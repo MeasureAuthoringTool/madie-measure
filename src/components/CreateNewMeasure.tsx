@@ -10,7 +10,7 @@ export default function CreateNewMeasure() {
         id="measureName"
         name="measureName"
         placeholder="Enter a Measure Name"
-        data-testid="new-measure-name-test-id"
+        data-testid="measure-name-text-field"
       >
         <LabelComponent htmlFor="measureName" text="Measure Name" />
       </TextInput>
@@ -19,14 +19,14 @@ export default function CreateNewMeasure() {
         type="button"
         tw="inline-flex items-center mt-4 mr-4 px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         onClick={() => (window.location.href = "/create-measure")}
-        data-testid="create-new-measure-save-test-id"
+        data-testid="create-new-measure-save-button"
       />
       <Button
         buttonTitle="Cancel"
         type="button"
         tw="inline-flex items-center mt-4 mr-4 px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         onClick={() => (window.location.href = "/")}
-        data-testid="create-new-measure-cancel-test-id"
+        data-testid="create-new-measure-cancel-button"
       />
     </div>
   );
