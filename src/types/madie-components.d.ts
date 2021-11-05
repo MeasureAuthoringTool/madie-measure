@@ -85,7 +85,8 @@ declare module "@madie/madie-components" {
   }
   export function LabelComponent(props: LabelProps): JSX.Element;
 
-  export interface HelperTextProps extends React.HTMLAttributes<HTMLSpanElement> {
+  export interface HelperTextProps
+    extends React.HTMLAttributes<HTMLSpanElement> {
     text: string;
     isError?: boolean;
   }
