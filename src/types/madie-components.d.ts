@@ -83,7 +83,7 @@ declare module "@madie/madie-components" {
     text: string;
     cornerHint?: string;
   }
-  export function LabelComponent(props: LabelProps): JSX.Element;
+  export function Label(props: LabelProps): JSX.Element;
 
   export interface HelperTextProps
     extends React.HTMLAttributes<HTMLSpanElement> {

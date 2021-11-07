@@ -1,6 +1,6 @@
 import React from "react";
 import tw from "twin.macro";
-import { TextInput, LabelComponent, Button } from "@madie/madie-components";
+import { TextInput, Label, Button } from "@madie/madie-components";
 
 export default function CreateNewMeasure() {
   return (
@@ -12,7 +12,7 @@ export default function CreateNewMeasure() {
         placeholder="Enter a Measure Name"
         data-testid="measure-name-text-field"
       >
-        <LabelComponent htmlFor="measureName" text="Measure Name" />
+        <Label htmlFor="measureName" text="Measure Name" />
       </TextInput>
       <Button
         buttonTitle="Create Measure"
