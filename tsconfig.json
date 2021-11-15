@@ -9,5 +9,10 @@
   },
   "files": ["src/madie-madie-measure.tsx"],
   "include": ["src/**/*"],
-  "exclude": ["src/**/*.test*"]
+  "exclude": ["src/**/*.test.*"],
+  "paths": {
+    "@modules/*": ["modules/*"],
+    "@config/*": ["config/*"],
+    "@shared/*": ["shared/*"]
+  }
 }
