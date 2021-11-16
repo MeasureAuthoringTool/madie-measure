@@ -1,6 +1,6 @@
 {
   "name": "@madie/madie-measure",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "files": [
     "dist/**/*"
   ],
@@ -40,6 +40,7 @@
     "@types/testing-library__jest-dom": "^5.14.0",
     "@types/webpack-env": "^1.16.0",
     "autoprefixer": "^10.3.3",
+    "axios": "^0.24.0",
     "babel-jest": "^27.1.0",
     "concurrently": "^6.2.0",
     "cross-env": "^7.0.3",
