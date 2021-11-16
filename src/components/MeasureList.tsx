@@ -46,7 +46,7 @@ export default function MeasureList(props: { measureList: Measure[] }) {
                 </thead>
                 <tbody>
                   {props.measureList?.map((measure, measureIdx) => (
-                    <tr tw="bg-white">
+                    <tr key={measure.measureHumanReadableId} tw="bg-white">
                       <td tw="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         <button
                           type="button"
