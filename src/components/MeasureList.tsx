@@ -51,7 +51,7 @@ export default function MeasureList(props: { measureList: Measure[] }) {
                         <button
                           type="button"
                           onClick={() => (window.location.href = "#")}
-                          data-testid={`measure-button-${measureIdx}`}
+                          data-testid={`measure-button-${measure.measureHumanReadableId}`}
                         >
                           {measure.name}
                         </button>
