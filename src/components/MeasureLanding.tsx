@@ -12,10 +12,6 @@ export default function MeasureLanding() {
           <Route exact path="/measure/create">
             <CreateNewMeasure />
           </Route>
-          {/* render={({ match }) => {
-            // Do whatever you want with the match...
-            return <div>Welcome to editing {JSON.stringify(match.params["id"])}</div>;
-          }}  */}
           <Route path="/measure/:id/edit" component={EditMeasure} />
           <Route exact path="/measure">
             <span>Welcome </span>
