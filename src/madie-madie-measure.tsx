@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import singleSpaReact from "single-spa-react";
 import Root from "./root.component";
 import MeasureLanding from "./components/MeasureLanding";
-import CreateNewMeasure from "./components/CreateNewMeasure";
+import { CreateNewMeasure } from "./components/CreateNewMeasure";
 
 const lifecycles = singleSpaReact({
   React,
