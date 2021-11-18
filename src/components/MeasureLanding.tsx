@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import tw from "twin.macro";
-import { Route, Switch, BrowserRouter } from "react-router-dom";
+
+
+import { Route, Switch, BrowserRouter, useHistory } from "react-router-dom";
 import CreateNewMeasure from "./CreateNewMeasure";
 import EditMeasure from "./EditMeasure";
-import { getServiceConfig, ServiceConfig } from "./Config";
-import axios from "axios";
-import MeasureList from "./MeasureList";
+import NewMeasure from "./NewMeasure";
+
+
 
 export interface Measure {
   id: {
@@ -26,27 +28,8 @@ export interface Measure {
   model: string;
 }
 
-export default function MeasureLanding() {
-  const [serviceConfig, setServiceConfig] = useState<ServiceConfig>();
-  const [serviceConfigErr, setServiceConfigErr] = useState<string>();
-  const [measureList, setMeasureList] = React.useState<Measure[]>([]);
 
-  if (!serviceConfig && !serviceConfigErr) {
-    (async () => {
-      const config: ServiceConfig = await getServiceConfig();
-      setServiceConfig(config);
-      axios
-        .get(config?.measureService?.baseUrl + "/measures")
-        .then((response) => {
-          setMeasureList(response.data as Array<Measure>);
-        })
-        .catch((err) => {
-          setServiceConfigErr(
-            "Unable to load page, please contact the site administration"
-          );
-        });
-    })();
-  }
+export default function MeasureLanding() {
 
   return (
     <>
@@ -57,18 +40,7 @@ export default function MeasureLanding() {
           </Route>
           <Route path="/measure/:id/edit" component={EditMeasure} />
           <Route exact path="/measure">
-            <span>Welcome </span>
-            <button
-              type="button"
-              tw="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              onClick={() => (window.location.href = "/measure/create")}
-              data-testid="create-new-measure-button"
-            >
-              New Measure
-            </button>
-            <div tw="mx-5 my-8">
-              <MeasureList measureList={measureList} />
-            </div>
+            <NewMeasure />
           </Route>
         </Switch>
       </BrowserRouter>
