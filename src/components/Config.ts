@@ -11,7 +11,9 @@ export async function getServiceConfig(): Promise<ServiceConfig> {
     await axios.get<ServiceConfig>("env-config/serviceConfig.json")
   ).data;
 
-  if (!serviceConfig.measureService && !serviceConfig?.measureService.baseUrl) {
+  if (
+    !(serviceConfig?.measureService && serviceConfig.measureService.baseUrl)
+  ) {
     throw new Error("Invalid Service Config");
   }
 
