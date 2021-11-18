@@ -3,12 +3,12 @@ import tw from "twin.macro";
 import "styled-components/macro";
 
 import { useHistory } from "react-router-dom";
-import CreateNewMeasure from "./CreateNewMeasure";
+import { CreateNewMeasure } from "./createNewMeasure/CreateNewMeasure";
 import EditMeasure from "./EditMeasure";
 import MeasureList from "./MeasureList";
-import { Measure } from "../types/measure";
+import { Measure } from "../models/measure";
 
-import { getServiceConfig, ServiceConfig } from "./Config";
+import { getServiceConfig, ServiceConfig } from "./config/Config";
 import axios from "axios";
 
 export default function NewMeasure() {
@@ -38,7 +38,7 @@ export default function NewMeasure() {
       <span>Welcome </span>
       <button
         type="button"
-        tw="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        tw="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         onClick={() => history.push("/measure/create")}
         data-testid="create-new-measure-button"
       >

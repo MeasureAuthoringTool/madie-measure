@@ -28,7 +28,6 @@ const sendGetRequest = async (id: string): Promise<Measure> => {
 };
 
 export default function EditMeasure() {
-
   const { id } = useParams<MeasureParam>();
   const [measure, setMeasure] = useState<Measure>({ id: "", name: "" });
 
@@ -41,7 +40,7 @@ export default function EditMeasure() {
   }, []);
 
   return (
-    <div tw="px-4 " data-testid="measure-name-edit">  
+    <div tw="px-4 " data-testid="measure-name-edit">
       Measure:
       <InlineEdit
         text={measure.name}

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { getServiceConfig, ServiceConfig } from "../Config";
+import { getServiceConfig, ServiceConfig } from "../config/Config";
 import axios from "axios";
 
 jest.mock("axios");

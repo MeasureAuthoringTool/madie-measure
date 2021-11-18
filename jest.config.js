@@ -1,6 +1,5 @@
 module.exports = {
-  rootDir: "src",
-  roots: ["<rootDir>/src/"],
+  roots: ["<rootDir>"],
   modulePathIgnorePatterns: ["<rootDir>/dist/"],
   testEnvironment: "jsdom",
   transform: {
@@ -14,4 +13,12 @@ module.exports = {
       "<rootDir>/node_modules/@madie/madie-components/src/madie-madie-components.tsx",
   },
   setupFilesAfterEnv: ["@testing-library/jest-dom"],
+  globals: {
+    "ts-jest": {
+      tsconfig: {
+        jsx: "react-jsx",
+      },
+      useEsm: true,
+    },
+  },
 };

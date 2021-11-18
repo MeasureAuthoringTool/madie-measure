@@ -1,5 +1,5 @@
 import React from "react";
-import tw from "twin.macro";
+import tw, { css } from "twin.macro";
 import { TextInput, Label, Button, HelperText } from "@madie/madie-components";
 import axios from "axios";
 import { CreateNewMeasureModel } from "../../models/CreateNewMeasureModel";
@@ -82,7 +82,6 @@ const CreateNewMeasure = () => {
           <Button
             buttonTitle="Create Measure"
             type="submit"
-            tw="mr-4"
             data-testid="create-new-measure-save-button"
             disabled={!(formik.isValid && formik.dirty)}
           />
