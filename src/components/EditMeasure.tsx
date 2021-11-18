@@ -30,6 +30,8 @@ const sendGetRequest = async (id: string): Promise<Measure> => {
 };
 
 export default function EditMeasure() {
+
+
   const { id } = useParams<MeasureParam>();
   const [measure, setMeasure] = useState<Measure>({ id: "", name: "" });
 
