@@ -3,8 +3,6 @@ import { useParams } from "react-router-dom";
 import tw from "twin.macro";
 import "styled-components/macro";
 
-import { TextInput, Label, Button } from "@madie/madie-components";
-
 import axios from "axios";
 import InlineEdit from "./InlineEdit";
 
