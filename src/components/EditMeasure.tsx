@@ -1,10 +1,9 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 import tw from "twin.macro";
-import { TextInput, Label, Button } from "@madie/madie-components";
 
 interface inputParams {
-  id: string
+  id: string;
 }
 
 export default function EditMeasure() {
