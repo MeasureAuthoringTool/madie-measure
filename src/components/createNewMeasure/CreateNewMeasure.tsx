@@ -2,13 +2,15 @@ import React from "react";
 import tw from "twin.macro";
 import { TextInput, Label, Button, HelperText } from "@madie/madie-components";
 import axios from "axios";
-import { Measure } from "../models/Measure";
+import { CreateNewMeasureModel } from "../../models/CreateNewMeasureModel";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-
-const measureServiceUrl = "http://localhost:8080";
+import { useHistory } from "react-router-dom";
+import { getServiceConfig, ServiceConfig } from "../config/Config";
 
 const CreateNewMeasure = () => {
+  const history = useHistory();
+
   const formik = useFormik({
     initialValues: {
       measureName: "",
@@ -23,28 +25,36 @@ const CreateNewMeasure = () => {
           "Measure Name must not contain '_' (underscores)."
         ),
     }),
-    onSubmit: async (values: Measure) => {
+    onSubmit: async (values: CreateNewMeasureModel) => {
       await createMeasure(values);
     },
   });
 
-  async function createMeasure(measure: Measure) {
+  async function createMeasure(measure: CreateNewMeasureModel) {
+    const config: ServiceConfig = await getServiceConfig();
     await axios
-      .post<Measure>(measureServiceUrl + "/measure", measure)
+      .post<CreateNewMeasureModel>(
+        config?.measureService?.baseUrl + "/measure",
+        measure
+      )
       .then((response) => {
-        // window.location.href = "/measure";
-        alert("Added Measures " + response.data.measureName);
+        history.push("/measure");
       })
       .catch((err) => {
+        // replace this with a banner ?
         // eslint-disable-next-line no-console
-        console.log(err);
+        console.log(
+          "Internal Error occurred, Please contact administration ->",
+          err
+        );
       });
   }
+
   function formikErrorHandler(name: string, isError: boolean) {
     if (formik.touched[name] && formik.errors[name]) {
       return (
         <HelperText
-          data-testid={"helper-text"}
+          data-testid={`${name}-helper-text`}
           text={formik.errors[name]}
           isError={isError}
         />
@@ -71,14 +81,15 @@ const CreateNewMeasure = () => {
         <Button
           buttonTitle="Create Measure"
           type="submit"
-          tw="inline-flex items-center mt-4 mr-4 px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           data-testid="create-new-measure-save-button"
+          disabled={!(formik.isValid && formik.dirty)}
         />
         <Button
           buttonTitle="Cancel"
           type="button"
-          tw="inline-flex items-center mt-4 mr-4 px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          onClick={() => (window.location.href = "/measure")}
+          onClick={() => {
+            history.push("/measure");
+          }}
           data-testid="create-new-measure-cancel-button"
         />
       </form>
