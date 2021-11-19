@@ -78,20 +78,24 @@ const CreateNewMeasure = () => {
           <Label htmlFor="measureName" text="Measure Name" />
           {formikErrorHandler("measureName", true)}
         </TextInput>
-        <Button
-          buttonTitle="Create Measure"
-          type="submit"
-          data-testid="create-new-measure-save-button"
-          disabled={!(formik.isValid && formik.dirty)}
-        />
-        <Button
-          buttonTitle="Cancel"
-          type="button"
-          onClick={() => {
-            history.push("/measure");
-          }}
-          data-testid="create-new-measure-cancel-button"
-        />
+        <div tw="mt-4">
+          <Button
+            buttonTitle="Create Measure"
+            type="submit"
+            tw="mr-4"
+            data-testid="create-new-measure-save-button"
+            disabled={!(formik.isValid && formik.dirty)}
+          />
+          <Button
+            buttonTitle="Cancel"
+            tw="mr-4"
+            type="button"
+            onClick={() => {
+              history.push("/measure");
+            }}
+            data-testid="create-new-measure-cancel-button"
+          />
+        </div>
       </form>
     </div>
   );
