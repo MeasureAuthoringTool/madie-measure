@@ -8,9 +8,8 @@ export interface ServiceConfig {
 
 export async function getServiceConfig(): Promise<ServiceConfig> {
   const serviceConfig: ServiceConfig = (
-    await axios.get<ServiceConfig>("env-config/serviceConfig.json")
+    await axios.get<ServiceConfig>("/env-config/serviceConfig.json")
   ).data;
-
   if (
     !(serviceConfig?.measureService && serviceConfig.measureService.baseUrl)
   ) {

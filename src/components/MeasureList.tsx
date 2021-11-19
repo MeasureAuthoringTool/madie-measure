@@ -1,6 +1,6 @@
 import React from "react";
 import tw from "twin.macro";
-import { Measure } from "./MeasureLanding";
+import { Measure } from "../models/Measure";
 
 export default function MeasureList(props: { measureList: Measure[] }) {
   return (
@@ -53,7 +53,7 @@ export default function MeasureList(props: { measureList: Measure[] }) {
                           onClick={() => (window.location.href = "#")}
                           data-testid={`measure-button-${measure.measureHumanReadableId}`}
                         >
-                          {measure.name}
+                          {measure.measureName}
                         </button>
                       </td>
                       <td tw="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
