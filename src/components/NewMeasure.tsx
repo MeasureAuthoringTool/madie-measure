@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import tw from "twin.macro";
 
-import { Route, Switch, BrowserRouter, useHistory, useState } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import CreateNewMeasure from "./CreateNewMeasure";
 import EditMeasure from "./EditMeasure";
 import MeasureList from "./MeasureList";
+import { Measure } from "../types/measure";
+
 import { getServiceConfig, ServiceConfig } from "./Config";
 import axios from "axios";
 
@@ -42,8 +44,8 @@ export default function NewMeasure() {
         New Measure
       </button>
       <div tw="mx-5 my-8">
-              <MeasureList measureList={measureList} />
-            </div>
+        <MeasureList measureList={measureList} />
+      </div>
     </>
   );
 }
