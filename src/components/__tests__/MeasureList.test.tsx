@@ -1,7 +1,11 @@
 import * as React from "react";
+
 import { fireEvent, getByTestId, render, screen } from "@testing-library/react";
-import MeasureList from "./MeasureList";
-import { Measure } from "../models/Measure";
+import MeasureList from "../MeasureList";
+import { Measure } from "../../models/Measure";
+
+import userEvent from "@testing-library/user-event";
+
 import { v4 as uuid } from "uuid";
 
 const mockPush = jest.fn();

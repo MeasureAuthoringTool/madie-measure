@@ -63,6 +63,7 @@ function InlineEdit(props) {
     onSetText(inputValue);
     setIsInputActive(false);
   }
+
   const onEnter = useCallback(() => {
     if (enter) {
       save();
@@ -74,6 +75,7 @@ function InlineEdit(props) {
     setInputValue(props.text);
     setIsInputActive(false);
   }
+
   const onEsc = useCallback(() => {
     if (esc) {
       cancel();

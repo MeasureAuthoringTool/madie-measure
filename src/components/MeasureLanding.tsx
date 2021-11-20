@@ -1,40 +1,21 @@
-import React, { useState } from "react";
-import tw from "twin.macro";
-
-
-import { Route, Switch, BrowserRouter, useHistory } from "react-router-dom";
-import  from "./CreateNewMeasure";
-import NewMeasure from "./NewMeasure";
-
+import React from "react";
+import { Route, Switch, BrowserRouter } from "react-router-dom";
 import { CreateNewMeasure } from "./createNewMeasure/CreateNewMeasure";
+import NewMeasure from "./NewMeasure";
 import EditMeasure from "./EditMeasure";
-import { getServiceConfig, ServiceConfig } from "./config/Config";
-import axios from "axios";
-import MeasureList from "./MeasureList";
-import { Measure } from "../models/Measure";
-import { Button } from "@madie/madie-components";
-
-
-
-
 
 
 export default function MeasureLanding() {
 
   return (
-    <>
+    <div data-testid="browser-router">
       <BrowserRouter>
         <Switch>
-          <Route exact path="/measure/create">
-            <CreateNewMeasure />
-          </Route>
+          <Route exact path="/measure/create" component={CreateNewMeasure} />
           <Route path="/measure/:id/edit" component={EditMeasure} />
-          <Route exact path="/measure">
-            <NewMeasure />
-          </Route>
+          <Route exact path="/measure" component={NewMeasure} />
         </Switch>
       </BrowserRouter>
-    </>
-
+    </div>
   );
 }
