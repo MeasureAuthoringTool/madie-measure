@@ -6,39 +6,16 @@ import CreateNewMeasure from "./CreateNewMeasure";
 import EditMeasure from "./EditMeasure";
 import NewMeasure from "./NewMeasure";
 
-export interface Measure {
-  id: {
-    timestamp: number;
-    date: string;
-  };
-  measureHumanReadableId: string;
-  measureSetId: string;
-  version: number;
-  revisionNumber: number;
-  state: string;
-  name: string;
-  cql: string;
-  createdAt: string;
-  createdBy: string;
-  lastModifiedAt: string;
-  lastModifiedBy: string;
-  model: string;
-}
-
 export default function MeasureLanding() {
   return (
-    <>
+    <div data-testid="browser-router">
       <BrowserRouter>
         <Switch>
-          <Route exact path="/measure/create">
-            <CreateNewMeasure />
-          </Route>
+          <Route exact path="/measure/create" component={CreateNewMeasure} />
           <Route path="/measure/:id/edit" component={EditMeasure} />
-          <Route exact path="/measure">
-            <NewMeasure />
-          </Route>
+          <Route exact path="/measure" component={NewMeasure} />
         </Switch>
       </BrowserRouter>
-    </>
+    </div>
   );
 }

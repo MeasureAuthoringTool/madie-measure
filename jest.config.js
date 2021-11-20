@@ -1,4 +1,5 @@
 module.exports = {
+  verbose: true,
   rootDir: "src",
   testEnvironment: "jsdom",
   transform: {

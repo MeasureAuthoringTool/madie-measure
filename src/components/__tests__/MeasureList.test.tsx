@@ -1,8 +1,8 @@
 import * as React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import MeasureList from "./MeasureList";
-import { Measure } from "./MeasureLanding";
+import MeasureList from "../MeasureList";
+import { Measure } from "../../types/measure";
 import { v4 as uuid } from "uuid";
 
 const measures: Measure[] = [

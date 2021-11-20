@@ -40,7 +40,7 @@ export default function EditMeasure() {
   }, []);
 
   return (
-    <div tw="px-4 ">
+    <div tw="px-4 " data-testid="measure-name-edit">
       Measure:
       <InlineEdit
         text={measure.name}

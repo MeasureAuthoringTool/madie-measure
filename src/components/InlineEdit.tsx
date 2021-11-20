@@ -71,6 +71,30 @@ function InlineEdit(props) {
     }
   });
 
+  function save() {
+    onSetText(inputValue);
+    setIsInputActive(false);
+  }
+
+  const onEnter = useCallback(() => {
+    if (enter) {
+      save();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enter]);
+
+  function cancel() {
+    setInputValue(props.text);
+    setIsInputActive(false);
+  }
+
+  const onEsc = useCallback(() => {
+    if (esc) {
+      cancel();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [esc, props.text]);
+
   useEffect(() => {
     setInputValue(props.text);
   }, [props.text]);
@@ -80,25 +104,6 @@ function InlineEdit(props) {
       inputRef.current.focus();
     }
   }, [isInputActive, inputRef]);
-
-  function save() {
-    onSetText(inputValue);
-    setIsInputActive(false);
-  }
-  const onEnter = useCallback(() => {
-    if (enter) {
-      save();
-    }
-  }, [enter]);
-  function cancel() {
-    setInputValue(props.text);
-    setIsInputActive(false);
-  }
-  const onEsc = useCallback(() => {
-    if (esc) {
-      cancel();
-    }
-  }, [esc, props.text]);
 
   useEffect(() => {
     if (isInputActive) {
@@ -122,6 +127,7 @@ function InlineEdit(props) {
         setIsInputActive(false);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enter, esc]); // watch the Enter and Escape key presses
 
   const handleInputChange = useCallback(
@@ -138,7 +144,7 @@ function InlineEdit(props) {
 
   return (
     <>
-      <span ref={wrapperRef}>
+      <span data-testid="inline-edit" ref={wrapperRef}>
         {isInputActive ? (
           <>
             <StyledInput
@@ -149,7 +155,7 @@ function InlineEdit(props) {
                 setInputValue(e.target.value);
               }}
             />
-            <FontAwesomeIcon icon={faCheckCircle} onClick={save} />
+            <FontAwesomeIcon icon={faCheckCircle} onClick={() => save()} />
             <FontAwesomeIcon icon={faTimesCircle} onClick={cancel} />
           </>
         ) : (
