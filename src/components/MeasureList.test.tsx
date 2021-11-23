@@ -1,14 +1,21 @@
 import * as React from "react";
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { fireEvent, getByTestId, render, screen } from "@testing-library/react";
 import MeasureList from "./MeasureList";
 import { Measure } from "../models/Measure";
 import { v4 as uuid } from "uuid";
 
+const mockPush = jest.fn();
+jest.mock("react-router-dom", () => ({
+  useHistory: () => {
+    const push = () => mockPush("/example");
+    return { push };
+  },
+}));
+
 const measures: Measure[] = [
   {
     id: {
-      timestamp: 1637010157,
+      timestamp: 1637010156,
       date: "2021-11-15T21:02:37.000+00:00",
     },
     measureHumanReadableId: null,
@@ -26,8 +33,8 @@ const measures: Measure[] = [
   },
   {
     id: {
-      timestamp: 1637010157,
-      date: "2021-11-15T21:02:37.000+00:00",
+      timestamp: 1637010167,
+      date: "2021-11-16T21:02:37.000+00:00",
     },
     measureHumanReadableId: null,
     measureSetId: "2",
@@ -44,8 +51,8 @@ const measures: Measure[] = [
   },
   {
     id: {
-      timestamp: 1637010157,
-      date: "2021-11-15T21:02:37.000+00:00",
+      timestamp: 1637010657,
+      date: "2021-11-17T21:02:37.000+00:00",
     },
     measureHumanReadableId: null,
     measureSetId: "3",
@@ -70,23 +77,27 @@ describe("Measure List component", () => {
   });
 
   it("should display a list of measures", () => {
-    const { getByText } = render(<MeasureList measureList={measures} />);
+    const { getByText, getByTestId } = render(
+      <MeasureList measureList={measures} />
+    );
     measures.forEach((m) => {
       expect(getByText(m.measureName)).toBeInTheDocument();
       expect(
         screen.getByTestId(`measure-button-${m.measureHumanReadableId}`)
       ).toBeInTheDocument();
     });
-  });
-
-  it("should navigate to the edit measure screen on name click", () => {
-    render(<MeasureList measureList={measures} />);
-    const measureButton = screen.getByTestId(
+    const measureButton = getByTestId(
       `measure-button-${measures[0].measureHumanReadableId}`
     );
+    fireEvent.click(measureButton);
+    expect(mockPush).toHaveBeenCalledWith("/example");
+  });
+
+  it("should navigate to the edit measure screen on click of edit button", () => {
+    const { getByTestId } = render(<MeasureList measureList={measures} />);
+    const editButton = getByTestId(`edit-measure-${measures[0].id.date}`);
     expect(window.location.href).toBe("http://localhost/");
-    userEvent.click(measureButton);
-    //TODO update once edit component is available
-    expect(window.location.href).toBe("http://localhost/#");
+    fireEvent.click(editButton);
+    expect(mockPush).toHaveBeenCalledWith("/example");
   });
 });
