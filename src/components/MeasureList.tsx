@@ -5,6 +5,7 @@ import "styled-components/macro";
 
 import { Measure } from "../models/Measure";
 import { useHistory } from "react-router-dom";
+import "styled-components/macro";
 
 
 export default function MeasureList(props: { measureList: Measure[] }) {
