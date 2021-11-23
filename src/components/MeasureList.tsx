@@ -1,8 +1,11 @@
 import React from "react";
 import tw from "twin.macro";
 import { Measure } from "../models/Measure";
+import { useHistory } from "react-router-dom";
 
 export default function MeasureList(props: { measureList: Measure[] }) {
+  const history = useHistory();
+
   return (
     <div data-testid="measure-list">
       <div tw="flex flex-col">
@@ -42,6 +45,10 @@ export default function MeasureList(props: { measureList: Measure[] }) {
                     >
                       Revision
                     </th>
+                    <th
+                      scope="col"
+                      tw="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    />
                   </tr>
                 </thead>
                 <tbody>
@@ -50,7 +57,7 @@ export default function MeasureList(props: { measureList: Measure[] }) {
                       <td tw="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         <button
                           type="button"
-                          onClick={() => (window.location.href = "#")}
+                          onClick={() => history.push("#")}
                           data-testid={`measure-button-${measure.measureHumanReadableId}`}
                         >
                           {measure.measureName}
@@ -67,6 +74,17 @@ export default function MeasureList(props: { measureList: Measure[] }) {
                       </td>
                       <td tw="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {measure.revisionNumber}
+                      </td>
+                      <td tw="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button
+                          onClick={() => {
+                            history.push(`/measure/${measure.id}/edit`);
+                          }}
+                          tw="text-primary-600 hover:text-primary-900"
+                          data-testid={`edit-measure-${measure.id.date}`}
+                        >
+                          Edit
+                        </button>
                       </td>
                     </tr>
                   ))}
