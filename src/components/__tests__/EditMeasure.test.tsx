@@ -29,6 +29,6 @@ jest.mock("../InlineEdit");
 test("Renders the Edit measure div", () => {
   act(() => {
     render(<EditMeasure />);
+    expect(screen.getByTestId("measure-name-edit")).toBeTruthy();
   });
-  expect(screen.getByTestId("measure-name-edit")).toBeTruthy();
 });

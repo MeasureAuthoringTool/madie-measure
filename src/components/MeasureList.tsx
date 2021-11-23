@@ -1,5 +1,6 @@
 import React from "react";
 import tw from "twin.macro";
+import "styled-components/macro";
 import { Measure } from "../types/measure";
 
 export default function MeasureList(props: { measureList: Measure[] }) {

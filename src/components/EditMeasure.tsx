@@ -1,9 +1,10 @@
-import React from "react";
+import * as React from "react";
 import { useParams } from "react-router-dom";
 import tw from "twin.macro";
+import "styled-components/macro";
+
 import { TextInput, Label, Button } from "@madie/madie-components";
 
-import MeasureLanding from "./MeasureLanding";
 import axios from "axios";
 import InlineEdit from "./InlineEdit";
 
@@ -18,9 +19,9 @@ interface Measure {
   name: string;
 }
 
-const sendGetRequest = async (): Promise<Measure> => {
+const sendGetRequest = async (id: string): Promise<Measure> => {
   try {
-    const resp = await axios.get("http://localhost:8081/dummy");
+    const resp = await axios.get("http://localhost:8081/measure/${id}/edit");
     return await resp.data;
   } catch (err) {
     // Handle Error Here
@@ -33,10 +34,11 @@ export default function EditMeasure() {
   const [measure, setMeasure] = useState<Measure>({ id: "", name: "" });
 
   useEffect(() => {
-    const result = Promise.resolve(sendGetRequest());
+    const result = Promise.resolve(sendGetRequest(id));
     result.then(function (value) {
       setMeasure(value);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

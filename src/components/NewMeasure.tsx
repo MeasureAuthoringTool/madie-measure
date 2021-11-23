@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import tw from "twin.macro";
+import "styled-components/macro";
 
 import { useHistory } from "react-router-dom";
 import CreateNewMeasure from "./CreateNewMeasure";

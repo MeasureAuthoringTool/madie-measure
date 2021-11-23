@@ -1,4 +1,5 @@
-import React, {
+import * as React from "react";
+import {
   useState,
   useEffect,
   useRef,
@@ -9,7 +10,6 @@ import React, {
 import tw, { styled } from "twin.macro";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faCheck,
   faCheckCircle,
   faPenAlt,
   faTimesCircle,
@@ -17,7 +17,6 @@ import {
 import useKeypress from "../hooks/useKeypress";
 import useOnClickOutside from "../hooks/useOnClickOutside";
 import DOMPurify from "dompurify";
-import { PROPERTY_TYPES, tsPropertySignature } from "@babel/types";
 
 interface ISpanProps extends React.HtmlHTMLAttributes<HTMLSpanElement> {
   // extends React's HTMLAttributes
@@ -27,12 +26,7 @@ interface ISpanProps extends React.HtmlHTMLAttributes<HTMLSpanElement> {
   text?: string;
 }
 
-const StyledSpan = styled.span((props: ISpanProps) => []);
-const Span = (props: ISpanProps) => (
-  <StyledSpan isActive={props.isActive} onClick={props.onClick} ref={props.ref}>
-    {props.children}
-  </StyledSpan>
-);
+const ClickableSpan = styled.span((props: ISpanProps) => []);
 
 interface IInputProps extends InputHTMLAttributes<HTMLInputElement> {
   // extends React's HTMLAttributes/
@@ -45,10 +39,6 @@ const StyledInput = styled.input((props: IInputProps) => [
   !props.isActive && tw`hidden`,
   props.isActive && tw`visible`,
 ]);
-
-const Input = (props: IInputProps) => (
-  <StyledInput isActive={props.isActive} ref={props.ref} />
-);
 
 function InlineEdit(props) {
   const [isInputActive, setIsInputActive] = useState<boolean>(false);
@@ -65,9 +55,7 @@ function InlineEdit(props) {
 
   useOnClickOutside(wrapperRef, () => {
     if (isInputActive) {
-      // save the value and close the editor
-      props.onSetText(inputValue);
-      setIsInputActive(false);
+      save();
     }
   });
 
@@ -143,11 +131,12 @@ function InlineEdit(props) {
   }, [setIsInputActive]);
 
   return (
-    <>
-      <span data-testid="inline-edit" ref={wrapperRef}>
+    <div data-testid="outer-area">
+      <span data-testid="inline-editor" ref={wrapperRef}>
         {isInputActive ? (
-          <>
+          <div data-testid="inline-edit">
             <StyledInput
+              data-testid="inline-edit-input"
               isActive={isInputActive}
               value={inputValue}
               ref={inputRef}
@@ -157,21 +146,22 @@ function InlineEdit(props) {
             />
             <FontAwesomeIcon icon={faCheckCircle} onClick={() => save()} />
             <FontAwesomeIcon icon={faTimesCircle} onClick={cancel} />
-          </>
+          </div>
         ) : (
-          <>
-            <Span
+          <div data-testid="inline-view">
+            <ClickableSpan
+              data-testid="inline-view-span"
               isActive={!isInputActive}
               ref={textRef}
               onClick={handleSpanClick}
             >
               {props.text}
               <FontAwesomeIcon icon={faPenAlt} />
-            </Span>
-          </>
+            </ClickableSpan>
+          </div>
         )}
       </span>
-    </>
+    </div>
   );
 }
 
