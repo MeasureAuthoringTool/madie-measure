@@ -18,10 +18,7 @@ jest.mock("react-router-dom", () => ({
 
 const measures: Measure[] = [
   {
-    id: {
-      timestamp: 1637010156,
-      date: "2021-11-15T21:02:37.000+00:00",
-    },
+    id: "IDIDID1",
     measureHumanReadableId: null,
     measureSetId: "1",
     version: 0,
@@ -36,10 +33,7 @@ const measures: Measure[] = [
     model: "QDM",
   },
   {
-    id: {
-      timestamp: 1637010167,
-      date: "2021-11-16T21:02:37.000+00:00",
-    },
+    id: "IDIDID2",
     measureHumanReadableId: null,
     measureSetId: "2",
     version: 0,
@@ -54,10 +48,7 @@ const measures: Measure[] = [
     model: "FHIR",
   },
   {
-    id: {
-      timestamp: 1637010657,
-      date: "2021-11-17T21:02:37.000+00:00",
-    },
+    id: "IDIDID2",
     measureHumanReadableId: null,
     measureSetId: "3",
     version: 1.3,

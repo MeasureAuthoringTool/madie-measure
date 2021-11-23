@@ -5,7 +5,10 @@ import "styled-components/macro";
 
 import { Measure } from "../models/Measure";
 import { useHistory } from "react-router-dom";
+<<<<<<< HEAD
 import "styled-components/macro";
+=======
+>>>>>>> eb98a40 (Added edit button on measure grid)
 
 
 export default function MeasureList(props: { measureList: Measure[] }) {
