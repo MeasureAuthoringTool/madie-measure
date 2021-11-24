@@ -3,6 +3,7 @@ import { getServiceConfig, ServiceConfig } from "../config/Config";
 import axios from "axios";
 
 jest.mock("axios");
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe("Service Config Utility", () => {
   it("should retrieve the service configuration info", () => {
@@ -13,16 +14,14 @@ describe("Service Config Utility", () => {
       },
     };
     const resp = { data: config };
-    // @ts-ignore
-    axios.get.mockResolvedValue(resp);
+    mockedAxios.get.mockResolvedValue(resp);
     getServiceConfig().then((result) => expect(result).toEqual(config));
   });
 
   it("should error if the config is inaccessible", async () => {
     expect.assertions(1);
     const resp = { data: {} };
-    // @ts-ignore
-    axios.get.mockResolvedValue(resp);
+    mockedAxios.get.mockResolvedValue(resp);
     try {
       await getServiceConfig();
     } catch (err) {

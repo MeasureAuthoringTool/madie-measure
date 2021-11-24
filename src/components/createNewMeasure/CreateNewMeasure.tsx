@@ -82,6 +82,7 @@ const CreateNewMeasure = () => {
           <Button
             buttonTitle="Create Measure"
             type="submit"
+            tw="mr-4"
             data-testid="create-new-measure-save-button"
             disabled={!(formik.isValid && formik.dirty)}
           />
