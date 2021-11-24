@@ -6,7 +6,7 @@ import { useHistory } from "react-router-dom";
 import { CreateNewMeasure } from "./createNewMeasure/CreateNewMeasure";
 import EditMeasure from "./EditMeasure";
 import MeasureList from "./MeasureList";
-import { Measure } from "../models/measure";
+import { Measure } from "../models/Measure";
 
 import { getServiceConfig, ServiceConfig } from "./config/Config";
 import axios from "axios";
