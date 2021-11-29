@@ -2,6 +2,8 @@ import * as React from "react";
 import { useParams } from "react-router-dom";
 import tw from "twin.macro";
 import "styled-components/macro";
+import { getServiceConfig, ServiceConfig } from "./config/Config";
+import { Measure } from "../models/Measure";
 
 import axios from "axios";
 import InlineEdit from "./InlineEdit";
@@ -12,24 +14,36 @@ interface MeasureParam {
   id: string;
 }
 
-interface Measure {
-  id: string;
-  name: string;
-}
-
-const sendGetRequest = async (id: string): Promise<Measure> => {
-  try {
-    const resp = await axios.get("http://localhost:8081/measure/${id}/edit");
-    return await resp.data;
-  } catch (err) {
-    // Handle Error Here
-    console.error(err);
-  }
-};
-
 export default function EditMeasure() {
   const { id } = useParams<MeasureParam>();
-  const [measure, setMeasure] = useState<Measure>({ id: "", name: "" });
+  const [measure, setMeasure] = useState<Measure>({} as Measure);
+
+  const transmitUpdatedMeasure = async (measure: Measure) => {
+    try {
+      const config: ServiceConfig = await getServiceConfig();
+      const resp = await axios.put(
+        config?.measureService?.baseUrl + "/measure/",
+        measure
+      );
+      setMeasure(measure);
+    } catch (err) {
+      // Handle Error Here
+      console.error(err);
+    }
+  };
+
+  const sendGetRequest = async (id: string): Promise<Measure> => {
+    try {
+      const config: ServiceConfig = await getServiceConfig();
+      const resp = await axios.get<Measure>(
+        config?.measureService?.baseUrl + "/measures/" + id
+      );
+      return await resp.data;
+    } catch (err) {
+      // Handle Error Here
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     const result = Promise.resolve(sendGetRequest(id));
@@ -43,8 +57,10 @@ export default function EditMeasure() {
     <div tw="px-4 " data-testid="measure-name-edit">
       Measure:
       <InlineEdit
-        text={measure.name}
-        onSetText={(text) => setMeasure({ ...measure, name: text })}
+        text={measure.measureName}
+        onSetText={(text) => {
+          transmitUpdatedMeasure({ ...measure, measureName: text } as Measure);
+        }}
       />
     </div>
   );
