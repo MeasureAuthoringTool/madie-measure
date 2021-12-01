@@ -1,7 +1,9 @@
 import * as React from "react";
+import userEvent from "@testing-library/user-event";
 import { fireEvent, getByTestId, render, screen } from "@testing-library/react";
-import MeasureList from "./MeasureList";
-import { Measure } from "../models/Measure";
+import { Measure } from "../../models/Measure";
+import MeasureList from "../MeasureList";
+
 import { v4 as uuid } from "uuid";
 
 const mockPush = jest.fn();
@@ -14,10 +16,7 @@ jest.mock("react-router-dom", () => ({
 
 const measures: Measure[] = [
   {
-    id: {
-      timestamp: 1637010156,
-      date: "2021-11-15T21:02:37.000+00:00",
-    },
+    id: "IDIDID1",
     measureHumanReadableId: null,
     measureSetId: "1",
     version: 0,
@@ -32,10 +31,7 @@ const measures: Measure[] = [
     model: "QDM",
   },
   {
-    id: {
-      timestamp: 1637010167,
-      date: "2021-11-16T21:02:37.000+00:00",
-    },
+    id: "IDIDID2",
     measureHumanReadableId: null,
     measureSetId: "2",
     version: 0,
@@ -50,10 +46,7 @@ const measures: Measure[] = [
     model: "FHIR",
   },
   {
-    id: {
-      timestamp: 1637010657,
-      date: "2021-11-17T21:02:37.000+00:00",
-    },
+    id: "IDIDID2",
     measureHumanReadableId: null,
     measureSetId: "3",
     version: 1.3,
@@ -95,7 +88,7 @@ describe("Measure List component", () => {
 
   it("should navigate to the edit measure screen on click of edit button", () => {
     const { getByTestId } = render(<MeasureList measureList={measures} />);
-    const editButton = getByTestId(`edit-measure-${measures[0].id.date}`);
+    const editButton = getByTestId(`edit-measure-${measures[0].id}`);
     expect(window.location.href).toBe("http://localhost/");
     fireEvent.click(editButton);
     expect(mockPush).toHaveBeenCalledWith("/example");

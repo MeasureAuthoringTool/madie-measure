@@ -1,13 +1,67 @@
-import React from "react";
+import * as React from "react";
 import { useParams } from "react-router-dom";
 import tw from "twin.macro";
+import "styled-components/macro";
+import { getServiceConfig, ServiceConfig } from "./config/Config";
+import { Measure } from "../models/Measure";
 
-interface inputParams {
+import axios from "axios";
+import InlineEdit from "./InlineEdit";
+
+const { useState, useEffect } = React;
+
+interface MeasureParam {
   id: string;
 }
 
 export default function EditMeasure() {
-  const { id } = useParams<inputParams>();
+  const { id } = useParams<MeasureParam>();
+  const [measure, setMeasure] = useState<Measure>({} as Measure);
 
-  return <div tw="w-1/4 mx-auto my-8">Edit a measure {id}</div>;
+  const transmitUpdatedMeasure = async (measure: Measure) => {
+    try {
+      const config: ServiceConfig = await getServiceConfig();
+      const resp = await axios.put(
+        config?.measureService?.baseUrl + "/measure/",
+        measure
+      );
+      setMeasure(measure);
+    } catch (err) {
+      // Handle Error Here
+      console.error(err);
+    }
+  };
+
+  const sendGetRequest = async (id: string): Promise<Measure> => {
+    try {
+      const config: ServiceConfig = await getServiceConfig();
+      const resp = await axios.get<Measure>(
+        config?.measureService?.baseUrl + "/measures/" + id
+      );
+      return await resp.data;
+    } catch (err) {
+      // Handle Error Here
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    const result = Promise.resolve(sendGetRequest(id));
+    result.then(function (value) {
+      setMeasure(value);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div tw="px-4 " data-testid="measure-name-edit">
+      Measure:
+      <InlineEdit
+        text={measure.measureName}
+        onSetText={(text) => {
+          transmitUpdatedMeasure({ ...measure, measureName: text } as Measure);
+        }}
+      />
+    </div>
+  );
 }

@@ -1,5 +1,7 @@
 import React from "react";
 import tw from "twin.macro";
+import "styled-components/macro";
+
 import { Measure } from "../models/Measure";
 import { useHistory } from "react-router-dom";
 
@@ -80,8 +82,8 @@ export default function MeasureList(props: { measureList: Measure[] }) {
                           onClick={() => {
                             history.push(`/measure/${measure.id}/edit`);
                           }}
-                          tw="text-primary-600 hover:text-primary-900"
-                          data-testid={`edit-measure-${measure.id.date}`}
+                          tw="text-blue-600 hover:text-blue-900"
+                          data-testid={`edit-measure-${measure.id}`}
                         >
                           Edit
                         </button>

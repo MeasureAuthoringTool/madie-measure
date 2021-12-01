@@ -1,8 +1,5 @@
 export interface Measure {
-  id: {
-    timestamp: number;
-    date: string;
-  };
+  id: string;
   measureHumanReadableId: string;
   measureSetId: string;
   version: number;
