@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-import tw from "twin.macro";
+import "twin.macro";
 import "styled-components/macro";
-
+import { Button } from "@madie/madie-components";
 import { useHistory } from "react-router-dom";
-import { CreateNewMeasure } from "./createNewMeasure/CreateNewMeasure";
-import EditMeasure from "./EditMeasure";
 import MeasureList from "./MeasureList";
 import { Measure } from "../models/Measure";
 
@@ -36,14 +34,12 @@ export default function NewMeasure() {
   return (
     <>
       <span>Welcome </span>
-      <button
-        type="button"
-        tw="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      <Button
+        buttonTitle="New Measure"
+        tw="mr-4"
         onClick={() => history.push("/measure/create")}
         data-testid="create-new-measure-button"
-      >
-        New Measure
-      </button>
+      />
       <div tw="mx-5 my-8">
         <MeasureList measureList={measureList} />
       </div>
