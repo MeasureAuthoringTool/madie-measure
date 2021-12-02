@@ -1,10 +1,7 @@
 import React from "react";
-import tw, { css } from "twin.macro";
+import { Route, Switch, BrowserRouter } from "react-router-dom";
 import { CreateNewMeasure } from "./createNewMeasure/CreateNewMeasure";
 import EditMeasure from "./EditMeasure";
-
-import { Route, Switch, BrowserRouter, useHistory } from "react-router-dom";
-
 import NewMeasure from "./NewMeasure";
 
 export default function MeasureLanding() {
