@@ -5,7 +5,7 @@ import * as React from "react";
 import { render, fireEvent, screen } from "@testing-library/react";
 import MeasureLanding from "../MeasureLanding/MeasureLanding";
 
-jest.mock("../createNewMeasure/CreateNewMeasure");
+jest.mock("../CreateNewMeasure/CreateNewMeasure");
 
 test("shows the children when the checkbox is checked", () => {
   const testMessage = "New Measure";
