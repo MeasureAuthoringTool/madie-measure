@@ -1,20 +1,13 @@
 import "@testing-library/jest-dom";
 // NOTE: jest-dom adds handy assertions to Jest and is recommended, but not required
 
-import React, { useState } from "react";
-import {
-  render,
-  screen,
-  act,
-  fireEvent,
-  waitFor,
-} from "@testing-library/react";
+import * as React from "react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-
-import InlineEdit from "../InlineEdit";
+import InlineEdit from "./InlineEdit";
 import axios from "axios";
 
-import Enzyme, { mount } from "enzyme";
+import Enzyme from "enzyme";
 import Adapter from "@wojtekmaj/enzyme-adapter-react-17";
 
 interface Measure {

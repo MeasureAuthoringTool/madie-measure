@@ -2,11 +2,11 @@ import * as React from "react";
 import { useParams } from "react-router-dom";
 import tw from "twin.macro";
 import "styled-components/macro";
-import { getServiceConfig, ServiceConfig } from "./config/Config";
-import { Measure } from "../models/Measure";
+import { getServiceConfig, ServiceConfig } from "../config/Config";
+import { Measure } from "../../models/Measure";
 
 import axios from "axios";
-import InlineEdit from "./InlineEdit";
+import InlineEdit from "../InlineEdit/InlineEdit";
 
 const { useState, useEffect } = React;
 
@@ -38,7 +38,7 @@ export default function EditMeasure() {
       const resp = await axios.get<Measure>(
         config?.measureService?.baseUrl + "/measures/" + id
       );
-      return await resp.data;
+      return resp.data;
     } catch (err) {
       // Handle Error Here
       console.error(err);
@@ -54,7 +54,7 @@ export default function EditMeasure() {
   }, []);
 
   return (
-    <div tw="px-4 " data-testid="measure-name-edit">
+    <div tw="px-4" data-testid="measure-name-edit">
       Measure:
       <InlineEdit
         text={measure.measureName}

@@ -3,10 +3,10 @@ import "twin.macro";
 import "styled-components/macro";
 import { Button } from "@madie/madie-components";
 import { useHistory } from "react-router-dom";
-import MeasureList from "./MeasureList";
-import { Measure } from "../models/Measure";
+import MeasureList from "../MeasureList/MeasureList";
+import { Measure } from "../../models/Measure";
 
-import { getServiceConfig, ServiceConfig } from "./config/Config";
+import { getServiceConfig, ServiceConfig } from "../config/Config";
 import axios from "axios";
 
 export default function NewMeasure() {
