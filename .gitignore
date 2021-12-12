@@ -5,6 +5,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+localhost.crt
+localhost.key
+localhost.pem
+
 # Runtime data
 pids
 *.pid
