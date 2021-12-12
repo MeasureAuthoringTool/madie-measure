@@ -14,8 +14,8 @@ import {
   faPenAlt,
   faTimesCircle,
 } from "@fortawesome/free-solid-svg-icons";
-import useKeypress from "../hooks/useKeypress";
-import useOnClickOutside from "../hooks/useOnClickOutside";
+import useKeypress from "../../hooks/useKeypress";
+import useOnClickOutside from "../../hooks/useOnClickOutside";
 import DOMPurify from "dompurify";
 
 interface ISpanProps extends React.HtmlHTMLAttributes<HTMLSpanElement> {

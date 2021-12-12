@@ -2,7 +2,7 @@ import * as React from "react";
 import userEvent from "@testing-library/user-event";
 import { fireEvent, getByTestId, render, screen } from "@testing-library/react";
 import { Measure } from "../../models/Measure";
-import MeasureList from "../MeasureList";
+import MeasureList from "./MeasureList";
 
 import { v4 as uuid } from "uuid";
 
