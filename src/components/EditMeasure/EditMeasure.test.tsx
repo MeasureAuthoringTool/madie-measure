@@ -1,52 +1,49 @@
-import "@testing-library/jest-dom";
-// NOTE: jest-dom adds handy assertions to Jest and is recommended, but not required
-
 import * as React from "react";
-import { waitFor, render } from "@testing-library/react";
+import { render, fireEvent } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
 import EditMeasure from "./EditMeasure";
-import axios from "axios";
-import { Measure } from "../../models/Measure";
 
-jest.mock("axios");
+jest.mock("./MeasureDetails/MeasureDetails");
 
-jest.mock("../config/Config", () => ({
-  getServiceConfig: () => ({
-    measureService: {
-      baseUrl: "example-service-url",
-    },
-  }),
-}));
+describe("EditMeasure Component", () => {
+  it("should render edit measure menu with measure details page active by default", () => {
+    const { getByText } = render(
+      <MemoryRouter initialEntries={["/"]}>
+        <EditMeasure />
+      </MemoryRouter>
+    );
 
-const mockedAxios = axios as jest.Mocked<typeof axios>;
-const measure: Measure = {
-  id: "1",
-  measureName: "MSR001",
-  cql: "",
-  createdAt: "",
-  createdBy: "",
-  lastModifiedAt: "",
-  lastModifiedBy: "",
-  measureHumanReadableId: "",
-  measureSetId: "",
-  model: "",
-  revisionNumber: 0,
-  state: "",
-  version: 0,
-};
-mockedAxios.get.mockResolvedValue({ data: measure });
+    //verify all menus present in the dom
+    expect(getByText("Details")).toBeInTheDocument();
+    expect(getByText("CQL Editor")).toBeInTheDocument();
+    expect(getByText("Measure Groups")).toBeInTheDocument();
+    expect(getByText("Patients")).toBeInTheDocument();
 
-jest.mock("react-router-dom", () => ({
-  ...(jest.requireActual("react-router-dom") as any),
-  useParams: () => ({
-    id: "1",
-  }),
-}));
+    expect(getByText("Details").classList).toContain("active");
+  });
 
-jest.mock("../InlineEdit/InlineEdit");
+  it("should render respective menu contents on clicking menu items", () => {
+    const { getByText } = render(
+      <MemoryRouter initialEntries={["/"]}>
+        <EditMeasure />
+      </MemoryRouter>
+    );
 
-test("Renders the Edit measure div", async () => {
-  const { getByTestId } = render(<EditMeasure />);
-  await waitFor(() => {
-    expect(getByTestId("measure-name-edit")).toBeTruthy();
+    // CQL Editor Menu click action
+    fireEvent.click(getByText("CQL Editor"));
+    expect(getByText("CQL Editor").classList).toContain("active");
+    expect(document.body.textContent).toContain(
+      "library testCql version '1.0.000'"
+    );
+
+    // Measure Groups Menu click action
+    fireEvent.click(getByText("Measure Groups"));
+    expect(getByText("Measure Groups").classList).toContain("active");
+    expect(document.body.textContent).toContain("In progress...");
+
+    // Patients Menu click action
+    fireEvent.click(getByText("Patients"));
+    expect(getByText("Patients").classList).toContain("active");
+    expect(document.body.textContent).toContain("In progress...");
   });
 });
