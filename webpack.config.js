@@ -4,6 +4,20 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { mergeWithRules } = require("webpack-merge");
 const singleSpaDefaults = require("webpack-config-single-spa-react-ts");
 const path = require("path");
+const fs = require("fs");
+
+let https;
+console.log("Dir Name " + __dirname);
+try {
+  https = {
+    key: fs.readFileSync(path.resolve(__dirname, "localhost.key"), "utf-8"),
+    cert: fs.readFileSync(path.resolve(__dirname, "localhost.crt"), "utf-8"),
+  };
+} catch {
+  console.warn(
+    "Consider creating an SSL certificate at ./localhost.key and ./localhost.crt, so you can tell your operating system to trust the certificate"
+  );
+}
 
 module.exports = (webpackConfigEnv, argv) => {
   const defaultConfig = singleSpaDefaults({
@@ -31,6 +45,7 @@ module.exports = (webpackConfigEnv, argv) => {
       ],
     },
     devServer: {
+      https,
       static: [
         {
           directory: path.join(__dirname, "local-dev-env"),
