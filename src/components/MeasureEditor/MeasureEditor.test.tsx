@@ -1,14 +1,12 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import * as React from "react";
 import MeasureEditor from "./MeasureEditor";
 
-describe("Editor component", () => {
-  it("should mount editor component", async () => {
-    render(<MeasureEditor />);
-    fireEvent.click(screen.getByTestId("madie-editor"));
-    const editorValdivEl: HTMLElement = await screen.getByTestId(
-      "madie-editor-value"
-    );
+describe("MeasureEditor component", () => {
+  it("should mount measure editor component", async () => {
+    const { getByTestId } = render(<MeasureEditor />);
+    fireEvent.click(getByTestId("measure-editor"));
+    const editorValdivEl: HTMLElement = await getByTestId("measure-editor");
     expect(editorValdivEl.innerHTML).toEqual(
       "library testCql version '1.0.000'"
     );
