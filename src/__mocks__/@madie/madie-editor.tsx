@@ -6,7 +6,7 @@ export function MadieEditor({ props }) {
     <div
       role="button"
       tabIndex={0}
-      data-testid="madie-editor"
+      data-testid="measure-editor"
       onClick={() => {
         props.handleValueChanges(returnValue);
       }}
