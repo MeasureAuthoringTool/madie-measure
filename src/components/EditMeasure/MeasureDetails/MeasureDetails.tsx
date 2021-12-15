@@ -11,6 +11,9 @@ interface MeasureParam {
   id: string;
 }
 
+const Grid = tw.div`grid grid-cols-4 gap-4 ml-6`;
+const Content = tw.div`col-span-3`;
+
 export default function EditMeasure(params: MeasureParam) {
   const { id } = params;
   const [measure, setMeasure] = useState<Measure>(null);
@@ -27,9 +30,6 @@ export default function EditMeasure(params: MeasureParam) {
   }, [measureServiceApi, id]);
 
   const loadingDiv = <div>Loading...</div>;
-
-  const Grid = tw.div`grid grid-cols-4 gap-4 ml-6`;
-  const Content = tw.div`col-span-3`;
 
   const links = [
     {
