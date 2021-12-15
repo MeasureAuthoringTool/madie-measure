@@ -13,10 +13,8 @@ const MeasureEditor = () => {
   };
 
   const editorProps = {
-    props: {
-      handleValueChanges: (val: string) => handleMadieEditorValue(val),
-      defaultValue: editorVal,
-    },
+    onChange: (val: string) => handleMadieEditorValue(val),
+    value: editorVal,
   };
 
   return (
