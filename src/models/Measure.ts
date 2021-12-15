@@ -1,4 +1,8 @@
-export interface Measure {
+export interface MeasureMetadata {
+  measureSteward?: string;
+}
+
+export default interface Measure {
   id: string;
   measureHumanReadableId: string;
   measureSetId: string;
@@ -12,4 +16,5 @@ export interface Measure {
   lastModifiedAt: string;
   lastModifiedBy: string;
   model: string;
+  measureMetaData?: MeasureMetadata;
 }

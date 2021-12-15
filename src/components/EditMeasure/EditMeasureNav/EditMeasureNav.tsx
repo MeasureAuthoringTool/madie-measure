@@ -20,7 +20,7 @@ const EditMeasureNav = () => {
   return (
     <div>
       <MenuItemContainer>
-        <MenuItem isActive={pathname === `${url}/details`}>
+        <MenuItem isActive={pathname.startsWith(`${url}/details`)}>
           <NavLink to={`${url}/details`}>Details</NavLink>
         </MenuItem>
         <MenuItem isActive={pathname === `${url}/cql-editor`}>

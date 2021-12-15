@@ -1,64 +1,64 @@
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 import tw from "twin.macro";
-import "styled-components/macro";
-import { getServiceConfig, ServiceConfig } from "../../config/Config";
-import { Measure } from "../../../models/Measure";
-
-import axios from "axios";
-import InlineEdit from "../../InlineEdit/InlineEdit";
-
-const { useState, useEffect } = React;
+import { Route, Switch, useRouteMatch } from "react-router-dom";
+import Measure from "../../../models/Measure";
+import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
+import MeasureInformation from "./MeasureInformation";
+import MeasureSteward from "./MeasureSteward";
+import MeasureDetailsSidebar from "./MeasureDetailsSidebar";
 
 interface MeasureParam {
   id: string;
 }
 
-export default function MeasureDetails(props: MeasureParam) {
-  const [measure, setMeasure] = useState<Measure>({} as Measure);
-  const transmitUpdatedMeasure = async (measure: Measure) => {
-    try {
-      const config: ServiceConfig = await getServiceConfig();
-      const resp = await axios.put(
-        config?.measureService?.baseUrl + "/measure/",
-        measure
-      );
-      setMeasure(measure);
-    } catch (err) {
-      // Handle Error Here
-      console.error(err);
-    }
-  };
-
-  const sendGetRequest = async (id: string): Promise<Measure> => {
-    try {
-      const config: ServiceConfig = await getServiceConfig();
-      const resp = await axios.get<Measure>(
-        config?.measureService?.baseUrl + "/measures/" + id
-      );
-      return resp.data;
-    } catch (err) {
-      // Handle Error Here
-      console.error(err);
-    }
-  };
+export default function EditMeasure(params: MeasureParam) {
+  const { id } = params;
+  const [measure, setMeasure] = useState<Measure>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const measureServiceApi = useMeasureServiceApi();
+  const { url } = useRouteMatch();
+  const stewardLink = `${url}/measure-steward`;
 
   useEffect(() => {
-    const result = Promise.resolve(sendGetRequest(props.id));
-    result.then(function (value) {
+    measureServiceApi.fetchMeasure(id).then((value: Measure) => {
       setMeasure(value);
+      setLoading(false);
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [measureServiceApi, id]);
 
-  return (
-    <div tw="px-4" data-testid="measure-name-edit">
-      Measure:
-      <InlineEdit
-        text={measure.measureName}
-        onSetText={(text) => {
-          transmitUpdatedMeasure({ ...measure, measureName: text } as Measure);
-        }}
-      />
-    </div>
+  const loadingDiv = <div>Loading...</div>;
+
+  const Grid = tw.div`grid grid-cols-4 gap-4 ml-6`;
+  const Content = tw.div`col-span-3`;
+
+  const links = [
+    {
+      title: "Measure Information",
+      href: url,
+    },
+    {
+      title: "Steward/Author",
+      href: stewardLink,
+    },
+  ];
+
+  const contentDiv = (
+    <>
+      <Grid>
+        <MeasureDetailsSidebar links={links} />
+        <Content>
+          <Switch>
+            <Route exact path={url}>
+              <MeasureInformation measure={measure} />
+            </Route>
+            <Route path={stewardLink}>
+              <MeasureSteward measure={measure} />
+            </Route>
+          </Switch>
+        </Content>
+      </Grid>
+    </>
   );
+
+  return loading ? loadingDiv : contentDiv;
 }

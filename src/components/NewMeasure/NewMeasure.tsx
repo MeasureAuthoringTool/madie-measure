@@ -4,7 +4,7 @@ import "styled-components/macro";
 import { Button } from "@madie/madie-components";
 import { useHistory } from "react-router-dom";
 import MeasureList from "../MeasureList/MeasureList";
-import { Measure } from "../../models/Measure";
+import Measure from "../../models/Measure";
 
 import { getServiceConfig, ServiceConfig } from "../config/Config";
 import axios from "axios";

@@ -2,7 +2,7 @@ import React from "react";
 import tw from "twin.macro";
 import "styled-components/macro";
 
-import { Measure } from "../../models/Measure";
+import Measure from "../../models/Measure";
 import { useHistory } from "react-router-dom";
 
 export default function MeasureList(props: { measureList: Measure[] }) {

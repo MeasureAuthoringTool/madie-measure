@@ -19,7 +19,7 @@ const EditMeasureRoutes = () => {
 
   return (
     <Switch>
-      <Redirect exact from={`${url}`} to={`${url}/details`} />
+      <Redirect exact from={url} to={`${url}/details`} />
       <Route path={`${url}/details`}>
         <MeasureDetails id={id} />
       </Route>
