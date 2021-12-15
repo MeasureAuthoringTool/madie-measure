@@ -1,11 +1,7 @@
 import React, { useState } from "react";
 import tw from "twin.macro";
-import Measure from "../../../models/Measure";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
-
-export interface MeasureStewardProps {
-  measure: Measure;
-}
+import useCurrentMeasure from "../useCurrentMeasure";
 
 const Form = tw.form`max-w-xl mt-3 space-y-8 divide-y divide-gray-200`;
 const FormContent = tw.div`space-y-8 divide-y divide-gray-200`;
@@ -24,10 +20,11 @@ const MessageText = tw.p`text-sm font-medium`;
 const SuccessText = tw(MessageText)`text-green-800`;
 const ErrorText = tw(MessageText)`text-red-800`;
 
-export default function MeasureSteward({ measure }: MeasureStewardProps) {
+export default function MeasureSteward() {
   const measureServiceApi = useMeasureServiceApi();
   const [success, setSuccess] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+  const { measure } = useCurrentMeasure();
   let { measureMetaData } = measure;
   measureMetaData = measureMetaData || {};
 
@@ -54,6 +51,7 @@ export default function MeasureSteward({ measure }: MeasureStewardProps) {
         const message = `Error updating measure ${measure.measureName}`;
         console.error(message);
         console.error(reason);
+        setError(message);
         throw new Error(message);
       });
   }

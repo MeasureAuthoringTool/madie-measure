@@ -36,12 +36,12 @@ export default function EditMeasure() {
 
   const contentDiv = (
     <div>
-      <MeasureContextProvider value={measure}>
+      <MeasureContextProvider value={{ measure, setMeasure }}>
         <EditMeasureNav />
         <Switch>
           <Redirect exact from={url} to={`${url}/details`} />
           <Route path={`${url}/details`}>
-            <MeasureDetails id={id} />
+            <MeasureDetails />
           </Route>
           <Route path={`${url}/cql-editor`}>
             <MeasureEditor />

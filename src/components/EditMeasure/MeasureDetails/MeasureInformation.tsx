@@ -1,16 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
 import InlineEdit from "../../InlineEdit/InlineEdit";
 import Measure from "../../../models/Measure";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
+import useCurrentMeasure from "../useCurrentMeasure";
 
-export interface MeasureInformationProps {
-  measure: Measure;
-}
-
-export default function MeasureInformation(props: MeasureInformationProps) {
-  const { measure: measureParam } = props;
-  const [measure, setMeasure] = useState<Measure>(measureParam);
+export default function MeasureInformation() {
   const measureServiceApi = useMeasureServiceApi();
+  const { measure, setMeasure } = useCurrentMeasure();
 
   function updateMeasureTitle(text: string): void {
     if (text !== measure.measureName) {

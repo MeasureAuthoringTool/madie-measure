@@ -1,7 +1,12 @@
 import { createContext } from "react";
 import Measure from "../../models/Measure";
 
-const MeasureContext = createContext<Measure>(null);
+export interface MeasureContextHolder {
+  measure: Measure;
+  setMeasure: (measure: Measure) => void;
+}
+
+const MeasureContext = createContext<MeasureContextHolder>(null);
 
 export default MeasureContext;
 

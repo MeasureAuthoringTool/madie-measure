@@ -1,8 +1,6 @@
 import React, { useContext } from "react";
-import MeasureContext from "./MeasureContext";
-import Measure from "../../models/Measure";
+import MeasureContext, { MeasureContextHolder } from "./MeasureContext";
 
-export default function useCurrentMeasure() {
-  const measure: Measure = useContext(MeasureContext);
-  return measure;
+export default function useCurrentMeasure(): MeasureContextHolder {
+  return useContext(MeasureContext);
 }
