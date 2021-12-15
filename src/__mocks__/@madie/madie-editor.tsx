@@ -1,14 +1,14 @@
 import React from "react";
 
-export function MadieEditor({ props }) {
+export function MadieEditor({ onChange }) {
   const returnValue = "library testCql version '1.0.000'";
   return (
     <div
       role="button"
       tabIndex={0}
-      data-testid="madie-editor"
+      data-testid="measure-editor"
       onClick={() => {
-        props.handleValueChanges(returnValue);
+        onChange(returnValue);
       }}
     >
       {returnValue}
