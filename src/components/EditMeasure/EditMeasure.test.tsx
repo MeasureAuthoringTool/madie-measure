@@ -5,7 +5,7 @@ import EditMeasure from "./EditMeasure";
 
 jest.mock("./MeasureDetails/MeasureDetails");
 
-describe("EditMeasure Component", () => {
+describe.skip("EditMeasure Component", () => {
   it("should render edit measure menu with measure details page active by default", () => {
     const { getByText } = render(
       <MemoryRouter initialEntries={["/"]}>
