@@ -34,10 +34,10 @@ export default function EditMeasure() {
     }
   }, [measureServiceApi, id, measure]);
 
-  const loadingDiv = <div>Loading...</div>;
+  const loadingDiv = <div data-testid="loading">Loading...</div>;
 
   const contentDiv = (
-    <div>
+    <div data-testid="editMeasure">
       <EditMeasureNav />
       <MeasureContextProvider value={{ measure, setMeasure }}>
         <Switch>

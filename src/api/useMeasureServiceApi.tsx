@@ -34,7 +34,7 @@ export class MeasureServiceApi {
   }
 }
 
-export default function useMeasureServiceApi() {
+export default function useMeasureServiceApi(): MeasureServiceApi {
   const serviceConfig: ServiceConfig = useServiceConfig();
   const { baseUrl } = serviceConfig.measureService;
 
