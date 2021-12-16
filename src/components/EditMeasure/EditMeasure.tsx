@@ -26,18 +26,20 @@ export default function EditMeasure() {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    measureServiceApi.fetchMeasure(id).then((value: Measure) => {
-      setMeasure(value);
-      setLoading(false);
-    });
-  }, [measureServiceApi, id]);
+    if (!measure) {
+      measureServiceApi.fetchMeasure(id).then((value: Measure) => {
+        setMeasure(value);
+        setLoading(false);
+      });
+    }
+  }, [measureServiceApi, id, measure]);
 
   const loadingDiv = <div>Loading...</div>;
 
   const contentDiv = (
     <div>
+      <EditMeasureNav />
       <MeasureContextProvider value={{ measure, setMeasure }}>
-        <EditMeasureNav />
         <Switch>
           <Redirect exact from={url} to={`${url}/details`} />
           <Route path={`${url}/details`}>
