@@ -1,45 +1,57 @@
 import "@testing-library/jest-dom";
-// NOTE: jest-dom adds handy assertions to Jest and is recommended, but not required
-
 import * as React from "react";
-import { waitFor, render } from "@testing-library/react";
+import { render } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
+import { Route } from "react-router-dom";
 import MeasureDetails from "./MeasureDetails";
-import axios from "axios";
-import Measure from "../../../models/Measure";
+import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
+import MeasureInformation from "./MeasureInformation";
+import MeasureSteward from "./MeasureSteward";
 
-jest.mock("axios");
+jest.mock("./MeasureInformation");
+jest.mock("./MeasureSteward");
 
-jest.mock("../../config/Config", () => ({
-  getServiceConfig: () => ({
-    measureService: {
-      baseUrl: "example-service-url",
-    },
-  }),
-}));
+const MeasureInformationMock = MeasureInformation as jest.Mock<JSX.Element>;
+const MeasureStewardMock = MeasureSteward as jest.Mock<JSX.Element>;
 
-const mockedAxios = axios as jest.Mocked<typeof axios>;
-const measure: Measure = {
-  id: "1",
-  measureName: "MSR001",
-  cql: "",
-  createdAt: "",
-  createdBy: "",
-  lastModifiedAt: "",
-  lastModifiedBy: "",
-  measureHumanReadableId: "",
-  measureSetId: "",
-  model: "",
-  revisionNumber: 0,
-  state: "",
-  version: 0,
+MeasureInformationMock.mockImplementation(() => {
+  return <div>Mock Measure Info</div>;
+});
+
+MeasureStewardMock.mockImplementation(() => {
+  return <div>Mock Measure Steward</div>;
+});
+
+const serviceConfig: ServiceConfig = {
+  measureService: {
+    baseUrl: "base.url",
+  },
 };
-mockedAxios.get.mockResolvedValue({ data: measure });
 
-jest.mock("../../InlineEdit/InlineEdit");
+describe("MeasureDetails component", () => {
+  it("should render the MeasureInformation component for default URL", () => {
+    const { getByText } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
+          <Route path="/foo">
+            <MeasureDetails />
+          </Route>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    expect(getByText("Mock Measure Info")).toBeTruthy();
+  });
 
-test.skip("Renders the Edit measure div", async () => {
-  const { getByTestId } = render(<MeasureDetails id="1" />);
-  await waitFor(() => {
-    expect(getByTestId("measure-name-edit")).toBeTruthy();
+  it("should render the MeasureSteward component for measure-steward URL", () => {
+    const { getByText } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={[{ pathname: "/foo/measure-steward" }]}>
+          <Route path="/foo">
+            <MeasureDetails />
+          </Route>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    expect(getByText("Mock Measure Steward")).toBeTruthy();
   });
 });

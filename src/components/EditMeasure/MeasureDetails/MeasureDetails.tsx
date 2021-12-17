@@ -9,13 +9,13 @@ const Grid = tw.div`grid grid-cols-4 gap-4 ml-6`;
 const Content = tw.div`col-span-3`;
 
 export default function EditMeasure() {
-  const { url } = useRouteMatch();
-  const stewardLink = `${url}/measure-steward`;
+  const { path } = useRouteMatch();
+  const stewardLink = `${path}/measure-steward`;
 
   const links = [
     {
       title: "Measure Information",
-      href: url,
+      href: path,
     },
     {
       title: "Steward/Author",
@@ -29,7 +29,7 @@ export default function EditMeasure() {
         <MeasureDetailsSidebar links={links} />
         <Content>
           <Switch>
-            <Route exact path={url}>
+            <Route exact path={path}>
               <MeasureInformation />
             </Route>
             <Route path={stewardLink}>
