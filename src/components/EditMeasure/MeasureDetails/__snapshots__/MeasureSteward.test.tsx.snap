@@ -1,0 +1,76 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MeasureSteward component should render the component with the supplied steward information 1`] = `
+<form
+  class="sc-bdvvtL exmvhH"
+  data-testid="measureSteward"
+>
+  <div
+    class="sc-gsDKAQ jTbVDJ"
+  >
+    <div>
+      <div>
+        <h3
+          class="sc-dkPtRN iSLtKt"
+        >
+          Steward/Author
+        </h3>
+        <p
+          class="sc-hKwDye fOHyGW"
+        >
+          This information will be displayed publicly so be careful what you share.
+        </p>
+      </div>
+      <div
+        class="sc-eCImPb kFJnon"
+      >
+        <div
+          class="sc-jRQBWg dcteYI"
+        >
+          <label
+            class="sc-gKclnd jKgMyI"
+            for="measure-steward"
+          >
+            Measure Steward
+          </label>
+          <div
+            class="sc-iCfMLu kQPxNJ"
+          >
+            <input
+              autocomplete="given-name"
+              class="sc-furwcr tryd"
+              data-testid="measureStewardInput"
+              id="measure-steward"
+              name="measure-steward"
+              placeholder="Measure Steward Name"
+              required=""
+              type="text"
+              value="Steward Test Value"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="sc-pVTFL lhiOkj"
+  >
+    <div
+      class="sc-jrQzAO iTeANG"
+    >
+      <button
+        class="sc-kDTinF hCJDQG"
+        data-testid="measureStewardSave"
+        type="submit"
+      >
+        Save
+      </button>
+      <div
+        class="sc-iqseJM bxnQes"
+      >
+        
+      </div>
+    </div>
+  </div>
+</form>
+`;

@@ -48,63 +48,63 @@ export default function MeasureSteward() {
         setSuccess(true);
       })
       .catch((reason) => {
-        const message = `Error updating measure ${measure.measureName}`;
+        const message = `Error updating measure "${measure.measureName}"`;
         console.error(message);
         console.error(reason);
         setError(message);
-        throw new Error(message);
       });
   }
 
   return (
-    <>
-      <Form onSubmit={onFormSubmit}>
-        <FormContent>
+    <Form onSubmit={onFormSubmit} data-testid="measureSteward">
+      <FormContent>
+        <div>
           <div>
-            <div>
-              <Header>Steward/Author</Header>
-              <SubHeader>
-                This information will be displayed publicly so be careful what
-                you share.
-              </SubHeader>
-            </div>
-
-            <FormField>
-              <FormFieldInner>
-                <FieldLabel htmlFor="measure-steward">
-                  Measure Steward
-                </FieldLabel>
-                <FieldSeparator>
-                  <FieldInput
-                    value={measureSteward}
-                    type="text"
-                    name="measure-steward"
-                    id="measure-steward"
-                    autoComplete="given-name"
-                    required
-                    onChange={onStewardChange}
-                    placeholder="Measure Steward Name"
-                  />
-                </FieldSeparator>
-              </FormFieldInner>
-            </FormField>
+            <Header>Steward/Author</Header>
+            <SubHeader>
+              This information will be displayed publicly so be careful what you
+              share.
+            </SubHeader>
           </div>
-        </FormContent>
 
-        <FormButtons>
-          <ButtonWrapper>
-            <SubmitButton type="submit">Save</SubmitButton>
-            <MessageDiv>
-              {success && (
-                <SuccessText>
-                  Measure Steward Information Saved Successfully
-                </SuccessText>
-              )}
-              {error && <ErrorText>{error}</ErrorText>}
-            </MessageDiv>
-          </ButtonWrapper>
-        </FormButtons>
-      </Form>
-    </>
+          <FormField>
+            <FormFieldInner>
+              <FieldLabel htmlFor="measure-steward">Measure Steward</FieldLabel>
+              <FieldSeparator>
+                <FieldInput
+                  value={measureSteward}
+                  type="text"
+                  name="measure-steward"
+                  id="measure-steward"
+                  autoComplete="given-name"
+                  required
+                  onChange={onStewardChange}
+                  placeholder="Measure Steward Name"
+                  data-testid="measureStewardInput"
+                />
+              </FieldSeparator>
+            </FormFieldInner>
+          </FormField>
+        </div>
+      </FormContent>
+
+      <FormButtons>
+        <ButtonWrapper>
+          <SubmitButton type="submit" data-testid="measureStewardSave">
+            Save
+          </SubmitButton>
+          <MessageDiv>
+            {success && (
+              <SuccessText data-testid="measureStewardSuccess">
+                Measure Steward Information Saved Successfully
+              </SuccessText>
+            )}
+            {error && (
+              <ErrorText data-testid="measureStewardError">{error}</ErrorText>
+            )}
+          </MessageDiv>
+        </ButtonWrapper>
+      </FormButtons>
+    </Form>
   );
 }
