@@ -7,12 +7,20 @@ import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../api/useMeasureServiceApi";
 import Measure from "../../models/Measure";
+import MeasureEditor from "../MeasureEditor/MeasureEditor";
 
 jest.mock("./MeasureDetails/MeasureDetails");
+jest.mock("../MeasureEditor/MeasureEditor");
 jest.mock("../../api/useMeasureServiceApi");
 
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
+
+const MeasureEditorMock = MeasureEditor as jest.Mock<JSX.Element>;
+
+MeasureEditorMock.mockImplementation(() => {
+  return <div>library testCql version '1.0.000'</div>;
+});
 
 const measure = {
   id: "measure ID",

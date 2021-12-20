@@ -1,17 +1,13 @@
-import React from "react";
+import React, { ChangeEvent } from "react";
 
-export function MadieEditor({ onChange }) {
-  const returnValue = "library testCql version '1.0.000'";
+export function MadieEditor({ onChange, value }) {
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <input
       data-testid="measure-editor"
-      onClick={() => {
-        onChange(returnValue);
+      value={value}
+      onChange={(e: ChangeEvent<HTMLInputElement>) => {
+        onChange(e.target.value);
       }}
-    >
-      {returnValue}
-    </div>
+    />
   );
 }
