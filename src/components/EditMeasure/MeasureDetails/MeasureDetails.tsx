@@ -1,5 +1,5 @@
 import * as React from "react";
-import tw from "twin.macro";
+import "twin.macro";
 import "styled-components/macro";
 import { getServiceConfig, ServiceConfig } from "../../config/Config";
 import { Measure } from "../../../models/Measure";
