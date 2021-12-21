@@ -5,10 +5,10 @@ import { MemoryRouter } from "react-router";
 import { Route } from "react-router-dom";
 import MeasureDetails from "./MeasureDetails";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
-import MeasureInformation from "./MeasureInformation";
+import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureSteward from "./MeasureSteward";
 
-jest.mock("./MeasureInformation");
+jest.mock("./measureInformation/MeasureInformation");
 jest.mock("./MeasureSteward");
 
 const MeasureInformationMock = MeasureInformation as jest.Mock<JSX.Element>;

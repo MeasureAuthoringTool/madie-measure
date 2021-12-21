@@ -7,9 +7,9 @@ import {
   useRouteMatch,
 } from "react-router-dom";
 import "styled-components/macro";
-import EditMeasureNav from "./EditMeasureNav/EditMeasureNav";
-import MeasureDetails from "./MeasureDetails/MeasureDetails";
-import MeasureEditor from "../MeasureEditor/MeasureEditor";
+import EditMeasureNav from "./editMeasureNav/EditMeasureNav";
+import MeasureDetails from "./measureDetails/MeasureDetails";
+import MeasureEditor from "../measureEditor/MeasureEditor";
 import Measure from "../../models/Measure";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { MeasureContextProvider } from "./MeasureContext";

@@ -1,7 +1,7 @@
 import * as React from "react";
 import tw from "twin.macro";
 import { Route, Switch, useRouteMatch } from "react-router-dom";
-import MeasureInformation from "./MeasureInformation";
+import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureSteward from "./MeasureSteward";
 import MeasureDetailsSidebar from "./MeasureDetailsSidebar";
 

@@ -14,6 +14,7 @@ import InlineEdit from "./InlineEdit";
 import axios from "axios";
 
 import Enzyme from "enzyme";
+// @ts-ignore
 import Adapter from "@wojtekmaj/enzyme-adapter-react-17";
 
 interface Measure {

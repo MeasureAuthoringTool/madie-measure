@@ -60,10 +60,10 @@ function InlineEdit(props) {
   });
 
   function save() {
-    if (inputValue.length > 500) {
-      setErrorMessage("A measure name cannot be more than 500 characters.");
-    } else if (!inputValue) {
+    if (!inputValue) {
       setErrorMessage("A measure name is required.");
+    } else if (inputValue.length > 500) {
+      setErrorMessage("A measure name cannot be more than 500 characters.");
     } else if (!/[a-zA-Z]/.test(inputValue)) {
       setErrorMessage("A measure name must contain at least one letter.");
     } else if (!/^((?!_).)*$/.test(inputValue)) {

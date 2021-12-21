@@ -22,15 +22,7 @@ export class MeasureServiceApi {
   }
 
   async updateMeasure(measure: Measure): Promise<void> {
-    try {
-      await axios.put(`${this.baseUrl}/measure/`, measure);
-    } catch (err) {
-      const message = `Unable to update measure ${measure.id}`;
-      console.error(message);
-      console.error(err);
-      console.error(measure);
-      throw new Error(message);
-    }
+    return await axios.put(`${this.baseUrl}/measure/`, measure);
   }
 }
 

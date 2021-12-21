@@ -3,7 +3,7 @@ import "@testing-library/jest-dom";
 
 import * as React from "react";
 import { render, fireEvent, screen } from "@testing-library/react";
-import MeasureLanding from "../MeasureLanding/MeasureLanding";
+import MeasureLanding from ".//MeasureLanding";
 
 jest.mock("../CreateNewMeasure/CreateNewMeasure");
 
