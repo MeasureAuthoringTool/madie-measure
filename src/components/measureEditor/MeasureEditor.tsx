@@ -2,7 +2,7 @@ import React, { SetStateAction, Dispatch, useState } from "react";
 import "styled-components/macro";
 import { MadieEditor } from "@madie/madie-editor";
 import { Button } from "@madie/madie-components";
-import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
+import useCurrentMeasure from "../EditMeasure/useCurrentMeasure";
 import Measure from "../../models/Measure";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import tw from "twin.macro";

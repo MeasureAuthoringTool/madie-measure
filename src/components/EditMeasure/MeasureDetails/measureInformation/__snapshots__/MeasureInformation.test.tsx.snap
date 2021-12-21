@@ -2,14 +2,14 @@
 
 exports[`MeasureInformation component should render the component with a blank measure name 1`] = `
 <div
-  class="MeasureInformation___StyledDiv-sc-1pua5bc-0 kIvXMc"
+  class="MeasureInformation___StyledDiv-sc-inwpvm-0 bvXTEO"
   data-testid="measure-name-edit"
 >
   <div
-    class="MeasureInformation___StyledDiv3-sc-1pua5bc-3 iIpBCt"
+    class="MeasureInformation___StyledDiv3-sc-inwpvm-3 fcwpcX"
   >
     <span
-      class="MeasureInformation___StyledSpan2-sc-1pua5bc-4 gexfQv"
+      class="MeasureInformation___StyledSpan2-sc-inwpvm-4 jerKIp"
     >
       Measure Name:
     </span>
@@ -43,14 +43,14 @@ exports[`MeasureInformation component should render the component with a blank m
 
 exports[`MeasureInformation component should render the component with measure's name populated 1`] = `
 <div
-  class="MeasureInformation___StyledDiv-sc-1pua5bc-0 kIvXMc"
+  class="MeasureInformation___StyledDiv-sc-inwpvm-0 bvXTEO"
   data-testid="measure-name-edit"
 >
   <div
-    class="MeasureInformation___StyledDiv3-sc-1pua5bc-3 iIpBCt"
+    class="MeasureInformation___StyledDiv3-sc-inwpvm-3 fcwpcX"
   >
     <span
-      class="MeasureInformation___StyledSpan2-sc-1pua5bc-4 gexfQv"
+      class="MeasureInformation___StyledSpan2-sc-inwpvm-4 jerKIp"
     >
       Measure Name:
     </span>
