@@ -27,7 +27,7 @@ export default function MeasureInformation() {
   }
 
   return (
-    <div tw="px-4 " data-testid="measure-name-edit">
+    <div tw="px-4" data-testid="measureNameEdit">
       <span>Measure:</span>
       <InlineEdit text={measure.measureName} onSetText={updateMeasureTitle} />
     </div>
