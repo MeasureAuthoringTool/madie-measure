@@ -2,7 +2,7 @@ import * as React from "react";
 import tw from "twin.macro";
 import { Route, Switch, useRouteMatch } from "react-router-dom";
 import MeasureInformation from "./measureInformation/MeasureInformation";
-import MeasureSteward from "./MeasureSteward";
+import MeasureSteward from "./measureSteward/MeasureSteward";
 import MeasureDetailsSidebar from "./MeasureDetailsSidebar";
 
 const Grid = tw.div`grid grid-cols-4 gap-4 ml-6`;

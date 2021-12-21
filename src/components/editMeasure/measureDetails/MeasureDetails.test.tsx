@@ -6,10 +6,10 @@ import { Route } from "react-router-dom";
 import MeasureDetails from "./MeasureDetails";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
 import MeasureInformation from "./measureInformation/MeasureInformation";
-import MeasureSteward from "./MeasureSteward";
+import MeasureSteward from "./measureSteward/MeasureSteward";
 
 jest.mock("./measureInformation/MeasureInformation");
-jest.mock("./MeasureSteward");
+jest.mock("./measureSteward/MeasureSteward");
 
 const MeasureInformationMock = MeasureInformation as jest.Mock<JSX.Element>;
 const MeasureStewardMock = MeasureSteward as jest.Mock<JSX.Element>;
