@@ -1,7 +1,7 @@
 import React from "react";
 import { Route, Switch, BrowserRouter } from "react-router-dom";
 import { CreateNewMeasure } from "../createNewMeasure/CreateNewMeasure";
-import EditMeasure from "../EditMeasure/EditMeasure";
+import EditMeasure from "../editMeasure/EditMeasure";
 import NewMeasure from "../newMeasure/NewMeasure";
 
 export default function MeasureLanding() {

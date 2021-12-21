@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import "styled-components/macro";
 import EditMeasureNav from "./editMeasureNav/EditMeasureNav";
-import MeasureDetails from "./MeasureDetails/MeasureDetails";
+import MeasureDetails from "./measureDetails/MeasureDetails";
 import MeasureEditor from "../measureEditor/MeasureEditor";
 import Measure from "../../models/Measure";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
