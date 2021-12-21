@@ -3,7 +3,7 @@ import "@testing-library/jest-dom";
 
 import * as React from "react";
 import { render, screen } from "@testing-library/react";
-import NewMeasure from ".//NewMeasure";
+import NewMeasure from "./NewMeasure";
 
 test("shows the children when the checkbox is checked", () => {
   render(<NewMeasure />);
