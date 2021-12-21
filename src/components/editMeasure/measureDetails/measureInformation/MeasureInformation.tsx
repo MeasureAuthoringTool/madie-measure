@@ -31,7 +31,7 @@ export default function MeasureInformation() {
   }
 
   return (
-    <div tw="px-4" data-testid="measure-name-edit">
+    <div tw="px-4 pt-4" data-testid="measure-name-edit">
       {genericErrorMessage && (
         <div tw="bg-red-500 pt-4 px-4 pb-4">
           <span
@@ -42,8 +42,10 @@ export default function MeasureInformation() {
           </span>
         </div>
       )}
-      <span>Measure Name:</span>
-      <InlineEdit text={measure.measureName} onSetText={updateMeasureTitle} />
+      <div tw="flex">
+        <span tw="mr-2">Measure Name:</span>
+        <InlineEdit text={measure.measureName} onSetText={updateMeasureTitle} />
+      </div>
     </div>
   );
 }
