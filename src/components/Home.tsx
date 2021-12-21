@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import axios from "axios";
-import MeasureLanding from "./MeasureLanding/MeasureLanding";
+import MeasureLanding from "./measureLanding/MeasureLanding";
 import { ApiContextProvider, ServiceConfig } from "../api/ServiceContext";
 
 export default function Home() {

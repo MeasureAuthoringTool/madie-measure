@@ -1,7 +1,7 @@
 import { fireEvent, render, waitFor } from "@testing-library/react";
 import * as React from "react";
 import MeasureEditor from "./MeasureEditor";
-import { MeasureContextProvider } from "../EditMeasure/MeasureContext";
+import { MeasureContextProvider } from "../editMeasure/MeasureContext";
 import Measure from "../../models/Measure";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import axios from "axios";

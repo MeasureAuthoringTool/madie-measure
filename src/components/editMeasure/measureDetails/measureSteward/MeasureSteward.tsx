@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import tw from "twin.macro";
-import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
-import useCurrentMeasure from "../useCurrentMeasure";
+import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
+import useCurrentMeasure from "../../useCurrentMeasure";
 
 const Form = tw.form`max-w-xl mt-3 space-y-8 divide-y divide-gray-200`;
 const FormContent = tw.div`space-y-8 divide-y divide-gray-200`;

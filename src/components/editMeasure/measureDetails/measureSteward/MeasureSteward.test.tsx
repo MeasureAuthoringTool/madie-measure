@@ -3,13 +3,13 @@ import { render, cleanup, fireEvent } from "@testing-library/react";
 import MeasureSteward from "./MeasureSteward";
 import useMeasureServiceApi, {
   MeasureServiceApi,
-} from "../../../api/useMeasureServiceApi";
-import useCurrentMeasure from "../useCurrentMeasure";
-import { MeasureContextHolder } from "../MeasureContext";
-import Measure from "../../../models/Measure";
+} from "../../../../api/useMeasureServiceApi";
+import useCurrentMeasure from "../../useCurrentMeasure";
+import { MeasureContextHolder } from "../../MeasureContext";
+import Measure from "../../../../models/Measure";
 
-jest.mock("../../../api/useMeasureServiceApi");
-jest.mock("../useCurrentMeasure");
+jest.mock("../../../../api/useMeasureServiceApi");
+jest.mock("../../useCurrentMeasure");
 
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;

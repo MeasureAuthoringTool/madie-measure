@@ -1,8 +1,8 @@
 import React from "react";
 import { Route, Switch, BrowserRouter } from "react-router-dom";
-import { CreateNewMeasure } from "../CreateNewMeasure/CreateNewMeasure";
-import EditMeasure from "../EditMeasure/EditMeasure";
-import NewMeasure from "../NewMeasure/NewMeasure";
+import { CreateNewMeasure } from "../createNewMeasure/CreateNewMeasure";
+import EditMeasure from "../editMeasure/EditMeasure";
+import NewMeasure from "../newMeasure/NewMeasure";
 
 export default function MeasureLanding() {
   return (

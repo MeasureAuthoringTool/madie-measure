@@ -3,15 +3,15 @@ import { render, cleanup, fireEvent } from "@testing-library/react";
 import MeasureInformation from "./MeasureInformation";
 import useMeasureServiceApi, {
   MeasureServiceApi,
-} from "../../../api/useMeasureServiceApi";
-import useCurrentMeasure from "../useCurrentMeasure";
-import useKeyPress from "../../../hooks/useKeypress";
-import { MeasureContextHolder } from "../MeasureContext";
-import Measure from "../../../models/Measure";
+} from "../../../../api/useMeasureServiceApi";
+import useCurrentMeasure from "../../useCurrentMeasure";
+import useKeyPress from "../../../../hooks/useKeypress";
+import { MeasureContextHolder } from "../../MeasureContext";
+import Measure from "../../../../models/Measure";
 
-jest.mock("../../../api/useMeasureServiceApi");
-jest.mock("../useCurrentMeasure");
-jest.mock("../../../hooks/useKeypress");
+jest.mock("../../../../api/useMeasureServiceApi");
+jest.mock("../../useCurrentMeasure");
+jest.mock("../../../../hooks/useKeypress");
 
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
@@ -52,7 +52,7 @@ describe("MeasureInformation component", () => {
 
   it("should render the component with measure's name populated", () => {
     const { getByTestId } = render(<MeasureInformation />);
-    const result: HTMLElement = getByTestId("measureNameEdit");
+    const result: HTMLElement = getByTestId("measure-name-edit");
     expect(result).toBeInTheDocument();
     expect(result).toMatchSnapshot();
     const text = getByTestId("inline-view-span");
@@ -62,7 +62,7 @@ describe("MeasureInformation component", () => {
   it("should render the component with a blank measure name", () => {
     delete measure.measureName;
     const { getByTestId } = render(<MeasureInformation />);
-    const result: HTMLElement = getByTestId("measureNameEdit");
+    const result: HTMLElement = getByTestId("measure-name-edit");
     expect(result).toBeInTheDocument();
     expect(result).toMatchSnapshot();
     const text = getByTestId("inline-view-span");

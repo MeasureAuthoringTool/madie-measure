@@ -7,10 +7,10 @@ import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../api/useMeasureServiceApi";
 import Measure from "../../models/Measure";
-import MeasureEditor from "../MeasureEditor/MeasureEditor";
+import MeasureEditor from "../measureEditor/MeasureEditor";
 
-jest.mock("./MeasureDetails/MeasureDetails");
-jest.mock("../MeasureEditor/MeasureEditor");
+jest.mock("./measureDetails/MeasureDetails");
+jest.mock("../measureEditor/MeasureEditor");
 jest.mock("../../api/useMeasureServiceApi");
 
 const useMeasureServiceApiMock =

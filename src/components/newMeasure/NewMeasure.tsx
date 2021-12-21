@@ -3,7 +3,7 @@ import "twin.macro";
 import "styled-components/macro";
 import { Button } from "@madie/madie-components";
 import { useHistory } from "react-router-dom";
-import MeasureList from "../MeasureList/MeasureList";
+import MeasureList from "../measureList/MeasureList";
 import Measure from "../../models/Measure";
 
 import { getServiceConfig, ServiceConfig } from "../config/Config";
