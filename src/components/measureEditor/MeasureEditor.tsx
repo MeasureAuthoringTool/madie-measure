@@ -15,7 +15,7 @@ const EditorActions = tw.div`mt-2 ml-2 mb-5`;
 const MeasureEditor = () => {
   const { measure, setMeasure } = useCurrentMeasure();
   const [editorVal, setEditorVal]: [string, Dispatch<SetStateAction<string>>] =
-    useState(measure.cql);
+    useState(measure.cql || "");
   const measureServiceApi = useMeasureServiceApi();
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
@@ -31,7 +31,6 @@ const MeasureEditor = () => {
         .catch((reason) => {
           console.error(reason);
           setError(true);
-          throw new Error(reason.message);
         });
     }
   };
@@ -43,7 +42,7 @@ const MeasureEditor = () => {
   };
 
   const resetCql = (): void => {
-    setEditorVal(measure.cql);
+    setEditorVal(measure.cql || "");
   };
 
   const editorProps = {
@@ -55,16 +54,24 @@ const MeasureEditor = () => {
     <>
       <MadieEditor {...editorProps} />
       <EditorActions data-testid="measure-editor-actions">
-        <UpdateAlerts data-testid="update_cql_alerts">
-          {success && <SuccessText>CQL saved successfully</SuccessText>}
-          {error && <ErrorText>Error updating the CQL</ErrorText>}
+        <UpdateAlerts data-testid="update-cql-alerts">
+          {success && (
+            <SuccessText data-testid="save-cql-success">
+              CQL saved successfully
+            </SuccessText>
+          )}
+          {error && (
+            <ErrorText data-testid="save-cql-error">
+              Error updating the CQL
+            </ErrorText>
+          )}
         </UpdateAlerts>
         <Button
           buttonSize="md"
           buttonTitle="Save"
           variant="primary"
           onClick={() => updateMeasureCql()}
-          data-testid="save_cql_btn"
+          data-testid="save-cql-btn"
         />
         <Button
           tw="ml-2"
@@ -72,7 +79,7 @@ const MeasureEditor = () => {
           buttonTitle="Cancel"
           variant="secondary"
           onClick={() => resetCql()}
-          data-testid="reset_cql_btn"
+          data-testid="reset-cql-btn"
         />
       </EditorActions>
     </>
