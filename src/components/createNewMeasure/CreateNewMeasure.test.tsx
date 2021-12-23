@@ -3,7 +3,7 @@ import { render, fireEvent, waitFor } from "@testing-library/react";
 import { CreateNewMeasure } from "./CreateNewMeasure";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
-import { CreateNewMeasureModel } from "../../models/CreateNewMeasureModel";
+import Measure from "../../models/Measure";
 
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -69,18 +69,26 @@ describe("Home component", () => {
     });
   });
 
-  it("should successfully retrieve service config and save measure, then navigate to measure list display", async () => {
-    const measure: CreateNewMeasureModel = {
+  it("should creates new measure, then navigate to measure list display", async () => {
+    const measure = {
       measureName: "Example Measure name",
-    };
+      cqlLibraryName: "TestLib",
+    } as Measure;
 
     const { getByTestId } = render(<CreateNewMeasure />);
-    const input = getByTestId("measure-name-text-field") as HTMLInputElement;
+    const measureName = getByTestId(
+      "measure-name-text-field"
+    ) as HTMLInputElement;
 
-    fireEvent.blur(input);
-    userEvent.type(input, "Example Measure name");
-
-    expect(input.value).toBe("Example Measure name");
+    fireEvent.blur(measureName);
+    userEvent.type(measureName, "Example Measure name");
+    expect(measureName.value).toBe("Example Measure name");
+    const cqlLibraryName = getByTestId(
+      "cql-library-name-name"
+    ) as HTMLInputElement;
+    fireEvent.change(cqlLibraryName, {
+      target: { value: "TestLib" },
+    });
 
     fireEvent.click(getByTestId("create-new-measure-save-button"));
 
@@ -94,23 +102,24 @@ describe("Home component", () => {
   });
 
   it("should handle post service call error", async () => {
-    const measure: CreateNewMeasureModel = {
-      measureName: "Example Measure name",
-    };
-
     const { getByTestId } = render(<CreateNewMeasure />);
     const input = getByTestId("measure-name-text-field") as HTMLInputElement;
 
     fireEvent.blur(input);
     userEvent.type(input, "Example Measure name");
-    fireEvent.click(getByTestId("create-new-measure-save-button"));
+    const cqlLibraryName = getByTestId(
+      "cql-library-name-name"
+    ) as HTMLInputElement;
+    fireEvent.change(cqlLibraryName, {
+      target: { value: "TestLib" },
+    });
 
-    mockedAxios.post.mockRejectedValue({ data: {} });
+    fireEvent.click(getByTestId("create-new-measure-save-button"));
+    const error = { response: { data: { message: "some error" } } };
+    mockedAxios.post.mockRejectedValue(error);
     await waitFor(() => {
-      expect(mockedAxios.post).toHaveBeenCalledWith(
-        "exmaple-service-url/measure",
-        measure
-      );
+      const errors = getByTestId("server-error-alerts");
+      expect(errors.textContent).toEqual(error.response.data.message);
     });
   });
 
@@ -119,5 +128,37 @@ describe("Home component", () => {
 
     fireEvent.click(getByTestId("create-new-measure-cancel-button"));
     expect(mockPush).toHaveBeenCalledWith("/example");
+  });
+
+  it("should perform validations on library name", async () => {
+    const { getByTestId } = render(<CreateNewMeasure />);
+    const cqlLibraryName = getByTestId(
+      "cql-library-name-name"
+    ) as HTMLInputElement;
+    // required constraints
+    fireEvent.blur(cqlLibraryName);
+    await waitFor(() => {
+      expect(getByTestId("cqlLibraryName-helper-text")).toHaveTextContent(
+        "Measure library name is required."
+      );
+    });
+
+    // Name start with Upper case Letter constraints
+    fireEvent.blur(cqlLibraryName);
+    userEvent.type(cqlLibraryName, "t123123");
+    await waitFor(() => {
+      expect(getByTestId("cqlLibraryName-helper-text")).toHaveTextContent(
+        "Measure library name must start with an upper case letter, followed by alpha-numeric character(s) and must not contain spaces."
+      );
+    });
+
+    // No space constraints
+    fireEvent.blur(cqlLibraryName);
+    userEvent.type(cqlLibraryName, "Test 123123");
+    await waitFor(() => {
+      expect(getByTestId("cqlLibraryName-helper-text")).toHaveTextContent(
+        "Measure library name must start with an upper case letter, followed by alpha-numeric character(s) and must not contain spaces."
+      );
+    });
   });
 });

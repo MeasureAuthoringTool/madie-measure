@@ -10,6 +10,7 @@ export default interface Measure {
   revisionNumber: number;
   state: string;
   measureName: string;
+  cqlLibraryName: string;
   cql: string;
   createdAt: string;
   createdBy: string;
