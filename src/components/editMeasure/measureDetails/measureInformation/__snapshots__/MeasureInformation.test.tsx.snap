@@ -40,6 +40,7 @@ exports[`MeasureInformation component should render the component with a blank m
   </div>
   <div
     class="MeasureInformation___StyledDiv4-sc-1pua5bc-5 kmMvDE"
+    data-testid="cql-library-name-display"
   >
     <span
       class="MeasureInformation___StyledSpan3-sc-1pua5bc-6 cPwLxs"
@@ -94,6 +95,7 @@ exports[`MeasureInformation component should render the component with measure's
   </div>
   <div
     class="MeasureInformation___StyledDiv4-sc-1pua5bc-5 kmMvDE"
+    data-testid="cql-library-name-display"
   >
     <span
       class="MeasureInformation___StyledSpan3-sc-1pua5bc-6 cPwLxs"
