@@ -69,7 +69,7 @@ describe("Home component", () => {
     });
   });
 
-  it("should creates new measure, then navigate to measure list display", async () => {
+  it("should create new measure, then navigate to measure list display", async () => {
     const measure = {
       measureName: "Example Measure name",
       cqlLibraryName: "TestLib",
