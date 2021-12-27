@@ -38,6 +38,18 @@ exports[`MeasureInformation component should render the component with a blank m
       </div>
     </div>
   </div>
+  <div
+    class="MeasureInformation___StyledDiv4-sc-1pua5bc-5 kmMvDE"
+  >
+    <span
+      class="MeasureInformation___StyledSpan3-sc-1pua5bc-6 cPwLxs"
+    >
+      Measure CQL Library Name:
+    </span>
+    <span>
+      NA
+    </span>
+  </div>
 </div>
 `;
 
@@ -79,6 +91,18 @@ exports[`MeasureInformation component should render the component with measure's
         </span>
       </div>
     </div>
+  </div>
+  <div
+    class="MeasureInformation___StyledDiv4-sc-1pua5bc-5 kmMvDE"
+  >
+    <span
+      class="MeasureInformation___StyledSpan3-sc-1pua5bc-6 cPwLxs"
+    >
+      Measure CQL Library Name:
+    </span>
+    <span>
+      NA
+    </span>
   </div>
 </div>
 `;
