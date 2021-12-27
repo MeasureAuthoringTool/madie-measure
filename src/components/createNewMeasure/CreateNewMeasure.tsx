@@ -80,7 +80,7 @@ const CreateNewMeasure = () => {
             id="cqlLibraryName"
             {...formik.getFieldProps("cqlLibraryName")}
             placeholder="Enter CQL Library Name"
-            data-testid="cql-library-name-name"
+            data-testid="cql-library-name"
           >
             <Label htmlFor="cqlLibraryName" text="Measure CQL Library Name" />
             {formikErrorHandler("cqlLibraryName", true)}

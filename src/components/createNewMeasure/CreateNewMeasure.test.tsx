@@ -83,9 +83,7 @@ describe("Home component", () => {
     fireEvent.blur(measureName);
     userEvent.type(measureName, "Example Measure name");
     expect(measureName.value).toBe("Example Measure name");
-    const cqlLibraryName = getByTestId(
-      "cql-library-name-name"
-    ) as HTMLInputElement;
+    const cqlLibraryName = getByTestId("cql-library-name") as HTMLInputElement;
     fireEvent.change(cqlLibraryName, {
       target: { value: "TestLib" },
     });
@@ -103,13 +101,13 @@ describe("Home component", () => {
 
   it("should handle post service call error", async () => {
     const { getByTestId } = render(<CreateNewMeasure />);
-    const input = getByTestId("measure-name-text-field") as HTMLInputElement;
-
-    fireEvent.blur(input);
-    userEvent.type(input, "Example Measure name");
-    const cqlLibraryName = getByTestId(
-      "cql-library-name-name"
+    const measureName = getByTestId(
+      "measure-name-text-field"
     ) as HTMLInputElement;
+
+    fireEvent.blur(measureName);
+    userEvent.type(measureName, "Example Measure name");
+    const cqlLibraryName = getByTestId("cql-library-name") as HTMLInputElement;
     fireEvent.change(cqlLibraryName, {
       target: { value: "TestLib" },
     });
@@ -130,11 +128,9 @@ describe("Home component", () => {
     expect(mockPush).toHaveBeenCalledWith("/example");
   });
 
-  it("should perform validations on library name", async () => {
+  it("should validate required library name constraints", async () => {
     const { getByTestId } = render(<CreateNewMeasure />);
-    const cqlLibraryName = getByTestId(
-      "cql-library-name-name"
-    ) as HTMLInputElement;
+    const cqlLibraryName = getByTestId("cql-library-name") as HTMLInputElement;
     // required constraints
     fireEvent.blur(cqlLibraryName);
     await waitFor(() => {
@@ -142,19 +138,40 @@ describe("Home component", () => {
         "Measure library name is required."
       );
     });
+  });
 
+  it("should validate no underscore constraint on library name", async () => {
+    const { getByTestId } = render(<CreateNewMeasure />);
+    const cqlLibraryName = getByTestId("cql-library-name") as HTMLInputElement;
+    // No underscore constraints
+    fireEvent.blur(cqlLibraryName);
+    userEvent.type(cqlLibraryName, "Te_st");
+    await waitFor(() => {
+      expect(getByTestId("cqlLibraryName-helper-text")).toHaveTextContent(
+        "Measure library name must not contain '_' (underscores)."
+      );
+    });
+  });
+
+  it("should validate library name starts with upper case letter constraints", async () => {
+    const { getByTestId } = render(<CreateNewMeasure />);
+    const cqlLibraryName = getByTestId("cql-library-name") as HTMLInputElement;
     // Name start with Upper case Letter constraints
     fireEvent.blur(cqlLibraryName);
-    userEvent.type(cqlLibraryName, "t123123");
+    userEvent.type(cqlLibraryName, "test");
     await waitFor(() => {
       expect(getByTestId("cqlLibraryName-helper-text")).toHaveTextContent(
         "Measure library name must start with an upper case letter, followed by alpha-numeric character(s) and must not contain spaces."
       );
     });
+  });
 
+  it("should validate library name no space constraints", async () => {
+    const { getByTestId } = render(<CreateNewMeasure />);
+    const cqlLibraryName = getByTestId("cql-library-name") as HTMLInputElement;
     // No space constraints
     fireEvent.blur(cqlLibraryName);
-    userEvent.type(cqlLibraryName, "Test 123123");
+    userEvent.type(cqlLibraryName, "Test Lib");
     await waitFor(() => {
       expect(getByTestId("cqlLibraryName-helper-text")).toHaveTextContent(
         "Measure library name must start with an upper case letter, followed by alpha-numeric character(s) and must not contain spaces."
