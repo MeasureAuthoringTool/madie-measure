@@ -93,12 +93,16 @@ const CreateNewMeasure = () => {
               error={formik.touched.model && Boolean(formik.errors.model)}
               helperText={formik.touched.model && formik.errors.model}
             >
-              <MenuItem key="" value={""}>
+              <MenuItem key="" value="" data-testid="measure-model-option-none">
                 None
               </MenuItem>
               {Object.keys(Model).map((modelKey) => {
                 return (
-                  <MenuItem key={modelKey} value={Model[modelKey]}>
+                  <MenuItem
+                    key={modelKey}
+                    value={Model[modelKey]}
+                    data-testid={`measure-model-option-${Model[modelKey]}`}
+                  >
                     {Model[modelKey]}
                   </MenuItem>
                 );
