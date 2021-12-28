@@ -46,7 +46,7 @@ export default function MeasureInformation() {
         <span tw="mr-2">Measure Name:</span>
         <InlineEdit text={measure.measureName} onSetText={updateMeasureTitle} />
       </div>
-      <div tw="flex">
+      <div tw="flex" data-testid="cql-library-name-display">
         <span tw="mr-2">Measure CQL Library Name:</span>
         <span>{measure.cqlLibraryName || "NA"}</span>
       </div>
