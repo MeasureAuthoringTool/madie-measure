@@ -11,6 +11,7 @@ export default interface Measure {
   state: string;
   measureName: string;
   cqlLibraryName: string;
+  measureScoring: string;
   cql: string;
   createdAt: string;
   createdBy: string;

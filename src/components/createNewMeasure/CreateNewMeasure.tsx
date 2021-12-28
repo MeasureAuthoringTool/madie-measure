@@ -8,6 +8,8 @@ import { useHistory } from "react-router-dom";
 import Measure from "../../models/Measure";
 import { MeasureSchemaValidator } from "../../models/MeasureSchemaValidator";
 import { getServiceConfig, ServiceConfig } from "../config/Config";
+import TextField from "@mui/material/TextField";
+import MenuItem from "@mui/material/MenuItem";
 
 const ErrorAlert = tw.div`bg-red-200 rounded-lg py-3 px-3 text-red-900 mb-3`;
 const FormRow = tw.div`mt-3`;
@@ -85,6 +87,22 @@ const CreateNewMeasure = () => {
             <Label htmlFor="cqlLibraryName" text="Measure CQL Library Name" />
             {formikErrorHandler("cqlLibraryName", true)}
           </TextInput>
+        </FormRow>
+        <FormRow>
+          <TextField
+            tw="w-72"
+            size="small"
+            label="Measure Scoring"
+            id="measureScoring"
+            {...formik.getFieldProps("measureScoring")}
+            data-testid="measure-scoring-select-field"
+            select
+          >
+            <MenuItem value="Cohort">Cohort</MenuItem>
+            <MenuItem value="Proportion">Proportion</MenuItem>
+            <MenuItem value="CV">CV</MenuItem>
+            <MenuItem value="Ratio">Ratio</MenuItem>
+          </TextField>
         </FormRow>
         <FormRow>
           <Button

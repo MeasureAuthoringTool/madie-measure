@@ -19,7 +19,7 @@ jest.mock("react-router-dom", () => ({
 jest.mock("../config/Config", () => ({
   getServiceConfig: () => ({
     measureService: {
-      baseUrl: "exmaple-service-url",
+      baseUrl: "example-service-url",
     },
   }),
 }));
@@ -93,7 +93,7 @@ describe("Home component", () => {
     mockedAxios.post.mockResolvedValue({ data: {} });
     await waitFor(() => {
       expect(mockedAxios.post).toHaveBeenCalledWith(
-        "exmaple-service-url/measure",
+        "example-service-url/measure",
         measure
       );
     });
