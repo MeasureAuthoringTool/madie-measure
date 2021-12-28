@@ -11,7 +11,7 @@ import { getServiceConfig, ServiceConfig } from "../config/Config";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import { TextField } from "@mui/material";
-import { Models } from "../../types/madie-models";
+import { Model } from "../../models/Model";
 
 const ErrorAlert = tw.div`bg-red-200 rounded-lg py-3 px-3 text-red-900 mb-3`;
 const FormRow = tw.div`mt-3`;
@@ -80,29 +80,31 @@ const CreateNewMeasure = () => {
           </TextInput>
         </FormRow>
         <FormRow>
-          <Label text="Measure Model" />
-          <TextField
-            tw="w-72"
-            size="small"
-            select
-            label="Select a model"
-            data-testid="measure-model-select"
-            name={"model"}
-            {...formik.getFieldProps("model")}
-            error={formik.touched.model && Boolean(formik.errors.model)}
-            helperText={formik.touched.model && formik.errors.model}
-          >
-            <MenuItem key="" value={""}>
-              None
-            </MenuItem>
-            {Object.keys(Models).map((modelKey) => {
-              return (
-                <MenuItem key={modelKey} value={Models[modelKey]}>
-                  {Models[modelKey]}
-                </MenuItem>
-              );
-            })}
-          </TextField>
+          <FormControl tw="w-72">
+            <Label text="Measure Model" />
+            <TextField
+              tw="w-full"
+              size="small"
+              select
+              label="Select a model"
+              data-testid="measure-model-select"
+              name={"model"}
+              {...formik.getFieldProps("model")}
+              error={formik.touched.model && Boolean(formik.errors.model)}
+              helperText={formik.touched.model && formik.errors.model}
+            >
+              <MenuItem key="" value={""}>
+                None
+              </MenuItem>
+              {Object.keys(Model).map((modelKey) => {
+                return (
+                  <MenuItem key={modelKey} value={Model[modelKey]}>
+                    {Model[modelKey]}
+                  </MenuItem>
+                );
+              })}
+            </TextField>
+          </FormControl>
         </FormRow>
         <FormRow>
           <TextInput
@@ -132,15 +134,6 @@ const CreateNewMeasure = () => {
               history.push("/measure");
             }}
             data-testid="create-new-measure-cancel-button"
-          />
-          <Button
-            buttonTitle="debug"
-            name={"debug"}
-            onClick={(e) => {
-              e.preventDefault();
-              // eslint-disable-next-line no-console
-              console.log("current form state: ", formik.values);
-            }}
           />
         </FormRow>
       </form>

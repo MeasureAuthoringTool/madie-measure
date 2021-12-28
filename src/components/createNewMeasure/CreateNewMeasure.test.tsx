@@ -5,10 +5,13 @@ import {
   waitFor,
   screen,
   waitForElementToBeRemoved,
+  within,
 } from "@testing-library/react";
 import { CreateNewMeasure } from "./CreateNewMeasure";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
+import Measure from "../../models/Measure";
+import { Model } from "../../models/Model";
 
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -96,6 +99,21 @@ describe("Home component", () => {
     expect(qiCoreOption).toBeInTheDocument();
   });
 
+  it("should have model options of Model enum types plus None", async () => {
+    render(<CreateNewMeasure />);
+    const modelDropdown = screen.getByRole("button", {
+      name: /select a model/i,
+    });
+    userEvent.click(modelDropdown);
+    const modelOptionsList = await screen.findByRole("listbox", {
+      name: /select a model/i,
+    });
+    const options = within(modelOptionsList).getAllByRole("option");
+    expect(options.length).toBe(Object.values(Model).length + 1);
+    const optionTexts = options.map((option) => option.textContent);
+    expect(optionTexts).toEqual(["None", ...Object.values(Model)]);
+  });
+
   it("should update the dropdown with the selected option", async () => {
     render(<CreateNewMeasure />);
     const modelDropdown = screen.getByRole("button", {
@@ -112,75 +130,63 @@ describe("Home component", () => {
     expect(qiCoreButton).toBeInTheDocument();
   });
 
-  // it.skip("should create new measure, then navigate to measure list display", async () => {
-  //   const measure = {
-  //     measureName: "Example Measure name",
-  //     cqlLibraryName: "TestLib",
-  //     model: "QI-Core",
-  //   } as Measure;
-  //
-  //   const { container, getByTestId } = render(<CreateNewMeasure />);
-  //   const measureName = getByTestId(
-  //     "measure-name-text-field"
-  //   ) as HTMLInputElement;
-  //
-  //   fireEvent.blur(measureName);
-  //   userEvent.type(measureName, "Example Measure name");
-  //   expect(measureName.value).toBe("Example Measure name");
-  //
-  //   const modelDropdown = screen.getByRole("button", {
-  //     name: /select a model/i,
-  //   });
-  //   userEvent.click(modelDropdown);
-  //   const option = await screen.findByText("QI-Core");
-  //   userEvent.click(option);
-  //   await waitForElementToBeRemoved(() => screen.queryByText("None"));
-  //   const qiCore = await screen.findByText("QI-Core");
-  //   expect(qiCore).toBeInTheDocument();
-  //   const cqlLibraryName = getByTestId("cql-library-name") as HTMLInputElement;
-  //   fireEvent.change(cqlLibraryName, {
-  //     target: { value: "TestLib" },
-  //   });
-  //
-  //   logRoles(container);
-  //   const createButton = await screen.findByRole("button", {
-  //     name: "Create Measure",
-  //   });
-  //
-  //   screen.debug();
-  //
-  //   await waitFor(() => expect(createButton).not.toBeDisabled(), {
-  //     timeout: 5000,
-  //   });
-  //
-  //   fireEvent.click(getByTestId("create-new-measure-save-button"));
-  //
-  //   mockedAxios.post.mockResolvedValue({ data: {} });
-  //   await waitFor(() => {
-  //     expect(mockedAxios.post).toHaveBeenCalledWith(
-  //       "exmaple-service-url/measure",
-  //       measure
-  //     );
-  //   });
-  // });
-
-  it("should handle post service call error", async () => {
-    const { getByTestId } = render(<CreateNewMeasure />);
-    // const measureName = getByTestId(
-    //   "measure-name-text-field"
-    // ) as HTMLInputElement;
-
+  it("should create new measure, then navigate to measure list display", async () => {
+    const measure = {
+      measureName: "Example Measure name",
+      cqlLibraryName: "TestLib",
+      model: "QI-Core",
+    } as Measure;
+    render(<CreateNewMeasure />);
     const measureNameInput = await screen.findByRole("textbox", {
       name: "Measure Name",
     });
-    // fireEvent.blur(measureName);
+    userEvent.type(measureNameInput, measure.measureName);
+    await waitFor(() => {
+      expect(measureNameInput).toHaveValue(measure.measureName);
+    });
+
+    const modelDropdown = screen.getByRole("button", {
+      name: /select a model/i,
+    });
+    userEvent.click(modelDropdown);
+    const qiCoreOption = await screen.findByText(measure.model);
+    userEvent.click(qiCoreOption);
+    await waitForElementToBeRemoved(() => screen.queryByText("None"));
+    const cqlLibraryNameInput = screen.getByRole("textbox", {
+      name: "Measure CQL Library Name",
+    });
+    userEvent.type(cqlLibraryNameInput, measure.cqlLibraryName);
+    await waitFor(() =>
+      expect(cqlLibraryNameInput).toHaveValue(measure.cqlLibraryName)
+    );
+
+    const createMeasureButton = screen.getByRole("button", {
+      name: "Create Measure",
+    });
+    await waitFor(() => expect(createMeasureButton).toBeEnabled(), {
+      timeout: 3000,
+    });
+    userEvent.click(createMeasureButton);
+
+    mockedAxios.post.mockResolvedValue({ data: {} });
+    await waitFor(() => {
+      expect(mockedAxios.post).toHaveBeenCalledWith(
+        "exmaple-service-url/measure",
+        measure
+      );
+    });
+  });
+
+  it("should handle post service call error", async () => {
+    const { getByTestId } = render(<CreateNewMeasure />);
+    const measureNameInput = await screen.findByRole("textbox", {
+      name: "Measure Name",
+    });
     userEvent.type(measureNameInput, "Example Measure name");
     await waitFor(() => {
       expect(measureNameInput).toHaveValue("Example Measure name");
     });
-    // expect(measureNameInput).toHaveTextContent("Example Measure name");
 
-    // await act(async () => {
     const modelDropdown = screen.getByRole("button", {
       name: /select a model/i,
     });
@@ -188,30 +194,18 @@ describe("Home component", () => {
     const qiCoreOption = await screen.findByText("QI-Core");
     userEvent.click(qiCoreOption);
     await waitForElementToBeRemoved(() => screen.queryByText("None"));
-    // const qiCoreButton = screen.getByRole("button", {name: /qi-core/i});
-    // expect(qiCoreButton).toBeInTheDocument();
-    // });
     const cqlLibraryNameInput = screen.getByRole("textbox", {
       name: "Measure CQL Library Name",
     });
-    // const cqlLibraryName = getByTestId("cql-library-name") as HTMLInputElement;
-    // fireEvent.change(cqlLibraryName, {
-    //   target: {value: "TestLib"},
-    // });
     userEvent.type(cqlLibraryNameInput, "TestLib");
     await waitFor(() => expect(cqlLibraryNameInput).toHaveValue("TestLib"));
-
-    const debugButton = screen.getByRole("button", { name: "debug" });
-    userEvent.click(debugButton);
 
     const createMeasureButton = screen.getByRole("button", {
       name: "Create Measure",
     });
-
     await waitFor(() => expect(createMeasureButton).toBeEnabled(), {
       timeout: 3000,
     });
-
     userEvent.click(createMeasureButton);
 
     const error = { response: { data: { message: "some error" } } };
@@ -220,7 +214,6 @@ describe("Home component", () => {
       const errors = getByTestId("server-error-alerts");
       expect(errors.textContent).toEqual(error.response.data.message);
     });
-    // });
   });
 
   it("should navigate to measure home page on cancel", async () => {
