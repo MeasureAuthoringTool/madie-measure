@@ -8,8 +8,10 @@ import { useHistory } from "react-router-dom";
 import Measure from "../../models/Measure";
 import { MeasureSchemaValidator } from "../../models/MeasureSchemaValidator";
 import { getServiceConfig, ServiceConfig } from "../config/Config";
-import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import { TextField } from "@mui/material";
+import { Model } from "../../models/Model";
 
 const ErrorAlert = tw.div`bg-red-200 rounded-lg py-3 px-3 text-red-900 mb-3`;
 const FormRow = tw.div`mt-3`;
@@ -21,6 +23,7 @@ const CreateNewMeasure = () => {
   const formik = useFormik({
     initialValues: {
       measureName: "",
+      model: "",
       cqlLibraryName: "",
     } as Measure,
     validationSchema: MeasureSchemaValidator,
@@ -77,6 +80,37 @@ const CreateNewMeasure = () => {
           </TextInput>
         </FormRow>
         <FormRow>
+          <FormControl tw="w-72">
+            <Label text="Measure Model" />
+            <TextField
+              tw="w-full"
+              size="small"
+              select
+              label="Select a model"
+              data-testid="measure-model-select"
+              name={"model"}
+              {...formik.getFieldProps("model")}
+              error={formik.touched.model && Boolean(formik.errors.model)}
+              helperText={formik.touched.model && formik.errors.model}
+            >
+              <MenuItem key="" value="" data-testid="measure-model-option-none">
+                None
+              </MenuItem>
+              {Object.keys(Model).map((modelKey) => {
+                return (
+                  <MenuItem
+                    key={modelKey}
+                    value={Model[modelKey]}
+                    data-testid={`measure-model-option-${Model[modelKey]}`}
+                  >
+                    {Model[modelKey]}
+                  </MenuItem>
+                );
+              })}
+            </TextField>
+          </FormControl>
+        </FormRow>
+        <FormRow>
           <TextInput
             type="text"
             id="cqlLibraryName"
@@ -92,11 +126,11 @@ const CreateNewMeasure = () => {
           <TextField
             tw="w-72"
             size="small"
+            select
             label="Measure Scoring"
             id="measureScoring"
             {...formik.getFieldProps("measureScoring")}
             data-testid="measure-scoring-select-field"
-            select
           >
             <MenuItem value="Cohort">Cohort</MenuItem>
             <MenuItem value="Proportion">Proportion</MenuItem>
