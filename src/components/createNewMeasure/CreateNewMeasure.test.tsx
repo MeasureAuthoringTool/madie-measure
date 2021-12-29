@@ -6,6 +6,7 @@ import {
   screen,
   waitForElementToBeRemoved,
   within,
+  logRoles,
 } from "@testing-library/react";
 import { CreateNewMeasure } from "./CreateNewMeasure";
 import userEvent from "@testing-library/user-event";
@@ -27,7 +28,7 @@ jest.mock("react-router-dom", () => ({
 jest.mock("../config/Config", () => ({
   getServiceConfig: () => ({
     measureService: {
-      baseUrl: "exmaple-service-url",
+      baseUrl: "example-service-url",
     },
   }),
 }));
@@ -87,6 +88,16 @@ describe("Home component", () => {
     expect(selectModelLabels.length).toEqual(2);
   });
 
+  it("should render the measure Scoring field", () => {
+    render(<CreateNewMeasure />);
+    const scoringDropdown = screen.getByRole("button", {
+      name: /measure scoring/i,
+    });
+    expect(scoringDropdown).toBeInTheDocument();
+    const selectLabels = screen.getAllByText("Measure Scoring");
+    expect(selectLabels.length).toEqual(2);
+  });
+
   it("should render the model options when clicked", async () => {
     render(<CreateNewMeasure />);
     const modelDropdown = screen.getByRole("button", {
@@ -97,6 +108,17 @@ describe("Home component", () => {
     expect(noneOption).toBeInTheDocument();
     const qiCoreOption = screen.getByText("QI-Core");
     expect(qiCoreOption).toBeInTheDocument();
+  });
+
+  it("should render the scoring options when clicked", async () => {
+    render(<CreateNewMeasure />);
+    const scoringDropdown = screen.getByRole("button", {
+      name: /measure scoring/i,
+    });
+    userEvent.click(scoringDropdown);
+
+    const cohortOption = screen.getByText("Cohort");
+    expect(cohortOption).toBeInTheDocument();
   });
 
   it("should have model options of Model enum types plus None", async () => {
@@ -171,7 +193,7 @@ describe("Home component", () => {
     mockedAxios.post.mockResolvedValue({ data: {} });
     await waitFor(() => {
       expect(mockedAxios.post).toHaveBeenCalledWith(
-        "exmaple-service-url/measure",
+        "example-service-url/measure",
         measure
       );
     });

@@ -123,6 +123,22 @@ const CreateNewMeasure = () => {
           </TextInput>
         </FormRow>
         <FormRow>
+          <TextField
+            tw="w-72"
+            size="small"
+            select
+            label="Measure Scoring"
+            id="measureScoring"
+            {...formik.getFieldProps("measureScoring")}
+            data-testid="measure-scoring-select-field"
+          >
+            <MenuItem value="Cohort">Cohort</MenuItem>
+            <MenuItem value="Proportion">Proportion</MenuItem>
+            <MenuItem value="CV">CV</MenuItem>
+            <MenuItem value="Ratio">Ratio</MenuItem>
+          </TextField>
+        </FormRow>
+        <FormRow>
           <Button
             buttonTitle="Create Measure"
             type="submit"
