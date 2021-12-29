@@ -157,6 +157,7 @@ describe("Home component", () => {
       measureName: "Example Measure name",
       cqlLibraryName: "TestLib",
       model: "QI-Core",
+      measureScoring: "",
     } as Measure;
     render(<CreateNewMeasure />);
     const measureNameInput = await screen.findByRole("textbox", {
@@ -278,7 +279,8 @@ describe("Home component", () => {
     userEvent.type(cqlLibraryName, "test");
     await waitFor(() => {
       expect(getByTestId("cqlLibraryName-helper-text")).toHaveTextContent(
-        "Measure library name must start with an upper case letter, followed by alpha-numeric character(s) and must not contain spaces."
+        "Measure library name must start with an upper case letter, " +
+          "followed by alpha-numeric character(s) and must not contain spaces or other special characters."
       );
     });
   });
@@ -291,7 +293,8 @@ describe("Home component", () => {
     userEvent.type(cqlLibraryName, "Test Lib");
     await waitFor(() => {
       expect(getByTestId("cqlLibraryName-helper-text")).toHaveTextContent(
-        "Measure library name must start with an upper case letter, followed by alpha-numeric character(s) and must not contain spaces."
+        "Measure library name must start with an upper case letter, " +
+          "followed by alpha-numeric character(s) and must not contain spaces or other special characters."
       );
     });
   });

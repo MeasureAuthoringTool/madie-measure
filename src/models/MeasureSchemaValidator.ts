@@ -18,6 +18,6 @@ export const MeasureSchemaValidator = Yup.object().shape({
     )
     .matches(
       /^[A-Z][a-zA-Z0-9]*$/,
-      "Measure library name must start with an upper case letter, followed by alpha-numeric character(s) and must not contain spaces."
+      "Measure library name must start with an upper case letter, followed by alpha-numeric character(s) and must not contain spaces or other special characters."
     ),
 });
