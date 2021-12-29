@@ -25,6 +25,7 @@ const CreateNewMeasure = () => {
       measureName: "",
       model: "",
       cqlLibraryName: "",
+      measureScoring: "",
     } as Measure,
     validationSchema: MeasureSchemaValidator,
     onSubmit: async (values: Measure) => {
