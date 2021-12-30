@@ -116,6 +116,8 @@ describe("EditMeasure Component", () => {
     // Patients Menu click action
     fireEvent.click(await findByText("Patients"));
     expect((await findByText("Patients")).classList).toContain("active");
-    expect(document.body.textContent).toContain("In progress...");
+    expect(document.body.textContent).toContain(
+      "Patient work is in progress !!"
+    );
   });
 });
