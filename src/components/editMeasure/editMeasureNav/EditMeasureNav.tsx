@@ -20,16 +20,28 @@ const EditMeasureNav = () => {
   return (
     <div>
       <MenuItemContainer>
-        <MenuItem isActive={pathname.startsWith(`${url}/details`)}>
+        <MenuItem
+          data-testid="measure-details-tab"
+          isActive={pathname.startsWith(`${url}/details`)}
+        >
           <NavLink to={`${url}/details`}>Details</NavLink>
         </MenuItem>
-        <MenuItem isActive={pathname === `${url}/cql-editor`}>
+        <MenuItem
+          data-testid="cql-editor-tab"
+          isActive={pathname === `${url}/cql-editor`}
+        >
           <NavLink to={`${url}/cql-editor`}>CQL Editor</NavLink>
         </MenuItem>
-        <MenuItem isActive={pathname === `${url}/measure-groups`}>
+        <MenuItem
+          data-testid="measure-groups-tab"
+          isActive={pathname === `${url}/measure-groups`}
+        >
           <NavLink to={`${url}/measure-groups`}>Measure Groups</NavLink>
         </MenuItem>
-        <MenuItem isActive={pathname === `${url}/patients`}>
+        <MenuItem
+          data-testid="patients-tab"
+          isActive={pathname === `${url}/patients`}
+        >
           <NavLink to={`${url}/patients`}>Patients</NavLink>
         </MenuItem>
       </MenuItemContainer>
