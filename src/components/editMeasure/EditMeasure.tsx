@@ -13,6 +13,7 @@ import MeasureEditor from "../measureEditor/MeasureEditor";
 import Measure from "../../models/Measure";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { MeasureContextProvider } from "./MeasureContext";
+import { MadiePatient } from "@madie/madie-patient";
 
 interface inputParams {
   id: string;
@@ -47,6 +48,9 @@ export default function EditMeasure() {
           </Route>
           <Route path={`${url}/cql-editor`}>
             <MeasureEditor />
+          </Route>
+          <Route path={`${url}/patients`}>
+            <MadiePatient />
           </Route>
           <Route path="*">
             <div>In progress...</div>
