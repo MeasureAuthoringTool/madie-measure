@@ -4,6 +4,9 @@ export interface ServiceConfig {
   measureService: {
     baseUrl: string;
   };
+  elmTranslationService: {
+    baseUrl: string;
+  };
 }
 
 const ServiceContext = createContext<ServiceConfig>(null);

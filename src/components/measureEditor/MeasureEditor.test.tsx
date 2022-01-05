@@ -1,17 +1,38 @@
-import { fireEvent, render, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import * as React from "react";
 import MeasureEditor from "./MeasureEditor";
 import { MeasureContextProvider } from "../editMeasure/MeasureContext";
 import Measure from "../../models/Measure";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import axios from "axios";
+import { ElmTranslation } from "../../api/useElmTranslationServiceApi";
+import { Model } from "../../models/Model";
+import userEvent from "@testing-library/user-event";
 
 const measure = {
   id: "abcd-pqrs-xyz",
-  model: "FHIR",
+  measureHumanReadableId: "",
+  measureSetId: "",
+  version: 1.0,
+  revisionNumber: 1.1,
+  state: "",
   measureName: "MSR001",
   cql: "library testCql version '1.0.000'",
+  cqlLibraryName: "",
+  measureScoring: "",
+  createdAt: "",
+  createdBy: "",
+  lastModifiedAt: "",
+  lastModifiedBy: "",
+  model: Model.QICORE,
+  measureMetaData: "",
 } as Measure;
+
+const elmTranslationWithNoErrors: ElmTranslation = {
+  externalErrors: [],
+  errorExceptions: [],
+  library: null,
+};
 
 const setMeasure = jest.fn();
 jest.mock("axios");
@@ -20,6 +41,9 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 const serviceConfig: ServiceConfig = {
   measureService: {
     baseUrl: "madie.com",
+  },
+  elmTranslationService: {
+    baseUrl: "elm-translator.com",
   },
 };
 
@@ -61,7 +85,21 @@ describe("MeasureEditor component", () => {
   });
 
   it("save measure with updated cql in editor on save button click", async () => {
-    mockedAxios.put.mockResolvedValue({ data: measure });
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measure });
+      } else if (
+        args &&
+        args.startsWith(serviceConfig.elmTranslationService.baseUrl)
+      ) {
+        return Promise.resolve({
+          data: { json: JSON.stringify(elmTranslationWithNoErrors) },
+          status: 200,
+        });
+      }
+      return Promise.resolve(args);
+    });
+
     const getByTestId = renderEditor(measure);
     const editorContainer = (await getByTestId(
       "measure-editor"
@@ -69,16 +107,83 @@ describe("MeasureEditor component", () => {
     expect(measure.cql).toEqual(editorContainer.value);
     fireEvent.change(getByTestId("measure-editor"), {
       target: {
-        value: "library testCql version '2.0.000'",
+        value:
+          "library AdvancedIllnessandFrailtyExclusion_QICore4 version '5.0.000'",
       },
     });
     fireEvent.click(getByTestId("save-cql-btn"));
     await waitFor(() => {
       const successMessage = getByTestId("save-cql-success");
       expect(successMessage.textContent).toEqual("CQL saved successfully");
-      expect(mockedAxios.put).toHaveBeenCalledTimes(1);
+      expect(mockedAxios.put).toHaveBeenCalledTimes(2);
       expect(setMeasure).toHaveBeenCalledTimes(1);
+      expect(mockedAxios.put).toHaveBeenCalledWith(
+        "elm-translator.com/cql/translator/cql",
+        expect.anything(),
+        expect.anything()
+      );
+      expect(mockedAxios.put).toHaveBeenCalledWith(
+        "madie.com/measure/",
+        expect.anything()
+      );
     });
+  });
+
+  it("should alert user if ELM translation fails on save", async () => {
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measure });
+      } else if (
+        args &&
+        args.startsWith(serviceConfig.elmTranslationService.baseUrl)
+      ) {
+        return Promise.resolve({
+          data: { error: "Something bad happened!" },
+          status: 500,
+        });
+      }
+      return Promise.resolve(args);
+    });
+
+    const getByTestId = renderEditor(measure);
+    const editorContainer = (await getByTestId(
+      "measure-editor"
+    )) as HTMLInputElement;
+    expect(measure.cql).toEqual(editorContainer.value);
+    fireEvent.change(getByTestId("measure-editor"), {
+      target: {
+        value:
+          "library AdvancedIllnessandFrailtyExclusion_QICore4 version '5.0.000'",
+      },
+    });
+    const saveButton = screen.getByRole("button", { name: "Save" });
+    userEvent.click(saveButton);
+    // fireEvent.click(getByTestId("save-cql-btn"));
+    const elmTranslationError = await screen.findByText(
+      "Unable to translate CQL to ELM!"
+    );
+    expect(elmTranslationError).toBeInTheDocument();
+    expect(mockedAxios.put).toHaveBeenCalledTimes(2);
+    expect(mockedAxios.put).toHaveBeenCalledWith(
+      "elm-translator.com/cql/translator/cql",
+      expect.anything(),
+      expect.anything()
+    );
+    // await waitFor(() => {
+    //   const successMessage = getByTestId("save-cql-success");
+    //   expect(successMessage.textContent).toEqual("CQL saved successfully");
+    //   expect(mockedAxios.put).toHaveBeenCalledTimes(2);
+    //   expect(setMeasure).toHaveBeenCalledTimes(1);
+    //   expect(mockedAxios.put).toHaveBeenCalledWith(
+    //     "elm-translator.com/cql/translator/cql",
+    //     expect.anything(),
+    //     expect.anything()
+    //   );
+    //   expect(mockedAxios.put).toHaveBeenCalledWith(
+    //     "madie.com/measure/",
+    //     expect.anything()
+    //   );
+    // });
   });
 
   it("reset the editor changes with measure cql when clicked on cancel button", async () => {
@@ -103,7 +208,21 @@ describe("MeasureEditor component", () => {
 
   it("reports an error when save cql fails", async () => {
     // mock put call for errors
-    mockedAxios.put.mockRejectedValue("server error");
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.reject("server error");
+      } else if (
+        args &&
+        args.startsWith(serviceConfig.elmTranslationService.baseUrl)
+      ) {
+        return Promise.resolve({
+          data: { json: JSON.stringify(elmTranslationWithNoErrors) },
+          status: 200,
+        });
+      }
+      return Promise.resolve(args);
+    });
+    // mockedAxios.put.mockRejectedValue("server error");
     const getByTestId = renderEditor(measure);
     const editorContainer = (await getByTestId(
       "measure-editor"
