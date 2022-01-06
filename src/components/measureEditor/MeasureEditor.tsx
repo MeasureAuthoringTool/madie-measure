@@ -64,7 +64,8 @@ const MeasureEditor = () => {
 
   const debouncedChangeHandler: any = useRef(
     _.debounce((nextValue: string) => {
-      updateElmAnnotations(nextValue).catch(() => {
+      updateElmAnnotations(nextValue).catch((err) => {
+        console.error("An error occurred while translating CQL to ELM", err);
         setElmTranslationError("Unable to translate CQL to ELM!");
       });
       // other debounced operations can go here as well
@@ -72,7 +73,8 @@ const MeasureEditor = () => {
   ).current;
 
   const updateMeasureCql = () => {
-    updateElmAnnotations(editorVal).catch(() => {
+    updateElmAnnotations(editorVal).catch((err) => {
+      console.error("An error occurred while translating CQL to ELM", err);
       setElmTranslationError("Unable to translate CQL to ELM!");
     });
     if (editorVal !== measure.cql) {
