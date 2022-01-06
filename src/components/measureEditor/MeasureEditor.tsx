@@ -67,6 +67,7 @@ const MeasureEditor = () => {
       updateElmAnnotations(nextValue).catch((err) => {
         console.error("An error occurred while translating CQL to ELM", err);
         setElmTranslationError("Unable to translate CQL to ELM!");
+        setElmAnnotations([]);
       });
       // other debounced operations can go here as well
     }, 1500)
@@ -76,6 +77,7 @@ const MeasureEditor = () => {
     updateElmAnnotations(editorVal).catch((err) => {
       console.error("An error occurred while translating CQL to ELM", err);
       setElmTranslationError("Unable to translate CQL to ELM!");
+      setElmAnnotations([]);
     });
     if (editorVal !== measure.cql) {
       const newMeasure: Measure = { ...measure, cql: editorVal };
