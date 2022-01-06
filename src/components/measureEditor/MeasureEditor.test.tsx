@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import * as React from "react";
-import MeasureEditor from "./MeasureEditor";
+import MeasureEditor, { mapElmErrorsToAceAnnotations } from "./MeasureEditor";
 import { MeasureContextProvider } from "../editMeasure/MeasureContext";
 import Measure from "../../models/Measure";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
@@ -34,6 +34,38 @@ const elmTranslationWithNoErrors: ElmTranslation = {
   library: null,
 };
 
+const translationErrors = [
+  {
+    startLine: 4,
+    startChar: 19,
+    endLine: 19,
+    endChar: 23,
+    errorSeverity: "Error",
+    errorType: null,
+    message: "Test error 123",
+    targetIncludeLibraryId: "TestLibrary_QICore",
+    targetIncludeLibraryVersionId: "5.0.000",
+    type: null,
+  },
+  {
+    startLine: 24,
+    startChar: 7,
+    endLine: 24,
+    endChar: 15,
+    errorSeverity: "Warning",
+    errorType: null,
+    message: "Test Warning 456",
+    targetIncludeLibraryId: "TestLibrary_QICore",
+    targetIncludeLibraryVersionId: "5.0.000",
+    type: null,
+  },
+];
+const elmTranslationWithErrors: ElmTranslation = {
+  externalErrors: [],
+  errorExceptions: translationErrors,
+  library: null,
+};
+
 const setMeasure = jest.fn();
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -48,15 +80,13 @@ const serviceConfig: ServiceConfig = {
 };
 
 const renderEditor = (measure: Measure) => {
-  const { getByTestId } = render(
+  return render(
     <ApiContextProvider value={serviceConfig}>
       <MeasureContextProvider value={{ measure, setMeasure }}>
         <MeasureEditor />
       </MeasureContextProvider>
     </ApiContextProvider>
   );
-
-  return getByTestId;
 };
 
 describe("MeasureEditor component", () => {
@@ -65,7 +95,7 @@ describe("MeasureEditor component", () => {
   });
 
   it("should mount measure editor component with measure cql", async () => {
-    const getByTestId = renderEditor(measure);
+    const { getByTestId } = renderEditor(measure);
     const editorContainer = (await getByTestId(
       "measure-editor"
     )) as HTMLInputElement;
@@ -77,7 +107,7 @@ describe("MeasureEditor component", () => {
       id: "MSR1",
       measureName: "MSR1",
     } as Measure;
-    const getByTestId = renderEditor(measureWithNoCql);
+    const { getByTestId } = renderEditor(measureWithNoCql);
     const editorContainer = (await getByTestId(
       "measure-editor"
     )) as HTMLInputElement;
@@ -100,7 +130,7 @@ describe("MeasureEditor component", () => {
       return Promise.resolve(args);
     });
 
-    const getByTestId = renderEditor(measure);
+    const { getByTestId } = renderEditor(measure);
     const editorContainer = (await getByTestId(
       "measure-editor"
     )) as HTMLInputElement;
@@ -145,7 +175,7 @@ describe("MeasureEditor component", () => {
       return Promise.resolve(args);
     });
 
-    const getByTestId = renderEditor(measure);
+    const { getByTestId } = renderEditor(measure);
     const editorContainer = (await getByTestId(
       "measure-editor"
     )) as HTMLInputElement;
@@ -169,25 +199,10 @@ describe("MeasureEditor component", () => {
       expect.anything(),
       expect.anything()
     );
-    // await waitFor(() => {
-    //   const successMessage = getByTestId("save-cql-success");
-    //   expect(successMessage.textContent).toEqual("CQL saved successfully");
-    //   expect(mockedAxios.put).toHaveBeenCalledTimes(2);
-    //   expect(setMeasure).toHaveBeenCalledTimes(1);
-    //   expect(mockedAxios.put).toHaveBeenCalledWith(
-    //     "elm-translator.com/cql/translator/cql",
-    //     expect.anything(),
-    //     expect.anything()
-    //   );
-    //   expect(mockedAxios.put).toHaveBeenCalledWith(
-    //     "madie.com/measure/",
-    //     expect.anything()
-    //   );
-    // });
   });
 
   it("reset the editor changes with measure cql when clicked on cancel button", async () => {
-    const getByTestId = renderEditor(measure);
+    const { getByTestId } = renderEditor(measure);
     const editorContainer = (await getByTestId(
       "measure-editor"
     )) as HTMLInputElement;
@@ -222,8 +237,7 @@ describe("MeasureEditor component", () => {
       }
       return Promise.resolve(args);
     });
-    // mockedAxios.put.mockRejectedValue("server error");
-    const getByTestId = renderEditor(measure);
+    const { getByTestId } = renderEditor(measure);
     const editorContainer = (await getByTestId(
       "measure-editor"
     )) as HTMLInputElement;
@@ -239,6 +253,132 @@ describe("MeasureEditor component", () => {
     await waitFor(() => {
       const error = getByTestId("save-cql-error");
       expect(error.textContent).toEqual("Error updating the CQL");
+    });
+  });
+
+  it("runs ELM translation after value change and generate annotations", async () => {
+    jest.useFakeTimers("modern");
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measure });
+      } else if (
+        args &&
+        args.startsWith(serviceConfig.elmTranslationService.baseUrl)
+      ) {
+        return Promise.resolve({
+          data: { json: JSON.stringify(elmTranslationWithErrors) },
+          status: 200,
+        });
+      }
+      return Promise.resolve(args);
+    });
+    renderEditor(measure);
+    jest.advanceTimersByTime(2000);
+    const issues = await screen.findByText("2 issues found with CQL");
+    expect(issues).toBeInTheDocument();
+  });
+
+  it("runs ELM translation after value change and displays errors with invoking translation", async () => {
+    jest.useFakeTimers("modern");
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measure });
+      } else if (
+        args &&
+        args.startsWith(serviceConfig.elmTranslationService.baseUrl)
+      ) {
+        return Promise.resolve({
+          data: { error: "Something bad happened!" },
+          status: 500,
+        });
+      }
+      return Promise.resolve(args);
+    });
+    renderEditor(measure);
+    jest.advanceTimersByTime(2000);
+    const error = await screen.findByText("Unable to translate CQL to ELM!");
+    expect(error).toBeInTheDocument();
+  });
+
+  it("clears ELM translation errors when CQL is cleared", async () => {
+    jest.useFakeTimers("modern");
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measure });
+      } else if (
+        args &&
+        args.startsWith(serviceConfig.elmTranslationService.baseUrl)
+      ) {
+        return Promise.resolve({
+          data: { json: JSON.stringify(elmTranslationWithErrors) },
+          status: 200,
+        });
+      }
+      return Promise.resolve(args);
+    });
+    const { getByTestId } = renderEditor(measure);
+    jest.advanceTimersByTime(2000);
+    const error = await screen.findByText("2 issues found with CQL");
+    expect(error).toBeInTheDocument();
+    fireEvent.change(getByTestId("measure-editor"), {
+      target: {
+        value: "",
+      },
+    });
+    // wait for the debounced translation to run
+    const valid = await screen.findByText(
+      "CQL is valid",
+      {},
+      { timeout: 2500 }
+    );
+    expect(valid).toBeInTheDocument();
+  });
+});
+
+describe("mapElmErrorsToAceAnnotations", () => {
+  it("should return an empty array for null input", () => {
+    const translationErrors = null;
+    const output = mapElmErrorsToAceAnnotations(translationErrors);
+    expect(output).toBeDefined();
+    expect(output.length).toEqual(0);
+  });
+
+  it("should return an empty array for undefined input", () => {
+    const translationErrors = undefined;
+    const output = mapElmErrorsToAceAnnotations(translationErrors);
+    expect(output).toBeDefined();
+    expect(output.length).toEqual(0);
+  });
+
+  it("should return an empty array for empty array input", () => {
+    const translationErrors = [];
+    const output = mapElmErrorsToAceAnnotations(translationErrors);
+    expect(output).toBeDefined();
+    expect(output.length).toEqual(0);
+  });
+
+  it("should return an empty array for non-array input", () => {
+    const translationErrors: any = { field: "value" };
+    const output = mapElmErrorsToAceAnnotations(translationErrors);
+    expect(output).toBeDefined();
+    expect(output.length).toEqual(0);
+  });
+
+  it("should return an array of mapped elements", () => {
+    const output = mapElmErrorsToAceAnnotations(translationErrors);
+    expect(output).toBeDefined();
+    expect(output.length).toEqual(2);
+    expect(output[0]).toEqual({
+      row: 3,
+      column: 19,
+      type: "error",
+      text: `ELM: 19:23 | Test error 123`,
+    });
+    expect(output[1]).toEqual({
+      row: 23,
+      column: 7,
+      type: "warning",
+      text: `ELM: 7:15 | Test Warning 456`,
     });
   });
 });

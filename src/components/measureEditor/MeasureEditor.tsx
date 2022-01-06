@@ -27,7 +27,7 @@ export const mapElmErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
 ): EditorAnnotation[] => {
   let annotations: EditorAnnotation[] = [];
-  if (errors && errors.length > 0) {
+  if (errors && _.isArray(errors) && errors.length > 0) {
     annotations = errors.map((error: ElmTranslationError) => ({
       row: error.startLine - 1,
       column: error.startChar,
@@ -102,7 +102,7 @@ const MeasureEditor = () => {
 
   useEffect(() => {
     debouncedChangeHandler(editorVal);
-  }, [editorVal]);
+  }, [editorVal, debouncedChangeHandler]);
 
   return (
     <>
