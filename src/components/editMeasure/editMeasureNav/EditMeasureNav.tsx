@@ -40,9 +40,9 @@ const EditMeasureNav = () => {
         </MenuItem>
         <MenuItem
           data-testid="patients-tab"
-          isActive={pathname === `${url}/patients`}
+          isActive={pathname.startsWith(`${url}/patients`)}
         >
-          <NavLink to={`${url}/patients`}>Patients</NavLink>
+          <NavLink to={`${url}/patients`}>Test Cases</NavLink>
         </MenuItem>
       </MenuItemContainer>
     </div>

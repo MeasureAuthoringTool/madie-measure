@@ -71,7 +71,7 @@
     "jest-cli": "^27.1.0",
     "postcss": "^8.3.6",
     "postcss-loader": "^6.1.1",
-    "postcss-preset-env": "^6.7.0",
+    "postcss-preset-env": "^7.2.0",
     "prettier": "^2.3.2",
     "pretty-quick": "^3.1.1",
     "react-router": "^5.2.1",

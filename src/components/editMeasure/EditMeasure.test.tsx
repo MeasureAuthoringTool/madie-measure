@@ -88,7 +88,7 @@ describe("EditMeasure Component", () => {
     expect(await findByText("Details")).toBeInTheDocument();
     expect(await findByText("CQL Editor")).toBeInTheDocument();
     expect(await findByText("Measure Groups")).toBeInTheDocument();
-    expect(await findByText("Patients")).toBeInTheDocument();
+    expect(await findByText("Test Cases")).toBeInTheDocument();
     expect((await findByText("Details")).classList).toContain("active");
   });
 
@@ -113,9 +113,9 @@ describe("EditMeasure Component", () => {
     expect((await findByText("Measure Groups")).classList).toContain("active");
     expect(document.body.textContent).toContain("In progress...");
 
-    // Patients Menu click action
-    fireEvent.click(await findByText("Patients"));
-    expect((await findByText("Patients")).classList).toContain("active");
+    // Test Cases Menu click action
+    fireEvent.click(await findByText("Test Cases"));
+    expect((await findByText("Test Cases")).classList).toContain("active");
     expect(document.body.textContent).toContain("Patient Component");
   });
 });
