@@ -1,5 +1,6 @@
 import * as Yup from "yup";
 import { Model } from "./Model";
+import { MeasureScoring } from "./MeasureScoring";
 
 export const MeasureSchemaValidator = Yup.object().shape({
   measureName: Yup.string()
@@ -20,4 +21,7 @@ export const MeasureSchemaValidator = Yup.object().shape({
       /^[A-Z][a-zA-Z0-9]*$/,
       "Measure library name must start with an upper case letter, followed by alpha-numeric character(s) and must not contain spaces or other special characters."
     ),
+  measureScoring: Yup.string()
+    .oneOf(Object.values(MeasureScoring))
+    .required("Measure Scoring is required."),
 });
