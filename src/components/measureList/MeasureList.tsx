@@ -4,6 +4,7 @@ import "styled-components/macro";
 
 import Measure from "../../models/Measure";
 import { useHistory } from "react-router-dom";
+import { MeasureScoring } from "../../models/MeasureScoring";
 
 export default function MeasureList(props: { measureList: Measure[] }) {
   const history = useHistory();
@@ -28,6 +29,12 @@ export default function MeasureList(props: { measureList: Measure[] }) {
                       tw="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
                       Model
+                    </th>
+                    <th
+                      scope="col"
+                      tw="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Measure Scoring
                     </th>
                     <th
                       scope="col"
@@ -67,6 +74,9 @@ export default function MeasureList(props: { measureList: Measure[] }) {
                       </td>
                       <td tw="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {measure.model}
+                      </td>{" "}
+                      <td tw="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {measure.measureScoring}
                       </td>
                       <td tw="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {measure.state}

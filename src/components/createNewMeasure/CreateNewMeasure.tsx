@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import tw from "twin.macro";
 import "styled-components/macro";
-import { TextInput, Label, Button, HelperText } from "@madie/madie-components";
+import { Button, HelperText, Label, TextInput } from "@madie/madie-components";
 import axios from "axios";
 import { useFormik } from "formik";
 import { useHistory } from "react-router-dom";
@@ -12,6 +12,7 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import { TextField } from "@mui/material";
 import { Model } from "../../models/Model";
+import { MeasureScoring } from "../../models/MeasureScoring";
 
 const ErrorAlert = tw.div`bg-red-200 rounded-lg py-3 px-3 text-red-900 mb-3`;
 const FormRow = tw.div`mt-3`;
@@ -41,7 +42,15 @@ const CreateNewMeasure = () => {
         history.push("/measure");
       })
       .catch((error) => {
-        setServerError(error.response.data.message);
+        let msg: string = error.response.data.message;
+        if (!!error.response.data.validationErrors) {
+          for (const erroredField in error.response.data.validationErrors) {
+            msg = msg.concat(
+              ` ${erroredField} : ${error.response.data.validationErrors[erroredField]}`
+            );
+          }
+        }
+        setServerError(msg);
       });
   }
 
@@ -124,20 +133,38 @@ const CreateNewMeasure = () => {
           </TextInput>
         </FormRow>
         <FormRow>
-          <TextField
-            tw="w-72"
-            size="small"
-            select
-            label="Measure Scoring"
-            id="measureScoring"
-            {...formik.getFieldProps("measureScoring")}
-            data-testid="measure-scoring-select-field"
-          >
-            <MenuItem value="Cohort">Cohort</MenuItem>
-            <MenuItem value="Proportion">Proportion</MenuItem>
-            <MenuItem value="CV">CV</MenuItem>
-            <MenuItem value="Ratio">Ratio</MenuItem>
-          </TextField>
+          <FormControl tw="w-72">
+            <Label text="Measure Scoring" />
+            <TextField
+              tw="w-full"
+              size="small"
+              select
+              label="Select scoring"
+              id="measureScoring"
+              {...formik.getFieldProps("measureScoring")}
+              data-testid="measure-scoring-select-field"
+              name={"measureScoring"}
+            >
+              <MenuItem
+                key=""
+                value=""
+                data-testid="measure-scoring-option-none"
+              >
+                None
+              </MenuItem>
+              {Object.keys(MeasureScoring).map((scoringKey) => {
+                return (
+                  <MenuItem
+                    key={scoringKey}
+                    value={MeasureScoring[scoringKey]}
+                    data-testid={`measure-scoring-option-${MeasureScoring[scoringKey]}`}
+                  >
+                    {MeasureScoring[scoringKey]}
+                  </MenuItem>
+                );
+              })}
+            </TextField>
+          </FormControl>
         </FormRow>
         <FormRow>
           <Button

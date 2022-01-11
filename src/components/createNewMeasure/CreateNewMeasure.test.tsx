@@ -1,18 +1,18 @@
 import * as React from "react";
 import {
-  render,
   fireEvent,
-  waitFor,
+  render,
   screen,
+  waitFor,
   waitForElementToBeRemoved,
   within,
-  logRoles,
 } from "@testing-library/react";
 import { CreateNewMeasure } from "./CreateNewMeasure";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
 import Measure from "../../models/Measure";
 import { Model } from "../../models/Model";
+import { MeasureScoring } from "../../models/MeasureScoring";
 
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -88,14 +88,16 @@ describe("Home component", () => {
     expect(selectModelLabels.length).toEqual(2);
   });
 
-  it("should render the measure Scoring field", () => {
+  it("should render the measure scoring field", () => {
     render(<CreateNewMeasure />);
     const scoringDropdown = screen.getByRole("button", {
-      name: /measure scoring/i,
+      name: /select scoring/i,
     });
     expect(scoringDropdown).toBeInTheDocument();
     const selectLabels = screen.getAllByText("Measure Scoring");
-    expect(selectLabels.length).toEqual(2);
+    expect(selectLabels.length).toEqual(1);
+    const formLabel = screen.getAllByText("Select scoring");
+    expect(formLabel.length).toEqual(2);
   });
 
   it("should render the model options when clicked", async () => {
@@ -113,7 +115,7 @@ describe("Home component", () => {
   it("should render the scoring options when clicked", async () => {
     render(<CreateNewMeasure />);
     const scoringDropdown = screen.getByRole("button", {
-      name: /measure scoring/i,
+      name: /select scoring/i,
     });
     userEvent.click(scoringDropdown);
 
@@ -134,6 +136,21 @@ describe("Home component", () => {
     expect(options.length).toBe(Object.values(Model).length + 1);
     const optionTexts = options.map((option) => option.textContent);
     expect(optionTexts).toEqual(["None", ...Object.values(Model)]);
+  });
+
+  it("should have measure scoring options of Measure Scoring enum types plus None", async () => {
+    render(<CreateNewMeasure />);
+    const measureScoringDropdown = screen.getByRole("button", {
+      name: /select scoring/i,
+    });
+    userEvent.click(measureScoringDropdown);
+    const measureScoringOptionsList = await screen.findByRole("listbox", {
+      name: /select scoring/i,
+    });
+    const options = within(measureScoringOptionsList).getAllByRole("option");
+    expect(options.length).toBe(Object.values(MeasureScoring).length + 1);
+    const optionTexts = options.map((option) => option.textContent);
+    expect(optionTexts).toEqual(["None", ...Object.values(MeasureScoring)]);
   });
 
   it("should update the dropdown with the selected option", async () => {
@@ -157,7 +174,7 @@ describe("Home component", () => {
       measureName: "Example Measure name",
       cqlLibraryName: "TestLib",
       model: "QI-Core",
-      measureScoring: "",
+      measureScoring: "Cohort",
     } as Measure;
     render(<CreateNewMeasure />);
     const measureNameInput = await screen.findByRole("textbox", {
@@ -175,6 +192,15 @@ describe("Home component", () => {
     const qiCoreOption = await screen.findByText(measure.model);
     userEvent.click(qiCoreOption);
     await waitForElementToBeRemoved(() => screen.queryByText("None"));
+
+    const measureScoringDropdown = screen.getByRole("button", {
+      name: /select scoring/i,
+    });
+    userEvent.click(measureScoringDropdown);
+    const cohortOption = await screen.findByText(measure.measureScoring);
+    userEvent.click(cohortOption);
+    await waitForElementToBeRemoved(() => screen.queryByText("None"));
+
     const cqlLibraryNameInput = screen.getByRole("textbox", {
       name: "Measure CQL Library Name",
     });
@@ -217,6 +243,15 @@ describe("Home component", () => {
     const qiCoreOption = await screen.findByText("QI-Core");
     userEvent.click(qiCoreOption);
     await waitForElementToBeRemoved(() => screen.queryByText("None"));
+
+    const scoringDropdown = screen.getByRole("button", {
+      name: /select scoring/i,
+    });
+    userEvent.click(scoringDropdown);
+    const cohortOption = await screen.findByText("Cohort");
+    userEvent.click(cohortOption);
+    await waitForElementToBeRemoved(() => screen.queryByText("None"));
+
     const cqlLibraryNameInput = screen.getByRole("textbox", {
       name: "Measure CQL Library Name",
     });

@@ -1,4 +1,5 @@
 import { Model } from "./Model";
+import { MeasureScoring } from "./MeasureScoring";
 
 export interface MeasureMetadata {
   measureSteward?: string;
@@ -13,7 +14,7 @@ export default interface Measure {
   state: string;
   measureName: string;
   cqlLibraryName: string;
-  measureScoring: string;
+  measureScoring: MeasureScoring | "";
   cql: string;
   createdAt: string;
   createdBy: string;
