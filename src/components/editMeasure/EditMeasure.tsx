@@ -49,7 +49,7 @@ export default function EditMeasure() {
           <Route path={`${url}/cql-editor`}>
             <MeasureEditor />
           </Route>
-          <Route path={`${url}/patients`}>
+          <Route path={`${url}/test-cases`}>
             <MadiePatient />
           </Route>
           <Route path="*">
