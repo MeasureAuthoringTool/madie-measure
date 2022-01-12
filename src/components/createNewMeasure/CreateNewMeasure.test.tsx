@@ -4,7 +4,6 @@ import {
   render,
   screen,
   waitFor,
-  waitForElementToBeRemoved,
   within,
 } from "@testing-library/react";
 import { CreateNewMeasure } from "./CreateNewMeasure";
@@ -106,8 +105,6 @@ describe("Home component", () => {
       name: /select a model/i,
     });
     userEvent.click(modelDropdown);
-    const noneOption = await screen.findByText("None");
-    expect(noneOption).toBeInTheDocument();
     const qiCoreOption = screen.getByText("QI-Core");
     expect(qiCoreOption).toBeInTheDocument();
   });
@@ -133,9 +130,9 @@ describe("Home component", () => {
       name: /select a model/i,
     });
     const options = within(modelOptionsList).getAllByRole("option");
-    expect(options.length).toBe(Object.values(Model).length + 1);
+    expect(options.length).toBe(Object.values(Model).length);
     const optionTexts = options.map((option) => option.textContent);
-    expect(optionTexts).toEqual(["None", ...Object.values(Model)]);
+    expect(optionTexts).toEqual([...Object.values(Model)]);
   });
 
   it("should have measure scoring options of Measure Scoring enum types plus None", async () => {
@@ -148,9 +145,9 @@ describe("Home component", () => {
       name: /select scoring/i,
     });
     const options = within(measureScoringOptionsList).getAllByRole("option");
-    expect(options.length).toBe(Object.values(MeasureScoring).length + 1);
+    expect(options.length).toBe(Object.values(MeasureScoring).length);
     const optionTexts = options.map((option) => option.textContent);
-    expect(optionTexts).toEqual(["None", ...Object.values(MeasureScoring)]);
+    expect(optionTexts).toEqual([...Object.values(MeasureScoring)]);
   });
 
   it("should update the dropdown with the selected option", async () => {
@@ -162,7 +159,6 @@ describe("Home component", () => {
     const qiCoreOption = screen.getByText("QI-Core");
     expect(qiCoreOption).toBeInTheDocument();
     userEvent.click(qiCoreOption);
-    await waitForElementToBeRemoved(() => screen.queryByText("None"));
     const qiCore = await screen.findByText("QI-Core");
     expect(qiCore).toBeInTheDocument();
     const qiCoreButton = screen.getByRole("button", { name: /qi-core/i });
@@ -191,7 +187,6 @@ describe("Home component", () => {
     userEvent.click(modelDropdown);
     const qiCoreOption = await screen.findByText(measure.model);
     userEvent.click(qiCoreOption);
-    await waitForElementToBeRemoved(() => screen.queryByText("None"));
 
     const measureScoringDropdown = screen.getByRole("button", {
       name: /select scoring/i,
@@ -199,7 +194,6 @@ describe("Home component", () => {
     userEvent.click(measureScoringDropdown);
     const cohortOption = await screen.findByText(measure.measureScoring);
     userEvent.click(cohortOption);
-    await waitForElementToBeRemoved(() => screen.queryByText("None"));
 
     const cqlLibraryNameInput = screen.getByRole("textbox", {
       name: "Measure CQL Library Name",
@@ -242,7 +236,6 @@ describe("Home component", () => {
     userEvent.click(modelDropdown);
     const qiCoreOption = await screen.findByText("QI-Core");
     userEvent.click(qiCoreOption);
-    await waitForElementToBeRemoved(() => screen.queryByText("None"));
 
     const scoringDropdown = screen.getByRole("button", {
       name: /select scoring/i,
@@ -250,7 +243,6 @@ describe("Home component", () => {
     userEvent.click(scoringDropdown);
     const cohortOption = await screen.findByText("Cohort");
     userEvent.click(cohortOption);
-    await waitForElementToBeRemoved(() => screen.queryByText("None"));
 
     const cqlLibraryNameInput = screen.getByRole("textbox", {
       name: "Measure CQL Library Name",
