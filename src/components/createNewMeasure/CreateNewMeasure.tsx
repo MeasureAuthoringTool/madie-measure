@@ -144,6 +144,13 @@ const CreateNewMeasure = () => {
               {...formik.getFieldProps("measureScoring")}
               data-testid="measure-scoring-select-field"
               name={"measureScoring"}
+              error={
+                formik.touched.measureScoring &&
+                Boolean(formik.errors.measureScoring)
+              }
+              helperText={
+                formik.touched.measureScoring && formik.errors.measureScoring
+              }
             >
               <MenuItem
                 key=""
