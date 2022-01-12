@@ -103,9 +103,6 @@ const CreateNewMeasure = () => {
               error={formik.touched.model && Boolean(formik.errors.model)}
               helperText={formik.touched.model && formik.errors.model}
             >
-              <MenuItem key="" value="" data-testid="measure-model-option-none">
-                None
-              </MenuItem>
               {Object.keys(Model).map((modelKey) => {
                 return (
                   <MenuItem
@@ -152,13 +149,6 @@ const CreateNewMeasure = () => {
                 formik.touched.measureScoring && formik.errors.measureScoring
               }
             >
-              <MenuItem
-                key=""
-                value=""
-                data-testid="measure-scoring-option-none"
-              >
-                None
-              </MenuItem>
               {Object.keys(MeasureScoring).map((scoringKey) => {
                 return (
                   <MenuItem
