@@ -95,6 +95,8 @@
     "@emotion/styled": "^11.6.0",
     "@heroicons/react": "^1.0.5",
     "@mui/material": "^5.2.5",
+    "@okta/okta-auth-js": "^5.10.1",
+    "@okta/okta-react": "^6.1.0",
     "@tailwindcss/forms": "^0.3.4",
     "axios": "^0.24.0",
     "formik": "^2.2.9",
