@@ -8,19 +8,25 @@ import Measure from "../../models/Measure";
 
 import { getServiceConfig, ServiceConfig } from "../config/Config";
 import axios from "axios";
+import useOktaTokens from "../../hooks/useOktaTokens";
 
 export default function NewMeasure() {
   const history = useHistory();
   const [measureList, setMeasureList] = useState<Measure[]>([]);
   const [serviceConfig, setServiceConfig] = useState<ServiceConfig>();
   const [serviceConfigErr, setServiceConfigErr] = useState<string>();
+  const { getAccessToken } = useOktaTokens();
 
   if (!serviceConfig && !serviceConfigErr) {
     (async () => {
       const config: ServiceConfig = await getServiceConfig();
       setServiceConfig(config);
       axios
-        .get(config?.measureService?.baseUrl + "/measures")
+        .get(config?.measureService?.baseUrl + "/measures", {
+          headers: {
+            Authorization: `Bearer ${getAccessToken()}`,
+          },
+        })
         .then((response) => {
           setMeasureList(response.data as Array<Measure>);
         })
