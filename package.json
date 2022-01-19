@@ -5,7 +5,8 @@
     "dist/**/*"
   ],
   "scripts": {
-    "start": "webpack serve --port 8505",
+    "starts": "webpack serve --port 8505 --env=protocol=https",
+    "start": "webpack serve --port 8505 --env=protocol=http",
     "build": "concurrently npm:build:*",
     "build:webpack": "webpack --mode=production",
     "analyze": "webpack --mode=production --env analyze",
