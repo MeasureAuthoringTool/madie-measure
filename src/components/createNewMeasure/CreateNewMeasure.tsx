@@ -13,7 +13,7 @@ import FormControl from "@mui/material/FormControl";
 import { TextField } from "@mui/material";
 import { Model } from "../../models/Model";
 import { MeasureScoring } from "../../models/MeasureScoring";
-import { useOktaTokens } from "../../hooks/useOktaJwt";
+import useOktaTokens from "../../hooks/useOktaTokens";
 
 const ErrorAlert = tw.div`bg-red-200 rounded-lg py-3 px-3 text-red-900 mb-3`;
 const FormRow = tw.div`mt-3`;

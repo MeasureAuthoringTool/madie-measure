@@ -79,6 +79,12 @@ const serviceConfig: ServiceConfig = {
   },
 };
 
+jest.mock("../../hooks/useOktaTokens", () =>
+  jest.fn(() => ({
+    getAccessToken: () => "test.jwt",
+  }))
+);
+
 const renderEditor = (measure: Measure) => {
   return render(
     <ApiContextProvider value={serviceConfig}>
@@ -92,6 +98,7 @@ const renderEditor = (measure: Measure) => {
 describe("MeasureEditor component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.setTimeout(120000);
   });
 
   it("should mount measure editor component with measure cql", async () => {
@@ -147,15 +154,23 @@ describe("MeasureEditor component", () => {
       expect(successMessage.textContent).toEqual("CQL saved successfully");
       expect(mockedAxios.put).toHaveBeenCalledTimes(2);
       expect(setMeasure).toHaveBeenCalledTimes(1);
-      expect(mockedAxios.put).toHaveBeenCalledWith(
-        "elm-translator.com/cql/translator/cql",
-        expect.anything(),
-        expect.anything()
-      );
-      expect(mockedAxios.put).toHaveBeenCalledWith(
-        "madie.com/measure/",
-        expect.anything()
-      );
+      // console.log(mockedAxios.put.mock.calls);
+      expect(mockedAxios.put.mock.calls).toEqual([
+        [
+          "elm-translator.com/cql/translator/cql",
+          expect.anything(),
+          expect.anything(),
+        ],
+        [
+          "madie.com/measure/",
+          expect.anything(),
+          {
+            headers: {
+              Authorization: "Bearer test.jwt",
+            },
+          },
+        ],
+      ]);
     });
   });
 

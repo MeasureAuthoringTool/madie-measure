@@ -25,7 +25,7 @@ const getIdToken = (storageKey) => {
   return getIdTokenObj(storageKey)?.idToken;
 };
 
-export const useOktaTokens = (storageKey = "okta-token-storage") => {
+const useOktaTokens = (storageKey = "okta-token-storage") => {
   return {
     getAccessToken: () => getAccessToken(storageKey),
     getAccessTokenObj: () => getAccessTokenObj(storageKey),
@@ -33,3 +33,5 @@ export const useOktaTokens = (storageKey = "okta-token-storage") => {
     getIdTokenObj: () => getIdTokenObj(storageKey),
   };
 };
+
+export default useOktaTokens;

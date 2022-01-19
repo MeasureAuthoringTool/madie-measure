@@ -32,6 +32,12 @@ jest.mock("../config/Config", () => ({
   }),
 }));
 
+jest.mock("../../hooks/useOktaTokens", () =>
+  jest.fn(() => ({
+    getAccessToken: () => "test.jwt",
+  }))
+);
+
 describe("Home component", () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -215,7 +221,8 @@ describe("Home component", () => {
     await waitFor(() => {
       expect(mockedAxios.post).toHaveBeenCalledWith(
         "example-service-url/measure",
-        measure
+        measure,
+        expect.anything()
       );
     });
   });
