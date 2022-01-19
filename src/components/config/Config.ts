@@ -1,5 +1,12 @@
 import axios from "axios";
 
+export interface OktaConfig {
+  baseUrl: string;
+  issuer: string;
+  clientId: string;
+  redirectUri: string;
+}
+
 export interface ServiceConfig {
   measureService: {
     baseUrl: string;

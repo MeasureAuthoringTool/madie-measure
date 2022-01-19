@@ -3,14 +3,20 @@ import axios from "axios";
 import useServiceConfig from "./useServiceConfig";
 import { ServiceConfig } from "./ServiceContext";
 import Measure from "../models/Measure";
+import useOktaTokens from "../hooks/useOktaTokens";
 
 export class MeasureServiceApi {
-  constructor(private baseUrl: string) {}
+  constructor(private baseUrl: string, private getAccessToken: () => string) {}
 
   async fetchMeasure(id: string): Promise<Measure> {
     try {
       const response = await axios.get<Measure>(
-        `${this.baseUrl}/measures/${id}`
+        `${this.baseUrl}/measures/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
       );
       return response.data;
     } catch (err) {
@@ -22,13 +28,18 @@ export class MeasureServiceApi {
   }
 
   async updateMeasure(measure: Measure): Promise<void> {
-    return await axios.put(`${this.baseUrl}/measure/`, measure);
+    return await axios.put(`${this.baseUrl}/measure/`, measure, {
+      headers: {
+        Authorization: `Bearer ${this.getAccessToken()}`,
+      },
+    });
   }
 }
 
 export default function useMeasureServiceApi(): MeasureServiceApi {
   const serviceConfig: ServiceConfig = useServiceConfig();
+  const { getAccessToken } = useOktaTokens();
   const { baseUrl } = serviceConfig.measureService;
 
-  return new MeasureServiceApi(baseUrl);
+  return new MeasureServiceApi(baseUrl, getAccessToken);
 }

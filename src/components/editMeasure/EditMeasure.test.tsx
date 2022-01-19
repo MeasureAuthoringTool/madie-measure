@@ -34,9 +34,18 @@ useMeasureServiceApiMock.mockImplementation(() => {
   return serviceApiMock;
 });
 
+jest.mock("../../hooks/useOktaTokens", () => ({
+  useOktaTokens: jest.fn(() => ({
+    getAccessToken: () => "test.jwt",
+  })),
+}));
+
 const serviceConfig: ServiceConfig = {
   measureService: {
     baseUrl: "base.url",
+  },
+  elmTranslationService: {
+    baseUrl: "",
   },
 };
 

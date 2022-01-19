@@ -13,12 +13,14 @@ import FormControl from "@mui/material/FormControl";
 import { TextField } from "@mui/material";
 import { Model } from "../../models/Model";
 import { MeasureScoring } from "../../models/MeasureScoring";
+import useOktaTokens from "../../hooks/useOktaTokens";
 
 const ErrorAlert = tw.div`bg-red-200 rounded-lg py-3 px-3 text-red-900 mb-3`;
 const FormRow = tw.div`mt-3`;
 
 const CreateNewMeasure = () => {
   const history = useHistory();
+  const { getAccessToken } = useOktaTokens();
   const [serverError, setServerError] = useState(undefined);
 
   const formik = useFormik({
@@ -37,7 +39,11 @@ const CreateNewMeasure = () => {
   async function createMeasure(measure: Measure) {
     const config: ServiceConfig = await getServiceConfig();
     await axios
-      .post<Measure>(config?.measureService?.baseUrl + "/measure", measure)
+      .post<Measure>(config?.measureService?.baseUrl + "/measure", measure, {
+        headers: {
+          Authorization: `Bearer ${getAccessToken()}`,
+        },
+      })
       .then((response) => {
         history.push("/measure");
       })
