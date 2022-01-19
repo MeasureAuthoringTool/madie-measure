@@ -98,7 +98,6 @@ const renderEditor = (measure: Measure) => {
 describe("MeasureEditor component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.setTimeout(120000);
   });
 
   it("should mount measure editor component with measure cql", async () => {
