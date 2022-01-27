@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useRef, useState} from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { Button } from "@madie/madie-components";
@@ -13,44 +13,52 @@ import useOktaTokens from "../../hooks/useOktaTokens";
 import { Divider, InputAdornment, Tab, Tabs, TextField } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 
 export default function NewMeasure() {
   const history = useHistory();
   const [measureList, setMeasureList] = useState<Measure[]>([]);
-  const [serviceConfig, setServiceConfig] = useState<ServiceConfig>();
-  const [serviceConfigErr, setServiceConfigErr] = useState<string>();
+  // const [serviceConfig, setServiceConfig] = useState<ServiceConfig>();
+  // const [serviceConfigErr, setServiceConfigErr] = useState<string>();
   const [activeTab, setActiveTab] = useState(0);
-  const { getAccessToken } = useOktaTokens();
+  const measureServiceApi = useMeasureServiceApi();
+  // const { getAccessToken } = useRef(useOktaTokens()).current;
+
+  // useEffect(() => {
+  //   getServiceConfig()
+  //     .then((serviceConfig) => setServiceConfig(serviceConfig))
+  //     .catch(() =>
+  //       setServiceConfigErr(
+  //         "Unable to load page, please contact the site administration"
+  //       )
+  //     );
+  // }, []);
 
   useEffect(() => {
-    getServiceConfig()
-      .then((serviceConfig) => setServiceConfig(serviceConfig))
-      .catch(() =>
-        setServiceConfigErr(
-          "Unable to load page, please contact the site administration"
-        )
-      );
-  }, []);
-
-  useEffect(() => {
-    if (serviceConfig) {
-      setMeasureList(() => []);
-      axios
-        .get<Measure[]>(serviceConfig?.measureService?.baseUrl + "/measures", {
-          headers: {
-            Authorization: `Bearer ${getAccessToken()}`,
-          },
-          params: {
-            currentUser: activeTab === 0,
-          },
-        })
-        .then((response) => {
-          setMeasureList(() =>
-            _.orderBy(response.data, ["lastModifiedAt"], ["desc"])
-          );
-        });
-    }
-  }, [serviceConfig, activeTab, getAccessToken]);
+    // if (serviceConfig) {
+    setMeasureList(() => []);
+    (async () => {
+      const measures = await measureServiceApi.fetchMeasures(activeTab === 0);
+      setMeasureList(() => _.orderBy(measures, ["lastModifiedAt"], ["desc"]));
+    })();
+    // axios
+    //   .get<Measure[]>(serviceConfig?.measureService?.baseUrl + "/measures", {
+    //     headers: {
+    //       Authorization: `Bearer ${getAccessToken()}`,
+    //     },
+    //     params: {
+    //       currentUser: activeTab === 0,
+    //     },
+    //   })
+    //   .then((response) => {
+    //     console.log("got response: ", response);
+    //     setMeasureList(() =>
+    //       _.orderBy(response.data, ["lastModifiedAt"], ["desc"])
+    //     );
+    //   });
+    // }
+    // }, [serviceConfig, activeTab, getAccessToken]);
+  }, [activeTab, measureServiceApi]);
 
   const handleTabChange = (event, nextTab) => {
     setActiveTab(nextTab);
