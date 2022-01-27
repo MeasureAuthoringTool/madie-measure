@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { Button } from "@madie/madie-components";
@@ -7,9 +7,6 @@ import MeasureList from "../measureList/MeasureList";
 import Measure from "../../models/Measure";
 import * as _ from "lodash";
 
-import { getServiceConfig, ServiceConfig } from "../config/Config";
-import axios from "axios";
-import useOktaTokens from "../../hooks/useOktaTokens";
 import { Divider, InputAdornment, Tab, Tabs, TextField } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
@@ -18,46 +15,14 @@ import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 export default function NewMeasure() {
   const history = useHistory();
   const [measureList, setMeasureList] = useState<Measure[]>([]);
-  // const [serviceConfig, setServiceConfig] = useState<ServiceConfig>();
-  // const [serviceConfigErr, setServiceConfigErr] = useState<string>();
   const [activeTab, setActiveTab] = useState(0);
-  const measureServiceApi = useMeasureServiceApi();
-  // const { getAccessToken } = useRef(useOktaTokens()).current;
-
-  // useEffect(() => {
-  //   getServiceConfig()
-  //     .then((serviceConfig) => setServiceConfig(serviceConfig))
-  //     .catch(() =>
-  //       setServiceConfigErr(
-  //         "Unable to load page, please contact the site administration"
-  //       )
-  //     );
-  // }, []);
+  const measureServiceApi = useRef(useMeasureServiceApi()).current;
 
   useEffect(() => {
-    // if (serviceConfig) {
-    setMeasureList(() => []);
     (async () => {
       const measures = await measureServiceApi.fetchMeasures(activeTab === 0);
       setMeasureList(() => _.orderBy(measures, ["lastModifiedAt"], ["desc"]));
     })();
-    // axios
-    //   .get<Measure[]>(serviceConfig?.measureService?.baseUrl + "/measures", {
-    //     headers: {
-    //       Authorization: `Bearer ${getAccessToken()}`,
-    //     },
-    //     params: {
-    //       currentUser: activeTab === 0,
-    //     },
-    //   })
-    //   .then((response) => {
-    //     console.log("got response: ", response);
-    //     setMeasureList(() =>
-    //       _.orderBy(response.data, ["lastModifiedAt"], ["desc"])
-    //     );
-    //   });
-    // }
-    // }, [serviceConfig, activeTab, getAccessToken]);
   }, [activeTab, measureServiceApi]);
 
   const handleTabChange = (event, nextTab) => {
@@ -79,8 +44,8 @@ export default function NewMeasure() {
       <section tw="flex flex-row">
         <div>
           <Tabs value={activeTab} onChange={handleTabChange} tw="flex flex-row">
-            <Tab label={`My Measures`} />
-            <Tab label="All Measures" />
+            <Tab label={`My Measures`} data-testid="my-measures-tab" />
+            <Tab label="All Measures" data-testid="all-measures-tab" />
           </Tabs>
           <Divider />
         </div>
