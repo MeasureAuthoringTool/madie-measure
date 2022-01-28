@@ -27,6 +27,25 @@ export class MeasureServiceApi {
     }
   }
 
+  async fetchMeasures(filterByCurrentUser: boolean): Promise<Measure[]> {
+    try {
+      const response = await axios.get<Measure[]>(`${this.baseUrl}/measures`, {
+        headers: {
+          Authorization: `Bearer ${this.getAccessToken()}`,
+        },
+        params: {
+          currentUser: filterByCurrentUser,
+        },
+      });
+      return response.data;
+    } catch (err) {
+      const message = `Unable to fetch measures`;
+      console.error(message);
+      console.error(err);
+      throw new Error(message);
+    }
+  }
+
   async updateMeasure(measure: Measure): Promise<void> {
     return await axios.put(`${this.baseUrl}/measure/`, measure, {
       headers: {
