@@ -7,9 +7,7 @@ import MeasureList from "../measureList/MeasureList";
 import Measure from "../../models/Measure";
 import * as _ from "lodash";
 
-import { Divider, InputAdornment, Tab, Tabs, TextField } from "@mui/material";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import { Divider, Tab, Tabs } from "@mui/material";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 
 export default function NewMeasure() {
@@ -50,18 +48,6 @@ export default function NewMeasure() {
           <Divider />
         </div>
         <span tw="flex-grow" />
-        <TextField
-          size="small"
-          placeholder="Search Measures"
-          tw="w-80"
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <FontAwesomeIcon icon={faSearch} />
-              </InputAdornment>
-            ),
-          }}
-        />
       </section>
       <div tw="my-4">
         <MeasureList measureList={measureList} />
