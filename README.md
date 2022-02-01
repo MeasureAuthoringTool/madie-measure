@@ -10,3 +10,17 @@ Measure Application
 npm install .
 
 ```
+
+# Running the application
+
+Running server with http
+
+```
+npm run start
+```
+
+Running Server with https
+
+```
+npm run starts
+```
