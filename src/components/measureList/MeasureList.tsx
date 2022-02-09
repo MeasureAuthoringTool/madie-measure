@@ -89,7 +89,7 @@ export default function MeasureList(props: { measureList: Measure[] }) {
                       <td tw="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
                           onClick={() => {
-                            history.push(`/measure/${measure.id}/edit`);
+                            history.push(`/measures/${measure.id}/edit`);
                           }}
                           tw="text-blue-600 hover:text-blue-900"
                           data-testid={`edit-measure-${measure.id}`}
