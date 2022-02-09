@@ -7,10 +7,10 @@ import NewMeasure from "../newMeasure/NewMeasure";
 export function MeasureRoutes() {
   return (
     <Switch>
-      <Route exact path="/measure/create" component={CreateNewMeasure} />
-      <Route path="/measure/:id/edit" component={EditMeasure} />
-      <Route exact path="/measure" component={NewMeasure} />
-      <Redirect to="/measure" path="*" />
+      <Route exact path="/measures/create" component={CreateNewMeasure} />
+      <Route path="/measures/:id/edit" component={EditMeasure} />
+      <Route exact path="/measures" component={NewMeasure} />
+      <Redirect to="/measures" path="*" />
     </Switch>
   );
 }

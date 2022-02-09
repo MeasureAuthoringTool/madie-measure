@@ -35,7 +35,7 @@ export default function NewMeasure() {
         <Button
           buttonTitle="New Measure"
           tw="h-10"
-          onClick={() => history.push("/measure/create")}
+          onClick={() => history.push("/measures/create")}
           data-testid="create-new-measure-button"
         />
       </section>
