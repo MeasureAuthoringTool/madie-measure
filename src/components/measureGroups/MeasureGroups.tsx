@@ -131,33 +131,31 @@ const MeasureGroups = () => {
           </HeavyLabel>
           <Row>
             <Col>
-              {expressionDefinitions.length > 0 && (
-                <Select
-                  native
-                  defaultValue=""
-                  displayEmpty
-                  labelId="select-expression-definition-scoring-label"
-                  id="select-expression-definition"
-                  data-testid="select-expression-definition"
-                >
-                  {expressionDefinitions.map(({ name }, i) => (
-                    <option
-                      key={`${name}-${i}`}
-                      value={name}
-                      data-testid="select-option-expression-definition"
-                    >
-                      {name.replace(/"/g, "")}
-                    </option>
-                  ))}
+              <Select
+                native
+                defaultValue=""
+                displayEmpty
+                labelId="select-expression-definition-scoring-label"
+                id="select-expression-definition"
+                data-testid="select-expression-definition"
+              >
+                {expressionDefinitions.map(({ name }, i) => (
                   <option
-                    value={""}
-                    disabled
-                    data-testid="select-option-expression-default"
+                    key={`${name}-${i}`}
+                    value={name}
+                    data-testid="select-option-expression-definition"
                   >
-                    Select Definition
+                    {name.replace(/"/g, "")}
                   </option>
-                </Select>
-              )}
+                ))}
+                <option
+                  value={""}
+                  disabled
+                  data-testid="select-option-expression-default"
+                >
+                  Select Definition
+                </option>
+              </Select>
             </Col>
             <SpacerContainer>
               <ButtonSpacer>
