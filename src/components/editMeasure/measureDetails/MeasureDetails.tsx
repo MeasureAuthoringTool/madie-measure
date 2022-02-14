@@ -26,7 +26,7 @@ export default function EditMeasure() {
   return (
     <>
       <Grid>
-        <MeasureDetailsSidebar links={links} />
+        <MeasureDetailsSidebar header="Edit Measure" links={links} />
         <Content>
           <Switch>
             <Route exact path={path}>
