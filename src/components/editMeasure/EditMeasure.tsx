@@ -14,6 +14,7 @@ import Measure from "../../models/Measure";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { MeasureContextProvider } from "./MeasureContext";
 import { MadiePatient } from "@madie/madie-patient";
+import MeasureGroups from "../measureGroups/MeasureGroups";
 
 interface inputParams {
   id: string;
@@ -53,7 +54,7 @@ export default function EditMeasure() {
             <MadiePatient />
           </Route>
           <Route path="*">
-            <div>In progress...</div>
+            <MeasureGroups />
           </Route>
         </Switch>
       </MeasureContextProvider>

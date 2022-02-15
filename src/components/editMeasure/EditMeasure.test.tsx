@@ -120,7 +120,6 @@ describe("EditMeasure Component", () => {
     // Measure Groups Menu click action
     fireEvent.click(await findByText("Measure Groups"));
     expect((await findByText("Measure Groups")).classList).toContain("active");
-    expect(document.body.textContent).toContain("In progress...");
 
     // Test Cases Menu click action
     fireEvent.click(await findByText("Test Cases"));
