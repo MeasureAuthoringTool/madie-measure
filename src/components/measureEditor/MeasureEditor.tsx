@@ -1,10 +1,4 @@
-import React, {
-  SetStateAction,
-  Dispatch,
-  useState,
-  useRef,
-  useEffect,
-} from "react";
+import React, { SetStateAction, Dispatch, useState, useEffect } from "react";
 import "styled-components/macro";
 import { EditorAnnotation, MadieEditor } from "@madie/madie-editor";
 import { Button } from "@madie/madie-components";
@@ -41,7 +35,7 @@ export const mapElmErrorsToAceAnnotations = (
 const MeasureEditor = () => {
   const { measure, setMeasure } = useCurrentMeasure();
   const [editorVal, setEditorVal]: [string, Dispatch<SetStateAction<string>>] =
-    useState(measure.cql || "");
+    useState("");
   const measureServiceApi = useMeasureServiceApi();
   const elmTranslationServiceApi = useElmTranslationServiceApi();
   const [success, setSuccess] = useState(false);
@@ -61,17 +55,6 @@ const MeasureEditor = () => {
       setElmAnnotations([]);
     }
   };
-
-  const debouncedChangeHandler: any = useRef(
-    _.debounce((nextValue: string) => {
-      updateElmAnnotations(nextValue).catch((err) => {
-        console.error("An error occurred while translating CQL to ELM", err);
-        setElmTranslationError("Unable to translate CQL to ELM!");
-        setElmAnnotations([]);
-      });
-      // other debounced operations can go here as well
-    }, 1500)
-  ).current;
 
   const updateMeasureCql = () => {
     updateElmAnnotations(editorVal).catch((err) => {
@@ -105,8 +88,16 @@ const MeasureEditor = () => {
   };
 
   useEffect(() => {
-    debouncedChangeHandler(editorVal);
-  }, [editorVal, debouncedChangeHandler]);
+    if (!editorVal) {
+      updateElmAnnotations(measure.cql).catch((err) => {
+        console.error("An error occurred while translating CQL to ELM", err);
+        setElmTranslationError("Unable to translate CQL to ELM!");
+        setElmAnnotations([]);
+      });
+      setEditorVal(measure.cql);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editorVal]);
 
   return (
     <>

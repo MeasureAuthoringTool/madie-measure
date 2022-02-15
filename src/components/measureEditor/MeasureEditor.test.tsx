@@ -151,10 +151,14 @@ describe("MeasureEditor component", () => {
     await waitFor(() => {
       const successMessage = getByTestId("save-cql-success");
       expect(successMessage.textContent).toEqual("CQL saved successfully");
-      expect(mockedAxios.put).toHaveBeenCalledTimes(2);
+      expect(mockedAxios.put).toHaveBeenCalledTimes(3);
       expect(setMeasure).toHaveBeenCalledTimes(1);
-      // console.log(mockedAxios.put.mock.calls);
       expect(mockedAxios.put.mock.calls).toEqual([
+        [
+          "elm-translator.com/cql/translator/cql",
+          expect.anything(),
+          expect.anything(),
+        ],
         [
           "elm-translator.com/cql/translator/cql",
           expect.anything(),
@@ -202,12 +206,11 @@ describe("MeasureEditor component", () => {
     });
     const saveButton = screen.getByRole("button", { name: "Save" });
     userEvent.click(saveButton);
-    // fireEvent.click(getByTestId("save-cql-btn"));
     const elmTranslationError = await screen.findByText(
       "Unable to translate CQL to ELM!"
     );
     expect(elmTranslationError).toBeInTheDocument();
-    expect(mockedAxios.put).toHaveBeenCalledTimes(2);
+    expect(mockedAxios.put).toHaveBeenCalledTimes(3);
     expect(mockedAxios.put).toHaveBeenCalledWith(
       "elm-translator.com/cql/translator/cql",
       expect.anything(),
@@ -270,8 +273,7 @@ describe("MeasureEditor component", () => {
     });
   });
 
-  it("runs ELM translation after value change and generate annotations", async () => {
-    jest.useFakeTimers("modern");
+  it("runs ELM translation on initial load of component and generate annotations", async () => {
     mockedAxios.put.mockImplementation((args) => {
       if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
         return Promise.resolve({ data: measure });
@@ -287,65 +289,8 @@ describe("MeasureEditor component", () => {
       return Promise.resolve(args);
     });
     renderEditor(measure);
-    jest.advanceTimersByTime(2000);
     const issues = await screen.findByText("2 issues found with CQL");
     expect(issues).toBeInTheDocument();
-  });
-
-  it("runs ELM translation after value change and displays errors with invoking translation", async () => {
-    jest.useFakeTimers("modern");
-    mockedAxios.put.mockImplementation((args) => {
-      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-        return Promise.resolve({ data: measure });
-      } else if (
-        args &&
-        args.startsWith(serviceConfig.elmTranslationService.baseUrl)
-      ) {
-        return Promise.resolve({
-          data: { error: "Something bad happened!" },
-          status: 500,
-        });
-      }
-      return Promise.resolve(args);
-    });
-    renderEditor(measure);
-    jest.advanceTimersByTime(2000);
-    const error = await screen.findByText("Unable to translate CQL to ELM!");
-    expect(error).toBeInTheDocument();
-  });
-
-  it("clears ELM translation errors when CQL is cleared", async () => {
-    jest.useFakeTimers("modern");
-    mockedAxios.put.mockImplementation((args) => {
-      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-        return Promise.resolve({ data: measure });
-      } else if (
-        args &&
-        args.startsWith(serviceConfig.elmTranslationService.baseUrl)
-      ) {
-        return Promise.resolve({
-          data: { json: JSON.stringify(elmTranslationWithErrors) },
-          status: 200,
-        });
-      }
-      return Promise.resolve(args);
-    });
-    const { getByTestId } = renderEditor(measure);
-    jest.advanceTimersByTime(2000);
-    const error = await screen.findByText("2 issues found with CQL");
-    expect(error).toBeInTheDocument();
-    fireEvent.change(getByTestId("measure-editor"), {
-      target: {
-        value: "",
-      },
-    });
-    // wait for the debounced translation to run
-    const valid = await screen.findByText(
-      "CQL is valid",
-      {},
-      { timeout: 2500 }
-    );
-    expect(valid).toBeInTheDocument();
   });
 });
 
