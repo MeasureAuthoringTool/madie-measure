@@ -126,5 +126,4 @@ module.exports = (webpackConfigEnv, argv) => {
     },
     plugins: "append",
   })(defaultConfig, polyfillConfig, newCssRule, externalsConfig);
-  // })(defaultConfig, newCssRule);
 };
