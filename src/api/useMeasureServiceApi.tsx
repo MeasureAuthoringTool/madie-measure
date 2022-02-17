@@ -47,7 +47,7 @@ export class MeasureServiceApi {
   }
 
   async updateMeasure(measure: Measure): Promise<void> {
-    return await axios.put(`${this.baseUrl}/measure/${measure.id}`, measure, {
+    return await axios.put(`${this.baseUrl}/measures/${measure.id}`, measure, {
       headers: {
         Authorization: `Bearer ${this.getAccessToken()}`,
       },

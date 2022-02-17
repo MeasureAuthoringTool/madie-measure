@@ -165,7 +165,7 @@ describe("MeasureEditor component", () => {
           expect.anything(),
         ],
         [
-          `madie.com/measure/${measure.id}`,
+          `madie.com/measures/${measure.id}`,
           expect.anything(),
           {
             headers: {
