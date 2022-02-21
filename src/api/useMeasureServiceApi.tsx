@@ -2,7 +2,7 @@ import React from "react";
 import axios from "axios";
 import useServiceConfig from "./useServiceConfig";
 import { ServiceConfig } from "./ServiceContext";
-import Measure from "../models/Measure";
+import Measure, { Group } from "../models/Measure";
 import useOktaTokens from "../hooks/useOktaTokens";
 
 export class MeasureServiceApi {
@@ -52,6 +52,44 @@ export class MeasureServiceApi {
         Authorization: `Bearer ${this.getAccessToken()}`,
       },
     });
+  }
+
+  async createGroup(group: Group, measureId: string): Promise<Group> {
+    try {
+      const response = await axios.post<Group>(
+        `${this.baseUrl}/measures/${measureId}/groups/`,
+        group,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      const message = `Failed to create the group.`;
+      console.error(message, err);
+      throw new Error(message);
+    }
+  }
+
+  async updateGroup(group: Group, measureId: string): Promise<Group> {
+    try {
+      const response = await axios.put<Group>(
+        `${this.baseUrl}/measures/${measureId}/groups/`,
+        group,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      const message = `Failed to update the group.`;
+      console.error(message, err);
+      throw new Error(message);
+    }
   }
 }
 
