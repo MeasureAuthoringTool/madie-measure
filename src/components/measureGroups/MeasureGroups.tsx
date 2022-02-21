@@ -61,9 +61,9 @@ const ButtonSpacer = styled.span`
   margin-left: 15px;
 `;
 
-const Footer = tw(Grid)`border-t border-b`;
-const NewGroupSection = styled.div(() => [tw`col-span-1 border-r p-1`]);
-const GroupActions = styled.div(() => [
+const GroupFooter = tw(Grid)`border-t border-b`;
+const GroupActions = styled.div(() => [tw`col-span-1 border-r p-1`]);
+const PopulationActions = styled.div(() => [
   "background-color: #f2f5f7;",
   tw`col-span-3 p-1 pl-6`,
 ]);
@@ -243,9 +243,9 @@ const MeasureGroups = () => {
           </FormControl>
         </Content>
       </Grid>
-      <Footer>
-        <NewGroupSection />
-        <GroupActions>
+      <GroupFooter>
+        <GroupActions />
+        <PopulationActions>
           <ButtonSpacer>
             <Button
               style={{ background: "#424B5A" }}
@@ -257,8 +257,8 @@ const MeasureGroups = () => {
           <ButtonSpacer>
             <Button type="button" buttonTitle="Cancel" variant="white" />
           </ButtonSpacer>
-        </GroupActions>
-      </Footer>
+        </PopulationActions>
+      </GroupFooter>
     </form>
   );
 };
