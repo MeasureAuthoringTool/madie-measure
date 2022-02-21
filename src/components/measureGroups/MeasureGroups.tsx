@@ -63,7 +63,7 @@ const ButtonSpacer = styled.span`
 
 const Footer = tw(Grid)`border-t border-b`;
 const NewGroupSection = styled.div(() => [tw`col-span-1 border-r p-1`]);
-const ColSpanThree = styled.div(() => [
+const GroupActions = styled.div(() => [
   "background-color: #f2f5f7;",
   tw`col-span-3 p-1 pl-6`,
 ]);
@@ -245,7 +245,7 @@ const MeasureGroups = () => {
       </Grid>
       <Footer>
         <NewGroupSection />
-        <ColSpanThree>
+        <GroupActions>
           <ButtonSpacer>
             <Button
               style={{ background: "#424B5A" }}
@@ -257,7 +257,7 @@ const MeasureGroups = () => {
           <ButtonSpacer>
             <Button type="button" buttonTitle="Cancel" variant="white" />
           </ButtonSpacer>
-        </ColSpanThree>
+        </GroupActions>
       </Footer>
     </form>
   );
