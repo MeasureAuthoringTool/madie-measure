@@ -97,7 +97,7 @@ const MeasureGroups = () => {
       population: {
         initialPopulation: group?.population?.initialPopulation || "",
       },
-    } as unknown as Group,
+    } as Group,
     onSubmit: (group: Group) => {
       submitForm(group);
     },
