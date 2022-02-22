@@ -3,6 +3,7 @@ import { MeasureScoring } from "./MeasureScoring";
 
 export interface MeasureMetadata {
   measureSteward?: string;
+  measureDescription?: string;
 }
 
 export default interface Measure {
