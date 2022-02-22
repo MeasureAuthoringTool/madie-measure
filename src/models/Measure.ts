@@ -1,9 +1,16 @@
 import { Model } from "./Model";
 import { MeasureScoring } from "./MeasureScoring";
+import { PopulationType } from "./MeasurePopulation";
 
 export interface MeasureMetadata {
   measureSteward?: string;
   measureDescription?: string;
+}
+
+export interface Group {
+  id: string;
+  scoring?: string;
+  population?: PopulationType;
 }
 
 export default interface Measure {
@@ -23,4 +30,5 @@ export default interface Measure {
   lastModifiedBy: string;
   model: Model | "";
   measureMetaData?: MeasureMetadata;
+  groups?: Array<Group>;
 }
