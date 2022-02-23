@@ -60,7 +60,6 @@ describe("MeasureDescription component", () => {
 
     const result = getByTestId("measureDescription");
     expect(result).toBeInTheDocument();
-    expect(result).toMatchSnapshot();
 
     const input = getByTestId("measureDescriptionInput");
     expectInputValue(input, DESCRIPTION);
