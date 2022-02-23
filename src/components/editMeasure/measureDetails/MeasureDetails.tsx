@@ -12,7 +12,7 @@ const Content = tw.div`col-span-3`;
 export default function EditMeasure() {
   const { path } = useRouteMatch();
   const stewardLink = `${path}/measure-steward`;
-  const measureDescriptionLink = `${path}/measure-description`;
+  const descriptionLink = `${path}/measure-description`;
 
   const links = [
     {
@@ -25,7 +25,7 @@ export default function EditMeasure() {
     },
     {
       title: "Description",
-      href: measureDescriptionLink,
+      href: descriptionLink,
     },
   ];
 
@@ -41,7 +41,7 @@ export default function EditMeasure() {
             <Route path={stewardLink}>
               <MeasureSteward />
             </Route>
-            <Route path={measureDescriptionLink}>
+            <Route path={descriptionLink}>
               <MeasureDescription />
             </Route>
           </Switch>

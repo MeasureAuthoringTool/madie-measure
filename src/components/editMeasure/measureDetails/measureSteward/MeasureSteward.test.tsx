@@ -31,7 +31,7 @@ describe("MeasureSteward component", () => {
       id: "test measure",
       measureName: "the measure for testing",
       measureMetaData: {
-        measureSteward: STEWARD,
+        steward: STEWARD,
       },
     } as Measure;
 
@@ -112,7 +112,7 @@ describe("MeasureSteward component", () => {
     expect(serviceApiMock.updateMeasure).toHaveBeenCalledWith({
       id: "test measure",
       measureMetaData: {
-        measureSteward: "new value",
+        steward: "new value",
       },
       measureName: "the measure for testing",
     });

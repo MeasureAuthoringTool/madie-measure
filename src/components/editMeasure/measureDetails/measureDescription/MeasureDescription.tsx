@@ -27,7 +27,7 @@ export default function MeasureDescription() {
   const [error, setError] = useState<string>("");
 
   const [measureDescription, setMeasureDescription] = useState(
-    measureMetaData.measureDescription
+    measureMetaData.description
   );
 
   const onMeasureDescriptionChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -38,7 +38,7 @@ export default function MeasureDescription() {
     e.preventDefault();
 
     measure.measureMetaData = { ...measureMetaData };
-    measure.measureMetaData.measureDescription = measureDescription;
+    measure.measureMetaData.description = measureDescription;
 
     measureServiceApi
       .updateMeasure(measure)

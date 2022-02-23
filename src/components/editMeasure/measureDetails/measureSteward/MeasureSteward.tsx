@@ -28,9 +28,7 @@ export default function MeasureSteward() {
   let { measureMetaData } = measure;
   measureMetaData = measureMetaData || {};
 
-  const [measureSteward, setMeasureSteward] = useState(
-    measureMetaData.measureSteward
-  );
+  const [measureSteward, setMeasureSteward] = useState(measureMetaData.steward);
 
   function onStewardChange(e: React.ChangeEvent<HTMLInputElement>) {
     setMeasureSteward(e.target.value);
@@ -40,7 +38,7 @@ export default function MeasureSteward() {
     e.preventDefault();
 
     measure.measureMetaData = { ...measureMetaData };
-    measure.measureMetaData.measureSteward = measureSteward;
+    measure.measureMetaData.steward = measureSteward;
 
     measureServiceApi
       .updateMeasure(measure)

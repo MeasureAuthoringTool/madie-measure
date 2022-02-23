@@ -31,7 +31,7 @@ describe("MeasureDescription component", () => {
       id: "test measure",
       measureName: "the measure for testing",
       measureMetaData: {
-        measureDescription: DESCRIPTION,
+        description: DESCRIPTION,
       },
     } as Measure;
 
@@ -111,7 +111,7 @@ describe("MeasureDescription component", () => {
     expect(serviceApiMock.updateMeasure).toHaveBeenCalledWith({
       id: "test measure",
       measureMetaData: {
-        measureDescription: "new value",
+        description: "new value",
       },
       measureName: "the measure for testing",
     });
