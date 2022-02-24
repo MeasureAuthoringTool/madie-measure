@@ -3,6 +3,7 @@ import tw from "twin.macro";
 import { Route, Switch, useRouteMatch } from "react-router-dom";
 import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureSteward from "./measureSteward/MeasureSteward";
+import MeasureDescription from "./measureDescription/MeasureDescription";
 import MeasureDetailsSidebar from "./MeasureDetailsSidebar";
 
 const Grid = tw.div`grid grid-cols-4 gap-4 ml-6`;
@@ -11,6 +12,7 @@ const Content = tw.div`col-span-3`;
 export default function EditMeasure() {
   const { path } = useRouteMatch();
   const stewardLink = `${path}/measure-steward`;
+  const descriptionLink = `${path}/measure-description`;
 
   const links = [
     {
@@ -20,6 +22,10 @@ export default function EditMeasure() {
     {
       title: "Steward/Author",
       href: stewardLink,
+    },
+    {
+      title: "Description",
+      href: descriptionLink,
     },
   ];
 
@@ -34,6 +40,9 @@ export default function EditMeasure() {
             </Route>
             <Route path={stewardLink}>
               <MeasureSteward />
+            </Route>
+            <Route path={descriptionLink}>
+              <MeasureDescription />
             </Route>
           </Switch>
         </Content>

@@ -3,7 +3,8 @@ import { MeasureScoring } from "./MeasureScoring";
 import { PopulationType } from "./MeasurePopulation";
 
 export interface MeasureMetadata {
-  measureSteward?: string;
+  steward?: string;
+  description?: string;
 }
 
 export interface Group {

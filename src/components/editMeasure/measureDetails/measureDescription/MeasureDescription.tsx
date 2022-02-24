@@ -1,12 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, ChangeEvent, FormEvent } from "react";
 import tw from "twin.macro";
-import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import useCurrentMeasure from "../../useCurrentMeasure";
+import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 
 const Form = tw.form`max-w-xl mt-3 space-y-8 divide-y divide-gray-200`;
 const FormContent = tw.div`space-y-8 divide-y divide-gray-200`;
-const Header = tw.h3`text-lg leading-6 font-medium text-gray-900`;
-const SubHeader = tw.p`mt-1 text-sm text-gray-500`;
 const FormField = tw.div`mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6`;
 const FormFieldInner = tw.div`sm:col-span-3`;
 const FieldLabel = tw.label`block text-sm font-medium text-gray-700`;
@@ -20,25 +18,27 @@ const MessageText = tw.p`text-sm font-medium`;
 const SuccessText = tw(MessageText)`text-green-800`;
 const ErrorText = tw(MessageText)`text-red-800`;
 
-export default function MeasureSteward() {
-  const measureServiceApi = useMeasureServiceApi();
-  const [success, setSuccess] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
+export default function MeasureDescription() {
   const { measure } = useCurrentMeasure();
   let { measureMetaData } = measure;
   measureMetaData = measureMetaData || {};
+  const measureServiceApi = useMeasureServiceApi();
+  const [success, setSuccess] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
 
-  const [measureSteward, setMeasureSteward] = useState(measureMetaData.steward);
+  const [measureDescription, setMeasureDescription] = useState(
+    measureMetaData.description
+  );
 
-  function onStewardChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setMeasureSteward(e.target.value);
-  }
+  const onMeasureDescriptionChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setMeasureDescription(e.target.value);
+  };
 
-  function onFormSubmit(e: React.FormEvent<HTMLFormElement>) {
+  const onFormSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     measure.measureMetaData = { ...measureMetaData };
-    measure.measureMetaData.steward = measureSteward;
+    measure.measureMetaData.description = measureDescription;
 
     measureServiceApi
       .updateMeasure(measure)
@@ -51,34 +51,28 @@ export default function MeasureSteward() {
         console.error(reason);
         setError(message);
       });
-  }
+  };
 
   return (
-    <Form onSubmit={onFormSubmit} data-testid="measureSteward">
+    <Form onSubmit={onFormSubmit} data-testid="measureDescription">
       <FormContent>
         <div>
-          <div>
-            <Header>Steward/Author</Header>
-            <SubHeader>
-              This information will be displayed publicly so be careful what you
-              share.
-            </SubHeader>
-          </div>
-
           <FormField>
             <FormFieldInner>
-              <FieldLabel htmlFor="measure-steward">Measure Steward</FieldLabel>
+              <FieldLabel htmlFor="measure-description">
+                Measure Description
+              </FieldLabel>
               <FieldSeparator>
                 <FieldInput
-                  value={measureSteward}
+                  value={measureDescription}
                   type="text"
-                  name="measure-steward"
-                  id="measure-steward"
+                  name="measure-description"
+                  id="measure-description"
                   autoComplete="given-name"
                   required
-                  onChange={onStewardChange}
-                  placeholder="Measure Steward Name"
-                  data-testid="measureStewardInput"
+                  onChange={onMeasureDescriptionChange}
+                  placeholder="Measure Description"
+                  data-testid="measureDescriptionInput"
                 />
               </FieldSeparator>
             </FormFieldInner>
@@ -88,17 +82,19 @@ export default function MeasureSteward() {
 
       <FormButtons>
         <ButtonWrapper>
-          <SubmitButton type="submit" data-testid="measureStewardSave">
+          <SubmitButton type="submit" data-testid="measureDescriptionSave">
             Save
           </SubmitButton>
           <MessageDiv>
             {success && (
-              <SuccessText data-testid="measureStewardSuccess">
-                Measure Steward Information Saved Successfully
+              <SuccessText data-testid="measureDescriptionSuccess">
+                Measure Description Information Saved Successfully
               </SuccessText>
             )}
             {error && (
-              <ErrorText data-testid="measureStewardError">{error}</ErrorText>
+              <ErrorText data-testid="measureDescriptionError">
+                {error}
+              </ErrorText>
             )}
           </MessageDiv>
         </ButtonWrapper>
