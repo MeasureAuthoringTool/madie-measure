@@ -4,7 +4,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogContentText,
-  DialogActions,
 } from "@mui/material";
 
 export interface timeoutPropTypes {
@@ -56,7 +55,6 @@ const TimeoutHandler = ({ timeLeft = 10000 }) => {
             inactivity.
           </DialogContentText>
         </DialogContent>
-        <DialogActions></DialogActions>
       </div>
     </Dialog>
   );
