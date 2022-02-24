@@ -41,9 +41,18 @@ describe("Measure Groups Page", () => {
   test("Timeout handler renders after 10 seconds, disappears on outer click", async () => {
     setTimeout(() => {
       expect(screen.getByTestId("warn-timeout-title")).toBeTruthy();
-      const alertTitle = screen.queryByText("Session Expiration Warning");
       const outerDiv = screen.getAllByTestId("sentinelStart");
       outerDiv.click();
+      expect(alertTitle).toBeNull();
+    }, 10000);
+  });
+
+  test("Timeout handler renders after 10 seconds, disappears on mouse move", async () => {
+    setTimeout(() => {
+      expect(screen.getByTestId("warn-timeout-title")).toBeTruthy();
+      const alertTitle = screen.queryByText("Session Expiration Warning");
+      const mouseMove = new Event("mousemove");
+      document.dispatchEvent(mouseMove);
       expect(alertTitle).toBeNull();
     }, 10000);
   });
