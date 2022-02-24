@@ -55,7 +55,11 @@ jest.mock("../../api/useMeasureServiceApi", () =>
 
 describe("MeasureLanding", () => {
   test("shows the children when the checkbox is checked", async () => {
-    render(<MeasureLanding />);
+    render(
+      <div id="main">
+        <MeasureLanding />
+      </div>
+    );
 
     expect(screen.getByTestId("browser-router")).toBeTruthy();
     const measure1 = await screen.findByText("TestMeasure1");
