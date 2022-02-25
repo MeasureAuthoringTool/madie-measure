@@ -7,11 +7,11 @@ import MeasureDetails from "./MeasureDetails";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
 import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureSteward from "./measureSteward/MeasureSteward";
-import MeasureDescription from "./MeasureDescription/MeasureDescription";
+import MeasureDescription from "./measureDescription/MeasureDescription";
 
 jest.mock("./measureInformation/MeasureInformation");
 jest.mock("./measureSteward/MeasureSteward");
-jest.mock("./MeasureDescription/MeasureDescription");
+jest.mock("./measureDescription/MeasureDescription");
 
 const MeasureInformationMock = MeasureInformation as jest.Mock<JSX.Element>;
 const MeasureStewardMock = MeasureSteward as jest.Mock<JSX.Element>;
