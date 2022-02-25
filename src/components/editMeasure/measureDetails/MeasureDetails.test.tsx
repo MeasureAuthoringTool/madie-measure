@@ -7,12 +7,15 @@ import MeasureDetails from "./MeasureDetails";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
 import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureSteward from "./measureSteward/MeasureSteward";
+import MeasureDescription from "./measureDescription/MeasureDescription";
 
 jest.mock("./measureInformation/MeasureInformation");
 jest.mock("./measureSteward/MeasureSteward");
+jest.mock("./measureDescription/MeasureDescription");
 
 const MeasureInformationMock = MeasureInformation as jest.Mock<JSX.Element>;
 const MeasureStewardMock = MeasureSteward as jest.Mock<JSX.Element>;
+const MeasureDescriptionMock = MeasureDescription as jest.Mock<JSX.Element>;
 
 MeasureInformationMock.mockImplementation(() => {
   return <div>Mock Measure Info</div>;
@@ -20,6 +23,10 @@ MeasureInformationMock.mockImplementation(() => {
 
 MeasureStewardMock.mockImplementation(() => {
   return <div>Mock Measure Steward</div>;
+});
+
+MeasureDescriptionMock.mockImplementation(() => {
+  return <div>Mock Measure Description</div>;
 });
 
 const serviceConfig: ServiceConfig = {
@@ -53,5 +60,24 @@ describe("MeasureDetails component", () => {
       </ApiContextProvider>
     );
     expect(getByText("Mock Measure Steward")).toBeTruthy();
+  });
+
+  it("should render the MeasureDescription component for measure-description URL", () => {
+    const { getByText, getByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter
+          initialEntries={[{ pathname: "/foo/measure-description" }]}
+        >
+          <Route path="/foo">
+            <MeasureDetails />
+          </Route>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    expect(getByText("Mock Measure Description")).toBeTruthy();
+    expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureSteward")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
   });
 });

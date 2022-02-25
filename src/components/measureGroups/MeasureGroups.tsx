@@ -137,7 +137,13 @@ const MeasureGroups = () => {
     }
   };
   // Local state to later populate the left nav and and govern routes based on group ids
-  const measureGroups = [{ title: "MEASURE GROUP 1", href: "0011001" }];
+  const measureGroups = [
+    {
+      title: "MEASURE GROUP 1",
+      href: "0011001",
+      dataTestId: "leftPanelMeasureInformation",
+    },
+  ];
   const allOptions = Object.values(MeasureScoring);
   return (
     <form onSubmit={formik.handleSubmit}>

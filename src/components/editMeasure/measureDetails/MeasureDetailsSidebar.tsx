@@ -22,6 +22,7 @@ const InactiveNavLink = tw(StyledNavLink)`
 interface SidebarLink {
   title: string;
   href: string;
+  dataTestId: string;
 }
 
 export interface MeasureDetailsSidebarProps {
@@ -48,7 +49,11 @@ export default function MeasureDetailsSidebar(
                 LinkEl = ActiveNavLink;
               }
               return (
-                <LinkEl key={linkInfo.title} to={linkInfo.href}>
+                <LinkEl
+                  key={linkInfo.title}
+                  to={linkInfo.href}
+                  data-testid={linkInfo.dataTestId}
+                >
                   {linkInfo.title}
                 </LinkEl>
               );
