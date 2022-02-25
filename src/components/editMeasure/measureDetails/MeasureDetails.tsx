@@ -18,14 +18,17 @@ export default function EditMeasure() {
     {
       title: "Measure Information",
       href: path,
+      dataTestId: "leftPanelMeasureInformation",
     },
     {
       title: "Steward/Author",
       href: stewardLink,
+      dataTestId: "leftPanelMeasureSteward",
     },
     {
       title: "Description",
       href: descriptionLink,
+      dataTestId: "leftPanelMeasureDescription",
     },
   ];
 
