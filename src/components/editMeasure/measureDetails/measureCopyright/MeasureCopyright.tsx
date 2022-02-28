@@ -59,9 +59,7 @@ export default function MeasureCopyright() {
         <div>
           <FormField>
             <FormFieldInner>
-              <FieldLabel htmlFor="measure-copyright">
-                Measure Copyright
-              </FieldLabel>
+              <FieldLabel htmlFor="measure-copyright">Copyright</FieldLabel>
               <FieldSeparator>
                 <FieldInput
                   value={measureCopyright}
