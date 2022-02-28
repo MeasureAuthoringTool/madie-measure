@@ -5,6 +5,7 @@ import { PopulationType } from "./MeasurePopulation";
 export interface MeasureMetadata {
   steward?: string;
   description?: string;
+  disclaimer?: string;
 }
 
 export interface Group {

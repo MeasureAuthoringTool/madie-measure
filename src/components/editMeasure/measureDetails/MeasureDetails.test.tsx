@@ -8,14 +8,17 @@ import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
 import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureSteward from "./measureSteward/MeasureSteward";
 import MeasureDescription from "./measureDescription/MeasureDescription";
+import MeasureDisclaimer from "./measureDisclaimer/MeasureDisclaimer";
 
 jest.mock("./measureInformation/MeasureInformation");
 jest.mock("./measureSteward/MeasureSteward");
 jest.mock("./measureDescription/MeasureDescription");
+jest.mock("./measureDisclaimer/MeasureDisclaimer");
 
 const MeasureInformationMock = MeasureInformation as jest.Mock<JSX.Element>;
 const MeasureStewardMock = MeasureSteward as jest.Mock<JSX.Element>;
 const MeasureDescriptionMock = MeasureDescription as jest.Mock<JSX.Element>;
+const MeasureDisclaimerMock = MeasureDisclaimer as jest.Mock<JSX.Element>;
 
 MeasureInformationMock.mockImplementation(() => {
   return <div>Mock Measure Info</div>;
@@ -27,6 +30,10 @@ MeasureStewardMock.mockImplementation(() => {
 
 MeasureDescriptionMock.mockImplementation(() => {
   return <div>Mock Measure Description</div>;
+});
+
+MeasureDisclaimerMock.mockImplementation(() => {
+  return <div>Mock Measure Disclaimer</div>;
 });
 
 const serviceConfig: ServiceConfig = {
@@ -79,5 +86,25 @@ describe("MeasureDetails component", () => {
     expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureSteward")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
+  });
+
+  it("should render the MeasureDisclaimer component for measure-disclaimer URL", () => {
+    const { getByText, getByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter
+          initialEntries={[{ pathname: "/foo/measure-disclaimer" }]}
+        >
+          <Route path="/foo">
+            <MeasureDetails />
+          </Route>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    expect(getByText("Mock Measure Disclaimer")).toBeTruthy();
+    expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureSteward")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureDisclaimer")).toBeInTheDocument();
   });
 });
