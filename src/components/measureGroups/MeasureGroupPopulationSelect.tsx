@@ -1,0 +1,130 @@
+import React from "react";
+import tw, { styled } from "twin.macro";
+import { kebabCase } from "lodash";
+import { Select } from "@mui/material";
+import { ExpressionDefinition } from "./MeasureGroups";
+
+const FormControl = styled.section(() => [tw`mb-3`, `margin: 25px 40px;`]);
+const Col = styled.article`
+  display: flex;
+  flex-direction: column;
+`;
+const HeavyLabel = styled.label`
+  color: #505d68;
+  font-weight: 500;
+`;
+const Link = styled.a`
+  text-decoration: underline;
+  display: inline-block;
+  padding-left: 1rem;
+`;
+const Row = styled.section`
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  align-items: center;
+  margin-top: 14px;
+`;
+const Required = styled.span`
+  display: inline-block;
+  padding-left: 0.25rem;
+`;
+const SpacerContainer = styled.span`
+  margin-left: 45px;
+`;
+const SubTitle = styled.p`
+  color: #505d68;
+  font-size: 11px;
+  margin-top: 20px;
+  max-width: 405px;
+`;
+
+type Props = {
+  label: string;
+  required: boolean;
+  subTitle?: string;
+  name: string;
+  onChange: any;
+  optionTitle?: string;
+  options?: Array<ExpressionDefinition>;
+  value?: string;
+};
+
+const MeasureGroupPopulationSelect = ({
+  label,
+  required,
+  subTitle,
+  name,
+  onChange,
+  optionTitle,
+  options,
+  value,
+}: Props) => {
+  const htmlId = kebabCase(`measure-group-population-select-${label}`);
+  const defaultOptionTitle = optionTitle ? optionTitle : label;
+
+  // FPO noop onClick handler
+  const onClickCallback = (evt) => {
+    evt.preventDefault();
+  };
+
+  return (
+    <FormControl>
+      <HeavyLabel
+        htmlFor={htmlId}
+        id={`${htmlId}-label`}
+        data-testid={`${htmlId}-label`}
+      >
+        {label}
+        {required && <Required>*</Required>}
+      </HeavyLabel>
+
+      <Row>
+        <Col>
+          <Select
+            native
+            displayEmpty
+            data-testid={`select-${htmlId}`}
+            value={value.replace(/"/g, "")}
+            id={htmlId}
+            labelId={`select-${htmlId}-label`}
+            name={name}
+            onChange={onChange}
+            style={{ minWidth: "20rem" }}
+          >
+            {options.map(({ name }, i) => (
+              <option
+                key={`${name}-${i}`}
+                value={name.replace(/"/g, "")}
+                data-testid={`expression-select-option-${htmlId}-${kebabCase(
+                  name
+                )}`}
+              >
+                {name.replace(/"/g, "")}
+              </option>
+            ))}
+            <option
+              value={""}
+              disabled
+              data-testid={`select-option-${htmlId}-default`}
+            >
+              Select {defaultOptionTitle}
+            </option>
+          </Select>
+        </Col>
+
+        <SpacerContainer>
+          <Link href="#" onClick={onClickCallback}>
+            View
+          </Link>
+          <Link href="#" onClick={onClickCallback}>
+            Delete
+          </Link>
+        </SpacerContainer>
+      </Row>
+      {subTitle && <SubTitle>{subTitle}</SubTitle>}
+    </FormControl>
+  );
+};
+
+export default MeasureGroupPopulationSelect;
