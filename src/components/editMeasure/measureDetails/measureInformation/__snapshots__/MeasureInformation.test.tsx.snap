@@ -2,14 +2,14 @@
 
 exports[`MeasureInformation component should render the component with a blank measure name 1`] = `
 <div
-  class="MeasureInformation___StyledDiv-sc-1pua5bc-0 kIvXMc"
+  class="MeasureInformation___StyledDiv-sc-1pua5bc-2 dDRMtm"
   data-testid="measure-name-edit"
 >
   <div
-    class="MeasureInformation___StyledDiv3-sc-1pua5bc-3 iIpBCt"
+    class="MeasureInformation__DisplayDiv-sc-1pua5bc-0 jpinyT"
   >
     <span
-      class="MeasureInformation___StyledSpan2-sc-1pua5bc-4 gexfQv"
+      class="MeasureInformation___StyledSpan2-sc-1pua5bc-5 hrVKWS"
     >
       Measure Name:
     </span>
@@ -39,15 +39,17 @@ exports[`MeasureInformation component should render the component with a blank m
     </div>
   </div>
   <div
-    class="MeasureInformation___StyledDiv4-sc-1pua5bc-5 kmMvDE"
+    class="MeasureInformation___StyledDiv3-sc-1pua5bc-6 gfhfzs"
     data-testid="cql-library-name-display"
   >
     <span
-      class="MeasureInformation___StyledSpan3-sc-1pua5bc-6 cPwLxs"
+      class="MeasureInformation___StyledSpan3-sc-1pua5bc-7 fpwjB"
     >
       Measure CQL Library Name:
     </span>
-    <span>
+    <span
+      class="MeasureInformation__DisplaySpan-sc-1pua5bc-1 kjcoMV"
+    >
       NA
     </span>
   </div>
@@ -56,14 +58,14 @@ exports[`MeasureInformation component should render the component with a blank m
 
 exports[`MeasureInformation component should render the component with measure's name populated 1`] = `
 <div
-  class="MeasureInformation___StyledDiv-sc-1pua5bc-0 kIvXMc"
+  class="MeasureInformation___StyledDiv-sc-1pua5bc-2 dDRMtm"
   data-testid="measure-name-edit"
 >
   <div
-    class="MeasureInformation___StyledDiv3-sc-1pua5bc-3 iIpBCt"
+    class="MeasureInformation__DisplayDiv-sc-1pua5bc-0 jpinyT"
   >
     <span
-      class="MeasureInformation___StyledSpan2-sc-1pua5bc-4 gexfQv"
+      class="MeasureInformation___StyledSpan2-sc-1pua5bc-5 hrVKWS"
     >
       Measure Name:
     </span>
@@ -94,15 +96,17 @@ exports[`MeasureInformation component should render the component with measure's
     </div>
   </div>
   <div
-    class="MeasureInformation___StyledDiv4-sc-1pua5bc-5 kmMvDE"
+    class="MeasureInformation___StyledDiv3-sc-1pua5bc-6 gfhfzs"
     data-testid="cql-library-name-display"
   >
     <span
-      class="MeasureInformation___StyledSpan3-sc-1pua5bc-6 cPwLxs"
+      class="MeasureInformation___StyledSpan3-sc-1pua5bc-7 fpwjB"
     >
       Measure CQL Library Name:
     </span>
-    <span>
+    <span
+      class="MeasureInformation__DisplaySpan-sc-1pua5bc-1 kjcoMV"
+    >
       NA
     </span>
   </div>

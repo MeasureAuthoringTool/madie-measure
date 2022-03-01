@@ -1,10 +1,21 @@
 import React, { useState } from "react";
+import tw from "twin.macro";
+import styled, { css } from "styled-components";
 import InlineEdit from "../../../inlineEdit/InlineEdit";
 import Measure from "../../../../models/Measure";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import useCurrentMeasure from "../../useCurrentMeasure";
-import "twin.macro";
 import "styled-components/macro";
+
+export const DisplayDiv = styled.div(() => [
+  tw`flex`,
+  css`
+    white-space: pre;
+  `,
+]);
+export const DisplaySpan = styled.span`
+  white-space: pre;
+`;
 
 export default function MeasureInformation() {
   const measureServiceApi = useMeasureServiceApi();
@@ -42,13 +53,13 @@ export default function MeasureInformation() {
           </span>
         </div>
       )}
-      <div tw="flex">
+      <DisplayDiv>
         <span tw="mr-2">Measure Name:</span>
         <InlineEdit text={measure.measureName} onSetText={updateMeasureTitle} />
-      </div>
+      </DisplayDiv>
       <div tw="flex" data-testid="cql-library-name-display">
         <span tw="mr-2">Measure CQL Library Name:</span>
-        <span>{measure.cqlLibraryName || "NA"}</span>
+        <DisplaySpan>{measure.cqlLibraryName || "NA"}</DisplaySpan>
       </div>
     </div>
   );

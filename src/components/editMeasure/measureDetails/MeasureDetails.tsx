@@ -4,6 +4,7 @@ import { Route, Switch, useRouteMatch } from "react-router-dom";
 import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureSteward from "./measureSteward/MeasureSteward";
 import MeasureDescription from "./measureDescription/MeasureDescription";
+import MeasureCopyright from "./measureCopyright/MeasureCopyright";
 import MeasureDisclaimer from "./measureDisclaimer/MeasureDisclaimer";
 import MeasureDetailsSidebar from "./MeasureDetailsSidebar";
 
@@ -14,6 +15,7 @@ export default function EditMeasure() {
   const { path } = useRouteMatch();
   const stewardLink = `${path}/measure-steward`;
   const descriptionLink = `${path}/measure-description`;
+  const copyrightLink = `${path}/measure-copyright`;
   const disclaimerLink = `${path}/measure-disclaimer`;
 
   const links = [
@@ -31,6 +33,11 @@ export default function EditMeasure() {
       title: "Description",
       href: descriptionLink,
       dataTestId: "leftPanelMeasureDescription",
+    },
+    {
+      title: "Copyright",
+      href: copyrightLink,
+      dataTestId: "leftPanelMeasureCopyright",
     },
     {
       title: "Dislaimer",
@@ -53,6 +60,9 @@ export default function EditMeasure() {
             </Route>
             <Route path={descriptionLink}>
               <MeasureDescription />
+            </Route>
+            <Route path={copyrightLink}>
+              <MeasureCopyright />
             </Route>
             <Route path={disclaimerLink}>
               <MeasureDisclaimer />
