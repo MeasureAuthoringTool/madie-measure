@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Fragment } from "react";
 import tw, { styled } from "twin.macro";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import { MeasureScoring } from "../../models/MeasureScoring";
@@ -9,6 +9,7 @@ import { Button } from "@madie/madie-components";
 import { useFormik, getIn } from "formik";
 import { Group } from "../../models/Measure";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
+import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
 const Content = styled.div(() => [tw`col-span-3`]);
@@ -28,39 +29,14 @@ const SoftLabel = styled.label`
   font-size: 12px;
   color: rgba(66, 75, 90, 0.7);
 `;
-const HeavyLabel = styled.label`
-  color: #505d68;
-  font-weight: 500;
-`;
-const Row = styled.section`
-  display: flex;
-  flex-direction: row;
-  flex-grow: 1;
-  align-items: center;
-  margin-top: 14px;
-`;
-const Col = styled.article`
-  display: flex;
-  flex-direction: column;
-`;
 const Divider = styled.div`
   width: 100%;
-  margin: 37px 0px 52px 0px;
+  margin: 37px 0px 32px 0px;
   border-bottom: solid 1px rgba(80, 93, 104, 0.2);
-`;
-const SubTitle = styled.p`
-  color: #505d68;
-  font-size: 11px;
-  margin-top: 20px;
-  max-width: 405px;
-`;
-const SpacerContainer = styled.span`
-  margin-left: 45px;
 `;
 const ButtonSpacer = styled.span`
   margin-left: 15px;
 `;
-
 const GroupFooter = tw(Grid)`border-t border-b`;
 const GroupActions = styled.div(() => [tw`col-span-1 border-r p-1`]);
 const PopulationActions = styled.div(() => [
@@ -89,13 +65,17 @@ const MeasureGroups = () => {
   // TODO: group will be coming from props when we separate this into separate component
   const group = measure.groups && measure.groups[0];
   const defaultScoring = group?.scoring || measure?.measureScoring || "Cohort";
-
   const formik = useFormik({
     initialValues: {
       id: group?.id || null,
       scoring: defaultScoring,
       population: {
         initialPopulation: group?.population?.initialPopulation || "",
+        denominator: group?.population?.denominator || "",
+        denominatorExclusion: group?.population?.denominatorExclusion || "",
+        denominatorException: group?.population?.denominatorException || "",
+        numerator: group?.population?.numerator || "",
+        numeratorExclusion: group?.population?.numeratorExclusion || "",
       },
     } as Group,
     onSubmit: (group: Group) => {
@@ -110,6 +90,65 @@ const MeasureGroups = () => {
       setExpressionDefinitions(definitions);
     }
   }, [measure]);
+
+  // Define fields to conditionally appear based on selected scoring unit
+  // @TODO: Pull directly from MeasurePopulation
+  const PopulationSelectorDefinitions = [
+    {
+      key: "initialPopulation",
+      label: "Initial Population",
+      subTitle: `
+        Caution: Removing or invalidating a population will cause any
+        package groupings containing that population to be cleared on the
+        Measure Packager.
+      `,
+    },
+    { label: "Denominator", key: "denominator", hidden: ["Cohort"] },
+    {
+      label: "Denominator Exclusion",
+      key: "denominatorExclusion",
+      optional: ["*"],
+      hidden: ["Cohort"],
+    },
+    {
+      label: "Denominator Exception",
+      key: "denominatorException",
+      optional: ["Proportion"],
+      hidden: ["Cohort", "Continuous Variable", "Ratio"],
+    },
+    {
+      label: "Numerator",
+      key: "numerator",
+      hidden: ["Cohort", "Continuous Variable"],
+    },
+    {
+      label: "Numerator Exclusion",
+      key: "numeratorExclusion",
+      optional: ["Proportion", "Ratio"],
+      hidden: ["Cohort", "Continuous Variable"],
+    },
+  ];
+
+  // Helper function do determine the properties for a select item
+  const populationSelectorProperties = (
+    fieldProps: any,
+    selectedOption: String
+  ) => {
+    const hidden = fieldProps.hidden?.includes(selectedOption);
+    const required = !fieldProps.optional?.includes(selectedOption);
+    const options: Array<ExpressionDefinition> = fieldProps.options
+      ? []
+      : expressionDefinitions;
+    const name: string = `population.${fieldProps.key}`;
+    return {
+      label: fieldProps.label,
+      hidden,
+      required,
+      name,
+      options,
+      subTitle: fieldProps.subTitle,
+    };
+  };
 
   const submitForm = (group: Group) => {
     if (group.id) {
@@ -145,6 +184,7 @@ const MeasureGroups = () => {
     },
   ];
   const allOptions = Object.values(MeasureScoring);
+
   return (
     <form onSubmit={formik.handleSubmit}>
       <Grid>
@@ -197,56 +237,30 @@ const MeasureGroups = () => {
                 </option>
               ))}
             </Select>
-            <Divider />
-            <HeavyLabel htmlFor="ipp-expression-select">
-              Initial Population 1*
-            </HeavyLabel>
-            <Row>
-              <Col>
-                <Select
-                  native
-                  displayEmpty
-                  id="ipp-expression-select"
-                  inputProps={{
-                    "data-testid": "ipp-expression-select",
-                  }}
-                  name="population.initialPopulation"
-                  onChange={formik.handleChange}
-                  value={getIn(formik.values, "population.initialPopulation")}
-                >
-                  {expressionDefinitions.map(({ name }, i) => (
-                    <option
-                      key={`${name}-${i}`}
-                      value={name.replace(/"/g, "")}
-                      data-testid="ipp-expression-option"
-                    >
-                      {name.replace(/"/g, "")}
-                    </option>
-                  ))}
-                  <option
-                    value={""}
-                    disabled
-                    data-testid="ipp-expression-option-default"
-                  >
-                    Select Definition
-                  </option>
-                </Select>
-              </Col>
-              <SpacerContainer>
-                <ButtonSpacer>
-                  <Button buttonTitle="View" variant="white" />
-                </ButtonSpacer>
-                <ButtonSpacer>
-                  <Button buttonTitle="Delete" variant="white" />
-                </ButtonSpacer>
-              </SpacerContainer>
-            </Row>
-            <SubTitle>
-              Caution: Removing or invalidating a population will cause any
-              package groupings containing that population to be cleared on the
-              Measure Packager.
-            </SubTitle>
           </FormControl>
+
+          {PopulationSelectorDefinitions.map((selectorDefinition) => {
+            const selectorProps = populationSelectorProperties(
+              selectorDefinition,
+              formik.values.scoring
+            );
+            if (selectorProps.hidden) return;
+
+            const populationValue: string = getIn(
+              formik.values,
+              `population.${selectorDefinition.key}`
+            );
+            return (
+              <Fragment key={`select_${selectorDefinition.label}`}>
+                <Divider />
+                <MeasureGroupPopulationSelect
+                  {...selectorProps}
+                  onChange={formik.handleChange}
+                  value={populationValue}
+                />
+              </Fragment>
+            );
+          })}
         </Content>
       </Grid>
       <GroupFooter>
