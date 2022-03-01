@@ -135,7 +135,9 @@ const MeasureGroups = () => {
     selectedOption: String
   ) => {
     const hidden = fieldProps.hidden?.includes(selectedOption);
-    const required = !fieldProps.optional?.includes(selectedOption);
+    const required =
+      !fieldProps.optional?.includes("*") &&
+      !fieldProps.optional?.includes(selectedOption);
     const options: Array<ExpressionDefinition> = fieldProps.options
       ? []
       : expressionDefinitions;
@@ -261,6 +263,7 @@ const MeasureGroups = () => {
               </Fragment>
             );
           })}
+          <br />
         </Content>
       </Grid>
       <GroupFooter>
