@@ -59,9 +59,7 @@ export default function MeasureDisclaimer() {
         <div>
           <FormField>
             <FormFieldInner>
-              <FieldLabel htmlFor="measure-disclaimer">
-                Measure Disclaimer
-              </FieldLabel>
+              <FieldLabel htmlFor="measure-disclaimer">Disclaimer</FieldLabel>
               <FieldSeparator>
                 <FieldInput
                   value={measureDisclaimer}
@@ -71,7 +69,7 @@ export default function MeasureDisclaimer() {
                   autoComplete="given-name"
                   required
                   onChange={onMeasureDisclaimerChange}
-                  placeholder="Measure Disclaimer"
+                  placeholder="Disclaimer"
                   data-testid="measureDisclaimerInput"
                 />
               </FieldSeparator>
