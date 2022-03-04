@@ -9,16 +9,19 @@ import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureSteward from "./measureSteward/MeasureSteward";
 import MeasureDescription from "./measureDescription/MeasureDescription";
 import MeasureCopyright from "./measureCopyright/MeasureCopyright";
+import MeasureDisclaimer from "./measureDisclaimer/MeasureDisclaimer";
 
 jest.mock("./measureInformation/MeasureInformation");
 jest.mock("./measureSteward/MeasureSteward");
 jest.mock("./measureDescription/MeasureDescription");
 jest.mock("./measureCopyright/MeasureCopyright");
+jest.mock("./measureDisclaimer/MeasureDisclaimer");
 
 const MeasureInformationMock = MeasureInformation as jest.Mock<JSX.Element>;
 const MeasureStewardMock = MeasureSteward as jest.Mock<JSX.Element>;
 const MeasureDescriptionMock = MeasureDescription as jest.Mock<JSX.Element>;
 const MeasureCopyrightMock = MeasureCopyright as jest.Mock<JSX.Element>;
+const MeasureDisclaimerMock = MeasureDisclaimer as jest.Mock<JSX.Element>;
 
 MeasureInformationMock.mockImplementation(() => {
   return <div>Mock Measure Info</div>;
@@ -34,6 +37,10 @@ MeasureDescriptionMock.mockImplementation(() => {
 
 MeasureCopyrightMock.mockImplementation(() => {
   return <div>Mock Measure Copyright</div>;
+});
+
+MeasureDisclaimerMock.mockImplementation(() => {
+  return <div>Mock Measure Disclaimer</div>;
 });
 
 const serviceConfig: ServiceConfig = {
@@ -68,7 +75,6 @@ describe("MeasureDetails component", () => {
     );
     expect(getByText("Mock Measure Steward")).toBeTruthy();
   });
-
   it("should render the MeasureDescription component for measure-description URL", () => {
     const { getByText, getByTestId } = render(
       <ApiContextProvider value={serviceConfig}>
@@ -104,5 +110,25 @@ describe("MeasureDetails component", () => {
     expect(getByTestId("leftPanelMeasureSteward")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureCopyright")).toBeInTheDocument();
+  });
+
+  it("should render the MeasureDisclaimer component for measure-disclaimer URL", () => {
+    const { getByText, getByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter
+          initialEntries={[{ pathname: "/foo/measure-disclaimer" }]}
+        >
+          <Route path="/foo">
+            <MeasureDetails />
+          </Route>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    expect(getByText("Mock Measure Disclaimer")).toBeTruthy();
+    expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureSteward")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureDisclaimer")).toBeInTheDocument();
   });
 });

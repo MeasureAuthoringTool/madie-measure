@@ -6,6 +6,7 @@ export interface MeasureMetadata {
   steward?: string;
   description?: string;
   copyright?: string;
+  disclaimer?: string;
 }
 
 export interface Group {
