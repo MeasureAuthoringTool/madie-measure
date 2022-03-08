@@ -2,7 +2,7 @@ import "@testing-library/jest-dom";
 // NOTE: jest-dom adds handy assertions to Jest and is recommended, but not required
 
 import * as React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import MeasureLanding, { MeasureRoutes } from "./MeasureLanding";
 import { MemoryRouter } from "react-router";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
@@ -45,6 +45,12 @@ jest.mock("../../hooks/useOktaTokens", () => () => ({
   getAccessToken: () => "test.jwt",
 }));
 
+jest.mock("../notfound/NotFound", () => () => {
+  return (
+    <div data-testid="notfound-component-mocked">404 NotFound Component</div>
+  );
+});
+
 const mockMeasureServiceApi = {
   fetchMeasures: jest.fn().mockResolvedValue(measures),
 } as unknown as MeasureServiceApi;
@@ -54,7 +60,7 @@ jest.mock("../../api/useMeasureServiceApi", () =>
 );
 
 describe("MeasureLanding", () => {
-  test("shows the children when the checkbox is checked", async () => {
+  test("Routes to 404 when no matching", async () => {
     render(
       <div id="main">
         <MeasureLanding />
@@ -62,14 +68,14 @@ describe("MeasureLanding", () => {
     );
 
     expect(screen.getByTestId("browser-router")).toBeTruthy();
-    const measure1 = await screen.findByText("TestMeasure1");
-    expect(measure1).toBeInTheDocument();
+    const notfound = await screen.findByText("404 NotFound Component");
+    expect(notfound).toBeInTheDocument();
   });
 
   test("renders create new measure screen on button click", async () => {
     render(
       <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={["/measure"]}>
+        <MemoryRouter initialEntries={["/measures"]}>
           <MeasureRoutes />
         </MemoryRouter>
       </ApiContextProvider>
@@ -83,5 +89,16 @@ describe("MeasureLanding", () => {
       name: "Measure Name",
     });
     expect(measureNameInput).toBeInTheDocument();
+  });
+
+  it("should render 404 NotFound component", async () => {
+    const { getByTestId } = render(
+      <MemoryRouter initialEntries={["/test"]}>
+        <MeasureRoutes />
+      </MemoryRouter>
+    );
+    await waitFor(() => {
+      expect(getByTestId("notfound-component-mocked")).toBeInTheDocument();
+    });
   });
 });
