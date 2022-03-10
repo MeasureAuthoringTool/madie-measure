@@ -40,7 +40,9 @@ export default function EditMeasure() {
           setLoading(false);
         })
         .catch((err) => {
-          setNotFound(true);
+          if (err.toString().includes("404")) {
+            setNotFound(true);
+          }
         });
     }
   }, [measureServiceApi, id, measure]);

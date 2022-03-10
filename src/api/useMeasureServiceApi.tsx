@@ -23,7 +23,7 @@ export class MeasureServiceApi {
       const message = `Unable to fetch measure ${id}`;
       console.error(message);
       console.error(err);
-      throw new Error(message);
+      throw new Error(err);
     }
   }
 
