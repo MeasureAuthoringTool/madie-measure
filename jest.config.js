@@ -4,6 +4,7 @@ module.exports = {
   testEnvironment: "jsdom",
   transform: {
     "^.+\\.(j|t)sx?$": "babel-jest",
+    "^.+\\.js?$": require.resolve("babel-jest"),
   },
   transformIgnorePatterns: ["node_modules/(?!formik)/"],
   moduleNameMapper: {
