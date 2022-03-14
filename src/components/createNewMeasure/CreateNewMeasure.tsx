@@ -45,7 +45,7 @@ const CreateNewMeasure = () => {
         },
       })
       .then((response) => {
-        history.push("/measure");
+        history.push("/measures");
       })
       .catch((error) => {
         let msg: string = error.response.data.message;
