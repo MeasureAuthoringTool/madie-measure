@@ -182,7 +182,7 @@ const CreateNewMeasure = () => {
             type="button"
             variant="white"
             onClick={() => {
-              history.push("/measure");
+              history.push("/measures");
             }}
             data-testid="create-new-measure-cancel-button"
           />
