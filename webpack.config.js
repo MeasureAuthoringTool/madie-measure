@@ -56,6 +56,7 @@ module.exports = (webpackConfigEnv, argv) => {
   const newCssRule = {
     module: {
       rules: [
+        { test: /\.m?js/, type: "javascript/auto" },
         {
           test: /\.css$/i,
           include: [/node_modules/, /src/],

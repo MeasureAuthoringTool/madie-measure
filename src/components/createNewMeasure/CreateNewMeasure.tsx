@@ -45,7 +45,7 @@ const CreateNewMeasure = () => {
         },
       })
       .then((response) => {
-        history.push("/measure");
+        history.push("/measures");
       })
       .catch((error) => {
         let msg: string = error.response.data.message;
@@ -182,7 +182,7 @@ const CreateNewMeasure = () => {
             type="button"
             variant="white"
             onClick={() => {
-              history.push("/measure");
+              history.push("/measures");
             }}
             data-testid="create-new-measure-cancel-button"
           />

@@ -220,7 +220,7 @@ const MeasureGroups = () => {
           {/* Form control later should be moved to own component and dynamically rendered by switch based on measure. */}
           <FormControl>
             {/* pull from cql file */}
-            <SoftLabel htmlFor="scoring-unit-select">Scoring Unit:</SoftLabel>
+            <SoftLabel htmlFor="scoring-unit-select">Group Scoring:</SoftLabel>
             <Select
               native
               id="scoring-unit-select"
