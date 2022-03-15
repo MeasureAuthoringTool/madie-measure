@@ -27,14 +27,20 @@ export class MeasureServiceApi {
     }
   }
 
-  async fetchMeasures(filterByCurrentUser: boolean): Promise<Measure[]> {
+  async fetchMeasures(
+    filterByCurrentUser: boolean,
+    limit: number = 25,
+    page: number = 0
+  ): Promise<any> {
     try {
-      const response = await axios.get<Measure[]>(`${this.baseUrl}/measures`, {
+      const response = await axios.get<any>(`${this.baseUrl}/measures`, {
         headers: {
           Authorization: `Bearer ${this.getAccessToken()}`,
         },
         params: {
           currentUser: filterByCurrentUser,
+          limit,
+          page,
         },
       });
       return response.data;

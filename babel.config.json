@@ -12,6 +12,8 @@
   "plugins": [
     "babel-plugin-macros",
     "@babel/plugin-transform-react-jsx",
+    "@babel/plugin-transform-modules-commonjs",
+    "babel-plugin-dynamic-import-node",
     [
       "@babel/plugin-transform-runtime",
       {
