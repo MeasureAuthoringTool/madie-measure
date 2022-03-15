@@ -6,7 +6,7 @@ import { Router } from "react-router-dom";
 import { createMemoryHistory } from "history";
 
 describe("NotFound component", () => {
-  it("should render NotFound component",  () => {
+  it("should render NotFound component", () => {
     const { getByTestId, getByText } = render(<NotFound />);
 
     expect(getByTestId("404-page")).toBeInTheDocument();
@@ -14,7 +14,7 @@ describe("NotFound component", () => {
     expect(getByTestId("404-page-link")).toBeInTheDocument();
   });
 
-  it("should render home page after clicking Go Home",  () => {
+  it("should render home page after clicking Go Home", () => {
     const history = createMemoryHistory();
     const pushSpy = jest.spyOn(history, "push");
     render(
