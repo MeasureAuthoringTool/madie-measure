@@ -1,6 +1,10 @@
 import * as React from "react";
-import { render, screen } from "@testing-library/react";
-import MeasureGroups from "./MeasureGroups";
+import { render, screen, act, within } from "@testing-library/react";
+import { isEqual } from "lodash";
+import MeasureGroups, {
+  DefaultPopulationSelectorDefinitions,
+} from "./MeasureGroups";
+import { MEASURE_SCORING_KEYS } from "../../models/MeasureScoring";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import { MemoryRouter } from "react-router-dom";
@@ -37,6 +41,7 @@ describe("Measure Groups Page", () => {
   let measure: Measure;
   let group: Group;
   let measureContextHolder: MeasureContextHolder;
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -59,6 +64,11 @@ describe("Measure Groups Page", () => {
       scoring: "Cohort",
       population: {
         initialPopulation: "Initial Population",
+        denominator: "",
+        denominatorException: "",
+        denominatorExclusion: "",
+        numerator: "",
+        numeratorExclusion: "",
       },
     };
   });
@@ -80,134 +90,179 @@ describe("Measure Groups Page", () => {
     expect(optionList[0].textContent).toBe("Cohort");
   });
 
-  // test("MeasureGroups renders a list of definitions based on parsed CQL", async () => {
-  //   renderMeasureGroupComponent();
-  //   const definitions = await screen.findAllByTestId("ipp-expression-option");
-  //   expect(definitions).toHaveLength(10);
-  //   expect(definitions[0].textContent).toBe("SDE Ethnicity");
-  // });
+  test("MeasureGroups renders a list of definitions based on parsed CQL", async () => {
+    renderMeasureGroupComponent();
 
-  // test("Should create population Group with one initial population successfully", async () => {
-  //   renderMeasureGroupComponent();
-  //   // select initial population from dropdown
-  //   userEvent.selectOptions(
-  //     screen.getByTestId("ipp-expression-select"),
-  //     screen.getByText("Initial Population")
-  //   );
-  //   expect(
-  //     screen.getByRole("option", { name: "Initial Population" }).selected
-  //   ).toBe(true);
+    // Test that each Scoring Unit selection displays the correct population filters
+    await act(async () => {
+      for await (let [value, key] of MEASURE_SCORING_KEYS) {
+        // Change the selection value
+        userEvent.selectOptions(screen.getByTestId("scoring-unit-select"), [
+          screen.getByText(value),
+        ]);
+        let optionEl = screen.getByRole("option", { name: value });
+        expect(optionEl.selected).toBe(true);
 
-  //   mockedAxios.post.mockResolvedValue({ data: { group } });
+        // Check that the appropriate filter labels are rendered as expected
+        let filterLabelArrayIntended =
+          DefaultPopulationSelectorDefinitions.reduce((filters, option) => {
+            if (option.hidden?.includes(value)) return filters;
+            let isRequired = "*";
+            if (option.optional?.length) {
+              if (
+                option.optional?.includes(value) ||
+                option.optional[0] === "*"
+              ) {
+                isRequired = "";
+              }
+            }
+            filters.push(`${option.label}${isRequired}`);
+            return filters;
+          }, []);
 
-  //   // submit the form
-  //   userEvent.click(screen.getByTestId("group-form-submit-btn"));
-  //   const alert = await screen.findByTestId("success-alerts");
+        // Check what is actually rendered
+        let filterLabelArrayActual = screen
+          .getAllByTestId("select-measure-group-population-label")
+          .map((labelEl, id) => {
+            return labelEl.textContent;
+          });
+        expect(isEqual(filterLabelArrayIntended, filterLabelArrayActual)).toBe(
+          true
+        );
+      }
+    });
 
-  //   expect(alert).toHaveTextContent(
-  //     "Population details for this group saved successfully."
-  //   );
-  //   expect(mockedAxios.post).toHaveBeenCalledWith(
-  //     "example-service-url/measures/test-measure/groups/",
-  //     group,
-  //     expect.anything()
-  //   );
-  // });
+    const definitions = await screen.findAllByTestId(
+      "select-measure-group-population"
+    );
+    for await (let def of definitions) {
+      let options = def.getElementsByTagName("option");
+      expect(options.length).toBe(11);
+      expect(def[0].textContent).toBe("SDE Ethnicity");
+    }
+  });
 
-  // test("Should be able to update initial population of a population group", async () => {
-  //   group.id = "7p03-5r29-7O0I";
-  //   measure.groups = [group];
-  //   renderMeasureGroupComponent();
+  test("Should create population Group with one initial population successfully", async () => {
+    renderMeasureGroupComponent();
+    // select initial population from dropdown
+    userEvent.selectOptions(
+      screen.getByTestId("select-measure-group-population"),
+      "Initial Population"
+    );
+    expect(
+      screen.getByRole("option", { name: "Initial Population" }).selected
+    ).toBe(true);
 
-  //   // initial population before update
-  //   expect(
-  //     screen.getByRole("option", {
-  //       name: "Initial Population",
-  //     }).selected
-  //   ).toBe(true);
+    mockedAxios.post.mockResolvedValue({ data: { group } });
 
-  //   const definitionToUpdate =
-  //     "VTE Prophylaxis by Medication Administered or Device Applied";
-  //   // update initial population from dropdown
-  //   userEvent.selectOptions(
-  //     screen.getByTestId("ipp-expression-select"),
-  //     screen.getByText(definitionToUpdate)
-  //   );
+    // submit the form
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+    const alert = await screen.findByTestId("success-alerts");
 
-  //   expect(
-  //     screen.getByRole("option", {
-  //       name: definitionToUpdate,
-  //     }).selected
-  //   ).toBe(true);
+    expect(alert).toHaveTextContent(
+      "Population details for this group saved successfully."
+    );
+    expect(mockedAxios.post).toHaveBeenCalledWith(
+      "example-service-url/measures/test-measure/groups/",
+      group,
+      expect.anything()
+    );
+  });
 
-  //   group.population.initialPopulation = definitionToUpdate;
+  test("Should be able to update initial population of a population group", async () => {
+    group.id = "7p03-5r29-7O0I";
+    measure.groups = [group];
+    renderMeasureGroupComponent();
 
-  //   mockedAxios.put.mockResolvedValue({ data: { group } });
+    // initial population before update
+    expect(
+      screen.getByRole("option", {
+        name: "Initial Population",
+      }).selected
+    ).toBe(true);
 
-  //   // submit the form
-  //   userEvent.click(screen.getByTestId("group-form-submit-btn"));
-  //   const alert = await screen.findByTestId("success-alerts");
+    const definitionToUpdate =
+      "VTE Prophylaxis by Medication Administered or Device Applied";
+    // update initial population from dropdown
+    userEvent.selectOptions(
+      screen.getByTestId("select-measure-group-population"),
+      screen.getByText(definitionToUpdate)
+    );
 
-  //   expect(alert).toHaveTextContent(
-  //     "Population details for this group updated successfully."
-  //   );
-  //   expect(mockedAxios.put).toHaveBeenCalledWith(
-  //     "example-service-url/measures/test-measure/groups/",
-  //     group,
-  //     expect.anything()
-  //   );
-  // });
+    expect(
+      screen.getByRole("option", {
+        name: definitionToUpdate,
+      }).selected
+    ).toBe(true);
 
-  // test("Should report an error if create population Group fails", async () => {
-  //   renderMeasureGroupComponent();
-  //   // select initial population from dropdown
-  //   userEvent.selectOptions(
-  //     screen.getByTestId("ipp-expression-select"),
-  //     screen.getByText("Initial Population")
-  //   );
+    group.population.initialPopulation = definitionToUpdate;
 
-  //   expect(
-  //     screen.getByRole("option", { name: "Initial Population" }).selected
-  //   ).toBe(true);
+    mockedAxios.put.mockResolvedValue({ data: { group } });
 
-  //   mockedAxios.post.mockRejectedValue({
-  //     data: {
-  //       error: "500error",
-  //     },
-  //   });
+    // submit the form
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+    const alert = await screen.findByTestId("success-alerts");
 
-  //   // submit the form
-  //   userEvent.click(screen.getByTestId("group-form-submit-btn"));
-  //   const alert = await screen.findByTestId("error-alerts");
-  //   expect(alert).toHaveTextContent("Failed to create the group.");
-  // });
+    expect(alert).toHaveTextContent(
+      "Population details for this group updated successfully."
+    );
+    expect(mockedAxios.put).toHaveBeenCalledWith(
+      "example-service-url/measures/test-measure/groups/",
+      group,
+      expect.anything()
+    );
+  });
 
-  // test("Should report an error if the update population Group fails", async () => {
-  //   group.id = "7p03-5r29-7O0I";
-  //   measure.groups = [group];
-  //   renderMeasureGroupComponent();
-  //   // update initial population from dropdown
-  //   const definitionToUpdate =
-  //     "VTE Prophylaxis by Medication Administered or Device Applied";
-  //   userEvent.selectOptions(
-  //     screen.getByTestId("ipp-expression-select"),
-  //     screen.getByText(definitionToUpdate)
-  //   );
+  test("Should report an error if create population Group fails", async () => {
+    renderMeasureGroupComponent();
+    // select initial population from dropdown
+    userEvent.selectOptions(
+      screen.getByTestId("select-measure-group-population"),
+      ["Initial Population"]
+    );
 
-  //   expect(
-  //     screen.getByRole("option", { name: definitionToUpdate }).selected
-  //   ).toBe(true);
+    expect(
+      screen.getByRole("option", { name: "Initial Population" }).selected
+    ).toBe(true);
 
-  //   mockedAxios.put.mockRejectedValue({
-  //     data: {
-  //       error: "500error",
-  //     },
-  //   });
+    mockedAxios.post.mockRejectedValue({
+      data: {
+        error: "500error",
+      },
+    });
 
-  //   // submit the form
-  //   userEvent.click(screen.getByTestId("group-form-submit-btn"));
-  //   const alert = await screen.findByTestId("error-alerts");
-  //   expect(alert).toBeInTheDocument();
-  //   expect(alert).toHaveTextContent("Failed to update the group.");
-  // });
+    // submit the form
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+    const alert = await screen.findByTestId("error-alerts");
+    expect(alert).toHaveTextContent("Failed to create the group.");
+  });
+
+  test("Should report an error if the update population Group fails", async () => {
+    group.id = "7p03-5r29-7O0I";
+    measure.groups = [group];
+    renderMeasureGroupComponent();
+    // update initial population from dropdown
+    const definitionToUpdate =
+      "VTE Prophylaxis by Medication Administered or Device Applied";
+    userEvent.selectOptions(
+      screen.getByTestId("select-measure-group-population"),
+      screen.getByText(definitionToUpdate)
+    );
+
+    expect(
+      screen.getByRole("option", { name: definitionToUpdate }).selected
+    ).toBe(true);
+
+    mockedAxios.put.mockRejectedValue({
+      data: {
+        error: "500error",
+      },
+    });
+
+    // submit the form
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+    const alert = await screen.findByTestId("error-alerts");
+    expect(alert).toBeInTheDocument();
+    expect(alert).toHaveTextContent("Failed to update the group.");
+  });
 });
