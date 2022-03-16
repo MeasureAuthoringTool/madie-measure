@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, fireEvent, cleanup } from "@testing-library/react";
+import { render, fireEvent, cleanup, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import EditMeasure from "./EditMeasure";
@@ -48,6 +48,16 @@ const serviceConfig: ServiceConfig = {
     baseUrl: "",
   },
 };
+
+// mocking useHistory
+const mockPush = jest.fn();
+jest.mock("react-router-dom", () => ({
+  ...(jest.requireActual("react-router-dom") as any),
+  useHistory: () => {
+    const push = () => mockPush("/example");
+    return { push };
+  },
+}));
 
 afterEach(cleanup);
 
@@ -125,5 +135,24 @@ describe("EditMeasure Component", () => {
     fireEvent.click(await findByText("Test Cases"));
     expect((await findByText("Test Cases")).classList).toContain("active");
     expect(document.body.textContent).toContain("Patient Component");
+  });
+
+  it("should redirect to 404", async () => {
+    const serviceApiRejectedMock = {
+      fetchMeasure: jest.fn().mockRejectedValue("404"),
+    } as unknown as MeasureServiceApi;
+    useMeasureServiceApiMock.mockImplementation(() => {
+      return serviceApiRejectedMock;
+    });
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <EditMeasure />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalled();
+    });
   });
 });

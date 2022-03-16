@@ -28,8 +28,7 @@ export default function EditMeasure() {
   const [measure, setMeasure] = useState<Measure>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  let history = useHistory();
-  const [notFound, setNotFound] = useState<boolean>(false);
+  const history = useHistory();
 
   useEffect(() => {
     if (!measure) {
@@ -41,15 +40,11 @@ export default function EditMeasure() {
         })
         .catch((err) => {
           if (err.toString().includes("404")) {
-            setNotFound(true);
+            history.push("/404");
           }
         });
     }
   }, [measureServiceApi, id, measure]);
-
-  if (notFound) {
-    history.push("/404");
-  }
 
   const loadingDiv = <div data-testid="loading">Loading...</div>;
 
