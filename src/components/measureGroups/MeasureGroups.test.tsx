@@ -69,6 +69,8 @@ describe("Measure Groups Page", () => {
         denominatorExclusion: "",
         numerator: "",
         numeratorExclusion: "",
+        measurePopulation: "",
+        measurePopulationExclusion: "",
       },
     };
   });

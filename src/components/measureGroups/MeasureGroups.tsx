@@ -79,6 +79,17 @@ export const DefaultPopulationSelectorDefinitions = [
     optional: ["Proportion", "Ratio"],
     hidden: ["Cohort", "Continuous Variable"],
   },
+  {
+    label: "Measure Population",
+    key: "measurePopulation",
+    hidden: ["Cohort", "Proportion", "Ratio"],
+  },
+  {
+    label: "Measure Population Exclusion",
+    key: "measurePopulationExclusion",
+    optional: ["Continuous Variable"],
+    hidden: ["Cohort", "Ratio", "Proportion"],
+  },
 ];
 
 export interface ExpressionDefinition {
@@ -113,6 +124,9 @@ const MeasureGroups = () => {
         denominatorException: group?.population?.denominatorException || "",
         numerator: group?.population?.numerator || "",
         numeratorExclusion: group?.population?.numeratorExclusion || "",
+        measurePopulation: group?.population?.measurePopulation || "",
+        measurePopulationExclusion:
+          group?.population?.measurePopulationExclusion || "",
       },
     } as Group,
     onSubmit: (group: Group) => {
