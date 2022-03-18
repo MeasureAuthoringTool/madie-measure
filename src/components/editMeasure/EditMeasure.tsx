@@ -5,6 +5,7 @@ import {
   Switch,
   useParams,
   useRouteMatch,
+  useHistory,
 } from "react-router-dom";
 import "styled-components/macro";
 import EditMeasureNav from "./editMeasureNav/EditMeasureNav";
@@ -27,12 +28,21 @@ export default function EditMeasure() {
   const [measure, setMeasure] = useState<Measure>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const history = useHistory();
+
   useEffect(() => {
     if (!measure) {
-      measureServiceApi.fetchMeasure(id).then((value: Measure) => {
-        setMeasure(value);
-        setLoading(false);
-      });
+      measureServiceApi
+        .fetchMeasure(id)
+        .then((value: Measure) => {
+          setMeasure(value);
+          setLoading(false);
+        })
+        .catch((err) => {
+          if (err.toString().includes("404")) {
+            history.push("/404");
+          }
+        });
     }
   }, [measureServiceApi, id, measure]);
 
