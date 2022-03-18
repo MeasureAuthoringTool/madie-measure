@@ -44,6 +44,43 @@ const PopulationActions = styled.div(() => [
   tw`col-span-3 p-1 pl-6`,
 ]);
 
+// Define fields to conditionally appear based on selected scoring unit
+export const DefaultPopulationSelectorDefinitions = [
+  {
+    key: "initialPopulation",
+    label: "Initial Population",
+    subTitle: `
+      Caution: Removing or invalidating a population will cause any
+      package groupings containing that population to be cleared on the
+      Measure Packager.
+    `,
+  },
+  { label: "Denominator", key: "denominator", hidden: ["Cohort"] },
+  {
+    label: "Denominator Exclusion",
+    key: "denominatorExclusion",
+    optional: ["*"],
+    hidden: ["Cohort"],
+  },
+  {
+    label: "Denominator Exception",
+    key: "denominatorException",
+    optional: ["Proportion"],
+    hidden: ["Cohort", "Continuous Variable", "Ratio"],
+  },
+  {
+    label: "Numerator",
+    key: "numerator",
+    hidden: ["Cohort", "Continuous Variable"],
+  },
+  {
+    label: "Numerator Exclusion",
+    key: "numeratorExclusion",
+    optional: ["Proportion", "Ratio"],
+    hidden: ["Cohort", "Continuous Variable"],
+  },
+];
+
 export interface ExpressionDefinition {
   expression?: string;
   expressionClass?: string;
@@ -91,43 +128,8 @@ const MeasureGroups = () => {
     }
   }, [measure]);
 
-  // Define fields to conditionally appear based on selected scoring unit
-  // @TODO: Pull directly from MeasurePopulation
-  const PopulationSelectorDefinitions = [
-    {
-      key: "initialPopulation",
-      label: "Initial Population",
-      subTitle: `
-        Caution: Removing or invalidating a population will cause any
-        package groupings containing that population to be cleared on the
-        Measure Packager.
-      `,
-    },
-    { label: "Denominator", key: "denominator", hidden: ["Cohort"] },
-    {
-      label: "Denominator Exclusion",
-      key: "denominatorExclusion",
-      optional: ["*"],
-      hidden: ["Cohort"],
-    },
-    {
-      label: "Denominator Exception",
-      key: "denominatorException",
-      optional: ["Proportion"],
-      hidden: ["Cohort", "Continuous Variable", "Ratio"],
-    },
-    {
-      label: "Numerator",
-      key: "numerator",
-      hidden: ["Cohort", "Continuous Variable"],
-    },
-    {
-      label: "Numerator Exclusion",
-      key: "numeratorExclusion",
-      optional: ["Proportion", "Ratio"],
-      hidden: ["Cohort", "Continuous Variable"],
-    },
-  ];
+  // @TODO: Pull directly from MeasurePopulation instead of local export
+  const PopulationSelectorDefinitions = DefaultPopulationSelectorDefinitions;
 
   // Helper function do determine the properties for a select item
   const populationSelectorProperties = (
@@ -218,7 +220,7 @@ const MeasureGroups = () => {
           {/* Form control later should be moved to own component and dynamically rendered by switch based on measure. */}
           <FormControl>
             {/* pull from cql file */}
-            <SoftLabel htmlFor="scoring-unit-select">Scoring Unit:</SoftLabel>
+            <SoftLabel htmlFor="scoring-unit-select">Group Scoring:</SoftLabel>
             <Select
               native
               id="scoring-unit-select"

@@ -10,8 +10,8 @@ export function MeasureRoutes() {
   return (
     <Switch>
       <Route exact path="/measures/create" component={CreateNewMeasure} />
-      <Route path="/measures/:id/edit" component={EditMeasure} />
       <Route exact path="/measures" component={NewMeasure} />
+      <Route path="/measures/:id/edit" component={EditMeasure} />
       <Route path="/404" component={NotFound} />
       <Redirect to="/404" />
     </Switch>

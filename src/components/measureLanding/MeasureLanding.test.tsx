@@ -7,30 +7,9 @@ import MeasureLanding, { MeasureRoutes } from "./MeasureLanding";
 import { MemoryRouter } from "react-router";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import userEvent from "@testing-library/user-event";
-import { MeasureScoring } from "../../models/MeasureScoring";
-import { Model } from "../../models/Model";
 import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
-
-const measures = [
-  {
-    id: "ab123",
-    measureHumanReadableId: "ab123",
-    measureSetId: null,
-    version: 1.2,
-    revisionNumber: 12,
-    state: "NA",
-    measureName: "TestMeasure1",
-    cqlLibraryName: "TestLib1",
-    measureScoring: MeasureScoring.COHORT,
-    cql: null,
-    createdAt: null,
-    createdBy: "TestUser1",
-    lastModifiedAt: null,
-    lastModifiedBy: "TestUser1",
-    model: Model.QICORE,
-    measureMetaData: null,
-  },
-];
+import { act } from "react-dom/test-utils";
+import { oneItemResponse } from "../measureLanding/mockMeasureResponses";
 
 const serviceConfig: ServiceConfig = {
   measureService: {
@@ -45,21 +24,57 @@ jest.mock("../../hooks/useOktaTokens", () => () => ({
   getAccessToken: () => "test.jwt",
 }));
 
-jest.mock("../notfound/NotFound", () => () => {
-  return (
-    <div data-testid="notfound-component-mocked">404 NotFound Component</div>
-  );
-});
-
 const mockMeasureServiceApi = {
-  fetchMeasures: jest.fn().mockResolvedValue(measures),
+  fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
 } as unknown as MeasureServiceApi;
 
 jest.mock("../../api/useMeasureServiceApi", () =>
   jest.fn(() => mockMeasureServiceApi)
 );
 
+jest.mock("../notfound/NotFound", () => () => {
+  return (
+    <div data-testid="notfound-component-mocked">404 NotFound Component</div>
+  );
+});
+
+// react no op error is caused by two awaits in one it call. ignorable.
 describe("MeasureLanding", () => {
+  test("renders create new measure screen on button click", () => {
+    act(async () => {
+      render(
+        <ApiContextProvider value={serviceConfig}>
+          <MemoryRouter initialEntries={["/measures"]}>
+            <MeasureRoutes />
+          </MemoryRouter>
+        </ApiContextProvider>
+      );
+      expect(screen.getByTestId("create-new-measure-button")).toBeTruthy();
+      const measure1 = await screen.findByText("TestMeasure1");
+      expect(measure1).toBeInTheDocument();
+      const newMeasureBtn = screen.getByRole("button", { name: "New Measure" });
+      userEvent.click(newMeasureBtn);
+      const measureNameInput = await screen.findByRole("textbox", {
+        name: "Measure Name",
+      });
+      expect(measureNameInput).toBeInTheDocument();
+    });
+  });
+
+  test("renders create new measure screen on button click", () => {
+    act(async () => {
+      render(
+        <ApiContextProvider value={serviceConfig}>
+          <MemoryRouter initialEntries={["/measures"]}>
+            <MeasureRoutes />
+          </MemoryRouter>
+        </ApiContextProvider>
+      );
+      const measure1 = await screen.findByText("TestMeasure1");
+      expect(measure1).toBeInTheDocument();
+    });
+  });
+
   test("Routes to 404 when no matching", async () => {
     render(
       <div id="main">
@@ -70,25 +85,6 @@ describe("MeasureLanding", () => {
     expect(screen.getByTestId("browser-router")).toBeTruthy();
     const notfound = await screen.findByText("404 NotFound Component");
     expect(notfound).toBeInTheDocument();
-  });
-
-  test("renders create new measure screen on button click", async () => {
-    render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={["/measures"]}>
-          <MeasureRoutes />
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
-    expect(screen.getByTestId("create-new-measure-button")).toBeTruthy();
-    const measure1 = await screen.findByText("TestMeasure1");
-    expect(measure1).toBeInTheDocument();
-    const newMeasureBtn = screen.getByRole("button", { name: "New Measure" });
-    userEvent.click(newMeasureBtn);
-    const measureNameInput = await screen.findByRole("textbox", {
-      name: "Measure Name",
-    });
-    expect(measureNameInput).toBeInTheDocument();
   });
 
   it("should render 404 NotFound component", async () => {

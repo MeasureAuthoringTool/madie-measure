@@ -60,7 +60,7 @@ const MeasureGroupPopulationSelect = ({
   options,
   value,
 }: Props) => {
-  const htmlId = kebabCase(`measure-group-population-select-${label}`);
+  const htmlId = kebabCase(`population-select-${label}`);
   const defaultOptionTitle = optionTitle ? optionTitle : label;
 
   // FPO noop onClick handler
@@ -73,7 +73,7 @@ const MeasureGroupPopulationSelect = ({
       <HeavyLabel
         htmlFor={htmlId}
         id={`${htmlId}-label`}
-        data-testid={`${htmlId}-label`}
+        data-testid={`select-measure-group-population-label`}
       >
         {label}
         {required && <Required>*</Required>}
@@ -84,9 +84,11 @@ const MeasureGroupPopulationSelect = ({
           <Select
             native
             displayEmpty
-            data-testid={`select-${htmlId}`}
             value={value.replace(/"/g, "")}
             id={htmlId}
+            inputProps={{
+              "data-testid": `select-measure-group-population`,
+            }}
             labelId={`select-${htmlId}-label`}
             name={name}
             onChange={onChange}
@@ -96,9 +98,7 @@ const MeasureGroupPopulationSelect = ({
               <option
                 key={`${name}-${i}`}
                 value={name.replace(/"/g, "")}
-                data-testid={`expression-select-option-${htmlId}-${kebabCase(
-                  name
-                )}`}
+                data-testid={`select-option-measure-group-population`}
               >
                 {name.replace(/"/g, "")}
               </option>
@@ -106,7 +106,7 @@ const MeasureGroupPopulationSelect = ({
             <option
               value={""}
               disabled
-              data-testid={`select-option-${htmlId}-default`}
+              data-testid={`select-option-measure-group-population`}
             >
               Select {defaultOptionTitle}
             </option>
