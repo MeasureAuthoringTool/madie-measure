@@ -10,6 +10,8 @@ import { useFormik, getIn } from "formik";
 import { Group } from "../../models/Measure";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
+import * as _ from "lodash";
+import { MeasureGroupSchemaValidator } from "../../models/MeasureGroupSchemaValidator";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
 const Content = styled.div(() => [tw`col-span-3`]);
@@ -129,6 +131,7 @@ const MeasureGroups = () => {
           group?.population?.measurePopulationExclusion || "",
       },
     } as Group,
+    validationSchema: MeasureGroupSchemaValidator,
     onSubmit: (group: Group) => {
       submitForm(group);
     },
@@ -169,6 +172,13 @@ const MeasureGroups = () => {
   };
 
   const submitForm = (group: Group) => {
+    if (group && group.population) {
+      // remove any key/value pairs that do not have a valid define selected before saving to DB
+      group.population = _.omitBy(
+        group.population,
+        (value) => _.isNil(value) || value.trim().length === 0
+      );
+    }
     if (group.id) {
       measureServiceApi
         .updateGroup(group, measure.id)
