@@ -1,9 +1,10 @@
 import React from "react";
-import { Route, Switch, BrowserRouter } from "react-router-dom";
+import { Route, Switch, BrowserRouter, Redirect } from "react-router-dom";
 import { CreateNewMeasure } from "../createNewMeasure/CreateNewMeasure";
 import EditMeasure from "../editMeasure/EditMeasure";
 import NewMeasure from "../newMeasure/NewMeasure";
 import TimeoutHandler from "./TimeoutHandler";
+import NotFound from "../notfound/NotFound";
 
 export function MeasureRoutes() {
   return (
@@ -11,6 +12,8 @@ export function MeasureRoutes() {
       <Route exact path="/measures/create" component={CreateNewMeasure} />
       <Route exact path="/measures" component={NewMeasure} />
       <Route path="/measures/:id/edit" component={EditMeasure} />
+      <Route path="/404" component={NotFound} />
+      <Redirect to="/404" />
     </Switch>
   );
 }

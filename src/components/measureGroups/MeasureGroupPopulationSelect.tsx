@@ -57,8 +57,8 @@ const MeasureGroupPopulationSelect = ({
   name,
   onChange,
   optionTitle,
-  options,
-  value,
+  options = [] as ExpressionDefinition[],
+  value = "",
 }: Props) => {
   const htmlId = kebabCase(`population-select-${label}`);
   const defaultOptionTitle = optionTitle ? optionTitle : label;

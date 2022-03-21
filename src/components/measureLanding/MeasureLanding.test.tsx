@@ -2,8 +2,8 @@ import "@testing-library/jest-dom";
 // NOTE: jest-dom adds handy assertions to Jest and is recommended, but not required
 
 import * as React from "react";
-import { render, screen } from "@testing-library/react";
-import { MeasureRoutes } from "./MeasureLanding";
+import { render, screen, waitFor } from "@testing-library/react";
+import MeasureLanding, { MeasureRoutes } from "./MeasureLanding";
 import { MemoryRouter } from "react-router";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import userEvent from "@testing-library/user-event";
@@ -31,6 +31,12 @@ const mockMeasureServiceApi = {
 jest.mock("../../api/useMeasureServiceApi", () =>
   jest.fn(() => mockMeasureServiceApi)
 );
+
+jest.mock("../notfound/NotFound", () => () => {
+  return (
+    <div data-testid="notfound-component-mocked">404 NotFound Component</div>
+  );
+});
 
 // react no op error is caused by two awaits in one it call. ignorable.
 describe("MeasureLanding", () => {
@@ -66,6 +72,29 @@ describe("MeasureLanding", () => {
       );
       const measure1 = await screen.findByText("TestMeasure1");
       expect(measure1).toBeInTheDocument();
+    });
+  });
+
+  test("Routes to 404 when no matching", async () => {
+    render(
+      <div id="main">
+        <MeasureLanding />
+      </div>
+    );
+
+    expect(screen.getByTestId("browser-router")).toBeTruthy();
+    const notfound = await screen.findByText("404 NotFound Component");
+    expect(notfound).toBeInTheDocument();
+  });
+
+  it("should render 404 NotFound component", async () => {
+    const { getByTestId } = render(
+      <MemoryRouter initialEntries={["/test"]}>
+        <MeasureRoutes />
+      </MemoryRouter>
+    );
+    await waitFor(() => {
+      expect(getByTestId("notfound-component-mocked")).toBeInTheDocument();
     });
   });
 });
