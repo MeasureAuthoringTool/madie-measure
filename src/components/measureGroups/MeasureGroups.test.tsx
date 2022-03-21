@@ -132,7 +132,7 @@ describe("Measure Groups Page", () => {
           true
         );
       }
-    });
+    },10000);
 
     const definitions = await screen.findAllByTestId(
       "select-measure-group-population"

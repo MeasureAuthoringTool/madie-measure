@@ -15,7 +15,9 @@ describe("Service Config Utility", () => {
     };
     const resp = { data: config };
     mockedAxios.get.mockResolvedValue(resp);
-    getServiceConfig().then((result) => expect(result).toEqual(config));
+    getServiceConfig().then((result) => {
+      expect(result).toEqual(config);
+    });
   });
 
   it("should error if the config is inaccessible", async () => {

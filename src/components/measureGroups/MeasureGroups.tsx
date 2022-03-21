@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Fragment } from "react";
+import React, { useEffect, useState, Fragment, useRef } from "react";
 import tw, { styled } from "twin.macro";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import { MeasureScoring } from "../../models/MeasureScoring";
@@ -105,7 +105,7 @@ const MeasureGroups = () => {
   const [expressionDefinitions, setExpressionDefinitions] = useState<
     Array<ExpressionDefinition>
   >([]);
-  const { measure } = useCurrentMeasure();
+  const { measure, setMeasure } = useCurrentMeasure();
   const measureServiceApi = useMeasureServiceApi();
   const [genericErrorMessage, setGenericErrorMessage] = useState<string>();
   const [successMessage, setSuccessMessage] = useState<string>();
@@ -113,6 +113,7 @@ const MeasureGroups = () => {
   // TODO: group will be coming from props when we separate this into separate component
   const group = measure.groups && measure.groups[0];
   const defaultScoring = group?.scoring || measure?.measureScoring || "Cohort";
+  const canReset = useRef(false);
   const formik = useFormik({
     initialValues: {
       id: group?.id || null,
@@ -141,6 +142,25 @@ const MeasureGroups = () => {
       setExpressionDefinitions(definitions);
     }
   }, [measure]);
+
+  useEffect(() => {
+    if (formik.values.scoring && formik.values.scoring !== "") {
+      if (!canReset.current) {
+        canReset.current = true;
+      } else {
+        formik.setFieldValue("population", {
+          initialPopulation: "",
+          denominator: "",
+          denominatorExclusion: "",
+          denominatorException: "",
+          numerator: "",
+          numeratorExclusion: "",
+          measurePopulation: "",
+          measurePopulationExclusion: "",
+        });
+      }
+    }
+  }, [formik.values.scoring, formik.setFieldValue]);
 
   // @TODO: Pull directly from MeasurePopulation instead of local export
   const PopulationSelectorDefinitions = DefaultPopulationSelectorDefinitions;
@@ -172,22 +192,30 @@ const MeasureGroups = () => {
     if (group.id) {
       measureServiceApi
         .updateGroup(group, measure.id)
-        .then((g: Group) =>
+        .then((g: Group) => {
           setSuccessMessage(
             "Population details for this group updated successfully."
-          )
-        )
+          );
+          setMeasure({
+            ...measure,
+            groups: [g],
+          });
+        })
         .catch((error) => {
           setGenericErrorMessage(error.message);
         });
     } else {
       measureServiceApi
         .createGroup(group, measure.id)
-        .then((g: Group) =>
+        .then((g: Group) => {
           setSuccessMessage(
             "Population details for this group saved successfully."
-          )
-        )
+          );
+          setMeasure({
+            ...measure,
+            groups: [g],
+          });
+        })
         .catch((error) => {
           setGenericErrorMessage(error.message);
         });
