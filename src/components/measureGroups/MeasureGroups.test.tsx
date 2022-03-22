@@ -161,12 +161,20 @@ describe("Measure Groups Page", () => {
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
     const alert = await screen.findByTestId("success-alerts");
 
+    const expectedGroup = {
+      id: null,
+      population: {
+        initialPopulation: "Initial Population",
+      },
+      scoring: "Cohort",
+    };
+
     expect(alert).toHaveTextContent(
       "Population details for this group saved successfully."
     );
     expect(mockedAxios.post).toHaveBeenCalledWith(
       "example-service-url/measures/test-measure/groups/",
-      group,
+      expectedGroup,
       expect.anything()
     );
   });
@@ -201,6 +209,15 @@ describe("Measure Groups Page", () => {
 
     mockedAxios.put.mockResolvedValue({ data: { group } });
 
+    const expectedGroup = {
+      id: "7p03-5r29-7O0I",
+      population: {
+        initialPopulation:
+          "VTE Prophylaxis by Medication Administered or Device Applied",
+      },
+      scoring: "Cohort",
+    };
+
     // submit the form
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
     const alert = await screen.findByTestId("success-alerts");
@@ -210,7 +227,7 @@ describe("Measure Groups Page", () => {
     );
     expect(mockedAxios.put).toHaveBeenCalledWith(
       "example-service-url/measures/test-measure/groups/",
-      group,
+      expectedGroup,
       expect.anything()
     );
   });
