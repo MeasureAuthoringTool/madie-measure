@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen, act, within } from "@testing-library/react";
+import { render, screen, act, within, fireEvent } from "@testing-library/react";
 import { isEqual } from "lodash";
 import MeasureGroups, {
   DefaultPopulationSelectorDefinitions,
@@ -142,6 +142,27 @@ describe("Measure Groups Page", () => {
       expect(options.length).toBe(11);
       expect(def[0].textContent).toBe("SDE Ethnicity");
     }
+  });
+
+  test("On change of group scoring the field definitions are cleared", () => {
+    group.id = "";
+    measure.groups = [group];
+    renderMeasureGroupComponent();
+    userEvent.selectOptions(
+      screen.getByTestId("scoring-unit-select"),
+      screen.getByRole("option", { name: "Cohort" })
+    );
+    expect(screen.getByRole("option", { name: "Cohort" }).selected).toBe(true);
+    const option = screen.getByTestId("scoring-unit-select");
+
+    const populationOption = screen.getAllByTestId(
+      "select-measure-group-population"
+    )[0];
+    expect(populationOption.value).toBe(group.population.initialPopulation);
+
+    fireEvent.change(option, { target: { value: "Ratio" } });
+    expect(option.value).toBe("Ratio");
+    expect(populationOption.value).toBe("");
   });
 
   test("Should create population Group with one initial population successfully", async () => {

@@ -84,7 +84,7 @@ const MeasureGroupPopulationSelect = ({
           <Select
             native
             displayEmpty
-            value={value.replace(/"/g, "")}
+            value={value?.replace(/"/g, "")}
             id={htmlId}
             inputProps={{
               "data-testid": `select-measure-group-population`,
@@ -105,10 +105,11 @@ const MeasureGroupPopulationSelect = ({
             ))}
             <option
               value={""}
-              disabled
+              disabled={required}
               data-testid={`select-option-measure-group-population`}
             >
-              Select {defaultOptionTitle}
+              Select {defaultOptionTitle}{" "}
+              {required ? "" : "( Leave selected for no population )"}
             </option>
           </Select>
         </Col>
