@@ -338,6 +338,47 @@ describe("Measure Groups Page", () => {
     expect(alert).toHaveTextContent("Failed to update the group.");
   });
 
+  test("Should report an error if the update population Group fails due to group validation error", async () => {
+    group.id = "7p03-5r29-7O0I";
+    measure.groups = [group];
+    renderMeasureGroupComponent();
+    // update initial population from dropdown
+    const definitionToUpdate =
+      "VTE Prophylaxis by Medication Administered or Device Applied";
+    userEvent.selectOptions(
+      screen.getByTestId("select-measure-group-population"),
+      screen.getByText(definitionToUpdate)
+    );
+
+    expect(
+      (
+        screen.getByRole("option", {
+          name: definitionToUpdate,
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
+
+    mockedAxios.put.mockRejectedValue({
+      response: {
+        status: 400,
+        data: {
+          error: "400error",
+          validationErrors: {
+            group: "Populations do not match Scoring",
+          },
+        },
+      },
+    });
+
+    // submit the form
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+    const alert = await screen.findByTestId("error-alerts");
+    expect(alert).toBeInTheDocument();
+    expect(alert).toHaveTextContent(
+      "Failed to update the group. Missing required populations for selected scoring type."
+    );
+  });
+
   test("Form displays message next to save button about required populations", async () => {
     renderMeasureGroupComponent();
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();

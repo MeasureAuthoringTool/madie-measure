@@ -73,7 +73,10 @@ export class MeasureServiceApi {
       );
       return response.data;
     } catch (err) {
-      const message = `Failed to create the group.`;
+      const message = this.buildErrorMessage(
+        err,
+        "Failed to create the group."
+      );
       console.error(message, err);
       throw new Error(message);
     }
@@ -92,10 +95,24 @@ export class MeasureServiceApi {
       );
       return response.data;
     } catch (err) {
-      const message = `Failed to update the group.`;
+      const message = this.buildErrorMessage(
+        err,
+        "Failed to update the group."
+      );
       console.error(message, err);
       throw new Error(message);
     }
+  }
+
+  buildErrorMessage(err, baseMessage): string {
+    let extraMessage = "";
+    if (
+      err?.response?.status === 400 &&
+      err?.response?.data?.validationErrors?.group
+    ) {
+      extraMessage = " Missing required populations for selected scoring type.";
+    }
+    return `${baseMessage}${extraMessage}`;
   }
 }
 
