@@ -8,6 +8,7 @@ import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import tw from "twin.macro";
 import * as _ from "lodash";
 import useElmTranslationServiceApi, {
+  ElmTranslation,
   ElmTranslationError,
 } from "../../api/useElmTranslationServiceApi";
 
@@ -42,6 +43,7 @@ const MeasureEditor = () => {
   const [error, setError] = useState(false);
   const [elmTranslationError, setElmTranslationError] = useState(null);
   const [elmAnnotations, setElmAnnotations] = useState<EditorAnnotation[]>([]);
+  const [elmJson, setElmJson] = useState<ElmTranslation>(null);
 
   const updateElmAnnotations = async (cql: string) => {
     setElmTranslationError(null);
@@ -51,6 +53,7 @@ const MeasureEditor = () => {
         data?.errorExceptions
       );
       setElmAnnotations(elmAnnotations);
+      setElmJson(data);
     } else {
       setElmAnnotations([]);
     }
@@ -63,7 +66,11 @@ const MeasureEditor = () => {
       setElmAnnotations([]);
     });
     if (editorVal !== measure.cql) {
-      const newMeasure: Measure = { ...measure, cql: editorVal };
+      const newMeasure: Measure = {
+        ...measure,
+        cql: editorVal,
+        elmJson: JSON.stringify(elmJson),
+      };
       measureServiceApi
         .updateMeasure(newMeasure)
         .then(() => {
