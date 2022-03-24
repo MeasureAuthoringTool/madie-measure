@@ -111,6 +111,8 @@ const MeasureGroups = () => {
   const measureServiceApi = useMeasureServiceApi();
   const [genericErrorMessage, setGenericErrorMessage] = useState<string>();
   const [successMessage, setSuccessMessage] = useState<string>();
+  const [warningMessage, setWarningMessage] = useState<boolean>(false);
+  const [updateConfirm, setUpdateConfirm] = useState<boolean>(false);
   // TODO: hardcoded index 0 as only one group is there.
   // TODO: group will be coming from props when we separate this into separate component
   const group = measure.groups && measure.groups[0];
@@ -134,7 +136,18 @@ const MeasureGroups = () => {
     } as Group,
     validationSchema: MeasureGroupSchemaValidator,
     onSubmit: (group: Group) => {
-      submitForm(group);
+      setSuccessMessage(undefined);
+      window.scrollTo(0, 0);
+      if (measure?.groups) {
+        setWarningMessage(true);
+        if (updateConfirm) {
+          setWarningMessage(false);
+          submitForm(group);
+          setUpdateConfirm(false);
+        }
+      } else {
+        submitForm(group);
+      }
     },
   });
 
@@ -199,18 +212,23 @@ const MeasureGroups = () => {
         (value) => _.isNil(value) || value.trim().length === 0
       );
     }
-    if (group.id) {
+
+    if (measure?.groups) {
+      group.id = measure.groups[0].id;
       measureServiceApi
         .updateGroup(group, measure.id)
         .then((g: Group) => {
-          setSuccessMessage(
-            "Population details for this group updated successfully."
-          );
           setMeasure({
             ...measure,
             groups: [g],
           });
         })
+        .then(() => {
+          setSuccessMessage(
+            "Population details for this group updated successfully."
+          );
+        })
+
         .catch((error) => {
           setGenericErrorMessage(error.message);
         });
@@ -218,14 +236,17 @@ const MeasureGroups = () => {
       measureServiceApi
         .createGroup(group, measure.id)
         .then((g: Group) => {
-          setSuccessMessage(
-            "Population details for this group saved successfully."
-          );
           setMeasure({
             ...measure,
             groups: [g],
           });
         })
+        .then(() => {
+          setSuccessMessage(
+            "Population details for this group saved successfully."
+          );
+        })
+
         .catch((error) => {
           setGenericErrorMessage(error.message);
         });
@@ -240,6 +261,23 @@ const MeasureGroups = () => {
     },
   ];
   const allOptions = Object.values(MeasureScoring);
+
+  const warningTemplate = (
+    <>
+      <ButtonSpacer>
+        <Button
+          style={{ background: "#424B5A" }}
+          type="submit"
+          buttonTitle="Update"
+          data-testid="group-form-update-btn"
+          onClick={() => setUpdateConfirm(true)}
+        />
+      </ButtonSpacer>
+      <ButtonSpacer>
+        <Button type="button" buttonTitle="Cancel" variant="white" />
+      </ButtonSpacer>
+    </>
+  );
 
   return (
     <form onSubmit={formik.handleSubmit}>
@@ -267,6 +305,17 @@ const MeasureGroups = () => {
               onClose={() => setSuccessMessage(undefined)}
             >
               {successMessage}
+            </Alert>
+          )}
+          {warningMessage && (
+            <Alert
+              data-testid="warning-alerts"
+              role="alert"
+              severity="warning"
+              onClose={() => setWarningMessage(false)}
+            >
+              This change will reset the population scoring value in test cases.
+              Are you sure you wanted to continue with this? {warningTemplate}
             </Alert>
           )}
           {/* Form control later should be moved to own component and dynamically rendered by switch based on measure. */}
