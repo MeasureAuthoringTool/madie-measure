@@ -45,6 +45,7 @@ export const MeasureGroupSchemaValidator = Yup.object().shape({
           denominatorExclusion: Yup.string(),
         });
       default:
+        // blind object if not known scoring type
         return Yup.object();
     }
   }),
