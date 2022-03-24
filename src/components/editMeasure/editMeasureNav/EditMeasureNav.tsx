@@ -27,6 +27,10 @@ const EditMeasureNav = () => {
     pathname !== `${url}/details` &&
     pathname !== `${url}/cql-editor` &&
     pathname !== `${url}/measure-groups` &&
+    pathname !== `${url}/details/measure-steward` &&
+    pathname !== `${url}/details/measure-description` &&
+    pathname !== `${url}/details/measure-copyright` &&
+    pathname !== `${url}/details/measure-disclaimer` &&
     !pathname.startsWith(`${url}/test-cases`)
   ) {
     history.push("/404");
