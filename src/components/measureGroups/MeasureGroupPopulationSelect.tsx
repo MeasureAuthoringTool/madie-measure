@@ -1,7 +1,7 @@
 import React from "react";
 import tw, { styled } from "twin.macro";
 import { kebabCase } from "lodash";
-import { Select } from "@mui/material";
+import { TextField } from "@mui/material";
 import { ExpressionDefinition } from "./MeasureGroups";
 
 const FormControl = styled.section(() => [tw`mb-3`, `margin: 25px 40px;`]);
@@ -59,7 +59,8 @@ const MeasureGroupPopulationSelect = ({
   optionTitle,
   options = [] as ExpressionDefinition[],
   value = "",
-}: Props) => {
+  ...props
+}: Props & any) => {
   const htmlId = kebabCase(`population-select-${label}`);
   const defaultOptionTitle = optionTitle ? optionTitle : label;
 
@@ -81,18 +82,24 @@ const MeasureGroupPopulationSelect = ({
 
       <Row>
         <Col>
-          <Select
-            native
-            displayEmpty
+          <TextField
+            select
             value={value?.replace(/"/g, "")}
+            label=""
             id={htmlId}
             inputProps={{
               "data-testid": `select-measure-group-population`,
             }}
-            labelId={`select-${htmlId}-label`}
+            InputLabelProps={{ shrink: false, id: `select-${htmlId}-label` }}
+            SelectProps={{
+              native: true,
+              displayEmpty: true,
+            }}
+            // labelId={`select-${htmlId}-label`}
             name={name}
             onChange={onChange}
             style={{ minWidth: "20rem" }}
+            {...props}
           >
             {options.map(({ name }, i) => (
               <option
@@ -108,10 +115,10 @@ const MeasureGroupPopulationSelect = ({
               disabled={required}
               data-testid={`select-option-measure-group-population`}
             >
-              Select {defaultOptionTitle}{" "}
-              {required ? "" : "( Leave selected for no population )"}
+              Select {defaultOptionTitle}
+              {required ? "" : " ( Leave selected for no population )"}
             </option>
-          </Select>
+          </TextField>
         </Col>
 
         <SpacerContainer>
