@@ -43,9 +43,8 @@ const MeasureEditor = () => {
   const [error, setError] = useState(false);
   const [elmTranslationError, setElmTranslationError] = useState(null);
   const [elmAnnotations, setElmAnnotations] = useState<EditorAnnotation[]>([]);
-  const [elmJson, setElmJson] = useState<ElmTranslation>(null);
 
-  const updateElmAnnotations = async (cql: string) => {
+  const updateElmAnnotations = async (cql: string): Promise<ElmTranslation> => {
     setElmTranslationError(null);
     if (cql && cql.trim().length > 0) {
       const data = await elmTranslationServiceApi.translateCqlToElm(cql);
@@ -53,14 +52,15 @@ const MeasureEditor = () => {
         data?.errorExceptions
       );
       setElmAnnotations(elmAnnotations);
-      setElmJson(data);
+      return data;
     } else {
       setElmAnnotations([]);
     }
+    return null;
   };
 
-  const updateMeasureCql = () => {
-    updateElmAnnotations(editorVal).catch((err) => {
+  const updateMeasureCql = async () => {
+    const data = await updateElmAnnotations(editorVal).catch((err) => {
       console.error("An error occurred while translating CQL to ELM", err);
       setElmTranslationError("Unable to translate CQL to ELM!");
       setElmAnnotations([]);
@@ -69,7 +69,7 @@ const MeasureEditor = () => {
       const newMeasure: Measure = {
         ...measure,
         cql: editorVal,
-        elmJson: JSON.stringify(elmJson),
+        elmJson: JSON.stringify(data),
       };
       measureServiceApi
         .updateMeasure(newMeasure)
