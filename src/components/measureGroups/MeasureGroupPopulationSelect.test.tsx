@@ -128,7 +128,9 @@ describe("Measure Group Population Select Component", () => {
       </div>
     );
 
-    let optionEl = screen.getByRole("option", { name: defaultValue });
+    let optionEl = screen.getByRole("option", {
+      name: defaultValue,
+    }) as HTMLOptionElement;
     expect(optionEl.selected).toBe(true);
   });
 
@@ -150,5 +152,25 @@ describe("Measure Group Population Select Component", () => {
       updatedValue,
     ]);
     expect(mockOnChangeHandler).toHaveReturnedWith(updatedValue);
+  });
+
+  test("should show error helper text", async () => {
+    const defaultValue = selectOptions[0].name;
+
+    render(
+      <div>
+        <MeasureGroupPopulationSelect
+          {...selectorProps}
+          onChange={mockOnChangeHandler}
+          value={defaultValue}
+          helperText="Value is required"
+          error={true}
+        />
+      </div>
+    );
+
+    const helperText = screen.getByText("Value is required");
+    expect(helperText).toBeInTheDocument();
+    expect(helperText).toHaveClass("Mui-error");
   });
 });

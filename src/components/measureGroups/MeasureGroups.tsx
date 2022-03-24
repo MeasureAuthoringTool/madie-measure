@@ -1,12 +1,13 @@
 import React, { useEffect, useState, Fragment, useRef } from "react";
 import tw, { styled } from "twin.macro";
+import "styled-components/macro";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import { MeasureScoring } from "../../models/MeasureScoring";
-import { Select, Alert } from "@mui/material";
+import { Alert, TextField } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import MeasureDetailsSidebar from "../editMeasure/measureDetails/MeasureDetailsSidebar";
 import { Button } from "@madie/madie-components";
-import { useFormik, getIn } from "formik";
+import { useFormik } from "formik";
 import { Group } from "../../models/Measure";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
@@ -57,12 +58,16 @@ export const DefaultPopulationSelectorDefinitions = [
       Measure Packager.
     `,
   },
-  { label: "Denominator", key: "denominator", hidden: ["Cohort"] },
+  {
+    label: "Denominator",
+    key: "denominator",
+    hidden: ["Cohort", "Continuous Variable"],
+  },
   {
     label: "Denominator Exclusion",
     key: "denominatorExclusion",
     optional: ["*"],
-    hidden: ["Cohort"],
+    hidden: ["Cohort", "Continuous Variable"],
   },
   {
     label: "Denominator Exception",
@@ -322,11 +327,16 @@ const MeasureGroups = () => {
           <FormControl>
             {/* pull from cql file */}
             <SoftLabel htmlFor="scoring-unit-select">Group Scoring:</SoftLabel>
-            <Select
-              native
+            <TextField
+              select
               id="scoring-unit-select"
+              label=""
               inputProps={{
                 "data-testid": "scoring-unit-select",
+              }}
+              InputLabelProps={{ shrink: false }}
+              SelectProps={{
+                native: true,
               }}
               name="scoring"
               value={formik.values.scoring}
@@ -341,7 +351,7 @@ const MeasureGroups = () => {
                   {opt}
                 </option>
               ))}
-            </Select>
+            </TextField>
           </FormControl>
 
           {PopulationSelectorDefinitions.map((selectorDefinition) => {
@@ -350,9 +360,11 @@ const MeasureGroups = () => {
               formik.values.scoring
             );
             if (selectorProps.hidden) return;
-
-            const populationValue: string = getIn(
-              formik.values,
+            const error = _.get(
+              formik.errors.population,
+              selectorDefinition.key
+            );
+            const formikFieldProps = formik.getFieldProps(
               `population.${selectorDefinition.key}`
             );
             return (
@@ -360,8 +372,9 @@ const MeasureGroups = () => {
                 <Divider />
                 <MeasureGroupPopulationSelect
                   {...selectorProps}
-                  onChange={formik.handleChange}
-                  value={populationValue}
+                  {...formikFieldProps}
+                  helperText={error}
+                  error={!!error}
                 />
               </Fragment>
             );
@@ -378,10 +391,21 @@ const MeasureGroups = () => {
               type="submit"
               buttonTitle="Save"
               data-testid="group-form-submit-btn"
+              disabled={!(formik.isValid && formik.dirty)}
             />
           </ButtonSpacer>
           <ButtonSpacer>
             <Button type="button" buttonTitle="Cancel" variant="white" />
+          </ButtonSpacer>
+          <ButtonSpacer>
+            <span
+              tw="text-sm text-gray-600"
+              data-testid="save-measure-group-validation-message"
+            >
+              {!(formik.isValid && formik.dirty)
+                ? "You must set all required Populations."
+                : ""}
+            </span>
           </ButtonSpacer>
         </PopulationActions>
       </GroupFooter>

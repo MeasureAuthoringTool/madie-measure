@@ -1,10 +1,19 @@
 import * as React from "react";
-import { render, screen, act, within, fireEvent } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { isEqual } from "lodash";
 import MeasureGroups, {
   DefaultPopulationSelectorDefinitions,
 } from "./MeasureGroups";
-import { MEASURE_SCORING_KEYS } from "../../models/MeasureScoring";
+import {
+  MEASURE_SCORING_KEYS,
+  MeasureScoring,
+} from "../../models/MeasureScoring";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import { MemoryRouter } from "react-router-dom";
@@ -102,7 +111,9 @@ describe("Measure Groups Page", () => {
         userEvent.selectOptions(screen.getByTestId("scoring-unit-select"), [
           screen.getByText(value),
         ]);
-        let optionEl = screen.getByRole("option", { name: value });
+        let optionEl = screen.getByRole("option", {
+          name: value,
+        }) as HTMLOptionElement;
         expect(optionEl.selected).toBe(true);
 
         // Check that the appropriate filter labels are rendered as expected
@@ -152,12 +163,17 @@ describe("Measure Groups Page", () => {
       screen.getByTestId("scoring-unit-select"),
       screen.getByRole("option", { name: "Cohort" })
     );
-    expect(screen.getByRole("option", { name: "Cohort" }).selected).toBe(true);
-    const option = screen.getByTestId("scoring-unit-select");
+    expect(
+      (screen.getByRole("option", { name: "Cohort" }) as HTMLOptionElement)
+        .selected
+    ).toBe(true);
+    const option = screen.getByTestId(
+      "scoring-unit-select"
+    ) as HTMLOptionElement;
 
     const populationOption = screen.getAllByTestId(
       "select-measure-group-population"
-    )[0];
+    )[0] as HTMLOptionElement;
     expect(populationOption.value).toBe(group.population.initialPopulation);
 
     fireEvent.change(option, { target: { value: "Ratio" } });
@@ -173,7 +189,11 @@ describe("Measure Groups Page", () => {
       "Initial Population"
     );
     expect(
-      screen.getByRole("option", { name: "Initial Population" }).selected
+      (
+        screen.getByRole("option", {
+          name: "Initial Population",
+        }) as HTMLOptionElement
+      ).selected
     ).toBe(true);
 
     mockedAxios.post.mockResolvedValue({ data: { group } });
@@ -207,9 +227,11 @@ describe("Measure Groups Page", () => {
 
   //   // initial population before update
   //   expect(
-  //     screen.getByRole("option", {
-  //       name: "Initial Population",
-  //     }).selected
+  //     (
+  //       screen.getByRole("option", {
+  //         name: "Initial Population",
+  //       }) as HTMLOptionElement
+  //     ).selected
   //   ).toBe(true);
 
   //   const definitionToUpdate =
@@ -221,9 +243,11 @@ describe("Measure Groups Page", () => {
   //   );
 
   //   expect(
-  //     screen.getByRole("option", {
-  //       name: definitionToUpdate,
-  //     }).selected
+  //     (
+  //       screen.getByRole("option", {
+  //         name: definitionToUpdate,
+  //       }) as HTMLOptionElement
+  //     ).selected
   //   ).toBe(true);
 
   //   group.population.initialPopulation = definitionToUpdate;
@@ -242,9 +266,6 @@ describe("Measure Groups Page", () => {
   //   // submit the form
   //   userEvent.click(screen.getByTestId("group-form-submit-btn"));
   //   const alert = await screen.findByTestId("success-alerts");
-
-  //   //const alert = await screen.findByTestId("warning-alerts");
-  //   //expect(alert).toBeInTheDocument();
 
   //   expect(alert).toHaveTextContent(
   //     "Population details for this group updated successfully."
@@ -265,7 +286,11 @@ describe("Measure Groups Page", () => {
     );
 
     expect(
-      screen.getByRole("option", { name: "Initial Population" }).selected
+      (
+        screen.getByRole("option", {
+          name: "Initial Population",
+        }) as HTMLOptionElement
+      ).selected
     ).toBe(true);
 
     mockedAxios.post.mockRejectedValue({
@@ -293,7 +318,11 @@ describe("Measure Groups Page", () => {
   //   );
 
   //   expect(
-  //     screen.getByRole("option", { name: definitionToUpdate }).selected
+  //     (
+  //       screen.getByRole("option", {
+  //         name: definitionToUpdate,
+  //       }) as HTMLOptionElement
+  //     ).selected
   //   ).toBe(true);
 
   //   mockedAxios.put.mockRejectedValue({
@@ -308,4 +337,214 @@ describe("Measure Groups Page", () => {
   //   expect(alert).toBeInTheDocument();
   //   expect(alert).toHaveTextContent("Failed to update the group.");
   // });
+
+  // test("Should report an error if the update population Group fails due to group validation error", async () => {
+  //   group.id = "7p03-5r29-7O0I";
+  //   measure.groups = [group];
+  //   renderMeasureGroupComponent();
+  //   // update initial population from dropdown
+  //   const definitionToUpdate =
+  //     "VTE Prophylaxis by Medication Administered or Device Applied";
+  //   userEvent.selectOptions(
+  //     screen.getByTestId("select-measure-group-population"),
+  //     screen.getByText(definitionToUpdate)
+  //   );
+
+  //   expect(
+  //     (
+  //       screen.getByRole("option", {
+  //         name: definitionToUpdate,
+  //       }) as HTMLOptionElement
+  //     ).selected
+  //   ).toBe(true);
+
+  //   mockedAxios.put.mockRejectedValue({
+  //     response: {
+  //       status: 400,
+  //       data: {
+  //         error: "400error",
+  //         validationErrors: {
+  //           group: "Populations do not match Scoring",
+  //         },
+  //       },
+  //     },
+  //   });
+
+  //   // submit the form
+  //   userEvent.click(screen.getByTestId("group-form-submit-btn"));
+  //   const alert = await screen.findByTestId("error-alerts");
+  //   expect(alert).toBeInTheDocument();
+  //   expect(alert).toHaveTextContent(
+  //     "Failed to update the group. Missing required populations for selected scoring type."
+  //   );
+  // });
+
+  test("Form displays message next to save button about required populations", async () => {
+    renderMeasureGroupComponent();
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    expect(
+      screen.getByText("You must set all required Populations.")
+    ).toBeInTheDocument();
+  });
+
+  test("Save button is disabled until all required Cohort populations are entered", async () => {
+    renderMeasureGroupComponent();
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    userEvent.selectOptions(
+      screen.getByTestId("select-measure-group-population"),
+      "Initial Population"
+    );
+    const option = screen.getByRole("option", {
+      name: "Initial Population",
+    }) as HTMLOptionElement;
+    expect(option.selected).toBe(true);
+    expect(screen.getByRole("button", { name: "Save" })).not.toBeDisabled();
+  });
+
+  test("Save button is disabled until all required Proportion populations are entered", async () => {
+    measure.measureScoring = MeasureScoring.PROPORTION;
+    group.scoring = "Proportion";
+    renderMeasureGroupComponent();
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    await waitFor(() => {
+      expect(screen.getAllByRole("option", { name: "SDE Payer" })).toHaveLength(
+        6
+      );
+    });
+    userEvent.selectOptions(
+      screen.getByRole("combobox", { name: "Initial Population *" }),
+      "Encounter With Age Range and Without VTE Diagnosis or Obstetrical Conditions"
+    );
+    userEvent.selectOptions(
+      screen.getByRole("combobox", { name: "Denominator *" }),
+      "Denominator"
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Save" })).toBeDisabled()
+    );
+    expect(
+      screen.getByText("You must set all required Populations.")
+    ).toBeInTheDocument();
+    userEvent.selectOptions(
+      screen.getByRole("combobox", { name: "Numerator *" }),
+      "Numerator"
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Save" })).not.toBeDisabled()
+    );
+  });
+
+  test("Save button is disabled until all required Proportion populations are entered", async () => {
+    measure.measureScoring = MeasureScoring.PROPORTION;
+    group.scoring = "Proportion";
+    renderMeasureGroupComponent();
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    await waitFor(() => {
+      expect(screen.getAllByRole("option", { name: "SDE Payer" })).toHaveLength(
+        6
+      );
+    });
+    userEvent.selectOptions(
+      screen.getByRole("combobox", { name: "Initial Population *" }),
+      "Encounter With Age Range and Without VTE Diagnosis or Obstetrical Conditions"
+    );
+    userEvent.selectOptions(
+      screen.getByRole("combobox", { name: "Denominator *" }),
+      "Denominator"
+    );
+    userEvent.selectOptions(
+      screen.getByRole("combobox", { name: "Denominator Exclusion" }),
+      "Encounter With Age Range and Without VTE Diagnosis or Obstetrical Conditions"
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Save" })).toBeDisabled()
+    );
+    expect(
+      screen.getByText("You must set all required Populations.")
+    ).toBeInTheDocument();
+    userEvent.selectOptions(
+      screen.getByRole("combobox", { name: "Numerator *" }),
+      "Numerator"
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Save" })).not.toBeDisabled()
+    );
+  });
+
+  test("Save button is disabled until all required Ratio populations are entered", async () => {
+    measure.measureScoring = MeasureScoring.RATIO;
+    group.scoring = "Ratio";
+    renderMeasureGroupComponent();
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    await waitFor(() => {
+      expect(screen.getAllByRole("option", { name: "SDE Payer" })).toHaveLength(
+        5
+      );
+    });
+    userEvent.selectOptions(
+      screen.getByRole("combobox", { name: "Initial Population *" }),
+      "Encounter With Age Range and Without VTE Diagnosis or Obstetrical Conditions"
+    );
+    userEvent.selectOptions(
+      screen.getByRole("combobox", { name: "Denominator *" }),
+      "Denominator"
+    );
+    userEvent.selectOptions(
+      screen.getByRole("combobox", { name: "Denominator Exclusion" }),
+      "Encounter With Age Range and Without VTE Diagnosis or Obstetrical Conditions"
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Save" })).toBeDisabled()
+    );
+    expect(
+      screen.getByText("You must set all required Populations.")
+    ).toBeInTheDocument();
+    userEvent.selectOptions(
+      screen.getByRole("combobox", { name: "Numerator *" }),
+      "Numerator"
+    );
+    expect(
+      screen.getByRole("combobox", { name: "Initial Population *" })
+    ).toHaveValue(
+      "Encounter With Age Range and Without VTE Diagnosis or Obstetrical Conditions"
+    );
+    expect(screen.getByRole("combobox", { name: "Denominator *" })).toHaveValue(
+      "Denominator"
+    );
+    expect(screen.getByRole("combobox", { name: "Numerator *" })).toHaveValue(
+      "Numerator"
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Save" })).not.toBeDisabled()
+    );
+  });
+
+  test("Save button is disabled until all required CV populations are entered", async () => {
+    measure.measureScoring = MeasureScoring.CONTINUOUS_VARIABLE;
+    group.scoring = "Continuous Variable";
+    renderMeasureGroupComponent();
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    await waitFor(() => {
+      expect(screen.getAllByRole("option", { name: "SDE Payer" })).toHaveLength(
+        3
+      );
+    });
+    userEvent.selectOptions(
+      screen.getByRole("combobox", { name: "Initial Population *" }),
+      "Initial Population"
+    );
+    userEvent.selectOptions(
+      screen.getByRole("combobox", { name: "Measure Population *" }),
+      "Denominator"
+    );
+    expect(
+      screen.getByRole("combobox", { name: "Initial Population *" })
+    ).toHaveValue("Initial Population");
+    expect(
+      screen.getByRole("combobox", { name: "Measure Population *" })
+    ).toHaveValue("Denominator");
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Save" })).not.toBeDisabled()
+    );
+  });
 });
