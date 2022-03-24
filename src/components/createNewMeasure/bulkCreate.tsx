@@ -4,25 +4,26 @@ import { Model } from "../../models/Model";
 // This is some frontend logic for adding a bunch of measures
 // use Bulk create in createNewMeasure as a button press for a quick load and db crash
 
-const bulkCreate = (count: number) => {
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const generateLetter = () =>
-    alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-  const generateNumber = () => Math.floor(Math.random() * (500 - 0 + 1)) + 0;
+const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const generateLetter = () =>
+  alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+const generateNumber = () => Math.floor(Math.random() * (500 - 0 + 1)) + 0;
 
-  const mockLibraryName = () => {
-    let string = "";
+export const mockLibraryName = () => {
+  let string = "";
+  string += generateLetter();
+  string += generateNumber();
+  return string;
+};
+export const mockMeasureName = () => {
+  let string = "";
+  for (let i = 0; i < 10; i++) {
     string += generateLetter();
-    string += generateNumber();
-    return string;
-  };
-  const mockMeasureName = () => {
-    let string = "";
-    for (let i = 0; i < 10; i++) {
-      string += generateLetter();
-    }
-    return string;
-  };
+  }
+  return string;
+};
+
+const bulkCreate = (count: number) => {
   const randomMeasure = () =>
     MeasureScoring[
       Object.keys(MeasureScoring)[
