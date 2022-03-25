@@ -2,43 +2,43 @@
 
 exports[`MeasureSteward component should render the component with the supplied steward information 1`] = `
 <form
-  class="sc-bdvvtL exmvhH"
+  class="sc-bczRLJ cmSzWA"
   data-testid="measureSteward"
 >
   <div
-    class="sc-gsDKAQ jTbVDJ"
+    class="sc-gsnTZi hRUErZ"
   >
     <div>
       <div>
         <h3
-          class="sc-dkPtRN iSLtKt"
+          class="sc-dkzDqf jmdhBy"
         >
           Steward/Author
         </h3>
         <p
-          class="sc-hKwDye fOHyGW"
+          class="sc-hKMtZM kvqZVB"
         >
           This information will be displayed publicly so be careful what you share.
         </p>
       </div>
       <div
-        class="sc-eCImPb kFJnon"
+        class="sc-eCYdqJ eYrFIR"
       >
         <div
-          class="sc-jRQBWg dcteYI"
+          class="sc-jSMfEi cPhOWP"
         >
           <label
-            class="sc-gKclnd jKgMyI"
+            class="sc-gKXOVf jiosPY"
             for="measure-steward"
           >
             Measure Steward
           </label>
           <div
-            class="sc-iCfMLu kQPxNJ"
+            class="sc-iBkjds hwKHAK"
           >
             <input
               autocomplete="given-name"
-              class="sc-furwcr tryd"
+              class="sc-ftvSup fRjUCW"
               data-testid="measureStewardInput"
               id="measure-steward"
               name="measure-steward"
@@ -53,20 +53,20 @@ exports[`MeasureSteward component should render the component with the supplied 
     </div>
   </div>
   <div
-    class="sc-pVTFL lhiOkj"
+    class="sc-papXJ cGxTiS"
   >
     <div
-      class="sc-jrQzAO iTeANG"
+      class="sc-jqUVSM dSBcWX"
     >
       <button
-        class="sc-kDTinF hCJDQG"
+        class="sc-kDDrLX bjwxCP"
         data-testid="measureStewardSave"
         type="submit"
       >
         Save
       </button>
       <div
-        class="sc-iqseJM bxnQes"
+        class="sc-iqcoie bRExLb"
       >
         
       </div>
