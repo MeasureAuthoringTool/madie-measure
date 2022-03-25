@@ -5,8 +5,6 @@ import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { MeasureRoutes } from "./MeasureLanding";
-import { MeasureScoring } from "../../models/MeasureScoring";
-import { Model } from "../../models/Model";
 import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import userEvent from "@testing-library/user-event";
@@ -69,7 +67,8 @@ describe("Measure Page", () => {
     await act(async () => {
       const { findByTestId } = render(
         <ApiContextProvider value={serviceConfig}>
-          <MemoryRouter initialEntries={[
+          <MemoryRouter
+            initialEntries={[
               {
                 pathname: "/measures",
                 search: "",
@@ -77,7 +76,8 @@ describe("Measure Page", () => {
                 state: undefined,
                 key: "1fewtg",
               },
-            ]}>
+            ]}
+          >
             <MeasureRoutes />
           </MemoryRouter>
         </ApiContextProvider>
@@ -90,17 +90,19 @@ describe("Measure Page", () => {
         10,
         0
       );
-      const myMeasuresTab = await findByTestId('my-measures-tab')
+      const myMeasuresTab = await findByTestId("my-measures-tab");
       expect(myMeasuresTab).toHaveClass("Mui-selected");
-      
-      const allMeasuresTab = await findByTestId('all-measures-tab');
+
+      const allMeasuresTab = await findByTestId("all-measures-tab");
       userEvent.click(allMeasuresTab);
       expect(allMeasuresTab).toHaveClass("Mui-selected");
-      await waitFor(() => expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
-        false,
-        10,
-        0
-      ))
+      await waitFor(() =>
+        expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
+          false,
+          10,
+          0
+        )
+      );
     });
   });
 });
