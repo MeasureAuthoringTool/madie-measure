@@ -4,12 +4,12 @@ import "@testing-library/jest-dom";
 import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
-import { MeasureRoutes } from "./MeasureLanding";
+import { MeasureRoutes } from "../measureLanding/MeasureLanding";
 import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import userEvent from "@testing-library/user-event";
 import { act } from "react-dom/test-utils";
-import { oneItemResponse } from "./mockMeasureResponses";
+import { oneItemResponse } from "../measureLanding/mockMeasureResponses";
 
 const serviceConfig: ServiceConfig = {
   measureService: {
