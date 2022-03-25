@@ -58,12 +58,6 @@ describe("Measures Pagination", () => {
       );
       const rowItems = await findAllByTestId("row-item");
       expect(rowItems).toHaveLength(10);
-      // await waitFor(() => {
-      //   expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalled(),
-      //     {
-      //       timeout: 5000,
-      //     };
-      // });
     });
   });
 
