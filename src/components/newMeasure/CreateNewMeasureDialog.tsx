@@ -174,6 +174,8 @@ const CreateNewMeasureDialog = ({ open, onClose }) => {
         if (status === 201) {
           onClose(true);
           formik.resetForm();
+          setManualId(false);
+          setAutoGenerate(false);
           setServerError("");
         }
       })
