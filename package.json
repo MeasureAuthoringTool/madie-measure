@@ -100,7 +100,7 @@
     "@emotion/styled": "^11.6.0",
     "@heroicons/react": "^1.0.5",
     "@madie/cql-antlr-parser": "^1.0.0",
-    "@madie/madie-design-system": "^1.0.5",
+    "@madie/madie-design-system": "^1.0.6",
     "@mui/icons-material": "^5.5.1",
     "@mui/material": "^5.2.5",
     "@mui/styles": "^5.5.1",
