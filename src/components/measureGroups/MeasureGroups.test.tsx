@@ -220,62 +220,66 @@ describe("Measure Groups Page", () => {
     );
   });
 
-  // test("Should be able to update initial population of a population group", async () => {
-  //   group.id = "7p03-5r29-7O0I";
-  //   measure.groups = [group];
-  //   renderMeasureGroupComponent();
+  test("Should be able to update initial population of a population group", async () => {
+    group.id = "7p03-5r29-7O0I";
+    measure.groups = [group];
+    renderMeasureGroupComponent();
 
-  //   // initial population before update
-  //   expect(
-  //     (
-  //       screen.getByRole("option", {
-  //         name: "Initial Population",
-  //       }) as HTMLOptionElement
-  //     ).selected
-  //   ).toBe(true);
+    // initial population before update
+    expect(
+      (
+        screen.getByRole("option", {
+          name: "Initial Population",
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
 
-  //   const definitionToUpdate =
-  //     "VTE Prophylaxis by Medication Administered or Device Applied";
-  //   // update initial population from dropdown
-  //   userEvent.selectOptions(
-  //     screen.getByTestId("select-measure-group-population"),
-  //     screen.getByText(definitionToUpdate)
-  //   );
+    const definitionToUpdate =
+      "VTE Prophylaxis by Medication Administered or Device Applied";
+    // update initial population from dropdown
+    userEvent.selectOptions(
+      screen.getByTestId("select-measure-group-population"),
+      screen.getByText(definitionToUpdate)
+    );
 
-  //   expect(
-  //     (
-  //       screen.getByRole("option", {
-  //         name: definitionToUpdate,
-  //       }) as HTMLOptionElement
-  //     ).selected
-  //   ).toBe(true);
+    expect(
+      (
+        screen.getByRole("option", {
+          name: definitionToUpdate,
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
 
-  //   group.population.initialPopulation = definitionToUpdate;
+    group.population.initialPopulation = definitionToUpdate;
 
-  //   mockedAxios.put.mockResolvedValue({ data: { group } });
+    mockedAxios.put.mockResolvedValue({ data: { group } });
 
-  //   const expectedGroup = {
-  //     id: "7p03-5r29-7O0I",
-  //     population: {
-  //       initialPopulation:
-  //         "VTE Prophylaxis by Medication Administered or Device Applied",
-  //     },
-  //     scoring: "Cohort",
-  //   };
+    const expectedGroup = {
+      id: "7p03-5r29-7O0I",
+      population: {
+        initialPopulation:
+          "VTE Prophylaxis by Medication Administered or Device Applied",
+      },
+      scoring: "Cohort",
+    };
 
-  //   // submit the form
-  //   userEvent.click(screen.getByTestId("group-form-submit-btn"));
-  //   const alert = await screen.findByTestId("success-alerts");
+    // submit the form
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+    const alert = await screen.findByTestId("warning-alerts");
+    expect(alert).toBeInTheDocument();
 
-  //   expect(alert).toHaveTextContent(
-  //     "Population details for this group updated successfully."
-  //   );
-  //   expect(mockedAxios.put).toHaveBeenCalledWith(
-  //     "example-service-url/measures/test-measure/groups/",
-  //     expectedGroup,
-  //     expect.anything()
-  //   );
-  // });
+    userEvent.click(screen.getByTestId("group-form-update-btn"));
+    const successAlert = await screen.findByTestId("success-alerts");
+
+    expect(successAlert).toHaveTextContent(
+      "Population details for this group updated successfully."
+    );
+    expect(mockedAxios.put).toHaveBeenCalledWith(
+      "example-service-url/measures/test-measure/groups/",
+      expectedGroup,
+      expect.anything()
+    );
+  });
 
   test("Should report an error if create population Group fails", async () => {
     renderMeasureGroupComponent();
@@ -305,79 +309,87 @@ describe("Measure Groups Page", () => {
     expect(alert).toHaveTextContent("Failed to create the group.");
   });
 
-  // test("Should report an error if the update population Group fails", async () => {
-  //   group.id = "7p03-5r29-7O0I";
-  //   measure.groups = [group];
-  //   renderMeasureGroupComponent();
-  //   // update initial population from dropdown
-  //   const definitionToUpdate =
-  //     "VTE Prophylaxis by Medication Administered or Device Applied";
-  //   userEvent.selectOptions(
-  //     screen.getByTestId("select-measure-group-population"),
-  //     screen.getByText(definitionToUpdate)
-  //   );
+  test("Should report an error if the update population Group fails", async () => {
+    group.id = "7p03-5r29-7O0I";
+    measure.groups = [group];
+    renderMeasureGroupComponent();
+    // update initial population from dropdown
+    const definitionToUpdate =
+      "VTE Prophylaxis by Medication Administered or Device Applied";
+    userEvent.selectOptions(
+      screen.getByTestId("select-measure-group-population"),
+      screen.getByText(definitionToUpdate)
+    );
 
-  //   expect(
-  //     (
-  //       screen.getByRole("option", {
-  //         name: definitionToUpdate,
-  //       }) as HTMLOptionElement
-  //     ).selected
-  //   ).toBe(true);
+    expect(
+      (
+        screen.getByRole("option", {
+          name: definitionToUpdate,
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
 
-  //   mockedAxios.put.mockRejectedValue({
-  //     data: {
-  //       error: "500error",
-  //     },
-  //   });
+    mockedAxios.put.mockRejectedValue({
+      data: {
+        error: "500error",
+      },
+    });
 
-  //   // submit the form
-  //   userEvent.click(screen.getByTestId("group-form-submit-btn"));
-  //   const alert = await screen.findByTestId("error-alerts");
-  //   expect(alert).toBeInTheDocument();
-  //   expect(alert).toHaveTextContent("Failed to update the group.");
-  // });
+    // submit the form
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+    const alert = await screen.findByTestId("warning-alerts");
+    expect(alert).toBeInTheDocument();
 
-  // test("Should report an error if the update population Group fails due to group validation error", async () => {
-  //   group.id = "7p03-5r29-7O0I";
-  //   measure.groups = [group];
-  //   renderMeasureGroupComponent();
-  //   // update initial population from dropdown
-  //   const definitionToUpdate =
-  //     "VTE Prophylaxis by Medication Administered or Device Applied";
-  //   userEvent.selectOptions(
-  //     screen.getByTestId("select-measure-group-population"),
-  //     screen.getByText(definitionToUpdate)
-  //   );
+    userEvent.click(screen.getByTestId("group-form-update-btn"));
+    const errorAlert = await screen.findByTestId("error-alerts");
+    expect(errorAlert).toBeInTheDocument();
+    expect(errorAlert).toHaveTextContent("Failed to update the group.");
+  });
 
-  //   expect(
-  //     (
-  //       screen.getByRole("option", {
-  //         name: definitionToUpdate,
-  //       }) as HTMLOptionElement
-  //     ).selected
-  //   ).toBe(true);
+  test("Should report an error if the update population Group fails due to group validation error", async () => {
+    group.id = "7p03-5r29-7O0I";
+    measure.groups = [group];
+    renderMeasureGroupComponent();
+    // update initial population from dropdown
+    const definitionToUpdate =
+      "VTE Prophylaxis by Medication Administered or Device Applied";
+    userEvent.selectOptions(
+      screen.getByTestId("select-measure-group-population"),
+      screen.getByText(definitionToUpdate)
+    );
 
-  //   mockedAxios.put.mockRejectedValue({
-  //     response: {
-  //       status: 400,
-  //       data: {
-  //         error: "400error",
-  //         validationErrors: {
-  //           group: "Populations do not match Scoring",
-  //         },
-  //       },
-  //     },
-  //   });
+    expect(
+      (
+        screen.getByRole("option", {
+          name: definitionToUpdate,
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
 
-  //   // submit the form
-  //   userEvent.click(screen.getByTestId("group-form-submit-btn"));
-  //   const alert = await screen.findByTestId("error-alerts");
-  //   expect(alert).toBeInTheDocument();
-  //   expect(alert).toHaveTextContent(
-  //     "Failed to update the group. Missing required populations for selected scoring type."
-  //   );
-  // });
+    mockedAxios.put.mockRejectedValue({
+      response: {
+        status: 400,
+        data: {
+          error: "400error",
+          validationErrors: {
+            group: "Populations do not match Scoring",
+          },
+        },
+      },
+    });
+
+    // submit the form
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+    const alert = await screen.findByTestId("warning-alerts");
+    expect(alert).toBeInTheDocument();
+
+    userEvent.click(screen.getByTestId("group-form-update-btn"));
+    const errorAlert = await screen.findByTestId("error-alerts");
+    expect(errorAlert).toBeInTheDocument();
+    expect(errorAlert).toHaveTextContent(
+      "Failed to update the group. Missing required populations for selected scoring type."
+    );
+  });
 
   test("Form displays message next to save button about required populations", async () => {
     renderMeasureGroupComponent();
