@@ -143,7 +143,10 @@ const MeasureGroups = () => {
     onSubmit: (group: Group) => {
       setSuccessMessage(undefined);
       window.scrollTo(0, 0);
-      if (measure?.groups) {
+      if (
+        measure?.groups &&
+        formik.values.scoring !== measure.groups[0].scoring
+      ) {
         setWarningMessage(true);
         if (updateConfirm) {
           setWarningMessage(false);

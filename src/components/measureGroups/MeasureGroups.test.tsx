@@ -265,13 +265,9 @@ describe("Measure Groups Page", () => {
 
     // submit the form
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
-    const alert = await screen.findByTestId("warning-alerts");
-    expect(alert).toBeInTheDocument();
+    const alert = await screen.findByTestId("success-alerts");
 
-    userEvent.click(screen.getByTestId("group-form-update-btn"));
-    const successAlert = await screen.findByTestId("success-alerts");
-
-    expect(successAlert).toHaveTextContent(
+    expect(alert).toHaveTextContent(
       "Population details for this group updated successfully."
     );
     expect(mockedAxios.put).toHaveBeenCalledWith(
@@ -337,13 +333,9 @@ describe("Measure Groups Page", () => {
 
     // submit the form
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
-    const alert = await screen.findByTestId("warning-alerts");
+    const alert = await screen.findByTestId("error-alerts");
     expect(alert).toBeInTheDocument();
-
-    userEvent.click(screen.getByTestId("group-form-update-btn"));
-    const errorAlert = await screen.findByTestId("error-alerts");
-    expect(errorAlert).toBeInTheDocument();
-    expect(errorAlert).toHaveTextContent("Failed to update the group.");
+    expect(alert).toHaveTextContent("Failed to update the group.");
   });
 
   test("Should report an error if the update population Group fails due to group validation error", async () => {
@@ -380,13 +372,9 @@ describe("Measure Groups Page", () => {
 
     // submit the form
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
-    const alert = await screen.findByTestId("warning-alerts");
+    const alert = await screen.findByTestId("error-alerts");
     expect(alert).toBeInTheDocument();
-
-    userEvent.click(screen.getByTestId("group-form-update-btn"));
-    const errorAlert = await screen.findByTestId("error-alerts");
-    expect(errorAlert).toBeInTheDocument();
-    expect(errorAlert).toHaveTextContent(
+    expect(alert).toHaveTextContent(
       "Failed to update the group. Missing required populations for selected scoring type."
     );
   });
