@@ -42,6 +42,7 @@ const useStyles = makeStyles({
   },
   end: {
     justifyContent: "flex-end",
+    marginBottom: -23,
   },
   gap: {
     columnGap: 24,
@@ -77,9 +78,6 @@ const useStyles = makeStyles({
     color: "#D92F2F",
     marginRight: 3,
   },
-  dividerTop: {
-    marginBottom: 19,
-  },
   dividerBottom: {
     marginTop: 10,
   },
@@ -106,7 +104,7 @@ const useStyles = makeStyles({
   },
   alert: {
     position: "absolute",
-    bottom: -140,
+    bottom: -120,
     width: "85%",
     marginLeft: "10%",
     boxShadow: "0px 0px 13px rgba(0, 21, 44, 0.2)",
@@ -248,6 +246,7 @@ const CreateNewMeasureDialog = ({ open, onClose }) => {
       <form
         data-testid="create-new-measure-form"
         onSubmit={formik.handleSubmit}
+        style={{ overflow: "scroll" }}
       >
         <div className={classes.dialogTitle}>
           <DialogTitle className={classes.title}>Create Measure</DialogTitle>
@@ -257,7 +256,7 @@ const CreateNewMeasureDialog = ({ open, onClose }) => {
             </IconButton>
           </div>
         </div>
-        <Divider className={classes.dividerTop} />
+        <Divider />
         <DialogContent>
           <div className={flexEnd}>
             <Typography className={classes.info}>
@@ -333,6 +332,7 @@ const CreateNewMeasureDialog = ({ open, onClose }) => {
               {...formik.getFieldProps("cqlLibraryName")}
             />
           </div>
+
           <div className={formRowGapped}>
             <TextField
               required
@@ -348,6 +348,7 @@ const CreateNewMeasureDialog = ({ open, onClose }) => {
                 <FormControlLabel
                   control={
                     <Checkbox
+                      disabled
                       checked={autoGenerate}
                       id="auto-generate"
                       data-testid="auto-generate-checkbox"
@@ -365,6 +366,7 @@ const CreateNewMeasureDialog = ({ open, onClose }) => {
                 <FormControlLabel
                   control={
                     <Checkbox
+                      disabled
                       checked={manualId}
                       id="manual-generate"
                       data-testid="manual-generate-checkbox"
@@ -398,6 +400,7 @@ const CreateNewMeasureDialog = ({ open, onClose }) => {
               </div>
             </div>
           </div>
+
           <div className={formRowGapped}>
             <Select
               required
