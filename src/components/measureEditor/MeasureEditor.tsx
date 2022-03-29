@@ -8,6 +8,7 @@ import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import tw from "twin.macro";
 import * as _ from "lodash";
 import useElmTranslationServiceApi, {
+  ElmTranslation,
   ElmTranslationError,
 } from "../../api/useElmTranslationServiceApi";
 
@@ -43,7 +44,7 @@ const MeasureEditor = () => {
   const [elmTranslationError, setElmTranslationError] = useState(null);
   const [elmAnnotations, setElmAnnotations] = useState<EditorAnnotation[]>([]);
 
-  const updateElmAnnotations = async (cql: string) => {
+  const updateElmAnnotations = async (cql: string): Promise<ElmTranslation> => {
     setElmTranslationError(null);
     if (cql && cql.trim().length > 0) {
       const data = await elmTranslationServiceApi.translateCqlToElm(cql);
@@ -51,19 +52,25 @@ const MeasureEditor = () => {
         data?.errorExceptions
       );
       setElmAnnotations(elmAnnotations);
+      return data;
     } else {
       setElmAnnotations([]);
     }
+    return null;
   };
 
-  const updateMeasureCql = () => {
-    updateElmAnnotations(editorVal).catch((err) => {
+  const updateMeasureCql = async () => {
+    const data = await updateElmAnnotations(editorVal).catch((err) => {
       console.error("An error occurred while translating CQL to ELM", err);
       setElmTranslationError("Unable to translate CQL to ELM!");
       setElmAnnotations([]);
     });
     if (editorVal !== measure.cql) {
-      const newMeasure: Measure = { ...measure, cql: editorVal };
+      const newMeasure: Measure = {
+        ...measure,
+        cql: editorVal,
+        elmJson: JSON.stringify(data),
+      };
       measureServiceApi
         .updateMeasure(newMeasure)
         .then(() => {
