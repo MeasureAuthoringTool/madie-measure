@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import queryString from "query-string";
 import "twin.macro";
@@ -11,8 +11,7 @@ import { Divider, Tab, Tabs } from "@mui/material";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { Button } from "@madie/madie-components";
 import { Pagination } from "@madie/madie-design-system/dist/react";
-
-// need reference to limit, cur page,
+import CreateNewMeasureDialog from "./CreateNewMeasureDialog";
 export default function NewMeasure() {
   const { search } = useLocation();
   const history = useHistory();
@@ -40,9 +39,19 @@ export default function NewMeasure() {
   const handleLimitChange = (e) => {
     history.push(`?page=${0}&limit=${e.target.value}`);
   };
-
-  useEffect(() => {
-    const retrieveMeasures = async (tab = 0, limit = 10, page = 0) => {
+  //dialog utilities
+  const [createOpen, setCreateOpen] = useState(false);
+  // bool, if we close on success, we want to retrieve measures again
+  const handleClose = (status = false) => {
+    if (status) {
+      // retrieive
+      retrieveMeasures(activeTab, curLimit, curPage - 1);
+    }
+    setCreateOpen(false);
+  };
+  // retrieve measures needs to be a callback to avoid dependency depth fail checks
+  const retrieveMeasures = useCallback(
+    async (tab = 0, limit = 10, page = 0) => {
       const data = await measureServiceApi.fetchMeasures(
         tab === 0,
         limit,
@@ -62,23 +71,13 @@ export default function NewMeasure() {
         setMeasureList(content);
         setOffset(pageable.offset);
       }
-    };
+    },
+    [measureServiceApi]
+  );
+
+  useEffect(() => {
     retrieveMeasures(activeTab, curLimit, curPage - 1);
-    return () => {
-      setTotalPages(0);
-      setVisibleItems(0);
-      setTotalItems(0);
-      setMeasureList([]);
-      setOffset(0);
-    };
-  }, [
-    values.page,
-    values.limit,
-    activeTab,
-    curLimit,
-    curPage,
-    measureServiceApi,
-  ]);
+  }, [retrieveMeasures, activeTab, curLimit, curPage, measureServiceApi]);
 
   const handleTabChange = (event, nextTab) => {
     setActiveTab(nextTab);
@@ -87,13 +86,16 @@ export default function NewMeasure() {
   };
   return (
     <div tw="mx-12 mt-5">
+      <CreateNewMeasureDialog open={createOpen} onClose={handleClose} />
       <section tw="flex flex-row my-2">
         <h1 tw="text-4xl font-light">Measures</h1>
         <span tw="flex-grow" />
         <Button
           buttonTitle="New Measure"
           tw="h-10"
-          onClick={() => history.push("/measures/create")}
+          onClick={() => {
+            setCreateOpen(true);
+          }}
           data-testid="create-new-measure-button"
         />
       </section>

@@ -60,9 +60,9 @@ export default function MeasureList(props: { measureList: Measure[] }) {
                   </tr>
                 </thead>
                 <tbody data-testid="table-body">
-                  {props.measureList?.map((measure, measureIdx) => (
+                  {props.measureList?.map((measure, i) => (
                     <tr
-                      key={measure.measureHumanReadableId}
+                      key={`${measure.id}-${i}`}
                       tw="bg-white"
                       data-testid="row-item"
                     >
@@ -70,7 +70,7 @@ export default function MeasureList(props: { measureList: Measure[] }) {
                         <button
                           type="button"
                           onClick={() => history.push("#")}
-                          data-testid={`measure-button-${measure.measureHumanReadableId}`}
+                          data-testid={`measure-button-${measure.id}`}
                         >
                           {measure.measureName}
                         </button>
