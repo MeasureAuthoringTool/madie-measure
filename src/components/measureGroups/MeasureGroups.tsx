@@ -166,68 +166,6 @@ const MeasureGroups = () => {
     }
   }, [measure]);
 
-  // useEffect(() => {
-  //   if (formik.values.scoring && formik.values.scoring !== "") {
-  //     // if (!canReset.current) {
-  //     //   canReset.current = true;
-  //     // } else {
-  //       // setTimeout(() => {
-  //       formik.resetForm({
-  //         values: {
-  //           ...formik.values,
-  //           population: {
-  //             initialPopulation: "",
-  //             denominator: "",
-  //             denominatorExclusion: "",
-  //             denominatorException: "",
-  //             numerator: "",
-  //             numeratorExclusion: "",
-  //             measurePopulation: "",
-  //             measurePopulationExclusion: "",
-  //           },
-  //         },
-  //       });
-  //       setLayoutKey(new Date());
-  //       // }, 500);
-  //
-  //       // formik.setFieldValue("population", {
-  //       //   initialPopulation: "",
-  //       //   denominator: "",
-  //       //   denominatorExclusion: "",
-  //       //   denominatorException: "",
-  //       //   numerator: "",
-  //       //   numeratorExclusion: "",
-  //       //   measurePopulation: "",
-  //       //   measurePopulationExclusion: "",
-  //       // });
-  //       // formik.setFieldTouched("population", false);
-  //     // }
-  //   }
-  // }, [formik.values.scoring, formik.setFieldValue]);
-  //
-  // useEffect(() => {
-  //   if (!canReset.current) {
-  //     canReset.current = true;
-  //   } else {
-  //     // setTimeout(() => {
-  //     formik.resetForm({
-  //       values: {
-  //         ...formik.values,
-  //         population: {
-  //           initialPopulation: "",
-  //           denominator: "",
-  //           denominatorExclusion: "",
-  //           denominatorException: "",
-  //           numerator: "",
-  //           numeratorExclusion: "",
-  //           measurePopulation: "",
-  //           measurePopulationExclusion: "",
-  //         },
-  //       },
-  //     });
-  //   }
-  // }, [layoutKey]);
-
   // @TODO: Pull directly from MeasurePopulation instead of local export
   const PopulationSelectorDefinitions = DefaultPopulationSelectorDefinitions;
 
@@ -329,10 +267,6 @@ const MeasureGroups = () => {
     </>
   );
 
-  // const showMessage = () => {
-  //   return !formik.isValid || (formik.touched)
-  // }
-
   return (
     <form onSubmit={formik.handleSubmit}>
       <Grid>
@@ -390,7 +324,6 @@ const MeasureGroups = () => {
               name="scoring"
               value={formik.values.scoring}
               onChange={(e) => {
-                console.log("!!!!!!!!!!! resetting the form");
                 formik.resetForm({
                   values: {
                     ...formik.values,
@@ -468,19 +401,6 @@ const MeasureGroups = () => {
           </ButtonSpacer>
           <ButtonSpacer>
             <Button type="button" buttonTitle="Cancel" variant="white" />
-          </ButtonSpacer>
-          <ButtonSpacer>
-            <Button
-              buttonTitle="Debug"
-              onClick={(e) => {
-                e.preventDefault();
-                console.log(
-                  `Formik isValid: ${formik.isValid}, formik dirty: ${formik.dirty}`
-                );
-                console.log("touched: ", formik.touched);
-                console.log("extra check: ", MeasureGroupSchemaValidator.isValidSync(formik.values));
-              }}
-            />
           </ButtonSpacer>
           <ButtonSpacer>
             <span
