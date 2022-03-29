@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Fragment, useRef } from "react";
+import React, { useEffect, useState, Fragment } from "react";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
@@ -122,7 +122,6 @@ const MeasureGroups = () => {
   // TODO: group will be coming from props when we separate this into separate component
   const group = measure.groups && measure.groups[0];
   const defaultScoring = group?.scoring || measure?.measureScoring || "Cohort";
-  const canReset = useRef(false);
   const formik = useFormik({
     initialValues: {
       id: group?.id || null,
@@ -167,24 +166,67 @@ const MeasureGroups = () => {
     }
   }, [measure]);
 
-  useEffect(() => {
-    if (formik.values.scoring && formik.values.scoring !== "") {
-      if (!canReset.current) {
-        canReset.current = true;
-      } else {
-        formik.setFieldValue("population", {
-          initialPopulation: "",
-          denominator: "",
-          denominatorExclusion: "",
-          denominatorException: "",
-          numerator: "",
-          numeratorExclusion: "",
-          measurePopulation: "",
-          measurePopulationExclusion: "",
-        });
-      }
-    }
-  }, [formik.values.scoring, formik.setFieldValue]);
+  // useEffect(() => {
+  //   if (formik.values.scoring && formik.values.scoring !== "") {
+  //     // if (!canReset.current) {
+  //     //   canReset.current = true;
+  //     // } else {
+  //       // setTimeout(() => {
+  //       formik.resetForm({
+  //         values: {
+  //           ...formik.values,
+  //           population: {
+  //             initialPopulation: "",
+  //             denominator: "",
+  //             denominatorExclusion: "",
+  //             denominatorException: "",
+  //             numerator: "",
+  //             numeratorExclusion: "",
+  //             measurePopulation: "",
+  //             measurePopulationExclusion: "",
+  //           },
+  //         },
+  //       });
+  //       setLayoutKey(new Date());
+  //       // }, 500);
+  //
+  //       // formik.setFieldValue("population", {
+  //       //   initialPopulation: "",
+  //       //   denominator: "",
+  //       //   denominatorExclusion: "",
+  //       //   denominatorException: "",
+  //       //   numerator: "",
+  //       //   numeratorExclusion: "",
+  //       //   measurePopulation: "",
+  //       //   measurePopulationExclusion: "",
+  //       // });
+  //       // formik.setFieldTouched("population", false);
+  //     // }
+  //   }
+  // }, [formik.values.scoring, formik.setFieldValue]);
+  //
+  // useEffect(() => {
+  //   if (!canReset.current) {
+  //     canReset.current = true;
+  //   } else {
+  //     // setTimeout(() => {
+  //     formik.resetForm({
+  //       values: {
+  //         ...formik.values,
+  //         population: {
+  //           initialPopulation: "",
+  //           denominator: "",
+  //           denominatorExclusion: "",
+  //           denominatorException: "",
+  //           numerator: "",
+  //           numeratorExclusion: "",
+  //           measurePopulation: "",
+  //           measurePopulationExclusion: "",
+  //         },
+  //       },
+  //     });
+  //   }
+  // }, [layoutKey]);
 
   // @TODO: Pull directly from MeasurePopulation instead of local export
   const PopulationSelectorDefinitions = DefaultPopulationSelectorDefinitions;
@@ -287,6 +329,10 @@ const MeasureGroups = () => {
     </>
   );
 
+  // const showMessage = () => {
+  //   return !formik.isValid || (formik.touched)
+  // }
+
   return (
     <form onSubmit={formik.handleSubmit}>
       <Grid>
@@ -343,7 +389,25 @@ const MeasureGroups = () => {
               }}
               name="scoring"
               value={formik.values.scoring}
-              onChange={formik.handleChange}
+              onChange={(e) => {
+                console.log("!!!!!!!!!!! resetting the form");
+                formik.resetForm({
+                  values: {
+                    ...formik.values,
+                    scoring: e.target.value,
+                    population: {
+                      initialPopulation: "",
+                      denominator: "",
+                      denominatorExclusion: "",
+                      denominatorException: "",
+                      numerator: "",
+                      numeratorExclusion: "",
+                      measurePopulation: "",
+                      measurePopulationExclusion: "",
+                    },
+                  },
+                });
+              }}
             >
               {allOptions.map((opt, i) => (
                 <option
@@ -363,10 +427,15 @@ const MeasureGroups = () => {
               formik.values.scoring
             );
             if (selectorProps.hidden) return;
-            const error = _.get(
-              formik.errors.population,
+
+            const touched = _.get(
+              formik.touched.population,
               selectorDefinition.key
             );
+            const error = !!touched
+              ? _.get(formik.errors.population, selectorDefinition.key)
+              : null;
+
             const formikFieldProps = formik.getFieldProps(
               `population.${selectorDefinition.key}`
             );
@@ -377,7 +446,7 @@ const MeasureGroups = () => {
                   {...selectorProps}
                   {...formikFieldProps}
                   helperText={error}
-                  error={!!error}
+                  error={!!error && !!touched}
                 />
               </Fragment>
             );
@@ -401,13 +470,26 @@ const MeasureGroups = () => {
             <Button type="button" buttonTitle="Cancel" variant="white" />
           </ButtonSpacer>
           <ButtonSpacer>
+            <Button
+              buttonTitle="Debug"
+              onClick={(e) => {
+                e.preventDefault();
+                console.log(
+                  `Formik isValid: ${formik.isValid}, formik dirty: ${formik.dirty}`
+                );
+                console.log("touched: ", formik.touched);
+                console.log("extra check: ", MeasureGroupSchemaValidator.isValidSync(formik.values));
+              }}
+            />
+          </ButtonSpacer>
+          <ButtonSpacer>
             <span
               tw="text-sm text-gray-600"
               data-testid="save-measure-group-validation-message"
             >
-              {!(formik.isValid && formik.dirty)
-                ? "You must set all required Populations."
-                : ""}
+              {MeasureGroupSchemaValidator.isValidSync(formik.values)
+                ? ""
+                : "You must set all required Populations."}
             </span>
           </ButtonSpacer>
         </PopulationActions>

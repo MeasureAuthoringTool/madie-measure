@@ -155,14 +155,11 @@ describe("Measure Groups Page", () => {
     }
   });
 
-  test("On change of group scoring the field definitions are cleared", () => {
+  test("On change of group scoring the field definitions are cleared", async () => {
     group.id = "";
+    group.scoring = "Cohort";
     measure.groups = [group];
     renderMeasureGroupComponent();
-    userEvent.selectOptions(
-      screen.getByTestId("scoring-unit-select"),
-      screen.getByRole("option", { name: "Cohort" })
-    );
     expect(
       (screen.getByRole("option", { name: "Cohort" }) as HTMLOptionElement)
         .selected
@@ -174,7 +171,9 @@ describe("Measure Groups Page", () => {
     const populationOption = screen.getAllByTestId(
       "select-measure-group-population"
     )[0] as HTMLOptionElement;
-    expect(populationOption.value).toBe(group.population.initialPopulation);
+    await waitFor(() => {
+      expect(populationOption.value).toBe(group.population.initialPopulation);
+    });
 
     fireEvent.change(option, { target: { value: "Ratio" } });
     expect(option.value).toBe("Ratio");
@@ -382,9 +381,11 @@ describe("Measure Groups Page", () => {
   test("Form displays message next to save button about required populations", async () => {
     renderMeasureGroupComponent();
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
-    expect(
-      screen.getByText("You must set all required Populations.")
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.getByText("You must set all required Populations.")
+      ).toBeInTheDocument();
+    });
   });
 
   test("Save button is disabled until all required Cohort populations are entered", async () => {
