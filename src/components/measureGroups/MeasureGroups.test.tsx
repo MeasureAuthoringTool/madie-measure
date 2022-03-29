@@ -157,12 +157,9 @@ describe("Measure Groups Page", () => {
 
   test("On change of group scoring the field definitions are cleared", () => {
     group.id = "";
+    group.scoring = "Cohort";
     measure.groups = [group];
     renderMeasureGroupComponent();
-    userEvent.selectOptions(
-      screen.getByTestId("scoring-unit-select"),
-      screen.getByRole("option", { name: "Cohort" })
-    );
     expect(
       (screen.getByRole("option", { name: "Cohort" }) as HTMLOptionElement)
         .selected
@@ -379,7 +376,7 @@ describe("Measure Groups Page", () => {
     );
   });
 
-  test("Form displays message next to save button about required populations", async () => {
+  test("Form displays message next to save button about required populations", () => {
     renderMeasureGroupComponent();
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     expect(
