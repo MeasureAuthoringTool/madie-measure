@@ -46,7 +46,7 @@ const measures: Measure[] = [
     model: "FHIR",
   },
   {
-    id: "IDIDID2",
+    id: "IDIDID3",
     measureHumanReadableId: null,
     measureSetId: "3",
     version: 1.3,
@@ -75,13 +75,9 @@ describe("Measure List component", () => {
     );
     measures.forEach((m) => {
       expect(getByText(m.measureName)).toBeInTheDocument();
-      expect(
-        screen.getByTestId(`measure-button-${m.measureHumanReadableId}`)
-      ).toBeInTheDocument();
+      expect(screen.getByTestId(`measure-button-${m.id}`)).toBeInTheDocument();
     });
-    const measureButton = getByTestId(
-      `measure-button-${measures[0].measureHumanReadableId}`
-    );
+    const measureButton = getByTestId(`measure-button-${measures[0].id}`);
     fireEvent.click(measureButton);
     expect(mockPush).toHaveBeenCalledWith("/example");
   });

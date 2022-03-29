@@ -44,7 +44,9 @@ describe("MeasureLanding", () => {
     act(async () => {
       render(
         <ApiContextProvider value={serviceConfig}>
-          <MemoryRouter initialEntries={["/measures"]}>
+          <MemoryRouter
+            initialEntries={[{ pathname: "/measures", search: "" }]}
+          >
             <MeasureRoutes />
           </MemoryRouter>
         </ApiContextProvider>

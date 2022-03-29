@@ -2,16 +2,14 @@ import "@testing-library/jest-dom";
 // NOTE: jest-dom adds handy assertions to Jest and is recommended, but not required
 
 import * as React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
-import { MeasureRoutes } from "./MeasureLanding";
-import { MeasureScoring } from "../../models/MeasureScoring";
-import { Model } from "../../models/Model";
+import { MeasureRoutes } from "../measureLanding/MeasureLanding";
 import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import userEvent from "@testing-library/user-event";
 import { act } from "react-dom/test-utils";
-import { oneItemResponse } from "./mockMeasureResponses";
+import { oneItemResponse } from "../measureLanding/mockMeasureResponses";
 
 const serviceConfig: ServiceConfig = {
   measureService: {
@@ -40,7 +38,7 @@ describe("Measure Page", () => {
   });
 
   test("shows my measures on page load", async () => {
-    act(async () => {
+    await act(async () => {
       render(
         <ApiContextProvider value={serviceConfig}>
           <MemoryRouter initialEntries={["/measures"]}>
@@ -51,7 +49,11 @@ describe("Measure Page", () => {
       expect(screen.getByTestId("create-new-measure-button")).toBeTruthy();
       const measure1 = await screen.findByText("TestMeasure1");
       expect(measure1).toBeInTheDocument();
-      expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(true);
+      expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
+        true,
+        10,
+        0
+      );
       const myMeasuresTab = screen.getByRole("tab", { name: "My Measures" });
       expect(myMeasuresTab).toBeInTheDocument();
       expect(myMeasuresTab).toHaveClass("Mui-selected");
@@ -62,10 +64,20 @@ describe("Measure Page", () => {
   });
 
   test("shows all measures measures on tab click", async () => {
-    act(async () => {
-      render(
+    await act(async () => {
+      const { findByTestId } = render(
         <ApiContextProvider value={serviceConfig}>
-          <MemoryRouter initialEntries={["/measures"]}>
+          <MemoryRouter
+            initialEntries={[
+              {
+                pathname: "/measures",
+                search: "",
+                hash: "",
+                state: undefined,
+                key: "1fewtg",
+              },
+            ]}
+          >
             <MeasureRoutes />
           </MemoryRouter>
         </ApiContextProvider>
@@ -73,36 +85,24 @@ describe("Measure Page", () => {
       expect(screen.getByTestId("create-new-measure-button")).toBeTruthy();
       const measure1 = await screen.findByText("TestMeasure1");
       expect(measure1).toBeInTheDocument();
-      expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(true);
-      const myMeasuresTab = screen.getByRole("tab", { name: "My Measures" });
+      expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
+        true,
+        10,
+        0
+      );
+      const myMeasuresTab = await findByTestId("my-measures-tab");
       expect(myMeasuresTab).toHaveClass("Mui-selected");
-      const allMeasuresTab = screen.getByRole("tab", { name: "All Measures" });
-      mockMeasureServiceApi.fetchMeasures = jest.fn().mockResolvedValue([
-        ...measures,
-        {
-          id: "ab123",
-          measureHumanReadableId: "ab123",
-          measureSetId: null,
-          version: 1.2,
-          revisionNumber: 12,
-          state: "NA",
-          measureName: "TestMeasure2",
-          cqlLibraryName: "TestLib2",
-          measureScoring: MeasureScoring.COHORT,
-          cql: null,
-          createdAt: null,
-          createdBy: "TestUser2",
-          lastModifiedAt: null,
-          lastModifiedBy: "TestUser2",
-          model: Model.QICORE,
-          measureMetaData: null,
-        },
-      ]);
 
+      const allMeasuresTab = await findByTestId("all-measures-tab");
       userEvent.click(allMeasuresTab);
-      const measure2 = await screen.findByText("TestMeasure2");
-      expect(measure2).toBeInTheDocument();
-      expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(false);
+      expect(allMeasuresTab).toHaveClass("Mui-selected");
+      await waitFor(() =>
+        expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
+          false,
+          10,
+          0
+        )
+      );
     });
   });
 });

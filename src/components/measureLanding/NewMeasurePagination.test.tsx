@@ -2,13 +2,14 @@ import "@testing-library/jest-dom";
 // NOTE: jest-dom adds handy assertions to Jest and is recommended, but not required
 
 import * as React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { MeasureRoutes } from "./MeasureLanding";
 import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import { act } from "react-dom/test-utils";
 import { mockPaginationResponses } from "./mockMeasureResponses";
+import { describe, expect, test } from "@jest/globals";
 
 const serviceConfig: ServiceConfig = {
   measureService: {
@@ -25,7 +26,6 @@ jest.mock("../../hooks/useOktaTokens", () => () => ({
 
 const mockMeasureServiceApi = {
   fetchMeasures: jest.fn(mockPaginationResponses),
-  //   fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
 } as unknown as MeasureServiceApi;
 
 jest.mock("../../api/useMeasureServiceApi", () =>
@@ -38,91 +38,152 @@ describe("Measures Pagination", () => {
   });
 
   test("On Page load, 10 measures are displayed by default  ", async () => {
-    act(async () => {
-      render(
+    await act(async () => {
+      const { findAllByTestId } = await render(
         <ApiContextProvider value={serviceConfig}>
-          <MemoryRouter initialEntries={["/measures"]}>
+          <MemoryRouter
+            initialEntries={[
+              {
+                pathname: "/measures",
+                search: "",
+                hash: "",
+                state: undefined,
+                key: "1fewtg",
+              },
+            ]}
+          >
             <MeasureRoutes />
           </MemoryRouter>
         </ApiContextProvider>
       );
-      await waitFor(() => {
-        const itemList = screen.getAllByTestId("row-item");
-        expect(itemList).toHaveLength(10);
-        const nextButton = screen.getByLabelText("Go to next page");
-        expect(nextButton).toBeInTheDocument();
-        const prevButton = screen.getByLabelText("Go to previous page");
-        expect(prevButton).toBeNull();
-      });
+      const rowItems = await findAllByTestId("row-item");
+      expect(rowItems).toHaveLength(10);
     });
   });
 
   test("On First page, previous button is hidden, next is available  ", async () => {
-    act(async () => {
-      render(
+    await act(async () => {
+      const { findByTestId, queryByTestId } = await render(
         <ApiContextProvider value={serviceConfig}>
-          <MemoryRouter initialEntries={["/measures"]}>
+          <MemoryRouter
+            initialEntries={[
+              {
+                pathname: "/measures",
+                search: "",
+                hash: "",
+                state: undefined,
+                key: "1fewtg",
+              },
+            ]}
+          >
             <MeasureRoutes />
           </MemoryRouter>
         </ApiContextProvider>
       );
-      await waitFor(() => {
-        const itemList = screen.getAllByTestId("row-item");
-        const nextButton = screen.getByLabelText("Go to next page");
-        expect(nextButton).toBeInTheDocument();
-        const prevButton = screen.getByLabelText("Go to previous page");
-        expect(prevButton).toBeNull();
-      });
+      const nextButton = await findByTestId("NavigateNextIcon");
+      expect(nextButton).toBeTruthy();
+      expect(queryByTestId("NavigateBeforeIcon")).toBeNull();
+    });
+  });
+
+  test("On second page, all buttons available", async () => {
+    await act(async () => {
+      const { findByTestId } = await render(
+        <ApiContextProvider value={serviceConfig}>
+          <MemoryRouter
+            initialEntries={[
+              {
+                pathname: "/measures",
+                search: "?page=2&limit=10",
+                hash: "",
+                state: undefined,
+                key: "1fewtg",
+              },
+            ]}
+          >
+            <MeasureRoutes />
+          </MemoryRouter>
+        </ApiContextProvider>
+      );
+      const prevButton = await findByTestId("NavigateBeforeIcon");
+      expect(prevButton).toBeTruthy();
+      const nextButton = await findByTestId("NavigateNextIcon");
+      expect(nextButton).toBeTruthy();
     });
   });
 
   test("passing in query paramaters alters result list", async () => {
-    act(async () => {
-      render(
+    await act(async () => {
+      const { findByTestId } = await render(
         <ApiContextProvider value={serviceConfig}>
-          <MemoryRouter initialEntries={["/measures?page=1&limit=25"]}>
+          <MemoryRouter
+            initialEntries={[
+              {
+                pathname: "/measures",
+                search: "?page=2&limit=10",
+                hash: "",
+                state: undefined,
+                key: "1fewtg",
+              },
+            ]}
+          >
             <MeasureRoutes />
           </MemoryRouter>
         </ApiContextProvider>
       );
-      await waitFor(() => {
-        const itemList = screen.getAllByTestId("row-item");
-        expect(itemList).toHaveLength(25);
-      });
+      const prevButton = await findByTestId("NavigateBeforeIcon");
+      expect(prevButton).toBeTruthy();
+      const nextButton = await findByTestId("NavigateNextIcon");
+      expect(nextButton).toBeTruthy();
     });
   });
 
-  test("Boundaries of requests display correct amount of items on screen", async () => {
-    act(async () => {
-      render(
+  test("passing in query paramaters alters result list", async () => {
+    await act(async () => {
+      const { findAllByTestId } = await render(
         <ApiContextProvider value={serviceConfig}>
-          <MemoryRouter initialEntries={["/measures?page=4&limit=25"]}>
+          <MemoryRouter
+            initialEntries={[
+              {
+                pathname: "/measures",
+                search: "?page=1&limit=25",
+                hash: "",
+                state: undefined,
+                key: "1fewtg",
+              },
+            ]}
+          >
             <MeasureRoutes />
           </MemoryRouter>
         </ApiContextProvider>
       );
-      await waitFor(() => {
-        const itemList = screen.getAllByTestId("row-item");
-        expect(itemList).toHaveLength(10);
-      });
+      const itemList = await findAllByTestId("row-item");
+      expect(itemList).toHaveLength(25);
     });
   });
 
-  test("On Last page next button is hidden, prev is available", async () => {
-    act(async () => {
-      render(
+  test("Pagination handles the boundaries clean", async () => {
+    await act(async () => {
+      const { findAllByTestId, queryByTestId } = await render(
         <ApiContextProvider value={serviceConfig}>
-          <MemoryRouter initialEntries={["/measures?page=4&limit=25"]}>
+          <MemoryRouter
+            initialEntries={[
+              {
+                pathname: "/measures",
+                search: "?page=5&limit=25",
+                hash: "",
+                state: undefined,
+                key: "1fewtg",
+              },
+            ]}
+          >
             <MeasureRoutes />
           </MemoryRouter>
         </ApiContextProvider>
       );
-      await waitFor(() => {
-        const nextButton = screen.getByLabelText("Go to next page");
-        expect(nextButton).toBeNull();
-        const prevButton = screen.getByLabelText("Go to previous page");
-        expect(prevButton).toBeInTheDocument();
-      });
+      const itemList = await findAllByTestId("row-item");
+      expect(itemList).toHaveLength(10);
+      expect(queryByTestId("NavigateNextIcon")).toBeNull();
     });
   });
 });

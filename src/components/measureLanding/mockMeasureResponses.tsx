@@ -33,22 +33,26 @@ const oneHundredTenTestMeasures = bulkCreate(110);
 
 // number of elements left on page..
 const mockPaginationResponses = (filterByCurrentUser, limit, page) => {
-  let visibleEments = oneHundredTenTestMeasures.slice(
-    page + 1 * limit,
-    page + 1 * limit + limit
-  ).length;
-  const data = {
-    content: oneHundredTenTestMeasures.slice(page * limit, limit),
-    totalPages: Math.ceil(100 / limit),
-    totalElements: 100,
-    numberOfElements: visibleEments,
-    pageable: {
-      offset: limit * page,
-      pageSize: limit,
-    },
-  };
-
-  return data;
+  return new Promise((resolve) => {
+    let visibleEments = oneHundredTenTestMeasures.slice(
+      page + 1 * limit,
+      page + 1 * limit + limit
+    ).length;
+    const data = {
+      content: oneHundredTenTestMeasures.slice(
+        page * limit,
+        page * limit + limit
+      ),
+      totalPages: Math.ceil(oneHundredTenTestMeasures.length / limit),
+      totalElements: oneHundredTenTestMeasures.length,
+      numberOfElements: visibleEments,
+      pageable: {
+        offset: limit * page,
+        pageSize: limit,
+      },
+    };
+    resolve(data);
+  });
 };
 
 export { oneItemResponse, mockPaginationResponses };
