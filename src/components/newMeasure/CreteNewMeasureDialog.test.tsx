@@ -122,7 +122,7 @@ describe("Measures Create Dialog", () => {
       expect(
         await findByTestId("manual-generate-checkbox")
       ).toBeInTheDocument();
-      expect(await findByTestId("CMSID-text-field")).toBeInTheDocument();
+      // expect(await findByTestId("CMSID-text-field")).toBeInTheDocument();
       expect(
         await findByTestId("measure-scoring-select-field")
       ).toBeInTheDocument();
@@ -134,7 +134,8 @@ describe("Measures Create Dialog", () => {
     });
   });
 
-  test("checking the checkbox for manual entry makes cmsid visible", async () => {
+  // temporarily skipping until it's added back in to document
+  test.skip("checking the checkbox for manual entry makes cmsid visible", async () => {
     await act(async () => {
       const { findByTestId, queryByTestId } = await render(
         <ApiContextProvider value={serviceConfig}>
