@@ -10,8 +10,12 @@ import * as _ from "lodash";
 import { Divider, Tab, Tabs } from "@mui/material";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { Button } from "@madie/madie-components";
-import { Pagination } from "@madie/madie-design-system/dist/react";
+import {
+  Pagination,
+  MadieSpinner,
+} from "@madie/madie-design-system/dist/react";
 import CreateNewMeasureDialog from "./CreateNewMeasureDialog";
+
 export default function NewMeasure() {
   const { search } = useLocation();
   const history = useHistory();
@@ -19,13 +23,14 @@ export default function NewMeasure() {
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [measureList, setMeasureList] = useState<Measure[]>([]);
   // utilities for pagination
+  const values = queryString.parse(search);
+  const [initialLoad, setInitialLoad] = useState<boolean>(true);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [visibleItems, setVisibleItems] = useState<number>(0);
-  const [activeTab, setActiveTab] = useState<number>(0);
+  const activeTab: number = values.tab ? Number(values.tab) : 0;
   const [offset, setOffset] = useState<number>(0);
   // pull info from some query url
-  const values = queryString.parse(search);
   const curLimit = values.limit && Number(values.limit);
   const curPage = (values.page && Number(values?.page)) || 1;
   // can we do stuff
@@ -70,6 +75,7 @@ export default function NewMeasure() {
         setTotalItems(totalElements);
         setMeasureList(content);
         setOffset(pageable.offset);
+        setInitialLoad(false);
       }
     },
     [measureServiceApi]
@@ -80,9 +86,8 @@ export default function NewMeasure() {
   }, [retrieveMeasures, activeTab, curLimit, curPage, measureServiceApi]);
 
   const handleTabChange = (event, nextTab) => {
-    setActiveTab(nextTab);
     const limit = values?.limit || 10;
-    history.push(`?page=0&limit=${limit}`);
+    history.push(`?tab=${nextTab}&page=0&limit=${limit}`);
   };
   return (
     <div tw="mx-12 mt-5">
@@ -110,37 +115,45 @@ export default function NewMeasure() {
         <span tw="flex-grow" />
       </section>
       <div tw="my-4">
-        <div
-          tw="overflow-hidden border-b border-gray-200 sm:rounded-lg"
-          style={{ boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)" }}
-        >
-          <MeasureList measureList={measureList} />
+        {/* spin or display */}
+        {!initialLoad && (
           <div
-            style={{
-              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-              border: "1px solid rgba(151, 151, 151, 0.17)",
-              borderWidth: "0 1px 1px 1px",
-            }}
+            tw="overflow-hidden border-b border-gray-200 sm:rounded-lg"
+            style={{ boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)" }}
           >
-            {totalItems > 0 && (
-              <Pagination
-                totalItems={totalItems}
-                visibleItems={visibleItems}
-                limitOptions={[10, 25, 50]}
-                offset={offset}
-                handlePageChange={handlePageChange}
-                handleLimitChange={handleLimitChange}
-                page={Number(values?.page) || 1}
-                limit={Number(values?.limit) || 10}
-                count={totalPages}
-                shape="rounded"
-                hideNextButton={!canGoNext}
-                hidePrevButton={!canGoPrev}
-              />
-            )}
+            <MeasureList measureList={measureList} />
+            <div
+              style={{
+                boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+                border: "1px solid rgba(151, 151, 151, 0.17)",
+                borderWidth: "0 1px 1px 1px",
+              }}
+            >
+              {totalItems > 0 && (
+                <Pagination
+                  totalItems={totalItems}
+                  visibleItems={visibleItems}
+                  limitOptions={[10, 25, 50]}
+                  offset={offset}
+                  handlePageChange={handlePageChange}
+                  handleLimitChange={handleLimitChange}
+                  page={Number(values?.page) || 1}
+                  limit={Number(values?.limit) || 10}
+                  count={totalPages}
+                  shape="rounded"
+                  hideNextButton={!canGoNext}
+                  hidePrevButton={!canGoPrev}
+                />
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
+      {initialLoad && (
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <MadieSpinner style={{ height: 50, width: 50 }} />
+        </div>
+      )}
     </div>
   );
 }
