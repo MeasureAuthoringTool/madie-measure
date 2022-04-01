@@ -22,22 +22,25 @@ const InactiveNavLink = tw(StyledNavLink)`
 interface SidebarLink {
   title: string;
   href: string;
+  dataTestId: string;
 }
 
 export interface MeasureDetailsSidebarProps {
   links: Array<SidebarLink>;
+  header?: String;
 }
 
 export default function MeasureDetailsSidebar(
   props: MeasureDetailsSidebarProps
 ) {
-  const { links } = props;
+  const { links, header = "" } = props;
   const { pathname } = useLocation();
 
-  return (
-    <>
+  // if no header, we don't need an outer wrapper
+  if (header) {
+    return (
       <OuterWrapper>
-        <Title>Edit Measure</Title>
+        {header && <Title>{header}</Title>}
         <InnerWrapper>
           <Nav aria-label="Sidebar">
             {links.map((linkInfo) => {
@@ -46,7 +49,11 @@ export default function MeasureDetailsSidebar(
                 LinkEl = ActiveNavLink;
               }
               return (
-                <LinkEl key={linkInfo.title} to={linkInfo.href}>
+                <LinkEl
+                  key={linkInfo.title}
+                  to={linkInfo.href}
+                  data-testid={linkInfo.dataTestId}
+                >
                   {linkInfo.title}
                 </LinkEl>
               );
@@ -54,6 +61,23 @@ export default function MeasureDetailsSidebar(
           </Nav>
         </InnerWrapper>
       </OuterWrapper>
-    </>
+    );
+  }
+  return (
+    <OuterWrapper>
+      <Nav aria-label="Sidebar">
+        {links.map((linkInfo) => {
+          let LinkEl = InactiveNavLink;
+          if (pathname === linkInfo.href) {
+            LinkEl = ActiveNavLink;
+          }
+          return (
+            <LinkEl key={linkInfo.title} to={linkInfo.href}>
+              {linkInfo.title}
+            </LinkEl>
+          );
+        })}
+      </Nav>
+    </OuterWrapper>
   );
 }

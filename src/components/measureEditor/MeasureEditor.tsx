@@ -1,10 +1,4 @@
-import React, {
-  SetStateAction,
-  Dispatch,
-  useState,
-  useRef,
-  useEffect,
-} from "react";
+import React, { SetStateAction, Dispatch, useState, useEffect } from "react";
 import "styled-components/macro";
 import { EditorAnnotation, MadieEditor } from "@madie/madie-editor";
 import { Button } from "@madie/madie-components";
@@ -14,6 +8,7 @@ import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import tw from "twin.macro";
 import * as _ from "lodash";
 import useElmTranslationServiceApi, {
+  ElmTranslation,
   ElmTranslationError,
 } from "../../api/useElmTranslationServiceApi";
 
@@ -41,7 +36,7 @@ export const mapElmErrorsToAceAnnotations = (
 const MeasureEditor = () => {
   const { measure, setMeasure } = useCurrentMeasure();
   const [editorVal, setEditorVal]: [string, Dispatch<SetStateAction<string>>] =
-    useState(measure.cql || "");
+    useState("");
   const measureServiceApi = useMeasureServiceApi();
   const elmTranslationServiceApi = useElmTranslationServiceApi();
   const [success, setSuccess] = useState(false);
@@ -49,7 +44,7 @@ const MeasureEditor = () => {
   const [elmTranslationError, setElmTranslationError] = useState(null);
   const [elmAnnotations, setElmAnnotations] = useState<EditorAnnotation[]>([]);
 
-  const updateElmAnnotations = async (cql: string) => {
+  const updateElmAnnotations = async (cql: string): Promise<ElmTranslation> => {
     setElmTranslationError(null);
     if (cql && cql.trim().length > 0) {
       const data = await elmTranslationServiceApi.translateCqlToElm(cql);
@@ -57,30 +52,25 @@ const MeasureEditor = () => {
         data?.errorExceptions
       );
       setElmAnnotations(elmAnnotations);
+      return data;
     } else {
       setElmAnnotations([]);
     }
+    return null;
   };
 
-  const debouncedChangeHandler: any = useRef(
-    _.debounce((nextValue: string) => {
-      updateElmAnnotations(nextValue).catch((err) => {
-        console.error("An error occurred while translating CQL to ELM", err);
-        setElmTranslationError("Unable to translate CQL to ELM!");
-        setElmAnnotations([]);
-      });
-      // other debounced operations can go here as well
-    }, 1500)
-  ).current;
-
-  const updateMeasureCql = () => {
-    updateElmAnnotations(editorVal).catch((err) => {
+  const updateMeasureCql = async () => {
+    const data = await updateElmAnnotations(editorVal).catch((err) => {
       console.error("An error occurred while translating CQL to ELM", err);
       setElmTranslationError("Unable to translate CQL to ELM!");
       setElmAnnotations([]);
     });
     if (editorVal !== measure.cql) {
-      const newMeasure: Measure = { ...measure, cql: editorVal };
+      const newMeasure: Measure = {
+        ...measure,
+        cql: editorVal,
+        elmJson: JSON.stringify(data),
+      };
       measureServiceApi
         .updateMeasure(newMeasure)
         .then(() => {
@@ -105,8 +95,16 @@ const MeasureEditor = () => {
   };
 
   useEffect(() => {
-    debouncedChangeHandler(editorVal);
-  }, [editorVal, debouncedChangeHandler]);
+    if (!editorVal) {
+      updateElmAnnotations(measure.cql).catch((err) => {
+        console.error("An error occurred while translating CQL to ELM", err);
+        setElmTranslationError("Unable to translate CQL to ELM!");
+        setElmAnnotations([]);
+      });
+      setEditorVal(measure.cql);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editorVal]);
 
   return (
     <>

@@ -1,6 +1,6 @@
-import * as React from "react";
+import React from "react";
 import { render, cleanup, fireEvent } from "@testing-library/react";
-import MeasureSteward from "./MeasureSteward";
+import MeasureCopyright from "./MeasureCopyright";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../api/useMeasureServiceApi";
@@ -17,9 +17,9 @@ const useMeasureServiceApiMock =
 const useCurrentMeasureMock =
   useCurrentMeasure as jest.Mock<MeasureContextHolder>;
 
-const STEWARD = "Steward Test Value";
+const COPYRIGHT = "Test Copyright";
 
-describe("MeasureSteward component", () => {
+describe("MeasureCopyright component", () => {
   let measure: Measure;
   let serviceApiMock: MeasureServiceApi;
   let measureContextHolder: MeasureContextHolder;
@@ -31,7 +31,7 @@ describe("MeasureSteward component", () => {
       id: "test measure",
       measureName: "the measure for testing",
       measureMetaData: {
-        steward: STEWARD,
+        copyright: COPYRIGHT,
       },
     } as Measure;
 
@@ -49,49 +49,48 @@ describe("MeasureSteward component", () => {
     useCurrentMeasureMock.mockImplementation(() => measureContextHolder);
   });
 
-  function expectInputValue(element: HTMLElement, value: string): void {
+  const expectInputValue = (element: HTMLElement, value: string): void => {
     expect(element).toBeInstanceOf(HTMLInputElement);
     const inputEl = element as HTMLInputElement;
     expect(inputEl.value).toBe(value);
-  }
+  };
 
-  it("should render the component with the supplied steward information", () => {
-    const { getByTestId } = render(<MeasureSteward />);
+  it("should render the component with the supplied copyright information", () => {
+    const { getByTestId } = render(<MeasureCopyright />);
 
-    const result: HTMLElement = getByTestId("measureSteward");
+    const result = getByTestId("measureCopyright");
     expect(result).toBeInTheDocument();
-    expect(result).toMatchSnapshot();
 
-    const input = getByTestId("measureStewardInput");
-    expectInputValue(input, STEWARD);
+    const input = getByTestId("measureCopyrightInput");
+    expectInputValue(input, COPYRIGHT);
   });
 
   it("should default the measureMetadata if none is supplied", async () => {
     delete measure.measureMetaData;
-    const { findByTestId, getByTestId } = render(<MeasureSteward />);
-    const input = getByTestId("measureStewardInput");
+    const { findByTestId, getByTestId } = render(<MeasureCopyright />);
+    const input = getByTestId("measureCopyrightInput");
     expectInputValue(input, "");
 
-    const save = getByTestId("measureStewardSave");
+    const save = getByTestId("measureCopyrightSave");
     fireEvent.click(save);
 
     expect(serviceApiMock.updateMeasure).toHaveBeenCalledWith({
       id: "test measure",
       measureMetaData: {
-        measureSteward: undefined,
+        copyright: undefined,
       },
       measureName: "the measure for testing",
     });
 
-    const success = await findByTestId("measureStewardSuccess");
+    const success = await findByTestId("measureCopyrightSuccess");
     expect(success).toBeInTheDocument();
   });
 
-  it("should update the input when a user types", () => {
-    const { getByTestId } = render(<MeasureSteward />);
+  it("should update the input when a user types a new value", () => {
+    const { getByTestId } = render(<MeasureCopyright />);
 
-    const input = getByTestId("measureStewardInput");
-    expectInputValue(input, STEWARD);
+    const input = getByTestId("measureCopyrightInput");
+    expectInputValue(input, COPYRIGHT);
 
     fireEvent.change(input, {
       target: { value: "new value" },
@@ -100,39 +99,39 @@ describe("MeasureSteward component", () => {
     expectInputValue(input, "new value");
   });
 
-  it("should save the steward information when the form is submitted", async () => {
-    const { findByTestId, getByTestId } = render(<MeasureSteward />);
-    const input = getByTestId("measureStewardInput");
+  it("should save the copyright information when the form is submitted", async () => {
+    const { findByTestId, getByTestId } = render(<MeasureCopyright />);
+    const input = getByTestId("measureCopyrightInput");
     fireEvent.change(input, {
       target: { value: "new value" },
     });
-    const save = getByTestId("measureStewardSave");
+    const save = getByTestId("measureCopyrightSave");
     fireEvent.click(save);
 
     expect(serviceApiMock.updateMeasure).toHaveBeenCalledWith({
       id: "test measure",
       measureMetaData: {
-        steward: "new value",
+        copyright: "new value",
       },
       measureName: "the measure for testing",
     });
 
-    const success = await findByTestId("measureStewardSuccess");
+    const success = await findByTestId("measureCopyrightSuccess");
     expect(success).toBeInTheDocument();
   });
 
   it("should render an error message if the measure cannot be saved", async () => {
     serviceApiMock.updateMeasure = jest.fn().mockRejectedValue("Save error");
 
-    const { findByTestId, getByTestId } = render(<MeasureSteward />);
-    const input = getByTestId("measureStewardInput");
+    const { findByTestId, getByTestId } = render(<MeasureCopyright />);
+    const input = getByTestId("measureCopyrightInput");
     fireEvent.change(input, {
       target: { value: "new value" },
     });
-    const save = getByTestId("measureStewardSave");
+    const save = getByTestId("measureCopyrightSave");
     fireEvent.click(save);
 
-    const error = await findByTestId("measureStewardError");
+    const error = await findByTestId("measureCopyrightError");
     expect(error.textContent).toBe(
       'Error updating measure "the measure for testing"'
     );

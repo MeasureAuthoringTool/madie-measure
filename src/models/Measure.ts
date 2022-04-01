@@ -1,8 +1,18 @@
 import { Model } from "./Model";
 import { MeasureScoring } from "./MeasureScoring";
+import { PopulationType } from "./MeasurePopulation";
 
 export interface MeasureMetadata {
-  measureSteward?: string;
+  steward?: string;
+  description?: string;
+  copyright?: string;
+  disclaimer?: string;
+}
+
+export interface Group {
+  id: string;
+  scoring?: string;
+  population?: PopulationType;
 }
 
 export default interface Measure {
@@ -22,4 +32,8 @@ export default interface Measure {
   lastModifiedBy: string;
   model: Model | "";
   measureMetaData?: MeasureMetadata;
+  measurementPeriodStart: Date;
+  measurementPeriodEnd: Date;
+  groups?: Array<Group>;
+  elmJson?: string;
 }

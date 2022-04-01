@@ -1,5 +1,10 @@
 import React from "react";
-import { NavLink, useLocation, useRouteMatch } from "react-router-dom";
+import {
+  NavLink,
+  useLocation,
+  useRouteMatch,
+  useHistory,
+} from "react-router-dom";
 import tw, { styled } from "twin.macro";
 
 interface PropTypes {
@@ -16,6 +21,20 @@ const EditMeasureNav = () => {
   const { url } = useRouteMatch();
   // TODO: try activeClassName of NavLink instead of manual path check
   const { pathname } = useLocation();
+  let history = useHistory();
+
+  if (
+    pathname !== `${url}/details` &&
+    pathname !== `${url}/cql-editor` &&
+    pathname !== `${url}/measure-groups` &&
+    pathname !== `${url}/details/measure-steward` &&
+    pathname !== `${url}/details/measure-description` &&
+    pathname !== `${url}/details/measure-copyright` &&
+    pathname !== `${url}/details/measure-disclaimer` &&
+    !pathname.startsWith(`${url}/test-cases`)
+  ) {
+    history.push("/404");
+  }
 
   return (
     <div>

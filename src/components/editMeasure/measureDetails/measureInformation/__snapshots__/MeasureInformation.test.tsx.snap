@@ -2,14 +2,14 @@
 
 exports[`MeasureInformation component should render the component with a blank measure name 1`] = `
 <div
-  class="MeasureInformation___StyledDiv-sc-1pua5bc-0 kIvXMc"
+  class="MeasureInformation___StyledDiv-sc-1pua5bc-2 IOWWo"
   data-testid="measure-name-edit"
 >
   <div
-    class="MeasureInformation___StyledDiv3-sc-1pua5bc-3 iIpBCt"
+    class="MeasureInformation__DisplayDiv-sc-1pua5bc-0 goZaEd"
   >
     <span
-      class="MeasureInformation___StyledSpan2-sc-1pua5bc-4 gexfQv"
+      class="MeasureInformation___StyledSpan2-sc-1pua5bc-5 jXgrNU"
     >
       Measure Name:
     </span>
@@ -25,7 +25,7 @@ exports[`MeasureInformation component should render the component with a blank m
         >
           <svg
             aria-hidden="true"
-            class="InlineEdit___StyledPencilIcon-sc-infirb-2 kHpXEx"
+            class="InlineEdit___StyledPencilIcon-sc-infirb-2 gvkVkb"
             fill="currentColor"
             viewBox="0 0 20 20"
             xmlns="http://www.w3.org/2000/svg"
@@ -39,15 +39,17 @@ exports[`MeasureInformation component should render the component with a blank m
     </div>
   </div>
   <div
-    class="MeasureInformation___StyledDiv4-sc-1pua5bc-5 kmMvDE"
+    class="MeasureInformation___StyledDiv3-sc-1pua5bc-6 ieyezC"
     data-testid="cql-library-name-display"
   >
     <span
-      class="MeasureInformation___StyledSpan3-sc-1pua5bc-6 cPwLxs"
+      class="MeasureInformation___StyledSpan3-sc-1pua5bc-7 byhJob"
     >
       Measure CQL Library Name:
     </span>
-    <span>
+    <span
+      class="MeasureInformation__DisplaySpan-sc-1pua5bc-1 eEmctf"
+    >
       NA
     </span>
   </div>
@@ -56,14 +58,14 @@ exports[`MeasureInformation component should render the component with a blank m
 
 exports[`MeasureInformation component should render the component with measure's name populated 1`] = `
 <div
-  class="MeasureInformation___StyledDiv-sc-1pua5bc-0 kIvXMc"
+  class="MeasureInformation___StyledDiv-sc-1pua5bc-2 IOWWo"
   data-testid="measure-name-edit"
 >
   <div
-    class="MeasureInformation___StyledDiv3-sc-1pua5bc-3 iIpBCt"
+    class="MeasureInformation__DisplayDiv-sc-1pua5bc-0 goZaEd"
   >
     <span
-      class="MeasureInformation___StyledSpan2-sc-1pua5bc-4 gexfQv"
+      class="MeasureInformation___StyledSpan2-sc-1pua5bc-5 jXgrNU"
     >
       Measure Name:
     </span>
@@ -80,7 +82,7 @@ exports[`MeasureInformation component should render the component with measure's
           the measure for testing
           <svg
             aria-hidden="true"
-            class="InlineEdit___StyledPencilIcon-sc-infirb-2 kHpXEx"
+            class="InlineEdit___StyledPencilIcon-sc-infirb-2 gvkVkb"
             fill="currentColor"
             viewBox="0 0 20 20"
             xmlns="http://www.w3.org/2000/svg"
@@ -94,15 +96,17 @@ exports[`MeasureInformation component should render the component with measure's
     </div>
   </div>
   <div
-    class="MeasureInformation___StyledDiv4-sc-1pua5bc-5 kmMvDE"
+    class="MeasureInformation___StyledDiv3-sc-1pua5bc-6 ieyezC"
     data-testid="cql-library-name-display"
   >
     <span
-      class="MeasureInformation___StyledSpan3-sc-1pua5bc-6 cPwLxs"
+      class="MeasureInformation___StyledSpan3-sc-1pua5bc-7 byhJob"
     >
       Measure CQL Library Name:
     </span>
-    <span>
+    <span
+      class="MeasureInformation__DisplaySpan-sc-1pua5bc-1 eEmctf"
+    >
       NA
     </span>
   </div>

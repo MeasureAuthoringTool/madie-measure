@@ -1,6 +1,7 @@
 import axios from "axios";
 import useServiceConfig from "./useServiceConfig";
 import { ServiceConfig } from "./ServiceContext";
+import useOktaTokens from "../hooks/useOktaTokens";
 
 export type ElmTranslationError = {
   startLine: number;
@@ -33,12 +34,15 @@ export type ElmTranslation = {
 };
 
 export class ElmTranslationServiceApi {
-  constructor(private baseUrl: string) {}
+  constructor(private baseUrl: string, private getAccessToken: () => string) {}
 
   async translateCqlToElm(cql: string): Promise<ElmTranslation> {
     if (this.baseUrl) {
       const resp = await axios.put(`${this.baseUrl}/cql/translator/cql`, cql, {
-        headers: { "Content-Type": "text/plain" },
+        headers: {
+          Authorization: `Bearer ${this.getAccessToken()}`,
+          "Content-Type": "text/plain",
+        },
         params: {
           showWarnings: true,
           annotations: true,
@@ -67,7 +71,9 @@ export class ElmTranslationServiceApi {
 
 export default function useElmTranslationServiceApi(): ElmTranslationServiceApi {
   const serviceConfig: ServiceConfig = useServiceConfig();
+  const { getAccessToken } = useOktaTokens();
   return new ElmTranslationServiceApi(
-    serviceConfig.elmTranslationService?.baseUrl
+    serviceConfig.elmTranslationService?.baseUrl,
+    getAccessToken
   );
 }

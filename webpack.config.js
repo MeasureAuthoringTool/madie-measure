@@ -4,6 +4,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { mergeWithRules } = require("webpack-merge");
 const singleSpaDefaults = require("webpack-config-single-spa-react-ts");
 const path = require("path");
+const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
 const fs = require("fs");
 
 module.exports = (webpackConfigEnv, argv) => {
@@ -38,13 +39,24 @@ module.exports = (webpackConfigEnv, argv) => {
     webpackConfigEnv,
     argv,
     disableHtmlGeneration: true,
+    orgPackagesAsExternal: false,
   });
 
+  // This must be updated for any single-spa applications or utilities,
+  // or any other package to be loaded externally
+  const externalsConfig = {
+    externals: [
+      "@madie/madie-patient",
+      "@madie/madie-components",
+      "@madie/madie-editor",
+    ],
+  };
   // We need to override the css loading rule from the parent configuration
   // so that we can add postcss-loader to the chain
   const newCssRule = {
     module: {
       rules: [
+        { test: /\.m?js/, type: "javascript/auto" },
         {
           test: /\.css$/i,
           include: [/node_modules/, /src/],
@@ -96,6 +108,16 @@ module.exports = (webpackConfigEnv, argv) => {
     ],
   };
 
+  // node polyfills
+  const polyfillConfig = {
+    resolve: {
+      fallback: {
+        fs: false,
+      },
+    },
+    plugins: [new NodePolyfillPlugin()],
+  };
+
   return mergeWithRules({
     module: {
       rules: {
@@ -104,5 +126,6 @@ module.exports = (webpackConfigEnv, argv) => {
       },
     },
     plugins: "append",
-  })(defaultConfig, newCssRule);
+  })(defaultConfig, polyfillConfig, newCssRule, externalsConfig);
+  // })(defaultConfig, newCssRule);
 };

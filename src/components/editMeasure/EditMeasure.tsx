@@ -5,6 +5,7 @@ import {
   Switch,
   useParams,
   useRouteMatch,
+  useHistory,
 } from "react-router-dom";
 import "styled-components/macro";
 import EditMeasureNav from "./editMeasureNav/EditMeasureNav";
@@ -14,6 +15,7 @@ import Measure from "../../models/Measure";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { MeasureContextProvider } from "./MeasureContext";
 import { MadiePatient } from "@madie/madie-patient";
+import MeasureGroups from "../measureGroups/MeasureGroups";
 
 interface inputParams {
   id: string;
@@ -26,12 +28,21 @@ export default function EditMeasure() {
   const [measure, setMeasure] = useState<Measure>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const history = useHistory();
+
   useEffect(() => {
     if (!measure) {
-      measureServiceApi.fetchMeasure(id).then((value: Measure) => {
-        setMeasure(value);
-        setLoading(false);
-      });
+      measureServiceApi
+        .fetchMeasure(id)
+        .then((value: Measure) => {
+          setMeasure(value);
+          setLoading(false);
+        })
+        .catch((err) => {
+          if (err.toString().includes("404")) {
+            history.push("/404");
+          }
+        });
     }
   }, [measureServiceApi, id, measure]);
 
@@ -53,7 +64,7 @@ export default function EditMeasure() {
             <MadiePatient />
           </Route>
           <Route path="*">
-            <div>In progress...</div>
+            <MeasureGroups />
           </Route>
         </Switch>
       </MeasureContextProvider>
