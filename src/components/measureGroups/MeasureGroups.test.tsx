@@ -81,6 +81,7 @@ describe("Measure Groups Page", () => {
         measurePopulation: "",
         measurePopulationExclusion: "",
       },
+      groupDescription: "",
     };
   });
 
@@ -179,7 +180,7 @@ describe("Measure Groups Page", () => {
   });
 
   test("Should create population Group with one initial population successfully", async () => {
-    renderMeasureGroupComponent();
+    const { getByTestId } = renderMeasureGroupComponent();
     // select initial population from dropdown
     userEvent.selectOptions(
       screen.getByTestId("select-measure-group-population"),
@@ -193,6 +194,11 @@ describe("Measure Groups Page", () => {
       ).selected
     ).toBe(true);
 
+    const input = getByTestId("groupDescriptionInput");
+    fireEvent.change(input, {
+      target: { value: "new description" },
+    });
+
     mockedAxios.post.mockResolvedValue({ data: { group } });
 
     // submit the form
@@ -205,6 +211,7 @@ describe("Measure Groups Page", () => {
         initialPopulation: "Initial Population",
       },
       scoring: "Cohort",
+      groupDescription: "new description",
     };
 
     expect(alert).toHaveTextContent(
@@ -219,6 +226,7 @@ describe("Measure Groups Page", () => {
 
   test("Should be able to update initial population of a population group", async () => {
     group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "testDescription";
     measure.groups = [group];
     renderMeasureGroupComponent();
 
@@ -258,6 +266,7 @@ describe("Measure Groups Page", () => {
           "VTE Prophylaxis by Medication Administered or Device Applied",
       },
       scoring: "Cohort",
+      groupDescription: "testDescription",
     };
 
     // submit the form

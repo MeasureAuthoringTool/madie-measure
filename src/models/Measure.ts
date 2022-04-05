@@ -13,6 +13,7 @@ export interface Group {
   id: string;
   scoring?: string;
   population?: PopulationType;
+  groupDescription?: string;
 }
 
 export default interface Measure {

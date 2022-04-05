@@ -47,6 +47,13 @@ const PopulationActions = styled.div(() => [
   tw`col-span-3 p-1 pl-6`,
 ]);
 
+const FormContent = tw.div`space-y-8 divide-y divide-gray-200`;
+const FormField = tw.div`mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6`;
+const FormFieldInner = tw.div`sm:col-span-3`;
+const FieldLabel = tw.label`block text-sm font-medium text-gray-700`;
+const FieldSeparator = tw.div`mt-1`;
+const FieldInput = tw.input`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
+
 // Define fields to conditionally appear based on selected scoring unit
 export const DefaultPopulationSelectorDefinitions = [
   {
@@ -137,6 +144,7 @@ const MeasureGroups = () => {
         measurePopulationExclusion:
           group?.population?.measurePopulationExclusion || "",
       },
+      groupDescription: group?.groupDescription,
     } as Group,
     validationSchema: MeasureGroupSchemaValidator,
     onSubmit: (group: Group) => {
@@ -241,10 +249,11 @@ const MeasureGroups = () => {
     }
   };
   // Local state to later populate the left nav and and govern routes based on group ids
+  const baseURL = "/measures/" + measure.id + "/edit/measure-groups";
   const measureGroups = [
     {
       title: "MEASURE GROUP 1",
-      href: "0011001",
+      href: `${baseURL}`,
       dataTestId: "leftPanelMeasureInformation",
     },
   ];
@@ -274,6 +283,28 @@ const MeasureGroups = () => {
         <Content>
           <Header>
             <Title>Measure Group 1</Title>
+
+            <FormField>
+              <FormFieldInner>
+                <FieldLabel htmlFor="measure-group-description">
+                  Group Description
+                </FieldLabel>
+                <FieldSeparator>
+                  <FieldInput
+                    value={formik.values.groupDescription}
+                    type="text"
+                    name="group-description"
+                    id="group-description"
+                    autoComplete="group-description"
+                    required
+                    //onChange={onGroupDescriptionChange}
+                    placeholder="Group Description"
+                    data-testid="groupDescriptionInput"
+                    {...formik.getFieldProps("groupDescription")}
+                  />
+                </FieldSeparator>
+              </FormFieldInner>
+            </FormField>
           </Header>
           {genericErrorMessage && (
             <Alert
