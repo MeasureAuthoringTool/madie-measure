@@ -24,7 +24,6 @@ const MeasureStewardMock = MeasureSteward as jest.Mock<JSX.Element>;
 const MeasureDescriptionMock = MeasureDescription as jest.Mock<JSX.Element>;
 const MeasureCopyrightMock = MeasureCopyright as jest.Mock<JSX.Element>;
 const MeasureDisclaimerMock = MeasureDisclaimer as jest.Mock<JSX.Element>;
-const MeasureRationaleMock = MeasureRationale as jest.Mock<JSX.Element>;
 
 MeasureInformationMock.mockImplementation(() => {
   return <div>Mock Measure Info</div>;
@@ -46,9 +45,9 @@ MeasureDisclaimerMock.mockImplementation(() => {
   return <div>Mock Measure Disclaimer</div>;
 });
 
-MeasureRationaleMock.mockImplementation(() => {
-  return <div>Mock Measure Rationale</div>;
-});
+jest.mock("./measureRationale/MeasureRationale", () => (
+  <div>Mock Measure Rationale</div>
+));
 
 const serviceConfig: ServiceConfig = {
   measureService: {
