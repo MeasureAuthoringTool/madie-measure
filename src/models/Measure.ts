@@ -1,7 +1,6 @@
 import { Model } from "./Model";
 import { MeasureScoring } from "./MeasureScoring";
 import { PopulationType } from "./MeasurePopulation";
-import { string } from "yup/lib/locale";
 
 export interface MeasureMetadata {
   steward?: string;
