@@ -296,8 +296,6 @@ const MeasureGroups = () => {
                     name="group-description"
                     id="group-description"
                     autoComplete="group-description"
-                    required
-                    //onChange={onGroupDescriptionChange}
                     placeholder="Group Description"
                     data-testid="groupDescriptionInput"
                     {...formik.getFieldProps("groupDescription")}
