@@ -24,6 +24,7 @@ const MeasureStewardMock = MeasureSteward as jest.Mock<JSX.Element>;
 const MeasureDescriptionMock = MeasureDescription as jest.Mock<JSX.Element>;
 const MeasureCopyrightMock = MeasureCopyright as jest.Mock<JSX.Element>;
 const MeasureDisclaimerMock = MeasureDisclaimer as jest.Mock<JSX.Element>;
+const MeasureRationaleMock = MeasureRationale as jest.Mock<JSX.Element>;
 
 MeasureInformationMock.mockImplementation(() => {
   return <div>Mock Measure Info</div>;
@@ -45,9 +46,9 @@ MeasureDisclaimerMock.mockImplementation(() => {
   return <div>Mock Measure Disclaimer</div>;
 });
 
-jest.mock("./measureRationale/MeasureRationale", () => (
-  <div>Mock Measure Rationale</div>
-));
+MeasureRationaleMock.mockImplementation(() => {
+  return <div>Mock Measure Rationale</div>;
+});
 
 const serviceConfig: ServiceConfig = {
   measureService: {
@@ -134,6 +135,25 @@ describe("MeasureDetails component", () => {
     );
 
     expect(getByText("Mock Measure Disclaimer")).toBeTruthy();
+    expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureSteward")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureDisclaimer")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureRationale")).toBeInTheDocument();
+  });
+
+  it("should render the MeasureRationale component for measure-rationale URL", () => {
+    const { getByText, getByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={[{ pathname: "/foo/measure-rationale" }]}>
+          <Route path="/foo">
+            <MeasureDetails />
+          </Route>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    expect(getByText("Mock Measure Rationale")).toBeTruthy();
     expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureSteward")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
