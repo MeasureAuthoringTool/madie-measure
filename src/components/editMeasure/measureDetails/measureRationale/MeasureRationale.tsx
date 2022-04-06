@@ -47,8 +47,6 @@ export default function MeasureRationale() {
       })
       .catch((reason) => {
         const message = `Error updating measure "${measure.measureName}"`;
-        console.error(message);
-        console.error(reason);
         setError(message);
       });
   };
