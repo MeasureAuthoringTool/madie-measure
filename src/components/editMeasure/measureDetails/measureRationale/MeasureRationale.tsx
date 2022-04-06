@@ -2,6 +2,7 @@ import React, { useState, ChangeEvent, FormEvent } from "react";
 import tw from "twin.macro";
 import useCurrentMeasure from "../../useCurrentMeasure";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
+import { useFormik } from "formik";
 
 const Form = tw.form`max-w-xl mt-3 space-y-8 divide-y divide-gray-200`;
 const FormContent = tw.div`space-y-8 divide-y divide-gray-200`;
@@ -26,19 +27,16 @@ export default function MeasureRationale() {
   const [success, setSuccess] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
-  const [measureRationale, setMeasureRationale] = useState(
-    measureMetaData.rationale
-  );
+  const formik = useFormik({
+    initialValues: { rationale: measure?.measureMetaData?.rationale },
+    onSubmit: (values) => {
+      submitForm(values.rationale);
+    },
+  });
 
-  const onMeasureRationaleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setMeasureRationale(e.target.value);
-  };
-
-  const onFormSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
+  const submitForm = (rationale: string) => {
     measure.measureMetaData = { ...measureMetaData };
-    measure.measureMetaData.rationale = measureRationale;
+    measure.measureMetaData.rationale = rationale;
 
     measureServiceApi
       .updateMeasure(measure)
@@ -52,7 +50,7 @@ export default function MeasureRationale() {
   };
 
   return (
-    <Form onSubmit={onFormSubmit} data-testid="measureRationale">
+    <Form onSubmit={formik.handleSubmit} data-testid="measureRationale">
       <FormContent>
         <div>
           <FormField>
@@ -60,15 +58,15 @@ export default function MeasureRationale() {
               <FieldLabel htmlFor="measure-rationale">Rationale</FieldLabel>
               <FieldSeparator>
                 <FieldInput
-                  value={measureRationale}
                   type="text"
                   name="measure-rationale"
                   id="measure-rationale"
                   autoComplete="measure-rationale"
-                  required
-                  onChange={onMeasureRationaleChange}
+                  onChange={formik.handleChange}
+                  value={formik.values.rationale}
                   placeholder="Rationale"
                   data-testid="measureRationaleInput"
+                  {...formik.getFieldProps("rationale")}
                 />
               </FieldSeparator>
             </FormFieldInner>
@@ -78,7 +76,11 @@ export default function MeasureRationale() {
 
       <FormButtons>
         <ButtonWrapper>
-          <SubmitButton type="submit" data-testid="measureRationaleSave">
+          <SubmitButton
+            type="submit"
+            data-testid="measureRationaleSave"
+            disabled={!(formik.isValid && formik.dirty)}
+          >
             Save
           </SubmitButton>
           <MessageDiv>
