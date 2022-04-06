@@ -6,6 +6,7 @@ import MeasureSteward from "./measureSteward/MeasureSteward";
 import MeasureDescription from "./measureDescription/MeasureDescription";
 import MeasureCopyright from "./measureCopyright/MeasureCopyright";
 import MeasureDisclaimer from "./measureDisclaimer/MeasureDisclaimer";
+import MeasureRationale from "./measureRationale/MeasureRationale";
 import MeasureDetailsSidebar from "./MeasureDetailsSidebar";
 
 const Grid = tw.div`grid grid-cols-4 gap-4 ml-6`;
@@ -17,6 +18,7 @@ export default function EditMeasure() {
   const descriptionLink = `${path}/measure-description`;
   const copyrightLink = `${path}/measure-copyright`;
   const disclaimerLink = `${path}/measure-disclaimer`;
+  const rationaleLink = `${path}/measure-rationale`;
 
   const links = [
     {
@@ -44,6 +46,11 @@ export default function EditMeasure() {
       href: disclaimerLink,
       dataTestId: "leftPanelMeasureDisclaimer",
     },
+    {
+      title: "Rationale",
+      href: rationaleLink,
+      dataTestId: "leftPanelMeasureRationale",
+    },
   ];
 
   return (
@@ -66,6 +73,9 @@ export default function EditMeasure() {
             </Route>
             <Route path={disclaimerLink}>
               <MeasureDisclaimer />
+            </Route>
+            <Route path={rationaleLink}>
+              <MeasureRationale />
             </Route>
           </Switch>
         </Content>
