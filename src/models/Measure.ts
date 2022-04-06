@@ -1,12 +1,14 @@
 import { Model } from "./Model";
 import { MeasureScoring } from "./MeasureScoring";
 import { PopulationType } from "./MeasurePopulation";
+import { string } from "yup/lib/locale";
 
 export interface MeasureMetadata {
   steward?: string;
   description?: string;
   copyright?: string;
   disclaimer?: string;
+  rationale?: string;
 }
 
 export interface Group {
