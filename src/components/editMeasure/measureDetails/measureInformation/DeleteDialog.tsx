@@ -7,7 +7,7 @@ export interface DeleteDialogProps {
   open: boolean;
   onClose: any;
   measureName: String;
-  deleteMeasure: Boolean;
+  deleteMeasure: Function;
 }
 
 const DeleteDialog = (props: DeleteDialogProps) => {
