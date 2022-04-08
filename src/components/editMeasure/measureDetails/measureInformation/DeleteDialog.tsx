@@ -4,8 +4,8 @@ import { Button } from "@madie/madie-design-system/dist/react";
 import { Dialog, IconButton, DialogActions, Divider } from "@mui/material";
 
 export interface DeleteDialogProps {
-  open: Boolean;
-  onClose: Function;
+  open: boolean;
+  onClose: any;
   measureName: String;
   deleteMeasure: Boolean;
 }
