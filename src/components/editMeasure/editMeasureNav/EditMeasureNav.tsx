@@ -32,6 +32,8 @@ const EditMeasureNav = () => {
     pathname !== `${url}/details/measure-copyright` &&
     pathname !== `${url}/details/measure-disclaimer` &&
     pathname !== `${url}/details/measure-rationale` &&
+    pathname !== `${url}/details/measure-author` &&
+    pathname !== `${url}/details/measure-guidance` &&
     !pathname.startsWith(`${url}/test-cases`)
   ) {
     history.push("/404");
