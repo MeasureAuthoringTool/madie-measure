@@ -55,7 +55,10 @@ const DeleteDialog = (props: DeleteDialogProps) => {
     >
       <div className="top-row">
         <h3>Delete Measure</h3>
-        <IconButton onClick={onClose}>
+        <IconButton
+          onClick={onClose}
+          data-testid="delete-measure-dialog-button"
+        >
           <CloseIcon />
         </IconButton>
       </div>
