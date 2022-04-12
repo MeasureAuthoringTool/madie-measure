@@ -153,6 +153,7 @@ const CreateNewMeasureDialog = ({ open, onClose }) => {
       model: "",
       cqlLibraryName: "",
       measureScoring: "",
+      active: true,
       // TO DO: validation, models for new entries
     } as Measure,
     validationSchema: MeasureSchemaValidator,
