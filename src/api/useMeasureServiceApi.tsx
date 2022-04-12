@@ -71,6 +71,12 @@ export class MeasureServiceApi {
           },
         }
       );
+      if (!!response && !!response.data) {
+        const responseData = JSON.stringify(response.data);
+        if (responseData.includes("Request Rejected")) {
+          throw new Error("failure create group");
+        }
+      }
       return response.data;
     } catch (err) {
       const message = this.buildErrorMessage(
@@ -93,6 +99,12 @@ export class MeasureServiceApi {
           },
         }
       );
+      if (!!response && !!response.data) {
+        const responseData = JSON.stringify(response.data);
+        if (responseData.includes("Request Rejected")) {
+          throw new Error("failure update group");
+        }
+      }
       return response.data;
     } catch (err) {
       const message = this.buildErrorMessage(
