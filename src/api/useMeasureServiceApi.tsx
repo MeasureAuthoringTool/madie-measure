@@ -71,7 +71,7 @@ export class MeasureServiceApi {
           },
         }
       );
-      if (!!response && !!response.data) {
+      if (response?.data) {
         const responseData = JSON.stringify(response.data);
         if (responseData.includes("Request Rejected")) {
           throw new Error("failure create group");
@@ -99,7 +99,7 @@ export class MeasureServiceApi {
           },
         }
       );
-      if (!!response && !!response.data) {
+      if (response?.data) {
         const responseData = JSON.stringify(response.data);
         if (responseData.includes("Request Rejected")) {
           throw new Error("failure update group");
