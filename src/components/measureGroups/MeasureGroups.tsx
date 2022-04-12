@@ -214,7 +214,7 @@ const MeasureGroups = () => {
       measureServiceApi
         .updateGroup(group, measure.id)
         .then((g: Group) => {
-          if(g===null || g.id==="" || g.id===null) {
+          if (g === null || g.id === null) {
             throw new Error("Error updating group");
           }
           setMeasure({
@@ -236,7 +236,7 @@ const MeasureGroups = () => {
       measureServiceApi
         .createGroup(group, measure.id)
         .then((g: Group) => {
-          if(g===null || g.id===null) {
+          if (g === null || g.id === null) {
             throw new Error("Error creating group");
           }
           setMeasure({
