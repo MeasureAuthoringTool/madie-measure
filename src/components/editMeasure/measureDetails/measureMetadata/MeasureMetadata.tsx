@@ -1,11 +1,14 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState } from "react";
 import tw from "twin.macro";
 import useCurrentMeasure from "../../useCurrentMeasure";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import { useFormik } from "formik";
+import getInitialValues, { setMeasureMetadata } from "./MeasureMetadataHelper";
 
 const Form = tw.form`max-w-xl mt-3 space-y-8 divide-y divide-gray-200`;
 const FormContent = tw.div`space-y-8 divide-y divide-gray-200`;
+const Header = tw.h3`text-lg leading-6 font-medium text-gray-900`;
+const SubHeader = tw.p`mt-1 text-sm text-gray-500`;
 const FormField = tw.div`mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6`;
 const FormFieldInner = tw.div`sm:col-span-3`;
 const FieldLabel = tw.label`block text-sm font-medium text-gray-700`;
@@ -19,54 +22,76 @@ const MessageText = tw.p`text-sm font-medium`;
 const SuccessText = tw(MessageText)`text-green-800`;
 const ErrorText = tw(MessageText)`text-red-800`;
 
-export default function MeasureRationale() {
+export interface MeasureMetadataProps {
+  measureMetadataType?: String;
+}
+
+export default function MeasureMetadata(props: MeasureMetadataProps) {
+  const { measureMetadataType } = props;
+  const typeLower = measureMetadataType.toLowerCase();
+
   const { measure } = useCurrentMeasure();
   let { measureMetaData } = measure;
   measureMetaData = measureMetaData || {};
   const measureServiceApi = useMeasureServiceApi();
-  const [success, setSuccess] = useState<boolean>(false);
+  const [success, setSuccess] = useState<string>("");
   const [error, setError] = useState<string>("");
 
   const formik = useFormik({
-    initialValues: { rationale: measure?.measureMetaData?.rationale },
+    enableReinitialize: true,
+    initialValues: { genericField: getInitialValues(measure, typeLower) },
     onSubmit: (values) => {
-      submitForm(values.rationale);
+      submitForm(values.genericField);
     },
   });
 
-  const submitForm = (rationale: string) => {
+  const submitForm = (genericField: string) => {
     measure.measureMetaData = { ...measureMetaData };
-    measure.measureMetaData.rationale = rationale;
+    setMeasureMetadata(measure, typeLower, genericField);
 
     measureServiceApi
       .updateMeasure(measure)
       .then(() => {
-        setSuccess(true);
+        setSuccess(`${measureMetadataType}`);
       })
       .catch((reason) => {
         const message = `Error updating measure "${measure.measureName}"`;
-        setError(message);
+        setError(message + " for " + measureMetadataType);
       });
   };
 
   return (
-    <Form onSubmit={formik.handleSubmit} data-testid="measureRationale">
+    <Form
+      onSubmit={formik.handleSubmit}
+      data-testid={`measure${measureMetadataType}`}
+    >
       <FormContent>
         <div>
+          {measureMetadataType === "Steward" && (
+            <div>
+              <Header>Steward/Author</Header>
+              <SubHeader>
+                This information will be displayed publicly so be careful what
+                you share.
+              </SubHeader>
+            </div>
+          )}
           <FormField>
             <FormFieldInner>
-              <FieldLabel htmlFor="measure-rationale">Rationale</FieldLabel>
+              <FieldLabel htmlFor={`measure-${typeLower}`}>
+                {measureMetadataType}
+              </FieldLabel>
               <FieldSeparator>
                 <FieldInput
                   type="text"
-                  name="measure-rationale"
-                  id="measure-rationale"
-                  autoComplete="measure-rationale"
+                  name={`measure-${typeLower}`}
+                  id={`measure-${typeLower}`}
+                  autoComplete={`measure-${typeLower}`}
                   onChange={formik.handleChange}
-                  value={formik.values.rationale}
-                  placeholder="Rationale"
-                  data-testid="measureRationaleInput"
-                  {...formik.getFieldProps("rationale")}
+                  value={formik.values.genericField}
+                  placeholder={`${measureMetadataType}`}
+                  data-testid={`measure${measureMetadataType}Input`}
+                  {...formik.getFieldProps("genericField")}
                 />
               </FieldSeparator>
             </FormFieldInner>
@@ -78,19 +103,21 @@ export default function MeasureRationale() {
         <ButtonWrapper>
           <SubmitButton
             type="submit"
-            data-testid="measureRationaleSave"
+            data-testid={`measure${measureMetadataType}Save`}
             disabled={!(formik.isValid && formik.dirty)}
           >
             Save
           </SubmitButton>
           <MessageDiv>
-            {success && (
-              <SuccessText data-testid="measureRationaleSuccess">
-                Measure Rationale Information Saved Successfully
+            {success && success.includes(`${measureMetadataType}`) && (
+              <SuccessText data-testid={`measure${measureMetadataType}Success`}>
+                Measure {measureMetadataType} Information Saved Successfully
               </SuccessText>
             )}
-            {error && (
-              <ErrorText data-testid="measureRationaleError">{error}</ErrorText>
+            {error && error.includes(`${measureMetadataType}`) && (
+              <ErrorText data-testid={`measure${measureMetadataType}Error`}>
+                {error}
+              </ErrorText>
             )}
           </MessageDiv>
         </ButtonWrapper>

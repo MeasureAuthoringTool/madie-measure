@@ -8,6 +8,8 @@ export interface MeasureMetadata {
   copyright?: string;
   disclaimer?: string;
   rationale?: string;
+  author?: string;
+  guidance?: string;
 }
 
 export interface Group {
