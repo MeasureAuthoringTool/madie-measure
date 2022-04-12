@@ -2,11 +2,7 @@ import * as React from "react";
 import tw from "twin.macro";
 import { Route, Switch, useRouteMatch } from "react-router-dom";
 import MeasureInformation from "./measureInformation/MeasureInformation";
-import MeasureSteward from "./measureSteward/MeasureSteward";
-import MeasureDescription from "./measureDescription/MeasureDescription";
-import MeasureCopyright from "./measureCopyright/MeasureCopyright";
-import MeasureDisclaimer from "./measureDisclaimer/MeasureDisclaimer";
-import MeasureRationale from "./measureRationale/MeasureRationale";
+import MeasureMetadata from "./measureMetadata/MeasureMetadata";
 import MeasureDetailsSidebar from "./MeasureDetailsSidebar";
 
 const Grid = tw.div`grid grid-cols-4 gap-4 ml-6`;
@@ -19,6 +15,8 @@ export default function EditMeasure() {
   const copyrightLink = `${path}/measure-copyright`;
   const disclaimerLink = `${path}/measure-disclaimer`;
   const rationaleLink = `${path}/measure-rationale`;
+  const authorLink = `${path}/measure-author`;
+  const guidanceLink = `${path}/measure-guidance`;
 
   const links = [
     {
@@ -42,7 +40,7 @@ export default function EditMeasure() {
       dataTestId: "leftPanelMeasureCopyright",
     },
     {
-      title: "Dislaimer",
+      title: "Disclaimer",
       href: disclaimerLink,
       dataTestId: "leftPanelMeasureDisclaimer",
     },
@@ -50,6 +48,16 @@ export default function EditMeasure() {
       title: "Rationale",
       href: rationaleLink,
       dataTestId: "leftPanelMeasureRationale",
+    },
+    {
+      title: "Author",
+      href: authorLink,
+      dataTestId: "leftPanelMeasureAuthor",
+    },
+    {
+      title: "Guidance",
+      href: guidanceLink,
+      dataTestId: "leftPanelMeasureGuidance",
     },
   ];
 
@@ -63,19 +71,25 @@ export default function EditMeasure() {
               <MeasureInformation />
             </Route>
             <Route path={stewardLink}>
-              <MeasureSteward />
+              <MeasureMetadata measureMetadataType="Steward" />
             </Route>
             <Route path={descriptionLink}>
-              <MeasureDescription />
+              <MeasureMetadata measureMetadataType="Description" />
             </Route>
             <Route path={copyrightLink}>
-              <MeasureCopyright />
+              <MeasureMetadata measureMetadataType="Copyright" />
             </Route>
             <Route path={disclaimerLink}>
-              <MeasureDisclaimer />
+              <MeasureMetadata measureMetadataType="Disclaimer" />
             </Route>
             <Route path={rationaleLink}>
-              <MeasureRationale />
+              <MeasureMetadata measureMetadataType="Rationale" />
+            </Route>
+            <Route path={authorLink}>
+              <MeasureMetadata measureMetadataType="Author" />
+            </Route>
+            <Route path={guidanceLink}>
+              <MeasureMetadata measureMetadataType="Guidance" />
             </Route>
           </Switch>
         </Content>
