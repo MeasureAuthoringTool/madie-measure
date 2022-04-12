@@ -37,6 +37,13 @@ exports[`MeasureInformation component should render the component with a blank m
         </span>
       </div>
     </div>
+    <button
+      class="qpp-c-button qpp-c-button--danger-primary"
+      data-testid="delete-measure-button"
+      type="button"
+    >
+      Delete Measure
+    </button>
   </div>
   <div
     class="MeasureInformation___StyledDiv3-sc-1pua5bc-6 ieyezC"
@@ -94,6 +101,13 @@ exports[`MeasureInformation component should render the component with measure's
         </span>
       </div>
     </div>
+    <button
+      class="qpp-c-button qpp-c-button--danger-primary"
+      data-testid="delete-measure-button"
+      type="button"
+    >
+      Delete Measure
+    </button>
   </div>
   <div
     class="MeasureInformation___StyledDiv3-sc-1pua5bc-6 ieyezC"

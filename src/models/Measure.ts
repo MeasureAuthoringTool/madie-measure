@@ -21,6 +21,7 @@ export interface Group {
 
 export default interface Measure {
   id: string;
+  active: boolean;
   measureHumanReadableId: string;
   measureSetId: string;
   version: number;
