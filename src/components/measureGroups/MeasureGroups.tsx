@@ -214,16 +214,12 @@ const MeasureGroups = () => {
       measureServiceApi
         .updateGroup(group, measure.id)
         .then((g: Group) => {
-          if (g === null || g.id === null) {
-            throw new Error("Error updating group");
-          }
           setMeasure({
             ...measure,
             groups: [g],
           });
         })
         .then(() => {
-          setGenericErrorMessage("");
           setSuccessMessage(
             "Population details for this group updated successfully."
           );
@@ -236,16 +232,12 @@ const MeasureGroups = () => {
       measureServiceApi
         .createGroup(group, measure.id)
         .then((g: Group) => {
-          if (g === null || g.id === null) {
-            throw new Error("Error creating group");
-          }
           setMeasure({
             ...measure,
             groups: [g],
           });
         })
         .then(() => {
-          setGenericErrorMessage("");
           setSuccessMessage(
             "Population details for this group saved successfully."
           );
