@@ -440,43 +440,6 @@ describe("Measure Groups Page", () => {
     );
   });
 
-  test("Save button is disabled until all required Proportion populations are entered", async () => {
-    measure.measureScoring = MeasureScoring.PROPORTION;
-    group.scoring = "Proportion";
-    renderMeasureGroupComponent();
-    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
-    await waitFor(() => {
-      expect(screen.getAllByRole("option", { name: "SDE Payer" })).toHaveLength(
-        6
-      );
-    });
-    userEvent.selectOptions(
-      screen.getByRole("combobox", { name: "Initial Population *" }),
-      "Encounter With Age Range and Without VTE Diagnosis or Obstetrical Conditions"
-    );
-    userEvent.selectOptions(
-      screen.getByRole("combobox", { name: "Denominator *" }),
-      "Denominator"
-    );
-    userEvent.selectOptions(
-      screen.getByRole("combobox", { name: "Denominator Exclusion" }),
-      "Encounter With Age Range and Without VTE Diagnosis or Obstetrical Conditions"
-    );
-    await waitFor(() =>
-      expect(screen.getByRole("button", { name: "Save" })).toBeDisabled()
-    );
-    expect(
-      screen.getByText("You must set all required Populations.")
-    ).toBeInTheDocument();
-    userEvent.selectOptions(
-      screen.getByRole("combobox", { name: "Numerator *" }),
-      "Numerator"
-    );
-    await waitFor(() =>
-      expect(screen.getByRole("button", { name: "Save" })).not.toBeDisabled()
-    );
-  });
-
   test("Save button is disabled until all required Ratio populations are entered", async () => {
     measure.measureScoring = MeasureScoring.RATIO;
     group.scoring = "Ratio";
