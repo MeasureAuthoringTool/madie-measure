@@ -1,6 +1,9 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import * as React from "react";
-import MeasureEditor, { mapElmErrorsToAceAnnotations } from "./MeasureEditor";
+import MeasureEditor, {
+  mapElmErrorsToAceAnnotations,
+  mapElmErrorsToAceMarkers,
+} from "./MeasureEditor";
 import { MeasureContextProvider } from "../editMeasure/MeasureContext";
 import Measure from "../../models/Measure";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
@@ -25,7 +28,7 @@ const measure = {
   lastModifiedAt: "",
   lastModifiedBy: "",
   model: Model.QICORE,
-  measureMetaData: "",
+  measureMetaData: {},
 } as Measure;
 
 const elmTranslationWithNoErrors: ElmTranslation = {
@@ -102,10 +105,10 @@ describe("MeasureEditor component", () => {
 
   it("should mount measure editor component with measure cql", async () => {
     const { getByTestId } = renderEditor(measure);
-    const editorContainer = (await getByTestId(
-      "measure-editor"
-    )) as HTMLInputElement;
-    expect(measure.cql).toEqual(editorContainer.value);
+    await waitFor(() => {
+      const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
+      expect(measure.cql).toEqual(editorContainer.value);
+    });
   });
 
   it("set the editor to empty when no measure cql present", async () => {
@@ -338,6 +341,70 @@ describe("mapElmErrorsToAceAnnotations", () => {
       column: 7,
       type: "warning",
       text: `ELM: 7:15 | Test Warning 456`,
+    });
+  });
+});
+
+describe("map elm errors to Ace Markers", () => {
+  it("should return an empty array for null input", () => {
+    const translationErrors = null;
+    const output = mapElmErrorsToAceMarkers(translationErrors);
+    expect(output).toBeDefined();
+    expect(output.length).toEqual(0);
+  });
+
+  it("should return an empty array for undefined input", () => {
+    const translationErrors = undefined;
+    const output = mapElmErrorsToAceMarkers(translationErrors);
+    expect(output).toBeDefined();
+    expect(output.length).toEqual(0);
+  });
+
+  it("should return an empty array for empty array input", () => {
+    const translationErrors = [];
+    const output = mapElmErrorsToAceMarkers(translationErrors);
+    expect(output).toBeDefined();
+    expect(output.length).toEqual(0);
+  });
+
+  it("should return an empty array for non-array input", () => {
+    const translationErrors: any = { field: "value" };
+    const output = mapElmErrorsToAceMarkers(translationErrors);
+    expect(output).toBeDefined();
+    expect(output.length).toEqual(0);
+  });
+
+  it("should return an array of mapped elements", () => {
+    const output = mapElmErrorsToAceMarkers(translationErrors);
+    expect(output).toBeDefined();
+    expect(output.length).toEqual(2);
+    expect(output[0]).toEqual({
+      clazz: "editor-error-underline",
+      range: {
+        end: {
+          column: 23,
+          row: 18,
+        },
+        start: {
+          column: 19,
+          row: 3,
+        },
+      },
+      type: "text",
+    });
+    expect(output[1]).toEqual({
+      clazz: "editor-error-underline",
+      range: {
+        end: {
+          column: 15,
+          row: 23,
+        },
+        start: {
+          column: 7,
+          row: 23,
+        },
+      },
+      type: "text",
     });
   });
 });
