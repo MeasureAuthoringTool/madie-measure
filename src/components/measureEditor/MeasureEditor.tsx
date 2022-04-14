@@ -1,6 +1,10 @@
 import React, { SetStateAction, Dispatch, useState, useEffect } from "react";
 import "styled-components/macro";
-import { EditorAnnotation, MadieEditor } from "@madie/madie-editor";
+import {
+  EditorAnnotation,
+  EditorErrorMarker,
+  MadieEditor,
+} from "@madie/madie-editor";
 import { Button } from "@madie/madie-components";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import Measure from "../../models/Measure";
@@ -33,6 +37,29 @@ export const mapElmErrorsToAceAnnotations = (
   return annotations;
 };
 
+export const mapElmErrorsToAceMarkers = (
+  errors: ElmTranslationError[]
+): EditorErrorMarker[] => {
+  let markers: EditorErrorMarker[] = [];
+  if (errors && _.isArray(errors) && errors.length > 0) {
+    markers = errors.map((error) => ({
+      range: {
+        start: {
+          row: error.startLine - 1,
+          column: error.startChar,
+        },
+        end: {
+          row: error.endLine - 1,
+          column: error.endChar,
+        },
+      },
+      clazz: "editor-error-underline",
+      type: "text",
+    }));
+  }
+  return markers;
+};
+
 const MeasureEditor = () => {
   const { measure, setMeasure } = useCurrentMeasure();
   const [editorVal, setEditorVal]: [string, Dispatch<SetStateAction<string>>] =
@@ -42,16 +69,24 @@ const MeasureEditor = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
   const [elmTranslationError, setElmTranslationError] = useState(null);
+  // annotations control the gutter error icons.
   const [elmAnnotations, setElmAnnotations] = useState<EditorAnnotation[]>([]);
+  // error markers control the error underlining in the editor.
+  const [errorMarkers, setErrorMarkers] = useState<EditorErrorMarker[]>([]);
 
   const updateElmAnnotations = async (cql: string): Promise<ElmTranslation> => {
     setElmTranslationError(null);
     if (cql && cql.trim().length > 0) {
       const data = await elmTranslationServiceApi.translateCqlToElm(cql);
+      // errorExceptions contains error data for the primary library,
+      // aka the CQL loaded into the editor. Errors from included
+      // libraries are available in data.annotations.errors, if needed.
       const elmAnnotations = mapElmErrorsToAceAnnotations(
         data?.errorExceptions
       );
+      const errorMarkers = mapElmErrorsToAceMarkers(data?.errorExceptions);
       setElmAnnotations(elmAnnotations);
+      setErrorMarkers(errorMarkers);
       return data;
     } else {
       setElmAnnotations([]);
@@ -112,6 +147,8 @@ const MeasureEditor = () => {
         onChange={(val: string) => handleMadieEditorValue(val)}
         value={editorVal}
         inboundAnnotations={elmAnnotations}
+        inboundErrorMarkers={errorMarkers}
+        height={"1000px"}
       />
       <EditorActions data-testid="measure-editor-actions">
         <UpdateAlerts data-testid="update-cql-alerts">
