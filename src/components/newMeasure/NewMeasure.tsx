@@ -32,17 +32,17 @@ export default function NewMeasure() {
   const [offset, setOffset] = useState<number>(0);
   // pull info from some query url
   const curLimit = values.limit && Number(values.limit);
-  const curPage = (values.page && Number(values?.page)) || 1;
+  const curPage = (values.page && Number(values.page)) || 1;
   // can we do stuff
   const canGoNext = (() => {
     return curPage < totalPages;
   })();
   const canGoPrev = Number(values?.page) > 1;
   const handlePageChange = (e, v) => {
-    history.push(`?tab=${activeTab}&?page=${v}&limit=${values?.limit || 10}`);
+    history.push(`?tab=${activeTab}&page=${v}&limit=${values?.limit || 10}`);
   };
   const handleLimitChange = (e) => {
-    history.push(`?tab=${activeTab}&?page=${0}&limit=${e.target.value}`);
+    history.push(`?tab=${activeTab}&page=${0}&limit=${e.target.value}`);
   };
   //dialog utilities
   const [createOpen, setCreateOpen] = useState(false);
