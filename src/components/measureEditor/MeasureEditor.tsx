@@ -148,15 +148,13 @@ const MeasureEditor = () => {
 
   return (
     <>
-      {canEdit && (
-        <MadieEditor
-          onChange={(val: string) => handleMadieEditorValue(val)}
-          value={editorVal}
-          inboundAnnotations={elmAnnotations}
-          inboundErrorMarkers={errorMarkers}
-          height={"1000px"}
-        />
-      )}
+      <MadieEditor
+        onChange={(val: string) => handleMadieEditorValue(val)}
+        value={editorVal}
+        inboundAnnotations={elmAnnotations}
+        inboundErrorMarkers={errorMarkers}
+        height={"1000px"}
+      />
 
       <EditorActions data-testid="measure-editor-actions">
         <UpdateAlerts data-testid="update-cql-alerts">
