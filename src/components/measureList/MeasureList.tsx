@@ -4,9 +4,12 @@ import "styled-components/macro";
 
 import Measure from "../../models/Measure";
 import { useHistory } from "react-router-dom";
+import useOktaTokens from "../../hooks/useOktaTokens";
 
 export default function MeasureList(props: { measureList: Measure[] }) {
   const history = useHistory();
+  const { getUserName } = useOktaTokens();
+  const userName = getUserName();
 
   return (
     <div data-testid="measure-list">
@@ -91,15 +94,28 @@ export default function MeasureList(props: { measureList: Measure[] }) {
                         {measure.revisionNumber}
                       </td>
                       <td tw="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button
-                          onClick={() => {
-                            history.push(`/measures/${measure.id}/edit`);
-                          }}
-                          tw="text-blue-600 hover:text-blue-900"
-                          data-testid={`edit-measure-${measure.id}`}
-                        >
-                          Edit
-                        </button>
+                        {measure.createdBy === userName && (
+                          <button
+                            onClick={() => {
+                              history.push(`/measures/${measure.id}/edit`);
+                            }}
+                            tw="text-blue-600 hover:text-blue-900"
+                            data-testid={`edit-measure-${measure.id}`}
+                          >
+                            Edit
+                          </button>
+                        )}
+                        {measure.createdBy !== userName && (
+                          <button
+                            onClick={() => {
+                              history.push(`/measures/${measure.id}/edit`);
+                            }}
+                            tw="text-blue-600 hover:text-blue-900"
+                            data-testid={`view-measure-${measure.id}`}
+                          >
+                            View
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}

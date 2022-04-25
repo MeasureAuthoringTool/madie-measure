@@ -12,6 +12,7 @@ import { ElmTranslation } from "../../api/useElmTranslationServiceApi";
 import { Model } from "../../models/Model";
 import userEvent from "@testing-library/user-event";
 
+const MEASURE_CREATEDBY = "testuser@example.com";
 const measure = {
   id: "abcd-pqrs-xyz",
   measureHumanReadableId: "",
@@ -24,7 +25,7 @@ const measure = {
   cqlLibraryName: "",
   measureScoring: "",
   createdAt: "",
-  createdBy: "",
+  createdBy: MEASURE_CREATEDBY,
   lastModifiedAt: "",
   lastModifiedBy: "",
   model: Model.QICORE,
@@ -85,6 +86,7 @@ const serviceConfig: ServiceConfig = {
 jest.mock("../../hooks/useOktaTokens", () =>
   jest.fn(() => ({
     getAccessToken: () => "test.jwt",
+    getUserName: () => MEASURE_CREATEDBY,
   }))
 );
 
@@ -115,6 +117,7 @@ describe("MeasureEditor component", () => {
     const measureWithNoCql = {
       id: "MSR1",
       measureName: "MSR1",
+      createdBy: MEASURE_CREATEDBY,
     } as Measure;
     const { getByTestId } = renderEditor(measureWithNoCql);
     const editorContainer = (await getByTestId(
@@ -406,5 +409,15 @@ describe("map elm errors to Ace Markers", () => {
       },
       type: "text",
     });
+  });
+
+  it("test - Save button should not show if user is not the owner of the measure", () => {
+    measure.createdBy = "AnotherUser@example.com";
+    const { getByTestId } = renderEditor(measure);
+
+    const cancelButton = getByTestId("reset-cql-btn");
+    expect(cancelButton).toBeInTheDocument();
+    const saveButton = screen.queryByText("save-cql-btn");
+    expect(saveButton).not.toBeInTheDocument();
   });
 });

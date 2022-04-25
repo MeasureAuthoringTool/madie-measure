@@ -59,6 +59,7 @@ const MeasureGroupPopulationSelect = ({
   optionTitle,
   options = [] as ExpressionDefinition[],
   value = "",
+  canEdit,
   ...props
 }: Props & any) => {
   const htmlId = kebabCase(`population-select-${label}`);
@@ -82,43 +83,47 @@ const MeasureGroupPopulationSelect = ({
 
       <Row>
         <Col>
-          <TextField
-            select
-            value={value?.replace(/"/g, "")}
-            label=""
-            id={htmlId}
-            inputProps={{
-              "data-testid": `select-measure-group-population`,
-            }}
-            InputLabelProps={{ shrink: false, id: `select-${htmlId}-label` }}
-            SelectProps={{
-              native: true,
-              displayEmpty: true,
-            }}
-            // labelId={`select-${htmlId}-label`}
-            name={name}
-            onChange={onChange}
-            style={{ minWidth: "20rem" }}
-            {...props}
-          >
-            {options.map(({ name }, i) => (
+          {canEdit && (
+            <TextField
+              select
+              value={value?.replace(/"/g, "")}
+              label=""
+              id={htmlId}
+              inputProps={{
+                "data-testid": `select-measure-group-population`,
+              }}
+              InputLabelProps={{ shrink: false, id: `select-${htmlId}-label` }}
+              SelectProps={{
+                native: true,
+                displayEmpty: true,
+              }}
+              // labelId={`select-${htmlId}-label`}
+              name={name}
+              onChange={onChange}
+              style={{ minWidth: "20rem" }}
+              {...props}
+            >
+              {options.map(({ name }, i) => (
+                <option
+                  key={`${name}-${i}`}
+                  value={name.replace(/"/g, "")}
+                  data-testid={`select-option-measure-group-population`}
+                >
+                  {name.replace(/"/g, "")}
+                </option>
+              ))}
               <option
-                key={`${name}-${i}`}
-                value={name.replace(/"/g, "")}
+                value={""}
+                disabled={required}
                 data-testid={`select-option-measure-group-population`}
               >
-                {name.replace(/"/g, "")}
+                Select {defaultOptionTitle}
+                {required ? "" : " ( Leave selected for no population )"}
               </option>
-            ))}
-            <option
-              value={""}
-              disabled={required}
-              data-testid={`select-option-measure-group-population`}
-            >
-              Select {defaultOptionTitle}
-              {required ? "" : " ( Leave selected for no population )"}
-            </option>
-          </TextField>
+            </TextField>
+          )}
+
+          {!canEdit && value}
         </Col>
 
         <SpacerContainer>
@@ -130,6 +135,7 @@ const MeasureGroupPopulationSelect = ({
           </Link>
         </SpacerContainer>
       </Row>
+
       {subTitle && <SubTitle>{subTitle}</SubTitle>}
     </FormControl>
   );

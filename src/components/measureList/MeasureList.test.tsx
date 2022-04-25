@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { fireEvent, getByTestId, render, screen } from "@testing-library/react";
 import { Measure } from "../../models/Measure";
 import MeasureList from "./MeasureList";
+import useOktaTokens from "../../hooks/useOktaTokens";
 
 import { v4 as uuid } from "uuid";
 
@@ -13,6 +14,9 @@ jest.mock("react-router-dom", () => ({
     return { push };
   },
 }));
+jest.mock("../../hooks/useOktaTokens");
+const useOktaTokensMock = useOktaTokens as Jest.Mock<Function>;
+const MEASURE_CREATEDBY = "testuser@example.com";
 
 const measures: Measure[] = [
   {
@@ -25,7 +29,7 @@ const measures: Measure[] = [
     measureName: "new measure - A",
     cql: null,
     createdAt: null,
-    createdBy: null,
+    createdBy: MEASURE_CREATEDBY,
     lastModifiedAt: null,
     lastModifiedBy: null,
     model: "QDM",
@@ -70,6 +74,9 @@ describe("Measure List component", () => {
   });
 
   it("should display a list of measures", () => {
+    useOktaTokensMock.mockImplementation(() => ({
+      getUserName: () => MEASURE_CREATEDBY,
+    }));
     const { getByText, getByTestId } = render(
       <MeasureList measureList={measures} />
     );
@@ -87,6 +94,19 @@ describe("Measure List component", () => {
     const editButton = getByTestId(`edit-measure-${measures[0].id}`);
     expect(window.location.href).toBe("http://localhost/");
     fireEvent.click(editButton);
+    expect(mockPush).toHaveBeenCalledWith("/example");
+  });
+
+  it("should view button instead of edit button when user is not the owner of the measure", () => {
+    useOktaTokensMock.mockImplementation(() => ({
+      getUserName: () => "AnotherUser@example.com",
+    }));
+    const { getByTestId } = render(<MeasureList measureList={measures} />);
+    const viewButton = getByTestId(`view-measure-${measures[0].id}`);
+    expect(viewButton).toBeInTheDocument();
+
+    expect(window.location.href).toBe("http://localhost/");
+    fireEvent.click(viewButton);
     expect(mockPush).toHaveBeenCalledWith("/example");
   });
 });
