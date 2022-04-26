@@ -204,7 +204,7 @@ describe("MeasureInformation component", () => {
 
   it("Should not allow user to edit measure name if user is not the owner of measure", async () => {
     useOktaTokensMock.mockImplementation(() => ({
-      getUserName: () => "AnotherUser@example.com",
+      getUserName: () => "othertestuser@example.com",
     }));
     render(<MeasureInformation />);
 
