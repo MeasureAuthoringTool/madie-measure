@@ -97,7 +97,6 @@ const MeasureGroupPopulationSelect = ({
                 native: true,
                 displayEmpty: true,
               }}
-              // labelId={`select-${htmlId}-label`}
               name={name}
               onChange={onChange}
               style={{ minWidth: "20rem" }}
