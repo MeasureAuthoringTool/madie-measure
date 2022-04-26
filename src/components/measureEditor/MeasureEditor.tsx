@@ -154,6 +154,7 @@ const MeasureEditor = () => {
         inboundAnnotations={elmAnnotations}
         inboundErrorMarkers={errorMarkers}
         height={"1000px"}
+        readOnly={!canEdit}
       />
 
       <EditorActions data-testid="measure-editor-actions">
