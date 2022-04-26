@@ -32,116 +32,133 @@ import classNames from "classnames";
 import { Model } from "../../models/Model";
 import useOktaTokens from "../../hooks/useOktaTokens";
 import Checkbox from "./CheckBox";
-const useStyles = makeStyles({
-  row: {
-    display: "flex",
-    flexDirection: "row",
-  },
-  spaced: {
-    marginTop: 23,
-  },
-  end: {
-    justifyContent: "flex-end",
-    marginBottom: -23,
-  },
-  gap: {
-    columnGap: 24,
-    "& > * ": {
-      flex: 1,
-    },
-  },
-  dialogTitle: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "24px 32px",
-  },
-  title: {
-    fontFamily: "Rubik",
-    fontSize: 24,
-    padding: 0,
-  },
-  chevron: {
-    fontSize: 22,
-    margin: "-9px -14px -7px 4px",
-  },
-  close: {
-    color: "#242424",
-  },
-  info: {
-    fontSize: 14,
-    fontWeight: 300,
-    fontFamily: "Rubik",
-  },
-  asterisk: {
-    color: "#D92F2F",
-    marginRight: 3,
-  },
-  dividerBottom: {
-    marginTop: 10,
-  },
-  hidden: {
-    maxHeight: 0,
-  },
-  expanded: {
-    maxHeight: 1000,
-    borderLeft: "2px dashed #CACACA",
-    paddingLeft: 16,
-    marginTop: 5,
-    marginLeft: 15,
-  },
-  paper: {
-    position: "relative",
-    overflow: "visible",
-    marginTop: -20,
-  },
-  actionsRoot: {
-    padding: 16,
-    "& >:not(:first-of-type)": {
-      marginLeft: 16,
-    },
-  },
-  alert: {
-    position: "absolute",
-    bottom: -120,
-    width: "85%",
-    marginLeft: "10%",
-    boxShadow: "0px 0px 13px rgba(0, 21, 44, 0.2)",
-    borderRadius: 4,
-    backgroundColor: "inherit",
-    "& > div": {
-      padding: 16,
-    },
-    "& .icon-cont": {
-      display: "flex",
-      backgroundColor: "#D92F2F",
-      borderRadius: "4px 0 0 4px",
-      "& > svg": {
-        color: "#fff",
-        fontSize: 25,
-      },
-    },
-    "& .alert-text": {
+const useStyles = makeStyles(
+  {
+    row: {
       display: "flex",
       flexDirection: "row",
-      flexGrow: 1,
-      justifyContent: "space-between",
-      "& .MuiButtonBase-root": {
-        margin: "-10px 0px -2px 0px",
+    },
+    spaced: {
+      marginTop: 23,
+    },
+    end: {
+      justifyContent: "flex-end",
+      marginBottom: -23,
+    },
+    gap: {
+      columnGap: 24,
+      "& > * ": {
+        flex: 1,
       },
-      "& .MuiTypography-body2": {
-        margin: 0,
-        padding: 0,
-        paddingTop: 2,
-        color: "#D92F2F",
-        fontFamily: "Rubik",
-        fontWeight: 500,
-        fontSize: 14,
+    },
+    dialogTitle: {
+      display: "flex",
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: "24px 32px",
+    },
+    title: {
+      fontFamily: "Rubik",
+      fontSize: 24,
+      padding: 0,
+    },
+    chevron: {
+      fontSize: 22,
+      margin: "-9px -14px -7px 4px",
+    },
+    close: {
+      color: "#242424",
+    },
+    info: {
+      fontSize: 14,
+      fontWeight: 300,
+      fontFamily: "Rubik",
+    },
+    asterisk: {
+      color: "#D92F2F",
+      marginRight: 3,
+    },
+    dividerBottom: {
+      marginTop: 10,
+    },
+    hidden: {
+      maxHeight: 0,
+    },
+    expanded: {
+      maxHeight: 1000,
+      borderLeft: "2px dashed #CACACA",
+      paddingLeft: 16,
+      marginTop: 5,
+      marginLeft: 15,
+    },
+    paper: {
+      position: "relative",
+      overflow: "visible",
+      marginTop: -20,
+      "& .MuiDialogActions-root": {
+        padding: 16,
+        "& >:not(:first-of-type)": {
+          marginLeft: 16,
+        },
+      },
+      "& .MuiDivider-fullWidth": {
+        display: "none",
+      },
+      "& .MuiPagination-ul": {},
+    },
+    actionsRoot: {
+      "& >:not(:first-of-type)": {
+        marginLeft: 16,
+      },
+    },
+    alert: {
+      "& > .alert-inner": {
+        position: "absolute",
+        bottom: -80,
+        width: "85%",
+        margin: "auto",
+        display: "flex",
+        boxShadow: "0px 0px 13px rgba(0, 21, 44, 0.2)",
+        borderRadius: 4,
+        backgroundColor: "white",
+        left: "7%",
+        "& > div": {
+          padding: 16,
+        },
+        "& .icon-cont": {
+          display: "flex",
+          backgroundColor: "#D92F2F",
+          borderRadius: "4px 0 0 4px",
+          "& > svg": {
+            color: "#fff",
+            fontSize: 25,
+          },
+        },
+        "& .alert-text": {
+          display: "flex",
+          flexDirection: "row",
+          flexGrow: 1,
+          paddingBottom: 10,
+          justifyContent: "space-between",
+          "& .MuiButtonBase-root": {
+            margin: "-10px 0px -2px 0px",
+          },
+          "& .MuiTypography-body2": {
+            margin: 0,
+            padding: 0,
+            paddingTop: 2,
+            color: "#D92F2F",
+            fontFamily: "Rubik",
+            fontWeight: 500,
+            fontSize: 14,
+          },
+        },
       },
     },
   },
-});
+  { name: "CreateNewMeasureDialog" }
+);
 const CreateNewMeasureDialog = ({ open, onClose }) => {
   const { getAccessToken } = useOktaTokens();
   const [serverError, setServerError] = useState<string>("");
@@ -223,27 +240,6 @@ const CreateNewMeasureDialog = ({ open, onClose }) => {
         paper: classes.paper,
       }}
     >
-      {serverError && (
-        <div
-          className={alertClass}
-          data-testid="server-error-alerts"
-          role="alert"
-        >
-          <div className="icon-cont">
-            <ErrorOutlineIcon />
-          </div>
-          <div className="alert-text">
-            <Typography variant="body2" data-testid="server-error-msg">
-              {serverError}
-            </Typography>
-            <div>
-              <IconButton onClick={() => setServerError("")}>
-                <CloseIcon className={classes.close} />
-              </IconButton>
-            </div>
-          </div>
-        </div>
-      )}
       <form
         data-testid="create-new-measure-form"
         onSubmit={formik.handleSubmit}
@@ -466,6 +462,29 @@ const CreateNewMeasureDialog = ({ open, onClose }) => {
           </Button>
         </DialogActions>
       </form>
+      {serverError && (
+        <div
+          className={alertClass}
+          data-testid="server-error-alerts"
+          role="alert"
+        >
+          <div className="alert-inner">
+            <div className="icon-cont">
+              <ErrorOutlineIcon />
+            </div>
+            <div className="alert-text">
+              <Typography variant="body2" data-testid="server-error-msg">
+                {serverError}
+              </Typography>
+              <div>
+                <IconButton onClick={() => setServerError("")}>
+                  <CloseIcon className={classes.close} />
+                </IconButton>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </Dialog>
   );
 };
