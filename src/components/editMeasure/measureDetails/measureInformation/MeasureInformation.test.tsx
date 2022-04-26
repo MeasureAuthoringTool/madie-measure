@@ -1,5 +1,11 @@
 import * as React from "react";
-import { render, cleanup, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  cleanup,
+  fireEvent,
+  waitFor,
+  screen,
+} from "@testing-library/react";
 import { act } from "react-dom/test-utils";
 import MeasureInformation from "./MeasureInformation";
 import useMeasureServiceApi, {
@@ -194,5 +200,15 @@ describe("MeasureInformation component", () => {
         }
       );
     });
+  });
+
+  it("Should not allow user to edit measure name if user is not the owner of measure", async () => {
+    useOktaTokensMock.mockImplementation(() => ({
+      getUserName: () => "AnotherUser@example.com",
+    }));
+    render(<MeasureInformation />);
+
+    const inlineInput = screen.queryByTestId("inline-view-span");
+    expect(inlineInput).not.toBeInTheDocument();
   });
 });

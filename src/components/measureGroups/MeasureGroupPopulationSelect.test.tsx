@@ -196,4 +196,44 @@ describe("Measure Group Population Select Component", () => {
     expect(helperText).toBeInTheDocument();
     expect(helperText).toHaveClass("Mui-error");
   });
+
+  test("should display both View and Delete buttons for measure owner", () => {
+    render(
+      <div>
+        <MeasureGroupPopulationSelect
+          {...selectorProps}
+          onChange={mockOnChangeHandler}
+          value={""}
+          canEdit={true}
+        />
+      </div>
+    );
+
+    expect(
+      screen.getByTestId("measure-group-population-view")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("measure-group-population-delete")
+    ).toBeInTheDocument();
+  });
+
+  test("should display only View button for non-measure owner", () => {
+    render(
+      <div>
+        <MeasureGroupPopulationSelect
+          {...selectorProps}
+          onChange={mockOnChangeHandler}
+          value={""}
+          canEdit={false}
+        />
+      </div>
+    );
+
+    expect(
+      screen.getByTestId("measure-group-population-view")
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("measure-group-population-delete")
+    ).not.toBeInTheDocument();
+  });
 });

@@ -126,12 +126,22 @@ const MeasureGroupPopulationSelect = ({
         </Col>
 
         <SpacerContainer>
-          <Link href="#" onClick={onClickCallback}>
+          <Link
+            href="#"
+            onClick={onClickCallback}
+            data-testid={`measure-group-population-view`}
+          >
             View
           </Link>
-          <Link href="#" onClick={onClickCallback}>
-            Delete
-          </Link>
+          {canEdit && (
+            <Link
+              href="#"
+              onClick={onClickCallback}
+              data-testid={`measure-group-population-delete`}
+            >
+              Delete
+            </Link>
+          )}
         </SpacerContainer>
       </Row>
 

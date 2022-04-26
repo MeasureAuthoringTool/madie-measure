@@ -105,7 +105,13 @@ export default function MeasureInformation() {
       )}
       <DisplayDiv>
         <span tw="mr-2">Measure Name:</span>
-        <InlineEdit text={measure.measureName} onSetText={updateMeasureTitle} />
+        {measure.createdBy === userName && (
+          <InlineEdit
+            text={measure.measureName}
+            onSetText={updateMeasureTitle}
+          />
+        )}
+        {measure.createdBy !== userName && measure.measureName}
         {measure.createdBy === userName && (
           <Button
             variant="danger-primary"
