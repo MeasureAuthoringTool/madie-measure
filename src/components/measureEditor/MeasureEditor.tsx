@@ -186,14 +186,16 @@ const MeasureEditor = () => {
             data-testid="save-cql-btn"
           />
         )}
-        <Button
-          tw="ml-2"
-          buttonSize="md"
-          buttonTitle="Cancel"
-          variant="secondary"
-          onClick={() => resetCql()}
-          data-testid="reset-cql-btn"
-        />
+        {canEdit && (
+          <Button
+            tw="ml-2"
+            buttonSize="md"
+            buttonTitle="Cancel"
+            variant="secondary"
+            onClick={() => resetCql()}
+            data-testid="reset-cql-btn"
+          />
+        )}
       </EditorActions>
     </>
   );

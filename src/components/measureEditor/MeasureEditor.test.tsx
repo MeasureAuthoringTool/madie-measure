@@ -411,13 +411,13 @@ describe("map elm errors to Ace Markers", () => {
     });
   });
 
-  it("test - Save button should not show if user is not the owner of the measure", () => {
+  it("Save button and Cancel button should not show if user is not the owner of the measure", () => {
     measure.createdBy = "AnotherUser@example.com";
-    const { getByTestId } = renderEditor(measure);
+    renderEditor(measure);
 
-    const cancelButton = getByTestId("reset-cql-btn");
-    expect(cancelButton).toBeInTheDocument();
-    const saveButton = screen.queryByText("save-cql-btn");
+    const cancelButton = screen.queryByTestId("reset-cql-btn");
+    expect(cancelButton).not.toBeInTheDocument();
+    const saveButton = screen.queryByTestId("save-cql-btn");
     expect(saveButton).not.toBeInTheDocument();
   });
 });
