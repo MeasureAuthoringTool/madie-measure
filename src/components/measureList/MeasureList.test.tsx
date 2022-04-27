@@ -92,6 +92,8 @@ describe("Measure List component", () => {
   it("should navigate to the edit measure screen on click of edit button", () => {
     const { getByTestId } = render(<MeasureList measureList={measures} />);
     const editButton = getByTestId(`edit-measure-${measures[0].id}`);
+    expect(editButton).toBeInTheDocument();
+    expect(editButton).toHaveTextContent("Edit");
     expect(window.location.href).toBe("http://localhost/");
     fireEvent.click(editButton);
     expect(mockPush).toHaveBeenCalledWith("/example");
@@ -102,8 +104,9 @@ describe("Measure List component", () => {
       getUserName: () => "AnotherUser@example.com",
     }));
     const { getByTestId } = render(<MeasureList measureList={measures} />);
-    const viewButton = getByTestId(`view-measure-${measures[0].id}`);
+    const viewButton = getByTestId(`edit-measure-${measures[0].id}`);
     expect(viewButton).toBeInTheDocument();
+    expect(viewButton).toHaveTextContent("View");
 
     expect(window.location.href).toBe("http://localhost/");
     fireEvent.click(viewButton);

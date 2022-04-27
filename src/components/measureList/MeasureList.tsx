@@ -94,28 +94,15 @@ export default function MeasureList(props: { measureList: Measure[] }) {
                         {measure.revisionNumber}
                       </td>
                       <td tw="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        {measure.createdBy === userName && (
-                          <button
-                            onClick={() => {
-                              history.push(`/measures/${measure.id}/edit`);
-                            }}
-                            tw="text-blue-600 hover:text-blue-900"
-                            data-testid={`edit-measure-${measure.id}`}
-                          >
-                            Edit
-                          </button>
-                        )}
-                        {measure.createdBy !== userName && (
-                          <button
-                            onClick={() => {
-                              history.push(`/measures/${measure.id}/edit`);
-                            }}
-                            tw="text-blue-600 hover:text-blue-900"
-                            data-testid={`view-measure-${measure.id}`}
-                          >
-                            View
-                          </button>
-                        )}
+                        <button
+                          onClick={() => {
+                            history.push(`/measures/${measure.id}/edit`);
+                          }}
+                          tw="text-blue-600 hover:text-blue-900"
+                          data-testid={`edit-measure-${measure.id}`}
+                        >
+                          {measure.createdBy === userName ? `Edit` : `View`}
+                        </button>
                       </td>
                     </tr>
                   ))}

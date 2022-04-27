@@ -77,7 +77,7 @@ const MeasureEditor = () => {
 
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
-  const canEdit = userName === measure.createdBy ? true : false;
+  const canEdit = userName === measure.createdBy;
 
   const updateElmAnnotations = async (cql: string): Promise<ElmTranslation> => {
     setElmTranslationError(null);

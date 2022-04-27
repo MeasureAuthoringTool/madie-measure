@@ -34,7 +34,7 @@ export default function MeasureInformation() {
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
-  const canEdit = measure.createdBy === userName ? true : false;
+  const canEdit = measure.createdBy === userName;
 
   const onToastClose = () => {
     setToastType(null);

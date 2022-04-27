@@ -39,7 +39,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
   const [error, setError] = useState<string>("");
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
-  const canEdit = userName === measure.createdBy ? true : false;
+  const canEdit = userName === measure.createdBy;
 
   const formik = useFormik({
     enableReinitialize: true,

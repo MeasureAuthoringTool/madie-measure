@@ -123,7 +123,7 @@ const MeasureGroups = () => {
   const { measure, setMeasure } = useCurrentMeasure();
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
-  const canEdit = userName === measure.createdBy ? true : false;
+  const canEdit = userName === measure.createdBy;
   const measureServiceApi = useMeasureServiceApi();
   const [genericErrorMessage, setGenericErrorMessage] = useState<string>();
   const [successMessage, setSuccessMessage] = useState<string>();
