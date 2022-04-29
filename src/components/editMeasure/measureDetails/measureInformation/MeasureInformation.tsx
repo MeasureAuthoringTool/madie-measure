@@ -34,6 +34,7 @@ export default function MeasureInformation() {
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
+  const canEdit = measure.createdBy === userName;
 
   const onToastClose = () => {
     setToastType(null);
@@ -105,12 +106,18 @@ export default function MeasureInformation() {
       )}
       <DisplayDiv>
         <span tw="mr-2">Measure Name:</span>
-        <InlineEdit text={measure.measureName} onSetText={updateMeasureTitle} />
-        {measure.createdBy === userName && (
+        {canEdit && (
+          <InlineEdit
+            text={measure.measureName}
+            onSetText={updateMeasureTitle}
+          />
+        )}
+        {!canEdit && measure.measureName}
+        {canEdit && (
           <Button
             variant="danger-primary"
             data-testid="delete-measure-button"
-            disabled={measure.createdBy !== userName}
+            disabled={!canEdit}
             onClick={() => setDeleteOpen(true)}
           >
             Delete Measure

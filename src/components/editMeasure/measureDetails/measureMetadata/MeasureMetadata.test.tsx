@@ -8,15 +8,19 @@ import useCurrentMeasure from "../../useCurrentMeasure";
 import { MeasureContextHolder } from "../../MeasureContext";
 import Measure, { MeasureMetadata } from "../../../../models/Measure";
 import MeasureMetadataForm from "./MeasureMetadata";
+import useOktaTokens from "../../../../hooks/useOktaTokens";
 
 jest.mock("../../../../api/useMeasureServiceApi");
 jest.mock("../../useCurrentMeasure");
+jest.mock("../../../../hooks/useOktaTokens");
 
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 
 const useCurrentMeasureMock =
   useCurrentMeasure as jest.Mock<MeasureContextHolder>;
+
+const useOktaTokensMock = useOktaTokens as Jest.Mock<Function>;
 
 describe("MeasureRationale component", () => {
   let measure: Measure;
@@ -34,6 +38,7 @@ describe("MeasureRationale component", () => {
   const AUTHOR = "Test Author";
   const GUIDANCE = "Test Guidance";
   const NEWVALUE = "Test New Value";
+  const MEASURE_CREATEDBY = "testuser@example.com";
 
   afterEach(cleanup);
 
@@ -51,6 +56,7 @@ describe("MeasureRationale component", () => {
     measure = {
       id: MEASUREID,
       measureName: MEASURENAME,
+      createdBy: MEASURE_CREATEDBY,
       measureMetaData: measureMetaData,
     } as Measure;
 
@@ -66,6 +72,10 @@ describe("MeasureRationale component", () => {
     };
 
     useCurrentMeasureMock.mockImplementation(() => measureContextHolder);
+
+    useOktaTokensMock.mockImplementation(() => ({
+      getUserName: () => MEASURE_CREATEDBY,
+    }));
   });
 
   const expectInputValue = (element: HTMLElement, value: string): void => {
@@ -282,5 +292,25 @@ describe("MeasureRationale component", () => {
     expect(error.textContent).toBe(
       'Error updating measure "The Measure for Testing" for Author'
     );
+  });
+
+  it("Should have no input field if user is not the measure owner", async () => {
+    useOktaTokensMock.mockImplementation(() => ({
+      getUserName: () => "AnotherUser@example.com",
+    }));
+    render(<MeasureMetadataForm measureMetadataType="Rationale" />);
+
+    const saveButton = screen.queryByText("measureRationaleSave");
+    expect(saveButton).not.toBeInTheDocument();
+  });
+
+  it("test - Should have no Save button if user is not the measure owner", async () => {
+    useOktaTokensMock.mockImplementation(() => ({
+      getUserName: () => "AnotherUser@example.com",
+    }));
+    render(<MeasureMetadataForm measureMetadataType="Rationale" />);
+
+    const input = screen.queryByText("measureRationaleInput");
+    expect(input).not.toBeInTheDocument();
   });
 });

@@ -40,9 +40,11 @@ const serviceConfig: ServiceConfig = {
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
+const MEASURE_CREATEDBY = "testuser@example.com";
 jest.mock("../../hooks/useOktaTokens", () =>
   jest.fn(() => ({
     getAccessToken: () => "test.jwt",
+    getUserName: () => MEASURE_CREATEDBY,
   }))
 );
 
@@ -61,6 +63,7 @@ describe("Measure Groups Page", () => {
       measureScoring: "Cohort",
       measureName: "the measure for testing",
       cql: MeasureCQL,
+      createdBy: MEASURE_CREATEDBY,
     } as Measure;
     measureContextHolder = {
       measure,
@@ -95,11 +98,18 @@ describe("Measure Groups Page", () => {
     );
   };
 
-  test("MeasureGroups renders to correct options length, and defaults to Cohort", async () => {
+  test("Measure Group Scoring renders to correct options length, and defaults to Cohort", async () => {
     const { getAllByTestId } = renderMeasureGroupComponent();
     const optionList = getAllByTestId("scoring-unit-option");
     expect(optionList).toHaveLength(4);
     expect(optionList[0].textContent).toBe("Cohort");
+  });
+
+  test("Measure Group Scoring should not render options if user is not the measure owner", async () => {
+    measure.createdBy = "AnotherUser@example.com";
+    const { queryAllByTestId } = renderMeasureGroupComponent();
+    const optionList = queryAllByTestId("scoring-unit-option");
+    expect(optionList).toHaveLength(0);
   });
 
   test("MeasureGroups renders a list of definitions based on parsed CQL", async () => {
@@ -515,5 +525,19 @@ describe("Measure Groups Page", () => {
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Save" })).not.toBeDisabled()
     );
+  });
+
+  test("Measure Group Description should not render input field if user is not the measure owner", async () => {
+    measure.createdBy = "AnotherUser@example.com";
+    const { queryByTestId } = renderMeasureGroupComponent();
+    const inputField = queryByTestId("groupDescriptionInput");
+    expect(inputField).not.toBeInTheDocument();
+  });
+
+  test("Measure Group Save button should not render if user is not the measure owner", async () => {
+    measure.createdBy = "AnotherUser@example.com";
+    const { queryByTestId } = renderMeasureGroupComponent();
+    const saveButton = queryByTestId("group-form-submit-btn");
+    expect(saveButton).not.toBeInTheDocument();
   });
 });

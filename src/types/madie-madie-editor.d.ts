@@ -31,6 +31,7 @@ declare module "@madie/madie-editor" {
     inboundAnnotations?: EditorAnnotation[];
     inboundErrorMarkers?: EditorErrorMarker[];
     height?: string;
+    readOnly?: boolean;
   }>;
   export const bootstrap: LifeCycleFn<void>;
   export const mount: LifeCycleFn<void>;

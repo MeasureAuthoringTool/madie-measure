@@ -4,9 +4,12 @@ import "styled-components/macro";
 
 import Measure from "../../models/Measure";
 import { useHistory } from "react-router-dom";
+import useOktaTokens from "../../hooks/useOktaTokens";
 
 export default function MeasureList(props: { measureList: Measure[] }) {
   const history = useHistory();
+  const { getUserName } = useOktaTokens();
+  const userName = getUserName();
 
   return (
     <div data-testid="measure-list">
@@ -98,7 +101,7 @@ export default function MeasureList(props: { measureList: Measure[] }) {
                           tw="text-blue-600 hover:text-blue-900"
                           data-testid={`edit-measure-${measure.id}`}
                         >
-                          Edit
+                          {measure.createdBy === userName ? `Edit` : `View`}
                         </button>
                       </td>
                     </tr>

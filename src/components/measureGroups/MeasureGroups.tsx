@@ -13,6 +13,7 @@ import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
 import * as _ from "lodash";
 import { MeasureGroupSchemaValidator } from "../../models/MeasureGroupSchemaValidator";
+import useOktaTokens from "../../hooks/useOktaTokens";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
 const Content = styled.div(() => [tw`col-span-3`]);
@@ -120,6 +121,9 @@ const MeasureGroups = () => {
     Array<ExpressionDefinition>
   >([]);
   const { measure, setMeasure } = useCurrentMeasure();
+  const { getUserName } = useOktaTokens();
+  const userName = getUserName();
+  const canEdit = userName === measure.createdBy;
   const measureServiceApi = useMeasureServiceApi();
   const [genericErrorMessage, setGenericErrorMessage] = useState<string>();
   const [successMessage, setSuccessMessage] = useState<string>();
@@ -298,16 +302,19 @@ const MeasureGroups = () => {
                   Group Description
                 </FieldLabel>
                 <FieldSeparator>
-                  <FieldInput
-                    value={formik.values.groupDescription}
-                    type="text"
-                    name="group-description"
-                    id="group-description"
-                    autoComplete="group-description"
-                    placeholder="Group Description"
-                    data-testid="groupDescriptionInput"
-                    {...formik.getFieldProps("groupDescription")}
-                  />
+                  {canEdit && (
+                    <FieldInput
+                      value={formik.values.groupDescription}
+                      type="text"
+                      name="group-description"
+                      id="group-description"
+                      autoComplete="group-description"
+                      placeholder="Group Description"
+                      data-testid="groupDescriptionInput"
+                      {...formik.getFieldProps("groupDescription")}
+                    />
+                  )}
+                  {!canEdit && formik.values.groupDescription}
                 </FieldSeparator>
               </FormFieldInner>
             </FormField>
@@ -347,48 +354,51 @@ const MeasureGroups = () => {
           <FormControl>
             {/* pull from cql file */}
             <SoftLabel htmlFor="scoring-unit-select">Group Scoring:</SoftLabel>
-            <TextField
-              select
-              id="scoring-unit-select"
-              label=""
-              inputProps={{
-                "data-testid": "scoring-unit-select",
-              }}
-              InputLabelProps={{ shrink: false }}
-              SelectProps={{
-                native: true,
-              }}
-              name="scoring"
-              value={formik.values.scoring}
-              onChange={(e) => {
-                formik.resetForm({
-                  values: {
-                    ...formik.values,
-                    scoring: e.target.value,
-                    population: {
-                      initialPopulation: "",
-                      denominator: "",
-                      denominatorExclusion: "",
-                      denominatorException: "",
-                      numerator: "",
-                      numeratorExclusion: "",
-                      measurePopulation: "",
-                      measurePopulationExclusion: "",
+            {canEdit && (
+              <TextField
+                select
+                id="scoring-unit-select"
+                label=""
+                inputProps={{
+                  "data-testid": "scoring-unit-select",
+                }}
+                InputLabelProps={{ shrink: false }}
+                SelectProps={{
+                  native: true,
+                }}
+                name="scoring"
+                value={formik.values.scoring}
+                onChange={(e) => {
+                  formik.resetForm({
+                    values: {
+                      ...formik.values,
+                      scoring: e.target.value,
+                      population: {
+                        initialPopulation: "",
+                        denominator: "",
+                        denominatorExclusion: "",
+                        denominatorException: "",
+                        numerator: "",
+                        numeratorExclusion: "",
+                        measurePopulation: "",
+                        measurePopulationExclusion: "",
+                      },
                     },
-                  },
-                });
-              }}
-            >
-              {allOptions.map((opt, i) => (
-                <option
-                  key={`${opt}-${i}`}
-                  value={opt}
-                  data-testid="scoring-unit-option"
-                >
-                  {opt}
-                </option>
-              ))}
-            </TextField>
+                  });
+                }}
+              >
+                {allOptions.map((opt, i) => (
+                  <option
+                    key={`${opt}-${i}`}
+                    value={opt}
+                    data-testid="scoring-unit-option"
+                  >
+                    {opt}
+                  </option>
+                ))}
+              </TextField>
+            )}
+            {!canEdit && formik.values.scoring}
           </FormControl>
 
           {PopulationSelectorDefinitions.map((selectorDefinition) => {
@@ -417,6 +427,7 @@ const MeasureGroups = () => {
                   {...formikFieldProps}
                   helperText={error}
                   error={!!error && !!touched}
+                  canEdit={canEdit}
                 />
               </Fragment>
             );
@@ -424,33 +435,35 @@ const MeasureGroups = () => {
           <br />
         </Content>
       </Grid>
-      <GroupFooter>
-        <GroupActions />
-        <PopulationActions>
-          <ButtonSpacer>
-            <Button
-              style={{ background: "#424B5A" }}
-              type="submit"
-              buttonTitle="Save"
-              data-testid="group-form-submit-btn"
-              disabled={!(formik.isValid && formik.dirty)}
-            />
-          </ButtonSpacer>
-          <ButtonSpacer>
-            <Button type="button" buttonTitle="Cancel" variant="white" />
-          </ButtonSpacer>
-          <ButtonSpacer>
-            <span
-              tw="text-sm text-gray-600"
-              data-testid="save-measure-group-validation-message"
-            >
-              {MeasureGroupSchemaValidator.isValidSync(formik.values)
-                ? ""
-                : "You must set all required Populations."}
-            </span>
-          </ButtonSpacer>
-        </PopulationActions>
-      </GroupFooter>
+      {canEdit && (
+        <GroupFooter>
+          <GroupActions />
+          <PopulationActions>
+            <ButtonSpacer>
+              <Button
+                style={{ background: "#424B5A" }}
+                type="submit"
+                buttonTitle="Save"
+                data-testid="group-form-submit-btn"
+                disabled={!(formik.isValid && formik.dirty)}
+              />
+            </ButtonSpacer>
+            <ButtonSpacer>
+              <Button type="button" buttonTitle="Cancel" variant="white" />
+            </ButtonSpacer>
+            <ButtonSpacer>
+              <span
+                tw="text-sm text-gray-600"
+                data-testid="save-measure-group-validation-message"
+              >
+                {MeasureGroupSchemaValidator.isValidSync(formik.values)
+                  ? ""
+                  : "You must set all required Populations."}
+              </span>
+            </ButtonSpacer>
+          </PopulationActions>
+        </GroupFooter>
+      )}
     </form>
   );
 };

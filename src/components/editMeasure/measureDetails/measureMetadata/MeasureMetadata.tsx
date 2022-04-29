@@ -4,6 +4,7 @@ import useCurrentMeasure from "../../useCurrentMeasure";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import { useFormik } from "formik";
 import getInitialValues, { setMeasureMetadata } from "./MeasureMetadataHelper";
+import useOktaTokens from "../../../../hooks/useOktaTokens";
 
 const Form = tw.form`max-w-xl mt-3 space-y-8 divide-y divide-gray-200`;
 const FormContent = tw.div`space-y-8 divide-y divide-gray-200`;
@@ -36,6 +37,9 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
   const measureServiceApi = useMeasureServiceApi();
   const [success, setSuccess] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const { getUserName } = useOktaTokens();
+  const userName = getUserName();
+  const canEdit = userName === measure.createdBy;
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -82,46 +86,52 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
                 {measureMetadataType}
               </FieldLabel>
               <FieldSeparator>
-                <FieldInput
-                  type="text"
-                  name={`measure-${typeLower}`}
-                  id={`measure-${typeLower}`}
-                  autoComplete={`measure-${typeLower}`}
-                  onChange={formik.handleChange}
-                  value={formik.values.genericField}
-                  placeholder={`${measureMetadataType}`}
-                  data-testid={`measure${measureMetadataType}Input`}
-                  {...formik.getFieldProps("genericField")}
-                />
+                {canEdit && (
+                  <FieldInput
+                    type="text"
+                    name={`measure-${typeLower}`}
+                    id={`measure-${typeLower}`}
+                    autoComplete={`measure-${typeLower}`}
+                    onChange={formik.handleChange}
+                    value={formik.values.genericField}
+                    placeholder={`${measureMetadataType}`}
+                    data-testid={`measure${measureMetadataType}Input`}
+                    {...formik.getFieldProps("genericField")}
+                  />
+                )}
+                {!canEdit && formik.values.genericField}
               </FieldSeparator>
             </FormFieldInner>
           </FormField>
         </div>
       </FormContent>
-
-      <FormButtons>
-        <ButtonWrapper>
-          <SubmitButton
-            type="submit"
-            data-testid={`measure${measureMetadataType}Save`}
-            disabled={!(formik.isValid && formik.dirty)}
-          >
-            Save
-          </SubmitButton>
-          <MessageDiv>
-            {success && success.includes(`${measureMetadataType}`) && (
-              <SuccessText data-testid={`measure${measureMetadataType}Success`}>
-                Measure {measureMetadataType} Information Saved Successfully
-              </SuccessText>
-            )}
-            {error && error.includes(`${measureMetadataType}`) && (
-              <ErrorText data-testid={`measure${measureMetadataType}Error`}>
-                {error}
-              </ErrorText>
-            )}
-          </MessageDiv>
-        </ButtonWrapper>
-      </FormButtons>
+      {canEdit && (
+        <FormButtons>
+          <ButtonWrapper>
+            <SubmitButton
+              type="submit"
+              data-testid={`measure${measureMetadataType}Save`}
+              disabled={!(formik.isValid && formik.dirty)}
+            >
+              Save
+            </SubmitButton>
+            <MessageDiv>
+              {success && success.includes(`${measureMetadataType}`) && (
+                <SuccessText
+                  data-testid={`measure${measureMetadataType}Success`}
+                >
+                  Measure {measureMetadataType} Information Saved Successfully
+                </SuccessText>
+              )}
+              {error && error.includes(`${measureMetadataType}`) && (
+                <ErrorText data-testid={`measure${measureMetadataType}Error`}>
+                  {error}
+                </ErrorText>
+              )}
+            </MessageDiv>
+          </ButtonWrapper>
+        </FormButtons>
+      )}
     </Form>
   );
 }

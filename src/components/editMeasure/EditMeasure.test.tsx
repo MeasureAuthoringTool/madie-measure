@@ -22,8 +22,10 @@ MeasureEditorMock.mockImplementation(() => {
   return <div>library testCql version '1.0.000'</div>;
 });
 
+const MEASURE_CREATEDBY = "testuser@example.com";
 const measure = {
   id: "measure ID",
+  createdBy: MEASURE_CREATEDBY,
 } as Measure;
 
 const serviceApiMock = {
@@ -34,10 +36,9 @@ useMeasureServiceApiMock.mockImplementation(() => {
   return serviceApiMock;
 });
 
-jest.mock("../../hooks/useOktaTokens", () => ({
-  useOktaTokens: jest.fn(() => ({
-    getAccessToken: () => "test.jwt",
-  })),
+jest.mock("../../hooks/useOktaTokens", () => () => ({
+  getAccessToken: () => "test.jwt",
+  getUserName: () => MEASURE_CREATEDBY,
 }));
 
 const serviceConfig: ServiceConfig = {
