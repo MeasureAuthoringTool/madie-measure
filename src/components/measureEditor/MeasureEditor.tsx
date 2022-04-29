@@ -178,23 +178,24 @@ const MeasureEditor = () => {
           )}
         </UpdateAlerts>
         {canEdit && (
-          <Button
-            buttonSize="md"
-            buttonTitle="Save"
-            variant="primary"
-            onClick={() => updateMeasureCql()}
-            data-testid="save-cql-btn"
-          />
-        )}
-        {canEdit && (
-          <Button
-            tw="ml-2"
-            buttonSize="md"
-            buttonTitle="Cancel"
-            variant="secondary"
-            onClick={() => resetCql()}
-            data-testid="reset-cql-btn"
-          />
+          <div>
+            <Button
+              buttonSize="md"
+              buttonTitle="Save"
+              variant="primary"
+              onClick={() => updateMeasureCql()}
+              data-testid="save-cql-btn"
+            />
+
+            <Button
+              tw="ml-2"
+              buttonSize="md"
+              buttonTitle="Cancel"
+              variant="secondary"
+              onClick={() => resetCql()}
+              data-testid="reset-cql-btn"
+            />
+          </div>
         )}
       </EditorActions>
     </>
