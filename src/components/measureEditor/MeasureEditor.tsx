@@ -178,7 +178,7 @@ const MeasureEditor = () => {
           )}
         </UpdateAlerts>
         {canEdit && (
-          <div>
+          <>
             <Button
               buttonSize="md"
               buttonTitle="Save"
@@ -195,7 +195,7 @@ const MeasureEditor = () => {
               onClick={() => resetCql()}
               data-testid="reset-cql-btn"
             />
-          </div>
+          </>
         )}
       </EditorActions>
     </>
