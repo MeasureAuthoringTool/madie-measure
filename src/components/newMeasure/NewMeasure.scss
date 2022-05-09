@@ -38,6 +38,10 @@
 
 .table-body {
   > tr {
+    &.odd {
+      background-color: #f7f7f7;
+    }
+
     > td {
       font-family: Rubik, sans-serif;
       color: #242424;

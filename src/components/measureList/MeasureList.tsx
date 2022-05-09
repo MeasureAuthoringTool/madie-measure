@@ -42,7 +42,11 @@ export default function MeasureList(props: { measureList: Measure[] }) {
                 </thead>
                 <tbody data-testid="table-body" className="table-body">
                   {props.measureList?.map((measure, i) => (
-                    <tr key={`${measure.id}-${i}`} data-testid="row-item">
+                    <tr
+                      key={`${measure.id}-${i}`}
+                      data-testid="row-item"
+                      className={i % 2 === 0 ? "odd" : ""}
+                    >
                       <td>
                         <button
                           type="button"
