@@ -22,8 +22,15 @@ export default function Header(props: { measure: Measure }) {
           <p tw="text-3xl py-0 mb-4">{props.measure.measureName}</p>
         </div>
         <div tw="flex flex-nowrap justify-start items-center">
-          {["Active", props.measure.model, "v1.0", "1/1/2023 – 12/31/2023"].map(
-            (val, key) => {
+          {[
+            "Active",
+            props.measure.model,
+            props.measure.version,
+            props.measure.measurementPeriodStart +
+              " - " +
+              props.measure.measurementPeriodEnd,
+          ].map((val, key) => {
+            if (val)
               return (
                 <p
                   key={key}
@@ -32,8 +39,7 @@ export default function Header(props: { measure: Measure }) {
                   {val}
                 </p>
               );
-            }
-          )}
+          })}
         </div>
       </HeaderContent>
     </div>
