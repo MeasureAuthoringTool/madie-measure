@@ -13,6 +13,7 @@ module.exports = {
     "^react($|/.+)": "<rootDir>/node_modules/react$1", // makes sure all React imports are running off of the one in this package.
     "@madie/madie-components":
       "<rootDir>/node_modules/@madie/madie-components/src/madie-madie-components.tsx",
+      '\\.(css|scss)$': 'identity-obj-proxy'
   },
   setupFilesAfterEnv: ["@testing-library/jest-dom"],
   globals: {
