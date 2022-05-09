@@ -13,7 +13,7 @@ interface PropTypes {
 
 const MenuItemContainer = tw.ul`bg-transparent flex px-8`;
 const MenuItem = styled.li((props: PropTypes) => [
-  tw`mr-1 text-white bg-blue-950 rounded-t-md hover:bg-blue-975`,
+  tw`mr-1 text-white bg-[rgba(0, 32, 64, 0.5)] rounded-t-md hover:bg-[rgba(0,6,13, 0.5)]`,
   props.isActive && tw`bg-slate text-slate-90 font-medium hover:bg-slate`,
 ]);
 
