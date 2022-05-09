@@ -7,6 +7,7 @@ import {
   useRouteMatch,
   useHistory,
 } from "react-router-dom";
+import "twin.macro";
 import "styled-components/macro";
 import EditMeasureNav from "./editMeasureNav/EditMeasureNav";
 import MeasureDetails from "./measureDetails/MeasureDetails";
@@ -50,26 +51,28 @@ export default function EditMeasure() {
   const loadingDiv = <div data-testid="loading">Loading...</div>;
 
   const contentDiv = (
-    <div className="container-header-gradient" data-testid="editMeasure">
+    <div data-testid="editMeasure">
       <Header measure={measure} />
-      <EditMeasureNav />
-      <MeasureContextProvider value={{ measure, setMeasure }}>
-        <Switch>
-          <Redirect exact from={url} to={`${url}/details`} />
-          <Route path={`${url}/details`}>
-            <MeasureDetails />
-          </Route>
-          <Route path={`${url}/cql-editor`}>
-            <MeasureEditor />
-          </Route>
-          <Route path={`${url}/test-cases`}>
-            <MadiePatient />
-          </Route>
-          <Route path="*">
-            <MeasureGroups />
-          </Route>
-        </Switch>
-      </MeasureContextProvider>
+      <div tw="relative -mt-12">
+        <EditMeasureNav />
+        <MeasureContextProvider value={{ measure, setMeasure }}>
+          <Switch>
+            <Redirect exact from={url} to={`${url}/details`} />
+            <Route path={`${url}/details`}>
+              <MeasureDetails />
+            </Route>
+            <Route path={`${url}/cql-editor`}>
+              <MeasureEditor />
+            </Route>
+            <Route path={`${url}/test-cases`}>
+              <MadiePatient />
+            </Route>
+            <Route path="*">
+              <MeasureGroups />
+            </Route>
+          </Switch>
+        </MeasureContextProvider>
+      </div>
     </div>
   );
 

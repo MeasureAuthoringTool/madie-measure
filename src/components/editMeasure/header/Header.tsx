@@ -9,7 +9,10 @@ const HeaderContent = tw.div`h-44 text-white px-8 py-6 flex justify-center items
 
 export default function Header(props: { measure: Measure }) {
   return (
-    <div data-testid="edit-measure-header">
+    <div
+      className="container-header-gradient"
+      data-testid="edit-measure-header"
+    >
       <HeaderContent>
         <div tw="mb-2" role="presentation">
           <Breadcrumbs aria-label="measures">
