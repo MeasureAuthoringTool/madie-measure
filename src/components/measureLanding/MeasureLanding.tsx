@@ -18,7 +18,7 @@ export function MeasureRoutes() {
 
 const MeasureLanding = () => {
   return (
-    <div className="container-header-gradient" data-testid="browser-router">
+    <div data-testid="browser-router">
       <TimeoutHandler timeLeft={1500000} />
       <BrowserRouter>
         <MeasureRoutes />

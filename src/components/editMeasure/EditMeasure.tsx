@@ -50,7 +50,7 @@ export default function EditMeasure() {
   const loadingDiv = <div data-testid="loading">Loading...</div>;
 
   const contentDiv = (
-    <div data-testid="editMeasure">
+    <div className="container-header-gradient" data-testid="editMeasure">
       <Header measure={measure} />
       <EditMeasureNav />
       <MeasureContextProvider value={{ measure, setMeasure }}>
