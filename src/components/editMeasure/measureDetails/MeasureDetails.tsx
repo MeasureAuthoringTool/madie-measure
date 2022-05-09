@@ -5,8 +5,8 @@ import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureMetadata from "./measureMetadata/MeasureMetadata";
 import MeasureDetailsSidebar from "./MeasureDetailsSidebar";
 
-const Grid = tw.div`grid grid-cols-4 gap-4 ml-6`;
-const Content = tw.div`col-span-3`;
+const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
+const Content = tw.div`col-span-5 py-6`;
 
 export default function EditMeasure() {
   const { path } = useRouteMatch();
@@ -20,7 +20,7 @@ export default function EditMeasure() {
 
   const links = [
     {
-      title: "Measure Information",
+      title: "Information",
       href: path,
       dataTestId: "leftPanelMeasureInformation",
     },

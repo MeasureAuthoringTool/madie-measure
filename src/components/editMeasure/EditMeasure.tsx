@@ -16,6 +16,7 @@ import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { MeasureContextProvider } from "./MeasureContext";
 import { MadiePatient } from "@madie/madie-patient";
 import MeasureGroups from "../measureGroups/MeasureGroups";
+import Header from "./header/Header";
 
 interface inputParams {
   id: string;
@@ -44,12 +45,13 @@ export default function EditMeasure() {
           }
         });
     }
-  }, [measureServiceApi, id, measure]);
+  }, [measureServiceApi, id, measure, history]);
 
   const loadingDiv = <div data-testid="loading">Loading...</div>;
 
   const contentDiv = (
     <div data-testid="editMeasure">
+      <Header measure={measure} />
       <EditMeasureNav />
       <MeasureContextProvider value={{ measure, setMeasure }}>
         <Switch>

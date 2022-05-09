@@ -107,7 +107,7 @@ describe("EditMeasure Component", () => {
     //verify all menus present in the dom
     expect(await findByText("Details")).toBeInTheDocument();
     expect(await findByText("CQL Editor")).toBeInTheDocument();
-    expect(await findByText("Measure Groups")).toBeInTheDocument();
+    expect(await findByText("Groups")).toBeInTheDocument();
     expect(await findByText("Test Cases")).toBeInTheDocument();
     expect((await findByText("Details")).classList).toContain("active");
   });
@@ -129,8 +129,8 @@ describe("EditMeasure Component", () => {
     );
 
     // Measure Groups Menu click action
-    fireEvent.click(await findByText("Measure Groups"));
-    expect((await findByText("Measure Groups")).classList).toContain("active");
+    fireEvent.click(await findByText("Groups"));
+    expect((await findByText("Groups")).classList).toContain("active");
 
     // Test Cases Menu click action
     fireEvent.click(await findByText("Test Cases"));
