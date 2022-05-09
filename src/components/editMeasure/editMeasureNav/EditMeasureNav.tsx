@@ -11,11 +11,15 @@ interface PropTypes {
   isActive?: boolean;
 }
 
-const MenuItemContainer = tw.ul`bg-current flex border-b`;
+const MenuItemContainer = tw.ul`bg-transparent flex px-8`;
 const MenuItem = styled.li((props: PropTypes) => [
-  tw`mr-1 text-white inline-block py-2 px-4 font-semibold focus:outline-none`,
-  props.isActive && tw`bg-white text-black`,
+  tw`mr-1 text-white bg-[rgba(0, 32, 64, 0.5)] rounded-t-md hover:bg-[rgba(0,6,13, 0.5)]`,
+  props.isActive && tw`bg-slate text-slate-90 font-medium hover:bg-slate`,
 ]);
+
+const NavLinkCustom = tw(
+  NavLink
+)`py-3.5 px-8 inline-block no-underline text-inherit text-sm hover:text-inherit focus:outline-none focus:text-inherit focus:no-underline`;
 
 const EditMeasureNav = () => {
   const { url } = useRouteMatch();
@@ -26,7 +30,7 @@ const EditMeasureNav = () => {
   if (
     pathname !== `${url}/details` &&
     pathname !== `${url}/cql-editor` &&
-    pathname !== `${url}/measure-groups` &&
+    pathname !== `${url}/groups` &&
     pathname !== `${url}/details/measure-steward` &&
     pathname !== `${url}/details/measure-description` &&
     pathname !== `${url}/details/measure-copyright` &&
@@ -46,25 +50,25 @@ const EditMeasureNav = () => {
           data-testid="measure-details-tab"
           isActive={pathname.startsWith(`${url}/details`)}
         >
-          <NavLink to={`${url}/details`}>Details</NavLink>
+          <NavLinkCustom to={`${url}/details`}>Details</NavLinkCustom>
         </MenuItem>
         <MenuItem
           data-testid="cql-editor-tab"
           isActive={pathname === `${url}/cql-editor`}
         >
-          <NavLink to={`${url}/cql-editor`}>CQL Editor</NavLink>
+          <NavLinkCustom to={`${url}/cql-editor`}>CQL Editor</NavLinkCustom>
         </MenuItem>
         <MenuItem
-          data-testid="measure-groups-tab"
-          isActive={pathname === `${url}/measure-groups`}
+          data-testid="groups-tab"
+          isActive={pathname === `${url}/groups`}
         >
-          <NavLink to={`${url}/measure-groups`}>Measure Groups</NavLink>
+          <NavLinkCustom to={`${url}/groups`}>Groups</NavLinkCustom>
         </MenuItem>
         <MenuItem
           data-testid="patients-tab"
           isActive={pathname.startsWith(`${url}/test-cases`)}
         >
-          <NavLink to={`${url}/test-cases`}>Test Cases</NavLink>
+          <NavLinkCustom to={`${url}/test-cases`}>Test Cases</NavLinkCustom>
         </MenuItem>
       </MenuItemContainer>
     </div>

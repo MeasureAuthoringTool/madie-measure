@@ -12,6 +12,7 @@ module.exports = {
     },
     colors: {
       transparent: "transparent",
+      inherit: "inherit",
       current: "currentColor",
       black: colors.black,
       white: colors.white,
@@ -37,8 +38,10 @@ module.exports = {
         500: "#33c5bf",
         DEFAULT: "#33c5bf",
         600: "#25a3a9",
+        650: "#209FA6",
         700: "#197e8d",
         800: "#105c72",
+        850: "#125496",
         900: "#09435e",
       },
       green: {
@@ -107,6 +110,11 @@ module.exports = {
         900: "#1c2556",
         950: "#20253a",
         975: "#080B1A",
+      },
+      slate: {
+        DEFAULT: "#EDEDED",
+        90: "#242424",
+        80: "#333333",
       },
     },
     extend: {
