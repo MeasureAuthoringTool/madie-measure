@@ -16,7 +16,7 @@ export default function Header(props: { measure: Measure }) {
       <HeaderContent>
         <div tw="mb-2" role="presentation">
           <Breadcrumbs aria-label="measures">
-            <Link tw="text-white" to="/measures">
+            <Link tw="text-white hover:text-white" to="/measures">
               Measures
             </Link>
           </Breadcrumbs>
