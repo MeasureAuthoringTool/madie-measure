@@ -53,12 +53,12 @@
 
         &:active {
           background-color: #efefef;
-          color: #333333;
+          color: #333;
         }
 
         &:focus {
           border: 1px solid #0073c8;
-          box-shadow: rgb(203, 228, 255) 0px 0px 0px 4px;
+          box-shadow: rgb(203, 228, 255) 0 0 0 4px;
         }
 
         &:focus-visible {

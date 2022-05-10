@@ -5,7 +5,7 @@
 .measure-table {
   background-color: #fff;
   border: 1px solid rgba(151, 151, 151, 0.17);
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   margin: 0 130px 111px 130px;
   border-radius: 6px;
   margin-top: -35px;
@@ -13,7 +13,7 @@
   > div {
     > .table {
       overflow: hidden;
-      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 
       .col-header {
         color: #2d3540;
