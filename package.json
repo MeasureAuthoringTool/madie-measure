@@ -111,6 +111,8 @@
     "lodash": "^4.17.21",
     "node-polyfill-webpack-plugin": "^1.1.4",
     "query-string": "^7.1.1",
+    "sass": "^1.51.0",
+    "sass-loader": "^12.6.0",
     "single-spa": "^5.9.3",
     "single-spa-react": "^4.2.0",
     "yup": "^0.32.11"

@@ -11,6 +11,7 @@ module.exports = {
     "\\.(css)$": "identity-obj-proxy",
     "single-spa-react/parcel": "single-spa-react/lib/cjs/parcel.cjs",
     "^react($|/.+)": "<rootDir>/node_modules/react$1", // makes sure all React imports are running off of the one in this package.
+    "\\.(css|scss)$": "identity-obj-proxy",
     "@madie/madie-components":
       "<rootDir>/node_modules/@madie/madie-components/src/madie-madie-components.tsx",
   },
