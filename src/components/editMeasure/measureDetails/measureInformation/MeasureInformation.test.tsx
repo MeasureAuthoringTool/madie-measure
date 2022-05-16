@@ -95,24 +95,8 @@ describe("MeasureInformation component", () => {
     const { getByTestId } = render(<MeasureInformation />);
     const result: HTMLElement = getByTestId("measurement-period-save-button");
     expect(result).toBeInTheDocument();
-    // const measurementPeriodStart =
-    //   "Tue Feb 05 2002 00:00:00 GMT-0500 (Eastern Standard Time)";
-    // const  measurementPeriodEnd =
-    //   "Tue Feb 05 2003 00:00:00 GMT-0500 (Eastern Standard Time)";
 
     fireEvent.click(result);
-    // //const result1: HTMLElement = getByTestId("measurement-period-success-message")
-    // //expect(result1).toBeInTheDocument();
-    // const expected = {
-    //   id: "test measure",
-    //   measureName: "new value",
-    //   createdBy: "testuser@example.com",
-    //   measurementPeriodStart :
-    //   "05/10/2022",
-    //   measurementPeriodEnd :
-    //   "05/10/2023"
-    // };
-    // expect(serviceApiMock.updateMeasure).toHaveBeenCalledWith(expected);
   });
 
   it("Check if measurement start field is present in the form", () => {
