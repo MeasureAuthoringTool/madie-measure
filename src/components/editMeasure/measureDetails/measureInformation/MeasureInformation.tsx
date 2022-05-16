@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import tw from "twin.macro";
 import styled, { css } from "styled-components";
@@ -10,6 +10,17 @@ import "styled-components/macro";
 import useOktaTokens from "../../../../hooks/useOktaTokens";
 import { Button, Toast } from "@madie/madie-design-system/dist/react";
 import DeleteDialog from "./DeleteDialog";
+import LocalizationProvider from "@mui/lab/LocalizationProvider";
+import DateAdapter from "@mui/lab/AdapterDateFns";
+import DesktopDatePicker from "@mui/lab/DesktopDatePicker";
+import { TextField } from "@mui/material";
+import { useFormik } from "formik";
+import { HelperText } from "@madie/madie-components";
+import { MeasurementPeriodValidator } from "../../../../models/MeasurementPeriodValidator";
+interface measureInformationForm {
+  measurementPeriodStart: Date;
+  measurementPeriodEnd: Date;
+}
 
 export const DisplayDiv = styled.div(() => [
   tw`flex`,
@@ -20,6 +31,21 @@ export const DisplayDiv = styled.div(() => [
 export const DisplaySpan = styled.span`
   white-space: pre;
 `;
+
+const Form = tw.form`max-w-xl my-8`;
+const FormButtons = tw.div`pt-5`;
+const ButtonWrapper = tw.div`flex justify-start`;
+const SubmitButton = tw.button` inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500`;
+const MessageDiv = tw.div`ml-3`;
+const MessageText = tw.p`text-sm font-medium`;
+const SuccessText = tw(MessageText)`text-green-800`;
+const ErrorText = tw(MessageText)`text-red-800`;
+const FormErrors = tw.div`h-6`;
+
+const INITIAL_VALUES = {
+  measurementPeriodStart: null,
+  measurementPeriodEnd: null,
+} as measureInformationForm;
 
 export default function MeasureInformation() {
   const history = useHistory();
@@ -34,6 +60,15 @@ export default function MeasureInformation() {
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
+  const [successMessage, setSuccessMessage] = useState<string>(null);
+  const [errorMessage, setErrorMessage] = useState<string>(null);
+
+  const formik = useFormik({
+    initialValues: { ...INITIAL_VALUES },
+    validationSchema: MeasurementPeriodValidator,
+    onSubmit: async (values: measureInformationForm) =>
+      await handleSubmit(values),
+  });
 
   const onToastClose = () => {
     setToastType(null);
@@ -82,6 +117,48 @@ export default function MeasureInformation() {
             );
           }
         });
+    }
+  }
+
+  const handleSubmit = async (values) => {
+    const newMeasure: Measure = {
+      ...measure,
+      measurementPeriodStart: values.measurementPeriodStart,
+      measurementPeriodEnd: values.measurementPeriodEnd,
+    };
+    measureServiceApi
+      .updateMeasure(newMeasure)
+      .then(() => {
+        setSuccessMessage("Measurement Period Updated Successfully");
+        setMeasure(newMeasure);
+      })
+      .catch((err) => {
+        setErrorMessage(err.response.data.message);
+      });
+  };
+
+  useEffect(() => {
+    if (measure?.measurementPeriodStart && measure?.measurementPeriodEnd) {
+      formik.setFieldValue(
+        "measurementPeriodStart",
+        measure?.measurementPeriodStart
+      );
+      formik.setFieldValue(
+        "measurementPeriodEnd",
+        measure?.measurementPeriodEnd
+      );
+    }
+  }, []);
+
+  function formikErrorHandler(name: string, isError: boolean) {
+    if (formik.touched[name] && formik.errors[name]) {
+      return (
+        <HelperText
+          data-testid={`${name}-helper-text`}
+          text={formik.errors[name]?.toString()}
+          isError={isError}
+        />
+      );
     }
   }
 
@@ -134,6 +211,92 @@ export default function MeasureInformation() {
         onClose={onToastClose}
         autoHideDuration={6000}
       />
+
+      <Form
+        className="flex"
+        onSubmit={formik.handleSubmit}
+        data-testid="measurement-period-form"
+      >
+        <h5>Measurement Period</h5>
+        <div tw="flex">
+          <div tw="m-5" data-testid="measurement-period-start-date">
+            <LocalizationProvider dateAdapter={DateAdapter}>
+              <DesktopDatePicker
+                data-testid="measurement-period-start"
+                disableOpenPicker={true}
+                label="Start"
+                inputFormat="MM/dd/yyyy"
+                value={formik.values.measurementPeriodStart}
+                onChange={(startDate) => {
+                  setSuccessMessage(null);
+                  formik.setFieldValue("measurementPeriodStart", startDate);
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    data-testid="measurement-period-start"
+                  />
+                )}
+              />
+            </LocalizationProvider>
+          </div>
+
+          <div tw="m-5" data-testid="measurement-period-end-date">
+            <LocalizationProvider dateAdapter={DateAdapter}>
+              <DesktopDatePicker
+                data-testid="measurement-period-end"
+                disableOpenPicker={true}
+                label="End"
+                inputFormat="MM/dd/yyyy"
+                value={formik.values.measurementPeriodEnd}
+                onChange={(endDate) => {
+                  setSuccessMessage(null);
+                  formik.setFieldValue("measurementPeriodEnd", endDate);
+                }}
+                renderInput={(params) => <TextField {...params} />}
+              />
+            </LocalizationProvider>
+          </div>
+        </div>
+
+        {formik.touched.measurementPeriodStart &&
+        formik.errors.measurementPeriodStart ? (
+          <FormErrors>
+            {formikErrorHandler("measurementPeriodStart", true)}
+          </FormErrors>
+        ) : null}
+
+        {formik.touched.measurementPeriodEnd &&
+        formik.errors.measurementPeriodEnd ? (
+          <FormErrors>
+            {formikErrorHandler("measurementPeriodEnd", true)}
+          </FormErrors>
+        ) : null}
+
+        <FormButtons>
+          <ButtonWrapper>
+            <SubmitButton
+              type="submit"
+              data-testid="measurement-period-save-button"
+              // disabled={!(formik.isValid && formik.dirty)}
+            >
+              Save
+            </SubmitButton>
+          </ButtonWrapper>
+        </FormButtons>
+      </Form>
+      <MessageDiv>
+        {successMessage && (
+          <SuccessText data-testid="measurement-period-success-message">
+            {successMessage}
+          </SuccessText>
+        )}
+        {errorMessage && (
+          <ErrorText data-testid="measurement-period-error-message">
+            {errorMessage}
+          </ErrorText>
+        )}
+      </MessageDiv>
     </div>
   );
 }

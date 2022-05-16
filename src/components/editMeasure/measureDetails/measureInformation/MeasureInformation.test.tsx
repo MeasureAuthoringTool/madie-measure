@@ -1,5 +1,6 @@
 import * as React from "react";
 import { render, cleanup, fireEvent, waitFor } from "@testing-library/react";
+import { screen } from "@testing-library/dom";
 import { act } from "react-dom/test-utils";
 import MeasureInformation from "./MeasureInformation";
 import useMeasureServiceApi, {
@@ -11,6 +12,10 @@ import { MeasureContextHolder } from "../../MeasureContext";
 import Measure from "../../../../models/Measure";
 import useOktaTokens from "../../../../hooks/useOktaTokens";
 import { MemoryRouter } from "react-router";
+import LocalizationProvider from "@mui/lab/LocalizationProvider";
+import DateAdapter from "@mui/lab/AdapterDateFns";
+import DesktopDatePicker from "@mui/lab/DesktopDatePicker";
+import { TextField } from "@mui/material";
 
 const mockHistoryPush = jest.fn();
 
@@ -73,7 +78,6 @@ describe("MeasureInformation component", () => {
     const { getByTestId } = render(<MeasureInformation />);
     const result: HTMLElement = getByTestId("measure-name-edit");
     expect(result).toBeInTheDocument();
-    expect(result).toMatchSnapshot();
     const text = getByTestId("inline-view-span");
     expect(text.textContent).toBe(measure.measureName);
   });
@@ -83,9 +87,89 @@ describe("MeasureInformation component", () => {
     const { getByTestId } = render(<MeasureInformation />);
     const result: HTMLElement = getByTestId("measure-name-edit");
     expect(result).toBeInTheDocument();
-    expect(result).toMatchSnapshot();
     const text = getByTestId("inline-view-span");
     expect(text.textContent).toBe("");
+  });
+
+  it("Check if the measurement period save button is present", () => {
+    const { getByTestId } = render(<MeasureInformation />);
+    const result: HTMLElement = getByTestId("measurement-period-save-button");
+    expect(result).toBeInTheDocument();
+    // const measurementPeriodStart =
+    //   "Tue Feb 05 2002 00:00:00 GMT-0500 (Eastern Standard Time)";
+    // const  measurementPeriodEnd =
+    //   "Tue Feb 05 2003 00:00:00 GMT-0500 (Eastern Standard Time)";
+
+    fireEvent.click(result);
+    // //const result1: HTMLElement = getByTestId("measurement-period-success-message")
+    // //expect(result1).toBeInTheDocument();
+    // const expected = {
+    //   id: "test measure",
+    //   measureName: "new value",
+    //   createdBy: "testuser@example.com",
+    //   measurementPeriodStart :
+    //   "05/10/2022",
+    //   measurementPeriodEnd :
+    //   "05/10/2023"
+    // };
+    // expect(serviceApiMock.updateMeasure).toHaveBeenCalledWith(expected);
+  });
+
+  it("Check if measurement start field is present in the form", () => {
+    const { getByTestId } = render(<MeasureInformation />);
+    const result = getByTestId("measurement-period-form");
+    expect(result).toBeInTheDocument();
+    const measurementPeriodStart: HTMLElement = getByTestId(
+      "measurement-period-start-date"
+    );
+    expect(measurementPeriodStart).toBeInTheDocument();
+  });
+
+  it("Check if measurement start date field as expected", () => {
+    const measurementPeriodStart1 = "05/10/2022";
+    const handleChange = jest.fn();
+    const onError = jest.fn();
+    render(
+      <LocalizationProvider dateAdapter={DateAdapter}>
+        <DesktopDatePicker
+          data-testid="measurement-period-start"
+          disableOpenPicker={true}
+          label="Start"
+          inputFormat="MM/dd/yyyy"
+          value={measurementPeriodStart1}
+          onChange={handleChange}
+          onError={onError}
+          renderInput={(params) => <TextField {...params} />}
+        />
+      </LocalizationProvider>
+    );
+    const startLabelContent = screen.getByLabelText("Start");
+    expect(startLabelContent).toHaveValue("05/10/2022");
+    const { getByTestId } = render(<MeasureInformation />);
+    const result: HTMLElement = getByTestId("measurement-period-save-button");
+    expect(result).toBeInTheDocument();
+  });
+
+  it("Check if measurement end date field has expected value", () => {
+    const measurementPeriodEnd = "05/15/2022";
+    const handleChange = jest.fn();
+    const onError = jest.fn();
+    render(
+      <LocalizationProvider dateAdapter={DateAdapter}>
+        <DesktopDatePicker
+          data-testid="measurement-period-end"
+          disableOpenPicker={true}
+          label="End"
+          inputFormat="MM/dd/yyyy"
+          value={measurementPeriodEnd}
+          onChange={handleChange}
+          onError={onError}
+          renderInput={(params) => <TextField {...params} />}
+        />
+      </LocalizationProvider>
+    );
+    const startLabelContent = screen.getByLabelText("End");
+    expect(startLabelContent).toHaveValue("05/15/2022");
   });
 
   it("should save the measure's name on an update", async () => {
