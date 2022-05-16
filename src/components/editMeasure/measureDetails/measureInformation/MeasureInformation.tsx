@@ -17,6 +17,7 @@ import { TextField } from "@mui/material";
 import { useFormik } from "formik";
 import { HelperText } from "@madie/madie-components";
 import { MeasurementPeriodValidator } from "../../../../models/MeasurementPeriodValidator";
+
 interface measureInformationForm {
   measurementPeriodStart: Date;
   measurementPeriodEnd: Date;
@@ -235,6 +236,7 @@ export default function MeasureInformation() {
                 inputFormat="MM/dd/yyyy"
                 value={formik.values.measurementPeriodStart}
                 onChange={(startDate) => {
+                  setErrorMessage(null);
                   setSuccessMessage(null);
                   formik.setFieldValue("measurementPeriodStart", startDate);
                 }}
@@ -257,6 +259,7 @@ export default function MeasureInformation() {
                 inputFormat="MM/dd/yyyy"
                 value={formik.values.measurementPeriodEnd}
                 onChange={(endDate) => {
+                  setErrorMessage(null);
                   setSuccessMessage(null);
                   formik.setFieldValue("measurementPeriodEnd", endDate);
                 }}
@@ -285,7 +288,6 @@ export default function MeasureInformation() {
             <SubmitButton
               type="submit"
               data-testid="measurement-period-save-button"
-              // disabled={!(formik.isValid && formik.dirty)}
             >
               Save
             </SubmitButton>

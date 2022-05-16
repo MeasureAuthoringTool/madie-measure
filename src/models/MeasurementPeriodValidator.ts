@@ -11,8 +11,8 @@ export const MeasurementPeriodValidator = Yup.object().shape({
       "Measurement periods should be between the years 1990 and 2099.",
       (measurementPeriodStart) => {
         return moment(measurementPeriodStart).isBetween(
-          "1900-01-01",
-          "2099-12-31"
+          "1899-12-31",
+          "2100-01-01"
         );
       }
     ),
@@ -26,8 +26,8 @@ export const MeasurementPeriodValidator = Yup.object().shape({
       "Measurement periods should be between the years 1990 and 2099.",
       (measurementPeriodStart) => {
         return moment(measurementPeriodStart).isBetween(
-          "1900-01-01",
-          "2099-12-31"
+          "1899-12-31",
+          "2100-01-01"
         );
       }
     )
