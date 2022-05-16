@@ -62,8 +62,6 @@ export class ElmTranslationServiceApi {
         timeout: 15000,
       });
       if (resp.status === 200) {
-        //temp
-        //console.log("translateCqlToElm(): resp.data.json = "+resp.data.json);
         return JSON.parse(resp.data.json);
       } else {
         const message = "received non-OK response for CQL-to-ELM translation";
