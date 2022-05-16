@@ -100,13 +100,14 @@ describe("Measure Group Population Select Component", () => {
     );
   });
 
-  test("should display a select element with options", () => {
+  test("should display a select element with options if measure is editable for owner of measure", () => {
     const { getAllByTestId } = render(
       <div>
         <MeasureGroupPopulationSelect
           {...selectorProps}
           onChange={mockOnChangeHandler}
           value={""}
+          canEdit={true}
         />
       </div>
     );
@@ -116,7 +117,26 @@ describe("Measure Group Population Select Component", () => {
     expect(optionList).toHaveLength(11);
   });
 
-  test("should display the default value if passed", () => {
+  test("should not display a select element with options if measure is not editable", () => {
+    render(
+      <div>
+        <MeasureGroupPopulationSelect
+          {...selectorProps}
+          onChange={mockOnChangeHandler}
+          value={""}
+          canEdit={false}
+        />
+      </div>
+    );
+
+    const optionList = screen.queryAllByText(
+      "select-option-measure-group-population"
+    );
+
+    expect(optionList).toHaveLength(0);
+  });
+
+  test("should display the default option value if passed and measure is editable", () => {
     const defaultValue = selectOptions[0].name;
     const { getByText, getByTestId, getAllByTestId } = render(
       <div>
@@ -124,6 +144,7 @@ describe("Measure Group Population Select Component", () => {
           {...selectorProps}
           onChange={mockOnChangeHandler}
           value={defaultValue}
+          canEdit={true}
         />
       </div>
     );
@@ -134,7 +155,7 @@ describe("Measure Group Population Select Component", () => {
     expect(optionEl.selected).toBe(true);
   });
 
-  test("should fire onChange update when value changes", async () => {
+  test("should fire onChange update when value changes when measure is editable", async () => {
     const defaultValue = selectOptions[0].name;
     const updatedValue = selectOptions[1].name;
 
@@ -144,6 +165,7 @@ describe("Measure Group Population Select Component", () => {
           {...selectorProps}
           onChange={mockOnChangeHandler}
           value={defaultValue}
+          canEdit={true}
         />
       </div>
     );
@@ -154,7 +176,7 @@ describe("Measure Group Population Select Component", () => {
     expect(mockOnChangeHandler).toHaveReturnedWith(updatedValue);
   });
 
-  test("should show error helper text", async () => {
+  test("should show error helper text when measure is editable", async () => {
     const defaultValue = selectOptions[0].name;
 
     render(
@@ -165,6 +187,7 @@ describe("Measure Group Population Select Component", () => {
           value={defaultValue}
           helperText="Value is required"
           error={true}
+          canEdit={true}
         />
       </div>
     );
@@ -172,5 +195,45 @@ describe("Measure Group Population Select Component", () => {
     const helperText = screen.getByText("Value is required");
     expect(helperText).toBeInTheDocument();
     expect(helperText).toHaveClass("Mui-error");
+  });
+
+  test("should display both View and Delete buttons for measure owner", () => {
+    render(
+      <div>
+        <MeasureGroupPopulationSelect
+          {...selectorProps}
+          onChange={mockOnChangeHandler}
+          value={""}
+          canEdit={true}
+        />
+      </div>
+    );
+
+    expect(
+      screen.getByTestId("measure-group-population-view")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("measure-group-population-delete")
+    ).toBeInTheDocument();
+  });
+
+  test("should display only View button for non-measure owner", () => {
+    render(
+      <div>
+        <MeasureGroupPopulationSelect
+          {...selectorProps}
+          onChange={mockOnChangeHandler}
+          value={""}
+          canEdit={false}
+        />
+      </div>
+    );
+
+    expect(
+      screen.getByTestId("measure-group-population-view")
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("measure-group-population-delete")
+    ).not.toBeInTheDocument();
   });
 });

@@ -22,8 +22,10 @@ MeasureEditorMock.mockImplementation(() => {
   return <div>library testCql version '1.0.000'</div>;
 });
 
+const MEASURE_CREATEDBY = "testuser@example.com";
 const measure = {
   id: "measure ID",
+  createdBy: MEASURE_CREATEDBY,
 } as Measure;
 
 const serviceApiMock = {
@@ -34,10 +36,9 @@ useMeasureServiceApiMock.mockImplementation(() => {
   return serviceApiMock;
 });
 
-jest.mock("../../hooks/useOktaTokens", () => ({
-  useOktaTokens: jest.fn(() => ({
-    getAccessToken: () => "test.jwt",
-  })),
+jest.mock("../../hooks/useOktaTokens", () => () => ({
+  getAccessToken: () => "test.jwt",
+  getUserName: () => MEASURE_CREATEDBY,
 }));
 
 const serviceConfig: ServiceConfig = {
@@ -106,7 +107,7 @@ describe("EditMeasure Component", () => {
     //verify all menus present in the dom
     expect(await findByText("Details")).toBeInTheDocument();
     expect(await findByText("CQL Editor")).toBeInTheDocument();
-    expect(await findByText("Measure Groups")).toBeInTheDocument();
+    expect(await findByText("Groups")).toBeInTheDocument();
     expect(await findByText("Test Cases")).toBeInTheDocument();
     expect((await findByText("Details")).classList).toContain("active");
   });
@@ -128,8 +129,8 @@ describe("EditMeasure Component", () => {
     );
 
     // Measure Groups Menu click action
-    fireEvent.click(await findByText("Measure Groups"));
-    expect((await findByText("Measure Groups")).classList).toContain("active");
+    fireEvent.click(await findByText("Groups"));
+    expect((await findByText("Groups")).classList).toContain("active");
 
     // Test Cases Menu click action
     fireEvent.click(await findByText("Test Cases"));

@@ -69,6 +69,7 @@ export default function MeasureInformation() {
     onSubmit: async (values: measureInformationForm) =>
       await handleSubmit(values),
   });
+  const canEdit = measure.createdBy === userName;
 
   const onToastClose = () => {
     setToastType(null);
@@ -182,12 +183,18 @@ export default function MeasureInformation() {
       )}
       <DisplayDiv>
         <span tw="mr-2">Measure Name:</span>
-        <InlineEdit text={measure.measureName} onSetText={updateMeasureTitle} />
-        {measure.createdBy === userName && (
+        {canEdit && (
+          <InlineEdit
+            text={measure.measureName}
+            onSetText={updateMeasureTitle}
+          />
+        )}
+        {!canEdit && measure.measureName}
+        {canEdit && (
           <Button
             variant="danger-primary"
             data-testid="delete-measure-button"
-            disabled={measure.createdBy !== userName}
+            disabled={!canEdit}
             onClick={() => setDeleteOpen(true)}
           >
             Delete Measure

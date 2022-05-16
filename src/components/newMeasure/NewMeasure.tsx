@@ -7,15 +7,15 @@ import MeasureList from "../measureList/MeasureList";
 import Measure from "../../models/Measure";
 import * as _ from "lodash";
 
-import { Divider, Tab, Tabs } from "@mui/material";
+import { Tab, Tabs } from "@mui/material";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
-import { Button } from "@madie/madie-components";
 import {
   Pagination,
   MadieSpinner,
 } from "@madie/madie-design-system/dist/react";
 import CreateNewMeasureDialog from "./CreateNewMeasureDialog";
-
+import PageHeader from "../PageHeader";
+import "./NewMeasure.scss";
 export default function NewMeasure() {
   const { search } = useLocation();
   const history = useHistory();
@@ -89,71 +89,104 @@ export default function NewMeasure() {
     const limit = values?.limit || 10;
     history.push(`?tab=${nextTab}&page=0&limit=${limit}`);
   };
+
+  const [userFirstName, setUserFirstName] = useState<string>("");
+  useEffect(() => {
+    const setStorage = () => {
+      const givenName = window.localStorage.getItem("givenName");
+      if (!givenName) {
+        setTimeout(setStorage, 1500);
+      } else {
+        setUserFirstName(window.localStorage.getItem("givenName"));
+      }
+    };
+    setStorage();
+  }, []);
+  const openCreate = () => {
+    setCreateOpen(true);
+  };
+
   return (
-    <div tw="mx-12 mt-5">
-      <CreateNewMeasureDialog open={createOpen} onClose={handleClose} />
-      <section tw="flex flex-row my-2">
-        <h1 tw="text-4xl font-light">Measures</h1>
-        <span tw="flex-grow" />
-        <Button
-          buttonTitle="New Measure"
-          tw="h-10"
-          onClick={() => {
-            setCreateOpen(true);
-          }}
-          data-testid="create-new-measure-button"
-        />
-      </section>
-      <section tw="flex flex-row">
-        <div>
-          <Tabs value={activeTab} onChange={handleTabChange} tw="flex flex-row">
-            <Tab label={`My Measures`} data-testid="my-measures-tab" />
-            <Tab label="All Measures" data-testid="all-measures-tab" />
-          </Tabs>
-          <Divider />
-        </div>
-        <span tw="flex-grow" />
-      </section>
-      <div tw="my-4">
-        {/* spin or display */}
-        {!initialLoad && (
-          <div
-            tw="overflow-hidden border-b border-gray-200 sm:rounded-lg"
-            style={{ boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)" }}
-          >
-            <MeasureList measureList={measureList} />
-            <div
-              style={{
-                boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-                border: "1px solid rgba(151, 151, 151, 0.17)",
-                borderWidth: "0 1px 1px 1px",
+    <div id="measure-landing">
+      <PageHeader name={userFirstName} openCreate={openCreate} />
+      <div className="measure-table">
+        <CreateNewMeasureDialog open={createOpen} onClose={handleClose} />
+        <section tw="flex flex-row">
+          <div>
+            <Tabs
+              value={activeTab}
+              onChange={handleTabChange}
+              sx={{
+                fontWeight: 700,
+                color: "#003366",
+                "& .MuiTabs-indicator": {
+                  height: "4px",
+                  backgroundColor: "#0073C8",
+                },
+                "& .Mui-selected": {
+                  fontWeight: 500,
+                  color: "#003366 !important",
+                },
               }}
             >
-              {totalItems > 0 && (
-                <Pagination
-                  totalItems={totalItems}
-                  visibleItems={visibleItems}
-                  limitOptions={[10, 25, 50]}
-                  offset={offset}
-                  handlePageChange={handlePageChange}
-                  handleLimitChange={handleLimitChange}
-                  page={Number(values?.page) || 1}
-                  limit={Number(values?.limit) || 10}
-                  count={totalPages}
-                  shape="rounded"
-                  hideNextButton={!canGoNext}
-                  hidePrevButton={!canGoPrev}
-                />
-              )}
+              <Tab
+                sx={{
+                  padding: "24px 21px",
+                  fontFamily: "Rubik, sans serif",
+                  borderRadius: "6px 0 0 0",
+                  fontWeight: 400,
+                  color: "#003366",
+                }}
+                label={`My Measures`}
+                data-testid="my-measures-tab"
+              />
+              <Tab
+                sx={{
+                  padding: "24px 21px",
+                  fontFamily: "Rubik, sans serif",
+                  borderRadius: "0 6px 0 0",
+                  fontWeight: 400,
+                  color: "#003366",
+                }}
+                label="All Measures"
+                data-testid="all-measures-tab"
+              />
+            </Tabs>
+          </div>
+          <span tw="flex-grow" />
+        </section>
+        <div>
+          {/* spin or display */}
+          {!initialLoad && (
+            <div className="table">
+              <MeasureList measureList={measureList} />
+              <div className="pagination-container">
+                {totalItems > 0 && (
+                  <Pagination
+                    totalItems={totalItems}
+                    visibleItems={visibleItems}
+                    limitOptions={[10, 25, 50]}
+                    offset={offset}
+                    handlePageChange={handlePageChange}
+                    handleLimitChange={handleLimitChange}
+                    page={Number(values?.page) || 1}
+                    limit={Number(values?.limit) || 10}
+                    count={totalPages}
+                    shape="rounded"
+                    hideNextButton={!canGoNext}
+                    hidePrevButton={!canGoPrev}
+                  />
+                )}
+              </div>
             </div>
+          )}
+        </div>
+        {initialLoad && (
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <MadieSpinner style={{ height: 50, width: 50 }} />
           </div>
         )}
       </div>
-      {initialLoad && (
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <MadieSpinner style={{ height: 50, width: 50 }} />
-        </div>
-      )}
     </div>
   );
 }

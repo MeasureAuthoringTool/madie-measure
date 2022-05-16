@@ -7,6 +7,7 @@ import {
   useRouteMatch,
   useHistory,
 } from "react-router-dom";
+import "twin.macro";
 import "styled-components/macro";
 import EditMeasureNav from "./editMeasureNav/EditMeasureNav";
 import MeasureDetails from "./measureDetails/MeasureDetails";
@@ -16,6 +17,7 @@ import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { MeasureContextProvider } from "./MeasureContext";
 import { MadiePatient } from "@madie/madie-patient";
 import MeasureGroups from "../measureGroups/MeasureGroups";
+import Header from "./header/Header";
 
 interface inputParams {
   id: string;
@@ -44,30 +46,33 @@ export default function EditMeasure() {
           }
         });
     }
-  }, [measureServiceApi, id, measure]);
+  }, [measureServiceApi, id, measure, history]);
 
   const loadingDiv = <div data-testid="loading">Loading...</div>;
 
   const contentDiv = (
     <div data-testid="editMeasure">
-      <EditMeasureNav />
-      <MeasureContextProvider value={{ measure, setMeasure }}>
-        <Switch>
-          <Redirect exact from={url} to={`${url}/details`} />
-          <Route path={`${url}/details`}>
-            <MeasureDetails />
-          </Route>
-          <Route path={`${url}/cql-editor`}>
-            <MeasureEditor />
-          </Route>
-          <Route path={`${url}/test-cases`}>
-            <MadiePatient />
-          </Route>
-          <Route path="*">
-            <MeasureGroups />
-          </Route>
-        </Switch>
-      </MeasureContextProvider>
+      <Header measure={measure} />
+      <div tw="relative -mt-12">
+        <EditMeasureNav />
+        <MeasureContextProvider value={{ measure, setMeasure }}>
+          <Switch>
+            <Redirect exact from={url} to={`${url}/details`} />
+            <Route path={`${url}/details`}>
+              <MeasureDetails />
+            </Route>
+            <Route path={`${url}/cql-editor`}>
+              <MeasureEditor />
+            </Route>
+            <Route path={`${url}/test-cases`}>
+              <MadiePatient />
+            </Route>
+            <Route path="*">
+              <MeasureGroups />
+            </Route>
+          </Switch>
+        </MeasureContextProvider>
+      </div>
     </div>
   );
 

@@ -4,69 +4,50 @@ import "styled-components/macro";
 
 import Measure from "../../models/Measure";
 import { useHistory } from "react-router-dom";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export default function MeasureList(props: { measureList: Measure[] }) {
   const history = useHistory();
-
   return (
     <div data-testid="measure-list">
       <div tw="flex flex-col">
         <div tw="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div tw="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-            <div style={{ border: "solid 1px #DDDDDD" }}>
-              <table tw="min-w-full divide-y divide-gray-200">
-                <thead tw="bg-gray-50">
+            <div>
+              <table tw="min-w-full" style={{ borderTop: "solid 1px #DDD" }}>
+                <thead>
                   <tr>
-                    <th
-                      scope="col"
-                      tw="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      Name
+                    <th scope="col" className="col-header">
+                      Measure Name
                     </th>
-                    <th
-                      scope="col"
-                      tw="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
+                    <th scope="col" className="col-header">
                       Model
                     </th>
-                    <th
-                      scope="col"
-                      tw="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
+                    <th scope="col" className="col-header">
                       Measure Scoring
                     </th>
-                    <th
-                      scope="col"
-                      tw="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      State
-                    </th>
-                    <th
-                      scope="col"
-                      tw="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
+                    <th scope="col" className="col-header">
                       Version
                     </th>
-                    <th
-                      scope="col"
-                      tw="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
+                    <th scope="col" className="col-header">
                       Revision
                     </th>
-                    <th
-                      scope="col"
-                      tw="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    />
+                    <th scope="col" className="col-header">
+                      Status
+                    </th>
+                    <th scope="col" className="col-header">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
-                <tbody data-testid="table-body">
+                <tbody data-testid="table-body" className="table-body">
                   {props.measureList?.map((measure, i) => (
                     <tr
                       key={`${measure.id}-${i}`}
-                      tw="bg-white"
                       data-testid="row-item"
+                      className={i % 2 === 0 ? "odd" : ""}
                     >
-                      <td tw="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td>
                         <button
                           type="button"
                           onClick={() => history.push("#")}
@@ -75,30 +56,32 @@ export default function MeasureList(props: { measureList: Measure[] }) {
                           {measure.measureName}
                         </button>
                       </td>
-                      <td tw="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {measure.model}
+                      <td>{measure.model}</td>
+                      <td>{measure.measureScoring}</td>
+                      <td>{measure.version}</td>
+                      <td>{measure.revisionNumber}</td>
+                      <td>
+                        <div>
+                          <div className="activity">
+                            <div className="bubble active-bubble" />
+                            <div>{measure.active ? "Active" : "Inactive"}</div>
+                          </div>
+                        </div>
                       </td>
-                      <td tw="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {measure.measureScoring}
-                      </td>
-                      <td tw="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {measure.state}
-                      </td>
-                      <td tw="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {measure.version}
-                      </td>
-                      <td tw="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {measure.revisionNumber}
-                      </td>
-                      <td tw="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+
+                      <td>
                         <button
+                          className="action-button"
                           onClick={() => {
                             history.push(`/measures/${measure.id}/edit`);
                           }}
                           tw="text-blue-600 hover:text-blue-900"
                           data-testid={`edit-measure-${measure.id}`}
                         >
-                          Edit
+                          <div className="action">View/Edit</div>
+                          <div className="chevron-container">
+                            <ExpandMoreIcon />
+                          </div>
                         </button>
                       </td>
                     </tr>

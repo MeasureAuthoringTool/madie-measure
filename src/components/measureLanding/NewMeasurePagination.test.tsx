@@ -22,6 +22,7 @@ const serviceConfig: ServiceConfig = {
 
 jest.mock("../../hooks/useOktaTokens", () => () => ({
   getAccessToken: () => "test.jwt",
+  getUserName: () => "TestUser@example.com",
 }));
 
 const mockMeasureServiceApi = {

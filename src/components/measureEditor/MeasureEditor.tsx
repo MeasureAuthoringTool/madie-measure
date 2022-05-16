@@ -15,6 +15,7 @@ import useElmTranslationServiceApi, {
   ElmTranslation,
   ElmTranslationError,
 } from "../../api/useElmTranslationServiceApi";
+import useOktaTokens from "../../hooks/useOktaTokens";
 
 const MessageText = tw.p`text-sm font-medium`;
 const SuccessText = tw(MessageText)`text-green-800`;
@@ -73,6 +74,10 @@ const MeasureEditor = () => {
   const [elmAnnotations, setElmAnnotations] = useState<EditorAnnotation[]>([]);
   // error markers control the error underlining in the editor.
   const [errorMarkers, setErrorMarkers] = useState<EditorErrorMarker[]>([]);
+
+  const { getUserName } = useOktaTokens();
+  const userName = getUserName();
+  const canEdit = userName === measure.createdBy;
 
   const updateElmAnnotations = async (cql: string): Promise<ElmTranslation> => {
     setElmTranslationError(null);
@@ -149,7 +154,9 @@ const MeasureEditor = () => {
         inboundAnnotations={elmAnnotations}
         inboundErrorMarkers={errorMarkers}
         height={"1000px"}
+        readOnly={!canEdit}
       />
+
       <EditorActions data-testid="measure-editor-actions">
         <UpdateAlerts data-testid="update-cql-alerts">
           {success && (
@@ -170,21 +177,26 @@ const MeasureEditor = () => {
             </ErrorText>
           )}
         </UpdateAlerts>
-        <Button
-          buttonSize="md"
-          buttonTitle="Save"
-          variant="primary"
-          onClick={() => updateMeasureCql()}
-          data-testid="save-cql-btn"
-        />
-        <Button
-          tw="ml-2"
-          buttonSize="md"
-          buttonTitle="Cancel"
-          variant="secondary"
-          onClick={() => resetCql()}
-          data-testid="reset-cql-btn"
-        />
+        {canEdit && (
+          <>
+            <Button
+              buttonSize="md"
+              buttonTitle="Save"
+              variant="primary"
+              onClick={() => updateMeasureCql()}
+              data-testid="save-cql-btn"
+            />
+
+            <Button
+              tw="ml-2"
+              buttonSize="md"
+              buttonTitle="Cancel"
+              variant="secondary"
+              onClick={() => resetCql()}
+              data-testid="reset-cql-btn"
+            />
+          </>
+        )}
       </EditorActions>
     </>
   );

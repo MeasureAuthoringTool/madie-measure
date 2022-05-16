@@ -40,6 +40,7 @@ mockedAxios.post.mockReturnValueOnce({ data: postData });
 mockedAxios.get.mockReturnValueOnce({ data: getData });
 jest.mock("../../hooks/useOktaTokens", () => () => ({
   getAccessToken: () => "test.jwt",
+  getUserName: () => "TestUser@example.com",
 }));
 
 const mockMeasureServiceApi = {
