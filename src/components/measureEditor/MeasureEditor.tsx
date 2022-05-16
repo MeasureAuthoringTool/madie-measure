@@ -260,7 +260,7 @@ const MeasureEditor = () => {
     }
   };
 
-  const handleMadieEditorValue = async (val: string) => {
+  const handleMadieEditorValue = (val: string) => {
     setSuccess(false);
     setError(false);
     setEditorVal(val);
