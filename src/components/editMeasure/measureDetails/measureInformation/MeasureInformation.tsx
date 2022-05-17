@@ -33,6 +33,12 @@ export const DisplaySpan = styled.span`
   white-space: pre;
 `;
 
+const FormErrors = styled.div(() => [
+  css`
+    max-width: fit-content;
+  `,
+]);
+
 const Form = tw.form`max-w-xl my-8`;
 const FormButtons = tw.div`pt-5`;
 const ButtonWrapper = tw.div`flex justify-start`;
@@ -41,7 +47,6 @@ const MessageDiv = tw.div`ml-3`;
 const MessageText = tw.p`text-sm font-medium`;
 const SuccessText = tw(MessageText)`text-green-800`;
 const ErrorText = tw(MessageText)`text-red-800`;
-const FormErrors = tw.div`h-6`;
 
 const INITIAL_VALUES = {
   measurementPeriodStart: null,
@@ -66,7 +71,7 @@ export default function MeasureInformation() {
 
   const formik = useFormik({
     initialValues: { ...INITIAL_VALUES },
-    validationSchema: MeasurementPeriodValidator,
+    validationSchema: "",
     onSubmit: async (values: measureInformationForm) =>
       await handleSubmit(values),
   });
@@ -230,7 +235,6 @@ export default function MeasureInformation() {
           <div tw="m-5" data-testid="measurement-period-start-date">
             <LocalizationProvider dateAdapter={DateAdapter}>
               <DesktopDatePicker
-                data-testid="measurement-period-start"
                 disableOpenPicker={true}
                 label="Start"
                 inputFormat="MM/dd/yyyy"
@@ -244,6 +248,16 @@ export default function MeasureInformation() {
                   <TextField
                     {...params}
                     data-testid="measurement-period-start"
+                    required
+                    helperText={formikErrorHandler(
+                      "measurementPeriodStart",
+                      true
+                    )}
+                    error={
+                      formik.touched.measurementPeriodStart &&
+                      Boolean(formik.errors.measurementPeriodStart)
+                    }
+                    {...formik.getFieldProps("measurementPeriodStart")}
                   />
                 )}
               />
@@ -253,7 +267,6 @@ export default function MeasureInformation() {
           <div tw="m-5" data-testid="measurement-period-end-date">
             <LocalizationProvider dateAdapter={DateAdapter}>
               <DesktopDatePicker
-                data-testid="measurement-period-end"
                 disableOpenPicker={true}
                 label="End"
                 inputFormat="MM/dd/yyyy"
@@ -263,31 +276,33 @@ export default function MeasureInformation() {
                   setSuccessMessage(null);
                   formik.setFieldValue("measurementPeriodEnd", endDate);
                 }}
-                renderInput={(params) => <TextField {...params} />}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    data-testid="measurement-period-end"
+                    helperText={formikErrorHandler(
+                      "measurementPeriodEnd",
+                      true
+                    )}
+                    error={
+                      formik.touched.measurementPeriodEnd &&
+                      Boolean(formik.errors.measurementPeriodEnd)
+                    }
+                    {...formik.getFieldProps("measurementPeriodEnd")}
+                  />
+                )}
               />
             </LocalizationProvider>
           </div>
         </div>
-
-        {formik.touched.measurementPeriodStart &&
-        formik.errors.measurementPeriodStart ? (
-          <FormErrors>
-            {formikErrorHandler("measurementPeriodStart", true)}
-          </FormErrors>
-        ) : null}
-
-        {formik.touched.measurementPeriodEnd &&
-        formik.errors.measurementPeriodEnd ? (
-          <FormErrors>
-            {formikErrorHandler("measurementPeriodEnd", true)}
-          </FormErrors>
-        ) : null}
 
         <FormButtons>
           <ButtonWrapper>
             <SubmitButton
               type="submit"
               data-testid="measurement-period-save-button"
+              disabled={!(formik.isValid && formik.dirty)}
             >
               Save
             </SubmitButton>

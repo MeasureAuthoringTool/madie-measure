@@ -2,7 +2,7 @@ import "@testing-library/jest-dom";
 // NOTE: jest-dom adds handy assertions to Jest and is recommended, but not required
 
 import * as React from "react";
-import { render, fireEvent, waitFor } from "@testing-library/react";
+import { render, fireEvent, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { MeasureRoutes } from "../measureLanding/MeasureLanding";
 import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
@@ -58,6 +58,8 @@ const mockFormikInfo = {
   model: "QI-Core",
   cqlLibraryName: mockLib,
   measureScoring: "Cohort",
+  measurementPeriodStart: "01/05/2022",
+  measurementPeriodEnd: "03/07/2022",
 };
 
 describe("Measures Create Dialog", () => {
@@ -217,6 +219,32 @@ describe("Measures Create Dialog", () => {
       });
       expect(scoringNode.value).toBe(mockFormikInfo.measureScoring);
       Simulate.change(scoringNode);
+
+      const measurementPeriodStartNode = getByTestId(
+        "measurement-period-start"
+      );
+      const measurementPeriodStartInput = within(
+        measurementPeriodStartNode
+      ).getByRole("textbox");
+      userEvent.type(
+        measurementPeriodStartInput,
+        mockFormikInfo.measurementPeriodStart
+      );
+      expect(measurementPeriodStartInput.value).toBe(
+        mockFormikInfo.measurementPeriodStart
+      );
+
+      const measurementPeriodEndNode = getByTestId("measurement-period-end");
+      const measurementPeriodEndInput = within(
+        measurementPeriodEndNode
+      ).getByRole("textbox");
+      userEvent.type(
+        measurementPeriodEndInput,
+        mockFormikInfo.measurementPeriodEnd
+      );
+      expect(measurementPeriodEndInput.value).toBe(
+        mockFormikInfo.measurementPeriodEnd
+      );
 
       const submitButton = await findByTestId("create-new-measure-save-button");
       await waitFor(() => expect(submitButton).not.toBeDisabled(), {

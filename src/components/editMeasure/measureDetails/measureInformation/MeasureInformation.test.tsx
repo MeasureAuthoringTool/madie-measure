@@ -5,6 +5,7 @@ import {
   fireEvent,
   waitFor,
   screen,
+  within,
 } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
 import MeasureInformation from "./MeasureInformation";
@@ -21,6 +22,7 @@ import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import DateAdapter from "@mui/lab/AdapterDateFns";
 import DesktopDatePicker from "@mui/lab/DesktopDatePicker";
 import { TextField } from "@mui/material";
+import userEvent from "@testing-library/user-event";
 
 const mockHistoryPush = jest.fn();
 
@@ -101,7 +103,7 @@ describe("MeasureInformation component", () => {
     const result: HTMLElement = getByTestId("measurement-period-save-button");
     expect(result).toBeInTheDocument();
 
-    fireEvent.click(result);
+    //fireEvent.click(result);
   });
 
   it("Check if measurement start field is present in the form", () => {
@@ -114,51 +116,24 @@ describe("MeasureInformation component", () => {
     expect(measurementPeriodStart).toBeInTheDocument();
   });
 
-  it("Check if measurement start date field as expected", () => {
-    const measurementPeriodStart1 = "05/10/2022";
-    const handleChange = jest.fn();
-    const onError = jest.fn();
-    render(
-      <LocalizationProvider dateAdapter={DateAdapter}>
-        <DesktopDatePicker
-          data-testid="measurement-period-start"
-          disableOpenPicker={true}
-          label="Start"
-          inputFormat="MM/dd/yyyy"
-          value={measurementPeriodStart1}
-          onChange={handleChange}
-          onError={onError}
-          renderInput={(params) => <TextField {...params} />}
-        />
-      </LocalizationProvider>
-    );
-    const startLabelContent = screen.getByLabelText("Start");
-    expect(startLabelContent).toHaveValue("05/10/2022");
+  it("check if measurement start date has expected changed value", () => {
     const { getByTestId } = render(<MeasureInformation />);
-    const result: HTMLElement = getByTestId("measurement-period-save-button");
-    expect(result).toBeInTheDocument();
+    const measurementPeriodStartNode = getByTestId("measurement-period-start");
+    const measurementPeriodStartInput = within(
+      measurementPeriodStartNode
+    ).getByRole("textbox");
+    userEvent.type(measurementPeriodStartInput, "12/07/2001");
+    expect(measurementPeriodStartInput.value).toBe("12/07/2001");
   });
 
-  it("Check if measurement end date field has expected value", () => {
-    const measurementPeriodEnd = "05/15/2022";
-    const handleChange = jest.fn();
-    const onError = jest.fn();
-    render(
-      <LocalizationProvider dateAdapter={DateAdapter}>
-        <DesktopDatePicker
-          data-testid="measurement-period-end"
-          disableOpenPicker={true}
-          label="End"
-          inputFormat="MM/dd/yyyy"
-          value={measurementPeriodEnd}
-          onChange={handleChange}
-          onError={onError}
-          renderInput={(params) => <TextField {...params} />}
-        />
-      </LocalizationProvider>
-    );
-    const startLabelContent = screen.getByLabelText("End");
-    expect(startLabelContent).toHaveValue("05/15/2022");
+  it("check if measurement end date has expected changed value", () => {
+    const { getByTestId } = render(<MeasureInformation />);
+    const measurementPeriodEndNode = getByTestId("measurement-period-end");
+    const measurementPeriodEndInput = within(
+      measurementPeriodEndNode
+    ).getByRole("textbox");
+    userEvent.type(measurementPeriodEndInput, "12/09/2001");
+    expect(measurementPeriodEndInput.value).toBe("12/09/2001");
   });
 
   it("should save the measure's name on an update", async () => {

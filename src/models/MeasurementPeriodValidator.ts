@@ -1,19 +1,19 @@
-import moment from "moment";
+import { isWithinInterval } from "date-fns";
 import * as Yup from "yup";
 
 export const MeasurementPeriodValidator = Yup.object().shape({
   measurementPeriodStart: Yup.date()
+    .required("Required")
     .typeError("Invalid date format. (mm/dd/yyyy)")
     .nullable()
-    .required("Required")
     .test(
       "measurementPeriodStart",
-      "Measurement periods should be between the years 1990 and 2099.",
+      "Start date should be between the years 1900 and 2099.",
       (measurementPeriodStart) => {
-        return moment(measurementPeriodStart).isBetween(
-          "1899-12-31",
-          "2100-01-01"
-        );
+        return isWithinInterval(measurementPeriodStart, {
+          start: new Date(1899, 12, 31),
+          end: new Date(2100, 1, 1),
+        });
       }
     ),
 
@@ -23,16 +23,14 @@ export const MeasurementPeriodValidator = Yup.object().shape({
     .typeError("Invalid date format. (mm/dd/yyyy)")
     .test(
       "measurementPeriodStart",
-      "Measurement periods should be between the years 1990 and 2099.",
-      (measurementPeriodStart) => {
-        return moment(measurementPeriodStart).isBetween(
-          "1899-12-31",
-          "2100-01-01"
-        );
+      "End date should be between the years 1900 and 2099.",
+      (measurementPeriodEnd) => {
+        return isWithinInterval(measurementPeriodEnd, {
+          start: new Date(1899, 12, 31),
+          end: new Date(2100, 1, 1),
+        });
       }
     )
-
-    //method 1
     .when("measurementPeriodStart", (measurementPeriodStart, schema) => {
       if (measurementPeriodStart !== null) {
         if (!isNaN(measurementPeriodStart.getTime())) {
@@ -47,27 +45,4 @@ export const MeasurementPeriodValidator = Yup.object().shape({
       }
       return schema;
     }),
-
-  //Method 2 works but doesn't check for equal date condition
-  //   .min(
-  //     Yup.ref("measurementPeriodStart"),
-  //     "End date has to be more than start date"
-  //  )
-
-  //Method 3 need to work:
-  // .test("measurementPeriodEnd","Measurement periods should be between the years 1990 and 2099.",(measurementPeriodStart,measurementPeriodEnd)=>{
-  //   return moment(measurementPeriodStart).isBefore(measurementPeriodEnd)
-  // })
-
-  //Method 4 need to work:
-
-  // .when('startTime', (measurementPeriodEnd, schema: Yup.DateSchema) => {
-  //   return schema.test(
-  //     'start-time-past',
-  //     'End Time should be ahead of Start Time',
-  //     (measurementPeriodStart,schema) => {
-  //      //console.log(schema.min(measurementPeriodStart))
-  //       return schema.isAfter(measurementPeriodEnd, measurementPeriodStart);
-  //   });
-  // })
 });
