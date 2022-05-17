@@ -5,6 +5,7 @@ import {
   fireEvent,
   waitFor,
   screen,
+  within,
 } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
 import MeasureInformation from "./MeasureInformation";
@@ -17,6 +18,7 @@ import { MeasureContextHolder } from "../../MeasureContext";
 import Measure from "../../../../models/Measure";
 import useOktaTokens from "../../../../hooks/useOktaTokens";
 import { MemoryRouter } from "react-router";
+import userEvent from "@testing-library/user-event";
 
 const mockHistoryPush = jest.fn();
 
@@ -79,7 +81,6 @@ describe("MeasureInformation component", () => {
     const { getByTestId } = render(<MeasureInformation />);
     const result: HTMLElement = getByTestId("measure-name-edit");
     expect(result).toBeInTheDocument();
-    expect(result).toMatchSnapshot();
     const text = getByTestId("inline-view-span");
     expect(text.textContent).toBe(measure.measureName);
   });
@@ -89,9 +90,44 @@ describe("MeasureInformation component", () => {
     const { getByTestId } = render(<MeasureInformation />);
     const result: HTMLElement = getByTestId("measure-name-edit");
     expect(result).toBeInTheDocument();
-    expect(result).toMatchSnapshot();
     const text = getByTestId("inline-view-span");
     expect(text.textContent).toBe("");
+  });
+
+  it("Check if the measurement period save button is present", () => {
+    const { getByTestId } = render(<MeasureInformation />);
+    const result: HTMLElement = getByTestId("measurement-period-save-button");
+    expect(result).toBeInTheDocument();
+  });
+
+  it("Check if measurement start field is present in the form", () => {
+    const { getByTestId } = render(<MeasureInformation />);
+    const result = getByTestId("measurement-period-form");
+    expect(result).toBeInTheDocument();
+    const measurementPeriodStart: HTMLElement = getByTestId(
+      "measurement-period-start-date"
+    );
+    expect(measurementPeriodStart).toBeInTheDocument();
+  });
+
+  it("Check if measurement start date field as expected", () => {
+    const { getByTestId } = render(<MeasureInformation />);
+    const measurementPeriodStartNode = getByTestId("measurement-period-start");
+    const measurementPeriodStartInput = within(
+      measurementPeriodStartNode
+    ).getByRole("textbox");
+    userEvent.type(measurementPeriodStartInput, "12/07/2001");
+    expect(measurementPeriodStartInput.value).toBe("12/07/2001");
+  });
+
+  it("Check if measurement end date field has expected value", () => {
+    const { getByTestId } = render(<MeasureInformation />);
+    const measurementPeriodEndNode = getByTestId("measurement-period-end");
+    const measurementPeriodEndInput = within(
+      measurementPeriodEndNode
+    ).getByRole("textbox");
+    userEvent.type(measurementPeriodEndInput, "12/07/2009");
+    expect(measurementPeriodEndInput.value).toBe("12/07/2009");
   });
 
   it("should save the measure's name on an update", async () => {

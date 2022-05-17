@@ -32,6 +32,9 @@ import classNames from "classnames";
 import { Model } from "../../models/Model";
 import useOktaTokens from "../../hooks/useOktaTokens";
 import Checkbox from "./CheckBox";
+import LocalizationProvider from "@mui/lab/LocalizationProvider";
+import DesktopDatePicker from "@mui/lab/DesktopDatePicker";
+import DateAdapter from "@mui/lab/AdapterDateFns";
 const useStyles = makeStyles({
   row: {
     display: "flex",
@@ -142,6 +145,7 @@ const useStyles = makeStyles({
     },
   },
 });
+
 const CreateNewMeasureDialog = ({ open, onClose }) => {
   const { getAccessToken } = useOktaTokens();
   const [serverError, setServerError] = useState<string>("");
@@ -154,6 +158,8 @@ const CreateNewMeasureDialog = ({ open, onClose }) => {
       cqlLibraryName: "",
       measureScoring: "",
       active: true,
+      measurementPeriodStart: null,
+      measurementPeriodEnd: null,
       // TO DO: validation, models for new entries
     } as Measure,
     validationSchema: MeasureSchemaValidator,
@@ -441,6 +447,63 @@ const CreateNewMeasureDialog = ({ open, onClose }) => {
               id="subject-select"
               size="small"
             />
+          </div>
+
+          <div className={formRowGapped} data-testid="measurement-period-div">
+            <LocalizationProvider dateAdapter={DateAdapter}>
+              <DesktopDatePicker
+                disableOpenPicker={true}
+                label="Measurement Period - Start Date"
+                inputFormat="MM/dd/yyyy"
+                value={formik.values.measurementPeriodStart}
+                onChange={(startDate) => {
+                  formik.setFieldValue("measurementPeriodStart", startDate);
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    helperText={formikErrorHandler(
+                      "measurementPeriodStart",
+                      true
+                    )}
+                    error={
+                      formik.touched.measurementPeriodStart &&
+                      Boolean(formik.errors.measurementPeriodStart)
+                    }
+                    {...formik.getFieldProps("measurementPeriodStart")}
+                    data-testid="measurement-period-start"
+                  />
+                )}
+              />
+            </LocalizationProvider>
+            <LocalizationProvider dateAdapter={DateAdapter}>
+              <DesktopDatePicker
+                disableOpenPicker={true}
+                label="Measurement Period - End Date"
+                inputFormat="MM/dd/yyyy"
+                value={formik.values.measurementPeriodEnd}
+                onChange={(endDate) => {
+                  formik.setFieldValue("measurementPeriodEnd", endDate);
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    data-testid="measurement-period-end"
+                    helperText={formikErrorHandler(
+                      "measurementPeriodEnd",
+                      true
+                    )}
+                    error={
+                      formik.touched.measurementPeriodEnd &&
+                      Boolean(formik.errors.measurementPeriodEnd)
+                    }
+                    {...formik.getFieldProps("measurementPeriodEnd")}
+                  />
+                )}
+              />
+            </LocalizationProvider>
           </div>
         </DialogContent>
         <Divider className={classes.dividerBottom} />
