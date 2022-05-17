@@ -71,7 +71,7 @@ export default function MeasureInformation() {
 
   const formik = useFormik({
     initialValues: { ...INITIAL_VALUES },
-    validationSchema: "",
+    validationSchema: MeasurementPeriodValidator,
     onSubmit: async (values: measureInformationForm) =>
       await handleSubmit(values),
   });
