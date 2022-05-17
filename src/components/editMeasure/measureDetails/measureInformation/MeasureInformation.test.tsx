@@ -102,8 +102,6 @@ describe("MeasureInformation component", () => {
     const { getByTestId } = render(<MeasureInformation />);
     const result: HTMLElement = getByTestId("measurement-period-save-button");
     expect(result).toBeInTheDocument();
-
-    //fireEvent.click(result);
   });
 
   it("Check if measurement start field is present in the form", () => {
