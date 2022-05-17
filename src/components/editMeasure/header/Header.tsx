@@ -16,7 +16,7 @@ export default function Header(props: { measure: Measure }) {
 
   useEffect(() => {
     if (
-      props.measure.measurementPeriodStart !== null ||
+      props.measure.measurementPeriodStart !== null &&
       props.measure.measurementPeriodEnd !== null
     ) {
       setDisplayMeasurementPeriod(true);

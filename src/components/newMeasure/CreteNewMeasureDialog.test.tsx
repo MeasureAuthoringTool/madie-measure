@@ -264,5 +264,5 @@ describe("Measures Create Dialog", () => {
         expect(queryByTestId("server-error-alerts")).not.toBeInTheDocument();
       });
     });
-  });
+  }, 20000);
 });
