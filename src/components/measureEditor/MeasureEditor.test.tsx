@@ -11,6 +11,8 @@ import axios from "axios";
 import { ElmTranslation } from "../../api/useElmTranslationServiceApi";
 import { Model } from "../../models/Model";
 import userEvent from "@testing-library/user-event";
+// @ts-ignore
+import { parseContent } from "@madie/madie-editor";
 
 const MEASURE_CREATEDBY = "testuser@example.com";
 const measure = {
@@ -216,11 +218,163 @@ describe("MeasureEditor component", () => {
       "Unable to translate CQL to ELM!"
     );
     expect(elmTranslationError).toBeInTheDocument();
-    expect(mockedAxios.put).toHaveBeenCalledTimes(3);
-    expect(mockedAxios.put).toHaveBeenCalledWith(
+    expect(mockedAxios.put).toHaveBeenCalledTimes(2);
+    expect(mockedAxios.put).toHaveBeenNthCalledWith(
+      1,
       "elm-translator.com/cql/translator/cql",
-      expect.anything(),
+      "library testCql version '1.0.000'",
       expect.anything()
+    );
+    expect(mockedAxios.put).toHaveBeenNthCalledWith(
+      2,
+      "elm-translator.com/cql/translator/cql",
+      "library AdvancedIllnessandFrailtyExclusion_QICore4 version '5.0.000'",
+      expect.anything()
+    );
+  });
+
+  it.only("should persist error flag when there are ELM translation errors", async () => {
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measure });
+      } else if (
+        args &&
+        args.startsWith(serviceConfig.elmTranslationService.baseUrl)
+      ) {
+        return Promise.resolve({
+          data: { json: JSON.stringify(elmTranslationWithErrors) },
+          status: 200,
+        });
+      }
+      return Promise.resolve(args);
+    });
+    renderEditor(measure);
+    const issues = await screen.findByText("2 issues found with CQL");
+    expect(issues).toBeInTheDocument();
+    const editorContainer = (await screen.getByTestId(
+      "measure-editor"
+    )) as HTMLInputElement;
+    expect(measure.cql).toEqual(editorContainer.value);
+    fireEvent.change(screen.getByTestId("measure-editor"), {
+      target: {
+        value:
+          "library AdvancedIllnessandFrailtyExclusion_QICore4 version '5.0.000'",
+      },
+    });
+    const saveButton = screen.getByRole("button", { name: "Save" });
+    userEvent.click(saveButton);
+    const saveSuccess = await screen.findByText("CQL saved successfully");
+    expect(saveSuccess).toBeInTheDocument();
+    expect(mockedAxios.put).toHaveBeenCalledTimes(3);
+    expect(mockedAxios.put).toHaveBeenNthCalledWith(
+      1,
+      "elm-translator.com/cql/translator/cql",
+      "library testCql version '1.0.000'",
+      expect.anything()
+    );
+    expect(mockedAxios.put).toHaveBeenNthCalledWith(
+      2,
+      "elm-translator.com/cql/translator/cql",
+      "library AdvancedIllnessandFrailtyExclusion_QICore4 version '5.0.000'",
+      expect.anything()
+    );
+    expect(mockedAxios.put).toHaveBeenNthCalledWith(
+      3,
+      "madie.com/measures/abcd-pqrs-xyz",
+      {
+        cql: "library AdvancedIllnessandFrailtyExclusion_QICore4 version '5.0.000'",
+        cqlErrors: true,
+        cqlLibraryName: "",
+        createdAt: "",
+        createdBy: "testuser@example.com",
+        elmJson:
+          '{"externalErrors":[],"errorExceptions":[{"startLine":4,"startChar":19,"endLine":19,"endChar":23,"errorSeverity":"Error","errorType":null,"message":"Test error 123","targetIncludeLibraryId":"TestLibrary_QICore","targetIncludeLibraryVersionId":"5.0.000","type":null},{"startLine":24,"startChar":7,"endLine":24,"endChar":15,"errorSeverity":"Warning","errorType":null,"message":"Test Warning 456","targetIncludeLibraryId":"TestLibrary_QICore","targetIncludeLibraryVersionId":"5.0.000","type":null}],"library":null}',
+        id: "abcd-pqrs-xyz",
+        lastModifiedAt: "",
+        lastModifiedBy: "",
+        measureHumanReadableId: "",
+        measureMetaData: {},
+        measureName: "MSR001",
+        measureScoring: "",
+        measureSetId: "",
+        model: "QI-Core",
+        revisionNumber: 1.1,
+        state: "",
+        version: 1,
+      },
+      { headers: { Authorization: "Bearer test.jwt" } }
+    );
+  });
+
+  it("should persist error flag when there are parse errors", async () => {
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measure });
+      } else if (
+        args &&
+        args.startsWith(serviceConfig.elmTranslationService.baseUrl)
+      ) {
+        return Promise.resolve({
+          data: { json: JSON.stringify(elmTranslationWithNoErrors) },
+          status: 200,
+        });
+      }
+      return Promise.resolve(args);
+    });
+
+    const { getByTestId } = renderEditor(measure);
+    const editorContainer = (await getByTestId(
+      "measure-editor"
+    )) as HTMLInputElement;
+    expect(measure.cql).toEqual(editorContainer.value);
+    fireEvent.change(getByTestId("measure-editor"), {
+      target: {
+        value:
+          "library AdvancedIllnessandFrailtyExclusion_QICore4 version '5.0.000'",
+      },
+    });
+    parseContent.mockClear().mockImplementation((content) => ["Test error"]);
+    const saveButton = screen.getByRole("button", { name: "Save" });
+    userEvent.click(saveButton);
+    const saveSuccess = await screen.findByText("CQL saved successfully");
+    expect(saveSuccess).toBeInTheDocument();
+    expect(mockedAxios.put).toHaveBeenCalledTimes(3);
+    expect(mockedAxios.put).toHaveBeenNthCalledWith(
+      1,
+      "elm-translator.com/cql/translator/cql",
+      "library testCql version '1.0.000'",
+      expect.anything()
+    );
+    expect(mockedAxios.put).toHaveBeenNthCalledWith(
+      2,
+      "elm-translator.com/cql/translator/cql",
+      "library AdvancedIllnessandFrailtyExclusion_QICore4 version '5.0.000'",
+      expect.anything()
+    );
+    expect(mockedAxios.put).toHaveBeenNthCalledWith(
+      3,
+      "madie.com/measures/abcd-pqrs-xyz",
+      {
+        cql: "library AdvancedIllnessandFrailtyExclusion_QICore4 version '5.0.000'",
+        cqlErrors: true,
+        cqlLibraryName: "",
+        createdAt: "",
+        createdBy: "testuser@example.com",
+        elmJson: '{"externalErrors":[],"errorExceptions":[],"library":null}',
+        id: "abcd-pqrs-xyz",
+        lastModifiedAt: "",
+        lastModifiedBy: "",
+        measureHumanReadableId: "",
+        measureMetaData: {},
+        measureName: "MSR001",
+        measureScoring: "",
+        measureSetId: "",
+        model: "QI-Core",
+        revisionNumber: 1.1,
+        state: "",
+        version: 1,
+      },
+      { headers: { Authorization: "Bearer test.jwt" } }
     );
   });
 
@@ -298,6 +452,8 @@ describe("MeasureEditor component", () => {
     const issues = await screen.findByText("2 issues found with CQL");
     expect(issues).toBeInTheDocument();
   });
+
+
 });
 
 describe("mapElmErrorsToAceAnnotations", () => {

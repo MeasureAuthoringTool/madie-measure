@@ -496,7 +496,7 @@ describe("Measure Groups Page", () => {
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Save" })).not.toBeDisabled()
     );
-  });
+  }, 15000);
 
   test("Save button is disabled until all required CV populations are entered", async () => {
     measure.measureScoring = MeasureScoring.CONTINUOUS_VARIABLE;
