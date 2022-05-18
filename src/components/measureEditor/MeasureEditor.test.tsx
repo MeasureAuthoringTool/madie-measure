@@ -80,12 +80,12 @@ const elmTransaltionLibraryWithValueSets: ElmTranslationLibrary = {
       {
         localId: "test1",
         locator: "25:1-25:97",
-        id: "http://test.com/ValueSet/testoid1",
+        id: "http://test.com/ValueSet/2.16.840.1.113762.1.4.1",
       },
       {
         localId: "test2",
         locator: "26:1-26:81",
-        id: "http://test.com/ValueSet/testoid2",
+        id: "http://test.com/ValueSet/2.16.840.1.114222.4.11.836",
       },
     ],
   },

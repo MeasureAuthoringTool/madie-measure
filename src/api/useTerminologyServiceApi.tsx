@@ -33,10 +33,8 @@ export class TerminologyServiceApi {
         timeout: 15000,
       })
       .then((resp) => {
-        if (resp.status === 200) {
-          fhirValueset = resp.data;
-          fhirValueset = { ...fhirValueset, status: "200" };
-        }
+        fhirValueset = resp.data;
+        fhirValueset = { ...fhirValueset, status: resp.statusText };
       })
       .catch((error) => {
         const message =
