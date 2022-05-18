@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import tw from "twin.macro";
 import "styled-components/macro";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
@@ -8,6 +8,30 @@ import Measure from "../../../models/Measure";
 const HeaderContent = tw.div`h-44 text-white px-8 py-6 flex justify-center items-start flex-col`;
 
 export default function Header(props: { measure: Measure }) {
+  const [measurementPeriodStart, setMeasurementPeriodStart] =
+    useState<string>("");
+  const [measurementPeriodEnd, setMeasurementPeriodEnd] = useState<string>("");
+  const [displayMeasurementPeriod, setDisplayMeasurementPeriod] =
+    useState<boolean>(false);
+
+  useEffect(() => {
+    if (
+      props.measure.measurementPeriodStart !== null &&
+      props.measure.measurementPeriodEnd !== null
+    ) {
+      setDisplayMeasurementPeriod(true);
+      setMeasurementPeriodStart(
+        new Date(props.measure.measurementPeriodStart).toLocaleDateString()
+      );
+      setMeasurementPeriodEnd(
+        new Date(props.measure.measurementPeriodEnd).toLocaleDateString()
+      );
+    }
+  }, [
+    props.measure.measurementPeriodStart,
+    props.measure.measurementPeriodEnd,
+  ]);
+
   return (
     <div
       className="container-header-gradient"
@@ -29,9 +53,9 @@ export default function Header(props: { measure: Measure }) {
             "Active",
             props.measure.model,
             props.measure.version,
-            props.measure.measurementPeriodStart +
-              " - " +
-              props.measure.measurementPeriodEnd,
+            displayMeasurementPeriod
+              ? measurementPeriodStart + " - " + measurementPeriodEnd
+              : "",
           ].map((val, key) => {
             if (val)
               return (
