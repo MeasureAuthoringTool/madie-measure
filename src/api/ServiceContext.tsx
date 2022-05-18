@@ -7,6 +7,9 @@ export interface ServiceConfig {
   elmTranslationService: {
     baseUrl: string;
   };
+  terminologyService: {
+    baseUrl: string;
+  };
 }
 
 const ServiceContext = createContext<ServiceConfig>(null);

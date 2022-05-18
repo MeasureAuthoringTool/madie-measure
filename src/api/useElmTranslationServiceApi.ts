@@ -24,7 +24,14 @@ export type ElmTranslationLibrary = {
   schemaIdentifier: any;
   statements: any;
   usings: any;
-  valueSets: any;
+  valueSets?: any;
+};
+
+export type ElmValueSet = {
+  localId: any;
+  locator: any;
+  name: any;
+  id: any;
 };
 
 export type ElmTranslation = {
