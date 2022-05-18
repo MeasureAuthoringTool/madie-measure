@@ -452,8 +452,6 @@ describe("MeasureEditor component", () => {
     const issues = await screen.findByText("2 issues found with CQL");
     expect(issues).toBeInTheDocument();
   });
-
-
 });
 
 describe("mapElmErrorsToAceAnnotations", () => {
