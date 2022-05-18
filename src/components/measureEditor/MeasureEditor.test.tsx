@@ -8,11 +8,15 @@ import { MeasureContextProvider } from "../editMeasure/MeasureContext";
 import Measure from "../../models/Measure";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import axios from "axios";
-import { ElmTranslation } from "../../api/useElmTranslationServiceApi";
+import {
+  ElmTranslation,
+  ElmTranslationLibrary,
+} from "../../api/useElmTranslationServiceApi";
 import { Model } from "../../models/Model";
 import userEvent from "@testing-library/user-event";
 // @ts-ignore
 import { parseContent } from "@madie/madie-editor";
+import getValueSet, { FHIRValueSet } from "../../api/useTerminologyServiceApi";
 
 const MEASURE_CREATEDBY = "testuser@example.com";
 const measure = {
@@ -72,6 +76,43 @@ const elmTranslationWithErrors: ElmTranslation = {
   library: null,
 };
 
+const elmTransaltionLibraryWithValueSets: ElmTranslationLibrary = {
+  valueSets: {
+    def: [
+      {
+        localId: "test1",
+        locator: "25:1-25:97",
+        id: "http://test.com/ValueSet/2.16.840.1.113762.1.4.1",
+      },
+      {
+        localId: "test2",
+        locator: "26:1-26:81",
+        id: "http://test.com/ValueSet/2.16.840.1.114222.4.11.836",
+      },
+    ],
+  },
+};
+
+const fhirValueset: FHIRValueSet = {
+  resourceType: "ValueSet",
+  id: "testId",
+  url: "testUrl",
+  status: "testStatus",
+  errorMsg: "error",
+};
+
+const elmTranslationWithValueSetAndTranslationErrors: ElmTranslation = {
+  externalErrors: [],
+  errorExceptions: translationErrors,
+  library: elmTransaltionLibraryWithValueSets,
+};
+
+const elmTranslationWithValueSets: ElmTranslation = {
+  externalErrors: [],
+  errorExceptions: [],
+  library: null,
+};
+
 const setMeasure = jest.fn();
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -82,6 +123,9 @@ const serviceConfig: ServiceConfig = {
   },
   elmTranslationService: {
     baseUrl: "elm-translator.com",
+  },
+  terminologyService: {
+    baseUrl: "terminology-service.com",
   },
 };
 
@@ -105,6 +149,9 @@ const renderEditor = (measure: Measure) => {
 describe("MeasureEditor component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+  afterEach(() => {
+    window.localStorage.removeItem("TGT");
   });
 
   it("should mount measure editor component with measure cql", async () => {
@@ -564,14 +611,90 @@ describe("map elm errors to Ace Markers", () => {
       type: "text",
     });
   });
+});
 
-  it("Save button and Cancel button should not show if user is not the owner of the measure", () => {
-    measure.createdBy = "AnotherUser@example.com";
+it("Save button and Cancel button should not show if user is not the owner of the measure", () => {
+  measure.createdBy = "AnotherUser@example.com";
+  renderEditor(measure);
+
+  const cancelButton = screen.queryByTestId("reset-cql-btn");
+  expect(cancelButton).not.toBeInTheDocument();
+  const saveButton = screen.queryByTestId("save-cql-btn");
+  expect(saveButton).not.toBeInTheDocument();
+});
+
+describe("Validate value sets", () => {
+  it("Valid value sets", async () => {
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measure });
+      } else if (
+        args &&
+        args.startsWith(serviceConfig.elmTranslationService.baseUrl)
+      ) {
+        return Promise.resolve({
+          data: { json: JSON.stringify(elmTranslationWithValueSets) },
+          status: 200,
+        });
+      }
+      return Promise.resolve(args);
+    });
+    const tgtObj = {
+      TGT: "Test-TGT",
+      tgtTimeStamp: new Date().getTime(),
+    };
+    window.localStorage.setItem("TGT", JSON.stringify(tgtObj));
+
+    mockedAxios.get.mockImplementation((args) => {
+      return Promise.resolve({
+        data: { json: JSON.stringify(fhirValueset) },
+        status: 200,
+      });
+    });
+
     renderEditor(measure);
+    const valueSetValidation = await screen.findByText("Value Set is valid!");
+    expect(valueSetValidation).toBeInTheDocument();
+  });
 
-    const cancelButton = screen.queryByTestId("reset-cql-btn");
-    expect(cancelButton).not.toBeInTheDocument();
-    const saveButton = screen.queryByTestId("save-cql-btn");
-    expect(saveButton).not.toBeInTheDocument();
+  it("Invalid value sets", async () => {
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measure });
+      } else if (
+        args &&
+        args.startsWith(serviceConfig.elmTranslationService.baseUrl)
+      ) {
+        return Promise.resolve({
+          data: {
+            json: JSON.stringify(
+              elmTranslationWithValueSetAndTranslationErrors
+            ),
+          },
+          status: 200,
+        });
+      } else if (
+        args &&
+        args.startsWith(serviceConfig.terminologyService.baseUrl)
+      ) {
+      }
+      return Promise.resolve(args);
+    });
+    const tgtObj = {
+      TGT: "Test-TGT",
+      tgtTimeStamp: new Date().getTime(),
+    };
+    window.localStorage.setItem("TGT", JSON.stringify(tgtObj));
+
+    mockedAxios.get.mockImplementation((args) => {
+      return Promise.reject({
+        data: null,
+        status: 404,
+      });
+    });
+
+    renderEditor(measure);
+    const issues = await screen.findByText("4 issues found with CQL");
+    expect(issues).toBeInTheDocument();
   });
 });

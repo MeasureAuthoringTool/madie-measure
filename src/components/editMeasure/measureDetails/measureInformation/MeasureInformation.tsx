@@ -40,9 +40,6 @@ const FormErrors = styled.div(() => [
 ]);
 
 const Form = tw.form`max-w-xl my-8`;
-const FormButtons = tw.div`pt-5`;
-const ButtonWrapper = tw.div`flex justify-start`;
-const SubmitButton = tw.button` inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500`;
 const MessageDiv = tw.div`ml-3`;
 const MessageText = tw.p`text-sm font-medium`;
 const SuccessText = tw(MessageText)`text-green-800`;
@@ -297,18 +294,17 @@ export default function MeasureInformation() {
           </div>
         </div>
 
-        <FormButtons>
-          <ButtonWrapper>
-            <SubmitButton
-              type="submit"
-              data-testid="measurement-period-save-button"
-              disabled={!(formik.isValid && formik.dirty)}
-            >
-              Save
-            </SubmitButton>
-          </ButtonWrapper>
-        </FormButtons>
+        <Button
+          className="qpp-c-button--cyan"
+          type="submit"
+          data-testid="measurement-period-save-button"
+          disabled={!(formik.isValid && formik.dirty)}
+          style={{ marginTop: 0 }}
+        >
+          Save
+        </Button>
       </Form>
+
       <MessageDiv>
         {successMessage && (
           <SuccessText data-testid="measurement-period-success-message">
