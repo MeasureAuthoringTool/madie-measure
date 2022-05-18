@@ -117,11 +117,7 @@ const MeasureEditor = () => {
     let tgtValue = null;
     if (tgt) {
       let tgtObjFromLocalStorage = JSON.parse(tgt);
-      for (const [key, value] of Object.entries(tgtObjFromLocalStorage)) {
-        if (key === "TGT") {
-          tgtValue = value.toString();
-        }
-      }
+      tgtValue = tgtObjFromLocalStorage.TGT;
     }
     return tgtValue;
   };
