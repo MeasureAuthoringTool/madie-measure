@@ -24,6 +24,21 @@ declare module "@madie/madie-editor" {
     type: "text" | null;
   };
 
+  export interface LineInfo {
+    line: number;
+    position: number;
+  }
+
+  export interface CqlError {
+    text?: string;
+    name?: string;
+    start?: LineInfo;
+    stop?: LineInfo;
+    message: string;
+  }
+
+  export const parseContent: (content: string) => CqlError[];
+
   export const MadieEditor: FC<{
     value: string;
     onChange: (value: string) => void;

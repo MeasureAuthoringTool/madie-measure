@@ -4,6 +4,7 @@ import {
   EditorAnnotation,
   EditorErrorMarker,
   MadieEditor,
+  parseContent,
 } from "@madie/madie-editor";
 import { Button } from "@madie/madie-components";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
@@ -227,28 +228,66 @@ const MeasureEditor = () => {
     return null;
   };
 
+  const hasParserErrors = async (val) => {
+    return !!(parseContent(val)?.length > 0);
+  };
+
   const updateMeasureCql = async () => {
-    const data = await updateElmAnnotations(editorVal).catch((err) => {
-      console.error("An error occurred while translating CQL to ELM", err);
-      setElmTranslationError("Unable to translate CQL to ELM!");
+    try {
+      const results = await Promise.allSettled([
+        updateElmAnnotations(editorVal),
+        hasParserErrors(editorVal),
+      ]);
+
+      if (results[0].status === "rejected") {
+        console.error(
+          "An error occurred while translating CQL to ELM",
+          results[0].reason
+        );
+        setElmTranslationError(
+          "Unable to translate CQL to ELM, CQL was not saved!"
+        );
+        setElmAnnotations([]);
+      } else if (results[1].status === "rejected") {
+        const rejection: PromiseRejectedResult = results[1];
+        console.error(
+          "An error occurred while parsing the CQL",
+          rejection.reason
+        );
+      } else {
+        const cqlElmResult = results[0].value;
+        const parseErrors = results[1].value;
+
+        const cqlElmErrors = !!(cqlElmResult?.errorExceptions?.length > 0);
+        if (editorVal !== measure.cql) {
+          const cqlErrors = parseErrors || cqlElmErrors;
+          const newMeasure: Measure = {
+            ...measure,
+            cql: editorVal,
+            elmJson: JSON.stringify(cqlElmResult),
+            cqlErrors,
+          };
+          measureServiceApi
+            .updateMeasure(newMeasure)
+            .then(() => {
+              setMeasure(newMeasure);
+              setSuccess(true);
+            })
+            .catch((reason) => {
+              console.error(reason);
+              setError(true);
+            });
+        }
+      }
+    } catch (err) {
+      console.error(
+        "An error occurred while parsing CQL and translating CQL to ELM",
+        err
+      );
+      setElmTranslationError(
+        "Unable to parse CQL and translate CQL to ELM, CQL was not saved!"
+      );
       setElmAnnotations([]);
-    });
-    if (editorVal !== measure.cql) {
-      const newMeasure: Measure = {
-        ...measure,
-        cql: editorVal,
-        elmJson: JSON.stringify(data),
-      };
-      measureServiceApi
-        .updateMeasure(newMeasure)
-        .then(() => {
-          setMeasure(newMeasure);
-          setSuccess(true);
-        })
-        .catch((reason) => {
-          console.error(reason);
-          setError(true);
-        });
     }
   };
 
