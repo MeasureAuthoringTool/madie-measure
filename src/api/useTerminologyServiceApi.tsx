@@ -39,6 +39,7 @@ export class TerminologyServiceApi {
       .catch((error) => {
         const message =
           error.message + " for oid = " + oid + " location = " + locator;
+        console.warn("useTerminologyServiceApi error: " + message);
         fhirValueset = {
           resourceType: "ValueSet",
           id: oid,
