@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import axios from "axios";
-import MeasureLanding from "./measureLanding/MeasureLanding";
+import MeasureRoutes from "./MeasureRoutes/MeasureRoutes";
 import { ApiContextProvider, ServiceConfig } from "../api/ServiceContext";
 
 export default function Home() {
@@ -35,7 +35,7 @@ export default function Home() {
   const loadedState = (
     <BrowserRouter>
       <ApiContextProvider value={serviceConfig}>
-        <MeasureLanding />
+        <MeasureRoutes />
       </ApiContextProvider>
     </BrowserRouter>
   );
