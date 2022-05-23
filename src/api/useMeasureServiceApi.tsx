@@ -3,7 +3,7 @@ import axios from "axios";
 import useServiceConfig from "./useServiceConfig";
 import { ServiceConfig } from "./ServiceContext";
 import Measure, { Group } from "../models/Measure";
-import useOktaTokens from "../hooks/useOktaTokens";
+import { useOktaTokens } from "@madie/madie-util";
 
 export class MeasureServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}

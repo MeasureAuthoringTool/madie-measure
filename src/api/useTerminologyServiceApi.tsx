@@ -1,9 +1,9 @@
 import axios from "axios";
 import useServiceConfig from "./useServiceConfig";
 import { ServiceConfig } from "./ServiceContext";
-import useOktaTokens from "../hooks/useOktaTokens";
 import { CustomCqlCode } from "../components/measureEditor/MeasureEditor";
 import { processCodeSystemErrors } from "../components/measureEditor/measureEditorUtils";
+import { useOktaTokens } from "@madie/madie-util";
 
 export type FHIRValueSet = {
   resourceType: string;

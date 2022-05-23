@@ -1,4 +1,3 @@
-=
 import util from "@madie/madie-util";
 // Mock SystemJS
 global.System = {
