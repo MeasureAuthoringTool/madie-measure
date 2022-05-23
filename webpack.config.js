@@ -49,6 +49,7 @@ module.exports = (webpackConfigEnv, argv) => {
       "@madie/madie-patient",
       "@madie/madie-components",
       "@madie/madie-editor",
+      "@madie/madie-util",
     ],
   };
   // We need to override the css loading rule from the parent configuration
