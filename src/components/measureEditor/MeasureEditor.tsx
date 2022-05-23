@@ -9,6 +9,11 @@ import {
 import { Button } from "@madie/madie-components";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import Measure from "../../models/Measure";
+import {
+  CqlAntlr,
+  CqlCode,
+  CqlCodeSystem,
+} from "@madie/cql-antlr-parser/dist/src";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import useTerminologyServiceApi from "../../api/useTerminologyServiceApi";
 import tw from "twin.macro";
@@ -19,6 +24,8 @@ import useElmTranslationServiceApi, {
   ElmValueSet,
 } from "../../api/useElmTranslationServiceApi";
 import useOktaTokens from "../../hooks/useOktaTokens";
+import CqlResult from "@madie/cql-antlr-parser/dist/src/dto/CqlResult";
+import { processCodeSystemErrors } from "./measureEditorUtils";
 
 const MessageText = tw.p`text-sm font-medium`;
 const SuccessText = tw(MessageText)`text-green-800`;
@@ -63,6 +70,16 @@ export const mapElmErrorsToAceMarkers = (
   }
   return markers;
 };
+
+export interface CustomCqlCodeSystem extends CqlCodeSystem {
+  valid?: boolean;
+  errorMessage?: string;
+}
+export interface CustomCqlCode extends Omit<CqlCode, "codeSystem"> {
+  codeSystem: CustomCqlCodeSystem;
+  valid?: boolean;
+  errorMessage?: string;
+}
 
 const MeasureEditor = () => {
   const { measure, setMeasure } = useCurrentMeasure();
@@ -181,28 +198,48 @@ const MeasureEditor = () => {
   const updateElmAnnotations = async (cql: string): Promise<ElmTranslation> => {
     setElmTranslationError(null);
     if (cql && cql.trim().length > 0) {
-      const data = await elmTranslationServiceApi.translateCqlToElm(cql);
-
-      let valuesetsErrors = null;
+      // using Antlr to get cqlCodes & cqlCodeSystems
+      // Constructs a list of CustomCqlCode objects, which are validated in terminology service
+      const cqlResult: CqlResult = new CqlAntlr(cql).parse();
+      const customCqlCodes: CustomCqlCode[] = cqlResult?.codes?.map((code) => {
+        return {
+          ...code,
+          codeSystem: cqlResult.codeSystems?.find(
+            (codeSys) => codeSys.name === code.codeSystem
+          ),
+        };
+      });
       const tgt = getTgt();
       const tgtValue = getTgtValue(tgt);
+      const [validatedCodes, translationResults] = await Promise.all([
+        await terminologyServiceApi.validateCodes(customCqlCodes, tgtValue), // handle 401 and 500 errors
+        await elmTranslationServiceApi.translateCqlToElm(cql),
+      ]);
+      const codeSystemCqlErrors = processCodeSystemErrors(validatedCodes);
+      let valuesetsErrors = null;
+
       if (
-        data.library?.valueSets?.def !== null &&
+        translationResults.library?.valueSets?.def !== null &&
         tgt &&
         tgtValue &&
         tgtValue !== ""
       ) {
         valuesetsErrors = await getValueSetErrors(
-          data.library?.valueSets?.def,
+          translationResults.library?.valueSets?.def,
           tgtValue
         );
       }
 
-      const allErrorsArray: ElmTranslationError[] = data?.errorExceptions
-        ? data?.errorExceptions
-        : [];
+      let allErrorsArray: ElmTranslationError[] =
+        translationResults?.errorExceptions
+          ? translationResults?.errorExceptions
+          : [];
+
+      if (codeSystemCqlErrors && codeSystemCqlErrors.length > 0) {
+        allErrorsArray = [...allErrorsArray, ...codeSystemCqlErrors];
+      }
       if (valuesetsErrors && valuesetsErrors.length > 0) {
-        valuesetsErrors.map((valueSet, i) => {
+        valuesetsErrors.map((valueSet) => {
           allErrorsArray.push(valueSet);
         });
       } else {
@@ -221,7 +258,7 @@ const MeasureEditor = () => {
       const errorMarkers = mapElmErrorsToAceMarkers(allErrorsArray);
       setElmAnnotations(elmAnnotations);
       setErrorMarkers(errorMarkers);
-      return data;
+      return translationResults;
     } else {
       setElmAnnotations([]);
     }
@@ -324,7 +361,6 @@ const MeasureEditor = () => {
         height={"1000px"}
         readOnly={!canEdit}
       />
-
       <EditorActions data-testid="measure-editor-actions">
         <UpdateAlerts data-testid="update-cql-alerts">
           {success && (

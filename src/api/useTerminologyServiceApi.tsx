@@ -2,6 +2,7 @@ import axios from "axios";
 import useServiceConfig from "./useServiceConfig";
 import { ServiceConfig } from "./ServiceContext";
 import useOktaTokens from "../hooks/useOktaTokens";
+import { CustomCqlCode } from "../components/measureEditor/MeasureEditor";
 
 export type FHIRValueSet = {
   resourceType: string;
@@ -49,6 +50,49 @@ export class TerminologyServiceApi {
         };
       });
     return fhirValueset;
+  }
+
+  async validateCodes(
+    customCqlCode: CustomCqlCode[],
+    tgt: string
+  ): Promise<CustomCqlCode[]> {
+    if (!tgt || tgt === "") {
+      return customCqlCode.map((code) => {
+        return { ...code, errorMessage: "Please Login to UMLS", valid: false };
+      });
+    }
+    try {
+      const response = await axios.put(
+        `${this.baseUrl}/vsac/validateCodes`,
+        customCqlCode,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+          params: {
+            tgt: tgt,
+          },
+        }
+      );
+      if (response.status === 200) {
+        return response.data;
+      } else if (response.status === 401) {
+        return customCqlCode.map((code) => {
+          return { ...code, errorMessage: "Invalid UMLS Login", valid: false };
+        });
+      } else {
+        return customCqlCode.map((code) => {
+          return {
+            ...code,
+            errorMessage:
+              "Error while validating codes, Please contact HelpDesk",
+            valid: false,
+          };
+        });
+      }
+    } catch (err) {
+      throw new Error(err);
+    }
   }
 }
 

@@ -35,6 +35,9 @@ const serviceConfig: ServiceConfig = {
   elmTranslationService: {
     baseUrl: "test-elm-service",
   },
+  terminologyService: {
+    baseUrl: "terminology-service.com",
+  },
 };
 
 jest.mock("axios");
