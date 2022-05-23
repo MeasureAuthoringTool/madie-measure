@@ -23,9 +23,9 @@ import useElmTranslationServiceApi, {
   ElmTranslationError,
   ElmValueSet,
 } from "../../api/useElmTranslationServiceApi";
-import useOktaTokens from "../../hooks/useOktaTokens";
 import CqlResult from "@madie/cql-antlr-parser/dist/src/dto/CqlResult";
 import { mapCodeSystemErrorsToTranslationErrors } from "./measureEditorUtils";
+import { useOktaTokens } from "@madie/madie-util";
 
 const MessageText = tw.p`text-sm font-medium`;
 const SuccessText = tw(MessageText)`text-green-800`;

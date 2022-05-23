@@ -15,8 +15,7 @@ import {
   faCheckCircle,
   faTimesCircle,
 } from "@fortawesome/free-solid-svg-icons";
-import useKeypress from "../../hooks/useKeypress";
-import useOnClickOutside from "../../hooks/useOnClickOutside";
+import { useKeyPress, useOnClickOutside } from "@madie/madie-util";
 import { HelperText } from "@madie/madie-components";
 
 interface ISpanProps extends React.HtmlHTMLAttributes<HTMLSpanElement> {
@@ -46,8 +45,8 @@ function InlineEdit(props) {
   const [inputValue, setInputValue] = useState<string>(props.text);
   const [errorMessage, setErrorMessage] = useState<string>();
 
-  const enter = useKeypress("Enter");
-  const esc = useKeypress("Escape");
+  const enter = useKeyPress("Enter");
+  const esc = useKeyPress("Escape");
 
   const wrapperRef = useRef(null);
   const inputRef = React.createRef<HTMLInputElement>();

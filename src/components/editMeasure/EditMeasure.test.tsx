@@ -36,9 +36,14 @@ useMeasureServiceApiMock.mockImplementation(() => {
   return serviceApiMock;
 });
 
-jest.mock("../../hooks/useOktaTokens", () => () => ({
-  getAccessToken: () => "test.jwt",
-  getUserName: () => MEASURE_CREATEDBY,
+jest.mock("@madie/madie-util", () => ({
+  measureStore: {
+    updateMeasure: (measure) => measure,
+  },
+  useOktaTokens: () => ({
+    getAccessToken: () => "test.jwt",
+    getUserName: () => MEASURE_CREATEDBY,
+  }),
 }));
 
 const serviceConfig: ServiceConfig = {

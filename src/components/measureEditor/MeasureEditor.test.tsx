@@ -213,13 +213,6 @@ const serviceConfig: ServiceConfig = {
   },
 };
 
-jest.mock("../../hooks/useOktaTokens", () =>
-  jest.fn(() => ({
-    getAccessToken: () => "test.jwt",
-    getUserName: () => MEASURE_CREATEDBY,
-  }))
-);
-
 const renderEditor = (measure: Measure) => {
   return render(
     <ApiContextProvider value={serviceConfig}>

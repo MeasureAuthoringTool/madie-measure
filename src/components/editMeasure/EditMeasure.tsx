@@ -17,8 +17,7 @@ import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { MeasureContextProvider } from "./MeasureContext";
 import { MadiePatient } from "@madie/madie-patient";
 import MeasureGroups from "../measureGroups/MeasureGroups";
-import Header from "./header/Header";
-
+import { measureStore } from "@madie/madie-util";
 interface inputParams {
   id: string;
 }
@@ -28,6 +27,10 @@ export default function EditMeasure() {
   const { id } = useParams<inputParams>();
   const measureServiceApi = useMeasureServiceApi();
   const [measure, setMeasure] = useState<Measure>(null);
+  // we're going to listen to context updates here and send them to layout
+  useEffect(() => {
+    measureStore.updateMeasure(measure);
+  }, [measure]);
   const [loading, setLoading] = useState<boolean>(true);
 
   const history = useHistory();
@@ -52,7 +55,6 @@ export default function EditMeasure() {
 
   const contentDiv = (
     <div data-testid="editMeasure">
-      <Header measure={measure} />
       <div tw="relative -mt-12">
         <EditMeasureNav />
         <MeasureContextProvider value={{ measure, setMeasure }}>

@@ -44,12 +44,15 @@ jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const MEASURE_CREATEDBY = "testuser@example.com";
-jest.mock("../../hooks/useOktaTokens", () =>
-  jest.fn(() => ({
+jest.mock("@madie/madie-util", () => ({
+  measureStore: {
+    updateMeasure: (measure) => measure,
+  },
+  useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
     getUserName: () => MEASURE_CREATEDBY,
-  }))
-);
+  }),
+}));
 
 describe("Measure Groups Page", () => {
   let measure: Measure;
