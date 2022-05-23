@@ -14,7 +14,7 @@ const getCqlErrors = (cqlObj, errorSeverity, errorType) => {
     targetIncludeLibraryVersionId: "",
     type: errorType,
   };
-}
+};
 
 const processCodeSystemErrors = (
   cqlCodes: CustomCqlCode[]
