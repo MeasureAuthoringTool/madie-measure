@@ -35,6 +35,7 @@ const measures: Measure[] = [
     lastModifiedAt: null,
     lastModifiedBy: null,
     model: "QDM",
+    active: true,
   },
   {
     id: "IDIDID2",
@@ -50,6 +51,7 @@ const measures: Measure[] = [
     lastModifiedAt: null,
     lastModifiedBy: null,
     model: "FHIR",
+    active: false,
   },
   {
     id: "IDIDID3",
@@ -65,6 +67,7 @@ const measures: Measure[] = [
     lastModifiedAt: null,
     lastModifiedBy: null,
     model: "QI-Core",
+    active: false,
   },
 ];
 
