@@ -22,7 +22,7 @@ jest.mock("../../../../api/useMeasureServiceApi");
 jest.mock("../../useCurrentMeasure");
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: jest.fn(() => ({
-    getUserName: jest.fn(() => "testuser@example.com"),
+    getUserName: jest.fn(() => "testuser@example.com"), //#nosec
   })),
 }));
 const useMeasureServiceApiMock =
@@ -47,7 +47,7 @@ describe("MeasureRationale component", () => {
   const AUTHOR = "Test Author";
   const GUIDANCE = "Test Guidance";
   const NEWVALUE = "Test New Value";
-  const MEASURE_CREATEDBY = "testuser@example.com";
+  const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
 
   afterEach(cleanup);
 
@@ -296,7 +296,7 @@ describe("MeasureRationale component", () => {
 
   it("Should have no input field if user is not the measure owner", () => {
     useOktaTokens.mockImplementation(() => ({
-      getUserName: () => "AnotherUser@example.com",
+      getUserName: () => "AnotherUser@example.com", //#nosec
     }));
     render(<MeasureMetadataForm measureMetadataType="Rationale" />);
 
@@ -306,7 +306,7 @@ describe("MeasureRationale component", () => {
 
   it("test - Should have no Save button if user is not the measure owner", () => {
     useOktaTokens.mockImplementation(() => ({
-      getUserName: () => "AnotherUser@example.com",
+      getUserName: () => "AnotherUser@example.com", //#nosec
     }));
     render(<MeasureMetadataForm measureMetadataType="Rationale" />);
 

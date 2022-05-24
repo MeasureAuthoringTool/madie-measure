@@ -33,7 +33,7 @@ jest.mock("../../../../api/useMeasureServiceApi");
 jest.mock("../../useCurrentMeasure");
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: jest.fn(() => ({
-    getUserName: jest.fn(() => "testuser@example.com"),
+    getUserName: jest.fn(() => "testuser@example.com"), //#nosec
   })),
   useKeyPress: jest.fn(() => false),
   measureStore: {
@@ -60,7 +60,7 @@ serviceApiMock = {
 useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
 
 useOktaTokens.mockImplementation(() => ({
-  getUserName: () => "testuser@example.com",
+  getUserName: () => "testuser@example.com", //#nosec
 }));
 
 describe("MeasureInformation mponent", () => {
@@ -178,7 +178,7 @@ describe("MeasureInformation mponent", () => {
 
   it("Should not display a delete button if user is not the owner of measure", () => {
     useOktaTokens.mockImplementationOnce(() => ({
-      getUserName: () => "othertestuser@example.com",
+      getUserName: () => "othertestuser@example.com", //#nosec
     }));
     render(<MeasureInformation />);
     const result: HTMLElement = queryByText("delete-measure-button");

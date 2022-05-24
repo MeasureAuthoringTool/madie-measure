@@ -53,7 +53,7 @@ useMeasureServiceApiMock.mockImplementation(() => {
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
-    getUserName: () => "TestUser@example.com",
+    getUserName: () => "TestUser@example.com", //#nosec
   }),
   measureStore: {
     state: null,

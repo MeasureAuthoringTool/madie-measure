@@ -22,7 +22,7 @@ MeasureEditorMock.mockImplementation(() => {
   return <div>library testCql version '1.0.000'</div>;
 });
 
-const MEASURE_CREATEDBY = "testuser@example.com";
+const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
 const measure = {
   id: "measure ID",
   createdBy: MEASURE_CREATEDBY,

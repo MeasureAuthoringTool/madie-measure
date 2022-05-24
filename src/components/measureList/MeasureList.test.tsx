@@ -18,8 +18,7 @@ jest.mock("@madie/madie-util", () => () => ({
     getUserName: () => "TestUser@example.com",
   }),
 }));
-// const useOktaTokensMock = useOktaTokens as Jest.Mock<Function>;
-const MEASURE_CREATEDBY = "testuser@example.com";
+const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
 
 const measures: Measure[] = [
   {
