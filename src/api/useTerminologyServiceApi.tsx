@@ -3,6 +3,7 @@ import useServiceConfig from "./useServiceConfig";
 import { ServiceConfig } from "./ServiceContext";
 import useOktaTokens from "../hooks/useOktaTokens";
 import { CustomCqlCode } from "../components/measureEditor/MeasureEditor";
+import { processCodeSystemErrors } from "../components/measureEditor/measureEditorUtils";
 
 export type FHIRValueSet = {
   resourceType: string;
@@ -53,18 +54,20 @@ export class TerminologyServiceApi {
   }
 
   async validateCodes(
-    customCqlCode: CustomCqlCode[],
+    customCqlCodes: CustomCqlCode[],
     tgt: string
   ): Promise<CustomCqlCode[]> {
     if (!tgt || tgt === "") {
-      return customCqlCode.map((code) => {
-        return { ...code, errorMessage: "Please Login to UMLS", valid: false };
-      });
+      return processCodeSystemErrors(
+        customCqlCodes,
+        "Please Login to UMLS",
+        false
+      );
     }
     try {
       const response = await axios.put(
-        `${this.baseUrl}/vsac/validateCodes`,
-        customCqlCode,
+        `${this.baseUrl}/vsac/validations/codes`,
+        customCqlCodes,
         {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
@@ -77,21 +80,24 @@ export class TerminologyServiceApi {
       if (response.status === 200) {
         return response.data;
       } else if (response.status === 401) {
-        return customCqlCode.map((code) => {
-          return { ...code, errorMessage: "Invalid UMLS Login", valid: false };
-        });
+        return processCodeSystemErrors(
+          customCqlCodes,
+          "Invalid UMLS Login",
+          false
+        );
       } else {
-        return customCqlCode.map((code) => {
-          return {
-            ...code,
-            errorMessage:
-              "Error while validating codes, Please contact HelpDesk",
-            valid: false,
-          };
-        });
+        return processCodeSystemErrors(
+          customCqlCodes,
+          "Unable to validate code, Please contact HelpDesk",
+          false
+        );
       }
     } catch (err) {
-      throw new Error(err);
+      return processCodeSystemErrors(
+        customCqlCodes,
+        "Unable to validate code, Please contact HelpDesk",
+        false
+      );
     }
   }
 }

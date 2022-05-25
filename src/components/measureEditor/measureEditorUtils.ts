@@ -16,7 +16,7 @@ const getCqlErrors = (cqlObj, errorSeverity, errorType) => {
   };
 };
 
-const processCodeSystemErrors = (
+const mapCodeSystemErrorsToTranslationErrors = (
   cqlCodes: CustomCqlCode[]
 ): ElmTranslationError[] => {
   const result = [];
@@ -33,4 +33,23 @@ const processCodeSystemErrors = (
   return result;
 };
 
-export { processCodeSystemErrors };
+const processCodeSystemErrors = (
+  cqlCodes: CustomCqlCode[],
+  errorMessage: string,
+  valid: boolean
+): CustomCqlCode[] => {
+  return cqlCodes.map((code) => {
+    return {
+      ...code,
+      codeSystem: {
+        ...code.codeSystem,
+        errorMessage: errorMessage,
+        valid: valid,
+      },
+      errorMessage: errorMessage,
+      valid: valid,
+    };
+  });
+};
+
+export { mapCodeSystemErrorsToTranslationErrors, processCodeSystemErrors };

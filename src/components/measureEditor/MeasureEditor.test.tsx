@@ -2,8 +2,8 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import * as React from "react";
 import MeasureEditor, {
   CustomCqlCode,
-  mapElmErrorsToAceAnnotations,
-  mapElmErrorsToAceMarkers,
+  mapErrorsToAceAnnotations,
+  mapErrorsToAceMarkers,
 } from "./MeasureEditor";
 import { MeasureContextProvider } from "../editMeasure/MeasureContext";
 import Measure from "../../models/Measure";
@@ -90,12 +90,12 @@ const elmTranslationLibraryWithValueSets: ElmTranslationLibrary = {
       {
         localId: "test1",
         locator: "25:1-25:97",
-        id: "http://test.com/ValueSet/2.16.840.1.113762.1.4.1",
+        id: "https://test.com/ValueSet/2.16.840.1.113762.1.4.1",
       },
       {
         localId: "test2",
         locator: "26:1-26:81",
-        id: "http://test.com/ValueSet/2.16.840.1.114222.4.11.836",
+        id: "https://test.com/ValueSet/2.16.840.1.114222.4.11.836",
       },
     ],
   },
@@ -113,12 +113,12 @@ const customCqlCodes: CustomCqlCode[] = [
   {
     codeId: "'P'",
     codeSystem: {
-      oid: "'http://terminology.hl7.org/CodeSystem/v3-ActPriority'",
+      oid: "'https://terminology.hl7.org/CodeSystem/v3-ActPriority'",
       hits: 0,
       version: "'HL7V3.0_2021-03'",
       text:
         "codesystem 'ActPriority:HL7V3.0_2021-03':" +
-        " 'http://terminology.hl7.org/CodeSystem/v3-ActPriority' version 'HL7V3.0_2021-03'",
+        " 'https://terminology.hl7.org/CodeSystem/v3-ActPriority' version 'HL7V3.0_2021-03'",
       name: '"ActPriority:HL7V3.0_2021-03"',
       start: {
         line: 9,
@@ -151,12 +151,12 @@ const customCqlCodesWithErrors: CustomCqlCode[] = [
   {
     codeId: "'P'",
     codeSystem: {
-      oid: "'http://terminology.hl7.org/CodeSystem/v3-ActPriority'",
+      oid: "'https://terminology.hl7.org/CodeSystem/v3-ActPriority'",
       hits: 0,
       version: "'HL7V3.0_2021-03'",
       text:
         "codesystem 'ActPriority:HL7V3.0_2021-03':" +
-        " 'http://terminology.hl7.org/CodeSystem/v3-ActPriority' version 'HL7V3.0_2021-03'",
+        " 'https://terminology.hl7.org/CodeSystem/v3-ActPriority' version 'HL7V3.0_2021-03'",
       name: '"ActPriority:HL7V3.0_2021-03"',
       start: {
         line: 9,
@@ -586,34 +586,34 @@ describe("MeasureEditor component", () => {
 describe("mapElmErrorsToAceAnnotations", () => {
   it("should return an empty array for null input", () => {
     const translationErrors = null;
-    const output = mapElmErrorsToAceAnnotations(translationErrors);
+    const output = mapErrorsToAceAnnotations(translationErrors, "ELM");
     expect(output).toBeDefined();
     expect(output.length).toEqual(0);
   });
 
   it("should return an empty array for undefined input", () => {
     const translationErrors = undefined;
-    const output = mapElmErrorsToAceAnnotations(translationErrors);
+    const output = mapErrorsToAceAnnotations(translationErrors, "ELM");
     expect(output).toBeDefined();
     expect(output.length).toEqual(0);
   });
 
   it("should return an empty array for empty array input", () => {
     const translationErrors = [];
-    const output = mapElmErrorsToAceAnnotations(translationErrors);
+    const output = mapErrorsToAceAnnotations(translationErrors, "ELM");
     expect(output).toBeDefined();
     expect(output.length).toEqual(0);
   });
 
   it("should return an empty array for non-array input", () => {
     const translationErrors: any = { field: "value" };
-    const output = mapElmErrorsToAceAnnotations(translationErrors);
+    const output = mapErrorsToAceAnnotations(translationErrors, "ELM");
     expect(output).toBeDefined();
     expect(output.length).toEqual(0);
   });
 
   it("should return an array of mapped elements", () => {
-    const output = mapElmErrorsToAceAnnotations(translationErrors);
+    const output = mapErrorsToAceAnnotations(translationErrors, "ELM");
     expect(output).toBeDefined();
     expect(output.length).toEqual(2);
     expect(output[0]).toEqual({
@@ -634,34 +634,34 @@ describe("mapElmErrorsToAceAnnotations", () => {
 describe("map elm errors to Ace Markers", () => {
   it("should return an empty array for null input", () => {
     const translationErrors = null;
-    const output = mapElmErrorsToAceMarkers(translationErrors);
+    const output = mapErrorsToAceMarkers(translationErrors);
     expect(output).toBeDefined();
     expect(output.length).toEqual(0);
   });
 
   it("should return an empty array for undefined input", () => {
     const translationErrors = undefined;
-    const output = mapElmErrorsToAceMarkers(translationErrors);
+    const output = mapErrorsToAceMarkers(translationErrors);
     expect(output).toBeDefined();
     expect(output.length).toEqual(0);
   });
 
   it("should return an empty array for empty array input", () => {
     const translationErrors = [];
-    const output = mapElmErrorsToAceMarkers(translationErrors);
+    const output = mapErrorsToAceMarkers(translationErrors);
     expect(output).toBeDefined();
     expect(output.length).toEqual(0);
   });
 
   it("should return an empty array for non-array input", () => {
     const translationErrors: any = { field: "value" };
-    const output = mapElmErrorsToAceMarkers(translationErrors);
+    const output = mapErrorsToAceMarkers(translationErrors);
     expect(output).toBeDefined();
     expect(output.length).toEqual(0);
   });
 
   it("should return an array of mapped elements", () => {
-    const output = mapElmErrorsToAceMarkers(translationErrors);
+    const output = mapErrorsToAceMarkers(translationErrors);
     expect(output).toBeDefined();
     expect(output.length).toEqual(2);
     expect(output[0]).toEqual({
@@ -705,7 +705,7 @@ it("Save button and Cancel button should not show if user is not the owner of th
   expect(saveButton).not.toBeInTheDocument();
 });
 
-describe("Validate value sets and codes", () => {
+describe("Validate value sets", () => {
   it("Valid value sets", async () => {
     mockedAxios.get.mockImplementation(() => {
       return Promise.resolve({
@@ -779,7 +779,7 @@ describe("Validate value sets and codes", () => {
     };
     window.localStorage.setItem("TGT", JSON.stringify(tgtObj));
 
-    mockedAxios.get.mockImplementation((args) => {
+    mockedAxios.get.mockImplementation(() => {
       return Promise.reject({
         data: null,
         status: 404,
@@ -790,8 +790,25 @@ describe("Validate value sets and codes", () => {
     const issues = await screen.findByText("4 issues found with CQL");
     expect(issues).toBeInTheDocument();
   });
+});
 
-  it("display invalid codes along with translation error", async () => {
+describe("Validate codes and code systems", () => {
+  it("should display invalid codes", async () => {
+    const tgtObj = {
+      TGT: "Test-TGT",
+      tgtTimeStamp: new Date().getTime(),
+    };
+    window.localStorage.setItem("TGT", JSON.stringify(tgtObj));
+    const measureWithCqlCodes = {
+      ...measure,
+      cql:
+        "library DuplicateMeasureTest version '0.0.000'\n" +
+        "\n" +
+        "using FHIR version '4.0.1'\n" +
+        "\n" +
+        "codesystem \"ActPriority:HL7V3.0_2021-03\": 'https://terminology.hl7.org/CodeSystem/v3-ActPriority' version 'HL7V3.0_2021-03'\n" +
+        "code \"preop\": 'P' from \"ActPriority:HL7V3.0_2021-03\" display 'preop'",
+    };
     mockedAxios.put.mockImplementation((args) => {
       if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
         return Promise.resolve({ data: measure });
@@ -801,9 +818,7 @@ describe("Validate value sets and codes", () => {
       ) {
         return Promise.resolve({
           data: {
-            json: JSON.stringify(
-              elmTranslationWithValueSetAndTranslationErrors
-            ),
+            json: JSON.stringify(elmTranslationWithNoErrors),
           },
           status: 200,
         });
@@ -816,23 +831,147 @@ describe("Validate value sets and codes", () => {
           status: 200,
         });
       }
-      return Promise.resolve(args);
     });
+    renderEditor(measureWithCqlCodes);
+    const issues = await screen.findByText("1 issues found with CQL");
+    expect(issues).toBeInTheDocument();
+  });
+
+  it("should display errors if not logged into umls", async () => {
+    const tgtObj = {
+      TGT: "",
+      tgtTimeStamp: new Date().getTime(),
+    };
+    window.localStorage.setItem("TGT", JSON.stringify(tgtObj));
+
+    const measureWithCqlCodes = {
+      ...measure,
+      cql:
+        "library DuplicateMeasureTest version '0.0.000'\n" +
+        "\n" +
+        "using FHIR version '4.0.1'\n" +
+        "\n" +
+        "codesystem \"ActPriority:HL7V3.0_2021-03\": 'https://terminology.hl7.org/CodeSystem/v3-ActPriority' version 'HL7V3.0_2021-03'\n" +
+        "code \"preop\": 'P' from \"ActPriority:HL7V3.0_2021-03\" display 'preop'",
+    };
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measureWithCqlCodes });
+      } else if (
+        args &&
+        args.startsWith(serviceConfig.elmTranslationService.baseUrl)
+      ) {
+        return Promise.resolve({
+          data: {
+            json: JSON.stringify(elmTranslationWithNoErrors),
+          },
+          status: 200,
+        });
+      } else if (
+        args &&
+        args.startsWith(serviceConfig.terminologyService.baseUrl)
+      ) {
+        return Promise.resolve({
+          data: customCqlCodes,
+          status: 200,
+        });
+      }
+    });
+
+    renderEditor(measureWithCqlCodes);
+    const issues = await screen.findByText("2 issues found with CQL");
+    expect(issues).toBeInTheDocument();
+  });
+
+  it("should throw unable to login with umls error", async () => {
     const tgtObj = {
       TGT: "Test-TGT",
       tgtTimeStamp: new Date().getTime(),
     };
     window.localStorage.setItem("TGT", JSON.stringify(tgtObj));
 
-    mockedAxios.get.mockImplementation((args) => {
-      return Promise.reject({
-        data: null,
-        status: 404,
-      });
+    const measureWithCqlCodes = {
+      ...measure,
+      cql:
+        "library DuplicateMeasureTest version '0.0.000'\n" +
+        "\n" +
+        "using FHIR version '4.0.1'\n" +
+        "\n" +
+        "codesystem \"ActPriority:HL7V3.0_2021-03\": 'https://terminology.hl7.org/CodeSystem/v3-ActPriority' version 'HL7V3.0_2021-03'\n" +
+        "code \"preop\": 'P' from \"ActPriority:HL7V3.0_2021-03\" display 'preop'",
+    };
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measureWithCqlCodes });
+      } else if (
+        args &&
+        args.startsWith(serviceConfig.elmTranslationService.baseUrl)
+      ) {
+        return Promise.resolve({
+          data: {
+            json: JSON.stringify(elmTranslationWithNoErrors),
+          },
+          status: 200,
+        });
+      } else if (
+        args &&
+        args.startsWith(serviceConfig.terminologyService.baseUrl)
+      ) {
+        return Promise.resolve({
+          data: customCqlCodes,
+          status: 401,
+        });
+      }
     });
 
-    renderEditor(measure);
-    const issues = await screen.findByText("5 issues found with CQL");
+    renderEditor(measureWithCqlCodes);
+    const issues = await screen.findByText("2 issues found with CQL");
+    expect(issues).toBeInTheDocument();
+  });
+
+  it("should throw unable to validate code error", async () => {
+    const tgtObj = {
+      TGT: "Test-TGT",
+      tgtTimeStamp: new Date().getTime(),
+    };
+    window.localStorage.setItem("TGT", JSON.stringify(tgtObj));
+
+    const measureWithCqlCodes = {
+      ...measure,
+      cql:
+        "library DuplicateMeasureTest version '0.0.000'\n" +
+        "\n" +
+        "using FHIR version '4.0.1'\n" +
+        "\n" +
+        "codesystem \"ActPriority:HL7V3.0_2021-03\": 'https://terminology.hl7.org/CodeSystem/v3-ActPriority' version 'HL7V3.0_2021-03'\n" +
+        "code \"preop\": 'P' from \"ActPriority:HL7V3.0_2021-03\" display 'preop'",
+    };
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measureWithCqlCodes });
+      } else if (
+        args &&
+        args.startsWith(serviceConfig.elmTranslationService.baseUrl)
+      ) {
+        return Promise.resolve({
+          data: {
+            json: JSON.stringify(elmTranslationWithNoErrors),
+          },
+          status: 200,
+        });
+      } else if (
+        args &&
+        args.startsWith(serviceConfig.terminologyService.baseUrl)
+      ) {
+        return Promise.resolve({
+          data: customCqlCodes,
+          status: 500,
+        });
+      }
+    });
+
+    renderEditor(measureWithCqlCodes);
+    const issues = await screen.findByText("2 issues found with CQL");
     expect(issues).toBeInTheDocument();
   });
 });
