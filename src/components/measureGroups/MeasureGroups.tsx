@@ -13,7 +13,7 @@ import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
 import * as _ from "lodash";
 import { MeasureGroupSchemaValidator } from "../../models/MeasureGroupSchemaValidator";
-import useOktaTokens from "../../hooks/useOktaTokens";
+import { useOktaTokens } from "@madie/madie-util";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
 const Content = styled.div(() => [tw`col-span-3`]);

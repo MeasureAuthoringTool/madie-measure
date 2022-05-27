@@ -13,13 +13,11 @@ import {
   Pagination,
   MadieSpinner,
 } from "@madie/madie-design-system/dist/react";
-import CreateNewMeasureDialog from "./CreateNewMeasureDialog";
-import PageHeader from "../PageHeader";
-import "./NewMeasure.scss";
-export default function NewMeasure() {
+import "./MeasureLanding.scss";
+
+export default function MeasureLanding() {
   const { search } = useLocation();
   const history = useHistory();
-
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [measureList, setMeasureList] = useState<Measure[]>([]);
   // utilities for pagination
@@ -44,17 +42,7 @@ export default function NewMeasure() {
   const handleLimitChange = (e) => {
     history.push(`?tab=${activeTab}&page=${0}&limit=${e.target.value}`);
   };
-  //dialog utilities
-  const [createOpen, setCreateOpen] = useState(false);
-  // bool, if we close on success, we want to retrieve measures again
-  const handleClose = (status = false) => {
-    if (status) {
-      // retrieive
-      retrieveMeasures(activeTab, curLimit, curPage - 1);
-    }
-    setCreateOpen(false);
-  };
-  // retrieve measures needs to be a callback to avoid dependency depth fail checks
+
   const retrieveMeasures = useCallback(
     async (tab = 0, limit = 10, page = 0) => {
       const data = await measureServiceApi.fetchMeasures(
@@ -84,33 +72,24 @@ export default function NewMeasure() {
   useEffect(() => {
     retrieveMeasures(activeTab, curLimit, curPage - 1);
   }, [retrieveMeasures, activeTab, curLimit, curPage, measureServiceApi]);
-
+  // create is in a different app, so we need to listen for it.
+  useEffect(() => {
+    const createListener = () => {
+      retrieveMeasures();
+    };
+    window.addEventListener("create", createListener, false);
+    return () => {
+      window.removeEventListener("create", createListener, false);
+    };
+  }, []);
   const handleTabChange = (event, nextTab) => {
     const limit = values?.limit || 10;
     history.push(`?tab=${nextTab}&page=0&limit=${limit}`);
   };
 
-  const [userFirstName, setUserFirstName] = useState<string>("");
-  useEffect(() => {
-    const setStorage = () => {
-      const givenName = window.localStorage.getItem("givenName");
-      if (!givenName) {
-        setTimeout(setStorage, 1500);
-      } else {
-        setUserFirstName(window.localStorage.getItem("givenName"));
-      }
-    };
-    setStorage();
-  }, []);
-  const openCreate = () => {
-    setCreateOpen(true);
-  };
-
   return (
-    <div id="measure-landing">
-      <PageHeader name={userFirstName} openCreate={openCreate} />
+    <div id="measure-landing" data-testid="measure-landing">
       <div className="measure-table">
-        <CreateNewMeasureDialog open={createOpen} onClose={handleClose} />
         <section tw="flex flex-row">
           <div>
             <Tabs

@@ -1,7 +1,7 @@
 import axios from "axios";
 import useServiceConfig from "./useServiceConfig";
 import { ServiceConfig } from "./ServiceContext";
-import useOktaTokens from "../hooks/useOktaTokens";
+import { useOktaTokens } from "@madie/madie-util";
 
 export type ElmTranslationError = {
   startLine: number;

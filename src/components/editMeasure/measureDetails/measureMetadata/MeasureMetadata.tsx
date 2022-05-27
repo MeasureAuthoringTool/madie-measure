@@ -4,7 +4,7 @@ import useCurrentMeasure from "../../useCurrentMeasure";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import { useFormik } from "formik";
 import getInitialValues, { setMeasureMetadata } from "./MeasureMetadataHelper";
-import useOktaTokens from "../../../../hooks/useOktaTokens";
+import { useOktaTokens } from "@madie/madie-util";
 
 const Form = tw.form`max-w-xl mt-3 space-y-8 divide-y divide-gray-200`;
 const FormContent = tw.div`space-y-8 divide-y divide-gray-200`;

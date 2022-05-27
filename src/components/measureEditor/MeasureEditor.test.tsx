@@ -19,7 +19,14 @@ import userEvent from "@testing-library/user-event";
 import { parseContent } from "@madie/madie-editor";
 import { FHIRValueSet } from "../../api/useTerminologyServiceApi";
 
-const MEASURE_CREATEDBY = "testuser@example.com";
+jest.mock("@madie/madie-util", () => ({
+  useOktaTokens: () => ({
+    getAccessToken: () => "test.jwt",
+    getUserName: () => MEASURE_CREATEDBY,
+  }),
+}));
+
+const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
 const measure = {
   id: "abcd-pqrs-xyz",
   measureHumanReadableId: "",
@@ -212,13 +219,6 @@ const serviceConfig: ServiceConfig = {
     baseUrl: "terminology-service.com",
   },
 };
-
-jest.mock("../../hooks/useOktaTokens", () =>
-  jest.fn(() => ({
-    getAccessToken: () => "test.jwt",
-    getUserName: () => MEASURE_CREATEDBY,
-  }))
-);
 
 const renderEditor = (measure: Measure) => {
   return render(

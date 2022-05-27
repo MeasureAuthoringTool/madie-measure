@@ -2,9 +2,9 @@ import "@testing-library/jest-dom";
 // NOTE: jest-dom adds handy assertions to Jest and is recommended, but not required
 
 import * as React from "react";
-import { render, waitFor } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
-import { MeasureRoutes } from "./MeasureLanding";
+import { MeasureRoutes } from "./MeasureRoutes";
 import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import { act } from "react-dom/test-utils";
@@ -20,9 +20,11 @@ const serviceConfig: ServiceConfig = {
   },
 };
 
-jest.mock("../../hooks/useOktaTokens", () => () => ({
-  getAccessToken: () => "test.jwt",
-  getUserName: () => "TestUser@example.com",
+jest.mock("@madie/madie-util", () => () => ({
+  useOktaTokens: () => ({
+    getAccessToken: () => "test.jwt",
+    getUserName: () => "TestUser@example.com", //#nosec
+  }),
 }));
 
 const mockMeasureServiceApi = {

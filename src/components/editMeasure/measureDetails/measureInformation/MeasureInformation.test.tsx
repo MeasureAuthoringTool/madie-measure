@@ -13,12 +13,12 @@ import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../api/useMeasureServiceApi";
 import useCurrentMeasure from "../../useCurrentMeasure";
-import useKeyPress from "../../../../hooks/useKeypress";
 import { MeasureContextHolder } from "../../MeasureContext";
 import Measure from "../../../../models/Measure";
-import useOktaTokens from "../../../../hooks/useOktaTokens";
 import { MemoryRouter } from "react-router";
 import userEvent from "@testing-library/user-event";
+import { useOktaTokens, useKeyPress } from "@madie/madie-util";
+import { describe, expect, it } from "@jest/globals";
 
 const mockHistoryPush = jest.fn();
 
@@ -28,20 +28,26 @@ jest.mock("react-router-dom", () => ({
     push: mockHistoryPush,
   }),
 }));
+
 jest.mock("../../../../api/useMeasureServiceApi");
 jest.mock("../../useCurrentMeasure");
-jest.mock("../../../../hooks/useKeypress");
-jest.mock("../../../../hooks/useOktaTokens");
+jest.mock("@madie/madie-util", () => ({
+  useOktaTokens: jest.fn(() => ({
+    getUserName: jest.fn(() => "testuser@example.com"), //#nosec
+  })),
+  useKeyPress: jest.fn(() => false),
+  measureStore: {
+    updateMeasure: jest.fn((measure) => measure),
+  },
+  useOnClickOutside: jest.fn(() => false),
+}));
 
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 
-const useOktaTokensMock = useOktaTokens as Jest.Mock<Function>;
-
 const useCurrentMeasureMock =
   useCurrentMeasure as jest.Mock<MeasureContextHolder>;
 
-const useKeypressMock = useKeyPress as jest.Mock<boolean>;
 let serviceApiMock: MeasureServiceApi;
 serviceApiMock = {
   updateMeasure: jest
@@ -53,22 +59,22 @@ serviceApiMock = {
 } as unknown as MeasureServiceApi;
 useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
 
+useOktaTokens.mockImplementation(() => ({
+  getUserName: () => "testuser@example.com", // #nosec
+}));
+
 describe("MeasureInformation component", () => {
   let measure: Measure;
   let measureContextHolder: MeasureContextHolder;
   afterEach(cleanup);
 
   beforeEach(() => {
-    useKeypressMock.mockReturnValue(false);
     measure = {
       id: "test measure",
       measureName: "the measure for testing",
       createdBy: "testuser@example.com",
     } as Measure;
 
-    useOktaTokensMock.mockImplementation(() => ({
-      getUserName: () => "testuser@example.com",
-    }));
     measureContextHolder = {
       measure,
       setMeasure: jest.fn(),
@@ -76,9 +82,10 @@ describe("MeasureInformation component", () => {
 
     useCurrentMeasureMock.mockImplementation(() => measureContextHolder);
   });
+  const { getByTestId, findByTestId, queryByText, queryByTestId } = screen;
 
   it("should render the component with measure's name populated", () => {
-    const { getByTestId } = render(<MeasureInformation />);
+    render(<MeasureInformation />);
     const result: HTMLElement = getByTestId("measure-name-edit");
     expect(result).toBeInTheDocument();
     const text = getByTestId("inline-view-span");
@@ -87,7 +94,7 @@ describe("MeasureInformation component", () => {
 
   it("should render the component with a blank measure name", () => {
     delete measure.measureName;
-    const { getByTestId } = render(<MeasureInformation />);
+    render(<MeasureInformation />);
     const result: HTMLElement = getByTestId("measure-name-edit");
     expect(result).toBeInTheDocument();
     const text = getByTestId("inline-view-span");
@@ -95,13 +102,13 @@ describe("MeasureInformation component", () => {
   });
 
   it("Check if the measurement period save button is present", () => {
-    const { getByTestId } = render(<MeasureInformation />);
+    render(<MeasureInformation />);
     const result: HTMLElement = getByTestId("measurement-period-save-button");
     expect(result).toBeInTheDocument();
   });
 
   it("Check if measurement start field is present in the form", () => {
-    const { getByTestId } = render(<MeasureInformation />);
+    render(<MeasureInformation />);
     const result = getByTestId("measurement-period-form");
     expect(result).toBeInTheDocument();
     const measurementPeriodStart: HTMLElement = getByTestId(
@@ -110,33 +117,39 @@ describe("MeasureInformation component", () => {
     expect(measurementPeriodStart).toBeInTheDocument();
   });
 
-  it("Check if measurement start date field as expected", () => {
-    const { getByTestId } = render(<MeasureInformation />);
+  it("Check if measurement start date field updates input as expected", async () => {
+    render(<MeasureInformation />);
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
       measurementPeriodStartNode
     ).getByRole("textbox");
     userEvent.type(measurementPeriodStartInput, "12/07/2001");
-    expect(measurementPeriodStartInput.value).toBe("12/07/2001");
+    await act(async () => {
+      await waitFor(() =>
+        expect(measurementPeriodStartInput.value).toBe("12/07/2001")
+      );
+    });
   });
 
-  it("Check if measurement end date field has expected value", () => {
-    const { getByTestId } = render(<MeasureInformation />);
+  it("Check if measurement end date field has expected value", async () => {
+    render(<MeasureInformation />);
     const measurementPeriodEndNode = getByTestId("measurement-period-end");
     const measurementPeriodEndInput = within(
       measurementPeriodEndNode
     ).getByRole("textbox");
     userEvent.type(measurementPeriodEndInput, "12/07/2009");
-    expect(measurementPeriodEndInput.value).toBe("12/07/2009");
+    await waitFor(() =>
+      expect(measurementPeriodEndInput.value).toBe("12/07/2009")
+    );
   });
 
   it("should save the measure's name on an update", async () => {
-    const { findByTestId, getByTestId } = render(<MeasureInformation />);
+    render(<MeasureInformation />);
     // Click the name to trigger the inline edit
     const clickableSpan = getByTestId("inline-view-span");
     fireEvent.click(clickableSpan);
     // Have the user click enter (after input)
-    useKeypressMock.mockReturnValueOnce(true);
+    useKeyPress.mockReturnValueOnce(true);
     // Type in the new value
     const input = await findByTestId("inline-edit-input");
     fireEvent.change(input, {
@@ -156,95 +169,81 @@ describe("MeasureInformation component", () => {
   });
 
   it("Should display a delete button if user is the owner of measure", async () => {
-    await act(async () => {
-      const { findByTestId } = render(<MeasureInformation />);
-      const result: HTMLElement = await findByTestId("delete-measure-button");
-      expect(result).toBeInTheDocument();
-    });
+    render(<MeasureInformation />);
+    const result: HTMLElement = await findByTestId("delete-measure-button");
+    expect(result).toBeInTheDocument();
   });
 
-  it("Should not display a delete button if user is not the owner of measure", async () => {
-    useOktaTokensMock.mockImplementation(() => ({
-      getUserName: () => "othertestuser@example.com",
+  it("Should not display a delete button if user is not the owner of measure", () => {
+    useOktaTokens.mockImplementationOnce(() => ({
+      getUserName: () => "othertestuser@example.com", //#nosec
     }));
-    await act(async () => {
-      const { queryByText } = render(<MeasureInformation />);
-      const result: HTMLElement = queryByText("delete-measure-button");
-      expect(result).toBeNull();
-    });
+    render(<MeasureInformation />);
+    const result: HTMLElement = queryByText("delete-measure-button");
+    expect(result).toBeNull();
   });
 
   it("On delete click, user is presented with a confirm deletion screen", async () => {
-    await act(async () => {
-      const { findByTestId, getByTestId } = await render(
-        <MeasureInformation />
-      );
-      const result: HTMLElement = await findByTestId("delete-measure-button");
-      fireEvent.click(result);
-      const confirmDelete = await getByTestId("delete-measure-button-2");
-      expect(confirmDelete).toBeInTheDocument();
-      const cancelDelete = await getByTestId("cancel-delete-measure-button");
-      expect(cancelDelete).toBeInTheDocument();
-    });
+    render(<MeasureInformation />);
+    const result: HTMLElement = await findByTestId("delete-measure-button");
+    fireEvent.click(result);
+    const confirmDelete = getByTestId("delete-measure-button-2");
+    expect(confirmDelete).toBeInTheDocument();
+    const cancelDelete = await getByTestId("cancel-delete-measure-button");
+    expect(cancelDelete).toBeInTheDocument();
   });
 
   it("On failed delete action click, user can see toast error pop up", async () => {
-    await act(async () => {
-      const { findByTestId, getByTestId } = await render(
-        <MeasureInformation />
-      );
-      const result: HTMLElement = await findByTestId("delete-measure-button");
-      fireEvent.click(result);
-      const confirmDelete = await getByTestId("delete-measure-button-2");
-      expect(confirmDelete).toBeInTheDocument();
-      const cancelDelete = await getByTestId("cancel-delete-measure-button");
-      expect(cancelDelete).toBeInTheDocument();
-      fireEvent.click(confirmDelete);
-      await waitFor(
-        () =>
-          expect(
-            getByTestId("edit-measure-information-generic-error-text")
-          ).toBeInTheDocument(),
-        {
-          timeout: 5000,
-        }
-      );
-    });
+    render(<MeasureInformation />);
+    const result: HTMLElement = await findByTestId("delete-measure-button");
+    fireEvent.click(result);
+    const confirmDelete = await getByTestId("delete-measure-button-2");
+    expect(confirmDelete).toBeInTheDocument();
+    const cancelDelete = await getByTestId("cancel-delete-measure-button");
+    expect(cancelDelete).toBeInTheDocument();
+    fireEvent.click(confirmDelete);
+    await waitFor(
+      () =>
+        expect(
+          getByTestId("edit-measure-information-generic-error-text")
+        ).toBeInTheDocument(),
+      {
+        timeout: 5000,
+      }
+    );
   });
 
   it("On successful delete action click, user can see success message and routes back to measures", async () => {
-    await act(async () => {
-      const { findByTestId, getByTestId } = await render(
-        <MemoryRouter>
-          <MeasureInformation />
-        </MemoryRouter>
-      );
-      const result: HTMLElement = await findByTestId("delete-measure-button");
-      fireEvent.click(result);
-      const confirmDelete = await getByTestId("delete-measure-button-2");
-      expect(confirmDelete).toBeInTheDocument();
-      fireEvent.click(confirmDelete);
-      await waitFor(
-        () => {
-          expect(
-            getByTestId("edit-measure-information-success-text")
-          ).toBeInTheDocument();
-          expect(mockHistoryPush).toHaveBeenCalledWith("/measures");
-        },
-        {
-          timeout: 5000,
-        }
-      );
-    });
+    await render(
+      <MemoryRouter>
+        <MeasureInformation />
+      </MemoryRouter>
+    );
+    const result: HTMLElement = await findByTestId("delete-measure-button");
+    fireEvent.click(result);
+    const confirmDelete = await getByTestId("delete-measure-button-2");
+    expect(confirmDelete).toBeInTheDocument();
+    fireEvent.click(confirmDelete);
+    await waitFor(
+      () => {
+        expect(
+          getByTestId("edit-measure-information-success-text")
+        ).toBeInTheDocument();
+        expect(mockHistoryPush).toHaveBeenCalledWith("/measures");
+      },
+      {
+        timeout: 5000,
+      }
+    );
   });
 
   it("Should not allow user to edit measure name if user is not the owner of measure", async () => {
-    useOktaTokensMock.mockImplementation(() => ({
+    useOktaTokens.mockImplementation(() => ({
       getUserName: () => "AnotherUser",
     }));
-    render(<MeasureInformation />);
+    await render(<MeasureInformation />);
 
-    const inlineInput = screen.queryByTestId("inline-view-span");
+    const inlineInput = queryByTestId("inline-view-span");
     expect(inlineInput).not.toBeInTheDocument();
   });
 });

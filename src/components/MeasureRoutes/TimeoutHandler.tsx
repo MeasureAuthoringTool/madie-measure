@@ -35,7 +35,8 @@ const TimeoutHandler = ({ timeLeft = 10000 }) => {
 
   // initialize
   useLayoutEffect(() => {
-    const rootNode = document.getElementById("main");
+    // option window object for testing.
+    const rootNode = document.getElementById("main") || window;
     timeoutRef.current = setTimeout(timeoutCallBack, timeLeft);
     rootNode.addEventListener("keypress", resetTimeout);
     rootNode.addEventListener("click", resetTimeout);

@@ -7,7 +7,6 @@ import Measure from "../../../../models/Measure";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import useCurrentMeasure from "../../useCurrentMeasure";
 import "styled-components/macro";
-import useOktaTokens from "../../../../hooks/useOktaTokens";
 import { Button, Toast } from "@madie/madie-design-system/dist/react";
 import DeleteDialog from "./DeleteDialog";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
@@ -17,6 +16,7 @@ import { TextField } from "@mui/material";
 import { useFormik } from "formik";
 import { HelperText } from "@madie/madie-components";
 import { MeasurementPeriodValidator } from "../../../../models/MeasurementPeriodValidator";
+import { measureStore, useOktaTokens } from "@madie/madie-util";
 
 interface measureInformationForm {
   measurementPeriodStart: Date;
@@ -53,6 +53,7 @@ const INITIAL_VALUES = {
 export default function MeasureInformation() {
   const history = useHistory();
   const measureServiceApi = useMeasureServiceApi();
+  const { updateMeasure } = measureStore;
   const { measure, setMeasure } = useCurrentMeasure();
   const [genericErrorMessage, setGenericErrorMessage] = useState<string>();
   const { getUserName } = useOktaTokens();
@@ -73,7 +74,6 @@ export default function MeasureInformation() {
       await handleSubmit(values),
   });
   const canEdit = measure.createdBy === userName;
-
   const onToastClose = () => {
     setToastType(null);
     setToastMessage("");
@@ -113,6 +113,7 @@ export default function MeasureInformation() {
         .updateMeasure(newMeasure)
         .then(() => {
           setMeasure(newMeasure);
+          updateMeasure(newMeasure);
         })
         .catch(({ response }) => {
           if (response.data.measureName) {
@@ -135,6 +136,7 @@ export default function MeasureInformation() {
       .then(() => {
         setSuccessMessage("Measurement Period Updated Successfully");
         setMeasure(newMeasure);
+        updateMeasure(newMeasure);
       })
       .catch((err) => {
         setErrorMessage(err.response.data.message);

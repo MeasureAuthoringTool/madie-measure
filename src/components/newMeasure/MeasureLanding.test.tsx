@@ -4,12 +4,12 @@ import "@testing-library/jest-dom";
 import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
-import { MeasureRoutes } from "../measureLanding/MeasureLanding";
+import { MeasureRoutes } from "../MeasureRoutes/MeasureRoutes";
 import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import userEvent from "@testing-library/user-event";
 import { act } from "react-dom/test-utils";
-import { oneItemResponse } from "../measureLanding/mockMeasureResponses";
+import { oneItemResponse } from "../MeasureRoutes/mockMeasureResponses";
 
 const serviceConfig: ServiceConfig = {
   measureService: {
@@ -20,10 +20,7 @@ const serviceConfig: ServiceConfig = {
   },
 };
 
-jest.mock("../../hooks/useOktaTokens", () => () => ({
-  getAccessToken: () => "test.jwt",
-  getUserName: () => "TestUser@example.com",
-}));
+jest.mock("@madie/madie-util");
 
 const mockMeasureServiceApi = {
   fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
@@ -47,7 +44,6 @@ describe("Measure Page", () => {
           </MemoryRouter>
         </ApiContextProvider>
       );
-      expect(screen.getByTestId("create-new-measure-button")).toBeTruthy();
       const measure1 = await screen.findByText("TestMeasure1");
       expect(measure1).toBeInTheDocument();
       expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
@@ -83,7 +79,6 @@ describe("Measure Page", () => {
           </MemoryRouter>
         </ApiContextProvider>
       );
-      expect(screen.getByTestId("create-new-measure-button")).toBeTruthy();
       const measure1 = await screen.findByText("TestMeasure1");
       expect(measure1).toBeInTheDocument();
       expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
