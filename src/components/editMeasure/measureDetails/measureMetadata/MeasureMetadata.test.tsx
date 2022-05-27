@@ -184,12 +184,10 @@ describe("MeasureRationale component", () => {
     const input = getByTestId("measureRationaleInput");
     expectInputValue(input, RATIONALE);
 
-    await act(async () => {
-      fireEvent.change(input, {
-        target: { value: NEWVALUE },
-      });
-      await waitFor(() => expectInputValue(input, NEWVALUE));
+    fireEvent.change(input, {
+      target: { value: NEWVALUE },
     });
+    await waitFor(() => expectInputValue(input, NEWVALUE));
   });
 
   it("should update the author input field when a user types a new value", async () => {
@@ -197,12 +195,10 @@ describe("MeasureRationale component", () => {
 
     const input = getByTestId("measureAuthorInput");
     expectInputValue(input, AUTHOR);
-    await act(async () => {
-      fireEvent.change(input, {
-        target: { value: NEWVALUE },
-      });
-      await waitFor(() => expectInputValue(input, NEWVALUE));
+    fireEvent.change(input, {
+      target: { value: NEWVALUE },
     });
+    await waitFor(() => expectInputValue(input, NEWVALUE));
   });
 
   it("should save the rationale information when the form is submitted", async () => {
@@ -217,7 +213,7 @@ describe("MeasureRationale component", () => {
     act(() => {
       fireEvent.click(save);
     });
-    await act(async () => {
+    await waitFor(async () => {
       const success = await findByTestId("measureRationaleSuccess");
       expect(success).toBeInTheDocument();
       expect(success.textContent).toBe(
