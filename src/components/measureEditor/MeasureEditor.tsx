@@ -1,4 +1,4 @@
-import React, { SetStateAction, Dispatch, useState, useEffect } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import "styled-components/macro";
 import {
   EditorAnnotation,
@@ -9,6 +9,11 @@ import {
 import { Button } from "@madie/madie-components";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import Measure from "../../models/Measure";
+import {
+  CqlAntlr,
+  CqlCode,
+  CqlCodeSystem,
+} from "@madie/cql-antlr-parser/dist/src";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import useTerminologyServiceApi from "../../api/useTerminologyServiceApi";
 import tw from "twin.macro";
@@ -19,6 +24,8 @@ import useElmTranslationServiceApi, {
   ElmValueSet,
 } from "../../api/useElmTranslationServiceApi";
 import useOktaTokens from "../../hooks/useOktaTokens";
+import CqlResult from "@madie/cql-antlr-parser/dist/src/dto/CqlResult";
+import { mapCodeSystemErrorsToTranslationErrors } from "./measureEditorUtils";
 
 const MessageText = tw.p`text-sm font-medium`;
 const SuccessText = tw(MessageText)`text-green-800`;
@@ -26,8 +33,9 @@ const ErrorText = tw(MessageText)`text-red-800`;
 const UpdateAlerts = tw.div`mb-2 h-5`;
 const EditorActions = tw.div`mt-2 ml-2 mb-5 space-y-5`;
 
-export const mapElmErrorsToAceAnnotations = (
-  errors: ElmTranslationError[]
+export const mapErrorsToAceAnnotations = (
+  errors: ElmTranslationError[],
+  type: string
 ): EditorAnnotation[] => {
   let annotations: EditorAnnotation[] = [];
   if (errors && _.isArray(errors) && errors.length > 0) {
@@ -35,13 +43,13 @@ export const mapElmErrorsToAceAnnotations = (
       row: error.startLine - 1,
       column: error.startChar,
       type: error.errorSeverity.toLowerCase(),
-      text: `ELM: ${error.startChar}:${error.endChar} | ${error.message}`,
+      text: `${type}: ${error.startChar}:${error.endChar} | ${error.message}`,
     }));
   }
   return annotations;
 };
 
-export const mapElmErrorsToAceMarkers = (
+export const mapErrorsToAceMarkers = (
   errors: ElmTranslationError[]
 ): EditorErrorMarker[] => {
   let markers: EditorErrorMarker[] = [];
@@ -63,6 +71,18 @@ export const mapElmErrorsToAceMarkers = (
   }
   return markers;
 };
+
+// customCqlCode contains validation result from VSAC
+// This object can be cached in future, to avoid calling VSAC everytime.
+export interface CustomCqlCodeSystem extends CqlCodeSystem {
+  valid?: boolean;
+  errorMessage?: string;
+}
+export interface CustomCqlCode extends Omit<CqlCode, "codeSystem"> {
+  codeSystem: CustomCqlCodeSystem;
+  valid?: boolean;
+  errorMessage?: string;
+}
 
 const MeasureEditor = () => {
   const { measure, setMeasure } = useCurrentMeasure();
@@ -90,8 +110,8 @@ const MeasureEditor = () => {
   ): Promise<ElmTranslationError[]> => {
     const valuesetsErrorArray: ElmTranslationError[] = [];
     if (valuesetsArray && tgtValue) {
-      const results = await Promise.allSettled(
-        valuesetsArray.map(async (valueSet, i) => {
+      await Promise.allSettled(
+        valuesetsArray.map(async (valueSet) => {
           const oid = getOid(valueSet);
           await terminologyServiceApi
             .getValueSet(tgtValue, oid, valueSet.locator)
@@ -178,31 +198,71 @@ const MeasureEditor = () => {
     };
   };
 
+  const getCustomCqlCodes = (cql: string): CustomCqlCode[] => {
+    // using Antlr to get cqlCodes & cqlCodeSystems
+    // Constructs a list of CustomCqlCode objects, which are validated in terminology service
+    const cqlResult: CqlResult = new CqlAntlr(cql).parse();
+    return cqlResult?.codes?.map((code) => {
+      return {
+        ...code,
+        codeSystem: cqlResult.codeSystems?.find(
+          (codeSys) => codeSys.name === code.codeSystem
+        ),
+      };
+    });
+  };
+
+  const getVsacErrorAnnotationAndMarkers = (
+    codeSystemCqlErrors: ElmTranslationError[]
+  ) => {
+    let vsacErrorsAnnotations: EditorAnnotation[] = [];
+    let vsacErrorMarkers: EditorErrorMarker[] = [];
+    if (codeSystemCqlErrors && codeSystemCqlErrors.length > 0) {
+      vsacErrorsAnnotations = mapErrorsToAceAnnotations(
+        codeSystemCqlErrors,
+        "VSAC"
+      );
+      vsacErrorMarkers = mapErrorsToAceMarkers(codeSystemCqlErrors);
+    }
+    return { vsacErrorsAnnotations, vsacErrorMarkers };
+  };
+
   const updateElmAnnotations = async (cql: string): Promise<ElmTranslation> => {
     setElmTranslationError(null);
     if (cql && cql.trim().length > 0) {
-      const data = await elmTranslationServiceApi.translateCqlToElm(cql);
-
-      let valuesetsErrors = null;
+      const customCqlCodes: CustomCqlCode[] = getCustomCqlCodes(cql);
       const tgt = getTgt();
       const tgtValue = getTgtValue(tgt);
+      const [validatedCodes, translationResults] = await Promise.all([
+        await terminologyServiceApi.validateCodes(customCqlCodes, tgtValue),
+        await elmTranslationServiceApi.translateCqlToElm(cql),
+      ]);
+      const codeSystemCqlErrors =
+        mapCodeSystemErrorsToTranslationErrors(validatedCodes);
+
+      const { vsacErrorsAnnotations, vsacErrorMarkers } =
+        getVsacErrorAnnotationAndMarkers(codeSystemCqlErrors);
+
+      let allErrorsArray: ElmTranslationError[] =
+        translationResults?.errorExceptions
+          ? translationResults?.errorExceptions
+          : [];
+
+      let valuesetsErrors = null;
       if (
-        data.library?.valueSets?.def !== null &&
+        translationResults.library?.valueSets?.def !== null &&
         tgt &&
         tgtValue &&
         tgtValue !== ""
       ) {
         valuesetsErrors = await getValueSetErrors(
-          data.library?.valueSets?.def,
+          translationResults.library?.valueSets?.def,
           tgtValue
         );
       }
 
-      const allErrorsArray: ElmTranslationError[] = data?.errorExceptions
-        ? data?.errorExceptions
-        : [];
       if (valuesetsErrors && valuesetsErrors.length > 0) {
-        valuesetsErrors.map((valueSet, i) => {
+        valuesetsErrors.map((valueSet) => {
           allErrorsArray.push(valueSet);
         });
       } else {
@@ -217,11 +277,14 @@ const MeasureEditor = () => {
       // errorExceptions contains error data for the primary library,
       // aka the CQL loaded into the editor. Errors from included
       // libraries are available in data.annotations.errors, if needed.
-      const elmAnnotations = mapElmErrorsToAceAnnotations(allErrorsArray);
-      const errorMarkers = mapElmErrorsToAceMarkers(allErrorsArray);
-      setElmAnnotations(elmAnnotations);
+      let annotations = mapErrorsToAceAnnotations(allErrorsArray, "ELM");
+      annotations = [...annotations, ...vsacErrorsAnnotations];
+      let errorMarkers = mapErrorsToAceMarkers(allErrorsArray);
+      errorMarkers = [...errorMarkers, ...vsacErrorMarkers];
+
+      setElmAnnotations(annotations);
       setErrorMarkers(errorMarkers);
-      return data;
+      return translationResults;
     } else {
       setElmAnnotations([]);
     }
@@ -324,7 +387,6 @@ const MeasureEditor = () => {
         height={"1000px"}
         readOnly={!canEdit}
       />
-
       <EditorActions data-testid="measure-editor-actions">
         <UpdateAlerts data-testid="update-cql-alerts">
           {success && (

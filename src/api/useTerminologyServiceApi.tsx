@@ -2,6 +2,8 @@ import axios from "axios";
 import useServiceConfig from "./useServiceConfig";
 import { ServiceConfig } from "./ServiceContext";
 import useOktaTokens from "../hooks/useOktaTokens";
+import { CustomCqlCode } from "../components/measureEditor/MeasureEditor";
+import { processCodeSystemErrors } from "../components/measureEditor/measureEditorUtils";
 
 export type FHIRValueSet = {
   resourceType: string;
@@ -49,6 +51,54 @@ export class TerminologyServiceApi {
         };
       });
     return fhirValueset;
+  }
+
+  async validateCodes(
+    customCqlCodes: CustomCqlCode[],
+    tgt: string
+  ): Promise<CustomCqlCode[]> {
+    if (!tgt || tgt === "") {
+      return processCodeSystemErrors(
+        customCqlCodes,
+        "Please Login to UMLS",
+        false
+      );
+    }
+    try {
+      const response = await axios.put(
+        `${this.baseUrl}/vsac/validations/codes`,
+        customCqlCodes,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+          params: {
+            tgt: tgt,
+          },
+        }
+      );
+      if (response.status === 200) {
+        return response.data;
+      } else if (response.status === 401) {
+        return processCodeSystemErrors(
+          customCqlCodes,
+          "Invalid UMLS Login",
+          false
+        );
+      } else {
+        return processCodeSystemErrors(
+          customCqlCodes,
+          "Unable to validate code, Please contact HelpDesk",
+          false
+        );
+      }
+    } catch (err) {
+      return processCodeSystemErrors(
+        customCqlCodes,
+        "Unable to validate code, Please contact HelpDesk",
+        false
+      );
+    }
   }
 }
 
