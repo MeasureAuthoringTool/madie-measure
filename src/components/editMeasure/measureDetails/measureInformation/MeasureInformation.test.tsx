@@ -60,10 +60,10 @@ serviceApiMock = {
 useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
 
 useOktaTokens.mockImplementation(() => ({
-  getUserName: () => "testuser@example.com", //#nosec
+  getUserName: () => "testuser@example.com", // #nosec
 }));
 
-describe("MeasureInformation mponent", () => {
+describe("MeasureInformation component", () => {
   let measure: Measure;
   let measureContextHolder: MeasureContextHolder;
   afterEach(cleanup);
@@ -117,7 +117,7 @@ describe("MeasureInformation mponent", () => {
     expect(measurementPeriodStart).toBeInTheDocument();
   });
 
-  it("Check if measurement start date field as expected", async () => {
+  it("Check if measurement start date field updates input as expected", async () => {
     render(<MeasureInformation />);
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
@@ -138,11 +138,9 @@ describe("MeasureInformation mponent", () => {
       measurementPeriodEndNode
     ).getByRole("textbox");
     userEvent.type(measurementPeriodEndInput, "12/07/2009");
-    await act(async () => {
-      await waitFor(() =>
-        expect(measurementPeriodEndInput.value).toBe("12/07/2009")
-      );
-    });
+    await waitFor(() =>
+      expect(measurementPeriodEndInput.value).toBe("12/07/2009")
+    );
   });
 
   it("should save the measure's name on an update", async () => {
@@ -189,7 +187,7 @@ describe("MeasureInformation mponent", () => {
     render(<MeasureInformation />);
     const result: HTMLElement = await findByTestId("delete-measure-button");
     fireEvent.click(result);
-    const confirmDelete = await getByTestId("delete-measure-button-2");
+    const confirmDelete = getByTestId("delete-measure-button-2");
     expect(confirmDelete).toBeInTheDocument();
     const cancelDelete = await getByTestId("cancel-delete-measure-button");
     expect(cancelDelete).toBeInTheDocument();
@@ -243,11 +241,9 @@ describe("MeasureInformation mponent", () => {
     useOktaTokens.mockImplementation(() => ({
       getUserName: () => "AnotherUser",
     }));
-    await act(async () => {
-      await render(<MeasureInformation />);
+    await render(<MeasureInformation />);
 
-      const inlineInput = queryByTestId("inline-view-span");
-      expect(inlineInput).not.toBeInTheDocument();
-    });
+    const inlineInput = queryByTestId("inline-view-span");
+    expect(inlineInput).not.toBeInTheDocument();
   });
 });
