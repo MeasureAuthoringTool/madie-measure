@@ -14,7 +14,7 @@ import useMeasureServiceApi, {
 } from "../../../../api/useMeasureServiceApi";
 import useCurrentMeasure from "../../useCurrentMeasure";
 import { MeasureContextHolder } from "../../MeasureContext";
-import Measure from "../../../../models/Measure";
+import { Measure } from "@madie/madie-models";
 import { MemoryRouter } from "react-router";
 import userEvent from "@testing-library/user-event";
 import { useOktaTokens, useKeyPress } from "@madie/madie-util";

@@ -12,7 +12,7 @@ import "styled-components/macro";
 import EditMeasureNav from "./editMeasureNav/EditMeasureNav";
 import MeasureDetails from "./measureDetails/MeasureDetails";
 import MeasureEditor from "../measureEditor/MeasureEditor";
-import Measure from "../../models/Measure";
+import { Measure } from "@madie/madie-models";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { MeasureContextProvider } from "./MeasureContext";
 import { MadiePatient } from "@madie/madie-patient";

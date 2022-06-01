@@ -13,13 +13,14 @@ import MeasureGroups, {
 import {
   MEASURE_SCORING_KEYS,
   MeasureScoring,
-} from "../../models/MeasureScoring";
+  Measure,
+  Group,
+} from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import { MemoryRouter } from "react-router-dom";
 import { MeasureCQL } from "../common/MeasureCQL";
 import { MeasureContextHolder } from "../editMeasure/MeasureContext";
-import Measure, { Group } from "../../models/Measure";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
 

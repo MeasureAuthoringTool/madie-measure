@@ -6,14 +6,13 @@ import MeasureEditor, {
   mapErrorsToAceMarkers,
 } from "./MeasureEditor";
 import { MeasureContextProvider } from "../editMeasure/MeasureContext";
-import Measure from "../../models/Measure";
+import { Measure, Model } from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import axios from "axios";
 import {
   ElmTranslation,
   ElmTranslationLibrary,
 } from "../../api/useElmTranslationServiceApi";
-import { Model } from "../../models/Model";
 import userEvent from "@testing-library/user-event";
 // @ts-ignore
 import { parseContent } from "@madie/madie-editor";

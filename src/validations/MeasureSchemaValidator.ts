@@ -1,6 +1,5 @@
 import * as Yup from "yup";
-import { Model } from "./Model";
-import { MeasureScoring } from "./MeasureScoring";
+import { MeasureScoring, Model } from "@madie/madie-models";
 import { isWithinInterval } from "date-fns";
 
 export const MeasureSchemaValidator = Yup.object().shape({

@@ -1,6 +1,4 @@
-import { MeasureScoring } from "../../models/MeasureScoring";
-import Measure from "../../models/Measure";
-import { Model } from "../../models/Model";
+import { MeasureScoring, Measure, Model } from "@madie/madie-models";
 // This is some frontend logic for adding a bunch of measures
 // use Bulk create in createNewMeasure as a button press for a quick load and db crash
 

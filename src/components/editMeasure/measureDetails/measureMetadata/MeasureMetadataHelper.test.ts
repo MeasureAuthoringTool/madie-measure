@@ -1,6 +1,6 @@
 import * as React from "react";
 import getInitialValues, { setMeasureMetadata } from "./MeasureMetadataHelper";
-import Measure, { MeasureMetadata } from "../../../../models/Measure";
+import { Measure, MeasureMetadata } from "@madie/madie-models";
 import { cleanup } from "@testing-library/react";
 
 describe("MeasureMetadataHelper", () => {

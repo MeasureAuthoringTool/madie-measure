@@ -1,6 +1,6 @@
 import * as React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
-import Measure from "../../models/Measure";
+import { Measure } from "@madie/madie-models";
 import MeasureList from "./MeasureList";
 
 import { v4 as uuid } from "uuid";

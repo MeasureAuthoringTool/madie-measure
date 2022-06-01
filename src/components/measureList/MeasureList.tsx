@@ -2,7 +2,7 @@ import React from "react";
 import "twin.macro";
 import "styled-components/macro";
 
-import Measure from "../../models/Measure";
+import { Measure } from "@madie/madie-models";
 import { useHistory } from "react-router-dom";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
