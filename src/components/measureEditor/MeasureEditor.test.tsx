@@ -234,9 +234,6 @@ describe("MeasureEditor component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  afterEach(() => {
-    window.localStorage.removeItem("TGT");
-  });
 
   it("should mount measure editor component with measure cql", async () => {
     const { getByTestId } = renderEditor(measure);
@@ -707,11 +704,20 @@ it("Save button and Cancel button should not show if user is not the owner of th
 
 describe("Validate value sets", () => {
   it("Valid value sets", async () => {
-    mockedAxios.get.mockImplementation(() => {
-      return Promise.resolve({
-        data: { json: JSON.stringify(fhirValueset) },
-        status: 200,
-      });
+    mockedAxios.get.mockImplementation((args) => {
+      if (args.startsWith(serviceConfig.terminologyService.baseUrl)) {
+        if (args.endsWith("checkLogin")) {
+          return Promise.resolve({
+            data: true,
+            status: 200,
+          });
+        } else if (args.endsWith("valueSet")) {
+          return Promise.resolve({
+            data: { json: JSON.stringify(fhirValueset) },
+            status: 200,
+          });
+        }
+      }
     });
     mockedAxios.put.mockImplementation((args) => {
       if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
@@ -721,7 +727,11 @@ describe("Validate value sets", () => {
         args.startsWith(serviceConfig.elmTranslationService.baseUrl)
       ) {
         return Promise.resolve({
-          data: { json: JSON.stringify(elmTranslationWithValueSets) },
+          data: {
+            json: JSON.stringify(
+              elmTranslationWithValueSetAndTranslationErrors
+            ),
+          },
           status: 200,
         });
       } else if (
@@ -735,11 +745,6 @@ describe("Validate value sets", () => {
       }
       return Promise.resolve(args);
     });
-    const tgtObj = {
-      TGT: "Test-TGT",
-      tgtTimeStamp: new Date().getTime(),
-    };
-    window.localStorage.setItem("TGT", JSON.stringify(tgtObj));
 
     renderEditor(measure);
     const valueSetValidation = await screen.findByText("Value Set is valid!");
@@ -773,17 +778,22 @@ describe("Validate value sets", () => {
       }
       return Promise.resolve(args);
     });
-    const tgtObj = {
-      TGT: "Test-TGT",
-      tgtTimeStamp: new Date().getTime(),
-    };
-    window.localStorage.setItem("TGT", JSON.stringify(tgtObj));
 
-    mockedAxios.get.mockImplementation(() => {
-      return Promise.reject({
-        data: null,
-        status: 404,
-      });
+    mockedAxios.get.mockImplementation((args) => {
+      if (args.startsWith(serviceConfig.terminologyService.baseUrl)) {
+        if (args.endsWith("checkLogin")) {
+          return Promise.resolve({
+            data: true,
+            status: 200,
+          });
+        } else if (args.endsWith("valueSet")) {
+          return Promise.reject({
+            data: null,
+            status: 404,
+            error: { message: "Not found!" },
+          });
+        }
+      }
     });
 
     renderEditor(measure);
@@ -794,11 +804,16 @@ describe("Validate value sets", () => {
 
 describe("Validate codes and code systems", () => {
   it("should display invalid codes", async () => {
-    const tgtObj = {
-      TGT: "Test-TGT",
-      tgtTimeStamp: new Date().getTime(),
-    };
-    window.localStorage.setItem("TGT", JSON.stringify(tgtObj));
+    mockedAxios.get.mockImplementation((args) => {
+      if (args.startsWith(serviceConfig.terminologyService.baseUrl)) {
+        if (args.endsWith("checkLogin")) {
+          return Promise.resolve({
+            data: true,
+            status: 200,
+          });
+        }
+      }
+    });
     const measureWithCqlCodes = {
       ...measure,
       cql:
@@ -838,11 +853,16 @@ describe("Validate codes and code systems", () => {
   });
 
   it("should display errors if not logged into umls", async () => {
-    const tgtObj = {
-      TGT: "",
-      tgtTimeStamp: new Date().getTime(),
-    };
-    window.localStorage.setItem("TGT", JSON.stringify(tgtObj));
+    mockedAxios.get.mockImplementation((args) => {
+      if (args.startsWith(serviceConfig.terminologyService.baseUrl)) {
+        if (args.endsWith("checkLogin")) {
+          return Promise.reject({
+            data: false,
+            status: 401,
+          });
+        }
+      }
+    });
 
     const measureWithCqlCodes = {
       ...measure,
@@ -884,11 +904,16 @@ describe("Validate codes and code systems", () => {
   });
 
   it("should throw unable to login with umls error", async () => {
-    const tgtObj = {
-      TGT: "Test-TGT",
-      tgtTimeStamp: new Date().getTime(),
-    };
-    window.localStorage.setItem("TGT", JSON.stringify(tgtObj));
+    mockedAxios.get.mockImplementation((args) => {
+      if (args.startsWith(serviceConfig.terminologyService.baseUrl)) {
+        if (args.endsWith("checkLogin")) {
+          return Promise.reject({
+            data: false,
+            status: 401,
+          });
+        }
+      }
+    });
 
     const measureWithCqlCodes = {
       ...measure,
@@ -930,11 +955,16 @@ describe("Validate codes and code systems", () => {
   });
 
   it("should throw unable to validate code error", async () => {
-    const tgtObj = {
-      TGT: "Test-TGT",
-      tgtTimeStamp: new Date().getTime(),
-    };
-    window.localStorage.setItem("TGT", JSON.stringify(tgtObj));
+    mockedAxios.get.mockImplementation((args) => {
+      if (args.startsWith(serviceConfig.terminologyService.baseUrl)) {
+        if (args.endsWith("checkLogin")) {
+          return Promise.resolve({
+            data: true,
+            status: 200,
+          });
+        }
+      }
+    });
 
     const measureWithCqlCodes = {
       ...measure,
