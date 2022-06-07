@@ -438,10 +438,10 @@ describe("MeasureInformation component", () => {
     const submit = {
       id: "test measure",
       measureName: "new value",
-      createdBy: "testuser@example.com",
+      createdBy: "testuser@example.com", //#nosec
     };
 
-    const mockSetMeasure = measureContextHolder.setMeasure as jest.Mock<void>;
+    //const mockSetMeasure = measureContextHolder.setMeasure as jest.Mock<void>;
     expect(serviceApiMock.updateMeasure).toHaveBeenCalledWith(submit);
     const error: HTMLElement = getByTestId(
       "edit-measure-information-generic-error-text"
