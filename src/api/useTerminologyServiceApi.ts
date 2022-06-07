@@ -18,7 +18,7 @@ export class TerminologyServiceApi {
 
   async checkLogin(): Promise<Boolean> {
     const resp = await axios
-      .get(`${this.baseUrl}/vsac/checkLogin`, {
+      .get(`${this.baseUrl}/vsac/umls-credentials/status`, {
         headers: {
           Authorization: `Bearer ${this.getAccessToken()}`,
           "Content-Type": "text/plain",

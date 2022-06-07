@@ -706,7 +706,7 @@ describe("Validate value sets", () => {
   it("Valid value sets", async () => {
     mockedAxios.get.mockImplementation((args) => {
       if (args.startsWith(serviceConfig.terminologyService.baseUrl)) {
-        if (args.endsWith("checkLogin")) {
+        if (args.endsWith("umls-credentials/status")) {
           return Promise.resolve({
             data: true,
             status: 200,
@@ -781,7 +781,7 @@ describe("Validate value sets", () => {
 
     mockedAxios.get.mockImplementation((args) => {
       if (args.startsWith(serviceConfig.terminologyService.baseUrl)) {
-        if (args.endsWith("checkLogin")) {
+        if (args.endsWith("umls-credentials/status")) {
           return Promise.resolve({
             data: true,
             status: 200,
@@ -806,7 +806,7 @@ describe("Validate codes and code systems", () => {
   it("should display invalid codes", async () => {
     mockedAxios.get.mockImplementation((args) => {
       if (args.startsWith(serviceConfig.terminologyService.baseUrl)) {
-        if (args.endsWith("checkLogin")) {
+        if (args.endsWith("umls-credentials/status")) {
           return Promise.resolve({
             data: true,
             status: 200,
@@ -855,7 +855,7 @@ describe("Validate codes and code systems", () => {
   it("should display errors if not logged into umls", async () => {
     mockedAxios.get.mockImplementation((args) => {
       if (args.startsWith(serviceConfig.terminologyService.baseUrl)) {
-        if (args.endsWith("checkLogin")) {
+        if (args.endsWith("umls-credentials/status")) {
           return Promise.reject({
             data: false,
             status: 401,
@@ -906,7 +906,7 @@ describe("Validate codes and code systems", () => {
   it("should throw unable to login with umls error", async () => {
     mockedAxios.get.mockImplementation((args) => {
       if (args.startsWith(serviceConfig.terminologyService.baseUrl)) {
-        if (args.endsWith("checkLogin")) {
+        if (args.endsWith("umls-credentials/status")) {
           return Promise.reject({
             data: false,
             status: 401,
@@ -957,7 +957,7 @@ describe("Validate codes and code systems", () => {
   it("should throw unable to validate code error", async () => {
     mockedAxios.get.mockImplementation((args) => {
       if (args.startsWith(serviceConfig.terminologyService.baseUrl)) {
-        if (args.endsWith("checkLogin")) {
+        if (args.endsWith("umls-credentials/status")) {
           return Promise.resolve({
             data: true,
             status: 200,
