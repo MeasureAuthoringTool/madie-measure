@@ -6,6 +6,7 @@ import {
   waitFor,
   screen,
   within,
+  logRoles,
 } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
 import MeasureInformation from "./MeasureInformation";
@@ -14,11 +15,12 @@ import useMeasureServiceApi, {
 } from "../../../../api/useMeasureServiceApi";
 import useCurrentMeasure from "../../useCurrentMeasure";
 import { MeasureContextHolder } from "../../MeasureContext";
-import { Measure } from "@madie/madie-models";
+import Measure from "../../../../models/Measure";
 import { MemoryRouter } from "react-router";
 import userEvent from "@testing-library/user-event";
 import { useOktaTokens, useKeyPress } from "@madie/madie-util";
 import { describe, expect, it } from "@jest/globals";
+import axios, { AxiosError, AxiosResponse } from "axios";
 
 const mockHistoryPush = jest.fn();
 
@@ -47,6 +49,13 @@ const useMeasureServiceApiMock =
 
 const useCurrentMeasureMock =
   useCurrentMeasure as jest.Mock<MeasureContextHolder>;
+const axiosError: AxiosError = {
+  response: {
+    status: 500,
+    data: { status: 500, error: "bad test", message: "oh no what happened" },
+  } as AxiosResponse,
+  toJSON: jest.fn(),
+} as unknown as AxiosError;
 
 let serviceApiMock: MeasureServiceApi;
 serviceApiMock = {
@@ -55,7 +64,11 @@ serviceApiMock = {
     .mockResolvedValueOnce(undefined)
     .mockResolvedValueOnce(undefined)
     .mockResolvedValueOnce(undefined)
-    .mockResolvedValueOnce({ status: 200 }),
+    .mockResolvedValueOnce({ status: 200 })
+    .mockResolvedValueOnce(undefined)
+    .mockRejectedValueOnce(axiosError)
+    .mockRejectedValueOnce({ response: { data: { measureName: "bad" } } })
+    .mockRejectedValueOnce({ response: { data: { measureName: "bad" } } }),
 } as unknown as MeasureServiceApi;
 useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
 
@@ -82,7 +95,15 @@ describe("MeasureInformation component", () => {
 
     useCurrentMeasureMock.mockImplementation(() => measureContextHolder);
   });
-  const { getByTestId, findByTestId, queryByText, queryByTestId } = screen;
+  const {
+    getByTestId,
+    findByTestId,
+    queryByText,
+    queryByTestId,
+    findByRole,
+    getByRole,
+    findByText,
+  } = screen;
 
   it("should render the component with measure's name populated", () => {
     render(<MeasureInformation />);
@@ -143,6 +164,143 @@ describe("MeasureInformation component", () => {
     );
   });
 
+  it("Check if measurement period save button is disabled when measurement period start and end date have same values", async () => {
+    render(<MeasureInformation />);
+    const measurementPeriodStartNode = getByTestId("measurement-period-start");
+    const measurementPeriodStartInput = within(
+      measurementPeriodStartNode
+    ).getByRole("textbox");
+    userEvent.type(measurementPeriodStartInput, "12/07/2009");
+    await act(async () => {
+      await waitFor(() =>
+        expect(measurementPeriodStartInput.value).toBe("12/07/2009")
+      );
+    });
+    const measurementPeriodEndNode = getByTestId("measurement-period-end");
+    const measurementPeriodEndInput = within(
+      measurementPeriodEndNode
+    ).getByRole("textbox");
+    userEvent.type(measurementPeriodEndInput, "12/07/2009");
+    await waitFor(() =>
+      expect(measurementPeriodEndInput.value).toBe("12/07/2009")
+    );
+
+    const createBtn = getByTestId("measurement-period-save-button");
+    expect(createBtn).toBeInTheDocument();
+    expect(createBtn).toBeDisabled();
+  });
+
+  it("Check if measurement period save button is disabled when measurement period end date is less than start date", async () => {
+    render(<MeasureInformation />);
+    const measurementPeriodStartNode = getByTestId("measurement-period-start");
+    const measurementPeriodStartInput = within(
+      measurementPeriodStartNode
+    ).getByRole("textbox");
+    userEvent.type(measurementPeriodStartInput, "12/07/2009");
+    await act(async () => {
+      await waitFor(() =>
+        expect(measurementPeriodStartInput.value).toBe("12/07/2009")
+      );
+    });
+    const measurementPeriodEndNode = getByTestId("measurement-period-end");
+    const measurementPeriodEndInput = within(
+      measurementPeriodEndNode
+    ).getByRole("textbox");
+    userEvent.type(measurementPeriodEndInput, "12/07/2008");
+    await waitFor(() =>
+      expect(measurementPeriodEndInput.value).toBe("12/07/2008")
+    );
+
+    const createBtn = getByTestId("measurement-period-save-button");
+    expect(createBtn).toBeInTheDocument();
+    expect(createBtn).toBeDisabled();
+  });
+
+  it("Check if measurement period save button is disabled when measurement period end date or state date is not valid", async () => {
+    render(<MeasureInformation />);
+    const measurementPeriodStartNode = getByTestId("measurement-period-start");
+    const measurementPeriodStartInput = within(
+      measurementPeriodStartNode
+    ).getByRole("textbox");
+    userEvent.type(measurementPeriodStartInput, "12/07/200");
+    await act(async () => {
+      await waitFor(() =>
+        expect(measurementPeriodStartInput.value).toBe("12/07/200")
+      );
+    });
+    const measurementPeriodEndNode = getByTestId("measurement-period-end");
+    const measurementPeriodEndInput = within(
+      measurementPeriodEndNode
+    ).getByRole("textbox");
+    userEvent.type(measurementPeriodEndInput, "12/07/2008");
+    await waitFor(() =>
+      expect(measurementPeriodEndInput.value).toBe("12/07/2008")
+    );
+
+    const createBtn = getByTestId("measurement-period-save-button");
+    expect(createBtn).toBeInTheDocument();
+    expect(createBtn).toBeDisabled();
+  });
+
+  it("Check if measurement period save button is enabled when measurement period start and end dates pass all date checks", async () => {
+    render(<MeasureInformation />);
+    const measurementPeriodStartNode = getByTestId("measurement-period-start");
+    const measurementPeriodStartInput = within(
+      measurementPeriodStartNode
+    ).getByRole("textbox");
+    userEvent.type(measurementPeriodStartInput, "12/07/2000");
+    await act(async () => {
+      await waitFor(() =>
+        expect(measurementPeriodStartInput.value).toBe("12/07/2000")
+      );
+    });
+    const measurementPeriodEndNode = getByTestId("measurement-period-end");
+    const measurementPeriodEndInput = within(
+      measurementPeriodEndNode
+    ).getByRole("textbox");
+    userEvent.type(measurementPeriodEndInput, "12/07/2009");
+    await waitFor(() =>
+      expect(measurementPeriodEndInput.value).toBe("12/07/2009")
+    );
+
+    const createBtn = getByTestId("measurement-period-save-button");
+    expect(createBtn).toBeInTheDocument();
+    expect(createBtn).toBeEnabled();
+  });
+
+  it("saving measurement periods", async () => {
+    render(<MeasureInformation />);
+    const measurementPeriodStartNode = getByTestId("measurement-period-start");
+    const measurementPeriodStartInput = within(
+      measurementPeriodStartNode
+    ).getByRole("textbox");
+    userEvent.type(measurementPeriodStartInput, "12/07/2000");
+    await act(async () => {
+      await waitFor(() =>
+        expect(measurementPeriodStartInput.value).toBe("12/07/2000")
+      );
+    });
+    const measurementPeriodEndNode = getByTestId("measurement-period-end");
+    const measurementPeriodEndInput = within(
+      measurementPeriodEndNode
+    ).getByRole("textbox");
+    userEvent.type(measurementPeriodEndInput, "12/07/2009");
+    await waitFor(() =>
+      expect(measurementPeriodEndInput.value).toBe("12/07/2009")
+    );
+
+    const createBtn = getByTestId("measurement-period-save-button");
+    fireEvent.click(createBtn);
+    await waitFor(
+      () =>
+        expect(
+          getByTestId("measurement-period-success-message")
+        ).toBeInTheDocument(),
+      {
+        timeout: 5000,
+      }
+    );
+  });
   it("should save the measure's name on an update", async () => {
     render(<MeasureInformation />);
     // Click the name to trigger the inline edit
@@ -193,26 +351,6 @@ describe("MeasureInformation component", () => {
     expect(cancelDelete).toBeInTheDocument();
   });
 
-  it("On failed delete action click, user can see toast error pop up", async () => {
-    render(<MeasureInformation />);
-    const result: HTMLElement = await findByTestId("delete-measure-button");
-    fireEvent.click(result);
-    const confirmDelete = await getByTestId("delete-measure-button-2");
-    expect(confirmDelete).toBeInTheDocument();
-    const cancelDelete = await getByTestId("cancel-delete-measure-button");
-    expect(cancelDelete).toBeInTheDocument();
-    fireEvent.click(confirmDelete);
-    await waitFor(
-      () =>
-        expect(
-          getByTestId("edit-measure-information-generic-error-text")
-        ).toBeInTheDocument(),
-      {
-        timeout: 5000,
-      }
-    );
-  });
-
   it("On successful delete action click, user can see success message and routes back to measures", async () => {
     await render(
       <MemoryRouter>
@@ -235,6 +373,83 @@ describe("MeasureInformation component", () => {
         timeout: 5000,
       }
     );
+  });
+
+  it("On failed delete action click, user can see toast error pop up", async () => {
+    render(<MeasureInformation />);
+    const result: HTMLElement = await findByTestId("delete-measure-button");
+    fireEvent.click(result);
+    const confirmDelete = await getByTestId("delete-measure-button-2");
+    expect(confirmDelete).toBeInTheDocument();
+    const cancelDelete = await getByTestId("cancel-delete-measure-button");
+    expect(cancelDelete).toBeInTheDocument();
+    fireEvent.click(confirmDelete);
+
+    await waitFor(
+      () =>
+        expect(
+          getByTestId("edit-measure-information-generic-error-text")
+        ).toBeInTheDocument(),
+      {
+        timeout: 5000,
+      }
+    );
+  });
+
+  it("On failed delete action, user can see toast with error message", async () => {
+    render(<MeasureInformation />);
+
+    const deleteButton = await findByRole("button", { name: "Delete Measure" });
+    userEvent.click(deleteButton);
+    const confirmDeleteButton = await findByRole("button", {
+      name: "Yes, Delete",
+    });
+    userEvent.click(confirmDeleteButton);
+    await waitFor(
+      () =>
+        expect(
+          getByTestId("edit-measure-information-generic-error-text")
+        ).toBeInTheDocument(),
+      {
+        timeout: 5000,
+      }
+    );
+    const toastErrorMessage = await findByText(
+      "500: bad test oh no what happened"
+    );
+    expect(toastErrorMessage).toBeInTheDocument();
+  });
+
+  it("On failed update of measure, error message shown", async () => {
+    render(<MeasureInformation />);
+    // Click the name to trigger the inline edit
+    const clickableSpan = getByTestId("inline-view-span");
+    fireEvent.click(clickableSpan);
+    // Have the user click enter (after input)
+    useKeyPress.mockReturnValueOnce(true);
+    // Type in the new value
+    const input = await findByTestId("inline-edit-input");
+    fireEvent.change(input, {
+      target: { value: "new value" },
+    });
+    // Wait for rendering
+    await findByTestId("inline-view-span");
+    // Check expectations
+    const submit = {
+      id: "test measure",
+      measureName: "new value",
+      createdBy: "testuser@example.com",
+    };
+
+    const mockSetMeasure = measureContextHolder.setMeasure as jest.Mock<void>;
+    expect(serviceApiMock.updateMeasure).toHaveBeenCalledWith(submit);
+    const error: HTMLElement = getByTestId(
+      "edit-measure-information-generic-error-text"
+    );
+    expect(error).toBeInTheDocument();
+
+    //logRoles(container)
+    //screen.debug()
   });
 
   it("Should not allow user to edit measure name if user is not the owner of measure", async () => {
