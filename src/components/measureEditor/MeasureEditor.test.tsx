@@ -711,7 +711,7 @@ describe("Validate value sets", () => {
             data: true,
             status: 200,
           });
-        } else if (args.endsWith("valueSet")) {
+        } else if (args.endsWith("valueset")) {
           return Promise.resolve({
             data: { json: JSON.stringify(fhirValueset) },
             status: 200,
@@ -786,7 +786,7 @@ describe("Validate value sets", () => {
             data: true,
             status: 200,
           });
-        } else if (args.endsWith("valueSet")) {
+        } else if (args.endsWith("valueset")) {
           return Promise.reject({
             data: null,
             status: 404,
