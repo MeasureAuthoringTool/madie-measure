@@ -434,15 +434,7 @@ describe("MeasureInformation component", () => {
     });
     // Wait for rendering
     await findByTestId("inline-view-span");
-    // Check expectations
-    const submit = {
-      id: "test measure",
-      measureName: "new value",
-      createdBy: "testuser@example.com", //#nosec
-    };
 
-    //const mockSetMeasure = measureContextHolder.setMeasure as jest.Mock<void>;
-    expect(serviceApiMock.updateMeasure).toHaveBeenCalledWith(submit);
     const error: HTMLElement = getByTestId(
       "edit-measure-information-generic-error-text"
     );
