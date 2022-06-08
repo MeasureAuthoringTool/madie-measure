@@ -269,10 +269,7 @@ const MeasureEditor = () => {
         if (!tgtValue) {
           setValuesetMsg("Please log in to UMLS!");
           window.localStorage.removeItem("TGT");
-        } else if (
-          translationResults.library?.valueSets ||
-          translationResults.library?.valueSets?.length > 0
-        ) {
+        } else if (translationResults.library?.valueSets) {
           setValuesetMsg("Value Set is valid!");
         }
       }
