@@ -422,26 +422,18 @@ describe("MeasureInformation component", () => {
 
   it("On failed update of measure, error message shown", async () => {
     render(<MeasureInformation />);
-    // Click the name to trigger the inline edit
     const clickableSpan = getByTestId("inline-view-span");
     fireEvent.click(clickableSpan);
-    // Have the user click enter (after input)
     useKeyPress.mockReturnValueOnce(true);
-    // Type in the new value
     const input = await findByTestId("inline-edit-input");
     fireEvent.change(input, {
       target: { value: "new value" },
     });
-    // Wait for rendering
     await findByTestId("inline-view-span");
-
     const error: HTMLElement = getByTestId(
       "edit-measure-information-generic-error-text"
     );
     expect(error).toBeInTheDocument();
-
-    //logRoles(container)
-    //screen.debug()
   });
 
   it("Should not allow user to edit measure name if user is not the owner of measure", async () => {
