@@ -143,7 +143,7 @@ const MeasureEditor = () => {
   };
 
   const getOid = (valueSet: ElmValueSet): string => {
-    return valueSet.id.match(/[0-2](\.(0|[1-9][0-9]*))+/)[0];
+    return valueSet.id.split("ValueSet/")[1];
   };
 
   const getStartLine = (locator: string): number => {
@@ -264,7 +264,7 @@ const MeasureEditor = () => {
       } else {
         if (!isLoggedIn) {
           setValuesetMsg("Please log in to UMLS!");
-        } else {
+        } else if (translationResults.library?.valueSets) {
           setValuesetMsg("Value Set is valid!");
         }
       }
