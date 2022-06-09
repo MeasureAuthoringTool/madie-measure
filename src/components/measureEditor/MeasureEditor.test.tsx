@@ -201,7 +201,16 @@ const elmTranslationWithValueSetAndTranslationErrors: ElmTranslation = {
 const elmTranslationWithValueSets: ElmTranslation = {
   externalErrors: [],
   errorExceptions: [],
-  library: null,
+  library: {
+    annotation: null,
+    contexts: null,
+    identifier: null,
+    parameters: null,
+    schemaIdentifier: null,
+    statements: null,
+    usings: null,
+    valueSets: {},
+  },
 };
 
 const setMeasure = jest.fn();
