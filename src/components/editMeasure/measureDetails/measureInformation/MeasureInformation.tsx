@@ -33,12 +33,6 @@ export const DisplaySpan = styled.span`
   white-space: pre;
 `;
 
-const FormErrors = styled.div(() => [
-  css`
-    max-width: fit-content;
-  `,
-]);
-
 const Form = tw.form`max-w-xl my-8`;
 const MessageDiv = tw.div`ml-3`;
 const MessageText = tw.p`text-sm font-medium`;
@@ -234,6 +228,7 @@ export default function MeasureInformation() {
           <div tw="m-5" data-testid="measurement-period-start-date">
             <LocalizationProvider dateAdapter={DateAdapter}>
               <DesktopDatePicker
+                disabled={!canEdit}
                 disableOpenPicker={true}
                 label="Start"
                 inputFormat="MM/dd/yyyy"
@@ -266,6 +261,7 @@ export default function MeasureInformation() {
           <div tw="m-5" data-testid="measurement-period-end-date">
             <LocalizationProvider dateAdapter={DateAdapter}>
               <DesktopDatePicker
+                disabled={!canEdit}
                 disableOpenPicker={true}
                 label="End"
                 inputFormat="MM/dd/yyyy"
