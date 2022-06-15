@@ -105,16 +105,15 @@ const MeasureEditor = () => {
   const [valuesetMsg, setValuesetMsg] = useState(null);
 
   const getValueSetErrors = async (
-    valuesetsArray: ElmValueSet[],
-    tgtValue: string
+    valuesetsArray: ElmValueSet[]
   ): Promise<ElmTranslationError[]> => {
     const valuesetsErrorArray: ElmTranslationError[] = [];
-    if (valuesetsArray && tgtValue) {
+    if (valuesetsArray) {
       await Promise.allSettled(
         valuesetsArray.map(async (valueSet) => {
           const oid = getOid(valueSet);
           await terminologyServiceApi
-            .getValueSet(tgtValue, oid, valueSet.locator)
+            .getValueSet(oid, valueSet.locator)
             .then((response) => {
               if (response.errorMsg) {
                 const vsErrorForElmTranslationError: ElmTranslationError =
@@ -130,17 +129,17 @@ const MeasureEditor = () => {
       return valuesetsErrorArray;
     }
   };
-
-  const getTgt = (): any => {
-    return window.localStorage.getItem("TGT");
-  };
-  const getTgtValue = (tgt: any): any => {
-    let tgtValue = null;
-    if (tgt) {
-      let tgtObjFromLocalStorage = JSON.parse(tgt);
-      tgtValue = tgtObjFromLocalStorage.TGT;
-    }
-    return tgtValue;
+  const checkLogin = async (): Promise<Boolean> => {
+    let isLoggedIn = false;
+    await terminologyServiceApi
+      .checkLogin()
+      .then(() => {
+        isLoggedIn = true;
+      })
+      .catch((err) => {
+        isLoggedIn = false;
+      });
+    return isLoggedIn;
   };
 
   const getOid = (valueSet: ElmValueSet): string => {
@@ -231,10 +230,12 @@ const MeasureEditor = () => {
     setElmTranslationError(null);
     if (cql && cql.trim().length > 0) {
       const customCqlCodes: CustomCqlCode[] = getCustomCqlCodes(cql);
-      const tgt = getTgt();
-      const tgtValue = getTgtValue(tgt);
+      const isLoggedIn = await Promise.resolve(checkLogin());
       const [validatedCodes, translationResults] = await Promise.all([
-        await terminologyServiceApi.validateCodes(customCqlCodes, tgtValue),
+        await terminologyServiceApi.validateCodes(
+          customCqlCodes,
+          isLoggedIn.valueOf()
+        ),
         await elmTranslationServiceApi.translateCqlToElm(cql),
       ]);
       const codeSystemCqlErrors =
@@ -249,15 +250,10 @@ const MeasureEditor = () => {
           : [];
 
       let valuesetsErrors = null;
-      if (
-        translationResults.library?.valueSets?.def !== null &&
-        tgt &&
-        tgtValue &&
-        tgtValue !== ""
-      ) {
+
+      if (translationResults.library?.valueSets?.def !== null && isLoggedIn) {
         valuesetsErrors = await getValueSetErrors(
-          translationResults.library?.valueSets?.def,
-          tgtValue
+          translationResults.library?.valueSets?.def
         );
       }
 
@@ -266,9 +262,8 @@ const MeasureEditor = () => {
           allErrorsArray.push(valueSet);
         });
       } else {
-        if (!tgtValue) {
+        if (!isLoggedIn) {
           setValuesetMsg("Please log in to UMLS!");
-          window.localStorage.removeItem("TGT");
         } else if (translationResults.library?.valueSets) {
           setValuesetMsg("Value Set is valid!");
         }
