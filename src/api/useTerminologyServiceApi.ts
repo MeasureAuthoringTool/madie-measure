@@ -16,20 +16,35 @@ export type FHIRValueSet = {
 export class TerminologyServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
 
-  async getValueSet(
-    tgt: string,
-    oid: string,
-    locator: string
-  ): Promise<FHIRValueSet> {
+  async checkLogin(): Promise<Boolean> {
+    const resp = await axios
+      .get(`${this.baseUrl}/vsac/umls-credentials/status`, {
+        headers: {
+          Authorization: `Bearer ${this.getAccessToken()}`,
+          "Content-Type": "text/plain",
+        },
+        timeout: 15000,
+      })
+      .then((resp) => {
+        if (resp.status === 200) {
+          return true;
+        }
+      })
+      .catch((error) => {
+        throw error;
+      });
+    return false;
+  }
+
+  async getValueSet(oid: string, locator: string): Promise<FHIRValueSet> {
     let fhirValueset: FHIRValueSet = null;
     const resp = await axios
-      .get(`${this.baseUrl}/vsac/valueSet`, {
+      .get(`${this.baseUrl}/vsac/valueset`, {
         headers: {
           Authorization: `Bearer ${this.getAccessToken()}`,
           "Content-Type": "text/plain",
         },
         params: {
-          tgt: tgt,
           oid: oid,
         },
         timeout: 15000,
@@ -55,9 +70,9 @@ export class TerminologyServiceApi {
 
   async validateCodes(
     customCqlCodes: CustomCqlCode[],
-    tgt: string
+    loggedInUMLS: boolean
   ): Promise<CustomCqlCode[]> {
-    if (!tgt || tgt === "") {
+    if (!loggedInUMLS) {
       return processCodeSystemErrors(
         customCqlCodes,
         "Please Login to UMLS",
@@ -71,9 +86,6 @@ export class TerminologyServiceApi {
         {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
-          },
-          params: {
-            tgt: tgt,
           },
         }
       );

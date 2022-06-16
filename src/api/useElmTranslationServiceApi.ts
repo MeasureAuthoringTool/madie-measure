@@ -56,7 +56,6 @@ export class ElmTranslationServiceApi {
           locators: true,
           "disable-list-demotion": true,
           "disable-list-promotion": true,
-          "disable-method-invocation": true,
           "validate-units": true,
         },
         timeout: 15000,
