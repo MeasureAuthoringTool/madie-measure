@@ -2,7 +2,6 @@ import React, { useEffect, useState, Fragment } from "react";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
-import { MeasureScoring } from "../../models/MeasureScoring";
 import { Alert, TextField } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import MeasureDetailsSidebar from "../editMeasure/measureDetails/MeasureDetailsSidebar";
@@ -14,6 +13,7 @@ import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
 import * as _ from "lodash";
 import { MeasureGroupSchemaValidator } from "../../models/MeasureGroupSchemaValidator";
 import { useOktaTokens } from "@madie/madie-util";
+import { GroupScoring } from "@madie/madie-models/dist/GroupScoring";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
 const Content = styled.div(() => [tw`col-span-3`]);
@@ -47,8 +47,6 @@ const PopulationActions = styled.div(() => [
   "background-color: #f2f5f7;",
   tw`col-span-3 p-1 pl-6`,
 ]);
-
-const FormContent = tw.div`space-y-8 divide-y divide-gray-200`;
 const FormField = tw.div`mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6`;
 const FormFieldInner = tw.div`sm:col-span-3`;
 const FieldLabel = tw.label`block text-sm font-medium text-gray-700`;
@@ -60,6 +58,7 @@ export const DefaultPopulationSelectorDefinitions = [
   {
     key: "initialPopulation",
     label: "Initial Population",
+    hidden: ["Select"],
     subTitle: `
       Caution: Removing or invalidating a population will cause any
       package groupings containing that population to be cleared on the
@@ -69,41 +68,41 @@ export const DefaultPopulationSelectorDefinitions = [
   {
     label: "Denominator",
     key: "denominator",
-    hidden: ["Cohort", "Continuous Variable"],
+    hidden: ["Select", "Cohort", "Continuous Variable"],
   },
   {
     label: "Denominator Exclusion",
     key: "denominatorExclusion",
     optional: ["*"],
-    hidden: ["Cohort", "Continuous Variable"],
+    hidden: ["Select", "Cohort", "Continuous Variable"],
   },
   {
     label: "Denominator Exception",
     key: "denominatorException",
     optional: ["Proportion"],
-    hidden: ["Cohort", "Continuous Variable", "Ratio"],
+    hidden: ["Select", "Cohort", "Continuous Variable", "Ratio"],
   },
   {
     label: "Numerator",
     key: "numerator",
-    hidden: ["Cohort", "Continuous Variable"],
+    hidden: ["Select", "Cohort", "Continuous Variable"],
   },
   {
     label: "Numerator Exclusion",
     key: "numeratorExclusion",
     optional: ["Proportion", "Ratio"],
-    hidden: ["Cohort", "Continuous Variable"],
+    hidden: ["Select", "Cohort", "Continuous Variable"],
   },
   {
     label: "Measure Population",
     key: "measurePopulation",
-    hidden: ["Cohort", "Proportion", "Ratio"],
+    hidden: ["Select", "Cohort", "Proportion", "Ratio"],
   },
   {
     label: "Measure Population Exclusion",
     key: "measurePopulationExclusion",
     optional: ["Continuous Variable"],
-    hidden: ["Cohort", "Ratio", "Proportion"],
+    hidden: ["Select", "Cohort", "Ratio", "Proportion"],
   },
 ];
 
@@ -132,7 +131,7 @@ const MeasureGroups = () => {
   // TODO: hardcoded index 0 as only one group is there.
   // TODO: group will be coming from props when we separate this into separate component
   const group = measure.groups && measure.groups[0];
-  const defaultScoring = group?.scoring || measure?.measureScoring || "Cohort";
+  const defaultScoring = group?.scoring || "Select";
   const formik = useFormik({
     initialValues: {
       id: group?.id || null,
@@ -269,7 +268,6 @@ const MeasureGroups = () => {
       dataTestId: "leftPanelMeasureInformation",
     },
   ];
-  const allOptions = Object.values(MeasureScoring);
 
   const warningTemplate = (
     <>
@@ -387,7 +385,7 @@ const MeasureGroups = () => {
                   });
                 }}
               >
-                {allOptions.map((opt, i) => (
+                {Object.values(GroupScoring).map((opt, i) => (
                   <option
                     key={`${opt}-${i}`}
                     value={opt}
