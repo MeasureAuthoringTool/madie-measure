@@ -164,7 +164,7 @@ describe("MeasureInformation component", () => {
     );
   });
 
-  it("Check if measurement period save button is disabled when measurement period start and end date have same values", async () => {
+  it("Check if measurement period save button is not disabled when measurement period start and end date have same values", async () => {
     render(<MeasureInformation />);
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
@@ -187,7 +187,7 @@ describe("MeasureInformation component", () => {
 
     const createBtn = getByTestId("measurement-period-save-button");
     expect(createBtn).toBeInTheDocument();
-    expect(createBtn).toBeDisabled();
+    expect(createBtn).toBeEnabled();
   });
 
   it("Check if measurement period save button is disabled when measurement period end date is less than start date", async () => {
