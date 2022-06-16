@@ -6,7 +6,7 @@ import EditMeasure from "./EditMeasure";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../api/useMeasureServiceApi";
-import Measure from "../../models/Measure";
+import { Measure } from "@madie/madie-models";
 import MeasureEditor from "../measureEditor/MeasureEditor";
 
 jest.mock("./measureDetails/MeasureDetails");

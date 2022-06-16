@@ -3,7 +3,7 @@ import { useHistory } from "react-router-dom";
 import tw from "twin.macro";
 import styled, { css } from "styled-components";
 import InlineEdit from "../../../inlineEdit/InlineEdit";
-import Measure from "../../../../models/Measure";
+import { Measure } from "@madie/madie-models";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import useCurrentMeasure from "../../useCurrentMeasure";
 import "styled-components/macro";
@@ -15,7 +15,7 @@ import DesktopDatePicker from "@mui/lab/DesktopDatePicker";
 import { TextField } from "@mui/material";
 import { useFormik } from "formik";
 import { HelperText } from "@madie/madie-components";
-import { MeasurementPeriodValidator } from "../../../../models/MeasurementPeriodValidator";
+import { MeasurementPeriodValidator } from "../../../../validations/MeasurementPeriodValidator";
 import { measureStore, useOktaTokens } from "@madie/madie-util";
 
 interface measureInformationForm {

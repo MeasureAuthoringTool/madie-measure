@@ -13,7 +13,7 @@ import useMeasureServiceApi, {
 } from "../../../../api/useMeasureServiceApi";
 import useCurrentMeasure from "../../useCurrentMeasure";
 import { MeasureContextHolder } from "../../MeasureContext";
-import Measure, { MeasureMetadata } from "../../../../models/Measure";
+import { Measure, MeasureMetadata } from "@madie/madie-models";
 import MeasureMetadataForm from "./MeasureMetadata";
 import { useOktaTokens } from "@madie/madie-util";
 import { describe, expect, it } from "@jest/globals";

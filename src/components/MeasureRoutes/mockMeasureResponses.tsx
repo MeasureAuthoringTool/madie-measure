@@ -1,5 +1,4 @@
-import { MeasureScoring } from "../../models/MeasureScoring";
-import { Model } from "../../models/Model";
+import { Model, MeasureScoring } from "@madie/madie-models";
 import bulkCreate from "../createNewMeasure/bulkCreate";
 
 const singleMeasure = [

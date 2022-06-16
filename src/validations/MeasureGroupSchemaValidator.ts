@@ -1,5 +1,5 @@
 import * as Yup from "yup";
-import { MeasureScoring } from "./MeasureScoring";
+import { MeasureScoring } from "@madie/madie-models";
 
 export const MeasureGroupSchemaValidator = Yup.object().shape({
   scoring: Yup.string()

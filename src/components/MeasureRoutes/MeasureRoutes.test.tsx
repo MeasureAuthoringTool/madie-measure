@@ -10,7 +10,7 @@ import { describe, expect, test } from "@jest/globals";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../api/useMeasureServiceApi";
-import Measure from "../../models/Measure";
+import { Measure } from "@madie/madie-models";
 
 jest.mock("../../api/useMeasureServiceApi");
 

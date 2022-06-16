@@ -1,4 +1,4 @@
-import Measure from "../../../../models/Measure";
+import { Measure } from "@madie/madie-models";
 
 export default function getInitialValues(measure: Measure, typeLower: string) {
   switch (typeLower) {

@@ -8,7 +8,7 @@ import {
 } from "@madie/madie-editor";
 import { Button } from "@madie/madie-components";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
-import Measure from "../../models/Measure";
+import { Measure } from "@madie/madie-models";
 import {
   CqlAntlr,
   CqlCode,

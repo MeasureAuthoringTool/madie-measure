@@ -4,7 +4,7 @@ import queryString from "query-string";
 import "twin.macro";
 import "styled-components/macro";
 import MeasureList from "../measureList/MeasureList";
-import Measure from "../../models/Measure";
+import { Measure } from "@madie/madie-models";
 import * as _ from "lodash";
 
 import { Tab, Tabs } from "@mui/material";
