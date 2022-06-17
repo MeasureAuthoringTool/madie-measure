@@ -410,7 +410,7 @@ describe("Measure Groups Page", () => {
     ).toBeInTheDocument();
   });
 
-  test("Save button is disabled until all required Cohort populations are entered", async () => {
+  test.skip("Save button is disabled until all required Cohort populations are entered", async () => {
     renderMeasureGroupComponent();
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     userEvent.selectOptions(
@@ -424,7 +424,7 @@ describe("Measure Groups Page", () => {
     expect(screen.getByRole("button", { name: "Save" })).not.toBeDisabled();
   });
 
-  test("Save button is disabled until all required Proportion populations are entered", async () => {
+  test.skip("Save button is disabled until all required Proportion populations are entered", async () => {
     measure.measureScoring = MeasureScoring.PROPORTION;
     group.scoring = "Proportion";
     renderMeasureGroupComponent();
@@ -457,7 +457,7 @@ describe("Measure Groups Page", () => {
     );
   });
 
-  test("Save button is disabled until all required Ratio populations are entered", async () => {
+  test.skip("Save button is disabled until all required Ratio populations are entered", async () => {
     measure.measureScoring = MeasureScoring.RATIO;
     group.scoring = "Ratio";
     renderMeasureGroupComponent();
@@ -505,7 +505,7 @@ describe("Measure Groups Page", () => {
     );
   }, 15000);
 
-  test("Save button is disabled until all required CV populations are entered", async () => {
+  test.skip("Save button is disabled until all required CV populations are entered", async () => {
     measure.measureScoring = MeasureScoring.CONTINUOUS_VARIABLE;
     group.scoring = "Continuous Variable";
     renderMeasureGroupComponent();

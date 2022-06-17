@@ -24,9 +24,6 @@ export default function MeasureList(props: { measureList: Measure[] }) {
                       Model
                     </th>
                     <th scope="col" className="col-header">
-                      Measure Scoring
-                    </th>
-                    <th scope="col" className="col-header">
                       Version
                     </th>
                     <th scope="col" className="col-header">
@@ -57,7 +54,6 @@ export default function MeasureList(props: { measureList: Measure[] }) {
                         </button>
                       </td>
                       <td>{measure.model}</td>
-                      <td>{measure.measureScoring}</td>
                       <td>{measure.version}</td>
                       <td>{measure.revisionNumber}</td>
                       <td>

@@ -131,7 +131,7 @@ const MeasureGroups = () => {
   // TODO: hardcoded index 0 as only one group is there.
   // TODO: group will be coming from props when we separate this into separate component
   const group = measure.groups && measure.groups[0];
-  const defaultScoring = group?.scoring || measure?.measureScoring || "Cohort";
+  const defaultScoring = group?.scoring || "Cohort";
   const formik = useFormik({
     initialValues: {
       id: group?.id || null,
