@@ -1,4 +1,4 @@
-import { Model, MeasureScoring } from "@madie/madie-models";
+import { Model } from "@madie/madie-models";
 import bulkCreate from "../createNewMeasure/bulkCreate";
 
 const singleMeasure = [
@@ -11,7 +11,6 @@ const singleMeasure = [
     state: "NA",
     measureName: "TestMeasure1",
     cqlLibraryName: "TestLib1",
-    measureScoring: MeasureScoring.COHORT,
     cql: null,
     createdAt: null,
     createdBy: "TestUser1",
