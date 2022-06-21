@@ -10,12 +10,7 @@ import { isEqual } from "lodash";
 import MeasureGroups, {
   DefaultPopulationSelectorDefinitions,
 } from "./MeasureGroups";
-import {
-  MEASURE_SCORING_KEYS,
-  MeasureScoring,
-  Measure,
-  Group,
-} from "@madie/madie-models";
+import { Measure, Group, GroupScoring } from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import { MemoryRouter } from "react-router-dom";
@@ -67,7 +62,6 @@ describe("Measure Groups Page", () => {
   beforeEach(() => {
     measure = {
       id: "test-measure",
-      measureScoring: "Cohort",
       measureName: "the measure for testing",
       cql: MeasureCQL,
       createdBy: MEASURE_CREATEDBY,
@@ -105,11 +99,11 @@ describe("Measure Groups Page", () => {
     );
   };
 
-  test("Measure Group Scoring renders to correct options length, and defaults to Cohort", async () => {
+  test("Measure Group Scoring renders to correct options length, and defaults to Select", async () => {
     const { getAllByTestId } = renderMeasureGroupComponent();
     const optionList = getAllByTestId("scoring-unit-option");
-    expect(optionList).toHaveLength(4);
-    expect(optionList[0].textContent).toBe("Cohort");
+    expect(optionList).toHaveLength(5);
+    expect(optionList[0].textContent).toBe("Select");
   });
 
   test("Measure Group Scoring should not render options if user is not the measure owner", async () => {
@@ -124,7 +118,7 @@ describe("Measure Groups Page", () => {
 
     // Test that each Scoring Unit selection displays the correct population filters
     await act(async () => {
-      for await (let [value, key] of MEASURE_SCORING_KEYS) {
+      for await (let value of Object.values(GroupScoring)) {
         // Change the selection value
         userEvent.selectOptions(screen.getByTestId("scoring-unit-select"), [
           screen.getByText(value),
@@ -152,14 +146,16 @@ describe("Measure Groups Page", () => {
           }, []);
 
         // Check what is actually rendered
-        let filterLabelArrayActual = screen
-          .getAllByTestId("select-measure-group-population-label")
-          .map((labelEl, id) => {
-            return labelEl.textContent;
-          });
-        expect(isEqual(filterLabelArrayIntended, filterLabelArrayActual)).toBe(
-          true
-        );
+        if (optionEl.text !== "Select") {
+          let filterLabelArrayActual = screen
+            .getAllByTestId("select-measure-group-population-label")
+            .map((labelEl, id) => {
+              return labelEl.textContent;
+            });
+          expect(
+            isEqual(filterLabelArrayIntended, filterLabelArrayActual)
+          ).toBe(true);
+        }
       }
     });
 
@@ -198,6 +194,10 @@ describe("Measure Groups Page", () => {
 
   test("Should create population Group with one initial population successfully", async () => {
     const { getByTestId } = renderMeasureGroupComponent();
+    userEvent.selectOptions(
+      screen.getByTestId("scoring-unit-select"),
+      "Cohort"
+    );
     // select initial population from dropdown
     userEvent.selectOptions(
       screen.getByTestId("select-measure-group-population"),
@@ -302,6 +302,10 @@ describe("Measure Groups Page", () => {
 
   test("Should report an error if create population Group fails", async () => {
     renderMeasureGroupComponent();
+    userEvent.selectOptions(
+      screen.getByTestId("scoring-unit-select"),
+      "Cohort"
+    );
     // select initial population from dropdown
     userEvent.selectOptions(
       screen.getByTestId("select-measure-group-population"),
@@ -410,9 +414,13 @@ describe("Measure Groups Page", () => {
     ).toBeInTheDocument();
   });
 
-  test.skip("Save button is disabled until all required Cohort populations are entered", async () => {
+  test("Save button is disabled until all required Cohort populations are entered", async () => {
     renderMeasureGroupComponent();
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    userEvent.selectOptions(
+      screen.getByTestId("scoring-unit-select"),
+      "Cohort"
+    );
     userEvent.selectOptions(
       screen.getByTestId("select-measure-group-population"),
       "Initial Population"
@@ -424,10 +432,12 @@ describe("Measure Groups Page", () => {
     expect(screen.getByRole("button", { name: "Save" })).not.toBeDisabled();
   });
 
-  test.skip("Save button is disabled until all required Proportion populations are entered", async () => {
-    measure.measureScoring = MeasureScoring.PROPORTION;
-    group.scoring = "Proportion";
+  test("Save button is disabled until all required Proportion populations are entered", async () => {
     renderMeasureGroupComponent();
+    userEvent.selectOptions(
+      screen.getByTestId("scoring-unit-select"),
+      "Proportion"
+    );
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     await waitFor(() => {
       expect(screen.getAllByRole("option", { name: "SDE Payer" })).toHaveLength(
@@ -457,10 +467,9 @@ describe("Measure Groups Page", () => {
     );
   });
 
-  test.skip("Save button is disabled until all required Ratio populations are entered", async () => {
-    measure.measureScoring = MeasureScoring.RATIO;
-    group.scoring = "Ratio";
+  test("Save button is disabled until all required Ratio populations are entered", async () => {
     renderMeasureGroupComponent();
+    userEvent.selectOptions(screen.getByTestId("scoring-unit-select"), "Ratio");
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     await waitFor(() => {
       expect(screen.getAllByRole("option", { name: "SDE Payer" })).toHaveLength(
@@ -505,10 +514,12 @@ describe("Measure Groups Page", () => {
     );
   }, 15000);
 
-  test.skip("Save button is disabled until all required CV populations are entered", async () => {
-    measure.measureScoring = MeasureScoring.CONTINUOUS_VARIABLE;
-    group.scoring = "Continuous Variable";
+  test("Save button is disabled until all required CV populations are entered", async () => {
     renderMeasureGroupComponent();
+    userEvent.selectOptions(
+      screen.getByTestId("scoring-unit-select"),
+      "Continuous Variable"
+    );
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     await waitFor(() => {
       expect(screen.getAllByRole("option", { name: "SDE Payer" })).toHaveLength(
