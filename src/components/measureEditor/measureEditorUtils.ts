@@ -21,12 +21,12 @@ const mapCodeSystemErrorsToTranslationErrors = (
 ): ElmTranslationError[] => {
   const result = [];
   cqlCodes
-    .filter((code) => !code.valid || !code.codeSystem.valid)
+    .filter((code) => !code.valid || !code.codeSystem?.valid)
     .forEach((code) => {
       if (!code.valid) {
         result.push(getCqlErrors(code, "Error", "Code"));
       }
-      if (!code.codeSystem.valid) {
+      if (code.codeSystem && !code.codeSystem.valid) {
         result.push(getCqlErrors(code.codeSystem, "Error", "CodeSystem"));
       }
     });
@@ -41,13 +41,15 @@ const processCodeSystemErrors = (
   return cqlCodes.map((code) => {
     return {
       ...code,
-      codeSystem: {
-        ...code.codeSystem,
-        errorMessage: errorMessage,
-        valid: valid,
-      },
       errorMessage: errorMessage,
       valid: valid,
+      ...(code.codeSystem && {
+        codeSystem: {
+          ...code.codeSystem,
+          errorMessage: errorMessage,
+          valid: valid,
+        },
+      }),
     };
   });
 };

@@ -17,7 +17,7 @@ export class TerminologyServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
 
   async checkLogin(): Promise<Boolean> {
-    const resp = await axios
+    await axios
       .get(`${this.baseUrl}/vsac/umls-credentials/status`, {
         headers: {
           Authorization: `Bearer ${this.getAccessToken()}`,
