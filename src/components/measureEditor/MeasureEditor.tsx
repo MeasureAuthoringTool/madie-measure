@@ -86,8 +86,6 @@ export interface CustomCqlCode extends Omit<CqlCode, "codeSystem"> {
 
 const MeasureEditor = () => {
   const { measure, setMeasure } = useCurrentMeasure();
-  // we need a variable to prevent superflous useEffect triggers
-  const [firstLoad, setFirstLoad] = useState<boolean>(true);
   const [editorVal, setEditorVal]: [string, Dispatch<SetStateAction<string>>] =
     useState("");
   const measureServiceApi = useMeasureServiceApi();
@@ -363,17 +361,14 @@ const MeasureEditor = () => {
   };
 
   useEffect(() => {
-    if (!editorVal && firstLoad) {
-      setFirstLoad(false);
-      updateElmAnnotations(measure.cql).catch((err) => {
-        console.error("An error occurred while translating CQL to ELM", err);
-        setElmTranslationError("Unable to translate CQL to ELM!");
-        setElmAnnotations([]);
-      });
-      setEditorVal(measure.cql);
-    }
+    updateElmAnnotations(measure.cql).catch((err) => {
+      console.error("An error occurred while translating CQL to ELM", err);
+      setElmTranslationError("Unable to translate CQL to ELM!");
+      setElmAnnotations([]);
+    });
+    setEditorVal(measure.cql);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editorVal, firstLoad]);
+  }, []);
 
   return (
     <>
@@ -433,5 +428,4 @@ const MeasureEditor = () => {
     </>
   );
 };
-
 export default MeasureEditor;
