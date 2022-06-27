@@ -361,16 +361,14 @@ const MeasureEditor = () => {
   };
 
   useEffect(() => {
-    if (!editorVal) {
-      updateElmAnnotations(measure.cql).catch((err) => {
-        console.error("An error occurred while translating CQL to ELM", err);
-        setElmTranslationError("Unable to translate CQL to ELM!");
-        setElmAnnotations([]);
-      });
-      setEditorVal(measure.cql);
-    }
+    updateElmAnnotations(measure.cql).catch((err) => {
+      console.error("An error occurred while translating CQL to ELM", err);
+      setElmTranslationError("Unable to translate CQL to ELM!");
+      setElmAnnotations([]);
+    });
+    setEditorVal(measure.cql);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editorVal]);
+  }, []);
 
   return (
     <>
@@ -430,5 +428,4 @@ const MeasureEditor = () => {
     </>
   );
 };
-
 export default MeasureEditor;
