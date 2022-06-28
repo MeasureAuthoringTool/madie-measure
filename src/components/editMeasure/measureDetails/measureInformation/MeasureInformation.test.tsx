@@ -30,15 +30,16 @@ jest.mock("react-router-dom", () => ({
 jest.mock("../../../../api/useMeasureServiceApi");
 jest.mock("../../useCurrentMeasure");
 
+const testUser = "john doe";
 const measure = {
   id: "test measure",
   measureName: "the measure for testing",
-  createdBy: "testuser@example.com",
+  createdBy: testUser,
 } as Measure;
 
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: jest.fn(() => ({
-    getUserName: jest.fn(() => "testuser@example.com"), //#nosec
+    getUserName: jest.fn(() => testUser), //#nosec
   })),
   useKeyPress: jest.fn(() => false),
   measureStore: {
@@ -80,7 +81,7 @@ serviceApiMock = {
 useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
 
 useOktaTokens.mockImplementation(() => ({
-  getUserName: () => "testuser@example.com", // #nosec
+  getUserName: () => testUser, // #nosec
 }));
 
 describe("MeasureInformation component", () => {
@@ -307,7 +308,7 @@ describe("MeasureInformation component", () => {
     const expected = {
       id: "test measure",
       measureName: "new value",
-      createdBy: "testuser@example.com",
+      createdBy: testUser,
     };
     expect(serviceApiMock.updateMeasure).toHaveBeenCalledWith(expected);
   });

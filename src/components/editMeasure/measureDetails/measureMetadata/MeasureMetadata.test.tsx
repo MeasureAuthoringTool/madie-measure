@@ -18,7 +18,7 @@ import { describe, expect, it } from "@jest/globals";
 
 jest.mock("../../../../api/useMeasureServiceApi");
 jest.mock("../../useCurrentMeasure");
-
+const testUser = "john doe";
 const mockMetaData = {
   steward: "Test Steward",
   description: "Test Description",
@@ -32,13 +32,13 @@ const mockMetaData = {
 const mockMeasure = {
   id: "TestMeasureId",
   measureName: "The Measure for Testing",
-  createdBy: "testuser@example.com",
+  createdBy: testUser,
   measureMetaData: { ...mockMetaData },
 } as Measure;
 
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: jest.fn(() => ({
-    getUserName: jest.fn(() => "testuser@example.com"), //#nosec
+    getUserName: jest.fn(() => testUser), //#nosec
   })),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
