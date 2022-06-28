@@ -1,26 +1,22 @@
 import * as React from "react";
 import {
   render,
-  cleanup,
   fireEvent,
   waitFor,
   screen,
   within,
-  logRoles,
 } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
 import MeasureInformation from "./MeasureInformation";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../api/useMeasureServiceApi";
-import useCurrentMeasure from "../../useCurrentMeasure";
-import { MeasureContextHolder } from "../../MeasureContext";
-import Measure from "../../../../models/Measure";
+import { Measure } from "@madie/madie-models";
 import { MemoryRouter } from "react-router";
 import userEvent from "@testing-library/user-event";
 import { useOktaTokens, useKeyPress } from "@madie/madie-util";
 import { describe, expect, it } from "@jest/globals";
-import axios, { AxiosError, AxiosResponse } from "axios";
+import { AxiosError, AxiosResponse } from "axios";
 
 const mockHistoryPush = jest.fn();
 
@@ -33,6 +29,13 @@ jest.mock("react-router-dom", () => ({
 
 jest.mock("../../../../api/useMeasureServiceApi");
 jest.mock("../../useCurrentMeasure");
+
+const measure = {
+  id: "test measure",
+  measureName: "the measure for testing",
+  createdBy: "testuser@example.com",
+} as Measure;
+
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: jest.fn(() => ({
     getUserName: jest.fn(() => "testuser@example.com"), //#nosec
@@ -40,6 +43,12 @@ jest.mock("@madie/madie-util", () => ({
   useKeyPress: jest.fn(() => false),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
+    state: null,
+    initialState: null,
+    subscribe: (set) => {
+      set(measure);
+      return { unsubscribe: () => null };
+    },
   },
   useOnClickOutside: jest.fn(() => false),
 }));
@@ -47,8 +56,6 @@ jest.mock("@madie/madie-util", () => ({
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 
-const useCurrentMeasureMock =
-  useCurrentMeasure as jest.Mock<MeasureContextHolder>;
 const axiosError: AxiosError = {
   response: {
     status: 500,
@@ -77,31 +84,12 @@ useOktaTokens.mockImplementation(() => ({
 }));
 
 describe("MeasureInformation component", () => {
-  let measure: Measure;
-  let measureContextHolder: MeasureContextHolder;
-  afterEach(cleanup);
-
-  beforeEach(() => {
-    measure = {
-      id: "test measure",
-      measureName: "the measure for testing",
-      createdBy: "testuser@example.com",
-    } as Measure;
-
-    measureContextHolder = {
-      measure,
-      setMeasure: jest.fn(),
-    };
-
-    useCurrentMeasureMock.mockImplementation(() => measureContextHolder);
-  });
   const {
     getByTestId,
     findByTestId,
     queryByText,
     queryByTestId,
     findByRole,
-    getByRole,
     findByText,
   } = screen;
 
@@ -321,9 +309,7 @@ describe("MeasureInformation component", () => {
       measureName: "new value",
       createdBy: "testuser@example.com",
     };
-    const mockSetMeasure = measureContextHolder.setMeasure as jest.Mock<void>;
     expect(serviceApiMock.updateMeasure).toHaveBeenCalledWith(expected);
-    expect(mockSetMeasure).toHaveBeenCalledWith(expected);
   });
 
   it("Should display a delete button if user is the owner of measure", async () => {

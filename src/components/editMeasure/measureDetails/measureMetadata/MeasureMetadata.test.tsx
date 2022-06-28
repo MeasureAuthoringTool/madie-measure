@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import {
   act,
   waitFor,
@@ -11,34 +11,51 @@ import {
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../api/useMeasureServiceApi";
-import useCurrentMeasure from "../../useCurrentMeasure";
-import { MeasureContextHolder } from "../../MeasureContext";
-import { Measure, MeasureMetadata } from "@madie/madie-models";
+import { Measure } from "@madie/madie-models";
 import MeasureMetadataForm from "./MeasureMetadata";
 import { useOktaTokens } from "@madie/madie-util";
 import { describe, expect, it } from "@jest/globals";
 
 jest.mock("../../../../api/useMeasureServiceApi");
 jest.mock("../../useCurrentMeasure");
+
+const mockMetaData = {
+  steward: "Test Steward",
+  description: "Test Description",
+  copyright: "Test Copyright",
+  disclaimer: "Test Disclaimer",
+  rationale: "Test Rationale",
+  author: "Test Author",
+  guidance: "Test Guidance",
+};
+
+const mockMeasure = {
+  id: "TestMeasureId",
+  measureName: "The Measure for Testing",
+  createdBy: "testuser@example.com",
+  measureMetaData: { ...mockMetaData },
+} as Measure;
+
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: jest.fn(() => ({
     getUserName: jest.fn(() => "testuser@example.com"), //#nosec
   })),
+  measureStore: {
+    updateMeasure: jest.fn((measure) => measure),
+    state: null,
+    initialState: null,
+    subscribe: (set) => {
+      set(mockMeasure);
+      return { unsubscribe: () => null };
+    },
+  },
 }));
+
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 
-const useCurrentMeasureMock =
-  useCurrentMeasure as jest.Mock<MeasureContextHolder>;
-
 describe("MeasureRationale component", () => {
-  let measure: Measure;
-  let measureMetaData: MeasureMetadata;
   let serviceApiMock: MeasureServiceApi;
-  let measureContextHolder: MeasureContextHolder;
-
-  const MEASUREID = "TestMeasureId";
-  const MEASURENAME = "The Measure for Testing";
   const STEWARD = "Test Steward";
   const DECRIPTION = "Test Description";
   const COPYRIGHT = "Test Copyright";
@@ -47,44 +64,16 @@ describe("MeasureRationale component", () => {
   const AUTHOR = "Test Author";
   const GUIDANCE = "Test Guidance";
   const NEWVALUE = "Test New Value";
-  const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
 
   afterEach(cleanup);
 
   beforeEach(() => {
-    measureMetaData = {
-      steward: STEWARD,
-      description: DECRIPTION,
-      copyright: COPYRIGHT,
-      disclaimer: DISCLAIMER,
-      rationale: RATIONALE,
-      author: AUTHOR,
-      guidance: GUIDANCE,
-    } as MeasureMetadata;
-
-    measure = {
-      id: MEASUREID,
-      measureName: MEASURENAME,
-      createdBy: MEASURE_CREATEDBY,
-      measureMetaData: measureMetaData,
-    } as Measure;
-
     serviceApiMock = {
       updateMeasure: jest.fn().mockResolvedValue(undefined),
     } as unknown as MeasureServiceApi;
 
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
-
-    measureContextHolder = {
-      measure,
-      setMeasure: jest.fn(),
-    };
-
-    useCurrentMeasureMock.mockImplementation(() => measureContextHolder);
-
-    useOktaTokens.mockImplementation(() => ({
-      getUserName: () => MEASURE_CREATEDBY,
-    }));
+    mockMeasure.measureMetaData = { ...mockMetaData };
   });
 
   const expectInputValue = (element: HTMLElement, value: string): void => {
@@ -161,7 +150,7 @@ describe("MeasureRationale component", () => {
   });
 
   it("should default the measureMetadata if none is supplied", () => {
-    delete measure.measureMetaData;
+    mockMeasure.measureMetaData = {};
     render(<MeasureMetadataForm measureMetadataType="Rationale" />);
 
     const input = getByTestId("measureRationaleInput");
@@ -182,7 +171,8 @@ describe("MeasureRationale component", () => {
     render(<MeasureMetadataForm measureMetadataType="Rationale" />);
 
     const input = getByTestId("measureRationaleInput");
-    expectInputValue(input, RATIONALE);
+
+    await waitFor(() => expectInputValue(input, RATIONALE));
 
     fireEvent.change(input, {
       target: { value: NEWVALUE },
@@ -221,13 +211,13 @@ describe("MeasureRationale component", () => {
       );
     });
 
-    expect(measure.measureMetaData.steward).toBe(STEWARD);
-    expect(measure.measureMetaData.description).toBe(DECRIPTION);
-    expect(measure.measureMetaData.copyright).toBe(COPYRIGHT);
-    expect(measure.measureMetaData.disclaimer).toBe(DISCLAIMER);
-    expect(measure.measureMetaData.rationale).toBe(NEWVALUE);
-    expect(measure.measureMetaData.author).toBe(AUTHOR);
-    expect(measure.measureMetaData.guidance).toBe(GUIDANCE);
+    expect(mockMeasure.measureMetaData.steward).toBe(STEWARD);
+    expect(mockMeasure.measureMetaData.description).toBe(DECRIPTION);
+    expect(mockMeasure.measureMetaData.copyright).toBe(COPYRIGHT);
+    expect(mockMeasure.measureMetaData.disclaimer).toBe(DISCLAIMER);
+    expect(mockMeasure.measureMetaData.rationale).toBe(NEWVALUE);
+    expect(mockMeasure.measureMetaData.author).toBe(AUTHOR);
+    expect(mockMeasure.measureMetaData.guidance).toBe(GUIDANCE);
   });
 
   it("should save the author information when the form is submitted", async () => {
@@ -247,13 +237,13 @@ describe("MeasureRationale component", () => {
       "Measure Author Information Saved Successfully"
     );
 
-    expect(measure.measureMetaData.steward).toBe(STEWARD);
-    expect(measure.measureMetaData.description).toBe(DECRIPTION);
-    expect(measure.measureMetaData.copyright).toBe(COPYRIGHT);
-    expect(measure.measureMetaData.disclaimer).toBe(DISCLAIMER);
-    expect(measure.measureMetaData.rationale).toBe(RATIONALE);
-    expect(measure.measureMetaData.author).toBe(NEWVALUE);
-    expect(measure.measureMetaData.guidance).toBe(GUIDANCE);
+    expect(mockMeasure.measureMetaData.steward).toBe(STEWARD);
+    expect(mockMeasure.measureMetaData.description).toBe(DECRIPTION);
+    expect(mockMeasure.measureMetaData.copyright).toBe(COPYRIGHT);
+    expect(mockMeasure.measureMetaData.disclaimer).toBe(DISCLAIMER);
+    expect(mockMeasure.measureMetaData.rationale).toBe(RATIONALE);
+    expect(mockMeasure.measureMetaData.author).toBe(NEWVALUE);
+    expect(mockMeasure.measureMetaData.guidance).toBe(GUIDANCE);
   });
 
   it("should render an error message if the measure rationale cannot be saved", async () => {
