@@ -40,6 +40,18 @@ const Divider = styled.div`
 const ButtonSpacer = styled.span`
   margin-left: 15px;
 `;
+const Row = styled.section`
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  align-items: center;
+  margin-top: 14px;
+`;
+const Col = styled.article`
+  display: flex;
+  flex-direction: column;
+  padding-right: 2em;
+`;
 const GroupFooter = tw(Grid)`border-t border-b`;
 const GroupActions = styled.div(() => [tw`col-span-1 border-r p-1`]);
 const PopulationActions = styled.div(() => [
@@ -317,6 +329,7 @@ const MeasureGroups = () => {
               </FormFieldInner>
             </FormField>
           </Header>
+
           {genericErrorMessage && (
             <Alert
               data-testid="error-alerts"
@@ -350,53 +363,183 @@ const MeasureGroups = () => {
           )}
           {/* Form control later should be moved to own component and dynamically rendered by switch based on measure. */}
           <FormControl>
-            {/* pull from cql file */}
-            <SoftLabel htmlFor="scoring-unit-select">Group Scoring:</SoftLabel>
+            <SoftLabel>Measure Type (not currently implemented)</SoftLabel>
             {canEdit && (
               <TextField
                 select
-                id="scoring-unit-select"
+                id="measure-type-select"
                 label=""
                 inputProps={{
-                  "data-testid": "scoring-unit-select",
+                  "data-testid": "measure-type-select",
                 }}
                 InputLabelProps={{ shrink: false }}
                 SelectProps={{
                   native: true,
                 }}
-                name="scoring"
-                value={formik.values.scoring}
-                onChange={(e) => {
+                name="type"
+                //value={formik.values.type}
+                /*onChange={(e) => {
                   formik.resetForm({
                     values: {
                       ...formik.values,
-                      scoring: e.target.value,
-                      population: {
-                        initialPopulation: "",
-                        denominator: "",
-                        denominatorExclusion: "",
-                        denominatorException: "",
-                        numerator: "",
-                        numeratorExclusion: "",
-                        measurePopulation: "",
-                        measurePopulationExclusion: "",
-                      },
+                      type: e.target.value,
+                      
+                      
                     },
                   });
-                }}
+                }}*/
               >
-                {Object.values(GroupScoring).map((opt, i) => (
-                  <option
-                    key={`${opt}-${i}`}
-                    value={opt}
-                    data-testid="scoring-unit-option"
-                  >
-                    {opt}
-                  </option>
-                ))}
+                {Object.values({ "Select Type": "Select Type" }).map(
+                  (opt, i) => (
+                    <option
+                      key={`${opt}-${i}`}
+                      value={opt}
+                      data-testid="scoring-unit-option"
+                    >
+                      {opt}
+                    </option>
+                  )
+                )}
               </TextField>
             )}
-            {!canEdit && formik.values.scoring}
+          </FormControl>
+
+          <FormControl>
+            <Row>
+              <Col>
+                {/* pull from cql file */}
+                <SoftLabel htmlFor="scoring-unit-select">
+                  Group Scoring:
+                </SoftLabel>
+                {canEdit && (
+                  <TextField
+                    select
+                    id="scoring-unit-select"
+                    label=""
+                    inputProps={{
+                      "data-testid": "scoring-unit-select",
+                    }}
+                    InputLabelProps={{ shrink: false }}
+                    SelectProps={{
+                      native: true,
+                    }}
+                    name="scoring"
+                    value={formik.values.scoring}
+                    onChange={(e) => {
+                      formik.resetForm({
+                        values: {
+                          ...formik.values,
+                          scoring: e.target.value,
+                          population: {
+                            initialPopulation: "",
+                            denominator: "",
+                            denominatorExclusion: "",
+                            denominatorException: "",
+                            numerator: "",
+                            numeratorExclusion: "",
+                            measurePopulation: "",
+                            measurePopulationExclusion: "",
+                          },
+                        },
+                      });
+                    }}
+                  >
+                    {Object.values(GroupScoring).map((opt, i) => (
+                      <option
+                        key={`${opt}-${i}`}
+                        value={opt}
+                        data-testid="scoring-unit-option"
+                      >
+                        {opt}
+                      </option>
+                    ))}
+                  </TextField>
+                )}
+                {!canEdit && formik.values.scoring}
+              </Col>
+              <Col>
+                <SoftLabel>Population Basis (not implemented)</SoftLabel>
+                {canEdit && (
+                  <TextField
+                    select
+                    id="population-basis-select"
+                    label=""
+                    inputProps={{
+                      "data-testid": "population-basis-select",
+                    }}
+                    InputLabelProps={{ shrink: false }}
+                    SelectProps={{
+                      native: true,
+                    }}
+                    name="population-basis"
+                    //value={formik.values.type}
+                    /*onChange={(e) => {
+                  formik.resetForm({
+                    values: {
+                      ...formik.values,
+                      type: e.target.value,
+                      
+                      
+                    },
+                  });
+                }}*/
+                  >
+                    {Object.values({ "Select Basis": "Select Basis" }).map(
+                      (opt, i) => (
+                        <option
+                          key={`${opt}-${i}`}
+                          value={opt}
+                          data-testid="basis-option"
+                        >
+                          {opt}
+                        </option>
+                      )
+                    )}
+                  </TextField>
+                )}
+              </Col>
+              <Col>
+                <SoftLabel>Scoring Unit (not implemented)</SoftLabel>
+                {canEdit && (
+                  <TextField
+                    select
+                    id="scoring-unit-select"
+                    label=""
+                    inputProps={{
+                      "data-testid": "scoring-unit-select",
+                    }}
+                    InputLabelProps={{ shrink: false }}
+                    SelectProps={{
+                      native: true,
+                    }}
+                    name="scoring-unit"
+                    //value={formik.values.type}
+                    /*onChange={(e) => {
+                  formik.resetForm({
+                    values: {
+                      ...formik.values,
+                      type: e.target.value,
+                      
+                      
+                    },
+                  });
+                }}*/
+                  >
+                    {Object.values({ "Select Unit": "Select Unit" }).map(
+                      (opt, i) => (
+                        <option
+                          key={`${opt}-${i}`}
+                          value={opt}
+                          data-testid="basis-option"
+                        >
+                          {opt}
+                        </option>
+                      )
+                    )}
+                  </TextField>
+                )}
+              </Col>
+            </Row>
           </FormControl>
 
           {PopulationSelectorDefinitions.map((selectorDefinition) => {
