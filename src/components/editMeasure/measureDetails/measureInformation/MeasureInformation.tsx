@@ -5,7 +5,6 @@ import styled, { css } from "styled-components";
 import InlineEdit from "../../../inlineEdit/InlineEdit";
 import { Measure } from "@madie/madie-models";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
-import useCurrentMeasure from "../../useCurrentMeasure";
 import "styled-components/macro";
 import { Button, Toast } from "@madie/madie-design-system/dist/react";
 import DeleteDialog from "./DeleteDialog";
@@ -48,7 +47,13 @@ export default function MeasureInformation() {
   const history = useHistory();
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
-  const { measure, setMeasure } = useCurrentMeasure();
+  const [measure, setMeasure] = useState<any>(measureStore.state);
+  useEffect(() => {
+    const subscription = measureStore.subscribe(setMeasure);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
   const [genericErrorMessage, setGenericErrorMessage] = useState<string>();
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
@@ -67,7 +72,7 @@ export default function MeasureInformation() {
     onSubmit: async (values: measureInformationForm) =>
       await handleSubmit(values),
   });
-  const canEdit = measure.createdBy === userName;
+  const canEdit = measure?.createdBy === userName;
   const onToastClose = () => {
     setToastType(null);
     setToastMessage("");
@@ -100,13 +105,12 @@ export default function MeasureInformation() {
     }
   };
   function updateMeasureTitle(text: string): void {
-    if (text !== measure.measureName) {
+    if (text !== measure?.measureName) {
       const newMeasure: Measure = { ...measure, measureName: text };
 
       measureServiceApi
         .updateMeasure(newMeasure)
         .then(() => {
-          setMeasure(newMeasure);
           updateMeasure(newMeasure);
         })
         .catch(({ response }) => {
@@ -184,11 +188,11 @@ export default function MeasureInformation() {
         <span tw="mr-2">Measure Name:</span>
         {canEdit && (
           <InlineEdit
-            text={measure.measureName}
+            text={measure?.measureName}
             onSetText={updateMeasureTitle}
           />
         )}
-        {!canEdit && measure.measureName}
+        {!canEdit && measure?.measureName}
         {canEdit && (
           <Button
             variant="danger-primary"
@@ -202,7 +206,7 @@ export default function MeasureInformation() {
       </DisplayDiv>
       <div tw="flex" data-testid="cql-library-name-display">
         <span tw="mr-2">Measure CQL Library Name:</span>
-        <DisplaySpan>{measure.cqlLibraryName || "NA"}</DisplaySpan>
+        <DisplaySpan>{measure?.cqlLibraryName || "NA"}</DisplaySpan>
       </div>
       <Toast
         toastKey="measure-information-toast"
