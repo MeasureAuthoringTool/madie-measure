@@ -58,6 +58,15 @@ const PopulationActions = styled.div(() => [
   "background-color: #f2f5f7;",
   tw`col-span-3 p-1 pl-6`,
 ]);
+interface PropTypes {
+  isActive?: boolean;
+}
+
+const MenuItemContainer = tw.ul`bg-transparent flex px-8`;
+const MenuItem = styled.li((props: PropTypes) => [
+  tw`mr-1 text-white bg-[rgba(0, 32, 64, 0.5)] rounded-t-md hover:bg-[rgba(0,6,13, 0.5)]`,
+  props.isActive && tw`bg-slate text-slate-90 font-medium hover:bg-slate`,
+]);
 
 const FormField = tw.div`mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6`;
 const FormFieldInner = tw.div`sm:col-span-3`;
@@ -138,6 +147,7 @@ const MeasureGroups = () => {
   const measureServiceApi = useMeasureServiceApi();
   const [genericErrorMessage, setGenericErrorMessage] = useState<string>();
   const [successMessage, setSuccessMessage] = useState<string>();
+  const [activeTab, setActiveTab] = useState<string>("population");
   const [warningMessage, setWarningMessage] = useState<boolean>(false);
   const [updateConfirm, setUpdateConfirm] = useState<boolean>(false);
   // TODO: hardcoded index 0 as only one group is there.
@@ -394,7 +404,7 @@ const MeasureGroups = () => {
                     <option
                       key={`${opt}-${i}`}
                       value={opt}
-                      data-testid="scoring-unit-option"
+                      data-testid="measure-type-option"
                     >
                       {opt}
                     </option>
@@ -501,18 +511,19 @@ const MeasureGroups = () => {
               <Col>
                 <SoftLabel>Scoring Unit (not implemented)</SoftLabel>
                 {canEdit && (
+                  //-----TOSOLVE Group scoring is called socring unit, might need to rename things???
                   <TextField
                     select
-                    id="scoring-unit-select"
+                    id="scoring-unit2-select"
                     label=""
                     inputProps={{
-                      "data-testid": "scoring-unit-select",
+                      "data-testid": "scoring-unit2-select",
                     }}
                     InputLabelProps={{ shrink: false }}
                     SelectProps={{
                       native: true,
                     }}
-                    name="scoring-unit"
+                    name="scoring-unit2"
                     //value={formik.values.type}
                     /*onChange={(e) => {
                   formik.resetForm({
@@ -541,6 +552,33 @@ const MeasureGroups = () => {
               </Col>
             </Row>
           </FormControl>
+          <div>
+            <MenuItemContainer>
+              <MenuItem
+                data-testid="populations-tab"
+                isActive={activeTab == "population"}
+                onClick={() => setActiveTab("population")}
+              >
+                Populations
+              </MenuItem>
+              {formik.values.scoring !== "Ratio" && (
+                <MenuItem
+                  data-testid="stratifications-tab"
+                  isActive={activeTab == "stratification"}
+                  onClick={() => setActiveTab("stratification")}
+                >
+                  Stratifications
+                </MenuItem>
+              )}
+              <MenuItem
+                data-testid="calculation-notes-tab"
+                isActive={activeTab == "notes"}
+                onClick={() => setActiveTab("notes")}
+              >
+                Calculation Notes
+              </MenuItem>
+            </MenuItemContainer>
+          </div>
 
           {PopulationSelectorDefinitions.map((selectorDefinition) => {
             const selectorProps = populationSelectorProperties(
@@ -560,19 +598,73 @@ const MeasureGroups = () => {
             const formikFieldProps = formik.getFieldProps(
               `population.${selectorDefinition.key}`
             );
-            return (
-              <Fragment key={`select_${selectorDefinition.label}`}>
-                <Divider />
-                <MeasureGroupPopulationSelect
-                  {...selectorProps}
-                  {...formikFieldProps}
-                  helperText={error}
-                  error={!!error && !!touched}
-                  canEdit={canEdit}
-                />
-              </Fragment>
-            );
+
+            if (activeTab === "population") {
+              return (
+                <Fragment key={`select_${selectorDefinition.label}`}>
+                  <Divider />
+                  <MeasureGroupPopulationSelect
+                    {...selectorProps}
+                    {...formikFieldProps}
+                    helperText={error}
+                    error={!!error && !!touched}
+                    canEdit={canEdit}
+                  />
+                </Fragment>
+              );
+            }
           })}
+          {activeTab === "stratification" && (
+            <FormControl>
+              <Divider />
+              <FieldLabel>Stratification support to come</FieldLabel>
+            </FormControl>
+          )}
+          {activeTab === "notes" && (
+            <FormControl>
+              <FormField>
+                <FormFieldInner>
+                  <FieldLabel htmlFor="rate-aggregation">
+                    Rate Aggregation (Not Implemented)
+                  </FieldLabel>
+                  <FieldSeparator>
+                    {canEdit && (
+                      <FieldInput
+                        //value={formik.values.rateAggregation}
+                        type="text"
+                        name="rate-aggregation"
+                        id="rate-aggregation"
+                        autoComplete="rate-aggregation"
+                        placeholder="Rate Aggregation"
+                        data-testid="rateAggregationText"
+                        //{...formik.getFieldProps("rateAggregation")}
+                      />
+                    )}
+                  </FieldSeparator>
+                  <Divider />
+                  <FieldLabel htmlFor="rate-aggregation">
+                    Improvment Notation (Not Implemented)
+                  </FieldLabel>
+                  <FieldSeparator>
+                    {canEdit && (
+                      <FieldInput
+                        //value={formik.values.improvementNotation}
+                        type="text"
+                        name="improvement-notation"
+                        id="improvement-notation"
+                        autoComplete="improvement-notation"
+                        placeholder="Improvment Notation"
+                        data-testid="improvementNotationText"
+                        //{...formik.getFieldProps("improvementNotation")}
+                      />
+                    )}
+                    {/*!canEdit && formik.values.groupDescription*/}
+                  </FieldSeparator>
+                </FormFieldInner>
+              </FormField>
+            </FormControl>
+          )}
+
           <br />
         </Content>
       </Grid>
