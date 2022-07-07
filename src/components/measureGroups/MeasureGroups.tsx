@@ -571,11 +571,11 @@ const MeasureGroups = () => {
                 </MenuItem>
               )}
               <MenuItem
-                data-testid="calculation-notes-tab"
-                isActive={activeTab == "notes"}
-                onClick={() => setActiveTab("notes")}
+                data-testid="reporting-tab"
+                isActive={activeTab == "reporting"}
+                onClick={() => setActiveTab("reporting")}
               >
-                Calculation Notes
+                Reporting
               </MenuItem>
             </MenuItemContainer>
           </div>
@@ -620,7 +620,7 @@ const MeasureGroups = () => {
               <FieldLabel>Stratification support to come</FieldLabel>
             </FormControl>
           )}
-          {activeTab === "notes" && (
+          {activeTab === "reporting" && (
             <FormControl>
               <FormField>
                 <FormFieldInner>
