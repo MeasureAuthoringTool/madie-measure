@@ -230,6 +230,7 @@ const MeasureGroups = () => {
           setSuccessMessage(
             "Population details for this group updated successfully."
           );
+          formik.resetForm();
         })
 
         .catch((error) => {
@@ -252,6 +253,7 @@ const MeasureGroups = () => {
           setSuccessMessage(
             "Population details for this group saved successfully."
           );
+          formik.resetForm();
         })
 
         .catch((error) => {
@@ -259,6 +261,7 @@ const MeasureGroups = () => {
         });
     }
   };
+
   // Local state to later populate the left nav and and govern routes based on group ids
   const baseURL = "/measures/" + measure.id + "/edit/measure-groups";
   const measureGroups = [
@@ -285,7 +288,6 @@ const MeasureGroups = () => {
       </ButtonSpacer>
     </>
   );
-
   return (
     <form onSubmit={formik.handleSubmit}>
       <Grid>
@@ -447,7 +449,15 @@ const MeasureGroups = () => {
               />
             </ButtonSpacer>
             <ButtonSpacer>
-              <Button type="button" buttonTitle="Cancel" variant="white" />
+              <Button
+                type="button"
+                buttonTitle="Discard Changes"
+                variant="white"
+                disabled={!formik.dirty}
+                onClick={() => {
+                  formik.resetForm();
+                }}
+              />
             </ButtonSpacer>
             <ButtonSpacer>
               <span
