@@ -83,59 +83,49 @@ const MeasureEditor = () => {
   };
 
   const updateMeasureCql = async () => {
-    try {
-      const results = await Promise.allSettled([
-        getTranslationResult(editorVal),
-        hasParserErrors(editorVal),
-      ]);
+    const results = await Promise.allSettled([
+      getTranslationResult(editorVal),
+      hasParserErrors(editorVal),
+    ]);
 
-      if (results[0].status === "rejected") {
-        console.error(
-          "An error occurred while translating CQL to ELM",
-          results[0].reason
-        );
-        setElmTranslationError(
-          "Unable to translate CQL to ELM, CQL was not saved!"
-        );
-      } else if (results[1].status === "rejected") {
-        const rejection: PromiseRejectedResult = results[1];
-        console.error(
-          "An error occurred while parsing the CQL",
-          rejection.reason
-        );
-      } else {
-        const cqlElmResult = results[0].value;
-        const parseErrors = results[1].value;
-
-        const cqlElmErrors = !!(cqlElmResult?.length > 0);
-        if (editorVal !== measure.cql) {
-          const cqlErrors = parseErrors || cqlElmErrors;
-          const newMeasure: Measure = {
-            ...measure,
-            cql: editorVal,
-            elmJson: JSON.stringify(cqlElmResult),
-            cqlErrors,
-          };
-          measureServiceApi
-            .updateMeasure(newMeasure)
-            .then(() => {
-              setMeasure(newMeasure);
-              setSuccess(true);
-            })
-            .catch((reason) => {
-              console.error(reason);
-              setError(true);
-            });
-        }
-      }
-    } catch (err) {
+    if (results[0].status === "rejected") {
       console.error(
-        "An error occurred while parsing CQL and translating CQL to ELM",
-        err
+        "An error occurred while translating CQL to ELM",
+        results[0].reason
       );
       setElmTranslationError(
-        "Unable to parse CQL and translate CQL to ELM, CQL was not saved!"
+        "Unable to translate CQL to ELM, CQL was not saved!"
       );
+    } else if (results[1].status === "rejected") {
+      const rejection: PromiseRejectedResult = results[1];
+      console.error(
+        "An error occurred while parsing the CQL",
+        rejection.reason
+      );
+    } else {
+      const cqlElmResult = results[0].value;
+      const parseErrors = results[1].value;
+
+      const cqlElmErrors = !!(cqlElmResult?.length > 0);
+      if (editorVal !== measure.cql) {
+        const cqlErrors = parseErrors || cqlElmErrors;
+        const newMeasure: Measure = {
+          ...measure,
+          cql: editorVal,
+          elmJson: JSON.stringify(cqlElmResult),
+          cqlErrors,
+        };
+        measureServiceApi
+          .updateMeasure(newMeasure)
+          .then(() => {
+            setMeasure(newMeasure);
+            setSuccess(true);
+          })
+          .catch((reason) => {
+            console.error(reason);
+            setError(true);
+          });
+      }
     }
   };
 
