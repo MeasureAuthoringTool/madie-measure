@@ -454,9 +454,6 @@ const MeasureGroups = () => {
                 buttonTitle="Discard Changes"
                 variant="white"
                 disabled={!formik.dirty}
-                onClick={() => {
-                  formik.resetForm();
-                }}
               />
             </ButtonSpacer>
             <ButtonSpacer>
