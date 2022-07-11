@@ -128,14 +128,47 @@ const MeasureGroups = () => {
   const [successMessage, setSuccessMessage] = useState<string>();
   const [warningMessage, setWarningMessage] = useState<boolean>(false);
   const [updateConfirm, setUpdateConfirm] = useState<boolean>(false);
+  const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(0);
+  const [group, setGroup] = useState<any>();
   // TODO: hardcoded index 0 as only one group is there.
   // TODO: group will be coming from props when we separate this into separate component
-  const group = measure.groups && measure.groups[0];
+  //const group = measure.groups && measure.groups[groupNumber];
+  useEffect(() => {
+    //console.log(measureGroupNumber);
+    if (measure?.groups && measure?.groups[measureGroupNumber]) {
+      setGroup(measure.groups[measureGroupNumber]);
+      resetForm({
+        values: { ...measure.groups[measureGroupNumber] },
+      });
+    } else {
+      if (measureGroupNumber >= measure?.groups?.length) {
+        resetForm({
+          values: {
+            ...formik.values,
+            scoring: "Select",
+            population: {
+              initialPopulation: "",
+              denominator: "",
+              denominatorExclusion: "",
+              denominatorException: "",
+              numerator: "",
+              numeratorExclusion: "",
+              measurePopulation: "",
+              measurePopulationExclusion: "",
+            },
+            groupDescription: "",
+          },
+        });
+      }
+    }
+    //console.log(groupNumber)
+  }, [measureGroupNumber]);
+  //console.log(group?.scoring);
   const defaultScoring = group?.scoring || "Select";
   const formik = useFormik({
     initialValues: {
       id: group?.id || null,
-      scoring: defaultScoring,
+      scoring: group?.scoring || "Select",
       population: {
         initialPopulation: group?.population?.initialPopulation || "",
         denominator: group?.population?.denominator || "",
@@ -168,6 +201,7 @@ const MeasureGroups = () => {
       }
     },
   });
+  const { resetForm } = formik;
 
   useEffect(() => {
     if (measure.cql) {
@@ -212,17 +246,30 @@ const MeasureGroups = () => {
       );
     }
 
-    if (measure?.groups) {
-      group.id = measure.groups[0].id;
+    if (measure?.groups && !(measureGroupNumber >= measure?.groups?.length)) {
+      //console.log(measure.groups)
+      group.id = measure.groups[measureGroupNumber].id;
+      //console.log(group.scoring);
       measureServiceApi
         .updateGroup(group, measure.id)
         .then((g: Group) => {
           if (g === null || g.id === null) {
             throw new Error("Error updating group");
           }
+          const updatedGroups = measure?.groups.map((p) => {
+            if (p.id === g.id) {
+              return {
+                ...p,
+                groupDescription: g.groupDescription,
+                scoring: g.scoring,
+                population: g.population,
+              };
+            }
+            return p;
+          });
           setMeasure({
             ...measure,
-            groups: [g],
+            groups: updatedGroups,
           });
         })
         .then(() => {
@@ -242,9 +289,10 @@ const MeasureGroups = () => {
           if (g === null || g.id === null) {
             throw new Error("Error creating group");
           }
+          const updatedGroups = [...measure?.groups, g];
           setMeasure({
             ...measure,
-            groups: [g],
+            groups: updatedGroups,
           });
         })
         .then(() => {
@@ -260,14 +308,24 @@ const MeasureGroups = () => {
     }
   };
   // Local state to later populate the left nav and and govern routes based on group ids
-  const baseURL = "/measures/" + measure.id + "/edit/measure-groups";
-  const measureGroups = [
-    {
-      title: "MEASURE GROUP 1",
-      href: `${baseURL}`,
-      dataTestId: "leftPanelMeasureInformation",
-    },
-  ];
+  const baseURL = "/measures/" + measure.id + "/edit/map-groups";
+  const measureGroups = measure.groups
+    ? measure.groups?.map((group, id) => ({
+        ...group,
+        title: `MEASURE GROUP ${id + 1}`,
+        href: `${baseURL}`,
+        dataTestId: `leftPanelMeasureInformation-MeasureGroup${id + 1}`,
+      }))
+    : [
+        {
+          title: "MEASURE GROUP 1",
+          href: `${baseURL}`,
+          dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
+        },
+      ];
+
+  //console.log(measure.groups);
+  //console.log(groupNumber)
 
   const warningTemplate = (
     <>
@@ -289,7 +347,10 @@ const MeasureGroups = () => {
   return (
     <form onSubmit={formik.handleSubmit}>
       <Grid>
-        <MeasureDetailsSidebar links={measureGroups} />
+        <MeasureDetailsSidebar
+          links={measureGroups}
+          setMeasureGroupNumber={setMeasureGroupNumber}
+        />
         <Content>
           <Header>
             <Title>Measure Group 1</Title>
