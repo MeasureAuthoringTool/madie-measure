@@ -17,7 +17,7 @@ jest.mock("@madie/madie-util", () => ({
   }),
 }));
 
-const MEASURE_CREATEDBY = "te$tuser@example.com"; //#nosec
+const MEASURE_CREATEDBY = "user1@example.com"; //#nosec
 const measure = {
   id: "abcd-pqrs-xyz",
   measureHumanReadableId: "",
