@@ -17,7 +17,7 @@ jest.mock("@madie/madie-util", () => ({
   }),
 }));
 
-const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
+const MEASURE_CREATEDBY = "te$tuser@example.com"; //#nosec
 const measure = {
   id: "abcd-pqrs-xyz",
   measureHumanReadableId: "",
@@ -215,7 +215,7 @@ describe("MeasureEditor component", () => {
         cqlErrors: true,
         cqlLibraryName: "",
         createdAt: "",
-        createdBy: "testuser@example.com",
+        createdBy: MEASURE_CREATEDBY,
         elmJson: JSON.stringify(elmTranslationErrors),
         id: "abcd-pqrs-xyz",
         lastModifiedAt: "",
@@ -267,7 +267,7 @@ describe("MeasureEditor component", () => {
         cqlErrors: true,
         cqlLibraryName: "",
         createdAt: "",
-        createdBy: "testuser@example.com",
+        createdBy: MEASURE_CREATEDBY,
         elmJson: JSON.stringify(cqlErrors),
         id: "abcd-pqrs-xyz",
         lastModifiedAt: "",
@@ -316,7 +316,7 @@ describe("MeasureEditor component", () => {
         cqlErrors: true,
         cqlLibraryName: "",
         createdAt: "",
-        createdBy: "testuser@example.com",
+        createdBy: MEASURE_CREATEDBY,
         elmJson: JSON.stringify(cqlErrors),
         id: "abcd-pqrs-xyz",
         lastModifiedAt: "",
