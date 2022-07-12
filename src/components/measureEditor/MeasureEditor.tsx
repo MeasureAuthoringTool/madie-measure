@@ -164,11 +164,7 @@ const MeasureEditor = () => {
               CQL saved successfully
             </SuccessText>
           )}
-          {valuesetMsg && (
-            <SuccessText data-testid="valueset-success">
-              {valuesetMsg}
-            </SuccessText>
-          )}
+
           {error && (
             <ErrorText data-testid="save-cql-error">
               Error updating the CQL

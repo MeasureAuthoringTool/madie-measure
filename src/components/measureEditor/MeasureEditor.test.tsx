@@ -234,41 +234,39 @@ describe("MeasureEditor component", () => {
     );
   });
 
-  it("should persist error flag when there are parse errors", async () => {
+  it("Should not persist CQL when changed value is the same as measure.cql", async () => {
     (translateContent as jest.Mock).mockImplementation((content) => {
-      return Promise.resolve(cqlErrors);
+      return Promise.resolve(elmTranslationErrors);
     });
     mockedAxios.put.mockImplementation((args) => {
       if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
         return Promise.resolve({ data: measure });
       }
     });
-
-    const { getByTestId } = renderEditor(measure);
-    const editorContainer = (await getByTestId(
+    renderEditor(measure);
+    const editorContainer = (await screen.getByTestId(
       "measure-editor"
     )) as HTMLInputElement;
     expect(measure.cql).toEqual(editorContainer.value);
-    fireEvent.change(getByTestId("measure-editor"), {
+    fireEvent.change(screen.getByTestId("measure-editor"), {
       target: {
-        value:
-          "library AdvancedIllnessandFrailtyExclusion_QICore4 version '5.0.000'",
+        value: "library testCql version '1.0.000'",
       },
     });
-    parseContent.mockClear().mockImplementation(() => ["Test error"]);
     const saveButton = screen.getByRole("button", { name: "Save" });
     userEvent.click(saveButton);
-    const saveSuccess = await screen.findByText("CQL saved successfully");
-    expect(saveSuccess).toBeInTheDocument();
-    expect(mockedAxios.put).toHaveBeenCalledWith(
+    const saveSuccess = await screen.queryByText("CQL saved successfully");
+    expect(saveSuccess).not.toBeInTheDocument();
+    expect(mockedAxios.put).toHaveBeenCalledTimes(0);
+    expect(mockedAxios.put).not.toHaveBeenCalledWith(
       "madie.com/measures/abcd-pqrs-xyz",
       {
-        cql: "library AdvancedIllnessandFrailtyExclusion_QICore4 version '5.0.000'",
+        cql: "library testCql version '1.0.000'",
         cqlErrors: true,
         cqlLibraryName: "",
         createdAt: "",
         createdBy: MEASURE_CREATEDBY,
-        elmJson: JSON.stringify(cqlErrors),
+        elmJson: JSON.stringify(elmTranslationErrors),
         id: "abcd-pqrs-xyz",
         lastModifiedAt: "",
         lastModifiedBy: "",
@@ -287,6 +285,9 @@ describe("MeasureEditor component", () => {
   });
 
   it("should persist error flag when there are parse errors", async () => {
+    (translateContent as jest.Mock).mockImplementation((content) => {
+      return Promise.resolve(cqlErrors);
+    });
     mockedAxios.put.mockImplementation((args) => {
       if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
         return Promise.resolve({ data: measure });
@@ -352,6 +353,44 @@ describe("MeasureEditor component", () => {
     await waitFor(() => {
       // check for old value
       expect(measure.cql).toEqual(editorContainer.value);
+    });
+  });
+
+  it("reset the editor changes with empty measure cql when clicked on cancel button", async () => {
+    const measureNoCql = {
+      id: "abcd-pqrs-xyz",
+      measureHumanReadableId: "",
+      measureSetId: "",
+      version: 1.0,
+      revisionNumber: 1.1,
+      state: "",
+      measureName: "MSR001",
+      cql: "",
+      cqlLibraryName: "",
+      measureScoring: "",
+      createdAt: "",
+      createdBy: MEASURE_CREATEDBY,
+      lastModifiedAt: "",
+      lastModifiedBy: "",
+      model: Model.QICORE,
+      measureMetaData: {},
+    } as Measure;
+    const { getByTestId } = renderEditor(measureNoCql);
+    const editorContainer = (await getByTestId(
+      "measure-editor"
+    )) as HTMLInputElement;
+    expect(measureNoCql.cql).toEqual(editorContainer.value);
+    // set new value to editor
+    fireEvent.change(getByTestId("measure-editor"), {
+      target: {
+        value: "library testCql version '2.0.000'",
+      },
+    });
+    // click on cancel button
+    fireEvent.click(getByTestId("reset-cql-btn"));
+    await waitFor(() => {
+      // check for old value
+      expect(measureNoCql.cql).toEqual(editorContainer.value);
     });
   });
 
