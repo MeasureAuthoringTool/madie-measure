@@ -152,7 +152,7 @@ export default function MeasureInformation() {
         measure?.measurementPeriodEnd
       );
     }
-  }, []);
+  }, [measure]);
 
   function formikErrorHandler(name: string, isError: boolean) {
     if (formik.touched[name] && formik.errors[name]) {
@@ -242,22 +242,22 @@ export default function MeasureInformation() {
                   setSuccessMessage(null);
                   formik.setFieldValue("measurementPeriodStart", startDate);
                 }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    data-testid="measurement-period-start"
-                    required
-                    helperText={formikErrorHandler(
-                      "measurementPeriodStart",
-                      true
-                    )}
-                    error={
-                      formik.touched.measurementPeriodStart &&
-                      Boolean(formik.errors.measurementPeriodStart)
-                    }
-                    {...formik.getFieldProps("measurementPeriodStart")}
-                  />
-                )}
+                renderInput={(params) => {
+                  const { onChange, ...formikFieldProps } =
+                    formik.getFieldProps("measurementPeriodStart");
+                  return (
+                    <TextField
+                      {...formikFieldProps}
+                      {...params}
+                      required
+                      data-testid="measurement-period-start"
+                      helperText={formikErrorHandler(
+                        "measurementPeriodStart",
+                        true
+                      )}
+                    />
+                  );
+                }}
               />
             </LocalizationProvider>
           </div>
@@ -275,22 +275,22 @@ export default function MeasureInformation() {
                   setSuccessMessage(null);
                   formik.setFieldValue("measurementPeriodEnd", endDate);
                 }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    data-testid="measurement-period-end"
-                    helperText={formikErrorHandler(
-                      "measurementPeriodEnd",
-                      true
-                    )}
-                    error={
-                      formik.touched.measurementPeriodEnd &&
-                      Boolean(formik.errors.measurementPeriodEnd)
-                    }
-                    {...formik.getFieldProps("measurementPeriodEnd")}
-                  />
-                )}
+                renderInput={(params) => {
+                  const { onChange, ...formikFieldProps } =
+                    formik.getFieldProps("measurementPeriodEnd");
+                  return (
+                    <TextField
+                      {...formikFieldProps}
+                      {...params}
+                      required
+                      data-testid="measurement-period-end"
+                      helperText={formikErrorHandler(
+                        "measurementPeriodEnd",
+                        true
+                      )}
+                    />
+                  );
+                }}
               />
             </LocalizationProvider>
           </div>
