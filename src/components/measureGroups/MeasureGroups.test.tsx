@@ -192,54 +192,210 @@ describe("Measure Groups Page", () => {
     expect(populationOption.value).toBe("");
   });
 
-  // test("Should create population Group with one initial population successfully", async () => {
-  //   const { getByTestId } = renderMeasureGroupComponent();
-  //   userEvent.selectOptions(
-  //     screen.getByTestId("scoring-unit-select"),
-  //     "Cohort"
-  //   );
-  //   // select initial population from dropdown
-  //   userEvent.selectOptions(
-  //     screen.getByTestId("select-measure-group-population"),
-  //     "Initial Population"
-  //   );
-  //   expect(
-  //     (
-  //       screen.getByRole("option", {
-  //         name: "Initial Population",
-  //       }) as HTMLOptionElement
-  //     ).selected
-  //   ).toBe(true);
+  test("Should create population Group with one initial population successfully", async () => {
+    const { getByTestId } = renderMeasureGroupComponent();
+    userEvent.selectOptions(
+      screen.getByTestId("scoring-unit-select"),
+      "Cohort"
+    );
+    // select initial population from dropdown
+    userEvent.selectOptions(
+      screen.getByTestId("select-measure-group-population"),
+      "Initial Population"
+    );
+    expect(
+      (
+        screen.getByRole("option", {
+          name: "Initial Population",
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
 
-  //   const input = getByTestId("groupDescriptionInput");
-  //   fireEvent.change(input, {
-  //     target: { value: "new description" },
-  //   });
+    const input = getByTestId("groupDescriptionInput");
+    fireEvent.change(input, {
+      target: { value: "new description" },
+    });
 
-  //   mockedAxios.post.mockResolvedValue({ data: { group } });
+    mockedAxios.post.mockResolvedValue({ data: { group } });
 
-  //   // submit the form
-  //   userEvent.click(screen.getByTestId("group-form-submit-btn"));
-  //   const alert = await screen.findByTestId("success-alerts");
+    // submit the form
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+    expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
 
-  //   const expectedGroup = {
-  //     id: null,
-  //     population: {
-  //       initialPopulation: "Initial Population",
-  //     },
-  //     scoring: "Cohort",
-  //     groupDescription: "new description",
-  //   };
+    const alert = await screen.findByTestId("success-alerts");
 
-  //   expect(alert).toHaveTextContent(
-  //     "Population details for this group saved successfully."
-  //   );
-  //   expect(mockedAxios.post).toHaveBeenCalledWith(
-  //     "example-service-url/measures/test-measure/groups/",
-  //     expectedGroup,
-  //     expect.anything()
-  //   );
-  // });
+    const expectedGroup = {
+      id: null,
+      population: {
+        initialPopulation: "Initial Population",
+      },
+      scoring: "Cohort",
+      groupDescription: "new description",
+    };
+
+    expect(alert).toHaveTextContent(
+      "Population details for this group saved successfully."
+    );
+    expect(mockedAxios.post).toHaveBeenCalledWith(
+      "example-service-url/measures/test-measure/groups/",
+      expectedGroup,
+      expect.anything()
+    );
+  });
+
+  test("Should create multiple group tabs on clicking add measure group ", async () => {
+    const { getByTestId } = renderMeasureGroupComponent();
+    userEvent.selectOptions(
+      screen.getByTestId("scoring-unit-select"),
+      "Cohort"
+    );
+    // select initial population from dropdown
+    userEvent.selectOptions(
+      screen.getByTestId("select-measure-group-population"),
+      "Initial Population"
+    );
+    expect(
+      (
+        screen.getByRole("option", {
+          name: "Initial Population",
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
+
+    const input = getByTestId("groupDescriptionInput");
+    fireEvent.change(input, {
+      target: { value: "new description" },
+    });
+
+    mockedAxios.post.mockResolvedValue({ data: { group } });
+
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+    expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+
+    expect(screen.getByTestId("add-measure-group-button")).toBeInTheDocument();
+    expect(screen.getByTestId("AddIcon")).toBeInTheDocument();
+
+    userEvent.click(screen.getByTestId("add-measure-group-button"));
+
+    expect(screen.getByText("MEASURE GROUP 2")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("leftPanelMeasureInformation-MeasureGroup2")
+    ).toBeInTheDocument();
+  });
+
+  test("Should be able to save multiple groups  ", async () => {
+    const { getByTestId } = renderMeasureGroupComponent();
+
+    userEvent.selectOptions(
+      screen.getByTestId("scoring-unit-select"),
+      "Cohort"
+    );
+    // select initial population from dropdown
+    userEvent.selectOptions(
+      screen.getByTestId("select-measure-group-population"),
+      "Initial Population"
+    );
+    expect(
+      (
+        screen.getByRole("option", {
+          name: "Initial Population",
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
+
+    const input = getByTestId("groupDescriptionInput");
+    fireEvent.change(input, {
+      target: { value: "new description" },
+    });
+
+    mockedAxios.post.mockResolvedValue({ data: { group } });
+
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+    expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+
+    const alert = await screen.findByTestId("success-alerts");
+
+    const expectedGroup = {
+      id: null,
+      population: {
+        initialPopulation: "Initial Population",
+      },
+      scoring: "Cohort",
+      groupDescription: "new description",
+    };
+
+    expect(alert).toHaveTextContent(
+      "Population details for this group saved successfully."
+    );
+    expect(mockedAxios.post).toHaveBeenCalledWith(
+      "example-service-url/measures/test-measure/groups/",
+      expectedGroup,
+      expect.anything()
+    );
+
+    expect(screen.getByText("MEASURE GROUP 1")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("leftPanelMeasureInformation-MeasureGroup1")
+    ).toBeInTheDocument();
+
+    //adding measure group 2
+
+    expect(screen.getByTestId("add-measure-group-button")).toBeInTheDocument();
+    expect(screen.getByTestId("AddIcon")).toBeInTheDocument();
+
+    userEvent.click(screen.getByTestId("add-measure-group-button"));
+
+    userEvent.selectOptions(
+      screen.getByTestId("scoring-unit-select"),
+      "Cohort"
+    );
+    // select initial population from dropdown
+    userEvent.selectOptions(
+      screen.getByTestId("select-measure-group-population"),
+      "Initial Population"
+    );
+    expect(
+      (
+        screen.getByRole("option", {
+          name: "Initial Population",
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
+
+    const newMeasureInput = getByTestId("groupDescriptionInput");
+    fireEvent.change(newMeasureInput, {
+      target: { value: "new description for group 2" },
+    });
+
+    mockedAxios.post.mockResolvedValue({ data: { group } });
+
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+    expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+
+    const alert1 = await screen.findByTestId("success-alerts");
+    const expectedGroup2 = {
+      id: null,
+      population: {
+        initialPopulation: "Initial Population",
+      },
+      scoring: "Cohort",
+      groupDescription: "new description for group 2",
+    };
+
+    expect(alert1).toHaveTextContent(
+      "Population details for this group saved successfully."
+    );
+    expect(mockedAxios.post).toHaveBeenCalledWith(
+      "example-service-url/measures/test-measure/groups/",
+      expectedGroup2,
+      expect.anything()
+    );
+
+    expect(screen.getByText("MEASURE GROUP 2")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("leftPanelMeasureInformation-MeasureGroup2")
+    ).toBeInTheDocument();
+  });
 
   test("Should be able to update initial population of a population group", async () => {
     group.id = "7p03-5r29-7O0I";

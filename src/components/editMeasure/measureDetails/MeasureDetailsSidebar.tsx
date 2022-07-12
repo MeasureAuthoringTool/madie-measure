@@ -28,13 +28,20 @@ export interface MeasureDetailsSidebarProps {
   links: Array<SidebarLink>;
   header?: String;
   setMeasureGroupNumber?: (value: number) => void;
+  setSuccessMessage?: (value: string) => void;
   measure?: Measure;
 }
 
 export default function MeasureDetailsSidebar(
   props: MeasureDetailsSidebarProps
 ) {
-  const { links, header = "", measure, setMeasureGroupNumber } = props;
+  const {
+    links,
+    header = "",
+    measure,
+    setMeasureGroupNumber,
+    setSuccessMessage,
+  } = props;
   const { pathname } = useLocation();
   const [measureGroups, setMeasureGroups] = useState<any>();
 
@@ -55,11 +62,13 @@ export default function MeasureDetailsSidebar(
         }`,
       },
     ]);
+    setSuccessMessage(undefined);
   };
 
   const HandleMeasureGroupClick = (e) => {
     e.preventDefault();
     setMeasureGroupNumber(parseInt(e.target.id));
+    setSuccessMessage(undefined);
   };
 
   // if no header, we don't need an outer wrapper
@@ -105,12 +114,16 @@ export default function MeasureDetailsSidebar(
                 onClick={(e) => HandleMeasureGroupClick(e)}
                 to={linkInfo.href}
                 id={index}
+                data-testid={linkInfo.dataTestId}
               >
                 <>{linkInfo.title}</>
               </LinkEl>
             );
           })}
-        <button onClick={(e) => AddNewBlankMeasureGroup(e)}>
+        <button
+          onClick={(e) => AddNewBlankMeasureGroup(e)}
+          data-testid="add-measure-group-button"
+        >
           <AddIcon className="add-icon" fontSize="small" />
           <div>Add Measure Group</div>
         </button>

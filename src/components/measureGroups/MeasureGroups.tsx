@@ -276,7 +276,6 @@ const MeasureGroups = () => {
           setSuccessMessage(
             "Population details for this group updated successfully."
           );
-          //formik.resetForm();
         })
 
         .catch((error) => {
@@ -289,18 +288,18 @@ const MeasureGroups = () => {
           if (g === null || g.id === null) {
             throw new Error("Error creating group");
           }
-          const updatedGroups = [...measure?.groups, g];
+          const updatedGroups = measure?.groups ? [...measure?.groups, g] : [g];
           setMeasure({
             ...measure,
             groups: updatedGroups,
           });
+          measure?.groups && setMeasureGroupNumber(measure?.groups.length);
         })
         .then(() => {
           setGenericErrorMessage("");
           setSuccessMessage(
             "Population details for this group saved successfully."
           );
-          //formik.resetForm();
         })
 
         .catch((error) => {
@@ -311,7 +310,7 @@ const MeasureGroups = () => {
 
   // Local state to later populate the left nav and and govern routes based on group ids
   const baseURL = "/measures/" + measure.id + "/edit/measure-groups";
-  const measureGroups = measure.groups
+  const measureGroups = measure?.groups
     ? measure.groups?.map((group, id) => ({
         ...group,
         title: `MEASURE GROUP ${id + 1}`,
@@ -349,6 +348,7 @@ const MeasureGroups = () => {
           links={measureGroups}
           setMeasureGroupNumber={setMeasureGroupNumber}
           measure={measure}
+          setSuccessMessage={setSuccessMessage}
         />
         <Content>
           <Header>
