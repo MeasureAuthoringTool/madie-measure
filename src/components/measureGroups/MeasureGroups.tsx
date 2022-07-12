@@ -145,6 +145,7 @@ const MeasureGroups = () => {
         resetForm({
           values: {
             ...formik.values,
+            id: null,
             scoring: "Select",
             population: {
               initialPopulation: "",
@@ -277,7 +278,7 @@ const MeasureGroups = () => {
           setSuccessMessage(
             "Population details for this group updated successfully."
           );
-          formik.resetForm();
+          //formik.resetForm();
         })
 
         .catch((error) => {
@@ -301,7 +302,7 @@ const MeasureGroups = () => {
           setSuccessMessage(
             "Population details for this group saved successfully."
           );
-          formik.resetForm();
+          //formik.resetForm();
         })
 
         .catch((error) => {
