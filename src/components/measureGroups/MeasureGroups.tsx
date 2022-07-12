@@ -130,9 +130,8 @@ const MeasureGroups = () => {
   const [updateConfirm, setUpdateConfirm] = useState<boolean>(false);
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(0);
   const [group, setGroup] = useState<any>();
-  // TODO: hardcoded index 0 as only one group is there.
+
   // TODO: group will be coming from props when we separate this into separate component
-  //const group = measure.groups && measure.groups[groupNumber];
 
   useEffect(() => {
     if (measure?.groups && measure?.groups[measureGroupNumber]) {
@@ -144,7 +143,6 @@ const MeasureGroups = () => {
       if (measureGroupNumber >= measure?.groups?.length) {
         resetForm({
           values: {
-            ...formik.values,
             id: null,
             scoring: "Select",
             population: {
