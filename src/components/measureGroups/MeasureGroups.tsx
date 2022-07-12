@@ -133,12 +133,12 @@ const MeasureGroups = () => {
   // TODO: hardcoded index 0 as only one group is there.
   // TODO: group will be coming from props when we separate this into separate component
   //const group = measure.groups && measure.groups[groupNumber];
+
   useEffect(() => {
-    //console.log(measureGroupNumber);
     if (measure?.groups && measure?.groups[measureGroupNumber]) {
-      setGroup(measure.groups[measureGroupNumber]);
+      setGroup(measure?.groups[measureGroupNumber]);
       resetForm({
-        values: { ...measure.groups[measureGroupNumber] },
+        values: { ...measure?.groups[measureGroupNumber] },
       });
     } else {
       if (measureGroupNumber >= measure?.groups?.length) {
@@ -162,14 +162,13 @@ const MeasureGroups = () => {
         });
       }
     }
-    //console.log(groupNumber)
   }, [measureGroupNumber]);
-  //console.log(group?.scoring);
+
   const defaultScoring = group?.scoring || "Select";
   const formik = useFormik({
     initialValues: {
       id: group?.id || null,
-      scoring: group?.scoring || "Select",
+      scoring: defaultScoring,
       population: {
         initialPopulation: group?.population?.initialPopulation || "",
         denominator: group?.population?.denominator || "",
@@ -189,7 +188,8 @@ const MeasureGroups = () => {
       window.scrollTo(0, 0);
       if (
         measure?.groups &&
-        formik.values.scoring !== measure.groups[0].scoring
+        !(measureGroupNumber >= measure?.groups?.length) &&
+        formik.values?.scoring !== measure?.groups[measureGroupNumber]?.scoring
       ) {
         setWarningMessage(true);
         if (updateConfirm) {
@@ -248,9 +248,7 @@ const MeasureGroups = () => {
     }
 
     if (measure?.groups && !(measureGroupNumber >= measure?.groups?.length)) {
-      //console.log(measure.groups)
-      group.id = measure.groups[measureGroupNumber].id;
-      //console.log(group.scoring);
+      group.id = measure?.groups[measureGroupNumber].id;
       measureServiceApi
         .updateGroup(group, measure.id)
         .then((g: Group) => {
@@ -312,7 +310,7 @@ const MeasureGroups = () => {
   };
 
   // Local state to later populate the left nav and and govern routes based on group ids
-  const baseURL = "/measures/" + measure.id + "/edit/map-groups";
+  const baseURL = "/measures/" + measure.id + "/edit/measure-groups";
   const measureGroups = measure.groups
     ? measure.groups?.map((group, id) => ({
         ...group,
@@ -327,9 +325,6 @@ const MeasureGroups = () => {
           dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
         },
       ];
-
-  //console.log(measure.groups);
-  //console.log(groupNumber)
 
   const warningTemplate = (
     <>
@@ -353,10 +348,11 @@ const MeasureGroups = () => {
         <MeasureDetailsSidebar
           links={measureGroups}
           setMeasureGroupNumber={setMeasureGroupNumber}
+          measure={measure}
         />
         <Content>
           <Header>
-            <Title>Measure Group 1</Title>
+            <Title>Measure Group {measureGroupNumber + 1}</Title>
 
             <FormField>
               <FormFieldInner>
