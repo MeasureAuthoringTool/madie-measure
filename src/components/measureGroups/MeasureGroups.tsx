@@ -129,7 +129,8 @@ const MeasureGroups = () => {
   const [warningMessage, setWarningMessage] = useState<boolean>(false);
   const [updateConfirm, setUpdateConfirm] = useState<boolean>(false);
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(0);
-  const [group, setGroup] = useState<any>();
+  const [group, setGroup] = useState<Group>();
+  //const [measureGroups, setMeasureGroups] = useState<any>();
 
   // TODO: group will be coming from props when we separate this into separate component
 
@@ -253,16 +254,16 @@ const MeasureGroups = () => {
           if (g === null || g.id === null) {
             throw new Error("Error updating group");
           }
-          const updatedGroups = measure?.groups.map((p) => {
-            if (p.id === g.id) {
+          const updatedGroups = measure?.groups.map((group) => {
+            if (group.id === g.id) {
               return {
-                ...p,
+                ...group,
                 groupDescription: g.groupDescription,
                 scoring: g.scoring,
                 population: g.population,
               };
             }
-            return p;
+            return group;
           });
           setMeasure({
             ...measure,
