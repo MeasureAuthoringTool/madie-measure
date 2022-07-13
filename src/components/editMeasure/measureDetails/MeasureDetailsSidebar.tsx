@@ -78,7 +78,7 @@ export default function MeasureDetailsSidebar(
         {header && <Title>{header}</Title>}
         <InnerWrapper>
           <Nav aria-label="Sidebar">
-            {links.map((linkInfo, id) => {
+            {links.map((linkInfo) => {
               let LinkEl = InactiveNavLink;
               if (pathname === linkInfo.href) {
                 LinkEl = ActiveNavLink;
@@ -125,7 +125,7 @@ export default function MeasureDetailsSidebar(
           data-testid="add-measure-group-button"
         >
           <AddIcon className="add-icon" fontSize="small" />
-          <div>Add Measure Group</div>
+          &nbsp; Add Measure Group
         </button>
       </Nav>
     </OuterWrapper>

@@ -395,6 +395,25 @@ describe("Measure Groups Page", () => {
     expect(
       screen.getByTestId("leftPanelMeasureInformation-MeasureGroup2")
     ).toBeInTheDocument();
+
+    userEvent.click(
+      screen.getByTestId("leftPanelMeasureInformation-MeasureGroup1")
+    );
+
+    expect(
+      (
+        screen.getByRole("option", {
+          name: "Initial Population",
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
+
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "testDescription";
+    measure.groups = [group];
+
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+    expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
   });
 
   test("Should be able to update initial population of a population group", async () => {
