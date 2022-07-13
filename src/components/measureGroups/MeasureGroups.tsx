@@ -13,6 +13,8 @@ import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
 import * as _ from "lodash";
 import { MeasureGroupSchemaValidator } from "../../validations/MeasureGroupSchemaValidator";
 import { useOktaTokens } from "@madie/madie-util";
+import { optionGroupUnstyledClasses } from "@mui/base";
+import { groupBy } from "lodash";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
 const Content = styled.div(() => [tw`col-span-3`]);
@@ -64,8 +66,9 @@ interface PropTypes {
 
 const MenuItemContainer = tw.ul`bg-transparent flex px-8`;
 const MenuItem = styled.li((props: PropTypes) => [
-  tw`mr-1 text-white bg-[rgba(0, 32, 64, 0.5)] rounded-t-md hover:bg-[rgba(0,6,13, 0.5)]`,
-  props.isActive && tw`bg-slate text-slate-90 font-medium hover:bg-slate`,
+  tw`mr-1 text-white bg-slate rounded-t-md pl-3 pr-3 text-slate-90`,
+  props.isActive &&
+    tw`bg-white text-slate-90 font-medium border-solid border-b border-red-500`,
 ]);
 
 const FormField = tw.div`mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6`;
@@ -127,6 +130,22 @@ export const DefaultPopulationSelectorDefinitions = [
   },
 ];
 
+export const MeasureImprovmentNotation = [
+  { label: "Select", subtitle: "Optional", code: "" },
+  {
+    label: "Increased score indicates improvement",
+    subtitle:
+      "Improvement is indicated as an increase in the score or measurement (e.g. Higher score indicates better quality).",
+    code: "increase",
+  },
+  {
+    label: "Decreased score indicates improvement",
+    subtitle:
+      "Improvement is indicated as a decrease in the score or measurement (e.g. Lower score indicates better quality).",
+    code: "decrease",
+  },
+];
+
 export interface ExpressionDefinition {
   expression?: string;
   expressionClass?: string;
@@ -169,6 +188,8 @@ const MeasureGroups = () => {
         measurePopulationExclusion:
           group?.population?.measurePopulationExclusion || "",
       },
+      rateAggregation: group?.rateAggregation || "",
+      improvementNotation: group?.improvementNotation || "",
       groupDescription: group?.groupDescription,
     } as Group,
     validationSchema: MeasureGroupSchemaValidator,
@@ -630,14 +651,14 @@ const MeasureGroups = () => {
                   <FieldSeparator>
                     {canEdit && (
                       <FieldInput
-                        //value={formik.values.rateAggregation}
+                        value={formik.values.rateAggregation}
                         type="text"
                         name="rate-aggregation"
                         id="rate-aggregation"
                         autoComplete="rate-aggregation"
                         placeholder="Rate Aggregation"
                         data-testid="rateAggregationText"
-                        //{...formik.getFieldProps("rateAggregation")}
+                        {...formik.getFieldProps("rateAggregation")}
                       />
                     )}
                   </FieldSeparator>
@@ -647,18 +668,44 @@ const MeasureGroups = () => {
                   </FieldLabel>
                   <FieldSeparator>
                     {canEdit && (
-                      <FieldInput
-                        //value={formik.values.improvementNotation}
-                        type="text"
-                        name="improvement-notation"
-                        id="improvement-notation"
-                        autoComplete="improvement-notation"
-                        placeholder="Improvment Notation"
-                        data-testid="improvementNotationText"
-                        //{...formik.getFieldProps("improvementNotation")}
-                      />
+                      <TextField
+                        select
+                        id="improvement-notation-select"
+                        label=""
+                        value={formik.values.improvementNotation}
+                        inputProps={{
+                          "data-testid": "improvement-notation-select",
+                        }}
+                        onChange={(e) => {
+                          formik.resetForm({
+                            values: {
+                              ...formik.values,
+                              improvementNotation: e.target.value,
+                            },
+                          });
+                        }}
+                        InputLabelProps={{ shrink: false }}
+                        SelectProps={{
+                          native: true,
+                        }}
+                        name="type"
+                      >
+                        {Object.values(MeasureImprovmentNotation).map(
+                          (opt, i) => (
+                            <option
+                              key={`${opt.code}-${i}`}
+                              value={opt.label}
+                              data-testid="improvement-notation-option"
+                            >
+                              {opt.label}
+                            </option>
+                          )
+                        )}
+
+                        {/*!canEdit && formik.values.improvementNotation*/}
+                      </TextField>
                     )}
-                    {/*!canEdit && formik.values.groupDescription*/}
+                    {!canEdit && formik.values.improvementNotation}
                   </FieldSeparator>
                 </FormFieldInner>
               </FormField>
