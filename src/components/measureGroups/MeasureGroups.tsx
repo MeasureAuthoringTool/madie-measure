@@ -128,9 +128,44 @@ const MeasureGroups = () => {
   const [successMessage, setSuccessMessage] = useState<string>();
   const [warningMessage, setWarningMessage] = useState<boolean>(false);
   const [updateConfirm, setUpdateConfirm] = useState<boolean>(false);
-  // TODO: hardcoded index 0 as only one group is there.
+  const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(0);
+  const [group, setGroup] = useState<Group>();
+
   // TODO: group will be coming from props when we separate this into separate component
-  const group = measure.groups && measure.groups[0];
+
+  useEffect(() => {
+    if (measure?.groups && measure?.groups[measureGroupNumber]) {
+      setGroup(measure?.groups[measureGroupNumber]);
+      resetForm({
+        values: {
+          ...measure?.groups[measureGroupNumber],
+          groupDescription:
+            measure?.groups[measureGroupNumber].groupDescription || "",
+        },
+      });
+    } else {
+      if (measureGroupNumber >= measure?.groups?.length) {
+        resetForm({
+          values: {
+            id: null,
+            scoring: "Select",
+            population: {
+              initialPopulation: "",
+              denominator: "",
+              denominatorExclusion: "",
+              denominatorException: "",
+              numerator: "",
+              numeratorExclusion: "",
+              measurePopulation: "",
+              measurePopulationExclusion: "",
+            },
+            groupDescription: "",
+          },
+        });
+      }
+    }
+  }, [measureGroupNumber]);
+
   const defaultScoring = group?.scoring || "Select";
   const formik = useFormik({
     initialValues: {
@@ -155,7 +190,8 @@ const MeasureGroups = () => {
       window.scrollTo(0, 0);
       if (
         measure?.groups &&
-        formik.values.scoring !== measure.groups[0].scoring
+        !(measureGroupNumber >= measure?.groups?.length) &&
+        formik.values?.scoring !== measure?.groups[measureGroupNumber]?.scoring
       ) {
         setWarningMessage(true);
         if (updateConfirm) {
@@ -168,6 +204,7 @@ const MeasureGroups = () => {
       }
     },
   });
+  const { resetForm } = formik;
 
   useEffect(() => {
     if (measure.cql) {
@@ -212,17 +249,28 @@ const MeasureGroups = () => {
       );
     }
 
-    if (measure?.groups) {
-      group.id = measure.groups[0].id;
+    if (measure?.groups && !(measureGroupNumber >= measure?.groups?.length)) {
+      group.id = measure?.groups[measureGroupNumber].id;
       measureServiceApi
         .updateGroup(group, measure.id)
         .then((g: Group) => {
           if (g === null || g.id === null) {
             throw new Error("Error updating group");
           }
+          const updatedGroups = measure?.groups.map((group) => {
+            if (group.id === g.id) {
+              return {
+                ...group,
+                groupDescription: g.groupDescription,
+                scoring: g.scoring,
+                population: g.population,
+              };
+            }
+            return group;
+          });
           setMeasure({
             ...measure,
-            groups: [g],
+            groups: updatedGroups,
           });
         })
         .then(() => {
@@ -230,7 +278,6 @@ const MeasureGroups = () => {
           setSuccessMessage(
             "Population details for this group updated successfully."
           );
-          formik.resetForm();
         })
 
         .catch((error) => {
@@ -243,17 +290,18 @@ const MeasureGroups = () => {
           if (g === null || g.id === null) {
             throw new Error("Error creating group");
           }
+          const updatedGroups = measure?.groups ? [...measure?.groups, g] : [g];
           setMeasure({
             ...measure,
-            groups: [g],
+            groups: updatedGroups,
           });
+          measure?.groups && setMeasureGroupNumber(measure?.groups.length);
         })
         .then(() => {
           setGenericErrorMessage("");
           setSuccessMessage(
             "Population details for this group saved successfully."
           );
-          formik.resetForm();
         })
 
         .catch((error) => {
@@ -264,13 +312,20 @@ const MeasureGroups = () => {
 
   // Local state to later populate the left nav and and govern routes based on group ids
   const baseURL = "/measures/" + measure.id + "/edit/measure-groups";
-  const measureGroups = [
-    {
-      title: "MEASURE GROUP 1",
-      href: `${baseURL}`,
-      dataTestId: "leftPanelMeasureInformation",
-    },
-  ];
+  const measureGroups = measure?.groups
+    ? measure.groups?.map((group, id) => ({
+        ...group,
+        title: `MEASURE GROUP ${id + 1}`,
+        href: `${baseURL}`,
+        dataTestId: `leftPanelMeasureInformation-MeasureGroup${id + 1}`,
+      }))
+    : [
+        {
+          title: "MEASURE GROUP 1",
+          href: `${baseURL}`,
+          dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
+        },
+      ];
 
   const warningTemplate = (
     <>
@@ -291,10 +346,15 @@ const MeasureGroups = () => {
   return (
     <form onSubmit={formik.handleSubmit}>
       <Grid>
-        <MeasureDetailsSidebar links={measureGroups} />
+        <MeasureDetailsSidebar
+          links={measureGroups}
+          setMeasureGroupNumber={setMeasureGroupNumber}
+          measure={measure}
+          setSuccessMessage={setSuccessMessage}
+        />
         <Content>
           <Header>
-            <Title>Measure Group 1</Title>
+            <Title>Measure Group {measureGroupNumber + 1}</Title>
 
             <FormField>
               <FormFieldInner>
