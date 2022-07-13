@@ -677,12 +677,10 @@ const MeasureGroups = () => {
                           "data-testid": "improvement-notation-select",
                         }}
                         onChange={(e) => {
-                          formik.resetForm({
-                            values: {
-                              ...formik.values,
-                              improvementNotation: e.target.value,
-                            },
-                          });
+                          formik.setFieldValue(
+                            "improvementNotation",
+                            e.target.value
+                          );
                         }}
                         InputLabelProps={{ shrink: false }}
                         SelectProps={{
