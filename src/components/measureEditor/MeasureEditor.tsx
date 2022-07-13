@@ -5,27 +5,24 @@ import {
   EditorErrorMarker,
   MadieEditor,
   parseContent,
+  translateContentCqlToElm,
+  validateContentCodes,
+  validateContentValueSets,
 } from "@madie/madie-editor";
 import { Button } from "@madie/madie-components";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import { Measure } from "@madie/madie-models";
-import {
-  CqlAntlr,
-  CqlCode,
-  CqlCodeSystem,
-} from "@madie/cql-antlr-parser/dist/src";
+import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
-import useTerminologyServiceApi from "../../api/useTerminologyServiceApi";
 import tw from "twin.macro";
 import * as _ from "lodash";
-import useElmTranslationServiceApi, {
+import CqlResult from "@madie/cql-antlr-parser/dist/src/dto/CqlResult";
+import {
+  CustomCqlCode,
   ElmTranslation,
   ElmTranslationError,
-  ElmValueSet,
-} from "../../api/useElmTranslationServiceApi";
-import CqlResult from "@madie/cql-antlr-parser/dist/src/dto/CqlResult";
-import { mapCodeSystemErrorsToTranslationErrors } from "./measureEditorUtils";
-import { useOktaTokens } from "@madie/madie-util";
+} from "./measureEditorUtils";
+import { useOktaTokens, useTerminologyServiceApi } from "@madie/madie-util";
 
 const MessageText = tw.p`text-sm font-medium`;
 const SuccessText = tw(MessageText)`text-green-800`;
@@ -42,8 +39,8 @@ export const mapErrorsToAceAnnotations = (
     annotations = errors.map((error: ElmTranslationError) => ({
       row: error.startLine - 1,
       column: error.startChar,
-      type: error.errorSeverity.toLowerCase(),
-      text: `${type}: ${error.startChar}:${error.endChar} | ${error.message}`,
+      type: error.errorSeverity?.toLowerCase(),
+      text: `${error.errorType}: ${error.startChar}:${error.endChar} | ${error.message}`,
     }));
   }
   return annotations;
@@ -72,24 +69,11 @@ export const mapErrorsToAceMarkers = (
   return markers;
 };
 
-// customCqlCode contains validation result from VSAC
-// This object can be cached in future, to avoid calling VSAC everytime.
-export interface CustomCqlCodeSystem extends CqlCodeSystem {
-  valid?: boolean;
-  errorMessage?: string;
-}
-export interface CustomCqlCode extends Omit<CqlCode, "codeSystem"> {
-  codeSystem: CustomCqlCodeSystem;
-  valid?: boolean;
-  errorMessage?: string;
-}
-
 const MeasureEditor = () => {
   const { measure, setMeasure } = useCurrentMeasure();
   const [editorVal, setEditorVal]: [string, Dispatch<SetStateAction<string>>] =
     useState("");
   const measureServiceApi = useMeasureServiceApi();
-  const elmTranslationServiceApi = useElmTranslationServiceApi();
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
   const [elmTranslationError, setElmTranslationError] = useState(null);
@@ -104,31 +88,6 @@ const MeasureEditor = () => {
   const terminologyServiceApi = useTerminologyServiceApi();
   const [valuesetMsg, setValuesetMsg] = useState(null);
 
-  const getValueSetErrors = async (
-    valuesetsArray: ElmValueSet[]
-  ): Promise<ElmTranslationError[]> => {
-    const valuesetsErrorArray: ElmTranslationError[] = [];
-    if (valuesetsArray) {
-      await Promise.allSettled(
-        valuesetsArray.map(async (valueSet) => {
-          const oid = getOid(valueSet);
-          await terminologyServiceApi
-            .getValueSet(oid, valueSet.locator)
-            .then((response) => {
-              if (response.errorMsg) {
-                const vsErrorForElmTranslationError: ElmTranslationError =
-                  processValueSetErrorForElmTranslationError(
-                    response.errorMsg.toString(),
-                    valueSet.locator
-                  );
-                valuesetsErrorArray.push(vsErrorForElmTranslationError);
-              }
-            });
-        })
-      );
-      return valuesetsErrorArray;
-    }
-  };
   const checkLogin = async (): Promise<Boolean> => {
     let isLoggedIn = false;
     await terminologyServiceApi
@@ -140,61 +99,6 @@ const MeasureEditor = () => {
         isLoggedIn = false;
       });
     return isLoggedIn;
-  };
-
-  const getOid = (valueSet: ElmValueSet): string => {
-    return valueSet.id.split("ValueSet/")[1];
-  };
-
-  const getStartLine = (locator: string): number => {
-    const index = locator.indexOf(":");
-    const startLine = locator.substring(0, index);
-    return Number(startLine);
-  };
-
-  const getStartChar = (locator: string): number => {
-    const index = locator.indexOf(":");
-    const index2 = locator.indexOf("-");
-    const startChar = locator.substring(index + 1, index2);
-    return Number(startChar);
-  };
-
-  const getEndLine = (locator: string): number => {
-    const index = locator.indexOf("-");
-    const endLineAndChar = locator.substring(index + 1);
-    const index2 = locator.indexOf(":");
-    const endLine = endLineAndChar.substring(0, index2);
-    return Number(endLine);
-  };
-
-  const getEndChar = (locator: string): number => {
-    const index = locator.indexOf("-");
-    const endLineAndChar = locator.substring(index + 1);
-    const index2 = locator.indexOf(":");
-    const endLine = endLineAndChar.substring(index2 + 1);
-    return Number(endLine);
-  };
-
-  const processValueSetErrorForElmTranslationError = (
-    vsError: string,
-    valuesetLocator: string
-  ): ElmTranslationError => {
-    const startLine: number = getStartLine(valuesetLocator);
-    const startChar: number = getStartChar(valuesetLocator);
-    const endLine: number = getEndLine(valuesetLocator);
-    const endChar: number = getEndChar(valuesetLocator);
-    return {
-      startLine: startLine,
-      startChar: startChar,
-      endChar: endChar,
-      endLine: endLine,
-      errorSeverity: "Error",
-      errorType: "ValueSet",
-      message: vsError,
-      targetIncludeLibraryId: "",
-      targetIncludeLibraryVersionId: "",
-      type: "ValueSet",
-    };
   };
 
   const getCustomCqlCodes = (cql: string): CustomCqlCode[] => {
@@ -231,29 +135,30 @@ const MeasureEditor = () => {
     if (cql && cql.trim().length > 0) {
       const customCqlCodes: CustomCqlCode[] = getCustomCqlCodes(cql);
       const isLoggedIn = await Promise.resolve(checkLogin());
-      const [validatedCodes, translationResults] = await Promise.all([
-        await terminologyServiceApi.validateCodes(
-          customCqlCodes,
-          isLoggedIn.valueOf()
-        ),
-        await elmTranslationServiceApi.translateCqlToElm(cql),
+      const [codeSystemCqlErrors, translationResults] = await Promise.all([
+        await validateContentCodes(customCqlCodes, isLoggedIn.valueOf()),
+        await translateContentCqlToElm(cql),
       ]);
-      const codeSystemCqlErrors =
-        mapCodeSystemErrorsToTranslationErrors(validatedCodes);
 
       const { vsacErrorsAnnotations, vsacErrorMarkers } =
         getVsacErrorAnnotationAndMarkers(codeSystemCqlErrors);
 
-      let allErrorsArray: ElmTranslationError[] =
+      let allErrorsArray: ElmTranslationError[] = [];
+      let elmTranslationErrors: ElmTranslationError[] =
         translationResults?.errorExceptions
           ? translationResults?.errorExceptions
           : [];
+      elmTranslationErrors.forEach((elmError) => {
+        elmError.errorType = "ELM";
+        allErrorsArray.push(elmError);
+      });
 
       let valuesetsErrors = null;
 
-      if (translationResults.library?.valueSets?.def !== null && isLoggedIn) {
-        valuesetsErrors = await getValueSetErrors(
-          translationResults.library?.valueSets?.def
+      if (translationResults.library?.valueSets?.def !== null) {
+        valuesetsErrors = await validateContentValueSets(
+          translationResults.library?.valueSets?.def,
+          isLoggedIn.valueOf()
         );
       }
 

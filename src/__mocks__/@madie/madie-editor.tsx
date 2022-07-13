@@ -2,6 +2,16 @@ import React, { ChangeEvent } from "react";
 
 export const parseContent = jest.fn().mockImplementation((content) => []);
 
+export const translateContentCqlToElm = jest
+  .fn()
+  .mockImplementation((content) => []);
+export const validateContentCodes = jest
+  .fn()
+  .mockImplementation((customCqlCodes, loggedInUMLS) => []);
+export const validateContentValueSets = jest
+  .fn()
+  .mockImplementation((valuesetsArray, loggedInUMLS) => []);
+
 export function MadieEditor({ onChange, value, inboundAnnotations }) {
   return (
     <>

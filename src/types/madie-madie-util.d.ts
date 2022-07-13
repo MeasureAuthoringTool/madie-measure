@@ -39,6 +39,12 @@ declare module "@madie/madie-util" {
   };
   export function useOnClickOutside(ref: any, handler: any): void;
 
+  export class TerminologyServiceApi {
+    constructor(baseUrl: string, getAccessToken: () => string);
+    checkLogin(): Promise<Boolean>;
+  }
+  export function useTerminologyServiceApi(): TerminologyServiceApi;
+
   export const bootstrap: LifeCycleFn<void>;
   export const mount: LifeCycleFn<void>;
   export const unmount: LifeCycleFn<void>;
