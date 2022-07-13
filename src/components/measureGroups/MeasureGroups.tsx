@@ -130,7 +130,6 @@ const MeasureGroups = () => {
   const [updateConfirm, setUpdateConfirm] = useState<boolean>(false);
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(0);
   const [group, setGroup] = useState<Group>();
-  //const [measureGroups, setMeasureGroups] = useState<any>();
 
   // TODO: group will be coming from props when we separate this into separate component
 
@@ -138,7 +137,11 @@ const MeasureGroups = () => {
     if (measure?.groups && measure?.groups[measureGroupNumber]) {
       setGroup(measure?.groups[measureGroupNumber]);
       resetForm({
-        values: { ...measure?.groups[measureGroupNumber] },
+        values: {
+          ...measure?.groups[measureGroupNumber],
+          groupDescription:
+            measure?.groups[measureGroupNumber].groupDescription || "",
+        },
       });
     } else {
       if (measureGroupNumber >= measure?.groups?.length) {
