@@ -169,6 +169,7 @@ const MeasureGroups = () => {
   const [activeTab, setActiveTab] = useState<string>("population");
   const [warningMessage, setWarningMessage] = useState<boolean>(false);
   const [updateConfirm, setUpdateConfirm] = useState<boolean>(false);
+  const [populationError, setPopulationError] = useState<number>(0);
   // TODO: hardcoded index 0 as only one group is there.
   // TODO: group will be coming from props when we separate this into separate component
   const group = measure.groups && measure.groups[0];
@@ -580,7 +581,7 @@ const MeasureGroups = () => {
                 isActive={activeTab == "population"}
                 onClick={() => setActiveTab("population")}
               >
-                Populations
+                Populations {!!formik.errors.population&&activeTab !== "population"&&"🚫"}
               </MenuItem>
               {formik.values.scoring !== "Ratio" && (
                 <MenuItem
@@ -646,7 +647,7 @@ const MeasureGroups = () => {
               <FormField>
                 <FormFieldInner>
                   <FieldLabel htmlFor="rate-aggregation">
-                    Rate Aggregation (Not Implemented)
+                    Rate Aggregation
                   </FieldLabel>
                   <FieldSeparator>
                     {canEdit && (
@@ -664,7 +665,7 @@ const MeasureGroups = () => {
                   </FieldSeparator>
                   <Divider />
                   <FieldLabel htmlFor="rate-aggregation">
-                    Improvment Notation (Not Implemented)
+                    Improvment Notation
                   </FieldLabel>
                   <FieldSeparator>
                     {canEdit && (
