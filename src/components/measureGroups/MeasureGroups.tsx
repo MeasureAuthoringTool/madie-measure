@@ -394,185 +394,55 @@ const MeasureGroups = () => {
             </Alert>
           )}
           {/* Form control later should be moved to own component and dynamically rendered by switch based on measure. */}
+
           <FormControl>
-            <SoftLabel>Measure Type (not currently implemented)</SoftLabel>
+            {/* pull from cql file */}
+            <SoftLabel htmlFor="scoring-unit-select">Group Scoring:</SoftLabel>
             {canEdit && (
               <TextField
                 select
-                id="measure-type-select"
+                id="scoring-unit-select"
                 label=""
                 inputProps={{
-                  "data-testid": "measure-type-select",
+                  "data-testid": "scoring-unit-select",
                 }}
                 InputLabelProps={{ shrink: false }}
                 SelectProps={{
                   native: true,
                 }}
-                name="type"
-                //value={formik.values.type}
-                /*onChange={(e) => {
+                name="scoring"
+                value={formik.values.scoring}
+                onChange={(e) => {
                   formik.resetForm({
                     values: {
                       ...formik.values,
-                      type: e.target.value,
-                      
-                      
+                      scoring: e.target.value,
+                      population: {
+                        initialPopulation: "",
+                        denominator: "",
+                        denominatorExclusion: "",
+                        denominatorException: "",
+                        numerator: "",
+                        numeratorExclusion: "",
+                        measurePopulation: "",
+                        measurePopulationExclusion: "",
+                      },
                     },
                   });
-                }}*/
+                }}
               >
-                {Object.values({ "Select Type": "Select Type" }).map(
-                  (opt, i) => (
-                    <option
-                      key={`${opt}-${i}`}
-                      value={opt}
-                      data-testid="measure-type-option"
-                    >
-                      {opt}
-                    </option>
-                  )
-                )}
+                {Object.values(GroupScoring).map((opt, i) => (
+                  <option
+                    key={`${opt}-${i}`}
+                    value={opt}
+                    data-testid="scoring-unit-option"
+                  >
+                    {opt}
+                  </option>
+                ))}
               </TextField>
             )}
-          </FormControl>
-
-          <FormControl>
-            <Row>
-              <Col>
-                {/* pull from cql file */}
-                <SoftLabel htmlFor="scoring-unit-select">
-                  Group Scoring:
-                </SoftLabel>
-                {canEdit && (
-                  <TextField
-                    select
-                    id="scoring-unit-select"
-                    label=""
-                    inputProps={{
-                      "data-testid": "scoring-unit-select",
-                    }}
-                    InputLabelProps={{ shrink: false }}
-                    SelectProps={{
-                      native: true,
-                    }}
-                    name="scoring"
-                    value={formik.values.scoring}
-                    onChange={(e) => {
-                      formik.resetForm({
-                        values: {
-                          ...formik.values,
-                          scoring: e.target.value,
-                          population: {
-                            initialPopulation: "",
-                            denominator: "",
-                            denominatorExclusion: "",
-                            denominatorException: "",
-                            numerator: "",
-                            numeratorExclusion: "",
-                            measurePopulation: "",
-                            measurePopulationExclusion: "",
-                          },
-                        },
-                      });
-                    }}
-                  >
-                    {Object.values(GroupScoring).map((opt, i) => (
-                      <option
-                        key={`${opt}-${i}`}
-                        value={opt}
-                        data-testid="scoring-unit-option"
-                      >
-                        {opt}
-                      </option>
-                    ))}
-                  </TextField>
-                )}
-                {!canEdit && formik.values.scoring}
-              </Col>
-              <Col>
-                <SoftLabel>Population Basis (not implemented)</SoftLabel>
-                {canEdit && (
-                  <TextField
-                    select
-                    id="population-basis-select"
-                    label=""
-                    inputProps={{
-                      "data-testid": "population-basis-select",
-                    }}
-                    InputLabelProps={{ shrink: false }}
-                    SelectProps={{
-                      native: true,
-                    }}
-                    name="population-basis"
-                    //value={formik.values.type}
-                    /*onChange={(e) => {
-                  formik.resetForm({
-                    values: {
-                      ...formik.values,
-                      type: e.target.value,
-                      
-                      
-                    },
-                  });
-                }}*/
-                  >
-                    {Object.values({ "Select Basis": "Select Basis" }).map(
-                      (opt, i) => (
-                        <option
-                          key={`${opt}-${i}`}
-                          value={opt}
-                          data-testid="basis-option"
-                        >
-                          {opt}
-                        </option>
-                      )
-                    )}
-                  </TextField>
-                )}
-              </Col>
-              <Col>
-                <SoftLabel>Scoring Unit (not implemented)</SoftLabel>
-                {canEdit && (
-                  //-----TOSOLVE Group scoring is called socring unit, might need to rename things???
-                  <TextField
-                    select
-                    id="scoring-unit2-select"
-                    label=""
-                    inputProps={{
-                      "data-testid": "scoring-unit2-select",
-                    }}
-                    InputLabelProps={{ shrink: false }}
-                    SelectProps={{
-                      native: true,
-                    }}
-                    name="scoring-unit2"
-                    //value={formik.values.type}
-                    /*onChange={(e) => {
-                  formik.resetForm({
-                    values: {
-                      ...formik.values,
-                      type: e.target.value,
-                      
-                      
-                    },
-                  });
-                }}*/
-                  >
-                    {Object.values({ "Select Unit": "Select Unit" }).map(
-                      (opt, i) => (
-                        <option
-                          key={`${opt}-${i}`}
-                          value={opt}
-                          data-testid="basis-option"
-                        >
-                          {opt}
-                        </option>
-                      )
-                    )}
-                  </TextField>
-                )}
-              </Col>
-            </Row>
+            {!canEdit && formik.values.scoring}
           </FormControl>
           <div>
             <MenuItemContainer>
@@ -581,7 +451,10 @@ const MeasureGroups = () => {
                 isActive={activeTab == "population"}
                 onClick={() => setActiveTab("population")}
               >
-                Populations {!!formik.errors.population&&activeTab !== "population"&&"🚫"}
+                Populations{" "}
+                {!!formik.errors.population &&
+                  activeTab !== "population" &&
+                  "🚫"}
               </MenuItem>
               {formik.values.scoring !== "Ratio" && (
                 <MenuItem
