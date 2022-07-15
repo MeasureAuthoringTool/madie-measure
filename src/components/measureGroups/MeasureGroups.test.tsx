@@ -395,10 +395,6 @@ describe("Measure Groups Page", () => {
     expect(
       screen.getByTestId("leftPanelMeasureInformation-MeasureGroup2")
     ).toBeInTheDocument();
-
-    userEvent.click(
-      screen.getByTestId("leftPanelMeasureInformation-MeasureGroup1")
-    );
   });
 
   test("Should be able to update initial population of a population group", async () => {
