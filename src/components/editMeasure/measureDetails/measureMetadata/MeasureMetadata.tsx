@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import tw from "twin.macro";
-import useCurrentMeasure from "../../useCurrentMeasure";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import { useFormik } from "formik";
 import getInitialValues, { setMeasureMetadata } from "./MeasureMetadataHelper";
-import { useOktaTokens } from "@madie/madie-util";
+import { measureStore, useOktaTokens } from "@madie/madie-util";
 
 const Form = tw.form`max-w-xl mt-3 space-y-8 divide-y divide-gray-200`;
 const FormContent = tw.div`space-y-8 divide-y divide-gray-200`;
@@ -31,15 +30,22 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
   const { measureMetadataType } = props;
   const typeLower = measureMetadataType.toLowerCase();
 
-  const { measure } = useCurrentMeasure();
-  let { measureMetaData } = measure;
-  measureMetaData = measureMetaData || {};
+  const { updateMeasure } = measureStore;
+  const [measure, setMeasure] = useState<any>(measureStore.state);
+  useEffect(() => {
+    const subscription = measureStore.subscribe(setMeasure);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  let measureMetaData = measure?.measureMetaData || {};
   const measureServiceApi = useMeasureServiceApi();
   const [success, setSuccess] = useState<string>("");
   const [error, setError] = useState<string>("");
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
-  const canEdit = userName === measure.createdBy;
+  const canEdit = userName === measure?.createdBy;
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -57,6 +63,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
       .updateMeasure(measure)
       .then(() => {
         setSuccess(`${measureMetadataType}`);
+        updateMeasure(measure);
       })
       .catch((reason) => {
         const message = `Error updating measure "${measure.measureName}"`;
