@@ -169,7 +169,6 @@ const MeasureGroups = () => {
   const [activeTab, setActiveTab] = useState<string>("population");
   const [warningMessage, setWarningMessage] = useState<boolean>(false);
   const [updateConfirm, setUpdateConfirm] = useState<boolean>(false);
-  const [populationError, setPopulationError] = useState<number>(0);
   // TODO: hardcoded index 0 as only one group is there.
   // TODO: group will be coming from props when we separate this into separate component
   const group = measure.groups && measure.groups[0];
