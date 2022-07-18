@@ -13,8 +13,6 @@ import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
 import * as _ from "lodash";
 import { MeasureGroupSchemaValidator } from "../../validations/MeasureGroupSchemaValidator";
 import { useOktaTokens } from "@madie/madie-util";
-import { optionGroupUnstyledClasses } from "@mui/base";
-import { groupBy } from "lodash";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
 const Content = styled.div(() => [tw`col-span-3`]);
@@ -130,7 +128,7 @@ export const DefaultPopulationSelectorDefinitions = [
   },
 ];
 
-export const MeasureImprovmentNotation = [
+export const MeasureImprovementNotation = [
   { label: "Select", subtitle: "Optional", code: "" },
   {
     label: "Increased score indicates improvement",
@@ -307,6 +305,8 @@ const MeasureGroups = () => {
                 groupDescription: g.groupDescription,
                 scoring: g.scoring,
                 population: g.population,
+                rateAggregation: g.rateAggregation,
+                improvementNotation: g.improvementNotation,
               };
             }
             return group;
@@ -628,7 +628,7 @@ const MeasureGroups = () => {
                         }}
                         name="type"
                       >
-                        {Object.values(MeasureImprovmentNotation).map(
+                        {Object.values(MeasureImprovementNotation).map(
                           (opt, i) => (
                             <option
                               key={`${opt.code}-${i}`}
@@ -639,8 +639,6 @@ const MeasureGroups = () => {
                             </option>
                           )
                         )}
-
-                        {/*!canEdit && formik.values.improvementNotation*/}
                       </TextField>
                     )}
                     {!canEdit && formik.values.improvementNotation}

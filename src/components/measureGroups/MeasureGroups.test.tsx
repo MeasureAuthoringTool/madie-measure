@@ -231,8 +231,6 @@ describe("Measure Groups Page", () => {
       },
       scoring: "Cohort",
       groupDescription: "new description",
-      rateAggregation: "",
-      improvementNotation: "",
     };
 
     expect(alert).toHaveTextContent(
@@ -442,8 +440,6 @@ describe("Measure Groups Page", () => {
       },
       scoring: "Cohort",
       groupDescription: "testDescription",
-      rateAggregation: "",
-      improvementNotation: "",
     };
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
 
