@@ -47,7 +47,7 @@ export default function MeasureDetailsSidebar(
 
   useEffect(() => {
     if (links) setMeasureGroups(links);
-  }, []);
+  }, [measure?.groups]);
 
   const AddNewBlankMeasureGroup = (e) => {
     e.preventDefault();

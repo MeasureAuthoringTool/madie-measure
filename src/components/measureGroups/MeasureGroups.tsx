@@ -144,7 +144,7 @@ const MeasureGroups = () => {
         },
       });
     } else {
-      if (measureGroupNumber >= measure?.groups?.length) {
+      if (measureGroupNumber >= measure?.groups?.length || !measure?.groups) {
         resetForm({
           values: {
             id: null,
@@ -164,7 +164,7 @@ const MeasureGroups = () => {
         });
       }
     }
-  }, [measureGroupNumber]);
+  }, [measureGroupNumber, measure.groups]);
 
   const defaultScoring = group?.scoring || "Select";
   const formik = useFormik({
@@ -278,6 +278,7 @@ const MeasureGroups = () => {
           setSuccessMessage(
             "Population details for this group updated successfully."
           );
+          formik.resetForm();
         })
 
         .catch((error) => {
@@ -295,7 +296,11 @@ const MeasureGroups = () => {
             ...measure,
             groups: updatedGroups,
           });
-          measure?.groups && setMeasureGroupNumber(measure?.groups.length);
+
+          //can be removed when validations for add new group is implemented
+          measure?.groups
+            ? setMeasureGroupNumber(measure?.groups.length)
+            : setMeasureGroupNumber(0);
         })
         .then(() => {
           setGenericErrorMessage("");
@@ -514,6 +519,7 @@ const MeasureGroups = () => {
                 buttonTitle="Discard Changes"
                 variant="white"
                 disabled={!formik.dirty}
+                data-testid="group-form-discard-btn"
               />
             </ButtonSpacer>
             <ButtonSpacer>
