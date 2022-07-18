@@ -459,7 +459,7 @@ describe("Measure Groups Page", () => {
     );
   });
 
-  test("should be able to discard", async () => {
+  test("Onclicking discard button,should be able to discard the changes", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "testDescription";
     measure.groups = [group];
