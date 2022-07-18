@@ -604,7 +604,7 @@ const MeasureGroups = () => {
                   </FieldSeparator>
                   <Divider />
                   <FieldLabel htmlFor="rate-aggregation">
-                    Improvment Notation
+                    Improvement Notation
                   </FieldLabel>
                   <FieldSeparator>
                     {canEdit && (
