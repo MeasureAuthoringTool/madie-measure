@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Fragment } from "react";
+import React, { useEffect, useState, Fragment, useRef } from "react";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
@@ -131,6 +131,8 @@ const MeasureGroups = () => {
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(0);
   const [group, setGroup] = useState<Group>();
 
+  const prevCountRef = useRef(0);
+
   // TODO: group will be coming from props when we separate this into separate component
 
   useEffect(() => {
@@ -238,6 +240,24 @@ const MeasureGroups = () => {
       options,
       subTitle: fieldProps.subTitle,
     };
+  };
+
+  const DiscardChanges = () => {
+    if (measureGroupNumber >= measure?.groups?.length || !measure?.groups) {
+      resetForm({
+        values: {
+          id: null,
+          groupDescription: "",
+          scoring: "Select",
+        },
+      });
+    } else {
+      resetForm({
+        values: {
+          ...measure?.groups[measureGroupNumber],
+        },
+      });
+    }
   };
 
   const submitForm = (group: Group) => {
@@ -520,6 +540,7 @@ const MeasureGroups = () => {
                 variant="white"
                 disabled={!formik.dirty}
                 data-testid="group-form-discard-btn"
+                onClick={() => DiscardChanges()}
               />
             </ButtonSpacer>
             <ButtonSpacer>

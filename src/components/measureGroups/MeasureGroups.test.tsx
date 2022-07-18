@@ -459,6 +459,55 @@ describe("Measure Groups Page", () => {
     );
   });
 
+  test("should be able to discard", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "testDescription";
+    measure.groups = [group];
+    renderMeasureGroupComponent();
+
+    expect(
+      (screen.getByRole("option", { name: "Cohort" }) as HTMLOptionElement)
+        .selected
+    ).toBe(true);
+
+    expect(
+      (
+        screen.getByRole("option", {
+          name: "Initial Population",
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
+
+    const definitionToUpdate =
+      "VTE Prophylaxis by Medication Administered or Device Applied";
+    // update initial population from dropdown
+    userEvent.selectOptions(
+      screen.getByTestId("select-measure-group-population"),
+      screen.getByText(definitionToUpdate)
+    );
+
+    expect(
+      (
+        screen.getByRole("option", {
+          name: definitionToUpdate,
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
+
+    expect(screen.getByTestId("group-form-discard-btn")).toBeEnabled();
+    userEvent.click(screen.getByTestId("group-form-discard-btn"));
+
+    expect(
+      (
+        screen.getByRole("option", {
+          name: "Initial Population",
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
+
+    expect(screen.getByTestId("group-form-discard-btn")).toBeDisabled();
+  });
+
   test("Should report an error if create population Group fails", async () => {
     renderMeasureGroupComponent();
     userEvent.selectOptions(
