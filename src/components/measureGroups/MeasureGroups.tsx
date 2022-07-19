@@ -240,7 +240,7 @@ const MeasureGroups = () => {
     };
   };
 
-  const DiscardChanges = () => {
+  const discardChanges = () => {
     if (measureGroupNumber >= measure?.groups?.length || !measure?.groups) {
       resetForm({
         values: {
@@ -538,7 +538,7 @@ const MeasureGroups = () => {
                 variant="white"
                 disabled={!formik.dirty}
                 data-testid="group-form-discard-btn"
-                onClick={() => DiscardChanges()}
+                onClick={() => discardChanges()}
               />
             </ButtonSpacer>
             <ButtonSpacer>
