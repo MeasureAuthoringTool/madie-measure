@@ -281,6 +281,24 @@ const MeasureGroups = () => {
     };
   };
 
+  const discardChanges = () => {
+    if (measureGroupNumber >= measure?.groups?.length || !measure?.groups) {
+      resetForm({
+        values: {
+          id: null,
+          groupDescription: "",
+          scoring: "Select",
+        },
+      });
+    } else {
+      resetForm({
+        values: {
+          ...measure?.groups[measureGroupNumber],
+        },
+      });
+    }
+  };
+
   const submitForm = (group: Group) => {
     if (group && group.population) {
       // remove any key/value pairs that do not have a valid define selected before saving to DB
@@ -671,6 +689,7 @@ const MeasureGroups = () => {
                 variant="white"
                 disabled={!formik.dirty}
                 data-testid="group-form-discard-btn"
+                onClick={() => discardChanges()}
               />
             </ButtonSpacer>
             <ButtonSpacer>
