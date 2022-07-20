@@ -219,8 +219,8 @@ describe("Measure Groups Page", () => {
     mockedAxios.post.mockResolvedValue({ data: { group } });
 
     // submit the form
-    userEvent.click(screen.getByTestId("group-form-submit-btn"));
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
 
     const alert = await screen.findByTestId("success-alerts");
 
@@ -269,8 +269,8 @@ describe("Measure Groups Page", () => {
 
     mockedAxios.post.mockResolvedValue({ data: { group } });
 
-    userEvent.click(screen.getByTestId("group-form-submit-btn"));
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
 
     expect(screen.getByTestId("add-measure-group-button")).toBeInTheDocument();
     expect(screen.getByTestId("AddIcon")).toBeInTheDocument();
@@ -310,8 +310,8 @@ describe("Measure Groups Page", () => {
 
     mockedAxios.post.mockResolvedValue({ data: { group } });
 
-    userEvent.click(screen.getByTestId("group-form-submit-btn"));
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
 
     const alert = await screen.findByTestId("success-alerts");
 
@@ -369,8 +369,8 @@ describe("Measure Groups Page", () => {
 
     mockedAxios.post.mockResolvedValue({ data: { group } });
 
-    userEvent.click(screen.getByTestId("group-form-submit-btn"));
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
 
     const alert1 = await screen.findByTestId("success-alerts");
     const expectedGroup2 = {
@@ -395,25 +395,6 @@ describe("Measure Groups Page", () => {
     expect(
       screen.getByTestId("leftPanelMeasureInformation-MeasureGroup2")
     ).toBeInTheDocument();
-
-    userEvent.click(
-      screen.getByTestId("leftPanelMeasureInformation-MeasureGroup1")
-    );
-
-    expect(
-      (
-        screen.getByRole("option", {
-          name: "Initial Population",
-        }) as HTMLOptionElement
-      ).selected
-    ).toBe(true);
-
-    group.id = "7p03-5r29-7O0I";
-    group.groupDescription = "testDescription";
-    measure.groups = [group];
-
-    userEvent.click(screen.getByTestId("group-form-submit-btn"));
-    expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
   });
 
   test("Should be able to update initial population of a population group", async () => {
@@ -460,10 +441,13 @@ describe("Measure Groups Page", () => {
       scoring: "Cohort",
       groupDescription: "testDescription",
     };
+    expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
 
     // submit the form
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
     const alert = await screen.findByTestId("success-alerts");
+    expect(screen.getByTestId("group-form-submit-btn")).toBeDisabled();
+    expect(screen.getByTestId("group-form-discard-btn")).toBeDisabled();
 
     expect(alert).toHaveTextContent(
       "Population details for this group updated successfully."
@@ -473,6 +457,55 @@ describe("Measure Groups Page", () => {
       expectedGroup,
       expect.anything()
     );
+  });
+
+  test("Onclicking discard button,should be able to discard the changes", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "testDescription";
+    measure.groups = [group];
+    renderMeasureGroupComponent();
+
+    expect(
+      (screen.getByRole("option", { name: "Cohort" }) as HTMLOptionElement)
+        .selected
+    ).toBe(true);
+
+    expect(
+      (
+        screen.getByRole("option", {
+          name: "Initial Population",
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
+
+    const definitionToUpdate =
+      "VTE Prophylaxis by Medication Administered or Device Applied";
+    // update initial population from dropdown
+    userEvent.selectOptions(
+      screen.getByTestId("select-measure-group-population"),
+      screen.getByText(definitionToUpdate)
+    );
+
+    expect(
+      (
+        screen.getByRole("option", {
+          name: definitionToUpdate,
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
+
+    expect(screen.getByTestId("group-form-discard-btn")).toBeEnabled();
+    userEvent.click(screen.getByTestId("group-form-discard-btn"));
+
+    expect(
+      (
+        screen.getByRole("option", {
+          name: "Initial Population",
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
+
+    expect(screen.getByTestId("group-form-discard-btn")).toBeDisabled();
   });
 
   test("Should report an error if create population Group fails", async () => {

@@ -47,9 +47,9 @@ export default function MeasureDetailsSidebar(
 
   useEffect(() => {
     if (links) setMeasureGroups(links);
-  }, []);
+  }, [measure?.groups]);
 
-  const AddNewBlankMeasureGroup = (e) => {
+  const addNewBlankMeasureGroup = (e) => {
     e.preventDefault();
     setMeasureGroupNumber(measureGroups.length);
     setMeasureGroups([
@@ -65,7 +65,7 @@ export default function MeasureDetailsSidebar(
     setSuccessMessage(undefined);
   };
 
-  const HandleMeasureGroupClick = (e) => {
+  const handleMeasureGroupClick = (e) => {
     e.preventDefault();
     setMeasureGroupNumber(parseInt(e.target.id));
     setSuccessMessage(undefined);
@@ -111,7 +111,7 @@ export default function MeasureDetailsSidebar(
             return (
               <LinkEl
                 key={linkInfo.title}
-                onClick={(e) => HandleMeasureGroupClick(e)}
+                onClick={(e) => handleMeasureGroupClick(e)}
                 to={linkInfo.href}
                 id={index}
                 data-testid={linkInfo.dataTestId}
@@ -121,7 +121,7 @@ export default function MeasureDetailsSidebar(
             );
           })}
         <button
-          onClick={(e) => AddNewBlankMeasureGroup(e)}
+          onClick={(e) => addNewBlankMeasureGroup(e)}
           data-testid="add-measure-group-button"
         >
           <AddIcon className="add-icon" fontSize="small" />
