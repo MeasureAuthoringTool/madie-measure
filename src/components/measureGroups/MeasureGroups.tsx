@@ -13,6 +13,7 @@ import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
 import * as _ from "lodash";
 import { MeasureGroupSchemaValidator } from "../../validations/MeasureGroupSchemaValidator";
 import { useOktaTokens } from "@madie/madie-util";
+import Ucum from "./Ucum";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
 const Content = styled.div(() => [tw`col-span-3`]);
@@ -528,6 +529,9 @@ const MeasureGroups = () => {
             )}
             {!canEdit && formik.values.scoring}
           </FormControl>
+
+          <Ucum></Ucum>
+
           <div>
             <MenuItemContainer>
               <MenuItem
