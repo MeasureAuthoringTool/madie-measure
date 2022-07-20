@@ -40,11 +40,33 @@ const Divider = styled.div`
 const ButtonSpacer = styled.span`
   margin-left: 15px;
 `;
+const Row = styled.section`
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  align-items: center;
+  margin-top: 14px;
+`;
+const Col = styled.article`
+  display: flex;
+  flex-direction: column;
+  padding-right: 2em;
+`;
 const GroupFooter = tw(Grid)`border-t border-b`;
 const GroupActions = styled.div(() => [tw`col-span-1 border-r p-1`]);
 const PopulationActions = styled.div(() => [
   "background-color: #f2f5f7;",
   tw`col-span-3 p-1 pl-6`,
+]);
+interface PropTypes {
+  isActive?: boolean;
+}
+
+const MenuItemContainer = tw.ul`bg-transparent flex px-8`;
+const MenuItem = styled.li((props: PropTypes) => [
+  tw`mr-1 text-white bg-slate rounded-t-md pl-3 pr-3 text-slate-90`,
+  props.isActive &&
+    tw`bg-white text-slate-90 font-medium border-solid border-b border-red-500`,
 ]);
 
 const FormField = tw.div`mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6`;
@@ -106,6 +128,22 @@ export const DefaultPopulationSelectorDefinitions = [
   },
 ];
 
+export const MeasureImprovementNotation = [
+  { label: "Select", subtitle: "Optional", code: "" },
+  {
+    label: "Increased score indicates improvement",
+    subtitle:
+      "Improvement is indicated as an increase in the score or measurement (e.g. Higher score indicates better quality).",
+    code: "increase",
+  },
+  {
+    label: "Decreased score indicates improvement",
+    subtitle:
+      "Improvement is indicated as a decrease in the score or measurement (e.g. Lower score indicates better quality).",
+    code: "decrease",
+  },
+];
+
 export interface ExpressionDefinition {
   expression?: string;
   expressionClass?: string;
@@ -126,6 +164,7 @@ const MeasureGroups = () => {
   const measureServiceApi = useMeasureServiceApi();
   const [genericErrorMessage, setGenericErrorMessage] = useState<string>();
   const [successMessage, setSuccessMessage] = useState<string>();
+  const [activeTab, setActiveTab] = useState<string>("population");
   const [warningMessage, setWarningMessage] = useState<boolean>(false);
   const [updateConfirm, setUpdateConfirm] = useState<boolean>(false);
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(0);
@@ -182,6 +221,8 @@ const MeasureGroups = () => {
         measurePopulationExclusion:
           group?.population?.measurePopulationExclusion || "",
       },
+      rateAggregation: group?.rateAggregation || "",
+      improvementNotation: group?.improvementNotation || "",
       groupDescription: group?.groupDescription,
     } as Group,
     validationSchema: MeasureGroupSchemaValidator,
@@ -240,6 +281,24 @@ const MeasureGroups = () => {
     };
   };
 
+  const discardChanges = () => {
+    if (measureGroupNumber >= measure?.groups?.length || !measure?.groups) {
+      resetForm({
+        values: {
+          id: null,
+          groupDescription: "",
+          scoring: "Select",
+        },
+      });
+    } else {
+      resetForm({
+        values: {
+          ...measure?.groups[measureGroupNumber],
+        },
+      });
+    }
+  };
+
   const submitForm = (group: Group) => {
     if (group && group.population) {
       // remove any key/value pairs that do not have a valid define selected before saving to DB
@@ -264,6 +323,8 @@ const MeasureGroups = () => {
                 groupDescription: g.groupDescription,
                 scoring: g.scoring,
                 population: g.population,
+                rateAggregation: g.rateAggregation,
+                improvementNotation: g.improvementNotation,
               };
             }
             return group;
@@ -384,6 +445,7 @@ const MeasureGroups = () => {
               </FormFieldInner>
             </FormField>
           </Header>
+
           {genericErrorMessage && (
             <Alert
               data-testid="error-alerts"
@@ -416,6 +478,7 @@ const MeasureGroups = () => {
             </Alert>
           )}
           {/* Form control later should be moved to own component and dynamically rendered by switch based on measure. */}
+
           <FormControl>
             {/* pull from cql file */}
             <SoftLabel htmlFor="scoring-unit-select">Group Scoring:</SoftLabel>
@@ -465,6 +528,36 @@ const MeasureGroups = () => {
             )}
             {!canEdit && formik.values.scoring}
           </FormControl>
+          <div>
+            <MenuItemContainer>
+              <MenuItem
+                data-testid="populations-tab"
+                isActive={activeTab == "population"}
+                onClick={() => setActiveTab("population")}
+              >
+                Populations{" "}
+                {!!formik.errors.population &&
+                  activeTab !== "population" &&
+                  "🚫"}
+              </MenuItem>
+              {formik.values.scoring !== "Ratio" && (
+                <MenuItem
+                  data-testid="stratifications-tab"
+                  isActive={activeTab == "stratification"}
+                  onClick={() => setActiveTab("stratification")}
+                >
+                  Stratifications
+                </MenuItem>
+              )}
+              <MenuItem
+                data-testid="reporting-tab"
+                isActive={activeTab == "reporting"}
+                onClick={() => setActiveTab("reporting")}
+              >
+                Reporting
+              </MenuItem>
+            </MenuItemContainer>
+          </div>
 
           {PopulationSelectorDefinitions.map((selectorDefinition) => {
             const selectorProps = populationSelectorProperties(
@@ -484,19 +577,95 @@ const MeasureGroups = () => {
             const formikFieldProps = formik.getFieldProps(
               `population.${selectorDefinition.key}`
             );
-            return (
-              <Fragment key={`select_${selectorDefinition.label}`}>
-                <Divider />
-                <MeasureGroupPopulationSelect
-                  {...selectorProps}
-                  {...formikFieldProps}
-                  helperText={error}
-                  error={!!error && !!touched}
-                  canEdit={canEdit}
-                />
-              </Fragment>
-            );
+
+            if (activeTab === "population") {
+              return (
+                <Fragment key={`select_${selectorDefinition.label}`}>
+                  <Divider />
+                  <MeasureGroupPopulationSelect
+                    {...selectorProps}
+                    {...formikFieldProps}
+                    helperText={error}
+                    error={!!error && !!touched}
+                    canEdit={canEdit}
+                  />
+                </Fragment>
+              );
+            }
           })}
+          {activeTab === "stratification" && (
+            <FormControl>
+              <Divider />
+              <FieldLabel>Stratification support to come</FieldLabel>
+            </FormControl>
+          )}
+          {activeTab === "reporting" && (
+            <FormControl>
+              <FormField>
+                <FormFieldInner>
+                  <FieldLabel htmlFor="rate-aggregation">
+                    Rate Aggregation
+                  </FieldLabel>
+                  <FieldSeparator>
+                    {canEdit && (
+                      <FieldInput
+                        value={formik.values.rateAggregation}
+                        type="text"
+                        name="rate-aggregation"
+                        id="rate-aggregation"
+                        autoComplete="rate-aggregation"
+                        placeholder="Rate Aggregation"
+                        data-testid="rateAggregationText"
+                        {...formik.getFieldProps("rateAggregation")}
+                      />
+                    )}
+                  </FieldSeparator>
+                  <Divider />
+                  <FieldLabel htmlFor="rate-aggregation">
+                    Improvement Notation
+                  </FieldLabel>
+                  <FieldSeparator>
+                    {canEdit && (
+                      <TextField
+                        select
+                        id="improvement-notation-select"
+                        label=""
+                        value={formik.values.improvementNotation}
+                        inputProps={{
+                          "data-testid": "improvement-notation-select",
+                        }}
+                        onChange={(e) => {
+                          formik.setFieldValue(
+                            "improvementNotation",
+                            e.target.value
+                          );
+                        }}
+                        InputLabelProps={{ shrink: false }}
+                        SelectProps={{
+                          native: true,
+                        }}
+                        name="type"
+                      >
+                        {Object.values(MeasureImprovementNotation).map(
+                          (opt, i) => (
+                            <option
+                              key={`${opt.code}-${i}`}
+                              value={opt.label}
+                              data-testid="improvement-notation-option"
+                            >
+                              {opt.label}
+                            </option>
+                          )
+                        )}
+                      </TextField>
+                    )}
+                    {!canEdit && formik.values.improvementNotation}
+                  </FieldSeparator>
+                </FormFieldInner>
+              </FormField>
+            </FormControl>
+          )}
+
           <br />
         </Content>
       </Grid>
@@ -520,6 +689,7 @@ const MeasureGroups = () => {
                 variant="white"
                 disabled={!formik.dirty}
                 data-testid="group-form-discard-btn"
+                onClick={() => discardChanges()}
               />
             </ButtonSpacer>
             <ButtonSpacer>
