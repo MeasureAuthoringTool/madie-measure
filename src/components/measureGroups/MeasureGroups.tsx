@@ -143,6 +143,32 @@ export const MeasureImprovementNotation = [
     code: "decrease",
   },
 ];
+export const StratifcationSelect = [
+  { label: "-", subtitle: "Optional", code: "" },
+  {
+    label: "Unsure what goes here, will follow up",
+    code: "",
+    subtitle: "",
+  },
+];
+
+export const AssociationSelect = {
+  Proportion: [
+    "Initial Population",
+    "Denominator",
+    "Denominator Exclusion",
+    "Numerator",
+    "Numerator Exclusion",
+    "Denominator Exception",
+  ],
+  "Continuous Variable": [
+    "Initial Population",
+    "Measure Population",
+    "Measure Population Exclusion",
+  ],
+  Cohort: ["Initial Population"],
+  Ratio: [],
+};
 
 export interface ExpressionDefinition {
   expression?: string;
@@ -392,7 +418,7 @@ const MeasureGroups = () => {
           dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
         },
       ];
-
+  const stratificationList = [{}];
   const warningTemplate = (
     <>
       <ButtonSpacer>
@@ -513,6 +539,7 @@ const MeasureGroups = () => {
                       },
                     },
                   });
+                  setActiveTab("population");
                 }}
               >
                 {Object.values(GroupScoring).map((opt, i) => (
@@ -595,8 +622,75 @@ const MeasureGroups = () => {
           })}
           {activeTab === "stratification" && (
             <FormControl>
-              <Divider />
-              <FieldLabel>Stratification support to come</FieldLabel>
+              <Col>
+                <FieldLabel htmlFor="stratification-select">
+                  Stratification ##
+                </FieldLabel>
+                <TextField
+                  select
+                  id="stratification-select"
+                  label=""
+                  //value={formik.values.improvementNotation}
+                  inputProps={{
+                    "data-testid": "stratification-select",
+                  }}
+                  // onChange={(e) => {
+                  //   formik.setFieldValue(
+                  //     "improvementNotation",
+                  //     e.target.value
+                  //   );
+                  // }}
+                  InputLabelProps={{ shrink: false }}
+                  SelectProps={{
+                    native: true,
+                  }}
+                  name="type"
+                >
+                  {Object.values(StratifcationSelect).map((opt, i) => (
+                    <option
+                      key={`${opt.code}-${i}`}
+                      value={opt.label}
+                      data-testid="stratification-select-option"
+                    >
+                      {opt.label}
+                    </option>
+                  ))}
+                </TextField>
+                <FieldLabel htmlFor="association-select">
+                  Association ##
+                </FieldLabel>
+                <TextField
+                  select
+                  id="association-select"
+                  label=""
+                  //value={formik.values.improvementNotation}
+                  inputProps={{
+                    "data-testid": "association-select",
+                  }}
+                  // onChange={(e) => {
+                  //   formik.setFieldValue(
+                  //     "improvementNotation",
+                  //     e.target.value
+                  //   );
+                  // }}
+                  InputLabelProps={{ shrink: false }}
+                  SelectProps={{
+                    native: true,
+                  }}
+                  name="type"
+                >
+                  {Object.values(AssociationSelect[formik.values.scoring]).map(
+                    (opt, i) => (
+                      <option
+                        key={`${i}`}
+                        data-testid="association-select-option"
+                      >
+                        {opt}
+                      </option>
+                    )
+                  )}
+                </TextField>
+              </Col>
             </FormControl>
           )}
           {activeTab === "reporting" && (
