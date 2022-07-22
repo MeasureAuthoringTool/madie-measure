@@ -298,17 +298,31 @@ describe("Measure Groups Page", () => {
   });
 
   test("Should be able to save multiple groups  ", async () => {
-    const { getByTestId, getByText } = renderMeasureGroupComponent();
+    renderMeasureGroupComponent();
 
+    // measure group type
+    const measureGroupTypeSelect = screen.getByTestId(
+      "measure-group-type-dropdown"
+    );
+    userEvent.click(getByRole(measureGroupTypeSelect, "button"));
+    await waitFor(() => {
+      userEvent.click(screen.getByText("Patient Reported Outcome"));
+    });
+    // after selecting measure group type, need to collapse the dropdown
+    fireEvent.click(screen.getByRole("presentation").firstChild);
+
+    // scoring type select
     userEvent.selectOptions(
       screen.getByTestId("scoring-unit-select"),
       "Cohort"
     );
+
     // select initial population from dropdown
     userEvent.selectOptions(
       screen.getByTestId("select-measure-group-population"),
       "Initial Population"
     );
+
     expect(
       (
         screen.getByRole("option", {
@@ -317,15 +331,9 @@ describe("Measure Groups Page", () => {
       ).selected
     ).toBe(true);
 
-    const input = getByTestId("groupDescriptionInput");
+    const input = screen.getByTestId("groupDescriptionInput");
     fireEvent.change(input, {
       target: { value: "new description" },
-    });
-
-    const measureGroupTypeSelect = getByTestId("measure-group-type-dropdown");
-    userEvent.click(getByRole(measureGroupTypeSelect, "button"));
-    await waitFor(() => {
-      userEvent.click(getByText("Patient Reported Outcome"));
     });
 
     mockedAxios.post.mockResolvedValue({ data: { group } });
@@ -359,7 +367,7 @@ describe("Measure Groups Page", () => {
       screen.getByTestId("leftPanelMeasureInformation-MeasureGroup1")
     ).toBeInTheDocument();
 
-    //adding measure group 2
+    // adding measure group 2
 
     expect(screen.getByTestId("add-measure-group-button")).toBeInTheDocument();
     expect(screen.getByTestId("AddIcon")).toBeInTheDocument();
@@ -375,25 +383,30 @@ describe("Measure Groups Page", () => {
       screen.getByTestId("select-measure-group-population"),
       "Initial Population"
     );
-    // expect(
-    //   (
-    //     screen.getByRole("option", {
-    //       name: "Initial Population",
-    //     }) as HTMLOptionElement
-    //   ).selected
-    // ).toBe(true);
+    expect(
+      (
+        screen.getByRole("option", {
+          name: "Initial Population",
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
 
-    const newMeasureInput = getByTestId("groupDescriptionInput");
+    const newMeasureInput = screen.getByTestId("groupDescriptionInput");
     fireEvent.change(newMeasureInput, {
       target: { value: "new description for group 2" },
     });
 
-    const measureGroupTypeSelect2 = getByTestId("measure-group-type-dropdown");
+    const measureGroupTypeSelect2 = screen.getByTestId(
+      "measure-group-type-dropdown"
+    );
     userEvent.click(await getByRole(measureGroupTypeSelect2, "button"));
 
     await waitFor(() => {
-      userEvent.click(getByText("Patient Reported Outcome"));
+      userEvent.click(screen.getByText("Patient Reported Outcome"));
     });
+
+    // after selecting measure group type, need to collapse the dropdown
+    fireEvent.click(screen.getByRole("presentation").firstChild);
 
     mockedAxios.post.mockResolvedValue({ data: { group } });
 
