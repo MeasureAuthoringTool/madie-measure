@@ -250,6 +250,10 @@ const MeasureGroups = () => {
       rateAggregation: group?.rateAggregation || "",
       improvementNotation: group?.improvementNotation || "",
       groupDescription: group?.groupDescription,
+      stratifications: group?.stratifications || [
+        { description: "", cqlDefinition: "", association: "", id: "" },
+        { description: "", cqlDefinition: "", association: "", id: "" },
+      ],
     } as Group,
     validationSchema: MeasureGroupSchemaValidator,
     onSubmit: (group: Group) => {
@@ -418,7 +422,7 @@ const MeasureGroups = () => {
           dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
         },
       ];
-  const stratificationList = [{}];
+
   const warningTemplate = (
     <>
       <ButtonSpacer>
@@ -571,7 +575,34 @@ const MeasureGroups = () => {
                 <MenuItem
                   data-testid="stratifications-tab"
                   isActive={activeTab == "stratification"}
-                  onClick={() => setActiveTab("stratification")}
+                  onClick={() => {
+                    setActiveTab("stratification");
+                    if (!!formik.values.stratifications) {
+                      while (formik.values.stratifications.length < 2) {
+                        formik.values.stratifications.push({
+                          cqlDefinition: "",
+                          description: "",
+                          association: "",
+                          id: "",
+                        });
+                      }
+                    } else {
+                      formik.values.stratifications = [
+                        {
+                          cqlDefinition: "",
+                          description: "",
+                          association: "",
+                          id: "",
+                        },
+                        {
+                          cqlDefinition: "",
+                          description: "",
+                          association: "",
+                          id: "",
+                        },
+                      ];
+                    }
+                  }}
                 >
                   Stratifications
                 </MenuItem>
@@ -622,75 +653,85 @@ const MeasureGroups = () => {
           })}
           {activeTab === "stratification" && (
             <FormControl>
-              <Col>
-                <FieldLabel htmlFor="stratification-select">
-                  Stratification ##
-                </FieldLabel>
-                <TextField
-                  select
-                  id="stratification-select"
-                  label=""
-                  //value={formik.values.improvementNotation}
-                  inputProps={{
-                    "data-testid": "stratification-select",
-                  }}
-                  // onChange={(e) => {
-                  //   formik.setFieldValue(
-                  //     "improvementNotation",
-                  //     e.target.value
-                  //   );
-                  // }}
-                  InputLabelProps={{ shrink: false }}
-                  SelectProps={{
-                    native: true,
-                  }}
-                  name="type"
-                >
-                  {Object.values(StratifcationSelect).map((opt, i) => (
-                    <option
-                      key={`${opt.code}-${i}`}
-                      value={opt.label}
-                      data-testid="stratification-select-option"
-                    >
-                      {opt.label}
-                    </option>
-                  ))}
-                </TextField>
-                <FieldLabel htmlFor="association-select">
-                  Association ##
-                </FieldLabel>
-                <TextField
-                  select
-                  id="association-select"
-                  label=""
-                  //value={formik.values.improvementNotation}
-                  inputProps={{
-                    "data-testid": "association-select",
-                  }}
-                  // onChange={(e) => {
-                  //   formik.setFieldValue(
-                  //     "improvementNotation",
-                  //     e.target.value
-                  //   );
-                  // }}
-                  InputLabelProps={{ shrink: false }}
-                  SelectProps={{
-                    native: true,
-                  }}
-                  name="type"
-                >
-                  {Object.values(AssociationSelect[formik.values.scoring]).map(
-                    (opt, i) => (
+              <Row>
+                <Col>
+                  <FieldLabel htmlFor="stratification-select">
+                    Stratification ##
+                  </FieldLabel>
+                  <TextField
+                    select
+                    id="stratification-select"
+                    label=""
+                    //value={formik.values.stratifications[0].cqlDefinition}
+                    inputProps={{
+                      "data-testid": "stratification-select",
+                    }}
+                    // onChange={(e) => {
+                    //   formik.setFieldValue(
+                    //     "improvementNotation",
+                    //     e.target.value
+                    //   );
+                    // }}
+                    InputLabelProps={{ shrink: false }}
+                    SelectProps={{
+                      native: true,
+                    }}
+                    name="type"
+                  >
+                    {Object.values(StratifcationSelect).map((opt, i) => (
                       <option
-                        key={`${i}`}
-                        data-testid="association-select-option"
+                        key={`${opt.code}-${i}`}
+                        value={opt.label}
+                        data-testid="stratification-select-option"
                       >
-                        {opt}
+                        {opt.label}
                       </option>
-                    )
-                  )}
-                </TextField>
-              </Col>
+                    ))}
+                  </TextField>
+                  <FieldLabel htmlFor="association-select">
+                    Association ##
+                  </FieldLabel>
+                  <TextField
+                    select
+                    id="association-select"
+                    label=""
+                    //value={formik.values.stratifications[0].association}
+                    inputProps={{
+                      "data-testid": "association-select",
+                    }}
+                    // onChange={(e) => {
+                    //   formik.setFieldValue(
+                    //     "stratifications[0].association",
+                    //     e.target.value
+                    //   );
+                    // }}
+                    InputLabelProps={{ shrink: false }}
+                    SelectProps={{
+                      native: true,
+                    }}
+                    name="type"
+                  ></TextField>
+                </Col>
+                <Col>
+                  <FieldLabel htmlFor="stratification-description">
+                    Stratification ## Description
+                  </FieldLabel>
+                  <FieldSeparator>
+                    {canEdit && (
+                      <textarea
+                        //value={formik.values.rateAggregation}
+                        //type="text"
+                        name="stratification-description"
+                        id="stratification-description"
+                        autoComplete="stratification-description"
+                        placeholder="Enter Description"
+                        data-testid="stratificationDescriptionText"
+                        //{...formik.getFieldProps("rateAggregation")}
+                      />
+                    )}
+                  </FieldSeparator>
+                </Col>
+              </Row>
             </FormControl>
           )}
           {activeTab === "reporting" && (
