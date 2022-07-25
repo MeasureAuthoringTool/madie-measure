@@ -13,6 +13,8 @@ import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
 import * as _ from "lodash";
 import { MeasureGroupSchemaValidator } from "../../validations/MeasureGroupSchemaValidator";
 import { useOktaTokens } from "@madie/madie-util";
+import DeleteMeasureGroupDialog from "./DeleteMeasureGroupDialog";
+import classNames from "classnames";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
 const Content = styled.div(() => [tw`col-span-3`]);
@@ -46,6 +48,10 @@ const Row = styled.section`
   flex-grow: 1;
   align-items: center;
   margin-top: 14px;
+`;
+const End = styled.section`
+    justifyContent: "flex-end",
+    marginBottom: -23,
 `;
 const Col = styled.article`
   display: flex;
@@ -153,6 +159,11 @@ export interface ExpressionDefinition {
   text?: string;
 }
 
+export interface DeleteMeasureGroupDialog {
+  open?: boolean;
+  measureGroupNumber?: number;
+}
+
 const MeasureGroups = () => {
   const [expressionDefinitions, setExpressionDefinitions] = useState<
     Array<ExpressionDefinition>
@@ -169,6 +180,12 @@ const MeasureGroups = () => {
   const [updateConfirm, setUpdateConfirm] = useState<boolean>(false);
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(0);
   const [group, setGroup] = useState<Group>();
+  const [deleteMeasureGroupDialog, setDeleteMeasureGroupDialog] =
+    useState<DeleteMeasureGroupDialog>({
+      open: false,
+      measureGroupNumber: undefined,
+    });
+  const flexEnd = classNames(ButtonSpacer, End);
 
   // TODO: group will be coming from props when we separate this into separate component
 
@@ -376,6 +393,27 @@ const MeasureGroups = () => {
     }
   };
 
+  const handleDialogClose = () => {
+    setDeleteMeasureGroupDialog({
+      open: false,
+      measureGroupNumber: undefined,
+    });
+  };
+
+  const deleteMeasureGroup = (e) => {
+    e.preventDefault();
+    measureServiceApi
+      .deleteMeasureGroup(measure?.groups[measureGroupNumber]?.id, measure.id)
+      .then((response) => {
+        setMeasure(response);
+        measure?.groups &&
+          setMeasureGroupNumber(
+            measureGroupNumber === 0 ? 0 : measureGroupNumber - 1
+          );
+        handleDialogClose();
+      });
+  };
+
   // Local state to later populate the left nav and and govern routes based on group ids
   const baseURL = "/measures/" + measure.id + "/edit/measure-groups";
   const measureGroups = measure?.groups
@@ -445,6 +483,13 @@ const MeasureGroups = () => {
               </FormFieldInner>
             </FormField>
           </Header>
+
+          <DeleteMeasureGroupDialog
+            open={deleteMeasureGroupDialog.open}
+            onClose={handleDialogClose}
+            onSubmit={deleteMeasureGroup}
+            measureGroupNumber={deleteMeasureGroupDialog.measureGroupNumber}
+          />
 
           {genericErrorMessage && (
             <Alert
@@ -701,6 +746,28 @@ const MeasureGroups = () => {
                   ? ""
                   : "You must set all required Populations."}
               </span>
+            </ButtonSpacer>
+
+            <ButtonSpacer>
+              <Button
+                style={{ background: "#424B5A" }}
+                type="submit"
+                buttonTitle="Delete"
+                data-testid="group-form-delete-btn"
+                className={flexEnd}
+                disabled={
+                  measureGroupNumber >= measure?.groups?.length ||
+                  !measure?.groups
+                }
+                onClick={(e) => {
+                  e.preventDefault();
+                  console.log(measureGroupNumber);
+                  setDeleteMeasureGroupDialog({
+                    open: true,
+                    measureGroupNumber: measureGroupNumber,
+                  });
+                }}
+              />
             </ButtonSpacer>
           </PopulationActions>
         </GroupFooter>

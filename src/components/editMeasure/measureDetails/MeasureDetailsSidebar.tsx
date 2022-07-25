@@ -47,6 +47,17 @@ export default function MeasureDetailsSidebar(
 
   useEffect(() => {
     if (links) setMeasureGroups(links);
+
+    if (!measure?.groups?.length) {
+      const baseURL = "/measures/" + measure?.id + "/edit/measure-groups";
+      setMeasureGroups([
+        {
+          title: "MEASURE GROUP 1",
+          href: `${baseURL}`,
+          dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
+        },
+      ]);
+    }
   }, [measure?.groups]);
 
   const addNewBlankMeasureGroup = (e) => {

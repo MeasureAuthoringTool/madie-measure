@@ -88,6 +88,30 @@ export class MeasureServiceApi {
     }
   }
 
+  async deleteMeasureGroup(
+    groupId: string,
+    measureId: string
+  ): Promise<Measure> {
+    try {
+      const response = await axios.delete(
+        `${this.baseUrl}/measures/${measureId}/groups/${groupId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      const message = this.buildErrorMessage(
+        err,
+        "Failed to delete the measure group."
+      );
+      console.error(message, err);
+      throw new Error(message);
+    }
+  }
+
   async updateGroup(group: Group, measureId: string): Promise<Group> {
     try {
       const response = await axios.put<Group>(

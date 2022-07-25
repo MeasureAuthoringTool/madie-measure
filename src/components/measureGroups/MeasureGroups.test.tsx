@@ -283,6 +283,43 @@ describe("Measure Groups Page", () => {
     ).toBeInTheDocument();
   });
 
+  test("Oncliking delete button, delete measure modal is displayed", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "testDescription";
+    measure.groups = [group];
+    renderMeasureGroupComponent();
+
+    expect(
+      (screen.getByRole("option", { name: "Cohort" }) as HTMLOptionElement)
+        .selected
+    ).toBe(true);
+
+    expect(
+      (
+        screen.getByRole("option", {
+          name: "Initial Population",
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
+
+    expect(screen.getByText("MEASURE GROUP 1")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("leftPanelMeasureInformation-MeasureGroup1")
+    ).toBeInTheDocument();
+
+    expect(screen.getByTestId("group-form-delete-btn")).toBeInTheDocument();
+    expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
+
+   
+    userEvent.click(screen.getByTestId("group-form-delete-btn"));
+
+    expect(screen.getByTestId("delete-measure-modal-cancel-btn")).toBeInTheDocument();
+    expect(screen.getByTestId("delete-measure-modal-cancel-btn")).toBeEnabled();
+
+    expect(screen.getByTestId("delete-measure-modal-delete-btn")).toBeInTheDocument();
+    expect(screen.getByTestId("delete-measure-modal-delete-btn")).toBeEnabled();
+  });
+
   test("Should be able to save multiple groups  ", async () => {
     const { getByTestId } = renderMeasureGroupComponent();
 
@@ -507,6 +544,8 @@ describe("Measure Groups Page", () => {
 
     expect(screen.getByTestId("group-form-discard-btn")).toBeDisabled();
   });
+
+  
 
   test("Should report an error if create population Group fails", async () => {
     renderMeasureGroupComponent();
