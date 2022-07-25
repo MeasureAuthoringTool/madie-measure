@@ -1,12 +1,17 @@
 import React from "react";
-import { Theme, useTheme } from "@mui/material/styles";
-import Box from "@mui/material/Box";
+import tw, { styled } from "twin.macro";
 import OutlinedInput from "@mui/material/OutlinedInput";
-import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-import Chip from "@mui/material/Chip";
+import { Checkbox, ListItemText } from "@mui/material";
+
+const SoftLabel = styled.label`
+  display: block;
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: rgba(66, 75, 90, 0.7);
+`;
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -19,19 +24,6 @@ const MenuProps = {
   },
 };
 
-function getStyles(
-  value: string,
-  selectedList: readonly string[],
-  theme: Theme
-) {
-  return {
-    fontWeight:
-      selectedList.indexOf(value) === -1
-        ? theme.typography.fontWeightRegular
-        : theme.typography.fontWeightMedium,
-  };
-}
-
 export default function MultipleSelectDropDown(props: {
   values: string[];
   selectedValues: string[];
@@ -39,38 +31,37 @@ export default function MultipleSelectDropDown(props: {
   label: string;
   id: string;
 }) {
-  const theme = useTheme();
   return (
     <div>
-      <FormControl sx={{ m: 1, width: 300 }}>
-        <InputLabel variant="outlined" id="multiple-select-dropdown">
-          Measure Group Type
-        </InputLabel>
+      <FormControl sx={{ m: 1, width: 300, mt: 3 }}>
+        <SoftLabel htmlFor="multiple-select-dropdown">
+          Measure Group type:
+        </SoftLabel>
         <Select
           labelId="multiple-select-dropdown"
           data-testid={`${props.id}-dropdown`}
           multiple
+          displayEmpty
           {...props.formControl}
           input={
             <OutlinedInput id="select-multiple-dropdown" label={props.label} />
           }
-          renderValue={(selected: any) => (
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-              {selected.map((value) => (
-                <Chip key={value} label={value} />
-              ))}
-            </Box>
-          )}
+          renderValue={(selected: any) => {
+            if (selected.length === 0) {
+              return <em>Select all that apply</em>;
+            }
+            return selected.join(", ");
+          }}
           native={false}
           MenuProps={MenuProps}
         >
+          <MenuItem disabled value="">
+            <em>Select all that apply</em>
+          </MenuItem>
           {props.values.map((value) => (
-            <MenuItem
-              key={value}
-              value={value}
-              style={getStyles(value, props.selectedValues, theme)}
-            >
-              {value}
+            <MenuItem key={value} value={value}>
+              <Checkbox checked={props.selectedValues.indexOf(value) > -1} />
+              <ListItemText primary={value} />
             </MenuItem>
           ))}
         </Select>
