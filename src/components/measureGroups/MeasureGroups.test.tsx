@@ -310,13 +310,16 @@ describe("Measure Groups Page", () => {
     expect(screen.getByTestId("group-form-delete-btn")).toBeInTheDocument();
     expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
 
-   
     userEvent.click(screen.getByTestId("group-form-delete-btn"));
 
-    expect(screen.getByTestId("delete-measure-modal-cancel-btn")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("delete-measure-modal-cancel-btn")
+    ).toBeInTheDocument();
     expect(screen.getByTestId("delete-measure-modal-cancel-btn")).toBeEnabled();
 
-    expect(screen.getByTestId("delete-measure-modal-delete-btn")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("delete-measure-modal-delete-btn")
+    ).toBeInTheDocument();
     expect(screen.getByTestId("delete-measure-modal-delete-btn")).toBeEnabled();
   });
 
@@ -544,8 +547,6 @@ describe("Measure Groups Page", () => {
 
     expect(screen.getByTestId("group-form-discard-btn")).toBeDisabled();
   });
-
-  
 
   test("Should report an error if create population Group fails", async () => {
     renderMeasureGroupComponent();

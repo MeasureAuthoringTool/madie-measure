@@ -761,7 +761,6 @@ const MeasureGroups = () => {
                 }
                 onClick={(e) => {
                   e.preventDefault();
-                  console.log(measureGroupNumber);
                   setDeleteMeasureGroupDialog({
                     open: true,
                     measureGroupNumber: measureGroupNumber,
