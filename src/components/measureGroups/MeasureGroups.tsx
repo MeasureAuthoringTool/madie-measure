@@ -2,7 +2,7 @@ import React, { useEffect, useState, Fragment } from "react";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
-import { Group, GroupScoring } from "@madie/madie-models";
+import { Group, GroupScoring, MeasureGroupTypes } from "@madie/madie-models";
 import { Alert, TextField } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import MeasureDetailsSidebar from "../editMeasure/measureDetails/MeasureDetailsSidebar";
@@ -13,6 +13,7 @@ import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
 import * as _ from "lodash";
 import { MeasureGroupSchemaValidator } from "../../validations/MeasureGroupSchemaValidator";
 import { useOktaTokens } from "@madie/madie-util";
+import MultipleSelectDropDown from "./MultipleSelectDropDown";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
 const Content = styled.div(() => [tw`col-span-3`]);
@@ -199,6 +200,7 @@ const MeasureGroups = () => {
               measurePopulationExclusion: "",
             },
             groupDescription: "",
+            measureGroupTypes: [],
           },
         });
       }
@@ -224,6 +226,7 @@ const MeasureGroups = () => {
       rateAggregation: group?.rateAggregation || "",
       improvementNotation: group?.improvementNotation || "",
       groupDescription: group?.groupDescription,
+      measureGroupTypes: group?.measureGroupTypes || [],
     } as Group,
     validationSchema: MeasureGroupSchemaValidator,
     onSubmit: (group: Group) => {
@@ -288,6 +291,7 @@ const MeasureGroups = () => {
           id: null,
           groupDescription: "",
           scoring: "Select",
+          measureGroupTypes: [],
         },
       });
     } else {
@@ -325,6 +329,7 @@ const MeasureGroups = () => {
                 population: g.population,
                 rateAggregation: g.rateAggregation,
                 improvementNotation: g.improvementNotation,
+                measureGroupTypes: g.measureGroupTypes || [],
               };
             }
             return group;
@@ -409,6 +414,7 @@ const MeasureGroups = () => {
       </ButtonSpacer>
     </>
   );
+
   return (
     <form onSubmit={formik.handleSubmit}>
       <Grid>
@@ -443,6 +449,15 @@ const MeasureGroups = () => {
                   {!canEdit && formik.values.groupDescription}
                 </FieldSeparator>
               </FormFieldInner>
+            </FormField>
+            <FormField>
+              <MultipleSelectDropDown
+                values={Object.values(MeasureGroupTypes)}
+                selectedValues={formik.values.measureGroupTypes}
+                formControl={formik.getFieldProps("measureGroupTypes")}
+                label="Measure Group Type"
+                id="measure-group-type"
+              />
             </FormField>
           </Header>
 
