@@ -49,10 +49,6 @@ const Row = styled.section`
   align-items: center;
   margin-top: 14px;
 `;
-const End = styled.section`
-    justifyContent: "flex-end",
-    marginBottom: -23,
-`;
 const Col = styled.article`
   display: flex;
   flex-direction: column;
@@ -185,7 +181,6 @@ const MeasureGroups = () => {
       open: false,
       measureGroupNumber: undefined,
     });
-  const flexEnd = classNames(ButtonSpacer, End);
 
   // TODO: group will be coming from props when we separate this into separate component
 
@@ -754,7 +749,6 @@ const MeasureGroups = () => {
                 type="submit"
                 buttonTitle="Delete"
                 data-testid="group-form-delete-btn"
-                className={flexEnd}
                 disabled={
                   measureGroupNumber >= measure?.groups?.length ||
                   !measure?.groups

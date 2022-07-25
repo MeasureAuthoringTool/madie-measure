@@ -22,10 +22,6 @@ const useStyles = makeStyles({
     overflow: "visible",
     marginTop: -20,
   },
-  end: {
-    justifyContent: "flex-end",
-    marginBottom: -23,
-  },
   dialogTitle: {
     display: "flex",
     flexDirection: "row",
