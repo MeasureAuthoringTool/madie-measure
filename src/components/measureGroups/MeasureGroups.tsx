@@ -167,7 +167,7 @@ const MeasureGroups = () => {
   const { measure, setMeasure } = useCurrentMeasure();
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
-  const canEdit = userName === measure.createdBy;
+  const canEdit = userName === measure?.createdBy;
   const measureServiceApi = useMeasureServiceApi();
   const [genericErrorMessage, setGenericErrorMessage] = useState<string>();
   const [successMessage, setSuccessMessage] = useState<string>();
@@ -215,7 +215,7 @@ const MeasureGroups = () => {
         });
       }
     }
-  }, [measureGroupNumber, measure.groups]);
+  }, [measureGroupNumber, measure?.groups]);
 
   const defaultScoring = group?.scoring || "Select";
   const formik = useFormik({
@@ -260,7 +260,7 @@ const MeasureGroups = () => {
   const { resetForm } = formik;
 
   useEffect(() => {
-    if (measure.cql) {
+    if (measure?.cql) {
       const definitions = new CqlAntlr(measure.cql).parse()
         .expressionDefinitions;
       setExpressionDefinitions(definitions);
@@ -410,7 +410,7 @@ const MeasureGroups = () => {
   };
 
   // Local state to later populate the left nav and and govern routes based on group ids
-  const baseURL = "/measures/" + measure.id + "/edit/measure-groups";
+  const baseURL = "/measures/" + measure?.id + "/edit/measure-groups";
   const measureGroups = measure?.groups
     ? measure.groups?.map((group, id) => ({
         ...group,

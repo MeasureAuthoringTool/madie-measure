@@ -93,15 +93,20 @@ export class MeasureServiceApi {
     measureId: string
   ): Promise<Measure> {
     try {
-      const response = await axios.delete(
-        `${this.baseUrl}/measures/${measureId}/groups/${groupId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${this.getAccessToken()}`,
-          },
-        }
-      );
-      return response.data;
+      if (groupId && measureId) {
+        const response = await axios.delete(
+          `${this.baseUrl}/measures/${measureId}/groups/${groupId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${this.getAccessToken()}`,
+            },
+          }
+        );
+        return response.data;
+      } else {
+        console.error("Group or Measure Id cannot be null");
+        throw new Error("Group or Measure Id cannot be null");
+      }
     } catch (err) {
       const message = this.buildErrorMessage(
         err,
