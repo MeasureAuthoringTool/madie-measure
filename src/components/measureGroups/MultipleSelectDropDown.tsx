@@ -4,7 +4,7 @@ import OutlinedInput from "@mui/material/OutlinedInput";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-import { Checkbox, ListItemText } from "@mui/material";
+import { Checkbox, Link, ListItemText } from "@mui/material";
 
 const SoftLabel = styled.label`
   display: block;
@@ -30,6 +30,7 @@ export default function MultipleSelectDropDown(props: {
   formControl: any;
   label: string;
   id: string;
+  clearAll: any;
 }) {
   return (
     <div>
@@ -64,6 +65,11 @@ export default function MultipleSelectDropDown(props: {
               <ListItemText primary={value} />
             </MenuItem>
           ))}
+          <MenuItem value="">
+            <Link underline="always" onClick={props.clearAll}>
+              Clear
+            </Link>
+          </MenuItem>
         </Select>
       </FormControl>
     </div>
