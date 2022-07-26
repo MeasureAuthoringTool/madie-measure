@@ -5,7 +5,7 @@ import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import { Group, GroupScoring } from "@madie/madie-models";
 import { Alert, TextField } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
-import MeasureDetailsSidebar from "../editMeasure/measureDetails/MeasureDetailsSidebar";
+import EditMeasureSideBarNav from "../editMeasure/measureDetails/EditMeasureSideBarNav";
 import { Button } from "@madie/madie-components";
 import { useFormik } from "formik";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
@@ -445,7 +445,7 @@ const MeasureGroups = () => {
   return (
     <form onSubmit={formik.handleSubmit}>
       <Grid>
-        <MeasureDetailsSidebar
+        <EditMeasureSideBarNav
           links={measureGroups}
           setMeasureGroupNumber={setMeasureGroupNumber}
           measure={measure}

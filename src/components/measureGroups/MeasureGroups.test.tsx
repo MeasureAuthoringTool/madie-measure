@@ -316,13 +316,15 @@ describe("Measure Groups Page", () => {
     userEvent.click(screen.getByTestId("group-form-delete-btn"));
 
     expect(
-      screen.getByTestId("delete-measure-modal-cancel-btn")
+      screen.getByTestId("delete-measure-group-modal-cancel-btn")
     ).toBeInTheDocument();
     expect(
-      screen.getByTestId("delete-measure-modal-delete-btn")
+      screen.getByTestId("delete-measure-group-modal-delete-btn")
     ).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId("delete-measure-modal-cancel-btn"));
+    userEvent.click(
+      screen.getByTestId("delete-measure-group-modal-cancel-btn")
+    );
     expect(screen.getByTestId("groupDescriptionInput")).toHaveValue(
       "testDescription"
     );
@@ -347,11 +349,11 @@ describe("Measure Groups Page", () => {
     userEvent.click(screen.getByTestId("group-form-delete-btn"));
 
     expect(
-      screen.getByTestId("delete-measure-modal-cancel-btn")
+      screen.getByTestId("delete-measure-group-modal-cancel-btn")
     ).toBeInTheDocument();
 
     expect(
-      screen.getByTestId("delete-measure-modal-delete-btn")
+      screen.getByTestId("delete-measure-group-modal-delete-btn")
     ).toBeInTheDocument();
 
     const expectedConfig = {
@@ -368,7 +370,9 @@ describe("Measure Groups Page", () => {
       groups: [],
     };
     mockedAxios.delete.mockResolvedValue({ data: updatedMeasure });
-    userEvent.click(screen.getByTestId("delete-measure-modal-delete-btn"));
+    userEvent.click(
+      screen.getByTestId("delete-measure-group-modal-delete-btn")
+    );
 
     expect(mockedAxios.delete).toHaveBeenCalledWith(
       `example-service-url/measures/test-measure/groups/7p03-5r29-7O0I`,
@@ -386,6 +390,7 @@ describe("Measure Groups Page", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("groupDescriptionInput")).toHaveValue("");
+      expect(screen.getByTestId("group-form-delete-btn")).toBeDisabled();
     });
   });
 

@@ -103,14 +103,14 @@ const DeleteMeasureGroupDialog = ({
           type="button"
           buttonTitle="Keep Measure Group"
           variant="white"
-          data-testid="delete-measure-modal-cancel-btn"
+          data-testid="delete-measure-group-modal-cancel-btn"
           onClick={onClose}
         />
         <Button
           style={{ background: "#424B5A", marginTop: 0 }}
           type="submit"
           buttonTitle="Yes, Delete Measure Group"
-          data-testid="delete-measure-modal-delete-btn"
+          data-testid="delete-measure-group-modal-delete-btn"
           onClick={onSubmit}
         />
       </DialogActions>

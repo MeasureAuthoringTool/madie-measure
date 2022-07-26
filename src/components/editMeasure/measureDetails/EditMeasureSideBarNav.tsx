@@ -24,7 +24,7 @@ interface SidebarLink {
   dataTestId: string;
 }
 
-export interface MeasureDetailsSidebarProps {
+export interface EditMeasureSideBarNavProps {
   links: Array<SidebarLink>;
   header?: String;
   setMeasureGroupNumber?: (value: number) => void;
@@ -32,8 +32,8 @@ export interface MeasureDetailsSidebarProps {
   measure?: Measure;
 }
 
-export default function MeasureDetailsSidebar(
-  props: MeasureDetailsSidebarProps
+export default function EditMeasureSideBarNav(
+  props: EditMeasureSideBarNavProps
 ) {
   const {
     links,

@@ -3,7 +3,7 @@ import tw from "twin.macro";
 import { Route, Switch, useRouteMatch } from "react-router-dom";
 import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureMetadata from "./measureMetadata/MeasureMetadata";
-import MeasureDetailsSidebar from "./MeasureDetailsSidebar";
+import EditMeasureSideBarNav from "./EditMeasureSideBarNav";
 
 const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
 const Content = tw.div`col-span-5 py-6`;
@@ -64,7 +64,7 @@ export default function EditMeasure() {
   return (
     <>
       <Grid>
-        <MeasureDetailsSidebar header="Edit Measure" links={links} />
+        <EditMeasureSideBarNav header="Edit Measure" links={links} />
         <Content>
           <Switch>
             <Route exact path={path}>
