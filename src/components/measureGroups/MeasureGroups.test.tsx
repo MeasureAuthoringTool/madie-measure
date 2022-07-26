@@ -229,6 +229,9 @@ describe("Measure Groups Page", () => {
       userEvent.click(getByText("Patient Reported Outcome"));
     });
 
+    expect(screen.getByTestId("group-form-delete-btn")).toBeInTheDocument();
+    expect(screen.getByTestId("group-form-delete-btn")).toBeDisabled();
+
     mockedAxios.post.mockResolvedValue({ data: { group } });
 
     // submit the form
@@ -295,6 +298,114 @@ describe("Measure Groups Page", () => {
     expect(
       screen.getByTestId("leftPanelMeasureInformation-MeasureGroup2")
     ).toBeInTheDocument();
+  });
+
+  test("Oncliking delete button, delete measure modal is displayed", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "testDescription";
+    measure.groups = [group];
+    renderMeasureGroupComponent();
+
+    expect(
+      (screen.getByRole("option", { name: "Cohort" }) as HTMLOptionElement)
+        .selected
+    ).toBe(true);
+
+    expect(
+      (
+        screen.getByRole("option", {
+          name: "Initial Population",
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
+
+    expect(screen.getByText("MEASURE GROUP 1")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("leftPanelMeasureInformation-MeasureGroup1")
+    ).toBeInTheDocument();
+
+    expect(screen.getByTestId("group-form-delete-btn")).toBeInTheDocument();
+    expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
+
+    userEvent.click(screen.getByTestId("group-form-delete-btn"));
+
+    expect(
+      screen.getByTestId("delete-measure-group-modal-cancel-btn")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("delete-measure-group-modal-delete-btn")
+    ).toBeInTheDocument();
+
+    userEvent.click(
+      screen.getByTestId("delete-measure-group-modal-cancel-btn")
+    );
+    expect(screen.getByTestId("groupDescriptionInput")).toHaveValue(
+      "testDescription"
+    );
+  });
+
+  test("Oncliking delete button, measure group should be deleted", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "testDescription";
+    measure.groups = [group];
+    const { rerender } = renderMeasureGroupComponent();
+
+    expect(
+      (screen.getByRole("option", { name: "Cohort" }) as HTMLOptionElement)
+        .selected
+    ).toBe(true);
+
+    expect(screen.getByText("MEASURE GROUP 1")).toBeInTheDocument();
+
+    expect(screen.getByTestId("group-form-delete-btn")).toBeInTheDocument();
+    expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
+
+    userEvent.click(screen.getByTestId("group-form-delete-btn"));
+
+    expect(
+      screen.getByTestId("delete-measure-group-modal-cancel-btn")
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByTestId("delete-measure-group-modal-delete-btn")
+    ).toBeInTheDocument();
+
+    const expectedConfig = {
+      headers: {
+        Authorization: `Bearer test.jwt`,
+      },
+    };
+
+    const updatedMeasure = {
+      id: "test-measure",
+      measureName: "the measure for testing",
+      cql: MeasureCQL,
+      createdBy: MEASURE_CREATEDBY,
+      groups: [],
+    };
+    mockedAxios.delete.mockResolvedValue({ data: updatedMeasure });
+    userEvent.click(
+      screen.getByTestId("delete-measure-group-modal-delete-btn")
+    );
+
+    expect(mockedAxios.delete).toHaveBeenCalledWith(
+      `example-service-url/measures/test-measure/groups/7p03-5r29-7O0I`,
+      expectedConfig
+    );
+
+    measure.groups = updatedMeasure.groups;
+    rerender(
+      <MemoryRouter initialEntries={[{ pathname: "/" }]}>
+        <ApiContextProvider value={serviceConfig}>
+          <MeasureGroups />
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("groupDescriptionInput")).toHaveValue("");
+      expect(screen.getByTestId("group-form-delete-btn")).toBeDisabled();
+    });
   });
 
   test("Should be able to save multiple groups  ", async () => {
