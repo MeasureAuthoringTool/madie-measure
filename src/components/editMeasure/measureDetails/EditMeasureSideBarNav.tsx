@@ -24,7 +24,7 @@ interface SidebarLink {
   dataTestId: string;
 }
 
-export interface MeasureDetailsSidebarProps {
+export interface EditMeasureSideBarNavProps {
   links: Array<SidebarLink>;
   header?: String;
   setMeasureGroupNumber?: (value: number) => void;
@@ -32,8 +32,8 @@ export interface MeasureDetailsSidebarProps {
   measure?: Measure;
 }
 
-export default function MeasureDetailsSidebar(
-  props: MeasureDetailsSidebarProps
+export default function EditMeasureSideBarNav(
+  props: EditMeasureSideBarNavProps
 ) {
   const {
     links,
@@ -47,6 +47,17 @@ export default function MeasureDetailsSidebar(
 
   useEffect(() => {
     if (links) setMeasureGroups(links);
+
+    if (!measure?.groups?.length) {
+      const baseURL = "/measures/" + measure?.id + "/edit/measure-groups";
+      setMeasureGroups([
+        {
+          title: "MEASURE GROUP 1",
+          href: `${baseURL}`,
+          dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
+        },
+      ]);
+    }
   }, [measure?.groups]);
 
   const addNewBlankMeasureGroup = (e) => {

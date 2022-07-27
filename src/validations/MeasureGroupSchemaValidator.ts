@@ -5,6 +5,10 @@ export const MeasureGroupSchemaValidator = Yup.object().shape({
   scoring: Yup.string()
     .oneOf(Object.values(MeasureScoring))
     .required("Group Scoring is required."),
+  measureGroupTypes: Yup.array().min(
+    1,
+    "At least one measure group type is required."
+  ),
   population: Yup.object().when("scoring", (scoring) => {
     switch (scoring) {
       case MeasureScoring.COHORT:

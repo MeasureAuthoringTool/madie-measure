@@ -2,10 +2,10 @@ import React, { useEffect, useState, Fragment } from "react";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
-import { Group, GroupScoring } from "@madie/madie-models";
+import { Group, GroupScoring, MeasureGroupTypes } from "@madie/madie-models";
 import { Alert, TextField } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
-import MeasureDetailsSidebar from "../editMeasure/measureDetails/MeasureDetailsSidebar";
+import EditMeasureSideBarNav from "../editMeasure/measureDetails/EditMeasureSideBarNav";
 import { Button } from "@madie/madie-components";
 import { useFormik } from "formik";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
@@ -13,6 +13,9 @@ import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
 import * as _ from "lodash";
 import { MeasureGroupSchemaValidator } from "../../validations/MeasureGroupSchemaValidator";
 import { useOktaTokens } from "@madie/madie-util";
+import MultipleSelectDropDown from "./MultipleSelectDropDown";
+import DeleteMeasureGroupDialog from "./DeleteMeasureGroupDialog";
+import classNames from "classnames";
 import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
@@ -154,6 +157,11 @@ export interface ExpressionDefinition {
   text?: string;
 }
 
+export interface DeleteMeasureGroupDialog {
+  open?: boolean;
+  measureGroupNumber?: number;
+}
+
 const MeasureGroups = () => {
   const [expressionDefinitions, setExpressionDefinitions] = useState<
     Array<ExpressionDefinition>
@@ -161,7 +169,7 @@ const MeasureGroups = () => {
   const { measure, setMeasure } = useCurrentMeasure();
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
-  const canEdit = userName === measure.createdBy;
+  const canEdit = userName === measure?.createdBy;
   const measureServiceApi = useMeasureServiceApi();
   const [genericErrorMessage, setGenericErrorMessage] = useState<string>();
   const [successMessage, setSuccessMessage] = useState<string>();
@@ -170,6 +178,12 @@ const MeasureGroups = () => {
   const [updateConfirm, setUpdateConfirm] = useState<boolean>(false);
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(0);
   const [group, setGroup] = useState<Group>();
+  const [clearAllGroupTypes, setClearAllGroupTypes] = useState<boolean>(false);
+  const [deleteMeasureGroupDialog, setDeleteMeasureGroupDialog] =
+    useState<DeleteMeasureGroupDialog>({
+      open: false,
+      measureGroupNumber: undefined,
+    });
 
   // TODO: group will be coming from props when we separate this into separate component
 
@@ -182,6 +196,8 @@ const MeasureGroups = () => {
           groupDescription:
             measure?.groups[measureGroupNumber].groupDescription || "",
           scoringUnit: measure?.groups[measureGroupNumber].scoringUnit || "",
+          measureGroupTypes:
+            measure?.groups[measureGroupNumber].measureGroupTypes || [],
         },
       });
     } else {
@@ -201,12 +217,13 @@ const MeasureGroups = () => {
               measurePopulationExclusion: "",
             },
             groupDescription: "",
+            measureGroupTypes: [],
             scoringUnit: "",
           },
         });
       }
     }
-  }, [measureGroupNumber, measure.groups]);
+  }, [measureGroupNumber, measure?.groups]);
 
   const defaultScoring = group?.scoring || "Select";
   const formik = useFormik({
@@ -227,6 +244,7 @@ const MeasureGroups = () => {
       rateAggregation: group?.rateAggregation || "",
       improvementNotation: group?.improvementNotation || "",
       groupDescription: group?.groupDescription,
+      measureGroupTypes: group?.measureGroupTypes || [],
       scoringUnit: group?.scoringUnit,
     } as Group,
     validationSchema: MeasureGroupSchemaValidator,
@@ -252,7 +270,14 @@ const MeasureGroups = () => {
   const { resetForm } = formik;
 
   useEffect(() => {
-    if (measure.cql) {
+    if (clearAllGroupTypes) {
+      formik.values.measureGroupTypes = [];
+    }
+    setClearAllGroupTypes(false);
+  }, [clearAllGroupTypes, formik.values]);
+
+  useEffect(() => {
+    if (measure?.cql) {
       const definitions = new CqlAntlr(measure.cql).parse()
         .expressionDefinitions;
       setExpressionDefinitions(definitions);
@@ -292,6 +317,7 @@ const MeasureGroups = () => {
           id: null,
           groupDescription: "",
           scoring: "Select",
+          measureGroupTypes: [],
         },
       });
     } else {
@@ -329,6 +355,7 @@ const MeasureGroups = () => {
                 population: g.population,
                 rateAggregation: g.rateAggregation,
                 improvementNotation: g.improvementNotation,
+                measureGroupTypes: g.measureGroupTypes || [],
                 scoringUnit: g.scoringUnit,
               };
             }
@@ -381,8 +408,29 @@ const MeasureGroups = () => {
     }
   };
 
+  const handleDialogClose = () => {
+    setDeleteMeasureGroupDialog({
+      open: false,
+      measureGroupNumber: undefined,
+    });
+  };
+
+  const deleteMeasureGroup = (e) => {
+    e.preventDefault();
+    measureServiceApi
+      .deleteMeasureGroup(measure?.groups[measureGroupNumber]?.id, measure.id)
+      .then((response) => {
+        setMeasure(response);
+        measure?.groups &&
+          setMeasureGroupNumber(
+            measureGroupNumber === 0 ? 0 : measureGroupNumber - 1
+          );
+        handleDialogClose();
+      });
+  };
+
   // Local state to later populate the left nav and and govern routes based on group ids
-  const baseURL = "/measures/" + measure.id + "/edit/measure-groups";
+  const baseURL = "/measures/" + measure?.id + "/edit/measure-groups";
   const measureGroups = measure?.groups
     ? measure.groups?.map((group, id) => ({
         ...group,
@@ -414,10 +462,11 @@ const MeasureGroups = () => {
       </ButtonSpacer>
     </>
   );
+
   return (
     <form onSubmit={formik.handleSubmit}>
       <Grid>
-        <MeasureDetailsSidebar
+        <EditMeasureSideBarNav
           links={measureGroups}
           setMeasureGroupNumber={setMeasureGroupNumber}
           measure={measure}
@@ -449,7 +498,24 @@ const MeasureGroups = () => {
                 </FieldSeparator>
               </FormFieldInner>
             </FormField>
+            <FormField>
+              <MultipleSelectDropDown
+                values={Object.values(MeasureGroupTypes)}
+                selectedValues={formik.values.measureGroupTypes}
+                formControl={formik.getFieldProps("measureGroupTypes")}
+                label="Measure Group Type"
+                id="measure-group-type"
+                clearAll={() => setClearAllGroupTypes(true)}
+              />
+            </FormField>
           </Header>
+
+          <DeleteMeasureGroupDialog
+            open={deleteMeasureGroupDialog.open}
+            onClose={handleDialogClose}
+            onSubmit={deleteMeasureGroup}
+            measureGroupNumber={deleteMeasureGroupDialog.measureGroupNumber}
+          />
 
           {genericErrorMessage && (
             <Alert
@@ -714,6 +780,26 @@ const MeasureGroups = () => {
                   ? ""
                   : "You must set all required Populations."}
               </span>
+            </ButtonSpacer>
+
+            <ButtonSpacer>
+              <Button
+                style={{ background: "#424B5A" }}
+                type="submit"
+                buttonTitle="Delete"
+                data-testid="group-form-delete-btn"
+                disabled={
+                  measureGroupNumber >= measure?.groups?.length ||
+                  !measure?.groups
+                }
+                onClick={(e) => {
+                  e.preventDefault();
+                  setDeleteMeasureGroupDialog({
+                    open: true,
+                    measureGroupNumber: measureGroupNumber,
+                  });
+                }}
+              />
             </ButtonSpacer>
           </PopulationActions>
         </GroupFooter>
