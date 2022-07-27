@@ -77,7 +77,7 @@ const DeleteMeasureGroupDialog = ({
     >
       <div className={classes.dialogTitle}>
         <DialogTitle className={classes.title}>
-          Delete Measure Group <span></span>
+          Delete Measure Group ?
         </DialogTitle>
         <div>
           <IconButton onClick={onClose}>

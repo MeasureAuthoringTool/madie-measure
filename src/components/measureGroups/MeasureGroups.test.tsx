@@ -234,6 +234,8 @@ describe("Measure Groups Page", () => {
       },
       scoring: "Cohort",
       groupDescription: "new description",
+      rateAggregation: "",
+      improvementNotation: "",
     };
 
     expect(alert).toHaveTextContent(
@@ -368,6 +370,8 @@ describe("Measure Groups Page", () => {
       cql: MeasureCQL,
       createdBy: MEASURE_CREATEDBY,
       groups: [],
+      rateAggregation: "",
+      improvementNotation: "Select",
     };
     mockedAxios.delete.mockResolvedValue({ data: updatedMeasure });
     userEvent.click(
@@ -390,8 +394,40 @@ describe("Measure Groups Page", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("groupDescriptionInput")).toHaveValue("");
+      userEvent.click(screen.getByTestId("reporting-tab"));
+      expect(screen.getByTestId("rateAggregationText")).toHaveValue("");
       expect(screen.getByTestId("group-form-delete-btn")).toBeDisabled();
     });
+  });
+
+  test("Navigating between the tabs in measure groups page", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "Description Text";
+    group.rateAggregation = "Rate Aggregation Text";
+    group.improvementNotation = "Increased score indicates improvement";
+    measure.groups = [group];
+    renderMeasureGroupComponent();
+
+    expect(screen.getByTestId("populations-tab")).toBeInTheDocument();
+    expect(
+      (screen.getByRole("option", { name: "Cohort" }) as HTMLOptionElement)
+        .selected
+    ).toBe(true);
+    expect(screen.getByText("MEASURE GROUP 1")).toBeInTheDocument();
+
+    userEvent.click(screen.getByTestId("reporting-tab"));
+
+    expect(screen.getByTestId("rateAggregationText")).toHaveValue(
+      "Rate Aggregation Text"
+    );
+    expect(
+      (
+        screen.getByRole("option", {
+          name: "Increased score indicates improvement",
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
+    expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
   });
 
   test("Should be able to save multiple groups  ", async () => {
@@ -433,6 +469,8 @@ describe("Measure Groups Page", () => {
       },
       scoring: "Cohort",
       groupDescription: "new description",
+      rateAggregation: "",
+      improvementNotation: "",
     };
 
     expect(alert).toHaveTextContent(
@@ -491,6 +529,8 @@ describe("Measure Groups Page", () => {
       },
       scoring: "Cohort",
       groupDescription: "new description for group 2",
+      rateAggregation: "",
+      improvementNotation: "",
     };
 
     expect(alert1).toHaveTextContent(
