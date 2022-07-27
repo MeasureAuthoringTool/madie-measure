@@ -1,5 +1,8 @@
-import { Population, PopulationType } from "@madie/madie-models";
-import { MeasureScoring } from "../../../../../../madie-models/src";
+import {
+  Population,
+  PopulationType,
+  MeasureScoring,
+} from "@madie/madie-models";
 
 const initialPopulation = {
   id: "",
