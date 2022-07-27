@@ -2,7 +2,7 @@ import React, { useEffect, useState, Fragment } from "react";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
-import { Group, GroupScoring } from "@madie/madie-models";
+import { Group, GroupScoring, MeasureGroupTypes } from "@madie/madie-models";
 import { Alert, TextField } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import EditMeasureSideBarNav from "../editMeasure/measureDetails/EditMeasureSideBarNav";
@@ -13,6 +13,7 @@ import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
 import * as _ from "lodash";
 import { MeasureGroupSchemaValidator } from "../../validations/MeasureGroupSchemaValidator";
 import { useOktaTokens } from "@madie/madie-util";
+import MultipleSelectDropDown from "./MultipleSelectDropDown";
 import DeleteMeasureGroupDialog from "./DeleteMeasureGroupDialog";
 import classNames from "classnames";
 
@@ -176,6 +177,7 @@ const MeasureGroups = () => {
   const [updateConfirm, setUpdateConfirm] = useState<boolean>(false);
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(0);
   const [group, setGroup] = useState<Group>();
+  const [clearAllGroupTypes, setClearAllGroupTypes] = useState<boolean>(false);
   const [deleteMeasureGroupDialog, setDeleteMeasureGroupDialog] =
     useState<DeleteMeasureGroupDialog>({
       open: false,
@@ -211,6 +213,7 @@ const MeasureGroups = () => {
               measurePopulationExclusion: "",
             },
             groupDescription: "",
+            measureGroupTypes: [],
           },
         });
       }
@@ -236,6 +239,7 @@ const MeasureGroups = () => {
       rateAggregation: group?.rateAggregation || "",
       improvementNotation: group?.improvementNotation || "",
       groupDescription: group?.groupDescription,
+      measureGroupTypes: group?.measureGroupTypes || [],
     } as Group,
     validationSchema: MeasureGroupSchemaValidator,
     onSubmit: (group: Group) => {
@@ -258,6 +262,13 @@ const MeasureGroups = () => {
     },
   });
   const { resetForm } = formik;
+
+  useEffect(() => {
+    if (clearAllGroupTypes) {
+      formik.values.measureGroupTypes = [];
+    }
+    setClearAllGroupTypes(false);
+  }, [clearAllGroupTypes, formik.values]);
 
   useEffect(() => {
     if (measure?.cql) {
@@ -300,6 +311,7 @@ const MeasureGroups = () => {
           id: null,
           groupDescription: "",
           scoring: "Select",
+          measureGroupTypes: [],
         },
       });
     } else {
@@ -337,6 +349,7 @@ const MeasureGroups = () => {
                 population: g.population,
                 rateAggregation: g.rateAggregation,
                 improvementNotation: g.improvementNotation,
+                measureGroupTypes: g.measureGroupTypes || [],
               };
             }
             return group;
@@ -442,6 +455,7 @@ const MeasureGroups = () => {
       </ButtonSpacer>
     </>
   );
+
   return (
     <form onSubmit={formik.handleSubmit}>
       <Grid>
@@ -476,6 +490,16 @@ const MeasureGroups = () => {
                   {!canEdit && formik.values.groupDescription}
                 </FieldSeparator>
               </FormFieldInner>
+            </FormField>
+            <FormField>
+              <MultipleSelectDropDown
+                values={Object.values(MeasureGroupTypes)}
+                selectedValues={formik.values.measureGroupTypes}
+                formControl={formik.getFieldProps("measureGroupTypes")}
+                label="Measure Group Type"
+                id="measure-group-type"
+                clearAll={() => setClearAllGroupTypes(true)}
+              />
             </FormField>
           </Header>
 
