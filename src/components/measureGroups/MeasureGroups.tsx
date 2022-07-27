@@ -213,6 +213,8 @@ const MeasureGroups = () => {
               measurePopulationExclusion: "",
             },
             groupDescription: "",
+            rateAggregation: "",
+            improvementNotation: "",
             measureGroupTypes: [],
           },
         });
