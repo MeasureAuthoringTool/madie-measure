@@ -1,4 +1,5 @@
 import { Population, PopulationType } from "@madie/madie-models";
+import { MeasureScoring } from "../../../../../../madie-models/src";
 
 const initialPopulation = {
   id: "",
@@ -60,10 +61,10 @@ export const allPopulations = [
 export const getPopulationsForScoring = (scoring: string): Population[] => {
   let populations: Population[];
   switch (scoring) {
-    case "Cohort":
+    case MeasureScoring.COHORT:
       populations = [initialPopulation];
       break;
-    case "Proportion":
+    case MeasureScoring.PROPORTION:
       populations = [
         initialPopulation,
         denominator,
@@ -73,14 +74,14 @@ export const getPopulationsForScoring = (scoring: string): Population[] => {
         numeratorExclusion,
       ];
       break;
-    case "Continuous Variable":
+    case MeasureScoring.CONTINUOUS_VARIABLE:
       populations = [
         initialPopulation,
         measurePopulation,
         measurePopulationExclusion,
       ];
       break;
-    case "Ratio":
+    case MeasureScoring.RATIO:
       populations = [
         initialPopulation,
         denominator,
