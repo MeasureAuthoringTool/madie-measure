@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import ucum, { ucumUtils } from "@lhncbc/ucum-lhc";
+import React from "react";
+import * as ucum from "@lhncbc/ucum-lhc";
 import AsyncSelect from "react-select/async";
 import tw, { styled } from "twin.macro";
 const FormControl = styled.section(() => [tw`mb-3`, `margin: 25px 40px;`]);
@@ -42,13 +42,12 @@ const basicOptions = [
   },
 ];
 
-const Ucum = () => {
-  const [selectedOption, setSelectedOption] = useState(null);
+export interface ScoringUnitProps {
+  value: any;
+  onChange: (newValue: any) => void;
+}
 
-  const handleInputChange = (value: string) => {
-    setSelectedOption(value);
-  };
-
+const MeasureGroupScoringUnit = ({ value, onChange }: ScoringUnitProps) => {
   const getBasicOptions = (input) => {
     return basicOptions.filter((unit) => {
       return unit.label.toLowerCase().includes(input.toLowerCase());
@@ -56,25 +55,27 @@ const Ucum = () => {
   };
 
   const getUcumOptions = (input) => {
-    // const synonyms = ucumUtils.checkSynonyms(input);
-    // const exactMatch = ucumUtils.validateUnitString(input);
-    // if(exactMatch.status === "valid") {
-    //     return [{
-    //       label: exactMatch.unit.code + " " +exactMatch.unit.name,
-    //       value: exactMatch.unit
-    //     }]
-    // }
-    // else if (synonyms.status === "succeeded") {
-    //   return synonyms.units.map((unit) => {
-    //     return {
-    //       label: unit.code + " " +unit.name,
-    //       value: unit
-    //     }
-    //   })
-    // } else {
-    //   return [];
-    // }
-    return [];
+    const ucumUtils = ucum.UcumLhcUtils.getInstance();
+
+    const synonyms = ucumUtils.checkSynonyms(input);
+    const exactMatch = ucumUtils.validateUnitString(input);
+    if (exactMatch.status === "valid") {
+      return [
+        {
+          label: exactMatch.unit.code + " " + exactMatch.unit.name,
+          value: exactMatch.unit,
+        },
+      ];
+    } else if (synonyms.status === "succeeded") {
+      return synonyms.units.map((unit) => {
+        return {
+          label: unit.code + " " + unit.name,
+          value: unit,
+        };
+      });
+    } else {
+      return [];
+    }
   };
 
   const loadOptions = (input, callback) => {
@@ -83,26 +84,31 @@ const Ucum = () => {
         label: "Basic",
         options: getBasicOptions(input),
       },
-      // {
-      //   label: "UCUM",
-      //   options: getUcumOptions(input)
-      // }
+      {
+        label: "UCUM",
+        options: getUcumOptions(input),
+      },
     ]);
   };
 
   return (
-    <div>
+    <div data-testid="measure-group-scoring-unit">
       <FormControl>
         <SoftLabel>Scoring Unit</SoftLabel>
         <AsyncSelect
           cacheOptions
           loadOptions={loadOptions}
           defaultOptions
-          onInputChange={handleInputChange}
+          placeholder="UCUM Code or Name"
+          onChange={(newValue: any) => {
+            onChange(newValue);
+          }}
+          value={value}
+          defaultInputValue={value}
         />
       </FormControl>
     </div>
   );
 };
 
-export default Ucum;
+export default MeasureGroupScoringUnit;

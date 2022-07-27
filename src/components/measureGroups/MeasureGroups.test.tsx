@@ -5,6 +5,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { isEqual } from "lodash";
 import MeasureGroups, {
@@ -86,6 +87,7 @@ describe("Measure Groups Page", () => {
         measurePopulationExclusion: "",
       },
       groupDescription: "",
+      scoringUnit: "",
     };
   });
 
@@ -231,6 +233,7 @@ describe("Measure Groups Page", () => {
       },
       scoring: "Cohort",
       groupDescription: "new description",
+      scoringUnit: "",
     };
 
     expect(alert).toHaveTextContent(
@@ -322,6 +325,7 @@ describe("Measure Groups Page", () => {
       },
       scoring: "Cohort",
       groupDescription: "new description",
+      scoringUnit: "",
     };
 
     expect(alert).toHaveTextContent(
@@ -380,6 +384,7 @@ describe("Measure Groups Page", () => {
       },
       scoring: "Cohort",
       groupDescription: "new description for group 2",
+      scoringUnit: "",
     };
 
     expect(alert1).toHaveTextContent(
@@ -400,6 +405,7 @@ describe("Measure Groups Page", () => {
   test("Should be able to update initial population of a population group", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "testDescription";
+    group.scoringUnit = "testScoringUnit";
     measure.groups = [group];
     renderMeasureGroupComponent();
 
@@ -440,6 +446,7 @@ describe("Measure Groups Page", () => {
       },
       scoring: "Cohort",
       groupDescription: "testDescription",
+      scoringUnit: "testScoringUnit",
     };
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
 
@@ -765,5 +772,26 @@ describe("Measure Groups Page", () => {
     const { queryByTestId } = renderMeasureGroupComponent();
     const saveButton = queryByTestId("group-form-submit-btn");
     expect(saveButton).not.toBeInTheDocument();
+  });
+
+  test("should display default select for scoring unit", async () => {
+    const { getByTestId } = renderMeasureGroupComponent();
+    const scoringUnit = getByTestId("measure-group-scoring-unit");
+    expect(scoringUnit.textContent).toBe("Scoring UnitUCUM Code or Name");
+  });
+
+  test("should display selected scoring unit", async () => {
+    const { getByTestId } = renderMeasureGroupComponent();
+
+    const scoringUnit = getByTestId("measure-group-scoring-unit");
+    expect(scoringUnit.textContent).toBe("Scoring UnitUCUM Code or Name");
+
+    const scoringUnitInput = within(scoringUnit).getByRole("combobox");
+    expect(scoringUnitInput.getAttribute("value")).toBe("");
+
+    fireEvent.change(scoringUnitInput, {
+      target: { value: "cm" },
+    });
+    expect(scoringUnitInput.getAttribute("value")).toBe("cm");
   });
 });

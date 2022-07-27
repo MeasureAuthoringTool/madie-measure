@@ -13,7 +13,7 @@ import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
 import * as _ from "lodash";
 import { MeasureGroupSchemaValidator } from "../../validations/MeasureGroupSchemaValidator";
 import { useOktaTokens } from "@madie/madie-util";
-import Ucum from "./Ucum";
+import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
 const Content = styled.div(() => [tw`col-span-3`]);
@@ -181,6 +181,7 @@ const MeasureGroups = () => {
           ...measure?.groups[measureGroupNumber],
           groupDescription:
             measure?.groups[measureGroupNumber].groupDescription || "",
+          scoringUnit: measure?.groups[measureGroupNumber].scoringUnit || "",
         },
       });
     } else {
@@ -200,6 +201,7 @@ const MeasureGroups = () => {
               measurePopulationExclusion: "",
             },
             groupDescription: "",
+            scoringUnit: "",
           },
         });
       }
@@ -225,6 +227,7 @@ const MeasureGroups = () => {
       rateAggregation: group?.rateAggregation || "",
       improvementNotation: group?.improvementNotation || "",
       groupDescription: group?.groupDescription,
+      scoringUnit: group?.scoringUnit,
     } as Group,
     validationSchema: MeasureGroupSchemaValidator,
     onSubmit: (group: Group) => {
@@ -326,6 +329,7 @@ const MeasureGroups = () => {
                 population: g.population,
                 rateAggregation: g.rateAggregation,
                 improvementNotation: g.improvementNotation,
+                scoringUnit: g.scoringUnit,
               };
             }
             return group;
@@ -530,7 +534,12 @@ const MeasureGroups = () => {
             {!canEdit && formik.values.scoring}
           </FormControl>
 
-          <Ucum></Ucum>
+          <MeasureGroupScoringUnit
+            {...formik.getFieldProps("scoringUnit")}
+            onChange={(newValue) => {
+              formik.setFieldValue("scoringUnit", newValue);
+            }}
+          ></MeasureGroupScoringUnit>
 
           <div>
             <MenuItemContainer>

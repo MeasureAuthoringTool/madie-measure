@@ -56,15 +56,6 @@ module.exports = (webpackConfigEnv, argv) => {
   // so that we can add postcss-loader to the chain
   const newCssRule = {
     module: {
-      loaders: [
-        {
-          test: "./node_modules/@lhncbc/ucum-lhc/data/ucumDefs.min.json", 
-          loader: 'json-loader'
-        }
-      ]
-    },
-
-    module: {
       rules: [
         { test: /\.m?js/, type: "javascript/auto" },
         {
@@ -101,6 +92,7 @@ module.exports = (webpackConfigEnv, argv) => {
           ],
           exclude: /node_modules/,
         },
+        { test: /\.json$/, type: "json" },
       ],
     },
     devServer: {
