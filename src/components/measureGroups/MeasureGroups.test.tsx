@@ -8,14 +8,13 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { isEqual } from "lodash";
-import MeasureGroups, {
-  DefaultPopulationSelectorDefinitions,
-} from "./MeasureGroups";
+import MeasureGroups from "./MeasureGroups";
 import {
   Measure,
   Group,
   GroupScoring,
   MeasureGroupTypes,
+  PopulationType,
 } from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
@@ -24,6 +23,8 @@ import { MeasureCQL } from "../common/MeasureCQL";
 import { MeasureContextHolder } from "../editMeasure/MeasureContext";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
+import { getPopulationsForScoring } from "./PopulationHelper";
+import * as _ from "lodash";
 
 jest.mock("../editMeasure/useCurrentMeasure");
 
@@ -81,16 +82,13 @@ describe("Measure Groups Page", () => {
     group = {
       id: null,
       scoring: "Cohort",
-      population: {
-        initialPopulation: "Initial Population",
-        denominator: "",
-        denominatorException: "",
-        denominatorExclusion: "",
-        numerator: "",
-        numeratorExclusion: "",
-        measurePopulation: "",
-        measurePopulationExclusion: "",
-      },
+      populations: [
+        {
+          id: "id-1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+        },
+      ],
       groupDescription: "",
       measureGroupTypes: [],
     };
@@ -136,9 +134,8 @@ describe("Measure Groups Page", () => {
         expect(optionEl.selected).toBe(true);
 
         // Check that the appropriate filter labels are rendered as expected
-        let filterLabelArrayIntended =
-          DefaultPopulationSelectorDefinitions.reduce((filters, option) => {
-            if (option.hidden?.includes(value)) return filters;
+        let filterLabelArrayIntended = getPopulationsForScoring(value).reduce(
+          (filters, option) => {
             let isRequired = "*";
             if (option.optional?.length) {
               if (
@@ -148,9 +145,11 @@ describe("Measure Groups Page", () => {
                 isRequired = "";
               }
             }
-            filters.push(`${option.label}${isRequired}`);
+            filters.push(`${_.startCase(option.name)}${isRequired}`);
             return filters;
-          }, []);
+          },
+          []
+        );
 
         // Check what is actually rendered
         if (optionEl.text !== "Select") {
@@ -192,7 +191,7 @@ describe("Measure Groups Page", () => {
     const populationOption = screen.getAllByTestId(
       "select-measure-group-population"
     )[0] as HTMLOptionElement;
-    expect(populationOption.value).toBe(group.population.initialPopulation);
+    expect(populationOption.value).toBe(group.populations[0].definition);
 
     fireEvent.change(option, { target: { value: "Ratio" } });
     expect(option.value).toBe("Ratio");
@@ -242,9 +241,13 @@ describe("Measure Groups Page", () => {
 
     const expectedGroup = {
       id: null,
-      population: {
-        initialPopulation: "Initial Population",
-      },
+      populations: [
+        {
+          id: "",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+        },
+      ],
       scoring: "Cohort",
       groupDescription: "new description",
       measureGroupTypes: ["Patient Reported Outcome"],
@@ -302,7 +305,7 @@ describe("Measure Groups Page", () => {
     ).toBeInTheDocument();
   });
 
-  test("Oncliking delete button, delete measure modal is displayed", async () => {
+  test("OnClicking delete button, delete group modal is displayed", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "testDescription";
     measure.groups = [group];
@@ -493,9 +496,13 @@ describe("Measure Groups Page", () => {
 
     const expectedGroup = {
       id: null,
-      population: {
-        initialPopulation: "Initial Population",
-      },
+      populations: [
+        {
+          id: "",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+        },
+      ],
       scoring: "Cohort",
       groupDescription: "new description",
       measureGroupTypes: ["Patient Reported Outcome"],
@@ -566,9 +573,13 @@ describe("Measure Groups Page", () => {
     const alert1 = await screen.findByTestId("success-alerts");
     const expectedGroup2 = {
       id: null,
-      population: {
-        initialPopulation: "Initial Population",
-      },
+      populations: [
+        {
+          id: "",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+        },
+      ],
       scoring: "Cohort",
       groupDescription: "new description for group 2",
       measureGroupTypes: ["Patient Reported Outcome"],
@@ -622,7 +633,7 @@ describe("Measure Groups Page", () => {
       ).selected
     ).toBe(true);
 
-    group.population.initialPopulation = definitionToUpdate;
+    group.populations[0].definition = definitionToUpdate;
 
     const measureGroupTypeSelect = getByTestId("measure-group-type-dropdown");
     userEvent.click(getByRole(measureGroupTypeSelect, "button"));
@@ -634,10 +645,14 @@ describe("Measure Groups Page", () => {
 
     const expectedGroup = {
       id: "7p03-5r29-7O0I",
-      population: {
-        initialPopulation:
-          "VTE Prophylaxis by Medication Administered or Device Applied",
-      },
+      populations: [
+        {
+          id: "id-1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition:
+            "VTE Prophylaxis by Medication Administered or Device Applied",
+        },
+      ],
       scoring: "Cohort",
       groupDescription: "testDescription",
       measureGroupTypes: ["Patient Reported Outcome"],
@@ -947,6 +962,18 @@ describe("Measure Groups Page", () => {
 
   test("Save button is disabled until all required CV populations are entered", async () => {
     renderMeasureGroupComponent();
+    const measureGroupTypeDropdown = screen.getByTestId(
+      "measure-group-type-dropdown"
+    );
+    userEvent.click(await getByRole(measureGroupTypeDropdown, "button"));
+
+    await waitFor(() => {
+      userEvent.click(screen.getByText("Patient Reported Outcome"));
+    });
+
+    // after selecting measure group type, need to collapse the dropdown
+    fireEvent.click(screen.getByRole("presentation").firstChild);
+
     userEvent.selectOptions(
       screen.getByTestId("scoring-unit-select"),
       "Continuous Variable"
