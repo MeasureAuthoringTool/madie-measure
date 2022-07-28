@@ -15,13 +15,12 @@ import { MeasureGroupSchemaValidator } from "../../validations/MeasureGroupSchem
 import { useOktaTokens } from "@madie/madie-util";
 import MultipleSelectDropDown from "./MultipleSelectDropDown";
 import DeleteMeasureGroupDialog from "./DeleteMeasureGroupDialog";
-import classNames from "classnames";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
 const Content = styled.div(() => [tw`col-span-3`]);
 const Header = styled.section`
   background-color: #f2f5f7;
-  padding: 40px;
+  padding: 15px;
   border-bottom: solid 1px rgba(80, 93, 104, 0.2);
 `;
 const Title = styled.h1`
@@ -43,18 +42,7 @@ const Divider = styled.div`
 const ButtonSpacer = styled.span`
   margin-left: 15px;
 `;
-const Row = styled.section`
-  display: flex;
-  flex-direction: row;
-  flex-grow: 1;
-  align-items: center;
-  margin-top: 14px;
-`;
-const Col = styled.article`
-  display: flex;
-  flex-direction: column;
-  padding-right: 2em;
-`;
+
 const GroupFooter = tw(Grid)`border-t border-b`;
 const GroupActions = styled.div(() => [tw`col-span-1 border-r p-1`]);
 const PopulationActions = styled.div(() => [
@@ -77,6 +65,7 @@ const FormFieldInner = tw.div`sm:col-span-3`;
 const FieldLabel = tw.label`block text-sm font-medium text-gray-700`;
 const FieldSeparator = tw.div`mt-1`;
 const FieldInput = tw.input`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
+const TextArea = tw.textarea`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
 
 // Define fields to conditionally appear based on selected scoring unit
 export const DefaultPopulationSelectorDefinitions = [
@@ -84,11 +73,6 @@ export const DefaultPopulationSelectorDefinitions = [
     key: "initialPopulation",
     label: "Initial Population",
     hidden: ["Select"],
-    subTitle: `
-      Caution: Removing or invalidating a population will cause any
-      package groupings containing that population to be cleared on the
-      Measure Packager.
-    `,
   },
   {
     label: "Denominator",
@@ -194,6 +178,8 @@ const MeasureGroups = () => {
           ...measure?.groups[measureGroupNumber],
           groupDescription:
             measure?.groups[measureGroupNumber].groupDescription || "",
+          measureGroupTypes:
+            measure?.groups[measureGroupNumber].measureGroupTypes || [],
         },
       });
     } else {
@@ -461,6 +447,7 @@ const MeasureGroups = () => {
       <Grid>
         <EditMeasureSideBarNav
           links={measureGroups}
+          measureGroupNumber={measureGroupNumber}
           setMeasureGroupNumber={setMeasureGroupNumber}
           measure={measure}
           setSuccessMessage={setSuccessMessage}
@@ -468,39 +455,6 @@ const MeasureGroups = () => {
         <Content>
           <Header>
             <Title>Measure Group {measureGroupNumber + 1}</Title>
-
-            <FormField>
-              <FormFieldInner>
-                <FieldLabel htmlFor="measure-group-description">
-                  Group Description
-                </FieldLabel>
-                <FieldSeparator>
-                  {canEdit && (
-                    <FieldInput
-                      value={formik.values.groupDescription}
-                      type="text"
-                      name="group-description"
-                      id="group-description"
-                      autoComplete="group-description"
-                      placeholder="Group Description"
-                      data-testid="groupDescriptionInput"
-                      {...formik.getFieldProps("groupDescription")}
-                    />
-                  )}
-                  {!canEdit && formik.values.groupDescription}
-                </FieldSeparator>
-              </FormFieldInner>
-            </FormField>
-            <FormField>
-              <MultipleSelectDropDown
-                values={Object.values(MeasureGroupTypes)}
-                selectedValues={formik.values.measureGroupTypes}
-                formControl={formik.getFieldProps("measureGroupTypes")}
-                label="Measure Group Type"
-                id="measure-group-type"
-                clearAll={() => setClearAllGroupTypes(true)}
-              />
-            </FormField>
           </Header>
 
           <DeleteMeasureGroupDialog
@@ -544,6 +498,39 @@ const MeasureGroups = () => {
           {/* Form control later should be moved to own component and dynamically rendered by switch based on measure. */}
 
           <FormControl>
+            <FormField>
+              <FormFieldInner>
+                <FieldLabel htmlFor="measure-group-description">
+                  Group Description
+                </FieldLabel>
+                <FieldSeparator>
+                  {canEdit && (
+                    <TextArea
+                      value={formik.values.groupDescription}
+                      style={{ height: "100px", width: "600px" }}
+                      name="group-description"
+                      id="group-description"
+                      autoComplete="group-description"
+                      placeholder="Group Description"
+                      data-testid="groupDescriptionInput"
+                      {...formik.getFieldProps("groupDescription")}
+                    />
+                  )}
+                  {!canEdit && formik.values.groupDescription}
+                </FieldSeparator>
+              </FormFieldInner>
+            </FormField>
+            <FormField>
+              <MultipleSelectDropDown
+                values={Object.values(MeasureGroupTypes)}
+                selectedValues={formik.values.measureGroupTypes}
+                formControl={formik.getFieldProps("measureGroupTypes")}
+                label="Measure Group Type"
+                id="measure-group-type"
+                clearAll={() => setClearAllGroupTypes(true)}
+              />
+            </FormField>
+            <br />
             {/* pull from cql file */}
             <SoftLabel htmlFor="scoring-unit-select">Group Scoring:</SoftLabel>
             {canEdit && (
@@ -592,6 +579,7 @@ const MeasureGroups = () => {
             )}
             {!canEdit && formik.values.scoring}
           </FormControl>
+          <br />
           <div>
             <MenuItemContainer>
               <MenuItem
@@ -741,36 +729,6 @@ const MeasureGroups = () => {
               <Button
                 style={{ background: "#424B5A" }}
                 type="submit"
-                buttonTitle="Save"
-                data-testid="group-form-submit-btn"
-                disabled={!(formik.isValid && formik.dirty)}
-              />
-            </ButtonSpacer>
-            <ButtonSpacer>
-              <Button
-                type="button"
-                buttonTitle="Discard Changes"
-                variant="white"
-                disabled={!formik.dirty}
-                data-testid="group-form-discard-btn"
-                onClick={() => discardChanges()}
-              />
-            </ButtonSpacer>
-            <ButtonSpacer>
-              <span
-                tw="text-sm text-gray-600"
-                data-testid="save-measure-group-validation-message"
-              >
-                {MeasureGroupSchemaValidator.isValidSync(formik.values)
-                  ? ""
-                  : "You must set all required Populations."}
-              </span>
-            </ButtonSpacer>
-
-            <ButtonSpacer>
-              <Button
-                style={{ background: "#424B5A" }}
-                type="submit"
                 buttonTitle="Delete"
                 data-testid="group-form-delete-btn"
                 disabled={
@@ -785,6 +743,37 @@ const MeasureGroups = () => {
                   });
                 }}
               />
+            </ButtonSpacer>
+            <ButtonSpacer>
+              <span
+                tw="text-sm text-gray-600"
+                data-testid="save-measure-group-validation-message"
+              >
+                {MeasureGroupSchemaValidator.isValidSync(formik.values)
+                  ? ""
+                  : "You must set all required Populations."}
+              </span>
+            </ButtonSpacer>
+            <ButtonSpacer style={{ float: "right" }}>
+              <ButtonSpacer>
+                <Button
+                  type="button"
+                  buttonTitle="Discard Changes"
+                  variant="white"
+                  disabled={!formik.dirty}
+                  data-testid="group-form-discard-btn"
+                  onClick={() => discardChanges()}
+                />
+              </ButtonSpacer>
+              <ButtonSpacer>
+                <Button
+                  style={{ background: "#424B5A" }}
+                  type="submit"
+                  buttonTitle="Save"
+                  data-testid="group-form-submit-btn"
+                  disabled={!(formik.isValid && formik.dirty)}
+                />
+              </ButtonSpacer>
             </ButtonSpacer>
           </PopulationActions>
         </GroupFooter>

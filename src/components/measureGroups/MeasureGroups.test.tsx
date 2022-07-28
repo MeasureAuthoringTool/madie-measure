@@ -98,7 +98,9 @@ describe("Measure Groups Page", () => {
 
   const renderMeasureGroupComponent = () => {
     return render(
-      <MemoryRouter initialEntries={[{ pathname: "/" }]}>
+      <MemoryRouter
+        initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
+      >
         <ApiContextProvider value={serviceConfig}>
           <MeasureGroups />
         </ApiContextProvider>
@@ -298,6 +300,14 @@ describe("Measure Groups Page", () => {
     expect(
       screen.getByTestId("leftPanelMeasureInformation-MeasureGroup2")
     ).toBeInTheDocument();
+
+    const measureGroup1Link = screen.getByTestId(
+      "leftPanelMeasureInformation-MeasureGroup1"
+    );
+    expect(measureGroup1Link).toBeInTheDocument();
+    userEvent.click(measureGroup1Link);
+    const measureGroupTitle = screen.getByText("Measure Group 1");
+    expect(measureGroupTitle).toBeInTheDocument();
   });
 
   test("Oncliking delete button, delete measure modal is displayed", async () => {
