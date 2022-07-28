@@ -124,7 +124,6 @@ const MeasureGroups = () => {
   const [updateConfirm, setUpdateConfirm] = useState<boolean>(false);
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(0);
   const [group, setGroup] = useState<Group>();
-  const [clearAllGroupTypes, setClearAllGroupTypes] = useState<boolean>(false);
   const [deleteMeasureGroupDialog, setDeleteMeasureGroupDialog] =
     useState<DeleteMeasureGroupDialog>({
       open: false,
@@ -149,6 +148,8 @@ const MeasureGroups = () => {
             scoring: "Select",
             populations: group?.populations,
             groupDescription: "",
+            rateAggregation: "",
+            improvementNotation: "",
             measureGroupTypes: [],
           },
         });
@@ -188,13 +189,6 @@ const MeasureGroups = () => {
     },
   });
   const { resetForm } = formik;
-
-  useEffect(() => {
-    if (clearAllGroupTypes) {
-      formik.values.measureGroupTypes = [];
-    }
-    setClearAllGroupTypes(false);
-  }, [clearAllGroupTypes, formik.values]);
 
   useEffect(() => {
     if (measure?.cql) {
@@ -414,7 +408,7 @@ const MeasureGroups = () => {
                   formControl={formik.getFieldProps("measureGroupTypes")}
                   label="Measure Group Type"
                   id="measure-group-type"
-                  clearAll={() => setClearAllGroupTypes(true)}
+                  clearAll={() => formik.setFieldValue("measureGroupTypes", [])}
                 />
               </FormField>
             </Header>
