@@ -143,14 +143,6 @@ export const MeasureImprovementNotation = [
     code: "decrease",
   },
 ];
-export const StratifcationSelect = [
-  { label: "-", subtitle: "Optional", code: "" },
-  {
-    label: "Unsure what goes here, will follow up",
-    code: "",
-    subtitle: "",
-  },
-];
 
 export const AssociationSelect = {
   Proportion: [
@@ -225,6 +217,10 @@ const MeasureGroups = () => {
               measurePopulationExclusion: "",
             },
             groupDescription: "",
+            stratifications: [
+              { cqlDefinition: "", description: "", association: "", id: "" },
+              { description: "", cqlDefinition: "", association: "", id: "" },
+            ],
           },
         });
       }
@@ -251,7 +247,7 @@ const MeasureGroups = () => {
       improvementNotation: group?.improvementNotation || "",
       groupDescription: group?.groupDescription,
       stratifications: group?.stratifications || [
-        { description: "", cqlDefinition: "", association: "", id: "" },
+        { cqlDefinition: "", description: "", association: "", id: "" },
         { description: "", cqlDefinition: "", association: "", id: "" },
       ],
     } as Group,
@@ -337,6 +333,9 @@ const MeasureGroups = () => {
         (value) => _.isNil(value) || value.trim().length === 0
       );
     }
+    group.stratifications = group.stratifications.filter(
+      (strat) => !!strat.description || !!strat.cqlDefinition
+    );
 
     if (measure?.groups && !(measureGroupNumber >= measure?.groups?.length)) {
       group.id = measure?.groups[measureGroupNumber].id;
@@ -355,6 +354,7 @@ const MeasureGroups = () => {
                 population: g.population,
                 rateAggregation: g.rateAggregation,
                 improvementNotation: g.improvementNotation,
+                stratifications: g.stratifications,
               };
             }
             return group;
@@ -405,6 +405,8 @@ const MeasureGroups = () => {
         });
     }
   };
+
+  //const StratificationSelect =
 
   // Local state to later populate the left nav and and govern routes based on group ids
   const baseURL = "/measures/" + measure.id + "/edit/measure-groups";
@@ -653,85 +655,112 @@ const MeasureGroups = () => {
           })}
           {activeTab === "stratification" && (
             <FormControl>
-              <Row>
-                <Col>
-                  <FieldLabel htmlFor="stratification-select">
-                    Stratification ##
-                  </FieldLabel>
-                  <TextField
-                    select
-                    id="stratification-select"
-                    label=""
-                    //value={formik.values.stratifications[0].cqlDefinition}
-                    inputProps={{
-                      "data-testid": "stratification-select",
-                    }}
-                    // onChange={(e) => {
-                    //   formik.setFieldValue(
-                    //     "improvementNotation",
-                    //     e.target.value
-                    //   );
-                    // }}
-                    InputLabelProps={{ shrink: false }}
-                    SelectProps={{
-                      native: true,
-                    }}
-                    name="type"
-                  >
-                    {Object.values(StratifcationSelect).map((opt, i) => (
+              {formik.values.stratifications.map((strat, i) => (
+                <Row>
+                  <Col>
+                    <FieldLabel htmlFor="stratification-select">
+                      Stratification {i}
+                    </FieldLabel>
+                    <TextField
+                      select
+                      id="stratification-select"
+                      label=""
+                      value={formik.values.stratifications[i].cqlDefinition}
+                      inputProps={{
+                        "data-testid": "stratification-select",
+                      }}
+                      onChange={(e) => {
+                        formik.setFieldValue(
+                          `stratifications[${i}]cqlDefinition`,
+                          e.target.value
+                        );
+                      }}
+                      InputLabelProps={{ shrink: false }}
+                      SelectProps={{
+                        native: true,
+                      }}
+                      name="type"
+                    >
                       <option
-                        key={`${opt.code}-${i}`}
-                        value={opt.label}
+                        value=""
                         data-testid="stratification-select-option"
                       >
-                        {opt.label}
+                        -
                       </option>
-                    ))}
-                  </TextField>
-                  <FieldLabel htmlFor="association-select">
-                    Association ##
-                  </FieldLabel>
-                  <TextField
-                    select
-                    id="association-select"
-                    label=""
-                    //value={formik.values.stratifications[0].association}
-                    inputProps={{
-                      "data-testid": "association-select",
-                    }}
-                    // onChange={(e) => {
-                    //   formik.setFieldValue(
-                    //     "stratifications[0].association",
-                    //     e.target.value
-                    //   );
-                    // }}
-                    InputLabelProps={{ shrink: false }}
-                    SelectProps={{
-                      native: true,
-                    }}
-                    name="type"
-                  ></TextField>
-                </Col>
-                <Col>
-                  <FieldLabel htmlFor="stratification-description">
-                    Stratification ## Description
-                  </FieldLabel>
-                  <FieldSeparator>
-                    {canEdit && (
-                      <textarea
-                        //value={formik.values.rateAggregation}
-                        //type="text"
-                        name="stratification-description"
-                        id="stratification-description"
-                        autoComplete="stratification-description"
-                        placeholder="Enter Description"
-                        data-testid="stratificationDescriptionText"
-                        //{...formik.getFieldProps("rateAggregation")}
-                      />
-                    )}
-                  </FieldSeparator>
-                </Col>
-              </Row>
+                      {Object.values(
+                        expressionDefinitions.sort((a, b) =>
+                          a.name.localeCompare(b.name)
+                        )
+                      ).map((opt, i) => (
+                        <option
+                          key={`${i + 1}`}
+                          value={opt.name}
+                          data-testid="stratification-select-option"
+                        >
+                          {opt.name.replace(/"/g, "")}
+                        </option>
+                      ))}
+                    </TextField>
+                    <FieldLabel htmlFor="association-select">
+                      Association {i}
+                    </FieldLabel>
+                    <TextField
+                      select
+                      id="association-select"
+                      label=""
+                      value={formik.values.stratifications[i].association}
+                      inputProps={{
+                        "data-testid": "association-select",
+                      }}
+                      onChange={(e) => {
+                        formik.setFieldValue(
+                          `stratifications[${i}].association`,
+                          e.target.value
+                        );
+                      }}
+                      InputLabelProps={{ shrink: false }}
+                      SelectProps={{
+                        native: true,
+                      }}
+                      name="type"
+                    >
+                      {Object.values(
+                        AssociationSelect[formik.values.scoring]
+                      ).map((opt, i) => (
+                        <option
+                          key={`${opt}-${i}`}
+                          value={`${opt}`}
+                          data-testid="association-select-option"
+                        >
+                          {opt}
+                        </option>
+                      ))}
+                    </TextField>
+                  </Col>
+                  <Col>
+                    <FieldLabel htmlFor="stratification-description">
+                      Stratification {i} Description
+                    </FieldLabel>
+                    <FieldSeparator>
+                      {canEdit && (
+                        <textarea
+                          value={formik.values.stratifications[i].description}
+                          //type="text"
+                          name="stratification-description"
+                          id="stratification-description"
+                          autoComplete="stratification-description"
+                          placeholder="Enter Description"
+                          data-testid="stratificationDescriptionText"
+                          maxLength={5000}
+                          {...formik.getFieldProps(
+                            `stratifications[${i}].description`
+                          )}
+                        />
+                      )}
+                    </FieldSeparator>
+                  </Col>
+                </Row>
+              ))}
             </FormControl>
           )}
           {activeTab === "reporting" && (
