@@ -333,9 +333,11 @@ const MeasureGroups = () => {
         (value) => _.isNil(value) || value.trim().length === 0
       );
     }
-    group.stratifications = group.stratifications.filter(
-      (strat) => !!strat.description || !!strat.cqlDefinition
-    );
+    if (group.stratifications) {
+      group.stratifications = group.stratifications.filter(
+        (strat) => !!strat.description || !!strat.cqlDefinition
+      );
+    }
 
     if (measure?.groups && !(measureGroupNumber >= measure?.groups?.length)) {
       group.id = measure?.groups[measureGroupNumber].id;

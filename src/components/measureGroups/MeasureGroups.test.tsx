@@ -231,6 +231,7 @@ describe("Measure Groups Page", () => {
       },
       scoring: "Cohort",
       groupDescription: "new description",
+      stratifications: [],
     };
 
     expect(alert).toHaveTextContent(
@@ -322,6 +323,7 @@ describe("Measure Groups Page", () => {
       },
       scoring: "Cohort",
       groupDescription: "new description",
+      stratifications: [],
     };
 
     expect(alert).toHaveTextContent(
@@ -379,7 +381,8 @@ describe("Measure Groups Page", () => {
         initialPopulation: "Initial Population",
       },
       scoring: "Cohort",
-      groupDescription: "new description for group 2",
+      groupDescription: "new description",
+      stratifications: [],
     };
 
     expect(alert1).toHaveTextContent(
