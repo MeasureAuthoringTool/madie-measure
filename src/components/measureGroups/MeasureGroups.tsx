@@ -221,6 +221,8 @@ const MeasureGroups = () => {
           groupDescription: "",
           scoring: "Select",
           measureGroupTypes: [],
+          rateAggregation: "",
+          improvementNotation: "",
         },
       });
     } else {

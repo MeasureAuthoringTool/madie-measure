@@ -688,14 +688,14 @@ describe("Measure Groups Page", () => {
   test("Onclicking discard button,should be able to discard the changes", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "testDescription";
+    group.rateAggregation = "Rate Aggregation Text";
+    group.improvementNotation = "Increased score indicates improvement";
     measure.groups = [group];
     renderMeasureGroupComponent();
-
     expect(
       (screen.getByRole("option", { name: "Cohort" }) as HTMLOptionElement)
         .selected
     ).toBe(true);
-
     expect(
       (
         screen.getByRole("option", {
@@ -703,7 +703,6 @@ describe("Measure Groups Page", () => {
         }) as HTMLOptionElement
       ).selected
     ).toBe(true);
-
     const definitionToUpdate =
       "VTE Prophylaxis by Medication Administered or Device Applied";
     // update initial population from dropdown
@@ -711,7 +710,6 @@ describe("Measure Groups Page", () => {
       screen.getByTestId("select-measure-group-population"),
       screen.getByText(definitionToUpdate)
     );
-
     expect(
       (
         screen.getByRole("option", {
@@ -719,10 +717,17 @@ describe("Measure Groups Page", () => {
         }) as HTMLOptionElement
       ).selected
     ).toBe(true);
-
+    userEvent.click(screen.getByTestId("reporting-tab"));
+    const input = screen.getByTestId("rateAggregationText");
+    fireEvent.change(input, {
+      target: { value: "New rate aggregation text" },
+    });
     expect(screen.getByTestId("group-form-discard-btn")).toBeEnabled();
     userEvent.click(screen.getByTestId("group-form-discard-btn"));
-
+    expect(screen.getByTestId("rateAggregationText")).toHaveValue(
+      "Rate Aggregation Text"
+    );
+    userEvent.click(screen.getByTestId("populations-tab"));
     expect(
       (
         screen.getByRole("option", {
@@ -730,7 +735,6 @@ describe("Measure Groups Page", () => {
         }) as HTMLOptionElement
       ).selected
     ).toBe(true);
-
     expect(screen.getByTestId("group-form-discard-btn")).toBeDisabled();
   });
 
