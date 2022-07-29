@@ -141,9 +141,6 @@ const MeasureEditor = () => {
           "An error occurred while parsing the CQL",
           rejection.reason
         );
-        setElmTranslationError(
-          "An error occurred while parsing the CQL " + rejection.reason
-        );
       } else {
         const cqlElmResult = results[0].value;
         const parseErrors = results[1].value;
