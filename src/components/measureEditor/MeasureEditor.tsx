@@ -5,26 +5,16 @@ import {
   EditorErrorMarker,
   MadieEditor,
   parseContent,
+  validateContent,
+  ElmTranslationError,
 } from "@madie/madie-editor";
 import { Button } from "@madie/madie-components";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import { Measure } from "@madie/madie-models";
-import {
-  CqlAntlr,
-  CqlCode,
-  CqlCodeSystem,
-} from "@madie/cql-antlr-parser/dist/src";
+import { CqlCode, CqlCodeSystem } from "@madie/cql-antlr-parser/dist/src";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
-import useTerminologyServiceApi from "../../api/useTerminologyServiceApi";
 import tw from "twin.macro";
 import * as _ from "lodash";
-import useElmTranslationServiceApi, {
-  ElmTranslation,
-  ElmTranslationError,
-  ElmValueSet,
-} from "../../api/useElmTranslationServiceApi";
-import CqlResult from "@madie/cql-antlr-parser/dist/src/dto/CqlResult";
-import { mapCodeSystemErrorsToTranslationErrors } from "./measureEditorUtils";
 import { useOktaTokens } from "@madie/madie-util";
 
 const MessageText = tw.p`text-sm font-medium`;
@@ -34,8 +24,7 @@ const UpdateAlerts = tw.div`mb-2 h-5`;
 const EditorActions = tw.div`mt-2 ml-2 mb-5 space-y-5`;
 
 export const mapErrorsToAceAnnotations = (
-  errors: ElmTranslationError[],
-  type: string
+  errors: ElmTranslationError[]
 ): EditorAnnotation[] => {
   let annotations: EditorAnnotation[] = [];
   if (errors && _.isArray(errors) && errors.length > 0) {
@@ -43,7 +32,7 @@ export const mapErrorsToAceAnnotations = (
       row: error.startLine - 1,
       column: error.startChar,
       type: error.errorSeverity.toLowerCase(),
-      text: `${type}: ${error.startChar}:${error.endChar} | ${error.message}`,
+      text: `${error.errorType}: ${error.startChar}:${error.endChar} | ${error.message}`,
     }));
   }
   return annotations;
@@ -89,7 +78,6 @@ const MeasureEditor = () => {
   const [editorVal, setEditorVal]: [string, Dispatch<SetStateAction<string>>] =
     useState("");
   const measureServiceApi = useMeasureServiceApi();
-  const elmTranslationServiceApi = useElmTranslationServiceApi();
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
   const [elmTranslationError, setElmTranslationError] = useState(null);
@@ -101,185 +89,24 @@ const MeasureEditor = () => {
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
   const canEdit = userName === measure.createdBy;
-  const terminologyServiceApi = useTerminologyServiceApi();
   const [valuesetMsg, setValuesetMsg] = useState(null);
 
-  const getValueSetErrors = async (
-    valuesetsArray: ElmValueSet[]
+  const updateElmAnnotations = async (
+    cql: string
   ): Promise<ElmTranslationError[]> => {
-    const valuesetsErrorArray: ElmTranslationError[] = [];
-    if (valuesetsArray) {
-      await Promise.allSettled(
-        valuesetsArray.map(async (valueSet) => {
-          const oid = getOid(valueSet);
-          await terminologyServiceApi
-            .getValueSet(oid, valueSet.locator)
-            .then((response) => {
-              if (response.errorMsg) {
-                const vsErrorForElmTranslationError: ElmTranslationError =
-                  processValueSetErrorForElmTranslationError(
-                    response.errorMsg.toString(),
-                    valueSet.locator
-                  );
-                valuesetsErrorArray.push(vsErrorForElmTranslationError);
-              }
-            });
-        })
-      );
-      return valuesetsErrorArray;
-    }
-  };
-  const checkLogin = async (): Promise<Boolean> => {
-    let isLoggedIn = false;
-    await terminologyServiceApi
-      .checkLogin()
-      .then(() => {
-        isLoggedIn = true;
-      })
-      .catch((err) => {
-        isLoggedIn = false;
-      });
-    return isLoggedIn;
-  };
-
-  const getOid = (valueSet: ElmValueSet): string => {
-    return valueSet.id.split("ValueSet/")[1];
-  };
-
-  const getStartLine = (locator: string): number => {
-    const index = locator.indexOf(":");
-    const startLine = locator.substring(0, index);
-    return Number(startLine);
-  };
-
-  const getStartChar = (locator: string): number => {
-    const index = locator.indexOf(":");
-    const index2 = locator.indexOf("-");
-    const startChar = locator.substring(index + 1, index2);
-    return Number(startChar);
-  };
-
-  const getEndLine = (locator: string): number => {
-    const index = locator.indexOf("-");
-    const endLineAndChar = locator.substring(index + 1);
-    const index2 = locator.indexOf(":");
-    const endLine = endLineAndChar.substring(0, index2);
-    return Number(endLine);
-  };
-
-  const getEndChar = (locator: string): number => {
-    const index = locator.indexOf("-");
-    const endLineAndChar = locator.substring(index + 1);
-    const index2 = locator.indexOf(":");
-    const endLine = endLineAndChar.substring(index2 + 1);
-    return Number(endLine);
-  };
-
-  const processValueSetErrorForElmTranslationError = (
-    vsError: string,
-    valuesetLocator: string
-  ): ElmTranslationError => {
-    const startLine: number = getStartLine(valuesetLocator);
-    const startChar: number = getStartChar(valuesetLocator);
-    const endLine: number = getEndLine(valuesetLocator);
-    const endChar: number = getEndChar(valuesetLocator);
-    return {
-      startLine: startLine,
-      startChar: startChar,
-      endChar: endChar,
-      endLine: endLine,
-      errorSeverity: "Error",
-      errorType: "ValueSet",
-      message: vsError,
-      targetIncludeLibraryId: "",
-      targetIncludeLibraryVersionId: "",
-      type: "ValueSet",
-    };
-  };
-
-  const getCustomCqlCodes = (cql: string): CustomCqlCode[] => {
-    // using Antlr to get cqlCodes & cqlCodeSystems
-    // Constructs a list of CustomCqlCode objects, which are validated in terminology service
-    const cqlResult: CqlResult = new CqlAntlr(cql).parse();
-    return cqlResult?.codes?.map((code) => {
-      return {
-        ...code,
-        codeSystem: cqlResult.codeSystems?.find(
-          (codeSys) => codeSys.name === code.codeSystem
-        ),
-      };
-    });
-  };
-
-  const getVsacErrorAnnotationAndMarkers = (
-    codeSystemCqlErrors: ElmTranslationError[]
-  ) => {
-    let vsacErrorsAnnotations: EditorAnnotation[] = [];
-    let vsacErrorMarkers: EditorErrorMarker[] = [];
-    if (codeSystemCqlErrors && codeSystemCqlErrors.length > 0) {
-      vsacErrorsAnnotations = mapErrorsToAceAnnotations(
-        codeSystemCqlErrors,
-        "VSAC"
-      );
-      vsacErrorMarkers = mapErrorsToAceMarkers(codeSystemCqlErrors);
-    }
-    return { vsacErrorsAnnotations, vsacErrorMarkers };
-  };
-
-  const updateElmAnnotations = async (cql: string): Promise<ElmTranslation> => {
     setElmTranslationError(null);
     if (cql && cql.trim().length > 0) {
-      const customCqlCodes: CustomCqlCode[] = getCustomCqlCodes(cql);
-      const isLoggedIn = await Promise.resolve(checkLogin());
-      const [validatedCodes, translationResults] = await Promise.all([
-        await terminologyServiceApi.validateCodes(
-          customCqlCodes,
-          isLoggedIn.valueOf()
-        ),
-        await elmTranslationServiceApi.translateCqlToElm(cql),
-      ]);
-      const codeSystemCqlErrors =
-        mapCodeSystemErrorsToTranslationErrors(validatedCodes);
-
-      const { vsacErrorsAnnotations, vsacErrorMarkers } =
-        getVsacErrorAnnotationAndMarkers(codeSystemCqlErrors);
-
-      let allErrorsArray: ElmTranslationError[] =
-        translationResults?.errorExceptions
-          ? translationResults?.errorExceptions
-          : [];
-
-      let valuesetsErrors = null;
-
-      if (translationResults.library?.valueSets?.def !== null && isLoggedIn) {
-        valuesetsErrors = await getValueSetErrors(
-          translationResults.library?.valueSets?.def
-        );
+      const allErrorsArray = await validateContent(cql);
+      if (isLoggedInUMLS(allErrorsArray)) {
+        setValuesetMsg("Please log in to UMLS!");
       }
 
-      if (valuesetsErrors && valuesetsErrors.length > 0) {
-        valuesetsErrors.map((valueSet) => {
-          allErrorsArray.push(valueSet);
-        });
-      } else {
-        if (!isLoggedIn) {
-          setValuesetMsg("Please log in to UMLS!");
-        } else if (translationResults.library?.valueSets) {
-          setValuesetMsg("Value Set is valid!");
-        }
-      }
-
-      // errorExceptions contains error data for the primary library,
-      // aka the CQL loaded into the editor. Errors from included
-      // libraries are available in data.annotations.errors, if needed.
-      let annotations = mapErrorsToAceAnnotations(allErrorsArray, "ELM");
-      annotations = [...annotations, ...vsacErrorsAnnotations];
-      let errorMarkers = mapErrorsToAceMarkers(allErrorsArray);
-      errorMarkers = [...errorMarkers, ...vsacErrorMarkers];
+      const annotations = mapErrorsToAceAnnotations(allErrorsArray);
+      const errorMarkers = mapErrorsToAceMarkers(allErrorsArray);
 
       setElmAnnotations(annotations);
       setErrorMarkers(errorMarkers);
-      return translationResults;
+      return allErrorsArray;
     } else {
       setElmAnnotations([]);
     }
@@ -289,6 +116,9 @@ const MeasureEditor = () => {
   const hasParserErrors = async (val) => {
     return !!(parseContent(val)?.length > 0);
   };
+  const isLoggedInUMLS = (errors: ElmTranslationError[]) => {
+    return JSON.stringify(errors).includes("Please log in to UMLS");
+  };
 
   const updateMeasureCql = async () => {
     try {
@@ -296,7 +126,6 @@ const MeasureEditor = () => {
         updateElmAnnotations(editorVal),
         hasParserErrors(editorVal),
       ]);
-
       if (results[0].status === "rejected") {
         console.error(
           "An error occurred while translating CQL to ELM",
@@ -312,11 +141,13 @@ const MeasureEditor = () => {
           "An error occurred while parsing the CQL",
           rejection.reason
         );
+        setElmTranslationError(
+          "An error occurred while parsing the CQL " + rejection.reason
+        );
       } else {
         const cqlElmResult = results[0].value;
         const parseErrors = results[1].value;
-
-        const cqlElmErrors = !!(cqlElmResult?.errorExceptions?.length > 0);
+        const cqlElmErrors = !!(cqlElmResult?.length > 0);
         if (editorVal !== measure.cql) {
           const cqlErrors = parseErrors || cqlElmErrors;
           const newMeasure: Measure = {

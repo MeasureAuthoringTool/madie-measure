@@ -32,6 +32,14 @@ export default function MultipleSelectDropDown(props: {
   id: string;
   clearAll: any;
 }) {
+  // To handle clearAll, since clear is considered as an option in Select
+  const handleOnchange = (event) => {
+    if (event.target.value.includes("clear")) {
+      return props.clearAll();
+    }
+    return props.formControl.onChange(event);
+  };
+
   return (
     <div>
       <FormControl sx={{ width: 300, mt: 1 }}>
@@ -44,6 +52,7 @@ export default function MultipleSelectDropDown(props: {
           multiple
           displayEmpty
           {...props.formControl}
+          onChange={handleOnchange}
           input={
             <OutlinedInput id="select-multiple-dropdown" label={props.label} />
           }
@@ -65,10 +74,8 @@ export default function MultipleSelectDropDown(props: {
               <ListItemText primary={value} />
             </MenuItem>
           ))}
-          <MenuItem value="">
-            <Link underline="always" onClick={props.clearAll}>
-              Clear
-            </Link>
+          <MenuItem value="clear">
+            <Link underline="always">Clear</Link>
           </MenuItem>
         </Select>
       </FormControl>
