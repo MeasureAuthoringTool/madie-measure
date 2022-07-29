@@ -96,7 +96,9 @@ describe("Measure Groups Page", () => {
 
   const renderMeasureGroupComponent = () => {
     return render(
-      <MemoryRouter initialEntries={[{ pathname: "/" }]}>
+      <MemoryRouter
+        initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
+      >
         <ApiContextProvider value={serviceConfig}>
           <MeasureGroups />
         </ApiContextProvider>
@@ -303,6 +305,14 @@ describe("Measure Groups Page", () => {
     expect(
       screen.getByTestId("leftPanelMeasureInformation-MeasureGroup2")
     ).toBeInTheDocument();
+
+    const measureGroup1Link = screen.getByTestId(
+      "leftPanelMeasureInformation-MeasureGroup1"
+    );
+    expect(measureGroup1Link).toBeInTheDocument();
+    userEvent.click(measureGroup1Link);
+    const measureGroupTitle = screen.getByText("Measure Group 1");
+    expect(measureGroupTitle).toBeInTheDocument();
   });
 
   test("OnClicking delete button, delete group modal is displayed", async () => {
@@ -1019,5 +1029,106 @@ describe("Measure Groups Page", () => {
     const { queryByTestId } = renderMeasureGroupComponent();
     const saveButton = queryByTestId("group-form-submit-btn");
     expect(saveButton).not.toBeInTheDocument();
+  });
+
+  test("Add new group and click Discard button should discard the changes", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "testDescription";
+    measure.groups = [group];
+    renderMeasureGroupComponent();
+    expect(screen.getByText("Measure Group 1")).toBeInTheDocument();
+
+    const addButton = screen.getByTestId("AddIcon");
+    expect(addButton).toBeInTheDocument();
+    await act(async () => {
+      userEvent.click(addButton);
+    });
+    expect(screen.getByText("Measure Group 2")).toBeInTheDocument();
+
+    const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
+    expect(groupDescriptionInput).toBeTruthy();
+    await act(async () => {
+      fireEvent.change(groupDescriptionInput, {
+        target: { value: "New group description" },
+      });
+    });
+    expect(screen.getByText("New group description")).toBeInTheDocument();
+
+    const discardButton = screen.getByTestId("group-form-discard-btn");
+    expect(discardButton).toBeEnabled();
+    await act(async () => {
+      userEvent.click(discardButton);
+    });
+    expect(screen.queryByText("New group description")).not.toBeInTheDocument();
+  });
+
+  test("Should display error message when updating group", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "testDescription";
+    measure.groups = [group];
+    const { getByTestId, getByText } = renderMeasureGroupComponent();
+
+    const measureGroupTypeSelect = getByTestId("measure-group-type-dropdown");
+    await act(async () => {
+      userEvent.click(getByRole(measureGroupTypeSelect, "button"));
+      await waitFor(() => {
+        userEvent.click(getByText("Patient Reported Outcome"));
+      });
+    });
+
+    mockedAxios.put.mockResolvedValue({ data: null });
+
+    expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+    await act(async () => {
+      userEvent.click(screen.getByTestId("group-form-submit-btn"));
+    });
+    expect(screen.getByText("Error updating group")).toBeInTheDocument();
+  });
+
+  test("Should display error message when adding group", async () => {
+    measure.groups = [];
+    renderMeasureGroupComponent();
+    expect(screen.getByText("Measure Group 1")).toBeInTheDocument();
+
+    const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
+    expect(groupDescriptionInput).toBeTruthy();
+    await act(async () => {
+      fireEvent.change(groupDescriptionInput, {
+        target: { value: "New group description" },
+      });
+    });
+    expect(screen.getByText("New group description")).toBeInTheDocument();
+
+    const measureGroupTypeSelect = screen.getByTestId(
+      "measure-group-type-dropdown"
+    );
+    userEvent.click(getByRole(measureGroupTypeSelect, "button"));
+    await waitFor(() => {
+      userEvent.click(screen.getByText("Patient Reported Outcome"));
+    });
+
+    const groupScoringSelect = screen.getByTestId("scoring-unit-select");
+    await act(async () => {
+      fireEvent.change(groupScoringSelect, {
+        target: { value: "Cohort" },
+      });
+    });
+
+    const populationSelect = screen.getByTestId(
+      "select-measure-group-population"
+    );
+    await act(async () => {
+      fireEvent.change(populationSelect, {
+        target: { value: "SDE Race" },
+      });
+    });
+
+    mockedAxios.put.mockResolvedValue({ data: null });
+
+    expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+    await act(async () => {
+      userEvent.click(screen.getByTestId("group-form-submit-btn"));
+    });
+    expect(screen.getByText("Failed to create the group.")).toBeInTheDocument();
   });
 });
