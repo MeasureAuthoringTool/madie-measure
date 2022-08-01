@@ -128,7 +128,6 @@ describe("MeasureInformation component", () => {
   });
 
   it("Check if measurement start date field updates input as expected", async () => {
-    jest.setTimeout(30000);
     render(<MeasureInformation />);
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(

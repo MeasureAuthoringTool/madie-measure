@@ -93,7 +93,12 @@ export const MeasureImprovementNotation = [
     code: "decrease",
   },
 ];
-
+export const EmptyStrat = {
+  cqlDefinition: "",
+  description: "",
+  association: "",
+  id: "",
+};
 export const AssociationSelect = {
   Proportion: [
     "Initial Population",
@@ -166,10 +171,7 @@ const MeasureGroups = () => {
             scoring: "Select",
             populations: group?.populations,
             groupDescription: "",
-            stratifications: [
-              { cqlDefinition: "", description: "", association: "", id: "" },
-              { description: "", cqlDefinition: "", association: "", id: "" },
-            ],
+            stratifications: [{ ...EmptyStrat }, { ...EmptyStrat }],
             rateAggregation: "",
             improvementNotation: "",
             measureGroupTypes: [],
@@ -189,8 +191,8 @@ const MeasureGroups = () => {
       improvementNotation: group?.improvementNotation || "",
       groupDescription: group?.groupDescription,
       stratifications: group?.stratifications || [
-        { cqlDefinition: "", description: "", association: "", id: "" },
-        { description: "", cqlDefinition: "", association: "", id: "" },
+        { ...EmptyStrat },
+        { ...EmptyStrat },
       ],
       measureGroupTypes: group?.measureGroupTypes || [],
     } as Group,
@@ -559,25 +561,16 @@ const MeasureGroups = () => {
                       if (!!formik.values.stratifications) {
                         while (formik.values.stratifications.length < 2) {
                           formik.values.stratifications.push({
-                            cqlDefinition: "",
-                            description: "",
-                            association: "",
-                            id: "",
+                            ...EmptyStrat,
                           });
                         }
                       } else {
                         formik.values.stratifications = [
                           {
-                            cqlDefinition: "",
-                            description: "",
-                            association: "",
-                            id: "",
+                            ...EmptyStrat,
                           },
                           {
-                            cqlDefinition: "",
-                            description: "",
-                            association: "",
-                            id: "",
+                            ...EmptyStrat,
                           },
                         ];
                       }
@@ -642,6 +635,7 @@ const MeasureGroups = () => {
             {activeTab === "stratification" && (
               <FormControl>
                 {formik.values.stratifications.map((strat, i) => (
+                  //Can be made into it's own component, later"
                   <Row>
                     <Col>
                       <FieldLabel htmlFor="stratification-select">
