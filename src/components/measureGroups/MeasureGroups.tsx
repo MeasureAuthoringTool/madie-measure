@@ -49,6 +49,18 @@ const PopulationActions = styled.div(() => [
   "background-color: #f2f5f7;",
   tw`col-span-3 p-1 pl-6`,
 ]);
+const Row = styled.section`
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  align-items: center;
+  margin-top: 14px;
+`;
+const Col = styled.article`
+  display: flex;
+  flex-direction: column;
+  padding-right: 2em;
+`;
 interface PropTypes {
   isActive?: boolean;
 }
