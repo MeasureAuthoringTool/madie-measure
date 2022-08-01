@@ -252,6 +252,7 @@ describe("Measure Groups Page", () => {
       ],
       scoring: "Cohort",
       groupDescription: "new description",
+      stratifications: [],
       measureGroupTypes: ["Patient Reported Outcome"],
       rateAggregation: "",
       improvementNotation: "",
@@ -515,6 +516,7 @@ describe("Measure Groups Page", () => {
       ],
       scoring: "Cohort",
       groupDescription: "new description",
+      stratifications: [],
       measureGroupTypes: ["Patient Reported Outcome"],
       rateAggregation: "",
       improvementNotation: "",
@@ -595,6 +597,7 @@ describe("Measure Groups Page", () => {
       measureGroupTypes: ["Patient Reported Outcome"],
       rateAggregation: "",
       improvementNotation: "",
+      stratifications: [],
     };
 
     expect(alert1).toHaveTextContent(
