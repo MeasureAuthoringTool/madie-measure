@@ -97,6 +97,11 @@ export interface DeleteMeasureGroupDialog {
   measureGroupNumber?: number;
 }
 
+// export interface UpdateMeasureGroupScoring {
+//   open?: boolean;
+//   measureGroupData?: Group;
+// }
+
 const MeasureGroups = () => {
   const [expressionDefinitions, setExpressionDefinitions] = useState<
     Array<ExpressionDefinition>
@@ -109,10 +114,14 @@ const MeasureGroups = () => {
   const [genericErrorMessage, setGenericErrorMessage] = useState<string>();
   const [successMessage, setSuccessMessage] = useState<string>();
   const [activeTab, setActiveTab] = useState<string>("populations");
-  const [warningMessage, setWarningMessage] = useState<boolean>(false);
-  const [updateConfirm, setUpdateConfirm] = useState<boolean>(false);
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(0);
   const [group, setGroup] = useState<Group>();
+  const [updateMeasureGroupScoringDialog, setUpdateMeasureGroupScoringDialog] =
+    useState<boolean>(false);
+  // useState<UpdateMeasureGroupScoring>({
+  //   open: false,
+  //   measureGroupData: undefined,
+  // });
   const [deleteMeasureGroupDialog, setDeleteMeasureGroupDialog] =
     useState<DeleteMeasureGroupDialog>({
       open: false,
@@ -168,12 +177,7 @@ const MeasureGroups = () => {
         !(measureGroupNumber >= measure?.groups?.length) &&
         formik.values?.scoring !== measure?.groups[measureGroupNumber]?.scoring
       ) {
-        setWarningMessage(true);
-        if (updateConfirm) {
-          setWarningMessage(false);
-          submitForm(group);
-          setUpdateConfirm(false);
-        }
+        setUpdateMeasureGroupScoringDialog(true);
       } else {
         submitForm(group);
       }
@@ -264,6 +268,7 @@ const MeasureGroups = () => {
         })
         .then(() => {
           setGenericErrorMessage("");
+          handleDialogClose();
           setSuccessMessage(
             "Population details for this group updated successfully."
           );
@@ -305,10 +310,8 @@ const MeasureGroups = () => {
   };
 
   const handleDialogClose = () => {
-    setDeleteMeasureGroupDialog({
-      open: false,
-      measureGroupNumber: undefined,
-    });
+    setUpdateMeasureGroupScoringDialog(false);
+    setDeleteMeasureGroupDialog({ open: false });
   };
 
   const deleteMeasureGroup = (e) => {
@@ -342,23 +345,6 @@ const MeasureGroups = () => {
         },
       ];
 
-  const warningTemplate = (
-    <>
-      <ButtonSpacer>
-        <Button
-          style={{ background: "#424B5A" }}
-          type="submit"
-          buttonTitle="Update"
-          data-testid="group-form-update-btn"
-          onClick={() => setUpdateConfirm(true)}
-        />
-      </ButtonSpacer>
-      <ButtonSpacer>
-        <Button type="button" buttonTitle="Cancel" variant="white" />
-      </ButtonSpacer>
-    </>
-  );
-
   return (
     <FormikProvider value={formik}>
       <form onSubmit={formik.handleSubmit}>
@@ -380,6 +366,14 @@ const MeasureGroups = () => {
               onClose={handleDialogClose}
               onSubmit={deleteMeasureGroup}
               measureGroupNumber={deleteMeasureGroupDialog.measureGroupNumber}
+              modalType="deleteMeasureGroup"
+            />
+
+            <DeleteMeasureGroupDialog
+              open={updateMeasureGroupScoringDialog}
+              onClose={handleDialogClose}
+              onSubmit={() => submitForm(formik.values)}
+              modalType="scoring"
             />
 
             {genericErrorMessage && (
@@ -402,18 +396,7 @@ const MeasureGroups = () => {
                 {successMessage}
               </Alert>
             )}
-            {warningMessage && (
-              <Alert
-                data-testid="warning-alerts"
-                role="alert"
-                severity="warning"
-                onClose={() => setWarningMessage(false)}
-              >
-                This change will reset the population scoring value in test
-                cases. cases. Are you sure you wanted to continue with this?{" "}
-                {warningTemplate}
-              </Alert>
-            )}
+
             {/* Form control later should be moved to own component and dynamically rendered by switch based on measure. */}
 
             <FormControl>
