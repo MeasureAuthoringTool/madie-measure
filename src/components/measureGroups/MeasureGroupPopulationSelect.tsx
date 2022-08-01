@@ -65,11 +65,6 @@ const MeasureGroupPopulationSelect = ({
   const htmlId = kebabCase(`population-select-${label}`);
   const defaultOptionTitle = optionTitle ? optionTitle : label;
 
-  // FPO noop onClick handler
-  const onClickCallback = (evt) => {
-    evt.preventDefault();
-  };
-
   return (
     <FormControl>
       <HeavyLabel
@@ -124,25 +119,6 @@ const MeasureGroupPopulationSelect = ({
 
           {!canEdit && value}
         </Col>
-
-        <SpacerContainer>
-          <Link
-            href="#"
-            onClick={onClickCallback}
-            data-testid={`measure-group-population-view`}
-          >
-            View
-          </Link>
-          {canEdit && (
-            <Link
-              href="#"
-              onClick={onClickCallback}
-              data-testid={`measure-group-population-delete`}
-            >
-              Delete
-            </Link>
-          )}
-        </SpacerContainer>
       </Row>
 
       {subTitle && <SubTitle>{subTitle}</SubTitle>}

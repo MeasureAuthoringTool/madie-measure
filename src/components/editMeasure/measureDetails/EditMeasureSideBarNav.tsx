@@ -3,6 +3,7 @@ import tw from "twin.macro";
 import { NavLink, useLocation } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import { Measure } from "@madie/madie-models";
+import "./EditMeasureSideBarNav.scss";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
 const Title = tw.div`flex items-center flex-shrink-0 px-4 space-y-5 font-display`;
@@ -27,6 +28,7 @@ interface SidebarLink {
 export interface EditMeasureSideBarNavProps {
   links: Array<SidebarLink>;
   header?: String;
+  measureGroupNumber?: number;
   setMeasureGroupNumber?: (value: number) => void;
   setSuccessMessage?: (value: string) => void;
   measure?: Measure;
@@ -39,6 +41,7 @@ export default function EditMeasureSideBarNav(
     links,
     header = "",
     measure,
+    measureGroupNumber,
     setMeasureGroupNumber,
     setSuccessMessage,
   } = props;
@@ -116,7 +119,10 @@ export default function EditMeasureSideBarNav(
         {measureGroups &&
           measureGroups.map((linkInfo, index) => {
             let LinkEl = InactiveNavLink;
-            if (pathname === linkInfo.href) {
+            if (
+              pathname.replace("groups", "measure-groups") === linkInfo.href &&
+              index === measureGroupNumber
+            ) {
               LinkEl = ActiveNavLink;
             }
             return (
@@ -131,13 +137,16 @@ export default function EditMeasureSideBarNav(
               </LinkEl>
             );
           })}
-        <button
-          onClick={(e) => addNewBlankMeasureGroup(e)}
-          data-testid="add-measure-group-button"
-        >
-          <AddIcon className="add-icon" fontSize="small" />
-          &nbsp; Add Measure Group
-        </button>
+        <div className="right-col">
+          <button
+            className="new-measure-group"
+            onClick={(e) => addNewBlankMeasureGroup(e)}
+            data-testid="add-measure-group-button"
+          >
+            <AddIcon className="add-icon" fontSize="small" />
+            &nbsp; Add Measure Group
+          </button>
+        </div>
       </Nav>
     </OuterWrapper>
   );
