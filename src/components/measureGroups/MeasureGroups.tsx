@@ -14,7 +14,7 @@ import * as _ from "lodash";
 import { MeasureGroupSchemaValidator } from "../../validations/MeasureGroupSchemaValidator";
 import { useOktaTokens } from "@madie/madie-util";
 import MultipleSelectDropDown from "./MultipleSelectDropDown";
-import DeleteMeasureGroupDialog from "./DeleteMeasureGroupDialog";
+import WarningDialog from "./WarningDialog";
 import { allPopulations, getPopulationsForScoring } from "./PopulationHelper";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
@@ -132,11 +132,6 @@ export interface DeleteMeasureGroupDialog {
   measureGroupNumber?: number;
 }
 
-// export interface UpdateMeasureGroupScoring {
-//   open?: boolean;
-//   measureGroupData?: Group;
-// }
-
 const MeasureGroups = () => {
   const [expressionDefinitions, setExpressionDefinitions] = useState<
     Array<ExpressionDefinition>
@@ -153,10 +148,6 @@ const MeasureGroups = () => {
   const [group, setGroup] = useState<Group>();
   const [updateMeasureGroupScoringDialog, setUpdateMeasureGroupScoringDialog] =
     useState<boolean>(false);
-  // useState<UpdateMeasureGroupScoring>({
-  //   open: false,
-  //   measureGroupData: undefined,
-  // });
   const [deleteMeasureGroupDialog, setDeleteMeasureGroupDialog] =
     useState<DeleteMeasureGroupDialog>({
       open: false,
@@ -409,20 +400,26 @@ const MeasureGroups = () => {
               <Title>Measure Group {measureGroupNumber + 1}</Title>
             </Header>
 
-            <DeleteMeasureGroupDialog
-              open={deleteMeasureGroupDialog.open}
-              onClose={handleDialogClose}
-              onSubmit={deleteMeasureGroup}
-              measureGroupNumber={deleteMeasureGroupDialog.measureGroupNumber}
-              modalType="deleteMeasureGroup"
-            />
+            {/* delete measure group warning dialog */}
+            {deleteMeasureGroupDialog.open && (
+              <WarningDialog
+                open={deleteMeasureGroupDialog.open}
+                onClose={handleDialogClose}
+                onSubmit={deleteMeasureGroup}
+                measureGroupNumber={deleteMeasureGroupDialog.measureGroupNumber}
+                modalType="deleteMeasureGroup"
+              />
+            )}
 
-            <DeleteMeasureGroupDialog
-              open={updateMeasureGroupScoringDialog}
-              onClose={handleDialogClose}
-              onSubmit={() => submitForm(formik.values)}
-              modalType="scoring"
-            />
+            {/* scoring change warning dialog */}
+            {updateMeasureGroupScoringDialog && (
+              <WarningDialog
+                open={updateMeasureGroupScoringDialog}
+                onClose={handleDialogClose}
+                onSubmit={() => submitForm(formik.values)}
+                modalType="scoring"
+              />
+            )}
 
             {genericErrorMessage && (
               <Alert

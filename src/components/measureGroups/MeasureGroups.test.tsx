@@ -349,7 +349,7 @@ describe("Measure Groups Page", () => {
       screen.getByTestId("delete-measure-group-modal-cancel-btn")
     ).toBeInTheDocument();
     expect(
-      screen.getByTestId("delete-measure-group-modal-delete-btn")
+      screen.getByTestId("delete-measure-group-modal-agree-btn")
     ).toBeInTheDocument();
 
     userEvent.click(
@@ -383,7 +383,7 @@ describe("Measure Groups Page", () => {
     ).toBeInTheDocument();
 
     expect(
-      screen.getByTestId("delete-measure-group-modal-delete-btn")
+      screen.getByTestId("delete-measure-group-modal-agree-btn")
     ).toBeInTheDocument();
 
     const expectedConfig = {
@@ -400,9 +400,7 @@ describe("Measure Groups Page", () => {
       groups: [],
     };
     mockedAxios.delete.mockResolvedValue({ data: updatedMeasure });
-    userEvent.click(
-      screen.getByTestId("delete-measure-group-modal-delete-btn")
-    );
+    userEvent.click(screen.getByTestId("delete-measure-group-modal-agree-btn"));
 
     expect(mockedAxios.delete).toHaveBeenCalledWith(
       `example-service-url/measures/test-measure/groups/7p03-5r29-7O0I`,
