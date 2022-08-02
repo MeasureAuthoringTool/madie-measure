@@ -12,3 +12,5 @@ function mockImport(importName) {
     return Promise.resolve({});
   }
 }
+
+jest.setTimeout(15000);

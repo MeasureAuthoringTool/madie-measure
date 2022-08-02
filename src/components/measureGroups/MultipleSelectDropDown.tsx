@@ -6,12 +6,7 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import { Checkbox, Link, ListItemText } from "@mui/material";
 
-const SoftLabel = styled.label`
-  display: block;
-  margin-bottom: 5px;
-  font-size: 12px;
-  color: rgba(66, 75, 90, 0.7);
-`;
+const FieldLabel = tw.label`block text-sm font-medium text-gray-700`;
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -42,10 +37,10 @@ export default function MultipleSelectDropDown(props: {
 
   return (
     <div>
-      <FormControl sx={{ width: 300, mt: 1 }}>
-        <SoftLabel htmlFor="multiple-select-dropdown">
+      <FormControl sx={{ width: 300, mt: 3 }}>
+        <FieldLabel htmlFor="multiple-select-dropdown">
           Measure Group type:
-        </SoftLabel>
+        </FieldLabel>
         <Select
           labelId="multiple-select-dropdown"
           data-testid={`${props.id}-dropdown`}

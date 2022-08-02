@@ -53,6 +53,7 @@ const serviceConfig: ServiceConfig = {
   elmTranslationService: {
     baseUrl: "",
   },
+  terminologyService: { baseUrl: "" },
 };
 
 // mocking useHistory

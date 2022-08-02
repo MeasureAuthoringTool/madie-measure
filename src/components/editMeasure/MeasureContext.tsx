@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { Measure } from "@madie/madie-models";
+import { Measure } from "../../../../madie-models/dist";
 
 export interface MeasureContextHolder {
   measure: Measure;

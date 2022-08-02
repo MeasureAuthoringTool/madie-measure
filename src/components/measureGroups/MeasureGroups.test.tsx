@@ -15,7 +15,7 @@ import {
   GroupScoring,
   MeasureGroupTypes,
   PopulationType,
-} from "@madie/madie-models";
+} from "../../../../madie-models/dist";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import { MemoryRouter } from "react-router-dom";
@@ -57,6 +57,13 @@ jest.mock("@madie/madie-util", () => ({
   }),
 }));
 
+const populationBasisValues: string[] = [
+  "Boolean",
+  "test-data-1",
+  "test-data-2",
+];
+mockedAxios.get.mockResolvedValue({ data: { populationBasisValues } });
+
 describe("Measure Groups Page", () => {
   let measure: Measure;
   let group: Group;
@@ -91,6 +98,7 @@ describe("Measure Groups Page", () => {
       ],
       groupDescription: "",
       measureGroupTypes: [],
+      populationBasis: "Boolean",
     };
   });
 
@@ -177,7 +185,7 @@ describe("Measure Groups Page", () => {
     }
   });
 
-  test("On change of group scoring the field definitions are cleared", () => {
+  test("On change of group scoring the field definitions are cleared", async () => {
     group.id = "";
     group.scoring = "Cohort";
     measure.groups = [group];
@@ -186,7 +194,7 @@ describe("Measure Groups Page", () => {
       (screen.getByRole("option", { name: "Cohort" }) as HTMLOptionElement)
         .selected
     ).toBe(true);
-    const option = screen.getByTestId(
+    const scoringUnitOption = screen.getByTestId(
       "scoring-unit-select"
     ) as HTMLOptionElement;
 
@@ -195,9 +203,14 @@ describe("Measure Groups Page", () => {
     )[0] as HTMLOptionElement;
     expect(populationOption.value).toBe(group.populations[0].definition);
 
-    fireEvent.change(option, { target: { value: "Ratio" } });
-    expect(option.value).toBe("Ratio");
-    expect(populationOption.value).toBe("");
+    fireEvent.change(scoringUnitOption, { target: { value: "Ratio" } });
+    expect(scoringUnitOption.value).toBe("Ratio");
+    await waitFor(() => {
+      const selectedPopulationOption = screen.getAllByTestId(
+        "select-measure-group-population"
+      )[0] as HTMLOptionElement;
+      expect(selectedPopulationOption.value).toBe("");
+    });
   });
 
   test("Should create population Group with one initial population successfully", async () => {
@@ -256,6 +269,7 @@ describe("Measure Groups Page", () => {
       measureGroupTypes: ["Patient Reported Outcome"],
       rateAggregation: "",
       improvementNotation: "",
+      populationBasis: "Boolean",
     };
 
     expect(alert).toHaveTextContent(
@@ -520,6 +534,7 @@ describe("Measure Groups Page", () => {
       measureGroupTypes: ["Patient Reported Outcome"],
       rateAggregation: "",
       improvementNotation: "",
+      populationBasis: "Boolean",
     };
 
     expect(alert).toHaveTextContent(
@@ -597,6 +612,7 @@ describe("Measure Groups Page", () => {
       measureGroupTypes: ["Patient Reported Outcome"],
       rateAggregation: "",
       improvementNotation: "",
+      populationBasis: "Boolean",
       stratifications: [],
     };
 
@@ -613,11 +629,11 @@ describe("Measure Groups Page", () => {
     expect(
       screen.getByTestId("leftPanelMeasureInformation-MeasureGroup2")
     ).toBeInTheDocument();
-  }, 10000);
+  });
 
   test("Should be able to update initial population of a population group", async () => {
     group.id = "7p03-5r29-7O0I";
-    group.groupDescription = "testDescription";
+    // group.groupDescription = "testDescription";
     measure.groups = [group];
     const { getByTestId, getByText } = renderMeasureGroupComponent();
 
@@ -667,24 +683,27 @@ describe("Measure Groups Page", () => {
         },
       ],
       scoring: "Cohort",
-      groupDescription: "testDescription",
+      groupDescription: "",
       measureGroupTypes: ["Patient Reported Outcome"],
+      populationBasis: "Boolean",
     };
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
 
     // submit the form
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
+    await waitFor(() => {
+      expect(mockedAxios.put).toHaveBeenCalledWith(
+        "example-service-url/measures/test-measure/groups/",
+        expectedGroup,
+        expect.anything()
+      );
+    });
     const alert = await screen.findByTestId("success-alerts");
     expect(screen.getByTestId("group-form-submit-btn")).toBeDisabled();
     expect(screen.getByTestId("group-form-discard-btn")).toBeDisabled();
 
     expect(alert).toHaveTextContent(
       "Population details for this group updated successfully."
-    );
-    expect(mockedAxios.put).toHaveBeenCalledWith(
-      "example-service-url/measures/test-measure/groups/",
-      expectedGroup,
-      expect.anything()
     );
   });
 
@@ -782,6 +801,7 @@ describe("Measure Groups Page", () => {
   test("Should report an error if the update population Group fails", async () => {
     group.id = "7p03-5r29-7O0I";
     group.measureGroupTypes = [MeasureGroupTypes.PROCESS];
+    group.populationBasis = "Boolean";
     measure.groups = [group];
     renderMeasureGroupComponent();
     // update initial population from dropdown
@@ -816,6 +836,7 @@ describe("Measure Groups Page", () => {
   test("Should report an error if the update population Group fails due to group validation error", async () => {
     group.id = "7p03-5r29-7O0I";
     group.measureGroupTypes = [MeasureGroupTypes.PROCESS];
+    group.populationBasis = "Boolean";
     measure.groups = [group];
     renderMeasureGroupComponent();
     // update initial population from dropdown
@@ -921,7 +942,7 @@ describe("Measure Groups Page", () => {
     await waitFor(() =>
       expect(screen.getByTestId("group-form-submit-btn")).not.toBeDisabled()
     );
-  }, 10000);
+  });
 
   test("Save button is disabled until all required Ratio populations are entered", async () => {
     renderMeasureGroupComponent();
@@ -975,7 +996,7 @@ describe("Measure Groups Page", () => {
     await waitFor(() =>
       expect(screen.getByTestId("group-form-submit-btn")).not.toBeDisabled()
     );
-  }, 15000);
+  });
 
   test("Save button is disabled until all required CV populations are entered", async () => {
     renderMeasureGroupComponent();

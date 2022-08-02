@@ -65,16 +65,23 @@ const MeasureGroupPopulationSelect = ({
   const htmlId = kebabCase(`population-select-${label}`);
   const defaultOptionTitle = optionTitle ? optionTitle : label;
 
+  // FPO noop onClick handler
+  const onClickCallback = (evt) => {
+    evt.preventDefault();
+  };
+  const FormField = tw.div`mt-6`;
+  const FieldLabel = tw.label`block text-sm font-medium text-gray-700`;
+
   return (
-    <FormControl>
-      <HeavyLabel
+    <FormField>
+      <FieldLabel
         htmlFor={htmlId}
         id={`${htmlId}-label`}
         data-testid={`select-measure-group-population-label`}
       >
         {label}
         {required && <Required>*</Required>}
-      </HeavyLabel>
+      </FieldLabel>
 
       <Row>
         <Col>
@@ -122,7 +129,7 @@ const MeasureGroupPopulationSelect = ({
       </Row>
 
       {subTitle && <SubTitle>{subTitle}</SubTitle>}
-    </FormControl>
+    </FormField>
   );
 };
 
