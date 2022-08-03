@@ -13,4 +13,4 @@ function mockImport(importName) {
   }
 }
 
-jest.setTimeout(15000);
+jest.setTimeout(20000);
