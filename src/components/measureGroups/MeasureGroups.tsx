@@ -14,7 +14,7 @@ import * as _ from "lodash";
 import { MeasureGroupSchemaValidator } from "../../validations/MeasureGroupSchemaValidator";
 import { useOktaTokens } from "@madie/madie-util";
 import MultipleSelectDropDown from "./MultipleSelectDropDown";
-import WarningDialog from "./WarningDialog";
+import MeasureGroupsWarningDialog from "./MeasureGroupWarningDialog";
 import { allPopulations, getPopulationsForScoring } from "./PopulationHelper";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
@@ -402,7 +402,7 @@ const MeasureGroups = () => {
 
             {/* delete measure group warning dialog */}
             {deleteMeasureGroupDialog.open && (
-              <WarningDialog
+              <MeasureGroupsWarningDialog
                 open={deleteMeasureGroupDialog.open}
                 onClose={handleDialogClose}
                 onSubmit={deleteMeasureGroup}
@@ -413,7 +413,7 @@ const MeasureGroups = () => {
 
             {/* scoring change warning dialog */}
             {updateMeasureGroupScoringDialog && (
-              <WarningDialog
+              <MeasureGroupsWarningDialog
                 open={updateMeasureGroupScoringDialog}
                 onClose={handleDialogClose}
                 onSubmit={() => submitForm(formik.values)}

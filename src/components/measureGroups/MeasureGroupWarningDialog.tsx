@@ -65,7 +65,7 @@ const useStyles = makeStyles({
   },
 });
 
-export interface WarningDialogProps {
+export interface MeasureGroupsWarningDialogProps {
   modalType?: string;
   measureGroupNumber?: number;
   open?: boolean;
@@ -73,7 +73,9 @@ export interface WarningDialogProps {
   onSubmit?;
 }
 
-export default function WarningDialog(props: WarningDialogProps) {
+export default function MeasureGroupsWarningDialog(
+  props: MeasureGroupsWarningDialogProps
+) {
   const { modalType, measureGroupNumber, open, onClose, onSubmit } = props;
   const classes = useStyles();
 
