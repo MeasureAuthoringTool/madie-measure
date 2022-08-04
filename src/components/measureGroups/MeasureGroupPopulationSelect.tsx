@@ -1,37 +1,23 @@
 import React from "react";
 import tw, { styled } from "twin.macro";
+import "styled-components/macro";
 import { kebabCase } from "lodash";
 import { TextField } from "@mui/material";
 import { ExpressionDefinition } from "./MeasureGroups";
+import { DSLink } from "@madie/madie-design-system/dist/react";
 
-const FormControl = styled.section(() => [tw`mb-3`, `margin: 25px 40px;`]);
-const Col = styled.article`
-  display: flex;
-  flex-direction: column;
-`;
+const FormControl = styled.section(() => [tw`mb-3`, `margin: 40px`]);
+
 const HeavyLabel = styled.label`
   color: #505d68;
   font-weight: 500;
 `;
-const Link = styled.a`
-  text-decoration: underline;
-  display: inline-block;
-  padding-left: 1rem;
-`;
-const Row = styled.section`
-  display: flex;
-  flex-direction: row;
-  flex-grow: 1;
-  align-items: center;
-  margin-top: 14px;
-`;
+
 const Required = styled.span`
   display: inline-block;
   padding-left: 0.25rem;
 `;
-const SpacerContainer = styled.span`
-  margin-left: 45px;
-`;
+
 const SubTitle = styled.p`
   color: #505d68;
   font-size: 11px;
@@ -60,10 +46,24 @@ const MeasureGroupPopulationSelect = ({
   options = [] as ExpressionDefinition[],
   value = "",
   canEdit,
+  removePopulationCallback,
+  addPopulationCallback,
+  isRemovable,
+  showAddPopulationLink,
   ...props
 }: Props & any) => {
   const htmlId = kebabCase(`population-select-${label}`);
   const defaultOptionTitle = optionTitle ? optionTitle : label;
+
+  const removePopulation = (evt) => {
+    evt.preventDefault();
+    removePopulationCallback();
+  };
+
+  const addPopulation = (evt) => {
+    evt.preventDefault();
+    addPopulationCallback();
+  };
 
   return (
     <FormControl>
@@ -74,53 +74,61 @@ const MeasureGroupPopulationSelect = ({
       >
         {label}
         {required && <Required>*</Required>}
-      </HeavyLabel>
-
-      <Row>
-        <Col>
-          {canEdit && (
-            <TextField
-              select
-              value={value?.replace(/"/g, "")}
-              label=""
-              id={htmlId}
-              inputProps={{
-                "data-testid": `select-measure-group-population`,
-              }}
-              InputLabelProps={{ shrink: false, id: `select-${htmlId}-label` }}
-              SelectProps={{
-                native: true,
-                displayEmpty: true,
-              }}
-              name={name}
-              onChange={onChange}
-              style={{ minWidth: "20rem" }}
-              {...props}
-            >
-              {options.map(({ name }, i) => (
-                <option
-                  key={`${name}-${i}`}
-                  value={name.replace(/"/g, "")}
-                  data-testid={`select-option-measure-group-population`}
-                >
-                  {name.replace(/"/g, "")}
-                </option>
-              ))}
+      </HeavyLabel>{" "}
+      {isRemovable && (
+        <span tw={"ml-2"}>
+          <DSLink onClick={(evt) => removePopulation(evt)}>Remove</DSLink>
+        </span>
+      )}
+      <br />
+      {canEdit && (
+        <div>
+          <TextField
+            select
+            value={value?.replace(/"/g, "")}
+            label=""
+            id={htmlId}
+            inputProps={{
+              "data-testid": `select-measure-group-population`,
+            }}
+            InputLabelProps={{ shrink: false, id: `select-${htmlId}-label` }}
+            SelectProps={{
+              native: true,
+              displayEmpty: true,
+            }}
+            name={name}
+            onChange={onChange}
+            style={{ minWidth: "20rem" }}
+            {...props}
+          >
+            {options.map(({ name }, i) => (
               <option
-                value={""}
-                disabled={required}
+                key={`${name}-${i}`}
+                value={name.replace(/"/g, "")}
                 data-testid={`select-option-measure-group-population`}
               >
-                Select {defaultOptionTitle}
-                {required ? "" : " ( Leave selected for no population )"}
+                {name.replace(/"/g, "")}
               </option>
-            </TextField>
+            ))}
+            <option
+              value={""}
+              disabled={required}
+              data-testid={`select-option-measure-group-population`}
+            >
+              Select {defaultOptionTitle}
+              {required ? "" : " ( Leave selected for no population )"}
+            </option>
+          </TextField>{" "}
+          {showAddPopulationLink && (
+            <span tw={"ml-2"}>
+              <DSLink onClick={(evt) => addPopulation(evt)}>
+                + Add {label}
+              </DSLink>
+            </span>
           )}
-
-          {!canEdit && value}
-        </Col>
-      </Row>
-
+        </div>
+      )}
+      {!canEdit && value}
       {subTitle && <SubTitle>{subTitle}</SubTitle>}
     </FormControl>
   );

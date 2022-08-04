@@ -4,7 +4,7 @@ import {
   MeasureScoring,
 } from "@madie/madie-models";
 
-const initialPopulation = {
+export const initialPopulation = {
   id: "",
   name: PopulationType.INITIAL_POPULATION,
   definition: "",
