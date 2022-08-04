@@ -2,11 +2,7 @@ import React, { useEffect, useState, Fragment } from "react";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
-import {
-  Group,
-  GroupScoring,
-  MeasureGroupTypes,
-} from "../../../../madie-models/dist";
+import { Group, GroupScoring, MeasureGroupTypes } from "@madie/madie-models";
 import { Alert, Autocomplete, TextField } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import EditMeasureSideBarNav from "../editMeasure/measureDetails/EditMeasureSideBarNav";

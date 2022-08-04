@@ -103,7 +103,7 @@
     "@heroicons/react": "^1.0.5",
     "@madie/cql-antlr-parser": "^1.0.0",
     "@madie/madie-design-system": "^1.0.12",
-    "@madie/madie-models": "1.1.0",
+    "@madie/madie-models": "1.1.1",
     "@mui/icons-material": "^5.5.1",
     "@mui/material": "^5.2.5",
     "@mui/styles": "^5.5.1",

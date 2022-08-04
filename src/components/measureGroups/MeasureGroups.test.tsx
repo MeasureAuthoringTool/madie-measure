@@ -15,7 +15,7 @@ import {
   GroupScoring,
   MeasureGroupTypes,
   PopulationType,
-} from "../../../../madie-models/dist";
+} from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import { MemoryRouter } from "react-router-dom";
