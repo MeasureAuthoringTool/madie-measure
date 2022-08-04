@@ -91,7 +91,7 @@ export default function MeasureGroupsWarningDialog(
     title: "Delete Measure Group?",
     info: `Measure Group ${
       measureGroupNumber + 1
-    } will be deleted. Are you sure you want to delete this measure group ?`,
+    } will be deleted. Are you sure you want to delete this measure group?`,
     subText: "",
     bottomInfo: "This action cannot be undone.",
     dataTestId: "delete-measure-group",
