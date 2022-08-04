@@ -14,7 +14,7 @@ import * as _ from "lodash";
 import { MeasureGroupSchemaValidator } from "../../validations/MeasureGroupSchemaValidator";
 import { useOktaTokens } from "@madie/madie-util";
 import MultipleSelectDropDown from "./MultipleSelectDropDown";
-import DeleteMeasureGroupDialog from "./DeleteMeasureGroupDialog";
+import MeasureGroupsWarningDialog from "./MeasureGroupWarningDialog";
 import { allPopulations, getPopulationsForScoring } from "./PopulationHelper";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
@@ -144,10 +144,10 @@ const MeasureGroups = () => {
   const [genericErrorMessage, setGenericErrorMessage] = useState<string>();
   const [successMessage, setSuccessMessage] = useState<string>();
   const [activeTab, setActiveTab] = useState<string>("populations");
-  const [warningMessage, setWarningMessage] = useState<boolean>(false);
-  const [updateConfirm, setUpdateConfirm] = useState<boolean>(false);
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(0);
   const [group, setGroup] = useState<Group>();
+  const [updateMeasureGroupScoringDialog, setUpdateMeasureGroupScoringDialog] =
+    useState<boolean>(false);
   const [deleteMeasureGroupDialog, setDeleteMeasureGroupDialog] =
     useState<DeleteMeasureGroupDialog>({
       open: false,
@@ -208,12 +208,7 @@ const MeasureGroups = () => {
         !(measureGroupNumber >= measure?.groups?.length) &&
         formik.values?.scoring !== measure?.groups[measureGroupNumber]?.scoring
       ) {
-        setWarningMessage(true);
-        if (updateConfirm) {
-          setWarningMessage(false);
-          submitForm(group);
-          setUpdateConfirm(false);
-        }
+        setUpdateMeasureGroupScoringDialog(true);
       } else {
         submitForm(group);
       }
@@ -311,6 +306,7 @@ const MeasureGroups = () => {
         })
         .then(() => {
           setGenericErrorMessage("");
+          handleDialogClose();
           setSuccessMessage(
             "Population details for this group updated successfully."
           );
@@ -353,10 +349,8 @@ const MeasureGroups = () => {
   };
 
   const handleDialogClose = () => {
-    setDeleteMeasureGroupDialog({
-      open: false,
-      measureGroupNumber: undefined,
-    });
+    setUpdateMeasureGroupScoringDialog(false);
+    setDeleteMeasureGroupDialog({ open: false });
   };
 
   const deleteMeasureGroup = (e) => {
@@ -390,23 +384,6 @@ const MeasureGroups = () => {
         },
       ];
 
-  const warningTemplate = (
-    <>
-      <ButtonSpacer>
-        <Button
-          style={{ background: "#424B5A" }}
-          type="submit"
-          buttonTitle="Update"
-          data-testid="group-form-update-btn"
-          onClick={() => setUpdateConfirm(true)}
-        />
-      </ButtonSpacer>
-      <ButtonSpacer>
-        <Button type="button" buttonTitle="Cancel" variant="white" />
-      </ButtonSpacer>
-    </>
-  );
-
   return (
     <FormikProvider value={formik}>
       <form onSubmit={formik.handleSubmit}>
@@ -423,12 +400,26 @@ const MeasureGroups = () => {
               <Title>Measure Group {measureGroupNumber + 1}</Title>
             </Header>
 
-            <DeleteMeasureGroupDialog
-              open={deleteMeasureGroupDialog.open}
-              onClose={handleDialogClose}
-              onSubmit={deleteMeasureGroup}
-              measureGroupNumber={deleteMeasureGroupDialog.measureGroupNumber}
-            />
+            {/* delete measure group warning dialog */}
+            {deleteMeasureGroupDialog.open && (
+              <MeasureGroupsWarningDialog
+                open={deleteMeasureGroupDialog.open}
+                onClose={handleDialogClose}
+                onSubmit={deleteMeasureGroup}
+                measureGroupNumber={deleteMeasureGroupDialog.measureGroupNumber}
+                modalType="deleteMeasureGroup"
+              />
+            )}
+
+            {/* scoring change warning dialog */}
+            {updateMeasureGroupScoringDialog && (
+              <MeasureGroupsWarningDialog
+                open={updateMeasureGroupScoringDialog}
+                onClose={handleDialogClose}
+                onSubmit={() => submitForm(formik.values)}
+                modalType="scoring"
+              />
+            )}
 
             {genericErrorMessage && (
               <Alert
@@ -450,18 +441,7 @@ const MeasureGroups = () => {
                 {successMessage}
               </Alert>
             )}
-            {warningMessage && (
-              <Alert
-                data-testid="warning-alerts"
-                role="alert"
-                severity="warning"
-                onClose={() => setWarningMessage(false)}
-              >
-                This change will reset the population scoring value in test
-                cases. cases. Are you sure you wanted to continue with this?{" "}
-                {warningTemplate}
-              </Alert>
-            )}
+
             {/* Form control later should be moved to own component and dynamically rendered by switch based on measure. */}
 
             <FormControl>
