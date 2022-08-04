@@ -15,8 +15,8 @@ import MultipleSelectDropDown from "./MultipleSelectDropDown";
 import DeleteMeasureGroupDialog from "./DeleteMeasureGroupDialog";
 import {
   allPopulations,
-  initialPopulation,
   getPopulationsForScoring,
+  findPopulations,
 } from "./PopulationHelper";
 import GroupPopulation from "./GroupPopulation";
 
@@ -583,8 +583,13 @@ const MeasureGroups = () => {
                       const fieldProps = {
                         name: `populations[${index}].definition`,
                       };
+                      const populationCount = findPopulations(
+                        formik.values.populations,
+                        population.name
+                      ).length;
+                      const gridSize = populationCount === 2 ? 6 : 12;
                       return (
-                        <GridLayout item xs={12}>
+                        <GridLayout item xs={gridSize}>
                           <Field
                             {...fieldProps}
                             component={GroupPopulation}

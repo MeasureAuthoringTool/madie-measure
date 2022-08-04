@@ -60,6 +60,15 @@ export const allPopulations = [
   measurePopulationExclusion,
 ];
 
+export const findPopulations = (
+  populations: Population[],
+  populationType: PopulationType
+) => {
+  return populations?.filter(
+    (population) => population.name === populationType
+  );
+};
+
 // default populations for each scoring
 export const getPopulationsForScoring = (scoring: string): Population[] => {
   let populations: Population[];

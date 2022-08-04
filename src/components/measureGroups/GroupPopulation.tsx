@@ -4,6 +4,7 @@ import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
 import { ExpressionDefinition } from "./MeasureGroups";
 import { GroupScoring, Population, PopulationType } from "@madie/madie-models";
 import { FieldInputProps } from "formik/dist/types";
+import { findPopulations } from "./PopulationHelper";
 
 type Props = {
   field: FieldInputProps<string>;
@@ -43,15 +44,6 @@ const GroupPopulation = ({
       options,
       subTitle: fieldProps.subTitle,
     };
-  };
-
-  const findPopulations = (
-    populations: Population[],
-    populationType: PopulationType
-  ) => {
-    return populations?.filter(
-      (population) => population.name === populationType
-    );
   };
 
   const showAddPopulationLink = (
