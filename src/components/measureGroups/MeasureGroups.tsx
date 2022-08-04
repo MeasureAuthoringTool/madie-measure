@@ -657,17 +657,12 @@ const MeasureGroups = () => {
                           inputProps={{
                             "data-testid": "stratification-select",
                           }}
-                          onChange={(e) => {
-                            formik.setFieldValue(
-                              `stratifications[${i}]cqlDefinition`,
-                              e.target.value
-                            );
-                          }}
+                          onChange={formik.handleChange}
                           InputLabelProps={{ shrink: false }}
                           SelectProps={{
                             native: true,
                           }}
-                          name="type"
+                          name={`stratifications[${i}].cqlDefinition`}
                         >
                           <option
                             value=""
@@ -701,17 +696,12 @@ const MeasureGroups = () => {
                           inputProps={{
                             "data-testid": "association-select",
                           }}
-                          onChange={(e) => {
-                            formik.setFieldValue(
-                              `stratifications[${i}].association`,
-                              e.target.value
-                            );
-                          }}
+                          onChange={formik.handleChange}
                           InputLabelProps={{ shrink: false }}
                           SelectProps={{
                             native: true,
                           }}
-                          name="type"
+                          name={`stratifications[${i}].association`}
                         >
                           {formik.values.scoring != "Select" &&
                             Object.values(
@@ -738,7 +728,7 @@ const MeasureGroups = () => {
                                 formik.values.stratifications[i].description
                               }
                               //type="text"
-                              name="stratification-description"
+                              name={`stratifications[${i}].description`}
                               id="stratification-description"
                               autoComplete="stratification-description"
                               placeholder="Enter Description"
