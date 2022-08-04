@@ -586,7 +586,6 @@ const MeasureGroups = () => {
                       return (
                         <GridLayout item xs={12}>
                           <Field
-                            name="lastName"
                             {...fieldProps}
                             component={GroupPopulation}
                             cqlDefinitions={expressionDefinitions}
@@ -595,10 +594,8 @@ const MeasureGroups = () => {
                             populationIndex={index}
                             scoring={formik.values.scoring}
                             canEdit={canEdit}
-                            insertCb={() =>
-                              arrayHelpers.insert(1, { ...initialPopulation })
-                            }
-                            removeCb={() => arrayHelpers.remove(1)}
+                            insertCallback={arrayHelpers.insert}
+                            removeCallback={arrayHelpers.remove}
                           />
                         </GridLayout>
                       );

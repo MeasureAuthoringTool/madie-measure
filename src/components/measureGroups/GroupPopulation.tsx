@@ -13,8 +13,8 @@ type Props = {
   populationIndex: number;
   scoring: string;
   canEdit: boolean;
-  insertCb: any;
-  removeCb: any;
+  insertCallback: any;
+  removeCallback: any;
 };
 
 const GroupPopulation = ({
@@ -25,8 +25,8 @@ const GroupPopulation = ({
   populationIndex,
   scoring,
   canEdit,
-  insertCb,
-  removeCb,
+  insertCallback,
+  removeCallback,
 }: Props) => {
   // Helper function do determine the properties for a select item
   const populationSelectorProperties = (fieldProps: any, scoring: String) => {
@@ -90,6 +90,9 @@ const GroupPopulation = ({
     return false;
   };
 
+  // when new copy of this population is added, label needs to be adjusted
+  // e.g. Initial Population becomes "Initial Population 1"
+  // If more than one IP, second IP becomes "Initial Population 2"
   const correctPopulationLabel = (
     populations: Population[],
     population: Population
@@ -100,6 +103,15 @@ const GroupPopulation = ({
       return `${label} ${populationIndex + 1}`;
     }
     return label;
+  };
+
+  // add copy of this population
+  const addPopulation = () => {
+    insertCallback(populationIndex + 1, {
+      id: "",
+      name: population.name,
+      definition: "",
+    });
   };
 
   const selectorProps = populationSelectorProperties(population, scoring);
@@ -117,10 +129,10 @@ const GroupPopulation = ({
         helperText={error}
         error={!!error && !!touched}
         canEdit={canEdit}
-        removePopulationCallback={() => removeCb()}
+        removePopulationCallback={() => removeCallback(populationIndex)}
         isRemovable={isRemovable}
         showAddPopulationLink={canBeAdded}
-        addPopulationCallback={insertCb}
+        addPopulationCallback={addPopulation}
       />
     </Fragment>
   );
