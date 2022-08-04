@@ -50,6 +50,9 @@ type Props = {
   value?: string;
 };
 
+const FormField = tw.div`mt-6`;
+const FieldLabel = tw.label`block text-sm font-medium text-gray-700`;
+
 const MeasureGroupPopulationSelect = ({
   label,
   required,
@@ -69,8 +72,6 @@ const MeasureGroupPopulationSelect = ({
   const onClickCallback = (evt) => {
     evt.preventDefault();
   };
-  const FormField = tw.div`mt-6`;
-  const FieldLabel = tw.label`block text-sm font-medium text-gray-700`;
 
   return (
     <FormField>
