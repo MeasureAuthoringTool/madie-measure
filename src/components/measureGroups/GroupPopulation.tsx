@@ -35,13 +35,12 @@ const GroupPopulation = ({
     const required =
       !fieldProps.optional?.includes("*") &&
       !fieldProps.optional?.includes(scoring);
-    const options: ExpressionDefinition[] = cqlDefinitions;
     return {
       label: _.startCase(field.name),
       hidden,
       required,
       name: field.name,
-      options,
+      options: cqlDefinitions,
       subTitle: fieldProps.subTitle,
     };
   };
