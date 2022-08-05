@@ -92,7 +92,10 @@ const MeasureGroupScoringUnit = ({ value, onChange }: ScoringUnitProps) => {
   };
 
   return (
-    <div data-testid="measure-group-scoring-unit">
+    <div
+      data-testid="measure-group-scoring-unit"
+      style={{ height: "100px", width: "600px" }}
+    >
       <FormControl>
         <SoftLabel>Scoring Unit</SoftLabel>
         <AsyncSelect

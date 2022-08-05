@@ -9,14 +9,13 @@ import {
   within,
 } from "@testing-library/react";
 import { isEqual } from "lodash";
-import MeasureGroups, {
-  DefaultPopulationSelectorDefinitions,
-} from "./MeasureGroups";
+import MeasureGroups from "./MeasureGroups";
 import {
   Measure,
   Group,
   GroupScoring,
   MeasureGroupTypes,
+  PopulationType,
 } from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
@@ -25,6 +24,8 @@ import { MeasureCQL } from "../common/MeasureCQL";
 import { MeasureContextHolder } from "../editMeasure/MeasureContext";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
+import { getPopulationsForScoring } from "./PopulationHelper";
+import * as _ from "lodash";
 
 jest.mock("../editMeasure/useCurrentMeasure");
 
@@ -82,16 +83,13 @@ describe("Measure Groups Page", () => {
     group = {
       id: null,
       scoring: "Cohort",
-      population: {
-        initialPopulation: "Initial Population",
-        denominator: "",
-        denominatorException: "",
-        denominatorExclusion: "",
-        numerator: "",
-        numeratorExclusion: "",
-        measurePopulation: "",
-        measurePopulationExclusion: "",
-      },
+      populations: [
+        {
+          id: "id-1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+        },
+      ],
       groupDescription: "",
       measureGroupTypes: [],
       scoringUnit: "",
@@ -100,7 +98,9 @@ describe("Measure Groups Page", () => {
 
   const renderMeasureGroupComponent = () => {
     return render(
-      <MemoryRouter initialEntries={[{ pathname: "/" }]}>
+      <MemoryRouter
+        initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
+      >
         <ApiContextProvider value={serviceConfig}>
           <MeasureGroups />
         </ApiContextProvider>
@@ -138,9 +138,8 @@ describe("Measure Groups Page", () => {
         expect(optionEl.selected).toBe(true);
 
         // Check that the appropriate filter labels are rendered as expected
-        let filterLabelArrayIntended =
-          DefaultPopulationSelectorDefinitions.reduce((filters, option) => {
-            if (option.hidden?.includes(value)) return filters;
+        let filterLabelArrayIntended = getPopulationsForScoring(value).reduce(
+          (filters, option) => {
             let isRequired = "*";
             if (option.optional?.length) {
               if (
@@ -150,9 +149,11 @@ describe("Measure Groups Page", () => {
                 isRequired = "";
               }
             }
-            filters.push(`${option.label}${isRequired}`);
+            filters.push(`${_.startCase(option.name)}${isRequired}`);
             return filters;
-          }, []);
+          },
+          []
+        );
 
         // Check what is actually rendered
         if (optionEl.text !== "Select") {
@@ -194,7 +195,7 @@ describe("Measure Groups Page", () => {
     const populationOption = screen.getAllByTestId(
       "select-measure-group-population"
     )[0] as HTMLOptionElement;
-    expect(populationOption.value).toBe(group.population.initialPopulation);
+    expect(populationOption.value).toBe(group.populations[0].definition);
 
     fireEvent.change(option, { target: { value: "Ratio" } });
     expect(option.value).toBe("Ratio");
@@ -244,13 +245,20 @@ describe("Measure Groups Page", () => {
 
     const expectedGroup = {
       id: null,
-      population: {
-        initialPopulation: "Initial Population",
-      },
+      populations: [
+        {
+          id: "",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+        },
+      ],
       scoring: "Cohort",
       groupDescription: "new description",
+      stratifications: [],
       measureGroupTypes: ["Patient Reported Outcome"],
       scoringUnit: "",
+      rateAggregation: "",
+      improvementNotation: "",
     };
 
     expect(alert).toHaveTextContent(
@@ -301,9 +309,17 @@ describe("Measure Groups Page", () => {
     expect(
       screen.getByTestId("leftPanelMeasureInformation-MeasureGroup2")
     ).toBeInTheDocument();
+
+    const measureGroup1Link = screen.getByTestId(
+      "leftPanelMeasureInformation-MeasureGroup1"
+    );
+    expect(measureGroup1Link).toBeInTheDocument();
+    userEvent.click(measureGroup1Link);
+    const measureGroupTitle = screen.getByText("Measure Group 1");
+    expect(measureGroupTitle).toBeInTheDocument();
   });
 
-  test("Oncliking delete button, delete measure modal is displayed", async () => {
+  test("OnClicking delete button, delete group modal is displayed", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "testDescription";
     measure.groups = [group];
@@ -336,7 +352,7 @@ describe("Measure Groups Page", () => {
       screen.getByTestId("delete-measure-group-modal-cancel-btn")
     ).toBeInTheDocument();
     expect(
-      screen.getByTestId("delete-measure-group-modal-delete-btn")
+      screen.getByTestId("delete-measure-group-modal-agree-btn")
     ).toBeInTheDocument();
 
     userEvent.click(
@@ -370,7 +386,7 @@ describe("Measure Groups Page", () => {
     ).toBeInTheDocument();
 
     expect(
-      screen.getByTestId("delete-measure-group-modal-delete-btn")
+      screen.getByTestId("delete-measure-group-modal-agree-btn")
     ).toBeInTheDocument();
 
     const expectedConfig = {
@@ -387,9 +403,7 @@ describe("Measure Groups Page", () => {
       groups: [],
     };
     mockedAxios.delete.mockResolvedValue({ data: updatedMeasure });
-    userEvent.click(
-      screen.getByTestId("delete-measure-group-modal-delete-btn")
-    );
+    userEvent.click(screen.getByTestId("delete-measure-group-modal-agree-btn"));
 
     expect(mockedAxios.delete).toHaveBeenCalledWith(
       `example-service-url/measures/test-measure/groups/7p03-5r29-7O0I`,
@@ -407,8 +421,43 @@ describe("Measure Groups Page", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("groupDescriptionInput")).toHaveValue("");
+      userEvent.click(screen.getByTestId("reporting-tab"));
+      expect(screen.getByTestId("rateAggregationText")).toHaveValue("");
       expect(screen.getByTestId("group-form-delete-btn")).toBeDisabled();
     });
+  });
+
+  test("Navigating between the tabs in measure groups page", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "Description Text";
+    group.rateAggregation = "Rate Aggregation Text";
+    group.improvementNotation = "Increased score indicates improvement";
+    measure.groups = [group];
+    renderMeasureGroupComponent();
+
+    expect(screen.getByTestId("populations-tab")).toBeInTheDocument();
+    expect(
+      (screen.getByRole("option", { name: "Cohort" }) as HTMLOptionElement)
+        .selected
+    ).toBe(true);
+    expect(
+      screen.getByTestId("measure-group-type-dropdown")
+    ).toBeInTheDocument();
+    expect(screen.getByText("MEASURE GROUP 1")).toBeInTheDocument();
+
+    userEvent.click(screen.getByTestId("reporting-tab"));
+
+    expect(screen.getByTestId("rateAggregationText")).toHaveValue(
+      "Rate Aggregation Text"
+    );
+    expect(
+      (
+        screen.getByRole("option", {
+          name: "Increased score indicates improvement",
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
+    expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
   });
 
   test("Should be able to save multiple groups  ", async () => {
@@ -459,13 +508,20 @@ describe("Measure Groups Page", () => {
 
     const expectedGroup = {
       id: null,
-      population: {
-        initialPopulation: "Initial Population",
-      },
+      populations: [
+        {
+          id: "",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+        },
+      ],
       scoring: "Cohort",
       groupDescription: "new description",
+      stratifications: [],
       measureGroupTypes: ["Patient Reported Outcome"],
       scoringUnit: "",
+      rateAggregation: "",
+      improvementNotation: "",
     };
 
     expect(alert).toHaveTextContent(
@@ -531,13 +587,20 @@ describe("Measure Groups Page", () => {
     const alert1 = await screen.findByTestId("success-alerts");
     const expectedGroup2 = {
       id: null,
-      population: {
-        initialPopulation: "Initial Population",
-      },
+      populations: [
+        {
+          id: "",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+        },
+      ],
       scoring: "Cohort",
       groupDescription: "new description for group 2",
       measureGroupTypes: ["Patient Reported Outcome"],
       scoringUnit: "",
+      rateAggregation: "",
+      improvementNotation: "",
+      stratifications: [],
     };
 
     expect(alert1).toHaveTextContent(
@@ -587,7 +650,7 @@ describe("Measure Groups Page", () => {
       ).selected
     ).toBe(true);
 
-    group.population.initialPopulation = definitionToUpdate;
+    group.populations[0].definition = definitionToUpdate;
 
     const measureGroupTypeSelect = getByTestId("measure-group-type-dropdown");
     userEvent.click(getByRole(measureGroupTypeSelect, "button"));
@@ -599,10 +662,14 @@ describe("Measure Groups Page", () => {
 
     const expectedGroup = {
       id: "7p03-5r29-7O0I",
-      population: {
-        initialPopulation:
-          "VTE Prophylaxis by Medication Administered or Device Applied",
-      },
+      populations: [
+        {
+          id: "id-1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition:
+            "VTE Prophylaxis by Medication Administered or Device Applied",
+        },
+      ],
       scoring: "Cohort",
       groupDescription: "testDescription",
       measureGroupTypes: ["Patient Reported Outcome"],
@@ -626,33 +693,55 @@ describe("Measure Groups Page", () => {
     );
   });
 
-  test("Onclicking discard button,should be able to discard the changes", async () => {
-    group.id = "7p03-5r29-7O0I";
-    group.groupDescription = "testDescription";
-    measure.groups = [group];
+  test("displaying a measure update warning modal while updating measure scoring and updating measure scoring for a measure group", async () => {
+    const newGroup = {
+      id: "7p03-5r29-7O0I",
+      scoring: "Continuous Variable",
+      populations: [
+        {
+          id: "id-1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+        },
+        {
+          id: "id-2",
+          name: PopulationType.MEASURE_POPULATION,
+          definition: "Measure Population",
+        },
+      ],
+      groupDescription: "testDescription",
+      stratifications: [],
+      measureGroupTypes: ["Patient Reported Outcome"],
+      rateAggregation: "",
+      improvementNotation: "",
+    };
+    measure.groups = [newGroup];
+
     renderMeasureGroupComponent();
+    expect(
+      (
+        screen.getByRole("option", {
+          name: "Continuous Variable",
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
+
+    userEvent.selectOptions(
+      screen.getByTestId("scoring-unit-select"),
+      "Cohort"
+    );
 
     expect(
       (screen.getByRole("option", { name: "Cohort" }) as HTMLOptionElement)
         .selected
     ).toBe(true);
 
-    expect(
-      (
-        screen.getByRole("option", {
-          name: "Initial Population",
-        }) as HTMLOptionElement
-      ).selected
-    ).toBe(true);
-
     const definitionToUpdate =
       "VTE Prophylaxis by Medication Administered or Device Applied";
-    // update initial population from dropdown
     userEvent.selectOptions(
       screen.getByTestId("select-measure-group-population"),
       screen.getByText(definitionToUpdate)
     );
-
     expect(
       (
         screen.getByRole("option", {
@@ -661,9 +750,64 @@ describe("Measure Groups Page", () => {
       ).selected
     ).toBe(true);
 
-    expect(screen.getByTestId("group-form-discard-btn")).toBeEnabled();
-    userEvent.click(screen.getByTestId("group-form-discard-btn"));
+    expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
 
+    mockedAxios.put.mockResolvedValue({ data: { newGroup } });
+
+    const expectedGroup = {
+      id: "7p03-5r29-7O0I",
+      populations: [
+        {
+          id: "",
+          name: PopulationType.INITIAL_POPULATION,
+          definition:
+            "VTE Prophylaxis by Medication Administered or Device Applied",
+        },
+      ],
+      scoring: "Cohort",
+      scoringUnit: "",
+      groupDescription: "testDescription",
+      measureGroupTypes: ["Patient Reported Outcome"],
+      rateAggregation: "",
+      improvementNotation: "",
+      stratifications: [],
+    };
+
+    expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("update-measure-group-scoring-modal-agree-btn")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("update-measure-group-scoring-modal-cancel-btn")
+      );
+    });
+
+    userEvent.click(
+      screen.getByTestId("update-measure-group-scoring-modal-agree-btn")
+    );
+
+    expect(mockedAxios.put).toHaveBeenCalledWith(
+      "example-service-url/measures/test-measure/groups/",
+      expectedGroup,
+      expect.anything()
+    );
+  });
+
+  test("Onclicking discard button,should be able to discard the changes", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "testDescription";
+    group.rateAggregation = "Rate Aggregation Text";
+    group.improvementNotation = "Increased score indicates improvement";
+    measure.groups = [group];
+    renderMeasureGroupComponent();
+    expect(
+      (screen.getByRole("option", { name: "Cohort" }) as HTMLOptionElement)
+        .selected
+    ).toBe(true);
     expect(
       (
         screen.getByRole("option", {
@@ -671,7 +815,38 @@ describe("Measure Groups Page", () => {
         }) as HTMLOptionElement
       ).selected
     ).toBe(true);
-
+    const definitionToUpdate =
+      "VTE Prophylaxis by Medication Administered or Device Applied";
+    // update initial population from dropdown
+    userEvent.selectOptions(
+      screen.getByTestId("select-measure-group-population"),
+      screen.getByText(definitionToUpdate)
+    );
+    expect(
+      (
+        screen.getByRole("option", {
+          name: definitionToUpdate,
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
+    userEvent.click(screen.getByTestId("reporting-tab"));
+    const input = screen.getByTestId("rateAggregationText");
+    fireEvent.change(input, {
+      target: { value: "New rate aggregation text" },
+    });
+    expect(screen.getByTestId("group-form-discard-btn")).toBeEnabled();
+    userEvent.click(screen.getByTestId("group-form-discard-btn"));
+    expect(screen.getByTestId("rateAggregationText")).toHaveValue(
+      "Rate Aggregation Text"
+    );
+    userEvent.click(screen.getByTestId("populations-tab"));
+    expect(
+      (
+        screen.getByRole("option", {
+          name: "Initial Population",
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
     expect(screen.getByTestId("group-form-discard-btn")).toBeDisabled();
   });
 
@@ -913,6 +1088,18 @@ describe("Measure Groups Page", () => {
 
   test("Save button is disabled until all required CV populations are entered", async () => {
     renderMeasureGroupComponent();
+    const measureGroupTypeDropdown = screen.getByTestId(
+      "measure-group-type-dropdown"
+    );
+    userEvent.click(await getByRole(measureGroupTypeDropdown, "button"));
+
+    await waitFor(() => {
+      userEvent.click(screen.getByText("Patient Reported Outcome"));
+    });
+
+    // after selecting measure group type, need to collapse the dropdown
+    fireEvent.click(screen.getByRole("presentation").firstChild);
+
     userEvent.selectOptions(
       screen.getByTestId("scoring-unit-select"),
       "Continuous Variable"
@@ -975,5 +1162,106 @@ describe("Measure Groups Page", () => {
       target: { value: "cm" },
     });
     expect(scoringUnitInput.getAttribute("value")).toBe("cm");
+  });
+
+  test("Add new group and click Discard button should discard the changes", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "testDescription";
+    measure.groups = [group];
+    renderMeasureGroupComponent();
+    expect(screen.getByText("Measure Group 1")).toBeInTheDocument();
+
+    const addButton = screen.getByTestId("AddIcon");
+    expect(addButton).toBeInTheDocument();
+    await act(async () => {
+      userEvent.click(addButton);
+    });
+    expect(screen.getByText("Measure Group 2")).toBeInTheDocument();
+
+    const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
+    expect(groupDescriptionInput).toBeTruthy();
+    await act(async () => {
+      fireEvent.change(groupDescriptionInput, {
+        target: { value: "New group description" },
+      });
+    });
+    expect(screen.getByText("New group description")).toBeInTheDocument();
+
+    const discardButton = screen.getByTestId("group-form-discard-btn");
+    expect(discardButton).toBeEnabled();
+    await act(async () => {
+      userEvent.click(discardButton);
+    });
+    expect(screen.queryByText("New group description")).not.toBeInTheDocument();
+  });
+
+  test("Should display error message when updating group", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "testDescription";
+    measure.groups = [group];
+    const { getByTestId, getByText } = renderMeasureGroupComponent();
+
+    const measureGroupTypeSelect = getByTestId("measure-group-type-dropdown");
+    await act(async () => {
+      userEvent.click(getByRole(measureGroupTypeSelect, "button"));
+      await waitFor(() => {
+        userEvent.click(getByText("Patient Reported Outcome"));
+      });
+    });
+
+    mockedAxios.put.mockResolvedValue({ data: null });
+
+    expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+    await act(async () => {
+      userEvent.click(screen.getByTestId("group-form-submit-btn"));
+    });
+    expect(screen.getByText("Error updating group")).toBeInTheDocument();
+  });
+
+  test("Should display error message when adding group", async () => {
+    measure.groups = [];
+    renderMeasureGroupComponent();
+    expect(screen.getByText("Measure Group 1")).toBeInTheDocument();
+
+    const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
+    expect(groupDescriptionInput).toBeTruthy();
+    await act(async () => {
+      fireEvent.change(groupDescriptionInput, {
+        target: { value: "New group description" },
+      });
+    });
+    expect(screen.getByText("New group description")).toBeInTheDocument();
+
+    const measureGroupTypeSelect = screen.getByTestId(
+      "measure-group-type-dropdown"
+    );
+    userEvent.click(getByRole(measureGroupTypeSelect, "button"));
+    await waitFor(() => {
+      userEvent.click(screen.getByText("Patient Reported Outcome"));
+    });
+
+    const groupScoringSelect = screen.getByTestId("scoring-unit-select");
+    await act(async () => {
+      fireEvent.change(groupScoringSelect, {
+        target: { value: "Cohort" },
+      });
+    });
+
+    const populationSelect = screen.getByTestId(
+      "select-measure-group-population"
+    );
+    await act(async () => {
+      fireEvent.change(populationSelect, {
+        target: { value: "SDE Race" },
+      });
+    });
+
+    mockedAxios.put.mockResolvedValue({ data: null });
+
+    expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+    await act(async () => {
+      userEvent.click(screen.getByTestId("group-form-submit-btn"));
+    });
+    expect(screen.getByText("Failed to create the group.")).toBeInTheDocument();
   });
 });
