@@ -77,7 +77,12 @@ const MeasureGroupPopulationSelect = ({
       </HeavyLabel>{" "}
       {isRemovable && (
         <span tw={"ml-2"}>
-          <DSLink onClick={(evt) => removePopulation(evt)}>Remove</DSLink>
+          <DSLink
+            data-testid={`remove_${name}`}
+            onClick={(evt) => removePopulation(evt)}
+          >
+            Remove
+          </DSLink>
         </span>
       )}
       <br />
@@ -121,7 +126,10 @@ const MeasureGroupPopulationSelect = ({
           </TextField>{" "}
           {showAddPopulationLink && (
             <span tw={"ml-2"}>
-              <DSLink onClick={(evt) => addPopulation(evt)}>
+              <DSLink
+                data-testid={`add_${name}`}
+                onClick={(evt) => addPopulation(evt)}
+              >
                 + Add {label}
               </DSLink>
             </span>
