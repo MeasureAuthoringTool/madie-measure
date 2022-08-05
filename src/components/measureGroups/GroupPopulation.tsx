@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React from "react";
 import * as _ from "lodash";
 import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
 import { ExpressionDefinition } from "./MeasureGroups";
@@ -113,19 +113,17 @@ const GroupPopulation = ({
   selectorProps.label = correctPopulationLabel(populations, population);
 
   return (
-    <Fragment key={`select_${selectorProps.label}`}>
-      <MeasureGroupPopulationSelect
-        {...selectorProps}
-        {...field}
-        helperText={error}
-        error={!!error && !!touched}
-        canEdit={canEdit}
-        removePopulationCallback={() => removeCallback(populationIndex)}
-        isRemovable={isRemovable}
-        showAddPopulationLink={canBeAdded}
-        addPopulationCallback={addPopulation}
-      />
-    </Fragment>
+    <MeasureGroupPopulationSelect
+      {...selectorProps}
+      {...field}
+      helperText={error}
+      error={!!error && !!touched}
+      canEdit={canEdit}
+      removePopulationCallback={() => removeCallback(populationIndex)}
+      isRemovable={isRemovable}
+      showAddPopulationLink={canBeAdded}
+      addPopulationCallback={addPopulation}
+    />
   );
 };
 

@@ -1249,9 +1249,8 @@ describe("Measure Groups Page", () => {
     const addIpLink = screen.getByRole("link", {
       name: "+ Add Initial Population",
     });
-    // add second ip link visible
+    // add second ip
     expect(addIpLink).toBeInTheDocument();
-
     userEvent.click(addIpLink);
 
     // verify  IP1 and IP2 visible
@@ -1266,8 +1265,8 @@ describe("Measure Groups Page", () => {
       })
     ).toBeInTheDocument();
 
+    // delete the IP2
     const removeIpLink = screen.getByRole("link", { name: /Remove/ });
-    // remove second ip link visible
     expect(removeIpLink).toBeInTheDocument();
     userEvent.click(removeIpLink);
 
