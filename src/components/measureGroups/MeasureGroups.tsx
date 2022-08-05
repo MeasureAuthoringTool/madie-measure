@@ -569,7 +569,11 @@ const MeasureGroups = () => {
                       ).length;
                       const gridSize = populationCount === 2 ? 6 : 12;
                       return (
-                        <GridLayout item xs={gridSize}>
+                        <GridLayout
+                          item
+                          xs={gridSize}
+                          key={`population_${index}`}
+                        >
                           <Field
                             {...fieldProps}
                             component={GroupPopulation}
