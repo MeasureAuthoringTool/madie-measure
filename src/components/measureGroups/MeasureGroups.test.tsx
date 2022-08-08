@@ -6,6 +6,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { isEqual } from "lodash";
 import MeasureGroups from "./MeasureGroups";
@@ -91,6 +92,7 @@ describe("Measure Groups Page", () => {
       ],
       groupDescription: "",
       measureGroupTypes: [],
+      scoringUnit: "",
     };
   });
 
@@ -254,6 +256,7 @@ describe("Measure Groups Page", () => {
       groupDescription: "new description",
       stratifications: [],
       measureGroupTypes: ["Patient Reported Outcome"],
+      scoringUnit: "",
       rateAggregation: "",
       improvementNotation: "",
     };
@@ -516,6 +519,7 @@ describe("Measure Groups Page", () => {
       groupDescription: "new description",
       stratifications: [],
       measureGroupTypes: ["Patient Reported Outcome"],
+      scoringUnit: "",
       rateAggregation: "",
       improvementNotation: "",
     };
@@ -593,6 +597,7 @@ describe("Measure Groups Page", () => {
       scoring: "Cohort",
       groupDescription: "new description for group 2",
       measureGroupTypes: ["Patient Reported Outcome"],
+      scoringUnit: "",
       rateAggregation: "",
       improvementNotation: "",
       stratifications: [],
@@ -616,6 +621,7 @@ describe("Measure Groups Page", () => {
   test("Should be able to update initial population of a population group", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "testDescription";
+    group.scoringUnit = "testScoringUnit";
     measure.groups = [group];
     const { getByTestId, getByText } = renderMeasureGroupComponent();
 
@@ -667,6 +673,7 @@ describe("Measure Groups Page", () => {
       scoring: "Cohort",
       groupDescription: "testDescription",
       measureGroupTypes: ["Patient Reported Outcome"],
+      scoringUnit: "testScoringUnit",
     };
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
 
@@ -758,6 +765,7 @@ describe("Measure Groups Page", () => {
         },
       ],
       scoring: "Cohort",
+      scoringUnit: "",
       groupDescription: "testDescription",
       measureGroupTypes: ["Patient Reported Outcome"],
       rateAggregation: "",
@@ -1133,6 +1141,27 @@ describe("Measure Groups Page", () => {
     const { queryByTestId } = renderMeasureGroupComponent();
     const saveButton = queryByTestId("group-form-submit-btn");
     expect(saveButton).not.toBeInTheDocument();
+  });
+
+  test("should display default select for scoring unit", async () => {
+    const { getByTestId } = renderMeasureGroupComponent();
+    const scoringUnit = getByTestId("measure-group-scoring-unit");
+    expect(scoringUnit.textContent).toBe("Scoring UnitUCUM Code or Name");
+  });
+
+  test("should display selected scoring unit", async () => {
+    const { getByTestId } = renderMeasureGroupComponent();
+
+    const scoringUnit = getByTestId("measure-group-scoring-unit");
+    expect(scoringUnit.textContent).toBe("Scoring UnitUCUM Code or Name");
+
+    const scoringUnitInput = within(scoringUnit).getByRole("combobox");
+    expect(scoringUnitInput.getAttribute("value")).toBe("");
+
+    fireEvent.change(scoringUnitInput, {
+      target: { value: "cm" },
+    });
+    expect(scoringUnitInput.getAttribute("value")).toBe("cm");
   });
 
   test("Add new group and click Discard button should discard the changes", async () => {

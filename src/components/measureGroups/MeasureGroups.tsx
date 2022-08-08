@@ -19,6 +19,7 @@ import {
   findPopulations,
 } from "./PopulationHelper";
 import GroupPopulation from "./GroupPopulation";
+import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
 const Content = styled.div(() => [tw`col-span-3`]);
@@ -165,6 +166,7 @@ const MeasureGroups = () => {
           ...measure?.groups[measureGroupNumber],
           groupDescription:
             measure?.groups[measureGroupNumber].groupDescription || "",
+          scoringUnit: measure?.groups[measureGroupNumber].scoringUnit || "",
           measureGroupTypes:
             measure?.groups[measureGroupNumber].measureGroupTypes || [],
           populations: measure?.groups[measureGroupNumber].populations || [],
@@ -182,6 +184,7 @@ const MeasureGroups = () => {
             rateAggregation: "",
             improvementNotation: "",
             measureGroupTypes: [],
+            scoringUnit: "",
           },
         });
       }
@@ -202,6 +205,7 @@ const MeasureGroups = () => {
         { ...EmptyStrat },
       ],
       measureGroupTypes: group?.measureGroupTypes || [],
+      scoringUnit: group?.scoringUnit,
     } as Group,
     validationSchema: MeasureGroupSchemaValidator,
     onSubmit: (group: Group) => {
@@ -238,6 +242,7 @@ const MeasureGroups = () => {
           measureGroupTypes: [],
           rateAggregation: "",
           improvementNotation: "",
+          scoringUnit: "",
         },
       });
     } else {
@@ -275,6 +280,7 @@ const MeasureGroups = () => {
                 improvementNotation: g.improvementNotation,
                 stratifications: g.stratifications,
                 measureGroupTypes: g.measureGroupTypes || [],
+                scoringUnit: g.scoringUnit,
               };
             }
             return group;
@@ -502,6 +508,12 @@ const MeasureGroups = () => {
               )}
               {!canEdit && formik.values.scoring}
             </FormControl>
+            <MeasureGroupScoringUnit
+              {...formik.getFieldProps("scoringUnit")}
+              onChange={(newValue) => {
+                formik.setFieldValue("scoringUnit", newValue);
+              }}
+            ></MeasureGroupScoringUnit>
             <br />
             <div>
               <MenuItemContainer>
