@@ -574,7 +574,7 @@ const MeasureGroups = () => {
                 onChange={(newValue) => {
                   formik.setFieldValue("scoringUnit", newValue);
                 }}
-              ></MeasureGroupScoringUnit>
+              />
               <div>
                 <MenuItemContainer>
                   <MenuItem

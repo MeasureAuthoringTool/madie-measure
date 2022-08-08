@@ -2,13 +2,15 @@ import React from "react";
 import * as ucum from "@lhncbc/ucum-lhc";
 import AsyncSelect from "react-select/async";
 import tw, { styled } from "twin.macro";
-const FormControl = styled.section(() => [tw`mb-3`, `margin: 25px 40px;`]);
+
+const FormField = tw.div`mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-3`;
 const SoftLabel = styled.label`
   display: block;
   margin-bottom: 5px;
   font-size: 12px;
   color: rgba(66, 75, 90, 0.7);
 `;
+const FieldSeparator = tw.div`mt-1`;
 const basicOptions = [
   {
     label: "Number",
@@ -92,24 +94,23 @@ const MeasureGroupScoringUnit = ({ value, onChange }: ScoringUnitProps) => {
   };
 
   return (
-    <div
-      data-testid="measure-group-scoring-unit"
-      style={{ height: "100px", width: "600px" }}
-    >
-      <FormControl>
-        <SoftLabel>Scoring Unit</SoftLabel>
-        <AsyncSelect
-          cacheOptions
-          loadOptions={loadOptions}
-          defaultOptions
-          placeholder="UCUM Code or Name"
-          onChange={(newValue: any) => {
-            onChange(newValue);
-          }}
-          value={value}
-          defaultInputValue={value}
-        />
-      </FormControl>
+    <div data-testid="measure-group-scoring-unit">
+      <FormField>
+        <FieldSeparator>
+          <SoftLabel>Scoring Unit</SoftLabel>
+          <AsyncSelect
+            cacheOptions
+            loadOptions={loadOptions}
+            defaultOptions
+            placeholder="UCUM Code or Name"
+            onChange={(newValue: any) => {
+              onChange(newValue);
+            }}
+            value={value}
+            defaultInputValue={value}
+          />
+        </FieldSeparator>
+      </FormField>
     </div>
   );
 };
