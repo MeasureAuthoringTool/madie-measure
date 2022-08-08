@@ -16,6 +16,7 @@ import { useOktaTokens } from "@madie/madie-util";
 import MultipleSelectDropDown from "./MultipleSelectDropDown";
 import MeasureGroupsWarningDialog from "./MeasureGroupWarningDialog";
 import { allPopulations, getPopulationsForScoring } from "./PopulationHelper";
+import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
 const Content = styled.div(() => [tw`col-span-3`]);
@@ -165,6 +166,7 @@ const MeasureGroups = () => {
           ...measure?.groups[measureGroupNumber],
           groupDescription:
             measure?.groups[measureGroupNumber].groupDescription || "",
+          scoringUnit: measure?.groups[measureGroupNumber].scoringUnit || "",
           measureGroupTypes:
             measure?.groups[measureGroupNumber].measureGroupTypes || [],
         },
@@ -182,6 +184,7 @@ const MeasureGroups = () => {
             improvementNotation: "",
             measureGroupTypes: [],
             populationBasis: "Boolean",
+            scoringUnit: "",
           },
         });
       }
@@ -203,6 +206,7 @@ const MeasureGroups = () => {
       ],
       measureGroupTypes: group?.measureGroupTypes || [],
       populationBasis: group?.populationBasis || "Boolean",
+      scoringUnit: group?.scoringUnit,
     } as Group,
     validationSchema: MeasureGroupSchemaValidator,
     onSubmit: (group: Group) => {
@@ -273,6 +277,7 @@ const MeasureGroups = () => {
           rateAggregation: "",
           improvementNotation: "",
           populationBasis: "Boolean",
+          scoringUnit: "",
         },
       });
     } else {
@@ -311,6 +316,7 @@ const MeasureGroups = () => {
                 stratifications: g.stratifications,
                 measureGroupTypes: g.measureGroupTypes || [],
                 populationBasis: g.populationBasis,
+                scoringUnit: g.scoringUnit,
               };
             }
             return group;
@@ -519,9 +525,9 @@ const MeasureGroups = () => {
               <FormField>
                 <FieldSeparator>
                   {/* pull from cql file */}
-                  <FieldLabel htmlFor="scoring-unit-select">
+                  <SoftLabel htmlFor="scoring-unit-select">
                     Group Scoring:
-                  </FieldLabel>
+                  </SoftLabel>
                   {canEdit && (
                     <TextField
                       select
@@ -563,6 +569,12 @@ const MeasureGroups = () => {
                   {!canEdit && formik.values.scoring}
                 </FieldSeparator>
               </FormField>
+              <MeasureGroupScoringUnit
+                {...formik.getFieldProps("scoringUnit")}
+                onChange={(newValue) => {
+                  formik.setFieldValue("scoringUnit", newValue);
+                }}
+              ></MeasureGroupScoringUnit>
               <div>
                 <MenuItemContainer>
                   <MenuItem
