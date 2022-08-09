@@ -497,6 +497,7 @@ const MeasureGroups = () => {
                   label="Measure Group Type"
                   id="measure-group-type"
                   clearAll={() => formik.setFieldValue("measureGroupTypes", [])}
+                  canEdit={canEdit}
                 />
               </FormField>
               {populationBasisValues && (
@@ -505,20 +506,23 @@ const MeasureGroups = () => {
                     <FieldLabel htmlFor="population-basis-combo-box">
                       Population Basis:
                     </FieldLabel>
-                    <Autocomplete
-                      disablePortal
-                      data-testid="population-basis-combo-box"
-                      options={populationBasisValues}
-                      sx={{ width: 300 }}
-                      defaultValue={formik.values.populationBasis}
-                      {...formik.getFieldProps("populationBasis")}
-                      onChange={(_event: any, selectedVal: string | null) => {
-                        formik.setFieldValue("populationBasis", selectedVal);
-                      }}
-                      renderInput={(params) => (
-                        <TextField {...params} label="" />
-                      )}
-                    />
+                    {canEdit && (
+                      <Autocomplete
+                        disablePortal
+                        data-testid="population-basis-combo-box"
+                        options={populationBasisValues}
+                        sx={{ width: 300 }}
+                        defaultValue={formik.values.populationBasis}
+                        {...formik.getFieldProps("populationBasis")}
+                        onChange={(_event: any, selectedVal: string | null) => {
+                          formik.setFieldValue("populationBasis", selectedVal);
+                        }}
+                        renderInput={(params) => (
+                          <TextField {...params} label="" />
+                        )}
+                      />
+                    )}
+                    {!canEdit && formik.values.populationBasis}
                   </FieldSeparator>
                 </FormField>
               )}
@@ -574,6 +578,7 @@ const MeasureGroups = () => {
                 onChange={(newValue) => {
                   formik.setFieldValue("scoringUnit", newValue);
                 }}
+                canEdit={canEdit}
               />
               <div>
                 <MenuItemContainer>
@@ -625,7 +630,6 @@ const MeasureGroups = () => {
                   </MenuItem>
                 </MenuItemContainer>
               </div>
-
               {activeTab === "populations" && (
                 <FieldArray
                   name="populations"

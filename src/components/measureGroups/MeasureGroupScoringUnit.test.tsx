@@ -7,7 +7,11 @@ describe("MeasureGroupScoringUnit Component", () => {
   test("Should render scoring unit field", () => {
     const handleChange = jest.fn();
     render(
-      <MeasureGroupScoringUnit value={"Test Option1"} onChange={handleChange} />
+      <MeasureGroupScoringUnit
+        value={"Test Option1"}
+        onChange={handleChange}
+        canEdit={true}
+      />
     );
 
     const scoringUnitLabel = screen.getByText("Scoring Unit");
@@ -20,7 +24,11 @@ describe("MeasureGroupScoringUnit Component", () => {
     const handleChange = jest.fn();
 
     render(
-      <MeasureGroupScoringUnit value={"Test Option1"} onChange={handleChange} />
+      <MeasureGroupScoringUnit
+        value={"Test Option1"}
+        onChange={handleChange}
+        canEdit={true}
+      />
     );
     const scoringUnitInput = screen.getByRole("combobox");
     userEvent.click(scoringUnitInput);
@@ -45,7 +53,11 @@ describe("MeasureGroupScoringUnit Component", () => {
     const handleChange = jest.fn();
 
     const { getByTestId } = render(
-      <MeasureGroupScoringUnit value={"Test Option1"} onChange={handleChange} />
+      <MeasureGroupScoringUnit
+        value={"Test Option1"}
+        onChange={handleChange}
+        canEdit={true}
+      />
     );
     const scoringUnit = getByTestId("measure-group-scoring-unit");
     expect(scoringUnit.textContent).toBe("Scoring Unit");
@@ -76,7 +88,13 @@ describe("MeasureGroupScoringUnit Component", () => {
 
   test("Should display No options when user input is invalid", () => {
     const handleChange = jest.fn();
-    render(<MeasureGroupScoringUnit value={""} onChange={handleChange} />);
+    render(
+      <MeasureGroupScoringUnit
+        value={""}
+        onChange={handleChange}
+        canEdit={true}
+      />
+    );
 
     const scoringUnitLabel = screen.getByText("Scoring Unit");
     expect(scoringUnitLabel).toBeInTheDocument();

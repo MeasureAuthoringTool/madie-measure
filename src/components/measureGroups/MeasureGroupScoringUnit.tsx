@@ -47,9 +47,14 @@ const basicOptions = [
 export interface ScoringUnitProps {
   value: any;
   onChange: (newValue: any) => void;
+  canEdit: boolean;
 }
 
-const MeasureGroupScoringUnit = ({ value, onChange }: ScoringUnitProps) => {
+const MeasureGroupScoringUnit = ({
+  value,
+  onChange,
+  canEdit,
+}: ScoringUnitProps) => {
   const getBasicOptions = (input) => {
     return basicOptions.filter((unit) => {
       return unit.label.toLowerCase().includes(input.toLowerCase());
@@ -98,17 +103,19 @@ const MeasureGroupScoringUnit = ({ value, onChange }: ScoringUnitProps) => {
       <FormField>
         <FieldSeparator>
           <SoftLabel>Scoring Unit</SoftLabel>
-          <AsyncSelect
-            cacheOptions
-            loadOptions={loadOptions}
-            defaultOptions
-            placeholder="UCUM Code or Name"
-            onChange={(newValue: any) => {
-              onChange(newValue);
-            }}
-            value={value}
-            defaultInputValue={value}
-          />
+          {canEdit && (
+            <AsyncSelect
+              cacheOptions
+              loadOptions={loadOptions}
+              defaultOptions
+              placeholder="UCUM Code or Name"
+              onChange={(newValue: any) => {
+                onChange(newValue);
+              }}
+              value={value}
+              defaultInputValue={value}
+            />
+          )}
         </FieldSeparator>
       </FormField>
     </div>

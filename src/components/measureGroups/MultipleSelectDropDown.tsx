@@ -26,6 +26,7 @@ export default function MultipleSelectDropDown(props: {
   label: string;
   id: string;
   clearAll: any;
+  canEdit: boolean;
 }) {
   // To handle clearAll, since clear is considered as an option in Select
   const handleOnchange = (event) => {
@@ -41,38 +42,44 @@ export default function MultipleSelectDropDown(props: {
         <FieldLabel htmlFor="multiple-select-dropdown">
           Measure Group type:
         </FieldLabel>
-        <Select
-          labelId="multiple-select-dropdown"
-          data-testid={`${props.id}-dropdown`}
-          multiple
-          displayEmpty
-          {...props.formControl}
-          onChange={handleOnchange}
-          input={
-            <OutlinedInput id="select-multiple-dropdown" label={props.label} />
-          }
-          renderValue={(selected: any) => {
-            if (selected.length === 0) {
-              return <em>Select all that apply</em>;
+        {props.canEdit && (
+          <Select
+            labelId="multiple-select-dropdown"
+            data-testid={`${props.id}-dropdown`}
+            multiple
+            displayEmpty
+            {...props.formControl}
+            onChange={handleOnchange}
+            input={
+              <OutlinedInput
+                id="select-multiple-dropdown"
+                label={props.label}
+              />
             }
-            return selected.join(", ");
-          }}
-          native={false}
-          MenuProps={MenuProps}
-        >
-          <MenuItem disabled value="">
-            <em>Select all that apply</em>
-          </MenuItem>
-          {props.values.map((value) => (
-            <MenuItem key={value} value={value}>
-              <Checkbox checked={props.selectedValues.indexOf(value) > -1} />
-              <ListItemText primary={value} />
+            renderValue={(selected: any) => {
+              if (selected.length === 0) {
+                return <em>Select all that apply</em>;
+              }
+              return selected.join(", ");
+            }}
+            native={false}
+            MenuProps={MenuProps}
+          >
+            <MenuItem disabled value="">
+              <em>Select all that apply</em>
             </MenuItem>
-          ))}
-          <MenuItem value="clear">
-            <Link underline="always">Clear</Link>
-          </MenuItem>
-        </Select>
+            {props.values.map((value) => (
+              <MenuItem key={value} value={value}>
+                <Checkbox checked={props.selectedValues.indexOf(value) > -1} />
+                <ListItemText primary={value} />
+              </MenuItem>
+            ))}
+            <MenuItem value="clear">
+              <Link underline="always">Clear</Link>
+            </MenuItem>
+          </Select>
+        )}
+        {!props.canEdit && props.selectedValues.join(", ")}
       </FormControl>
     </div>
   );
