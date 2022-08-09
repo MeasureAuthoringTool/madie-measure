@@ -6,6 +6,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { isEqual } from "lodash";
 import MeasureGroups from "./MeasureGroups";
@@ -91,6 +92,7 @@ describe("Measure Groups Page", () => {
       ],
       groupDescription: "",
       measureGroupTypes: [],
+      scoringUnit: "",
     };
   });
 
@@ -254,6 +256,7 @@ describe("Measure Groups Page", () => {
       groupDescription: "new description",
       stratifications: [],
       measureGroupTypes: ["Patient Reported Outcome"],
+      scoringUnit: "",
       rateAggregation: "",
       improvementNotation: "",
     };
@@ -349,7 +352,7 @@ describe("Measure Groups Page", () => {
       screen.getByTestId("delete-measure-group-modal-cancel-btn")
     ).toBeInTheDocument();
     expect(
-      screen.getByTestId("delete-measure-group-modal-delete-btn")
+      screen.getByTestId("delete-measure-group-modal-agree-btn")
     ).toBeInTheDocument();
 
     userEvent.click(
@@ -383,7 +386,7 @@ describe("Measure Groups Page", () => {
     ).toBeInTheDocument();
 
     expect(
-      screen.getByTestId("delete-measure-group-modal-delete-btn")
+      screen.getByTestId("delete-measure-group-modal-agree-btn")
     ).toBeInTheDocument();
 
     const expectedConfig = {
@@ -400,9 +403,7 @@ describe("Measure Groups Page", () => {
       groups: [],
     };
     mockedAxios.delete.mockResolvedValue({ data: updatedMeasure });
-    userEvent.click(
-      screen.getByTestId("delete-measure-group-modal-delete-btn")
-    );
+    userEvent.click(screen.getByTestId("delete-measure-group-modal-agree-btn"));
 
     expect(mockedAxios.delete).toHaveBeenCalledWith(
       `example-service-url/measures/test-measure/groups/7p03-5r29-7O0I`,
@@ -518,6 +519,7 @@ describe("Measure Groups Page", () => {
       groupDescription: "new description",
       stratifications: [],
       measureGroupTypes: ["Patient Reported Outcome"],
+      scoringUnit: "",
       rateAggregation: "",
       improvementNotation: "",
     };
@@ -595,6 +597,7 @@ describe("Measure Groups Page", () => {
       scoring: "Cohort",
       groupDescription: "new description for group 2",
       measureGroupTypes: ["Patient Reported Outcome"],
+      scoringUnit: "",
       rateAggregation: "",
       improvementNotation: "",
       stratifications: [],
@@ -618,6 +621,7 @@ describe("Measure Groups Page", () => {
   test("Should be able to update initial population of a population group", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "testDescription";
+    group.scoringUnit = "testScoringUnit";
     measure.groups = [group];
     const { getByTestId, getByText } = renderMeasureGroupComponent();
 
@@ -669,6 +673,7 @@ describe("Measure Groups Page", () => {
       scoring: "Cohort",
       groupDescription: "testDescription",
       measureGroupTypes: ["Patient Reported Outcome"],
+      scoringUnit: "testScoringUnit",
     };
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
 
@@ -681,6 +686,110 @@ describe("Measure Groups Page", () => {
     expect(alert).toHaveTextContent(
       "Population details for this group updated successfully."
     );
+    expect(mockedAxios.put).toHaveBeenCalledWith(
+      "example-service-url/measures/test-measure/groups/",
+      expectedGroup,
+      expect.anything()
+    );
+  });
+
+  test("displaying a measure update warning modal while updating measure scoring and updating measure scoring for a measure group", async () => {
+    const newGroup = {
+      id: "7p03-5r29-7O0I",
+      scoring: "Continuous Variable",
+      populations: [
+        {
+          id: "id-1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+        },
+        {
+          id: "id-2",
+          name: PopulationType.MEASURE_POPULATION,
+          definition: "Measure Population",
+        },
+      ],
+      groupDescription: "testDescription",
+      stratifications: [],
+      measureGroupTypes: ["Patient Reported Outcome"],
+      rateAggregation: "",
+      improvementNotation: "",
+    };
+    measure.groups = [newGroup];
+
+    renderMeasureGroupComponent();
+    expect(
+      (
+        screen.getByRole("option", {
+          name: "Continuous Variable",
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
+
+    userEvent.selectOptions(
+      screen.getByTestId("scoring-unit-select"),
+      "Cohort"
+    );
+
+    expect(
+      (screen.getByRole("option", { name: "Cohort" }) as HTMLOptionElement)
+        .selected
+    ).toBe(true);
+
+    const definitionToUpdate =
+      "VTE Prophylaxis by Medication Administered or Device Applied";
+    userEvent.selectOptions(
+      screen.getByTestId("select-measure-group-population"),
+      screen.getByText(definitionToUpdate)
+    );
+    expect(
+      (
+        screen.getByRole("option", {
+          name: definitionToUpdate,
+        }) as HTMLOptionElement
+      ).selected
+    ).toBe(true);
+
+    expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
+
+    mockedAxios.put.mockResolvedValue({ data: { newGroup } });
+
+    const expectedGroup = {
+      id: "7p03-5r29-7O0I",
+      populations: [
+        {
+          id: "",
+          name: PopulationType.INITIAL_POPULATION,
+          definition:
+            "VTE Prophylaxis by Medication Administered or Device Applied",
+        },
+      ],
+      scoring: "Cohort",
+      scoringUnit: "",
+      groupDescription: "testDescription",
+      measureGroupTypes: ["Patient Reported Outcome"],
+      rateAggregation: "",
+      improvementNotation: "",
+      stratifications: [],
+    };
+
+    expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("update-measure-group-scoring-modal-agree-btn")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("update-measure-group-scoring-modal-cancel-btn")
+      );
+    });
+
+    userEvent.click(
+      screen.getByTestId("update-measure-group-scoring-modal-agree-btn")
+    );
+
     expect(mockedAxios.put).toHaveBeenCalledWith(
       "example-service-url/measures/test-measure/groups/",
       expectedGroup,
@@ -1032,6 +1141,27 @@ describe("Measure Groups Page", () => {
     const { queryByTestId } = renderMeasureGroupComponent();
     const saveButton = queryByTestId("group-form-submit-btn");
     expect(saveButton).not.toBeInTheDocument();
+  });
+
+  test("should display default select for scoring unit", async () => {
+    const { getByTestId } = renderMeasureGroupComponent();
+    const scoringUnit = getByTestId("measure-group-scoring-unit");
+    expect(scoringUnit.textContent).toBe("Scoring UnitUCUM Code or Name");
+  });
+
+  test("should display selected scoring unit", async () => {
+    const { getByTestId } = renderMeasureGroupComponent();
+
+    const scoringUnit = getByTestId("measure-group-scoring-unit");
+    expect(scoringUnit.textContent).toBe("Scoring UnitUCUM Code or Name");
+
+    const scoringUnitInput = within(scoringUnit).getByRole("combobox");
+    expect(scoringUnitInput.getAttribute("value")).toBe("");
+
+    fireEvent.change(scoringUnitInput, {
+      target: { value: "cm" },
+    });
+    expect(scoringUnitInput.getAttribute("value")).toBe("cm");
   });
 
   test("Add new group and click Discard button should discard the changes", async () => {
