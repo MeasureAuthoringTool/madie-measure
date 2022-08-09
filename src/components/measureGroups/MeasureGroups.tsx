@@ -37,7 +37,6 @@ const Title = styled.h1`
   font-size: 18px;
   color: #424b5a;
 `;
-const FormControl = styled.section(() => [tw`mb-3`, `margin: 25px 40px;`]);
 const SoftLabel = styled.label`
   display: block;
   margin-bottom: 5px;
@@ -489,7 +488,7 @@ const MeasureGroups = () => {
                 <FormField>
                   <FieldSeparator>
                     <FieldLabel htmlFor="population-basis-combo-box">
-                      Population Basis:
+                      Population Basis
                     </FieldLabel>
                     {canEdit && (
                       <Autocomplete

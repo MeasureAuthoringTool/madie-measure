@@ -6,8 +6,6 @@ import { TextField } from "@mui/material";
 import { ExpressionDefinition } from "./MeasureGroups";
 import { DSLink } from "@madie/madie-design-system/dist/react";
 
-const FormControl = styled.section(() => [tw`mb-3`, `margin: 40px`]);
-
 const HeavyLabel = styled.label`
   color: #505d68;
   font-weight: 500;
@@ -37,7 +35,6 @@ type Props = {
 };
 
 const FormField = tw.div`mt-6`;
-const FieldLabel = tw.label`block text-sm font-medium text-gray-700`;
 
 const MeasureGroupPopulationSelect = ({
   label,
@@ -57,11 +54,6 @@ const MeasureGroupPopulationSelect = ({
 }: Props & any) => {
   const htmlId = kebabCase(`population-select-${label}`);
   const defaultOptionTitle = optionTitle ? optionTitle : label;
-
-  // FPO noop onClick handler
-  const onClickCallback = (evt) => {
-    evt.preventDefault();
-  };
 
   const removePopulation = (evt) => {
     evt.preventDefault();

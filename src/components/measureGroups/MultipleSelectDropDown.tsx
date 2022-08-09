@@ -1,5 +1,5 @@
 import React from "react";
-import tw, { styled } from "twin.macro";
+import tw from "twin.macro";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
@@ -40,7 +40,7 @@ export default function MultipleSelectDropDown(props: {
     <div>
       <FormControl sx={{ width: 300, mt: 3 }}>
         <FieldLabel htmlFor="multiple-select-dropdown">
-          Measure Group type:
+          Measure Group type
         </FieldLabel>
         {props.canEdit && (
           <Select
