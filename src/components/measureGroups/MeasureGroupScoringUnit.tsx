@@ -116,6 +116,7 @@ const MeasureGroupScoringUnit = ({
               defaultInputValue={value}
             />
           )}
+          {!canEdit && value?.label}
         </FieldSeparator>
       </FormField>
     </div>
