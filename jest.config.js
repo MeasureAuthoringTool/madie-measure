@@ -15,7 +15,7 @@ module.exports = {
     "@madie/madie-components":
       "<rootDir>/node_modules/@madie/madie-components/src/madie-madie-components.tsx",
   },
-  setupFilesAfterEnv: ["@testing-library/jest-dom"],
+  setupFilesAfterEnv: ["@testing-library/jest-dom", "./jest.setup.js"],
   globals: {
     "ts-jest": {
       tsconfig: {

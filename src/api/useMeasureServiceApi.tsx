@@ -155,6 +155,29 @@ export class MeasureServiceApi {
     }
     return `${baseMessage}${extraMessage}`;
   }
+
+  async getAllPopulationBasisOptions(): Promise<string[]> {
+    try {
+      const response = await axios.get<string[]>(
+        `${this.baseUrl}/populationBasisValues`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      if (response?.data.length < 1) {
+        throw new Error("Unable to fetch population basis options");
+      }
+      return response?.data;
+    } catch (err) {
+      const message = this.buildErrorMessage(
+        err,
+        "Unable to fetch population basis options"
+      );
+      throw new Error(message);
+    }
+  }
 }
 
 export default function useMeasureServiceApi(): MeasureServiceApi {
