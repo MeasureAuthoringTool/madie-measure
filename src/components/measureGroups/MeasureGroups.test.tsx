@@ -1264,4 +1264,58 @@ describe("Measure Groups Page", () => {
     });
     expect(screen.getByText("Failed to create the group.")).toBeInTheDocument();
   });
+
+  test("Add/remove second IP for ratio group", () => {
+    renderMeasureGroupComponent();
+    userEvent.selectOptions(screen.getByTestId("scoring-unit-select"), "Ratio");
+    // initial population available for ratio scoring
+    expect(
+      screen.getByRole("combobox", {
+        name: "Initial Population *",
+      })
+    ).toBeInTheDocument();
+
+    const addIpLink = screen.getByRole("link", {
+      name: "+ Add Initial Population",
+    });
+    // add second ip
+    expect(addIpLink).toBeInTheDocument();
+    userEvent.click(addIpLink);
+
+    // verify  IP1 and IP2 visible
+    expect(
+      screen.getByRole("combobox", {
+        name: "Initial Population 1 *",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("combobox", {
+        name: "Initial Population 2 *",
+      })
+    ).toBeInTheDocument();
+
+    // delete the IP2
+    const removeIpLink = screen.getByRole("link", { name: /Remove/ });
+    expect(removeIpLink).toBeInTheDocument();
+    userEvent.click(removeIpLink);
+
+    // IP is back
+    expect(
+      screen.getByRole("combobox", {
+        name: "Initial Population *",
+      })
+    ).toBeInTheDocument();
+
+    // no more IP1 & IP2 in the document
+    expect(
+      screen.queryByRole("combobox", {
+        name: "Initial Population 1 *",
+      })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("combobox", {
+        name: "Initial Population 2 *",
+      })
+    ).not.toBeInTheDocument();
+  });
 });
