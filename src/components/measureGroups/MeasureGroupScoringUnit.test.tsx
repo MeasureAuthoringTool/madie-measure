@@ -86,7 +86,7 @@ describe("MeasureGroupScoringUnit Component", () => {
     expect(ucumOptionText2).toBeInTheDocument();
   });
 
-  test("Should display No options when user input is invalid", () => {
+  test("Should display Invalid Scoring Unit when user input is invalid", () => {
     const handleChange = jest.fn();
     render(
       <MeasureGroupScoringUnit
@@ -104,7 +104,8 @@ describe("MeasureGroupScoringUnit Component", () => {
     fireEvent.change(scoringUnitInput, {
       target: { value: "null" },
     });
-    const scoringUnitOption = screen.getByText("No options");
+
+    const scoringUnitOption = screen.getByText("Invalid Scoring Unit!");
     expect(scoringUnitOption).toBeInTheDocument();
   });
 });
