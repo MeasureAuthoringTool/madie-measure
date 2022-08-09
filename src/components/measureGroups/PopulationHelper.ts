@@ -4,7 +4,7 @@ import {
   MeasureScoring,
 } from "@madie/madie-models";
 
-const initialPopulation = {
+export const initialPopulation = {
   id: "",
   name: PopulationType.INITIAL_POPULATION,
   definition: "",
@@ -59,6 +59,15 @@ export const allPopulations = [
   measurePopulation,
   measurePopulationExclusion,
 ];
+
+export const findPopulations = (
+  populations: Population[],
+  populationType: PopulationType
+) => {
+  return populations?.filter(
+    (population) => population.name === populationType
+  );
+};
 
 // default populations for each scoring
 export const getPopulationsForScoring = (scoring: string): Population[] => {
