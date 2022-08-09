@@ -1,21 +1,24 @@
-import React, { useEffect, useState, Fragment } from "react";
+import React, { useEffect, useState } from "react";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import { Group, GroupScoring, MeasureGroupTypes } from "@madie/madie-models";
-import { Alert, TextField } from "@mui/material";
+import { Alert, TextField, Grid as GridLayout } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import EditMeasureSideBarNav from "../editMeasure/measureDetails/EditMeasureSideBarNav";
 import { Button } from "@madie/madie-components";
-import { useFormik, FormikProvider, FieldArray } from "formik";
+import { useFormik, FormikProvider, FieldArray, Field } from "formik";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
-import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
-import * as _ from "lodash";
 import { MeasureGroupSchemaValidator } from "../../validations/MeasureGroupSchemaValidator";
 import { useOktaTokens } from "@madie/madie-util";
 import MultipleSelectDropDown from "./MultipleSelectDropDown";
 import MeasureGroupsWarningDialog from "./MeasureGroupWarningDialog";
-import { allPopulations, getPopulationsForScoring } from "./PopulationHelper";
+import {
+  allPopulations,
+  getPopulationsForScoring,
+  findPopulations,
+} from "./PopulationHelper";
+import GroupPopulation from "./GroupPopulation";
 import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
@@ -166,6 +169,7 @@ const MeasureGroups = () => {
           scoringUnit: measure?.groups[measureGroupNumber].scoringUnit || "",
           measureGroupTypes:
             measure?.groups[measureGroupNumber].measureGroupTypes || [],
+          populations: measure?.groups[measureGroupNumber].populations || [],
         },
       });
     } else {
@@ -174,7 +178,7 @@ const MeasureGroups = () => {
           values: {
             id: null,
             scoring: "Select",
-            populations: group?.populations,
+            populations: [],
             groupDescription: "",
             stratifications: [{ ...EmptyStrat }, { ...EmptyStrat }],
             rateAggregation: "",
@@ -227,30 +231,6 @@ const MeasureGroups = () => {
       setExpressionDefinitions(definitions);
     }
   }, [measure]);
-
-  // Helper function do determine the properties for a select item
-  const populationSelectorProperties = (
-    fieldProps: any,
-    selectedOption: String,
-    index: number
-  ) => {
-    const hidden = fieldProps.hidden?.includes(selectedOption);
-    const required =
-      !fieldProps.optional?.includes("*") &&
-      !fieldProps.optional?.includes(selectedOption);
-    const options: Array<ExpressionDefinition> = fieldProps.options
-      ? []
-      : expressionDefinitions;
-    const name: string = `populations[${index}].definition`;
-    return {
-      label: _.startCase(fieldProps.name),
-      hidden,
-      required,
-      name,
-      options,
-      subTitle: fieldProps.subTitle,
-    };
-  };
 
   const discardChanges = () => {
     if (measureGroupNumber >= measure?.groups?.length || !measure?.groups) {
@@ -502,6 +482,9 @@ const MeasureGroups = () => {
                   }}
                   name="scoring"
                   value={formik.values.scoring}
+                  onKeyPress={(e) => {
+                    e.preventDefault();
+                  }}
                   onChange={(e) => {
                     const populations = getPopulationsForScoring(
                       e.target.value
@@ -590,42 +573,38 @@ const MeasureGroups = () => {
               <FieldArray
                 name="populations"
                 render={(arrayHelpers) => (
-                  <div>
-                    {getPopulationsForScoring(formik.values.scoring).map(
-                      (population, index) => {
-                        const selectorProps = populationSelectorProperties(
-                          population,
-                          formik.values.scoring,
-                          index
-                        );
-                        const touched = _.get(
-                          formik.touched.populations,
-                          `populations[${index}].definition`
-                        );
-                        const error = !!touched
-                          ? _.get(
-                              formik.errors.populations,
-                              `populations[${index}].definition`
-                            )
-                          : null;
-                        const formikFieldProps = formik.getFieldProps(
-                          `populations[${index}].definition`
-                        );
-                        return (
-                          <Fragment key={`select_${selectorProps.label}`}>
-                            <Divider />
-                            <MeasureGroupPopulationSelect
-                              {...selectorProps}
-                              {...formikFieldProps}
-                              helperText={error}
-                              error={!!error && !!touched}
-                              canEdit={canEdit}
-                            />
-                          </Fragment>
-                        );
-                      }
-                    )}
-                  </div>
+                  <GridLayout container spacing={1} alignItems="center">
+                    {formik.values.populations?.map((population, index) => {
+                      const fieldProps = {
+                        name: `populations[${index}].definition`,
+                      };
+                      const populationCount = findPopulations(
+                        formik.values.populations,
+                        population.name
+                      ).length;
+                      const gridSize = populationCount === 2 ? 6 : 12;
+                      return (
+                        <GridLayout
+                          item
+                          xs={gridSize}
+                          key={`population_${index}`}
+                        >
+                          <Field
+                            {...fieldProps}
+                            component={GroupPopulation}
+                            cqlDefinitions={expressionDefinitions}
+                            populations={formik.values.populations}
+                            population={population}
+                            populationIndex={index}
+                            scoring={formik.values.scoring}
+                            canEdit={canEdit}
+                            insertCallback={arrayHelpers.insert}
+                            removeCallback={arrayHelpers.remove}
+                          />
+                        </GridLayout>
+                      );
+                    })}
+                  </GridLayout>
                 )}
               />
             )}
