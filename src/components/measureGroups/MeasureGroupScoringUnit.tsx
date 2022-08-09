@@ -54,7 +54,7 @@ const MeasureGroupScoringUnit = ({ value, onChange }: ScoringUnitProps) => {
     });
   };
 
-  const getUcumOptions = (input) => {
+  const getUcumOptions = (input, callback) => {
     const ucumUtils = ucum.UcumLhcUtils.getInstance();
 
     const synonyms = ucumUtils.checkSynonyms(input);
@@ -74,6 +74,14 @@ const MeasureGroupScoringUnit = ({ value, onChange }: ScoringUnitProps) => {
         };
       });
     } else {
+      callback([
+        {
+          value: "error",
+          label: "Invalid Scoring Unit!",
+          isDisabled: true,
+        },
+      ]);
+
       return [];
     }
   };
@@ -86,7 +94,7 @@ const MeasureGroupScoringUnit = ({ value, onChange }: ScoringUnitProps) => {
       },
       {
         label: "UCUM",
-        options: getUcumOptions(input),
+        options: getUcumOptions(input, callback),
       },
     ]);
   };
