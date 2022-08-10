@@ -69,7 +69,7 @@ export default function EditMeasure() {
             <Route path={`${url}/test-cases`}>
               <MadiePatient />
             </Route>
-            <Route path="*">
+            <Route path={`${url}/groups`}>
               <MeasureGroups />
             </Route>
           </Switch>

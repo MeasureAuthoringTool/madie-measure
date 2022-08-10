@@ -1,35 +1,44 @@
-import React, { useEffect, useState, Fragment } from "react";
+import React, { useEffect, useState } from "react";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import { Group, GroupScoring, MeasureGroupTypes } from "@madie/madie-models";
-import { Alert, TextField } from "@mui/material";
+import {
+  Alert,
+  Autocomplete,
+  TextField,
+  Grid as GridLayout,
+} from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import EditMeasureSideBarNav from "../editMeasure/measureDetails/EditMeasureSideBarNav";
 import { Button } from "@madie/madie-components";
-import { useFormik, FormikProvider, FieldArray } from "formik";
+import { useFormik, FormikProvider, FieldArray, Field } from "formik";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
-import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
-import * as _ from "lodash";
 import { MeasureGroupSchemaValidator } from "../../validations/MeasureGroupSchemaValidator";
 import { useOktaTokens } from "@madie/madie-util";
 import MultipleSelectDropDown from "./MultipleSelectDropDown";
 import MeasureGroupsWarningDialog from "./MeasureGroupWarningDialog";
-import { allPopulations, getPopulationsForScoring } from "./PopulationHelper";
+
 import { values } from "lodash";
+import {
+  allPopulations,
+  getPopulationsForScoring,
+  findPopulations,
+} from "./PopulationHelper";
+import GroupPopulation from "./GroupPopulation";
+import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
 const Content = styled.div(() => [tw`col-span-3`]);
 const Header = styled.section`
   background-color: #f2f5f7;
-  padding: 15px;
+  padding: 1em 3em;
   border-bottom: solid 1px rgba(80, 93, 104, 0.2);
 `;
 const Title = styled.h1`
   font-size: 18px;
   color: #424b5a;
 `;
-const FormControl = styled.section(() => [tw`mb-3`, `margin: 25px 40px;`]);
 const SoftLabel = styled.label`
   display: block;
   margin-bottom: 5px;
@@ -61,19 +70,20 @@ const Col = styled.article`
   display: flex;
   flex-direction: column;
   padding-right: 2em;
+  min-width: 30%;
 `;
 interface PropTypes {
   isActive?: boolean;
 }
 
-const MenuItemContainer = tw.ul`bg-transparent flex px-8`;
+const MenuItemContainer = tw.ul`bg-transparent flex mt-12 mb-8 border-b`;
 const MenuItem = styled.li((props: PropTypes) => [
   tw`mr-1 text-white bg-slate rounded-t-md pl-3 pr-3 text-slate-90`,
   props.isActive &&
     tw`bg-white text-slate-90 font-medium border-solid border-b border-red-500`,
 ]);
 
-const FormField = tw.div`mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6`;
+const FormField = tw.div`mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-3`;
 const FormFieldInner = tw.div`sm:col-span-3`;
 const FieldLabel = tw.label`block text-sm font-medium text-gray-700`;
 const FieldSeparator = tw.div`mt-1`;
@@ -161,6 +171,8 @@ const MeasureGroups = () => {
       measureGroupNumber: undefined,
     });
   const [visibleStrats, setVisibleStrats] = useState<number>(2);
+  const [populationBasisValues, setPopulationBasisValues] =
+    useState<string[]>();
 
   useEffect(() => {
     if (measure?.groups && measure?.groups[measureGroupNumber]) {
@@ -170,8 +182,10 @@ const MeasureGroups = () => {
           ...measure?.groups[measureGroupNumber],
           groupDescription:
             measure?.groups[measureGroupNumber].groupDescription || "",
+          scoringUnit: measure?.groups[measureGroupNumber].scoringUnit || "",
           measureGroupTypes:
             measure?.groups[measureGroupNumber].measureGroupTypes || [],
+          populations: measure?.groups[measureGroupNumber].populations || [],
         },
       });
       setVisibleStrats(
@@ -185,12 +199,14 @@ const MeasureGroups = () => {
           values: {
             id: null,
             scoring: "Select",
-            populations: group?.populations,
+            populations: [],
             groupDescription: "",
             stratifications: [{ ...EmptyStrat }, { ...EmptyStrat }],
             rateAggregation: "",
             improvementNotation: "",
             measureGroupTypes: [],
+            populationBasis: "Boolean",
+            scoringUnit: "",
           },
         });
       }
@@ -211,6 +227,8 @@ const MeasureGroups = () => {
         { ...EmptyStrat },
       ],
       measureGroupTypes: group?.measureGroupTypes || [],
+      populationBasis: group?.populationBasis || "Boolean",
+      scoringUnit: group?.scoringUnit,
     } as Group,
 
     validationSchema: MeasureGroupSchemaValidator,
@@ -262,13 +280,16 @@ const MeasureGroups = () => {
       subTitle: fieldProps.subTitle,
     };
   };
-  const flipSuccess = () => {
-    if (successMessage !== "") {
-      setSuccessMessage("");
-    } else {
-      setSuccessMessage(undefined);
-    }
-  };
+
+  // Fetches all population basis options from db
+  // Should be executed only on initial load of the component
+  useEffect(() => {
+    measureServiceApi
+      .getAllPopulationBasisOptions()
+      .then((response) => setPopulationBasisValues(response))
+      .catch((err) => setGenericErrorMessage(err.message));
+  }, []);
+
 
   const discardChanges = () => {
     if (measureGroupNumber >= measure?.groups?.length || !measure?.groups) {
@@ -280,6 +301,8 @@ const MeasureGroups = () => {
           measureGroupTypes: [],
           rateAggregation: "",
           improvementNotation: "",
+          populationBasis: "Boolean",
+          scoringUnit: "",
         },
       });
     } else {
@@ -319,6 +342,8 @@ const MeasureGroups = () => {
                 improvementNotation: g.improvementNotation,
                 stratifications: g.stratifications,
                 measureGroupTypes: g.measureGroupTypes || [],
+                populationBasis: g.populationBasis,
+                scoringUnit: g.scoringUnit,
               };
             }
             return group;
@@ -468,7 +493,7 @@ const MeasureGroups = () => {
 
             {/* Form control later should be moved to own component and dynamically rendered by switch based on measure. */}
 
-            <FormControl>
+            <div tw="px-12 py-8">
               <FormField>
                 <FormFieldInner>
                   <FieldLabel htmlFor="measure-group-description">
@@ -499,141 +524,175 @@ const MeasureGroups = () => {
                   label="Measure Group Type"
                   id="measure-group-type"
                   clearAll={() => formik.setFieldValue("measureGroupTypes", [])}
+                  canEdit={canEdit}
                 />
               </FormField>
-              <br />
-              {/* pull from cql file */}
-              <SoftLabel htmlFor="scoring-unit-select">
-                Group Scoring:
-              </SoftLabel>
-              {canEdit && (
-                <TextField
-                  select
-                  id="scoring-unit-select"
-                  label=""
-                  inputProps={{
-                    "data-testid": "scoring-unit-select",
-                  }}
-                  InputLabelProps={{ shrink: false }}
-                  SelectProps={{
-                    native: true,
-                  }}
-                  name="scoring"
-                  value={formik.values.scoring}
-                  onChange={(e) => {
-                    const populations = getPopulationsForScoring(
-                      e.target.value
-                    );
-                    formik.resetForm({
-                      values: {
-                        ...formik.values,
-                        scoring: e.target.value,
-                        populations: populations,
-                      },
-                    });
-                  }}
-                >
-                  {Object.values(GroupScoring).map((opt, i) => (
-                    <option
-                      key={`${opt}-${i}`}
-                      value={opt}
-                      data-testid="scoring-unit-option"
-                    >
-                      {opt}
-                    </option>
-                  ))}
-                </TextField>
+              {populationBasisValues && (
+                <FormField>
+                  <FieldSeparator>
+                    <FieldLabel htmlFor="population-basis-combo-box">
+                      Population Basis
+                    </FieldLabel>
+                    {canEdit && (
+                      <Autocomplete
+                        disablePortal
+                        data-testid="population-basis-combo-box"
+                        options={populationBasisValues}
+                        sx={{ width: 300 }}
+                        defaultValue={formik.values.populationBasis}
+                        {...formik.getFieldProps("populationBasis")}
+                        onChange={(_event: any, selectedVal: string | null) => {
+                          formik.setFieldValue("populationBasis", selectedVal);
+                        }}
+                        renderInput={(params) => (
+                          <TextField {...params} label="" />
+                        )}
+                      />
+                    )}
+                    {!canEdit && formik.values.populationBasis}
+                  </FieldSeparator>
+                </FormField>
               )}
-              {!canEdit && formik.values.scoring}
-            </FormControl>
-            <br />
-            <div>
-              <MenuItemContainer>
-                <MenuItem
-                  data-testid="populations-tab"
-                  isActive={activeTab == "populations"}
-                  onClick={() => {
-                    setActiveTab("populations");
-                  }}
-                >
-                  Populations{" "}
-                  {!!formik.errors.populations &&
-                    activeTab !== "populations" &&
-                    "🚫"}
-                </MenuItem>
-                {formik.values.scoring !== "Ratio" && (
+              <FormField>
+                <FieldSeparator>
+                  {/* pull from cql file */}
+                  <SoftLabel htmlFor="scoring-unit-select">
+                    Group Scoring:
+                  </SoftLabel>
+                  {canEdit && (
+                    <TextField
+                      select
+                      id="scoring-unit-select"
+                      label=""
+                      inputProps={{
+                        "data-testid": "scoring-unit-select",
+                      }}
+                      InputLabelProps={{ shrink: false }}
+                      SelectProps={{
+                        native: true,
+                      }}
+                      name="scoring"
+                      value={formik.values.scoring}
+                      onKeyPress={(e) => {
+                        e.preventDefault();
+                      }}
+                      onChange={(e) => {
+                        const populations = getPopulationsForScoring(
+                          e.target.value
+                        );
+                        formik.resetForm({
+                          values: {
+                            ...formik.values,
+                            scoring: e.target.value,
+                            populations: populations,
+                          },
+                        });
+                      }}
+                    >
+                      {Object.values(GroupScoring).map((opt, i) => (
+                        <option
+                          key={`${opt}-${i}`}
+                          value={opt}
+                          data-testid="scoring-unit-option"
+                        >
+                          {opt}
+                        </option>
+                      ))}
+                    </TextField>
+                  )}
+                  {!canEdit && formik.values.scoring}
+                </FieldSeparator>
+              </FormField>
+              <MeasureGroupScoringUnit
+                {...formik.getFieldProps("scoringUnit")}
+                onChange={(newValue) => {
+                  formik.setFieldValue("scoringUnit", newValue);
+                }}
+                canEdit={canEdit}
+              />
+              <div>
+                <MenuItemContainer>
                   <MenuItem
-                    data-testid="stratifications-tab"
-                    isActive={activeTab == "stratification"}
+                    data-testid="populations-tab"
+                    isActive={activeTab == "populations"}
                     onClick={() => {
-                      setActiveTab("stratification");
-                      if (!!formik.values.stratifications) {
-                        while (formik.values.stratifications.length < 2) {
-                          formik.values.stratifications.push({
-                            ...EmptyStrat,
-                          });
-                        }
-                      } else {
-                        formik.values.stratifications = [
-                          {
-                            ...EmptyStrat,
-                          },
-                          {
-                            ...EmptyStrat,
-                          },
-                        ];
-                      }
+                      setActiveTab("populations");
                     }}
                   >
-                    Stratifications
+                    Populations{" "}
+                    {!!formik.errors.populations &&
+                      activeTab !== "populations" &&
+                      "🚫"}
                   </MenuItem>
-                )}
-                <MenuItem
-                  data-testid="reporting-tab"
-                  isActive={activeTab == "reporting"}
-                  onClick={() => setActiveTab("reporting")}
-                >
-                  Reporting
-                </MenuItem>
-              </MenuItemContainer>
-            </div>
-
-            {activeTab === "populations" && (
-              <FieldArray
-                name="populations"
-                render={(arrayHelpers) => (
-                  <div>
-                    {getPopulationsForScoring(formik.values.scoring).map(
-                      (population, index) => {
-                        const selectorProps = populationSelectorProperties(
-                          population,
-                          formik.values.scoring,
-                          index
-                        );
-                        const touched = _.get(
-                          formik.touched.populations,
-                          `populations[${index}].definition`
-                        );
-                        const error = !!touched
-                          ? _.get(
-                              formik.errors.populations,
-                              `populations[${index}].definition`
-                            )
-                          : null;
-                        const formikFieldProps = formik.getFieldProps(
-                          `populations[${index}].definition`
-                        );
+                  {formik.values.scoring !== "Ratio" && (
+                    <MenuItem
+                      data-testid="stratifications-tab"
+                      isActive={activeTab == "stratification"}
+                      onClick={() => {
+                        setActiveTab("stratification");
+                        if (!!formik.values.stratifications) {
+                          while (formik.values.stratifications.length < 2) {
+                            formik.values.stratifications.push({
+                              ...EmptyStrat,
+                            });
+                          }
+                        } else {
+                          formik.values.stratifications = [
+                            {
+                              ...EmptyStrat,
+                            },
+                            {
+                              ...EmptyStrat,
+                            },
+                          ];
+                        }
+                      }}
+                    >
+                      Stratifications
+                    </MenuItem>
+                  )}
+                  <MenuItem
+                    data-testid="reporting-tab"
+                    isActive={activeTab == "reporting"}
+                    onClick={() => setActiveTab("reporting")}
+                  >
+                    Reporting
+                  </MenuItem>
+                </MenuItemContainer>
+              </div>
+              {activeTab === "populations" && (
+                <FieldArray
+                  name="populations"
+                  render={(arrayHelpers) => (
+                    <GridLayout container spacing={1} alignItems="center">
+                      {formik.values.populations?.map((population, index) => {
+                        const fieldProps = {
+                          name: `populations[${index}].definition`,
+                        };
+                        const populationCount = findPopulations(
+                          formik.values.populations,
+                          population.name
+                        ).length;
+                        const gridSize = populationCount === 2 ? 6 : 12;
                         return (
-                          <Fragment key={`select_${selectorProps.label}`}>
-                            <Divider />
-                            <MeasureGroupPopulationSelect
-                              {...selectorProps}
-                              {...formikFieldProps}
-                              helperText={error}
-                              error={!!error && !!touched}
+                          <GridLayout
+                            item
+                            xs={gridSize}
+                            key={`population_${index}`}
+                          >
+                            <Field
+                              {...fieldProps}
+                              component={GroupPopulation}
+                              cqlDefinitions={expressionDefinitions}
+                              populations={formik.values.populations}
+                              population={population}
+                              populationIndex={index}
+                              scoring={formik.values.scoring}
                               canEdit={canEdit}
+                              insertCallback={arrayHelpers.insert}
+                              removeCallback={arrayHelpers.remove}
                             />
-                          </Fragment>
+                          </GridLayout>
                         );
                       }
                     )}
@@ -870,7 +929,85 @@ const MeasureGroups = () => {
               </FormControl>
             )}
 
-            <br />
+
+                        //idk how to force a component update in a less dumb way
+                        if (successMessage !== "") {
+                          setSuccessMessage("");
+                        } else {
+                          setSuccessMessage(undefined);
+                        }
+                      }}
+                    />
+                  </Row>
+                </div>
+              )}
+              {activeTab === "reporting" && (
+                <div>
+                  <FormField>
+                    <FormFieldInner>
+                      <FieldLabel htmlFor="rate-aggregation">
+                        Rate Aggregation
+                      </FieldLabel>
+                      <FieldSeparator>
+                        {canEdit && (
+                          <FieldInput
+                            value={formik.values.rateAggregation}
+                            type="text"
+                            name="rate-aggregation"
+                            id="rate-aggregation"
+                            autoComplete="rate-aggregation"
+                            placeholder="Rate Aggregation"
+                            data-testid="rateAggregationText"
+                            {...formik.getFieldProps("rateAggregation")}
+                          />
+                        )}
+                      </FieldSeparator>
+                      <Divider />
+                      <FieldLabel htmlFor="rate-aggregation">
+                        Improvement Notation
+                      </FieldLabel>
+                      <FieldSeparator>
+                        {canEdit && (
+                          <TextField
+                            select
+                            id="improvement-notation-select"
+                            label=""
+                            value={formik.values.improvementNotation}
+                            inputProps={{
+                              "data-testid": "improvement-notation-select",
+                            }}
+                            onChange={(e) => {
+                              formik.setFieldValue(
+                                "improvementNotation",
+                                e.target.value
+                              );
+                            }}
+                            InputLabelProps={{ shrink: false }}
+                            SelectProps={{
+                              native: true,
+                            }}
+                            name="type"
+                          >
+                            {Object.values(MeasureImprovementNotation).map(
+                              (opt, i) => (
+                                <option
+                                  key={`${opt.code}-${i}`}
+                                  value={opt.label}
+                                  data-testid="improvement-notation-option"
+                                >
+                                  {opt.label}
+                                </option>
+                              )
+                            )}
+                          </TextField>
+                        )}
+                        {!canEdit && formik.values.improvementNotation}
+                      </FieldSeparator>
+                    </FormFieldInner>
+                  </FormField>
+                </div>
+              )}
+            </div>
           </Content>
         </Grid>
         {canEdit && (
@@ -896,7 +1033,6 @@ const MeasureGroups = () => {
                   }}
                 />
               </ButtonSpacer>
-
               <ButtonSpacer>
                 <span
                   tw="text-sm text-gray-600"

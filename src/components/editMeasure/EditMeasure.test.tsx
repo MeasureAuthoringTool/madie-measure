@@ -30,6 +30,7 @@ const measure = {
 
 const serviceApiMock = {
   fetchMeasure: jest.fn().mockResolvedValue(measure),
+  getAllPopulationBasisOptions: jest.fn().mockResolvedValue([]),
 } as unknown as MeasureServiceApi;
 
 useMeasureServiceApiMock.mockImplementation(() => {
@@ -53,6 +54,7 @@ const serviceConfig: ServiceConfig = {
   elmTranslationService: {
     baseUrl: "",
   },
+  terminologyService: { baseUrl: "" },
 };
 
 // mocking useHistory

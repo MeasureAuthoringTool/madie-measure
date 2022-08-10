@@ -92,6 +92,7 @@ module.exports = (webpackConfigEnv, argv) => {
           ],
           exclude: /node_modules/,
         },
+        { test: /\.json$/, type: "json" },
       ],
     },
     devServer: {
