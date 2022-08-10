@@ -1,17 +1,12 @@
 import React from "react";
-import tw, { styled } from "twin.macro";
+import tw from "twin.macro";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import { Checkbox, Link, ListItemText } from "@mui/material";
 
-const SoftLabel = styled.label`
-  display: block;
-  margin-bottom: 5px;
-  font-size: 12px;
-  color: rgba(66, 75, 90, 0.7);
-`;
+const FieldLabel = tw.label`block text-sm font-medium text-gray-700`;
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -31,6 +26,7 @@ export default function MultipleSelectDropDown(props: {
   label: string;
   id: string;
   clearAll: any;
+  canEdit: boolean;
 }) {
   // To handle clearAll, since clear is considered as an option in Select
   const handleOnchange = (event) => {
@@ -42,42 +38,48 @@ export default function MultipleSelectDropDown(props: {
 
   return (
     <div>
-      <FormControl sx={{ width: 300, mt: 1 }}>
-        <SoftLabel htmlFor="multiple-select-dropdown">
-          Measure Group type:
-        </SoftLabel>
-        <Select
-          labelId="multiple-select-dropdown"
-          data-testid={`${props.id}-dropdown`}
-          multiple
-          displayEmpty
-          {...props.formControl}
-          onChange={handleOnchange}
-          input={
-            <OutlinedInput id="select-multiple-dropdown" label={props.label} />
-          }
-          renderValue={(selected: any) => {
-            if (selected.length === 0) {
-              return <em>Select all that apply</em>;
+      <FormControl sx={{ width: 300, mt: 3 }}>
+        <FieldLabel htmlFor="multiple-select-dropdown">
+          Measure Group type
+        </FieldLabel>
+        {props.canEdit && (
+          <Select
+            labelId="multiple-select-dropdown"
+            data-testid={`${props.id}-dropdown`}
+            multiple
+            displayEmpty
+            {...props.formControl}
+            onChange={handleOnchange}
+            input={
+              <OutlinedInput
+                id="select-multiple-dropdown"
+                label={props.label}
+              />
             }
-            return selected.join(", ");
-          }}
-          native={false}
-          MenuProps={MenuProps}
-        >
-          <MenuItem disabled value="">
-            <em>Select all that apply</em>
-          </MenuItem>
-          {props.values.map((value) => (
-            <MenuItem key={value} value={value}>
-              <Checkbox checked={props.selectedValues.indexOf(value) > -1} />
-              <ListItemText primary={value} />
+            renderValue={(selected: any) => {
+              if (selected.length === 0) {
+                return <em>Select all that apply</em>;
+              }
+              return selected.join(", ");
+            }}
+            native={false}
+            MenuProps={MenuProps}
+          >
+            <MenuItem disabled value="">
+              <em>Select all that apply</em>
             </MenuItem>
-          ))}
-          <MenuItem value="clear">
-            <Link underline="always">Clear</Link>
-          </MenuItem>
-        </Select>
+            {props.values.map((value) => (
+              <MenuItem key={value} value={value}>
+                <Checkbox checked={props.selectedValues.indexOf(value) > -1} />
+                <ListItemText primary={value} />
+              </MenuItem>
+            ))}
+            <MenuItem value="clear">
+              <Link underline="always">Clear</Link>
+            </MenuItem>
+          </Select>
+        )}
+        {!props.canEdit && props.selectedValues.join(", ")}
       </FormControl>
     </div>
   );
