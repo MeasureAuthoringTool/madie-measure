@@ -120,6 +120,11 @@ const MeasureGroupScoringUnit = ({
               onChange={(newValue: any) => {
                 onChange(newValue);
               }}
+              onKeyDown={(event) => {
+                if (event.keyCode === 13) {
+                  event.preventDefault();
+                }
+              }}
               value={value}
               defaultInputValue={value}
             />
