@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import * as ucum from "@lhncbc/ucum-lhc";
 import AsyncSelect from "react-select/async";
 import tw, { styled } from "twin.macro";
@@ -48,6 +48,7 @@ export interface ScoringUnitProps {
 }
 
 const MeasureGroupScoringUnit = ({ value, onChange }: ScoringUnitProps) => {
+  const [tempValue, setTempValue] = useState(value);
   const getBasicOptions = (input) => {
     return basicOptions.filter((unit) => {
       return unit.label.toLowerCase().includes(input.toLowerCase());
@@ -111,8 +112,18 @@ const MeasureGroupScoringUnit = ({ value, onChange }: ScoringUnitProps) => {
           loadOptions={loadOptions}
           defaultOptions
           placeholder="UCUM Code or Name"
-          onChange={(newValue: any) => {
+          onChange={(newValue: any, event: any) => {
+            if (JSON.stringify(event).includes("select-option")) {
+              setTempValue(JSON.stringify(newValue));
+            } else {
+              setTempValue(undefined);
+            }
             onChange(newValue);
+          }}
+          onKeyDown={(event) => {
+            if (event.keyCode === 13 && tempValue !== undefined) {
+              event.preventDefault();
+            }
           }}
           value={value}
           defaultInputValue={value}
