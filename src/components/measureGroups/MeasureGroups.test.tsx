@@ -1478,4 +1478,17 @@ describe("Measure Groups Page", () => {
     const removebutton2 = screen.getAllByTestId("remove-strat-button")[0];
     expect(removebutton2).toBeInTheDocument();
   });
+
+  test("If stratification is empty, auto populate two empty stratifications", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "Description Text";
+    group.rateAggregation = "Rate Aggregation Text";
+    group.improvementNotation = "Increased score indicates improvement";
+    group.stratifications = [];
+    measure.groups = [group];
+    const { queryByTestId } = renderMeasureGroupComponent();
+    userEvent.click(screen.getByTestId("stratifications-tab"));
+    expect(group.stratifications.length == 2);
+    expect(group.stratifications[0] === EmptyStrat);
+  });
 });
