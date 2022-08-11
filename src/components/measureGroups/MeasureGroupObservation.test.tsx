@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { render, screen, within } from "@testing-library/react";
 import * as uuid from "uuid";
 import MeasureGroupObservation from "./MeasureGroupObservation";
-import { MeasureScoring, PopulationType } from "../../../../madie-models";
+import { MeasureScoring, PopulationType } from "@madie/madie-models";
 
 jest.mock("uuid", () => ({
   v4: jest.fn(),
