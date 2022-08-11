@@ -108,30 +108,4 @@ describe("MeasureGroupScoringUnit Component", () => {
     const scoringUnitOption = screen.getByText("Invalid Scoring Unit!");
     expect(scoringUnitOption).toBeInTheDocument();
   });
-
-  test("Press Enter key will prevent default behavior", () => {
-    const handleChange = jest.fn();
-    render(
-      <MeasureGroupScoringUnit
-        value={"cm"}
-        onChange={handleChange}
-        canEdit={true}
-      />
-    );
-
-    const scoringUnitLabel = screen.getByText("Scoring Unit");
-    expect(scoringUnitLabel).toBeInTheDocument();
-    const scoringUnitInput = screen.getByRole("combobox");
-    expect(scoringUnitInput).toBeInTheDocument();
-    expect(scoringUnitInput.value).toBe("cm");
-
-    fireEvent.keyDown(scoringUnitInput, {
-      key: "Enter",
-      code: "Enter",
-      keyCode: 13,
-      charCode: 13,
-    });
-
-    expect(scoringUnitInput.value).toBe("cm");
-  });
 });

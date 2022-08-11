@@ -504,11 +504,6 @@ const MeasureGroups = () => {
                         renderInput={(params) => (
                           <TextField {...params} label="" />
                         )}
-                        onKeyDown={(e) => {
-                          if (e.keyCode === 13) {
-                            e.preventDefault();
-                          }
-                        }}
                       />
                     )}
                     {!canEdit && formik.values.populationBasis}
@@ -535,9 +530,6 @@ const MeasureGroups = () => {
                       }}
                       name="scoring"
                       value={formik.values.scoring}
-                      onKeyPress={(e) => {
-                        e.preventDefault();
-                      }}
                       onChange={(e) => {
                         const populations = getPopulationsForScoring(
                           e.target.value
