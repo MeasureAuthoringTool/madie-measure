@@ -708,6 +708,7 @@ const MeasureGroups = () => {
                                               buttonTitle="Remove"
                                               variant="white"
                                               buttonSize="xs"
+                                              data-testid="remove-strat-button"
                                             />
                                           </span>
                                         )}
