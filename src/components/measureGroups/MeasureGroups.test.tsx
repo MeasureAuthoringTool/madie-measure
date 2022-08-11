@@ -275,6 +275,14 @@ describe("Measure Groups Page", () => {
       userEvent.click(getByText("Patient Reported Outcome"));
     });
 
+    const populationBasis = getByTestId("population-basis-combo-box");
+    fireEvent.keyDown(populationBasis, {
+      key: "Enter",
+      code: "Enter",
+      keyCode: 13,
+      charCode: 13,
+    });
+
     expect(screen.getByTestId("group-form-delete-btn")).toBeInTheDocument();
     expect(screen.getByTestId("group-form-delete-btn")).toBeDisabled();
 
