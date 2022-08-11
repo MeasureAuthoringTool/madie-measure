@@ -1,11 +1,11 @@
 import * as React from "react";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MeasureObservation } from "@madie/madie-models";
 import {
+  MeasureObservation,
   AGGREGATE_FUNCTION_KEYS,
   AggregateFunctionType,
-} from "../../../../madie-models/dist/AggregateFunctionType";
+} from "@madie/madie-models";
 import MeasureObservationDetails from "./MeasureObservationDetails";
 
 const AGGREGATE_FUNCTIONS = Array.from(AGGREGATE_FUNCTION_KEYS.keys()).sort();
