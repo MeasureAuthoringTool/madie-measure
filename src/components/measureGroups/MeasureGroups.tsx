@@ -504,6 +504,11 @@ const MeasureGroups = () => {
                         renderInput={(params) => (
                           <TextField {...params} label="" />
                         )}
+                        onKeyDown={(e) => {
+                          if (e.keyCode === 13) {
+                            e.preventDefault();
+                          }
+                        }}
                       />
                     )}
                     {!canEdit && formik.values.populationBasis}
