@@ -240,36 +240,6 @@ describe("Measure Groups Page", () => {
     });
   });
 
-  test("onKeyPress prevents default and selected scoring does not change", async () => {
-    group.id = "";
-    group.scoring = "Cohort";
-    measure.groups = [group];
-    renderMeasureGroupComponent();
-    expect(
-      (screen.getByRole("option", { name: "Cohort" }) as HTMLOptionElement)
-        .selected
-    ).toBe(true);
-    const option = screen.getByTestId(
-      "scoring-unit-select"
-    ) as HTMLOptionElement;
-
-    const populationOption = screen.getAllByTestId(
-      "select-measure-group-population"
-    )[0] as HTMLOptionElement;
-    expect(populationOption.value).toBe(group.populations[0].definition);
-
-    await act(async () => {
-      fireEvent.change(option, { target: { value: "Ratio" } });
-    });
-    expect(option.value).toBe("Ratio");
-    expect(populationOption.value).toBe("");
-
-    act(() => {
-      fireEvent.keyPress(option, { key: "Enter", code: 13, charCode: 13 });
-    });
-    expect(option.value).toBe("Ratio");
-  });
-
   test("Should create population Group with one initial population successfully", async () => {
     const { getByTestId, getByText } = renderMeasureGroupComponent();
     userEvent.selectOptions(

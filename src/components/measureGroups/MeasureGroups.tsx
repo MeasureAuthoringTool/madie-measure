@@ -574,9 +574,6 @@ const MeasureGroups = () => {
                       }}
                       name="scoring"
                       value={formik.values.scoring}
-                      onKeyPress={(e) => {
-                        e.preventDefault();
-                      }}
                       onChange={(e) => {
                         const nextScoring = e.target.value;
                         const populations =
