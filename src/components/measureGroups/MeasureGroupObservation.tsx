@@ -6,7 +6,7 @@ import {
   MeasureObservation,
   MeasureScoring,
   PopulationType,
-} from "../../../../madie-models";
+} from "@madie/madie-models";
 import { v4 as uuidv4 } from "uuid";
 import { useFormikContext } from "formik";
 import * as _ from "lodash";

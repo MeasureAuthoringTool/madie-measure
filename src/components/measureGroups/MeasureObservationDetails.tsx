@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import tw, { styled } from "twin.macro";
 import { Button, TextField } from "@mui/material";
-import { MeasureObservation } from "../../../../madie-models";
-import { AGGREGATE_FUNCTION_KEYS } from "../../../../madie-models/dist/AggregateFunctionType";
+import {
+  MeasureObservation,
+  AGGREGATE_FUNCTION_KEYS,
+} from "@madie/madie-models";
 import { DSLink } from "@madie/madie-design-system/dist/react";
 
 const FormControl = styled.section(() => [tw`mb-3`, `margin: 25px 40px;`]);
