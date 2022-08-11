@@ -185,7 +185,8 @@ const MeasureGroups = () => {
           measureGroupTypes:
             measure?.groups[measureGroupNumber].measureGroupTypes || [],
           populations: measure?.groups[measureGroupNumber].populations || [],
-          measureObservations: measure?.groups[measureGroupNumber].measureObservations || null,
+          measureObservations:
+            measure?.groups[measureGroupNumber].measureObservations || null,
         },
       });
     } else {
