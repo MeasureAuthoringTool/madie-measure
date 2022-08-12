@@ -122,6 +122,7 @@ const MeasureGroupScoringUnit = ({
               }}
               value={value}
               defaultInputValue={value}
+              isClearable={true}
             />
           )}
           {!canEdit && value?.label}

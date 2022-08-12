@@ -7,6 +7,7 @@ import {
   Group,
   GroupScoring,
   MeasureGroupTypes,
+  MeasureScoring
 } from "../../../../madie-models/dist/";
 import {
   Alert,
@@ -20,6 +21,8 @@ import EditMeasureSideBarNav from "../editMeasure/measureDetails/EditMeasureSide
 import { Button } from "@madie/madie-components";
 import { useFormik, FormikProvider, FieldArray, Field } from "formik";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
+import * as _ from "lodash";
+import { v4 as uuidv4 } from "uuid";
 import { MeasureGroupSchemaValidator } from "../../validations/MeasureGroupSchemaValidator";
 import { useOktaTokens } from "@madie/madie-util";
 import MultipleSelectDropDown from "./MultipleSelectDropDown";
@@ -31,6 +34,7 @@ import {
 } from "./PopulationHelper";
 import GroupPopulation from "./GroupPopulation";
 import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
+import MeasureGroupObservation from "./MeasureGroupObservation";
 import { Select } from "@madie/madie-design-system/dist/react";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
@@ -187,6 +191,8 @@ const MeasureGroups = () => {
           measureGroupTypes:
             measure?.groups[measureGroupNumber].measureGroupTypes || [],
           populations: measure?.groups[measureGroupNumber].populations || [],
+          measureObservations:
+            measure?.groups[measureGroupNumber].measureObservations || null,
         },
       });
     } else {
@@ -196,6 +202,7 @@ const MeasureGroups = () => {
             id: null,
             scoring: "-",
             populations: [],
+            measureObservations: null,
             groupDescription: "",
             stratifications: [{ ...EmptyStrat }, { ...EmptyStrat }],
             rateAggregation: "",
@@ -215,6 +222,7 @@ const MeasureGroups = () => {
       id: group?.id || null,
       scoring: defaultScoring,
       populations: allPopulations,
+      measureObservations: null,
       rateAggregation: group?.rateAggregation || "",
       improvementNotation: group?.improvementNotation || "",
       groupDescription: group?.groupDescription,
@@ -305,6 +313,7 @@ const MeasureGroups = () => {
                 groupDescription: g.groupDescription,
                 scoring: g.scoring,
                 populations: g.populations,
+                measureObservations: g.measureObservations,
                 rateAggregation: g.rateAggregation,
                 improvementNotation: g.improvementNotation,
                 stratifications: g.stratifications,
@@ -399,6 +408,19 @@ const MeasureGroups = () => {
           dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
         },
       ];
+
+  const getDefaultObservationsForScoring = (scoring) => {
+    if (scoring === MeasureScoring.CONTINUOUS_VARIABLE) {
+      return [
+        {
+          id: uuidv4(),
+          criteriaReference: null,
+        },
+      ];
+    } else {
+      return null;
+    }
+  };
 
   return (
     <FormikProvider value={formik}>
@@ -539,14 +561,20 @@ const MeasureGroups = () => {
                       }
                       size="small"
                       onChange={(e) => {
-                        const populations = getPopulationsForScoring(
-                          e.target.value
-                        );
+                        const nextScoring = e.target.value;
+                        const populations =
+                          getPopulationsForScoring(nextScoring);
+                        const observations =
+                          getDefaultObservationsForScoring(nextScoring);
                         formik.resetForm({
                           values: {
                             ...formik.values,
-                            scoring: e.target.value,
-                            populations: populations,
+                            scoring: nextScoring,
+                            populations: [...populations].map((p) => ({
+                              ...p,
+                              id: uuidv4(),
+                            })),
+                            measureObservations: observations,
                           },
                         });
                       }}
@@ -638,26 +666,42 @@ const MeasureGroups = () => {
                         ).length;
                         const gridSize = populationCount === 2 ? 6 : 12;
                         return (
-                          <GridLayout
-                            item
-                            xs={gridSize}
-                            key={`population_${index}`}
-                          >
-                            <Field
-                              {...fieldProps}
-                              component={GroupPopulation}
-                              cqlDefinitions={expressionDefinitions}
-                              populations={formik.values.populations}
-                              population={population}
-                              populationIndex={index}
-                              scoring={formik.values.scoring}
-                              canEdit={canEdit}
-                              insertCallback={arrayHelpers.insert}
-                              removeCallback={arrayHelpers.remove}
-                            />
-                          </GridLayout>
+                          <React.Fragment key={`population_${index}`}>
+                            <GridLayout item xs={gridSize}>
+                              <Field
+                                {...fieldProps}
+                                component={GroupPopulation}
+                                cqlDefinitions={expressionDefinitions}
+                                populations={formik.values.populations}
+                                population={population}
+                                populationIndex={index}
+                                scoring={formik.values.scoring}
+                                canEdit={canEdit}
+                                insertCallback={arrayHelpers.insert}
+                                removeCallback={arrayHelpers.remove}
+                              />
+                            </GridLayout>
+                            <GridLayout
+                              item
+                              xs={gridSize}
+                              key={`population_${index}`}
+                            >
+                              <MeasureGroupObservation
+                                scoring={formik.values.scoring}
+                                population={population}
+                                elmJson={measure.elmJson}
+                              />
+                            </GridLayout>
+                          </React.Fragment>
                         );
                       })}
+                      <GridLayout item>
+                        <MeasureGroupObservation
+                          scoring={formik.values.scoring}
+                          population={null}
+                          elmJson={measure.elmJson}
+                        />
+                      </GridLayout>
                     </GridLayout>
                   )}
                 />

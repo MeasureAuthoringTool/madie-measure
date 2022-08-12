@@ -1,5 +1,5 @@
 import * as Yup from "yup";
-import { GroupScoring } from "@madie/madie-models";
+import { AggregateFunctionType, GroupScoring, MeasureScoring } from "@madie/madie-models";
 
 export const MeasureGroupSchemaValidator = Yup.object().shape({
   scoring: Yup.string()
@@ -71,6 +71,47 @@ export const MeasureGroupSchemaValidator = Yup.object().shape({
             }),
           })
         );
+    }
+  }),
+  measureObservations: Yup.object().when("scoring", (scoring) => {
+    switch (scoring) {
+      case MeasureScoring.CONTINUOUS_VARIABLE:
+        return Yup.array()
+          .of(
+            Yup.object().shape({
+              definition: Yup.string().required(
+                "Measure Observation definition is required when an observation is added"
+              ),
+              aggregateMethod: Yup.string()
+                .oneOf(Object.values(AggregateFunctionType))
+                .required(
+                  "Aggregate Method is required for a measure observation"
+                ),
+            })
+          )
+          .length(
+            1,
+            "Continuous Variable measure groups must have a single measure observation"
+          );
+      case MeasureScoring.RATIO:
+        return Yup.array()
+          .of(
+            Yup.object().shape({
+              definition: Yup.string().required(
+                "Measure Observation definition is required when an observation is added"
+              ),
+              aggregateMethod: Yup.string()
+                .oneOf(Object.values(AggregateFunctionType))
+                .required(
+                  "Aggregate Method is required for a measure observation"
+                ),
+            })
+          )
+          .nullable()
+          .min(0)
+          .max(2, "Maximum of two measure observations on Ratio measure group");
+      default:
+        return Yup.array().nullable();
     }
   }),
 });
