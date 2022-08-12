@@ -7,6 +7,7 @@ import {
   MeasureScoring,
   PopulationType,
 } from "@madie/madie-models";
+import { Grid as GridLayout } from "@mui/material";
 import { v4 as uuidv4 } from "uuid";
 import { useFormikContext } from "formik";
 import * as _ from "lodash";
@@ -17,7 +18,7 @@ const MeasureGroupObservation = ({ scoring, population, elmJson }) => {
   let observationName = "";
   let label = `Observation`;
   let criteriaReference = null;
-  let margin = 0;
+  let style = {};
   let measureObservation = null;
   let required = false;
 
@@ -30,7 +31,7 @@ const MeasureGroupObservation = ({ scoring, population, elmJson }) => {
     label = `${population.name} ${label}`;
     observationName = population.name;
     criteriaReference = population.id;
-    margin = 40;
+    style = { marginLeft: 40, marginTop: 24 };
     measureObservation = formik.values.measureObservations?.find(
       (mo) => mo.criteriaReference === population.id
     );
@@ -42,12 +43,13 @@ const MeasureGroupObservation = ({ scoring, population, elmJson }) => {
     observationName = "cv-obs";
     measureObservation = formik.values.measureObservations?.[0];
     required = true;
+    style = { marginLeft: 8, marginTop: 24 };
   } else {
     return null;
   }
 
   return measureObservation ? (
-    <div style={{ margin }}>
+    <div style={style}>
       <MeasureObservationDetails
         label={label}
         required={required}
@@ -74,7 +76,7 @@ const MeasureGroupObservation = ({ scoring, population, elmJson }) => {
       />
     </div>
   ) : (
-    <span style={{ marginLeft: margin }}>
+    <span style={style}>
       <DSLink
         href=""
         onClick={(e) => {
