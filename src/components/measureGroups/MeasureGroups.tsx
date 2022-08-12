@@ -7,7 +7,7 @@ import {
   Group,
   GroupScoring,
   MeasureGroupTypes,
-  MeasureScoring
+  MeasureScoring,
 } from "../../../../madie-models/dist/";
 import {
   Alert,

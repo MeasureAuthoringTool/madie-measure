@@ -2,9 +2,9 @@ import React from "react";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import { kebabCase } from "lodash";
-import { TextField } from "@mui/material";
+import { TextField, MenuItem } from "@mui/material";
 import { ExpressionDefinition } from "./MeasureGroups";
-import { DSLink } from "@madie/madie-design-system/dist/react";
+import { DSLink, Select } from "@madie/madie-design-system/dist/react";
 
 const HeavyLabel = styled.label`
   color: #505d68;
@@ -32,6 +32,7 @@ type Props = {
   optionTitle?: string;
   options?: Array<ExpressionDefinition>;
   value?: string;
+  error?: boolean;
 };
 
 const FormField = tw.div`mt-6`;
@@ -50,10 +51,12 @@ const MeasureGroupPopulationSelect = ({
   addPopulationCallback,
   isRemovable,
   showAddPopulationLink,
+  error,
+  helperText,
   ...props
 }: Props & any) => {
   const htmlId = kebabCase(`population-select-${label}`);
-  const defaultOptionTitle = optionTitle ? optionTitle : label;
+  const defaultOptionTitle = "Select" + optionTitle ? optionTitle : label;
 
   const removePopulation = (evt) => {
     evt.preventDefault();
@@ -64,65 +67,60 @@ const MeasureGroupPopulationSelect = ({
     evt.preventDefault();
     addPopulationCallback();
   };
+  debugger;
 
   return (
     <FormField>
-      <HeavyLabel
-        htmlFor={htmlId}
-        id={`${htmlId}-label`}
-        data-testid={`select-measure-group-population-label`}
-      >
-        {label}
-        {required && <Required>*</Required>}
-      </HeavyLabel>
-      {isRemovable && (
-        <span tw={"ml-2"}>
-          <DSLink
-            data-testid={`remove_${name}`}
-            onClick={(evt) => removePopulation(evt)}
-          >
-            Remove
-          </DSLink>
-        </span>
-      )}
       {canEdit && (
-        <div>
-          <TextField
-            select
-            value={value?.replace(/"/g, "")}
-            label=""
+        <>
+          {isRemovable && (
+            <span tw={"ml-2"}>
+              <DSLink
+                data-testid={`remove_${name}`}
+                onClick={(evt) => removePopulation(evt)}
+              >
+                Remove
+              </DSLink>
+            </span>
+          )}
+
+          <Select
+            placeHolder={{ name: "-", value: "" }}
+            required={required}
+            label={label}
             id={htmlId}
             inputProps={{
-              "data-testid": `select-measure-group-population`,
+              "data-testid": `select-measure-group-population-input`,
             }}
-            InputLabelProps={{ shrink: false, id: `select-${htmlId}-label` }}
-            SelectProps={{
-              native: true,
-              displayEmpty: true,
-            }}
-            name={name}
+            data-testid={htmlId}
             onChange={onChange}
-            style={{ minWidth: "20rem" }}
-            {...props}
-          >
-            {options.map(({ name }, i) => (
-              <option
-                key={`${name}-${i}`}
-                value={name.replace(/"/g, "")}
+            value={value?.replace(/"/g, "")}
+            error={error}
+            helperText={helperText}
+            size="small"
+            options={[
+              <MenuItem
+                value={""}
+                disabled={required}
                 data-testid={`select-option-measure-group-population`}
               >
-                {name.replace(/"/g, "")}
-              </option>
-            ))}
-            <option
-              value={""}
-              disabled={required}
-              data-testid={`select-option-measure-group-population`}
-            >
-              Select {defaultOptionTitle}
-              {required ? "" : " ( Leave selected for no population )"}
-            </option>
-          </TextField>{" "}
+                Select {defaultOptionTitle}
+                {required ? "" : " ( Leave selected for no population )"}
+              </MenuItem>,
+              ...options.map(({ name }, i) => (
+                <MenuItem
+                  key={`${name}-${i}`}
+                  value={name.replace(/"/g, "")}
+                  data-testid={`group-population-option-${name.replace(
+                    /"/g,
+                    ""
+                  )}`}
+                >
+                  {name.replace(/"/g, "")}
+                </MenuItem>
+              )),
+            ]}
+          />
           {showAddPopulationLink && (
             <span tw={"ml-2"}>
               <DSLink
@@ -133,7 +131,7 @@ const MeasureGroupPopulationSelect = ({
               </DSLink>
             </span>
           )}
-        </div>
+        </>
       )}
       {!canEdit && value}
       {subTitle && <SubTitle>{subTitle}</SubTitle>}
