@@ -28,7 +28,6 @@ jest.mock("react-router-dom", () => ({
 }));
 
 jest.mock("../../../../api/useMeasureServiceApi");
-jest.mock("../../useCurrentMeasure");
 
 const testUser = "john doe";
 const measure = {

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
-import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import {
   Measure,
   Group,

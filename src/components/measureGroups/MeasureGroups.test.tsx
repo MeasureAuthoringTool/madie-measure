@@ -18,10 +18,8 @@ import {
   PopulationType,
 } from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
-import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import { MemoryRouter } from "react-router-dom";
 import { MeasureCQL } from "../common/MeasureCQL";
-import { MeasureContextHolder } from "../editMeasure/MeasureContext";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
 import * as uuid from "uuid";
@@ -32,11 +30,6 @@ import { measureStore } from "@madie/madie-util";
 jest.mock("uuid", () => ({
   v4: jest.fn(),
 }));
-
-jest.mock("../editMeasure/useCurrentMeasure");
-
-const useCurrentMeasureMock =
-  useCurrentMeasure as jest.Mock<MeasureContextHolder>;
 
 const serviceConfig: ServiceConfig = {
   measureService: {
@@ -88,7 +81,6 @@ mockedAxios.get.mockResolvedValue({ data: { populationBasisValues } });
 describe("Measure Groups Page", () => {
   let measure: Measure;
   let group: Group;
-  let measureContextHolder: MeasureContextHolder;
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -101,12 +93,7 @@ describe("Measure Groups Page", () => {
       cql: MeasureCQL,
       createdBy: MEASURE_CREATEDBY,
     } as Measure;
-    measureContextHolder = {
-      measure,
-      setMeasure: jest.fn(),
-    };
     measureStore.state.mockImplementationOnce(() => measure);
-
     group = {
       id: null,
       scoring: "Cohort",
