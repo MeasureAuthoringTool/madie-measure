@@ -2,12 +2,18 @@ import React, { useEffect, useState } from "react";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
-import { Group, GroupScoring, MeasureGroupTypes } from "@madie/madie-models";
+// import { Group, GroupScoring, MeasureGroupTypes } from "@madie/madie-models";
+import {
+  Group,
+  GroupScoring,
+  MeasureGroupTypes,
+} from "../../../../madie-models/dist/";
 import {
   Alert,
   Autocomplete,
   TextField,
   Grid as GridLayout,
+  MenuItem as MuiMenuItem,
 } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import EditMeasureSideBarNav from "../editMeasure/measureDetails/EditMeasureSideBarNav";
@@ -25,6 +31,7 @@ import {
 } from "./PopulationHelper";
 import GroupPopulation from "./GroupPopulation";
 import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
+import { Select } from "@madie/madie-design-system/dist/react";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
 const Content = styled.div(() => [tw`col-span-3`]);
@@ -162,6 +169,9 @@ const MeasureGroups = () => {
       open: false,
       measureGroupNumber: undefined,
     });
+
+  // Todo option should be an Array when passing to AutoComplete.
+  // warning during test cases
   const [populationBasisValues, setPopulationBasisValues] =
     useState<string[]>();
 
@@ -184,7 +194,7 @@ const MeasureGroups = () => {
         resetForm({
           values: {
             id: null,
-            scoring: "Select",
+            scoring: "-",
             populations: [],
             groupDescription: "",
             stratifications: [{ ...EmptyStrat }, { ...EmptyStrat }],
@@ -199,7 +209,7 @@ const MeasureGroups = () => {
     }
   }, [measureGroupNumber, measure?.groups]);
 
-  const defaultScoring = group?.scoring || "Select";
+  const defaultScoring = group?.scoring || "-";
   const formik = useFormik({
     initialValues: {
       id: group?.id || null,
@@ -256,7 +266,7 @@ const MeasureGroups = () => {
         values: {
           id: null,
           groupDescription: "",
-          scoring: "Select",
+          scoring: "-",
           measureGroupTypes: [],
           rateAggregation: "",
           improvementNotation: "",
@@ -512,27 +522,22 @@ const MeasureGroups = () => {
               )}
               <FormField>
                 <FieldSeparator>
-                  {/* pull from cql file */}
-                  <SoftLabel htmlFor="scoring-unit-select">
-                    Group Scoring:
-                  </SoftLabel>
                   {canEdit && (
-                    <TextField
-                      select
-                      id="scoring-unit-select"
-                      label=""
-                      inputProps={{
-                        "data-testid": "scoring-unit-select",
-                      }}
-                      InputLabelProps={{ shrink: false }}
-                      SelectProps={{
-                        native: true,
-                      }}
-                      name="scoring"
-                      value={formik.values.scoring}
-                      onKeyPress={(e) => {
-                        e.preventDefault();
-                      }}
+                    <Select
+                      placeHolder={{ name: "-", value: "" }}
+                      required
+                      label="Scoring"
+                      id="scoring-select"
+                      inputProps={{ "data-testid": "scoring-select-input" }}
+                      data-testid="scoring-select"
+                      {...formik.getFieldProps("scoring")}
+                      error={
+                        formik.touched.scoring && Boolean(formik.errors.scoring)
+                      }
+                      helperText={
+                        formik.touched.scoring && formik.errors.scoring
+                      }
+                      size="small"
                       onChange={(e) => {
                         const populations = getPopulationsForScoring(
                           e.target.value
@@ -545,17 +550,18 @@ const MeasureGroups = () => {
                           },
                         });
                       }}
-                    >
-                      {Object.values(GroupScoring).map((opt, i) => (
-                        <option
-                          key={`${opt}-${i}`}
-                          value={opt}
-                          data-testid="scoring-unit-option"
-                        >
-                          {opt}
-                        </option>
-                      ))}
-                    </TextField>
+                      options={Object.keys(GroupScoring).map((scoring) => {
+                        return (
+                          <MuiMenuItem
+                            key={scoring}
+                            value={GroupScoring[scoring]}
+                            data-testid={`group-scoring-option-${GroupScoring[scoring]}`}
+                          >
+                            {GroupScoring[scoring]}
+                          </MuiMenuItem>
+                        );
+                      })}
+                    />
                   )}
                   {!canEdit && formik.values.scoring}
                 </FieldSeparator>
