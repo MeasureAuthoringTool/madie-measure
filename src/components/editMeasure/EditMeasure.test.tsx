@@ -22,10 +22,9 @@ MeasureEditorMock.mockImplementation(() => {
   return <div>library testCql version '1.0.000'</div>;
 });
 
-const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
 const measure = {
   id: "measure ID",
-  createdBy: MEASURE_CREATEDBY,
+  createdBy: "testuser@example.com",
 } as Measure;
 
 const serviceApiMock = {
@@ -38,13 +37,28 @@ useMeasureServiceApiMock.mockImplementation(() => {
 });
 
 jest.mock("@madie/madie-util", () => ({
-  measureStore: {
-    updateMeasure: (measure) => measure,
-  },
-  useOktaTokens: () => ({
+  useOktaTokens: jest.fn(() => ({
+    getUserName: jest.fn(() => "testuser@example.com"), //#nosec
     getAccessToken: () => "test.jwt",
-    getUserName: () => MEASURE_CREATEDBY,
-  }),
+  })),
+  measureStore: {
+    updateMeasure: jest.fn((measure) => measure),
+    state: jest.fn().mockImplementation(() => null),
+    initialState: jest.fn().mockImplementation(() => null),
+    subscribe: (set) => {
+      set(measure);
+      return { unsubscribe: () => null };
+    },
+  },
+  routeHandlerStore: {
+    subscribe: (set) => {
+      set(measure);
+      return { unsubscribe: () => null };
+    },
+    updateRouteHandlerState: () => null,
+    state: { canTravel: true, pendingPath: "" },
+    initialState: { canTravel: true, pendingPath: "" },
+  },
 }));
 
 const serviceConfig: ServiceConfig = {
@@ -63,7 +77,7 @@ jest.mock("react-router-dom", () => ({
   ...(jest.requireActual("react-router-dom") as any),
   useHistory: () => {
     const push = () => mockPush("/example");
-    return { push };
+    return { push, block: () => null };
   },
 }));
 

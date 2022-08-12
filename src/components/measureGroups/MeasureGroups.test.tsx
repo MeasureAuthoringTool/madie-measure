@@ -27,6 +27,7 @@ import axios from "axios";
 import * as uuid from "uuid";
 import { getPopulationsForScoring } from "./PopulationHelper";
 import * as _ from "lodash";
+import { measureStore } from "@madie/madie-util";
 
 jest.mock("uuid", () => ({
   v4: jest.fn(),
@@ -56,11 +57,25 @@ const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
 jest.mock("@madie/madie-util", () => ({
   measureStore: {
     updateMeasure: (measure) => measure,
+    state: jest.fn().mockImplementation(() => null),
+    initialState: jest.fn().mockImplementation(() => null),
+    subscribe: (set) => {
+      return { unsubscribe: () => null };
+    },
   },
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
     getUserName: () => MEASURE_CREATEDBY,
   }),
+  routeHandlerStore: {
+    subscribe: (set) => {
+      // set(measure)
+      return { unsubscribe: () => null };
+    },
+    updateRouteHandlerState: () => null,
+    state: { canTravel: true, pendingPath: "" },
+    initialState: { canTravel: true, pendingPath: "" },
+  },
 }));
 
 const populationBasisValues: string[] = [
@@ -90,7 +105,7 @@ describe("Measure Groups Page", () => {
       measure,
       setMeasure: jest.fn(),
     };
-    useCurrentMeasureMock.mockImplementation(() => measureContextHolder);
+    measureStore.state.mockImplementationOnce(() => measure);
 
     group = {
       id: null,

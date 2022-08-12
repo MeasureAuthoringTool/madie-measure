@@ -14,19 +14,18 @@ import MeasureDetails from "./measureDetails/MeasureDetails";
 import MeasureEditor from "../measureEditor/MeasureEditor";
 import { Measure } from "@madie/madie-models";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
-import { MeasureContextProvider } from "./MeasureContext";
 import { MadiePatient } from "@madie/madie-patient";
 import MeasureGroups from "../measureGroups/MeasureGroups";
 import { measureStore } from "@madie/madie-util";
 interface inputParams {
   id: string;
 }
-
 export default function EditMeasure() {
   const { url } = useRouteMatch();
   const { id } = useParams<inputParams>();
   const measureServiceApi = useMeasureServiceApi();
-  const [measure, setMeasure] = useState<Measure>(null);
+  const [measure, setMeasure] = useState<Measure>(measureStore.state);
+  const { updateMeasure } = measureStore;
   // we're going to listen to context updates here and send them to layout
   useEffect(() => {
     measureStore.updateMeasure(measure);
@@ -40,7 +39,8 @@ export default function EditMeasure() {
       measureServiceApi
         .fetchMeasure(id)
         .then((value: Measure) => {
-          setMeasure(value);
+          // setMeasure(value);
+          updateMeasure(value);
           setLoading(false);
         })
         .catch((err) => {
@@ -57,26 +57,23 @@ export default function EditMeasure() {
     <div data-testid="editMeasure">
       <div tw="relative -mt-12">
         <EditMeasureNav />
-        <MeasureContextProvider value={{ measure, setMeasure }}>
-          <Switch>
-            <Redirect exact from={url} to={`${url}/details`} />
-            <Route path={`${url}/details`}>
-              <MeasureDetails />
-            </Route>
-            <Route path={`${url}/cql-editor`}>
-              <MeasureEditor />
-            </Route>
-            <Route path={`${url}/test-cases`}>
-              <MadiePatient />
-            </Route>
-            <Route path={`${url}/groups`}>
-              <MeasureGroups />
-            </Route>
-          </Switch>
-        </MeasureContextProvider>
+        <Switch>
+          <Redirect exact from={url} to={`${url}/details`} />
+          <Route path={`${url}/details`}>
+            <MeasureDetails />
+          </Route>
+          <Route path={`${url}/cql-editor`}>
+            <MeasureEditor />
+          </Route>
+          <Route path={`${url}/test-cases`}>
+            <MadiePatient />
+          </Route>
+          <Route path="*">
+            <MeasureGroups />
+          </Route>
+        </Switch>
       </div>
     </div>
   );
-
   return loading ? loadingDiv : contentDiv;
 }
