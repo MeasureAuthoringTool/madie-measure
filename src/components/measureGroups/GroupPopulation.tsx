@@ -105,10 +105,24 @@ const GroupPopulation = ({
 
   // add copy of this population
   const addPopulation = () => {
+    let secondAssociation = undefined;
+    if (scoring === GroupScoring.RATIO) {
+      const ip = populations[populationIndex];
+      if (
+        ip?.associationType === InitialPopulationAssociationType.DENOMINATOR
+      ) {
+        secondAssociation = InitialPopulationAssociationType.NUMERATOR;
+      } else if (
+        ip?.associationType === InitialPopulationAssociationType.NUMERATOR
+      ) {
+        secondAssociation = InitialPopulationAssociationType.DENOMINATOR;
+      }
+    }
     insertCallback(populationIndex + 1, {
       id: populationIndex + 1,
       name: population.name,
       definition: "",
+      associationType: secondAssociation,
     });
   };
 
