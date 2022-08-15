@@ -893,7 +893,7 @@ const MeasureGroups = () => {
               <ButtonSpacer>
                 <Button
                   style={{ background: "#424B5A" }}
-                  type="submit"
+                  type="button"
                   buttonTitle="Delete"
                   data-testid="group-form-delete-btn"
                   disabled={
