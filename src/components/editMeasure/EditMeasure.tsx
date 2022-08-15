@@ -39,7 +39,7 @@ export default function EditMeasure() {
       measureServiceApi
         .fetchMeasure(id)
         .then((value: Measure) => {
-          // setMeasure(value);
+          // setMeasure(value); We will instead depend on our subscription to update the store
           updateMeasure(value);
           setLoading(false);
         })
