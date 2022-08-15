@@ -677,27 +677,19 @@ const MeasureGroups = () => {
                                 replaceCallback={arrayHelpers.replace}
                               />
                             </GridLayout>
-                            <GridLayout
-                              item
-                              xs={gridSize}
-                              key={`population_${index}`}
-                            >
-                              <MeasureGroupObservation
-                                scoring={formik.values.scoring}
-                                population={population}
-                                elmJson={measure.elmJson}
-                              />
-                            </GridLayout>
+                            <MeasureGroupObservation
+                              scoring={formik.values.scoring}
+                              population={population}
+                              elmJson={measure.elmJson}
+                            />
                           </React.Fragment>
                         );
                       })}
-                      <GridLayout item>
-                        <MeasureGroupObservation
-                          scoring={formik.values.scoring}
-                          population={null}
-                          elmJson={measure.elmJson}
-                        />
-                      </GridLayout>
+                      <MeasureGroupObservation
+                        scoring={formik.values.scoring}
+                        population={null}
+                        elmJson={measure.elmJson}
+                      />
                     </GridLayout>
                   )}
                 />
