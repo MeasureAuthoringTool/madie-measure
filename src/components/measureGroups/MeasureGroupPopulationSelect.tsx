@@ -171,13 +171,17 @@ const MeasureGroupPopulationSelect = ({
                       value={InitialPopulationAssociationType.DENOMINATOR}
                       control={<Radio />}
                       label={InitialPopulationAssociationType.DENOMINATOR}
-                      disabled={!canEdit}
+                      disabled={
+                        !canEdit || label.includes("Initial Population 2")
+                      }
                     />
                     <FormControlLabel
                       value={InitialPopulationAssociationType.NUMERATOR}
                       control={<Radio />}
                       label={InitialPopulationAssociationType.NUMERATOR}
-                      disabled={!canEdit}
+                      disabled={
+                        !canEdit || label.includes("Initial Population 2")
+                      }
                     />
                   </RadioGroup>
                 </FieldSeparator>
