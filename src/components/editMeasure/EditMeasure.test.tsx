@@ -75,7 +75,7 @@ const mockPush = jest.fn();
 jest.mock("react-router-dom", () => ({
   ...(jest.requireActual("react-router-dom") as any),
   useHistory: () => {
-    const push = () => mockPush("/example");
+    const push = (val) => mockPush(val);
     return { push, block: () => null };
   },
 }));
@@ -95,7 +95,6 @@ describe("EditMeasure Component", () => {
 
     const result = getByTestId("loading");
     expect(result).toBeInTheDocument();
-
     await findByTestId("editMeasure"); // let the rendering finish
   });
 
@@ -174,7 +173,7 @@ describe("EditMeasure Component", () => {
       </ApiContextProvider>
     );
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalled();
+      expect(mockPush).toHaveBeenCalledWith("/404");
     });
   });
 });
