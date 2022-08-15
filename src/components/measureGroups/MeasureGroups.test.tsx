@@ -27,6 +27,7 @@ import axios from "axios";
 import * as uuid from "uuid";
 import { getPopulationsForScoring } from "./PopulationHelper";
 import * as _ from "lodash";
+import { InitialPopulationAssociationType } from "./GroupPopulation";
 
 jest.mock("uuid", () => ({
   v4: jest.fn(),
@@ -274,6 +275,7 @@ describe("Measure Groups Page", () => {
           id: "uuid-1",
           name: PopulationType.INITIAL_POPULATION,
           definition: "Initial Population",
+          associationType: InitialPopulationAssociationType.DENOMINATOR,
         },
       ],
       measureObservations: null,
@@ -700,6 +702,7 @@ describe("Measure Groups Page", () => {
           name: PopulationType.INITIAL_POPULATION,
           definition:
             "VTE Prophylaxis by Medication Administered or Device Applied",
+          associationType: InitialPopulationAssociationType.DENOMINATOR,
         },
       ],
       measureObservations: null,
@@ -799,6 +802,7 @@ describe("Measure Groups Page", () => {
           name: PopulationType.INITIAL_POPULATION,
           definition:
             "VTE Prophylaxis by Medication Administered or Device Applied",
+          associationType: InitialPopulationAssociationType.DENOMINATOR,
         },
       ],
       measureObservations: null,

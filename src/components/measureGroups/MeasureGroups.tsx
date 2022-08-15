@@ -674,6 +674,7 @@ const MeasureGroups = () => {
                                 canEdit={canEdit}
                                 insertCallback={arrayHelpers.insert}
                                 removeCallback={arrayHelpers.remove}
+                                replaceCallback={arrayHelpers.replace}
                               />
                             </GridLayout>
                             <GridLayout

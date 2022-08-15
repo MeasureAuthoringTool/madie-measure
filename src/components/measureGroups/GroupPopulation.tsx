@@ -6,6 +6,11 @@ import { GroupScoring, Population, PopulationType } from "@madie/madie-models";
 import { FieldInputProps } from "formik/dist/types";
 import { findPopulations } from "./PopulationHelper";
 
+export enum InitialPopulationAssociationType {
+  DENOMINATOR = "Denominator",
+  NUMERATOR = "Numerator",
+}
+
 type Props = {
   field: FieldInputProps<string>;
   cqlDefinitions: ExpressionDefinition[];
@@ -16,6 +21,7 @@ type Props = {
   canEdit: boolean;
   insertCallback: any;
   removeCallback: any;
+  replaceCallback: any;
 };
 
 const GroupPopulation = ({
@@ -28,6 +34,7 @@ const GroupPopulation = ({
   canEdit,
   insertCallback,
   removeCallback,
+  replaceCallback,
 }: Props) => {
   // Helper function do determine the properties for a select item
   const populationSelectorProperties = (fieldProps: any, scoring: String) => {
@@ -99,10 +106,62 @@ const GroupPopulation = ({
   // add copy of this population
   const addPopulation = () => {
     insertCallback(populationIndex + 1, {
-      id: "",
+      id: populationIndex + 1,
       name: population.name,
       definition: "",
     });
+  };
+
+  const getAssociationType = (label) => {
+    if (
+      (label === "Initial Population" || label === "Initial Population 1") &&
+      population.associationType === undefined
+    ) {
+      population.associationType = InitialPopulationAssociationType.DENOMINATOR;
+    } else if (
+      label === "Initial Population 2" &&
+      population.associationType === undefined
+    ) {
+      population.associationType = InitialPopulationAssociationType.NUMERATOR;
+    }
+    return population.associationType;
+  };
+
+  //find the other initial population (if any) and change the association type to the opposite
+  const changeAssociation = () => {
+    if (scoring === GroupScoring.RATIO) {
+      const ips = findPopulations(
+        populations,
+        PopulationType.INITIAL_POPULATION
+      );
+      if (ips && ips.length === 2) {
+        ips.forEach((ip) => {
+          if (ip.id !== population.id) {
+            if (
+              population.associationType ===
+              InitialPopulationAssociationType.DENOMINATOR
+            ) {
+              ip.associationType = InitialPopulationAssociationType.NUMERATOR;
+            } else if (
+              population.associationType ===
+              InitialPopulationAssociationType.NUMERATOR
+            ) {
+              ip.associationType = InitialPopulationAssociationType.DENOMINATOR;
+            }
+            const index = findIndex(ip, populations);
+            replaceCallback(index, ip);
+          }
+        });
+      }
+    }
+  };
+  const findIndex = (population: Population, populations: Population[]) => {
+    for (let index = 0; index < populations?.length; index++) {
+      const temp = populations[index];
+      if (population.id === temp.id) {
+        return index;
+      }
+    }
   };
 
   const selectorProps = populationSelectorProperties(population, scoring);
@@ -111,6 +170,7 @@ const GroupPopulation = ({
   const isRemovable = isPopulationRemovable(scoring, populations);
   const canBeAdded = showAddPopulationLink(scoring, populations);
   selectorProps.label = correctPopulationLabel(populations, population);
+  population.associationType = getAssociationType(selectorProps.label);
 
   return (
     <MeasureGroupPopulationSelect
@@ -123,6 +183,9 @@ const GroupPopulation = ({
       isRemovable={isRemovable}
       showAddPopulationLink={canBeAdded}
       addPopulationCallback={addPopulation}
+      scoring={scoring}
+      population={population}
+      changeAssociationCallback={() => changeAssociation()}
     />
   );
 };
