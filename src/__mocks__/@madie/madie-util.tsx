@@ -64,3 +64,10 @@ export function useOnClickOutside(ref, handler) {
     };
   }, [ref, handler]);
 }
+
+export const routeHandlerStore = {
+  initialState: { canTravel: true, pendingRoute: "" },
+  state: { canTravel: true, pendingRoute: "" },
+  subscribe: () => null, // needs to return an object with key subscribe
+  unsubscribe: () => null,
+};

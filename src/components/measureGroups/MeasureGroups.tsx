@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
-import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import {
+  Measure,
   Group,
   GroupScoring,
   MeasureGroupTypes,
@@ -22,7 +22,11 @@ import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import * as _ from "lodash";
 import { v4 as uuidv4 } from "uuid";
 import { MeasureGroupSchemaValidator } from "../../validations/MeasureGroupSchemaValidator";
-import { useOktaTokens } from "@madie/madie-util";
+import {
+  useOktaTokens,
+  measureStore,
+  routeHandlerStore,
+} from "@madie/madie-util";
 import MultipleSelectDropDown from "./MultipleSelectDropDown";
 import MeasureGroupsWarningDialog from "./MeasureGroupWarningDialog";
 import {
@@ -153,7 +157,13 @@ const MeasureGroups = () => {
   const [expressionDefinitions, setExpressionDefinitions] = useState<
     Array<ExpressionDefinition>
   >([]);
-  const { measure, setMeasure } = useCurrentMeasure();
+  const [measure, setMeasure] = useState<Measure>(measureStore.state);
+  useEffect(() => {
+    const subscription = measureStore.subscribe(setMeasure);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
   const canEdit = userName === measure?.createdBy;
@@ -244,7 +254,14 @@ const MeasureGroups = () => {
     },
   });
   const { resetForm } = formik;
-
+  // We want to update layout with a cannot travel flag while this is active
+  const { updateRouteHandlerState } = routeHandlerStore;
+  useEffect(() => {
+    updateRouteHandlerState({
+      canTravel: !formik.dirty,
+      pendingRoute: "",
+    });
+  }, [formik.dirty]);
   useEffect(() => {
     if (measure?.cql) {
       const definitions = new CqlAntlr(measure.cql).parse()
@@ -679,7 +696,7 @@ const MeasureGroups = () => {
                             <MeasureGroupObservation
                               scoring={formik.values.scoring}
                               population={population}
-                              elmJson={measure.elmJson}
+                              elmJson={measure?.elmJson}
                             />
                           </React.Fragment>
                         );
@@ -687,7 +704,7 @@ const MeasureGroups = () => {
                       <MeasureGroupObservation
                         scoring={formik.values.scoring}
                         population={null}
-                        elmJson={measure.elmJson}
+                        elmJson={measure?.elmJson}
                       />
                     </GridLayout>
                   )}
