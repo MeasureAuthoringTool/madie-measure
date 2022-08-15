@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import EditMeasureSideBarNav from "../editMeasure/measureDetails/EditMeasureSideBarNav";
-import { Button } from "@madie/madie-components";
+import { Button } from "@madie/madie-design-system/dist/react/";
 import { useFormik, FormikProvider, FieldArray, Field } from "formik";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import * as _ from "lodash";
@@ -742,11 +742,12 @@ const MeasureGroups = () => {
                                                   visibleStrats - 1
                                                 );
                                               }}
-                                              buttonTitle="Remove"
                                               variant="white"
-                                              buttonSize="xs"
+                                              size="xs"
                                               data-testid="remove-strat-button"
-                                            />
+                                            >
+                                              Remove
+                                            </Button>
                                           </span>
                                         )}
                                     </FieldLabel>
@@ -863,14 +864,15 @@ const MeasureGroups = () => {
                       <div>
                         <Row>
                           <Button
-                            buttonTitle="Add Stratification"
                             data-testid="add-strat-button"
                             onClick={(e) => {
                               e.preventDefault();
                               setVisibleStrats(visibleStrats + 1);
                               arrayHelpers.push(EmptyStrat);
                             }}
-                          />
+                          >
+                            Add Stratification
+                          </Button>
                         </Row>
                       </div>
                     </div>
@@ -954,7 +956,6 @@ const MeasureGroups = () => {
                 <Button
                   style={{ background: "#424B5A" }}
                   type="submit"
-                  buttonTitle="Delete"
                   data-testid="group-form-delete-btn"
                   disabled={
                     measureGroupNumber >= measure?.groups?.length ||
@@ -967,7 +968,9 @@ const MeasureGroups = () => {
                       measureGroupNumber: measureGroupNumber,
                     });
                   }}
-                />
+                >
+                  Delete
+                </Button>
               </ButtonSpacer>
               <ButtonSpacer>
                 <span
@@ -983,21 +986,23 @@ const MeasureGroups = () => {
                 <ButtonSpacer>
                   <Button
                     type="button"
-                    buttonTitle="Discard Changes"
                     variant="white"
                     disabled={!formik.dirty}
                     data-testid="group-form-discard-btn"
                     onClick={() => discardChanges()}
-                  />
+                  >
+                    Discard Changes
+                  </Button>
                 </ButtonSpacer>
                 <ButtonSpacer>
                   <Button
                     style={{ background: "#424B5A" }}
                     type="submit"
-                    buttonTitle="Save"
                     data-testid="group-form-submit-btn"
                     disabled={!(formik.isValid && formik.dirty)}
-                  />
+                  >
+                    Save
+                  </Button>
                 </ButtonSpacer>
               </ButtonSpacer>
             </PopulationActions>
