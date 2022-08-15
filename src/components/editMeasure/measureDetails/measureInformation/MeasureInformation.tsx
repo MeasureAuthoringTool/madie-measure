@@ -47,13 +47,6 @@ const MessageText = tw.p`text-sm font-medium`;
 const SuccessText = tw(MessageText)`text-green-800`;
 const ErrorText = tw(MessageText)`text-red-800`;
 
-// const INITIAL_VALUES = {
-//   measureName: "",
-//   cqlLibraryName: "",
-//   measurementPeriodStart: null,
-//   measurementPeriodEnd: null,
-// } as measureInformationForm;
-
 export default function MeasureInformation() {
   const history = useHistory();
   const measureServiceApi = useMeasureServiceApi();

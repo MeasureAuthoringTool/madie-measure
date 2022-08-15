@@ -55,9 +55,9 @@ jest.mock("@madie/madie-util", () => ({
       set(measure);
       return { unsubscribe: () => null };
     },
-    updateRouteHandlerState: () => null,
-    state: { canTravel: true, pendingPath: "" },
-    initialState: { canTravel: true, pendingPath: "" },
+    updateRouteHandlerState: jest.fn((routeObj) => routeObj),
+    state: { canTravel: false, pendingPath: "" },
+    initialState: { canTravel: false, pendingPath: "" },
   },
 }));
 
