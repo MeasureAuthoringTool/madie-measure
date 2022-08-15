@@ -46,7 +46,6 @@ jest.mock("@madie/madie-util", () => ({
     state: jest.fn().mockImplementation(() => null),
     initialState: jest.fn().mockImplementation(() => null),
     subscribe: (set) => {
-      set(measure);
       return { unsubscribe: () => null };
     },
   },

@@ -57,11 +57,9 @@ const EditMeasureNav = () => {
       subscription.unsubscribe();
     };
   }, []);
-
   useEffect(() => {
     const unblock = history.block(({ pathname }, action) => {
       if (!routeHandlerState.canTravel) {
-        // setDialogOpen(true)
         updateRouteHandlerState({ canTravel: false, pendingRoute: pathname });
         return false;
       }
