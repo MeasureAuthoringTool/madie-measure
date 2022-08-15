@@ -10,7 +10,28 @@ import MeasureMetadata from "./measureMetadata/MeasureMetadata";
 
 jest.mock("./measureInformation/MeasureInformation");
 jest.mock("./measureMetadata/MeasureMetadata");
-
+jest.mock("@madie/madie-util", () => ({
+  measureStore: {
+    updateMeasure: (measure) => measure,
+    state: jest.fn().mockImplementation(() => null),
+    initialState: jest.fn().mockImplementation(() => null),
+    subscribe: (set) => {
+      return { unsubscribe: () => null };
+    },
+  },
+  useOktaTokens: () => ({
+    getAccessToken: () => "test.jwt",
+  }),
+  routeHandlerStore: {
+    subscribe: (set) => {
+      set({ canTravel: false, pendingPath: "" });
+      return { unsubscribe: () => null };
+    },
+    updateRouteHandlerState: () => null,
+    state: { canTravel: false, pendingPath: "" },
+    initialState: { canTravel: false, pendingPath: "" },
+  },
+}));
 const MeasureInformationMock = MeasureInformation as jest.Mock<JSX.Element>;
 const MeasureMetadataMock = MeasureMetadata as jest.Mock<JSX.Element>;
 

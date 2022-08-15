@@ -1,13 +1,17 @@
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 import tw from "twin.macro";
-import { Route, Switch, useRouteMatch } from "react-router-dom";
+import { Route, Switch, useRouteMatch, useHistory } from "react-router-dom";
 import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureMetadata from "./measureMetadata/MeasureMetadata";
 import EditMeasureSideBarNav from "./EditMeasureSideBarNav";
+import { routeHandlerStore } from "@madie/madie-util";
 
 const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
 const Content = tw.div`col-span-5 py-6`;
-
+export interface RouteHandlerState {
+  canTravel: boolean;
+  pendingRoute: string;
+}
 export default function EditMeasure() {
   const { path } = useRouteMatch();
   const stewardLink = `${path}/measure-steward`;
@@ -60,6 +64,25 @@ export default function EditMeasure() {
       dataTestId: "leftPanelMeasureGuidance",
     },
   ];
+  const history = useHistory();
+  const [routeHandlerState, setRouteHandlerState] = useState<RouteHandlerState>(
+    routeHandlerStore.state
+  );
+  useEffect(() => {
+    const subscription = routeHandlerStore.subscribe(setRouteHandlerState);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+  useEffect(() => {
+    const unblock = history.block(({ pathname }, action) => {
+      if (!routeHandlerState.canTravel) {
+        return false;
+      }
+      unblock();
+    });
+    return unblock;
+  }, []);
 
   return (
     <>

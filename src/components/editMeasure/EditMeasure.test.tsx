@@ -8,6 +8,7 @@ import useMeasureServiceApi, {
 } from "../../api/useMeasureServiceApi";
 import { Measure } from "@madie/madie-models";
 import MeasureEditor from "../measureEditor/MeasureEditor";
+import { measureStore } from "@madie/madie-util";
 
 jest.mock("./measureDetails/MeasureDetails");
 jest.mock("../measureEditor/MeasureEditor");
@@ -22,10 +23,9 @@ MeasureEditorMock.mockImplementation(() => {
   return <div>library testCql version '1.0.000'</div>;
 });
 
-const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
 const measure = {
   id: "measure ID",
-  createdBy: MEASURE_CREATEDBY,
+  createdBy: "testuser@example.com",
 } as Measure;
 
 const serviceApiMock = {
@@ -38,13 +38,26 @@ useMeasureServiceApiMock.mockImplementation(() => {
 });
 
 jest.mock("@madie/madie-util", () => ({
-  measureStore: {
-    updateMeasure: (measure) => measure,
-  },
-  useOktaTokens: () => ({
+  useOktaTokens: jest.fn(() => ({
+    getUserName: jest.fn(() => "testuser@example.com"), //#nosec
     getAccessToken: () => "test.jwt",
-    getUserName: () => MEASURE_CREATEDBY,
-  }),
+  })),
+  measureStore: {
+    updateMeasure: jest.fn((measure) => measure),
+    state: jest.fn().mockImplementation(() => null),
+    initialState: jest.fn().mockImplementation(() => null),
+    subscribe: (set) => {
+      return { unsubscribe: () => null };
+    },
+  },
+  routeHandlerStore: {
+    subscribe: (set) => {
+      return { unsubscribe: () => null };
+    },
+    updateRouteHandlerState: jest.fn((routeObj) => routeObj),
+    state: { canTravel: false, pendingPath: "" },
+    initialState: { canTravel: false, pendingPath: "" },
+  },
 }));
 
 const serviceConfig: ServiceConfig = {
@@ -62,14 +75,15 @@ const mockPush = jest.fn();
 jest.mock("react-router-dom", () => ({
   ...(jest.requireActual("react-router-dom") as any),
   useHistory: () => {
-    const push = () => mockPush("/example");
-    return { push };
+    const push = (val) => mockPush(val);
+    return { push, block: () => null };
   },
 }));
 
 afterEach(cleanup);
 
 describe("EditMeasure Component", () => {
+  measureStore.state.mockImplementationOnce(() => null);
   it("should render a loading page if the measure is not yet loaded", async () => {
     const { getByTestId, findByTestId } = render(
       <ApiContextProvider value={serviceConfig}>
@@ -81,7 +95,6 @@ describe("EditMeasure Component", () => {
 
     const result = getByTestId("loading");
     expect(result).toBeInTheDocument();
-
     await findByTestId("editMeasure"); // let the rendering finish
   });
 
@@ -160,7 +173,7 @@ describe("EditMeasure Component", () => {
       </ApiContextProvider>
     );
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalled();
+      expect(mockPush).toHaveBeenCalledWith("/404");
     });
   });
 });

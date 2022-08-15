@@ -18,24 +18,18 @@ import {
   PopulationType,
 } from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
-import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import { MemoryRouter } from "react-router-dom";
 import { MeasureCQL } from "../common/MeasureCQL";
-import { MeasureContextHolder } from "../editMeasure/MeasureContext";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
 import * as uuid from "uuid";
 import { getPopulationsForScoring } from "./PopulationHelper";
 import * as _ from "lodash";
+import { measureStore } from "@madie/madie-util";
 
 jest.mock("uuid", () => ({
   v4: jest.fn(),
 }));
-
-jest.mock("../editMeasure/useCurrentMeasure");
-
-const useCurrentMeasureMock =
-  useCurrentMeasure as jest.Mock<MeasureContextHolder>;
 
 const serviceConfig: ServiceConfig = {
   measureService: {
@@ -70,11 +64,25 @@ const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
 jest.mock("@madie/madie-util", () => ({
   measureStore: {
     updateMeasure: (measure) => measure,
+    state: jest.fn().mockImplementation(() => null),
+    initialState: jest.fn().mockImplementation(() => null),
+    subscribe: (set) => {
+      return { unsubscribe: () => null };
+    },
   },
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
     getUserName: () => MEASURE_CREATEDBY,
   }),
+  routeHandlerStore: {
+    subscribe: (set) => {
+      // set(measure)
+      return { unsubscribe: () => null };
+    },
+    updateRouteHandlerState: () => null,
+    state: { canTravel: false, pendingPath: "" },
+    initialState: { canTravel: false, pendingPath: "" },
+  },
 }));
 
 const populationBasisValues: string[] = [
@@ -87,7 +95,6 @@ mockedAxios.get.mockResolvedValue({ data: { populationBasisValues } });
 describe("Measure Groups Page", () => {
   let measure: Measure;
   let group: Group;
-  let measureContextHolder: MeasureContextHolder;
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -100,12 +107,7 @@ describe("Measure Groups Page", () => {
       cql: MeasureCQL,
       createdBy: MEASURE_CREATEDBY,
     } as Measure;
-    measureContextHolder = {
-      measure,
-      setMeasure: jest.fn(),
-    };
-    useCurrentMeasureMock.mockImplementation(() => measureContextHolder);
-
+    measureStore.state.mockImplementationOnce(() => measure);
     group = {
       id: null,
       scoring: "Cohort",

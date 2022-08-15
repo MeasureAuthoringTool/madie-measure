@@ -36,13 +36,31 @@ const mockOnChangeHandler = jest
   .mockName("onChangeMock");
 
 describe("Measure Group Population Select Component", () => {
+  test("Component loads when omitting default value and options.", () => {
+    const omitProps = {
+      label: "Population Test",
+      hidden: false,
+      required: false,
+      name: "population-test",
+    };
+    const testProps = { ...omitProps, required: true };
+    const { getByTestId } = render(
+      <MeasureGroupPopulationSelect
+        {...testProps}
+        onChange={mockOnChangeHandler}
+      />
+    );
+    const label = getByTestId("select-measure-group-population-label");
+    expect(label.textContent).toEqual(expect.stringContaining("*"));
+  });
+
   test("Required inputs should indicate if they are required", () => {
     const requiredSelectorProps = { ...selectorProps, required: true };
     const { getByTestId } = render(
       <MeasureGroupPopulationSelect
         {...requiredSelectorProps}
         onChange={mockOnChangeHandler}
-        value={""}
+        value=""
       />
     );
 

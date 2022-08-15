@@ -28,7 +28,6 @@ jest.mock("react-router-dom", () => ({
 }));
 
 jest.mock("../../../../api/useMeasureServiceApi");
-jest.mock("../../useCurrentMeasure");
 
 const testUser = "john doe";
 const measure = {
@@ -37,24 +36,33 @@ const measure = {
   cqlLibraryName: "TestCqlLibraryName",
   measurementPeriodStart: "01/01/2022",
   measurementPeriodEnd: "12/02/2022",
-  createdBy: testUser,
+  createdBy: "john doe",
 } as unknown as Measure;
 
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: jest.fn(() => ({
-    getUserName: jest.fn(() => testUser), //#nosec
+    getUserName: jest.fn(() => "john doe"), //#nosec
+    getAccessToken: () => "test.jwt",
   })),
   useKeyPress: jest.fn(() => false),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
-    state: null,
-    initialState: null,
+    state: jest.fn().mockImplementation(() => measure),
+    initialState: jest.fn().mockImplementation(() => null),
+    subscribe: (set) => {
+      // set(measure)
+      return { unsubscribe: () => null };
+    },
+  },
+  routeHandlerStore: {
     subscribe: (set) => {
       set(measure);
       return { unsubscribe: () => null };
     },
+    updateRouteHandlerState: () => null,
+    state: { canTravel: true, pendingPath: "" },
+    initialState: { canTravel: true, pendingPath: "" },
   },
-  useOnClickOutside: jest.fn(() => false),
 }));
 
 const useMeasureServiceApiMock =
@@ -115,7 +123,7 @@ describe("MeasureInformation component", () => {
   });
 
   it("should render the component with a blank measure name", async () => {
-    delete measure.measureName;
+    measure.measureName = "";
     render(<MeasureInformation />);
     const result: HTMLElement = getByTestId("measure-information-edit");
     expect(result).toBeInTheDocument();
@@ -146,7 +154,7 @@ describe("MeasureInformation component", () => {
   });
 
   it("Check if measurement start date field updates input as expected", async () => {
-    delete measure.measurementPeriodStart;
+    measure.measurementPeriodStart = null;
     render(<MeasureInformation />);
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
@@ -161,7 +169,7 @@ describe("MeasureInformation component", () => {
   });
 
   it("Check if measurement end date field has expected value", async () => {
-    delete measure.measurementPeriodEnd;
+    measure.measurementPeriodEnd = null;
     render(<MeasureInformation />);
     const measurementPeriodEndNode = getByTestId("measurement-period-end");
     const measurementPeriodEndInput = within(
@@ -174,8 +182,8 @@ describe("MeasureInformation component", () => {
   });
 
   it("Check if measurement period save button is disabled when measurement period start and end date have same values", async () => {
-    delete measure.measurementPeriodStart;
-    delete measure.measurementPeriodEnd;
+    measure.measurementPeriodEnd = null;
+    measure.measurementPeriodStart = null;
     render(<MeasureInformation />);
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
@@ -202,8 +210,8 @@ describe("MeasureInformation component", () => {
   });
 
   it("Check if measurement period save button is disabled when measurement period end date is less than start date", async () => {
-    delete measure.measurementPeriodStart;
-    delete measure.measurementPeriodEnd;
+    measure.measurementPeriodEnd = null;
+    measure.measurementPeriodStart = null;
     render(<MeasureInformation />);
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
@@ -230,8 +238,8 @@ describe("MeasureInformation component", () => {
   });
 
   it("Check if measurement period save button is disabled when measurement period end date or state date is not valid", async () => {
-    delete measure.measurementPeriodStart;
-    delete measure.measurementPeriodEnd;
+    measure.measurementPeriodEnd = null;
+    measure.measurementPeriodStart = null;
     render(<MeasureInformation />);
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
@@ -258,8 +266,8 @@ describe("MeasureInformation component", () => {
   });
 
   it("Check if measurement period save button is enabled when measurement period start and end dates pass all date checks", async () => {
-    delete measure.measurementPeriodStart;
-    delete measure.measurementPeriodEnd;
+    measure.measurementPeriodEnd = null;
+    measure.measurementPeriodStart = null;
     render(<MeasureInformation />);
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
@@ -284,10 +292,9 @@ describe("MeasureInformation component", () => {
       updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
-
-    delete measure.measureName;
-    delete measure.measurementPeriodStart;
-    delete measure.measurementPeriodEnd;
+    measure.measurementPeriodEnd = null;
+    measure.measurementPeriodStart = null;
+    measure.measureName = "";
 
     render(<MeasureInformation />);
 
@@ -339,10 +346,9 @@ describe("MeasureInformation component", () => {
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
 
-    delete measure.measureName;
-    delete measure.measurementPeriodStart;
-    delete measure.measurementPeriodEnd;
-
+    measure.measureName = "";
+    measure.measurementPeriodEnd = null;
+    measure.measurementPeriodStart = null;
     render(<MeasureInformation />);
 
     await act(async () => {
