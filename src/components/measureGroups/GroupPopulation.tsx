@@ -182,6 +182,17 @@ const GroupPopulation = ({
       }
     }
   };
+  const getInitialPopulationSize = () => {
+    if (scoring === GroupScoring.RATIO) {
+      const ips = findPopulations(
+        populations,
+        PopulationType.INITIAL_POPULATION
+      );
+      if (ips && ips.length === 2) {
+        return 2;
+      }
+    }
+  };
 
   const selectorProps = populationSelectorProperties(population, scoring);
   const touched = _.get(populations, selectorProps.name);
@@ -190,6 +201,7 @@ const GroupPopulation = ({
   const canBeAdded = showAddPopulationLink(scoring, populations);
   selectorProps.label = correctPopulationLabel(populations, population);
   population.associationType = getAssociationType(selectorProps.label);
+  const initialPopulationSize = getInitialPopulationSize();
 
   return (
     <MeasureGroupPopulationSelect
@@ -204,6 +216,7 @@ const GroupPopulation = ({
       addPopulationCallback={addPopulation}
       scoring={scoring}
       population={population}
+      initialPopulationSize={initialPopulationSize}
       changeAssociationCallback={() => changeAssociation()}
     />
   );

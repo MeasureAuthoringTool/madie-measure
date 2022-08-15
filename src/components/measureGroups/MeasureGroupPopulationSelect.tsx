@@ -58,6 +58,7 @@ const MeasureGroupPopulationSelect = ({
   value = "",
   scoring,
   population,
+  initialPopulationSize,
   changeAssociationCallback,
   canEdit,
   removePopulationCallback,
@@ -154,40 +155,42 @@ const MeasureGroupPopulationSelect = ({
               </DSLink>
             </span>
           )}
-          {label.includes("Initial Population") && scoring === "Ratio" && (
-            <div data-testid="measure-group-initial-population-association">
-              <FormField>
-                <FieldSeparator style={{ marginLeft: 30 }}>
-                  <SoftLabel>Association</SoftLabel>
-                  <RadioGroup
-                    aria-labelledby="inital-population-association-label"
-                    defaultValue=""
-                    name="radio-buttons-group"
-                    value={population.associationType}
-                    onChange={changeAssociation}
-                    style={{ marginLeft: 15 }}
-                  >
-                    <FormControlLabel
-                      value={InitialPopulationAssociationType.DENOMINATOR}
-                      control={<Radio />}
-                      label={InitialPopulationAssociationType.DENOMINATOR}
-                      disabled={
-                        !canEdit || label.includes("Initial Population 2")
-                      }
-                    />
-                    <FormControlLabel
-                      value={InitialPopulationAssociationType.NUMERATOR}
-                      control={<Radio />}
-                      label={InitialPopulationAssociationType.NUMERATOR}
-                      disabled={
-                        !canEdit || label.includes("Initial Population 2")
-                      }
-                    />
-                  </RadioGroup>
-                </FieldSeparator>
-              </FormField>
-            </div>
-          )}
+          {initialPopulationSize === 2 &&
+            label.includes("Initial Population") &&
+            scoring === "Ratio" && (
+              <div data-testid="measure-group-initial-population-association">
+                <FormField>
+                  <FieldSeparator style={{ marginLeft: 30 }}>
+                    <SoftLabel>Association</SoftLabel>
+                    <RadioGroup
+                      aria-labelledby="inital-population-association-label"
+                      defaultValue=""
+                      name="radio-buttons-group"
+                      value={population.associationType}
+                      onChange={changeAssociation}
+                      style={{ marginLeft: 15 }}
+                    >
+                      <FormControlLabel
+                        value={InitialPopulationAssociationType.DENOMINATOR}
+                        control={<Radio />}
+                        label={InitialPopulationAssociationType.DENOMINATOR}
+                        disabled={
+                          !canEdit || label.includes("Initial Population 2")
+                        }
+                      />
+                      <FormControlLabel
+                        value={InitialPopulationAssociationType.NUMERATOR}
+                        control={<Radio />}
+                        label={InitialPopulationAssociationType.NUMERATOR}
+                        disabled={
+                          !canEdit || label.includes("Initial Population 2")
+                        }
+                      />
+                    </RadioGroup>
+                  </FieldSeparator>
+                </FormField>
+              </div>
+            )}
         </div>
       )}
       {!canEdit && value}
