@@ -64,7 +64,6 @@ export default function EditMeasure() {
       dataTestId: "leftPanelMeasureGuidance",
     },
   ];
-  const { updateRouteHandlerState } = routeHandlerStore;
   const [routeHandlerState, setRouteHandlerState] = useState<RouteHandlerState>(
     routeHandlerStore.state
   );
