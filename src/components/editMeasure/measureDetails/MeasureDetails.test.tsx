@@ -24,7 +24,7 @@ jest.mock("@madie/madie-util", () => ({
   }),
   routeHandlerStore: {
     subscribe: (set) => {
-      // set(measure)
+      set({ canTravel: false, pendingPath: "" });
       return { unsubscribe: () => null };
     },
     updateRouteHandlerState: () => null,

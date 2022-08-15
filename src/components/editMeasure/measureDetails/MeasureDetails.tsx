@@ -64,10 +64,16 @@ export default function EditMeasure() {
       dataTestId: "leftPanelMeasureGuidance",
     },
   ];
+  const history = useHistory();
   const [routeHandlerState, setRouteHandlerState] = useState<RouteHandlerState>(
     routeHandlerStore.state
   );
-  const history = useHistory();
+  useEffect(() => {
+    const subscription = routeHandlerStore.subscribe(setRouteHandlerState);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
   useEffect(() => {
     const unblock = history.block(({ pathname }, action) => {
       if (!routeHandlerState.canTravel) {

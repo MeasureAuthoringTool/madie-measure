@@ -8,6 +8,7 @@ import useMeasureServiceApi, {
 } from "../../api/useMeasureServiceApi";
 import { Measure } from "@madie/madie-models";
 import MeasureEditor from "../measureEditor/MeasureEditor";
+import { measureStore } from "@madie/madie-util";
 
 jest.mock("./measureDetails/MeasureDetails");
 jest.mock("../measureEditor/MeasureEditor");
@@ -51,7 +52,6 @@ jest.mock("@madie/madie-util", () => ({
   },
   routeHandlerStore: {
     subscribe: (set) => {
-      set(measure);
       return { unsubscribe: () => null };
     },
     updateRouteHandlerState: jest.fn((routeObj) => routeObj),
@@ -83,6 +83,7 @@ jest.mock("react-router-dom", () => ({
 afterEach(cleanup);
 
 describe("EditMeasure Component", () => {
+  measureStore.state.mockImplementationOnce(() => null);
   it("should render a loading page if the measure is not yet loaded", async () => {
     const { getByTestId, findByTestId } = render(
       <ApiContextProvider value={serviceConfig}>
