@@ -113,16 +113,19 @@ const GroupPopulation = ({
   };
 
   const getAssociationType = (label) => {
-    if (
-      (label === "Initial Population" || label === "Initial Population 1") &&
-      population.associationType === undefined
-    ) {
-      population.associationType = InitialPopulationAssociationType.DENOMINATOR;
-    } else if (
-      label === "Initial Population 2" &&
-      population.associationType === undefined
-    ) {
-      population.associationType = InitialPopulationAssociationType.NUMERATOR;
+    if (scoring === GroupScoring.RATIO) {
+      if (
+        (label === "Initial Population" || label === "Initial Population 1") &&
+        population.associationType === undefined
+      ) {
+        population.associationType =
+          InitialPopulationAssociationType.DENOMINATOR;
+      } else if (
+        label === "Initial Population 2" &&
+        population.associationType === undefined
+      ) {
+        population.associationType = InitialPopulationAssociationType.NUMERATOR;
+      }
     }
     return population.associationType;
   };
@@ -152,6 +155,8 @@ const GroupPopulation = ({
             replaceCallback(index, ip);
           }
         });
+      } else {
+        replaceCallback(populationIndex, population);
       }
     }
   };
