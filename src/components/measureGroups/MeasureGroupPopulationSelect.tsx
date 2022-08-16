@@ -27,6 +27,7 @@ type Props = {
 
 const FormField = tw.div`mt-6`;
 
+// Todo Inline errors should be displayed, MeasureGroupSchemaValidator
 const MeasureGroupPopulationSelect = ({
   field,
   label,
@@ -41,20 +42,15 @@ const MeasureGroupPopulationSelect = ({
   error,
   helperText,
 }: Props & any) => {
+  // if the field is not required a default option is provided
   const menuItems = [
-    <MenuItem
-      value={""}
-      disabled={required}
-      data-testid={`select-option-measure-group-population`}
-    >
-      {required ? "" : "-"}
-    </MenuItem>,
+    !required && (
+      <MenuItem key="-" value="">
+        -
+      </MenuItem>
+    ),
     ...options.map(({ name }, i) => (
-      <MenuItem
-        key={`${name}-${i}`}
-        value={name.replace(/"/g, "")}
-        data-testid={`group-population-option-${name.replace(/"/g, "")}`}
-      >
+      <MenuItem key={`${name}-${i}`} value={name.replace(/"/g, "")}>
         {name.replace(/"/g, "")}
       </MenuItem>
     )),
