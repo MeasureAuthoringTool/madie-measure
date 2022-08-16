@@ -47,6 +47,20 @@ const serviceConfig: ServiceConfig = {
   },
 };
 
+const EmptyStrat = {
+  cqlDefinition: "",
+  description: "",
+  association: "",
+  id: "",
+};
+
+const DeleteStrat = {
+  cqlDefinition: "delete",
+  description: "delete",
+  association: "delete",
+  id: "",
+};
+
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
@@ -1435,6 +1449,80 @@ describe("Measure Groups Page", () => {
         name: "Initial Population 2 *",
       })
     ).not.toBeInTheDocument();
+  });
+
+  test("Stratifications Should Not Have Remove Button if there are only two", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "Description Text";
+    group.rateAggregation = "Rate Aggregation Text";
+    group.improvementNotation = "Increased score indicates improvement";
+    group.stratifications = [EmptyStrat, EmptyStrat];
+    measure.groups = [group];
+    const { queryByTestId } = renderMeasureGroupComponent();
+    userEvent.click(screen.getByTestId("stratifications-tab"));
+    const removebutton = queryByTestId("remove-strat-button");
+    expect(removebutton).not.toBeInTheDocument();
+  });
+
+  test("Stratifications should have remove button if there are more than two", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "Description Text";
+    group.rateAggregation = "Rate Aggregation Text";
+    group.improvementNotation = "Increased score indicates improvement";
+    group.stratifications = [EmptyStrat, EmptyStrat, EmptyStrat];
+    measure.groups = [group];
+    const { queryByTestId } = renderMeasureGroupComponent();
+    expect(screen.getByTestId("stratifications-tab")).toBeInTheDocument();
+    userEvent.click(screen.getByTestId("stratifications-tab"));
+    const removebutton = screen.getAllByTestId("remove-strat-button")[0];
+    expect(removebutton).toBeInTheDocument();
+  });
+
+  test("Stratifications should no longer have remove button the stratifications are reduced to two", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "Description Text";
+    group.rateAggregation = "Rate Aggregation Text";
+    group.improvementNotation = "Increased score indicates improvement";
+    group.stratifications = [EmptyStrat, EmptyStrat, EmptyStrat];
+    measure.groups = [group];
+    const { queryByTestId } = renderMeasureGroupComponent();
+    expect(screen.getByTestId("stratifications-tab")).toBeInTheDocument();
+    userEvent.click(screen.getByTestId("stratifications-tab"));
+    const removebutton = screen.getAllByTestId("remove-strat-button")[0];
+    expect(removebutton).toBeInTheDocument();
+    userEvent.click(removebutton);
+    const removebutton2 = queryByTestId("remove-strat-button");
+    expect(removebutton2).not.toBeInTheDocument();
+  });
+
+  test("Stratifications should show add button if total increased to >2", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "Description Text";
+    group.rateAggregation = "Rate Aggregation Text";
+    group.improvementNotation = "Increased score indicates improvement";
+    group.stratifications = [EmptyStrat, EmptyStrat];
+    measure.groups = [group];
+    const { queryByTestId } = renderMeasureGroupComponent();
+    userEvent.click(screen.getByTestId("stratifications-tab"));
+    const removebutton = queryByTestId("remove-strat-button");
+    expect(removebutton).not.toBeInTheDocument();
+    const addbutton = queryByTestId("add-strat-button");
+    userEvent.click(addbutton);
+    const removebutton2 = screen.getAllByTestId("remove-strat-button")[0];
+    expect(removebutton2).toBeInTheDocument();
+  });
+
+  test("If stratification is empty, auto populate two empty stratifications", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "Description Text";
+    group.rateAggregation = "Rate Aggregation Text";
+    group.improvementNotation = "Increased score indicates improvement";
+    group.stratifications = [];
+    measure.groups = [group];
+    const { queryByTestId } = renderMeasureGroupComponent();
+    userEvent.click(screen.getByTestId("stratifications-tab"));
+    expect(group.stratifications.length == 2);
+    expect(group.stratifications[0] === EmptyStrat);
   });
 
   test("measure observation should not render for cohort", async () => {
