@@ -691,6 +691,7 @@ const MeasureGroups = () => {
                                 canEdit={canEdit}
                                 insertCallback={arrayHelpers.insert}
                                 removeCallback={arrayHelpers.remove}
+                                replaceCallback={arrayHelpers.replace}
                               />
                             </GridLayout>
                             <MeasureGroupObservation
@@ -909,7 +910,7 @@ const MeasureGroups = () => {
               <ButtonSpacer>
                 <Button
                   style={{ background: "#424B5A" }}
-                  type="submit"
+                  type="button"
                   buttonTitle="Delete"
                   data-testid="group-form-delete-btn"
                   disabled={

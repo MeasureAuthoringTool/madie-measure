@@ -278,6 +278,7 @@ describe("Measure Groups Page", () => {
           id: "uuid-1",
           name: PopulationType.INITIAL_POPULATION,
           definition: "Initial Population",
+          associationType: undefined,
         },
       ],
       measureObservations: null,
@@ -704,6 +705,7 @@ describe("Measure Groups Page", () => {
           name: PopulationType.INITIAL_POPULATION,
           definition:
             "VTE Prophylaxis by Medication Administered or Device Applied",
+          associationType: undefined,
         },
       ],
       measureObservations: null,
@@ -803,6 +805,7 @@ describe("Measure Groups Page", () => {
           name: PopulationType.INITIAL_POPULATION,
           definition:
             "VTE Prophylaxis by Medication Administered or Device Applied",
+          associationType: undefined,
         },
       ],
       measureObservations: null,
