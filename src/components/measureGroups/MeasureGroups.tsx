@@ -29,8 +29,6 @@ import {
 } from "@madie/madie-util";
 import MultipleSelectDropDown from "./MultipleSelectDropDown";
 import MeasureGroupsWarningDialog from "./MeasureGroupWarningDialog";
-
-import { values } from "lodash";
 import {
   allPopulations,
   getPopulationsForScoring,
@@ -123,7 +121,7 @@ export const EmptyStrat = {
   association: "",
   id: "",
 };
-export const DeleteStrat = {
+export const deleteStrat = {
   cqlDefinition: "delete",
   description: "delete",
   association: "delete",
@@ -753,7 +751,7 @@ const MeasureGroups = () => {
                                                 e.preventDefault();
                                                 arrayHelpers.replace(
                                                   i,
-                                                  DeleteStrat
+                                                  deleteStrat
                                                 );
                                                 setVisibleStrats(
                                                   visibleStrats - 1
