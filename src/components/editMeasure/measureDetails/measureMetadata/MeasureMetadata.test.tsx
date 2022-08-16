@@ -17,7 +17,6 @@ import { useOktaTokens } from "@madie/madie-util";
 import { describe, expect, it } from "@jest/globals";
 
 jest.mock("../../../../api/useMeasureServiceApi");
-jest.mock("../../useCurrentMeasure");
 const testUser = "john doe";
 const mockMetaData = {
   steward: "Test Steward",
