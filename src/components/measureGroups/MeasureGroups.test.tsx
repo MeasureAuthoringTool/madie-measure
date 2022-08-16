@@ -28,6 +28,9 @@ import { getPopulationsForScoring } from "./PopulationHelper";
 import * as _ from "lodash";
 import { measureStore } from "@madie/madie-util";
 
+// fix error about window.scrollto
+global.scrollTo = jest.fn();
+
 jest.mock("uuid", () => ({
   v4: jest.fn(),
 }));
@@ -505,9 +508,20 @@ describe("Measure Groups Page", () => {
     expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
   });
 
-  // TODO: skipped for strange failures, will fix in subsequent PR
-  test.skip("Should be able to save multiple groups  ", async () => {
+  test("Should be able to save multiple groups  ", async () => {
     renderMeasureGroupComponent();
+
+    // wait for state updates from async fetch of population basis
+    await waitFor(() =>
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        "example-service-url/populationBasisValues",
+        expect.anything()
+      )
+    );
+
+    expect(
+      await screen.findByTestId("population-basis-combo-box")
+    ).toBeInTheDocument();
 
     // measure group type
     const measureGroupTypeSelect = screen.getByTestId(
@@ -545,12 +559,19 @@ describe("Measure Groups Page", () => {
       target: { value: "new description" },
     });
 
-    mockedAxios.post.mockResolvedValue({ data: { group } });
+    mockedAxios.post.mockResolvedValue({
+      data: {
+        ...group,
+        id: "group1-id",
+        measureGroupTypes: [MeasureGroupTypes.PATIENT_REPORTED_OUTCOME],
+      },
+    });
 
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
 
     const alert = await screen.findByTestId("success-alerts");
+    expect(alert).toBeInTheDocument();
 
     const expectedGroup = {
       id: null,
@@ -586,6 +607,10 @@ describe("Measure Groups Page", () => {
     expect(
       screen.getByTestId("leftPanelMeasureInformation-MeasureGroup1")
     ).toBeInTheDocument();
+
+    // clear alert to reset for assertion after group 2 addition
+    userEvent.click(within(alert).getByTestId("CloseIcon"));
+    expect(screen.queryByTestId("success-alerts")).not.toBeInTheDocument();
 
     //adding measure group 2
 
@@ -628,7 +653,14 @@ describe("Measure Groups Page", () => {
     // after selecting measure group type, need to collapse the dropdown
     fireEvent.click(screen.getByRole("presentation").firstChild);
 
-    mockedAxios.post.mockResolvedValue({ data: { group } });
+    mockedAxios.post.mockResolvedValue({
+      data: {
+        ...group,
+        id: "group2-id",
+        groupDescription: "new description for group 2",
+        measureGroupTypes: [MeasureGroupTypes.PATIENT_REPORTED_OUTCOME],
+      },
+    });
 
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
@@ -638,7 +670,7 @@ describe("Measure Groups Page", () => {
       id: null,
       populations: [
         {
-          id: "uuid-1",
+          id: "uuid-2",
           name: PopulationType.INITIAL_POPULATION,
           definition: "Initial Population",
         },
@@ -1251,8 +1283,7 @@ describe("Measure Groups Page", () => {
     expect(scoringUnitInput.getAttribute("value")).toBe("cm");
   });
 
-  // test is broken, though functionality is untouched with my changes so skipping for now
-  test.skip("Add new group and click Discard button should discard the changes", async () => {
+  test("Add new group and click Discard button should discard the changes", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "testDescription";
     measure.groups = [group];
@@ -1617,37 +1648,4 @@ describe("Measure Groups Page", () => {
     expect(aggregateFuncSelect).toBeInTheDocument();
     expect(aggregateFuncSelect.value).toEqual("Count");
   });
-
-  // test.only("form should be disabled until measure observation is selected for continuous variable", async () => {
-  //   const { container } = renderMeasureGroupComponent();
-  //   userEvent.selectOptions(
-  //     screen.getByTestId("scoring-unit-select"),
-  //     "Continuous Variable"
-  //   );
-  //
-  //   expect(
-  //     screen.getAllByTestId("select-measure-group-population-label")
-  //   ).toHaveLength(3);
-  //
-  //   await waitFor(() =>
-  //     expect(mockedAxios.get).toHaveBeenCalledWith(
-  //       "example-service-url/populationBasisValues",
-  //       expect.anything()
-  //     )
-  //   );
-  //
-  //   const observation = screen.getByRole("combobox", {
-  //     name: "Observation *",
-  //   });
-  //   expect(observation).toBeInTheDocument();
-  //   expect(observation).toHaveValue("");
-  //   const aggregateFuncSelect = screen.getByRole("combobox", {
-  //     name: "Aggregate Function *",
-  //   }) as HTMLSelectElement;
-  //   expect(aggregateFuncSelect).toBeInTheDocument();
-  //   expect(aggregateFuncSelect.value).toEqual("");
-  //
-  //   // select all the required fields
-  //   logRoles(container);
-  // });
 });
