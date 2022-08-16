@@ -6,7 +6,7 @@ import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
 // Array of sample select option values
 const selectOptions = [
   { name: "SDE Ethnicity" },
-  { name: "SDE Payer" },
+  { name: "SDE-Payer" },
   { name: "SDE Race" },
   { name: "SDE Sex" },
   { name: "Initial Population" },
@@ -21,19 +21,25 @@ const selectOptions = [
   { name: "VTE Prophylaxis by Medication Administered or Device Applied" },
 ];
 
-const selectorProps = {
-  label: "Population Test",
-  hidden: false,
-  required: false,
-  name: "population-test",
-  options: selectOptions,
-};
-
 const mockOnChangeHandler = jest
   .fn((evt) => {
     return evt.target.value;
   })
   .mockName("onChangeMock");
+
+const defaultValue = selectOptions[0].name;
+
+const selectorProps = {
+  label: "Population Test",
+  hidden: false,
+  required: false,
+  field: {
+    name: "population-test",
+    onChange: mockOnChangeHandler,
+    value: defaultValue,
+  },
+  options: selectOptions,
+};
 
 describe("Measure Group Population Select Component", () => {
   test("Required inputs should indicate if they are required", () => {
@@ -156,35 +162,27 @@ describe("Measure Group Population Select Component", () => {
   });
 
   test("should fire onChange update when value changes when measure is editable", async () => {
-    const defaultValue = selectOptions[0].name;
     const updatedValue = selectOptions[1].name;
-
-    const { getByRole, getByText, getByTestId, getAllByTestId } = render(
-      <div>
-        <MeasureGroupPopulationSelect
-          {...selectorProps}
-          onChange={mockOnChangeHandler}
-          value={defaultValue}
-          canEdit={true}
-        />
-      </div>
-    );
-
-    userEvent.selectOptions(getByTestId("select-measure-group-population"), [
-      updatedValue,
-    ]);
-    expect(mockOnChangeHandler).toHaveReturnedWith(updatedValue);
-  });
-
-  test("should show error helper text when measure is editable", async () => {
-    const defaultValue = selectOptions[0].name;
 
     render(
       <div>
         <MeasureGroupPopulationSelect
           {...selectorProps}
-          onChange={mockOnChangeHandler}
-          value={defaultValue}
+          value="Numerator"
+          canEdit={true}
+        />
+      </div>
+    );
+
+    userEvent.click(screen.getByTestId("group-population-option-Denominator"));
+    expect(mockOnChangeHandler).toHaveReturnedWith("Denominator");
+  });
+
+  test("should show error helper text when measure is editable", async () => {
+    render(
+      <div>
+        <MeasureGroupPopulationSelect
+          {...selectorProps}
           helperText="Value is required"
           error={true}
           canEdit={true}

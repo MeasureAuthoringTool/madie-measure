@@ -99,22 +99,30 @@ const FieldSeparator = tw.div`mt-1`;
 const FieldInput = tw.input`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
 const TextArea = tw.textarea`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
 
-export const MeasureImprovementNotation = [
-  { label: "Select", subtitle: "Optional", code: "" },
+const improvementNotationOptions = [
+  {
+    label: "-",
+    value: null,
+    subtitle: "Optional",
+    code: "",
+  },
   {
     label: "Increased score indicates improvement",
+    value: "Increased score indicates improvement",
     subtitle:
       "Improvement is indicated as an increase in the score or measurement (e.g. Higher score indicates better quality).",
     code: "increase",
   },
   {
     label: "Decreased score indicates improvement",
+    value: "Decreased score indicates improvement",
     subtitle:
       "Improvement is indicated as a decrease in the score or measurement (e.g. Lower score indicates better quality).",
     code: "decrease",
   },
 ];
-export const EmptyStrat = {
+
+const EmptyStrat = {
   cqlDefinition: "",
   description: "",
   association: "",
@@ -193,6 +201,8 @@ const MeasureGroups = () => {
           populations: measure?.groups[measureGroupNumber].populations || [],
           measureObservations:
             measure?.groups[measureGroupNumber].measureObservations || null,
+          improvementNotation:
+            measure?.groups[measureGroupNumber].improvementNotation || "-",
         },
       });
     } else {
@@ -206,7 +216,7 @@ const MeasureGroups = () => {
             groupDescription: "",
             stratifications: [{ ...EmptyStrat }, { ...EmptyStrat }],
             rateAggregation: "",
-            improvementNotation: "",
+            improvementNotation: "-",
             measureGroupTypes: [],
             populationBasis: "Boolean",
             scoringUnit: "",
@@ -224,7 +234,7 @@ const MeasureGroups = () => {
       populations: allPopulations,
       measureObservations: null,
       rateAggregation: group?.rateAggregation || "",
-      improvementNotation: group?.improvementNotation || "",
+      improvementNotation: group?.improvementNotation || "-",
       groupDescription: group?.groupDescription,
       stratifications: group?.stratifications || [
         { ...EmptyStrat },
@@ -277,7 +287,7 @@ const MeasureGroups = () => {
           scoring: "-",
           measureGroupTypes: [],
           rateAggregation: "",
-          improvementNotation: "",
+          improvementNotation: "-",
           populationBasis: "Boolean",
           scoringUnit: "",
         },
@@ -546,7 +556,6 @@ const MeasureGroups = () => {
                 <FieldSeparator>
                   {canEdit && (
                     <Select
-                      placeHolder={{ name: "-", value: "" }}
                       required
                       label="Scoring"
                       id="scoring-select"
@@ -711,75 +720,59 @@ const MeasureGroups = () => {
                   {formik.values.stratifications.map((strat, i) => (
                     <Row>
                       <Col>
-                        <FieldLabel htmlFor="stratification-select">
-                          Stratification {i + 1}
-                        </FieldLabel>
-                        <TextField
-                          select
+                        <Select
+                          placeHolder={{ name: "-", value: "" }}
+                          label={`Stratification ${i + 1}`}
                           id="stratification-select"
-                          label=""
+                          {...formik.getFieldProps(`stratifications[${i}]`)}
                           value={formik.values.stratifications[i].cqlDefinition}
                           inputProps={{
                             "data-testid": "stratification-select",
                           }}
-                          onChange={formik.handleChange}
-                          InputLabelProps={{ shrink: false }}
-                          SelectProps={{
-                            native: true,
-                          }}
+                          // onChange={formik.handleChange} // todo This dude is also not working
                           name={`stratifications[${i}].cqlDefinition`}
-                        >
-                          <option
-                            value=""
-                            data-testid="stratification-select-option"
-                          >
-                            -
-                          </option>
-                          {Object.values(
+                          size="small"
+                          options={Object.values(
                             expressionDefinitions.sort((a, b) =>
                               a.name.localeCompare(b.name)
                             )
                           ).map((opt, i) => (
-                            <option
+                            <MuiMenuItem
                               key={`${i + 1}`}
                               value={opt.name}
                               data-testid="stratification-select-option"
                             >
                               {opt.name.replace(/"/g, "")}
-                            </option>
+                            </MuiMenuItem>
                           ))}
-                        </TextField>
-                        <FieldLabel htmlFor="association-select">
-                          Association {i + 1}
-                        </FieldLabel>
-                        <TextField
-                          select
+                        />
+                        <Select
+                          placeHolder={{ name: "-", value: "" }}
+                          label={`Association ${i + 1}`}
                           id="association-select"
-                          label=""
                           value={formik.values.stratifications[i].association}
+                          {...formik.getFieldProps("improvementNotation")} // this needs to change
                           inputProps={{
-                            "data-testid": "association-select",
+                            "data-testid": "stratification-select",
                           }}
-                          onChange={formik.handleChange}
-                          InputLabelProps={{ shrink: false }}
-                          SelectProps={{
-                            native: true,
-                          }}
+                          onChange={formik.handleChange} // todo This dude is also not working
                           name={`stratifications[${i}].association`}
-                        >
-                          {formik.values.scoring != "Select" &&
+                          size="small"
+                          options={
+                            formik.values.scoring != "-" &&
                             Object.values(
                               AssociationSelect[formik.values.scoring]
                             ).map((opt, i) => (
-                              <option
+                              <MuiMenuItem
                                 key={`${opt}-${i}`}
                                 value={`${opt}`}
                                 data-testid="association-select-option"
                               >
                                 {opt}
-                              </option>
-                            ))}
-                        </TextField>
+                              </MuiMenuItem>
+                            ))
+                          }
+                        />
                       </Col>
                       <Col>
                         <FieldLabel htmlFor="stratification-description">
@@ -830,70 +823,53 @@ const MeasureGroups = () => {
                 </div>
               )}
               {activeTab === "reporting" && (
-                <div>
-                  <FormField>
-                    <FormFieldInner>
-                      <FieldLabel htmlFor="rate-aggregation">
-                        Rate Aggregation
-                      </FieldLabel>
-                      <FieldSeparator>
-                        {canEdit && (
-                          <FieldInput
-                            value={formik.values.rateAggregation}
-                            type="text"
-                            name="rate-aggregation"
-                            id="rate-aggregation"
-                            autoComplete="rate-aggregation"
-                            placeholder="Rate Aggregation"
-                            data-testid="rateAggregationText"
-                            {...formik.getFieldProps("rateAggregation")}
-                          />
-                        )}
-                      </FieldSeparator>
-                      <Divider />
-                      <FieldLabel htmlFor="rate-aggregation">
-                        Improvement Notation
-                      </FieldLabel>
-                      <FieldSeparator>
-                        {canEdit && (
-                          <TextField
-                            select
-                            id="improvement-notation-select"
-                            label=""
-                            value={formik.values.improvementNotation}
-                            inputProps={{
-                              "data-testid": "improvement-notation-select",
-                            }}
-                            onChange={(e) => {
-                              formik.setFieldValue(
-                                "improvementNotation",
-                                e.target.value
-                              );
-                            }}
-                            InputLabelProps={{ shrink: false }}
-                            SelectProps={{
-                              native: true,
-                            }}
-                            name="type"
-                          >
-                            {Object.values(MeasureImprovementNotation).map(
-                              (opt, i) => (
-                                <option
-                                  key={`${opt.code}-${i}`}
-                                  value={opt.label}
-                                  data-testid="improvement-notation-option"
-                                >
-                                  {opt.label}
-                                </option>
-                              )
-                            )}
-                          </TextField>
-                        )}
-                        {!canEdit && formik.values.improvementNotation}
-                      </FieldSeparator>
-                    </FormFieldInner>
-                  </FormField>
-                </div>
+                <FormField>
+                  <FormFieldInner>
+                    <FieldLabel htmlFor="rate-aggregation">
+                      Rate Aggregation
+                    </FieldLabel>
+                    <FieldSeparator>
+                      {canEdit && (
+                        <FieldInput
+                          value={formik.values.rateAggregation}
+                          type="text"
+                          name="rate-aggregation"
+                          id="rate-aggregation"
+                          autoComplete="rate-aggregation"
+                          placeholder="Rate Aggregation"
+                          data-testid="rateAggregationText"
+                          {...formik.getFieldProps("rateAggregation")}
+                        />
+                      )}
+                    </FieldSeparator>
+                    <FieldSeparator>
+                      {canEdit && (
+                        <Select
+                          label="Improvement Notation"
+                          id="improvement-notation-select"
+                          inputProps={{
+                            "data-testid": "improvement-notation-select",
+                          }}
+                          data-testid="improvement-notation-select"
+                          {...formik.getFieldProps("improvementNotation")}
+                          size="small"
+                          options={Object.values(
+                            improvementNotationOptions
+                          ).map((opt) => (
+                            <MuiMenuItem
+                              key={opt.label}
+                              value={opt.value}
+                              data-testid="improvement-notation-option"
+                            >
+                              {opt.label}
+                            </MuiMenuItem>
+                          ))}
+                        />
+                      )}
+                      {!canEdit && formik.values.improvementNotation}
+                    </FieldSeparator>
+                  </FormFieldInner>
+                </FormField>
               )}
             </div>
           </Content>

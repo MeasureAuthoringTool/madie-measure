@@ -3,11 +3,12 @@ import * as _ from "lodash";
 import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
 import { ExpressionDefinition } from "./MeasureGroups";
 import { GroupScoring, Population, PopulationType } from "@madie/madie-models";
-import { FieldInputProps } from "formik/dist/types";
+import { FieldInputProps, FieldMetaProps } from "formik/dist/types";
 import { findPopulations } from "./PopulationHelper";
 
 type Props = {
   field: FieldInputProps<string>;
+  form: any;
   cqlDefinitions: ExpressionDefinition[];
   populations: Population[];
   population: Population;
@@ -115,7 +116,7 @@ const GroupPopulation = ({
   return (
     <MeasureGroupPopulationSelect
       {...selectorProps}
-      {...field}
+      field={field}
       helperText={error}
       error={!!error && !!touched}
       canEdit={canEdit}
