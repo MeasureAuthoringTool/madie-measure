@@ -1419,7 +1419,7 @@ describe("Measure Groups Page", () => {
       })
     ).not.toBeInTheDocument();
   });
-  
+
   test("Stratifications Should Not Have Remove Button if there are only two", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "Description Text";
