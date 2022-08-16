@@ -11,15 +11,16 @@ import {
 import { isEqual } from "lodash";
 import MeasureGroups from "./MeasureGroups";
 import {
-  Measure,
+  AggregateFunctionType,
   Group,
   GroupScoring,
+  Measure,
   MeasureGroupTypes,
   PopulationType,
 } from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import { MemoryRouter } from "react-router-dom";
-import { MeasureCQL } from "../common/MeasureCQL";
+import { ELM_JSON, MeasureCQL } from "../common/MeasureCQL";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
 import * as uuid from "uuid";
@@ -76,7 +77,7 @@ const populationBasisValues: string[] = [
   "test-data-1",
   "test-data-2",
 ];
-mockedAxios.get.mockResolvedValue({ data: { populationBasisValues } });
+mockedAxios.get.mockResolvedValue({ data: populationBasisValues });
 
 describe("Measure Groups Page", () => {
   let measure: Measure;
@@ -91,6 +92,7 @@ describe("Measure Groups Page", () => {
       id: "test-measure",
       measureName: "the measure for testing",
       cql: MeasureCQL,
+      elmJson: ELM_JSON,
       createdBy: MEASURE_CREATEDBY,
     } as Measure;
     measureStore.state.mockImplementationOnce(() => measure);
@@ -1129,9 +1131,15 @@ describe("Measure Groups Page", () => {
     );
   }, 15000);
 
-  // TODO: skipped, will fix in subsequent PR
-  test.skip("Save button is disabled until all required CV populations are entered", async () => {
+  test("Save button is disabled until all required CV populations are entered", async () => {
     renderMeasureGroupComponent();
+    await waitFor(() =>
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        "example-service-url/populationBasisValues",
+        expect.anything()
+      )
+    );
+
     const measureGroupTypeDropdown = screen.getByTestId(
       "measure-group-type-dropdown"
     );
@@ -1168,6 +1176,24 @@ describe("Measure Groups Page", () => {
     expect(
       screen.getByRole("combobox", { name: "Measure Population *" })
     ).toHaveValue("Denominator");
+    const observationComboBox = screen.getByRole("combobox", {
+      name: "Observation *",
+    });
+    expect(observationComboBox).toBeInTheDocument();
+    expect(observationComboBox).toHaveValue("");
+    const observationOptions =
+      within(observationComboBox).getAllByRole("option");
+    expect(observationOptions).toHaveLength(2);
+    expect((observationOptions[0] as HTMLOptionElement).selected).toBeTruthy();
+    userEvent.click(observationComboBox);
+    userEvent.selectOptions(observationComboBox, observationOptions[1]);
+    const aggregateComboBox = screen.getByRole("combobox", {
+      name: "Aggregate Function *",
+    });
+    expect(aggregateComboBox).toBeInTheDocument();
+    const aggregateOptions = within(aggregateComboBox).getAllByRole("option");
+    expect(aggregateOptions).toHaveLength(12);
+    userEvent.selectOptions(aggregateComboBox, aggregateOptions[2]);
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Save" })).not.toBeDisabled()
     );
@@ -1376,4 +1402,161 @@ describe("Measure Groups Page", () => {
       })
     ).not.toBeInTheDocument();
   });
+
+  test("measure observation should not render for cohort", async () => {
+    renderMeasureGroupComponent();
+    userEvent.selectOptions(
+      screen.getByTestId("scoring-unit-select"),
+      "Cohort"
+    );
+
+    expect(
+      screen.getByTestId("select-measure-group-population-label")
+    ).toBeInTheDocument();
+
+    await waitFor(() =>
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        "example-service-url/populationBasisValues",
+        expect.anything()
+      )
+    );
+
+    expect(
+      await screen.findByTestId("population-basis-combo-box")
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("link", {
+        name: "+ Add Observation",
+      })
+    ).not.toBeInTheDocument();
+  });
+
+  test("measure observation should not render for proportion", async () => {
+    renderMeasureGroupComponent();
+    userEvent.selectOptions(
+      screen.getByTestId("scoring-unit-select"),
+      "Proportion"
+    );
+
+    expect(
+      screen.getAllByTestId("select-measure-group-population-label")
+    ).toHaveLength(6);
+
+    await waitFor(() =>
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        "example-service-url/populationBasisValues",
+        expect.anything()
+      )
+    );
+
+    expect(
+      await screen.findByTestId("population-basis-combo-box")
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("link", {
+        name: "+ Add Observation",
+      })
+    ).not.toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("combobox", {
+        name: "Observation *",
+      })
+    ).not.toBeInTheDocument();
+  });
+
+  test("measure observation should render for CV group", async () => {
+    renderMeasureGroupComponent();
+    userEvent.selectOptions(
+      screen.getByTestId("scoring-unit-select"),
+      "Continuous Variable"
+    );
+
+    expect(
+      screen.getAllByTestId("select-measure-group-population-label")
+    ).toHaveLength(3);
+
+    await waitFor(() =>
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        "example-service-url/populationBasisValues",
+        expect.anything()
+      )
+    );
+
+    expect(
+      await screen.findByTestId("population-basis-combo-box")
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("combobox", {
+        name: "Observation *",
+      })
+    ).toBeInTheDocument();
+  });
+
+  test("measure observation should render existing for continuous variable", async () => {
+    group.scoring = "Continuous Variable";
+    group.measureObservations = [
+      {
+        id: "uuid-1",
+        definition: "fun",
+        aggregateMethod: AggregateFunctionType.COUNT,
+      },
+    ];
+    measure.groups = [group];
+    renderMeasureGroupComponent();
+
+    await waitFor(() =>
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        "example-service-url/populationBasisValues",
+        expect.anything()
+      )
+    );
+
+    const observation = screen.queryByRole("combobox", {
+      name: "Observation *",
+    });
+    expect(observation).toBeInTheDocument();
+    expect(observation).toHaveValue("fun");
+    const aggregateFuncSelect = screen.getByRole("combobox", {
+      name: "Aggregate Function *",
+    }) as HTMLSelectElement;
+    expect(aggregateFuncSelect).toBeInTheDocument();
+    expect(aggregateFuncSelect.value).toEqual("Count");
+  });
+
+  // test.only("form should be disabled until measure observation is selected for continuous variable", async () => {
+  //   const { container } = renderMeasureGroupComponent();
+  //   userEvent.selectOptions(
+  //     screen.getByTestId("scoring-unit-select"),
+  //     "Continuous Variable"
+  //   );
+  //
+  //   expect(
+  //     screen.getAllByTestId("select-measure-group-population-label")
+  //   ).toHaveLength(3);
+  //
+  //   await waitFor(() =>
+  //     expect(mockedAxios.get).toHaveBeenCalledWith(
+  //       "example-service-url/populationBasisValues",
+  //       expect.anything()
+  //     )
+  //   );
+  //
+  //   const observation = screen.getByRole("combobox", {
+  //     name: "Observation *",
+  //   });
+  //   expect(observation).toBeInTheDocument();
+  //   expect(observation).toHaveValue("");
+  //   const aggregateFuncSelect = screen.getByRole("combobox", {
+  //     name: "Aggregate Function *",
+  //   }) as HTMLSelectElement;
+  //   expect(aggregateFuncSelect).toBeInTheDocument();
+  //   expect(aggregateFuncSelect.value).toEqual("");
+  //
+  //   // select all the required fields
+  //   logRoles(container);
+  // });
 });
