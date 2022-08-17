@@ -158,7 +158,9 @@ const MeasureGroupPopulationSelect = ({
           {initialPopulationSize === 2 &&
             label.includes("Initial Population") &&
             scoring === "Ratio" && (
-              <div data-testid="measure-group-initial-population-association">
+              <div
+                data-testid={`measure-group-initial-population-association-${population.id}`}
+              >
                 <FormField>
                   <FieldSeparator style={{ marginLeft: 30 }}>
                     <SoftLabel>Association</SoftLabel>
@@ -177,6 +179,7 @@ const MeasureGroupPopulationSelect = ({
                         disabled={
                           !canEdit || label.includes("Initial Population 2")
                         }
+                        data-testid={`${label}-${InitialPopulationAssociationType.DENOMINATOR}`}
                       />
                       <FormControlLabel
                         value={InitialPopulationAssociationType.NUMERATOR}
@@ -185,6 +188,7 @@ const MeasureGroupPopulationSelect = ({
                         disabled={
                           !canEdit || label.includes("Initial Population 2")
                         }
+                        data-testid={`${label}-${InitialPopulationAssociationType.NUMERATOR}`}
                       />
                     </RadioGroup>
                   </FieldSeparator>

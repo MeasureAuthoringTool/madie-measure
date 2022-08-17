@@ -1377,4 +1377,85 @@ describe("Measure Groups Page", () => {
       })
     ).not.toBeInTheDocument();
   });
+
+  test("should show Initial Population Association for Ratio scoring", async () => {
+    const group1: Group = {
+      id: "1",
+      scoring: "Ratio",
+      populations: [
+        {
+          id: "id-1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+        },
+        {
+          id: "id-2",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+        },
+      ],
+      groupDescription: "",
+      measureGroupTypes: [MeasureGroupTypes.PROCESS],
+      populationBasis: "Boolean",
+      scoringUnit: "",
+    };
+    measure.groups = [group1];
+    renderMeasureGroupComponent();
+
+    // verify  IP1 and IP2 association type radio group is visible
+    const association1 = screen.getByTestId(
+      "measure-group-initial-population-association-id-1"
+    );
+    expect(association1).toBeInTheDocument();
+    const association1Input = within(association1).getByRole("radiogroup");
+    //expect((association1Input as HTMLButtonElement).value).toBe("Denomimator");
+    const ip1Denom = screen.getByTestId("Initial Population 1-Denominator");
+    const ip1Num = screen.getByTestId("Initial Population 1-Denominator");
+
+    const association2 = screen.getByTestId(
+      "measure-group-initial-population-association-id-2"
+    );
+    expect(association2).toBeInTheDocument();
+  });
+
+  test("test clicking association button", async () => {
+    const group1: Group = {
+      id: "1",
+      scoring: "Ratio",
+      populations: [
+        {
+          id: "id-1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+        },
+        {
+          id: "id-2",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+        },
+      ],
+      groupDescription: "",
+      measureGroupTypes: [MeasureGroupTypes.PROCESS],
+      populationBasis: "Boolean",
+      scoringUnit: "",
+    };
+    measure.groups = [group1];
+    renderMeasureGroupComponent();
+
+    // verify  IP1 and IP2 association type radio group is visible
+    const association1 = screen.getByTestId(
+      "measure-group-initial-population-association-id-1"
+    );
+    expect(association1).toBeInTheDocument();
+    const association1Input = within(association1).getByRole("radiogroup");
+    //expect((association1Input as HTMLInputElement).value).toBe("Denomimator");
+    const ip1Denom = screen.getByTestId("Initial Population 1-Denominator");
+    //console.log("ip1Denom = "+(ip1Denom as HTMLButtonElement).checked);
+    const ip1Num = screen.getByTestId("Initial Population 1-Denominator");
+
+    userEvent.click(ip1Num);
+
+    //temp
+    screen.debug(undefined, 30000);
+  });
 });
