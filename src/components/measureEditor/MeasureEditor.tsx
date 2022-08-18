@@ -7,7 +7,7 @@ import {
   parseContent,
   validateContent,
   ElmTranslationError,
-  AllErrorsResult,
+  ValidationResult,
 } from "@madie/madie-editor";
 import { Button } from "@madie/madie-components";
 import { Measure } from "@madie/madie-models";
@@ -103,7 +103,7 @@ const MeasureEditor = () => {
 
   const updateElmAnnotations = async (
     cql: string
-  ): Promise<AllErrorsResult> => {
+  ): Promise<ValidationResult> => {
     setElmTranslationError(null);
     if (cql && cql.trim().length > 0) {
       const result = await validateContent(cql);
@@ -153,15 +153,15 @@ const MeasureEditor = () => {
           rejection.reason
         );
       } else {
-        const allErrorsResult = results[0].value;
+        const validationResult = results[0].value;
         const parseErrors = results[1].value;
-        const cqlElmErrors = !!(allErrorsResult?.errors?.length > 0);
+        const cqlElmErrors = !!(validationResult?.errors?.length > 0);
         if (editorVal !== measure.cql) {
           const cqlErrors = parseErrors || cqlElmErrors;
           const newMeasure: Measure = {
             ...measure,
             cql: editorVal,
-            elmJson: JSON.stringify(allErrorsResult?.translation),
+            elmJson: JSON.stringify(validationResult?.translation),
             cqlErrors,
           };
           measureServiceApi
