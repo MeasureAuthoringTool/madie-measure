@@ -1,5 +1,9 @@
 import * as Yup from "yup";
-import { AggregateFunctionType, GroupScoring, MeasureScoring } from "@madie/madie-models";
+import {
+  AggregateFunctionType,
+  GroupScoring,
+  MeasureScoring,
+} from "@madie/madie-models";
 
 export const MeasureGroupSchemaValidator = Yup.object().shape({
   scoring: Yup.string()

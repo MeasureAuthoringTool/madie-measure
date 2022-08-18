@@ -50,7 +50,11 @@ const MeasureGroupPopulationSelect = ({
       </MenuItem>
     ),
     ...options.map(({ name }, i) => (
-      <MenuItem key={`${name}-${i}`} value={name.replace(/"/g, "")}>
+      <MenuItem
+        key={`${name}-${i}`}
+        value={name.replace(/"/g, "")}
+        data-testid="select-option-measure-group-population"
+      >
         {name.replace(/"/g, "")}
       </MenuItem>
     )),

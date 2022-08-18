@@ -83,7 +83,7 @@ const MenuItem = styled.li((props: PropTypes) => [
 
 const FormField = tw.div`mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-3`;
 const FormFieldInner = tw.div`sm:col-span-3`;
-const FieldLabel = tw.label`block text-sm font-medium text-gray-700`;
+const FieldLabel = tw.label`block capitalize text-sm font-medium text-gray-700`;
 const FieldSeparator = tw.div`mt-1`;
 const FieldInput = tw.input`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
 const TextArea = tw.textarea`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
@@ -541,7 +541,7 @@ const MeasureGroups = () => {
                 <FormField>
                   <FieldSeparator>
                     <FieldLabel htmlFor="population-basis-combo-box">
-                      Population Basis
+                      Population Basis *
                     </FieldLabel>
                     {canEdit && (
                       <Autocomplete
@@ -604,6 +604,7 @@ const MeasureGroups = () => {
                           <MuiMenuItem
                             key={scoring}
                             value={GroupScoring[scoring]}
+                            data-testid={`group-scoring-option-${scoring}`}
                           >
                             {GroupScoring[scoring]}
                           </MuiMenuItem>
@@ -756,7 +757,7 @@ const MeasureGroups = () => {
                           )}
                           size="small"
                           options={
-                            formik.values.scoring != "-" &&
+                            !!formik.values.scoring &&
                             associationSelect[formik.values.scoring].map(
                               (opt, i) => (
                                 <MuiMenuItem
