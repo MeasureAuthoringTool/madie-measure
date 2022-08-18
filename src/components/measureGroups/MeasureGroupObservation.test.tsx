@@ -369,14 +369,6 @@ describe("Measure Group Observation", () => {
         name: "+ Add Observation",
       })
     ).not.toBeInTheDocument();
-    // userEvent.click(addObservation);
-    // expect(mockSetFieldValue).toHaveBeenCalledTimes(1);
-    // expect(mockSetFieldValue).toHaveBeenCalledWith("measureObservations", [
-    //   {
-    //     id: "uuid-1",
-    //     criteriaReference: null,
-    //   },
-    // ]);
   });
 
   it("should handle Add Observation for Ratio scoring type", () => {
@@ -412,5 +404,53 @@ describe("Measure Group Observation", () => {
         criteriaReference: "pop3",
       },
     ]);
+  });
+
+  it("should handle onRemove observation for Ratio scoring type", () => {
+    const mockSetFieldValue = jest.fn();
+    mockFormikObj.values = {
+      scoring: "Ratio",
+      measureObservations: [
+        {
+          id: "abcd-01",
+          definition: "MyFunc1",
+          aggregateMethod: "Count",
+          criteriaReference: "pop3",
+        },
+      ],
+    };
+    mockFormikObj.setFieldValue = mockSetFieldValue;
+
+    const elmJson = JSON.stringify({
+      library: {
+        statements: {
+          def: [
+            {
+              type: "FunctionDef",
+              name: "MyFunc1",
+            },
+          ],
+        },
+      },
+    });
+    const population = {
+      id: "pop3",
+      name: PopulationType.NUMERATOR,
+      definition: "numer",
+    };
+
+    render(
+      <MeasureGroupObservation
+        scoring={MeasureScoring.RATIO}
+        elmJson={elmJson}
+        population={population}
+      />
+    );
+
+    const removeLink = screen.getByRole("link", { name: "Remove" });
+    expect(removeLink).toBeInTheDocument();
+    userEvent.click(removeLink);
+    expect(mockSetFieldValue).toHaveBeenCalledTimes(1);
+    expect(mockSetFieldValue).toHaveBeenCalledWith("measureObservations", []);
   });
 });
