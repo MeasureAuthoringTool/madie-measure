@@ -24,32 +24,24 @@ export default function EditMeasure() {
   const { url } = useRouteMatch();
   const { id } = useParams<inputParams>();
   const measureServiceApi = useMeasureServiceApi();
-  const [measure, setMeasure] = useState<Measure>(measureStore.state);
   const { updateMeasure } = measureStore;
-  // we're going to listen to context updates here and send them to layout
-  useEffect(() => {
-    measureStore.updateMeasure(measure);
-  }, [measure]);
   const [loading, setLoading] = useState<boolean>(true);
 
   const history = useHistory();
 
   useEffect(() => {
-    if (!measure) {
-      measureServiceApi
-        .fetchMeasure(id)
-        .then((value: Measure) => {
-          // setMeasure(value); We will instead depend on our subscription to update the store
-          updateMeasure(value);
-          setLoading(false);
-        })
-        .catch((err) => {
-          if (err.toString().includes("404")) {
-            history.push("/404");
-          }
-        });
-    }
-  }, [measureServiceApi, id, measure, history]);
+    measureServiceApi
+      .fetchMeasure(id)
+      .then((value: Measure) => {
+        updateMeasure(value);
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (err.toString().includes("404")) {
+          history.push("/404");
+        }
+      });
+  }, [measureServiceApi, id, history]);
 
   const loadingDiv = <div data-testid="loading">Loading...</div>;
 

@@ -204,7 +204,7 @@ const MeasureEditor = () => {
     });
     setEditorVal(measure?.cql);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [measure?.cql]);
 
   return (
     <>
