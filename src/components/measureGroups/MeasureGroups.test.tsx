@@ -1982,5 +1982,5 @@ describe("Measure Groups Page", () => {
       expectedGroup,
       expect.anything()
     );
-  });
+  }, 30000);
 });
