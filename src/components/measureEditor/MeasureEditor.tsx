@@ -7,6 +7,7 @@ import {
   parseContent,
   validateContent,
   ElmTranslationError,
+  AllErrorsResult,
 } from "@madie/madie-editor";
 import { Button } from "@madie/madie-components";
 import { Measure } from "@madie/madie-models";
@@ -76,7 +77,9 @@ const MeasureEditor = () => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   const { updateMeasure } = measureStore;
   useEffect(() => {
-    const subscription = measureStore.subscribe(setMeasure);
+    const subscription = measureStore.subscribe((measure) => {
+      setMeasure(measure);
+    });
     return () => {
       subscription.unsubscribe();
     };
@@ -100,20 +103,21 @@ const MeasureEditor = () => {
 
   const updateElmAnnotations = async (
     cql: string
-  ): Promise<ElmTranslationError[]> => {
+  ): Promise<AllErrorsResult> => {
     setElmTranslationError(null);
     if (cql && cql.trim().length > 0) {
-      const allErrorsArray = await validateContent(cql);
-      if (isLoggedInUMLS(allErrorsArray)) {
+      const result = await validateContent(cql);
+      const { errors } = result;
+      if (isLoggedInUMLS(errors)) {
         setValuesetMsg("Please log in to UMLS!");
       }
 
-      const annotations = mapErrorsToAceAnnotations(allErrorsArray);
-      const errorMarkers = mapErrorsToAceMarkers(allErrorsArray);
+      const annotations = mapErrorsToAceAnnotations(errors);
+      const errorMarkers = mapErrorsToAceMarkers(errors);
 
       setElmAnnotations(annotations);
       setErrorMarkers(errorMarkers);
-      return allErrorsArray;
+      return result;
     } else {
       setElmAnnotations([]);
     }
@@ -149,15 +153,15 @@ const MeasureEditor = () => {
           rejection.reason
         );
       } else {
-        const cqlElmResult = results[0].value;
+        const allErrorsResult = results[0].value;
         const parseErrors = results[1].value;
-        const cqlElmErrors = !!(cqlElmResult?.length > 0);
+        const cqlElmErrors = !!(allErrorsResult?.errors?.length > 0);
         if (editorVal !== measure.cql) {
           const cqlErrors = parseErrors || cqlElmErrors;
           const newMeasure: Measure = {
             ...measure,
             cql: editorVal,
-            elmJson: JSON.stringify(cqlElmResult),
+            elmJson: JSON.stringify(allErrorsResult?.translation),
             cqlErrors,
           };
           measureServiceApi
@@ -204,7 +208,7 @@ const MeasureEditor = () => {
     });
     setEditorVal(measure?.cql);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [measure?.cql]);
 
   return (
     <>
