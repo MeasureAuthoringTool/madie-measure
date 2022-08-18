@@ -1443,17 +1443,22 @@ describe("Measure Groups Page", () => {
     renderMeasureGroupComponent();
 
     // verify  IP1 and IP2 association type radio group is visible
-    const association1 = screen.getByTestId(
+    const ip1 = screen.getByTestId(
       "measure-group-initial-population-association-id-1"
     );
-    expect(association1).toBeInTheDocument();
-    const association1Input = within(association1).getByRole("radiogroup");
-    //expect((association1Input as HTMLInputElement).value).toBe("Denomimator");
-    const ip1Denom = screen.getByTestId("Initial Population 1-Denominator");
-    //console.log("ip1Denom = "+(ip1Denom as HTMLButtonElement).checked);
-    const ip1Num = screen.getByTestId("Initial Population 1-Denominator");
+    expect(ip1).toBeInTheDocument();
+    const ip1Associations = within(ip1).getByRole("radiogroup");
+    const ip1DenomAssociation = within(ip1Associations).getByRole("radio", {
+      name: "Denominator",
+    });
+    const ip1NumerAssociation = within(ip1Associations).getByRole("radio", {
+      name: "Numerator",
+    });
 
-    userEvent.click(ip1Num);
+    expect(ip1DenomAssociation).toHaveAttribute("checked", "");
+    expect(ip1NumerAssociation).not.toHaveAttribute("checked", "");
+
+    // userEvent.click(ip1Num);
 
     //temp
     screen.debug(undefined, 30000);
