@@ -260,7 +260,7 @@ describe("MeasureEditor component", () => {
         cqlLibraryName: "",
         createdAt: "",
         createdBy: "testuser@example.com",
-        elmJson: "{\"library\":{}}",
+        elmJson: '{"library":{}}',
         id: "abcd-pqrs-xyz",
         lastModifiedAt: "",
         lastModifiedBy: "",
@@ -310,7 +310,7 @@ describe("MeasureEditor component", () => {
         cqlLibraryName: "",
         createdAt: "",
         createdBy: "testuser@example.com",
-        elmJson: "{\"library\":{}}",
+        elmJson: '{"library":{}}',
         id: "abcd-pqrs-xyz",
         lastModifiedAt: "",
         lastModifiedBy: "",
@@ -528,7 +528,10 @@ it("should display errors if not logged into umls", async () => {
   ];
 
   (validateContent as jest.Mock).mockClear().mockImplementation(() => {
-    return Promise.resolve({errors: elmTransaltionErrorsUMLS, translation: null});
+    return Promise.resolve({
+      errors: elmTransaltionErrorsUMLS,
+      translation: null,
+    });
   });
 
   const measureWithCqlCodes = {
