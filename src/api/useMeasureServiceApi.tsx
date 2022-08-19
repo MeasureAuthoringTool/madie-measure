@@ -4,6 +4,7 @@ import useServiceConfig from "./useServiceConfig";
 import { ServiceConfig } from "./ServiceContext";
 import { Measure, Group } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
+import _ from "lodash";
 
 export class MeasureServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
@@ -177,6 +178,37 @@ export class MeasureServiceApi {
       );
       throw new Error(message);
     }
+  }
+
+  getReturnTypesForAllCqlDefinitions(elmJson: string): {
+    [key: string]: string;
+  } {
+    if (!elmJson) {
+      return {};
+    }
+
+    const elm = JSON.parse(elmJson);
+    const definitions = elm.library?.statements?.def;
+    if (definitions) {
+      return definitions.reduce((returnTypes, definition) => {
+        const returnType = {};
+        const name = _.camelCase(_.trim(definition.name));
+        if (definition.resultTypeName) {
+          returnType[`${name}`] = definition.resultTypeName;
+        } else if (definition.resultTypeSpecifier) {
+          returnType[`${name}`] =
+            definition.resultTypeSpecifier.elementType.name;
+        } else {
+          returnType[`${name}`] = undefined;
+        }
+        return {
+          ...returnTypes,
+          ...returnType,
+        };
+      }, {});
+    }
+
+    return {};
   }
 }
 
