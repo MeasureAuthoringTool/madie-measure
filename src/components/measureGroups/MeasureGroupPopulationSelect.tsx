@@ -174,6 +174,9 @@ const MeasureGroupPopulationSelect = ({
                           population.associationType ===
                           InitialPopulationAssociationType.DENOMINATOR
                         }
+                        disabled={
+                          !canEdit || label.includes("Initial Population 2")
+                        }
                         onChange={changeAssociation}
                         data-testid={`${label}-${InitialPopulationAssociationType.DENOMINATOR}`}
                       />
@@ -193,6 +196,9 @@ const MeasureGroupPopulationSelect = ({
                         checked={
                           population.associationType ===
                           InitialPopulationAssociationType.NUMERATOR
+                        }
+                        disabled={
+                          !canEdit || label.includes("Initial Population 2")
                         }
                         onChange={changeAssociation}
                         data-testid={`${label}-${InitialPopulationAssociationType.NUMERATOR}`}
