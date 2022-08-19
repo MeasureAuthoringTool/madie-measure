@@ -162,6 +162,12 @@ describe("MeasureEditor component", () => {
   });
 
   it("save measure with updated cql in editor on save button click", async () => {
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        translation: { library: {} },
+      });
+    });
     mockedAxios.put.mockImplementation((args) => {
       if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
         return Promise.resolve({ data: measure });
@@ -223,7 +229,10 @@ describe("MeasureEditor component", () => {
       }
     });
     (validateContent as jest.Mock).mockClear().mockImplementation(() => {
-      return Promise.resolve(elmTransaltionErrors);
+      return Promise.resolve({
+        errors: elmTransaltionErrors,
+        translation: { library: {} },
+      });
     });
     renderEditor(measure);
     const issues = await screen.findByText("2 issues found with CQL");
@@ -251,8 +260,7 @@ describe("MeasureEditor component", () => {
         cqlLibraryName: "",
         createdAt: "",
         createdBy: "testuser@example.com",
-        elmJson:
-          '[{"startLine":24,"startChar":7,"endLine":24,"endChar":15,"errorSeverity":"Warning","errorType":"ELM","message":"Test Warning 123","targetIncludeLibraryId":"TestLibrary_QICore","targetIncludeLibraryVersionId":"5.0.000","type":"ELM"},{"startLine":1,"startChar":1,"endLine":1,"endChar":96,"errorSeverity":"Warning","errorType":"ELM","message":"Test Warning 456","targetIncludeLibraryId":"TestLibrary_QICore","targetIncludeLibraryVersionId":"5.0.000","type":"ELM"}]',
+        elmJson: '{"library":{}}',
         id: "abcd-pqrs-xyz",
         lastModifiedAt: "",
         lastModifiedBy: "",
@@ -302,8 +310,7 @@ describe("MeasureEditor component", () => {
         cqlLibraryName: "",
         createdAt: "",
         createdBy: "testuser@example.com",
-        elmJson:
-          '[{"startLine":24,"startChar":7,"endLine":24,"endChar":15,"errorSeverity":"Warning","errorType":"ELM","message":"Test Warning 123","targetIncludeLibraryId":"TestLibrary_QICore","targetIncludeLibraryVersionId":"5.0.000","type":"ELM"},{"startLine":1,"startChar":1,"endLine":1,"endChar":96,"errorSeverity":"Warning","errorType":"ELM","message":"Test Warning 456","targetIncludeLibraryId":"TestLibrary_QICore","targetIncludeLibraryVersionId":"5.0.000","type":"ELM"}]',
+        elmJson: '{"library":{}}',
         id: "abcd-pqrs-xyz",
         lastModifiedAt: "",
         lastModifiedBy: "",
@@ -374,7 +381,7 @@ describe("MeasureEditor component", () => {
       }
     });
     (validateContent as jest.Mock).mockClear().mockImplementation(() => {
-      return Promise.resolve(elmTransaltionErrors);
+      return Promise.resolve({ errors: elmTransaltionErrors });
     });
     renderEditor(measure);
     const issues = await screen.findByText("2 issues found with CQL");
@@ -521,7 +528,10 @@ it("should display errors if not logged into umls", async () => {
   ];
 
   (validateContent as jest.Mock).mockClear().mockImplementation(() => {
-    return Promise.resolve(elmTransaltionErrorsUMLS);
+    return Promise.resolve({
+      errors: elmTransaltionErrorsUMLS,
+      translation: null,
+    });
   });
 
   const measureWithCqlCodes = {

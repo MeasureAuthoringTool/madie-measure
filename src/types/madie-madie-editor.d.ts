@@ -48,11 +48,28 @@ declare module "@madie/madie-editor" {
     targetIncludeLibraryVersionId: string;
     type: string;
   };
+  export interface ValidationResult {
+    translation: ElmTranslation;
+    errors: ElmTranslationError[];
+  }
+  export type ElmTranslation = {
+    errorExceptions: ElmTranslationError[];
+    externalErrors: any[];
+    library: ElmTranslationLibrary;
+  };
+  export type ElmTranslationLibrary = {
+    annotation: any[];
+    contexts: any;
+    identifier: any;
+    parameters: any;
+    schemaIdentifier: any;
+    statements: any;
+    usings: any;
+    valueSets?: any;
+  };
 
   export const parseContent: (content: string) => CqlError[];
-  export const validateContent: (
-    content: string
-  ) => Promise<ElmTranslationError[]>;
+  export const validateContent: (content: string) => Promise<ValidationResult>;
 
   export const MadieEditor: FC<{
     value: string;
