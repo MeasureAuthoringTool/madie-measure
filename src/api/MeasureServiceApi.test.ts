@@ -1,7 +1,7 @@
 import { MeasureServiceApi } from "./useMeasureServiceApi";
 import { libraryElm } from "./__mocks__/cqlLibraryElm";
 
-describe("CalculationService Tests", () => {
+describe("MeasureServiceApi Tests", () => {
   const baseUrl = "madie.com";
   const accessToken = jest.fn();
   const measureServiceApi = new MeasureServiceApi(baseUrl, accessToken);
