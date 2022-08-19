@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import { kebabCase } from "lodash";
@@ -81,7 +81,6 @@ const MeasureGroupPopulationSelect = ({
   };
 
   const changeAssociation = (event: React.ChangeEvent<HTMLInputElement>) => {
-    event.preventDefault();
     const changedValue: string = (event.target as HTMLInputElement).value;
     population.associationType = changedValue;
     changeAssociationCallback();
@@ -164,33 +163,46 @@ const MeasureGroupPopulationSelect = ({
                 <FormField>
                   <FieldSeparator style={{ marginLeft: 30 }}>
                     <SoftLabel>Association</SoftLabel>
-                    <RadioGroup
-                      aria-labelledby="inital-population-association-label"
-                      defaultValue=""
-                      name="radio-buttons-group"
-                      value={population.associationType}
-                      onChange={changeAssociation}
-                      style={{ marginLeft: 15 }}
+                    <div
+                      style={{
+                        marginLeft: 15,
+                        fontSize: 16,
+                        fontFamily: "Rubik",
+                      }}
                     >
-                      <FormControlLabel
+                      <input
+                        type="radio"
                         value={InitialPopulationAssociationType.DENOMINATOR}
-                        control={<Radio />}
-                        label={InitialPopulationAssociationType.DENOMINATOR}
-                        disabled={
-                          !canEdit || label.includes("Initial Population 2")
+                        checked={
+                          population.associationType ===
+                          InitialPopulationAssociationType.DENOMINATOR
                         }
+                        onChange={changeAssociation}
                         data-testid={`${label}-${InitialPopulationAssociationType.DENOMINATOR}`}
                       />
-                      <FormControlLabel
+                      &nbsp;
+                      {InitialPopulationAssociationType.DENOMINATOR}
+                    </div>
+                    <div
+                      style={{
+                        marginLeft: 15,
+                        fontSize: 16,
+                        fontFamily: "Rubik",
+                      }}
+                    >
+                      <input
+                        type="radio"
                         value={InitialPopulationAssociationType.NUMERATOR}
-                        control={<Radio />}
-                        label={InitialPopulationAssociationType.NUMERATOR}
-                        disabled={
-                          !canEdit || label.includes("Initial Population 2")
+                        checked={
+                          population.associationType ===
+                          InitialPopulationAssociationType.NUMERATOR
                         }
+                        onChange={changeAssociation}
                         data-testid={`${label}-${InitialPopulationAssociationType.NUMERATOR}`}
                       />
-                    </RadioGroup>
+                      &nbsp;
+                      {InitialPopulationAssociationType.NUMERATOR}
+                    </div>
                   </FieldSeparator>
                 </FormField>
               </div>
