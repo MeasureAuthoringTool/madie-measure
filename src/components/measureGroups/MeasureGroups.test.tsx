@@ -1982,7 +1982,7 @@ describe("Measure Groups Page", () => {
       expectedGroup,
       expect.anything()
     );
-  });
+  }, 30000);
 
   test("should not show Initial Population Association for Ratio scoring when there is 1 Initial Population", async () => {
     const group1: Group = {
