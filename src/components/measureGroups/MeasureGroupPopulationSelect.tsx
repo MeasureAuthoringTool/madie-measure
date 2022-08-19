@@ -1,13 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import { kebabCase } from "lodash";
 import { TextField } from "@mui/material";
 import { ExpressionDefinition } from "./MeasureGroups";
 import { DSLink } from "@madie/madie-design-system/dist/react";
-import Radio from "@mui/material/Radio";
-import RadioGroup from "@mui/material/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import { InitialPopulationAssociationType } from "./GroupPopulation";
 
 const HeavyLabel = styled.label`
