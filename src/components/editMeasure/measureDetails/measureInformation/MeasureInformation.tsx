@@ -47,13 +47,6 @@ const MessageText = tw.p`text-sm font-medium`;
 const SuccessText = tw(MessageText)`text-green-800`;
 const ErrorText = tw(MessageText)`text-red-800`;
 
-const INITIAL_VALUES = {
-  measureName: "",
-  cqlLibraryName: "",
-  measurementPeriodStart: null,
-  measurementPeriodEnd: null,
-} as measureInformationForm;
-
 export default function MeasureInformation() {
   const history = useHistory();
   const measureServiceApi = useMeasureServiceApi();
@@ -126,13 +119,22 @@ export default function MeasureInformation() {
   const [toastType, setToastType] = useState<string>("danger");
   const [successMessage, setSuccessMessage] = useState<string>(null);
   const [errorMessage, setErrorMessage] = useState<string>(null);
+  // our initial values are taken from the measure we subscribe to
+  const INITIAL_VALUES = {
+    measurementPeriodStart: measure?.measurementPeriodStart,
+    measurementPeriodEnd: measure?.measurementPeriodEnd,
+    measureName: measure?.measureName,
+    cqlLibraryName: measure?.cqlLibraryName,
+  } as measureInformationForm;
 
   const formik = useFormik({
     initialValues: { ...INITIAL_VALUES },
     validationSchema: MeasureSchemaValidator,
+    enableReinitialize: true, // formik will auto set initial variables whenever measure delivers new results
     onSubmit: async (values: measureInformationForm) =>
       await handleSubmit(values),
   });
+
   const canEdit = measure?.createdBy === userName;
   const onToastClose = () => {
     setToastType(null);
@@ -178,28 +180,13 @@ export default function MeasureInformation() {
       .updateMeasure(newMeasure)
       .then(() => {
         setSuccessMessage("Measurement Information Updated Successfully");
-        setMeasure(newMeasure);
+        // updating measure will propagate update state site wide.
         updateMeasure(newMeasure);
       })
       .catch((err) => {
         setErrorMessage(err.response.data.message);
       });
   };
-
-  useEffect(() => {
-    formik.setFieldValue("measureName", measure?.measureName);
-    formik.setFieldValue("cqlLibraryName", measure?.cqlLibraryName);
-    if (measure?.measurementPeriodStart && measure?.measurementPeriodEnd) {
-      formik.setFieldValue(
-        "measurementPeriodStart",
-        measure?.measurementPeriodStart
-      );
-      formik.setFieldValue(
-        "measurementPeriodEnd",
-        measure?.measurementPeriodEnd
-      );
-    }
-  }, [measure]);
 
   function formikErrorHandler(name: string, isError: boolean) {
     if (formik.touched[name] && formik.errors[name]) {
