@@ -153,14 +153,12 @@ describe("Measure Groups Page", () => {
     // Test that each Scoring selection displays the correct population filters
     await act(async () => {
       for await (let value of Object.values(GroupScoring)) {
-        const scoringSelectInput = screen.getByTestId(
-          "scoring-select-input"
-        ) as HTMLInputElement;
-        // Change the scoring value
-        fireEvent.change(scoringSelectInput, {
-          target: { value: value },
+        // select a scoring
+        const scoringSelect = screen.getByTestId("scoring-select");
+        userEvent.click(getByRole(scoringSelect, "button"));
+        await waitFor(() => {
+          userEvent.click(screen.getByText(value));
         });
-        expect(scoringSelectInput.value).toBe(value);
 
         // Check that the appropriate filter labels are rendered as expected
         let filterLabelArrayIntended = getPopulationsForScoring(value).reduce(
@@ -180,6 +178,10 @@ describe("Measure Groups Page", () => {
           []
         );
 
+        const scoringSelectInput = screen.getByTestId(
+          "scoring-select-input"
+        ) as HTMLInputElement;
+
         // Check what is actually rendered
         if (!scoringSelectInput.value) {
           let filterLabelArrayActual = screen
@@ -194,10 +196,10 @@ describe("Measure Groups Page", () => {
       }
     });
 
-    const definitions = await screen.findAllByTestId(
+    const cqlDefinitionsAsOptions = await screen.findAllByTestId(
       "select-measure-group-population-input"
     );
-    for await (let def of definitions) {
+    for await (let def of cqlDefinitionsAsOptions) {
       let options = def.getElementsByTagName("option");
       expect(options.length).toBe(11);
       expect(def[0].textContent).toBe("SDE Ethnicity");
@@ -473,13 +475,6 @@ describe("Measure Groups Page", () => {
     expect(improvementNotationInput.value).toBe(
       "Increased score indicates improvement"
     );
-    // expect(
-    //   (
-    //     screen.getByRole("option", {
-    //       name: "Increased score indicates improvement",
-    //     }) as HTMLOptionElement
-    //   ).selected
-    // ).toBe(true);
     expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
   });
 
@@ -858,14 +853,17 @@ describe("Measure Groups Page", () => {
     // Discard changed
     expect(screen.getByTestId("group-form-discard-btn")).toBeEnabled();
     userEvent.click(screen.getByTestId("group-form-discard-btn"));
+
     expect(screen.getByTestId("rateAggregationText")).toHaveValue(
-      "Rate Aggregation Text"
+      group.rateAggregation
     );
 
     // navigate to population and verify initial population is reverted to value from group object
     userEvent.click(screen.getByTestId("populations-tab"));
-    expect(groupPopulationInput.value).toBe(group.populations[0].definition);
-    expect(screen.getByTestId("group-form-discard-btn")).toBeDisabled();
+    await waitFor(() => {
+      expect(groupPopulationInput.value).toBe(group.populations[0].definition);
+      expect(screen.getByTestId("group-form-discard-btn")).toBeDisabled();
+    });
   });
 
   test("Should report an error if server fails to create population Group", async () => {
@@ -1299,47 +1297,17 @@ describe("Measure Groups Page", () => {
 
   test("Add/remove second IP for ratio group", async () => {
     renderMeasureGroupComponent();
-    // select a scoring
+
+    // select Ratio scoring
     const scoringSelect = screen.getByTestId("scoring-select");
     userEvent.click(getByRole(scoringSelect, "button"));
     await waitFor(() => {
-      userEvent.click(screen.getByText("Cohort"));
+      userEvent.click(screen.getByText("Ratio"));
     });
 
-    const allPopulationsInputs = screen.getAllByTestId(
-      "select-measure-group-population-input"
-    ) as HTMLInputElement[];
-
-    // setting initial population
-    fireEvent.change(allPopulationsInputs[0], {
-      target: {
-        value:
-          "Encounter With Age Range and Without VTE Diagnosis or Obstetrical Conditions",
-      },
-    });
-
-    // setting Denominator
-    fireEvent.change(allPopulationsInputs[1], {
-      target: {
-        value: "Denominator",
-      },
-    });
-
-    // Required population numerator is still not selected
-    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
-    expect(
-      screen.getByText("You must set all required Populations.")
-    ).toBeInTheDocument();
-
-    fireEvent.change(allPopulationsInputs[3], {
-      target: { value: "Numerator" },
-    });
-    // old
     // initial population available for ratio scoring
     expect(
-      screen.getByRole("combobox", {
-        name: "Initial Population *",
-      })
+      screen.getByTestId("population-select-initial-population")
     ).toBeInTheDocument();
 
     const addIpLink = screen.getByRole("link", {
@@ -1351,14 +1319,10 @@ describe("Measure Groups Page", () => {
 
     // verify  IP1 and IP2 visible
     expect(
-      screen.getByRole("combobox", {
-        name: "Initial Population 1 *",
-      })
+      screen.getByTestId("population-select-initial-population-1")
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("combobox", {
-        name: "Initial Population 2 *",
-      })
+      screen.getByTestId("population-select-initial-population-2")
     ).toBeInTheDocument();
 
     // delete the IP2
@@ -1368,21 +1332,15 @@ describe("Measure Groups Page", () => {
 
     // IP is back
     expect(
-      screen.getByRole("combobox", {
-        name: "Initial Population *",
-      })
+      screen.getByTestId("population-select-initial-population")
     ).toBeInTheDocument();
 
     // no more IP1 & IP2 in the document
-    expect(
-      screen.queryByRole("combobox", {
-        name: "Initial Population 1 *",
-      })
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("combobox", {
-        name: "Initial Population 2 *",
-      })
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId("population-select-initial-population-1")).toBe(
+      null
+    );
+    expect(screen.queryByTestId("population-select-initial-population-2")).toBe(
+      null
+    );
   });
 });

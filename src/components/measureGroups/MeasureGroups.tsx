@@ -272,6 +272,7 @@ const MeasureGroups = () => {
   }, []);
 
   const discardChanges = () => {
+    // check to identify a new group
     if (measureGroupNumber >= measure?.groups?.length || !measure?.groups) {
       resetForm({
         values: {
@@ -286,6 +287,7 @@ const MeasureGroups = () => {
         },
       });
     } else {
+      // resetting form with data from DB
       resetForm({
         values: {
           ...measure?.groups[measureGroupNumber],
