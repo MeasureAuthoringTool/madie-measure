@@ -654,6 +654,7 @@ const MeasureGroups = () => {
                             formik.values.stratifications.push({
                               ...EmptyStrat,
                             });
+                            setVisibleStrats(2);
                           }
                         } else {
                           formik.values.stratifications = [
@@ -664,6 +665,7 @@ const MeasureGroups = () => {
                               ...EmptyStrat,
                             },
                           ];
+                          setVisibleStrats(2);
                         }
                       }}
                     >
