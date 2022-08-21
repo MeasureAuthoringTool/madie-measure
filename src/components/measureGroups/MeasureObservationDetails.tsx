@@ -66,6 +66,9 @@ const MeasureObservationDetails = ({
               label={label ? label : "Observation"}
               id={`measure-observation-${name}`}
               data-testid={`select-measure-observation-${name}`}
+              inputProps={{
+                "data-testid": `measure-observation-${name}-input`,
+              }}
               style={{ width: 300 }}
               value={measureObservation?.definition || ""}
               onChange={(e) => {
@@ -117,7 +120,10 @@ const MeasureObservationDetails = ({
               required={required}
               label="Aggregate Function"
               id={`measure-observation-aggregate-${name}`}
-              data-testid={`select-measure-observation-${name}`}
+              data-testid={`select-measure-observation-aggregate-${name}`}
+              inputProps={{
+                "data-testid": `measure-observation-aggregate-${name}-input`,
+              }}
               style={{ width: 300 }}
               value={measureObservation?.aggregateMethod || ""}
               onChange={(e) => {

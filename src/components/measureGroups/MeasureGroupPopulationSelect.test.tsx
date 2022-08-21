@@ -27,37 +27,34 @@ const mockOnChangeHandler = jest
   })
   .mockName("onChangeMock");
 
-const defaultValue = selectOptions[0].name;
-
 const selectorProps = {
   field: {
     name: "population-test",
     onChange: mockOnChangeHandler,
-    value: defaultValue,
+    value: selectOptions[0].name,
   },
   label: "Population Test",
   required: false,
   options: selectOptions,
+  canEdit: true,
 };
 
 describe("Measure Group Population Select Component", () => {
-  test.skip("Required inputs should indicate if they are required", async () => {
+  test("Required inputs should indicate if they are required", async () => {
     const requiredSelectorProps = { ...selectorProps, required: true };
-    const { getByTestId } = render(
+    render(
       <MeasureGroupPopulationSelect
         {...requiredSelectorProps}
         onChange={mockOnChangeHandler}
-        value={""}
       />
     );
 
-    // const label = getByTestId("select-measure-group-population-label");
-    // expect(label.textContent).toEqual(expect.stringContaining("*"));
-    // expect(label.textContent).toEqual(
-    //   expect.stringContaining(selectorProps.label)
-    // );
+    expect(
+      await screen.findByTestId("select-measure-group-population-input")
+    ).toHaveAttribute("required");
   });
 
+  // No idea what we are trying to test here
   test.skip("Optional inputs should not indicate if they are required", () => {
     const requiredSelectorProps = { ...selectorProps, required: true };
     const { getByTestId } = render(
