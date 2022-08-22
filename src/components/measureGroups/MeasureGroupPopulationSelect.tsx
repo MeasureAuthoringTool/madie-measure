@@ -5,6 +5,10 @@ import { kebabCase } from "lodash";
 import { MenuItem } from "@mui/material";
 import { ExpressionDefinition } from "./MeasureGroups";
 import { DSLink, Select } from "@madie/madie-design-system/dist/react";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import { InitialPopulationAssociationType } from "./GroupPopulation";
 
 const SubTitle = styled.p`
   color: #505d68;
@@ -26,6 +30,13 @@ type Props = {
 };
 
 const FormField = tw.div`mt-6`;
+const FieldSeparator = tw.div`mt-1`;
+const SoftLabel = styled.label`
+  display: block;
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: rgba(66, 75, 90, 0.7);
+`;
 
 // Todo Inline errors should be displayed, MeasureGroupSchemaValidator
 const MeasureGroupPopulationSelect = ({
@@ -34,6 +45,11 @@ const MeasureGroupPopulationSelect = ({
   required,
   subTitle,
   options = [] as ExpressionDefinition[],
+  value = "",
+  scoring,
+  population,
+  initialPopulationSize,
+  changeAssociationCallback,
   canEdit,
   removePopulationCallback,
   addPopulationCallback,
@@ -69,6 +85,13 @@ const MeasureGroupPopulationSelect = ({
   const addPopulation = (evt) => {
     evt.preventDefault();
     addPopulationCallback();
+  };
+
+  const changeAssociation = (event: React.ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    const changedValue: string = (event.target as HTMLInputElement).value;
+    population.associationType = changedValue;
+    changeAssociationCallback();
   };
 
   return (
@@ -111,6 +134,42 @@ const MeasureGroupPopulationSelect = ({
               </DSLink>
             </span>
           )}
+          {initialPopulationSize === 2 &&
+            label.includes("Initial Population") &&
+            scoring === "Ratio" && (
+              <div data-testid="measure-group-initial-population-association">
+                <FormField>
+                  <FieldSeparator style={{ marginLeft: 30 }}>
+                    <SoftLabel>Association</SoftLabel>
+                    <RadioGroup
+                      aria-labelledby="inital-population-association-label"
+                      defaultValue=""
+                      name="radio-buttons-group"
+                      value={population.associationType}
+                      onChange={changeAssociation}
+                      style={{ marginLeft: 15 }}
+                    >
+                      <FormControlLabel
+                        value={InitialPopulationAssociationType.DENOMINATOR}
+                        control={<Radio />}
+                        label={InitialPopulationAssociationType.DENOMINATOR}
+                        disabled={
+                          !canEdit || label.includes("Initial Population 2")
+                        }
+                      />
+                      <FormControlLabel
+                        value={InitialPopulationAssociationType.NUMERATOR}
+                        control={<Radio />}
+                        label={InitialPopulationAssociationType.NUMERATOR}
+                        disabled={
+                          !canEdit || label.includes("Initial Population 2")
+                        }
+                      />
+                    </RadioGroup>
+                  </FieldSeparator>
+                </FormField>
+              </div>
+            )}
         </>
       )}
       {!canEdit && field.value}

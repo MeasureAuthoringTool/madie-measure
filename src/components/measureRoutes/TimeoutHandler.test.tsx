@@ -14,6 +14,16 @@ describe("Measure Groups Page", () => {
     renderTimeoutHandler();
   });
 
+  test("Timeout handler renders with default variable", async () => {
+    const { queryByText } = render(
+      <div id="main">
+        <TimeoutHandler timeLeft={10000} />
+      </div>
+    );
+    const alertTitle = queryByText("Session Expiration Warning");
+    expect(alertTitle).toBeNull();
+  });
+
   test("Timeout Handler does not render initially", async () => {
     const alertTitle = screen.queryByText("Session Expiration Warning");
     expect(alertTitle).toBeNull();

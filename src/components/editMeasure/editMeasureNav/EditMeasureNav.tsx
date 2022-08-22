@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   NavLink,
   useLocation,
@@ -6,7 +6,11 @@ import {
   useHistory,
 } from "react-router-dom";
 import tw, { styled } from "twin.macro";
-
+import { routeHandlerStore } from "@madie/madie-util";
+export interface RouteHandlerState {
+  canTravel: boolean;
+  pendingRoute: string;
+}
 interface PropTypes {
   isActive?: boolean;
 }
@@ -42,7 +46,31 @@ const EditMeasureNav = () => {
   ) {
     history.push("/404");
   }
+  const { updateRouteHandlerState } = routeHandlerStore;
+  const [routeHandlerState, setRouteHandlerState] = useState<RouteHandlerState>(
+    routeHandlerStore.state
+  );
 
+  useEffect(() => {
+    const subscription = routeHandlerStore.subscribe(setRouteHandlerState);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+  useEffect(() => {
+    const unblock = history.block(({ pathname }, action) => {
+      if (!routeHandlerState.canTravel) {
+        updateRouteHandlerState({ canTravel: false, pendingRoute: pathname });
+        return false;
+      }
+      unblock();
+    });
+    return unblock;
+  }, [
+    history.block,
+    routeHandlerState.canTravel,
+    routeHandlerState.pendingRoute,
+  ]);
   return (
     <div>
       <MenuItemContainer>

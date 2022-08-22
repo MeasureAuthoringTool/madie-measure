@@ -6,7 +6,7 @@ import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
 // Array of sample select option values
 const selectOptions = [
   { name: "SDE Ethnicity" },
-  { name: "SDE-Payer" },
+  { name: "SDE Payer" },
   { name: "SDE Race" },
   { name: "SDE Sex" },
   { name: "Initial Population" },
@@ -40,6 +40,24 @@ const selectorProps = {
 };
 
 describe("Measure Group Population Select Component", () => {
+  test("Component loads when omitting default value and options.", () => {
+    const omitProps = {
+      label: "Population Test",
+      hidden: false,
+      required: false,
+      name: "population-test",
+    };
+    const testProps = { ...omitProps, required: true };
+    const { getByTestId } = render(
+      <MeasureGroupPopulationSelect
+        {...testProps}
+        onChange={mockOnChangeHandler}
+      />
+    );
+    const label = getByTestId("select-measure-group-population-label");
+    expect(label.textContent).toEqual(expect.stringContaining("*"));
+  });
+
   test("Required inputs should indicate if they are required", async () => {
     const requiredSelectorProps = { ...selectorProps, required: true };
     render(

@@ -14,7 +14,6 @@ const Row = styled.section`
   flex-direction: row;
   flex-grow: 1;
   align-items: center;
-  margin-top: 14px;
 `;
 const Col = styled.article`
   display: flex;

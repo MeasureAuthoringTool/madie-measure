@@ -4,24 +4,14 @@ import MeasureEditor, {
   mapErrorsToAceAnnotations,
   mapErrorsToAceMarkers,
 } from "./MeasureEditor";
-import { MeasureContextProvider } from "../editMeasure/MeasureContext";
-import { Measure, Model } from "@madie/madie-models";
+import { Measure } from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import axios from "axios";
 import { ElmTranslationError } from "./measureEditorUtils";
 import userEvent from "@testing-library/user-event";
 // @ts-ignore
 import { parseContent, validateContent } from "@madie/madie-editor";
-
-jest.mock("@madie/madie-util", () => ({
-  validateContent: jest.fn(),
-  useOktaTokens: () => ({
-    getAccessToken: () => "test.jwt",
-    getUserName: () => MEASURE_CREATEDBY,
-  }),
-}));
-
-const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
+import { measureStore } from "@madie/madie-util";
 const measure = {
   id: "abcd-pqrs-xyz",
   measureHumanReadableId: "",
@@ -34,12 +24,37 @@ const measure = {
   cqlLibraryName: "",
   measureScoring: "",
   createdAt: "",
-  createdBy: MEASURE_CREATEDBY,
+  createdBy: "testuser@example.com",
   lastModifiedAt: "",
   lastModifiedBy: "",
-  model: Model.QICORE,
+  model: "QI-Core",
   measureMetaData: {},
 } as unknown as Measure;
+// } as Measure;
+
+// jest.mock("@madie/madie-util");
+jest.mock("@madie/madie-util", () => ({
+  useOktaTokens: jest.fn(() => ({
+    getUserName: jest.fn(() => "testuser@example.com"), //#nosec
+    getAccessToken: () => "test.jwt",
+  })),
+  measureStore: {
+    updateMeasure: jest.fn((measure) => measure),
+    state: jest.fn().mockImplementation(() => measure),
+    initialState: jest.fn().mockImplementation(() => measure),
+    subscribe: (set) => {
+      return { unsubscribe: () => null };
+    },
+  },
+}));
+
+const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
+
+const elmTranslationWithNoErrors: ElmTranslation = {
+  externalErrors: [],
+  errorExceptions: [],
+  library: null,
+};
 
 const translationErrors = [
   {
@@ -95,7 +110,7 @@ const elmTransaltionErrors: ElmTranslationError[] = [
   },
 ];
 
-const setMeasure = jest.fn();
+// const setMeasure = jest.fn();
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
@@ -111,12 +126,11 @@ const serviceConfig: ServiceConfig = {
   },
 };
 
-const renderEditor = (measure: Measure) => {
+const renderEditor = (measure) => {
+  measureStore.state.mockImplementationOnce(() => measure);
   return render(
     <ApiContextProvider value={serviceConfig}>
-      <MeasureContextProvider value={{ measure, setMeasure }}>
-        <MeasureEditor />
-      </MeasureContextProvider>
+      <MeasureEditor />
     </ApiContextProvider>
   );
 };
@@ -148,6 +162,12 @@ describe("MeasureEditor component", () => {
   });
 
   it("save measure with updated cql in editor on save button click", async () => {
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        translation: { library: {} },
+      });
+    });
     mockedAxios.put.mockImplementation((args) => {
       if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
         return Promise.resolve({ data: measure });
@@ -170,7 +190,6 @@ describe("MeasureEditor component", () => {
       const successMessage = getByTestId("save-cql-success");
       expect(successMessage.textContent).toEqual("CQL saved successfully");
       expect(mockedAxios.put).toHaveBeenCalledTimes(1);
-      expect(setMeasure).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -210,7 +229,10 @@ describe("MeasureEditor component", () => {
       }
     });
     (validateContent as jest.Mock).mockClear().mockImplementation(() => {
-      return Promise.resolve(elmTransaltionErrors);
+      return Promise.resolve({
+        errors: elmTransaltionErrors,
+        translation: { library: {} },
+      });
     });
     renderEditor(measure);
     const issues = await screen.findByText("2 issues found with CQL");
@@ -238,8 +260,7 @@ describe("MeasureEditor component", () => {
         cqlLibraryName: "",
         createdAt: "",
         createdBy: "testuser@example.com",
-        elmJson:
-          '[{"startLine":24,"startChar":7,"endLine":24,"endChar":15,"errorSeverity":"Warning","errorType":"ELM","message":"Test Warning 123","targetIncludeLibraryId":"TestLibrary_QICore","targetIncludeLibraryVersionId":"5.0.000","type":"ELM"},{"startLine":1,"startChar":1,"endLine":1,"endChar":96,"errorSeverity":"Warning","errorType":"ELM","message":"Test Warning 456","targetIncludeLibraryId":"TestLibrary_QICore","targetIncludeLibraryVersionId":"5.0.000","type":"ELM"}]',
+        elmJson: '{"library":{}}',
         id: "abcd-pqrs-xyz",
         lastModifiedAt: "",
         lastModifiedBy: "",
@@ -289,8 +310,7 @@ describe("MeasureEditor component", () => {
         cqlLibraryName: "",
         createdAt: "",
         createdBy: "testuser@example.com",
-        elmJson:
-          '[{"startLine":24,"startChar":7,"endLine":24,"endChar":15,"errorSeverity":"Warning","errorType":"ELM","message":"Test Warning 123","targetIncludeLibraryId":"TestLibrary_QICore","targetIncludeLibraryVersionId":"5.0.000","type":"ELM"},{"startLine":1,"startChar":1,"endLine":1,"endChar":96,"errorSeverity":"Warning","errorType":"ELM","message":"Test Warning 456","targetIncludeLibraryId":"TestLibrary_QICore","targetIncludeLibraryVersionId":"5.0.000","type":"ELM"}]',
+        elmJson: '{"library":{}}',
         id: "abcd-pqrs-xyz",
         lastModifiedAt: "",
         lastModifiedBy: "",
@@ -361,7 +381,7 @@ describe("MeasureEditor component", () => {
       }
     });
     (validateContent as jest.Mock).mockClear().mockImplementation(() => {
-      return Promise.resolve(elmTransaltionErrors);
+      return Promise.resolve({ errors: elmTransaltionErrors });
     });
     renderEditor(measure);
     const issues = await screen.findByText("2 issues found with CQL");
@@ -508,7 +528,10 @@ it("should display errors if not logged into umls", async () => {
   ];
 
   (validateContent as jest.Mock).mockClear().mockImplementation(() => {
-    return Promise.resolve(elmTransaltionErrorsUMLS);
+    return Promise.resolve({
+      errors: elmTransaltionErrorsUMLS,
+      translation: null,
+    });
   });
 
   const measureWithCqlCodes = {

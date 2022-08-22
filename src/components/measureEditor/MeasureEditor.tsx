@@ -7,15 +7,15 @@ import {
   parseContent,
   validateContent,
   ElmTranslationError,
+  ValidationResult,
 } from "@madie/madie-editor";
 import { Button } from "@madie/madie-components";
-import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import { Measure } from "@madie/madie-models";
 import { CqlCode, CqlCodeSystem } from "@madie/cql-antlr-parser/dist/src";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import tw from "twin.macro";
 import * as _ from "lodash";
-import { useOktaTokens } from "@madie/madie-util";
+import { useOktaTokens, measureStore } from "@madie/madie-util";
 
 const MessageText = tw.p`text-sm font-medium`;
 const SuccessText = tw(MessageText)`text-green-800`;
@@ -74,7 +74,17 @@ export interface CustomCqlCode extends Omit<CqlCode, "codeSystem"> {
 }
 
 const MeasureEditor = () => {
-  const { measure, setMeasure } = useCurrentMeasure();
+  const [measure, setMeasure] = useState<Measure>(measureStore.state);
+  const { updateMeasure } = measureStore;
+  useEffect(() => {
+    const subscription = measureStore.subscribe((measure) => {
+      setMeasure(measure);
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   const [editorVal, setEditorVal]: [string, Dispatch<SetStateAction<string>>] =
     useState("");
   const measureServiceApi = useMeasureServiceApi();
@@ -88,25 +98,26 @@ const MeasureEditor = () => {
 
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
-  const canEdit = userName === measure.createdBy;
+  const canEdit = userName === measure?.createdBy;
   const [valuesetMsg, setValuesetMsg] = useState(null);
 
   const updateElmAnnotations = async (
     cql: string
-  ): Promise<ElmTranslationError[]> => {
+  ): Promise<ValidationResult> => {
     setElmTranslationError(null);
     if (cql && cql.trim().length > 0) {
-      const allErrorsArray = await validateContent(cql);
-      if (isLoggedInUMLS(allErrorsArray)) {
+      const result = await validateContent(cql);
+      const { errors } = result;
+      if (isLoggedInUMLS(errors)) {
         setValuesetMsg("Please log in to UMLS!");
       }
 
-      const annotations = mapErrorsToAceAnnotations(allErrorsArray);
-      const errorMarkers = mapErrorsToAceMarkers(allErrorsArray);
+      const annotations = mapErrorsToAceAnnotations(errors);
+      const errorMarkers = mapErrorsToAceMarkers(errors);
 
       setElmAnnotations(annotations);
       setErrorMarkers(errorMarkers);
-      return allErrorsArray;
+      return result;
     } else {
       setElmAnnotations([]);
     }
@@ -142,21 +153,22 @@ const MeasureEditor = () => {
           rejection.reason
         );
       } else {
-        const cqlElmResult = results[0].value;
+        const validationResult = results[0].value;
         const parseErrors = results[1].value;
-        const cqlElmErrors = !!(cqlElmResult?.length > 0);
+        const cqlElmErrors = !!(validationResult?.errors?.length > 0);
         if (editorVal !== measure.cql) {
           const cqlErrors = parseErrors || cqlElmErrors;
           const newMeasure: Measure = {
             ...measure,
             cql: editorVal,
-            elmJson: JSON.stringify(cqlElmResult),
+            elmJson: JSON.stringify(validationResult?.translation),
             cqlErrors,
           };
           measureServiceApi
             .updateMeasure(newMeasure)
             .then(() => {
-              setMeasure(newMeasure);
+              updateMeasure(newMeasure);
+              // setMeasure(newMeasure);
               setSuccess(true);
             })
             .catch((reason) => {
@@ -185,18 +197,18 @@ const MeasureEditor = () => {
   };
 
   const resetCql = (): void => {
-    setEditorVal(measure.cql || "");
+    setEditorVal(measure?.cql || "");
   };
 
   useEffect(() => {
-    updateElmAnnotations(measure.cql).catch((err) => {
+    updateElmAnnotations(measure?.cql).catch((err) => {
       console.error("An error occurred while translating CQL to ELM", err);
       setElmTranslationError("Unable to translate CQL to ELM!");
       setElmAnnotations([]);
     });
-    setEditorVal(measure.cql);
+    setEditorVal(measure?.cql);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [measure?.cql]);
 
   return (
     <>
