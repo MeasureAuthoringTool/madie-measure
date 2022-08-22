@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
-// import { Group, GroupScoring, MeasureGroupTypes } from "@madie/madie-models";
 import {
   Measure,
   Group,
   GroupScoring,
   MeasureGroupTypes,
-  MeasureScoring,
-} from "../../../../madie-models/dist";
+} from "@madie/madie-models";
 import {
   Alert,
   Autocomplete,
@@ -448,7 +446,7 @@ const MeasureGroups = () => {
       ];
 
   const getDefaultObservationsForScoring = (scoring) => {
-    if (scoring === MeasureScoring.CONTINUOUS_VARIABLE) {
+    if (scoring === GroupScoring.CONTINUOUS_VARIABLE) {
       return [
         {
           id: uuidv4(),

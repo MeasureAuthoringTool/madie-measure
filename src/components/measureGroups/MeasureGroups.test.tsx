@@ -17,7 +17,7 @@ import {
   Measure,
   MeasureGroupTypes,
   PopulationType,
-} from "../../../../madie-models/dist";
+} from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import { MemoryRouter } from "react-router-dom";
 import { ELM_JSON, MeasureCQL } from "../common/MeasureCQL";
