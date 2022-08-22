@@ -48,17 +48,10 @@ const serviceConfig: ServiceConfig = {
   },
 };
 
-const EmptyStrat = {
+const emptyStrat = {
   cqlDefinition: "",
   description: "",
   association: "",
-  id: "",
-};
-
-const DeleteStrat = {
-  cqlDefinition: "delete",
-  description: "delete",
-  association: "delete",
   id: "",
 };
 
@@ -1417,7 +1410,7 @@ describe("Measure Groups Page", () => {
     group.groupDescription = "Description Text";
     group.rateAggregation = "Rate Aggregation Text";
     group.improvementNotation = "Increased score indicates improvement";
-    group.stratifications = [EmptyStrat, EmptyStrat];
+    group.stratifications = [emptyStrat, emptyStrat];
     measure.groups = [group];
     const { queryByTestId } = renderMeasureGroupComponent();
     userEvent.click(screen.getByTestId("stratifications-tab"));
@@ -1430,9 +1423,9 @@ describe("Measure Groups Page", () => {
     group.groupDescription = "Description Text";
     group.rateAggregation = "Rate Aggregation Text";
     group.improvementNotation = "Increased score indicates improvement";
-    group.stratifications = [EmptyStrat, EmptyStrat, EmptyStrat];
+    group.stratifications = [emptyStrat, emptyStrat, emptyStrat];
     measure.groups = [group];
-    const { queryByTestId } = renderMeasureGroupComponent();
+    renderMeasureGroupComponent();
     expect(screen.getByTestId("stratifications-tab")).toBeInTheDocument();
     userEvent.click(screen.getByTestId("stratifications-tab"));
     const removebutton = screen.getAllByTestId("remove-strat-button")[0];
@@ -1444,7 +1437,7 @@ describe("Measure Groups Page", () => {
     group.groupDescription = "Description Text";
     group.rateAggregation = "Rate Aggregation Text";
     group.improvementNotation = "Increased score indicates improvement";
-    group.stratifications = [EmptyStrat, EmptyStrat, EmptyStrat];
+    group.stratifications = [emptyStrat, emptyStrat, emptyStrat];
     measure.groups = [group];
     const { queryByTestId } = renderMeasureGroupComponent();
     expect(screen.getByTestId("stratifications-tab")).toBeInTheDocument();
@@ -1461,7 +1454,7 @@ describe("Measure Groups Page", () => {
     group.groupDescription = "Description Text";
     group.rateAggregation = "Rate Aggregation Text";
     group.improvementNotation = "Increased score indicates improvement";
-    group.stratifications = [EmptyStrat, EmptyStrat];
+    group.stratifications = [emptyStrat, emptyStrat];
     measure.groups = [group];
     const { queryByTestId } = renderMeasureGroupComponent();
     userEvent.click(screen.getByTestId("stratifications-tab"));
@@ -1480,10 +1473,10 @@ describe("Measure Groups Page", () => {
     group.improvementNotation = "Increased score indicates improvement";
     group.stratifications = [];
     measure.groups = [group];
-    const { queryByTestId } = renderMeasureGroupComponent();
+    renderMeasureGroupComponent();
     userEvent.click(screen.getByTestId("stratifications-tab"));
     expect(group.stratifications.length == 2);
-    expect(group.stratifications[0] === EmptyStrat);
+    expect(group.stratifications[0] === emptyStrat);
   });
 
   test("measure observation should not render for cohort", async () => {

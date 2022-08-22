@@ -22,7 +22,6 @@ import EditMeasureSideBarNav from "../editMeasure/measureDetails/EditMeasureSide
 import { Button, Select } from "@madie/madie-design-system/dist/react/";
 import { useFormik, FormikProvider, FieldArray, Field } from "formik";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
-import * as _ from "lodash";
 import { v4 as uuidv4 } from "uuid";
 import { MeasureGroupSchemaValidator } from "../../validations/MeasureGroupSchemaValidator";
 import {

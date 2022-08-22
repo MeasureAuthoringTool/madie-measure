@@ -3,7 +3,7 @@ import * as _ from "lodash";
 import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
 import { ExpressionDefinition } from "./MeasureGroups";
 import { GroupScoring, Population, PopulationType } from "@madie/madie-models";
-import { FieldInputProps, FieldMetaProps } from "formik/dist/types";
+import { FieldInputProps } from "formik/dist/types";
 import { findPopulations } from "./PopulationHelper";
 
 export enum InitialPopulationAssociationType {
