@@ -262,7 +262,6 @@ describe("Measure Groups Page", () => {
     await expect(groupPopulationInput.value).toBe("");
   });
 
-  // Todo need to fix this
   test("Should create population Group with one initial population successfully", async () => {
     renderMeasureGroupComponent();
 

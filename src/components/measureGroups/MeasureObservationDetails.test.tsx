@@ -407,8 +407,8 @@ describe("Measure Observation Details", () => {
     });
   });
 
-  // todo What is the purpose of this test case
-  it.skip("should handle no onChange for aggregate function change", () => {
+  // Since onChange is not provided, the aggregate value is not updated.
+  it("should handle no onChange for aggregate function change", async () => {
     const elmJson = JSON.stringify({
       library: {
         statements: {
@@ -433,18 +433,17 @@ describe("Measure Observation Details", () => {
         measureObservation={measureObservation}
       />
     );
+    const aggregateInput = screen.getByTestId(
+      "measure-observation-aggregate-obs1-input"
+    ) as HTMLInputElement;
+    expect(aggregateInput.value).toBe("");
 
-    const aggregateComboBox = screen.getByRole("combobox", {
-      name: "Aggregate Function *",
-    });
-    const aggregateOptions = within(aggregateComboBox).getAllByRole("option");
-    expect(aggregateComboBox).toHaveLength(12);
-    expect((aggregateOptions[0] as HTMLOptionElement).selected).toBeTruthy();
-    userEvent.selectOptions(aggregateComboBox, aggregateOptions[2]);
-    // after selecting an option why wouldn't it change ?
-    const aggregateOptions2 = within(aggregateComboBox).getAllByRole("option");
-    expect(aggregateOptions2).toHaveLength(12);
-    expect((aggregateOptions[0] as HTMLOptionElement).selected).toBeTruthy();
+    const aggregateSelect = screen.getByTestId(
+      "select-measure-observation-aggregate-obs1"
+    );
+    userEvent.click(getByRole(aggregateSelect, "button"));
+    userEvent.click(screen.getByText("Count"));
+    expect(aggregateInput.value).toBe("");
   });
 
   it("should fire callback for clicking remove measure observation", () => {
