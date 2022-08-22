@@ -176,7 +176,6 @@ describe("Measure Observation Details", () => {
     const observationSelect = screen.getByTestId(
       "select-measure-observation-obs1"
     );
-    expect(observationSelect).toBeInTheDocument();
     userEvent.click(getByRole(observationSelect, "button"));
     const observationOptions = await screen.findAllByRole("option");
     expect(observationOptions).toHaveLength(1);
@@ -397,7 +396,6 @@ describe("Measure Observation Details", () => {
     const aggregateSelect = screen.getByTestId(
       "select-measure-observation-aggregate-obs1"
     );
-    expect(aggregateSelect).toBeInTheDocument();
     userEvent.click(getByRole(aggregateSelect, "button"));
     const aggregateOptions = await screen.findAllByRole("option");
     expect(aggregateOptions).toHaveLength(12);
