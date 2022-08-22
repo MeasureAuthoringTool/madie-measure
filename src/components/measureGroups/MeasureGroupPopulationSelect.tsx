@@ -159,7 +159,9 @@ const MeasureGroupPopulationSelect = ({
               >
                 <FormField>
                   <FieldSeparator style={{ marginLeft: 30 }}>
-                    <SoftLabel>Association</SoftLabel>
+                    <div data-testid={`${label}`}>
+                      <SoftLabel>Association</SoftLabel>
+                    </div>
                     <div
                       style={{
                         marginLeft: 15,
