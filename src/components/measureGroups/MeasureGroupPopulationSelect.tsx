@@ -25,7 +25,6 @@ type Props = {
   onChange: any;
   optionTitle?: string;
   options?: Array<ExpressionDefinition>;
-  value?: string;
   error?: boolean;
 };
 
@@ -45,7 +44,6 @@ const MeasureGroupPopulationSelect = ({
   required,
   subTitle,
   options = [] as ExpressionDefinition[],
-  value = "",
   scoring,
   population,
   initialPopulationSize,
@@ -89,8 +87,7 @@ const MeasureGroupPopulationSelect = ({
 
   const changeAssociation = (event: React.ChangeEvent<HTMLInputElement>) => {
     event.preventDefault();
-    const changedValue: string = (event.target as HTMLInputElement).value;
-    population.associationType = changedValue;
+    population.associationType = (event.target as HTMLInputElement).value;
     changeAssociationCallback();
   };
 
@@ -173,7 +170,7 @@ const MeasureGroupPopulationSelect = ({
         </>
       )}
       {!canEdit && field.value}
-      {/*what is subTitle?*/}
+      {/* Todo what is subTitle?*/}
       {subTitle && <SubTitle>{subTitle}</SubTitle>}
     </FormField>
   );
