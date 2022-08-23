@@ -206,7 +206,7 @@ const MeasureGroups = () => {
     setCqlDefinitionDataTypes(
       measureServiceApi.getReturnTypesForAllCqlDefinitions(measure?.elmJson)
     );
-  }, [measureServiceApi, measure?.elmJson]);
+  }, [measure]);
 
   useEffect(() => {
     if (measure?.groups && measure?.groups[measureGroupNumber]) {
