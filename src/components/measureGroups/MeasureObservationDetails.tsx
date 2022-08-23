@@ -1,22 +1,13 @@
 import React, { useEffect, useState } from "react";
 import tw, { styled } from "twin.macro";
-import { Button, TextField } from "@mui/material";
+import { MenuItem } from "@mui/material";
 import {
   MeasureObservation,
   AGGREGATE_FUNCTION_KEYS,
 } from "@madie/madie-models";
-import { DSLink } from "@madie/madie-design-system/dist/react";
+import { DSLink, Select } from "@madie/madie-design-system/dist/react";
 
 const FormControl = styled.section(() => [tw`mb-3`, `margin: 25px 40px;`]);
-const HeavyLabel = styled.label`
-  color: #505d68;
-  font-weight: 500;
-`;
-
-const Required = styled.span`
-  display: inline-block;
-  padding-left: 0.25rem;
-`;
 
 const Row = styled.section`
   display: flex;
@@ -62,35 +53,23 @@ const MeasureObservationDetails = ({
     }
   }, [elmJson]);
 
+  // todo elmJson doesn't have any functions
   return (
     <>
       <div>
-        <HeavyLabel
-          htmlFor={`measure-observation-${name}`}
-          id={`measure-observation-${name}-label`}
-          data-testid={`select-measure-observation-${name}-label`}
-        >
-          {label ? label : "Observation"}
-          {required && <Required>*</Required>}
-        </HeavyLabel>
         <Row>
           <Col>
-            <TextField
+            <Select
+              placeHolder={{ name: "-", value: "" }}
+              required={required}
+              label={label ? label : "Observation"}
               id={`measure-observation-${name}`}
               data-testid={`select-measure-observation-${name}`}
-              InputLabelProps={{ shrink: false }}
-              label=" "
-              sx={{
-                "& .MuiInputLabel-root": {
-                  display: "none",
-                },
+              inputProps={{
+                "data-testid": `measure-observation-${name}-input`,
               }}
-              select
-              value={measureObservation?.definition || ""}
               style={{ width: 300 }}
-              SelectProps={{
-                native: true,
-              }}
+              value={measureObservation?.definition || ""}
               onChange={(e) => {
                 if (onChange) {
                   onChange({
@@ -99,16 +78,19 @@ const MeasureObservationDetails = ({
                   });
                 }
               }}
-            >
-              <option disabled value="">
-                -
-              </option>
-              {cqlFunctionNames.map((o) => (
-                <option key={o} value={o}>
-                  {o}
-                </option>
-              ))}
-            </TextField>
+              options={[
+                !required && (
+                  <MenuItem key="-" value="">
+                    -
+                  </MenuItem>
+                ),
+                ...cqlFunctionNames.map((o) => (
+                  <MenuItem key={o} value={o}>
+                    {o}
+                  </MenuItem>
+                )),
+              ]}
+            />
           </Col>
           {!required && (
             <Col style={{ marginLeft: 10 }}>
@@ -130,32 +112,19 @@ const MeasureObservationDetails = ({
         </Row>
       </div>
       <FormControl style={{ marginLeft: 40 }}>
-        <HeavyLabel
-          htmlFor={`measure-observation-aggregate-${name}`}
-          id={`measure-observation-aggregate-${name}-label`}
-          data-testid={`select-measure-observation-aggregate-${name}-label`}
-        >
-          Aggregate Function
-          <Required>*</Required>
-        </HeavyLabel>
         <Row>
           <Col>
-            <TextField
+            <Select
+              placeHolder={{ name: "-", value: "" }}
+              required={required}
+              label="Aggregate Function"
               id={`measure-observation-aggregate-${name}`}
-              data-testid={`select-measure-observation-${name}`}
-              InputLabelProps={{ shrink: false }}
-              label=" "
-              sx={{
-                "& .MuiInputLabel-root": {
-                  display: "none",
-                },
+              data-testid={`select-measure-observation-aggregate-${name}`}
+              inputProps={{
+                "data-testid": `measure-observation-aggregate-${name}-input`,
               }}
-              select
-              value={measureObservation?.aggregateMethod || ""}
               style={{ width: 300 }}
-              SelectProps={{
-                native: true,
-              }}
+              value={measureObservation?.aggregateMethod || ""}
               onChange={(e) => {
                 if (onChange) {
                   onChange({
@@ -164,16 +133,20 @@ const MeasureObservationDetails = ({
                   });
                 }
               }}
-            >
-              <option disabled value="">
-                -
-              </option>
-              {AGGREGATE_FUNCTIONS.map((o) => (
-                <option key={o} value={o}>
-                  {o}
-                </option>
-              ))}
-            </TextField>
+              size="small"
+              options={[
+                !required && (
+                  <MenuItem key="-" value="">
+                    -
+                  </MenuItem>
+                ),
+                ...AGGREGATE_FUNCTIONS.map((o) => (
+                  <MenuItem key={o} value={o}>
+                    {o}
+                  </MenuItem>
+                )),
+              ]}
+            />
           </Col>
         </Row>
       </FormControl>

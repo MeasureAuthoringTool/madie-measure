@@ -1,5 +1,5 @@
 import * as Yup from "yup";
-import { AggregateFunctionType, MeasureScoring } from "@madie/madie-models";
+import { AggregateFunctionType, GroupScoring } from "@madie/madie-models";
 import _ from "lodash";
 
 export type CqlDefineDataTypes = {
@@ -31,7 +31,7 @@ export const MeasureGroupSchemaValidator = (
 
   return Yup.object().shape({
     scoring: Yup.string()
-      .oneOf(Object.values(MeasureScoring))
+      .oneOf(Object.values(GroupScoring))
       .required("Group Scoring is required."),
     measureGroupTypes: Yup.array().min(
       1,
@@ -42,7 +42,7 @@ export const MeasureGroupSchemaValidator = (
       ["scoring", "populationBasis"],
       (scoring, populationBasis) => {
         switch (scoring) {
-          case MeasureScoring.COHORT:
+          case GroupScoring.COHORT:
             return Yup.array().of(
               Yup.object().shape({
                 definition: Yup.string().when(["name"], {
@@ -55,7 +55,7 @@ export const MeasureGroupSchemaValidator = (
                 }),
               })
             );
-          case MeasureScoring.CONTINUOUS_VARIABLE:
+          case GroupScoring.CONTINUOUS_VARIABLE:
             return Yup.array().of(
               Yup.object().shape({
                 definition: Yup.string().when(["name"], (populationName) => {
@@ -75,7 +75,7 @@ export const MeasureGroupSchemaValidator = (
                 }),
               })
             );
-          case MeasureScoring.PROPORTION:
+          case GroupScoring.PROPORTION:
             return Yup.array().of(
               Yup.object().shape({
                 definition: Yup.string().when(["name"], (populationName) => {
@@ -95,7 +95,7 @@ export const MeasureGroupSchemaValidator = (
                 }),
               })
             );
-          case MeasureScoring.RATIO:
+          case GroupScoring.RATIO:
             return Yup.array().of(
               Yup.object().shape({
                 definition: Yup.string().when(["name"], (populationName) => {
@@ -120,7 +120,7 @@ export const MeasureGroupSchemaValidator = (
     ),
     measureObservations: Yup.object().when("scoring", (scoring) => {
       switch (scoring) {
-        case MeasureScoring.CONTINUOUS_VARIABLE:
+        case GroupScoring.CONTINUOUS_VARIABLE:
           return Yup.array()
             .of(
               Yup.object().shape({
@@ -138,7 +138,7 @@ export const MeasureGroupSchemaValidator = (
               1,
               "Continuous Variable measure groups must have a single measure observation"
             );
-        case MeasureScoring.RATIO:
+        case GroupScoring.RATIO:
           return Yup.array()
             .of(
               Yup.object().shape({

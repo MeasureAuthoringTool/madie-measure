@@ -6,17 +6,18 @@ import {
   Group,
   GroupScoring,
   MeasureGroupTypes,
-  MeasureScoring,
 } from "@madie/madie-models";
 import {
   Alert,
   Autocomplete,
   TextField,
   Grid as GridLayout,
+  MenuItem as MuiMenuItem,
+  Link,
 } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import EditMeasureSideBarNav from "../editMeasure/measureDetails/EditMeasureSideBarNav";
-import { Button } from "@madie/madie-design-system/dist/react/";
+import { Button, Select } from "@madie/madie-design-system/dist/react/";
 import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { v4 as uuidv4 } from "uuid";
@@ -51,17 +52,7 @@ const Title = styled.h1`
   font-size: 18px;
   color: #424b5a;
 `;
-const SoftLabel = styled.label`
-  display: block;
-  margin-bottom: 5px;
-  font-size: 12px;
-  color: rgba(66, 75, 90, 0.7);
-`;
-const Divider = styled.div`
-  width: 100%;
-  margin: 37px 0px 32px 0px;
-  border-bottom: solid 1px rgba(80, 93, 104, 0.2);
-`;
+
 const ButtonSpacer = styled.span`
   margin-left: 15px;
 `;
@@ -97,40 +88,53 @@ const MenuItem = styled.li((props: PropTypes) => [
 
 const FormField = tw.div`mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-3`;
 const FormFieldInner = tw.div`sm:col-span-3`;
-const FieldLabel = tw.label`block text-sm font-medium text-gray-700`;
+const FieldLabel = tw.label`block capitalize text-sm font-medium text-gray-700`;
 const FieldSeparator = tw.div`mt-1`;
 const FieldInput = tw.input`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
 const TextArea = tw.textarea`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
 
-export const MeasureImprovementNotation = [
-  { label: "Select", subtitle: "Optional", code: "" },
+// provides dropdown options for Improvement Notation
+const improvementNotationOptions = [
+  {
+    label: "-",
+    value: "",
+    subtitle: "Optional",
+    code: "",
+  },
   {
     label: "Increased score indicates improvement",
+    value: "Increased score indicates improvement",
     subtitle:
       "Improvement is indicated as an increase in the score or measurement (e.g. Higher score indicates better quality).",
     code: "increase",
   },
   {
     label: "Decreased score indicates improvement",
+    value: "Decreased score indicates improvement",
     subtitle:
       "Improvement is indicated as a decrease in the score or measurement (e.g. Lower score indicates better quality).",
     code: "decrease",
   },
 ];
-export const EmptyStrat = {
+
+const emptyStrat = {
   cqlDefinition: "",
   description: "",
   association: "",
   id: "",
 };
+
 export const deleteStrat = {
   cqlDefinition: "delete",
   description: "delete",
   association: "delete",
   id: "",
 };
-export const AssociationSelect = {
+
+// provides dropdown options for stratification association
+const associationSelect = {
   Proportion: [
+    "-",
     "Initial Population",
     "Denominator",
     "Denominator Exclusion",
@@ -139,11 +143,12 @@ export const AssociationSelect = {
     "Denominator Exception",
   ],
   "Continuous Variable": [
+    "-",
     "Initial Population",
     "Measure Population",
     "Measure Population Exclusion",
   ],
-  Cohort: ["Initial Population"],
+  Cohort: ["-", "Initial Population"],
   Ratio: [],
 };
 
@@ -189,6 +194,8 @@ const MeasureGroups = () => {
       measureGroupNumber: undefined,
     });
   const [visibleStrats, setVisibleStrats] = useState<number>(2);
+  // Todo option should be an Array when passing to AutoComplete.
+  // warning during test cases
   const [populationBasisValues, setPopulationBasisValues] =
     useState<string[]>();
 
@@ -199,7 +206,7 @@ const MeasureGroups = () => {
     setCqlDefinitionDataTypes(
       measureServiceApi.getReturnTypesForAllCqlDefinitions(measure?.elmJson)
     );
-  }, [measure?.elmJson]);
+  }, [measureServiceApi, measure?.elmJson]);
 
   useEffect(() => {
     if (measure?.groups && measure?.groups[measureGroupNumber]) {
@@ -215,6 +222,8 @@ const MeasureGroups = () => {
           populations: measure?.groups[measureGroupNumber].populations || [],
           measureObservations:
             measure?.groups[measureGroupNumber].measureObservations || null,
+          improvementNotation:
+            measure?.groups[measureGroupNumber].improvementNotation || "",
         },
       });
       setVisibleStrats(
@@ -227,11 +236,11 @@ const MeasureGroups = () => {
         resetForm({
           values: {
             id: null,
-            scoring: "Select",
+            scoring: "",
             populations: [],
             measureObservations: null,
             groupDescription: "",
-            stratifications: [{ ...EmptyStrat }, { ...EmptyStrat }],
+            stratifications: [{ ...emptyStrat }, { ...emptyStrat }],
             rateAggregation: "",
             improvementNotation: "",
             measureGroupTypes: [],
@@ -243,27 +252,24 @@ const MeasureGroups = () => {
     }
   }, [measureGroupNumber, measure?.groups]);
 
-  const defaultScoring = group?.scoring || "Select";
   const formik = useFormik({
     initialValues: {
       id: group?.id || null,
-      scoring: defaultScoring,
+      scoring: group?.scoring || "",
       populations: allPopulations,
       measureObservations: null,
       rateAggregation: group?.rateAggregation || "",
       improvementNotation: group?.improvementNotation || "",
       groupDescription: group?.groupDescription,
       stratifications: group?.stratifications || [
-        { ...EmptyStrat },
-        { ...EmptyStrat },
+        { ...emptyStrat },
+        { ...emptyStrat },
       ],
       measureGroupTypes: group?.measureGroupTypes || [],
       populationBasis: group?.populationBasis || "Boolean",
       scoringUnit: group?.scoringUnit,
     } as Group,
-
     validationSchema: MeasureGroupSchemaValidator(cqlDefinitionDataTypes),
-
     onSubmit: (group: Group) => {
       setSuccessMessage(undefined);
       window.scrollTo(0, 0);
@@ -279,6 +285,7 @@ const MeasureGroups = () => {
     },
   });
   const { resetForm } = formik;
+
   // We want to update layout with a cannot travel flag while this is active
   const { updateRouteHandlerState } = routeHandlerStore;
   useEffect(() => {
@@ -287,6 +294,7 @@ const MeasureGroups = () => {
       pendingRoute: "",
     });
   }, [formik.dirty]);
+
   useEffect(() => {
     if (measure?.cql) {
       const definitions = new CqlAntlr(measure.cql).parse()
@@ -305,12 +313,13 @@ const MeasureGroups = () => {
   }, []);
 
   const discardChanges = () => {
+    // check to identify a new group
     if (measureGroupNumber >= measure?.groups?.length || !measure?.groups) {
       resetForm({
         values: {
           id: null,
           groupDescription: "",
-          scoring: "Select",
+          scoring: "",
           measureGroupTypes: [],
           rateAggregation: "",
           improvementNotation: "",
@@ -319,6 +328,7 @@ const MeasureGroups = () => {
         },
       });
     } else {
+      // resetting form with data from DB
       resetForm({
         values: {
           ...measure?.groups[measureGroupNumber],
@@ -448,7 +458,7 @@ const MeasureGroups = () => {
       ];
 
   const getDefaultObservationsForScoring = (scoring) => {
-    if (scoring === MeasureScoring.CONTINUOUS_VARIABLE) {
+    if (scoring === GroupScoring.CONTINUOUS_VARIABLE) {
       return [
         {
           id: uuidv4(),
@@ -459,6 +469,24 @@ const MeasureGroups = () => {
       return null;
     }
   };
+
+  // Provides dropdown options for stratification
+  // contains a default value along with all available CQL Definitions
+  const stratificationOptions = [
+    <MuiMenuItem key="-" value={""}>
+      -
+    </MuiMenuItem>,
+    expressionDefinitions
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((opt, i) => {
+        const sanitizedString = opt.name.replace(/"/g, "");
+        return (
+          <MuiMenuItem key={`${sanitizedString}-${i}`} value={sanitizedString}>
+            {sanitizedString}
+          </MuiMenuItem>
+        );
+      }),
+  ];
 
   return (
     <FormikProvider value={formik}>
@@ -558,7 +586,7 @@ const MeasureGroups = () => {
                 <FormField>
                   <FieldSeparator>
                     <FieldLabel htmlFor="population-basis-combo-box">
-                      Population Basis
+                      Population Basis *
                     </FieldLabel>
                     {canEdit && (
                       <Autocomplete
@@ -582,24 +610,22 @@ const MeasureGroups = () => {
               )}
               <FormField>
                 <FieldSeparator>
-                  {/* pull from cql file */}
-                  <SoftLabel htmlFor="scoring-unit-select">
-                    Group Scoring:
-                  </SoftLabel>
                   {canEdit && (
-                    <TextField
-                      select
-                      id="scoring-unit-select"
-                      label=""
-                      inputProps={{
-                        "data-testid": "scoring-unit-select",
-                      }}
-                      InputLabelProps={{ shrink: false }}
-                      SelectProps={{
-                        native: true,
-                      }}
-                      name="scoring"
-                      value={formik.values.scoring}
+                    <Select
+                      placeHolder={{ name: "-", value: "" }}
+                      required
+                      label="Scoring"
+                      id="scoring-select"
+                      inputProps={{ "data-testid": "scoring-select-input" }}
+                      data-testid="scoring-select"
+                      {...formik.getFieldProps("scoring")}
+                      error={
+                        formik.touched.scoring && Boolean(formik.errors.scoring)
+                      }
+                      helperText={
+                        formik.touched.scoring && formik.errors.scoring
+                      }
+                      size="small"
                       onChange={(e) => {
                         const nextScoring = e.target.value;
                         const populations =
@@ -618,17 +644,18 @@ const MeasureGroups = () => {
                           },
                         });
                       }}
-                    >
-                      {Object.values(GroupScoring).map((opt, i) => (
-                        <option
-                          key={`${opt}-${i}`}
-                          value={opt}
-                          data-testid="scoring-unit-option"
-                        >
-                          {opt}
-                        </option>
-                      ))}
-                    </TextField>
+                      options={Object.keys(GroupScoring).map((scoring) => {
+                        return (
+                          <MuiMenuItem
+                            key={scoring}
+                            value={GroupScoring[scoring]}
+                            data-testid={`group-scoring-option-${scoring}`}
+                          >
+                            {GroupScoring[scoring]}
+                          </MuiMenuItem>
+                        );
+                      })}
+                    />
                   )}
                   {!canEdit && formik.values.scoring}
                 </FieldSeparator>
@@ -663,17 +690,17 @@ const MeasureGroups = () => {
                         if (!!formik.values.stratifications) {
                           while (formik.values.stratifications.length < 2) {
                             formik.values.stratifications.push({
-                              ...EmptyStrat,
+                              ...emptyStrat,
                             });
                             setVisibleStrats(2);
                           }
                         } else {
                           formik.values.stratifications = [
                             {
-                              ...EmptyStrat,
+                              ...emptyStrat,
                             },
                             {
-                              ...EmptyStrat,
+                              ...emptyStrat,
                             },
                           ];
                           setVisibleStrats(2);
@@ -751,6 +778,7 @@ const MeasureGroups = () => {
                   )}
                 />
               )}
+
               {activeTab === "stratification" && (
                 <FieldArray
                   name="stratifications"
@@ -764,109 +792,75 @@ const MeasureGroups = () => {
                               <div key={i}>
                                 <Row>
                                   <Col>
-                                    <FieldLabel htmlFor="stratification-select">
-                                      Stratification {i + 1} {}
+                                    {/*Todo need to fix Styling*/}
+                                    <div>
                                       {formik.values.stratifications.length >
                                         2 &&
                                         visibleStrats > 2 && (
-                                          <span>
-                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                            <Button
-                                              onClick={(e) => {
-                                                e.preventDefault();
-                                                arrayHelpers.replace(
-                                                  i,
-                                                  deleteStrat
-                                                );
-                                                setVisibleStrats(
-                                                  visibleStrats - 1
-                                                );
-                                              }}
-                                              variant="white"
-                                              size="xs"
-                                              data-testid="remove-strat-button"
-                                            >
-                                              Remove
-                                            </Button>
-                                          </span>
+                                          <Link
+                                            component="button"
+                                            underline="always"
+                                            onClick={(e) => {
+                                              e.preventDefault();
+                                              arrayHelpers.replace(
+                                                i,
+                                                deleteStrat
+                                              );
+                                              setVisibleStrats(
+                                                visibleStrats - 1
+                                              );
+                                            }}
+                                            variant="body2"
+                                            data-testid="remove-strat-button"
+                                          >
+                                            Remove
+                                          </Link>
                                         )}
-                                    </FieldLabel>
 
-                                    <TextField
-                                      select
-                                      id="stratification-select"
-                                      label=""
-                                      value={
-                                        formik.values.stratifications[i]
-                                          .cqlDefinition
-                                      }
-                                      inputProps={{
-                                        "data-testid": "stratification-select",
-                                      }}
-                                      onChange={formik.handleChange}
-                                      InputLabelProps={{ shrink: false }}
-                                      SelectProps={{
-                                        native: true,
-                                      }}
-                                      name={`stratifications[${i}].cqlDefinition`}
-                                    >
-                                      <option
-                                        value=""
-                                        data-testid="stratification-select-option"
-                                      >
-                                        -
-                                      </option>
+                                      <Select
+                                        placeHolder={{ name: "-", value: "" }}
+                                        label={`Stratification ${i + 1}`}
+                                        id={`Stratification-select-${i + 1}`}
+                                        inputProps={{
+                                          "data-testid": `stratification-${
+                                            i + 1
+                                          }-input`,
+                                        }}
+                                        {...formik.getFieldProps(
+                                          `stratifications[${i}].cqlDefinition`
+                                        )}
+                                        size="small"
+                                        options={stratificationOptions}
+                                      />
+                                    </div>
 
-                                      {Object.values(
-                                        expressionDefinitions.sort((a, b) =>
-                                          a.name.localeCompare(b.name)
-                                        )
-                                      ).map((opt, i) => (
-                                        <option
-                                          key={`${i + 1}`}
-                                          value={opt.name}
-                                          data-testid="stratification-select-option"
-                                        >
-                                          {opt.name.replace(/"/g, "")}
-                                        </option>
-                                      ))}
-                                    </TextField>
-                                    <FieldLabel htmlFor="association-select">
-                                      Association {i + 1}
-                                    </FieldLabel>
-                                    <TextField
-                                      select
-                                      id="association-select"
-                                      label=""
-                                      value={
-                                        formik.values.stratifications[i]
-                                          .association
-                                      }
+                                    <Select
+                                      placeHolder={{ name: "-", value: "" }}
+                                      label={`Association ${i + 1}`}
+                                      id={`association-select-${i + 1}`}
                                       inputProps={{
-                                        "data-testid": "association-select",
+                                        "data-testid": `association-${
+                                          i + 1
+                                        }-input`,
                                       }}
-                                      onChange={formik.handleChange}
-                                      InputLabelProps={{ shrink: false }}
-                                      SelectProps={{
-                                        native: true,
-                                      }}
-                                      name={`stratifications[${i}].association`}
-                                    >
-                                      {formik.values.scoring != "Select" &&
-                                        Object.values(
-                                          AssociationSelect[
-                                            formik.values.scoring
-                                          ]
-                                        ).map((opt, i) => (
-                                          <option
+                                      {...formik.getFieldProps(
+                                        `stratifications[${i}].association`
+                                      )}
+                                      size="small"
+                                      options={
+                                        !!formik.values.scoring &&
+                                        associationSelect[
+                                          formik.values.scoring
+                                        ].map((opt, i) => (
+                                          <MuiMenuItem
                                             key={`${opt}-${i}`}
                                             value={`${opt}`}
-                                            data-testid="association-select-option"
                                           >
                                             {opt}
-                                          </option>
-                                        ))}
-                                    </TextField>
+                                          </MuiMenuItem>
+                                        ))
+                                      }
+                                    />
                                   </Col>
                                   <Col>
                                     <FieldLabel htmlFor="stratification-description">
@@ -879,7 +873,6 @@ const MeasureGroups = () => {
                                             formik.values.stratifications[i]
                                               .description
                                           }
-                                          //type="text"
                                           name={`stratifications[${i}].description`}
                                           id="stratification-description"
                                           autoComplete="stratification-description"
@@ -894,7 +887,6 @@ const MeasureGroups = () => {
                                     </FieldSeparator>
                                   </Col>
                                 </Row>
-                                <Divider />
                               </div>
                             )
                         )
@@ -908,7 +900,7 @@ const MeasureGroups = () => {
                             onClick={(e) => {
                               e.preventDefault();
                               setVisibleStrats(visibleStrats + 1);
-                              arrayHelpers.push(EmptyStrat);
+                              arrayHelpers.push(emptyStrat);
                             }}
                           >
                             Add Stratification
@@ -920,70 +912,50 @@ const MeasureGroups = () => {
                 />
               )}
               {activeTab === "reporting" && (
-                <div>
-                  <FormField>
-                    <FormFieldInner>
-                      <FieldLabel htmlFor="rate-aggregation">
-                        Rate Aggregation
-                      </FieldLabel>
-                      <FieldSeparator>
-                        {canEdit && (
-                          <FieldInput
-                            value={formik.values.rateAggregation}
-                            type="text"
-                            name="rate-aggregation"
-                            id="rate-aggregation"
-                            autoComplete="rate-aggregation"
-                            placeholder="Rate Aggregation"
-                            data-testid="rateAggregationText"
-                            {...formik.getFieldProps("rateAggregation")}
-                          />
-                        )}
-                      </FieldSeparator>
-                      <Divider />
-                      <FieldLabel htmlFor="rate-aggregation">
-                        Improvement Notation
-                      </FieldLabel>
-                      <FieldSeparator>
-                        {canEdit && (
-                          <TextField
-                            select
-                            id="improvement-notation-select"
-                            label=""
-                            value={formik.values.improvementNotation}
-                            inputProps={{
-                              "data-testid": "improvement-notation-select",
-                            }}
-                            onChange={(e) => {
-                              formik.setFieldValue(
-                                "improvementNotation",
-                                e.target.value
-                              );
-                            }}
-                            InputLabelProps={{ shrink: false }}
-                            SelectProps={{
-                              native: true,
-                            }}
-                            name="type"
-                          >
-                            {Object.values(MeasureImprovementNotation).map(
-                              (opt, i) => (
-                                <option
-                                  key={`${opt.code}-${i}`}
-                                  value={opt.label}
-                                  data-testid="improvement-notation-option"
-                                >
-                                  {opt.label}
-                                </option>
-                              )
-                            )}
-                          </TextField>
-                        )}
-                        {!canEdit && formik.values.improvementNotation}
-                      </FieldSeparator>
-                    </FormFieldInner>
-                  </FormField>
-                </div>
+                <FormField>
+                  <FormFieldInner>
+                    <FieldLabel htmlFor="rate-aggregation">
+                      Rate Aggregation
+                    </FieldLabel>
+                    <FieldSeparator>
+                      {canEdit && (
+                        <FieldInput
+                          value={formik.values.rateAggregation}
+                          type="text"
+                          name="rate-aggregation"
+                          id="rate-aggregation"
+                          autoComplete="rate-aggregation"
+                          placeholder="Rate Aggregation"
+                          data-testid="rateAggregationText"
+                          {...formik.getFieldProps("rateAggregation")}
+                        />
+                      )}
+                    </FieldSeparator>
+                    <FieldSeparator>
+                      {canEdit && (
+                        <Select
+                          placeHolder={{ name: "-", value: "" }}
+                          label="Improvement Notation"
+                          id="improvement-notation-select"
+                          inputProps={{
+                            "data-testid": "improvement-notation-input",
+                          }}
+                          data-testid="improvement-notation-select"
+                          {...formik.getFieldProps("improvementNotation")}
+                          size="small"
+                          options={Object.values(
+                            improvementNotationOptions
+                          ).map((opt) => (
+                            <MuiMenuItem key={opt.label} value={opt.value}>
+                              {opt.label}
+                            </MuiMenuItem>
+                          ))}
+                        />
+                      )}
+                      {!canEdit && formik.values.improvementNotation}
+                    </FieldSeparator>
+                  </FormFieldInner>
+                </FormField>
               )}
             </div>
           </Content>
@@ -996,7 +968,7 @@ const MeasureGroups = () => {
                 <Button
                   style={{ background: "#424B5A" }}
                   type="button"
-                  buttonTitle="Delete"
+                  buttontitle="Delete"
                   data-testid="group-form-delete-btn"
                   disabled={
                     measureGroupNumber >= measure?.groups?.length ||
