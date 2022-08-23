@@ -1886,4 +1886,93 @@ describe("Measure Groups Page", () => {
       expect.anything()
     );
   }, 30000);
+
+  test("should not show Initial Population Association for Ratio scoring when there is 1 Initial Population", async () => {
+    const group1: Group = {
+      id: "1",
+      scoring: "Ratio",
+      populations: [
+        {
+          id: "id-1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+          associationType: InitialPopulationAssociationType.NUMERATOR,
+        },
+      ],
+      groupDescription: "",
+      measureGroupTypes: [MeasureGroupTypes.PROCESS],
+      populationBasis: "Boolean",
+      scoringUnit: "",
+    };
+    measure.groups = [group1];
+    renderMeasureGroupComponent();
+
+    // verify  IP1 association type radio group is not visible
+    const association1 = screen.queryByTestId(
+      "measure-group-initial-population-association-id-1"
+    );
+    expect(association1).not.toBeInTheDocument();
+  });
+
+  test("should show Initial Population Association for Ratio scoring when there are 2 Initial Populations and can change values", async () => {
+    const group1: Group = {
+      id: "1",
+      scoring: "Ratio",
+      populations: [
+        {
+          id: "id-1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+        },
+        {
+          id: "id-2",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+        },
+      ],
+      groupDescription: "",
+      measureGroupTypes: [MeasureGroupTypes.PROCESS],
+      populationBasis: "Boolean",
+      scoringUnit: "",
+    };
+    measure.groups = [group1];
+    renderMeasureGroupComponent();
+
+    const association1 = screen.getByTestId(
+      "measure-group-initial-population-association-id-1"
+    );
+    expect(association1).toBeInTheDocument();
+    const ip1DenomAssociation = screen.getByTestId(
+      "Initial Population 1-Denominator"
+    );
+    const ip1NumerAssociation = screen.getByTestId(
+      "Initial Population 1-Numerator"
+    );
+    expect(ip1DenomAssociation).toHaveAttribute("checked", "");
+    expect(ip1NumerAssociation).not.toHaveAttribute("checked", "");
+    expect((ip1DenomAssociation as HTMLInputElement).checked).toEqual(true);
+    expect((ip1NumerAssociation as HTMLInputElement).checked).toEqual(false);
+
+    fireEvent.click(ip1NumerAssociation);
+    expect((ip1NumerAssociation as HTMLInputElement).checked).toEqual(true);
+    expect((ip1DenomAssociation as HTMLInputElement).checked).toEqual(false);
+
+    // delete the IP2
+    const removeIpLink = screen.getByRole("link", { name: /Remove/ });
+    expect(removeIpLink).toBeInTheDocument();
+    userEvent.click(removeIpLink);
+    expect(association1).not.toBeInTheDocument();
+
+    // add second IP
+    const addIpLink = screen.getByRole("link", {
+      name: "+ Add Initial Population",
+    });
+    expect(addIpLink).toBeInTheDocument();
+    userEvent.click(addIpLink);
+    expect(
+      screen.getByTestId("measure-group-initial-population-association-id-1")
+    ).toBeInTheDocument();
+    expect((ip1DenomAssociation as HTMLInputElement).checked).toEqual(false);
+    expect((ip1NumerAssociation as HTMLInputElement).checked).toEqual(true);
+  });
 });
