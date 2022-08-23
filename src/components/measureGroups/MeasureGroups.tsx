@@ -17,11 +17,13 @@ import {
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import EditMeasureSideBarNav from "../editMeasure/measureDetails/EditMeasureSideBarNav";
 import { Button } from "@madie/madie-design-system/dist/react/";
-import { useFormik, FormikProvider, FieldArray, Field } from "formik";
+import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
-import * as _ from "lodash";
 import { v4 as uuidv4 } from "uuid";
-import { MeasureGroupSchemaValidator } from "../../validations/MeasureGroupSchemaValidator";
+import {
+  MeasureGroupSchemaValidator,
+  CqlDefineDataTypes,
+} from "../../validations/MeasureGroupSchemaValidator";
 import {
   useOktaTokens,
   measureStore,
@@ -190,6 +192,15 @@ const MeasureGroups = () => {
   const [populationBasisValues, setPopulationBasisValues] =
     useState<string[]>();
 
+  const [cqlDefinitionDataTypes, setCqlDefinitionDataTypes] =
+    useState<CqlDefineDataTypes>();
+
+  useEffect(() => {
+    setCqlDefinitionDataTypes(
+      measureServiceApi.getReturnTypesForAllCqlDefinitions(measure?.elmJson)
+    );
+  }, [measure?.elmJson]);
+
   useEffect(() => {
     if (measure?.groups && measure?.groups[measureGroupNumber]) {
       setGroup(measure?.groups[measureGroupNumber]);
@@ -251,7 +262,7 @@ const MeasureGroups = () => {
       scoringUnit: group?.scoringUnit,
     } as Group,
 
-    validationSchema: MeasureGroupSchemaValidator,
+    validationSchema: MeasureGroupSchemaValidator(cqlDefinitionDataTypes),
 
     onSubmit: (group: Group) => {
       setSuccessMessage(undefined);
@@ -694,6 +705,15 @@ const MeasureGroups = () => {
                           formik.values.populations,
                           population.name
                         ).length;
+
+                        const showError = () => {
+                          return (
+                            (getIn(formik.touched, fieldProps.name) ||
+                              getIn(formik.values, fieldProps.name)) &&
+                            Boolean(getIn(formik.errors, fieldProps.name))
+                          );
+                        };
+
                         const gridSize = populationCount === 2 ? 6 : 12;
                         return (
                           <React.Fragment key={`population_${index}`}>
@@ -710,6 +730,8 @@ const MeasureGroups = () => {
                                 insertCallback={arrayHelpers.insert}
                                 removeCallback={arrayHelpers.remove}
                                 replaceCallback={arrayHelpers.replace}
+                                error={getIn(formik.errors, fieldProps.name)}
+                                showError={showError()}
                               />
                             </GridLayout>
                             <MeasureGroupObservation
@@ -996,7 +1018,9 @@ const MeasureGroups = () => {
                   tw="text-sm text-gray-600"
                   data-testid="save-measure-group-validation-message"
                 >
-                  {MeasureGroupSchemaValidator.isValidSync(formik.values)
+                  {MeasureGroupSchemaValidator(
+                    cqlDefinitionDataTypes
+                  ).isValidSync(formik.values)
                     ? ""
                     : "You must set all required Populations."}
                 </span>

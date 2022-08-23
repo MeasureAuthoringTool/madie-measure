@@ -22,6 +22,8 @@ type Props = {
   insertCallback: any;
   removeCallback: any;
   replaceCallback: any;
+  error: string;
+  showError: boolean;
 };
 
 const GroupPopulation = ({
@@ -35,6 +37,8 @@ const GroupPopulation = ({
   insertCallback,
   removeCallback,
   replaceCallback,
+  error,
+  showError,
 }: Props) => {
   // Helper function do determine the properties for a select item
   const populationSelectorProperties = (fieldProps: any, scoring: String) => {
@@ -195,8 +199,6 @@ const GroupPopulation = ({
   };
 
   const selectorProps = populationSelectorProperties(population, scoring);
-  const touched = _.get(populations, selectorProps.name);
-  const error = !!touched ? _.get(populations, selectorProps.name) : null;
   const isRemovable = isPopulationRemovable(scoring, populations);
   const canBeAdded = showAddPopulationLink(scoring, populations);
   selectorProps.label = correctPopulationLabel(populations, population);
@@ -207,8 +209,8 @@ const GroupPopulation = ({
     <MeasureGroupPopulationSelect
       {...selectorProps}
       {...field}
-      helperText={error}
-      error={!!error && !!touched}
+      helperText={showError ? error : ""}
+      error={showError}
       canEdit={canEdit}
       removePopulationCallback={() => removeCallback(populationIndex)}
       isRemovable={isRemovable}
