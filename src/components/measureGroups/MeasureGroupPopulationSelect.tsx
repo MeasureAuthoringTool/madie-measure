@@ -5,9 +5,6 @@ import { kebabCase } from "lodash";
 import { TextField } from "@mui/material";
 import { ExpressionDefinition } from "./MeasureGroups";
 import { DSLink } from "@madie/madie-design-system/dist/react";
-import Radio from "@mui/material/Radio";
-import RadioGroup from "@mui/material/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import { InitialPopulationAssociationType } from "./GroupPopulation";
 
 const HeavyLabel = styled.label`
@@ -81,7 +78,6 @@ const MeasureGroupPopulationSelect = ({
   };
 
   const changeAssociation = (event: React.ChangeEvent<HTMLInputElement>) => {
-    event.preventDefault();
     const changedValue: string = (event.target as HTMLInputElement).value;
     population.associationType = changedValue;
     changeAssociationCallback();
@@ -158,35 +154,60 @@ const MeasureGroupPopulationSelect = ({
           {initialPopulationSize === 2 &&
             label.includes("Initial Population") &&
             scoring === "Ratio" && (
-              <div data-testid="measure-group-initial-population-association">
+              <div
+                data-testid={`measure-group-initial-population-association-${population.id}`}
+              >
                 <FormField>
                   <FieldSeparator style={{ marginLeft: 30 }}>
-                    <SoftLabel>Association</SoftLabel>
-                    <RadioGroup
-                      aria-labelledby="inital-population-association-label"
-                      defaultValue=""
-                      name="radio-buttons-group"
-                      value={population.associationType}
-                      onChange={changeAssociation}
-                      style={{ marginLeft: 15 }}
+                    <div data-testid={`${label}`}>
+                      <SoftLabel>Association</SoftLabel>
+                    </div>
+                    <div
+                      style={{
+                        marginLeft: 15,
+                        fontSize: 16,
+                        fontFamily: "Rubik",
+                      }}
                     >
-                      <FormControlLabel
+                      <input
+                        type="radio"
                         value={InitialPopulationAssociationType.DENOMINATOR}
-                        control={<Radio />}
-                        label={InitialPopulationAssociationType.DENOMINATOR}
+                        checked={
+                          population.associationType ===
+                          InitialPopulationAssociationType.DENOMINATOR
+                        }
                         disabled={
                           !canEdit || label.includes("Initial Population 2")
                         }
+                        onChange={changeAssociation}
+                        data-testid={`${label}-${InitialPopulationAssociationType.DENOMINATOR}`}
                       />
-                      <FormControlLabel
+                      &nbsp;
+                      {InitialPopulationAssociationType.DENOMINATOR}
+                    </div>
+                    <div
+                      style={{
+                        marginLeft: 15,
+                        fontSize: 16,
+                        fontFamily: "Rubik",
+                      }}
+                    >
+                      <input
+                        type="radio"
                         value={InitialPopulationAssociationType.NUMERATOR}
-                        control={<Radio />}
-                        label={InitialPopulationAssociationType.NUMERATOR}
+                        checked={
+                          population.associationType ===
+                          InitialPopulationAssociationType.NUMERATOR
+                        }
                         disabled={
                           !canEdit || label.includes("Initial Population 2")
                         }
+                        onChange={changeAssociation}
+                        data-testid={`${label}-${InitialPopulationAssociationType.NUMERATOR}`}
                       />
-                    </RadioGroup>
+                      &nbsp;
+                      {InitialPopulationAssociationType.NUMERATOR}
+                    </div>
                   </FieldSeparator>
                 </FormField>
               </div>
