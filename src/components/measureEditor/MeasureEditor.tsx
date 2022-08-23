@@ -142,9 +142,6 @@ const MeasureEditor = () => {
           "An error occurred while translating CQL to ELM",
           results[0].reason
         );
-        setElmTranslationError(
-          "Unable to translate CQL to ELM, CQL was not saved!"
-        );
         setElmAnnotations([]);
       } else if (results[1].status === "rejected") {
         const rejection: PromiseRejectedResult = results[1];
@@ -152,30 +149,36 @@ const MeasureEditor = () => {
           "An error occurred while parsing the CQL",
           rejection.reason
         );
-      } else {
-        const validationResult = results[0].value;
-        const parseErrors = results[1].value;
-        const cqlElmErrors = !!(validationResult?.errors?.length > 0);
-        if (editorVal !== measure.cql) {
-          const cqlErrors = parseErrors || cqlElmErrors;
-          const newMeasure: Measure = {
-            ...measure,
-            cql: editorVal,
-            elmJson: JSON.stringify(validationResult?.translation),
-            cqlErrors,
-          };
-          measureServiceApi
-            .updateMeasure(newMeasure)
-            .then(() => {
-              updateMeasure(newMeasure);
-              // setMeasure(newMeasure);
-              setSuccess(true);
-            })
-            .catch((reason) => {
-              console.error(reason);
-              setError(true);
-            });
-        }
+      }
+
+      const validationResult =
+        results[0].status === "fulfilled" ? results[0].value : "";
+      const parseErrors =
+        results[1].status === "fulfilled" ? results[1].value : "";
+      const cqlElmErrors = validationResult
+        ? !!(validationResult?.errors?.length > 0)
+        : true;
+
+      if (editorVal !== measure.cql) {
+        const cqlErrors = parseErrors || cqlElmErrors;
+        const newMeasure: Measure = {
+          ...measure,
+          cql: editorVal,
+          elmJson:
+            validationResult && JSON.stringify(validationResult?.translation),
+          cqlErrors,
+        };
+        measureServiceApi
+          .updateMeasure(newMeasure)
+          .then(() => {
+            updateMeasure(newMeasure);
+            // setMeasure(newMeasure);
+            setSuccess(true);
+          })
+          .catch((reason) => {
+            console.error(reason);
+            setError(true);
+          });
       }
     } catch (err) {
       console.error(
