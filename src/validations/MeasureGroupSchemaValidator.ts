@@ -29,6 +29,25 @@ export const measureGroupSchemaValidator = (
     };
   };
 
+  const createPopulationSchema = (
+    requiredPopulations: string[],
+    populationBasis: string
+  ) => {
+    return Yup.array().of(
+      Yup.object().shape({
+        definition: Yup.string().when(["name"], (populationName) => {
+          if (requiredPopulations.includes(populationName)) {
+            return Yup.string()
+              .required(`${populationName} is required`)
+              .test(returnTypeCheckOptions(populationBasis));
+          } else {
+            return Yup.string().test(returnTypeCheckOptions(populationBasis));
+          }
+        }),
+      })
+    );
+  };
+
   return Yup.object().shape({
     scoring: Yup.string()
       .oneOf(Object.values(GroupScoring))
@@ -43,77 +62,24 @@ export const measureGroupSchemaValidator = (
       (scoring, populationBasis) => {
         switch (scoring) {
           case GroupScoring.COHORT:
-            return Yup.array().of(
-              Yup.object().shape({
-                definition: Yup.string().when(["name"], {
-                  is: (name) => {
-                    return name === "initialPopulation";
-                  },
-                  then: Yup.string()
-                    .required("Initial Population is required")
-                    .test(returnTypeCheckOptions(populationBasis)),
-                }),
-              })
+            return createPopulationSchema(
+              ["initialPopulation"],
+              populationBasis
             );
           case GroupScoring.CONTINUOUS_VARIABLE:
-            return Yup.array().of(
-              Yup.object().shape({
-                definition: Yup.string().when(["name"], (populationName) => {
-                  if (
-                    ["initialPopulation", "measurePopulation"].includes(
-                      populationName
-                    )
-                  ) {
-                    return Yup.string()
-                      .required(`${populationName} is required`)
-                      .test(returnTypeCheckOptions(populationBasis));
-                  } else {
-                    return Yup.string().test(
-                      returnTypeCheckOptions(populationBasis)
-                    );
-                  }
-                }),
-              })
+            return createPopulationSchema(
+              ["initialPopulation", "measurePopulation"],
+              populationBasis
             );
           case GroupScoring.PROPORTION:
-            return Yup.array().of(
-              Yup.object().shape({
-                definition: Yup.string().when(["name"], (populationName) => {
-                  if (
-                    ["initialPopulation", "numerator", "denominator"].includes(
-                      populationName
-                    )
-                  ) {
-                    return Yup.string()
-                      .required(`${populationName} is required`)
-                      .test(returnTypeCheckOptions(populationBasis));
-                  } else {
-                    return Yup.string().test(
-                      returnTypeCheckOptions(populationBasis)
-                    );
-                  }
-                }),
-              })
+            return createPopulationSchema(
+              ["initialPopulation", "numerator", "denominator"],
+              populationBasis
             );
           case GroupScoring.RATIO:
-            return Yup.array().of(
-              Yup.object().shape({
-                definition: Yup.string().when(["name"], (populationName) => {
-                  if (
-                    ["initialPopulation", "numerator", "denominator"].includes(
-                      populationName
-                    )
-                  ) {
-                    return Yup.string()
-                      .required(`${populationName} is required`)
-                      .test(returnTypeCheckOptions(populationBasis));
-                  } else {
-                    return Yup.string().test(
-                      returnTypeCheckOptions(populationBasis)
-                    );
-                  }
-                }),
-              })
+            return createPopulationSchema(
+              ["initialPopulation", "numerator", "denominator"],
+              populationBasis
             );
         }
       }
