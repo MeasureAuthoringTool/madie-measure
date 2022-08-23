@@ -20,11 +20,7 @@ import {
 } from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import { MemoryRouter } from "react-router-dom";
-import {
-  ELM_JSON,
-  MeasureCQL,
-  cqlDefinitionReturnTypes,
-} from "../common/MeasureCQL";
+import { ELM_JSON, MeasureCQL } from "../common/MeasureCQL";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
 import * as uuid from "uuid";

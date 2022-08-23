@@ -194,14 +194,17 @@ export class MeasureServiceApi {
         const returnType = {};
         const name = _.camelCase(_.trim(definition.name));
         if (definition.resultTypeName) {
-          // {urn:hl7-org:elm-types:r1}Integer
           returnType[name] = definition.resultTypeName?.split("}")[1];
         } else if (definition.resultTypeSpecifier) {
-          // {http://hl7.org/fhir}Encounter
-          returnType[name] =
-            definition.resultTypeSpecifier.elementType.name?.split("}")[1];
+          const resultType = definition.resultTypeSpecifier.elementType.type;
+          if (resultType === "NamedTypeSpecifier") {
+            returnType[name] =
+              definition.resultTypeSpecifier.elementType.name?.split("}")[1];
+          } else {
+            returnType[name] = "NA";
+          }
         } else {
-          returnType[name] = undefined;
+          returnType[name] = "NA";
         }
         return {
           ...returnTypes,

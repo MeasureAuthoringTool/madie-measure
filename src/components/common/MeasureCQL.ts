@@ -74,24 +74,6 @@ define "VTE Prophylaxis by Medication Administered or Device Applied":
 define function "fun"("notPascalCase" Integer ):
   true`;
 
-export const cqlDefinitionReturnTypes = {
-  denominator: "Encounter",
-  encounterWithAgeRangeAndWithoutVteDiagnosisOrObstetricalConditions:
-    "Encounter",
-  encounterWithVteProphylaxisReceivedOnDayOfOrDayAfterAdmissionOrProcedure:
-    "Encounter",
-  fun: "Boolean",
-  initialPopulation: "Encounter",
-  numerator: "Encounter",
-  patient: undefined,
-  sdeEthnicity: "Coding",
-  sdePayer: undefined,
-  sdeRace: "Coding",
-  sdeSex: "Code",
-  vteProphylaxisByMedicationAdministeredOrDeviceApplied:
-    "MedicationAdministration",
-};
-
 export const ELM_JSON = `
 {
   "errorExceptions": [
