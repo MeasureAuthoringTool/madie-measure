@@ -505,21 +505,6 @@ describe("Measure Groups Page", () => {
   test("Should be able to save multiple groups  ", async () => {
     renderMeasureGroupComponent();
 
-    // wait for state updates from async fetch of population basis
-    // await waitFor(() =>
-    //   expect(mockedAxios.get).toHaveBeenCalledWith(
-    //     "example-service-url/populationBasisValues",
-    //     expect.anything()
-    //   )
-    // );
-
-    // expect(
-    //   await screen.findByTestId("population-basis-combo-box")
-    // ).toBeInTheDocument();
-
-    // after selecting measure group type, need to collapse the dropdown
-    // fireEvent.click(screen.getByRole("presentation").firstChild);
-
     // select a scoring
     const scoringSelect = screen.getByTestId("scoring-select");
     userEvent.click(getByRole(scoringSelect, "button"));
@@ -861,9 +846,8 @@ describe("Measure Groups Page", () => {
       expect.anything()
     );
   });
-  // Todo not sure why its failing, same flow in UI looks good.
-  // When discard is clicked, the group population is not revertee back, or RTL didn;t load the new dom
-  test.skip("On clicking discard button,should be able to discard the changes", async () => {
+
+  test("On clicking discard button,should be able to discard the changes", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "testDescription";
     group.rateAggregation = "Rate Aggregation Text";
@@ -877,18 +861,20 @@ describe("Measure Groups Page", () => {
     expect(scoringSelectInput.value).toBe("Cohort");
 
     // verify is the initial population is already set from group object
-    const groupPopulationInput = screen.getByTestId(
+    const initialPopulationInput = screen.getByTestId(
       "select-measure-group-population-input"
     ) as HTMLInputElement;
-    expect(groupPopulationInput.value).toBe(group.populations[0].definition);
+    expect(initialPopulationInput.value).toBe(group.populations[0].definition);
 
     // update initial population from dropdown
     const definitionToUpdate =
       "VTE Prophylaxis by Medication Administered or Device Applied";
-    fireEvent.change(groupPopulationInput, {
-      target: { value: definitionToUpdate },
-    });
-    expect(groupPopulationInput.value).toBe(definitionToUpdate);
+    const initialPopulationSelect = screen.getByTestId(
+      "population-select-initial-population"
+    );
+    userEvent.click(getByRole(initialPopulationSelect, "button"));
+    userEvent.click(screen.getByText(definitionToUpdate));
+    expect(initialPopulationInput.value).toBe(definitionToUpdate);
 
     // update data in Reporting tab
     userEvent.click(screen.getByTestId("reporting-tab"));
@@ -907,10 +893,14 @@ describe("Measure Groups Page", () => {
 
     // navigate to population and verify initial population is reverted to value from group object
     userEvent.click(screen.getByTestId("populations-tab"));
-    await waitFor(() => {
-      expect(groupPopulationInput.value).toBe(group.populations[0].definition);
-      expect(screen.getByTestId("group-form-discard-btn")).toBeDisabled();
-    });
+    expect(
+      (
+        (await screen.getByTestId(
+          "select-measure-group-population-input"
+        )) as HTMLInputElement
+      ).value
+    ).toBe(group.populations[0].definition);
+    expect(await screen.getByTestId("group-form-discard-btn")).toBeDisabled();
   });
 
   test("Should report an error if server fails to create population Group", async () => {
