@@ -13,6 +13,7 @@ export enum InitialPopulationAssociationType {
 
 type Props = {
   field: FieldInputProps<string>;
+  form: any;
   cqlDefinitions: ExpressionDefinition[];
   populations: Population[];
   population: Population;
@@ -206,7 +207,7 @@ const GroupPopulation = ({
   return (
     <MeasureGroupPopulationSelect
       {...selectorProps}
-      {...field}
+      field={field}
       helperText={error}
       error={!!error && !!touched}
       canEdit={canEdit}
