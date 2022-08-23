@@ -5,6 +5,7 @@ import { kebabCase } from "lodash";
 import { TextField } from "@mui/material";
 import { ExpressionDefinition } from "./MeasureGroups";
 import { DSLink } from "@madie/madie-design-system/dist/react";
+import { InitialPopulationAssociationType } from "./GroupPopulation";
 
 const HeavyLabel = styled.label`
   color: #505d68;
@@ -35,6 +36,13 @@ type Props = {
 };
 
 const FormField = tw.div`mt-6`;
+const FieldSeparator = tw.div`mt-1`;
+const SoftLabel = styled.label`
+  display: block;
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: rgba(66, 75, 90, 0.7);
+`;
 
 const MeasureGroupPopulationSelect = ({
   label,
@@ -45,6 +53,10 @@ const MeasureGroupPopulationSelect = ({
   optionTitle,
   options = [] as ExpressionDefinition[],
   value = "",
+  scoring,
+  population,
+  initialPopulationSize,
+  changeAssociationCallback,
   canEdit,
   removePopulationCallback,
   addPopulationCallback,
@@ -63,6 +75,12 @@ const MeasureGroupPopulationSelect = ({
   const addPopulation = (evt) => {
     evt.preventDefault();
     addPopulationCallback();
+  };
+
+  const changeAssociation = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const changedValue: string = (event.target as HTMLInputElement).value;
+    population.associationType = changedValue;
+    changeAssociationCallback();
   };
 
   return (
@@ -133,6 +151,67 @@ const MeasureGroupPopulationSelect = ({
               </DSLink>
             </span>
           )}
+          {initialPopulationSize === 2 &&
+            label.includes("Initial Population") &&
+            scoring === "Ratio" && (
+              <div
+                data-testid={`measure-group-initial-population-association-${population.id}`}
+              >
+                <FormField>
+                  <FieldSeparator style={{ marginLeft: 30 }}>
+                    <div data-testid={`${label}`}>
+                      <SoftLabel>Association</SoftLabel>
+                    </div>
+                    <div
+                      style={{
+                        marginLeft: 15,
+                        fontSize: 16,
+                        fontFamily: "Rubik",
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        value={InitialPopulationAssociationType.DENOMINATOR}
+                        checked={
+                          population.associationType ===
+                          InitialPopulationAssociationType.DENOMINATOR
+                        }
+                        disabled={
+                          !canEdit || label.includes("Initial Population 2")
+                        }
+                        onChange={changeAssociation}
+                        data-testid={`${label}-${InitialPopulationAssociationType.DENOMINATOR}`}
+                      />
+                      &nbsp;
+                      {InitialPopulationAssociationType.DENOMINATOR}
+                    </div>
+                    <div
+                      style={{
+                        marginLeft: 15,
+                        fontSize: 16,
+                        fontFamily: "Rubik",
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        value={InitialPopulationAssociationType.NUMERATOR}
+                        checked={
+                          population.associationType ===
+                          InitialPopulationAssociationType.NUMERATOR
+                        }
+                        disabled={
+                          !canEdit || label.includes("Initial Population 2")
+                        }
+                        onChange={changeAssociation}
+                        data-testid={`${label}-${InitialPopulationAssociationType.NUMERATOR}`}
+                      />
+                      &nbsp;
+                      {InitialPopulationAssociationType.NUMERATOR}
+                    </div>
+                  </FieldSeparator>
+                </FormField>
+              </div>
+            )}
         </div>
       )}
       {!canEdit && value}

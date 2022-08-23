@@ -11,26 +11,30 @@ import {
 import { isEqual } from "lodash";
 import MeasureGroups from "./MeasureGroups";
 import {
-  Measure,
+  AggregateFunctionType,
   Group,
   GroupScoring,
+  Measure,
   MeasureGroupTypes,
   PopulationType,
 } from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
-import useCurrentMeasure from "../editMeasure/useCurrentMeasure";
 import { MemoryRouter } from "react-router-dom";
-import { MeasureCQL } from "../common/MeasureCQL";
-import { MeasureContextHolder } from "../editMeasure/MeasureContext";
+import { ELM_JSON, MeasureCQL } from "../common/MeasureCQL";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
+import * as uuid from "uuid";
 import { getPopulationsForScoring } from "./PopulationHelper";
 import * as _ from "lodash";
+import { measureStore } from "@madie/madie-util";
+import { InitialPopulationAssociationType } from "./GroupPopulation";
 
-jest.mock("../editMeasure/useCurrentMeasure");
+// fix error about window.scrollto
+global.scrollTo = jest.fn();
 
-const useCurrentMeasureMock =
-  useCurrentMeasure as jest.Mock<MeasureContextHolder>;
+jest.mock("uuid", () => ({
+  v4: jest.fn(),
+}));
 
 const serviceConfig: ServiceConfig = {
   measureService: {
@@ -44,6 +48,20 @@ const serviceConfig: ServiceConfig = {
   },
 };
 
+const EmptyStrat = {
+  cqlDefinition: "",
+  description: "",
+  association: "",
+  id: "",
+};
+
+const DeleteStrat = {
+  cqlDefinition: "delete",
+  description: "delete",
+  association: "delete",
+  id: "",
+};
+
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
@@ -51,11 +69,25 @@ const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
 jest.mock("@madie/madie-util", () => ({
   measureStore: {
     updateMeasure: (measure) => measure,
+    state: jest.fn().mockImplementation(() => null),
+    initialState: jest.fn().mockImplementation(() => null),
+    subscribe: (set) => {
+      return { unsubscribe: () => null };
+    },
   },
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
     getUserName: () => MEASURE_CREATEDBY,
   }),
+  routeHandlerStore: {
+    subscribe: (set) => {
+      // set(measure)
+      return { unsubscribe: () => null };
+    },
+    updateRouteHandlerState: () => null,
+    state: { canTravel: false, pendingPath: "" },
+    initialState: { canTravel: false, pendingPath: "" },
+  },
 }));
 
 const populationBasisValues: string[] = [
@@ -63,12 +95,11 @@ const populationBasisValues: string[] = [
   "test-data-1",
   "test-data-2",
 ];
-mockedAxios.get.mockResolvedValue({ data: { populationBasisValues } });
+mockedAxios.get.mockResolvedValue({ data: populationBasisValues });
 
 describe("Measure Groups Page", () => {
   let measure: Measure;
   let group: Group;
-  let measureContextHolder: MeasureContextHolder;
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -79,14 +110,10 @@ describe("Measure Groups Page", () => {
       id: "test-measure",
       measureName: "the measure for testing",
       cql: MeasureCQL,
+      elmJson: ELM_JSON,
       createdBy: MEASURE_CREATEDBY,
     } as Measure;
-    measureContextHolder = {
-      measure,
-      setMeasure: jest.fn(),
-    };
-    useCurrentMeasureMock.mockImplementation(() => measureContextHolder);
-
+    measureStore.state.mockImplementationOnce(() => measure);
     group = {
       id: null,
       scoring: "Cohort",
@@ -102,6 +129,19 @@ describe("Measure Groups Page", () => {
       populationBasis: "Boolean",
       scoringUnit: "",
     };
+
+    const mockUuid = require("uuid") as { v4: jest.Mock<string, []> };
+    mockUuid.v4
+      .mockReset()
+      .mockImplementationOnce(() => "uuid-1")
+      .mockImplementationOnce(() => "uuid-2")
+      .mockImplementationOnce(() => "uuid-3")
+      .mockImplementationOnce(() => "uuid-4")
+      .mockImplementationOnce(() => "uuid-5")
+      .mockImplementationOnce(() => "uuid-6")
+      .mockImplementationOnce(() => "uuid-7")
+      .mockImplementationOnce(() => "uuid-8")
+      .mockImplementationOnce(() => "uuid-9");
   });
 
   const renderMeasureGroupComponent = () => {
@@ -185,13 +225,14 @@ describe("Measure Groups Page", () => {
       expect(options.length).toBe(11);
       expect(def[0].textContent).toBe("SDE Ethnicity");
     }
-  });
+  }, 30000);
 
   test("On change of group scoring the field definitions are cleared", async () => {
     group.id = "";
     group.scoring = "Cohort";
     measure.groups = [group];
     renderMeasureGroupComponent();
+
     expect(
       (screen.getByRole("option", { name: "Cohort" }) as HTMLOptionElement)
         .selected
@@ -213,36 +254,6 @@ describe("Measure Groups Page", () => {
       )[0] as HTMLOptionElement;
       expect(selectedPopulationOption.value).toBe("");
     });
-  });
-
-  test("onKeyPress prevents default and selected scoring does not change", async () => {
-    group.id = "";
-    group.scoring = "Cohort";
-    measure.groups = [group];
-    renderMeasureGroupComponent();
-    expect(
-      (screen.getByRole("option", { name: "Cohort" }) as HTMLOptionElement)
-        .selected
-    ).toBe(true);
-    const option = screen.getByTestId(
-      "scoring-unit-select"
-    ) as HTMLOptionElement;
-
-    const populationOption = screen.getAllByTestId(
-      "select-measure-group-population"
-    )[0] as HTMLOptionElement;
-    expect(populationOption.value).toBe(group.populations[0].definition);
-
-    await act(async () => {
-      fireEvent.change(option, { target: { value: "Ratio" } });
-    });
-    expect(option.value).toBe("Ratio");
-    expect(populationOption.value).toBe("");
-
-    act(() => {
-      fireEvent.keyPress(option, { key: "Enter", code: 13, charCode: 13 });
-    });
-    expect(option.value).toBe("Ratio");
   });
 
   test("Should create population Group with one initial population successfully", async () => {
@@ -290,11 +301,13 @@ describe("Measure Groups Page", () => {
       id: null,
       populations: [
         {
-          id: "",
+          id: "uuid-1",
           name: PopulationType.INITIAL_POPULATION,
           definition: "Initial Population",
+          associationType: undefined,
         },
       ],
+      measureObservations: null,
       scoring: "Cohort",
       groupDescription: "new description",
       stratifications: [],
@@ -507,6 +520,18 @@ describe("Measure Groups Page", () => {
   test("Should be able to save multiple groups  ", async () => {
     renderMeasureGroupComponent();
 
+    // wait for state updates from async fetch of population basis
+    await waitFor(() =>
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        "example-service-url/populationBasisValues",
+        expect.anything()
+      )
+    );
+
+    expect(
+      await screen.findByTestId("population-basis-combo-box")
+    ).toBeInTheDocument();
+
     // measure group type
     const measureGroupTypeSelect = screen.getByTestId(
       "measure-group-type-dropdown"
@@ -543,22 +568,30 @@ describe("Measure Groups Page", () => {
       target: { value: "new description" },
     });
 
-    mockedAxios.post.mockResolvedValue({ data: { group } });
+    mockedAxios.post.mockResolvedValue({
+      data: {
+        ...group,
+        id: "group1-id",
+        measureGroupTypes: [MeasureGroupTypes.PATIENT_REPORTED_OUTCOME],
+      },
+    });
 
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
 
     const alert = await screen.findByTestId("success-alerts");
+    expect(alert).toBeInTheDocument();
 
     const expectedGroup = {
       id: null,
       populations: [
         {
-          id: "",
+          id: "uuid-1",
           name: PopulationType.INITIAL_POPULATION,
           definition: "Initial Population",
         },
       ],
+      measureObservations: null,
       scoring: "Cohort",
       groupDescription: "new description",
       stratifications: [],
@@ -572,7 +605,8 @@ describe("Measure Groups Page", () => {
     expect(alert).toHaveTextContent(
       "Population details for this group saved successfully."
     );
-    expect(mockedAxios.post).toHaveBeenCalledWith(
+    expect(mockedAxios.post).toHaveBeenNthCalledWith(
+      1,
       "example-service-url/measures/test-measure/groups/",
       expectedGroup,
       expect.anything()
@@ -582,6 +616,10 @@ describe("Measure Groups Page", () => {
     expect(
       screen.getByTestId("leftPanelMeasureInformation-MeasureGroup1")
     ).toBeInTheDocument();
+
+    // clear alert to reset for assertion after group 2 addition
+    userEvent.click(within(alert).getByTestId("CloseIcon"));
+    expect(screen.queryByTestId("success-alerts")).not.toBeInTheDocument();
 
     //adding measure group 2
 
@@ -624,7 +662,14 @@ describe("Measure Groups Page", () => {
     // after selecting measure group type, need to collapse the dropdown
     fireEvent.click(screen.getByRole("presentation").firstChild);
 
-    mockedAxios.post.mockResolvedValue({ data: { group } });
+    mockedAxios.post.mockResolvedValue({
+      data: {
+        ...group,
+        id: "group2-id",
+        groupDescription: "new description for group 2",
+        measureGroupTypes: [MeasureGroupTypes.PATIENT_REPORTED_OUTCOME],
+      },
+    });
 
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
@@ -634,11 +679,12 @@ describe("Measure Groups Page", () => {
       id: null,
       populations: [
         {
-          id: "",
+          id: "uuid-2",
           name: PopulationType.INITIAL_POPULATION,
           definition: "Initial Population",
         },
       ],
+      measureObservations: null,
       scoring: "Cohort",
       groupDescription: "new description for group 2",
       measureGroupTypes: ["Patient Reported Outcome"],
@@ -652,7 +698,8 @@ describe("Measure Groups Page", () => {
     expect(alert1).toHaveTextContent(
       "Population details for this group saved successfully."
     );
-    expect(mockedAxios.post).toHaveBeenCalledWith(
+    expect(mockedAxios.post).toHaveBeenNthCalledWith(
+      2,
       "example-service-url/measures/test-measure/groups/",
       expectedGroup2,
       expect.anything()
@@ -662,7 +709,7 @@ describe("Measure Groups Page", () => {
     expect(
       screen.getByTestId("leftPanelMeasureInformation-MeasureGroup2")
     ).toBeInTheDocument();
-  });
+  }, 15000);
 
   test("Should be able to update initial population of a population group", async () => {
     group.id = "7p03-5r29-7O0I";
@@ -713,8 +760,10 @@ describe("Measure Groups Page", () => {
           name: PopulationType.INITIAL_POPULATION,
           definition:
             "VTE Prophylaxis by Medication Administered or Device Applied",
+          associationType: undefined,
         },
       ],
+      measureObservations: null,
       scoring: "Cohort",
       groupDescription: "",
       measureGroupTypes: ["Patient Reported Outcome"],
@@ -807,12 +856,14 @@ describe("Measure Groups Page", () => {
       id: "7p03-5r29-7O0I",
       populations: [
         {
-          id: "",
+          id: "uuid-1",
           name: PopulationType.INITIAL_POPULATION,
           definition:
             "VTE Prophylaxis by Medication Administered or Device Applied",
+          associationType: undefined,
         },
       ],
+      measureObservations: null,
       scoring: "Cohort",
       scoringUnit: "",
       groupDescription: "testDescription",
@@ -1082,7 +1133,7 @@ describe("Measure Groups Page", () => {
     await waitFor(() =>
       expect(screen.getByTestId("group-form-submit-btn")).not.toBeDisabled()
     );
-  });
+  }, 15000);
 
   test("Save button is disabled until all required Ratio populations are entered", async () => {
     renderMeasureGroupComponent();
@@ -1136,10 +1187,17 @@ describe("Measure Groups Page", () => {
     await waitFor(() =>
       expect(screen.getByTestId("group-form-submit-btn")).not.toBeDisabled()
     );
-  });
+  }, 15000);
 
   test("Save button is disabled until all required CV populations are entered", async () => {
     renderMeasureGroupComponent();
+    await waitFor(() =>
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        "example-service-url/populationBasisValues",
+        expect.anything()
+      )
+    );
+
     const measureGroupTypeDropdown = screen.getByTestId(
       "measure-group-type-dropdown"
     );
@@ -1176,6 +1234,24 @@ describe("Measure Groups Page", () => {
     expect(
       screen.getByRole("combobox", { name: "Measure Population *" })
     ).toHaveValue("Denominator");
+    const observationComboBox = screen.getByRole("combobox", {
+      name: "Observation *",
+    });
+    expect(observationComboBox).toBeInTheDocument();
+    expect(observationComboBox).toHaveValue("");
+    const observationOptions =
+      within(observationComboBox).getAllByRole("option");
+    expect(observationOptions).toHaveLength(2);
+    expect((observationOptions[0] as HTMLOptionElement).selected).toBeTruthy();
+    userEvent.click(observationComboBox);
+    userEvent.selectOptions(observationComboBox, observationOptions[1]);
+    const aggregateComboBox = screen.getByRole("combobox", {
+      name: "Aggregate Function *",
+    });
+    expect(aggregateComboBox).toBeInTheDocument();
+    const aggregateOptions = within(aggregateComboBox).getAllByRole("option");
+    expect(aggregateOptions).toHaveLength(12);
+    userEvent.selectOptions(aggregateComboBox, aggregateOptions[2]);
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Save" })).not.toBeDisabled()
     );
@@ -1237,7 +1313,11 @@ describe("Measure Groups Page", () => {
         target: { value: "New group description" },
       });
     });
-    expect(screen.getByText("New group description")).toBeInTheDocument();
+    await waitFor(
+      () =>
+        expect(screen.getByText("New group description")).toBeInTheDocument(),
+      { timeout: 10000 }
+    );
 
     const discardButton = screen.getByTestId("group-form-discard-btn");
     expect(discardButton).toBeEnabled();
@@ -1245,7 +1325,7 @@ describe("Measure Groups Page", () => {
       userEvent.click(discardButton);
     });
     expect(screen.queryByText("New group description")).not.toBeInTheDocument();
-  });
+  }, 15000);
 
   test("Should display error message when updating group", async () => {
     group.id = "7p03-5r29-7O0I";
@@ -1267,7 +1347,9 @@ describe("Measure Groups Page", () => {
     await act(async () => {
       userEvent.click(screen.getByTestId("group-form-submit-btn"));
     });
-    expect(screen.getByText("Error updating group")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByText("Error updating group")).toBeInTheDocument()
+    );
   });
 
   test("Should display error message when adding group", async () => {
@@ -1310,11 +1392,18 @@ describe("Measure Groups Page", () => {
 
     mockedAxios.put.mockResolvedValue({ data: null });
 
-    expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+    await waitFor(() =>
+      expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled()
+    );
+    // expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
     await act(async () => {
       userEvent.click(screen.getByTestId("group-form-submit-btn"));
     });
-    expect(screen.getByText("Failed to create the group.")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen.getByText("Failed to create the group.")
+      ).toBeInTheDocument()
+    );
   });
 
   test("Add/remove second IP for ratio group", () => {
@@ -1369,5 +1458,618 @@ describe("Measure Groups Page", () => {
         name: "Initial Population 2 *",
       })
     ).not.toBeInTheDocument();
+  });
+
+  test("Stratifications Should Not Have Remove Button if there are only two", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "Description Text";
+    group.rateAggregation = "Rate Aggregation Text";
+    group.improvementNotation = "Increased score indicates improvement";
+    group.stratifications = [EmptyStrat, EmptyStrat];
+    measure.groups = [group];
+    const { queryByTestId } = renderMeasureGroupComponent();
+    userEvent.click(screen.getByTestId("stratifications-tab"));
+    const removebutton = queryByTestId("remove-strat-button");
+    expect(removebutton).not.toBeInTheDocument();
+  });
+
+  test("Stratifications should have remove button if there are more than two", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "Description Text";
+    group.rateAggregation = "Rate Aggregation Text";
+    group.improvementNotation = "Increased score indicates improvement";
+    group.stratifications = [EmptyStrat, EmptyStrat, EmptyStrat];
+    measure.groups = [group];
+    const { queryByTestId } = renderMeasureGroupComponent();
+    expect(screen.getByTestId("stratifications-tab")).toBeInTheDocument();
+    userEvent.click(screen.getByTestId("stratifications-tab"));
+    const removebutton = screen.getAllByTestId("remove-strat-button")[0];
+    expect(removebutton).toBeInTheDocument();
+  });
+
+  test("Stratifications should no longer have remove button the stratifications are reduced to two", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "Description Text";
+    group.rateAggregation = "Rate Aggregation Text";
+    group.improvementNotation = "Increased score indicates improvement";
+    group.stratifications = [EmptyStrat, EmptyStrat, EmptyStrat];
+    measure.groups = [group];
+    const { queryByTestId } = renderMeasureGroupComponent();
+    expect(screen.getByTestId("stratifications-tab")).toBeInTheDocument();
+    userEvent.click(screen.getByTestId("stratifications-tab"));
+    const removebutton = screen.getAllByTestId("remove-strat-button")[0];
+    expect(removebutton).toBeInTheDocument();
+    userEvent.click(removebutton);
+    const removebutton2 = queryByTestId("remove-strat-button");
+    expect(removebutton2).not.toBeInTheDocument();
+  });
+
+  test("Stratifications should show add button if total increased to >2", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "Description Text";
+    group.rateAggregation = "Rate Aggregation Text";
+    group.improvementNotation = "Increased score indicates improvement";
+    group.stratifications = [EmptyStrat, EmptyStrat];
+    measure.groups = [group];
+    const { queryByTestId } = renderMeasureGroupComponent();
+    userEvent.click(screen.getByTestId("stratifications-tab"));
+    const removebutton = queryByTestId("remove-strat-button");
+    expect(removebutton).not.toBeInTheDocument();
+    const addbutton = queryByTestId("add-strat-button");
+    userEvent.click(addbutton);
+    const removebutton2 = screen.getAllByTestId("remove-strat-button")[0];
+    expect(removebutton2).toBeInTheDocument();
+  });
+
+  test("If stratification is empty, auto populate two empty stratifications", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "Description Text";
+    group.rateAggregation = "Rate Aggregation Text";
+    group.improvementNotation = "Increased score indicates improvement";
+    group.stratifications = [];
+    measure.groups = [group];
+    const { queryByTestId } = renderMeasureGroupComponent();
+    userEvent.click(screen.getByTestId("stratifications-tab"));
+    expect(group.stratifications.length == 2);
+    expect(group.stratifications[0] === EmptyStrat);
+  });
+
+  test("measure observation should not render for cohort", async () => {
+    renderMeasureGroupComponent();
+    userEvent.selectOptions(
+      screen.getByTestId("scoring-unit-select"),
+      "Cohort"
+    );
+
+    expect(
+      screen.getByTestId("select-measure-group-population-label")
+    ).toBeInTheDocument();
+
+    await waitFor(() =>
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        "example-service-url/populationBasisValues",
+        expect.anything()
+      )
+    );
+
+    expect(
+      await screen.findByTestId("population-basis-combo-box")
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("link", {
+        name: "+ Add Observation",
+      })
+    ).not.toBeInTheDocument();
+  });
+
+  test("measure observation should not render for proportion", async () => {
+    renderMeasureGroupComponent();
+    userEvent.selectOptions(
+      screen.getByTestId("scoring-unit-select"),
+      "Proportion"
+    );
+
+    expect(
+      screen.getAllByTestId("select-measure-group-population-label")
+    ).toHaveLength(6);
+
+    await waitFor(() =>
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        "example-service-url/populationBasisValues",
+        expect.anything()
+      )
+    );
+
+    expect(
+      await screen.findByTestId("population-basis-combo-box")
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("link", {
+        name: "+ Add Observation",
+      })
+    ).not.toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("combobox", {
+        name: "Observation *",
+      })
+    ).not.toBeInTheDocument();
+  });
+
+  test("measure observation should render for CV group", async () => {
+    renderMeasureGroupComponent();
+    userEvent.selectOptions(
+      screen.getByTestId("scoring-unit-select"),
+      "Continuous Variable"
+    );
+
+    expect(
+      screen.getAllByTestId("select-measure-group-population-label")
+    ).toHaveLength(3);
+
+    await waitFor(() =>
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        "example-service-url/populationBasisValues",
+        expect.anything()
+      )
+    );
+
+    expect(
+      await screen.findByTestId("population-basis-combo-box")
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("combobox", {
+        name: "Observation *",
+      })
+    ).toBeInTheDocument();
+  });
+
+  test("measure observation should render existing for continuous variable", async () => {
+    group.scoring = "Continuous Variable";
+    group.measureObservations = [
+      {
+        id: "uuid-1",
+        definition: "fun",
+        aggregateMethod: AggregateFunctionType.COUNT,
+      },
+    ];
+    measure.groups = [group];
+    renderMeasureGroupComponent();
+
+    await waitFor(() =>
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        "example-service-url/populationBasisValues",
+        expect.anything()
+      )
+    );
+
+    const observation = screen.queryByRole("combobox", {
+      name: "Observation *",
+    });
+    expect(observation).toBeInTheDocument();
+    expect(observation).toHaveValue("fun");
+    const aggregateFuncSelect = screen.getByRole("combobox", {
+      name: "Aggregate Function *",
+    }) as HTMLSelectElement;
+    expect(aggregateFuncSelect).toBeInTheDocument();
+    expect(aggregateFuncSelect.value).toEqual("Count");
+  });
+
+  test("measure observation should render existing for ratio group", async () => {
+    group.scoring = "Ratio";
+    group.measureObservations = [
+      {
+        id: "uuid-1",
+        definition: "fun",
+        aggregateMethod: AggregateFunctionType.AVERAGE,
+        criteriaReference: "id-3",
+      },
+    ];
+    group.populations = [
+      {
+        id: "id-1",
+        name: PopulationType.INITIAL_POPULATION,
+        definition: "Initial Population",
+      },
+      {
+        id: "id-2",
+        name: PopulationType.DENOMINATOR,
+        definition: "Denominator",
+      },
+      {
+        id: "id-3",
+        name: PopulationType.NUMERATOR,
+        definition: "Numerator",
+      },
+    ];
+    measure.groups = [group];
+    renderMeasureGroupComponent();
+
+    await waitFor(() =>
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        "example-service-url/populationBasisValues",
+        expect.anything()
+      )
+    );
+
+    const observation = screen.getByRole("combobox", {
+      name: /Numerator Observation */i,
+    });
+    expect(observation).toBeInTheDocument();
+    expect(observation).toHaveValue("fun");
+    const aggregateFuncSelect = screen.getByRole("combobox", {
+      name: "Aggregate Function *",
+    }) as HTMLSelectElement;
+    expect(aggregateFuncSelect).toBeInTheDocument();
+    expect(aggregateFuncSelect.value).toEqual("Average");
+  });
+
+  test("measure observation should be included in persisted output for continuous variable", async () => {
+    renderMeasureGroupComponent();
+
+    await waitFor(() =>
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        "example-service-url/populationBasisValues",
+        expect.anything()
+      )
+    );
+
+    userEvent.selectOptions(
+      screen.getByTestId("scoring-unit-select"),
+      "Continuous Variable"
+    );
+
+    const measureGroupTypeDropdown = screen.getByTestId(
+      "measure-group-type-dropdown"
+    );
+    userEvent.click(await getByRole(measureGroupTypeDropdown, "button"));
+
+    await waitFor(() => {
+      userEvent.click(screen.getByText("Patient Reported Outcome"));
+    });
+
+    // after selecting measure group type, need to collapse the dropdown
+    fireEvent.click(screen.getByRole("presentation").firstChild);
+    await waitFor(() => {
+      expect(screen.getAllByRole("option", { name: "SDE Payer" })).toHaveLength(
+        3
+      );
+    });
+    userEvent.selectOptions(
+      screen.getByRole("combobox", { name: "Initial Population *" }),
+      "Initial Population"
+    );
+    userEvent.selectOptions(
+      screen.getByRole("combobox", { name: "Measure Population *" }),
+      "Denominator"
+    );
+
+    const observationComboBox = screen.getByRole("combobox", {
+      name: "Observation *",
+    });
+    const observationOptions =
+      within(observationComboBox).getAllByRole("option");
+    userEvent.click(observationComboBox);
+    userEvent.selectOptions(observationComboBox, observationOptions[1]);
+    const aggregateComboBox = screen.getByRole("combobox", {
+      name: "Aggregate Function *",
+    });
+    const aggregateOptions = within(aggregateComboBox).getAllByRole("option");
+    userEvent.selectOptions(aggregateComboBox, aggregateOptions[2]);
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Save" })).not.toBeDisabled()
+    );
+
+    mockedAxios.post.mockResolvedValue({
+      data: {
+        ...group,
+        id: "group1-id",
+        measureGroupTypes: [MeasureGroupTypes.PATIENT_REPORTED_OUTCOME],
+        measureObservations: [
+          {
+            id: "uuid-1",
+            definition: "fun",
+            aggregateMethod: AggregateFunctionType.COUNT,
+          },
+        ],
+      },
+    });
+
+    expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+
+    const alert = await screen.findByTestId("success-alerts");
+    expect(alert).toBeInTheDocument();
+    expect(alert).toHaveTextContent(
+      "Population details for this group saved successfully."
+    );
+    const expectedGroup = {
+      id: null,
+      populations: [
+        {
+          id: "uuid-2",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+          associationType: undefined,
+        },
+        {
+          id: "uuid-3",
+          name: PopulationType.MEASURE_POPULATION,
+          definition: "Denominator",
+          associationType: undefined,
+        },
+        {
+          id: "uuid-4",
+          name: PopulationType.MEASURE_POPULATION_EXCLUSION,
+          definition: "",
+          associationType: undefined,
+          optional: ["Continuous Variable"],
+        },
+      ],
+      measureObservations: [
+        {
+          id: "uuid-1",
+          definition: "fun",
+          aggregateMethod: AggregateFunctionType.COUNT,
+          criteriaReference: null,
+        },
+      ],
+      scoring: "Continuous Variable",
+      groupDescription: "",
+      stratifications: [],
+      measureGroupTypes: ["Patient Reported Outcome"],
+      scoringUnit: "",
+      rateAggregation: "",
+      improvementNotation: "",
+      populationBasis: "Boolean",
+    };
+    expect(mockedAxios.post).toHaveBeenNthCalledWith(
+      1,
+      "example-service-url/measures/test-measure/groups/",
+      expectedGroup,
+      expect.anything()
+    );
+  });
+
+  test("measure observation should be included in persisted output for ratio", async () => {
+    renderMeasureGroupComponent();
+
+    await waitFor(() =>
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        "example-service-url/populationBasisValues",
+        expect.anything()
+      )
+    );
+
+    userEvent.selectOptions(screen.getByTestId("scoring-unit-select"), "Ratio");
+
+    const measureGroupTypeDropdown = screen.getByTestId(
+      "measure-group-type-dropdown"
+    );
+    userEvent.click(await getByRole(measureGroupTypeDropdown, "button"));
+
+    await waitFor(() => {
+      userEvent.click(screen.getByText("Outcome"));
+    });
+
+    // after selecting measure group type, need to collapse the dropdown
+    fireEvent.click(screen.getByRole("presentation").firstChild);
+    await waitFor(() => {
+      expect(screen.getAllByRole("option", { name: "SDE Payer" })).toHaveLength(
+        5
+      );
+    });
+    userEvent.selectOptions(
+      screen.getByRole("combobox", { name: "Initial Population *" }),
+      "Initial Population"
+    );
+    userEvent.selectOptions(
+      screen.getByRole("combobox", { name: "Denominator *" }),
+      "Denominator"
+    );
+    userEvent.selectOptions(
+      screen.getByRole("combobox", { name: "Numerator *" }),
+      "Numerator"
+    );
+
+    const addObservationLink = screen.getAllByRole("link", {
+      name: /add observation/i,
+    });
+    expect(addObservationLink).toHaveLength(2);
+    userEvent.click(addObservationLink[1]);
+
+    const numerObservationComboBox = screen.getByRole("combobox", {
+      name: /numerator Observation */i,
+    });
+    const observationOptions = within(numerObservationComboBox).getAllByRole(
+      "option"
+    );
+    userEvent.click(numerObservationComboBox);
+    userEvent.selectOptions(numerObservationComboBox, observationOptions[1]);
+    const aggregateComboBox = screen.getByRole("combobox", {
+      name: "Aggregate Function *",
+    });
+    const aggregateOptions = within(aggregateComboBox).getAllByRole("option");
+    userEvent.selectOptions(aggregateComboBox, aggregateOptions[3]);
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Save" })).not.toBeDisabled()
+    );
+
+    mockedAxios.post.mockResolvedValue({
+      data: {
+        ...group,
+        id: "group1-id",
+        scoring: "Ratio",
+        measureGroupTypes: [MeasureGroupTypes.OUTCOME],
+        measureObservations: [
+          {
+            id: "uuid-1",
+            definition: "fun",
+            aggregateMethod: AggregateFunctionType.MAXIMUM,
+          },
+        ],
+      },
+    });
+
+    expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+
+    const alert = await screen.findByTestId("success-alerts");
+    expect(alert).toBeInTheDocument();
+    expect(alert).toHaveTextContent(
+      "Population details for this group saved successfully."
+    );
+    const expectedGroup = {
+      id: null,
+      populations: [
+        {
+          id: "uuid-1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+          // TODO: look into why this is the case - is this a bug?
+          associationType: InitialPopulationAssociationType.DENOMINATOR,
+        },
+        {
+          id: "uuid-2",
+          name: PopulationType.DENOMINATOR,
+          definition: "Denominator",
+          associationType: undefined,
+        },
+        {
+          id: "uuid-3",
+          name: PopulationType.DENOMINATOR_EXCLUSION,
+          definition: "",
+          associationType: undefined,
+          optional: ["*"],
+        },
+        {
+          id: "uuid-4",
+          name: PopulationType.NUMERATOR,
+          definition: "Numerator",
+          associationType: undefined,
+        },
+        {
+          id: "uuid-5",
+          name: PopulationType.NUMERATOR_EXCLUSION,
+          definition: "",
+          associationType: undefined,
+          optional: ["Proportion", "Ratio"],
+        },
+      ],
+      measureObservations: [
+        {
+          id: "uuid-6",
+          definition: "fun",
+          aggregateMethod: AggregateFunctionType.MAXIMUM,
+          criteriaReference: "uuid-4",
+        },
+      ],
+      scoring: "Ratio",
+      groupDescription: "",
+      stratifications: [],
+      measureGroupTypes: ["Outcome"],
+      scoringUnit: "",
+      rateAggregation: "",
+      improvementNotation: "",
+      populationBasis: "Boolean",
+    };
+    expect(mockedAxios.post).toHaveBeenNthCalledWith(
+      1,
+      "example-service-url/measures/test-measure/groups/",
+      expectedGroup,
+      expect.anything()
+    );
+  }, 30000);
+
+  test("should not show Initial Population Association for Ratio scoring when there is 1 Initial Population", async () => {
+    const group1: Group = {
+      id: "1",
+      scoring: "Ratio",
+      populations: [
+        {
+          id: "id-1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+          associationType: InitialPopulationAssociationType.NUMERATOR,
+        },
+      ],
+      groupDescription: "",
+      measureGroupTypes: [MeasureGroupTypes.PROCESS],
+      populationBasis: "Boolean",
+      scoringUnit: "",
+    };
+    measure.groups = [group1];
+    renderMeasureGroupComponent();
+
+    // verify  IP1 association type radio group is not visible
+    const association1 = screen.queryByTestId(
+      "measure-group-initial-population-association-id-1"
+    );
+    expect(association1).not.toBeInTheDocument();
+  });
+
+  test("should show Initial Population Association for Ratio scoring when there are 2 Initial Populations and can change values", async () => {
+    const group1: Group = {
+      id: "1",
+      scoring: "Ratio",
+      populations: [
+        {
+          id: "id-1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+        },
+        {
+          id: "id-2",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+        },
+      ],
+      groupDescription: "",
+      measureGroupTypes: [MeasureGroupTypes.PROCESS],
+      populationBasis: "Boolean",
+      scoringUnit: "",
+    };
+    measure.groups = [group1];
+    renderMeasureGroupComponent();
+
+    const association1 = screen.getByTestId(
+      "measure-group-initial-population-association-id-1"
+    );
+    expect(association1).toBeInTheDocument();
+    const ip1DenomAssociation = screen.getByTestId(
+      "Initial Population 1-Denominator"
+    );
+    const ip1NumerAssociation = screen.getByTestId(
+      "Initial Population 1-Numerator"
+    );
+    expect(ip1DenomAssociation).toHaveAttribute("checked", "");
+    expect(ip1NumerAssociation).not.toHaveAttribute("checked", "");
+    expect((ip1DenomAssociation as HTMLInputElement).checked).toEqual(true);
+    expect((ip1NumerAssociation as HTMLInputElement).checked).toEqual(false);
+
+    fireEvent.click(ip1NumerAssociation);
+    expect((ip1NumerAssociation as HTMLInputElement).checked).toEqual(true);
+    expect((ip1DenomAssociation as HTMLInputElement).checked).toEqual(false);
+
+    // delete the IP2
+    const removeIpLink = screen.getByRole("link", { name: /Remove/ });
+    expect(removeIpLink).toBeInTheDocument();
+    userEvent.click(removeIpLink);
+    expect(association1).not.toBeInTheDocument();
+
+    // add second IP
+    const addIpLink = screen.getByRole("link", {
+      name: "+ Add Initial Population",
+    });
+    expect(addIpLink).toBeInTheDocument();
+    userEvent.click(addIpLink);
+    expect(
+      screen.getByTestId("measure-group-initial-population-association-id-1")
+    ).toBeInTheDocument();
+    expect((ip1DenomAssociation as HTMLInputElement).checked).toEqual(false);
+    expect((ip1NumerAssociation as HTMLInputElement).checked).toEqual(true);
   });
 });
