@@ -164,7 +164,9 @@ describe("Measure Groups Page", () => {
 
   test("Measure Group Scoring should not render options if user is not the measure owner", async () => {
     measure.createdBy = "AnotherUser@example.com";
-    const { queryAllByTestId } = renderMeasureGroupComponent();
+    const { queryAllByTestId } = await waitFor(() =>
+      renderMeasureGroupComponent()
+    );
     const optionList = queryAllByTestId("scoring-select");
     expect(optionList).toHaveLength(0);
   });
@@ -232,7 +234,7 @@ describe("Measure Groups Page", () => {
   test("On change of group scoring the field definitions are cleared", async () => {
     group.id = "";
     measure.groups = [group];
-    renderMeasureGroupComponent();
+    await waitFor(() => renderMeasureGroupComponent());
     // verifies if the scoring value is population from group object
     const scoringSelectInput = screen.getByTestId(
       "scoring-select-input"
@@ -252,11 +254,11 @@ describe("Measure Groups Page", () => {
     expect(scoringSelectInput.value).toBe("Ratio");
 
     // verifies that the selected population definitions are cleared
-    await expect(groupPopulationInput.value).toBe("");
+    await waitFor(() => expect(groupPopulationInput.value).toBe(""));
   });
 
   test("Should create population Group with one initial population successfully", async () => {
-    renderMeasureGroupComponent();
+    await waitFor(() => renderMeasureGroupComponent());
 
     const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
     fireEvent.change(groupDescriptionInput, {
@@ -329,7 +331,7 @@ describe("Measure Groups Page", () => {
   });
 
   test("Should create multiple group tabs on clicking add measure group ", async () => {
-    renderMeasureGroupComponent();
+    await waitFor(() => renderMeasureGroupComponent());
 
     const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
     fireEvent.change(groupDescriptionInput, {
@@ -387,7 +389,7 @@ describe("Measure Groups Page", () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "testDescription";
     measure.groups = [group];
-    renderMeasureGroupComponent();
+    await waitFor(() => renderMeasureGroupComponent());
 
     expect(screen.getByText("MEASURE GROUP 1")).toBeInTheDocument();
     expect(
@@ -479,7 +481,7 @@ describe("Measure Groups Page", () => {
     group.rateAggregation = "Rate Aggregation Text";
     group.improvementNotation = "Increased score indicates improvement";
     measure.groups = [group];
-    renderMeasureGroupComponent();
+    await waitFor(() => renderMeasureGroupComponent());
 
     expect(screen.getByTestId("populations-tab")).toBeInTheDocument();
 
@@ -775,7 +777,7 @@ describe("Measure Groups Page", () => {
     };
     measure.groups = [newGroup];
 
-    renderMeasureGroupComponent();
+    await waitFor(() => renderMeasureGroupComponent());
     const scoringSelectInput = screen.getByTestId(
       "scoring-select-input"
     ) as HTMLInputElement;
@@ -783,7 +785,6 @@ describe("Measure Groups Page", () => {
     fireEvent.change(scoringSelectInput, {
       target: { value: "Cohort" },
     });
-
     expect(scoringSelectInput.value).toBe("Cohort");
 
     const definitionToUpdate =
@@ -853,12 +854,15 @@ describe("Measure Groups Page", () => {
     group.rateAggregation = "Rate Aggregation Text";
     group.improvementNotation = "Increased score indicates improvement";
     measure.groups = [group];
-    renderMeasureGroupComponent();
+
+    await waitFor(() => renderMeasureGroupComponent());
+
     // verify is the scoring type is Cohort
     const scoringSelectInput = screen.getByTestId(
       "scoring-select-input"
     ) as HTMLInputElement;
     expect(scoringSelectInput.value).toBe("Cohort");
+    // await waitFor(() => {});
 
     // verify is the initial population is already set from group object
     const initialPopulationInput = screen.getByTestId(
@@ -1009,8 +1013,8 @@ describe("Measure Groups Page", () => {
     );
   });
 
-  test("Form displays message next to save button about required populations", () => {
-    renderMeasureGroupComponent();
+  test("Form displays message next to save button about required populations", async () => {
+    await waitFor(() => renderMeasureGroupComponent());
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     expect(
       screen.getByText("You must set all required Populations.")
@@ -1213,26 +1217,30 @@ describe("Measure Groups Page", () => {
 
   test("Measure Group Description should not render input field if user is not the measure owner", async () => {
     measure.createdBy = "AnotherUser@example.com";
-    const { queryByTestId } = renderMeasureGroupComponent();
+    const { queryByTestId } = await waitFor(() =>
+      renderMeasureGroupComponent()
+    );
     const inputField = queryByTestId("groupDescriptionInput");
     expect(inputField).not.toBeInTheDocument();
   });
 
   test("Measure Group Save button should not render if user is not the measure owner", async () => {
     measure.createdBy = "AnotherUser@example.com";
-    const { queryByTestId } = renderMeasureGroupComponent();
+    const { queryByTestId } = await waitFor(() =>
+      renderMeasureGroupComponent()
+    );
     const saveButton = queryByTestId("group-form-submit-btn");
     expect(saveButton).not.toBeInTheDocument();
   });
 
   test("should display default select for scoring unit", async () => {
-    const { getByTestId } = renderMeasureGroupComponent();
+    const { getByTestId } = await waitFor(() => renderMeasureGroupComponent());
     const scoringUnit = getByTestId("measure-group-scoring-unit");
     expect(scoringUnit.textContent).toBe("Scoring UnitUCUM Code or Name");
   });
 
   test("should display selected scoring unit", async () => {
-    const { getByTestId } = renderMeasureGroupComponent();
+    const { getByTestId } = await waitFor(() => renderMeasureGroupComponent());
 
     const scoringUnit = getByTestId("measure-group-scoring-unit");
     expect(scoringUnit.textContent).toBe("Scoring UnitUCUM Code or Name");
@@ -1347,7 +1355,7 @@ describe("Measure Groups Page", () => {
   });
 
   test("Add/remove second IP for ratio group", async () => {
-    renderMeasureGroupComponent();
+    await waitFor(() => renderMeasureGroupComponent());
 
     // select Ratio scoring
     const scoringSelect = screen.getByTestId("scoring-select");
@@ -1402,10 +1410,10 @@ describe("Measure Groups Page", () => {
     group.improvementNotation = "Increased score indicates improvement";
     group.stratifications = [emptyStrat, emptyStrat];
     measure.groups = [group];
-    const { queryByTestId } = renderMeasureGroupComponent();
+    renderMeasureGroupComponent();
     userEvent.click(screen.getByTestId("stratifications-tab"));
-    const removebutton = queryByTestId("remove-strat-button");
-    expect(removebutton).not.toBeInTheDocument();
+    const removeButton = screen.queryByTestId("remove-strat-button");
+    await waitFor(() => expect(removeButton).not.toBeInTheDocument());
   });
 
   test("Stratifications should have remove button if there are more than two", async () => {
@@ -1418,8 +1426,8 @@ describe("Measure Groups Page", () => {
     renderMeasureGroupComponent();
     expect(screen.getByTestId("stratifications-tab")).toBeInTheDocument();
     userEvent.click(screen.getByTestId("stratifications-tab"));
-    const removebutton = screen.getAllByTestId("remove-strat-button")[0];
-    expect(removebutton).toBeInTheDocument();
+    const removeButton = screen.getAllByTestId("remove-strat-button")[0];
+    await waitFor(() => expect(removeButton).toBeInTheDocument());
   });
 
   test("Stratifications should no longer have remove button the stratifications are reduced to two", async () => {
@@ -1429,14 +1437,14 @@ describe("Measure Groups Page", () => {
     group.improvementNotation = "Increased score indicates improvement";
     group.stratifications = [emptyStrat, emptyStrat, emptyStrat];
     measure.groups = [group];
-    const { queryByTestId } = renderMeasureGroupComponent();
+    renderMeasureGroupComponent();
     expect(screen.getByTestId("stratifications-tab")).toBeInTheDocument();
     userEvent.click(screen.getByTestId("stratifications-tab"));
-    const removebutton = screen.getAllByTestId("remove-strat-button")[0];
-    expect(removebutton).toBeInTheDocument();
-    userEvent.click(removebutton);
-    const removebutton2 = queryByTestId("remove-strat-button");
-    expect(removebutton2).not.toBeInTheDocument();
+    const removeButton = screen.getAllByTestId("remove-strat-button")[0];
+    expect(removeButton).toBeInTheDocument();
+    userEvent.click(removeButton);
+    const removeButton2 = screen.queryByTestId("remove-strat-button");
+    await waitFor(() => expect(removeButton2).not.toBeInTheDocument());
   });
 
   test("Stratifications should show add button if total increased to >2", async () => {
@@ -1448,12 +1456,12 @@ describe("Measure Groups Page", () => {
     measure.groups = [group];
     const { queryByTestId } = renderMeasureGroupComponent();
     userEvent.click(screen.getByTestId("stratifications-tab"));
-    const removebutton = queryByTestId("remove-strat-button");
-    expect(removebutton).not.toBeInTheDocument();
-    const addbutton = queryByTestId("add-strat-button");
-    userEvent.click(addbutton);
-    const removebutton2 = screen.getAllByTestId("remove-strat-button")[0];
-    expect(removebutton2).toBeInTheDocument();
+    const removeButton = queryByTestId("remove-strat-button");
+    expect(removeButton).not.toBeInTheDocument();
+    const addButton = queryByTestId("add-strat-button");
+    userEvent.click(addButton);
+    const removeButton2 = screen.getAllByTestId("remove-strat-button")[0];
+    await waitFor(() => expect(removeButton2).toBeInTheDocument());
   });
 
   test("If stratification is empty, auto populate two empty stratifications", async () => {
@@ -1465,8 +1473,10 @@ describe("Measure Groups Page", () => {
     measure.groups = [group];
     renderMeasureGroupComponent();
     userEvent.click(screen.getByTestId("stratifications-tab"));
-    expect(group.stratifications.length == 2);
-    expect(group.stratifications[0] === emptyStrat);
+    await waitFor(() => {
+      expect(group.stratifications.length == 2);
+      expect(group.stratifications[0] === emptyStrat);
+    });
   });
 
   test("measure observation should not render for cohort", async () => {
@@ -1498,17 +1508,6 @@ describe("Measure Groups Page", () => {
       screen.getAllByTestId("select-measure-group-population-input")
     ).toHaveLength(6);
 
-    await waitFor(() =>
-      expect(mockedAxios.get).toHaveBeenCalledWith(
-        "example-service-url/populationBasisValues",
-        expect.anything()
-      )
-    );
-
-    expect(
-      await screen.findByTestId("population-basis-combo-box")
-    ).toBeInTheDocument();
-
     expect(
       screen.queryByRole("link", {
         name: "+ Add Observation",
@@ -1531,17 +1530,6 @@ describe("Measure Groups Page", () => {
       screen.getAllByTestId("select-measure-group-population-input")
     ).toHaveLength(3);
 
-    await waitFor(() =>
-      expect(mockedAxios.get).toHaveBeenCalledWith(
-        "example-service-url/populationBasisValues",
-        expect.anything()
-      )
-    );
-
-    expect(
-      await screen.findByTestId("population-basis-combo-box")
-    ).toBeInTheDocument();
-
     expect(
       screen.getByTestId("select-measure-observation-cv-obs")
     ).toBeInTheDocument();
@@ -1560,14 +1548,7 @@ describe("Measure Groups Page", () => {
       },
     ];
     measure.groups = [group];
-    renderMeasureGroupComponent();
-
-    await waitFor(() =>
-      expect(mockedAxios.get).toHaveBeenCalledWith(
-        "example-service-url/populationBasisValues",
-        expect.anything()
-      )
-    );
+    await waitFor(() => renderMeasureGroupComponent());
 
     const observationInput = screen.getByTestId(
       "measure-observation-cv-obs-input"
@@ -1608,14 +1589,7 @@ describe("Measure Groups Page", () => {
       },
     ];
     measure.groups = [group];
-    renderMeasureGroupComponent();
-
-    await waitFor(() =>
-      expect(mockedAxios.get).toHaveBeenCalledWith(
-        "example-service-url/populationBasisValues",
-        expect.anything()
-      )
-    );
+    await waitFor(() => renderMeasureGroupComponent());
 
     const numeratorObservationInput = screen.getByTestId(
       "measure-observation-numerator-input"
@@ -1625,7 +1599,6 @@ describe("Measure Groups Page", () => {
     const numeratorAggregateFunctionInput = screen.getByTestId(
       "measure-observation-aggregate-numerator-input"
     ) as HTMLInputElement;
-    expect(numeratorAggregateFunctionInput).toBeInTheDocument();
     expect(numeratorAggregateFunctionInput.value).toEqual("Average");
   });
 

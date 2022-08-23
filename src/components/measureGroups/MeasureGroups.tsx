@@ -945,7 +945,7 @@ const MeasureGroups = () => {
                 <Button
                   style={{ background: "#424B5A" }}
                   type="button"
-                  buttonTitle="Delete"
+                  buttontitle="Delete"
                   data-testid="group-form-delete-btn"
                   disabled={
                     measureGroupNumber >= measure?.groups?.length ||
