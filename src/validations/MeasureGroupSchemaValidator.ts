@@ -6,7 +6,7 @@ export type CqlDefineDataTypes = {
   [key: string]: string;
 };
 
-export const MeasureGroupSchemaValidator = (
+export const measureGroupSchemaValidator = (
   definitionDataTypes: CqlDefineDataTypes
 ) => {
   const returnTypeCheckOptions = (populationBasis) => {

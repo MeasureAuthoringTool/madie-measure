@@ -22,7 +22,7 @@ import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { v4 as uuidv4 } from "uuid";
 import {
-  MeasureGroupSchemaValidator,
+  measureGroupSchemaValidator,
   CqlDefineDataTypes,
 } from "../../validations/MeasureGroupSchemaValidator";
 import {
@@ -206,7 +206,7 @@ const MeasureGroups = () => {
     setCqlDefinitionDataTypes(
       measureServiceApi.getReturnTypesForAllCqlDefinitions(measure?.elmJson)
     );
-  }, [measure]);
+  }, [measure?.elmJson]);
 
   useEffect(() => {
     if (measure?.groups && measure?.groups[measureGroupNumber]) {
@@ -269,7 +269,7 @@ const MeasureGroups = () => {
       populationBasis: group?.populationBasis || "Boolean",
       scoringUnit: group?.scoringUnit,
     } as Group,
-    validationSchema: MeasureGroupSchemaValidator(cqlDefinitionDataTypes),
+    validationSchema: measureGroupSchemaValidator(cqlDefinitionDataTypes),
     onSubmit: (group: Group) => {
       setSuccessMessage(undefined);
       window.scrollTo(0, 0);
@@ -990,7 +990,7 @@ const MeasureGroups = () => {
                   tw="text-sm text-gray-600"
                   data-testid="save-measure-group-validation-message"
                 >
-                  {MeasureGroupSchemaValidator(
+                  {measureGroupSchemaValidator(
                     cqlDefinitionDataTypes
                   ).isValidSync(formik.values)
                     ? ""
