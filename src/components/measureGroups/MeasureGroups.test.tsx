@@ -371,10 +371,12 @@ describe("Measure Groups Page", () => {
 
     userEvent.click(screen.getByTestId("add-measure-group-button"));
 
-    expect(screen.getByText("MEASURE GROUP 2")).toBeInTheDocument();
-    expect(
-      screen.getByTestId("leftPanelMeasureInformation-MeasureGroup2")
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("MEASURE GROUP 2")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("leftPanelMeasureInformation-MeasureGroup2")
+      ).toBeInTheDocument();
+    });
 
     const measureGroup1Link = screen.getByTestId(
       "leftPanelMeasureInformation-MeasureGroup1"
