@@ -121,7 +121,7 @@ describe("Measure Groups Page", () => {
       ],
       groupDescription: "",
       measureGroupTypes: [],
-      populationBasis: "Encounter",
+      populationBasis: "Boolean",
       scoringUnit: "",
     };
 
@@ -711,10 +711,10 @@ describe("Measure Groups Page", () => {
   test("Should be able to update initial population of a population group", async () => {
     group.id = "7p03-5r29-7O0I";
     group.scoringUnit = "testScoringUnit";
+    group.populationBasis = "Medication Administration";
     measure.groups = [group];
     const populationBasis = "Medication Administration";
     const { getByTestId, getByText } = renderMeasureGroupComponent();
-    await changePopulationBasis(populationBasis);
     // initial population before update
     const groupPopulationInput = screen.getByTestId(
       "select-measure-group-population-input"
@@ -1325,6 +1325,7 @@ describe("Measure Groups Page", () => {
   test("Should display error message when updating group", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "testDescription";
+    group.populationBasis = "Encounter";
     measure.groups = [group];
     const { getByTestId, getByText } = renderMeasureGroupComponent();
 
