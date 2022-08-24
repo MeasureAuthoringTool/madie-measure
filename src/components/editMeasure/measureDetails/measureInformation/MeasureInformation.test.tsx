@@ -34,6 +34,7 @@ const measure = {
   id: "test measure",
   measureName: "the measure for testing",
   cqlLibraryName: "TestCqlLibraryName",
+  ecqmTitle: "ecqmTitle",
   measurementPeriodStart: "01/01/2022",
   measurementPeriodEnd: "12/02/2022",
   createdBy: "john doe",
@@ -99,23 +100,29 @@ describe("MeasureInformation component", () => {
     expect(result).toBeInTheDocument();
 
     await act(async () => {
-      const text = getByTestId("measure-name-input");
+      const text = getByTestId("measure-name-input") as HTMLInputElement;
       expect(text.value).toBe(measure.measureName);
-      const cqlLibraryNameText = getByTestId("cql-library-name-input");
+      const cqlLibraryNameText = getByTestId(
+        "cql-library-name-input"
+      ) as HTMLInputElement;
       expect(cqlLibraryNameText.value).toBe(measure.cqlLibraryName);
+      const ecqmTitleText = getByTestId(
+        "e-cqm-title-input"
+      ) as HTMLInputElement;
+      expect(ecqmTitleText.value).toBe(measure.ecqmTitle);
       const measurementPeriodStartNode = getByTestId(
         "measurement-period-start"
       );
       const measurementPeriodStartInput = within(
         measurementPeriodStartNode
-      ).getByRole("textbox");
+      ).getByRole("textbox") as HTMLInputElement;
       expect(measurementPeriodStartInput.value).toBe(
         measure.measurementPeriodStart
       );
       const measurementPeriodEndNode = getByTestId("measurement-period-end");
       const measurementPeriodEndInput = within(
         measurementPeriodEndNode
-      ).getByRole("textbox");
+      ).getByRole("textbox") as HTMLInputElement;
       expect(measurementPeriodEndInput.value).toBe(
         measure.measurementPeriodEnd
       );
@@ -128,7 +135,7 @@ describe("MeasureInformation component", () => {
     const result: HTMLElement = getByTestId("measure-information-edit");
     expect(result).toBeInTheDocument();
     await act(async () => {
-      const text = getByTestId("measure-name-input");
+      const text = getByTestId("measure-name-input") as HTMLInputElement;
       expect(text.value).toBe("");
     });
   });
@@ -159,7 +166,7 @@ describe("MeasureInformation component", () => {
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
       measurementPeriodStartNode
-    ).getByRole("textbox");
+    ).getByRole("textbox") as HTMLInputElement;
     userEvent.type(measurementPeriodStartInput, "12/07/2001");
     await act(async () => {
       await waitFor(() =>
@@ -174,7 +181,7 @@ describe("MeasureInformation component", () => {
     const measurementPeriodEndNode = getByTestId("measurement-period-end");
     const measurementPeriodEndInput = within(
       measurementPeriodEndNode
-    ).getByRole("textbox");
+    ).getByRole("textbox") as HTMLInputElement;
     userEvent.type(measurementPeriodEndInput, "12/07/2009");
     await waitFor(() =>
       expect(measurementPeriodEndInput.value).toBe("12/07/2009")
@@ -188,7 +195,7 @@ describe("MeasureInformation component", () => {
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
       measurementPeriodStartNode
-    ).getByRole("textbox");
+    ).getByRole("textbox") as HTMLInputElement;
     userEvent.type(measurementPeriodStartInput, "12/07/2009");
     await act(async () => {
       await waitFor(() =>
@@ -198,7 +205,7 @@ describe("MeasureInformation component", () => {
     const measurementPeriodEndNode = getByTestId("measurement-period-end");
     const measurementPeriodEndInput = within(
       measurementPeriodEndNode
-    ).getByRole("textbox");
+    ).getByRole("textbox") as HTMLInputElement;
     userEvent.type(measurementPeriodEndInput, "12/07/2009");
     await waitFor(() =>
       expect(measurementPeriodEndInput.value).toBe("12/07/2009")
@@ -216,7 +223,7 @@ describe("MeasureInformation component", () => {
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
       measurementPeriodStartNode
-    ).getByRole("textbox");
+    ).getByRole("textbox") as HTMLInputElement;
     userEvent.type(measurementPeriodStartInput, "12/07/2009");
     await act(async () => {
       await waitFor(() =>
@@ -226,7 +233,7 @@ describe("MeasureInformation component", () => {
     const measurementPeriodEndNode = getByTestId("measurement-period-end");
     const measurementPeriodEndInput = within(
       measurementPeriodEndNode
-    ).getByRole("textbox");
+    ).getByRole("textbox") as HTMLInputElement;
     userEvent.type(measurementPeriodEndInput, "12/07/2008");
     await waitFor(() =>
       expect(measurementPeriodEndInput.value).toBe("12/07/2008")
@@ -244,7 +251,7 @@ describe("MeasureInformation component", () => {
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
       measurementPeriodStartNode
-    ).getByRole("textbox");
+    ).getByRole("textbox") as HTMLInputElement;
     userEvent.type(measurementPeriodStartInput, "12/07/200");
     await act(async () => {
       await waitFor(() =>
@@ -254,7 +261,7 @@ describe("MeasureInformation component", () => {
     const measurementPeriodEndNode = getByTestId("measurement-period-end");
     const measurementPeriodEndInput = within(
       measurementPeriodEndNode
-    ).getByRole("textbox");
+    ).getByRole("textbox") as HTMLInputElement;
     userEvent.type(measurementPeriodEndInput, "12/07/2008");
     await waitFor(() =>
       expect(measurementPeriodEndInput.value).toBe("12/07/2008")
@@ -272,13 +279,13 @@ describe("MeasureInformation component", () => {
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
       measurementPeriodStartNode
-    ).getByRole("textbox");
+    ).getByRole("textbox") as HTMLInputElement;
     userEvent.type(measurementPeriodStartInput, "12/07/2000");
     expect(measurementPeriodStartInput.value).toBe("12/07/2000");
     const measurementPeriodEndNode = getByTestId("measurement-period-end");
     const measurementPeriodEndInput = within(
       measurementPeriodEndNode
-    ).getByRole("textbox");
+    ).getByRole("textbox") as HTMLInputElement;
     userEvent.type(measurementPeriodEndInput, "12/07/2009");
     expect(measurementPeriodEndInput.value).toBe("12/07/2009");
 
@@ -309,13 +316,13 @@ describe("MeasureInformation component", () => {
       );
       const measurementPeriodStartInput = within(
         measurementPeriodStartNode
-      ).getByRole("textbox");
+      ).getByRole("textbox") as HTMLInputElement;
       userEvent.type(measurementPeriodStartInput, "12/07/2000");
       expect(measurementPeriodStartInput.value).toBe("12/07/2000");
       const measurementPeriodEndNode = getByTestId("measurement-period-end");
       const measurementPeriodEndInput = within(
         measurementPeriodEndNode
-      ).getByRole("textbox");
+      ).getByRole("textbox") as HTMLInputElement;
       userEvent.type(measurementPeriodEndInput, "12/07/2009");
       expect(measurementPeriodEndInput.value).toBe("12/07/2009");
 
@@ -362,13 +369,13 @@ describe("MeasureInformation component", () => {
       );
       const measurementPeriodStartInput = within(
         measurementPeriodStartNode
-      ).getByRole("textbox");
+      ).getByRole("textbox") as HTMLInputElement;
       userEvent.type(measurementPeriodStartInput, "12/07/2000");
       expect(measurementPeriodStartInput.value).toBe("12/07/2000");
       const measurementPeriodEndNode = getByTestId("measurement-period-end");
       const measurementPeriodEndInput = within(
         measurementPeriodEndNode
-      ).getByRole("textbox");
+      ).getByRole("textbox") as HTMLInputElement;
       userEvent.type(measurementPeriodEndInput, "12/07/2009");
       expect(measurementPeriodEndInput.value).toBe("12/07/2009");
 

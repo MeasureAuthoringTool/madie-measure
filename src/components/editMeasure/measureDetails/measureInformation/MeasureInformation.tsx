@@ -27,6 +27,7 @@ import { makeStyles } from "@mui/styles";
 interface measureInformationForm {
   measureName: string;
   cqlLibraryName: string;
+  ecqmTitle: string;
   measurementPeriodStart: Date;
   measurementPeriodEnd: Date;
 }
@@ -125,6 +126,7 @@ export default function MeasureInformation() {
     measurementPeriodEnd: measure?.measurementPeriodEnd,
     measureName: measure?.measureName,
     cqlLibraryName: measure?.cqlLibraryName,
+    ecqmTitle: measure?.ecqmTitle,
   } as measureInformationForm;
 
   const formik = useFormik({
@@ -173,6 +175,7 @@ export default function MeasureInformation() {
       ...measure,
       measureName: values.measureName,
       cqlLibraryName: values.cqlLibraryName,
+      ecqmTitle: values.ecqmTitle,
       measurementPeriodStart: values.measurementPeriodStart,
       measurementPeriodEnd: values.measurementPeriodEnd,
     };
@@ -281,6 +284,31 @@ export default function MeasureInformation() {
                 Boolean(formik.errors.cqlLibraryName)
               }
               {...formik.getFieldProps("cqlLibraryName")}
+            />
+          </div>
+
+          <br />
+          <DisplayDiv>
+            <span className={classes.asterisk}>*</span>
+            <span tw="mr-2" className={classes.fieldName}>
+              ECQM Abbreviated Title:
+            </span>
+          </DisplayDiv>
+          <div className={formRowGapped}>
+            <TextField
+              placeholder="Enter ECQM Abbreviated Title"
+              required
+              disabled={!canEdit}
+              label="ECQM Abbreviated Title"
+              id="ecqmTitle"
+              data-testid="e-cqm-title"
+              inputProps={{ "data-testid": "e-cqm-title-input" }}
+              helperText={formikErrorHandler("ecqmTitle", true)}
+              size="small"
+              error={
+                formik.touched.ecqmTitle && Boolean(formik.errors.ecqmTitle)
+              }
+              {...formik.getFieldProps("ecqmTitle")}
             />
           </div>
 
