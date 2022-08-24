@@ -5,9 +5,6 @@ import { kebabCase } from "lodash";
 import { MenuItem } from "@mui/material";
 import { ExpressionDefinition } from "./MeasureGroups";
 import { DSLink, Select } from "@madie/madie-design-system/dist/react";
-import Radio from "@mui/material/Radio";
-import RadioGroup from "@mui/material/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import { InitialPopulationAssociationType } from "./GroupPopulation";
 
 const SubTitle = styled.p`
@@ -37,7 +34,6 @@ const SoftLabel = styled.label`
   color: rgba(66, 75, 90, 0.7);
 `;
 
-// Todo Inline errors should be displayed, MeasureGroupSchemaValidator
 const MeasureGroupPopulationSelect = ({
   field,
   label,
