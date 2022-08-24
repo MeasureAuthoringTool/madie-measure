@@ -1,7 +1,7 @@
 import React from "react";
 import { Route, Switch, BrowserRouter, Redirect } from "react-router-dom";
 import EditMeasure from "../editMeasure/EditMeasure";
-import MeasureLanding from "../newMeasure/MeasureLanding";
+import MeasureLanding from "../measureLanding/MeasureLanding";
 import TimeoutHandler from "./TimeoutHandler";
 import NotFound from "../notfound/NotFound";
 

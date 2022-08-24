@@ -13,6 +13,7 @@ export enum InitialPopulationAssociationType {
 
 type Props = {
   field: FieldInputProps<string>;
+  form: any;
   cqlDefinitions: ExpressionDefinition[];
   populations: Population[];
   population: Population;
@@ -22,6 +23,7 @@ type Props = {
   insertCallback: any;
   removeCallback: any;
   replaceCallback: any;
+  setAssociationChanged: (value: boolean) => void;
 };
 
 const GroupPopulation = ({
@@ -35,6 +37,7 @@ const GroupPopulation = ({
   insertCallback,
   removeCallback,
   replaceCallback,
+  setAssociationChanged,
 }: Props) => {
   // Helper function do determine the properties for a select item
   const populationSelectorProperties = (fieldProps: any, scoring: String) => {
@@ -130,7 +133,8 @@ const GroupPopulation = ({
     if (scoring === GroupScoring.RATIO) {
       if (
         (label === "Initial Population" || label === "Initial Population 1") &&
-        population.associationType === undefined
+        (population.associationType === undefined ||
+          population.associationType === null)
       ) {
         population.associationType =
           InitialPopulationAssociationType.DENOMINATOR;
@@ -167,6 +171,7 @@ const GroupPopulation = ({
             }
             const index = findIndex(ip, populations);
             replaceCallback(index, ip);
+            setAssociationChanged(true);
           }
         });
       } else {
@@ -206,7 +211,7 @@ const GroupPopulation = ({
   return (
     <MeasureGroupPopulationSelect
       {...selectorProps}
-      {...field}
+      field={field}
       helperText={error}
       error={!!error && !!touched}
       canEdit={canEdit}
