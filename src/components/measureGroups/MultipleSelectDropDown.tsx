@@ -6,7 +6,7 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import { Checkbox, Link, ListItemText } from "@mui/material";
 
-const FieldLabel = tw.label`block text-sm font-medium text-gray-700`;
+const FieldLabel = tw.label`block capitalize text-sm font-medium text-gray-700`;
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -40,7 +40,7 @@ export default function MultipleSelectDropDown(props: {
     <div>
       <FormControl sx={{ width: 300, mt: 3 }}>
         <FieldLabel htmlFor="multiple-select-dropdown">
-          Measure Group type
+          Measure Group type *
         </FieldLabel>
         {props.canEdit && (
           <Select
