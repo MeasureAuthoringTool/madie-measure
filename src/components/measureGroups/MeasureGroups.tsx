@@ -21,7 +21,10 @@ import { Button, Select } from "@madie/madie-design-system/dist/react/";
 import { useFormik, FormikProvider, FieldArray, Field } from "formik";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { v4 as uuidv4 } from "uuid";
-import { MeasureGroupSchemaValidator } from "../../validations/MeasureGroupSchemaValidator";
+import {
+  measureGroupSchemaValidator,
+  CqlDefineDataTypes,
+} from "../../validations/MeasureGroupSchemaValidator";
 import {
   useOktaTokens,
   measureStore,
@@ -197,6 +200,15 @@ const MeasureGroups = () => {
     useState<string[]>();
   const [associationChanged, setAssociationChanged] = useState(false);
 
+  const [cqlDefinitionDataTypes, setCqlDefinitionDataTypes] =
+    useState<CqlDefineDataTypes>();
+
+  useEffect(() => {
+    setCqlDefinitionDataTypes(
+      measureServiceApi.getReturnTypesForAllCqlDefinitions(measure?.elmJson)
+    );
+  }, [measure?.elmJson]);
+
   useEffect(() => {
     if (measure?.groups && measure?.groups[measureGroupNumber]) {
       setGroup(measure?.groups[measureGroupNumber]);
@@ -258,7 +270,7 @@ const MeasureGroups = () => {
       populationBasis: group?.populationBasis || "Boolean",
       scoringUnit: group?.scoringUnit,
     } as Group,
-    validationSchema: MeasureGroupSchemaValidator,
+    validationSchema: measureGroupSchemaValidator(cqlDefinitionDataTypes),
     onSubmit: (group: Group) => {
       setSuccessMessage(undefined);
       window.scrollTo(0, 0);
@@ -969,7 +981,9 @@ const MeasureGroups = () => {
                   tw="text-sm text-gray-600"
                   data-testid="save-measure-group-validation-message"
                 >
-                  {MeasureGroupSchemaValidator.isValidSync(formik.values)
+                  {measureGroupSchemaValidator(
+                    cqlDefinitionDataTypes
+                  ).isValidSync(formik.values)
                     ? ""
                     : "You must set all required Populations."}
                 </span>

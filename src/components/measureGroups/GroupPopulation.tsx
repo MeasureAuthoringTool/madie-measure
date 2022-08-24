@@ -3,6 +3,7 @@ import * as _ from "lodash";
 import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
 import { ExpressionDefinition } from "./MeasureGroups";
 import { GroupScoring, Population, PopulationType } from "@madie/madie-models";
+import { FormikState, getIn } from "formik";
 import { FieldInputProps } from "formik/dist/types";
 import { findPopulations } from "./PopulationHelper";
 
@@ -13,7 +14,7 @@ export enum InitialPopulationAssociationType {
 
 type Props = {
   field: FieldInputProps<string>;
-  form: any;
+  form: FormikState<any>;
   cqlDefinitions: ExpressionDefinition[];
   populations: Population[];
   population: Population;
@@ -28,6 +29,7 @@ type Props = {
 
 const GroupPopulation = ({
   field,
+  form,
   cqlDefinitions,
   populations,
   population,
@@ -200,8 +202,10 @@ const GroupPopulation = ({
   };
 
   const selectorProps = populationSelectorProperties(population, scoring);
-  const touched = _.get(populations, selectorProps.name);
-  const error = !!touched ? _.get(populations, selectorProps.name) : null;
+  const error = getIn(form.errors, field.name);
+  const showError =
+    Boolean(error) &&
+    (getIn(form.touched, field.name) || population.definition);
   const isRemovable = isPopulationRemovable(scoring, populations);
   const canBeAdded = showAddPopulationLink(scoring, populations);
   selectorProps.label = correctPopulationLabel(populations, population);
@@ -212,8 +216,8 @@ const GroupPopulation = ({
     <MeasureGroupPopulationSelect
       {...selectorProps}
       field={field}
-      helperText={error}
-      error={!!error && !!touched}
+      helperText={showError ? error : ""}
+      error={showError}
       canEdit={canEdit}
       removePopulationCallback={() => removeCallback(populationIndex)}
       isRemovable={isRemovable}
