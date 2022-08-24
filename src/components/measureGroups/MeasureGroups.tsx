@@ -195,6 +195,7 @@ const MeasureGroups = () => {
   // warning during test cases
   const [populationBasisValues, setPopulationBasisValues] =
     useState<string[]>();
+  const [associationChanged, setAssociationChanged] = useState(false);
 
   useEffect(() => {
     if (measure?.groups && measure?.groups[measureGroupNumber]) {
@@ -736,6 +737,7 @@ const MeasureGroups = () => {
                                 insertCallback={arrayHelpers.insert}
                                 removeCallback={arrayHelpers.remove}
                                 replaceCallback={arrayHelpers.replace}
+                                setAssociationChanged={setAssociationChanged}
                               />
                             </GridLayout>
                             <MeasureGroupObservation
@@ -989,7 +991,9 @@ const MeasureGroups = () => {
                     style={{ background: "#424B5A" }}
                     type="submit"
                     data-testid="group-form-submit-btn"
-                    disabled={!(formik.isValid && formik.dirty)}
+                    disabled={
+                      !(formik.isValid && (formik.dirty || associationChanged))
+                    }
                   >
                     Save
                   </Button>
