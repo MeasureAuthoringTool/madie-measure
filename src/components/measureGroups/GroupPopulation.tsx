@@ -204,8 +204,8 @@ const GroupPopulation = ({
   const selectorProps = populationSelectorProperties(population, scoring);
   const error = getIn(form.errors, field.name);
   const showError =
-    (getIn(form.touched, field.name) || population.definition) &&
-    Boolean(error);
+    Boolean(error) &&
+    (getIn(form.touched, field.name) || population.definition);
   const isRemovable = isPopulationRemovable(scoring, populations);
   const canBeAdded = showAddPopulationLink(scoring, populations);
   selectorProps.label = correctPopulationLabel(populations, population);

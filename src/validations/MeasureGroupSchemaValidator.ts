@@ -12,7 +12,7 @@ const returnTypeCheckOptions = (
 ) => {
   return {
     name: "equalsTo",
-    message: `Definition does not align with ${populationBasis}`,
+    message: `The selected definition does not align with the Population Basis field selection of ${populationBasis}`,
     test: (value) => {
       if (
         value &&
