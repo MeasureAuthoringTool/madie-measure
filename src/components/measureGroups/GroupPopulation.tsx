@@ -3,6 +3,7 @@ import * as _ from "lodash";
 import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
 import { ExpressionDefinition } from "./MeasureGroups";
 import { GroupScoring, Population, PopulationType } from "@madie/madie-models";
+import { FormikState, getIn } from "formik";
 import { FieldInputProps } from "formik/dist/types";
 import { findPopulations } from "./PopulationHelper";
 
@@ -13,7 +14,7 @@ export enum InitialPopulationAssociationType {
 
 type Props = {
   field: FieldInputProps<string>;
-  form: any;
+  form: FormikState<any>;
   cqlDefinitions: ExpressionDefinition[];
   populations: Population[];
   population: Population;
@@ -30,6 +31,7 @@ type Props = {
 
 const GroupPopulation = ({
   field,
+  form,
   cqlDefinitions,
   populations,
   population,
@@ -39,10 +41,8 @@ const GroupPopulation = ({
   insertCallback,
   removeCallback,
   replaceCallback,
-  error,
-  showError,
   setAssociationChanged,
-}: Props) => {
+}) => {
   // Helper function do determine the properties for a select item
   const populationSelectorProperties = (fieldProps: any, scoring: String) => {
     const hidden = fieldProps.hidden?.includes(scoring);
@@ -202,6 +202,9 @@ const GroupPopulation = ({
       }
     }
   };
+  const error = getIn(form.errors, field.name);
+  const showError =
+    (getIn(form.touched, field.name) || population.definition) && !!error;
 
   const selectorProps = populationSelectorProperties(population, scoring);
   const isRemovable = isPopulationRemovable(scoring, populations);

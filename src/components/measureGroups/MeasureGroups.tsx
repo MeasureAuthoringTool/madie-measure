@@ -18,7 +18,7 @@ import {
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import EditMeasureSideBarNav from "../editMeasure/measureDetails/EditMeasureSideBarNav";
 import { Button, Select } from "@madie/madie-design-system/dist/react/";
-import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
+import { useFormik, FormikProvider, FieldArray, Field } from "formik";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -733,15 +733,6 @@ const MeasureGroups = () => {
                           formik.values.populations,
                           population.name
                         ).length;
-
-                        const showError = () => {
-                          return (
-                            (getIn(formik.touched, fieldProps.name) ||
-                              getIn(formik.values, fieldProps.name)) &&
-                            Boolean(getIn(formik.errors, fieldProps.name))
-                          );
-                        };
-
                         const gridSize = populationCount === 2 ? 6 : 12;
                         return (
                           <React.Fragment key={`population_${index}`}>
@@ -759,8 +750,6 @@ const MeasureGroups = () => {
                                 removeCallback={arrayHelpers.remove}
                                 replaceCallback={arrayHelpers.replace}
                                 setAssociationChanged={setAssociationChanged}
-                                error={getIn(formik.errors, fieldProps.name)}
-                                showError={showError()}
                               />
                             </GridLayout>
                             <MeasureGroupObservation
