@@ -6,48 +6,54 @@ export type CqlDefineDataTypes = {
   [key: string]: string;
 };
 
+const returnTypeCheckOptions = (
+  populationBasis: string,
+  definitionDataTypes: CqlDefineDataTypes
+) => {
+  return {
+    name: "equalsTo",
+    message: `Definition does not align with ${populationBasis}`,
+    test: (value) => {
+      if (
+        value &&
+        definitionDataTypes &&
+        definitionDataTypes[_.camelCase(value)]
+      ) {
+        return (
+          definitionDataTypes[_.camelCase(value)].toLowerCase() ===
+          _.camelCase(populationBasis)?.toLowerCase()
+        );
+      }
+      return true;
+    },
+  };
+};
+
+const createPopulationSchema = (
+  requiredPopulations: string[],
+  populationBasis: string,
+  definitionDataTypes: CqlDefineDataTypes
+) => {
+  return Yup.array().of(
+    Yup.object().shape({
+      definition: Yup.string().when(["name"], (populationName) => {
+        if (requiredPopulations.includes(populationName)) {
+          return Yup.string()
+            .required(`${populationName} is required`)
+            .test(returnTypeCheckOptions(populationBasis, definitionDataTypes));
+        } else {
+          return Yup.string().test(
+            returnTypeCheckOptions(populationBasis, definitionDataTypes)
+          );
+        }
+      }),
+    })
+  );
+};
+
 export const measureGroupSchemaValidator = (
   definitionDataTypes: CqlDefineDataTypes
 ) => {
-  const returnTypeCheckOptions = (populationBasis) => {
-    return {
-      name: "equalsTo",
-      message: `Definition does not align with ${populationBasis}`,
-      test: (value) => {
-        if (
-          value &&
-          definitionDataTypes &&
-          definitionDataTypes[_.camelCase(value)]
-        ) {
-          return (
-            definitionDataTypes[_.camelCase(value)].toLowerCase() ===
-            _.camelCase(populationBasis)?.toLowerCase()
-          );
-        }
-        return true;
-      },
-    };
-  };
-
-  const createPopulationSchema = (
-    requiredPopulations: string[],
-    populationBasis: string
-  ) => {
-    return Yup.array().of(
-      Yup.object().shape({
-        definition: Yup.string().when(["name"], (populationName) => {
-          if (requiredPopulations.includes(populationName)) {
-            return Yup.string()
-              .required(`${populationName} is required`)
-              .test(returnTypeCheckOptions(populationBasis));
-          } else {
-            return Yup.string().test(returnTypeCheckOptions(populationBasis));
-          }
-        }),
-      })
-    );
-  };
-
   return Yup.object().shape({
     scoring: Yup.string()
       .oneOf(Object.values(GroupScoring))
@@ -64,22 +70,26 @@ export const measureGroupSchemaValidator = (
           case GroupScoring.COHORT:
             return createPopulationSchema(
               ["initialPopulation"],
-              populationBasis
+              populationBasis,
+              definitionDataTypes
             );
           case GroupScoring.CONTINUOUS_VARIABLE:
             return createPopulationSchema(
               ["initialPopulation", "measurePopulation"],
-              populationBasis
+              populationBasis,
+              definitionDataTypes
             );
           case GroupScoring.PROPORTION:
             return createPopulationSchema(
               ["initialPopulation", "numerator", "denominator"],
-              populationBasis
+              populationBasis,
+              definitionDataTypes
             );
           case GroupScoring.RATIO:
             return createPopulationSchema(
               ["initialPopulation", "numerator", "denominator"],
-              populationBasis
+              populationBasis,
+              definitionDataTypes
             );
         }
       }

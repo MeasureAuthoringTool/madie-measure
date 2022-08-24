@@ -198,6 +198,7 @@ const MeasureGroups = () => {
   // warning during test cases
   const [populationBasisValues, setPopulationBasisValues] =
     useState<string[]>();
+  const [associationChanged, setAssociationChanged] = useState(false);
 
   const [cqlDefinitionDataTypes, setCqlDefinitionDataTypes] =
     useState<CqlDefineDataTypes>();
@@ -757,6 +758,7 @@ const MeasureGroups = () => {
                                 insertCallback={arrayHelpers.insert}
                                 removeCallback={arrayHelpers.remove}
                                 replaceCallback={arrayHelpers.replace}
+                                setAssociationChanged={setAssociationChanged}
                                 error={getIn(formik.errors, fieldProps.name)}
                                 showError={showError()}
                               />
@@ -1014,7 +1016,9 @@ const MeasureGroups = () => {
                     style={{ background: "#424B5A" }}
                     type="submit"
                     data-testid="group-form-submit-btn"
-                    disabled={!(formik.isValid && formik.dirty)}
+                    disabled={
+                      !(formik.isValid && (formik.dirty || associationChanged))
+                    }
                   >
                     Save
                   </Button>

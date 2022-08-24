@@ -25,6 +25,7 @@ type Props = {
   replaceCallback: any;
   error: string;
   showError: boolean;
+  setAssociationChanged: (value: boolean) => void;
 };
 
 const GroupPopulation = ({
@@ -40,6 +41,7 @@ const GroupPopulation = ({
   replaceCallback,
   error,
   showError,
+  setAssociationChanged,
 }: Props) => {
   // Helper function do determine the properties for a select item
   const populationSelectorProperties = (fieldProps: any, scoring: String) => {
@@ -135,7 +137,8 @@ const GroupPopulation = ({
     if (scoring === GroupScoring.RATIO) {
       if (
         (label === "Initial Population" || label === "Initial Population 1") &&
-        population.associationType === undefined
+        (population.associationType === undefined ||
+          population.associationType === null)
       ) {
         population.associationType =
           InitialPopulationAssociationType.DENOMINATOR;
@@ -172,6 +175,7 @@ const GroupPopulation = ({
             }
             const index = findIndex(ip, populations);
             replaceCallback(index, ip);
+            setAssociationChanged(true);
           }
         });
       } else {
