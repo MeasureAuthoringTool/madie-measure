@@ -24,8 +24,6 @@ type Props = {
   insertCallback: any;
   removeCallback: any;
   replaceCallback: any;
-  error: string;
-  showError: boolean;
   setAssociationChanged: (value: boolean) => void;
 };
 
@@ -42,7 +40,7 @@ const GroupPopulation = ({
   removeCallback,
   replaceCallback,
   setAssociationChanged,
-}) => {
+}: Props) => {
   // Helper function do determine the properties for a select item
   const populationSelectorProperties = (fieldProps: any, scoring: String) => {
     const hidden = fieldProps.hidden?.includes(scoring);
@@ -202,11 +200,10 @@ const GroupPopulation = ({
       }
     }
   };
-  const error = getIn(form.errors, field.name);
-  const showError =
-    (getIn(form.touched, field.name) || population.definition) && !!error;
 
   const selectorProps = populationSelectorProperties(population, scoring);
+  const error = getIn(form.errors, field.name);
+  const showError = getIn(form.touched, field.name) && Boolean(error);
   const isRemovable = isPopulationRemovable(scoring, populations);
   const canBeAdded = showAddPopulationLink(scoring, populations);
   selectorProps.label = correctPopulationLabel(populations, population);
