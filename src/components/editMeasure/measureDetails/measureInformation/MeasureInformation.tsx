@@ -266,7 +266,7 @@ export default function MeasureInformation() {
               placeholder="eCQM Name"
               required
               disabled={!canEdit}
-              label="ECQM Abbreviated Title"
+              label="eCQM Abbreviated Title"
               id="ecqmTitle"
               data-testid="ecqm-text-field"
               inputProps={{ "data-testid": "ecqm-input" }}
