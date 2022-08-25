@@ -152,7 +152,7 @@ export class MeasureServiceApi {
       if (err.response.data?.validationErrors?.group) {
         errorMessage =
           "Missing required populations for selected scoring type.";
-      } else if (err.response.data?.message) {
+      } else if (err.response.data.message) {
         errorMessage = err.response.data.message;
       }
     }
