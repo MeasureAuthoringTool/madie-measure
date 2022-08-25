@@ -922,11 +922,26 @@ describe("Measure Groups Page", () => {
       target: { value: "New rate aggregation text" },
     });
 
-    // Discard changed
+    // Discard changed / test onClose
     expect(screen.getByTestId("group-form-discard-btn")).toBeEnabled();
     userEvent.click(screen.getByTestId("group-form-discard-btn"));
     const discardDialog = await screen.getByTestId("discard-dialog");
     expect(discardDialog).toBeInTheDocument();
+    const cancelButton = await screen.getByTestId(
+      "discard-dialog-cancel-button"
+    );
+    expect(cancelButton).toBeInTheDocument();
+    fireEvent.click(cancelButton);
+    await waitFor(() => {
+      expect(screen.queryByText("You have unsaved changes.")).not.toBeVisible();
+    });
+    expect(screen.getByTestId("group-form-discard-btn")).toBeEnabled();
+    userEvent.click(screen.getByTestId("group-form-discard-btn"));
+    expect(cancelButton).toBeInTheDocument();
+    fireEvent.click(cancelButton);
+    await waitFor(() => {
+      expect(screen.queryByText("You have unsaved changes.")).not.toBeVisible();
+    });
     const continueButton = await screen.getByTestId(
       "discard-dialog-continue-button"
     );

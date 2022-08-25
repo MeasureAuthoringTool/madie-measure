@@ -31,7 +31,7 @@ interface SidebarLink {
 
 export interface EditMeasureSideBarNavProps {
   dirty: Boolean;
-  links: Array<SidebarLink>;
+  links: Array<any>; // needs to be changed since some links are actually measure groups.
   header?: String;
   measureGroupNumber?: number;
   setMeasureGroupNumber?: (value: number) => void;
@@ -90,7 +90,7 @@ export default function EditMeasureSideBarNav(
         setInitiatedPayload({ action: "navigate", value: groupNumber });
         setDiscardDialogOpen(true);
       } else {
-        handleMeasureGroupClick(groupNumber);
+        handleMeasureGroupNavigation(groupNumber);
       }
     }
   };
@@ -112,7 +112,7 @@ export default function EditMeasureSideBarNav(
   };
 
   // we need to preserve the
-  const handleMeasureGroupClick = (val: number) => {
+  const handleMeasureGroupNavigation = (val: number) => {
     setMeasureGroupNumber(val);
     setSuccessMessage(undefined);
     onClose();
@@ -123,7 +123,7 @@ export default function EditMeasureSideBarNav(
     if (initiatedPayload.action === "add") {
       addNewBlankMeasureGroup();
     } else if (initiatedPayload.action === "navigate") {
-      handleMeasureGroupClick(initiatedPayload.value);
+      handleMeasureGroupNavigation(initiatedPayload.value);
     }
   };
 
