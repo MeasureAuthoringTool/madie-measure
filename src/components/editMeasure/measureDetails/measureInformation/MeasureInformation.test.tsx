@@ -106,9 +106,7 @@ describe("MeasureInformation component", () => {
         "cql-library-name-input"
       ) as HTMLInputElement;
       expect(cqlLibraryNameText.value).toBe(measure.cqlLibraryName);
-      const ecqmTitleText = getByTestId(
-        "e-cqm-title-input"
-      ) as HTMLInputElement;
+      const ecqmTitleText = getByTestId("ecqm-input") as HTMLInputElement;
       expect(ecqmTitleText.value).toBe(measure.ecqmTitle);
       const measurementPeriodStartNode = getByTestId(
         "measurement-period-start"
