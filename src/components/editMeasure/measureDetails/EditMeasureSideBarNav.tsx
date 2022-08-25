@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import tw from "twin.macro";
-import { NavLink, useLocation } from "react-router-dom";
+import { Link as NavLink, useLocation } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import { Measure } from "@madie/madie-models";
 import "./EditMeasureSideBarNav.scss";
-import { DSLink } from "@madie/madie-design-system/dist/react";
+import {
+  DSLink,
+  MadieDiscardDialog,
+} from "@madie/madie-design-system/dist/react";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
 const Title = tw.div`flex items-center flex-shrink-0 px-4 space-y-5 font-display`;
@@ -27,6 +30,7 @@ interface SidebarLink {
 }
 
 export interface EditMeasureSideBarNavProps {
+  dirty: Boolean;
   links: Array<SidebarLink>;
   header?: String;
   measureGroupNumber?: number;
@@ -45,13 +49,12 @@ export default function EditMeasureSideBarNav(
     measureGroupNumber,
     setMeasureGroupNumber,
     setSuccessMessage,
+    dirty,
   } = props;
   const { pathname } = useLocation();
   const [measureGroups, setMeasureGroups] = useState<any>();
-
   useEffect(() => {
     if (links) setMeasureGroups(links);
-
     if (!measure?.groups?.length) {
       const baseURL = "/measures/" + measure?.id + "/edit/measure-groups";
       setMeasureGroups([
@@ -63,9 +66,36 @@ export default function EditMeasureSideBarNav(
       ]);
     }
   }, [measure?.groups]);
+  // a bool for when discard is open triggered by an initiated state
+  const [discardDialogOpen, setDiscardDialogOpen] = useState<boolean>(false);
+  // action payload? like a redux operation
+  const [initiatedPayload, setInitiatedPayload] = useState<any>(null);
 
-  const addNewBlankMeasureGroup = (e) => {
+  const initiateBlankMeasureGroupClick = (e) => {
     e.preventDefault();
+    if (dirty) {
+      setInitiatedPayload({ action: "add", value: null });
+      setDiscardDialogOpen(true);
+    } else {
+      addNewBlankMeasureGroup();
+    }
+  };
+
+  const initiateNavigateGroupClick = (e) => {
+    e.preventDefault();
+    const groupNumber = Number(e.target.id);
+    // We don't want to trigger a warning if we're navigating to the same group
+    if (groupNumber !== measureGroupNumber) {
+      if (dirty) {
+        setInitiatedPayload({ action: "navigate", value: groupNumber });
+        setDiscardDialogOpen(true);
+      } else {
+        handleMeasureGroupClick(groupNumber);
+      }
+    }
+  };
+
+  const addNewBlankMeasureGroup = () => {
     setMeasureGroupNumber(measureGroups.length);
     setMeasureGroups([
       ...measureGroups,
@@ -78,14 +108,29 @@ export default function EditMeasureSideBarNav(
       },
     ]);
     setSuccessMessage(undefined);
+    onClose();
   };
 
-  const handleMeasureGroupClick = (e) => {
-    e.preventDefault();
-    setMeasureGroupNumber(parseInt(e.target.id));
+  // we need to preserve the
+  const handleMeasureGroupClick = (val: number) => {
+    setMeasureGroupNumber(val);
     setSuccessMessage(undefined);
+    onClose();
   };
 
+  // we need to pass a bound function to discard.
+  const onContinue = () => {
+    if (initiatedPayload.action === "add") {
+      addNewBlankMeasureGroup();
+    } else if (initiatedPayload.action === "navigate") {
+      handleMeasureGroupClick(initiatedPayload.value);
+    }
+  };
+
+  const onClose = () => {
+    setDiscardDialogOpen(false);
+    setInitiatedPayload(null);
+  };
   // if no header, we don't need an outer wrapper
   if (header) {
     return (
@@ -129,7 +174,7 @@ export default function EditMeasureSideBarNav(
             return (
               <LinkEl
                 key={linkInfo.title}
-                onClick={(e) => handleMeasureGroupClick(e)}
+                onClick={(e) => initiateNavigateGroupClick(e)}
                 to={linkInfo.href}
                 id={index}
                 data-testid={linkInfo.dataTestId}
@@ -141,7 +186,7 @@ export default function EditMeasureSideBarNav(
         <div className="right-col">
           <DSLink
             className="new-measure-group"
-            onClick={(e) => addNewBlankMeasureGroup(e)}
+            onClick={(e) => initiateBlankMeasureGroupClick(e)}
             data-testid="add-measure-group-button"
           >
             <AddIcon className="add-icon" fontSize="small" />
@@ -149,6 +194,11 @@ export default function EditMeasureSideBarNav(
           </DSLink>
         </div>
       </Nav>
+      <MadieDiscardDialog
+        open={discardDialogOpen}
+        onClose={onClose}
+        onContinue={onContinue}
+      />
     </OuterWrapper>
   );
 }
