@@ -194,12 +194,17 @@ export class MeasureServiceApi {
         const returnType = {};
         const name = _.camelCase(_.trim(definition.name));
         if (definition.resultTypeName) {
-          returnType[`${name}`] = definition.resultTypeName;
+          returnType[name] = definition.resultTypeName?.split("}")[1];
         } else if (definition.resultTypeSpecifier) {
-          returnType[`${name}`] =
-            definition.resultTypeSpecifier.elementType.name;
+          const resultType = definition.resultTypeSpecifier.elementType.type;
+          if (resultType === "NamedTypeSpecifier") {
+            returnType[name] =
+              definition.resultTypeSpecifier.elementType.name?.split("}")[1];
+          } else {
+            returnType[name] = "NA";
+          }
         } else {
-          returnType[`${name}`] = undefined;
+          returnType[name] = "NA";
         }
         return {
           ...returnTypes,

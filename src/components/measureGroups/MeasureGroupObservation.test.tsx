@@ -1,6 +1,6 @@
 import * as React from "react";
 import userEvent from "@testing-library/user-event";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import * as uuid from "uuid";
 import MeasureGroupObservation from "./MeasureGroupObservation";
 import { MeasureScoring, PopulationType } from "@madie/madie-models";
@@ -115,16 +115,16 @@ describe("Measure Group Observation", () => {
     expect(
       screen.queryByRole("link", { name: "Remove" })
     ).not.toBeInTheDocument();
-    const observationSelect = screen.getByRole("combobox", {
-      name: "Observation *",
-    }) as HTMLSelectElement;
-    expect(observationSelect).toBeInTheDocument();
-    expect(observationSelect.value).toEqual("MyFunc1");
-    const aggregateFuncSelect = screen.getByRole("combobox", {
-      name: "Aggregate Function *",
-    }) as HTMLSelectElement;
-    expect(aggregateFuncSelect).toBeInTheDocument();
-    expect(aggregateFuncSelect.value).toEqual("Count");
+
+    const observationInput = screen.getByTestId(
+      "measure-observation-cv-obs-input"
+    ) as HTMLInputElement;
+    expect(observationInput.value).toBe("MyFunc1");
+
+    const aggregateInput = screen.getByTestId(
+      "measure-observation-aggregate-cv-obs-input"
+    ) as HTMLInputElement;
+    expect(aggregateInput.value).toBe("Count");
   });
 
   it("should render existing measure observation for Ratio scoring type", () => {
@@ -170,16 +170,16 @@ describe("Measure Group Observation", () => {
       screen.queryByRole("link", { name: "Add Observation" })
     ).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Remove" })).toBeInTheDocument();
-    const observationSelect = screen.getByRole("combobox", {
-      name: /denominator observation */i,
-    }) as HTMLSelectElement;
-    expect(observationSelect).toBeInTheDocument();
-    expect(observationSelect.value).toEqual("MyFunc1");
-    const aggregateFuncSelect = screen.getByRole("combobox", {
-      name: "Aggregate Function *",
-    }) as HTMLSelectElement;
-    expect(aggregateFuncSelect).toBeInTheDocument();
-    expect(aggregateFuncSelect.value).toEqual("Count");
+
+    const denominatorObservationInput = screen.getByTestId(
+      "measure-observation-denominator-input"
+    ) as HTMLInputElement;
+    expect(denominatorObservationInput.value).toBe("MyFunc1");
+
+    const denominatorAggregateInput = screen.getByTestId(
+      "measure-observation-aggregate-denominator-input"
+    ) as HTMLInputElement;
+    expect(denominatorAggregateInput.value).toBe("Count");
   });
 
   it("should not render existing measure observation for Ratio scoring type with invalid population", () => {
@@ -328,15 +328,16 @@ describe("Measure Group Observation", () => {
       />
     );
 
-    const observationComboBox = screen.getByRole("combobox", {
-      name: "Observation *",
+    const observationInput = screen.getByTestId(
+      "measure-observation-cv-obs-input"
+    ) as HTMLInputElement;
+    // check if this value is already selected
+    expect(observationInput.value).toBe("MyFunc1");
+
+    fireEvent.change(observationInput, {
+      target: { value: "MyFuncAB" },
     });
-    const observationOptions =
-      within(observationComboBox).getAllByRole("option");
-    expect(observationOptions).toHaveLength(3);
-    expect((observationOptions[1] as HTMLOptionElement).selected).toBeTruthy();
-    userEvent.click(observationComboBox);
-    userEvent.selectOptions(observationComboBox, observationOptions[2]);
+
     expect(mockSetFieldValue).toHaveBeenCalledTimes(1);
     expect(mockSetFieldValue).toHaveBeenCalledWith("measureObservations", [
       {
