@@ -85,6 +85,8 @@ jest.mock("@madie/madie-util", () => ({
 
 const populationBasisValues: string[] = [
   "Boolean",
+  "Encounter",
+  "Medication Administration",
   "test-data-1",
   "test-data-2",
 ];
@@ -147,6 +149,22 @@ describe("Measure Groups Page", () => {
         </ApiContextProvider>
       </MemoryRouter>
     );
+  };
+
+  const changePopulationBasis = async (value: string) => {
+    let populationBasis;
+    await waitFor(() => {
+      populationBasis = screen.getByTestId("population-basis-combo-box");
+    });
+    const populationBasisAutoComplete =
+      within(populationBasis).getByRole("combobox");
+    populationBasis.focus();
+    fireEvent.change(populationBasisAutoComplete, {
+      target: { value: value },
+    });
+    fireEvent.keyDown(populationBasis, { key: "ArrowDown" });
+    fireEvent.keyDown(populationBasis, { key: "Enter" });
+    expect(populationBasisAutoComplete).toHaveValue(value);
   };
 
   test("Measure Group Scoring renders to correct options length, and defaults to empty string", async () => {
@@ -258,7 +276,9 @@ describe("Measure Groups Page", () => {
   });
 
   test("Should create population Group with one initial population successfully", async () => {
+    const populationBasis = "Encounter";
     await waitFor(() => renderMeasureGroupComponent());
+    await changePopulationBasis(populationBasis);
 
     const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
     fireEvent.change(groupDescriptionInput, {
@@ -317,7 +337,7 @@ describe("Measure Groups Page", () => {
       scoringUnit: "",
       rateAggregation: "",
       improvementNotation: "",
-      populationBasis: "Boolean",
+      populationBasis: populationBasis,
     };
 
     expect(alert).toHaveTextContent(
@@ -332,7 +352,7 @@ describe("Measure Groups Page", () => {
 
   test("Should create multiple group tabs on clicking add measure group ", async () => {
     await waitFor(() => renderMeasureGroupComponent());
-
+    await changePopulationBasis("Encounter");
     const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
     fireEvent.change(groupDescriptionInput, {
       target: { value: "new description" },
@@ -507,7 +527,9 @@ describe("Measure Groups Page", () => {
   });
 
   test("Should be able to save multiple groups  ", async () => {
+    const populationBasis = "Encounter";
     renderMeasureGroupComponent();
+    await changePopulationBasis(populationBasis);
 
     // select a scoring
     const scoringSelect = screen.getByTestId("scoring-select");
@@ -573,7 +595,7 @@ describe("Measure Groups Page", () => {
       scoringUnit: "",
       rateAggregation: "",
       improvementNotation: "",
-      populationBasis: "Boolean",
+      populationBasis: populationBasis,
     };
 
     expect(alert).toHaveTextContent(
@@ -601,6 +623,7 @@ describe("Measure Groups Page", () => {
     expect(screen.getByTestId("AddIcon")).toBeInTheDocument();
 
     userEvent.click(screen.getByTestId("add-measure-group-button"));
+    await changePopulationBasis(populationBasis);
 
     const groupDescriptionInput2 = screen.getByTestId("groupDescriptionInput");
     fireEvent.change(groupDescriptionInput2, {
@@ -665,7 +688,7 @@ describe("Measure Groups Page", () => {
       scoringUnit: "",
       rateAggregation: "",
       improvementNotation: "",
-      populationBasis: "Boolean",
+      populationBasis: populationBasis,
       stratifications: [],
     };
 
@@ -688,9 +711,10 @@ describe("Measure Groups Page", () => {
   test("Should be able to update initial population of a population group", async () => {
     group.id = "7p03-5r29-7O0I";
     group.scoringUnit = "testScoringUnit";
+    group.populationBasis = "Medication Administration";
     measure.groups = [group];
+    const populationBasis = "Medication Administration";
     const { getByTestId, getByText } = renderMeasureGroupComponent();
-
     // initial population before update
     const groupPopulationInput = screen.getByTestId(
       "select-measure-group-population-input"
@@ -730,7 +754,7 @@ describe("Measure Groups Page", () => {
       scoring: "Cohort",
       groupDescription: "",
       measureGroupTypes: ["Patient Reported Outcome"],
-      populationBasis: "Boolean",
+      populationBasis: populationBasis,
       scoringUnit: "testScoringUnit",
       improvementNotation: "",
     };
@@ -755,6 +779,7 @@ describe("Measure Groups Page", () => {
   });
 
   test("displaying a measure update warning modal while updating measure scoring and updating measure scoring for a measure group", async () => {
+    const populationBasis = "Medication Administration";
     const newGroup = {
       id: "7p03-5r29-7O0I",
       scoring: "Continuous Variable",
@@ -775,7 +800,7 @@ describe("Measure Groups Page", () => {
       measureGroupTypes: [MeasureGroupTypes.PATIENT_REPORTED_OUTCOME],
       rateAggregation: "",
       improvementNotation: "",
-      populationBasis: "Boolean",
+      populationBasis: populationBasis,
     };
     measure.groups = [newGroup];
 
@@ -823,7 +848,7 @@ describe("Measure Groups Page", () => {
       rateAggregation: "",
       improvementNotation: "",
       stratifications: [],
-      populationBasis: "Boolean",
+      populationBasis: populationBasis,
     };
 
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
@@ -911,7 +936,7 @@ describe("Measure Groups Page", () => {
 
   test("Should report an error if server fails to create population Group", async () => {
     renderMeasureGroupComponent();
-
+    await changePopulationBasis("Encounter");
     // select a scoring
     const scoringSelect = screen.getByTestId("scoring-select");
     userEvent.click(getByRole(scoringSelect, "button"));
@@ -951,6 +976,7 @@ describe("Measure Groups Page", () => {
   test("Should report an error if the update population Group fails", async () => {
     group.id = "7p03-5r29-7O0I";
     group.measureGroupTypes = [MeasureGroupTypes.PROCESS];
+    group.populationBasis = "Medication Administration";
     measure.groups = [group];
     renderMeasureGroupComponent();
 
@@ -981,6 +1007,7 @@ describe("Measure Groups Page", () => {
   test("Should report an error if the update population Group fails due to group validation error", async () => {
     group.id = "7p03-5r29-7O0I";
     group.measureGroupTypes = [MeasureGroupTypes.PROCESS];
+    group.populationBasis = "Medication Administration";
     measure.groups = [group];
     renderMeasureGroupComponent();
 
@@ -1026,7 +1053,7 @@ describe("Measure Groups Page", () => {
   test("Save button is disabled until all required Cohort populations are entered", async () => {
     renderMeasureGroupComponent();
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
-
+    await changePopulationBasis("Encounter");
     // select a scoring
     const scoringSelect = screen.getByTestId("scoring-select");
     userEvent.click(getByRole(scoringSelect, "button"));
@@ -1058,6 +1085,7 @@ describe("Measure Groups Page", () => {
 
   test("Save button is disabled until all required Proportion populations are entered", async () => {
     renderMeasureGroupComponent();
+    await changePopulationBasis("Encounter");
 
     // Select the scoring value to Proportion
     const scoringSelect = screen.getByTestId("scoring-select");
@@ -1104,6 +1132,7 @@ describe("Measure Groups Page", () => {
 
   test("Save button is disabled until all required Ratio populations are entered", async () => {
     renderMeasureGroupComponent();
+    await changePopulationBasis("Encounter");
 
     // Select the scoring value to RATIO
     const scoringSelect = screen.getByTestId("scoring-select");
@@ -1156,6 +1185,8 @@ describe("Measure Groups Page", () => {
 
   test("Save button is disabled until all required CV populations are entered", async () => {
     renderMeasureGroupComponent();
+    await changePopulationBasis("Encounter");
+
     // Select scoring to CONTINUOUS_VARIABLE
     const scoringSelect = screen.getByTestId("scoring-select");
     userEvent.click(getByRole(scoringSelect, "button"));
@@ -1294,6 +1325,7 @@ describe("Measure Groups Page", () => {
   test("Should display error message when updating group", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "testDescription";
+    group.populationBasis = "Encounter";
     measure.groups = [group];
     const { getByTestId, getByText } = renderMeasureGroupComponent();
 
@@ -1319,7 +1351,7 @@ describe("Measure Groups Page", () => {
   test("Should display error message when adding group", async () => {
     measure.groups = [];
     renderMeasureGroupComponent();
-
+    await changePopulationBasis("Encounter");
     // select a scoring
     const scoringSelect = screen.getByTestId("scoring-select");
     userEvent.click(getByRole(scoringSelect, "button"));
@@ -1332,7 +1364,7 @@ describe("Measure Groups Page", () => {
       "select-measure-group-population-input"
     ) as HTMLInputElement;
     fireEvent.change(groupPopulationInput, {
-      target: { value: "SDE Race" },
+      target: { value: "Initial Population" },
     });
 
     const measureGroupTypeSelect = screen.getByTestId(
@@ -1606,6 +1638,7 @@ describe("Measure Groups Page", () => {
 
   test("measure observation should be included in persisted output for continuous variable", async () => {
     renderMeasureGroupComponent();
+    await changePopulationBasis("Encounter");
 
     // Select scoring to CONTINUOUS_VARIABLE
     const scoringSelect = screen.getByTestId("scoring-select");
@@ -1722,7 +1755,7 @@ describe("Measure Groups Page", () => {
       scoringUnit: "",
       rateAggregation: "",
       improvementNotation: "",
-      populationBasis: "Boolean",
+      populationBasis: "Encounter",
     };
     expect(mockedAxios.post).toHaveBeenNthCalledWith(
       1,
@@ -1734,7 +1767,7 @@ describe("Measure Groups Page", () => {
 
   test("measure observation should be included in persisted output for ratio", async () => {
     renderMeasureGroupComponent();
-
+    await changePopulationBasis("Encounter");
     // Select scoring to Ratio
     const scoringSelect = screen.getByTestId("scoring-select");
     userEvent.click(getByRole(scoringSelect, "button"));
@@ -1877,7 +1910,7 @@ describe("Measure Groups Page", () => {
       scoringUnit: "",
       rateAggregation: "",
       improvementNotation: "",
-      populationBasis: "Boolean",
+      populationBasis: "Encounter",
     };
     expect(mockedAxios.post).toHaveBeenNthCalledWith(
       1,
