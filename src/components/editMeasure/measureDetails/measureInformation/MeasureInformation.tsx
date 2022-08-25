@@ -5,41 +5,31 @@ import styled, { css } from "styled-components";
 import { Measure } from "@madie/madie-models";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import "styled-components/macro";
-import { Button, Toast } from "@madie/madie-design-system/dist/react";
+import {
+  Button,
+  Toast,
+  TextField,
+} from "@madie/madie-design-system/dist/react";
 import DeleteDialog from "./DeleteDialog";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import DateAdapter from "@mui/lab/AdapterDateFns";
 import DesktopDatePicker from "@mui/lab/DesktopDatePicker";
-import {
-  TextField,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Typography,
-} from "@mui/material";
+import { DialogContent, DialogTitle, Divider, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import { HelperText } from "@madie/madie-components";
 import { MeasureSchemaValidator } from "../../../../validations/MeasureSchemaValidator";
 import { measureStore, useOktaTokens } from "@madie/madie-util";
 import classNames from "classnames";
 import { makeStyles } from "@mui/styles";
+import { Box } from "@mui/system";
 
 interface measureInformationForm {
   measureName: string;
   cqlLibraryName: string;
+  ecqmTitle: string;
   measurementPeriodStart: Date;
   measurementPeriodEnd: Date;
 }
-
-export const DisplayDiv = styled.div(() => [
-  tw`flex`,
-  css`
-    white-space: pre;
-  `,
-]);
-export const DisplaySpan = styled.span`
-  white-space: pre;
-`;
 
 const Form = tw.form`max-w-xl my-8`;
 const MessageDiv = tw.div`ml-3`;
@@ -67,17 +57,8 @@ export default function MeasureInformation() {
       display: "flex",
       flexDirection: "row",
     },
-    spaced: {
-      marginTop: 23,
-    },
     end: {
       justifyContent: "flex-end",
-    },
-    gap: {
-      columnGap: 24,
-      "& > * ": {
-        flex: 1,
-      },
     },
     dialogTitle: {
       display: "flex",
@@ -91,12 +72,6 @@ export default function MeasureInformation() {
       fontSize: 24,
       padding: 0,
     },
-    fieldName: {
-      fontFamily: "Rubik",
-      fontSize: 15,
-      padding: 0,
-      fontWeight: 500,
-    },
     info: {
       fontSize: 14,
       fontWeight: 300,
@@ -109,8 +84,22 @@ export default function MeasureInformation() {
   });
   const classes = useStyles();
   const flexEnd = classNames(classes.row, classes.end);
-  const formRow = classNames(classes.row, classes.spaced);
-  const formRowGapped = classNames(formRow, classes.gap);
+
+  const row = {
+    display: "flex",
+    flexDirection: "row",
+  };
+  const spaced = {
+    marginTop: "23px",
+  };
+  const gap = {
+    columnGap: "24px",
+    "& > * ": {
+      flex: 1,
+    },
+  };
+  const formRow = Object.assign({}, row, spaced);
+  const formRowGapped = Object.assign({}, formRow, gap);
 
   // Dialog and toast utilities
   const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
@@ -125,6 +114,7 @@ export default function MeasureInformation() {
     measurementPeriodEnd: measure?.measurementPeriodEnd,
     measureName: measure?.measureName,
     cqlLibraryName: measure?.cqlLibraryName,
+    ecqmTitle: measure?.ecqmTitle,
   } as measureInformationForm;
 
   const formik = useFormik({
@@ -173,6 +163,7 @@ export default function MeasureInformation() {
       ...measure,
       measureName: values.measureName,
       cqlLibraryName: values.cqlLibraryName,
+      ecqmTitle: values.ecqmTitle,
       measurementPeriodStart: values.measurementPeriodStart,
       measurementPeriodEnd: values.measurementPeriodEnd,
     };
@@ -233,14 +224,7 @@ export default function MeasureInformation() {
           <div>
             <Divider style={{ marginTop: 20, marginBottom: 20 }} />
           </div>
-
-          <DisplayDiv>
-            <span className={classes.asterisk}>*</span>
-            <span tw="mr-2" className={classes.fieldName}>
-              Measure Name:
-            </span>
-          </DisplayDiv>
-          <div className={formRowGapped}>
+          <Box sx={formRow}>
             <TextField
               placeholder="Measure Name"
               required
@@ -256,16 +240,9 @@ export default function MeasureInformation() {
               }
               {...formik.getFieldProps("measureName")}
             />
-          </div>
+          </Box>
 
-          <br />
-          <DisplayDiv>
-            <span className={classes.asterisk}>*</span>
-            <span tw="mr-2" className={classes.fieldName}>
-              Measure CQL Library Name:
-            </span>
-          </DisplayDiv>
-          <div className={formRowGapped}>
+          <Box sx={formRow}>
             <TextField
               placeholder="Enter CQL Library Name"
               required
@@ -282,73 +259,84 @@ export default function MeasureInformation() {
               }
               {...formik.getFieldProps("cqlLibraryName")}
             />
-          </div>
+          </Box>
 
-          <br />
-          <DisplayDiv>
-            <span className={classes.asterisk}>*</span>
-            <span tw="mr-2" className={classes.fieldName}>
-              Measurement Period:
-            </span>
-          </DisplayDiv>
-          <div className={formRowGapped} data-testid="measurement-period-div">
+          <Box sx={formRowGapped}>
+            <TextField
+              placeholder="eCQM Name"
+              required
+              disabled={!canEdit}
+              label="eCQM Abbreviated Title"
+              id="ecqmTitle"
+              data-testid="ecqm-text-field"
+              inputProps={{ "data-testid": "ecqm-input" }}
+              helperText={formikErrorHandler("ecqmTitle", true)}
+              size="small"
+              error={
+                formik.touched.ecqmTitle && Boolean(formik.errors.ecqmTitle)
+              }
+              {...formik.getFieldProps("ecqmTitle")}
+            />
+          </Box>
+
+          <Box sx={formRowGapped} data-testid="measurement-period-div">
             <LocalizationProvider dateAdapter={DateAdapter}>
               <DesktopDatePicker
                 disableOpenPicker={true}
                 disabled={!canEdit}
-                label="Start Date"
+                label="Measurement Period - Start Date"
                 inputFormat="MM/dd/yyyy"
                 value={formik.values.measurementPeriodStart}
                 onChange={(startDate) => {
                   formik.setFieldValue("measurementPeriodStart", startDate);
                 }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    helperText={formikErrorHandler(
-                      "measurementPeriodStart",
-                      true
-                    )}
-                    error={
-                      formik.touched.measurementPeriodStart &&
-                      Boolean(formik.errors.measurementPeriodStart)
-                    }
-                    {...formik.getFieldProps("measurementPeriodStart")}
-                    data-testid="measurement-period-start"
-                  />
-                )}
+                renderInput={(params) => {
+                  const { onChange, ...formikFieldProps } =
+                    formik.getFieldProps("measurementPeriodStart");
+                  return (
+                    <TextField
+                      {...formikFieldProps}
+                      {...params}
+                      required
+                      data-testid="measurement-period-start"
+                      helperText={formikErrorHandler(
+                        "measurementPeriodStart",
+                        true
+                      )}
+                    />
+                  );
+                }}
               />
             </LocalizationProvider>
             <LocalizationProvider dateAdapter={DateAdapter}>
               <DesktopDatePicker
                 disableOpenPicker={true}
                 disabled={!canEdit}
-                label="End Date"
+                label="Measurement Period - End Date"
                 inputFormat="MM/dd/yyyy"
                 value={formik.values.measurementPeriodEnd}
                 onChange={(endDate) => {
                   formik.setFieldValue("measurementPeriodEnd", endDate);
                 }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    data-testid="measurement-period-end"
-                    helperText={formikErrorHandler(
-                      "measurementPeriodEnd",
-                      true
-                    )}
-                    error={
-                      formik.touched.measurementPeriodEnd &&
-                      Boolean(formik.errors.measurementPeriodEnd)
-                    }
-                    {...formik.getFieldProps("measurementPeriodEnd")}
-                  />
-                )}
+                renderInput={(params) => {
+                  const { onChange, ...formikFieldProps } =
+                    formik.getFieldProps("measurementPeriodEnd");
+                  return (
+                    <TextField
+                      {...formikFieldProps}
+                      {...params}
+                      required
+                      data-testid="measurement-period-end"
+                      helperText={formikErrorHandler(
+                        "measurementPeriodEnd",
+                        true
+                      )}
+                    />
+                  );
+                }}
               />
             </LocalizationProvider>
-          </div>
+          </Box>
         </DialogContent>
 
         <Button
