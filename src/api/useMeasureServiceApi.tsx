@@ -147,14 +147,16 @@ export class MeasureServiceApi {
   }
 
   buildErrorMessage(err, baseMessage): string {
-    let extraMessage = "";
-    if (
-      err?.response?.status === 400 &&
-      err?.response?.data?.validationErrors?.group
-    ) {
-      extraMessage = " Missing required populations for selected scoring type.";
+    let errorMessage = undefined;
+    if (err?.response?.status === 400) {
+      if (err.response.data?.validationErrors?.group) {
+        errorMessage =
+          "Missing required populations for selected scoring type.";
+      } else if (err.response.data.message) {
+        errorMessage = err.response.data.message;
+      }
     }
-    return `${baseMessage}${extraMessage}`;
+    return errorMessage ? errorMessage : baseMessage;
   }
 
   async getAllPopulationBasisOptions(): Promise<string[]> {
@@ -194,12 +196,17 @@ export class MeasureServiceApi {
         const returnType = {};
         const name = _.camelCase(_.trim(definition.name));
         if (definition.resultTypeName) {
-          returnType[`${name}`] = definition.resultTypeName;
+          returnType[name] = definition.resultTypeName?.split("}")[1];
         } else if (definition.resultTypeSpecifier) {
-          returnType[`${name}`] =
-            definition.resultTypeSpecifier.elementType.name;
+          const resultType = definition.resultTypeSpecifier.elementType.type;
+          if (resultType === "NamedTypeSpecifier") {
+            returnType[name] =
+              definition.resultTypeSpecifier.elementType.name?.split("}")[1];
+          } else {
+            returnType[name] = "NA";
+          }
         } else {
-          returnType[`${name}`] = undefined;
+          returnType[name] = "NA";
         }
         return {
           ...returnTypes,

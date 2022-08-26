@@ -22,20 +22,36 @@ describe("MeasureServiceApi Tests", () => {
   it("get return types for all cql definitions", () => {
     let returnTypes =
       measureServiceApi.getReturnTypesForAllCqlDefinitions(libraryElm);
-    expect(returnTypes["initialPopulation"]).toEqual(
-      "{http://hl7.org/fhir}Encounter"
-    );
+    expect(returnTypes["initialPopulation"]).toEqual("Encounter");
 
-    expect(returnTypes["measurePopulation"]).toEqual(
-      "{http://hl7.org/fhir}Encounter"
-    );
+    expect(returnTypes["measurePopulation"]).toEqual("Encounter");
 
-    expect(returnTypes["measurePopulationExclusions"]).toEqual(
-      "{http://hl7.org/fhir}Encounter"
-    );
+    expect(returnTypes["measurePopulationExclusions"]).toEqual("Encounter");
 
-    expect(returnTypes["measureObservation"]).toEqual(
-      "{urn:hl7-org:elm-types:r1}Integer"
+    expect(returnTypes["measureObservation"]).toEqual("Integer");
+  });
+
+  it("build error message from server side error response", () => {
+    const errorResponse = {
+      response: {
+        status: 400,
+        data: {
+          message: "Invalid group",
+          validationErrors: undefined,
+        },
+      },
+    };
+    const baseMessage = "default error";
+    let message = measureServiceApi.buildErrorMessage(
+      errorResponse,
+      baseMessage
+    );
+    expect(message).toEqual("Invalid group");
+
+    errorResponse.response.data.validationErrors = { group: "group error" };
+    message = measureServiceApi.buildErrorMessage(errorResponse, baseMessage);
+    expect(message).toEqual(
+      "Missing required populations for selected scoring type."
     );
   });
 });
