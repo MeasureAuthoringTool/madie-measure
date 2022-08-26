@@ -70,6 +70,14 @@ declare module "@madie/madie-editor" {
 
   export const parseContent: (content: string) => CqlError[];
   export const validateContent: (content: string) => Promise<ValidationResult>;
+  export const synchingEditorCqlContent: (
+    editorVal: string,
+    existingCql: string,
+    libraryName: string,
+    existingCqlLibraryName: string,
+    versionString: string,
+    triggeredFrom: string
+  ) => any;
 
   export const MadieEditor: FC<{
     value: string;

@@ -8,6 +8,7 @@ import {
   validateContent,
   ElmTranslationError,
   ValidationResult,
+  synchingEditorCqlContent,
 } from "@madie/madie-editor";
 import { Button } from "@madie/madie-components";
 import { Measure } from "@madie/madie-models";
@@ -19,6 +20,7 @@ import { useOktaTokens, measureStore } from "@madie/madie-util";
 
 const MessageText = tw.p`text-sm font-medium`;
 const SuccessText = tw(MessageText)`text-green-800`;
+const WarningText = tw(MessageText)`text-yellow-800`;
 const ErrorText = tw(MessageText)`text-red-800`;
 const UpdateAlerts = tw.div`mb-2 h-5`;
 const EditorActions = tw.div`mt-2 ml-2 mb-5 space-y-5`;
@@ -88,7 +90,10 @@ const MeasureEditor = () => {
   const [editorVal, setEditorVal]: [string, Dispatch<SetStateAction<string>>] =
     useState("");
   const measureServiceApi = useMeasureServiceApi();
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState({
+    status: undefined,
+    message: undefined,
+  });
   const [error, setError] = useState(false);
   const [elmTranslationError, setElmTranslationError] = useState(null);
   // annotations control the gutter error icons.
@@ -133,9 +138,18 @@ const MeasureEditor = () => {
 
   const updateMeasureCql = async () => {
     try {
+      const inSyncCql = await synchingEditorCqlContent(
+        editorVal,
+        measure?.cql,
+        measure?.cqlLibraryName,
+        "",
+        "0.0.000",
+        "measureEditor"
+      );
+
       const results = await Promise.allSettled([
-        updateElmAnnotations(editorVal),
-        hasParserErrors(editorVal),
+        updateElmAnnotations(inSyncCql),
+        hasParserErrors(inSyncCql),
       ]);
       if (results[0].status === "rejected") {
         console.error(
@@ -163,7 +177,7 @@ const MeasureEditor = () => {
         const cqlErrors = parseErrors || cqlElmErrors;
         const newMeasure: Measure = {
           ...measure,
-          cql: editorVal,
+          cql: inSyncCql,
           elmJson:
             validationResult && JSON.stringify(validationResult?.translation),
           cqlErrors,
@@ -173,7 +187,16 @@ const MeasureEditor = () => {
           .then(() => {
             updateMeasure(newMeasure);
             // setMeasure(newMeasure);
-            setSuccess(true);
+            setEditorVal(newMeasure?.cql);
+            const successMessage =
+              inSyncCql !== editorVal
+                ? {
+                    status: "warning",
+                    message:
+                      "CQL updated successfully! Library Name and Version can be updated in the Details tab. MADiE has over written the updated Library Name and Version",
+                  }
+                : { status: "success", message: "CQL saved successfully" };
+            setSuccess(successMessage);
           })
           .catch((reason) => {
             console.error(reason);
@@ -193,7 +216,7 @@ const MeasureEditor = () => {
   };
 
   const handleMadieEditorValue = (val: string) => {
-    setSuccess(false);
+    setSuccess({ status: undefined, message: undefined });
     setError(false);
     setEditorVal(val);
     setValuesetMsg(null);
@@ -225,9 +248,13 @@ const MeasureEditor = () => {
       />
       <EditorActions data-testid="measure-editor-actions">
         <UpdateAlerts data-testid="update-cql-alerts">
-          {success && (
+          {success?.status === "warning" ? (
+            <WarningText data-testid="save-cql-success">
+              {success.message}
+            </WarningText>
+          ) : (
             <SuccessText data-testid="save-cql-success">
-              CQL saved successfully
+              {success.message}
             </SuccessText>
           )}
           {valuesetMsg && (

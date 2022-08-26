@@ -23,6 +23,7 @@ import { MeasureSchemaValidator } from "../../../../validations/MeasureSchemaVal
 import { measureStore, useOktaTokens } from "@madie/madie-util";
 import classNames from "classnames";
 import { makeStyles } from "@mui/styles";
+import { synchingEditorCqlContent } from "@madie/madie-editor";
 
 interface measureInformationForm {
   measureName: string;
@@ -169,12 +170,21 @@ export default function MeasureInformation() {
   };
 
   const handleSubmit = async (values) => {
+    const inSyncCql = await synchingEditorCqlContent(
+      "",
+      measure?.cql,
+      values.cqlLibraryName,
+      measure?.cqlLibraryName,
+      "0.0.000",
+      "measureInformation"
+    );
     const newMeasure: Measure = {
       ...measure,
       measureName: values.measureName,
       cqlLibraryName: values.cqlLibraryName,
       measurementPeriodStart: values.measurementPeriodStart,
       measurementPeriodEnd: values.measurementPeriodEnd,
+      cql: inSyncCql,
     };
     measureServiceApi
       .updateMeasure(newMeasure)
