@@ -8,6 +8,7 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
+import { describe, expect, test } from "@jest/globals";
 import { isEqual } from "lodash";
 import MeasureGroups from "./MeasureGroups";
 import {
@@ -391,6 +392,13 @@ describe("Measure Groups Page", () => {
 
     userEvent.click(screen.getByTestId("add-measure-group-button"));
 
+    const discardDialog = await screen.getByTestId("discard-dialog");
+    expect(discardDialog).toBeInTheDocument();
+    const continueButton = await screen.getByTestId(
+      "discard-dialog-continue-button"
+    );
+    expect(continueButton).toBeInTheDocument();
+    fireEvent.click(continueButton);
     await waitFor(() => {
       expect(screen.getByText("MEASURE GROUP 2")).toBeInTheDocument();
       expect(
@@ -914,10 +922,31 @@ describe("Measure Groups Page", () => {
       target: { value: "New rate aggregation text" },
     });
 
-    // Discard changed
+    // Discard changed / test onClose
     expect(screen.getByTestId("group-form-discard-btn")).toBeEnabled();
     userEvent.click(screen.getByTestId("group-form-discard-btn"));
-
+    const discardDialog = await screen.getByTestId("discard-dialog");
+    expect(discardDialog).toBeInTheDocument();
+    const cancelButton = await screen.getByTestId(
+      "discard-dialog-cancel-button"
+    );
+    expect(cancelButton).toBeInTheDocument();
+    fireEvent.click(cancelButton);
+    await waitFor(() => {
+      expect(screen.queryByText("You have unsaved changes.")).not.toBeVisible();
+    });
+    expect(screen.getByTestId("group-form-discard-btn")).toBeEnabled();
+    userEvent.click(screen.getByTestId("group-form-discard-btn"));
+    expect(cancelButton).toBeInTheDocument();
+    fireEvent.click(cancelButton);
+    await waitFor(() => {
+      expect(screen.queryByText("You have unsaved changes.")).not.toBeVisible();
+    });
+    const continueButton = await screen.getByTestId(
+      "discard-dialog-continue-button"
+    );
+    expect(continueButton).toBeInTheDocument();
+    fireEvent.click(continueButton);
     expect(screen.getByTestId("rateAggregationText")).toHaveValue(
       group.rateAggregation
     );
@@ -1038,7 +1067,7 @@ describe("Measure Groups Page", () => {
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
     const alert = await screen.findByTestId("error-alerts");
     expect(alert).toHaveTextContent(
-      "Failed to update the group. Missing required populations for selected scoring type."
+      "Missing required populations for selected scoring type."
     );
   });
 
@@ -1319,6 +1348,13 @@ describe("Measure Groups Page", () => {
     await act(async () => {
       userEvent.click(discardButton);
     });
+    const discardDialog = await screen.getByTestId("discard-dialog");
+    expect(discardDialog).toBeInTheDocument();
+    const continueButton = await screen.getByTestId(
+      "discard-dialog-continue-button"
+    );
+    expect(continueButton).toBeInTheDocument();
+    fireEvent.click(continueButton);
     expect(screen.queryByText("New group description")).not.toBeInTheDocument();
   });
 

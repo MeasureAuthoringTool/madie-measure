@@ -147,14 +147,16 @@ export class MeasureServiceApi {
   }
 
   buildErrorMessage(err, baseMessage): string {
-    let extraMessage = "";
-    if (
-      err?.response?.status === 400 &&
-      err?.response?.data?.validationErrors?.group
-    ) {
-      extraMessage = " Missing required populations for selected scoring type.";
+    let errorMessage = undefined;
+    if (err?.response?.status === 400) {
+      if (err.response.data?.validationErrors?.group) {
+        errorMessage =
+          "Missing required populations for selected scoring type.";
+      } else if (err.response.data.message) {
+        errorMessage = err.response.data.message;
+      }
     }
-    return `${baseMessage}${extraMessage}`;
+    return errorMessage ? errorMessage : baseMessage;
   }
 
   async getAllPopulationBasisOptions(): Promise<string[]> {
