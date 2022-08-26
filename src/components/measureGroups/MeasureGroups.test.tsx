@@ -1038,7 +1038,7 @@ describe("Measure Groups Page", () => {
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
     const alert = await screen.findByTestId("error-alerts");
     expect(alert).toHaveTextContent(
-      "Failed to update the group. Missing required populations for selected scoring type."
+      "Missing required populations for selected scoring type."
     );
   });
 
