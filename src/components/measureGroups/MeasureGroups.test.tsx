@@ -177,7 +177,7 @@ describe("Measure Groups Page", () => {
     const scoringSelect = screen.getByTestId("scoring-select");
     userEvent.click(getByRole(scoringSelect, "button"));
     const optionsList = await screen.findAllByTestId(/group-scoring-option/i);
-    expect(optionsList).toHaveLength(5);
+    expect(optionsList).toHaveLength(4);
   });
 
   test("Measure Group Scoring should not render options if user is not the measure owner", async () => {
