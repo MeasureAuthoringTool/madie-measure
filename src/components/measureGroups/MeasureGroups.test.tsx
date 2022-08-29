@@ -1553,12 +1553,11 @@ describe("Measure Groups Page", () => {
     group.id = "7p03-5r29-7O0I";
     group.stratifications = [emptyStrat, emptyStrat];
     measure.groups = [group];
+    const errorMessage =
+      "The selected definition does not align with the Population Basis field selection of Boolean";
     renderMeasureGroupComponent();
     // switch to stratification tab
     userEvent.click(screen.getByTestId("stratifications-tab"));
-    await waitFor(() => {
-      expect(group.stratifications.length == 2);
-    });
     // select Initial population from dropdown for start 1
     const strat1 = screen.getByTestId(
       "stratification-1-input"
@@ -1567,28 +1566,18 @@ describe("Measure Groups Page", () => {
       target: { value: "Initial Population" },
     });
     // no error because population basis matches with cql define return type
-    expect(
-      screen.queryByText(
-        "The selected definition does not align with the Population Basis field selection of Boolean"
-      )
-    ).toBeNull();
+    expect(screen.queryByText(errorMessage)).toBeNull();
 
     // update population basis to not match cql define return type
     await changePopulationBasis("Boolean");
     // error shown
-    expect(
-      screen.queryByText(
-        "The selected definition does not align with the Population Basis field selection of Boolean"
-      )
-    ).not.toBeNull();
+    expect(screen.queryByText(errorMessage)).not.toBeNull();
     // update population basis to match cql define return type
-    await changePopulationBasis("Boolean");
+    await changePopulationBasis("Encounter");
     // no error shown
-    expect(
-      screen.queryByText(
-        "The selected definition does not align with the Population Basis field selection of Boolean"
-      )
-    ).not.toBeNull();
+    await waitFor(() => {
+      expect(screen.queryByText(errorMessage)).toBeNull();
+    });
   });
 
   test("measure observation should not render for cohort", async () => {
