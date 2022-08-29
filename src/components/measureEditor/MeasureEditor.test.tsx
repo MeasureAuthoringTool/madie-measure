@@ -4,7 +4,7 @@ import MeasureEditor, {
   mapErrorsToAceAnnotations,
   mapErrorsToAceMarkers,
 } from "./MeasureEditor";
-import { Measure } from "@madie/madie-models";
+import { Measure, Model } from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import axios from "axios";
 import { ElmTranslationError } from "./measureEditorUtils";
@@ -27,7 +27,7 @@ const measure = {
   createdBy: "testuser@example.com",
   lastModifiedAt: "",
   lastModifiedBy: "",
-  model: "QI-Core",
+  model: "QI-Core v4.1.1",
   measureMetaData: {},
 } as unknown as Measure;
 // } as Measure;
@@ -269,7 +269,7 @@ describe("MeasureEditor component", () => {
         measureName: "MSR001",
         measureScoring: "",
         measureSetId: "",
-        model: "QI-Core",
+        model: Model.QICORE.valueOf(),
         revisionNumber: 1.1,
         state: "",
         version: 1,
@@ -319,7 +319,7 @@ describe("MeasureEditor component", () => {
         measureName: "MSR001",
         measureScoring: "",
         measureSetId: "",
-        model: "QI-Core",
+        model: Model.QICORE.valueOf(),
         revisionNumber: 1.1,
         state: "",
         version: 1,
