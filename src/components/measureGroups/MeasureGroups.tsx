@@ -17,7 +17,11 @@ import {
 } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import EditMeasureSideBarNav from "../editMeasure/measureDetails/EditMeasureSideBarNav";
-import { Button, Select } from "@madie/madie-design-system/dist/react/";
+import {
+  Button,
+  MadieDiscardDialog,
+  Select,
+} from "@madie/madie-design-system/dist/react/";
 import { useFormik, FormikProvider, FieldArray, Field } from "formik";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { v4 as uuidv4 } from "uuid";
@@ -286,7 +290,6 @@ const MeasureGroups = () => {
     },
   });
   const { resetForm } = formik;
-
   // We want to update layout with a cannot travel flag while this is active
   const { updateRouteHandlerState } = routeHandlerStore;
   useEffect(() => {
@@ -313,6 +316,8 @@ const MeasureGroups = () => {
       .catch((err) => setGenericErrorMessage(err.message));
   }, []);
 
+  // local discard check. Layout can't have access to a bound function
+  const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
   const discardChanges = () => {
     // check to identify a new group
     if (measureGroupNumber >= measure?.groups?.length || !measure?.groups) {
@@ -336,6 +341,7 @@ const MeasureGroups = () => {
         },
       });
     }
+    setDiscardDialogOpen(false);
   };
 
   const submitForm = (group: Group) => {
@@ -494,6 +500,7 @@ const MeasureGroups = () => {
       <form onSubmit={formik.handleSubmit}>
         <Grid>
           <EditMeasureSideBarNav
+            dirty={formik.dirty}
             links={measureGroups}
             measureGroupNumber={measureGroupNumber}
             setMeasureGroupNumber={setMeasureGroupNumber}
@@ -995,7 +1002,7 @@ const MeasureGroups = () => {
                     variant="white"
                     disabled={!formik.dirty}
                     data-testid="group-form-discard-btn"
-                    onClick={() => discardChanges()}
+                    onClick={() => setDiscardDialogOpen(true)}
                   >
                     Discard Changes
                   </Button>
@@ -1017,6 +1024,11 @@ const MeasureGroups = () => {
           </GroupFooter>
         )}
       </form>
+      <MadieDiscardDialog
+        open={discardDialogOpen}
+        onClose={() => setDiscardDialogOpen(false)}
+        onContinue={discardChanges}
+      />
     </FormikProvider>
   );
 };

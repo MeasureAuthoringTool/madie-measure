@@ -87,7 +87,12 @@ export default function EditMeasure() {
   return (
     <>
       <Grid>
-        <EditMeasureSideBarNav header="Edit Measure" links={links} />
+        {/* False is a temporary value to be overwritten when story for details is implemented */}
+        <EditMeasureSideBarNav
+          header="Edit Measure"
+          links={links}
+          dirty={false}
+        />
         <Content>
           <Switch>
             <Route exact path={path}>
