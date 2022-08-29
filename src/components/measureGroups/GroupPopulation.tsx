@@ -3,6 +3,7 @@ import * as _ from "lodash";
 import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
 import { ExpressionDefinition } from "./MeasureGroups";
 import { GroupScoring, Population, PopulationType } from "@madie/madie-models";
+import { FormikState, getIn } from "formik";
 import { FieldInputProps } from "formik/dist/types";
 import { findPopulations } from "./PopulationHelper";
 
@@ -13,6 +14,7 @@ export enum InitialPopulationAssociationType {
 
 type Props = {
   field: FieldInputProps<string>;
+  form: FormikState<any>;
   cqlDefinitions: ExpressionDefinition[];
   populations: Population[];
   population: Population;
@@ -22,10 +24,12 @@ type Props = {
   insertCallback: any;
   removeCallback: any;
   replaceCallback: any;
+  setAssociationChanged: (value: boolean) => void;
 };
 
 const GroupPopulation = ({
   field,
+  form,
   cqlDefinitions,
   populations,
   population,
@@ -35,6 +39,7 @@ const GroupPopulation = ({
   insertCallback,
   removeCallback,
   replaceCallback,
+  setAssociationChanged,
 }: Props) => {
   // Helper function do determine the properties for a select item
   const populationSelectorProperties = (fieldProps: any, scoring: String) => {
@@ -130,7 +135,8 @@ const GroupPopulation = ({
     if (scoring === GroupScoring.RATIO) {
       if (
         (label === "Initial Population" || label === "Initial Population 1") &&
-        population.associationType === undefined
+        (population.associationType === undefined ||
+          population.associationType === null)
       ) {
         population.associationType =
           InitialPopulationAssociationType.DENOMINATOR;
@@ -167,6 +173,7 @@ const GroupPopulation = ({
             }
             const index = findIndex(ip, populations);
             replaceCallback(index, ip);
+            setAssociationChanged(true);
           }
         });
       } else {
@@ -195,8 +202,10 @@ const GroupPopulation = ({
   };
 
   const selectorProps = populationSelectorProperties(population, scoring);
-  const touched = _.get(populations, selectorProps.name);
-  const error = !!touched ? _.get(populations, selectorProps.name) : null;
+  const error = getIn(form.errors, field.name);
+  const showError =
+    Boolean(error) &&
+    (getIn(form.touched, field.name) || population.definition);
   const isRemovable = isPopulationRemovable(scoring, populations);
   const canBeAdded = showAddPopulationLink(scoring, populations);
   selectorProps.label = correctPopulationLabel(populations, population);
@@ -206,9 +215,9 @@ const GroupPopulation = ({
   return (
     <MeasureGroupPopulationSelect
       {...selectorProps}
-      {...field}
-      helperText={error}
-      error={!!error && !!touched}
+      field={field}
+      helperText={showError ? error : ""}
+      error={showError}
       canEdit={canEdit}
       removePopulationCallback={() => removeCallback(populationIndex)}
       isRemovable={isRemovable}

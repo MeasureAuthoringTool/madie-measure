@@ -7,6 +7,8 @@ import {
   parseContent,
   validateContent,
   ElmTranslationError,
+  ValidationResult,
+  synchingEditorCqlContent,
 } from "@madie/madie-editor";
 import { Button } from "@madie/madie-components";
 import { Measure } from "@madie/madie-models";
@@ -18,6 +20,7 @@ import { useOktaTokens, measureStore } from "@madie/madie-util";
 
 const MessageText = tw.p`text-sm font-medium`;
 const SuccessText = tw(MessageText)`text-green-800`;
+const WarningText = tw(MessageText)`text-yellow-800`;
 const ErrorText = tw(MessageText)`text-red-800`;
 const UpdateAlerts = tw.div`mb-2 h-5`;
 const EditorActions = tw.div`mt-2 ml-2 mb-5 space-y-5`;
@@ -76,7 +79,9 @@ const MeasureEditor = () => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   const { updateMeasure } = measureStore;
   useEffect(() => {
-    const subscription = measureStore.subscribe(setMeasure);
+    const subscription = measureStore.subscribe((measure) => {
+      setMeasure(measure);
+    });
     return () => {
       subscription.unsubscribe();
     };
@@ -85,7 +90,10 @@ const MeasureEditor = () => {
   const [editorVal, setEditorVal]: [string, Dispatch<SetStateAction<string>>] =
     useState("");
   const measureServiceApi = useMeasureServiceApi();
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState({
+    status: undefined,
+    message: undefined,
+  });
   const [error, setError] = useState(false);
   const [elmTranslationError, setElmTranslationError] = useState(null);
   // annotations control the gutter error icons.
@@ -100,20 +108,21 @@ const MeasureEditor = () => {
 
   const updateElmAnnotations = async (
     cql: string
-  ): Promise<ElmTranslationError[]> => {
+  ): Promise<ValidationResult> => {
     setElmTranslationError(null);
     if (cql && cql.trim().length > 0) {
-      const allErrorsArray = await validateContent(cql);
-      if (isLoggedInUMLS(allErrorsArray)) {
+      const result = await validateContent(cql);
+      const { errors } = result;
+      if (isLoggedInUMLS(errors)) {
         setValuesetMsg("Please log in to UMLS!");
       }
 
-      const annotations = mapErrorsToAceAnnotations(allErrorsArray);
-      const errorMarkers = mapErrorsToAceMarkers(allErrorsArray);
+      const annotations = mapErrorsToAceAnnotations(errors);
+      const errorMarkers = mapErrorsToAceMarkers(errors);
 
       setElmAnnotations(annotations);
       setErrorMarkers(errorMarkers);
-      return allErrorsArray;
+      return result;
     } else {
       setElmAnnotations([]);
     }
@@ -129,17 +138,23 @@ const MeasureEditor = () => {
 
   const updateMeasureCql = async () => {
     try {
+      const inSyncCql = await synchingEditorCqlContent(
+        editorVal,
+        measure?.cql,
+        measure?.cqlLibraryName,
+        "",
+        "0.0.000", //as the versioning is not implemented in measure for now we just send default value: 0.0.000
+        "measureEditor"
+      );
+
       const results = await Promise.allSettled([
-        updateElmAnnotations(editorVal),
-        hasParserErrors(editorVal),
+        updateElmAnnotations(inSyncCql),
+        hasParserErrors(inSyncCql),
       ]);
       if (results[0].status === "rejected") {
         console.error(
           "An error occurred while translating CQL to ELM",
           results[0].reason
-        );
-        setElmTranslationError(
-          "Unable to translate CQL to ELM, CQL was not saved!"
         );
         setElmAnnotations([]);
       } else if (results[1].status === "rejected") {
@@ -148,30 +163,45 @@ const MeasureEditor = () => {
           "An error occurred while parsing the CQL",
           rejection.reason
         );
-      } else {
-        const cqlElmResult = results[0].value;
-        const parseErrors = results[1].value;
-        const cqlElmErrors = !!(cqlElmResult?.length > 0);
-        if (editorVal !== measure.cql) {
-          const cqlErrors = parseErrors || cqlElmErrors;
-          const newMeasure: Measure = {
-            ...measure,
-            cql: editorVal,
-            elmJson: JSON.stringify(cqlElmResult),
-            cqlErrors,
-          };
-          measureServiceApi
-            .updateMeasure(newMeasure)
-            .then(() => {
-              updateMeasure(newMeasure);
-              // setMeasure(newMeasure);
-              setSuccess(true);
-            })
-            .catch((reason) => {
-              console.error(reason);
-              setError(true);
-            });
-        }
+      }
+
+      const validationResult =
+        results[0].status === "fulfilled" ? results[0].value : "";
+      const parseErrors =
+        results[1].status === "fulfilled" ? results[1].value : "";
+      const cqlElmErrors = validationResult
+        ? !!(validationResult?.errors?.length > 0)
+        : true;
+
+      if (editorVal !== measure.cql) {
+        const cqlErrors = parseErrors || cqlElmErrors;
+        const newMeasure: Measure = {
+          ...measure,
+          cql: inSyncCql,
+          elmJson:
+            validationResult && JSON.stringify(validationResult?.translation),
+          cqlErrors,
+        };
+        measureServiceApi
+          .updateMeasure(newMeasure)
+          .then(() => {
+            updateMeasure(newMeasure);
+            // setMeasure(newMeasure);
+            setEditorVal(newMeasure?.cql);
+            const successMessage =
+              inSyncCql !== editorVal
+                ? {
+                    status: "warning",
+                    message:
+                      "CQL updated successfully! Library Name and Version can be updated in the Details tab. MADiE has over written the updated Library Name and Version",
+                  }
+                : { status: "success", message: "CQL saved successfully" };
+            setSuccess(successMessage);
+          })
+          .catch((reason) => {
+            console.error(reason);
+            setError(true);
+          });
       }
     } catch (err) {
       console.error(
@@ -186,7 +216,7 @@ const MeasureEditor = () => {
   };
 
   const handleMadieEditorValue = (val: string) => {
-    setSuccess(false);
+    setSuccess({ status: undefined, message: undefined });
     setError(false);
     setEditorVal(val);
     setValuesetMsg(null);
@@ -204,7 +234,7 @@ const MeasureEditor = () => {
     });
     setEditorVal(measure?.cql);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [measure?.cql]);
 
   return (
     <>
@@ -218,9 +248,13 @@ const MeasureEditor = () => {
       />
       <EditorActions data-testid="measure-editor-actions">
         <UpdateAlerts data-testid="update-cql-alerts">
-          {success && (
+          {success?.status === "warning" ? (
+            <WarningText data-testid="save-cql-success">
+              {success.message}
+            </WarningText>
+          ) : (
             <SuccessText data-testid="save-cql-success">
-              CQL saved successfully
+              {success.message}
             </SuccessText>
           )}
           {valuesetMsg && (

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, getByRole, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   MeasureObservation,
@@ -22,10 +22,10 @@ describe("Measure Observation Details", () => {
     );
 
     expect(
-      screen.getByRole("combobox", { name: "Observation" })
+      screen.getByTestId("select-measure-observation-obs1")
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("combobox", { name: "Aggregate Function *" })
+      screen.getByTestId("select-measure-observation-aggregate-obs1")
     ).toBeInTheDocument();
   });
 
@@ -43,10 +43,10 @@ describe("Measure Observation Details", () => {
     );
 
     expect(
-      screen.getByRole("combobox", { name: "Observation" })
+      screen.getByTestId("select-measure-observation-obs1")
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("combobox", { name: "Aggregate Function *" })
+      screen.getByTestId("select-measure-observation-aggregate-obs1")
     ).toBeInTheDocument();
   });
 
@@ -66,10 +66,10 @@ describe("Measure Observation Details", () => {
     );
 
     expect(
-      screen.getByRole("combobox", { name: "Observation" })
+      screen.getByTestId("select-measure-observation-obs1")
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("combobox", { name: "Aggregate Function *" })
+      screen.getByTestId("select-measure-observation-aggregate-obs1")
     ).toBeInTheDocument();
   });
 
@@ -91,10 +91,10 @@ describe("Measure Observation Details", () => {
     );
 
     expect(
-      screen.getByRole("combobox", { name: "Observation" })
+      screen.getByTestId("select-measure-observation-obs1")
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("combobox", { name: "Aggregate Function *" })
+      screen.getByTestId("select-measure-observation-aggregate-obs1")
     ).toBeInTheDocument();
   });
 
@@ -116,10 +116,10 @@ describe("Measure Observation Details", () => {
     );
 
     expect(
-      screen.getByRole("combobox", { name: "Observation" })
+      screen.getByTestId("select-measure-observation-obs1")
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("combobox", { name: "Aggregate Function *" })
+      screen.getByTestId("select-measure-observation-aggregate-obs1")
     ).toBeInTheDocument();
   });
 
@@ -142,14 +142,14 @@ describe("Measure Observation Details", () => {
     );
 
     expect(
-      screen.getByRole("combobox", { name: "MyLabel" })
+      screen.getByTestId("select-measure-observation-obs1")
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("combobox", { name: "Aggregate Function *" })
+      screen.getByTestId("select-measure-observation-aggregate-obs1")
     ).toBeInTheDocument();
   });
 
-  it("should render with no function elmJson library statements definitions or elmJson input", () => {
+  it("should render with no function elmJson library statements definitions or elmJson input", async () => {
     const elmJson = JSON.stringify({
       library: {
         statements: {
@@ -173,16 +173,16 @@ describe("Measure Observation Details", () => {
       />
     );
 
-    const observationComboBox = screen.getByRole("combobox", {
-      name: "Observation",
-    });
-    expect(observationComboBox).toBeInTheDocument();
-    const observationOptions =
-      within(observationComboBox).getAllByRole("option");
+    const observationSelect = screen.getByTestId(
+      "select-measure-observation-obs1"
+    );
+    userEvent.click(getByRole(observationSelect, "button"));
+    const observationOptions = await screen.findAllByRole("option");
     expect(observationOptions).toHaveLength(1);
     expect(observationOptions[0].textContent).toEqual("-");
+
     expect(
-      screen.getByRole("combobox", { name: "Aggregate Function *" })
+      screen.getByTestId("select-measure-observation-aggregate-obs1")
     ).toBeInTheDocument();
   });
 
@@ -215,22 +215,19 @@ describe("Measure Observation Details", () => {
       />
     );
 
-    const observationComboBox = screen.getByRole("combobox", {
-      name: "Observation",
-    });
-    expect(observationComboBox).toBeInTheDocument();
-    const observationOptions =
-      within(observationComboBox).getAllByRole("option");
-    await waitFor(() => expect(observationOptions).toHaveLength(3));
+    const observationSelect = screen.getByTestId(
+      "select-measure-observation-obs1"
+    );
+    expect(observationSelect).toBeInTheDocument();
+    userEvent.click(getByRole(observationSelect, "button"));
+    const observationOptions = await screen.findAllByRole("option");
+    expect(observationOptions).toHaveLength(3);
     expect(observationOptions[0].textContent).toEqual("-");
     expect(observationOptions[1].textContent).toEqual("MyFunc1");
     expect(observationOptions[2].textContent).toEqual("My Func 2");
-    expect(
-      screen.getByRole("combobox", { name: "Aggregate Function *" })
-    ).toBeInTheDocument();
   });
 
-  it("should have aggregate function options", () => {
+  it("should have aggregate function options", async () => {
     render(
       <MeasureObservationDetails
         name={"obs1"}
@@ -240,15 +237,15 @@ describe("Measure Observation Details", () => {
       />
     );
 
-    const aggregateFunctionComboBox = screen.getByRole("combobox", {
-      name: "Aggregate Function *",
-    });
-    expect(aggregateFunctionComboBox).toBeInTheDocument();
-    const aggregateFunctionOptions = within(
-      aggregateFunctionComboBox
-    ).getAllByRole("option");
+    const aggregateFunctionSelect = screen.getByTestId(
+      "select-measure-observation-aggregate-obs1"
+    );
 
+    expect(aggregateFunctionSelect).toBeInTheDocument();
+    userEvent.click(getByRole(aggregateFunctionSelect, "button"));
+    const aggregateFunctionOptions = await screen.findAllByRole("option");
     expect(aggregateFunctionOptions).toHaveLength(12);
+
     const optionContents = aggregateFunctionOptions.map((o) => o.textContent);
     for (const option of AGGREGATE_FUNCTIONS) {
       expect(optionContents.includes(option)).toBeTruthy();
@@ -267,14 +264,14 @@ describe("Measure Observation Details", () => {
     );
 
     expect(
-      screen.getByRole("combobox", { name: "Observation" })
+      screen.getByTestId("select-measure-observation-obs1")
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("combobox", { name: "Aggregate Function *" })
+      screen.getByTestId("select-measure-observation-aggregate-obs1")
     ).toBeInTheDocument();
   });
 
-  it("should fire change event for measure observation change", () => {
+  it("should fire change event for measure observation change", async () => {
     const elmJson = JSON.stringify({
       library: {
         statements: {
@@ -306,15 +303,18 @@ describe("Measure Observation Details", () => {
       />
     );
 
-    const observationComboBox = screen.getByRole("combobox", {
-      name: "Observation",
-    });
-    expect(observationComboBox).toBeInTheDocument();
-    const observationOptions =
-      within(observationComboBox).getAllByRole("option");
+    const observationSelect = screen.getByTestId(
+      "select-measure-observation-obs1"
+    );
+    expect(observationSelect).toBeInTheDocument();
+    userEvent.click(getByRole(observationSelect, "button"));
+    const observationOptions = await screen.findAllByRole("option");
     expect(observationOptions).toHaveLength(3);
-    userEvent.click(observationComboBox);
-    userEvent.selectOptions(observationComboBox, observationOptions[1]);
+    expect(observationOptions[0].textContent).toEqual("-");
+    expect(observationOptions[1].textContent).toEqual("MyFunc1");
+    expect(observationOptions[2].textContent).toEqual("My Func 2");
+
+    userEvent.click(screen.getByText("MyFunc1"));
     expect(handleChange).toHaveBeenCalledTimes(1);
     expect(handleChange).toHaveBeenCalledWith({
       ...measureObservation,
@@ -322,7 +322,7 @@ describe("Measure Observation Details", () => {
     });
   });
 
-  it("should handle no onChange for measure observation change", () => {
+  it("should handle no onChange for measure observation change", async () => {
     const elmJson = JSON.stringify({
       library: {
         statements: {
@@ -352,18 +352,20 @@ describe("Measure Observation Details", () => {
       />
     );
 
-    const observationComboBox = screen.getByRole("combobox", {
-      name: "Observation",
-    });
-    const observationOptions =
-      within(observationComboBox).getAllByRole("option");
+    const observationSelect = screen.getByTestId(
+      "select-measure-observation-obs1"
+    );
+    expect(observationSelect).toBeInTheDocument();
+    userEvent.click(getByRole(observationSelect, "button"));
+    const observationOptions = await screen.findAllByRole("option");
     expect(observationOptions).toHaveLength(3);
-    userEvent.click(observationComboBox);
-    userEvent.selectOptions(observationComboBox, observationOptions[1]);
+    expect(observationOptions[0].textContent).toEqual("-");
+    expect(observationOptions[1].textContent).toEqual("MyFunc1");
+    expect(observationOptions[2].textContent).toEqual("My Func 2");
     expect((observationOptions[0] as HTMLOptionElement).selected).toBeTruthy();
   });
 
-  it("should fire change event for aggregate function change", () => {
+  it("should fire change event for aggregate function change", async () => {
     const elmJson = JSON.stringify({
       library: {
         statements: {
@@ -391,13 +393,13 @@ describe("Measure Observation Details", () => {
       />
     );
 
-    const aggregateComboBox = screen.getByRole("combobox", {
-      name: "Aggregate Function *",
-    });
-    expect(aggregateComboBox).toBeInTheDocument();
-    const aggregateOptions = within(aggregateComboBox).getAllByRole("option");
+    const aggregateSelect = screen.getByTestId(
+      "select-measure-observation-aggregate-obs1"
+    );
+    userEvent.click(getByRole(aggregateSelect, "button"));
+    const aggregateOptions = await screen.findAllByRole("option");
     expect(aggregateOptions).toHaveLength(12);
-    userEvent.selectOptions(aggregateComboBox, aggregateOptions[2]);
+    userEvent.click(screen.getByText("Count"));
     expect(handleChange).toHaveBeenCalledTimes(1);
     expect(handleChange).toHaveBeenCalledWith({
       ...measureObservation,
@@ -405,7 +407,8 @@ describe("Measure Observation Details", () => {
     });
   });
 
-  it("should handle no onChange for aggregate function change", () => {
+  // Since onChange is not provided, the aggregate value is not updated.
+  it("should handle no onChange for aggregate function change", async () => {
     const elmJson = JSON.stringify({
       library: {
         statements: {
@@ -430,17 +433,17 @@ describe("Measure Observation Details", () => {
         measureObservation={measureObservation}
       />
     );
+    const aggregateInput = screen.getByTestId(
+      "measure-observation-aggregate-obs1-input"
+    ) as HTMLInputElement;
+    expect(aggregateInput.value).toBe("");
 
-    const aggregateComboBox = screen.getByRole("combobox", {
-      name: "Aggregate Function *",
-    });
-    const aggregateOptions = within(aggregateComboBox).getAllByRole("option");
-    expect(aggregateComboBox).toHaveLength(12);
-    expect((aggregateOptions[0] as HTMLOptionElement).selected).toBeTruthy();
-    userEvent.selectOptions(aggregateComboBox, aggregateOptions[2]);
-    const aggregateOptions2 = within(aggregateComboBox).getAllByRole("option");
-    expect(aggregateOptions2).toHaveLength(12);
-    expect((aggregateOptions[0] as HTMLOptionElement).selected).toBeTruthy();
+    const aggregateSelect = screen.getByTestId(
+      "select-measure-observation-aggregate-obs1"
+    );
+    userEvent.click(getByRole(aggregateSelect, "button"));
+    userEvent.click(screen.getByText("Count"));
+    expect(aggregateInput.value).toBe("");
   });
 
   it("should fire callback for clicking remove measure observation", () => {
@@ -459,6 +462,7 @@ describe("Measure Observation Details", () => {
     const handleRemove = jest.fn();
     render(
       <MeasureObservationDetails
+        required={false}
         name={"obs1"}
         elmJson={elmJson}
         measureObservation={measureObservation}

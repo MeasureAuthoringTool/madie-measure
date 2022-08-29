@@ -4,13 +4,17 @@ import MeasureEditor, {
   mapErrorsToAceAnnotations,
   mapErrorsToAceMarkers,
 } from "./MeasureEditor";
-import { Measure } from "@madie/madie-models";
+import { Measure, Model } from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import axios from "axios";
 import { ElmTranslationError } from "./measureEditorUtils";
 import userEvent from "@testing-library/user-event";
 // @ts-ignore
-import { parseContent, validateContent } from "@madie/madie-editor";
+import {
+  parseContent,
+  validateContent,
+  synchingEditorCqlContent,
+} from "@madie/madie-editor";
 import { measureStore } from "@madie/madie-util";
 const measure = {
   id: "abcd-pqrs-xyz",
@@ -27,7 +31,7 @@ const measure = {
   createdBy: "testuser@example.com",
   lastModifiedAt: "",
   lastModifiedBy: "",
-  model: "QI-Core",
+  model: "QI-Core v4.1.1",
   measureMetaData: {},
 } as unknown as Measure;
 // } as Measure;
@@ -162,6 +166,19 @@ describe("MeasureEditor component", () => {
   });
 
   it("save measure with updated cql in editor on save button click", async () => {
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        translation: { library: {} },
+      });
+    });
+
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => {
+        return "library testCql version '0.0.000'";
+      });
+
     mockedAxios.put.mockImplementation((args) => {
       if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
         return Promise.resolve({ data: measure });
@@ -175,14 +192,15 @@ describe("MeasureEditor component", () => {
     expect(measure.cql).toEqual(editorContainer.value);
     fireEvent.change(getByTestId("measure-editor"), {
       target: {
-        value:
-          "library AdvancedIllnessandFrailtyExclusion_QICore4 version '5.0.000'",
+        value: "library testCql versionss '0.0.000'",
       },
     });
     fireEvent.click(getByTestId("save-cql-btn"));
     await waitFor(() => {
       const successMessage = getByTestId("save-cql-success");
-      expect(successMessage.textContent).toEqual("CQL saved successfully");
+      expect(successMessage.textContent).toEqual(
+        "CQL updated successfully! Library Name and Version can be updated in the Details tab. MADiE has over written the updated Library Name and Version"
+      );
       expect(mockedAxios.put).toHaveBeenCalledTimes(1);
     });
   });
@@ -197,6 +215,12 @@ describe("MeasureEditor component", () => {
       return Promise.reject({ data: { error: "Something bad happened!" } });
     });
 
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => {
+        return "librarydwwd Test2dvh3wd version '0.0.000'";
+      });
+
     const { getByTestId } = renderEditor(measure);
     const editorContainer = (await getByTestId(
       "measure-editor"
@@ -204,16 +228,16 @@ describe("MeasureEditor component", () => {
     expect(measure.cql).toEqual(editorContainer.value);
     fireEvent.change(getByTestId("measure-editor"), {
       target: {
-        value:
-          "library AdvancedIllnessandFrailtyExclusion_QICore4 version '5.0.000'",
+        value: "librarydwwd Test2dvh3wd version '0.0.000'",
       },
     });
     const saveButton = screen.getByRole("button", { name: "Save" });
     userEvent.click(saveButton);
-    const elmTranslationError = await screen.findByText(
-      "Unable to translate CQL to ELM!"
-    );
-    expect(elmTranslationError).toBeInTheDocument();
+    await waitFor(() => {
+      const successMessage = getByTestId("save-cql-success");
+      expect(successMessage.textContent).toEqual("CQL saved successfully");
+      expect(mockedAxios.put).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("should persist error flag when there are ELM translation errors", async () => {
@@ -223,8 +247,17 @@ describe("MeasureEditor component", () => {
       }
     });
     (validateContent as jest.Mock).mockClear().mockImplementation(() => {
-      return Promise.resolve(elmTransaltionErrors);
+      return Promise.resolve({
+        errors: elmTransaltionErrors,
+        translation: { library: {} },
+      });
     });
+
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => {
+        return "library AdvancedIllnessandFrailtyExclusion version '0.0.000'";
+      });
     renderEditor(measure);
     const issues = await screen.findByText("2 issues found with CQL");
     expect(issues).toBeInTheDocument();
@@ -240,19 +273,20 @@ describe("MeasureEditor component", () => {
     });
     const saveButton = screen.getByRole("button", { name: "Save" });
     userEvent.click(saveButton);
-    const saveSuccess = await screen.findByText("CQL saved successfully");
+    const saveSuccess = await screen.findByText(
+      "CQL updated successfully! Library Name and Version can be updated in the Details tab. MADiE has over written the updated Library Name and Version"
+    );
     expect(saveSuccess).toBeInTheDocument();
     expect(mockedAxios.put).toHaveBeenCalledTimes(1);
     expect(mockedAxios.put).toHaveBeenCalledWith(
       "madie.com/measures/abcd-pqrs-xyz",
       {
-        cql: "library AdvancedIllnessandFrailtyExclusion_QICore4 version '5.0.000'",
+        cql: "library AdvancedIllnessandFrailtyExclusion version '0.0.000'",
         cqlErrors: true,
         cqlLibraryName: "",
         createdAt: "",
         createdBy: "testuser@example.com",
-        elmJson:
-          '[{"startLine":24,"startChar":7,"endLine":24,"endChar":15,"errorSeverity":"Warning","errorType":"ELM","message":"Test Warning 123","targetIncludeLibraryId":"TestLibrary_QICore","targetIncludeLibraryVersionId":"5.0.000","type":"ELM"},{"startLine":1,"startChar":1,"endLine":1,"endChar":96,"errorSeverity":"Warning","errorType":"ELM","message":"Test Warning 456","targetIncludeLibraryId":"TestLibrary_QICore","targetIncludeLibraryVersionId":"5.0.000","type":"ELM"}]',
+        elmJson: '{"library":{}}',
         id: "abcd-pqrs-xyz",
         lastModifiedAt: "",
         lastModifiedBy: "",
@@ -261,7 +295,7 @@ describe("MeasureEditor component", () => {
         measureName: "MSR001",
         measureScoring: "",
         measureSetId: "",
-        model: "QI-Core",
+        model: "QI-Core v4.1.1",
         revisionNumber: 1.1,
         state: "",
         version: 1,
@@ -276,6 +310,11 @@ describe("MeasureEditor component", () => {
         return Promise.resolve({ data: measure });
       }
     });
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => {
+        return "library AdvancedIllnessandFrailtyExclusion version '0.0.000'";
+      });
 
     const { getByTestId } = renderEditor(measure);
     const editorContainer = (await getByTestId(
@@ -285,25 +324,26 @@ describe("MeasureEditor component", () => {
     fireEvent.change(getByTestId("measure-editor"), {
       target: {
         value:
-          "library AdvancedIllnessandFrailtyExclusion_QICore4 version '5.0.000'",
+          "library AdvancedIllnessandFrailtyExclusion versiontest '5.0.000'",
       },
     });
     parseContent.mockClear().mockImplementation(() => ["Test error"]);
     const saveButton = screen.getByRole("button", { name: "Save" });
     userEvent.click(saveButton);
-    const saveSuccess = await screen.findByText("CQL saved successfully");
+    const saveSuccess = await screen.findByText(
+      "CQL updated successfully! Library Name and Version can be updated in the Details tab. MADiE has over written the updated Library Name and Version"
+    );
     expect(saveSuccess).toBeInTheDocument();
     expect(mockedAxios.put).toHaveBeenCalledTimes(1);
     expect(mockedAxios.put).toHaveBeenCalledWith(
       "madie.com/measures/abcd-pqrs-xyz",
       {
-        cql: "library AdvancedIllnessandFrailtyExclusion_QICore4 version '5.0.000'",
+        cql: "library AdvancedIllnessandFrailtyExclusion version '0.0.000'",
         cqlErrors: true,
         cqlLibraryName: "",
         createdAt: "",
         createdBy: "testuser@example.com",
-        elmJson:
-          '[{"startLine":24,"startChar":7,"endLine":24,"endChar":15,"errorSeverity":"Warning","errorType":"ELM","message":"Test Warning 123","targetIncludeLibraryId":"TestLibrary_QICore","targetIncludeLibraryVersionId":"5.0.000","type":"ELM"},{"startLine":1,"startChar":1,"endLine":1,"endChar":96,"errorSeverity":"Warning","errorType":"ELM","message":"Test Warning 456","targetIncludeLibraryId":"TestLibrary_QICore","targetIncludeLibraryVersionId":"5.0.000","type":"ELM"}]',
+        elmJson: '{"library":{}}',
         id: "abcd-pqrs-xyz",
         lastModifiedAt: "",
         lastModifiedBy: "",
@@ -312,7 +352,7 @@ describe("MeasureEditor component", () => {
         measureName: "MSR001",
         measureScoring: "",
         measureSetId: "",
-        model: "QI-Core",
+        model: "QI-Core v4.1.1",
         revisionNumber: 1.1,
         state: "",
         version: 1,
@@ -374,7 +414,7 @@ describe("MeasureEditor component", () => {
       }
     });
     (validateContent as jest.Mock).mockClear().mockImplementation(() => {
-      return Promise.resolve(elmTransaltionErrors);
+      return Promise.resolve({ errors: elmTransaltionErrors });
     });
     renderEditor(measure);
     const issues = await screen.findByText("2 issues found with CQL");
@@ -521,7 +561,10 @@ it("should display errors if not logged into umls", async () => {
   ];
 
   (validateContent as jest.Mock).mockClear().mockImplementation(() => {
-    return Promise.resolve(elmTransaltionErrorsUMLS);
+    return Promise.resolve({
+      errors: elmTransaltionErrorsUMLS,
+      translation: null,
+    });
   });
 
   const measureWithCqlCodes = {

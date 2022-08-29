@@ -4,6 +4,7 @@ import useServiceConfig from "./useServiceConfig";
 import { ServiceConfig } from "./ServiceContext";
 import { Measure, Group } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
+import _ from "lodash";
 
 export class MeasureServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
@@ -146,14 +147,16 @@ export class MeasureServiceApi {
   }
 
   buildErrorMessage(err, baseMessage): string {
-    let extraMessage = "";
-    if (
-      err?.response?.status === 400 &&
-      err?.response?.data?.validationErrors?.group
-    ) {
-      extraMessage = " Missing required populations for selected scoring type.";
+    let errorMessage = undefined;
+    if (err?.response?.status === 400) {
+      if (err.response.data?.validationErrors?.group) {
+        errorMessage =
+          "Missing required populations for selected scoring type.";
+      } else if (err.response.data.message) {
+        errorMessage = err.response.data.message;
+      }
     }
-    return `${baseMessage}${extraMessage}`;
+    return errorMessage ? errorMessage : baseMessage;
   }
 
   async getAllPopulationBasisOptions(): Promise<string[]> {
@@ -177,6 +180,42 @@ export class MeasureServiceApi {
       );
       throw new Error(message);
     }
+  }
+
+  getReturnTypesForAllCqlDefinitions(elmJson: string): {
+    [key: string]: string;
+  } {
+    if (!elmJson) {
+      return {};
+    }
+
+    const elm = JSON.parse(elmJson);
+    const definitions = elm.library?.statements?.def;
+    if (definitions) {
+      return definitions.reduce((returnTypes, definition) => {
+        const returnType = {};
+        const name = _.camelCase(_.trim(definition.name));
+        if (definition.resultTypeName) {
+          returnType[name] = definition.resultTypeName?.split("}")[1];
+        } else if (definition.resultTypeSpecifier) {
+          const resultType = definition.resultTypeSpecifier.elementType.type;
+          if (resultType === "NamedTypeSpecifier") {
+            returnType[name] =
+              definition.resultTypeSpecifier.elementType.name?.split("}")[1];
+          } else {
+            returnType[name] = "NA";
+          }
+        } else {
+          returnType[name] = "NA";
+        }
+        return {
+          ...returnTypes,
+          ...returnType,
+        };
+      }, {});
+    }
+
+    return {};
   }
 }
 

@@ -2,23 +2,10 @@ import React from "react";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import { kebabCase } from "lodash";
-import { TextField } from "@mui/material";
+import { MenuItem } from "@mui/material";
 import { ExpressionDefinition } from "./MeasureGroups";
-import { DSLink } from "@madie/madie-design-system/dist/react";
-import Radio from "@mui/material/Radio";
-import RadioGroup from "@mui/material/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
+import { DSLink, Select } from "@madie/madie-design-system/dist/react";
 import { InitialPopulationAssociationType } from "./GroupPopulation";
-
-const HeavyLabel = styled.label`
-  color: #505d68;
-  font-weight: 500;
-`;
-
-const Required = styled.span`
-  display: inline-block;
-  padding-left: 0.25rem;
-`;
 
 const SubTitle = styled.p`
   color: #505d68;
@@ -35,7 +22,7 @@ type Props = {
   onChange: any;
   optionTitle?: string;
   options?: Array<ExpressionDefinition>;
-  value?: string;
+  error?: boolean;
 };
 
 const FormField = tw.div`mt-6`;
@@ -48,14 +35,11 @@ const SoftLabel = styled.label`
 `;
 
 const MeasureGroupPopulationSelect = ({
+  field,
   label,
   required,
   subTitle,
-  name,
-  onChange,
-  optionTitle,
   options = [] as ExpressionDefinition[],
-  value = "",
   scoring,
   population,
   initialPopulationSize,
@@ -65,10 +49,27 @@ const MeasureGroupPopulationSelect = ({
   addPopulationCallback,
   isRemovable,
   showAddPopulationLink,
-  ...props
+  error,
+  helperText,
 }: Props & any) => {
+  // if the field is not required a default option is provided
+  const menuItems = [
+    !required && (
+      <MenuItem key="-" value="">
+        -
+      </MenuItem>
+    ),
+    ...options.map(({ name }, i) => (
+      <MenuItem
+        key={`${name}-${i}`}
+        value={name.replace(/"/g, "")}
+        data-testid="select-option-measure-group-population"
+      >
+        {name.replace(/"/g, "")}
+      </MenuItem>
+    )),
+  ];
   const htmlId = kebabCase(`population-select-${label}`);
-  const defaultOptionTitle = optionTitle ? optionTitle : label;
 
   const removePopulation = (evt) => {
     evt.preventDefault();
@@ -81,74 +82,45 @@ const MeasureGroupPopulationSelect = ({
   };
 
   const changeAssociation = (event: React.ChangeEvent<HTMLInputElement>) => {
-    event.preventDefault();
     const changedValue: string = (event.target as HTMLInputElement).value;
     population.associationType = changedValue;
     changeAssociationCallback();
   };
 
   return (
-    <FormField>
-      <HeavyLabel
-        htmlFor={htmlId}
-        id={`${htmlId}-label`}
-        data-testid={`select-measure-group-population-label`}
-      >
-        {label}
-        {required && <Required>*</Required>}
-      </HeavyLabel>
-      {isRemovable && (
-        <span tw={"ml-2"}>
-          <DSLink
-            data-testid={`remove_${name}`}
-            onClick={(evt) => removePopulation(evt)}
-          >
-            Remove
-          </DSLink>
-        </span>
-      )}
+    <FormField data-testid="temp-test-id">
       {canEdit && (
-        <div>
-          <TextField
-            select
-            value={value?.replace(/"/g, "")}
-            label=""
+        <>
+          {isRemovable && (
+            <span tw={"ml-2"}>
+              <DSLink
+                data-testid={`remove_${field.name}`}
+                onClick={(evt) => removePopulation(evt)}
+              >
+                Remove
+              </DSLink>
+            </span>
+          )}
+
+          <Select
+            placeHolder={{ name: "-", value: "" }}
+            required={required}
+            label={label}
             id={htmlId}
             inputProps={{
-              "data-testid": `select-measure-group-population`,
+              "data-testid": `select-measure-group-population-input`,
             }}
-            InputLabelProps={{ shrink: false, id: `select-${htmlId}-label` }}
-            SelectProps={{
-              native: true,
-              displayEmpty: true,
-            }}
-            name={name}
-            onChange={onChange}
-            style={{ minWidth: "20rem" }}
-            {...props}
-          >
-            {options.map(({ name }, i) => (
-              <option
-                key={`${name}-${i}`}
-                value={name.replace(/"/g, "")}
-                data-testid={`select-option-measure-group-population`}
-              >
-                {name.replace(/"/g, "")}
-              </option>
-            ))}
-            <option
-              value={""}
-              disabled={required}
-              data-testid={`select-option-measure-group-population`}
-            >
-              Select {defaultOptionTitle}
-              {required ? "" : " ( Leave selected for no population )"}
-            </option>
-          </TextField>{" "}
+            data-testid={htmlId}
+            {...field}
+            error={error}
+            helperText={helperText}
+            size="small"
+            options={menuItems}
+          />
           {showAddPopulationLink && (
             <span tw={"ml-2"}>
               <DSLink
-                data-testid={`add_${name}`}
+                data-testid={`add_${field.name}`}
                 onClick={(evt) => addPopulation(evt)}
               >
                 + Add {label}
@@ -158,42 +130,68 @@ const MeasureGroupPopulationSelect = ({
           {initialPopulationSize === 2 &&
             label.includes("Initial Population") &&
             scoring === "Ratio" && (
-              <div data-testid="measure-group-initial-population-association">
+              <div
+                data-testid={`measure-group-initial-population-association-${population.id}`}
+              >
                 <FormField>
                   <FieldSeparator style={{ marginLeft: 30 }}>
-                    <SoftLabel>Association</SoftLabel>
-                    <RadioGroup
-                      aria-labelledby="inital-population-association-label"
-                      defaultValue=""
-                      name="radio-buttons-group"
-                      value={population.associationType}
-                      onChange={changeAssociation}
-                      style={{ marginLeft: 15 }}
+                    <div data-testid={`${label}`}>
+                      <SoftLabel>Association</SoftLabel>
+                    </div>
+                    <div
+                      style={{
+                        marginLeft: 15,
+                        fontSize: 16,
+                        fontFamily: "Rubik",
+                      }}
                     >
-                      <FormControlLabel
+                      <input
+                        type="radio"
                         value={InitialPopulationAssociationType.DENOMINATOR}
-                        control={<Radio />}
-                        label={InitialPopulationAssociationType.DENOMINATOR}
+                        checked={
+                          population.associationType ===
+                          InitialPopulationAssociationType.DENOMINATOR
+                        }
                         disabled={
                           !canEdit || label.includes("Initial Population 2")
                         }
+                        onChange={changeAssociation}
+                        data-testid={`${label}-${InitialPopulationAssociationType.DENOMINATOR}`}
                       />
-                      <FormControlLabel
+                      &nbsp;
+                      {InitialPopulationAssociationType.DENOMINATOR}
+                    </div>
+                    <div
+                      style={{
+                        marginLeft: 15,
+                        fontSize: 16,
+                        fontFamily: "Rubik",
+                      }}
+                    >
+                      <input
+                        type="radio"
                         value={InitialPopulationAssociationType.NUMERATOR}
-                        control={<Radio />}
-                        label={InitialPopulationAssociationType.NUMERATOR}
+                        checked={
+                          population.associationType ===
+                          InitialPopulationAssociationType.NUMERATOR
+                        }
                         disabled={
                           !canEdit || label.includes("Initial Population 2")
                         }
+                        onChange={changeAssociation}
+                        data-testid={`${label}-${InitialPopulationAssociationType.NUMERATOR}`}
                       />
-                    </RadioGroup>
+                      &nbsp;
+                      {InitialPopulationAssociationType.NUMERATOR}
+                    </div>
                   </FieldSeparator>
                 </FormField>
               </div>
             )}
-        </div>
+        </>
       )}
-      {!canEdit && value}
+      {!canEdit && field.value}
+      {/* Todo what is subTitle?*/}
       {subTitle && <SubTitle>{subTitle}</SubTitle>}
     </FormField>
   );
