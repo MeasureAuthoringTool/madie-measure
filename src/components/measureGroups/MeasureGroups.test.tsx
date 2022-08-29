@@ -1545,8 +1545,50 @@ describe("Measure Groups Page", () => {
     userEvent.click(screen.getByTestId("stratifications-tab"));
     await waitFor(() => {
       expect(group.stratifications.length == 2);
-      expect(group.stratifications[0] === emptyStrat);
     });
+    expect(group.stratifications[0] === emptyStrat);
+  });
+
+  test("Stratification definitions return type validation to match population basis", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.stratifications = [emptyStrat, emptyStrat];
+    measure.groups = [group];
+    renderMeasureGroupComponent();
+    // switch to stratification tab
+    userEvent.click(screen.getByTestId("stratifications-tab"));
+    await waitFor(() => {
+      expect(group.stratifications.length == 2);
+    });
+    // select Initial population from dropdown for start 1
+    const strat1 = screen.getByTestId(
+      "stratification-1-input"
+    ) as HTMLInputElement;
+    fireEvent.change(strat1, {
+      target: { value: "Initial Population" },
+    });
+    // no error because population basis matches with cql define return type
+    expect(
+      screen.queryByText(
+        "The selected definition does not align with the Population Basis field selection of Boolean"
+      )
+    ).toBeNull();
+
+    // update population basis to not match cql define return type
+    await changePopulationBasis("Boolean");
+    // error shown
+    expect(
+      screen.queryByText(
+        "The selected definition does not align with the Population Basis field selection of Boolean"
+      )
+    ).not.toBeNull();
+    // update population basis to match cql define return type
+    await changePopulationBasis("Boolean");
+    // no error shown
+    expect(
+      screen.queryByText(
+        "The selected definition does not align with the Population Basis field selection of Boolean"
+      )
+    ).not.toBeNull();
   });
 
   test("measure observation should not render for cohort", async () => {
