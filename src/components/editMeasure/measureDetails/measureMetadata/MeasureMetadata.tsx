@@ -7,6 +7,7 @@ import { measureStore, useOktaTokens } from "@madie/madie-util";
 import { Divider, Typography } from "@mui/material";
 import { MeasureMetadataValidator } from "../../../../validations/MeasureMetadataValidator";
 import { Button } from "@madie/madie-design-system/dist/react";
+import "./MeasureMetadata.scss";
 
 const Form = tw.form`max-w-xl mt-3 space-y-8`;
 const FormContent = tw.div`space-y-8 divide-y divide-gray-200`;
@@ -95,23 +96,14 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
           )}
           {measureMetadataType !== "Steward" && (
             <>
-              <p style={{ fontFamily: "Rubik", fontSize: 32, fontWeight: 400 }}>
-                {measureMetadataType}
-              </p>
+              {/* <p style={{ fontFamily: "Rubik", fontSize: 32, fontWeight: 400 }}> */}
+              <p className="title">{measureMetadataType}</p>
 
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "flex-end",
-                }}
-              >
-                <Typography
-                  style={{ fontSize: 14, fontWeight: 300, fontFamily: "Rubik" }}
-                >
-                  <span style={{ color: "#D92F2F", marginRight: 3 }}>*</span>
+              <div className="flexend">
+                <div className="info">
+                  <span className="required">*</span>
                   Indicates required field
-                </Typography>
+                </div>
               </div>
 
               <Divider />
@@ -121,14 +113,14 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
             <FormFieldInner>
               <FieldLabel htmlFor={`measure-${typeLower}`}>
                 {measureMetadataType === "Description" && (
-                  <span style={{ color: "#D92F2F", marginRight: 3 }}>*</span>
+                  <span className="required">*</span>
                 )}
                 {measureMetadataType}
               </FieldLabel>
               <FieldSeparator>
                 {canEdit && (
                   <TextArea
-                    style={{ height: "200px", width: "500px" }}
+                    className="textarea"
                     name={`measure-${typeLower}`}
                     id={`measure-${typeLower}`}
                     autoComplete={`measure-${typeLower}`}
