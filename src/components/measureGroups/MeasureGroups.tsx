@@ -121,10 +121,11 @@ const improvementNotationOptions = [
   },
 ];
 
+// default value for any association is Initial population
 const emptyStrat = {
   cqlDefinition: "",
   description: "",
-  association: "",
+  association: "Initial Population",
   id: "",
 };
 
@@ -138,7 +139,6 @@ export const deleteStrat = {
 // provides dropdown options for stratification association
 const associationSelect = {
   Proportion: [
-    "-",
     "Initial Population",
     "Denominator",
     "Denominator Exclusion",
@@ -147,12 +147,11 @@ const associationSelect = {
     "Denominator Exception",
   ],
   "Continuous Variable": [
-    "-",
     "Initial Population",
     "Measure Population",
     "Measure Population Exclusion",
   ],
-  Cohort: ["-", "Initial Population"],
+  Cohort: ["Initial Population"],
   Ratio: [],
 };
 
