@@ -22,6 +22,7 @@ import { measureStore, useOktaTokens } from "@madie/madie-util";
 import classNames from "classnames";
 import { makeStyles } from "@mui/styles";
 import { Box } from "@mui/system";
+import { synchingEditorCqlContent } from "@madie/madie-editor";
 
 interface measureInformationForm {
   measureName: string;
@@ -159,6 +160,14 @@ export default function MeasureInformation() {
   };
 
   const handleSubmit = async (values) => {
+    const inSyncCql = await synchingEditorCqlContent(
+      "",
+      measure?.cql,
+      values.cqlLibraryName,
+      measure?.cqlLibraryName,
+      "0.0.000", //as the versioning is not implemented in measure for now we just send default value: 0.0.000
+      "measureInformation"
+    );
     const newMeasure: Measure = {
       ...measure,
       measureName: values.measureName,
@@ -166,6 +175,7 @@ export default function MeasureInformation() {
       ecqmTitle: values.ecqmTitle,
       measurementPeriodStart: values.measurementPeriodStart,
       measurementPeriodEnd: values.measurementPeriodEnd,
+      cql: inSyncCql,
     };
     measureServiceApi
       .updateMeasure(newMeasure)
