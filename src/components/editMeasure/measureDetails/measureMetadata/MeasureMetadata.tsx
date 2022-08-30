@@ -8,7 +8,7 @@ import { Divider, Typography } from "@mui/material";
 import { MeasureMetadataValidator } from "../../../../validations/MeasureMetadataValidator";
 import { Button } from "@madie/madie-design-system/dist/react";
 
-const Form = tw.form`max-w-xl mt-3 space-y-8 divide-y divide-gray-200`;
+const Form = tw.form`max-w-xl mt-3 space-y-8`;
 const FormContent = tw.div`space-y-8 divide-y divide-gray-200`;
 const Header = tw.h3`text-lg leading-6 font-medium text-gray-900`;
 const SubHeader = tw.p`mt-1 text-sm text-gray-500`;
