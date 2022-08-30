@@ -1,6 +1,6 @@
 import * as React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { Measure } from "@madie/madie-models";
+import { Measure, Model } from "@madie/madie-models";
 import MeasureList from "./MeasureList";
 
 import { v4 as uuid } from "uuid";
@@ -66,7 +66,7 @@ const measures: Measure[] = [
     createdBy: null,
     lastModifiedAt: null,
     lastModifiedBy: null,
-    model: "QI-Core",
+    model: Model.QICORE.valueOf(),
     active: false,
   },
 ];
