@@ -138,5 +138,16 @@ export const measureGroupSchemaValidator = (
           return Yup.array().nullable();
       }
     }),
+    stratifications: Yup.object().when("populationBasis", (populationBasis) => {
+      return Yup.array()
+        .of(
+          Yup.object().shape({
+            cqlDefinition: Yup.string().test(
+              returnTypeCheckOptions(populationBasis, definitionDataTypes)
+            ),
+          })
+        )
+        .nullable();
+    }),
   });
 };
