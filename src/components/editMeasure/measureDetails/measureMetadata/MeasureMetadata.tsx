@@ -96,14 +96,13 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
           )}
           {measureMetadataType !== "Steward" && (
             <>
-              {/* <p style={{ fontFamily: "Rubik", fontSize: 32, fontWeight: 400 }}> */}
               <p className="title">{measureMetadataType}</p>
 
               <div className="flexend">
-                <div className="info">
+                <p className="info">
                   <span className="required">*</span>
                   Indicates required field
-                </div>
+                </p>
               </div>
 
               <Divider />
