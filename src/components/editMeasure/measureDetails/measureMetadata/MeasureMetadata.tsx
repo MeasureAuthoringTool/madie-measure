@@ -4,7 +4,7 @@ import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import { useFormik } from "formik";
 import getInitialValues, { setMeasureMetadata } from "./MeasureMetadataHelper";
 import { measureStore, useOktaTokens } from "@madie/madie-util";
-import { Divider, Typography } from "@mui/material";
+import { Divider } from "@mui/material";
 import { MeasureMetadataValidator } from "../../../../validations/MeasureMetadataValidator";
 import { Button } from "@madie/madie-design-system/dist/react";
 import "./MeasureMetadata.scss";
