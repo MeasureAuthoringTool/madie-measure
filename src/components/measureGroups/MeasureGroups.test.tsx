@@ -934,11 +934,12 @@ describe("Measure Groups Page", () => {
     fireEvent.click(cancelButton);
     await waitFor(() => {
       expect(screen.queryByText("You have unsaved changes.")).not.toBeVisible();
+      expect(screen.getByTestId("group-form-discard-btn")).toBeEnabled();
+      userEvent.click(screen.getByTestId("group-form-discard-btn"));
+      expect(cancelButton).toBeInTheDocument();
+      fireEvent.click(cancelButton);
     });
-    expect(screen.getByTestId("group-form-discard-btn")).toBeEnabled();
-    userEvent.click(screen.getByTestId("group-form-discard-btn"));
-    expect(cancelButton).toBeInTheDocument();
-    fireEvent.click(cancelButton);
+
     await waitFor(() => {
       expect(screen.queryByText("You have unsaved changes.")).not.toBeVisible();
     });
