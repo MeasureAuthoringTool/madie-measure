@@ -939,10 +939,6 @@ describe("Measure Groups Page", () => {
       expect(cancelButton).toBeInTheDocument();
       fireEvent.click(cancelButton);
     });
-
-    await waitFor(() => {
-      expect(screen.queryByText("You have unsaved changes.")).not.toBeVisible();
-    });
     const continueButton = await screen.getByTestId(
       "discard-dialog-continue-button"
     );
