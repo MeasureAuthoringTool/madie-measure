@@ -1933,7 +1933,7 @@ describe("Measure Groups Page", () => {
           name: PopulationType.INITIAL_POPULATION,
           definition: "Initial Population",
           // TODO: look into why this is the case - is this a bug?
-          associationType: InitialPopulationAssociationType.DENOMINATOR,
+          associationType: undefined,
         },
         {
           id: "uuid-2",
