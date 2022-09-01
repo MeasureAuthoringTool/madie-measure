@@ -193,7 +193,7 @@ const MeasureEditor = () => {
                 ? {
                     status: "warning",
                     message:
-                      "CQL updated successfully! Library Name and Version can be updated in the Details tab. MADiE has over written the updated Library Name and Version",
+                      "CQL updated successfully! Library Name and/or Version can not be updated in the CQL Editor. MADiE has overwritten the updated Library Name and/or Version.",
                   }
                 : { status: "success", message: "CQL saved successfully" };
             setSuccess(successMessage);
