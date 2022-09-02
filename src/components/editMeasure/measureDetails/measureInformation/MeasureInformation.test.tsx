@@ -102,6 +102,9 @@ describe("MeasureInformation component", () => {
     await act(async () => {
       const text = getByTestId("measure-name-input") as HTMLInputElement;
       expect(text.value).toBe(measure.measureName);
+      const versionId = getByTestId("version-id-input") as HTMLInputElement;
+      expect(versionId.value).toBe(measure.id);
+      expect(versionId).toHaveProperty("disabled", true);
       const cqlLibraryNameText = getByTestId(
         "cql-library-name-input"
       ) as HTMLInputElement;

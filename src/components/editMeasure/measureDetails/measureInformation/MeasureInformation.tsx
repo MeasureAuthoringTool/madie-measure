@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import tw from "twin.macro";
-import styled, { css } from "styled-components";
 import { Measure } from "@madie/madie-models";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import "styled-components/macro";
@@ -16,15 +15,17 @@ import DateAdapter from "@mui/lab/AdapterDateFns";
 import DesktopDatePicker from "@mui/lab/DesktopDatePicker";
 import { DialogContent, DialogTitle, Divider, Typography } from "@mui/material";
 import { useFormik } from "formik";
-import { HelperText } from "@madie/madie-components";
+import { HelperText, TextInput, Label } from "@madie/madie-components";
 import { MeasureSchemaValidator } from "../../../../validations/MeasureSchemaValidator";
 import { measureStore, useOktaTokens } from "@madie/madie-util";
 import classNames from "classnames";
 import { makeStyles } from "@mui/styles";
 import { Box } from "@mui/system";
 import { synchingEditorCqlContent } from "@madie/madie-editor";
+import "./MeasureInformation.scss";
 
 interface measureInformationForm {
+  versionId: string;
   measureName: string;
   cqlLibraryName: string;
   ecqmTitle: string;
@@ -116,6 +117,10 @@ export default function MeasureInformation() {
     measureName: measure?.measureName,
     cqlLibraryName: measure?.cqlLibraryName,
     ecqmTitle: measure?.ecqmTitle,
+    versionId:
+      measure?.versionId === null || measure?.versionId === undefined
+        ? measure?.id
+        : measure?.versionId,
   } as measureInformationForm;
 
   const formik = useFormik({
@@ -170,6 +175,7 @@ export default function MeasureInformation() {
     );
     const newMeasure: Measure = {
       ...measure,
+      versionId: values.versionId,
       measureName: values.measureName,
       cqlLibraryName: values.cqlLibraryName,
       ecqmTitle: values.ecqmTitle,
@@ -234,7 +240,8 @@ export default function MeasureInformation() {
           <div>
             <Divider style={{ marginTop: 20, marginBottom: 20 }} />
           </div>
-          <Box sx={formRow}>
+
+          <Box sx={formRowGapped}>
             <TextField
               placeholder="Measure Name"
               required
@@ -250,6 +257,23 @@ export default function MeasureInformation() {
               }
               {...formik.getFieldProps("measureName")}
             />
+
+            <TextInput
+              type="text"
+              id="versionId"
+              {...formik.getFieldProps("versionId")}
+              data-testid="version-id-input"
+              required={true}
+              disabled={true}
+              className="textinputnoborder"
+            >
+              <Label
+                htmlFor="versionId"
+                text="Version ID"
+                className="textlabel"
+              />
+              {formikErrorHandler("versionId", true)}
+            </TextInput>
           </Box>
 
           <Box sx={formRow}>
