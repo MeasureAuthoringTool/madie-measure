@@ -22,7 +22,7 @@ import {
   MadieDiscardDialog,
   Select,
 } from "@madie/madie-design-system/dist/react/";
-import { useFormik, FormikProvider, FieldArray, Field } from "formik";
+import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -121,10 +121,11 @@ const improvementNotationOptions = [
   },
 ];
 
+// default value for any association is Initial population
 const emptyStrat = {
   cqlDefinition: "",
   description: "",
-  association: "",
+  association: "Initial Population",
   id: "",
 };
 
@@ -138,7 +139,6 @@ export const deleteStrat = {
 // provides dropdown options for stratification association
 const associationSelect = {
   Proportion: [
-    "-",
     "Initial Population",
     "Denominator",
     "Denominator Exclusion",
@@ -147,12 +147,11 @@ const associationSelect = {
     "Denominator Exception",
   ],
   "Continuous Variable": [
-    "-",
     "Initial Population",
     "Measure Population",
     "Measure Population Exclusion",
   ],
-  Cohort: ["-", "Initial Population"],
+  Cohort: ["Initial Population"],
   Ratio: [],
 };
 
@@ -819,6 +818,16 @@ const MeasureGroups = () => {
                                         placeHolder={{ name: "-", value: "" }}
                                         label={`Stratification ${i + 1}`}
                                         id={`Stratification-select-${i + 1}`}
+                                        error={Boolean(
+                                          getIn(
+                                            formik.errors,
+                                            `stratifications[${i}].cqlDefinition`
+                                          )
+                                        )}
+                                        helperText={getIn(
+                                          formik.errors,
+                                          `stratifications[${i}].cqlDefinition`
+                                        )}
                                         inputProps={{
                                           "data-testid": `stratification-${
                                             i + 1
