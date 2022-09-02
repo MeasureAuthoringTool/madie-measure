@@ -932,18 +932,24 @@ describe("Measure Groups Page", () => {
     );
     expect(cancelButton).toBeInTheDocument();
     fireEvent.click(cancelButton);
-    await waitFor(() => {
-      expect(screen.queryByText("You have unsaved changes.")).not.toBeVisible();
-      expect(screen.getByTestId("group-form-discard-btn")).toBeEnabled();
-      userEvent.click(screen.getByTestId("group-form-discard-btn"));
-      expect(cancelButton).toBeInTheDocument();
-      fireEvent.click(cancelButton);
-    });
-    const continueButton = await screen.getByTestId(
-      "discard-dialog-continue-button"
+    await waitFor(
+      () => {
+        expect(
+          screen.queryByText("You have unsaved changes.")
+        ).not.toBeVisible();
+        expect(screen.getByTestId("group-form-discard-btn")).toBeEnabled();
+        userEvent.click(screen.getByTestId("group-form-discard-btn"));
+        expect(cancelButton).toBeInTheDocument();
+        fireEvent.click(cancelButton);
+        const continueButton = screen.getByTestId(
+          "discard-dialog-continue-button"
+        );
+        expect(continueButton).toBeInTheDocument();
+        fireEvent.click(continueButton);
+      },
+      { timeout: 10000 }
     );
-    expect(continueButton).toBeInTheDocument();
-    fireEvent.click(continueButton);
+
     expect(screen.getByTestId("rateAggregationText")).toHaveValue(
       group.rateAggregation
     );
