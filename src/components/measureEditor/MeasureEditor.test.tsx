@@ -250,6 +250,7 @@ describe("MeasureEditor component", () => {
       return Promise.resolve({
         errors: elmTransaltionErrors,
         translation: { library: {} },
+        externalErrors: [],
       });
     });
 
@@ -309,6 +310,13 @@ describe("MeasureEditor component", () => {
       if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
         return Promise.resolve({ data: measure });
       }
+    });
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        translation: { library: {} },
+        externalErrors: [],
+      });
     });
     (synchingEditorCqlContent as jest.Mock)
       .mockClear()
@@ -414,7 +422,10 @@ describe("MeasureEditor component", () => {
       }
     });
     (validateContent as jest.Mock).mockClear().mockImplementation(() => {
-      return Promise.resolve({ errors: elmTransaltionErrors });
+      return Promise.resolve({
+        errors: elmTransaltionErrors,
+        externalErrors: [],
+      });
     });
     renderEditor(measure);
     const issues = await screen.findByText("2 issues found with CQL");
@@ -564,6 +575,7 @@ it("should display errors if not logged into umls", async () => {
     return Promise.resolve({
       errors: elmTransaltionErrorsUMLS,
       translation: null,
+      externalErrors: [],
     });
   });
 
