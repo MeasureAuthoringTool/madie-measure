@@ -14,8 +14,10 @@ import {
   parseContent,
   validateContent,
   synchingEditorCqlContent,
+  ElmTranslationExternalError,
 } from "@madie/madie-editor";
 import { measureStore } from "@madie/madie-util";
+
 const measure = {
   id: "abcd-pqrs-xyz",
   measureHumanReadableId: "",
@@ -111,6 +113,24 @@ const elmTransaltionErrors: ElmTranslationError[] = [
     targetIncludeLibraryId: "TestLibrary_QICore",
     targetIncludeLibraryVersionId: "5.0.000",
     type: "ELM",
+  },
+];
+
+const cqlToElmExternalErrors: ElmTranslationExternalError[] = [
+  {
+    libraryId: "SupplementalDataElements",
+    libraryVersion: "1.0.000",
+    startLine: 14,
+    startChar: 1,
+    endLine: 14,
+    endChar: 52,
+    message:
+      "Could not resolve reference to library QICoreCommon, version 1.0.000 because version 2.0.000 is already loaded.",
+    errorType: "include",
+    errorSeverity: "Error",
+    targetIncludeLibraryId: "QICoreCommon",
+    targetIncludeLibraryVersionId: "1.0.000",
+    type: "CqlToElmError",
   },
 ];
 
@@ -430,6 +450,46 @@ describe("MeasureEditor component", () => {
     renderEditor(measure);
     const issues = await screen.findByText("2 issues found with CQL");
     expect(issues).toBeInTheDocument();
+  });
+
+  it("should display toast for external errors received from Cql to Elm translation", async () => {
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measure });
+      }
+    });
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        externalErrors: cqlToElmExternalErrors,
+      });
+    });
+    renderEditor(measure);
+    const toastMessage = await screen.findByText(
+      cqlToElmExternalErrors[0].message
+    );
+    expect(toastMessage).toBeInTheDocument();
+  });
+
+  it("should be able to close toast message", async () => {
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measure });
+      }
+    });
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        externalErrors: cqlToElmExternalErrors,
+      });
+    });
+    renderEditor(measure);
+    const toastCloseButton = await screen.findByRole("button", {
+      name: "close",
+    });
+    expect(toastCloseButton).toBeInTheDocument();
+    fireEvent.click(toastCloseButton);
+    expect(toastCloseButton).not.toBeInTheDocument();
   });
 });
 

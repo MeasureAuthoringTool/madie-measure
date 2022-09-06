@@ -326,7 +326,7 @@ const MeasureEditor = () => {
         open={toastOpen}
         message={toastMessage}
         onClose={onToastClose}
-        autoHideDuration={6000}
+        // autoHideDuration={6000}
       />
     </>
   );
