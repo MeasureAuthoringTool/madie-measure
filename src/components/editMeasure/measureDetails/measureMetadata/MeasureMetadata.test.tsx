@@ -75,12 +75,22 @@ describe("MeasureRationale component", () => {
     mockMeasure.measureMetaData = { ...mockMetaData };
   });
 
-  const expectInputValue = (element: HTMLElement, value: string): void => {
-    expect(element).toBeInstanceOf(HTMLInputElement);
-    const inputEl = element as HTMLInputElement;
+  const expectInputValue = (
+    element: HTMLTextAreaElement,
+    value: string
+  ): void => {
+    expect(element).toBeInstanceOf(HTMLTextAreaElement);
+    const inputEl = element as HTMLTextAreaElement;
     expect(inputEl.value).toBe(value);
   };
-  const { queryByText, getByText, getByTestId, findByTestId } = screen;
+  const {
+    queryByText,
+    getByText,
+    getByTestId,
+    findByTestId,
+    queryAllByText,
+    getAllByText,
+  } = screen;
 
   it("Should render empty titles with empty props", () => {
     render(<MeasureMetadataForm measureMetadataType="" />);
@@ -120,7 +130,7 @@ describe("MeasureRationale component", () => {
     const input = screen.getByTestId("measureRationaleInput");
     expectInputValue(input, RATIONALE);
 
-    expect(getByText("Rationale")).toBeTruthy();
+    expect(getAllByText("Rationale")).toBeTruthy();
     expect(queryByText("Steward/Author")).toBeNull();
     expect(queryByText("Description")).toBeNull();
     expect(queryByText("Copyright")).toBeNull();
@@ -139,7 +149,7 @@ describe("MeasureRationale component", () => {
     expectInputValue(input, AUTHOR);
 
     expect(queryByText("Steward/Author")).toBeNull();
-    expect(queryByText("Author")).toBeTruthy();
+    expect(queryAllByText("Author")).toBeTruthy();
     expect(queryByText("Steward/Author")).toBeNull();
     expect(queryByText("Description")).toBeNull();
     expect(queryByText("Copyright")).toBeNull();
@@ -164,6 +174,55 @@ describe("MeasureRationale component", () => {
         rationale: undefined,
       },
     });
+  });
+
+  it("Should display Description validation error when input is empty", async () => {
+    render(<MeasureMetadataForm measureMetadataType="Description" />);
+
+    const input = getByTestId("measureDescriptionInput");
+    expectInputValue(input, "Test Description");
+    const saveBtn = getByTestId("measureDescriptionSave");
+    expect(saveBtn).toBeInTheDocument();
+    expect(saveBtn).not.toBeEnabled();
+
+    act(() => {
+      fireEvent.change(input, {
+        target: { value: "" },
+      });
+    });
+
+    act(() => {
+      fireEvent.click(saveBtn);
+    });
+
+    await waitFor(() =>
+      expect(getByText("Measure Description is required.")).toBeInTheDocument()
+    );
+  });
+
+  it("Should not display validation error and save empty input successfully for metadata that does not need validation", async () => {
+    render(<MeasureMetadataForm measureMetadataType="Copyright" />);
+
+    const input = getByTestId("measureCopyrightInput");
+    expectInputValue(input, "Test Copyright");
+    const saveBtn = getByTestId("measureCopyrightSave");
+    expect(saveBtn).toBeInTheDocument();
+    expect(saveBtn).not.toBeEnabled();
+
+    act(() => {
+      fireEvent.change(input, {
+        target: { value: "" },
+      });
+    });
+
+    act(() => {
+      fireEvent.click(saveBtn);
+    });
+    await waitFor(() =>
+      expect(
+        getByText("Measure Copyright Information Saved Successfully")
+      ).toBeInTheDocument()
+    );
   });
 
   it("should update the rationale input field when a user types a new value", async () => {
