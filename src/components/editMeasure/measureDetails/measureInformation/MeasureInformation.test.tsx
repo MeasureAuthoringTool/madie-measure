@@ -130,6 +130,22 @@ describe("MeasureInformation component", () => {
     });
   });
 
+  it("Should display measure Version ID when it is not null", async () => {
+    measure.versionId = "testVersionId";
+    render(<MeasureInformation />);
+
+    const result: HTMLElement = getByTestId("measure-information-edit");
+    expect(result).toBeInTheDocument();
+
+    await act(async () => {
+      const text = getByTestId("measure-name-input") as HTMLInputElement;
+      expect(text.value).toBe(measure.measureName);
+      const versionId = getByTestId("version-id-input") as HTMLInputElement;
+      expect(versionId.value).toBe(measure.versionId);
+      expect(versionId).toHaveProperty("disabled", true);
+    });
+  });
+
   it("should render the component with a blank measure name", async () => {
     measure.measureName = "";
     render(<MeasureInformation />);
