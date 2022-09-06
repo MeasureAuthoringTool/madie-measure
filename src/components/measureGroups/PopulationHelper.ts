@@ -69,6 +69,27 @@ export const findPopulations = (
   );
 };
 
+export const findPopulationOptional = (populationType: PopulationType) => {
+  switch (populationType) {
+    case PopulationType.INITIAL_POPULATION:
+      return null;
+    case PopulationType.DENOMINATOR:
+      return null;
+    case PopulationType.DENOMINATOR_EXCLUSION:
+      return denominatorExclusion.optional;
+    case PopulationType.DENOMINATOR_EXCEPTION:
+      return denominatorException.optional;
+    case PopulationType.NUMERATOR:
+      return null;
+    case PopulationType.NUMERATOR_EXCLUSION:
+      return numeratorExclusion.optional;
+    case PopulationType.MEASURE_POPULATION:
+      return null;
+    case PopulationType.MEASURE_POPULATION_EXCLUSION:
+      return measurePopulationExclusion.optional;
+  }
+};
+
 // default populations for each scoring
 export const getPopulationsForScoring = (scoring: string): Population[] => {
   let populations: Population[];
