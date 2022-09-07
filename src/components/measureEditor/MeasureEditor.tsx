@@ -1,4 +1,5 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import tw from "twin.macro";
 import "styled-components/macro";
 import {
   EditorAnnotation,
@@ -11,10 +12,10 @@ import {
   synchingEditorCqlContent,
 } from "@madie/madie-editor";
 import { Button } from "@madie/madie-components";
+import { Toast } from "@madie/madie-design-system/dist/react";
 import { Measure } from "@madie/madie-models";
 import { CqlCode, CqlCodeSystem } from "@madie/cql-antlr-parser/dist/src";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
-import tw from "twin.macro";
 import * as _ from "lodash";
 import { useOktaTokens, measureStore } from "@madie/madie-util";
 
@@ -106,22 +107,47 @@ const MeasureEditor = () => {
   const canEdit = userName === measure?.createdBy;
   const [valuesetMsg, setValuesetMsg] = useState(null);
 
+  // toast utilities
+  const [toastOpen, setToastOpen] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string>("");
+  const [toastType, setToastType] = useState<string>("danger");
+  const onToastClose = () => {
+    setToastType(null);
+    setToastMessage("");
+    setToastOpen(false);
+  };
+  const handleToast = (type, message, open) => {
+    setToastType(type);
+    setToastMessage(message);
+    setToastOpen(open);
+  };
+
+  // on load fetch elm translations results to display errors on editor
+  useEffect(() => {
+    updateElmAnnotations(measure?.cql).catch((err) => {
+      console.error("An error occurred while translating CQL to ELM", err);
+      setElmTranslationError("Unable to translate CQL to ELM!");
+      setElmAnnotations([]);
+    });
+    setEditorVal(measure?.cql);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [measure?.cql]);
+
   const updateElmAnnotations = async (
     cql: string
   ): Promise<ValidationResult> => {
     setElmTranslationError(null);
     if (cql && cql.trim().length > 0) {
       const result = await validateContent(cql);
-      const { errors } = result;
+      const { errors, externalErrors } = result;
+      // right now we are only displaying the external errors related to included libraries
+      // and only the first error returned by elm translator
+      handleToast("danger", externalErrors[0]?.message, true);
       if (isLoggedInUMLS(errors)) {
         setValuesetMsg("Please log in to UMLS!");
       }
-
-      const annotations = mapErrorsToAceAnnotations(errors);
-      const errorMarkers = mapErrorsToAceMarkers(errors);
-
-      setElmAnnotations(annotations);
-      setErrorMarkers(errorMarkers);
+      setElmAnnotations(mapErrorsToAceAnnotations(errors));
+      setErrorMarkers(mapErrorsToAceMarkers(errors));
       return result;
     } else {
       setElmAnnotations([]);
@@ -151,6 +177,7 @@ const MeasureEditor = () => {
         updateElmAnnotations(inSyncCql),
         hasParserErrors(inSyncCql),
       ]);
+
       if (results[0].status === "rejected") {
         console.error(
           "An error occurred while translating CQL to ELM",
@@ -165,13 +192,14 @@ const MeasureEditor = () => {
         );
       }
 
-      const validationResult =
-        results[0].status === "fulfilled" ? results[0].value : "";
       const parseErrors =
         results[1].status === "fulfilled" ? results[1].value : "";
-      const cqlElmErrors = validationResult
-        ? !!(validationResult?.errors?.length > 0)
-        : true;
+
+      const validationResult: ValidationResult =
+        results[0].status === "fulfilled" ? results[0].value : null;
+      const cqlElmErrors =
+        !_.isEmpty(validationResult?.errors) ||
+        !_.isEmpty(validationResult?.externalErrors);
 
       if (editorVal !== measure.cql) {
         const cqlErrors = parseErrors || cqlElmErrors;
@@ -226,75 +254,80 @@ const MeasureEditor = () => {
     setEditorVal(measure?.cql || "");
   };
 
-  useEffect(() => {
-    updateElmAnnotations(measure?.cql).catch((err) => {
-      console.error("An error occurred while translating CQL to ELM", err);
-      setElmTranslationError("Unable to translate CQL to ELM!");
-      setElmAnnotations([]);
-    });
-    setEditorVal(measure?.cql);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [measure?.cql]);
-
   return (
     <>
-      <MadieEditor
-        onChange={(val: string) => handleMadieEditorValue(val)}
-        value={editorVal}
-        inboundAnnotations={elmAnnotations}
-        inboundErrorMarkers={errorMarkers}
-        height={"1000px"}
-        readOnly={!canEdit}
+      <div tw="mx-8 my-6 shadow-lg rounded-md border border-slate overflow-hidden bg-white">
+        <MadieEditor
+          onChange={(val: string) => handleMadieEditorValue(val)}
+          value={editorVal}
+          inboundAnnotations={elmAnnotations}
+          inboundErrorMarkers={errorMarkers}
+          height={"80vh"}
+          readOnly={!canEdit}
+        />
+        <EditorActions data-testid="measure-editor-actions">
+          <UpdateAlerts data-testid="update-cql-alerts">
+            {success?.status === "warning" ? (
+              <WarningText data-testid="save-cql-success">
+                {success.message}
+              </WarningText>
+            ) : (
+              <SuccessText data-testid="save-cql-success">
+                {success.message}
+              </SuccessText>
+            )}
+            {valuesetMsg && (
+              <SuccessText data-testid="valueset-success">
+                {valuesetMsg}
+              </SuccessText>
+            )}
+            {error && (
+              <ErrorText data-testid="save-cql-error">
+                Error updating the CQL
+              </ErrorText>
+            )}
+          </UpdateAlerts>
+          <UpdateAlerts data-testid="elm-translation-alerts">
+            {elmTranslationError && (
+              <ErrorText data-testid="elm-translation-error">
+                {elmTranslationError}
+              </ErrorText>
+            )}
+          </UpdateAlerts>
+          {canEdit && (
+            <>
+              <Button
+                buttonSize="md"
+                buttonTitle="Save"
+                variant="primary"
+                onClick={() => updateMeasureCql()}
+                data-testid="save-cql-btn"
+              />
+              <Button
+                tw="ml-2"
+                buttonSize="md"
+                buttonTitle="Cancel"
+                variant="secondary"
+                onClick={() => resetCql()}
+                data-testid="reset-cql-btn"
+              />
+            </>
+          )}
+        </EditorActions>
+      </div>
+      <Toast
+        toastKey="measure-cql-editor-toast"
+        toastType={toastType}
+        testId={
+          toastType === "danger"
+            ? "edit-measure-cql-generic-error-text"
+            : "edit-measure-cql-success-text"
+        }
+        open={toastOpen}
+        message={toastMessage}
+        onClose={onToastClose}
+        autoHideDuration={6000}
       />
-      <EditorActions data-testid="measure-editor-actions">
-        <UpdateAlerts data-testid="update-cql-alerts">
-          {success?.status === "warning" ? (
-            <WarningText data-testid="save-cql-success">
-              {success.message}
-            </WarningText>
-          ) : (
-            <SuccessText data-testid="save-cql-success">
-              {success.message}
-            </SuccessText>
-          )}
-          {valuesetMsg && (
-            <SuccessText data-testid="valueset-success">
-              {valuesetMsg}
-            </SuccessText>
-          )}
-          {error && (
-            <ErrorText data-testid="save-cql-error">
-              Error updating the CQL
-            </ErrorText>
-          )}
-        </UpdateAlerts>
-        <UpdateAlerts data-testid="elm-translation-alerts">
-          {elmTranslationError && (
-            <ErrorText data-testid="elm-translation-error">
-              {elmTranslationError}
-            </ErrorText>
-          )}
-        </UpdateAlerts>
-        {canEdit && (
-          <>
-            <Button
-              buttonSize="md"
-              buttonTitle="Save"
-              variant="primary"
-              onClick={() => updateMeasureCql()}
-              data-testid="save-cql-btn"
-            />
-            <Button
-              tw="ml-2"
-              buttonSize="md"
-              buttonTitle="Cancel"
-              variant="secondary"
-              onClick={() => resetCql()}
-              data-testid="reset-cql-btn"
-            />
-          </>
-        )}
-      </EditorActions>
     </>
   );
 };
