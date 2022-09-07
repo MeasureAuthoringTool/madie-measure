@@ -4,23 +4,26 @@ import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import { useFormik } from "formik";
 import getInitialValues, { setMeasureMetadata } from "./MeasureMetadataHelper";
 import { measureStore, useOktaTokens } from "@madie/madie-util";
+import { Divider } from "@mui/material";
+import { MeasureMetadataValidator } from "../../../../validations/MeasureMetadataValidator";
+import { Button } from "@madie/madie-design-system/dist/react";
+import "./MeasureMetadata.scss";
 
-const Form = tw.form`max-w-xl mt-3 space-y-8 divide-y divide-gray-200`;
+const Form = tw.form`max-w-xl mt-3 space-y-8`;
 const FormContent = tw.div`space-y-8 divide-y divide-gray-200`;
 const Header = tw.h3`text-lg leading-6 font-medium text-gray-900`;
 const SubHeader = tw.p`mt-1 text-sm text-gray-500`;
 const FormField = tw.div`mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6`;
 const FormFieldInner = tw.div`sm:col-span-3`;
-const FieldLabel = tw.label`block text-sm font-medium text-gray-700`;
+const FieldLabel = tw.label`block text-sm font-normal text-black-100`;
 const FieldSeparator = tw.div`mt-1`;
-const FieldInput = tw.input`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
 const FormButtons = tw.div`pt-5`;
 const ButtonWrapper = tw.div`flex justify-start`;
-const SubmitButton = tw.button` inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500`;
 const MessageDiv = tw.div`ml-3 mt-2`;
 const MessageText = tw.p`text-sm font-medium`;
 const SuccessText = tw(MessageText)`text-green-800`;
 const ErrorText = tw(MessageText)`text-red-800`;
+const TextArea = tw.textarea`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
 
 export interface MeasureMetadataProps {
   measureMetadataType?: String;
@@ -49,7 +52,11 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
 
   const formik = useFormik({
     enableReinitialize: true,
-    initialValues: { genericField: getInitialValues(measure, typeLower) },
+    initialValues: {
+      genericField: getInitialValues(measure, typeLower),
+      dataType: typeLower,
+    },
+    validationSchema: MeasureMetadataValidator,
     onSubmit: (values) => {
       submitForm(values.genericField);
     },
@@ -87,15 +94,34 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
               </SubHeader>
             </div>
           )}
+          {measureMetadataType !== "Steward" && (
+            <>
+              <p className="title">{measureMetadataType}</p>
+
+              {measureMetadataType === "Description" && (
+                <div className="flexend">
+                  <p className="info">
+                    <span className="required">*</span>
+                    Indicates required field
+                  </p>
+                </div>
+              )}
+
+              <Divider />
+            </>
+          )}
           <FormField>
             <FormFieldInner>
               <FieldLabel htmlFor={`measure-${typeLower}`}>
+                {measureMetadataType === "Description" && (
+                  <span className="required">*</span>
+                )}
                 {measureMetadataType}
               </FieldLabel>
               <FieldSeparator>
                 {canEdit && (
-                  <FieldInput
-                    type="text"
+                  <TextArea
+                    className="textarea"
                     name={`measure-${typeLower}`}
                     id={`measure-${typeLower}`}
                     autoComplete={`measure-${typeLower}`}
@@ -107,6 +133,10 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
                   />
                 )}
                 {!canEdit && formik.values.genericField}
+
+                {formik.touched.genericField && formik.errors.genericField ? (
+                  <ErrorText>{formik.errors.genericField}</ErrorText>
+                ) : null}
               </FieldSeparator>
             </FormFieldInner>
           </FormField>
@@ -115,13 +145,16 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
       {canEdit && (
         <FormButtons>
           <ButtonWrapper>
-            <SubmitButton
+            <Button
+              className="qpp-c-button--cyan"
               type="submit"
               data-testid={`measure${measureMetadataType}Save`}
               disabled={!(formik.isValid && formik.dirty)}
+              style={{ marginTop: 20 }}
             >
               Save
-            </SubmitButton>
+            </Button>
+
             <MessageDiv>
               {success && success.includes(`${measureMetadataType}`) && (
                 <SuccessText
