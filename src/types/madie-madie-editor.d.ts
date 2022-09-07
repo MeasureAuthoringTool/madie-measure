@@ -48,9 +48,14 @@ declare module "@madie/madie-editor" {
     targetIncludeLibraryVersionId: string;
     type: string;
   };
+  export interface ElmTranslationExternalError extends ElmTranslationError {
+    libraryId: string;
+    libraryVersion: string;
+  }
   export interface ValidationResult {
     translation: ElmTranslation;
     errors: ElmTranslationError[];
+    externalErrors: ElmTranslationExternalError[];
   }
   export type ElmTranslation = {
     errorExceptions: ElmTranslationError[];
