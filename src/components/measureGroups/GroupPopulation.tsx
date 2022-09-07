@@ -133,10 +133,12 @@ const GroupPopulation = ({
 
   const getAssociationType = (label) => {
     if (scoring === GroupScoring.RATIO) {
+      if (label === "Initial Population") {
+        population.associationType = undefined;
+      }
       if (
-        (label === "Initial Population" || label === "Initial Population 1") &&
-        (population.associationType === undefined ||
-          population.associationType === null)
+        label === "Initial Population 1" &&
+        population.associationType === undefined
       ) {
         population.associationType =
           InitialPopulationAssociationType.DENOMINATOR;
