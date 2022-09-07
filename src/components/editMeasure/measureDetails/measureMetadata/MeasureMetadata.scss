@@ -1,0 +1,28 @@
+.title {
+  font-family: Rubik, sans-serif;
+  font-size: 32px;
+  font-weight: 400px;
+}
+
+.flexend {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.info {
+  font-family: Rubik, sans-serif;
+  font-size: 12px;
+  font-weight: 300px;
+  margin-bottom: 2px;
+}
+
+.required {
+  color: red;
+  margin-right: 3px;
+}
+
+.textarea {
+  height: 200px;
+  width: 500px;
+}
