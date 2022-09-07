@@ -98,12 +98,14 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
             <>
               <p className="title">{measureMetadataType}</p>
 
-              <div className="flexend">
-                <p className="info">
-                  <span className="required">*</span>
-                  Indicates required field
-                </p>
-              </div>
+              {measureMetadataType === "Description" && (
+                <div className="flexend">
+                  <p className="info">
+                    <span className="required">*</span>
+                    Indicates required field
+                  </p>
+                </div>
+              )}
 
               <Divider />
             </>
