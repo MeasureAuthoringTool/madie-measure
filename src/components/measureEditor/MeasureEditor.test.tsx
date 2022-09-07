@@ -219,7 +219,7 @@ describe("MeasureEditor component", () => {
     await waitFor(() => {
       const successMessage = getByTestId("save-cql-success");
       expect(successMessage.textContent).toEqual(
-        "CQL updated successfully! Library Name and Version can be updated in the Details tab. MADiE has over written the updated Library Name and Version"
+        "CQL updated successfully! Library Name and/or Version can not be updated in the CQL Editor. MADiE has overwritten the updated Library Name and/or Version."
       );
       expect(mockedAxios.put).toHaveBeenCalledTimes(1);
     });
@@ -295,7 +295,7 @@ describe("MeasureEditor component", () => {
     const saveButton = screen.getByRole("button", { name: "Save" });
     userEvent.click(saveButton);
     const saveSuccess = await screen.findByText(
-      "CQL updated successfully! Library Name and Version can be updated in the Details tab. MADiE has over written the updated Library Name and Version"
+      "CQL updated successfully! Library Name and/or Version can not be updated in the CQL Editor. MADiE has overwritten the updated Library Name and/or Version."
     );
     expect(saveSuccess).toBeInTheDocument();
     expect(mockedAxios.put).toHaveBeenCalledTimes(1);
@@ -359,7 +359,7 @@ describe("MeasureEditor component", () => {
     const saveButton = screen.getByRole("button", { name: "Save" });
     userEvent.click(saveButton);
     const saveSuccess = await screen.findByText(
-      "CQL updated successfully! Library Name and Version can be updated in the Details tab. MADiE has over written the updated Library Name and Version"
+      "CQL updated successfully! Library Name and/or Version can not be updated in the CQL Editor. MADiE has overwritten the updated Library Name and/or Version."
     );
     expect(saveSuccess).toBeInTheDocument();
     expect(mockedAxios.put).toHaveBeenCalledTimes(1);
