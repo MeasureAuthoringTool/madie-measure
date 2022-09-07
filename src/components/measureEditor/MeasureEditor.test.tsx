@@ -14,8 +14,10 @@ import {
   parseContent,
   validateContent,
   synchingEditorCqlContent,
+  ElmTranslationExternalError,
 } from "@madie/madie-editor";
 import { measureStore } from "@madie/madie-util";
+
 const measure = {
   id: "abcd-pqrs-xyz",
   measureHumanReadableId: "",
@@ -114,6 +116,24 @@ const elmTransaltionErrors: ElmTranslationError[] = [
   },
 ];
 
+const cqlToElmExternalErrors: ElmTranslationExternalError[] = [
+  {
+    libraryId: "SupplementalDataElements",
+    libraryVersion: "1.0.000",
+    startLine: 14,
+    startChar: 1,
+    endLine: 14,
+    endChar: 52,
+    message:
+      "Could not resolve reference to library QICoreCommon, version 1.0.000 because version 2.0.000 is already loaded.",
+    errorType: "include",
+    errorSeverity: "Error",
+    targetIncludeLibraryId: "QICoreCommon",
+    targetIncludeLibraryVersionId: "1.0.000",
+    type: "CqlToElmError",
+  },
+];
+
 // const setMeasure = jest.fn();
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -199,7 +219,7 @@ describe("MeasureEditor component", () => {
     await waitFor(() => {
       const successMessage = getByTestId("save-cql-success");
       expect(successMessage.textContent).toEqual(
-        "CQL updated successfully! Library Name and Version can be updated in the Details tab. MADiE has over written the updated Library Name and Version"
+        "CQL updated successfully! Library Name and/or Version can not be updated in the CQL Editor. MADiE has overwritten the updated Library Name and/or Version."
       );
       expect(mockedAxios.put).toHaveBeenCalledTimes(1);
     });
@@ -250,6 +270,7 @@ describe("MeasureEditor component", () => {
       return Promise.resolve({
         errors: elmTransaltionErrors,
         translation: { library: {} },
+        externalErrors: [],
       });
     });
 
@@ -274,7 +295,7 @@ describe("MeasureEditor component", () => {
     const saveButton = screen.getByRole("button", { name: "Save" });
     userEvent.click(saveButton);
     const saveSuccess = await screen.findByText(
-      "CQL updated successfully! Library Name and Version can be updated in the Details tab. MADiE has over written the updated Library Name and Version"
+      "CQL updated successfully! Library Name and/or Version can not be updated in the CQL Editor. MADiE has overwritten the updated Library Name and/or Version."
     );
     expect(saveSuccess).toBeInTheDocument();
     expect(mockedAxios.put).toHaveBeenCalledTimes(1);
@@ -310,6 +331,13 @@ describe("MeasureEditor component", () => {
         return Promise.resolve({ data: measure });
       }
     });
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        translation: { library: {} },
+        externalErrors: [],
+      });
+    });
     (synchingEditorCqlContent as jest.Mock)
       .mockClear()
       .mockImplementation(() => {
@@ -331,7 +359,7 @@ describe("MeasureEditor component", () => {
     const saveButton = screen.getByRole("button", { name: "Save" });
     userEvent.click(saveButton);
     const saveSuccess = await screen.findByText(
-      "CQL updated successfully! Library Name and Version can be updated in the Details tab. MADiE has over written the updated Library Name and Version"
+      "CQL updated successfully! Library Name and/or Version can not be updated in the CQL Editor. MADiE has overwritten the updated Library Name and/or Version."
     );
     expect(saveSuccess).toBeInTheDocument();
     expect(mockedAxios.put).toHaveBeenCalledTimes(1);
@@ -414,11 +442,54 @@ describe("MeasureEditor component", () => {
       }
     });
     (validateContent as jest.Mock).mockClear().mockImplementation(() => {
-      return Promise.resolve({ errors: elmTransaltionErrors });
+      return Promise.resolve({
+        errors: elmTransaltionErrors,
+        externalErrors: [],
+      });
     });
     renderEditor(measure);
     const issues = await screen.findByText("2 issues found with CQL");
     expect(issues).toBeInTheDocument();
+  });
+
+  it("should display toast for external errors received from Cql to Elm translation", async () => {
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measure });
+      }
+    });
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        externalErrors: cqlToElmExternalErrors,
+      });
+    });
+    renderEditor(measure);
+    const toastMessage = await screen.findByText(
+      cqlToElmExternalErrors[0].message
+    );
+    expect(toastMessage).toBeInTheDocument();
+  });
+
+  it("should be able to close toast message", async () => {
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measure });
+      }
+    });
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        externalErrors: cqlToElmExternalErrors,
+      });
+    });
+    renderEditor(measure);
+    const toastCloseButton = await screen.findByRole("button", {
+      name: "close",
+    });
+    expect(toastCloseButton).toBeInTheDocument();
+    fireEvent.click(toastCloseButton);
+    expect(toastCloseButton).not.toBeInTheDocument();
   });
 });
 
@@ -564,6 +635,7 @@ it("should display errors if not logged into umls", async () => {
     return Promise.resolve({
       errors: elmTransaltionErrorsUMLS,
       translation: null,
+      externalErrors: [],
     });
   });
 

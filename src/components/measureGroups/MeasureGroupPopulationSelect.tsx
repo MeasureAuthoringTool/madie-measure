@@ -26,6 +26,7 @@ type Props = {
 };
 
 const FormField = tw.div`mt-6`;
+const SecondIpLabel = tw.span`text-black-50`;
 const FieldSeparator = tw.div`mt-1`;
 const SoftLabel = styled.label`
   display: block;
@@ -87,25 +88,38 @@ const MeasureGroupPopulationSelect = ({
     changeAssociationCallback();
   };
 
+  const removeSecondIPLabelTemplate = () => {
+    const removeLabelTemplate = (
+      <div>
+        <SecondIpLabel>Initial Population 2 </SecondIpLabel>
+        &nbsp;&nbsp;
+        {isRemovable && (
+          <DSLink
+            data-testid={`remove_${field.name}`}
+            onClick={(evt) => {
+              removePopulation(evt);
+            }}
+          >
+            Remove{" "}
+          </DSLink>
+        )}
+      </div>
+    );
+    return removeLabelTemplate;
+  };
+
   return (
     <FormField data-testid="temp-test-id">
       {canEdit && (
         <>
-          {isRemovable && (
-            <span tw={"ml-2"}>
-              <DSLink
-                data-testid={`remove_${field.name}`}
-                onClick={(evt) => removePopulation(evt)}
-              >
-                Remove
-              </DSLink>
-            </span>
-          )}
-
           <Select
             placeHolder={{ name: "-", value: "" }}
             required={required}
-            label={label}
+            label={
+              label === "Initial Population 2"
+                ? removeSecondIPLabelTemplate()
+                : label
+            }
             id={htmlId}
             inputProps={{
               "data-testid": `select-measure-group-population-input`,
