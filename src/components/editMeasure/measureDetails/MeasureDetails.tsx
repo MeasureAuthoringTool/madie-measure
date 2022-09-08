@@ -139,7 +139,7 @@ export default function EditMeasure() {
           </Route>
           <Route path={clinicalLink}>
             <MeasureMetadata
-              measureMetadataType="Clinical"
+              measureMetadataType="Clinical Recommendation Statement"
               header="Clinical Recommendation"
             />
           </Route>
