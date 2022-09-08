@@ -50,7 +50,6 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
   const canEdit = userName === measure?.createdBy;
-
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: { genericField: getInitialValues(measure, typeLower) },
@@ -117,6 +116,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
         <div className="form-actions">
           <button
             className="cancel-button"
+            data-testid="cancel-button"
             disabled={!formik.dirty}
             onClick={() => resetForm()}
           >
