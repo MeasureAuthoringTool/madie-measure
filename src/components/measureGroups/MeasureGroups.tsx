@@ -639,17 +639,12 @@ const MeasureGroups = () => {
                           getPopulationsForScoring(nextScoring);
                         const observations =
                           getDefaultObservationsForScoring(nextScoring);
-                        formik.resetForm({
-                          values: {
-                            ...formik.values,
-                            scoring: nextScoring,
-                            populations: [...populations].map((p) => ({
-                              ...p,
-                              id: uuidv4(),
-                            })),
-                            measureObservations: observations,
-                          },
-                        });
+                        formik.setFieldValue("scoring", nextScoring)
+                        formik.setFieldValue("populations", [...populations].map((p) => ({
+                          ...p,
+                          id: uuidv4(),
+                        })))
+                        formik.setFieldValue("measureObservations", observations)
                       }}
                       options={Object.keys(GroupScoring).map((scoring) => {
                         return (
