@@ -1807,7 +1807,6 @@ describe("Measure Groups Page", () => {
           name: PopulationType.MEASURE_POPULATION_EXCLUSION,
           definition: "",
           associationType: undefined,
-          optional: ["Continuous Variable"],
         },
       ],
       measureObservations: [
@@ -1949,7 +1948,6 @@ describe("Measure Groups Page", () => {
           name: PopulationType.DENOMINATOR_EXCLUSION,
           definition: "",
           associationType: undefined,
-          optional: ["*"],
         },
         {
           id: "uuid-4",
@@ -1962,7 +1960,6 @@ describe("Measure Groups Page", () => {
           name: PopulationType.NUMERATOR_EXCLUSION,
           definition: "",
           associationType: undefined,
-          optional: ["Proportion", "Ratio"],
         },
       ],
       measureObservations: [

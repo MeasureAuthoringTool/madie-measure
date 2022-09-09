@@ -18,13 +18,11 @@ const denominatorExclusion = {
   id: "",
   name: PopulationType.DENOMINATOR_EXCLUSION,
   definition: "",
-  optional: ["*"],
 };
 const denominatorException = {
   id: "",
   name: PopulationType.DENOMINATOR_EXCEPTION,
   definition: "",
-  optional: ["Proportion"],
 };
 const numerator = {
   id: "",
@@ -35,7 +33,6 @@ const numeratorExclusion = {
   id: "",
   name: PopulationType.NUMERATOR_EXCLUSION,
   definition: "",
-  optional: ["Proportion", "Ratio"],
 };
 const measurePopulation = {
   id: "",
@@ -46,7 +43,6 @@ const measurePopulationExclusion = {
   id: "",
   name: PopulationType.MEASURE_POPULATION_EXCLUSION,
   definition: "",
-  optional: ["Continuous Variable"],
 };
 
 export const allPopulations = [
@@ -69,24 +65,18 @@ export const findPopulations = (
   );
 };
 
-export const findPopulationOptional = (populationType: PopulationType) => {
+export const isPopulationRequired = (populationType: PopulationType) => {
   switch (populationType) {
     case PopulationType.INITIAL_POPULATION:
-      return null;
+      return true;
     case PopulationType.DENOMINATOR:
-      return null;
-    case PopulationType.DENOMINATOR_EXCLUSION:
-      return denominatorExclusion.optional;
-    case PopulationType.DENOMINATOR_EXCEPTION:
-      return denominatorException.optional;
+      return true;
     case PopulationType.NUMERATOR:
-      return null;
-    case PopulationType.NUMERATOR_EXCLUSION:
-      return numeratorExclusion.optional;
+      return true;
     case PopulationType.MEASURE_POPULATION:
-      return null;
-    case PopulationType.MEASURE_POPULATION_EXCLUSION:
-      return measurePopulationExclusion.optional;
+      return true;
+    default:
+      return false;
   }
 };
 
