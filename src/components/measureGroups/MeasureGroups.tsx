@@ -385,6 +385,7 @@ const MeasureGroups = () => {
         })
         .then(() => {
           setGenericErrorMessage("");
+          setAssociationChanged(false);
           handleDialogClose();
           setSuccessMessage(
             "Population details for this group updated successfully."

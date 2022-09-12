@@ -102,6 +102,12 @@ describe("MeasureInformation component", () => {
     await act(async () => {
       const text = getByTestId("measure-name-input") as HTMLInputElement;
       expect(text.value).toBe(measure.measureName);
+      const versionId = getByTestId("version-id-input") as HTMLInputElement;
+      expect(versionId.value).toBe(measure.id);
+      expect(versionId).toHaveProperty("disabled", true);
+      const cmsId = getByTestId("cms-id-input") as HTMLInputElement;
+      expect(cmsId.value).toBe("");
+      expect(cmsId).toHaveProperty("disabled", true);
       const cqlLibraryNameText = getByTestId(
         "cql-library-name-input"
       ) as HTMLInputElement;
@@ -124,6 +130,22 @@ describe("MeasureInformation component", () => {
       expect(measurementPeriodEndInput.value).toBe(
         measure.measurementPeriodEnd
       );
+    });
+  });
+
+  it("Should display measure Version ID when it is not null", async () => {
+    measure.versionId = "testVersionId";
+    render(<MeasureInformation />);
+
+    const result: HTMLElement = getByTestId("measure-information-edit");
+    expect(result).toBeInTheDocument();
+
+    await act(async () => {
+      const text = getByTestId("measure-name-input") as HTMLInputElement;
+      expect(text.value).toBe(measure.measureName);
+      const versionId = getByTestId("version-id-input") as HTMLInputElement;
+      expect(versionId.value).toBe(measure.versionId);
+      expect(versionId).toHaveProperty("disabled", true);
     });
   });
 

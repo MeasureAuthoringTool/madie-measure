@@ -18,13 +18,11 @@ const denominatorExclusion = {
   id: "",
   name: PopulationType.DENOMINATOR_EXCLUSION,
   definition: "",
-  optional: ["*"],
 };
 const denominatorException = {
   id: "",
   name: PopulationType.DENOMINATOR_EXCEPTION,
   definition: "",
-  optional: ["Proportion"],
 };
 const numerator = {
   id: "",
@@ -35,7 +33,6 @@ const numeratorExclusion = {
   id: "",
   name: PopulationType.NUMERATOR_EXCLUSION,
   definition: "",
-  optional: ["Proportion", "Ratio"],
 };
 const measurePopulation = {
   id: "",
@@ -46,7 +43,6 @@ const measurePopulationExclusion = {
   id: "",
   name: PopulationType.MEASURE_POPULATION_EXCLUSION,
   definition: "",
-  optional: ["Continuous Variable"],
 };
 
 export const allPopulations = [
@@ -67,6 +63,21 @@ export const findPopulations = (
   return populations?.filter(
     (population) => population.name === populationType
   );
+};
+
+export const isPopulationRequired = (populationType: PopulationType) => {
+  switch (populationType) {
+    case PopulationType.INITIAL_POPULATION:
+      return true;
+    case PopulationType.DENOMINATOR:
+      return true;
+    case PopulationType.NUMERATOR:
+      return true;
+    case PopulationType.MEASURE_POPULATION:
+      return true;
+    default:
+      return false;
+  }
 };
 
 // default populations for each scoring
