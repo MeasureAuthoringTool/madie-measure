@@ -632,21 +632,21 @@ describe("Measure Groups Page", () => {
 
     userEvent.click(screen.getByTestId("add-measure-group-button"));
     await changePopulationBasis(populationBasis);
-        // Change and verifies the scoring value to Cohort
-        const scoringSelect2 = screen.getByTestId("scoring-select");
-        userEvent.click(getByRole(scoringSelect2, "button"));
-        await waitFor(() => {
-          userEvent.click(screen.getByText("Cohort"));
-        });
-    
-        // select initial population from dropdown
-        const groupPopulationInput2 = screen.getByTestId(
-          "select-measure-group-population-input"
-        ) as HTMLInputElement;
-        fireEvent.change(groupPopulationInput2, {
-          target: { value: "Initial Population" },
-        });
-        expect(groupPopulationInput2.value).toBe("Initial Population");
+    // Change and verifies the scoring value to Cohort
+    const scoringSelect2 = screen.getByTestId("scoring-select");
+    userEvent.click(getByRole(scoringSelect2, "button"));
+    await waitFor(() => {
+      userEvent.click(screen.getByText("Cohort"));
+    });
+
+    // select initial population from dropdown
+    const groupPopulationInput2 = screen.getByTestId(
+      "select-measure-group-population-input"
+    ) as HTMLInputElement;
+    fireEvent.change(groupPopulationInput2, {
+      target: { value: "Initial Population" },
+    });
+    expect(groupPopulationInput2.value).toBe("Initial Population");
 
     const groupDescriptionInput2 = screen.getByTestId("groupDescriptionInput");
     fireEvent.change(groupDescriptionInput2, {
@@ -663,8 +663,6 @@ describe("Measure Groups Page", () => {
 
     // after selecting measure group type, need to collapse the dropdown
     fireEvent.click(screen.getByRole("presentation").firstChild);
-
-
 
     mockedAxios.post.mockResolvedValue({
       data: {
@@ -830,24 +828,9 @@ describe("Measure Groups Page", () => {
       target: { value: definitionToUpdate },
     });
     expect(groupPopulationInput.value).toBe(definitionToUpdate);
-
-    const measureGroupTypeSelect = screen.getByTestId(
-      "measure-group-type-dropdown"
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Save" })).toBeEnabled()
     );
-    userEvent.click(getByRole(measureGroupTypeSelect, "button"));
-    await waitFor(() => {
-      userEvent.click(screen.getByText("Process"));
-    });
-
-    const groupPopulationInput = screen.getByTestId(
-      "select-measure-group-population-input"
-    ) as HTMLInputElement;
-    fireEvent.change(groupPopulationInput, {
-      target: { value: "Initial Population" },
-    });
-    expect(groupPopulationInput.value).toBe("Initial Population");
-
-    expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
 
     mockedAxios.put.mockResolvedValue({ data: { newGroup } });
 
