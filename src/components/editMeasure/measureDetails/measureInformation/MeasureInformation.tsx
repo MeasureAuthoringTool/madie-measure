@@ -311,6 +311,18 @@ export default function MeasureInformation() {
               }
               {...formik.getFieldProps("ecqmTitle")}
             />
+
+            <TextInput
+              type="text"
+              id="cmsId"
+              {...formik.getFieldProps("cmsId")}
+              data-testid="cms-id-input"
+              required={false}
+              disabled={true}
+              className="textinputnoborder"
+            >
+              <Label htmlFor="cmsId" text="CMS ID" className="textlabel" />
+            </TextInput>
           </Box>
 
           <Box sx={formRowGapped} data-testid="measurement-period-div">
