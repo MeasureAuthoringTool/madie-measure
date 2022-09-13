@@ -121,6 +121,7 @@ export default function MeasureInformation() {
       measure?.versionId === null || measure?.versionId === undefined
         ? measure?.id
         : measure?.versionId,
+    cmsId: measure?.cmsId,
   } as measureInformationForm;
 
   const formik = useFormik({
