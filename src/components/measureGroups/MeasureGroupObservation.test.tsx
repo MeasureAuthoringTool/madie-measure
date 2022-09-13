@@ -163,6 +163,7 @@ describe("Measure Group Observation", () => {
         scoring={MeasureScoring.RATIO}
         elmJson={elmJson}
         population={population}
+        canEdit
       />
     );
 
@@ -390,6 +391,7 @@ describe("Measure Group Observation", () => {
         scoring={MeasureScoring.RATIO}
         elmJson={null}
         population={population}
+        canEdit
       />
     );
 
@@ -445,6 +447,7 @@ describe("Measure Group Observation", () => {
         scoring={MeasureScoring.RATIO}
         elmJson={elmJson}
         population={population}
+        canEdit
       />
     );
 

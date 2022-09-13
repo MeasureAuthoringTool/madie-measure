@@ -761,6 +761,7 @@ const MeasureGroups = () => {
                               />
                             </GridLayout>
                             <MeasureGroupObservation
+                              canEdit={canEdit}
                               scoring={formik.values.scoring}
                               population={population}
                               elmJson={measure?.elmJson}
@@ -769,6 +770,7 @@ const MeasureGroups = () => {
                         );
                       })}
                       <MeasureGroupObservation
+                        canEdit={canEdit}
                         scoring={formik.values.scoring}
                         population={null}
                         elmJson={measure?.elmJson}
@@ -817,6 +819,7 @@ const MeasureGroups = () => {
                                         )}
 
                                       <Select
+                                        readOnly={!canEdit}
                                         placeHolder={{ name: "-", value: "" }}
                                         label={`Stratification ${i + 1}`}
                                         id={`Stratification-select-${i + 1}`}
@@ -844,6 +847,7 @@ const MeasureGroups = () => {
                                     </div>
 
                                     <Select
+                                      readOnly={!canEdit}
                                       placeHolder={{ name: "-", value: "" }}
                                       label={`Association ${i + 1}`}
                                       id={`association-select-${i + 1}`}
@@ -882,6 +886,7 @@ const MeasureGroups = () => {
                                             formik.values.stratifications[i]
                                               .description
                                           }
+                                          readOnly={!canEdit}
                                           name={`stratifications[${i}].description`}
                                           id="stratification-description"
                                           autoComplete="stratification-description"
@@ -903,18 +908,20 @@ const MeasureGroups = () => {
                         <div />
                       )}
                       <div>
-                        <Row>
-                          <Button
-                            data-testid="add-strat-button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setVisibleStrats(visibleStrats + 1);
-                              arrayHelpers.push(emptyStrat);
-                            }}
-                          >
-                            Add Stratification
-                          </Button>
-                        </Row>
+                        {canEdit && (
+                          <Row>
+                            <Button
+                              data-testid="add-strat-button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setVisibleStrats(visibleStrats + 1);
+                                arrayHelpers.push(emptyStrat);
+                              }}
+                            >
+                              Add Stratification
+                            </Button>
+                          </Row>
+                        )}
                       </div>
                     </div>
                   )}
