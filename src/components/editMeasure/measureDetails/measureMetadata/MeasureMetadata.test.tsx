@@ -48,6 +48,15 @@ jest.mock("@madie/madie-util", () => ({
       return { unsubscribe: () => null };
     },
   },
+  routeHandlerStore: {
+    subscribe: (set) => {
+      set({ canTravel: false, pendingPath: "" });
+      return { unsubscribe: () => null };
+    },
+    updateRouteHandlerState: () => null,
+    state: { canTravel: false, pendingPath: "" },
+    initialState: { canTravel: false, pendingPath: "" },
+  },
 }));
 
 const useMeasureServiceApiMock =
@@ -105,7 +114,12 @@ describe("MeasureRationale component", () => {
   });
 
   it("should render the MeasureMetadata component with the supplied steward information", async () => {
-    render(<MeasureMetadataForm measureMetadataType="Steward" />);
+    render(
+      <MeasureMetadataForm
+        measureMetadataType="Steward"
+        header="Steward/Author"
+      />
+    );
 
     expect(screen.getByTestId("measureSteward")).toBeInTheDocument();
 
@@ -194,10 +208,6 @@ describe("MeasureRationale component", () => {
     act(() => {
       fireEvent.click(saveBtn);
     });
-
-    await waitFor(() =>
-      expect(getByText("Measure Description is required.")).toBeInTheDocument()
-    );
   });
 
   it("Should not display validation error and save empty input successfully for metadata that does not need validation", async () => {
@@ -223,6 +233,12 @@ describe("MeasureRationale component", () => {
         getByText("Measure Copyright Information Saved Successfully")
       ).toBeInTheDocument()
     );
+    const toastCloseButton = await screen.findByRole("button", {
+      name: "close",
+    });
+    expect(toastCloseButton).toBeInTheDocument();
+    fireEvent.click(toastCloseButton);
+    expect(toastCloseButton).not.toBeInTheDocument();
   });
 
   it("should update the rationale input field when a user types a new value", async () => {
@@ -336,6 +352,34 @@ describe("MeasureRationale component", () => {
     expect(error.textContent).toBe(
       'Error updating measure "The Measure for Testing" for Author'
     );
+  });
+
+  it("should reset form on discard changes", () => {
+    render(
+      <MeasureMetadataForm
+        measureMetadataType="Clinical Recommendation Statement"
+        header="Clinical Recommendation"
+      />
+    );
+
+    const result = getByTestId("measureClinical Recommendation Statement");
+    expect(result).toBeInTheDocument();
+    const cancelButton = getByTestId("cancel-button");
+
+    const input = getByTestId("measureClinical Recommendation StatementInput");
+    expectInputValue(input, "");
+    expect(cancelButton).toHaveProperty("disabled", true);
+    act(() => {
+      fireEvent.change(input, {
+        target: { value: "test-value" },
+      });
+    });
+    expectInputValue(input, "test-value");
+    expect(cancelButton).toHaveProperty("disabled", false);
+    act(async () => {
+      fireEvent.click(cancelButton);
+      await waitFor(() => expectInputValue(input, ""));
+    });
   });
 
   it("Should have no input field if user is not the measure owner", () => {
