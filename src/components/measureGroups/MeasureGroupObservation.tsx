@@ -11,7 +11,7 @@ import { useFormikContext } from "formik";
 import * as _ from "lodash";
 import { DSLink } from "@madie/madie-design-system/dist/react";
 
-const MeasureGroupObservation = ({ scoring, population, elmJson }) => {
+const MeasureGroupObservation = ({ scoring, population, elmJson, canEdit }) => {
   const formik = useFormikContext<any>();
   let observationName = "";
   let label = `Observation`;
@@ -46,9 +46,12 @@ const MeasureGroupObservation = ({ scoring, population, elmJson }) => {
     return null;
   }
 
+  // we either return measureObservation, or the means to create one at the moment.
+  // We want three cases, MO, add, none
   return measureObservation ? (
     <div style={style}>
       <MeasureObservationDetails
+        canEdit={canEdit}
         label={label}
         required={required}
         name={observationName}
@@ -75,24 +78,26 @@ const MeasureGroupObservation = ({ scoring, population, elmJson }) => {
     </div>
   ) : (
     <span style={style}>
-      <DSLink
-        href=""
-        onClick={(e) => {
-          e.preventDefault();
-          const newObs = {
-            id: uuidv4(),
-            criteriaReference,
-          };
-          const updatedObservations: MeasureObservation[] = formik.values
-            .measureObservations
-            ? [...formik.values.measureObservations, newObs]
-            : [newObs];
-          formik.setFieldValue("measureObservations", updatedObservations);
-        }}
-        data-testid={`add-measure-observation-${observationName}`}
-      >
-        + Add Observation
-      </DSLink>
+      {canEdit && (
+        <DSLink
+          href=""
+          onClick={(e) => {
+            e.preventDefault();
+            const newObs = {
+              id: uuidv4(),
+              criteriaReference,
+            };
+            const updatedObservations: MeasureObservation[] = formik.values
+              .measureObservations
+              ? [...formik.values.measureObservations, newObs]
+              : [newObs];
+            formik.setFieldValue("measureObservations", updatedObservations);
+          }}
+          data-testid={`add-measure-observation-${observationName}`}
+        >
+          + Add Observation
+        </DSLink>
+      )}
     </span>
   );
 };
