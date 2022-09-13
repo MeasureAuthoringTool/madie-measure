@@ -632,6 +632,21 @@ describe("Measure Groups Page", () => {
 
     userEvent.click(screen.getByTestId("add-measure-group-button"));
     await changePopulationBasis(populationBasis);
+    // Change and verifies the scoring value to Cohort
+    const scoringSelect2 = screen.getByTestId("scoring-select");
+    userEvent.click(getByRole(scoringSelect2, "button"));
+    await waitFor(() => {
+      userEvent.click(screen.getByText("Cohort"));
+    });
+
+    // select initial population from dropdown
+    const groupPopulationInput2 = screen.getByTestId(
+      "select-measure-group-population-input"
+    ) as HTMLInputElement;
+    fireEvent.change(groupPopulationInput2, {
+      target: { value: "Initial Population" },
+    });
+    expect(groupPopulationInput2.value).toBe("Initial Population");
 
     const groupDescriptionInput2 = screen.getByTestId("groupDescriptionInput");
     fireEvent.change(groupDescriptionInput2, {
@@ -649,29 +664,10 @@ describe("Measure Groups Page", () => {
     // after selecting measure group type, need to collapse the dropdown
     fireEvent.click(screen.getByRole("presentation").firstChild);
 
-    // Change and verifies the scoring value to Cohort
-    const scoringSelectInput = screen.getByTestId(
-      "scoring-select-input"
-    ) as HTMLInputElement;
-    fireEvent.change(scoringSelectInput, {
-      target: { value: "Cohort" },
-    });
-    expect(scoringSelectInput.value).toBe("Cohort");
-
-    // select initial population from dropdown
-    const groupPopulationInput2 = screen.getByTestId(
-      "select-measure-group-population-input"
-    ) as HTMLInputElement;
-    fireEvent.change(groupPopulationInput2, {
-      target: { value: "Initial Population" },
-    });
-    expect(groupPopulationInput2.value).toBe("Initial Population");
-
     mockedAxios.post.mockResolvedValue({
       data: {
         ...group,
         id: "group2-id",
-        groupDescription: "new description for group 2",
         measureGroupTypes: [MeasureGroupTypes.PATIENT_REPORTED_OUTCOME],
       },
     });
@@ -832,8 +828,9 @@ describe("Measure Groups Page", () => {
       target: { value: definitionToUpdate },
     });
     expect(groupPopulationInput.value).toBe(definitionToUpdate);
-
-    expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Save" })).toBeEnabled()
+    );
 
     mockedAxios.put.mockResolvedValue({ data: { newGroup } });
 
@@ -1807,7 +1804,6 @@ describe("Measure Groups Page", () => {
           name: PopulationType.MEASURE_POPULATION_EXCLUSION,
           definition: "",
           associationType: undefined,
-          optional: ["Continuous Variable"],
         },
       ],
       measureObservations: [
@@ -1949,7 +1945,6 @@ describe("Measure Groups Page", () => {
           name: PopulationType.DENOMINATOR_EXCLUSION,
           definition: "",
           associationType: undefined,
-          optional: ["*"],
         },
         {
           id: "uuid-4",
@@ -1962,7 +1957,6 @@ describe("Measure Groups Page", () => {
           name: PopulationType.NUMERATOR_EXCLUSION,
           definition: "",
           associationType: undefined,
-          optional: ["Proportion", "Ratio"],
         },
       ],
       measureObservations: [

@@ -5,7 +5,7 @@ import { ExpressionDefinition } from "./MeasureGroups";
 import { GroupScoring, Population, PopulationType } from "@madie/madie-models";
 import { FormikState, getIn } from "formik";
 import { FieldInputProps } from "formik/dist/types";
-import { findPopulations } from "./PopulationHelper";
+import { findPopulations, isPopulationRequired } from "./PopulationHelper";
 
 export enum InitialPopulationAssociationType {
   DENOMINATOR = "Denominator",
@@ -42,11 +42,9 @@ const GroupPopulation = ({
   setAssociationChanged,
 }: Props) => {
   // Helper function do determine the properties for a select item
-  const populationSelectorProperties = (fieldProps: any, scoring: String) => {
+  const populationSelectorProperties = (fieldProps: any, scoring: string) => {
     const hidden = fieldProps.hidden?.includes(scoring);
-    const required =
-      !fieldProps.optional?.includes("*") &&
-      !fieldProps.optional?.includes(scoring);
+    const required = isPopulationRequired(population.name);
     return {
       label: _.startCase(field.name),
       hidden,
