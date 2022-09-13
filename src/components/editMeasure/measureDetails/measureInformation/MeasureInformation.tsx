@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import tw from "twin.macro";
+import tw, { styled } from "twin.macro";
 import { Measure } from "@madie/madie-models";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import "styled-components/macro";
@@ -33,7 +33,11 @@ interface measureInformationForm {
   measurementPeriodEnd: Date;
 }
 const Content = tw.div`col-span-5 py-6`;
-const Form = tw.form`max-w-xl my-8`;
+const Form = styled.form(() => [
+  tw`my-8`,
+  `max-width: 1360px;
+  `,
+]);
 const MessageDiv = tw.div`ml-3`;
 const MessageText = tw.p`text-sm font-medium`;
 const SuccessText = tw(MessageText)`text-green-800`;
@@ -260,33 +264,33 @@ export default function MeasureInformation() {
                 }
                 {...formik.getFieldProps("measureName")}
               />
-            <TextField
-              placeholder="eCQM Name"
-              required
-              disabled={!canEdit}
-              label="eCQM Abbreviated Title"
-              id="ecqmTitle"
-              data-testid="ecqm-text-field"
-              inputProps={{ "data-testid": "ecqm-input" }}
-              helperText={formikErrorHandler("ecqmTitle", true)}
-              size="small"
-              error={
-                formik.touched.ecqmTitle && Boolean(formik.errors.ecqmTitle)
-              }
-              {...formik.getFieldProps("ecqmTitle")}
-            />
+              <TextField
+                placeholder="eCQM Name"
+                required
+                disabled={!canEdit}
+                label="eCQM Abbreviated Title"
+                id="ecqmTitle"
+                data-testid="ecqm-text-field"
+                inputProps={{ "data-testid": "ecqm-input" }}
+                helperText={formikErrorHandler("ecqmTitle", true)}
+                size="small"
+                error={
+                  formik.touched.ecqmTitle && Boolean(formik.errors.ecqmTitle)
+                }
+                {...formik.getFieldProps("ecqmTitle")}
+              />
 
-            <TextInput
-              type="text"
-              id="cmsId"
-              {...formik.getFieldProps("cmsId")}
-              data-testid="cms-id-input"
-              required={false}
-              disabled={true}
-              className="textinputnoborder"
-            >
-              <Label htmlFor="cmsId" text="CMS ID" className="textlabel" />
-            </TextInput>
+              <TextInput
+                type="text"
+                id="cmsId"
+                {...formik.getFieldProps("cmsId")}
+                data-testid="cms-id-input"
+                required={false}
+                disabled={true}
+                className="textinputnoborder"
+              >
+                <Label htmlFor="cmsId" text="CMS ID" className="textlabel" />
+              </TextInput>
               <TextInput
                 type="text"
                 id="versionId"
@@ -321,24 +325,6 @@ export default function MeasureInformation() {
                   Boolean(formik.errors.cqlLibraryName)
                 }
                 {...formik.getFieldProps("cqlLibraryName")}
-              />
-            </Box>
-
-            <Box sx={formRowGapped}>
-              <TextField
-                placeholder="eCQM Name"
-                required
-                disabled={!canEdit}
-                label="eCQM Abbreviated Title"
-                id="ecqmTitle"
-                data-testid="ecqm-text-field"
-                inputProps={{ "data-testid": "ecqm-input" }}
-                helperText={formikErrorHandler("ecqmTitle", true)}
-                size="small"
-                error={
-                  formik.touched.ecqmTitle && Boolean(formik.errors.ecqmTitle)
-                }
-                {...formik.getFieldProps("ecqmTitle")}
               />
             </Box>
 
