@@ -8,14 +8,21 @@ import {
   Button,
   Toast,
   TextField,
+  ReadOnlyTextField,
 } from "@madie/madie-design-system/dist/react";
 import DeleteDialog from "./DeleteDialog";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import DateAdapter from "@mui/lab/AdapterDateFns";
 import DesktopDatePicker from "@mui/lab/DesktopDatePicker";
-import { DialogContent, DialogTitle, Divider, Typography } from "@mui/material";
+import {
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  Typography,
+} from "@mui/material";
 import { useFormik } from "formik";
-import { HelperText, TextInput, Label } from "@madie/madie-components";
+import { HelperText } from "@madie/madie-components";
 import { MeasureSchemaValidator } from "../../../../validations/MeasureSchemaValidator";
 import { measureStore, useOktaTokens } from "@madie/madie-util";
 import classNames from "classnames";
@@ -31,6 +38,8 @@ interface measureInformationForm {
   ecqmTitle: string;
   measurementPeriodStart: Date;
   measurementPeriodEnd: Date;
+  measureId: string;
+  cmsId: string;
 }
 const Content = tw.div`col-span-5 py-6`;
 const Form = styled.form(() => [
@@ -126,6 +135,7 @@ export default function MeasureInformation() {
         ? measure?.id
         : measure?.versionId,
     cmsId: measure?.cmsId,
+    measureId: measure?.measureSetId,
   } as measureInformationForm;
 
   const formik = useFormik({
@@ -187,6 +197,7 @@ export default function MeasureInformation() {
       measurementPeriodStart: values.measurementPeriodStart,
       measurementPeriodEnd: values.measurementPeriodEnd,
       cql: inSyncCql,
+      measureId: values.measureSetId,
     };
     measureServiceApi
       .updateMeasure(newMeasure)
@@ -247,145 +258,174 @@ export default function MeasureInformation() {
               <Divider style={{ marginTop: 20, marginBottom: 20 }} />
             </div>
 
-            <Box sx={formRowGapped}>
-              <TextField
-                placeholder="Measure Name"
-                required
-                disabled={!canEdit}
-                label="Measure Name"
-                id="measureName"
-                inputProps={{ "data-testid": "measure-name-input" }}
-                helperText={formikErrorHandler("measureName", true)}
-                data-testid="measure-name-text-field"
-                size="small"
-                error={
-                  formik.touched.measureName &&
-                  Boolean(formik.errors.measureName)
-                }
-                {...formik.getFieldProps("measureName")}
-              />
-              <TextField
-                placeholder="eCQM Name"
-                required
-                disabled={!canEdit}
-                label="eCQM Abbreviated Title"
-                id="ecqmTitle"
-                data-testid="ecqm-text-field"
-                inputProps={{ "data-testid": "ecqm-input" }}
-                helperText={formikErrorHandler("ecqmTitle", true)}
-                size="small"
-                error={
-                  formik.touched.ecqmTitle && Boolean(formik.errors.ecqmTitle)
-                }
-                {...formik.getFieldProps("ecqmTitle")}
-              />
+            <Grid container spacing={4}>
+              <Grid item xs={6}>
+                <Box sx={formRowGapped}>
+                  <TextField
+                    placeholder="Measure Name"
+                    required
+                    disabled={!canEdit}
+                    label="Measure Name"
+                    id="measureName"
+                    inputProps={{ "data-testid": "measure-name-input" }}
+                    helperText={formikErrorHandler("measureName", true)}
+                    data-testid="measure-name-text-field"
+                    size="small"
+                    error={
+                      formik.touched.measureName &&
+                      Boolean(formik.errors.measureName)
+                    }
+                    {...formik.getFieldProps("measureName")}
+                  />
+                  <TextField
+                    placeholder="eCQM Name"
+                    required
+                    disabled={!canEdit}
+                    label="eCQM Abbreviated Title"
+                    id="ecqmTitle"
+                    data-testid="ecqm-text-field"
+                    inputProps={{ "data-testid": "ecqm-input" }}
+                    helperText={formikErrorHandler("ecqmTitle", true)}
+                    size="small"
+                    error={
+                      formik.touched.ecqmTitle &&
+                      Boolean(formik.errors.ecqmTitle)
+                    }
+                    {...formik.getFieldProps("ecqmTitle")}
+                  />
+                </Box>
 
-              <TextInput
-                type="text"
-                id="cmsId"
-                {...formik.getFieldProps("cmsId")}
-                data-testid="cms-id-input"
-                required={false}
-                disabled={true}
-                className="textinputnoborder"
-              >
-                <Label htmlFor="cmsId" text="CMS ID" className="textlabel" />
-              </TextInput>
-              <TextInput
-                type="text"
-                id="versionId"
-                {...formik.getFieldProps("versionId")}
-                data-testid="version-id-input"
-                required={true}
-                disabled={true}
-                className="textinputnoborder"
-              >
-                <Label
-                  htmlFor="versionId"
-                  text="Version ID"
-                  className="textlabel"
-                />
-                {formikErrorHandler("versionId", true)}
-              </TextInput>
-            </Box>
+                <Box sx={formRow}>
+                  <TextField
+                    placeholder="Enter CQL Library Name"
+                    required
+                    disabled={!canEdit}
+                    label="Measure CQL Library Name"
+                    id="cqlLibraryName"
+                    data-testid="cql-library-name"
+                    inputProps={{ "data-testid": "cql-library-name-input" }}
+                    helperText={formikErrorHandler("cqlLibraryName", true)}
+                    size="small"
+                    error={
+                      formik.touched.cqlLibraryName &&
+                      Boolean(formik.errors.cqlLibraryName)
+                    }
+                    {...formik.getFieldProps("cqlLibraryName")}
+                  />
+                </Box>
 
-            <Box sx={formRow}>
-              <TextField
-                placeholder="Enter CQL Library Name"
-                required
-                disabled={!canEdit}
-                label="Measure CQL Library Name"
-                id="cqlLibraryName"
-                data-testid="cql-library-name"
-                inputProps={{ "data-testid": "cql-library-name-input" }}
-                helperText={formikErrorHandler("cqlLibraryName", true)}
-                size="small"
-                error={
-                  formik.touched.cqlLibraryName &&
-                  Boolean(formik.errors.cqlLibraryName)
-                }
-                {...formik.getFieldProps("cqlLibraryName")}
-              />
-            </Box>
-
-            <Box sx={formRowGapped} data-testid="measurement-period-div">
-              <LocalizationProvider dateAdapter={DateAdapter}>
-                <DesktopDatePicker
-                  disableOpenPicker={true}
-                  disabled={!canEdit}
-                  label="Measurement Period - Start Date"
-                  inputFormat="MM/dd/yyyy"
-                  value={formik.values.measurementPeriodStart}
-                  onChange={(startDate) => {
-                    formik.setFieldValue("measurementPeriodStart", startDate);
-                  }}
-                  renderInput={(params) => {
-                    const { onChange, ...formikFieldProps } =
-                      formik.getFieldProps("measurementPeriodStart");
-                    return (
-                      <TextField
-                        {...formikFieldProps}
-                        {...params}
-                        required
-                        data-testid="measurement-period-start"
-                        helperText={formikErrorHandler(
+                <Box sx={formRowGapped} data-testid="measurement-period-div">
+                  <LocalizationProvider dateAdapter={DateAdapter}>
+                    <DesktopDatePicker
+                      disableOpenPicker={true}
+                      disabled={!canEdit}
+                      label="Measurement Period - Start Date"
+                      inputFormat="MM/dd/yyyy"
+                      value={formik.values.measurementPeriodStart}
+                      onChange={(startDate) => {
+                        formik.setFieldValue(
                           "measurementPeriodStart",
-                          true
-                        )}
-                      />
-                    );
-                  }}
-                />
-              </LocalizationProvider>
-              <LocalizationProvider dateAdapter={DateAdapter}>
-                <DesktopDatePicker
-                  disableOpenPicker={true}
-                  disabled={!canEdit}
-                  label="Measurement Period - End Date"
-                  inputFormat="MM/dd/yyyy"
-                  value={formik.values.measurementPeriodEnd}
-                  onChange={(endDate) => {
-                    formik.setFieldValue("measurementPeriodEnd", endDate);
-                  }}
-                  renderInput={(params) => {
-                    const { onChange, ...formikFieldProps } =
-                      formik.getFieldProps("measurementPeriodEnd");
-                    return (
-                      <TextField
-                        {...formikFieldProps}
-                        {...params}
-                        required
-                        data-testid="measurement-period-end"
-                        helperText={formikErrorHandler(
-                          "measurementPeriodEnd",
-                          true
-                        )}
-                      />
-                    );
-                  }}
-                />
-              </LocalizationProvider>
-            </Box>
+                          startDate
+                        );
+                      }}
+                      renderInput={(params) => {
+                        const { onChange, ...formikFieldProps } =
+                          formik.getFieldProps("measurementPeriodStart");
+                        return (
+                          <TextField
+                            {...formikFieldProps}
+                            {...params}
+                            required
+                            data-testid="measurement-period-start"
+                            helperText={formikErrorHandler(
+                              "measurementPeriodStart",
+                              true
+                            )}
+                          />
+                        );
+                      }}
+                    />
+                  </LocalizationProvider>
+                  <LocalizationProvider dateAdapter={DateAdapter}>
+                    <DesktopDatePicker
+                      disableOpenPicker={true}
+                      disabled={!canEdit}
+                      label="Measurement Period - End Date"
+                      inputFormat="MM/dd/yyyy"
+                      value={formik.values.measurementPeriodEnd}
+                      onChange={(endDate) => {
+                        formik.setFieldValue("measurementPeriodEnd", endDate);
+                      }}
+                      renderInput={(params) => {
+                        const { onChange, ...formikFieldProps } =
+                          formik.getFieldProps("measurementPeriodEnd");
+                        return (
+                          <TextField
+                            {...formikFieldProps}
+                            {...params}
+                            required
+                            data-testid="measurement-period-end"
+                            helperText={formikErrorHandler(
+                              "measurementPeriodEnd",
+                              true
+                            )}
+                          />
+                        );
+                      }}
+                    />
+                  </LocalizationProvider>
+                </Box>
+              </Grid>
+              <Grid item xs={6}>
+                <Box sx={formRowGapped}>
+                  <ReadOnlyTextField
+                    placeholder="Measure ID"
+                    label="Measure Id"
+                    id="measureId"
+                    data-testid="measure-id-text-field"
+                    inputProps={{ "data-testid": "measure-id-input" }}
+                    helperText={formikErrorHandler("measureId", true)}
+                    size="small"
+                    error={
+                      formik.touched.measureId &&
+                      Boolean(formik.errors.measureId)
+                    }
+                    {...formik.getFieldProps("measureId")}
+                  />
+                </Box>
+
+                <Box sx={formRowGapped}>
+                  <ReadOnlyTextField
+                    placeholder="Version ID"
+                    label="Version ID"
+                    id="versionId"
+                    data-testid="version-id-text-field"
+                    inputProps={{ "data-testid": "version-id-input" }}
+                    helperText={formikErrorHandler("versionId", true)}
+                    size="small"
+                    error={
+                      formik.touched.versionId &&
+                      Boolean(formik.errors.versionId)
+                    }
+                    {...formik.getFieldProps("versionId")}
+                  />
+                </Box>
+
+                <Box sx={formRowGapped}>
+                  <ReadOnlyTextField
+                    placeholder="CMS ID"
+                    label="CMS Id"
+                    id="cmsId"
+                    data-testid="cms-id-text-field"
+                    inputProps={{ "data-testid": "cms-id-input" }}
+                    helperText={formikErrorHandler("cmsId", true)}
+                    size="small"
+                    error={formik.touched.cmsId && Boolean(formik.errors.cmsId)}
+                    {...formik.getFieldProps("cmsId")}
+                  />
+                </Box>
+              </Grid>
+            </Grid>
           </DialogContent>
 
           <Button
