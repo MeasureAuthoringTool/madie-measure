@@ -2,7 +2,11 @@ import React, { useEffect, useState } from "react";
 import tw from "twin.macro";
 import "styled-components/macro";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
-import { Button, Toast } from "@madie/madie-design-system/dist/react";
+import {
+  Button,
+  Toast,
+  InputLabel,
+} from "@madie/madie-design-system/dist/react";
 import {
   measureStore,
   routeHandlerStore,
@@ -16,12 +20,37 @@ import {
   Checkbox,
   FormHelperText,
   TextField,
+  Typography,
 } from "@mui/material";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
+
+const autoCompleteStyles = {
+  borderRadius: "3px",
+  height: 40,
+  border: "1px solid #DDDDDD",
+  "& .MuiOutlinedInput-notchedOutline": {
+    borderRadius: "3px",
+    "& legend": {
+      width: 0,
+    },
+  },
+  "& .MuiAutocomplete-inputFocused": {
+    border: "none",
+    boxShadow: "none",
+    outline: "none",
+  },
+  "& .MuiAutocomplete-inputRoot": {
+    paddingTop: 0,
+    paddingBottom: 0,
+  },
+  width: "50%",
+};
+
+const asterisk = { color: "#D92F2F", marginRight: 3 };
 
 // Need to have a "-" as placeholder if nothing is selected, but it doesn't have to be an option
 // Need to have 2 diff sizes of buttons
@@ -132,81 +161,107 @@ export default function StewardAndDevelopers() {
       data-testid="measure-steward-developers-form"
     >
       <div className="content">
-        <h3>Steward & Developers</h3>
-      </div>
-      {canEdit && organizations && (
-        <>
-          <label htmlFor={`steward`}>Measure Steward</label>
-          <Autocomplete
-            data-testid="measure-steward"
-            options={organizations}
-            sx={{ width: 300 }}
-            {...formik.getFieldProps("steward")}
-            onChange={(_event: any, selectedVal: string | null) => {
-              formik.setFieldValue("steward", selectedVal || "");
-            }}
-            renderInput={(params) => <TextField {...params} />}
-          />
-          {formik.errors["steward"] && (
-            <FormHelperText data-testid={`steward-helper-text`} error={true}>
-              {formik.errors["steward"]}
-            </FormHelperText>
-          )}
-          <label tw="text-black-100" htmlFor={`developers`}>
-            Developers
-          </label>
-          <Autocomplete
-            multiple
-            data-testid="developers-combo-box"
-            options={organizations}
-            disableCloseOnSelect
-            getOptionLabel={(option) => option}
-            renderOption={(props, option, { selected }) => (
-              <li {...props}>
-                <Checkbox
-                  icon={icon}
-                  checkedIcon={checkedIcon}
-                  style={{ marginRight: 8 }}
-                  checked={selected}
-                />
-                {option}
-              </li>
-            )}
-            sx={{ width: 300 }}
-            {...formik.getFieldProps("developers")}
-            onChange={(_event: any, selectedVal: string | null) => {
-              formik.setFieldValue("developers", selectedVal);
-            }}
-            renderInput={(params) => <TextField {...params} />}
-          />
-          {formik.errors["developers"] && (
-            <FormHelperText data-testid={`developers-helper-text`} error={true}>
-              {formik.errors["developers"]}
-            </FormHelperText>
-          )}
-          <div className="form-actions">
-            <Button
-              className="cancel-button"
-              data-testid="cancel-button"
-              disabled={!formik.dirty}
-              onClick={() => resetForm()}
+        <div className="subTitle">
+          <h3>Steward & Developers</h3>
+          <div className="required">
+            <Typography
+              style={{ fontSize: 14, fontWeight: 300, fontFamily: "Rubik" }}
             >
-              Discard Changes
-            </Button>
-            <Button
-              disabled={!(formik.isValid && formik.dirty)}
-              type="submit"
-              variant="cyan"
-              data-testid={`steward-and-developers-save`}
-            >
-              Save
-            </Button>
+              <span style={asterisk}>*</span>
+              Indicates required field
+            </Typography>
           </div>
-        </>
-      )}
-      {/*todo need to style these*/}
-      {!canEdit && formik.values.steward}
-      {!canEdit && formik.values.developers}
+        </div>
+        {organizations && (
+          <>
+            <div tw="mb-4">
+              <span style={asterisk}>*</span>
+              <label htmlFor={`steward`}>Measure Steward</label>
+              <Autocomplete
+                data-testid="measure-steward"
+                options={organizations}
+                disabled={!canEdit}
+                sx={autoCompleteStyles}
+                {...formik.getFieldProps("steward")}
+                onChange={(_event: any, selectedVal: string | null) => {
+                  formik.setFieldValue("steward", selectedVal || "");
+                }}
+                renderInput={(params) => <TextField {...params} />}
+              />
+              {formik.errors["steward"] && (
+                <FormHelperText
+                  data-testid={`steward-helper-text`}
+                  error={true}
+                >
+                  {formik.errors["steward"]}
+                </FormHelperText>
+              )}
+            </div>
+            <div tw="mb-4">
+              <span style={asterisk}>*</span>
+              <label htmlFor={`developers`}>Developers</label>
+              <Autocomplete
+                multiple
+                disabled={!canEdit}
+                data-testid="developers-combo-box"
+                options={organizations}
+                disableCloseOnSelect
+                getOptionLabel={(option) => option}
+                renderOption={(props, option, { selected }) => (
+                  <li {...props}>
+                    <Checkbox
+                      icon={icon}
+                      checkedIcon={checkedIcon}
+                      style={{ marginRight: 8 }}
+                      checked={selected}
+                    />
+                    {option}
+                  </li>
+                )}
+                {...formik.getFieldProps("developers")}
+                sx={{
+                  ...autoCompleteStyles,
+                  height: "auto",
+                  "& .MuiAutocomplete-inputRoot": {
+                    paddingTop: 1,
+                    paddingBottom: 1,
+                  },
+                }}
+                onChange={(_event: any, selectedVal: string | null) => {
+                  formik.setFieldValue("developers", selectedVal);
+                }}
+                renderInput={(params) => <TextField {...params} />}
+              />
+              {formik.errors["developers"] && (
+                <FormHelperText
+                  data-testid={`developers-helper-text`}
+                  error={true}
+                >
+                  {formik.errors["developers"]}
+                </FormHelperText>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+      <div className="form-actions">
+        <Button
+          className="cancel-button"
+          data-testid="cancel-button"
+          disabled={!formik.dirty}
+          onClick={() => resetForm()}
+        >
+          Discard Changes
+        </Button>
+        <Button
+          disabled={!(formik.isValid && formik.dirty)}
+          type="submit"
+          variant="cyan"
+          data-testid={`steward-and-developers-save`}
+        >
+          Save
+        </Button>
+      </div>
       <Toast
         toastKey="steward-and-developers-toast"
         toastType={toastType}
