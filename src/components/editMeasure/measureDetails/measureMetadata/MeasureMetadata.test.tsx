@@ -24,7 +24,6 @@ const mockMetaData = {
   copyright: "Test Copyright",
   disclaimer: "Test Disclaimer",
   rationale: "Test Rationale",
-  author: "Test Author",
   guidance: "Test Guidance",
 };
 
@@ -69,7 +68,6 @@ describe("MeasureRationale component", () => {
   const COPYRIGHT = "Test Copyright";
   const DISCLAIMER = "Test Disclaimer";
   const RATIONALE = "Test Rationale";
-  const AUTHOR = "Test Author";
   const GUIDANCE = "Test Guidance";
   const NEWVALUE = "Test New Value";
 
@@ -109,7 +107,6 @@ describe("MeasureRationale component", () => {
     expect(queryByText("Copyright")).toBeNull();
     expect(queryByText("Disclaimer")).toBeNull();
     expect(queryByText("Rationale")).toBeNull();
-    expect(queryByText("Author")).toBeNull();
     expect(queryByText("Guidance")).toBeNull();
   });
 

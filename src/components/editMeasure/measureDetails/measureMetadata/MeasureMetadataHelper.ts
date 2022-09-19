@@ -2,9 +2,6 @@ import { Measure } from "@madie/madie-models";
 
 export default function getInitialValues(measure: Measure, typeLower: string) {
   switch (typeLower) {
-    case "steward":
-      const steward = measure?.measureMetaData?.steward;
-      return !!steward ? steward : "";
     case "description":
       const description = measure?.measureMetaData?.description;
       return !!description ? description : "";
@@ -17,9 +14,6 @@ export default function getInitialValues(measure: Measure, typeLower: string) {
     case "rationale":
       const rationale = measure?.measureMetaData?.rationale;
       return !!rationale ? rationale : "";
-    case "author":
-      const author = measure?.measureMetaData?.author;
-      return !!author ? author : "";
     case "guidance":
       const guidance = measure?.measureMetaData?.guidance;
       return !!guidance ? guidance : "";
@@ -34,9 +28,6 @@ export const setMeasureMetadata = (
   newValue: string
 ) => {
   switch (typeLower) {
-    case "steward":
-      measure.measureMetaData.steward = newValue;
-      break;
     case "description":
       measure.measureMetaData.description = newValue;
       break;
@@ -48,9 +39,6 @@ export const setMeasureMetadata = (
       break;
     case "rationale":
       measure.measureMetaData.rationale = newValue;
-      break;
-    case "author":
-      measure.measureMetaData.author = newValue;
       break;
     case "guidance":
       measure.measureMetaData.guidance = newValue;

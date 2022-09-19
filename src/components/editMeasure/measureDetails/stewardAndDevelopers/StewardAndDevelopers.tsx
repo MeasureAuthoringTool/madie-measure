@@ -1,0 +1,225 @@
+import React, { useEffect, useState } from "react";
+import tw from "twin.macro";
+import "styled-components/macro";
+import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
+import { Button, Toast } from "@madie/madie-design-system/dist/react";
+import {
+  measureStore,
+  routeHandlerStore,
+  useOktaTokens,
+} from "@madie/madie-util";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import "../measureMetadata/MeasureMetaData.scss";
+import {
+  Autocomplete,
+  Checkbox,
+  FormHelperText,
+  TextField,
+} from "@mui/material";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
+
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const checkedIcon = <CheckBoxIcon fontSize="small" />;
+
+// Need to have a "-" as placeholder if nothing is selected, but it doesn't have to be an option
+// Need to have 2 diff sizes of buttons
+export default function StewardAndDevelopers() {
+  const measureServiceApi = useMeasureServiceApi();
+  const [organizations, setOrganizations] = useState<string[]>();
+  const [measure, setMeasure] = useState<any>(measureStore.state);
+  const { updateMeasure } = measureStore;
+
+  // toast utilities
+  const [toastOpen, setToastOpen] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string>("");
+  const [toastType, setToastType] = useState<string>("danger");
+  const onToastClose = () => {
+    setToastType(null);
+    setToastMessage("");
+    setToastOpen(false);
+  };
+  const handleToast = (type, message, open) => {
+    setToastType(type);
+    setToastMessage(message);
+    setToastOpen(open);
+  };
+
+  const { getUserName } = useOktaTokens();
+  const userName = getUserName();
+  const canEdit = userName === measure?.createdBy;
+
+  const formik = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      steward: measure?.measureMetaData?.steward || "",
+      developers: measure?.measureMetaData?.developers || [],
+    },
+    validationSchema: Yup.object({
+      steward: Yup.string().required("Steward is required"),
+      developers: Yup.array().min(1, "At least one developer is required"),
+    }),
+    onSubmit: (values) => {
+      submitForm(values);
+    },
+  });
+  const { resetForm } = formik;
+
+  // Updates the measure in DB, and also the measureStore
+  const submitForm = (values) => {
+    const submitMeasure = {
+      ...measure,
+      measureMetaData: {
+        ...measure.measureMetaData,
+        steward: values.steward,
+        developers: values.developers,
+      },
+    };
+    measureServiceApi
+      .updateMeasure(submitMeasure)
+      .then(() => {
+        handleToast(
+          "success",
+          `Measure Steward and Developers Information Saved Successfully`,
+          true
+        );
+        updateMeasure(submitMeasure);
+      })
+      .catch(() => {
+        const message = `Error updating measure "${measure.measureName}"`;
+        handleToast("danger", message, true);
+      });
+  };
+
+  useEffect(() => {
+    const subscription = measureStore.subscribe(setMeasure);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // Route handle store will give warning message
+  // if form is dirty and user ties to navigate across SPAs
+  const { updateRouteHandlerState } = routeHandlerStore;
+  useEffect(() => {
+    updateRouteHandlerState({
+      canTravel: !formik.dirty,
+      pendingRoute: "",
+    });
+  }, [formik.dirty]);
+
+  // fetch organizations DB using measure service and sorts alphabetically
+  useEffect(() => {
+    measureServiceApi
+      .getAllOrganizations()
+      .then((response) => {
+        const organizationsList = response
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((element) => element.name);
+        setOrganizations(organizationsList);
+      })
+      .catch(() => {
+        const message = `Error fetching organizations`;
+        handleToast("danger", message, true);
+      });
+  }, []);
+
+  return (
+    <form
+      id="measure-meta-data-form"
+      onSubmit={formik.handleSubmit}
+      data-testid="measure-steward-developers-form"
+    >
+      <div className="content">
+        <h3>Steward & Developers</h3>
+      </div>
+      {canEdit && organizations && (
+        <>
+          <label htmlFor={`steward`}>Measure Steward</label>
+          <Autocomplete
+            data-testid="measure-steward"
+            options={organizations}
+            sx={{ width: 300 }}
+            {...formik.getFieldProps("steward")}
+            onChange={(_event: any, selectedVal: string | null) => {
+              formik.setFieldValue("steward", selectedVal || "");
+            }}
+            renderInput={(params) => <TextField {...params} />}
+          />
+          {formik.errors["steward"] && (
+            <FormHelperText data-testid={`steward-helper-text`} error={true}>
+              {formik.errors["steward"]}
+            </FormHelperText>
+          )}
+          <label tw="text-black-100" htmlFor={`developers`}>
+            Developers
+          </label>
+          <Autocomplete
+            multiple
+            data-testid="developers-combo-box"
+            options={organizations}
+            disableCloseOnSelect
+            getOptionLabel={(option) => option}
+            renderOption={(props, option, { selected }) => (
+              <li {...props}>
+                <Checkbox
+                  icon={icon}
+                  checkedIcon={checkedIcon}
+                  style={{ marginRight: 8 }}
+                  checked={selected}
+                />
+                {option}
+              </li>
+            )}
+            sx={{ width: 300 }}
+            {...formik.getFieldProps("developers")}
+            onChange={(_event: any, selectedVal: string | null) => {
+              formik.setFieldValue("developers", selectedVal);
+            }}
+            renderInput={(params) => <TextField {...params} />}
+          />
+          {formik.errors["developers"] && (
+            <FormHelperText data-testid={`developers-helper-text`} error={true}>
+              {formik.errors["developers"]}
+            </FormHelperText>
+          )}
+          <div className="form-actions">
+            <Button
+              className="cancel-button"
+              data-testid="cancel-button"
+              disabled={!formik.dirty}
+              onClick={() => resetForm()}
+            >
+              Discard Changes
+            </Button>
+            <Button
+              disabled={!(formik.isValid && formik.dirty)}
+              type="submit"
+              variant="cyan"
+              data-testid={`steward-and-developers-save`}
+            >
+              Save
+            </Button>
+          </div>
+        </>
+      )}
+      {/*todo need to style these*/}
+      {!canEdit && formik.values.steward}
+      {!canEdit && formik.values.developers}
+      <Toast
+        toastKey="steward-and-developers-toast"
+        toastType={toastType}
+        testId={
+          toastType === "danger"
+            ? `steward-and-developers-error`
+            : `steward-and-developers-success`
+        }
+        open={toastOpen}
+        message={toastMessage}
+        onClose={onToastClose}
+        autoHideDuration={6000}
+      />
+    </form>
+  );
+}
