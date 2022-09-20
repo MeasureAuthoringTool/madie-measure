@@ -38,6 +38,7 @@ const measure = {
   measurementPeriodStart: "01/01/2022",
   measurementPeriodEnd: "12/02/2022",
   createdBy: "john doe",
+  measureSetId: "testMeasureId",
 } as unknown as Measure;
 
 jest.mock("@madie/madie-util", () => ({
@@ -102,6 +103,9 @@ describe("MeasureInformation component", () => {
     await act(async () => {
       const text = getByTestId("measure-name-input") as HTMLInputElement;
       expect(text.value).toBe(measure.measureName);
+      const measureId = getByTestId("measure-id-input") as HTMLInputElement;
+      expect(measureId.value).toBe(measure.measureSetId);
+      expect(measureId).toHaveProperty("readOnly", true);
       const versionId = getByTestId("version-id-input") as HTMLInputElement;
       expect(versionId.value).toBe(measure.id);
       expect(versionId).toHaveProperty("readOnly", true);
