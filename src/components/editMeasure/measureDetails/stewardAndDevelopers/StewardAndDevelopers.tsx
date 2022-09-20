@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from "react";
-import tw from "twin.macro";
+import "twin.macro";
 import "styled-components/macro";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
-import {
-  Button,
-  Toast,
-  InputLabel,
-} from "@madie/madie-design-system/dist/react";
+import { Button, Toast } from "@madie/madie-design-system/dist/react";
 import {
   measureStore,
   routeHandlerStore,
@@ -105,6 +101,7 @@ export default function StewardAndDevelopers() {
         developers: values.developers,
       },
     };
+
     measureServiceApi
       .updateMeasure(submitMeasure)
       .then(() => {
@@ -178,7 +175,7 @@ export default function StewardAndDevelopers() {
               <span style={asterisk}>*</span>
               <label htmlFor={`steward`}>Measure Steward</label>
               <Autocomplete
-                data-testid="measure-steward"
+                data-testid="steward"
                 options={organizations}
                 disabled={!canEdit}
                 sx={autoCompleteStyles}
@@ -203,7 +200,7 @@ export default function StewardAndDevelopers() {
               <Autocomplete
                 multiple
                 disabled={!canEdit}
-                data-testid="developers-combo-box"
+                data-testid="developers"
                 options={organizations}
                 disableCloseOnSelect
                 getOptionLabel={(option) => option}
