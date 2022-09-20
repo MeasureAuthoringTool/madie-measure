@@ -20,7 +20,6 @@ export interface MeasureMetadataProps {
 export default function MeasureMetadata(props: MeasureMetadataProps) {
   const { measureMetadataType, header } = props;
   const typeLower = measureMetadataType.toLowerCase();
-
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
   useEffect(() => {
@@ -68,7 +67,6 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
   const submitForm = (genericField: string) => {
     measure.measureMetaData = { ...measureMetaData };
     setMeasureMetadata(measure, typeLower, genericField);
-
     measureServiceApi
       .updateMeasure(measure)
       .then(() => {
