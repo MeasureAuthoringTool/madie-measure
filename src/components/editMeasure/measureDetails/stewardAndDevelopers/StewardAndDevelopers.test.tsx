@@ -179,6 +179,7 @@ describe("Steward and Developers component", () => {
 
   it("should display validation error messages, if the form is dirty and no options are selected", async () => {
     render(<StewardAndDevelopers />);
+
     // verify if inline error is displayed if no steward is selected and save button is disabled
     const stewardAutoComplete = await screen.findByTestId("steward");
     fireEvent.mouseOver(stewardAutoComplete);
