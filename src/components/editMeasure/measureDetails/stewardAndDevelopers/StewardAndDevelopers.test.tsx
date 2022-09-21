@@ -178,6 +178,8 @@ describe("Steward and Developers component", () => {
   });
 
   it("should display validation error messages, if the form is dirty and no options are selected", async () => {
+    // mockMeasure object has to be reset with actual user, as the scope is effected by one of the previous test
+    mockMeasure = { ...mockMeasure, createdBy: testUser };
     render(<StewardAndDevelopers />);
 
     // verify if inline error is displayed if no steward is selected and save button is disabled
