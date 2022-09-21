@@ -14,7 +14,6 @@ import useMeasureServiceApi, {
 import { Measure } from "@madie/madie-models";
 import MeasureMetadataForm from "./MeasureMetadata";
 import { useOktaTokens } from "@madie/madie-util";
-import { describe, expect, it } from "@jest/globals";
 
 jest.mock("../../../../api/useMeasureServiceApi");
 const testUser = "john doe";
@@ -24,7 +23,6 @@ const mockMetaData = {
   copyright: "Test Copyright",
   disclaimer: "Test Disclaimer",
   rationale: "Test Rationale",
-  author: "Test Author",
   guidance: "Test Guidance",
 };
 
@@ -64,12 +62,10 @@ const useMeasureServiceApiMock =
 
 describe("MeasureRationale component", () => {
   let serviceApiMock: MeasureServiceApi;
-  const STEWARD = "Test Steward";
-  const DECRIPTION = "Test Description";
+  const DESCRIPTION = "Test Description";
   const COPYRIGHT = "Test Copyright";
   const DISCLAIMER = "Test Disclaimer";
   const RATIONALE = "Test Rationale";
-  const AUTHOR = "Test Author";
   const GUIDANCE = "Test Guidance";
   const NEWVALUE = "Test New Value";
 
@@ -92,47 +88,15 @@ describe("MeasureRationale component", () => {
     const inputEl = element as HTMLTextAreaElement;
     expect(inputEl.value).toBe(value);
   };
-  const {
-    queryByText,
-    getByText,
-    getByTestId,
-    findByTestId,
-    queryAllByText,
-    getAllByText,
-  } = screen;
+  const { queryByText, getByText, getByTestId, findByTestId, getAllByText } =
+    screen;
 
   it("Should render empty titles with empty props", () => {
     render(<MeasureMetadataForm measureMetadataType="" />);
-
-    expect(queryByText("Steward")).toBeNull();
     expect(queryByText("Description")).toBeNull();
     expect(queryByText("Copyright")).toBeNull();
     expect(queryByText("Disclaimer")).toBeNull();
     expect(queryByText("Rationale")).toBeNull();
-    expect(queryByText("Author")).toBeNull();
-    expect(queryByText("Guidance")).toBeNull();
-  });
-
-  it("should render the MeasureMetadata component with the supplied steward information", async () => {
-    render(
-      <MeasureMetadataForm
-        measureMetadataType="Steward"
-        header="Steward/Author"
-      />
-    );
-
-    expect(screen.getByTestId("measureSteward")).toBeInTheDocument();
-
-    const input = screen.getByTestId("measureStewardInput");
-    expectInputValue(input, STEWARD);
-
-    expect(getByText("Steward/Author")).toBeTruthy();
-    expect(queryByText("Steward")).not.toBeNull();
-    expect(queryByText("Description")).toBeNull();
-    expect(queryByText("Copyright")).toBeNull();
-    expect(queryByText("Disclaimer")).toBeNull();
-    expect(queryByText("Rationale")).toBeNull();
-    expect(queryByText("Author")).toBeNull();
     expect(queryByText("Guidance")).toBeNull();
   });
 
@@ -141,34 +105,15 @@ describe("MeasureRationale component", () => {
 
     expect(screen.getByTestId("measureRationale")).toBeInTheDocument();
 
-    const input = screen.getByTestId("measureRationaleInput");
+    const input = screen.getByTestId(
+      "measureRationaleInput"
+    ) as HTMLTextAreaElement;
     expectInputValue(input, RATIONALE);
 
     expect(getAllByText("Rationale")).toBeTruthy();
-    expect(queryByText("Steward/Author")).toBeNull();
     expect(queryByText("Description")).toBeNull();
     expect(queryByText("Copyright")).toBeNull();
     expect(queryByText("Disclaimer")).toBeNull();
-    expect(queryByText("Author")).toBeNull();
-    expect(queryByText("Guidance")).toBeNull();
-  });
-
-  it("should render the MeasureMetadata component with the supplied author information", () => {
-    render(<MeasureMetadataForm measureMetadataType="Author" />);
-
-    const result = getByTestId("measureAuthor");
-    expect(result).toBeInTheDocument();
-
-    const input = getByTestId("measureAuthorInput");
-    expectInputValue(input, AUTHOR);
-
-    expect(queryByText("Steward/Author")).toBeNull();
-    expect(queryAllByText("Author")).toBeTruthy();
-    expect(queryByText("Steward/Author")).toBeNull();
-    expect(queryByText("Description")).toBeNull();
-    expect(queryByText("Copyright")).toBeNull();
-    expect(queryByText("Disclaimer")).toBeNull();
-    expect(queryByText("Rationale")).toBeNull();
     expect(queryByText("Guidance")).toBeNull();
   });
 
@@ -176,7 +121,7 @@ describe("MeasureRationale component", () => {
     mockMeasure.measureMetaData = {};
     render(<MeasureMetadataForm measureMetadataType="Rationale" />);
 
-    const input = getByTestId("measureRationaleInput");
+    const input = getByTestId("measureRationaleInput") as HTMLTextAreaElement;
     expectInputValue(input, "");
 
     const save = getByTestId("measureRationaleSave");
@@ -193,7 +138,7 @@ describe("MeasureRationale component", () => {
   it("Should display Description validation error when input is empty", async () => {
     render(<MeasureMetadataForm measureMetadataType="Description" />);
 
-    const input = getByTestId("measureDescriptionInput");
+    const input = getByTestId("measureDescriptionInput") as HTMLTextAreaElement;
     expectInputValue(input, "Test Description");
     const saveBtn = getByTestId("measureDescriptionSave");
     expect(saveBtn).toBeInTheDocument();
@@ -213,7 +158,7 @@ describe("MeasureRationale component", () => {
   it("Should not display validation error and save empty input successfully for metadata that does not need validation", async () => {
     render(<MeasureMetadataForm measureMetadataType="Copyright" />);
 
-    const input = getByTestId("measureCopyrightInput");
+    const input = getByTestId("measureCopyrightInput") as HTMLTextAreaElement;
     expectInputValue(input, "Test Copyright");
     const saveBtn = getByTestId("measureCopyrightSave");
     expect(saveBtn).toBeInTheDocument();
@@ -244,21 +189,9 @@ describe("MeasureRationale component", () => {
   it("should update the rationale input field when a user types a new value", async () => {
     render(<MeasureMetadataForm measureMetadataType="Rationale" />);
 
-    const input = getByTestId("measureRationaleInput");
-
+    const input = getByTestId("measureRationaleInput") as HTMLTextAreaElement;
     await waitFor(() => expectInputValue(input, RATIONALE));
 
-    fireEvent.change(input, {
-      target: { value: NEWVALUE },
-    });
-    await waitFor(() => expectInputValue(input, NEWVALUE));
-  });
-
-  it("should update the author input field when a user types a new value", async () => {
-    render(<MeasureMetadataForm measureMetadataType="Author" />);
-
-    const input = getByTestId("measureAuthorInput");
-    expectInputValue(input, AUTHOR);
     fireEvent.change(input, {
       target: { value: NEWVALUE },
     });
@@ -285,38 +218,10 @@ describe("MeasureRationale component", () => {
       );
     });
 
-    expect(mockMeasure.measureMetaData.steward).toBe(STEWARD);
-    expect(mockMeasure.measureMetaData.description).toBe(DECRIPTION);
+    expect(mockMeasure.measureMetaData.description).toBe(DESCRIPTION);
     expect(mockMeasure.measureMetaData.copyright).toBe(COPYRIGHT);
     expect(mockMeasure.measureMetaData.disclaimer).toBe(DISCLAIMER);
     expect(mockMeasure.measureMetaData.rationale).toBe(NEWVALUE);
-    expect(mockMeasure.measureMetaData.author).toBe(AUTHOR);
-    expect(mockMeasure.measureMetaData.guidance).toBe(GUIDANCE);
-  });
-
-  it("should save the author information when the form is submitted", async () => {
-    render(<MeasureMetadataForm measureMetadataType="Author" />);
-    const input = getByTestId("measureAuthorInput");
-    await act(async () => {
-      fireEvent.change(input, {
-        target: { value: NEWVALUE },
-      });
-    });
-    const save = getByTestId("measureAuthorSave");
-    fireEvent.click(save);
-
-    const success = await findByTestId("measureAuthorSuccess");
-    expect(success).toBeInTheDocument();
-    expect(success.textContent).toBe(
-      "Measure Author Information Saved Successfully"
-    );
-
-    expect(mockMeasure.measureMetaData.steward).toBe(STEWARD);
-    expect(mockMeasure.measureMetaData.description).toBe(DECRIPTION);
-    expect(mockMeasure.measureMetaData.copyright).toBe(COPYRIGHT);
-    expect(mockMeasure.measureMetaData.disclaimer).toBe(DISCLAIMER);
-    expect(mockMeasure.measureMetaData.rationale).toBe(RATIONALE);
-    expect(mockMeasure.measureMetaData.author).toBe(NEWVALUE);
     expect(mockMeasure.measureMetaData.guidance).toBe(GUIDANCE);
   });
 
@@ -337,23 +242,6 @@ describe("MeasureRationale component", () => {
     );
   });
 
-  it("should render an error message if the measure author cannot be saved", async () => {
-    serviceApiMock.updateMeasure = jest.fn().mockRejectedValue("Save error");
-
-    render(<MeasureMetadataForm measureMetadataType="Author" />);
-    const input = getByTestId("measureAuthorInput");
-    fireEvent.change(input, {
-      target: { value: NEWVALUE },
-    });
-    const save = getByTestId("measureAuthorSave");
-    fireEvent.click(save);
-
-    const error = await findByTestId("measureAuthorError");
-    expect(error.textContent).toBe(
-      'Error updating measure "The Measure for Testing" for Author'
-    );
-  });
-
   it("should reset form on discard changes", () => {
     render(
       <MeasureMetadataForm
@@ -366,7 +254,9 @@ describe("MeasureRationale component", () => {
     expect(result).toBeInTheDocument();
     const cancelButton = getByTestId("cancel-button");
 
-    const input = getByTestId("measureClinical Recommendation StatementInput");
+    const input = getByTestId(
+      "measureClinical Recommendation StatementInput"
+    ) as HTMLTextAreaElement;
     expectInputValue(input, "");
     expect(cancelButton).toHaveProperty("disabled", true);
     act(() => {
