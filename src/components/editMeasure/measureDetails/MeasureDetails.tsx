@@ -5,20 +5,20 @@ import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureMetadata from "./measureMetadata/MeasureMetadata";
 import EditMeasureSideBarNav from "./EditMeasureSideBarNav";
 import { routeHandlerStore } from "@madie/madie-util";
+import StewardAndDevelopers from "./stewardAndDevelopers/StewardAndDevelopers";
 
 const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
 export interface RouteHandlerState {
   canTravel: boolean;
   pendingRoute: string;
 }
-export default function EditMeasure() {
+export default function MeasureDetails() {
   const { path } = useRouteMatch();
   const stewardLink = `${path}/measure-steward`;
   const descriptionLink = `${path}/measure-description`;
   const copyrightLink = `${path}/measure-copyright`;
   const disclaimerLink = `${path}/measure-disclaimer`;
   const rationaleLink = `${path}/measure-rationale`;
-  const authorLink = `${path}/measure-author`;
   const guidanceLink = `${path}/measure-guidance`;
   const clinicalLink = `${path}/measure-clinical-recommendation`;
 
@@ -29,7 +29,7 @@ export default function EditMeasure() {
       dataTestId: "leftPanelMeasureInformation",
     },
     {
-      title: "Steward/Author",
+      title: "Steward & Developers",
       href: stewardLink,
       dataTestId: "leftPanelMeasureSteward",
     },
@@ -52,11 +52,6 @@ export default function EditMeasure() {
       title: "Rationale",
       href: rationaleLink,
       dataTestId: "leftPanelMeasureRationale",
-    },
-    {
-      title: "Author",
-      href: authorLink,
-      dataTestId: "leftPanelMeasureAuthor",
     },
     {
       title: "Guidance",
@@ -102,10 +97,7 @@ export default function EditMeasure() {
             <MeasureInformation />
           </Route>
           <Route path={stewardLink}>
-            <MeasureMetadata
-              measureMetadataType="Steward"
-              header="Steward/Author"
-            />
+            <StewardAndDevelopers />
           </Route>
           <Route path={descriptionLink}>
             <MeasureMetadata
@@ -130,9 +122,6 @@ export default function EditMeasure() {
               measureMetadataType="Rationale"
               header="Rationale"
             />
-          </Route>
-          <Route path={authorLink}>
-            <MeasureMetadata measureMetadataType="Author" header="Author" />
           </Route>
           <Route path={guidanceLink}>
             <MeasureMetadata measureMetadataType="Guidance" header="Guidance" />

@@ -2,7 +2,7 @@ import React from "react";
 import axios from "axios";
 import useServiceConfig from "./useServiceConfig";
 import { ServiceConfig } from "./ServiceContext";
-import { Measure, Group } from "@madie/madie-models";
+import { Measure, Group, Organization } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
 import _ from "lodash";
 
@@ -177,6 +177,29 @@ export class MeasureServiceApi {
       const message = this.buildErrorMessage(
         err,
         "Unable to fetch population basis options"
+      );
+      throw new Error(message);
+    }
+  }
+
+  async getAllOrganizations(): Promise<Organization[]> {
+    try {
+      const response = await axios.get<Organization[]>(
+        `${this.baseUrl}/organizations`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      if (response?.data.length < 1) {
+        throw new Error("Unable to fetch organizations");
+      }
+      return response?.data;
+    } catch (err) {
+      const message = this.buildErrorMessage(
+        err,
+        "Unable to fetch organizations"
       );
       throw new Error(message);
     }
