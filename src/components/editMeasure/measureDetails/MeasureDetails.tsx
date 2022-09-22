@@ -5,22 +5,22 @@ import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureMetadata from "./measureMetadata/MeasureMetadata";
 import EditMeasureSideBarNav from "./EditMeasureSideBarNav";
 import { routeHandlerStore } from "@madie/madie-util";
+import StewardAndDevelopers from "./stewardAndDevelopers/StewardAndDevelopers";
 
 const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
-const Content = tw.div`col-span-5 py-6`;
 export interface RouteHandlerState {
   canTravel: boolean;
   pendingRoute: string;
 }
-export default function EditMeasure() {
+export default function MeasureDetails() {
   const { path } = useRouteMatch();
   const stewardLink = `${path}/measure-steward`;
   const descriptionLink = `${path}/measure-description`;
   const copyrightLink = `${path}/measure-copyright`;
   const disclaimerLink = `${path}/measure-disclaimer`;
   const rationaleLink = `${path}/measure-rationale`;
-  const authorLink = `${path}/measure-author`;
   const guidanceLink = `${path}/measure-guidance`;
+  const clinicalLink = `${path}/measure-clinical-recommendation`;
 
   const links = [
     {
@@ -29,7 +29,7 @@ export default function EditMeasure() {
       dataTestId: "leftPanelMeasureInformation",
     },
     {
-      title: "Steward/Author",
+      title: "Steward & Developers",
       href: stewardLink,
       dataTestId: "leftPanelMeasureSteward",
     },
@@ -54,14 +54,14 @@ export default function EditMeasure() {
       dataTestId: "leftPanelMeasureRationale",
     },
     {
-      title: "Author",
-      href: authorLink,
-      dataTestId: "leftPanelMeasureAuthor",
-    },
-    {
       title: "Guidance",
       href: guidanceLink,
       dataTestId: "leftPanelMeasureGuidance",
+    },
+    {
+      title: "Clinical Recommendation",
+      href: clinicalLink,
+      dataTestId: "leftPanelMeasureClinicalGuidance",
     },
   ];
   const history = useHistory();
@@ -87,40 +87,52 @@ export default function EditMeasure() {
   return (
     <>
       <Grid>
-        {/* False is a temporary value to be overwritten when story for details is implemented */}
         <EditMeasureSideBarNav
           header="Edit Measure"
           links={links}
-          dirty={false}
+          dirty={true}
         />
-        <Content>
-          <Switch>
-            <Route exact path={path}>
-              <MeasureInformation />
-            </Route>
-            <Route path={stewardLink}>
-              <MeasureMetadata measureMetadataType="Steward" />
-            </Route>
-            <Route path={descriptionLink}>
-              <MeasureMetadata measureMetadataType="Description" />
-            </Route>
-            <Route path={copyrightLink}>
-              <MeasureMetadata measureMetadataType="Copyright" />
-            </Route>
-            <Route path={disclaimerLink}>
-              <MeasureMetadata measureMetadataType="Disclaimer" />
-            </Route>
-            <Route path={rationaleLink}>
-              <MeasureMetadata measureMetadataType="Rationale" />
-            </Route>
-            <Route path={authorLink}>
-              <MeasureMetadata measureMetadataType="Author" />
-            </Route>
-            <Route path={guidanceLink}>
-              <MeasureMetadata measureMetadataType="Guidance" />
-            </Route>
-          </Switch>
-        </Content>
+        <Switch>
+          <Route exact path={path}>
+            <MeasureInformation />
+          </Route>
+          <Route path={stewardLink}>
+            <StewardAndDevelopers />
+          </Route>
+          <Route path={descriptionLink}>
+            <MeasureMetadata
+              measureMetadataType="Description"
+              header="Description"
+            />
+          </Route>
+          <Route path={copyrightLink}>
+            <MeasureMetadata
+              measureMetadataType="Copyright"
+              header="Copyright"
+            />
+          </Route>
+          <Route path={disclaimerLink}>
+            <MeasureMetadata
+              measureMetadataType="Disclaimer"
+              header="Disclaimer"
+            />
+          </Route>
+          <Route path={rationaleLink}>
+            <MeasureMetadata
+              measureMetadataType="Rationale"
+              header="Rationale"
+            />
+          </Route>
+          <Route path={guidanceLink}>
+            <MeasureMetadata measureMetadataType="Guidance" header="Guidance" />
+          </Route>
+          <Route path={clinicalLink}>
+            <MeasureMetadata
+              measureMetadataType="Clinical Recommendation Statement"
+              header="Clinical Recommendation"
+            />
+          </Route>
+        </Switch>
       </Grid>
     </>
   );

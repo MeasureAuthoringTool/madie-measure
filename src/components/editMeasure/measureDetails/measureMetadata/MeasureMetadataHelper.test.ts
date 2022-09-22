@@ -1,4 +1,3 @@
-import * as React from "react";
 import getInitialValues, { setMeasureMetadata } from "./MeasureMetadataHelper";
 import { Measure, MeasureMetadata } from "@madie/madie-models";
 import { cleanup } from "@testing-library/react";
@@ -8,12 +7,10 @@ describe("MeasureMetadataHelper", () => {
   let measureMetaData: MeasureMetadata;
 
   const MEASUREID = "TestMeasureId";
-  const STEWARD = "Test Steward";
   const DECRIPTION = "Test Description";
   const COPYRIGHT = "Test Copyright";
   const DISCLAIMER = "Test Disclaimer";
   const RATIONALE = "Test Rationale";
-  const AUTHOR = "Test Author";
   const GUIDANCE = "Test Guidance";
   const NEWVALUE = "Test New Value";
 
@@ -21,12 +18,10 @@ describe("MeasureMetadataHelper", () => {
 
   beforeEach(() => {
     measureMetaData = {
-      steward: STEWARD,
       description: DECRIPTION,
       copyright: COPYRIGHT,
       disclaimer: DISCLAIMER,
       rationale: RATIONALE,
-      author: AUTHOR,
       guidance: GUIDANCE,
     } as MeasureMetadata;
 
@@ -34,31 +29,6 @@ describe("MeasureMetadataHelper", () => {
       id: MEASUREID,
       measureMetaData: measureMetaData,
     } as Measure;
-  });
-
-  it("should retrieve steward/author value", () => {
-    const actual = getInitialValues(measure, "steward");
-    expect(actual).toBe(STEWARD);
-  });
-
-  it("should return empty string instead of nul when steward is null", () => {
-    measureMetaData = {
-      steward: null,
-      description: DECRIPTION,
-      copyright: COPYRIGHT,
-      disclaimer: DISCLAIMER,
-      rationale: RATIONALE,
-      author: AUTHOR,
-      guidance: GUIDANCE,
-    } as MeasureMetadata;
-
-    measure = {
-      id: MEASUREID,
-      measureMetaData: measureMetaData,
-    } as Measure;
-
-    const actual = getInitialValues(measure, "steward");
-    expect(actual).toBe("");
   });
 
   it("should retrieve description value", () => {
@@ -68,12 +38,10 @@ describe("MeasureMetadataHelper", () => {
 
   it("should return empty string instead of nul when description is null", () => {
     measureMetaData = {
-      steward: STEWARD,
       description: null,
       copyright: COPYRIGHT,
       disclaimer: DISCLAIMER,
       rationale: RATIONALE,
-      author: AUTHOR,
       guidance: GUIDANCE,
     } as MeasureMetadata;
 
@@ -93,12 +61,10 @@ describe("MeasureMetadataHelper", () => {
 
   it("should return empty string instead of nul when copyright is null", () => {
     measureMetaData = {
-      steward: STEWARD,
       description: DECRIPTION,
       copyright: null,
       disclaimer: DISCLAIMER,
       rationale: RATIONALE,
-      author: AUTHOR,
       guidance: GUIDANCE,
     } as MeasureMetadata;
 
@@ -116,14 +82,12 @@ describe("MeasureMetadataHelper", () => {
     expect(actual).toBe(DISCLAIMER);
   });
 
-  it("should return empty string instead of nul when steward is null", () => {
+  it("should return empty string instead of nul when disclaimer is null", () => {
     measureMetaData = {
-      steward: STEWARD,
       description: DECRIPTION,
       copyright: COPYRIGHT,
       disclaimer: null,
       rationale: RATIONALE,
-      author: AUTHOR,
       guidance: GUIDANCE,
     } as MeasureMetadata;
 
@@ -143,12 +107,10 @@ describe("MeasureMetadataHelper", () => {
 
   it("should return empty string instead of nul when rationale is null", () => {
     measureMetaData = {
-      steward: STEWARD,
       description: DECRIPTION,
       copyright: COPYRIGHT,
       disclaimer: DISCLAIMER,
       rationale: null,
-      author: AUTHOR,
       guidance: GUIDANCE,
     } as MeasureMetadata;
 
@@ -161,31 +123,6 @@ describe("MeasureMetadataHelper", () => {
     expect(actual).toBe("");
   });
 
-  it("should retrieve author value", () => {
-    const actual = getInitialValues(measure, "author");
-    expect(actual).toBe(AUTHOR);
-  });
-
-  it("should return empty string instead of nul when author is null", () => {
-    measureMetaData = {
-      steward: STEWARD,
-      description: DECRIPTION,
-      copyright: COPYRIGHT,
-      disclaimer: DISCLAIMER,
-      rationale: RATIONALE,
-      author: null,
-      guidance: GUIDANCE,
-    } as MeasureMetadata;
-
-    measure = {
-      id: MEASUREID,
-      measureMetaData: measureMetaData,
-    } as Measure;
-
-    const actual = getInitialValues(measure, "author");
-    expect(actual).toBe("");
-  });
-
   it("should retrieve guidance value", () => {
     const actual = getInitialValues(measure, "guidance");
     expect(actual).toBe(GUIDANCE);
@@ -193,12 +130,10 @@ describe("MeasureMetadataHelper", () => {
 
   it("should return empty string instead of nul when guidance is null", () => {
     measureMetaData = {
-      steward: STEWARD,
       description: DECRIPTION,
       copyright: COPYRIGHT,
       disclaimer: DISCLAIMER,
       rationale: RATIONALE,
-      author: AUTHOR,
       guidance: null,
     } as MeasureMetadata;
 
@@ -214,11 +149,6 @@ describe("MeasureMetadataHelper", () => {
   it("should empty string when invalid measure metadata type", () => {
     const actual = getInitialValues(measure, "test");
     expect(actual).toBe("");
-  });
-
-  it("should reset steward value", () => {
-    setMeasureMetadata(measure, "steward", NEWVALUE);
-    expect(measure.measureMetaData.steward).toBe(NEWVALUE);
   });
 
   it("should reset description value", () => {
@@ -241,11 +171,6 @@ describe("MeasureMetadataHelper", () => {
     expect(measure.measureMetaData.rationale).toBe(NEWVALUE);
   });
 
-  it("should reset author value", () => {
-    setMeasureMetadata(measure, "author", NEWVALUE);
-    expect(measure.measureMetaData.author).toBe(NEWVALUE);
-  });
-
   it("should reset guidance value", () => {
     setMeasureMetadata(measure, "guidance", NEWVALUE);
     expect(measure.measureMetaData.guidance).toBe(NEWVALUE);
@@ -253,12 +178,10 @@ describe("MeasureMetadataHelper", () => {
 
   it("should not reset any measure metadata", () => {
     setMeasureMetadata(measure, "test", NEWVALUE);
-    expect(measure.measureMetaData.steward).toBe(STEWARD);
     expect(measure.measureMetaData.description).toBe(DECRIPTION);
     expect(measure.measureMetaData.copyright).toBe(COPYRIGHT);
     expect(measure.measureMetaData.disclaimer).toBe(DISCLAIMER);
     expect(measure.measureMetaData.rationale).toBe(RATIONALE);
-    expect(measure.measureMetaData.author).toBe(AUTHOR);
     expect(measure.measureMetaData.guidance).toBe(GUIDANCE);
   });
 });

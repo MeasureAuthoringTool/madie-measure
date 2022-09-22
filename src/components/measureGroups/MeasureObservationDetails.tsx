@@ -30,6 +30,7 @@ export interface MeasureObservationProps {
   label?: string;
   onChange?: (measureObservation) => void;
   onRemove?: (measureObservation) => void;
+  canEdit: boolean;
 }
 
 const MeasureObservationDetails = ({
@@ -40,6 +41,7 @@ const MeasureObservationDetails = ({
   measureObservation,
   onChange,
   onRemove,
+  canEdit,
 }: MeasureObservationProps) => {
   const [cqlFunctionNames, setCqlFunctionNames] = useState([]);
 
@@ -62,6 +64,7 @@ const MeasureObservationDetails = ({
             <Select
               placeHolder={{ name: "-", value: "" }}
               required={required}
+              readOnly={!canEdit}
               label={label ? label : "Observation"}
               id={`measure-observation-${name}`}
               data-testid={`select-measure-observation-${name}`}
@@ -92,7 +95,7 @@ const MeasureObservationDetails = ({
               ]}
             />
           </Col>
-          {!required && (
+          {!required && canEdit && (
             <Col style={{ marginLeft: 10 }}>
               <DSLink
                 href=""
@@ -116,6 +119,7 @@ const MeasureObservationDetails = ({
           <Col>
             <Select
               placeHolder={{ name: "-", value: "" }}
+              readOnly={!canEdit}
               required={required}
               label="Aggregate Function"
               id={`measure-observation-aggregate-${name}`}

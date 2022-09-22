@@ -1,0 +1,86 @@
+#measure-meta-data-form {
+  font-family: Rubik, sans-serif;
+  grid-column: span 5 / span 14;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 32px 32px calc(32px - 1rem);
+  > .content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    position: relative;
+    .subTitle {
+      padding-bottom: 8px;
+      margin-bottom: 1em;
+      border-bottom: solid 1px #ddd;
+      position: relative;
+      h3 {
+        border: none;
+        margin: 0;
+        padding: 0;
+      }
+      .required {
+        position: absolute;
+        bottom: 8px;
+        right: 12px;
+      }
+    }
+    h3 {
+      font-weight: 400;
+      font-size: 32px;
+      line-height: 48px;
+      display: flex;
+      flex-direction: row;
+      padding-bottom: 8px;
+      border-bottom: solid 1px #ddd;
+    }
+    textArea {
+      box-sizing: border-box;
+      width: 800px;
+      border-radius: 3px;
+      border: solid 1px #ddd;
+      background-color: #fff;
+      opacity: 1;
+      height: 100%;
+      font-size: 14px;
+      font-weight: 400;
+      resize: both;
+    }
+    label {
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 17px;
+      color: #333333;
+      text-transform: none;
+      margin-bottom: 7px;
+    }
+  }
+  .form-actions {
+    display: flex;
+    flex-direction: row;
+    min-width: 100%;
+    justify-content: flex-end;
+    > .cancel-button {
+      margin-top: 1rem;
+      margin-right: 32px;
+      padding: 0 16px;
+      font-size: 14px;
+      line-height: 17px;
+      font-family: Rubik, sans-serif;
+      font-weight: 500;
+      color: #0073c8;
+      background-color: #fff;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      border-radius: 4px;
+      border: solid 1px #fff;
+      border: solid 1px #0073c8;
+      &:disabled {
+        color: #ddd;
+        border-color: #ddd;
+      }
+    }
+  }
+}

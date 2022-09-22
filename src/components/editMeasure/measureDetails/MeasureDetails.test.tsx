@@ -47,6 +47,12 @@ const serviceConfig: ServiceConfig = {
   measureService: {
     baseUrl: "base.url",
   },
+  elmTranslationService: {
+    baseUrl: "base.url",
+  },
+  terminologyService: {
+    baseUrl: "base.url",
+  },
 };
 
 describe("MeasureDetails component", () => {
@@ -62,27 +68,6 @@ describe("MeasureDetails component", () => {
     );
 
     expect(getByText("Mock Measure Info")).toBeTruthy();
-  });
-
-  it("should render the MeasureMetadata component for measure-steward URL", () => {
-    const { getByText, getByTestId } = render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={[{ pathname: "/foo/measure-steward" }]}>
-          <Route path="/foo">
-            <MeasureDetails />
-          </Route>
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
-
-    expect(getByText("Mock Measure Metadata")).toBeTruthy();
-    expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
-    expect(getByTestId("leftPanelMeasureSteward")).toBeInTheDocument();
-    expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
-    expect(getByTestId("leftPanelMeasureDisclaimer")).toBeInTheDocument();
-    expect(getByTestId("leftPanelMeasureRationale")).toBeInTheDocument();
-    expect(getByTestId("leftPanelMeasureAuthor")).toBeInTheDocument();
-    expect(getByTestId("leftPanelMeasureGuidance")).toBeInTheDocument();
   });
 
   it("should render the MeasureMetadata component for measure-description URL", () => {
@@ -104,7 +89,6 @@ describe("MeasureDetails component", () => {
     expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureDisclaimer")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureRationale")).toBeInTheDocument();
-    expect(getByTestId("leftPanelMeasureAuthor")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureGuidance")).toBeInTheDocument();
   });
 
@@ -125,7 +109,6 @@ describe("MeasureDetails component", () => {
     expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureDisclaimer")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureRationale")).toBeInTheDocument();
-    expect(getByTestId("leftPanelMeasureAuthor")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureGuidance")).toBeInTheDocument();
   });
 
@@ -148,7 +131,6 @@ describe("MeasureDetails component", () => {
     expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureDisclaimer")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureRationale")).toBeInTheDocument();
-    expect(getByTestId("leftPanelMeasureAuthor")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureGuidance")).toBeInTheDocument();
   });
 
@@ -169,28 +151,6 @@ describe("MeasureDetails component", () => {
     expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureDisclaimer")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureRationale")).toBeInTheDocument();
-    expect(getByTestId("leftPanelMeasureAuthor")).toBeInTheDocument();
-    expect(getByTestId("leftPanelMeasureGuidance")).toBeInTheDocument();
-  });
-
-  it("should render the MeasureMetadata component for measure-author URL", () => {
-    const { getByText, getByTestId } = render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={[{ pathname: "/foo/measure-author" }]}>
-          <Route path="/foo">
-            <MeasureDetails />
-          </Route>
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
-
-    expect(getByText("Mock Measure Metadata")).toBeTruthy();
-    expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
-    expect(getByTestId("leftPanelMeasureSteward")).toBeInTheDocument();
-    expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
-    expect(getByTestId("leftPanelMeasureDisclaimer")).toBeInTheDocument();
-    expect(getByTestId("leftPanelMeasureRationale")).toBeInTheDocument();
-    expect(getByTestId("leftPanelMeasureAuthor")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureGuidance")).toBeInTheDocument();
   });
 
@@ -211,7 +171,6 @@ describe("MeasureDetails component", () => {
     expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureDisclaimer")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureRationale")).toBeInTheDocument();
-    expect(getByTestId("leftPanelMeasureAuthor")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureGuidance")).toBeInTheDocument();
   });
 });
