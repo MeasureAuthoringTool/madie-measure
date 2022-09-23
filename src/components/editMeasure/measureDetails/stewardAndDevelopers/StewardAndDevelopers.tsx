@@ -184,6 +184,13 @@ export default function StewardAndDevelopers() {
                   formik.setFieldValue("steward", selectedVal || "");
                 }}
                 renderInput={(params) => <TextField {...params} />}
+                renderOption={(props: any, option) => {
+                  const uniqueProps = {
+                    ...props,
+                    key: `${props.key}_${props.id}`,
+                  };
+                  return <li {...uniqueProps}>{option}</li>;
+                }}
               />
               {formik.errors["steward"] && (
                 <FormHelperText
@@ -204,17 +211,23 @@ export default function StewardAndDevelopers() {
                 options={organizations}
                 disableCloseOnSelect
                 getOptionLabel={(option) => option}
-                renderOption={(props, option, { selected }) => (
-                  <li {...props}>
-                    <Checkbox
-                      icon={icon}
-                      checkedIcon={checkedIcon}
-                      style={{ marginRight: 8 }}
-                      checked={selected}
-                    />
-                    {option}
-                  </li>
-                )}
+                renderOption={(props: any, option, { selected }) => {
+                  const uniqueProps = {
+                    ...props,
+                    key: `${props.key}_${props.id}`,
+                  };
+                  return (
+                    <li {...uniqueProps}>
+                      <Checkbox
+                        icon={icon}
+                        checkedIcon={checkedIcon}
+                        style={{ marginRight: 8 }}
+                        checked={selected}
+                      />
+                      {option}
+                    </li>
+                  );
+                }}
                 {...formik.getFieldProps("developers")}
                 sx={{
                   ...autoCompleteStyles,
