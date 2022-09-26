@@ -107,7 +107,7 @@ export default function StewardAndDevelopers() {
       .then(() => {
         handleToast(
           "success",
-          `Measure Steward and Developers Information Saved Successfully`,
+          `Steward and Developers Information Saved Successfully`,
           true
         );
         updateMeasure(submitMeasure);
