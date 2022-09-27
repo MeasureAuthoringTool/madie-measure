@@ -266,7 +266,7 @@ describe("Steward and Developers component", () => {
     expect(
       await screen.findByTestId("steward-and-developers-success")
     ).toHaveTextContent(
-      "Measure Steward and Developers Information Saved Successfully"
+      "Steward and Developers Information Saved Successfully"
     );
   });
 

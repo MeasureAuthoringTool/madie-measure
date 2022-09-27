@@ -107,7 +107,7 @@ export default function StewardAndDevelopers() {
       .then(() => {
         handleToast(
           "success",
-          `Measure Steward and Developers Information Saved Successfully`,
+          `Steward and Developers Information Saved Successfully`,
           true
         );
         updateMeasure(submitMeasure);
@@ -173,7 +173,7 @@ export default function StewardAndDevelopers() {
           <>
             <div tw="mb-4">
               <span style={asterisk}>*</span>
-              <label htmlFor={`steward`}>Measure Steward</label>
+              <label htmlFor={`steward`}>Steward</label>
               <Autocomplete
                 data-testid="steward"
                 options={organizations}
