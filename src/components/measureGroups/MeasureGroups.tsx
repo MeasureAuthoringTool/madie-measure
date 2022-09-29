@@ -122,18 +122,18 @@ const improvementNotationOptions = [
 ];
 
 // default value for any association is Initial population
-const emptyStrat = {
+const getEmptyStrat = {
   cqlDefinition: "",
   description: "",
   association: "Initial Population",
-  id: "",
+  id: uuidv4(),
 };
 
 export const deleteStrat = {
   cqlDefinition: "delete",
   description: "delete",
   association: "delete",
-  id: "",
+  id: uuidv4(),
 };
 
 // provides dropdown options for stratification association
@@ -244,7 +244,7 @@ const MeasureGroups = () => {
             populations: [],
             measureObservations: null,
             groupDescription: "",
-            stratifications: [{ ...emptyStrat }, { ...emptyStrat }],
+            stratifications: [getEmptyStrat, getEmptyStrat],
             rateAggregation: "",
             improvementNotation: "",
             measureGroupTypes: [],
@@ -265,10 +265,7 @@ const MeasureGroups = () => {
       rateAggregation: group?.rateAggregation || "",
       improvementNotation: group?.improvementNotation || "",
       groupDescription: group?.groupDescription,
-      stratifications: group?.stratifications || [
-        { ...emptyStrat },
-        { ...emptyStrat },
-      ],
+      stratifications: group?.stratifications || [getEmptyStrat, getEmptyStrat],
       measureGroupTypes: group?.measureGroupTypes || [],
       populationBasis: group?.populationBasis || "Boolean",
       scoringUnit: group?.scoringUnit,
@@ -698,19 +695,13 @@ const MeasureGroups = () => {
                         setActiveTab("stratification");
                         if (!!formik.values.stratifications) {
                           while (formik.values.stratifications.length < 2) {
-                            formik.values.stratifications.push({
-                              ...emptyStrat,
-                            });
+                            formik.values.stratifications.push(getEmptyStrat);
                             setVisibleStrats(2);
                           }
                         } else {
                           formik.values.stratifications = [
-                            {
-                              ...emptyStrat,
-                            },
-                            {
-                              ...emptyStrat,
-                            },
+                            getEmptyStrat,
+                            getEmptyStrat,
                           ];
                           setVisibleStrats(2);
                         }
@@ -915,7 +906,7 @@ const MeasureGroups = () => {
                               onClick={(e) => {
                                 e.preventDefault();
                                 setVisibleStrats(visibleStrats + 1);
-                                arrayHelpers.push(emptyStrat);
+                                arrayHelpers.push(getEmptyStrat);
                               }}
                             >
                               Add Stratification
