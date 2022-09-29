@@ -37,6 +37,7 @@ const measure = {
   measurementPeriodStart: "01/01/2022",
   measurementPeriodEnd: "12/02/2022",
   createdBy: "john doe",
+  measureSetId: "testMeasureId",
 } as unknown as Measure;
 
 jest.mock("@madie/madie-util", () => ({
@@ -101,12 +102,15 @@ describe("MeasureInformation component", () => {
     await act(async () => {
       const text = getByTestId("measure-name-input") as HTMLInputElement;
       expect(text.value).toBe(measure.measureName);
+      const measureId = getByTestId("measure-id-input") as HTMLInputElement;
+      expect(measureId.value).toBe(measure.measureSetId);
+      expect(measureId).toHaveProperty("readOnly", true);
       const versionId = getByTestId("version-id-input") as HTMLInputElement;
       expect(versionId.value).toBe(measure.id);
-      expect(versionId).toHaveProperty("disabled", true);
+      expect(versionId).toHaveProperty("readOnly", true);
       const cmsId = getByTestId("cms-id-input") as HTMLInputElement;
       expect(cmsId.value).toBe("");
-      expect(cmsId).toHaveProperty("disabled", true);
+      expect(cmsId).toHaveProperty("readOnly", true);
       const cqlLibraryNameText = getByTestId(
         "cql-library-name-input"
       ) as HTMLInputElement;
@@ -144,7 +148,7 @@ describe("MeasureInformation component", () => {
       expect(text.value).toBe(measure.measureName);
       const versionId = getByTestId("version-id-input") as HTMLInputElement;
       expect(versionId.value).toBe(measure.versionId);
-      expect(versionId).toHaveProperty("disabled", true);
+      expect(versionId).toHaveProperty("readOnly", true);
     });
   });
 
