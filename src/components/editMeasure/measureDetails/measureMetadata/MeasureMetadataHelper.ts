@@ -17,6 +17,9 @@ export default function getInitialValues(measure: Measure, typeLower: string) {
     case "guidance":
       const guidance = measure?.measureMetaData?.guidance;
       return !!guidance ? guidance : "";
+    case "clinical recommendation statement":
+      const clinical = measure?.measureMetaData?.clinicalRecommendation;
+      return !!clinical ? clinical : "";
     default:
       return "";
   }
@@ -43,6 +46,8 @@ export const setMeasureMetadata = (
     case "guidance":
       measure.measureMetaData.guidance = newValue;
       break;
+    case "clinical recommendation statement":
+      measure.measureMetaData.clinicalRecommendation = newValue;
     default:
       break;
   }
