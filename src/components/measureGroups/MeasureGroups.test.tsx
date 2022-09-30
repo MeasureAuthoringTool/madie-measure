@@ -350,9 +350,11 @@ describe("Measure Groups Page", () => {
     expect(mockedAxios.post.mock.calls[0][1].groupDescription).toBe(
       "new description"
     );
-    // "example-service-url/measures/test-measure/groups/",
-    // expectedGroup,
-    // expect.anything()
+    expect(mockedAxios.post).toHaveBeenCalledWith(
+      "example-service-url/measures/test-measure/groups/",
+      expect.anything(),
+      expect.anything()
+    );
   });
 
   test("Should create multiple group tabs on clicking add measure group ", async () => {
