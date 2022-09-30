@@ -11,8 +11,7 @@ import {
   ValidationResult,
   synchingEditorCqlContent,
 } from "@madie/madie-editor";
-import { Button } from "@madie/madie-components";
-import { Toast } from "@madie/madie-design-system/dist/react";
+import { Toast, Button } from "@madie/madie-design-system/dist/react";
 import { Measure } from "@madie/madie-models";
 import { CqlCode, CqlCodeSystem } from "@madie/cql-antlr-parser/dist/src";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
@@ -23,8 +22,6 @@ const MessageText = tw.p`text-sm font-medium`;
 const SuccessText = tw(MessageText)`text-green-800`;
 const WarningText = tw(MessageText)`text-yellow-800`;
 const ErrorText = tw(MessageText)`text-red-800`;
-const UpdateAlerts = tw.div`mb-2 h-5`;
-const EditorActions = tw.div`mt-2 ml-2 mb-5 space-y-5`;
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
@@ -256,64 +253,75 @@ const MeasureEditor = () => {
 
   return (
     <>
-      <div tw="mx-8 my-6 shadow-lg rounded-md border border-slate overflow-hidden bg-white">
-        <MadieEditor
-          onChange={(val: string) => handleMadieEditorValue(val)}
-          value={editorVal}
-          inboundAnnotations={elmAnnotations}
-          inboundErrorMarkers={errorMarkers}
-          height={"80vh"}
-          readOnly={!canEdit}
-        />
-        <EditorActions data-testid="measure-editor-actions">
-          <UpdateAlerts data-testid="update-cql-alerts">
-            {success?.status === "warning" ? (
-              <WarningText data-testid="save-cql-success">
-                {success.message}
-              </WarningText>
-            ) : (
-              <SuccessText data-testid="save-cql-success">
-                {success.message}
-              </SuccessText>
-            )}
-            {valuesetMsg && (
-              <SuccessText data-testid="valueset-success">
-                {valuesetMsg}
-              </SuccessText>
-            )}
-            {error && (
-              <ErrorText data-testid="save-cql-error">
-                Error updating the CQL
-              </ErrorText>
-            )}
-          </UpdateAlerts>
-          <UpdateAlerts data-testid="elm-translation-alerts">
-            {elmTranslationError && (
-              <ErrorText data-testid="elm-translation-error">
-                {elmTranslationError}
-              </ErrorText>
-            )}
-          </UpdateAlerts>
+      <div tw="flex flex-wrap mx-8 my-6 shadow-lg rounded-md border border-slate bg-white">
+        <div tw="flex-none sm:w-full">
+          <MadieEditor
+            onChange={(val: string) => handleMadieEditorValue(val)}
+            value={editorVal}
+            inboundAnnotations={elmAnnotations}
+            inboundErrorMarkers={errorMarkers}
+            height="calc(100vh - 135px)"
+            readOnly={!canEdit}
+          />
+        </div>
+        <div
+          tw="flex h-24 bg-white w-full sticky bottom-0 left-0 z-10"
+          data-testid="measure-editor-actions"
+        >
+          <div tw="w-1/2 flex flex-col px-10 py-2">
+            <div data-testid="update-cql-alerts">
+              {success?.status === "warning" ? (
+                <WarningText data-testid="save-cql-success">
+                  {success.message}
+                </WarningText>
+              ) : (
+                <SuccessText data-testid="save-cql-success">
+                  {success.message}
+                </SuccessText>
+              )}
+              {valuesetMsg && (
+                <SuccessText data-testid="valueset-success">
+                  {valuesetMsg}
+                </SuccessText>
+              )}
+              {error && (
+                <ErrorText data-testid="save-cql-error">
+                  Error updating the CQL
+                </ErrorText>
+              )}
+            </div>
+            <div data-testid="elm-translation-alerts">
+              {elmTranslationError && (
+                <ErrorText data-testid="elm-translation-error">
+                  {elmTranslationError}
+                </ErrorText>
+              )}
+            </div>
+          </div>
           {canEdit && (
-            <>
+            <div
+              tw="w-1/2 flex justify-end items-center px-10 py-6"
+              style={{ alignItems: "end" }}
+            >
               <Button
-                buttonSize="md"
-                buttonTitle="Save"
-                variant="primary"
-                onClick={() => updateMeasureCql()}
-                data-testid="save-cql-btn"
-              />
-              <Button
-                tw="ml-2"
-                buttonSize="md"
-                buttonTitle="Cancel"
-                variant="secondary"
+                tw="m-2"
+                type="button"
                 onClick={() => resetCql()}
                 data-testid="reset-cql-btn"
-              />
-            </>
+              >
+                Discard Changes
+              </Button>
+              <Button
+                tw="m-2"
+                buttonSize="md"
+                onClick={() => updateMeasureCql()}
+                data-testid="save-cql-btn"
+              >
+                Save
+              </Button>
+            </div>
           )}
-        </EditorActions>
+        </div>
       </div>
       <Toast
         toastKey="measure-cql-editor-toast"

@@ -12,6 +12,7 @@ describe("MeasureMetadataHelper", () => {
   const DISCLAIMER = "Test Disclaimer";
   const RATIONALE = "Test Rationale";
   const GUIDANCE = "Test Guidance";
+  const CLINICAL = "Test Clinical";
   const NEWVALUE = "Test New Value";
 
   afterEach(cleanup);
@@ -23,6 +24,7 @@ describe("MeasureMetadataHelper", () => {
       disclaimer: DISCLAIMER,
       rationale: RATIONALE,
       guidance: GUIDANCE,
+      clinicalRecommendation: CLINICAL,
     } as MeasureMetadata;
 
     measure = {
@@ -43,6 +45,7 @@ describe("MeasureMetadataHelper", () => {
       disclaimer: DISCLAIMER,
       rationale: RATIONALE,
       guidance: GUIDANCE,
+      clinicalRecommendation: CLINICAL,
     } as MeasureMetadata;
 
     measure = {
@@ -112,6 +115,7 @@ describe("MeasureMetadataHelper", () => {
       disclaimer: DISCLAIMER,
       rationale: null,
       guidance: GUIDANCE,
+      clinicalRecommendation: CLINICAL,
     } as MeasureMetadata;
 
     measure = {
@@ -128,6 +132,14 @@ describe("MeasureMetadataHelper", () => {
     expect(actual).toBe(GUIDANCE);
   });
 
+  it("should retrieve guidance value", () => {
+    const actual = getInitialValues(
+      measure,
+      "clinical recommendation statement"
+    );
+    expect(actual).toBe(CLINICAL);
+  });
+
   it("should return empty string instead of nul when guidance is null", () => {
     measureMetaData = {
       description: DECRIPTION,
@@ -135,6 +147,7 @@ describe("MeasureMetadataHelper", () => {
       disclaimer: DISCLAIMER,
       rationale: RATIONALE,
       guidance: null,
+      clinicalRecommendation: CLINICAL,
     } as MeasureMetadata;
 
     measure = {
@@ -174,6 +187,11 @@ describe("MeasureMetadataHelper", () => {
   it("should reset guidance value", () => {
     setMeasureMetadata(measure, "guidance", NEWVALUE);
     expect(measure.measureMetaData.guidance).toBe(NEWVALUE);
+  });
+
+  it("should reset clinicalRecommendation value", () => {
+    setMeasureMetadata(measure, "clinical recommendation statement", NEWVALUE);
+    expect(measure.measureMetaData.clinicalRecommendation).toBe(NEWVALUE);
   });
 
   it("should not reset any measure metadata", () => {
