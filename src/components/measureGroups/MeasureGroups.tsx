@@ -183,7 +183,17 @@ const MeasureGroups = () => {
   }, []);
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
-  const canEdit = userName === measure?.createdBy;
+  const canEdit =
+    measure?.createdBy === userName ||
+    measure?.acls?.map((acl) => {
+      if (
+        acl.userId === userName &&
+        acl.roles.map((role) => {
+          if (role === "SHARED_WITH") return true;
+        })
+      )
+        return acl;
+    }).length === 1;
   const measureServiceApi = useMeasureServiceApi();
   const [genericErrorMessage, setGenericErrorMessage] = useState<string>();
   const [successMessage, setSuccessMessage] = useState<string>();
