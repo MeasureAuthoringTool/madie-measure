@@ -1,11 +1,27 @@
 import * as React from "react";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import StewardAndDevelopers from "./StewardAndDevelopers";
 import { Measure } from "@madie/madie-models";
+import { useOktaTokens, measureStore } from "@madie/madie-util";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../api/useMeasureServiceApi";
 import { act } from "react-dom/test-utils";
+
+const mockHistoryPush = jest.fn();
+
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useHistory: () => ({
+    push: mockHistoryPush,
+  }),
+}));
 
 jest.mock("../../../../api/useMeasureServiceApi");
 const useMeasureServiceApiMock =
@@ -39,35 +55,42 @@ const mockMetaData = {
   rationale: "Test Rationale",
   guidance: "Test Guidance",
 };
-let mockMeasure = {
+const mockMeasure = {
   id: "TestMeasureId",
   measureName: "The Measure for Testing",
   createdBy: testUser,
   measureMetaData: { ...mockMetaData },
+  acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
 } as Measure;
 
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: jest.fn(() => ({
-    getUserName: jest.fn(() => testUser), //#nosec
+    getUserName: jest.fn(() => "test user"), //#nosec
+    getAccessToken: () => "test.jwt",
   })),
+  useKeyPress: jest.fn(() => false),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
-    state: null,
-    initialState: null,
+    state: jest.fn().mockImplementation(() => mockMeasure),
+    initialState: jest.fn().mockImplementation(() => null),
     subscribe: (set) => {
-      set(mockMeasure);
+      // set(mockMeasure)
       return { unsubscribe: () => null };
     },
   },
   routeHandlerStore: {
     subscribe: (set) => {
-      set({ canTravel: false, pendingPath: "" });
+      set(mockMeasure);
       return { unsubscribe: () => null };
     },
     updateRouteHandlerState: () => null,
-    state: { canTravel: false, pendingPath: "" },
-    initialState: { canTravel: false, pendingPath: "" },
+    state: { canTravel: true, pendingPath: "" },
+    initialState: { canTravel: true, pendingPath: "" },
   },
+}));
+
+useOktaTokens.mockImplementation(() => ({
+  getUserName: () => testUser, // #nosec
 }));
 
 let serviceApiMock: MeasureServiceApi;
@@ -147,17 +170,40 @@ describe("Steward and Developers component", () => {
   });
 
   it("should disable dropdowns if the user is not the owner of the measure", async () => {
-    mockMeasure = { ...mockMeasure, createdBy: "Test user 2" };
+    useOktaTokens.mockImplementation(() => ({
+      getUserName: () => "Test User 2", //#nosec
+    }));
+
     render(<StewardAndDevelopers />);
     const stewardAutoComplete = await screen.findByTestId("steward");
-    const stewardComboBox = within(stewardAutoComplete).getByRole("combobox");
-    expect(stewardComboBox).toBeDisabled();
-
-    const developersAutoComplete = await screen.findByTestId("developers");
-    const developersComboBox = within(developersAutoComplete).getByRole(
+    const stewardComboBox = await within(stewardAutoComplete).getByRole(
       "combobox"
     );
-    expect(developersComboBox).toBeDisabled();
+    await waitFor(() => expect(stewardComboBox).toBeDisabled());
+
+    const developersAutoComplete = await screen.findByTestId("developers");
+    const developersComboBox = await within(developersAutoComplete).getByRole(
+      "combobox"
+    );
+    await waitFor(() => expect(developersComboBox).toBeDisabled());
+  });
+
+  it("should not disable dropdowns if the measure is shared with the user", async () => {
+    useOktaTokens.mockImplementation(() => ({
+      getUserName: () => "othertestuser@example.com", //#nosec
+    }));
+    render(<StewardAndDevelopers />);
+    const stewardAutoComplete = await screen.findByTestId("steward");
+    const stewardComboBox = await within(stewardAutoComplete).findByRole(
+      "combobox"
+    );
+    await waitFor(() => expect(stewardComboBox).toBeEnabled());
+
+    const developersAutoComplete = await screen.findByTestId("developers");
+    const developersComboBox = await within(developersAutoComplete).findByRole(
+      "combobox"
+    );
+    await waitFor(() => expect(developersComboBox).toBeEnabled());
   });
 
   it("should render steward and developers fields with values from DB", async () => {
@@ -178,8 +224,6 @@ describe("Steward and Developers component", () => {
   });
 
   it("should display validation error messages, if the form is dirty and no options are selected", async () => {
-    // mockMeasure object has to be reset with actual user, as the scope is effected by one of the previous test
-    mockMeasure = { ...mockMeasure, createdBy: testUser };
     render(<StewardAndDevelopers />);
 
     // verify if inline error is displayed if no steward is selected and save button is disabled
