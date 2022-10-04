@@ -149,15 +149,9 @@ export default function MeasureInformation() {
   const isOwner = measure?.createdBy === userName;
   const canEdit =
     measure?.createdBy === userName ||
-    measure?.acls?.map((acl) => {
-      if (
-        acl.userId === userName &&
-        acl.roles.map((role) => {
-          if (role === "SHARED_WITH") return true;
-        })
-      )
-        return acl;
-    }).length === 1;
+    measure?.acls?.some(
+      (acl) => acl.userId === userName && acl.roles.indexOf("SHARED_WITH") >= 0
+    );
   const onToastClose = () => {
     setToastType(null);
     setToastMessage("");

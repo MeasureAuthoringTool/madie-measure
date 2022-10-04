@@ -185,15 +185,9 @@ const MeasureGroups = () => {
   const userName = getUserName();
   const canEdit =
     measure?.createdBy === userName ||
-    measure?.acls?.map((acl) => {
-      if (
-        acl.userId === userName &&
-        acl.roles.map((role) => {
-          if (role === "SHARED_WITH") return true;
-        })
-      )
-        return acl;
-    }).length === 1;
+    measure?.acls?.some(
+      (acl) => acl.userId === userName && acl.roles.indexOf("SHARED_WITH") >= 0
+    );
   const measureServiceApi = useMeasureServiceApi();
   const [genericErrorMessage, setGenericErrorMessage] = useState<string>();
   const [successMessage, setSuccessMessage] = useState<string>();
