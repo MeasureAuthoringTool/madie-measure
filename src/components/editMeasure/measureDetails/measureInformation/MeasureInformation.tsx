@@ -148,7 +148,7 @@ export default function MeasureInformation() {
 
   const isOwner = measure?.createdBy === userName;
   const canEdit =
-    measure?.createdBy === userName ||
+    isOwner ||
     measure?.acls?.some(
       (acl) => acl.userId === userName && acl.roles.indexOf("SHARED_WITH") >= 0
     );
