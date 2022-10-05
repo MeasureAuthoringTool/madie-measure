@@ -74,7 +74,7 @@ jest.mock("@madie/madie-util", () => ({
     state: jest.fn().mockImplementation(() => mockMeasure),
     initialState: jest.fn().mockImplementation(() => null),
     subscribe: (set) => {
-      // set(mockMeasure)
+      set(mockMeasure);
       return { unsubscribe: () => null };
     },
   },
@@ -169,7 +169,7 @@ describe("Steward and Developers component", () => {
     expect(toastMessage).not.toBeInTheDocument();
   });
 
-  it("should disable dropdowns if the user is not the owner of the measure", async () => {
+  it("should disable dropdowns if the user does not have measure edit permissions", async () => {
     useOktaTokens.mockImplementation(() => ({
       getUserName: () => "Test User 2", //#nosec
     }));

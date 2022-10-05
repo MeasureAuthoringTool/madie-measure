@@ -273,7 +273,7 @@ describe("MeasureRationale component", () => {
     });
   });
 
-  it("Should have no Save button if user is not the measure owner", () => {
+  it("Should have no Save button if user does not have measure edit permissions", () => {
     useOktaTokens.mockImplementation(() => ({
       getUserName: () => "AnotherUser@example.com", //#nosec
     }));
@@ -283,7 +283,7 @@ describe("MeasureRationale component", () => {
     expect(saveButton).not.toBeInTheDocument();
   });
 
-  it("test - Should have no input field if user is not the measure owner", () => {
+  it("Should have no input field if user does not have measure edit permissions", () => {
     useOktaTokens.mockImplementation(() => ({
       getUserName: () => "AnotherUser@example.com", //#nosec
     }));
