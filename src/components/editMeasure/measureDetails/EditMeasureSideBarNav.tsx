@@ -59,7 +59,7 @@ export default function EditMeasureSideBarNav(
       const baseURL = "/measures/" + measure?.id + "/edit/measure-groups";
       setMeasureGroups([
         {
-          title: "MEASURE GROUP 1",
+          title: "Population Criteria 1",
           href: `${baseURL}`,
           dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
         },
@@ -100,7 +100,7 @@ export default function EditMeasureSideBarNav(
     setMeasureGroups([
       ...measureGroups,
       {
-        title: `MEASURE GROUP ${measureGroups.length + 1}`,
+        title: `Population Criteria ${measureGroups.length + 1}`,
         href: "/measures/" + measure.id + "/edit/measure-groups",
         dataTestId: `leftPanelMeasureInformation-MeasureGroup${
           measureGroups.length + 1

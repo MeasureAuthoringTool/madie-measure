@@ -5,8 +5,7 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import { Checkbox, Link, ListItemText } from "@mui/material";
-
-const FieldLabel = tw.label`block capitalize text-sm font-medium text-gray-700`;
+import { InputLabel } from "@madie/madie-design-system/dist/react/";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -19,6 +18,37 @@ const MenuProps = {
   },
 };
 
+const dropdownStyle = {
+  borderRadius: "3px",
+  height: 40,
+  border: "1px solid #DDDDDD",
+  // remove weird line break from legend
+  "& .MuiOutlinedInput-notchedOutline": {
+    borderRadius: "3px",
+    "& legend": {
+      width: 0,
+    },
+  },
+  "& .MuiOutlinedInput-root": {
+    "&&": {
+      borderRadius: "3px",
+    },
+  },
+  // input base selector
+  "& .MuiInputBase-input": {
+    fontFamily: "Rubik",
+    fontSize: 14,
+    borderRadius: "3px",
+    padding: "9px 14px",
+    "&::placeholder": {
+      opacity: 0.6,
+    },
+  },
+  "& 	.MuiSelect-icon": {
+    color: "#323232",
+  },
+};
+
 export default function MultipleSelectDropDown(props: {
   values: string[];
   selectedValues: string[];
@@ -27,6 +57,8 @@ export default function MultipleSelectDropDown(props: {
   id: string;
   clearAll: any;
   canEdit: boolean;
+  required: boolean;
+  disabled: boolean;
 }) {
   // To handle clearAll, since clear is considered as an option in Select
   const handleOnchange = (event) => {
@@ -38,13 +70,18 @@ export default function MultipleSelectDropDown(props: {
 
   return (
     <div>
-      <FormControl sx={{ width: 300, mt: 3 }}>
-        <FieldLabel htmlFor="multiple-select-dropdown">
-          Measure Group type *
-        </FieldLabel>
+      <FormControl fullWidth sx={{ paddingRight: 2 }}>
+        <InputLabel
+          htmlFor={`${props.label}-dropdown`}
+          required={props.required}
+        >
+          {props.label}
+        </InputLabel>
         {props.canEdit && (
           <Select
-            labelId="multiple-select-dropdown"
+            sx={dropdownStyle}
+            required
+            labelId={`${props.id}-multiple-select-dropdown`}
             data-testid={`${props.id}-dropdown`}
             multiple
             displayEmpty
@@ -52,7 +89,7 @@ export default function MultipleSelectDropDown(props: {
             onChange={handleOnchange}
             input={
               <OutlinedInput
-                id="select-multiple-dropdown"
+                id={`${props.id}-select-multiple-dropdown`}
                 label={props.label}
               />
             }

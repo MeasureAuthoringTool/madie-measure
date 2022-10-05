@@ -400,10 +400,12 @@ describe("Measure Groups Page", () => {
     expect(continueButton).toBeInTheDocument();
     fireEvent.click(continueButton);
     await waitFor(() => {
-      expect(screen.getByText("MEASURE GROUP 2")).toBeInTheDocument();
-      expect(
-        screen.getByTestId("leftPanelMeasureInformation-MeasureGroup2")
-      ).toBeInTheDocument();
+      const populationCriteria2 = screen.getByTestId(
+        "leftPanelMeasureInformation-MeasureGroup2"
+      );
+      expect(populationCriteria2).toBeInTheDocument();
+
+      expect(populationCriteria2.textContent).toBe("Population Criteria 2");
     });
 
     const measureGroup1Link = screen.getByTestId(
@@ -411,8 +413,9 @@ describe("Measure Groups Page", () => {
     );
     expect(measureGroup1Link).toBeInTheDocument();
     userEvent.click(measureGroup1Link);
-    const measureGroupTitle = screen.getByText("Measure Group 1");
-    expect(measureGroupTitle).toBeInTheDocument();
+    expect(screen.getByTestId("title").textContent).toBe(
+      "Population Criteria 1"
+    );
   });
 
   test("OnClicking delete button, delete group modal is displayed", async () => {
@@ -421,7 +424,9 @@ describe("Measure Groups Page", () => {
     measure.groups = [group];
     await waitFor(() => renderMeasureGroupComponent());
 
-    expect(screen.getByText("MEASURE GROUP 1")).toBeInTheDocument();
+    expect(screen.getByTestId("title").textContent).toBe(
+      "Population Criteria 1"
+    );
     expect(
       screen.getByTestId("leftPanelMeasureInformation-MeasureGroup1")
     ).toBeInTheDocument();
@@ -452,7 +457,9 @@ describe("Measure Groups Page", () => {
     measure.groups = [group];
     const { rerender } = renderMeasureGroupComponent();
 
-    expect(screen.getByText("MEASURE GROUP 1")).toBeInTheDocument();
+    expect(screen.getByTestId("title").textContent).toBe(
+      "Population Criteria 1"
+    );
 
     expect(screen.getByTestId("group-form-delete-btn")).toBeInTheDocument();
     expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
@@ -518,7 +525,9 @@ describe("Measure Groups Page", () => {
     expect(
       screen.getByTestId("measure-group-type-dropdown")
     ).toBeInTheDocument();
-    expect(screen.getByText("MEASURE GROUP 1")).toBeInTheDocument();
+    expect(screen.getByTestId("title").textContent).toBe(
+      "Population Criteria 1"
+    );
 
     userEvent.click(screen.getByTestId("reporting-tab"));
 
@@ -616,7 +625,9 @@ describe("Measure Groups Page", () => {
       expect.anything()
     );
 
-    expect(screen.getByText("MEASURE GROUP 1")).toBeInTheDocument();
+    expect(screen.getByTestId("title").textContent).toBe(
+      "Population Criteria 1"
+    );
     expect(
       screen.getByTestId("leftPanelMeasureInformation-MeasureGroup1")
     ).toBeInTheDocument();
@@ -706,10 +717,11 @@ describe("Measure Groups Page", () => {
       expect.anything()
     );
 
-    expect(screen.getByText("MEASURE GROUP 2")).toBeInTheDocument();
-    expect(
-      screen.getByTestId("leftPanelMeasureInformation-MeasureGroup2")
-    ).toBeInTheDocument();
+    const populationCriteria2 = screen.getByTestId(
+      "leftPanelMeasureInformation-MeasureGroup2"
+    );
+    expect(populationCriteria2).toBeInTheDocument();
+    expect(populationCriteria2.textContent).toBe("Population Criteria 2");
   });
 
   test("Should be able to update initial population of a population group", async () => {
@@ -1321,14 +1333,20 @@ describe("Measure Groups Page", () => {
     group.groupDescription = "testDescription";
     measure.groups = [group];
     renderMeasureGroupComponent();
-    expect(screen.getByText("Measure Group 1")).toBeInTheDocument();
+    expect(screen.getByTestId("title").textContent).toBe(
+      "Population Criteria 1"
+    );
 
     const addButton = screen.getByTestId("AddIcon");
     expect(addButton).toBeInTheDocument();
     await act(async () => {
       userEvent.click(addButton);
     });
-    expect(screen.getByText("Measure Group 2")).toBeInTheDocument();
+    const populationCriteria2 = screen.getByTestId(
+      "leftPanelMeasureInformation-MeasureGroup2"
+    );
+    expect(populationCriteria2).toBeInTheDocument();
+    expect(populationCriteria2.textContent).toBe("Population Criteria 2");
 
     const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
     expect(groupDescriptionInput).toBeTruthy();

@@ -9,8 +9,6 @@ import {
 } from "@madie/madie-models";
 import {
   Alert,
-  Autocomplete,
-  TextField,
   Grid as GridLayout,
   MenuItem as MuiMenuItem,
   Link,
@@ -44,12 +42,11 @@ import {
 import GroupPopulation from "./GroupPopulation";
 import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
 import MeasureGroupObservation from "./MeasureGroupObservation";
+import AutoComplete from "./AutoComplete";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
-const Content = styled.div(() => [tw`col-span-3`]);
+const Content = styled.div(() => [tw`col-span-3 pl-4 pr-4`]);
 const Header = styled.section`
-  background-color: #f2f5f7;
-  padding: 1em 3em;
   border-bottom: solid 1px rgba(80, 93, 104, 0.2);
 `;
 const Title = styled.h1`
@@ -90,9 +87,9 @@ const MenuItem = styled.li((props: PropTypes) => [
     tw`bg-white text-slate-90 font-medium border-solid border-b border-red-500`,
 ]);
 
-const FormField = tw.div`mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-3`;
+const FormField = tw.div`mt-6 grid grid-cols-4`;
 const FormFieldInner = tw.div`sm:col-span-3`;
-const FieldLabel = tw.label`block capitalize text-sm font-medium text-gray-700`;
+const FieldLabel = tw.label`block capitalize text-sm font-medium text-slate-90`;
 const FieldSeparator = tw.div`mt-1`;
 const FieldInput = tw.input`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
 const TextArea = tw.textarea`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
@@ -452,13 +449,13 @@ const MeasureGroups = () => {
   const measureGroups = measure?.groups
     ? measure.groups?.map((group, id) => ({
         ...group,
-        title: `MEASURE GROUP ${id + 1}`,
+        title: `Population Criteria ${id + 1}`,
         href: `${baseURL}`,
         dataTestId: `leftPanelMeasureInformation-MeasureGroup${id + 1}`,
       }))
     : [
         {
-          title: "MEASURE GROUP 1",
+          title: "Population Criteria 1",
           href: `${baseURL}`,
           dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
         },
@@ -509,7 +506,9 @@ const MeasureGroups = () => {
           />
           <Content>
             <Header>
-              <Title>Measure Group {measureGroupNumber + 1}</Title>
+              <Title data-testid="title">
+                Population Criteria {measureGroupNumber + 1}
+              </Title>
             </Header>
 
             {/* delete measure group warning dialog */}
@@ -556,7 +555,7 @@ const MeasureGroups = () => {
 
             {/* Form control later should be moved to own component and dynamically rendered by switch based on measure. */}
 
-            <div tw="px-12 py-8">
+            <div>
               <FormField>
                 <FormFieldInner>
                   <FieldLabel htmlFor="measure-group-description">
@@ -579,6 +578,7 @@ const MeasureGroups = () => {
                   </FieldSeparator>
                 </FormFieldInner>
               </FormField>
+
               <FormField>
                 <MultipleSelectDropDown
                   values={Object.values(MeasureGroupTypes)}
@@ -588,94 +588,87 @@ const MeasureGroups = () => {
                   id="measure-group-type"
                   clearAll={() => formik.setFieldValue("measureGroupTypes", [])}
                   canEdit={canEdit}
+                  required={true}
+                  disabled={false}
+                />
+
+                {populationBasisValues && (
+                  <AutoComplete
+                    id="population-basis"
+                    label="Population Basis"
+                    placeHolder={{ name: "-", value: "" }}
+                    defaultValue={formik.values.populationBasis}
+                    required={true}
+                    disabled={false}
+                    {...formik.getFieldProps("populationBasis")}
+                    error={
+                      formik.touched.populationBasis &&
+                      Boolean(formik.errors.populationBasis)
+                    }
+                    helperText={
+                      formik.touched.populationBasis &&
+                      formik.errors.populationBasis
+                    }
+                    onChange={(_event: any, selectedVal: string | null) => {
+                      formik.setFieldValue("populationBasis", selectedVal);
+                    }}
+                    options={populationBasisValues}
+                  ></AutoComplete>
+                )}
+
+                {canEdit && (
+                  <Select
+                    placeHolder={{ name: "-", value: "" }}
+                    required
+                    label="Scoring"
+                    id="scoring-select"
+                    inputProps={{ "data-testid": "scoring-select-input" }}
+                    data-testid="scoring-select"
+                    {...formik.getFieldProps("scoring")}
+                    error={
+                      formik.touched.scoring && Boolean(formik.errors.scoring)
+                    }
+                    helperText={formik.touched.scoring && formik.errors.scoring}
+                    size="small"
+                    onChange={(e) => {
+                      const nextScoring = e.target.value;
+                      const populations = getPopulationsForScoring(nextScoring);
+                      const observations =
+                        getDefaultObservationsForScoring(nextScoring);
+                      formik.setFieldValue("scoring", nextScoring);
+                      formik.setFieldValue(
+                        "populations",
+                        [...populations].map((p) => ({
+                          ...p,
+                          id: uuidv4(),
+                        }))
+                      );
+                      formik.setFieldValue("measureObservations", observations);
+                    }}
+                    options={Object.keys(GroupScoring).map((scoring) => {
+                      return (
+                        <MuiMenuItem
+                          key={scoring}
+                          value={GroupScoring[scoring]}
+                          data-testid={`group-scoring-option-${scoring}`}
+                        >
+                          {GroupScoring[scoring]}
+                        </MuiMenuItem>
+                      );
+                    })}
+                  />
+                )}
+                {!canEdit && formik.values.scoring}
+
+                <MeasureGroupScoringUnit
+                  {...formik.getFieldProps("scoringUnit")}
+                  onChange={(newValue) => {
+                    formik.setFieldValue("scoringUnit", newValue);
+                  }}
+                  canEdit={canEdit}
                 />
               </FormField>
-              {populationBasisValues && (
-                <FormField>
-                  <FieldSeparator>
-                    <FieldLabel htmlFor="population-basis-combo-box">
-                      Population Basis *
-                    </FieldLabel>
-                    {canEdit && (
-                      <Autocomplete
-                        disablePortal
-                        data-testid="population-basis-combo-box"
-                        options={populationBasisValues}
-                        sx={{ width: 300 }}
-                        defaultValue={formik.values.populationBasis}
-                        {...formik.getFieldProps("populationBasis")}
-                        onChange={(_event: any, selectedVal: string | null) => {
-                          formik.setFieldValue("populationBasis", selectedVal);
-                        }}
-                        renderInput={(params) => (
-                          <TextField {...params} label="" />
-                        )}
-                      />
-                    )}
-                    {!canEdit && formik.values.populationBasis}
-                  </FieldSeparator>
-                </FormField>
-              )}
-              <FormField>
-                <FieldSeparator>
-                  {canEdit && (
-                    <Select
-                      placeHolder={{ name: "-", value: "" }}
-                      required
-                      label="Scoring"
-                      id="scoring-select"
-                      inputProps={{ "data-testid": "scoring-select-input" }}
-                      data-testid="scoring-select"
-                      {...formik.getFieldProps("scoring")}
-                      error={
-                        formik.touched.scoring && Boolean(formik.errors.scoring)
-                      }
-                      helperText={
-                        formik.touched.scoring && formik.errors.scoring
-                      }
-                      size="small"
-                      onChange={(e) => {
-                        const nextScoring = e.target.value;
-                        const populations =
-                          getPopulationsForScoring(nextScoring);
-                        const observations =
-                          getDefaultObservationsForScoring(nextScoring);
-                        formik.setFieldValue("scoring", nextScoring);
-                        formik.setFieldValue(
-                          "populations",
-                          [...populations].map((p) => ({
-                            ...p,
-                            id: uuidv4(),
-                          }))
-                        );
-                        formik.setFieldValue(
-                          "measureObservations",
-                          observations
-                        );
-                      }}
-                      options={Object.keys(GroupScoring).map((scoring) => {
-                        return (
-                          <MuiMenuItem
-                            key={scoring}
-                            value={GroupScoring[scoring]}
-                            data-testid={`group-scoring-option-${scoring}`}
-                          >
-                            {GroupScoring[scoring]}
-                          </MuiMenuItem>
-                        );
-                      })}
-                    />
-                  )}
-                  {!canEdit && formik.values.scoring}
-                </FieldSeparator>
-              </FormField>
-              <MeasureGroupScoringUnit
-                {...formik.getFieldProps("scoringUnit")}
-                onChange={(newValue) => {
-                  formik.setFieldValue("scoringUnit", newValue);
-                }}
-                canEdit={canEdit}
-              />
+
               <div>
                 <MenuItemContainer>
                   <MenuItem
