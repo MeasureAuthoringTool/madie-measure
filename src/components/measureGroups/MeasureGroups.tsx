@@ -119,12 +119,13 @@ const improvementNotationOptions = [
 ];
 
 // default value for any association is Initial population
-const emptyStrat = {
+// TODO: figure out why it is being called on every rerender
+const getEmptyStrat = () => ({
   cqlDefinition: "",
   description: "",
   association: "Initial Population",
-  id: "",
-};
+  id: uuidv4(),
+});
 
 export const deleteStrat = {
   cqlDefinition: "delete",
@@ -241,7 +242,7 @@ const MeasureGroups = () => {
             populations: [],
             measureObservations: null,
             groupDescription: "",
-            stratifications: [{ ...emptyStrat }, { ...emptyStrat }],
+            stratifications: [getEmptyStrat(), getEmptyStrat()],
             rateAggregation: "",
             improvementNotation: "",
             measureGroupTypes: [],
@@ -263,8 +264,8 @@ const MeasureGroups = () => {
       improvementNotation: group?.improvementNotation || "",
       groupDescription: group?.groupDescription,
       stratifications: group?.stratifications || [
-        { ...emptyStrat },
-        { ...emptyStrat },
+        getEmptyStrat(),
+        getEmptyStrat(),
       ],
       measureGroupTypes: group?.measureGroupTypes || [],
       populationBasis: group?.populationBasis || "Boolean",
@@ -691,19 +692,13 @@ const MeasureGroups = () => {
                         setActiveTab("stratification");
                         if (!!formik.values.stratifications) {
                           while (formik.values.stratifications.length < 2) {
-                            formik.values.stratifications.push({
-                              ...emptyStrat,
-                            });
+                            formik.values.stratifications.push(getEmptyStrat());
                             setVisibleStrats(2);
                           }
                         } else {
                           formik.values.stratifications = [
-                            {
-                              ...emptyStrat,
-                            },
-                            {
-                              ...emptyStrat,
-                            },
+                            getEmptyStrat(),
+                            getEmptyStrat(),
                           ];
                           setVisibleStrats(2);
                         }
@@ -908,7 +903,7 @@ const MeasureGroups = () => {
                               onClick={(e) => {
                                 e.preventDefault();
                                 setVisibleStrats(visibleStrats + 1);
-                                arrayHelpers.push(emptyStrat);
+                                arrayHelpers.push(getEmptyStrat());
                               }}
                             >
                               Add Stratification
