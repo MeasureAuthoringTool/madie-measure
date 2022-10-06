@@ -6,6 +6,7 @@ import {
   Group,
   GroupScoring,
   MeasureGroupTypes,
+  PopulationType,
 } from "@madie/madie-models";
 import {
   Alert,
@@ -97,6 +98,8 @@ const FieldSeparator = tw.div`mt-1`;
 const FieldInput = tw.input`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
 const TextArea = tw.textarea`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
 
+const deleteToken = "FDE8472A-6095-4292-ABF7-E35AD435F05F"; // randomly generated token for deleting
+
 // provides dropdown options for Improvement Notation
 const improvementNotationOptions = [
   {
@@ -126,14 +129,14 @@ const improvementNotationOptions = [
 const getEmptyStrat = () => ({
   cqlDefinition: "",
   description: "",
-  association: "Initial Population",
+  association: PopulationType.INITIAL_POPULATION,
   id: uuidv4(),
 });
 
 export const deleteStrat = {
   cqlDefinition: "delete",
-  description: "delete",
-  association: "delete",
+  description: deleteToken,
+  association: PopulationType.INITIAL_POPULATION,
   id: "",
 };
 
@@ -353,7 +356,7 @@ const MeasureGroups = () => {
       group.stratifications = group.stratifications.filter(
         (strat) =>
           (!!strat.description || !!strat.cqlDefinition) &&
-          strat.association !== "delete"
+          strat.description !== deleteToken
       );
     }
 
@@ -787,8 +790,8 @@ const MeasureGroups = () => {
                       {formik.values.stratifications ? (
                         formik.values.stratifications.map(
                           (strat, i) =>
-                            formik.values.stratifications[i].association !==
-                              "delete" && (
+                            formik.values.stratifications[i].description !==
+                              deleteToken && (
                               <div key={i}>
                                 <Row>
                                   <Col>
