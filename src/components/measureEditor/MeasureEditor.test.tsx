@@ -16,7 +16,7 @@ import {
   synchingEditorCqlContent,
   ElmTranslationExternalError,
 } from "@madie/madie-editor";
-import { measureStore } from "@madie/madie-util";
+import { useOktaTokens, measureStore } from "@madie/madie-util";
 
 const measure = {
   id: "abcd-pqrs-xyz",
@@ -35,6 +35,7 @@ const measure = {
   lastModifiedBy: "",
   model: "QI-Core v4.1.1",
   measureMetaData: {},
+  acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
 } as unknown as Measure;
 // } as Measure;
 
@@ -320,6 +321,7 @@ describe("MeasureEditor component", () => {
         revisionNumber: 1.1,
         state: "",
         version: 1,
+        acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
       },
       { headers: { Authorization: "Bearer test.jwt" } }
     );
@@ -384,6 +386,7 @@ describe("MeasureEditor component", () => {
         revisionNumber: 1.1,
         state: "",
         version: 1,
+        acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
       },
       { headers: { Authorization: "Bearer test.jwt" } }
     );
@@ -606,13 +609,27 @@ describe("map elm errors to Ace Markers", () => {
 });
 
 it("Save button and Cancel button should not show if user is not the owner of the measure", () => {
-  measure.createdBy = "AnotherUser@example.com";
+  useOktaTokens.mockImplementation(() => ({
+    getUserName: () => "AnotherUser@example.com", //#nosec
+  }));
   renderEditor(measure);
 
   const cancelButton = screen.queryByTestId("reset-cql-btn");
   expect(cancelButton).not.toBeInTheDocument();
   const saveButton = screen.queryByTestId("save-cql-btn");
   expect(saveButton).not.toBeInTheDocument();
+});
+
+it("Save button and Cancel button should show if measure is shared with the user", () => {
+  useOktaTokens.mockImplementation(() => ({
+    getUserName: () => "othertestuser@example.com", //#nosec
+  }));
+  renderEditor(measure);
+
+  const cancelButton = screen.queryByTestId("reset-cql-btn");
+  expect(cancelButton).toBeInTheDocument();
+  const saveButton = screen.queryByTestId("save-cql-btn");
+  expect(saveButton).toBeInTheDocument();
 });
 
 it("should display errors if not logged into umls", async () => {

@@ -73,8 +73,11 @@ export default function StewardAndDevelopers() {
 
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
-  const canEdit = userName === measure?.createdBy;
-
+  const canEdit =
+    measure?.createdBy === userName ||
+    measure?.acls?.some(
+      (acl) => acl.userId === userName && acl.roles.indexOf("SHARED_WITH") >= 0
+    );
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {

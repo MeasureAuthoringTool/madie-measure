@@ -38,6 +38,7 @@ const measure = {
   measurementPeriodEnd: "12/02/2022",
   createdBy: "john doe",
   measureSetId: "testMeasureId",
+  acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
 } as unknown as Measure;
 
 jest.mock("@madie/madie-util", () => ({
@@ -560,5 +561,33 @@ describe("MeasureInformation component", () => {
       "500: bad test oh no what happened"
     );
     expect(toastErrorMessage).toBeInTheDocument();
+  });
+
+  it("Should be editable if measure is shared with the user", () => {
+    useOktaTokens.mockImplementationOnce(() => ({
+      getUserName: () => "othertestuser@example.com", //#nosec
+    }));
+    render(<MeasureInformation />);
+    const result: HTMLElement = getByTestId("measure-information-edit");
+    expect(result).toBeInTheDocument();
+
+    const text = getByTestId("measure-name-input") as HTMLInputElement;
+    expect(text.disabled).toBe(false);
+    const cqlLibraryNameText = getByTestId(
+      "cql-library-name-input"
+    ) as HTMLInputElement;
+    expect(cqlLibraryNameText.disabled).toBe(false);
+    const ecqmTitleText = getByTestId("ecqm-input") as HTMLInputElement;
+    expect(ecqmTitleText.disabled).toBe(false);
+    const measurementPeriodStartNode = getByTestId("measurement-period-start");
+    const measurementPeriodStartInput = within(
+      measurementPeriodStartNode
+    ).getByRole("textbox") as HTMLInputElement;
+    expect(measurementPeriodStartInput.disabled).toBe(false);
+    const measurementPeriodEndNode = getByTestId("measurement-period-end");
+    const measurementPeriodEndInput = within(
+      measurementPeriodEndNode
+    ).getByRole("textbox") as HTMLInputElement;
+    expect(measurementPeriodEndInput.disabled).toBe(false);
   });
 });
