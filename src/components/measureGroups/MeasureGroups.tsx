@@ -774,7 +774,10 @@ const MeasureGroups = () => {
                       <MeasureGroupObservation
                         canEdit={canEdit}
                         scoring={formik.values.scoring}
-                        population={null}
+                        population={formik.values.populations?.filter(
+                          (pop) =>
+                            pop.name === PopulationType.MEASURE_POPULATION
+                        )}
                         elmJson={measure?.elmJson}
                       />
                     </GridLayout>

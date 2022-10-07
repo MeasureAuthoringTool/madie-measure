@@ -35,10 +35,12 @@ const MeasureGroupObservation = ({ scoring, population, elmJson, canEdit }) => {
     );
   } else if (
     scoring === MeasureScoring.CONTINUOUS_VARIABLE &&
-    _.isNil(population?.name) &&
+    [PopulationType.MEASURE_POPULATION].includes(population?.name) &&
     formik.values.measureObservations?.[0]
   ) {
     observationName = "cv-obs";
+    criteriaReference = population.id;
+    formik.values.measureObservations[0].criteriaReference = population?.id;
     measureObservation = formik.values.measureObservations?.[0];
     required = true;
     style = { marginLeft: 8, marginTop: 24 };
