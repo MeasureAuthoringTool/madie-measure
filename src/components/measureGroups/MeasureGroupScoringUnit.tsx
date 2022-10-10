@@ -70,14 +70,20 @@ const MeasureGroupScoringUnit = ({
       return [
         {
           label: exactMatch.unit.code + " " + exactMatch.unit.name,
-          value: exactMatch.unit,
+          value: {
+            ...exactMatch.unit,
+            system: "https://clinicaltables.nlm.nih.gov/",
+          },
         },
       ];
     } else if (synonyms.status === "succeeded") {
       return synonyms.units.map((unit) => {
         return {
           label: unit.code + " " + unit.name,
-          value: unit,
+          value: {
+            ...unit,
+            system: "https://clinicaltables.nlm.nih.gov/",
+          },
         };
       });
     } else {
