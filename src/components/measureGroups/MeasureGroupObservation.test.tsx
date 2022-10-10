@@ -83,7 +83,7 @@ describe("Measure Group Observation", () => {
           id: "abcd-01",
           definition: "MyFunc1",
           aggregateMethod: "Count",
-          criteriaReference: null,
+          criteriaReference: "pop3",
         },
       ],
     };
@@ -101,11 +101,17 @@ describe("Measure Group Observation", () => {
       },
     });
 
+    const population = {
+      id: "pop3",
+      name: PopulationType.MEASURE_POPULATION,
+      definition: "denom",
+    };
+
     render(
       <MeasureGroupObservation
         scoring={MeasureScoring.CONTINUOUS_VARIABLE}
         elmJson={elmJson}
-        population={null}
+        population={population}
       />
     );
 
@@ -164,6 +170,7 @@ describe("Measure Group Observation", () => {
         elmJson={elmJson}
         population={population}
         canEdit
+        linkMeasureObservationDisplay={true}
       />
     );
 
@@ -294,7 +301,7 @@ describe("Measure Group Observation", () => {
           id: "abcd-01",
           definition: "MyFunc1",
           aggregateMethod: "Count",
-          criteriaReference: null,
+          criteriaReference: "pop3",
         },
       ],
     };
@@ -321,11 +328,17 @@ describe("Measure Group Observation", () => {
       },
     });
 
+    const population = {
+      id: "pop3",
+      name: PopulationType.MEASURE_POPULATION,
+      definition: "denom",
+    };
+
     render(
       <MeasureGroupObservation
         scoring={MeasureScoring.CONTINUOUS_VARIABLE}
         elmJson={elmJson}
-        population={null}
+        population={population}
       />
     );
 
@@ -345,7 +358,7 @@ describe("Measure Group Observation", () => {
         id: "abcd-01",
         definition: "MyFuncAB",
         aggregateMethod: "Count",
-        criteriaReference: null,
+        criteriaReference: "pop3",
       },
     ]);
   });
@@ -392,6 +405,7 @@ describe("Measure Group Observation", () => {
         elmJson={null}
         population={population}
         canEdit
+        linkMeasureObservationDisplay={true}
       />
     );
 
@@ -448,6 +462,7 @@ describe("Measure Group Observation", () => {
         elmJson={elmJson}
         population={population}
         canEdit
+        linkMeasureObservationDisplay={true}
       />
     );
 

@@ -762,11 +762,13 @@ const MeasureGroups = () => {
                                 setAssociationChanged={setAssociationChanged}
                               />
                             </GridLayout>
+
                             <MeasureGroupObservation
                               canEdit={canEdit}
                               scoring={formik.values.scoring}
                               population={population}
                               elmJson={measure?.elmJson}
+                              linkMeasureObservationDisplay={true}
                             />
                           </React.Fragment>
                         );
@@ -774,8 +776,14 @@ const MeasureGroups = () => {
                       <MeasureGroupObservation
                         canEdit={canEdit}
                         scoring={formik.values.scoring}
-                        population={null}
+                        population={
+                          formik.values.populations?.filter(
+                            (pop) =>
+                              pop.name === PopulationType.MEASURE_POPULATION
+                          )[0]
+                        }
                         elmJson={measure?.elmJson}
+                        linkMeasureObservationDisplay={null}
                       />
                     </GridLayout>
                   )}
