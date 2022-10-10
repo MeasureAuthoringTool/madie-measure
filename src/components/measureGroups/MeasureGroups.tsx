@@ -12,6 +12,8 @@ import {
   Grid as GridLayout,
   MenuItem as MuiMenuItem,
   Link,
+  Typography,
+  Divider,
 } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import EditMeasureSideBarNav from "../editMeasure/measureDetails/EditMeasureSideBarNav";
@@ -46,13 +48,6 @@ import AutoComplete from "./AutoComplete";
 
 const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
 const Content = styled.div(() => [tw`col-span-3 pl-4 pr-4`]);
-const Header = styled.section`
-  border-bottom: solid 1px rgba(80, 93, 104, 0.2);
-`;
-const Title = styled.h1`
-  font-size: 18px;
-  color: #424b5a;
-`;
 
 const ButtonSpacer = styled.span`
   margin-left: 15px;
@@ -506,11 +501,28 @@ const MeasureGroups = () => {
             setSuccessMessage={setSuccessMessage}
           />
           <Content>
-            <Header>
-              <Title data-testid="title">
+            <div className="subTitle" style={{ marginTop: 30 }}>
+              <h3 data-testid="title">
                 Population Criteria {measureGroupNumber + 1}
-              </Title>
-            </Header>
+              </h3>
+              <div className="required">
+                <Typography
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 300,
+                    fontFamily: "Rubik",
+                    float: "right",
+                    marginBottom: -10,
+                  }}
+                >
+                  <span style={{ color: "#D92F2F", marginRight: 3 }}>*</span>
+                  Indicates required field
+                </Typography>
+              </div>
+              <div>
+                <Divider style={{ marginTop: 30, marginBottom: 20 }} />
+              </div>
+            </div>
 
             {/* delete measure group warning dialog */}
             {deleteMeasureGroupDialog.open && (
