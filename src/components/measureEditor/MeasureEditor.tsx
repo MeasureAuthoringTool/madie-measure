@@ -101,7 +101,12 @@ const MeasureEditor = () => {
 
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
-  const canEdit = userName === measure?.createdBy;
+  const canEdit =
+    measure?.createdBy === userName ||
+    measure?.acls?.some(
+      (acl) => acl.userId === userName && acl.roles.indexOf("SHARED_WITH") >= 0
+    );
+
   const [valuesetMsg, setValuesetMsg] = useState(null);
 
   // toast utilities
