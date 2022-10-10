@@ -38,7 +38,7 @@ describe("EditMeasureSideBarNav", () => {
         },
         stratifications: [],
         populationBasis: null,
-        title: "MEASURE GROUP 1",
+        title: "Population Criteria 1",
         href: "/measures/62e305056d85987a43a6060c/edit/measure-groups",
         dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
       },
@@ -66,7 +66,7 @@ describe("EditMeasureSideBarNav", () => {
         },
         stratifications: [],
         populationBasis: null,
-        title: "MEASURE GROUP 1",
+        title: "Population Criteria 1",
         href: "/measures/62e305056d85987a43a6060c/edit/measure-groups",
         dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
       },
@@ -112,7 +112,7 @@ describe("EditMeasureSideBarNav", () => {
 
   test("Measure Group add click when dirty opens up a warning dialog, hitting cancel closes it", async () => {
     await waitFor(() => RenderEditMeasureSideBarNav(initialProps));
-    expect(getByText("MEASURE GROUP 1")).toBeInTheDocument();
+    expect(getByText("Population Criteria 1")).toBeInTheDocument();
 
     const addButton = getByTestId("AddIcon");
     expect(addButton).toBeInTheDocument();
@@ -133,7 +133,7 @@ describe("EditMeasureSideBarNav", () => {
 
   test("Measure Group nav click when dirty opens up a warning dialog, hitting cancel closes it", async () => {
     await waitFor(() => RenderEditMeasureSideBarNav(initialProps));
-    expect(getByText("MEASURE GROUP 1")).toBeInTheDocument();
+    expect(getByText("Population Criteria 1")).toBeInTheDocument();
     const navButton = getByTestId("leftPanelMeasureInformation-MeasureGroup1");
     expect(navButton).toBeInTheDocument();
     fireEvent.click(navButton);
@@ -152,7 +152,7 @@ describe("EditMeasureSideBarNav", () => {
 
   test("Measure Group nav click when dirty opens up a warning dialog, hitting continue closes it", async () => {
     await waitFor(() => RenderEditMeasureSideBarNav(initialProps));
-    expect(getByText("MEASURE GROUP 1")).toBeInTheDocument();
+    expect(getByText("Population Criteria 1")).toBeInTheDocument();
     const navButton = getByTestId("leftPanelMeasureInformation-MeasureGroup1");
     expect(navButton).toBeInTheDocument();
     fireEvent.click(navButton);
@@ -172,7 +172,7 @@ describe("EditMeasureSideBarNav", () => {
   test("Measure navigation click without dirty does not render a dialog", async () => {
     const nonDirtyProps = { ...initialProps, dirty: false };
     await waitFor(() => RenderEditMeasureSideBarNav(nonDirtyProps));
-    expect(getByText("MEASURE GROUP 1")).toBeInTheDocument();
+    expect(getByText("Population Criteria 1")).toBeInTheDocument();
     const navButton = getByTestId("leftPanelMeasureInformation-MeasureGroup1");
     expect(navButton).toBeInTheDocument();
     fireEvent.click(navButton);
