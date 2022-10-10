@@ -1702,8 +1702,28 @@ describe("Measure Groups Page", () => {
         id: "uuid-1",
         definition: "fun",
         aggregateMethod: AggregateFunctionType.COUNT,
+        criteriaReference: "id-3",
       },
     ];
+
+    group.populations = [
+      {
+        id: "id-1",
+        name: PopulationType.INITIAL_POPULATION,
+        definition: "Initial Population",
+      },
+      {
+        id: "id-2",
+        name: PopulationType.MEASURE_POPULATION,
+        definition: "MeasurePopulationExclusion",
+      },
+      {
+        id: "id-3",
+        name: PopulationType.MEASURE_POPULATION_EXCLUSION,
+        definition: "MeasurePopulation",
+      },
+    ];
+
     measure.groups = [group];
     await waitFor(() => renderMeasureGroupComponent());
 

@@ -11,7 +11,13 @@ import { useFormikContext } from "formik";
 import * as _ from "lodash";
 import { DSLink } from "@madie/madie-design-system/dist/react";
 
-const MeasureGroupObservation = ({ scoring, population, elmJson, canEdit }) => {
+const MeasureGroupObservation = ({
+  scoring,
+  population,
+  elmJson,
+  canEdit,
+  linkMeasureObservationDisplay,
+}) => {
   const formik = useFormikContext<any>();
   let observationName = "";
   let label = `Observation`;
@@ -22,6 +28,7 @@ const MeasureGroupObservation = ({ scoring, population, elmJson, canEdit }) => {
 
   if (
     scoring === MeasureScoring.RATIO &&
+    linkMeasureObservationDisplay &&
     [PopulationType.NUMERATOR, PopulationType.DENOMINATOR].includes(
       population?.name
     )
@@ -35,10 +42,13 @@ const MeasureGroupObservation = ({ scoring, population, elmJson, canEdit }) => {
     );
   } else if (
     scoring === MeasureScoring.CONTINUOUS_VARIABLE &&
-    _.isNil(population?.name) &&
-    formik.values.measureObservations?.[0]
+    [PopulationType.MEASURE_POPULATION].includes(population?.name) &&
+    formik.values.measureObservations?.[0] &&
+    _.isNil(linkMeasureObservationDisplay)
   ) {
     observationName = "cv-obs";
+    criteriaReference = population.id;
+    formik.values.measureObservations[0].criteriaReference = population?.id;
     measureObservation = formik.values.measureObservations?.[0];
     required = true;
     style = { marginLeft: 8, marginTop: 24 };
