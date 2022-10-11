@@ -190,7 +190,7 @@ export default function EditMeasureSideBarNav(
             data-testid="add-measure-group-button"
           >
             <AddIcon className="add-icon" fontSize="small" />
-            &nbsp; Add Measure Group
+            &nbsp; Add Population Criteria
           </DSLink>
         </div>
       </Nav>
