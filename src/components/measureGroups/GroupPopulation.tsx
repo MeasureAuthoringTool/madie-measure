@@ -6,6 +6,7 @@ import { GroupScoring, Population, PopulationType } from "@madie/madie-models";
 import { FormikState, getIn } from "formik";
 import { FieldInputProps } from "formik/dist/types";
 import { findPopulations, isPopulationRequired } from "./PopulationHelper";
+import { v4 as uuidv4 } from "uuid";
 
 export enum InitialPopulationAssociationType {
   DENOMINATOR = "Denominator",
@@ -122,7 +123,7 @@ const GroupPopulation = ({
       }
     }
     insertCallback(populationIndex + 1, {
-      id: populationIndex + 1,
+      id: uuidv4(),
       name: population.name,
       definition: "",
       associationType: secondAssociation,
