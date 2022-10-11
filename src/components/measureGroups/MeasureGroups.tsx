@@ -243,6 +243,7 @@ const MeasureGroups = () => {
           ? measure.groups[measureGroupNumber].stratifications.length
           : 2
       );
+      setActiveTab("populations");
     } else {
       if (measureGroupNumber >= measure?.groups?.length || !measure?.groups) {
         resetForm({
@@ -260,6 +261,7 @@ const MeasureGroups = () => {
             scoringUnit: "",
           },
         });
+        setActiveTab("populations");
       }
     }
   }, [measureGroupNumber, measure?.groups]);
