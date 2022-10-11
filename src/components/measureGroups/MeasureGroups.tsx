@@ -580,7 +580,7 @@ const MeasureGroups = () => {
               <FormField>
                 <FormFieldInner>
                   <FieldLabel htmlFor="measure-group-description">
-                    Group Description
+                    Description
                   </FieldLabel>
                   <FieldSeparator>
                     {canEdit && (
@@ -590,7 +590,7 @@ const MeasureGroups = () => {
                         name="group-description"
                         id="group-description"
                         autoComplete="group-description"
-                        placeholder="Group Description"
+                        placeholder="Description"
                         data-testid="groupDescriptionInput"
                         {...formik.getFieldProps("groupDescription")}
                       />
@@ -605,7 +605,7 @@ const MeasureGroups = () => {
                   values={Object.values(MeasureGroupTypes)}
                   selectedValues={formik.values.measureGroupTypes}
                   formControl={formik.getFieldProps("measureGroupTypes")}
-                  label="Measure Group Type"
+                  label="Type"
                   id="measure-group-type"
                   clearAll={() => formik.setFieldValue("measureGroupTypes", [])}
                   canEdit={canEdit}
