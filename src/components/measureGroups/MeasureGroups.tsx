@@ -58,6 +58,7 @@ const GroupActions = styled.div(() => [tw`col-span-1 border-r p-1`]);
 const PopulationActions = styled.div(() => [
   "background-color: #f2f5f7;",
   tw`col-span-3 p-1 pl-6`,
+  "display: flex; align-items: end; justify-content: space-between",
 ]);
 const Row = styled.section`
   display: flex;
