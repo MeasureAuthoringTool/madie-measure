@@ -84,11 +84,7 @@ describe("Measure List component", () => {
     );
     measures.forEach((m) => {
       expect(getByText(m.measureName)).toBeInTheDocument();
-      expect(screen.getByTestId(`measure-button-${m.id}`)).toBeInTheDocument();
     });
-    const measureButton = getByTestId(`measure-button-${measures[0].id}`);
-    fireEvent.click(measureButton);
-    expect(mockPush).toHaveBeenCalledWith("/example");
   });
 
   it("should navigate to the edit measure screen on click of edit/view button", () => {

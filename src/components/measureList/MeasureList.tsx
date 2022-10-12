@@ -44,15 +44,7 @@ export default function MeasureList(props: { measureList: Measure[] }) {
                       data-testid="row-item"
                       className={i % 2 === 0 ? "odd" : ""}
                     >
-                      <td>
-                        <button
-                          type="button"
-                          onClick={() => history.push("#")}
-                          data-testid={`measure-button-${measure.id}`}
-                        >
-                          {measure.measureName}
-                        </button>
-                      </td>
+                      <td>{measure.measureName}</td>
                       <td>{measure.model}</td>
                       <td>{measure.version}</td>
                       <td>{measure.revisionNumber}</td>
@@ -64,7 +56,6 @@ export default function MeasureList(props: { measureList: Measure[] }) {
                           </div>
                         </div>
                       </td>
-
                       <td>
                         <button
                           className="action-button"
