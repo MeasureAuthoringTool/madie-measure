@@ -1,24 +1,12 @@
 import React, { useEffect, useState } from "react";
-import tw, { styled } from "twin.macro";
+import "twin.macro";
+import "styled-components/macro";
 import { MenuItem } from "@mui/material";
 import {
   MeasureObservation,
   AGGREGATE_FUNCTION_KEYS,
 } from "@madie/madie-models";
 import { DSLink, Select } from "@madie/madie-design-system/dist/react";
-
-const FormControl = styled.section(() => [tw`mb-3`, `margin: 25px 40px;`]);
-
-const Row = styled.section`
-  display: flex;
-  flex-direction: row;
-  flex-grow: 1;
-  align-items: center;
-`;
-const Col = styled.article`
-  display: flex;
-  flex-direction: column;
-`;
 
 const AGGREGATE_FUNCTIONS = Array.from(AGGREGATE_FUNCTION_KEYS.keys()).sort();
 
@@ -58,102 +46,98 @@ const MeasureObservationDetails = ({
   // todo elmJson doesn't have any functions
   return (
     <>
-      <div>
-        <Row>
-          <Col>
-            <Select
-              placeHolder={{ name: "-", value: "" }}
-              required={required}
-              readOnly={!canEdit}
-              label={label ? label : "Observation"}
-              id={`measure-observation-${name}`}
-              data-testid={`select-measure-observation-${name}`}
-              inputProps={{
-                "data-testid": `measure-observation-${name}-input`,
-              }}
-              style={{ width: 300 }}
-              value={measureObservation?.definition || ""}
-              onChange={(e) => {
-                if (onChange) {
-                  onChange({
-                    ...measureObservation,
-                    definition: e.target.value,
-                  });
-                }
-              }}
-              options={[
-                !required && (
-                  <MenuItem key="-" value="">
-                    -
-                  </MenuItem>
-                ),
-                ...cqlFunctionNames.map((o) => (
-                  <MenuItem key={o} value={o}>
-                    {o}
-                  </MenuItem>
-                )),
-              ]}
-            />
-          </Col>
-          {!required && canEdit && (
-            <Col style={{ marginLeft: 10 }}>
-              <DSLink
-                href=""
-                variant="text"
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (onRemove) {
-                    onRemove(measureObservation);
-                  }
-                }}
-                data-testid={`measure-observation-${name}-remove`}
-              >
-                Remove
-              </DSLink>
-            </Col>
-          )}
-        </Row>
+      <div tw="relative">
+        {!required && canEdit && (
+          <DSLink
+            style={{
+              position: "absolute",
+              left: "13rem",
+              bottom: "2.5rem",
+              zIndex: "1",
+            }}
+            href=""
+            variant="text"
+            onClick={(e) => {
+              e.preventDefault();
+              if (onRemove) {
+                onRemove(measureObservation);
+              }
+            }}
+            data-testid={`measure-observation-${name}-remove`}
+          >
+            Remove
+          </DSLink>
+        )}
+        <Select
+          placeHolder={{ name: "-", value: "" }}
+          required={required}
+          readOnly={!canEdit}
+          label={label ? label : "Observation"}
+          id={`measure-observation-${name}`}
+          data-testid={`select-measure-observation-${name}`}
+          inputProps={{
+            "data-testid": `measure-observation-${name}-input`,
+          }}
+          style={{ width: 300 }}
+          value={measureObservation?.definition || ""}
+          onChange={(e) => {
+            if (onChange) {
+              onChange({
+                ...measureObservation,
+                definition: e.target.value,
+              });
+            }
+          }}
+          options={[
+            !required && (
+              <MenuItem key="-" value="">
+                -
+              </MenuItem>
+            ),
+            ...cqlFunctionNames.map((o) => (
+              <MenuItem key={o} value={o}>
+                {o}
+              </MenuItem>
+            )),
+          ]}
+        />
       </div>
-      <FormControl style={{ marginLeft: 40 }}>
-        <Row>
-          <Col>
-            <Select
-              placeHolder={{ name: "-", value: "" }}
-              readOnly={!canEdit}
-              required={required}
-              label="Aggregate Function"
-              id={`measure-observation-aggregate-${name}`}
-              data-testid={`select-measure-observation-aggregate-${name}`}
-              inputProps={{
-                "data-testid": `measure-observation-aggregate-${name}-input`,
-              }}
-              style={{ width: 300 }}
-              value={measureObservation?.aggregateMethod || ""}
-              onChange={(e) => {
-                if (onChange) {
-                  onChange({
-                    ...measureObservation,
-                    aggregateMethod: e.target.value,
-                  });
-                }
-              }}
-              size="small"
-              options={[
-                !required && (
-                  <MenuItem key="-" value="">
-                    -
-                  </MenuItem>
-                ),
-                ...AGGREGATE_FUNCTIONS.map((o) => (
-                  <MenuItem key={o} value={o}>
-                    {o}
-                  </MenuItem>
-                )),
-              ]}
-            />
-          </Col>
-        </Row>
-      </FormControl>
+      <div tw="pb-3 px-8 pt-6">
+        <Select
+          placeHolder={{ name: "-", value: "" }}
+          readOnly={!canEdit}
+          required={required}
+          label="Aggregate Function"
+          id={`measure-observation-aggregate-${name}`}
+          data-testid={`select-measure-observation-aggregate-${name}`}
+          inputProps={{
+            "data-testid": `measure-observation-aggregate-${name}-input`,
+          }}
+          style={{ width: 300 }}
+          value={measureObservation?.aggregateMethod || ""}
+          onChange={(e) => {
+            if (onChange) {
+              onChange({
+                ...measureObservation,
+                aggregateMethod: e.target.value,
+              });
+            }
+          }}
+          size="small"
+          options={[
+            !required && (
+              <MenuItem key="-" value="">
+                -
+              </MenuItem>
+            ),
+            ...AGGREGATE_FUNCTIONS.map((o) => (
+              <MenuItem key={o} value={o}>
+                {o}
+              </MenuItem>
+            )),
+          ]}
+        />
+      </div>
     </>
   );
 };
