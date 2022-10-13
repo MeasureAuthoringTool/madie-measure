@@ -42,19 +42,9 @@ import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
 import MeasureGroupObservation from "./MeasureGroupObservation";
 import AutoComplete from "./AutoComplete";
 
-const Grid = styled.div(() => [tw`grid grid-cols-4 ml-1 gap-y-4`]);
-const Content = styled.div(() => [tw`col-span-3 pl-4 pr-4`]);
-
 const ButtonSpacer = styled.span`
   margin-left: 15px;
 `;
-const GroupFooter = tw(Grid)`border-t border-b`;
-const GroupActions = styled.div(() => [tw`col-span-1 border-r p-1`]);
-const PopulationActions = styled.div(() => [
-  "background-color: #f2f5f7;",
-  tw`col-span-3 p-1 pl-6`,
-  "display: flex; align-items: end; justify-content: space-between",
-]);
 
 interface PropTypes {
   isActive?: boolean;
@@ -78,8 +68,8 @@ const ColSpanPopulations = styled.div((props: ColSpanPopulationsType) => [
     : tw`md:col-start-1`,
 ]);
 
-const FormField = tw.div`mt-6 grid grid-cols-4`;
-const FormFieldInner = tw.div`sm:col-span-3`;
+// const FormField = tw.div`mt-6 grid grid-cols-4`;
+const FormFieldInner = tw.div`md:col-span-3`;
 const FieldLabel = tw.label`block capitalize text-sm font-medium text-slate-90`;
 const FieldSeparator = tw.div`mt-1`;
 const FieldInput = tw.input`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
@@ -493,7 +483,50 @@ const MeasureGroups = () => {
   return (
     <FormikProvider value={formik}>
       <form onSubmit={formik.handleSubmit}>
-        <Grid>
+        {/* delete measure group warning dialog */}
+        {deleteMeasureGroupDialog.open && (
+          <MeasureGroupsWarningDialog
+            open={deleteMeasureGroupDialog.open}
+            onClose={handleDialogClose}
+            onSubmit={deleteMeasureGroup}
+            measureGroupNumber={deleteMeasureGroupDialog.measureGroupNumber}
+            modalType="deleteMeasureGroup"
+          />
+        )}
+
+        {/* scoring change warning dialog */}
+        {updateMeasureGroupScoringDialog && (
+          <MeasureGroupsWarningDialog
+            open={updateMeasureGroupScoringDialog}
+            onClose={handleDialogClose}
+            onSubmit={() => submitForm(formik.values)}
+            modalType="scoring"
+          />
+        )}
+
+        {genericErrorMessage && (
+          <Alert
+            data-testid="error-alerts"
+            role="alert"
+            severity="error"
+            onClose={() => setGenericErrorMessage(undefined)}
+          >
+            {genericErrorMessage}
+          </Alert>
+        )}
+
+        {successMessage && (
+          <Alert
+            data-testid="success-alerts"
+            role="alert"
+            severity="success"
+            onClose={() => setSuccessMessage(undefined)}
+          >
+            {successMessage}
+          </Alert>
+        )}
+
+        <div tw="grid md:grid-cols-6 gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate bg-white">
           <EditMeasureSideBarNav
             dirty={formik.dirty}
             links={measureGroups}
@@ -502,7 +535,7 @@ const MeasureGroups = () => {
             measure={measure}
             setSuccessMessage={setSuccessMessage}
           />
-          <Content>
+          <div tw="md:col-span-5 pl-2 pr-2">
             <div className="subTitle" style={{ marginTop: 30 }}>
               <h3 data-testid="title">
                 Population Criteria {measureGroupNumber + 1}
@@ -529,7 +562,7 @@ const MeasureGroups = () => {
             {/* Form control later should be moved to own component and dynamically rendered by switch based on measure. */}
 
             <div>
-              <FormField>
+              <div tw="grid md:grid-cols-4 gap-4">
                 <FormFieldInner>
                   <FieldLabel htmlFor="measure-group-description">
                     Description
@@ -537,7 +570,7 @@ const MeasureGroups = () => {
                   <FieldSeparator>
                     {canEdit && (
                       <TextArea
-                        style={{ height: "100px", width: "600px" }}
+                        style={{ height: "100px", width: "100%" }}
                         value={formik.values.groupDescription}
                         name="group-description"
                         id="group-description"
@@ -550,20 +583,22 @@ const MeasureGroups = () => {
                     {!canEdit && formik.values.groupDescription}
                   </FieldSeparator>
                 </FormFieldInner>
-              </FormField>
 
-              <FormField>
-                <MultipleSelectDropDown
-                  values={Object.values(MeasureGroupTypes)}
-                  selectedValues={formik.values.measureGroupTypes}
-                  formControl={formik.getFieldProps("measureGroupTypes")}
-                  label="Type"
-                  id="measure-group-type"
-                  clearAll={() => formik.setFieldValue("measureGroupTypes", [])}
-                  canEdit={canEdit}
-                  required={true}
-                  disabled={false}
-                />
+                <div tw="md:col-start-1">
+                  <MultipleSelectDropDown
+                    values={Object.values(MeasureGroupTypes)}
+                    selectedValues={formik.values.measureGroupTypes}
+                    formControl={formik.getFieldProps("measureGroupTypes")}
+                    label="Type"
+                    id="measure-group-type"
+                    clearAll={() =>
+                      formik.setFieldValue("measureGroupTypes", [])
+                    }
+                    canEdit={canEdit}
+                    required={true}
+                    disabled={false}
+                  />
+                </div>
 
                 {populationBasisValues && (
                   <AutoComplete
@@ -640,7 +675,7 @@ const MeasureGroups = () => {
                   }}
                   canEdit={canEdit}
                 />
-              </FormField>
+              </div>
 
               <div>
                 <MenuItemContainer>
@@ -966,17 +1001,12 @@ const MeasureGroups = () => {
                 </div>
               )}
             </div>
-          </Content>
-        </Grid>
-        {canEdit && (
-          <GroupFooter>
-            <GroupActions />
-            <PopulationActions>
-              <ButtonSpacer>
+
+            {canEdit && (
+              <div tw="grid md:grid-cols-4 gap-4 items-center py-4">
                 <Button
-                  style={{ background: "#424B5A" }}
-                  type="button"
-                  buttontitle="Delete"
+                  style={{ height: "100%", width: "30%" }}
+                  variant="danger-primary"
                   data-testid="group-form-delete-btn"
                   disabled={
                     measureGroupNumber >= measure?.groups?.length ||
@@ -992,34 +1022,31 @@ const MeasureGroups = () => {
                 >
                   Delete
                 </Button>
-              </ButtonSpacer>
-              <ButtonSpacer>
-                <span
-                  tw="text-sm text-gray-600"
-                  data-testid="save-measure-group-validation-message"
-                >
-                  {measureGroupSchemaValidator(
-                    cqlDefinitionDataTypes
-                  ).isValidSync(formik.values)
-                    ? ""
-                    : "You must set all required Populations."}
-                </span>
-              </ButtonSpacer>
-              <ButtonSpacer style={{ float: "right" }}>
                 <ButtonSpacer>
+                  <span
+                    tw="text-sm text-gray-600"
+                    data-testid="save-measure-group-validation-message"
+                  >
+                    {measureGroupSchemaValidator(
+                      cqlDefinitionDataTypes
+                    ).isValidSync(formik.values)
+                      ? ""
+                      : "You must set all required Populations."}
+                  </span>
+                </ButtonSpacer>
+                <div tw="md:col-start-4 flex justify-around">
                   <Button
-                    type="button"
-                    variant="white"
+                    style={{ height: "80%", width: "50%" }}
+                    className="cancel-button"
                     disabled={!formik.dirty}
                     data-testid="group-form-discard-btn"
                     onClick={() => setDiscardDialogOpen(true)}
                   >
                     Discard Changes
                   </Button>
-                </ButtonSpacer>
-                <ButtonSpacer>
                   <Button
-                    style={{ background: "#424B5A" }}
+                    style={{ height: "80%", width: "30%", marginTop: "0px" }}
+                    className="cyan"
                     type="submit"
                     data-testid="group-form-submit-btn"
                     disabled={
@@ -1028,11 +1055,11 @@ const MeasureGroups = () => {
                   >
                     Save
                   </Button>
-                </ButtonSpacer>
-              </ButtonSpacer>
-            </PopulationActions>
-          </GroupFooter>
-        )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </form>
 
       {/*Utility components*/}
@@ -1041,49 +1068,6 @@ const MeasureGroups = () => {
         onClose={() => setDiscardDialogOpen(false)}
         onContinue={discardChanges}
       />
-
-      {/* delete measure group warning dialog */}
-      {deleteMeasureGroupDialog.open && (
-        <MeasureGroupsWarningDialog
-          open={deleteMeasureGroupDialog.open}
-          onClose={handleDialogClose}
-          onSubmit={deleteMeasureGroup}
-          measureGroupNumber={deleteMeasureGroupDialog.measureGroupNumber}
-          modalType="deleteMeasureGroup"
-        />
-      )}
-
-      {/* scoring change warning dialog */}
-      {updateMeasureGroupScoringDialog && (
-        <MeasureGroupsWarningDialog
-          open={updateMeasureGroupScoringDialog}
-          onClose={handleDialogClose}
-          onSubmit={() => submitForm(formik.values)}
-          modalType="scoring"
-        />
-      )}
-
-      {genericErrorMessage && (
-        <Alert
-          data-testid="error-alerts"
-          role="alert"
-          severity="error"
-          onClose={() => setGenericErrorMessage(undefined)}
-        >
-          {genericErrorMessage}
-        </Alert>
-      )}
-
-      {successMessage && (
-        <Alert
-          data-testid="success-alerts"
-          role="alert"
-          severity="success"
-          onClose={() => setSuccessMessage(undefined)}
-        >
-          {successMessage}
-        </Alert>
-      )}
     </FormikProvider>
   );
 };
