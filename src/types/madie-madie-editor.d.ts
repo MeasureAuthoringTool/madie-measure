@@ -91,6 +91,8 @@ declare module "@madie/madie-editor" {
     inboundAnnotations?: EditorAnnotation[];
     inboundErrorMarkers?: EditorErrorMarker[];
     height?: string;
+    validationsEnabled?: boolean;
+    setOutboundAnnotations?: Function;
     readOnly?: boolean;
   }>;
   export const bootstrap: LifeCycleFn<void>;

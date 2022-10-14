@@ -1,0 +1,17 @@
+.madie-alert {
+  margin-bottom: 10px;
+  > #content {
+    padding: 2px;
+    > ul,
+    > ol {
+      padding-left: 40px;
+      > li {
+        line-height: 1.2;
+      }
+    }
+    > ul {
+      list-style-position: inside;
+      list-style: disc;
+    }
+  }
+}
