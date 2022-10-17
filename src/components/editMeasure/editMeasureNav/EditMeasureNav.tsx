@@ -90,7 +90,9 @@ const EditMeasureNav = () => {
           data-testid="groups-tab"
           isActive={pathname === `${url}/groups`}
         >
-          <NavLinkCustom to={`${url}/groups`}>Groups</NavLinkCustom>
+          <NavLinkCustom to={`${url}/groups`}>
+            Population Criteria
+          </NavLinkCustom>
         </MenuItem>
         <MenuItem
           data-testid="patients-tab"

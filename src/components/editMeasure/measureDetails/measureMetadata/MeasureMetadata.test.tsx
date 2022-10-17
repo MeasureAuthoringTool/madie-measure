@@ -31,6 +31,7 @@ const mockMeasure = {
   measureName: "The Measure for Testing",
   createdBy: testUser,
   measureMetaData: { ...mockMetaData },
+  acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
 } as Measure;
 
 jest.mock("@madie/madie-util", () => ({
@@ -272,7 +273,7 @@ describe("MeasureRationale component", () => {
     });
   });
 
-  it("Should have no input field if user is not the measure owner", () => {
+  it("Should have no Save button if user does not have measure edit permissions", () => {
     useOktaTokens.mockImplementation(() => ({
       getUserName: () => "AnotherUser@example.com", //#nosec
     }));
@@ -282,7 +283,7 @@ describe("MeasureRationale component", () => {
     expect(saveButton).not.toBeInTheDocument();
   });
 
-  it("test - Should have no Save button if user is not the measure owner", () => {
+  it("Should have no input field if user does not have measure edit permissions", () => {
     useOktaTokens.mockImplementation(() => ({
       getUserName: () => "AnotherUser@example.com", //#nosec
     }));
@@ -290,5 +291,25 @@ describe("MeasureRationale component", () => {
 
     const input = screen.queryByText("measureRationaleInput");
     expect(input).not.toBeInTheDocument();
+  });
+
+  it("Should have Save button if the measure is shared with the user", async () => {
+    useOktaTokens.mockImplementation(() => ({
+      getUserName: () => "othertestuser@example.com", //#nosec
+    }));
+    render(<MeasureMetadataForm measureMetadataType="Rationale" />);
+
+    const saveButton = await screen.findByRole("button", { name: "Save" });
+    await waitFor(() => expect(saveButton).toBeInTheDocument());
+  });
+
+  it("Should have input field if the measure is shared with the user", async () => {
+    useOktaTokens.mockImplementation(() => ({
+      getUserName: () => "othertestuser@example.com", //#nosec
+    }));
+    render(<MeasureMetadataForm measureMetadataType="Rationale" />);
+
+    const input = await screen.findByRole("textbox", { name: "Rationale" });
+    await waitFor(() => expect(input).toBeInTheDocument());
   });
 });

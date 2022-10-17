@@ -11,17 +11,16 @@ import {
   ValidationResult,
   synchingEditorCqlContent,
 } from "@madie/madie-editor";
-import { Toast, Button } from "@madie/madie-design-system/dist/react";
+import { Button } from "@madie/madie-design-system/dist/react";
 import { Measure } from "@madie/madie-models";
 import { CqlCode, CqlCodeSystem } from "@madie/cql-antlr-parser/dist/src";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import * as _ from "lodash";
 import { useOktaTokens, measureStore } from "@madie/madie-util";
+import StatusHandler from "./StatusHandler";
 
 const MessageText = tw.p`text-sm font-medium`;
 const SuccessText = tw(MessageText)`text-green-800`;
-const WarningText = tw(MessageText)`text-yellow-800`;
-const ErrorText = tw(MessageText)`text-red-800`;
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
@@ -88,42 +87,36 @@ const MeasureEditor = () => {
   const [editorVal, setEditorVal]: [string, Dispatch<SetStateAction<string>>] =
     useState("");
   const measureServiceApi = useMeasureServiceApi();
+  // set success message
   const [success, setSuccess] = useState({
     status: undefined,
     message: undefined,
   });
   const [error, setError] = useState(false);
-  const [elmTranslationError, setElmTranslationError] = useState(null);
+  // const [elmTranslationError, setElmTranslationError] = useState(null); // should not be own error, modified to error message
+  const [outboundAnnotations, setOutboundAnnotations] = useState([]);
+  // console.log('elm Translationerror', elmTranslationError)
   // annotations control the gutter error icons.
   const [elmAnnotations, setElmAnnotations] = useState<EditorAnnotation[]>([]);
   // error markers control the error underlining in the editor.
   const [errorMarkers, setErrorMarkers] = useState<EditorErrorMarker[]>([]);
-
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
-  const canEdit = userName === measure?.createdBy;
-  const [valuesetMsg, setValuesetMsg] = useState(null);
+  const canEdit =
+    measure?.createdBy === userName ||
+    measure?.acls?.some(
+      (acl) => acl.userId === userName && acl.roles.indexOf("SHARED_WITH") >= 0
+    );
 
-  // toast utilities
-  const [toastOpen, setToastOpen] = useState<boolean>(false);
-  const [toastMessage, setToastMessage] = useState<string>("");
-  const [toastType, setToastType] = useState<string>("danger");
-  const onToastClose = () => {
-    setToastType(null);
-    setToastMessage("");
-    setToastOpen(false);
-  };
-  const handleToast = (type, message, open) => {
-    setToastType(type);
-    setToastMessage(message);
-    setToastOpen(open);
-  };
+  const [valuesetMsg, setValuesetMsg] = useState(null);
+  const [errorMessage, setErrorMessage] = useState<string>(null);
 
   // on load fetch elm translations results to display errors on editor
   useEffect(() => {
     updateElmAnnotations(measure?.cql).catch((err) => {
       console.error("An error occurred while translating CQL to ELM", err);
-      setElmTranslationError("Unable to translate CQL to ELM!");
+      // setElmTranslationError("Unable to translate CQL to ELM!");
+      setErrorMessage("Unable to translate CQL to ELM!");
       setElmAnnotations([]);
     });
     setEditorVal(measure?.cql);
@@ -133,13 +126,15 @@ const MeasureEditor = () => {
   const updateElmAnnotations = async (
     cql: string
   ): Promise<ValidationResult> => {
-    setElmTranslationError(null);
+    // setElmTranslationError(null); ? set Error false?
+    setError(false);
     if (cql && cql.trim().length > 0) {
       const result = await validateContent(cql);
       const { errors, externalErrors } = result;
       // right now we are only displaying the external errors related to included libraries
       // and only the first error returned by elm translator
-      handleToast("danger", externalErrors[0]?.message, true);
+      setError(true);
+      setErrorMessage(externalErrors[0]?.message);
       if (isLoggedInUMLS(errors)) {
         setValuesetMsg("Please log in to UMLS!");
       }
@@ -211,12 +206,11 @@ const MeasureEditor = () => {
           .updateMeasure(newMeasure)
           .then(() => {
             updateMeasure(newMeasure);
-            // setMeasure(newMeasure);
             setEditorVal(newMeasure?.cql);
             const successMessage =
               inSyncCql !== editorVal
                 ? {
-                    status: "warning",
+                    status: "success",
                     message:
                       "CQL updated successfully! Library Name and/or Version can not be updated in the CQL Editor. MADiE has overwritten the updated Library Name and/or Version.",
                   }
@@ -224,18 +218,25 @@ const MeasureEditor = () => {
             setSuccess(successMessage);
           })
           .catch((reason) => {
+            // inner failure
             console.error(reason);
             setError(true);
           });
       }
+      // outer reject from try block. Doesn't convey any meaningful errors
     } catch (err) {
       console.error(
         "An error occurred while parsing CQL and translating CQL to ELM",
         err
       );
-      setElmTranslationError(
+      setError(true);
+      // header: error
+      setErrorMessage(
         "Unable to parse CQL and translate CQL to ELM, CQL was not saved!"
       );
+      // setElmTranslationError(
+      //   "Unable to parse CQL and translate CQL to ELM, CQL was not saved!"
+      // ); // this is consoildated an an error message
       setElmAnnotations([]);
     }
   };
@@ -255,6 +256,17 @@ const MeasureEditor = () => {
     <>
       <div tw="flex flex-wrap mx-8 my-6 shadow-lg rounded-md border border-slate bg-white">
         <div tw="flex-none sm:w-full">
+          {valuesetMsg && (
+            <SuccessText data-testid="valueset-success">
+              {valuesetMsg}
+            </SuccessText>
+          )}
+          <StatusHandler
+            error={error}
+            errorMessage={errorMessage}
+            success={success}
+            outboundAnnotations={outboundAnnotations}
+          />
           <MadieEditor
             onChange={(val: string) => handleMadieEditorValue(val)}
             value={editorVal}
@@ -262,42 +274,14 @@ const MeasureEditor = () => {
             inboundErrorMarkers={errorMarkers}
             height="calc(100vh - 135px)"
             readOnly={!canEdit}
+            setOutboundAnnotations={setOutboundAnnotations}
           />
         </div>
         <div
           tw="flex h-24 bg-white w-full sticky bottom-0 left-0 z-10"
           data-testid="measure-editor-actions"
         >
-          <div tw="w-1/2 flex flex-col px-10 py-2">
-            <div data-testid="update-cql-alerts">
-              {success?.status === "warning" ? (
-                <WarningText data-testid="save-cql-success">
-                  {success.message}
-                </WarningText>
-              ) : (
-                <SuccessText data-testid="save-cql-success">
-                  {success.message}
-                </SuccessText>
-              )}
-              {valuesetMsg && (
-                <SuccessText data-testid="valueset-success">
-                  {valuesetMsg}
-                </SuccessText>
-              )}
-              {error && (
-                <ErrorText data-testid="save-cql-error">
-                  Error updating the CQL
-                </ErrorText>
-              )}
-            </div>
-            <div data-testid="elm-translation-alerts">
-              {elmTranslationError && (
-                <ErrorText data-testid="elm-translation-error">
-                  {elmTranslationError}
-                </ErrorText>
-              )}
-            </div>
-          </div>
+          <div tw="w-1/2 flex flex-col px-10 py-2"></div>
           {canEdit && (
             <div
               tw="w-1/2 flex justify-end items-center px-10 py-6"
@@ -323,19 +307,6 @@ const MeasureEditor = () => {
           )}
         </div>
       </div>
-      <Toast
-        toastKey="measure-cql-editor-toast"
-        toastType={toastType}
-        testId={
-          toastType === "danger"
-            ? "edit-measure-cql-generic-error-text"
-            : "edit-measure-cql-success-text"
-        }
-        open={toastOpen}
-        message={toastMessage}
-        onClose={onToastClose}
-        autoHideDuration={6000}
-      />
     </>
   );
 };

@@ -16,7 +16,7 @@ import {
   synchingEditorCqlContent,
   ElmTranslationExternalError,
 } from "@madie/madie-editor";
-import { measureStore } from "@madie/madie-util";
+import { useOktaTokens, measureStore } from "@madie/madie-util";
 
 const measure = {
   id: "abcd-pqrs-xyz",
@@ -35,6 +35,7 @@ const measure = {
   lastModifiedBy: "",
   model: "QI-Core v4.1.1",
   measureMetaData: {},
+  acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
 } as unknown as Measure;
 // } as Measure;
 
@@ -217,8 +218,8 @@ describe("MeasureEditor component", () => {
     });
     fireEvent.click(getByTestId("save-cql-btn"));
     await waitFor(() => {
-      const successMessage = getByTestId("save-cql-success");
-      expect(successMessage.textContent).toEqual(
+      const successText = getByTestId("generic-success-text-header");
+      expect(successText.textContent).toEqual(
         "CQL updated successfully! Library Name and/or Version can not be updated in the CQL Editor. MADiE has overwritten the updated Library Name and/or Version."
       );
       expect(mockedAxios.put).toHaveBeenCalledTimes(1);
@@ -254,7 +255,7 @@ describe("MeasureEditor component", () => {
     const saveButton = screen.getByRole("button", { name: "Save" });
     userEvent.click(saveButton);
     await waitFor(() => {
-      const successMessage = getByTestId("save-cql-success");
+      const successMessage = getByTestId("generic-success-text-header");
       expect(successMessage.textContent).toEqual("CQL saved successfully");
       expect(mockedAxios.put).toHaveBeenCalledTimes(1);
     });
@@ -320,6 +321,7 @@ describe("MeasureEditor component", () => {
         revisionNumber: 1.1,
         state: "",
         version: 1,
+        acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
       },
       { headers: { Authorization: "Bearer test.jwt" } }
     );
@@ -384,6 +386,7 @@ describe("MeasureEditor component", () => {
         revisionNumber: 1.1,
         state: "",
         version: 1,
+        acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
       },
       { headers: { Authorization: "Bearer test.jwt" } }
     );
@@ -430,8 +433,8 @@ describe("MeasureEditor component", () => {
     // click on save button
     fireEvent.click(getByTestId("save-cql-btn"));
     await waitFor(() => {
-      const error = getByTestId("save-cql-error");
-      expect(error.textContent).toEqual("Error updating the CQL");
+      const error = getByTestId("generic-error-text-header");
+      expect(error.textContent).toEqual("Errors were found within the CQL");
     });
   });
 
@@ -469,27 +472,6 @@ describe("MeasureEditor component", () => {
       cqlToElmExternalErrors[0].message
     );
     expect(toastMessage).toBeInTheDocument();
-  });
-
-  it("should be able to close toast message", async () => {
-    mockedAxios.put.mockImplementation((args) => {
-      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-        return Promise.resolve({ data: measure });
-      }
-    });
-    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
-      return Promise.resolve({
-        errors: [],
-        externalErrors: cqlToElmExternalErrors,
-      });
-    });
-    renderEditor(measure);
-    const toastCloseButton = await screen.findByRole("button", {
-      name: "close",
-    });
-    expect(toastCloseButton).toBeInTheDocument();
-    fireEvent.click(toastCloseButton);
-    expect(toastCloseButton).not.toBeInTheDocument();
   });
 });
 
@@ -606,13 +588,27 @@ describe("map elm errors to Ace Markers", () => {
 });
 
 it("Save button and Cancel button should not show if user is not the owner of the measure", () => {
-  measure.createdBy = "AnotherUser@example.com";
+  useOktaTokens.mockImplementation(() => ({
+    getUserName: () => "AnotherUser@example.com", //#nosec
+  }));
   renderEditor(measure);
 
   const cancelButton = screen.queryByTestId("reset-cql-btn");
   expect(cancelButton).not.toBeInTheDocument();
   const saveButton = screen.queryByTestId("save-cql-btn");
   expect(saveButton).not.toBeInTheDocument();
+});
+
+it("Save button and Cancel button should show if measure is shared with the user", () => {
+  useOktaTokens.mockImplementation(() => ({
+    getUserName: () => "othertestuser@example.com", //#nosec
+  }));
+  renderEditor(measure);
+
+  const cancelButton = screen.queryByTestId("reset-cql-btn");
+  expect(cancelButton).toBeInTheDocument();
+  const saveButton = screen.queryByTestId("save-cql-btn");
+  expect(saveButton).toBeInTheDocument();
 });
 
 it("should display errors if not logged into umls", async () => {

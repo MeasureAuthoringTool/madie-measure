@@ -146,7 +146,12 @@ export default function MeasureInformation() {
       await handleSubmit(values),
   });
 
-  const canEdit = measure?.createdBy === userName;
+  const isOwner = measure?.createdBy === userName;
+  const canEdit =
+    isOwner ||
+    measure?.acls?.some(
+      (acl) => acl.userId === userName && acl.roles.indexOf("SHARED_WITH") >= 0
+    );
   const onToastClose = () => {
     setToastType(null);
     setToastMessage("");
@@ -437,11 +442,11 @@ export default function MeasureInformation() {
           >
             Save
           </Button>
-          {canEdit && (
+          {isOwner && (
             <Button
               variant="danger-primary"
               data-testid="delete-measure-button"
-              disabled={!canEdit}
+              disabled={!isOwner}
               onClick={() => setDeleteOpen(true)}
               style={{ marginTop: 20, float: "right" }}
             >
