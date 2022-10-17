@@ -418,6 +418,7 @@ export default function MeasureInformation() {
 
                 <Box sx={formRowGapped}>
                   <ReadOnlyTextField
+                    tabIndex={0}
                     placeholder="CMS ID"
                     label="CMS Id"
                     id="cmsId"
