@@ -239,6 +239,7 @@ const MeasureGroups = () => {
         });
       }
     }
+    setActiveTab("populations");
   }, [measureGroupNumber, measure?.groups]);
 
   const formik = useFormik({
@@ -652,6 +653,8 @@ const MeasureGroups = () => {
                         }))
                       );
                       formik.setFieldValue("measureObservations", observations);
+                      formik.setFieldValue("stratifications", []);
+                      setActiveTab("populations");
                     }}
                     options={Object.keys(GroupScoring).map((scoring) => {
                       return (
