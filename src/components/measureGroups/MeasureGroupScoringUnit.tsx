@@ -27,39 +27,6 @@ const customStyles = {
   }),
 };
 
-const basicOptions = [
-  {
-    label: "Number",
-    value: {
-      code: "number",
-    },
-  },
-  {
-    label: "Boolean",
-    value: {
-      code: "boolean",
-    },
-  },
-  {
-    label: "Date",
-    value: {
-      code: "date",
-    },
-  },
-  {
-    label: "Text",
-    value: {
-      code: "text",
-    },
-  },
-  {
-    label: "Percentage (%)",
-    value: {
-      code: "percentage",
-    },
-  },
-];
-
 export interface ScoringUnitProps {
   value: any;
   onChange: (newValue: any) => void;
@@ -71,12 +38,6 @@ const MeasureGroupScoringUnit = ({
   onChange,
   canEdit,
 }: ScoringUnitProps) => {
-  const getBasicOptions = (input) => {
-    return basicOptions.filter((unit) => {
-      return unit.label.toLowerCase().includes(input.toLowerCase());
-    });
-  };
-
   const getUcumOptions = (input, callback) => {
     const ucumUtils = ucum.UcumLhcUtils.getInstance();
 
@@ -117,10 +78,6 @@ const MeasureGroupScoringUnit = ({
 
   const loadOptions = (input, callback) => {
     callback([
-      {
-        label: "Basic",
-        options: getBasicOptions(input),
-      },
       {
         label: "UCUM",
         options: getUcumOptions(input, callback),
