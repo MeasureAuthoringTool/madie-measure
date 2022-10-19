@@ -11,9 +11,9 @@ import {
   ReadOnlyTextField,
 } from "@madie/madie-design-system/dist/react";
 import DeleteDialog from "./DeleteDialog";
-import LocalizationProvider from "@mui/lab/LocalizationProvider";
-import DateAdapter from "@mui/lab/AdapterDateFns";
-import DesktopDatePicker from "@mui/lab/DesktopDatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import {
   DialogContent,
   DialogTitle,
