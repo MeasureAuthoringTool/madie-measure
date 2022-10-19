@@ -320,7 +320,7 @@ export default function MeasureInformation() {
                 </Box>
 
                 <Box sx={formRowGapped} data-testid="measurement-period-div">
-                  <LocalizationProvider dateAdapter={DateAdapter}>
+                  <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <DesktopDatePicker
                       disableOpenPicker={true}
                       disabled={!canEdit}
@@ -340,6 +340,7 @@ export default function MeasureInformation() {
                           <TextField
                             {...formikFieldProps}
                             {...params}
+                            id="measurementPeriodStartDate"
                             required
                             data-testid="measurement-period-start"
                             helperText={formikErrorHandler(
@@ -351,7 +352,7 @@ export default function MeasureInformation() {
                       }}
                     />
                   </LocalizationProvider>
-                  <LocalizationProvider dateAdapter={DateAdapter}>
+                  <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <DesktopDatePicker
                       disableOpenPicker={true}
                       disabled={!canEdit}
@@ -368,6 +369,7 @@ export default function MeasureInformation() {
                           <TextField
                             {...formikFieldProps}
                             {...params}
+                            id="measurementPeriodEndDate"
                             required
                             data-testid="measurement-period-end"
                             helperText={formikErrorHandler(

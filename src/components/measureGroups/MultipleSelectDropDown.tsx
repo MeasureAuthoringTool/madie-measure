@@ -72,27 +72,23 @@ export default function MultipleSelectDropDown(props: {
     <div>
       <FormControl fullWidth sx={{ paddingRight: 2 }}>
         <InputLabel
-          htmlFor={`${props.label}-dropdown`}
+          id={`${props.id}-label`}
+          htmlFor={props.id}
           required={props.required}
         >
           {props.label}
         </InputLabel>
         {props.canEdit && (
           <Select
+            id={props.id}
             sx={dropdownStyle}
             required
-            labelId={`${props.id}-multiple-select-dropdown`}
             data-testid={`${props.id}-dropdown`}
             multiple
             displayEmpty
             {...props.formControl}
             onChange={handleOnchange}
-            input={
-              <OutlinedInput
-                id={`${props.id}-select-multiple-dropdown`}
-                label={props.label}
-              />
-            }
+            aria-labelledby={`${props.id}-label`}
             renderValue={(selected: any) => {
               if (selected.length === 0) {
                 return <em>Select all that apply</em>;

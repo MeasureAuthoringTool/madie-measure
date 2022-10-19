@@ -899,7 +899,9 @@ const MeasureGroups = () => {
                                     </div>
                                   </div>
                                   <div tw="md:col-span-2">
-                                    <FieldLabel htmlFor="stratification-description">
+                                    <FieldLabel
+                                      htmlFor={`stratification-${i}-description`}
+                                    >
                                       Stratification {i + 1} Description
                                     </FieldLabel>
                                     <FieldSeparator>
@@ -915,7 +917,7 @@ const MeasureGroups = () => {
                                           }
                                           readOnly={!canEdit}
                                           name={`stratifications[${i}].description`}
-                                          id="stratification-description"
+                                          id={`stratification-${i}-description`}
                                           autoComplete="stratification-description"
                                           placeholder="Enter Description"
                                           data-testid="stratificationDescriptionText"
