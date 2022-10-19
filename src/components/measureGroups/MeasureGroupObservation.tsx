@@ -1,4 +1,5 @@
 import React from "react";
+import "twin.macro";
 import "styled-components/macro";
 import MeasureObservationDetails from "./MeasureObservationDetails";
 import {
@@ -36,7 +37,7 @@ const MeasureGroupObservation = ({
     label = `${population.name} ${label}`;
     observationName = population.name;
     criteriaReference = population.id;
-    style = { marginLeft: 40, marginTop: 24 };
+    style = { paddingLeft: 20, paddingTop: 30 };
     measureObservation = formik.values.measureObservations?.find(
       (mo) => mo.criteriaReference === population.id
     );
@@ -51,7 +52,6 @@ const MeasureGroupObservation = ({
     formik.values.measureObservations[0].criteriaReference = population?.id;
     measureObservation = formik.values.measureObservations?.[0];
     required = true;
-    style = { marginLeft: 8, marginTop: 24 };
   } else {
     return null;
   }
@@ -87,9 +87,10 @@ const MeasureGroupObservation = ({
       />
     </div>
   ) : (
-    <span style={style}>
+    <div tw="mx-7">
       {canEdit && (
         <DSLink
+          style={{ textDecoration: "none" }}
           href=""
           onClick={(e) => {
             e.preventDefault();
@@ -108,7 +109,7 @@ const MeasureGroupObservation = ({
           + Add Observation
         </DSLink>
       )}
-    </span>
+    </div>
   );
 };
 
