@@ -386,6 +386,7 @@ export default function MeasureInformation() {
               <Grid item xs={6}>
                 <Box sx={formRowGapped}>
                   <ReadOnlyTextField
+                    tabIndex={0}
                     placeholder="Measure ID"
                     label="Measure Id"
                     id="measureId"
@@ -403,6 +404,7 @@ export default function MeasureInformation() {
 
                 <Box sx={formRowGapped}>
                   <ReadOnlyTextField
+                    tabIndex={0}
                     placeholder="Version ID"
                     label="Version ID"
                     id="versionId"
@@ -420,6 +422,7 @@ export default function MeasureInformation() {
 
                 <Box sx={formRowGapped}>
                   <ReadOnlyTextField
+                    tabIndex={0}
                     placeholder="CMS ID"
                     label="CMS Id"
                     id="cmsId"
