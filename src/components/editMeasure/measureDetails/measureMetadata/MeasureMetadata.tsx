@@ -10,6 +10,7 @@ import {
 } from "@madie/madie-util";
 import { Button, Toast } from "@madie/madie-design-system/dist/react";
 import "./MeasureMetaData.scss";
+import _ from "lodash";
 const SubHeader = tw.p`mt-1 text-sm text-gray-500`;
 
 export interface MeasureMetadataProps {
@@ -19,7 +20,7 @@ export interface MeasureMetadataProps {
 
 export default function MeasureMetadata(props: MeasureMetadataProps) {
   const { measureMetadataType, header } = props;
-  const typeLower = measureMetadataType.toLowerCase();
+  const typeLower = _.kebabCase(measureMetadataType.toLowerCase());
 
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
