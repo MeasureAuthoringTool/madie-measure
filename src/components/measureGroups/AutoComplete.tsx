@@ -41,7 +41,7 @@ const AutoComplete = ({
 }) => {
   return (
     <FormControl error={error} fullWidth sx={{ paddingRight: 2 }}>
-      <InputLabel htmlFor={`${label}-dropdown`} required={required}>
+      <InputLabel htmlFor={`${id}`} required={required}>
         {label}
       </InputLabel>
       {!disabled && (
