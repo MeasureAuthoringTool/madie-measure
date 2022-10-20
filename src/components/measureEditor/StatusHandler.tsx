@@ -155,7 +155,7 @@ const StatusHandler = ({
                 <h3 data-testid="generic-error-text-header">
                   Errors were found within the CQL
                 </h3>
-                <h4 data-testid="generic-error-sub-header">{`${
+                <h4 data-testid="generic-error-text-sub-header">{`${
                   outboundAnnotations.length
                 } CQL error${isLength(outboundAnnotations)} found:`}</h4>
                 <ul data-testid="generic-error-text-list">{mappedMessages}</ul>
