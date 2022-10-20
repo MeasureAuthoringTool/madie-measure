@@ -23,7 +23,7 @@ const MenuItem = styled.li((props: PropTypes) => [
 
 const NavLinkCustom = tw(
   NavLink
-)`py-3.5 px-8 inline-block no-underline text-inherit text-sm hover:text-inherit focus:outline-none focus:text-inherit focus:no-underline`;
+)`py-3.5 px-8 inline-block no-underline text-inherit text-sm hover:text-inherit focus:text-inherit focus:no-underline`;
 
 const EditMeasureNav = () => {
   const { url } = useRouteMatch();

@@ -91,11 +91,12 @@ const MeasureGroupScoringUnit = ({
       style={{ paddingLeft: "16px" }}
     >
       <FormControl fullWidth>
-        <InputLabel htmlFor="scoring-unit-dropdown" required={false}>
+        <InputLabel id="scoring-unit-dropdown-label" required={false}>
           Scoring Unit
         </InputLabel>
         {canEdit && (
           <AsyncSelect
+            id="scoring-unit-dropdown"
             styles={customStyles}
             cacheOptions
             loadOptions={loadOptions}
@@ -107,6 +108,7 @@ const MeasureGroupScoringUnit = ({
             value={value}
             defaultInputValue={value}
             isClearable={true}
+            aria-labelledby="scoring-unit-dropdown-label"
           />
         )}
         {!canEdit && value?.label}

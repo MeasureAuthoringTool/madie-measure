@@ -41,6 +41,7 @@ import GroupPopulation from "./GroupPopulation";
 import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
 import MeasureGroupObservation from "./MeasureGroupObservation";
 import AutoComplete from "./AutoComplete";
+import * as _ from "lodash";
 
 const ButtonSpacer = styled.span`
   margin-left: 15px;
@@ -120,19 +121,19 @@ export const deleteStrat = {
 // provides dropdown options for stratification association
 const associationSelect = {
   Proportion: [
-    "Initial Population",
-    "Denominator",
-    "Denominator Exclusion",
-    "Numerator",
-    "Numerator Exclusion",
-    "Denominator Exception",
+    PopulationType.INITIAL_POPULATION,
+    PopulationType.DENOMINATOR,
+    PopulationType.DENOMINATOR_EXCLUSION,
+    PopulationType.NUMERATOR,
+    PopulationType.NUMERATOR_EXCLUSION,
+    PopulationType.DENOMINATOR_EXCEPTION,
   ],
   "Continuous Variable": [
-    "Initial Population",
-    "Measure Population",
-    "Measure Population Exclusion",
+    PopulationType.INITIAL_POPULATION,
+    PopulationType.MEASURE_POPULATION,
+    PopulationType.MEASURE_POPULATION_EXCLUSION,
   ],
-  Cohort: ["Initial Population"],
+  Cohort: [PopulationType.INITIAL_POPULATION],
   Ratio: [],
 };
 
@@ -882,6 +883,9 @@ const MeasureGroups = () => {
                                           `stratifications[${i}].association`
                                         )}
                                         size="small"
+                                        renderValue={(value) =>
+                                          _.startCase(value)
+                                        }
                                         options={
                                           !!formik.values.scoring &&
                                           associationSelect[
@@ -891,7 +895,7 @@ const MeasureGroups = () => {
                                               key={`${opt}-${i}`}
                                               value={`${opt}`}
                                             >
-                                              {opt}
+                                              {_.startCase(opt)}
                                             </MuiMenuItem>
                                           ))
                                         }
@@ -899,7 +903,9 @@ const MeasureGroups = () => {
                                     </div>
                                   </div>
                                   <div tw="md:col-span-2">
-                                    <FieldLabel htmlFor="stratification-description">
+                                    <FieldLabel
+                                      htmlFor={`stratification-${i}-description`}
+                                    >
                                       Stratification {i + 1} Description
                                     </FieldLabel>
                                     <FieldSeparator>
@@ -915,7 +921,7 @@ const MeasureGroups = () => {
                                           }
                                           readOnly={!canEdit}
                                           name={`stratifications[${i}].description`}
-                                          id="stratification-description"
+                                          id={`stratification-${i}-description`}
                                           autoComplete="stratification-description"
                                           placeholder="Enter Description"
                                           data-testid="stratificationDescriptionText"

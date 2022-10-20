@@ -117,7 +117,7 @@ const MeasureGroupPopulationSelect = ({
                 ? removeSecondIPLabelTemplate()
                 : label
             }
-            id={htmlId}
+            id={`${htmlId}-select`}
             inputProps={{
               "data-testid": `select-measure-group-population-input`,
             }}
