@@ -150,7 +150,7 @@ export interface DeleteMeasureGroupDialog {
 }
 
 const MeasureGroups = () => {
-  useDocumentTitle("MADiE Measure Groups");
+  useDocumentTitle("MADiE Edit Measure Population Criteria");
   const [expressionDefinitions, setExpressionDefinitions] = useState<
     Array<ExpressionDefinition>
   >([]);
