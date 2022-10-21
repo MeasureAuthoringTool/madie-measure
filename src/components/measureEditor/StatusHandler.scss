@@ -1,9 +1,21 @@
 .madie-alert {
   margin-bottom: 10px;
   > #content {
+    max-height: 125px;
+    overflow: scroll;
     padding: 2px;
+    .secondary {
+      margin-bottom: 5px;
+      ~ ul,
+      ~ ol {
+        margin-bottom: 0;
+        margin-top: 0;
+      }
+    }
     > ul,
     > ol {
+      margin-top: 0;
+      margin-bottom: 0;
       padding-left: 40px;
       > li {
         line-height: 1.2;
