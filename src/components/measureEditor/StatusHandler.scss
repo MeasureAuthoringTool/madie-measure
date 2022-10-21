@@ -1,6 +1,8 @@
 .madie-alert {
   margin-bottom: 10px;
   > #content {
+    max-height: 125px;
+    overflow: scroll;
     padding: 2px;
     > ul,
     > ol {
