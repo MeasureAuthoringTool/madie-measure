@@ -61,6 +61,7 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
 jest.mock("@madie/madie-util", () => ({
+  useDocumentTitle: jest.fn(),
   measureStore: {
     updateMeasure: (measure) => measure,
     state: jest.fn().mockImplementation(() => null),

@@ -4,7 +4,7 @@ import { Route, Switch, useRouteMatch, useHistory } from "react-router-dom";
 import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureMetadata from "./measureMetadata/MeasureMetadata";
 import EditMeasureSideBarNav from "./EditMeasureSideBarNav";
-import { routeHandlerStore } from "@madie/madie-util";
+import { routeHandlerStore, useDocumentTitle } from "@madie/madie-util";
 import StewardAndDevelopers from "./stewardAndDevelopers/StewardAndDevelopers";
 
 const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
@@ -13,6 +13,7 @@ export interface RouteHandlerState {
   pendingRoute: string;
 }
 export default function MeasureDetails() {
+  useDocumentTitle("MADiE Edit Measure Details");
   const { path } = useRouteMatch();
   const stewardLink = `${path}/measure-steward`;
   const descriptionLink = `${path}/measure-description`;
