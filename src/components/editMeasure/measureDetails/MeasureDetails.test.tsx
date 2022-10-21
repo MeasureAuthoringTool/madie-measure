@@ -11,6 +11,7 @@ import MeasureMetadata from "./measureMetadata/MeasureMetadata";
 jest.mock("./measureInformation/MeasureInformation");
 jest.mock("./measureMetadata/MeasureMetadata");
 jest.mock("@madie/madie-util", () => ({
+  useDocumentTitle: jest.fn(),
   measureStore: {
     updateMeasure: (measure) => measure,
     state: jest.fn().mockImplementation(() => null),

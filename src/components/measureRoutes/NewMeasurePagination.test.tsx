@@ -20,7 +20,8 @@ const serviceConfig: ServiceConfig = {
   },
 };
 
-jest.mock("@madie/madie-util", () => () => ({
+jest.mock("@madie/madie-util", () => ({
+  useDocumentTitle: jest.fn(),
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
     getUserName: () => "TestUser@example.com", //#nosec

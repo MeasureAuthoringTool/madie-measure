@@ -35,6 +35,7 @@ import {
   useOktaTokens,
   measureStore,
   routeHandlerStore,
+  useDocumentTitle,
 } from "@madie/madie-util";
 import MultipleSelectDropDown from "./MultipleSelectDropDown";
 import MeasureGroupsWarningDialog from "./MeasureGroupWarningDialog";
@@ -149,6 +150,7 @@ export interface DeleteMeasureGroupDialog {
 }
 
 const MeasureGroups = () => {
+  useDocumentTitle("MADiE Measure Groups");
   const [expressionDefinitions, setExpressionDefinitions] = useState<
     Array<ExpressionDefinition>
   >([]);

@@ -39,6 +39,7 @@ useMeasureServiceApiMock.mockImplementation(() => {
 });
 
 jest.mock("@madie/madie-util", () => ({
+  useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
     getUserName: jest.fn(() => "testuser@example.com"), //#nosec
     getAccessToken: () => "test.jwt",
