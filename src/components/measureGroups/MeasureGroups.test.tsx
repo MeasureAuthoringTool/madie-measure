@@ -1290,7 +1290,7 @@ describe("Measure Groups Page", () => {
     );
     userEvent.click(getByRole(aggregateSelect, "button"));
     const aggregateOptions = await screen.findAllByRole("option");
-    expect(aggregateOptions).toHaveLength(11);
+    expect(aggregateOptions).toHaveLength(6);
     userEvent.click(screen.getByText("Count"));
 
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
@@ -1826,7 +1826,7 @@ describe("Measure Groups Page", () => {
     );
     userEvent.click(getByRole(aggregateSelect, "button"));
     const aggregateOptions = await screen.findAllByRole("option");
-    expect(aggregateOptions).toHaveLength(11);
+    expect(aggregateOptions).toHaveLength(6);
     userEvent.click(screen.getByText("Count"));
 
     // Setting measure group type

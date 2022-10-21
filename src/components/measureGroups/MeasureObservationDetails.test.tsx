@@ -247,7 +247,7 @@ describe("Measure Observation Details", () => {
     expect(aggregateFunctionSelect).toBeInTheDocument();
     userEvent.click(getByRole(aggregateFunctionSelect, "button"));
     const aggregateFunctionOptions = await screen.findAllByRole("option");
-    expect(aggregateFunctionOptions).toHaveLength(12);
+    expect(aggregateFunctionOptions).toHaveLength(7);
 
     const optionContents = aggregateFunctionOptions.map((o) => o.textContent);
     for (const option of AGGREGATE_FUNCTIONS) {
@@ -405,7 +405,7 @@ describe("Measure Observation Details", () => {
     );
     userEvent.click(getByRole(aggregateSelect, "button"));
     const aggregateOptions = await screen.findAllByRole("option");
-    expect(aggregateOptions).toHaveLength(12);
+    expect(aggregateOptions).toHaveLength(7);
     userEvent.click(screen.getByText("Count"));
     expect(handleChange).toHaveBeenCalledTimes(1);
     expect(handleChange).toHaveBeenCalledWith({
