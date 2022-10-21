@@ -33,7 +33,9 @@ const StatusHandler = ({
                 </h3>
                 {success.message ===
                   "CQL updated successfully! Library Name and/or Version can not be updated in the CQL Editor. MADiE has overwritten the updated Library Name and/or Version." && (
-                  <h4 data-testid="library-warning">{success.message}</h4>
+                  <p className="secondary" data-testid="library-warning">
+                    {success.message}
+                  </p>
                 )}
                 <h4 data-testid="generic-success-text-sub-header">{`${
                   outboundAnnotations.length
@@ -165,19 +167,7 @@ const StatusHandler = ({
           />
         );
       }
-      return (
-        <MadieAlert
-          type="error"
-          content={
-            <>
-              <h3 aria-live="polite" data-testid="generic-error-text-header">
-                Errors were found within the CQL
-              </h3>
-            </>
-          }
-          canClose={false}
-        />
-      );
+      return <div />;
     }
   }
 };
