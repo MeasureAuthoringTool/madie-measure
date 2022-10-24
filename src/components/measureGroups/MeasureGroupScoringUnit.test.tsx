@@ -1,5 +1,11 @@
 import * as React from "react";
-import { render, screen, within, fireEvent } from "@testing-library/react";
+import {
+  render,
+  screen,
+  within,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
 import userEvent from "@testing-library/user-event";
 
@@ -20,7 +26,7 @@ describe("MeasureGroupScoringUnit Component", () => {
     expect(scoringUnitInput).toBeInTheDocument();
   });
 
-  test("Should render basic and ucum options on click", () => {
+  test("Should render ucum options on click", async () => {
     const handleChange = jest.fn();
 
     render(
@@ -33,20 +39,11 @@ describe("MeasureGroupScoringUnit Component", () => {
     const scoringUnitInput = screen.getByRole("combobox");
     userEvent.click(scoringUnitInput);
 
-    const selectList = document.getElementById("react-select-3-listbox");
-    expect(selectList).toBeInTheDocument();
+    expect(
+      await screen.findByRole("combobox", { expanded: true })
+    ).toBeInTheDocument();
 
-    //basic options
-    const basicOption1 = document.getElementById("react-select-3-option-0-0");
-    expect(basicOption1).toBeInTheDocument();
-    const basicOption2 = document.getElementById("react-select-3-option-0-1");
-    expect(basicOption2).toBeInTheDocument();
-
-    //UCUM options
-    const ucumOption1 = document.getElementById("react-select-3-option-1-0");
-    expect(ucumOption1).toBeInTheDocument();
-    const ucumOption2 = document.getElementById("react-select-3-option-1-1");
-    expect(ucumOption2).toBeInTheDocument();
+    expect(screen.getByText("%")).toBeInTheDocument();
   });
 
   test("Should filter options on input change", () => {
@@ -68,19 +65,17 @@ describe("MeasureGroupScoringUnit Component", () => {
     fireEvent.change(scoringUnitInput, {
       target: { value: "cm" },
     });
-    const ucumOption = document.getElementById("react-select-4-option-1-0");
-    expect(ucumOption).toBeInTheDocument();
     const ucumOptionText = screen.getByText("cm centimeter");
     expect(ucumOptionText).toBeInTheDocument();
 
     fireEvent.change(scoringUnitInput, {
       target: { value: "k" },
     });
-    const ucumOption1 = document.getElementById("react-select-4-option-1-0");
+    const ucumOption1 = document.getElementById("react-select-4-option-0-0");
     expect(ucumOption1).toBeInTheDocument();
     const ucumOptionText1 = screen.getByText("[k] Boltzmann constant");
     expect(ucumOptionText1).toBeInTheDocument();
-    const ucumOption2 = document.getElementById("react-select-4-option-1-1");
+    const ucumOption2 = document.getElementById("react-select-4-option-0-1");
     expect(ucumOption2).toBeInTheDocument();
     const ucumOptionText2 = screen.getByText("[car_Au] carat of gold alloys");
     expect(ucumOptionText2).toBeInTheDocument();

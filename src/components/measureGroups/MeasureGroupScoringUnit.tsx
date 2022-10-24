@@ -27,39 +27,6 @@ const customStyles = {
   }),
 };
 
-const basicOptions = [
-  {
-    label: "Number",
-    value: {
-      code: "number",
-    },
-  },
-  {
-    label: "Boolean",
-    value: {
-      code: "boolean",
-    },
-  },
-  {
-    label: "Date",
-    value: {
-      code: "date",
-    },
-  },
-  {
-    label: "Text",
-    value: {
-      code: "text",
-    },
-  },
-  {
-    label: "Percentage (%)",
-    value: {
-      code: "percentage",
-    },
-  },
-];
-
 export interface ScoringUnitProps {
   value: any;
   onChange: (newValue: any) => void;
@@ -71,12 +38,6 @@ const MeasureGroupScoringUnit = ({
   onChange,
   canEdit,
 }: ScoringUnitProps) => {
-  const getBasicOptions = (input) => {
-    return basicOptions.filter((unit) => {
-      return unit.label.toLowerCase().includes(input.toLowerCase());
-    });
-  };
-
   const getUcumOptions = (input, callback) => {
     const ucumUtils = ucum.UcumLhcUtils.getInstance();
 
@@ -118,10 +79,6 @@ const MeasureGroupScoringUnit = ({
   const loadOptions = (input, callback) => {
     callback([
       {
-        label: "Basic",
-        options: getBasicOptions(input),
-      },
-      {
         label: "UCUM",
         options: getUcumOptions(input, callback),
       },
@@ -134,11 +91,12 @@ const MeasureGroupScoringUnit = ({
       style={{ paddingLeft: "16px" }}
     >
       <FormControl fullWidth>
-        <InputLabel htmlFor="scoring-unit-dropdown" required={false}>
+        <InputLabel id="scoring-unit-dropdown-label" required={false}>
           Scoring Unit
         </InputLabel>
         {canEdit && (
           <AsyncSelect
+            id="scoring-unit-dropdown"
             styles={customStyles}
             cacheOptions
             loadOptions={loadOptions}
@@ -150,6 +108,7 @@ const MeasureGroupScoringUnit = ({
             value={value}
             defaultInputValue={value}
             isClearable={true}
+            aria-labelledby="scoring-unit-dropdown-label"
           />
         )}
         {!canEdit && value?.label}

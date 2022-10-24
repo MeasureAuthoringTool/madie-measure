@@ -13,8 +13,10 @@ import {
   MadieSpinner,
 } from "@madie/madie-design-system/dist/react";
 import "./MeasureLanding.scss";
+import { useDocumentTitle } from "@madie/madie-util";
 
 export default function MeasureLanding() {
+  useDocumentTitle("MADiE Measures");
   const { search } = useLocation();
   const history = useHistory();
   const measureServiceApi = useRef(useMeasureServiceApi()).current;

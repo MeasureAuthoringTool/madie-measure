@@ -171,4 +171,29 @@ describe("StatusHandler Component", () => {
     );
     expect(errorList).toBeInTheDocument();
   });
+
+  test("Error flag is false, but outbound annotations exist", () => {
+    const success = {
+      status: undefined,
+      message: "",
+    };
+    render(
+      <StatusHandler
+        success={success}
+        error={false}
+        errorMessage=""
+        outboundAnnotations={annotationsObject}
+      />
+    );
+
+    const errorHeader = getByTestId("generic-error-text-header");
+    const errorSubHeader = queryByTestId("generic-error-text-sub-header");
+    const errorList = queryByTestId("generic-error-text-list");
+
+    expect(errorHeader.textContent).toBe("Errors were found within the CQL");
+    expect(errorSubHeader?.textContent).toBe(
+      `${annotationsObject.length} CQL errors found:`
+    );
+    expect(errorList).toBeInTheDocument();
+  });
 });

@@ -61,6 +61,7 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
 jest.mock("@madie/madie-util", () => ({
+  useDocumentTitle: jest.fn(),
   measureStore: {
     updateMeasure: (measure) => measure,
     state: jest.fn().mockImplementation(() => null),
@@ -1289,7 +1290,7 @@ describe("Measure Groups Page", () => {
     );
     userEvent.click(getByRole(aggregateSelect, "button"));
     const aggregateOptions = await screen.findAllByRole("option");
-    expect(aggregateOptions).toHaveLength(11);
+    expect(aggregateOptions).toHaveLength(6);
     userEvent.click(screen.getByText("Count"));
 
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
@@ -1825,7 +1826,7 @@ describe("Measure Groups Page", () => {
     );
     userEvent.click(getByRole(aggregateSelect, "button"));
     const aggregateOptions = await screen.findAllByRole("option");
-    expect(aggregateOptions).toHaveLength(11);
+    expect(aggregateOptions).toHaveLength(6);
     userEvent.click(screen.getByText("Count"));
 
     // Setting measure group type

@@ -16,7 +16,11 @@ import { Measure } from "@madie/madie-models";
 import { CqlCode, CqlCodeSystem } from "@madie/cql-antlr-parser/dist/src";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import * as _ from "lodash";
-import { useOktaTokens, measureStore } from "@madie/madie-util";
+import {
+  useOktaTokens,
+  measureStore,
+  useDocumentTitle,
+} from "@madie/madie-util";
 import StatusHandler from "./StatusHandler";
 
 const MessageText = tw.p`text-sm font-medium`;
@@ -73,6 +77,7 @@ export interface CustomCqlCode extends Omit<CqlCode, "codeSystem"> {
 }
 
 const MeasureEditor = () => {
+  useDocumentTitle("MADiE Edit Measure CQL");
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   const { updateMeasure } = measureStore;
   useEffect(() => {

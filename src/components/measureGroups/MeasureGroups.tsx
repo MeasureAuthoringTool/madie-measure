@@ -14,6 +14,8 @@ import {
   Link,
   Typography,
   Divider,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import EditMeasureSideBarNav from "../editMeasure/measureDetails/EditMeasureSideBarNav";
@@ -33,6 +35,7 @@ import {
   useOktaTokens,
   measureStore,
   routeHandlerStore,
+  useDocumentTitle,
 } from "@madie/madie-util";
 import MultipleSelectDropDown from "./MultipleSelectDropDown";
 import MeasureGroupsWarningDialog from "./MeasureGroupWarningDialog";
@@ -52,11 +55,6 @@ interface PropTypes {
 }
 
 const MenuItemContainer = tw.ul`bg-transparent flex pt-12 pb-4 border-b`;
-const MenuItem = styled.li((props: PropTypes) => [
-  tw`mr-1 text-white bg-slate rounded-t-md pl-3 pr-3 text-slate-90`,
-  props.isActive &&
-    tw`bg-white text-slate-90 font-medium border-solid border-b border-red-500`,
-]);
 
 interface ColSpanPopulationsType {
   isExclusionPop?: boolean;
@@ -152,6 +150,7 @@ export interface DeleteMeasureGroupDialog {
 }
 
 const MeasureGroups = () => {
+  useDocumentTitle("MADiE Edit Measure Population Criteria");
   const [expressionDefinitions, setExpressionDefinitions] = useState<
     Array<ExpressionDefinition>
   >([]);
@@ -683,48 +682,111 @@ const MeasureGroups = () => {
 
               <div>
                 <MenuItemContainer>
-                  <MenuItem
-                    data-testid="populations-tab"
-                    isActive={activeTab == "populations"}
-                    onClick={() => {
-                      setActiveTab("populations");
+                  <Tabs
+                    value={activeTab}
+                    sx={{
+                      fontWeight: 700,
+                      color: "#003366",
+                      "&:focus": {
+                        color: "red",
+                      },
+                      "& .MuiTabs-indicator": {
+                        height: "4px",
+                        backgroundColor: "#209FA6",
+                      },
+                      "& .Mui-selected": {
+                        fontWeight: 500,
+                        color: "#003366 !important",
+                        outline: "none",
+                      },
                     }}
                   >
-                    Populations{" "}
-                    {!!formik.errors.populations &&
-                      activeTab !== "populations" &&
-                      "🚫"}
-                  </MenuItem>
-                  {formik.values.scoring !== "Ratio" && (
-                    <MenuItem
-                      data-testid="stratifications-tab"
-                      isActive={activeTab == "stratification"}
+                    <Tab
+                      role="tabpanel"
+                      aria-label="Populations tab panel"
+                      tabIndex={0}
+                      sx={{
+                        padding: "24px 21px",
+                        fontFamily: "Rubik, sans serif",
+                        borderRadius: "6px 0 0 0",
+                        fontWeight: 400,
+                        color: "#003366",
+                        "&:focus": {
+                          outline: "5px auto -webkit-focus-ring-color",
+                          outlineOffset: "-2px",
+                        },
+                      }}
+                      label={`Populations 
+                ${
+                  !!formik.errors.populations && activeTab !== "populations"
+                    ? "🚫"
+                    : ""
+                }`}
+                      data-testid="populations-tab"
                       onClick={() => {
-                        setActiveTab("stratification");
-                        if (!!formik.values.stratifications) {
-                          while (formik.values.stratifications.length < 2) {
-                            formik.values.stratifications.push(getEmptyStrat());
+                        setActiveTab("populations");
+                      }}
+                      value="populations"
+                    />
+                    {formik.values.scoring !== "Ratio" && (
+                      <Tab
+                        role="tabpanel"
+                        aria-label="Stratifications tab panel"
+                        tabIndex={0}
+                        sx={{
+                          padding: "24px 21px",
+                          fontFamily: "Rubik, sans serif",
+                          borderRadius: "0 6px 0 0",
+                          fontWeight: 400,
+                          color: "#003366",
+                          "&:focus": {
+                            outline: "5px auto -webkit-focus-ring-color",
+                            outlineOffset: "-2px",
+                          },
+                        }}
+                        label="Stratifications"
+                        data-testid="stratifications-tab"
+                        onClick={() => {
+                          setActiveTab("stratification");
+                          if (!!formik.values.stratifications) {
+                            while (formik.values.stratifications.length < 2) {
+                              formik.values.stratifications.push(
+                                getEmptyStrat()
+                              );
+                              setVisibleStrats(2);
+                            }
+                          } else {
+                            formik.values.stratifications = [
+                              getEmptyStrat(),
+                              getEmptyStrat(),
+                            ];
                             setVisibleStrats(2);
                           }
-                        } else {
-                          formik.values.stratifications = [
-                            getEmptyStrat(),
-                            getEmptyStrat(),
-                          ];
-                          setVisibleStrats(2);
-                        }
+                        }}
+                        value="stratification"
+                      />
+                    )}
+                    <Tab
+                      role="tabpanel"
+                      tabIndex={0}
+                      aria-label="Reporting tab panel"
+                      sx={{
+                        padding: "24px 21px",
+                        fontFamily: "Rubik, sans serif",
+                        borderRadius: "0 6px 0 0",
+                        fontWeight: 400,
+                        color: "#003366",
+                        "&:focus": {
+                          outline: "5px auto -webkit-focus-ring-color",
+                          outlineOffset: "-2px",
+                        },
                       }}
-                    >
-                      Stratifications
-                    </MenuItem>
-                  )}
-                  <MenuItem
-                    data-testid="reporting-tab"
-                    isActive={activeTab == "reporting"}
-                    onClick={() => setActiveTab("reporting")}
-                  >
-                    Reporting
-                  </MenuItem>
+                      label="Reporting"
+                      data-testid="reporting-tab"
+                      onClick={() => setActiveTab("reporting")}
+                      value="reporting"
+                    />
+                  </Tabs>
                 </MenuItemContainer>
               </div>
 
@@ -903,7 +965,9 @@ const MeasureGroups = () => {
                                     </div>
                                   </div>
                                   <div tw="md:col-span-2">
-                                    <FieldLabel htmlFor="stratification-description">
+                                    <FieldLabel
+                                      htmlFor={`stratification-${i}-description`}
+                                    >
                                       Stratification {i + 1} Description
                                     </FieldLabel>
                                     <FieldSeparator>
@@ -919,7 +983,7 @@ const MeasureGroups = () => {
                                           }
                                           readOnly={!canEdit}
                                           name={`stratifications[${i}].description`}
-                                          id="stratification-description"
+                                          id={`stratification-${i}-description`}
                                           autoComplete="stratification-description"
                                           placeholder="Enter Description"
                                           data-testid="stratificationDescriptionText"
