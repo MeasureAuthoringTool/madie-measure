@@ -51,10 +51,6 @@ const ButtonSpacer = styled.span`
   margin-left: 15px;
 `;
 
-interface PropTypes {
-  isActive?: boolean;
-}
-
 const MenuItemContainer = tw.ul`bg-transparent flex pt-12 pb-4 border-b`;
 
 interface ColSpanPopulationsType {
@@ -552,7 +548,8 @@ const MeasureGroups = () => {
           />
           <div tw="lg:col-span-5 pl-2 pr-2">
             <div tw="flex pb-2 pt-6">
-              <h2 tw="w-1/2 mb-0" data-testid="title">
+              {/* eslint-disable-next-line */}
+              <h2 tw="w-1/2 mb-0" data-testid="title" id="title" tabIndex={0}>
                 Population Criteria {measureGroupNumber + 1}
               </h2>
               <div tw="w-1/2 self-end">
@@ -642,7 +639,10 @@ const MeasureGroups = () => {
                     required
                     label="Scoring"
                     id="scoring-select"
-                    inputProps={{ "data-testid": "scoring-select-input" }}
+                    inputProps={{
+                      "data-testid": "scoring-select-input",
+                      "aria-required": "true",
+                    }}
                     data-testid="scoring-select"
                     {...formik.getFieldProps("scoring")}
                     error={
@@ -917,6 +917,9 @@ const MeasureGroups = () => {
                                         placeHolder={{ name: "-", value: "" }}
                                         label={`Stratification ${i + 1}`}
                                         id={`Stratification-select-${i + 1}`}
+                                        aria-describedby={`Stratification-select-${
+                                          i + 1
+                                        }-helper-text`}
                                         error={Boolean(
                                           getIn(
                                             formik.errors,
@@ -947,6 +950,9 @@ const MeasureGroups = () => {
                                         placeHolder={{ name: "-", value: "" }}
                                         label={`Association ${i + 1}`}
                                         id={`association-select-${i + 1}`}
+                                        aria-describedby={`association-select-${
+                                          i + 1
+                                        }-helper-text`}
                                         inputProps={{
                                           "data-testid": `association-${
                                             i + 1
@@ -1039,13 +1045,17 @@ const MeasureGroups = () => {
               {activeTab === "reporting" && (
                 <div tw="grid grid-cols-4 mt-6">
                   <div tw="lg:col-span-3">
-                    <FieldLabel htmlFor="rate-aggregation">
+                    <FieldLabel
+                      htmlFor="rate-aggregation"
+                      id="rate-aggregation-label"
+                    >
                       Rate Aggregation
                     </FieldLabel>
                     <FieldSeparator>
                       {canEdit && (
                         <FieldInput
                           value={formik.values.rateAggregation}
+                          aria-labelledby="rate-aggregation-label"
                           type="text"
                           name="rate-aggregation"
                           id="rate-aggregation"
@@ -1108,6 +1118,7 @@ const MeasureGroups = () => {
                   <span
                     tw="text-sm text-gray-600"
                     data-testid="save-measure-group-validation-message"
+                    aria-live="polite" //this triggers every time the user is there.. this intended?
                   >
                     {measureGroupSchemaValidator(
                       cqlDefinitionDataTypes

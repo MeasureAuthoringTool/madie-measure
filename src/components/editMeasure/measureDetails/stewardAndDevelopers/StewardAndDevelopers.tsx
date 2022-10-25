@@ -176,7 +176,9 @@ export default function StewardAndDevelopers() {
           <>
             <div tw="mb-4">
               <span style={asterisk}>*</span>
-              <label htmlFor="steward">Steward</label>
+              <label htmlFor="steward" id="steward-label">
+                Steward
+              </label>
               <Autocomplete
                 id="steward"
                 data-testid="steward"
@@ -187,14 +189,20 @@ export default function StewardAndDevelopers() {
                 onChange={(_event: any, selectedVal: string | null) => {
                   formik.setFieldValue("steward", selectedVal || "");
                 }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    /* Setting the describedby here does make MacOS's VoiceOver
+                renderInput={(params) => {
+                  const { inputProps } = params;
+                  inputProps["aria-describedby"] = "steward-helper-text";
+                  inputProps["aria-labelledby"] = "steward-label";
+                  return (
+                    <TextField
+                      {...params}
+                      inputProps={inputProps}
+                      /* Setting the describedby here does make MacOS's VoiceOver
                       read the helper text, but it also messes up the styling... */
-                    // inputProps={{ "aria-describedby": "steward-helper-text" }}
-                  />
-                )}
+                      // inputProps={{ "aria-describedby": "steward-helper-text" }}
+                    />
+                  );
+                }}
                 renderOption={(props: any, option) => {
                   const uniqueProps = {
                     ...props,
@@ -205,6 +213,8 @@ export default function StewardAndDevelopers() {
               />
               {formik.errors["steward"] && (
                 <FormHelperText
+                  tabIndex={0}
+                  aria-live="polite"
                   data-testid={`steward-helper-text`}
                   id="steward-helper-text"
                   error={true}
@@ -253,19 +263,27 @@ export default function StewardAndDevelopers() {
                 onChange={(_event: any, selectedVal: string | null) => {
                   formik.setFieldValue("developers", selectedVal);
                 }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    /* Setting the describedby here does make MacOS's VoiceOver
+                renderInput={(params) => {
+                  const { inputProps } = params;
+                  inputProps["aria-required"] = true;
+                  inputProps["aria-describedby"] = "developers-helper-text";
+                  return (
+                    <TextField
+                      {...params}
+                      inputProps={inputProps}
+                      /* Setting the describedby here does make MacOS's VoiceOver
                       read the helper text, but it also messes up the styling... */
-                    // inputProps={{
-                    //   "aria-describedby": "developers-helper-text",
-                    // }}
-                  />
-                )}
+                      // inputProps={{
+                      //   "aria-describedby": "developers-helper-text",
+                      // }}
+                    />
+                  );
+                }}
               />
               {formik.errors["developers"] && (
                 <FormHelperText
+                  tabIndex={0}
+                  aria-live="polite"
                   data-testid="developers-helper-text"
                   id="developers-helper-text"
                   error={true}
