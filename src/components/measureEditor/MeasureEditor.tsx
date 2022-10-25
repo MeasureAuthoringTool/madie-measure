@@ -100,7 +100,6 @@ const MeasureEditor = () => {
   const [error, setError] = useState(false);
   // const [elmTranslationError, setElmTranslationError] = useState(null); // should not be own error, modified to error message
   const [outboundAnnotations, setOutboundAnnotations] = useState([]);
-  // console.log('elm Translationerror', elmTranslationError)
   // annotations control the gutter error icons.
   const [elmAnnotations, setElmAnnotations] = useState<EditorAnnotation[]>([]);
   // error markers control the error underlining in the editor.
@@ -138,7 +137,9 @@ const MeasureEditor = () => {
       const { errors, externalErrors } = result;
       // right now we are only displaying the external errors related to included libraries
       // and only the first error returned by elm translator
-      setError(true);
+      if (errors?.length > 0 || externalErrors?.length > 0) {
+        setError(true);
+      }
       setErrorMessage(externalErrors[0]?.message);
       if (isLoggedInUMLS(errors)) {
         setValuesetMsg("Please log in to UMLS!");
