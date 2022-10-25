@@ -529,14 +529,13 @@ const MeasureGroups = () => {
         )}
 
         {measure && (measure.cqlErrors || !measure?.cql) && (
-          <div
-            style={{ margin: "17px 0 0 32px", width: "96.6%" }}
-            data-testid="cql-has-errors-message"
-          >
+          <div style={{ margin: "17px 0 0 32px", width: "96.6%" }}>
             <MadieAlert
               type="error"
               content={
-                <p>Please complete the CQL Editor process before continuing</p>
+                <p aria-live="polite" data-testid="cql-has-errors-message">
+                  Please complete the CQL Editor process before continuing
+                </p>
               }
               canClose={false}
             />
