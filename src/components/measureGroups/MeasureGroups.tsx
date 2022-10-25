@@ -16,6 +16,7 @@ import {
   Divider,
   Tabs,
   Tab,
+  FormHelperText,
 } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import EditMeasureSideBarNav from "../editMeasure/measureDetails/EditMeasureSideBarNav";
@@ -587,18 +588,38 @@ const MeasureGroups = () => {
 
                 <div tw="md:col-start-1">
                   <MultipleSelectDropDown
-                    values={Object.values(MeasureGroupTypes)}
-                    selectedValues={formik.values.measureGroupTypes}
                     formControl={formik.getFieldProps("measureGroupTypes")}
-                    label="Type"
                     id="measure-group-type"
-                    clearAll={() =>
-                      formik.setFieldValue("measureGroupTypes", [])
-                    }
-                    canEdit={canEdit}
+                    label="Type"
+                    placeHolder={{ name: "-", value: "" }}
+                    defaultValue={formik.values.measureGroupTypes}
                     required={true}
-                    disabled={false}
-                  />
+                    disabled={!canEdit}
+                    error={
+                      formik.touched.measureGroupTypes &&
+                      Boolean(formik.errors.measureGroupTypes)
+                    }
+                    helperText={
+                      formik.touched.measureGroupTypes &&
+                      formik.errors.measureGroupTypes
+                    }
+                    {...formik.getFieldProps("measureGroupTypes")}
+                    onChange={(_event: any, selectedVal: string | null) => {
+                      formik.setFieldValue("measureGroupTypes", selectedVal);
+                    }}
+                    options={Object.values(MeasureGroupTypes)}
+                    multipleSelect={true}
+                    limitTags={1}
+                  ></MultipleSelectDropDown>
+                  {formik.errors["measureGroupTypes"] && (
+                    <FormHelperText
+                      data-testid="measureGroupTypes-helper-text"
+                      id="measureGroupTypes-helper-text"
+                      error={true}
+                    >
+                      {formik.errors["measureGroupTypes"]}
+                    </FormHelperText>
+                  )}
                 </div>
 
                 {populationBasisValues && (
