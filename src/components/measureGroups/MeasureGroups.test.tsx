@@ -254,12 +254,18 @@ describe("Measure Groups Page", () => {
   test("On change of group scoring the field definitions are cleared", async () => {
     group.id = "";
     measure.groups = [group];
+    measure.cqlErrors = true;
     await waitFor(() => renderMeasureGroupComponent());
     // verifies if the scoring value is population from group object
     const scoringSelectInput = screen.getByTestId(
       "scoring-select-input"
     ) as HTMLInputElement;
     expect(scoringSelectInput.value).toBe(group.scoring);
+
+    const cqlHasErrorsMessage = screen.getByTestId(
+      "cql-has-errors-message"
+    ) as HTMLInputElement;
+    expect(cqlHasErrorsMessage).toBeInTheDocument();
 
     // verifies if the population has a selected option from group object
     const groupPopulationInput = screen.getByTestId(
@@ -2062,7 +2068,6 @@ describe("Measure Groups Page", () => {
       improvementNotation: "",
       populationBasis: "Encounter",
     };
-    //console.log("number of calls:",mockUuid.v4.mock.calls.length);
     expect(mockedAxios.post.mock.calls[0][0]).toBe(
       "example-service-url/measures/test-measure/groups/"
     );

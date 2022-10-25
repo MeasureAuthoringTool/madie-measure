@@ -220,6 +220,7 @@ export default function MeasureInformation() {
     if (formik.touched[name] && formik.errors[name]) {
       return (
         <HelperText
+          aria-live="polite"
           data-testid={`${name}-helper-text`}
           text={formik.errors[name]?.toString()}
           isError={isError}
@@ -272,7 +273,10 @@ export default function MeasureInformation() {
                     disabled={!canEdit}
                     label="Measure Name"
                     id="measureName"
-                    inputProps={{ "data-testid": "measure-name-input" }}
+                    inputProps={{
+                      "data-testid": "measure-name-input",
+                      "aria-required": "true",
+                    }}
                     helperText={formikErrorHandler("measureName", true)}
                     data-testid="measure-name-text-field"
                     size="small"
@@ -289,7 +293,10 @@ export default function MeasureInformation() {
                     label="eCQM Abbreviated Title"
                     id="ecqmTitle"
                     data-testid="ecqm-text-field"
-                    inputProps={{ "data-testid": "ecqm-input" }}
+                    inputProps={{
+                      "data-testid": "ecqm-input",
+                      "aria-required": "true",
+                    }}
                     helperText={formikErrorHandler("ecqmTitle", true)}
                     size="small"
                     error={
@@ -308,7 +315,10 @@ export default function MeasureInformation() {
                     label="Measure CQL Library Name"
                     id="cqlLibraryName"
                     data-testid="cql-library-name"
-                    inputProps={{ "data-testid": "cql-library-name-input" }}
+                    inputProps={{
+                      "data-testid": "cql-library-name-input",
+                      "aria-required": "true",
+                    }}
                     helperText={formikErrorHandler("cqlLibraryName", true)}
                     size="small"
                     error={
@@ -326,6 +336,7 @@ export default function MeasureInformation() {
                       disabled={!canEdit}
                       label="Measurement Period - Start Date"
                       inputFormat="MM/dd/yyyy"
+                      aria-required="true"
                       value={formik.values.measurementPeriodStart}
                       onChange={(startDate) => {
                         formik.setFieldValue(
@@ -336,10 +347,13 @@ export default function MeasureInformation() {
                       renderInput={(params) => {
                         const { onChange, ...formikFieldProps } =
                           formik.getFieldProps("measurementPeriodStart");
+                        const { inputProps } = params;
+                        inputProps["aria-required"] = true;
                         return (
                           <TextField
                             {...formikFieldProps}
                             {...params}
+                            inputProps={inputProps}
                             id="measurementPeriodStartDate"
                             required
                             data-testid="measurement-period-start"
@@ -365,10 +379,13 @@ export default function MeasureInformation() {
                       renderInput={(params) => {
                         const { onChange, ...formikFieldProps } =
                           formik.getFieldProps("measurementPeriodEnd");
+                        const { inputProps } = params;
+                        inputProps["aria-required"] = true;
                         return (
                           <TextField
                             {...formikFieldProps}
                             {...params}
+                            inputProps={inputProps}
                             id="measurementPeriodEndDate"
                             required
                             data-testid="measurement-period-end"
@@ -462,12 +479,18 @@ export default function MeasureInformation() {
 
         <MessageDiv>
           {successMessage && (
-            <SuccessText data-testid="measurement-information-success-message">
+            <SuccessText
+              data-testid="measurement-information-success-message"
+              aria-live="polite"
+            >
               {successMessage}
             </SuccessText>
           )}
           {errorMessage && (
-            <ErrorText data-testid="measurement-information-error-message">
+            <ErrorText
+              data-testid="measurement-information-error-message"
+              aria-live="polite"
+            >
               {errorMessage}
             </ErrorText>
           )}
@@ -481,6 +504,7 @@ export default function MeasureInformation() {
         />
         <Toast
           toastKey="measure-information-toast"
+          aria-live="polite"
           toastType={toastType}
           testId={
             toastType === "danger"

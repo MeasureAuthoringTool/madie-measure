@@ -46,6 +46,7 @@ import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
 import MeasureGroupObservation from "./MeasureGroupObservation";
 import AutoComplete from "./AutoComplete";
 import * as _ from "lodash";
+import { MadieAlert } from "@madie/madie-design-system/dist/react";
 
 const ButtonSpacer = styled.span`
   margin-left: 15px;
@@ -528,6 +529,20 @@ const MeasureGroups = () => {
           </Alert>
         )}
 
+        {measure && (measure.cqlErrors || !measure?.cql) && (
+          <div style={{ margin: "17px 0 0 32px", width: "96.6%" }}>
+            <MadieAlert
+              type="error"
+              content={
+                <p aria-live="polite" data-testid="cql-has-errors-message">
+                  Please complete the CQL Editor process before continuing
+                </p>
+              }
+              canClose={false}
+            />
+          </div>
+        )}
+
         <div tw="grid md:grid-cols-6 gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate bg-white">
           <EditMeasureSideBarNav
             dirty={formik.dirty}
@@ -539,7 +554,8 @@ const MeasureGroups = () => {
           />
           <div tw="md:col-span-5 pl-2 pr-2">
             <div className="subTitle" style={{ marginTop: 30 }}>
-              <h3 data-testid="title">
+              {/* eslint-disable-next-line */}
+              <h3 data-testid="title" id="title" tabIndex={0}>
                 Population Criteria {measureGroupNumber + 1}
               </h3>
               <div className="required">
@@ -652,7 +668,10 @@ const MeasureGroups = () => {
                     required
                     label="Scoring"
                     id="scoring-select"
-                    inputProps={{ "data-testid": "scoring-select-input" }}
+                    inputProps={{
+                      "data-testid": "scoring-select-input",
+                      "aria-required": "true",
+                    }}
                     data-testid="scoring-select"
                     {...formik.getFieldProps("scoring")}
                     error={
@@ -927,6 +946,9 @@ const MeasureGroups = () => {
                                         placeHolder={{ name: "-", value: "" }}
                                         label={`Stratification ${i + 1}`}
                                         id={`Stratification-select-${i + 1}`}
+                                        aria-describedby={`Stratification-select-${
+                                          i + 1
+                                        }-helper-text`}
                                         error={Boolean(
                                           getIn(
                                             formik.errors,
@@ -957,6 +979,9 @@ const MeasureGroups = () => {
                                         placeHolder={{ name: "-", value: "" }}
                                         label={`Association ${i + 1}`}
                                         id={`association-select-${i + 1}`}
+                                        aria-describedby={`association-select-${
+                                          i + 1
+                                        }-helper-text`}
                                         inputProps={{
                                           "data-testid": `association-${
                                             i + 1
@@ -1049,13 +1074,17 @@ const MeasureGroups = () => {
               {activeTab === "reporting" && (
                 <div tw="grid grid-cols-4 mt-6">
                   <div tw="md:col-span-3">
-                    <FieldLabel htmlFor="rate-aggregation">
+                    <FieldLabel
+                      htmlFor="rate-aggregation"
+                      id="rate-aggregation-label"
+                    >
                       Rate Aggregation
                     </FieldLabel>
                     <FieldSeparator>
                       {canEdit && (
                         <FieldInput
                           value={formik.values.rateAggregation}
+                          aria-labelledby="rate-aggregation-label"
                           type="text"
                           name="rate-aggregation"
                           id="rate-aggregation"
@@ -1118,6 +1147,7 @@ const MeasureGroups = () => {
                   <span
                     tw="text-sm text-gray-600"
                     data-testid="save-measure-group-validation-message"
+                    aria-live="polite" //this triggers every time the user is there.. this intended?
                   >
                     {measureGroupSchemaValidator(
                       cqlDefinitionDataTypes
