@@ -78,6 +78,8 @@ export default function EditMeasureSideBarNav(
       setDiscardDialogOpen(true);
     } else {
       addNewBlankMeasureGroup();
+      const element = document.getElementById("title");
+      element.focus();
     }
   };
 

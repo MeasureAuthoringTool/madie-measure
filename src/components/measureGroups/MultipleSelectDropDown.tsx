@@ -86,6 +86,9 @@ export default function MultipleSelectDropDown(props: {
             data-testid={`${props.id}-dropdown`}
             multiple
             displayEmpty
+            // aria-required={true}
+            // inputProps={{ "aria-required" : "true", "aria-hidden" : "false"}}
+            // aria-required={true}
             {...props.formControl}
             onChange={handleOnchange}
             aria-labelledby={`${props.id}-label`}
