@@ -233,7 +233,7 @@ export default function MeasureInformation() {
   }
 
   return (
-    <div tw="col-span-5 py-6">
+    <div tw="col-span-5 py-6 pr-8">
       <div tw="px-1 pt-1" data-testid="measure-information-edit">
         {genericErrorMessage && (
           <div tw="bg-red-500 pt-4 px-4 pb-4">
@@ -251,8 +251,8 @@ export default function MeasureInformation() {
           onSubmit={formik.handleSubmit}
           data-testid="measurement-information-form"
         >
-          <div tw="flex pb-2 pl-6">
-            <h2 tw="w-1/2">Information</h2>
+          <div tw="flex pb-2 pl-6" style={{ fontFamily: "Rubik" }}>
+            <h2 tw="w-1/2 text-2xl">Information</h2>
             <div tw="w-1/2 self-end">
               <Typography
                 style={{
@@ -450,7 +450,7 @@ export default function MeasureInformation() {
             type="submit"
             data-testid="measurement-information-save-button"
             disabled={!(formik.isValid && formik.dirty)}
-            style={{ marginTop: 20 }}
+            style={{ marginTop: 20, marginLeft: 22 }}
           >
             Save
           </Button>
