@@ -252,8 +252,8 @@ export default function MeasureInformation() {
           data-testid="measurement-information-form"
         >
           <div tw="flex pb-2 pl-6" style={{ fontFamily: "Rubik" }}>
-            <h2 tw="w-1/2 text-2xl">Information</h2>
-            <div tw="w-1/2 self-end">
+            <h2 tw="w-1/2 mb-0">Information</h2>
+            <div tw="w-1/2 self-end ">
               <Typography
                 style={{
                   fontSize: 14,

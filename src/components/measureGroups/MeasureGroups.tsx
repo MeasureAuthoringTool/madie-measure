@@ -538,7 +538,7 @@ const MeasureGroups = () => {
           />
           <div tw="lg:col-span-5 pl-2 pr-2">
             <div tw="flex pb-2 pt-6">
-              <h2 tw="w-1/2" data-testid="title">
+              <h2 tw="w-1/2 mb-0" data-testid="title">
                 Population Criteria {measureGroupNumber + 1}
               </h2>
               <div tw="w-1/2 self-end">
