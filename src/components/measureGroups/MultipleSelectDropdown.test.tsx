@@ -1,11 +1,5 @@
 import * as React from "react";
-import {
-  render,
-  screen,
-  within,
-  fireEvent,
-  waitFor,
-} from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import MultipleSelectDropDown from "./MultipleSelectDropDown";
 import userEvent from "@testing-library/user-event";
 
