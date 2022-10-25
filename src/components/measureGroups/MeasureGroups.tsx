@@ -527,7 +527,7 @@ const MeasureGroups = () => {
           </Alert>
         )}
 
-        <div tw="grid md:grid-cols-6 gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate bg-white">
+        <div tw="grid lg:grid-cols-6 gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate bg-white">
           <EditMeasureSideBarNav
             dirty={formik.dirty}
             links={measureGroups}
@@ -536,29 +536,24 @@ const MeasureGroups = () => {
             measure={measure}
             setSuccessMessage={setSuccessMessage}
           />
-          <div tw="md:col-span-5 pl-2 pr-2">
-            <div className="subTitle" style={{ marginTop: 30 }}>
-              <h3 data-testid="title">
-                Population Criteria {measureGroupNumber + 1}
-              </h3>
-              <div className="required">
+          <div tw="lg:col-span-5 pl-2 pr-2">
+            <div tw="flex pb-2 pt-6">
+              <h2 tw="w-1/2">Population Criteria {measureGroupNumber + 1}</h2>
+              <div tw="w-1/2 self-end">
                 <Typography
                   style={{
                     fontSize: 14,
                     fontWeight: 300,
                     fontFamily: "Rubik",
                     float: "right",
-                    marginBottom: -10,
                   }}
                 >
                   <span style={{ color: "#D92F2F", marginRight: 3 }}>*</span>
                   Indicates required field
                 </Typography>
               </div>
-              <div>
-                <Divider style={{ marginTop: 30, marginBottom: 20 }} />
-              </div>
             </div>
+            <Divider style={{ marginBottom: 30 }} />
 
             {/* Form control later should be moved to own component and dynamically rendered by switch based on measure. */}
 
