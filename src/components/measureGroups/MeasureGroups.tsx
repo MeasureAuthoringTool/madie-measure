@@ -45,6 +45,7 @@ import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
 import MeasureGroupObservation from "./MeasureGroupObservation";
 import AutoComplete from "./AutoComplete";
 import * as _ from "lodash";
+import { MadieAlert } from "@madie/madie-design-system/dist/react";
 
 const ButtonSpacer = styled.span`
   margin-left: 15px;
@@ -525,6 +526,21 @@ const MeasureGroups = () => {
           >
             {successMessage}
           </Alert>
+        )}
+
+        {measure && (measure.cqlErrors || !measure?.cql) && (
+          <div
+            style={{ margin: "17px 0 0 32px", width: "96.6%" }}
+            data-testid="cql-has-errors-message"
+          >
+            <MadieAlert
+              type="error"
+              content={
+                <p>Please complete the CQL Editor process before continuing</p>
+              }
+              canClose={false}
+            />
+          </div>
         )}
 
         <div tw="grid md:grid-cols-6 gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate bg-white">
