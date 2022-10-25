@@ -116,17 +116,26 @@ export default function MeasureLanding() {
                   borderRadius: "6px 0 0 0",
                   fontWeight: 400,
                   color: "#003366",
+                  "&:focus": {
+                    outline: "9px auto -webkit-focus-ring-color",
+                    outlineOffset: "-1px",
+                  },
                 }}
                 label={`My Measures`}
                 data-testid="my-measures-tab"
               />
               <Tab
+                tabIndex={0}
                 sx={{
                   padding: "24px 21px",
                   fontFamily: "Rubik, sans serif",
                   borderRadius: "0 6px 0 0",
                   fontWeight: 400,
                   color: "#003366",
+                  "&:focus": {
+                    outline: "9px auto -webkit-focus-ring-color",
+                    outlineOffset: "-1px",
+                  },
                 }}
                 label="All Measures"
                 data-testid="all-measures-tab"
