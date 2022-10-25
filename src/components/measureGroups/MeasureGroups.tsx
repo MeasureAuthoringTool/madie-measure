@@ -63,12 +63,12 @@ interface ColSpanPopulationsType {
 
 const ColSpanPopulations = styled.div((props: ColSpanPopulationsType) => [
   props.isSecondInitialPopulation || props.isExclusionPop
-    ? tw`md:col-start-2`
-    : tw`md:col-start-1`,
+    ? tw`lg:col-start-2`
+    : tw`lg:col-start-1`,
 ]);
 
 // const FormField = tw.div`mt-6 grid grid-cols-4`;
-const FormFieldInner = tw.div`md:col-span-3`;
+const FormFieldInner = tw.div`lg:col-span-3`;
 const FieldLabel = tw.label`block capitalize text-sm font-medium text-slate-90`;
 const FieldSeparator = tw.div`mt-1`;
 const FieldInput = tw.input`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
@@ -560,7 +560,7 @@ const MeasureGroups = () => {
             {/* Form control later should be moved to own component and dynamically rendered by switch based on measure. */}
 
             <div>
-              <div tw="grid md:grid-cols-4 gap-4">
+              <div tw="grid lg:grid-cols-4 gap-4">
                 <FormFieldInner>
                   <FieldLabel htmlFor="measure-group-description">
                     Description
@@ -582,7 +582,7 @@ const MeasureGroups = () => {
                   </FieldSeparator>
                 </FormFieldInner>
 
-                <div tw="md:col-start-1">
+                <div tw="lg:col-start-1">
                   <MultipleSelectDropDown
                     values={Object.values(MeasureGroupTypes)}
                     selectedValues={formik.values.measureGroupTypes}
@@ -791,7 +791,7 @@ const MeasureGroups = () => {
                 <FieldArray
                   name="populations"
                   render={(arrayHelpers) => (
-                    <div tw="grid md:grid-cols-4 gap-4 py-5 px-2">
+                    <div tw="grid lg:grid-cols-4 gap-4 py-5 px-2">
                       {formik.values.populations?.map((population, index) => {
                         const fieldProps = {
                           name: `populations[${index}].definition`,
@@ -837,7 +837,7 @@ const MeasureGroups = () => {
                           </React.Fragment>
                         );
                       })}
-                      <div tw="md:col-start-1">
+                      <div tw="lg:col-start-1">
                         <MeasureGroupObservation
                           canEdit={canEdit}
                           scoring={formik.values.scoring}
@@ -867,8 +867,8 @@ const MeasureGroups = () => {
                             formik.values.stratifications[i].description !==
                               deleteToken && (
                               <div key={i} tw="mt-6">
-                                <div tw="grid md:grid-cols-4 gap-4">
-                                  <div tw="md:col-span-1">
+                                <div tw="grid lg:grid-cols-4 gap-4">
+                                  <div tw="lg:col-span-1">
                                     <div tw="relative">
                                       {formik.values.stratifications.length >
                                         2 &&
@@ -961,7 +961,7 @@ const MeasureGroups = () => {
                                       />
                                     </div>
                                   </div>
-                                  <div tw="md:col-span-2">
+                                  <div tw="lg:col-span-2">
                                     <FieldLabel
                                       htmlFor={`stratification-${i}-description`}
                                     >
@@ -1024,7 +1024,7 @@ const MeasureGroups = () => {
 
               {activeTab === "reporting" && (
                 <div tw="grid grid-cols-4 mt-6">
-                  <div tw="md:col-span-3">
+                  <div tw="lg:col-span-3">
                     <FieldLabel htmlFor="rate-aggregation">
                       Rate Aggregation
                     </FieldLabel>
@@ -1071,7 +1071,7 @@ const MeasureGroups = () => {
             </div>
 
             {canEdit && (
-              <div tw="grid md:grid-cols-4 gap-4 items-center py-4">
+              <div tw="grid lg:grid-cols-4 gap-4 items-center py-4">
                 <Button
                   style={{ height: "100%", width: "30%" }}
                   variant="danger-primary"
@@ -1102,7 +1102,7 @@ const MeasureGroups = () => {
                       : "You must set all required Populations."}
                   </span>
                 </ButtonSpacer>
-                <div tw="md:col-start-4 flex justify-around">
+                <div tw="lg:col-start-4 flex justify-around">
                   <Button
                     style={{ height: "80%", width: "50%" }}
                     className="cancel-button"
