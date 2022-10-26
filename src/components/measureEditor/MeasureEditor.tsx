@@ -11,7 +11,10 @@ import {
   ValidationResult,
   synchingEditorCqlContent,
 } from "@madie/madie-editor";
-import { Button } from "@madie/madie-design-system/dist/react";
+import {
+  Button,
+  MadieDiscardDialog,
+} from "@madie/madie-design-system/dist/react";
 import { Measure } from "@madie/madie-models";
 import { CqlCode, CqlCodeSystem } from "@madie/cql-antlr-parser/dist/src";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
@@ -20,6 +23,7 @@ import {
   useOktaTokens,
   measureStore,
   useDocumentTitle,
+  routeHandlerStore,
 } from "@madie/madie-util";
 import StatusHandler from "./StatusHandler";
 
@@ -88,9 +92,30 @@ const MeasureEditor = () => {
       subscription.unsubscribe();
     };
   }, []);
-
+  const [discardDialogOpen, setDiscardDialogOpen]: [
+    boolean,
+    Dispatch<SetStateAction<boolean>>
+  ] = useState(false);
   const [editorVal, setEditorVal]: [string, Dispatch<SetStateAction<string>>] =
     useState("");
+  const { updateRouteHandlerState } = routeHandlerStore;
+  // We have a unique case where when we have a fresh measure the cql isn't an empty string. It's a null or undefined value.
+
+  const isCQLUnchanged = ((val1, val2) => {
+    // if  both measure cql are falsey values return true
+    if (!val1 && !val2) {
+      return true;
+    }
+    return val1 === val2;
+  })(measure?.cql, editorVal);
+
+  useEffect(() => {
+    updateRouteHandlerState({
+      canTravel: isCQLUnchanged,
+      pendingRoute: "",
+    });
+  }, [isCQLUnchanged, updateRouteHandlerState]);
+
   const measureServiceApi = useMeasureServiceApi();
   // set success message
   const [success, setSuccess] = useState({
@@ -115,7 +140,7 @@ const MeasureEditor = () => {
   const [valuesetMsg, setValuesetMsg] = useState(null);
   const [errorMessage, setErrorMessage] = useState<string>(null);
 
-  // on load fetch elm translations results to display errors on editor
+  // on load fetch elm translations results to display errors on editor not just on load..
   useEffect(() => {
     updateElmAnnotations(measure?.cql).catch((err) => {
       console.error("An error occurred while translating CQL to ELM", err);
@@ -296,8 +321,9 @@ const MeasureEditor = () => {
               <Button
                 tw="m-2"
                 type="button"
-                onClick={() => resetCql()}
+                onClick={() => setDiscardDialogOpen(true)}
                 data-testid="reset-cql-btn"
+                disabled={isCQLUnchanged}
               >
                 Discard Changes
               </Button>
@@ -306,6 +332,7 @@ const MeasureEditor = () => {
                 buttonSize="md"
                 onClick={() => updateMeasureCql()}
                 data-testid="save-cql-btn"
+                disabled={isCQLUnchanged}
               >
                 Save
               </Button>
@@ -313,6 +340,14 @@ const MeasureEditor = () => {
           )}
         </div>
       </div>
+      <MadieDiscardDialog
+        open={discardDialogOpen}
+        onContinue={() => {
+          resetCql();
+          setDiscardDialogOpen(false);
+        }}
+        onClose={() => setDiscardDialogOpen(false)}
+      />
     </>
   );
 };
