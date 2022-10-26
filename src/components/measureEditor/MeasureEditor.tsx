@@ -101,7 +101,7 @@ const MeasureEditor = () => {
   const { updateRouteHandlerState } = routeHandlerStore;
   // We have a unique case where when we have a fresh measure the cql isn't an empty string. It's a null or undefined value.
 
-  const areLike = ((val1, val2) => {
+  const isCQLUnchanged = ((val1, val2) => {
     // if  both measure cql are falsey values return true
     if (!val1 && !val2) {
       return true;
@@ -111,10 +111,10 @@ const MeasureEditor = () => {
 
   useEffect(() => {
     updateRouteHandlerState({
-      canTravel: areLike,
+      canTravel: isCQLUnchanged,
       pendingRoute: "",
     });
-  }, [areLike, updateRouteHandlerState]);
+  }, [isCQLUnchanged, updateRouteHandlerState]);
 
   const measureServiceApi = useMeasureServiceApi();
   // set success message
@@ -323,7 +323,7 @@ const MeasureEditor = () => {
                 type="button"
                 onClick={() => setDiscardDialogOpen(true)}
                 data-testid="reset-cql-btn"
-                disabled={areLike}
+                disabled={isCQLUnchanged}
               >
                 Discard Changes
               </Button>
@@ -332,7 +332,7 @@ const MeasureEditor = () => {
                 buttonSize="md"
                 onClick={() => updateMeasureCql()}
                 data-testid="save-cql-btn"
-                disabled={areLike}
+                disabled={isCQLUnchanged}
               >
                 Save
               </Button>
