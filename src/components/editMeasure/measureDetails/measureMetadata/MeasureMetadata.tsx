@@ -97,13 +97,9 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
       data-testid={`measure${measureMetadataType}`}
     >
       <div className="content">
-        <h3>{header}</h3>
-        {measureMetadataType === "Steward" && (
-          <SubHeader>
-            This information will be displayed publicly so be careful what you
-            share.
-          </SubHeader>
-        )}
+        <div className="subTitle">
+          <h2>{header}</h2>
+        </div>
         <label htmlFor={`measure-${typeLower}`}>{measureMetadataType}</label>
         <textarea
           readOnly={!canEdit}

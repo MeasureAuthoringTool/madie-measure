@@ -41,7 +41,6 @@ interface measureInformationForm {
   measureId: string;
   cmsId: string;
 }
-const Content = tw.div`col-span-5 py-6`;
 const Form = styled.form(() => [
   tw`my-8`,
   `max-width: 1360px;
@@ -84,8 +83,13 @@ export default function MeasureInformation() {
     },
     title: {
       fontFamily: "Rubik",
-      fontSize: 24,
+      fontSize: 32,
       padding: 0,
+    },
+    required: {
+      position: "absolute",
+      bottom: 8,
+      right: 12,
     },
     info: {
       fontSize: 14,
@@ -230,7 +234,7 @@ export default function MeasureInformation() {
   }
 
   return (
-    <Content>
+    <div tw="col-span-5 py-6 pr-8">
       <div tw="px-1 pt-1" data-testid="measure-information-edit">
         {genericErrorMessage && (
           <div tw="bg-red-500 pt-4 px-4 pb-4">
@@ -248,22 +252,25 @@ export default function MeasureInformation() {
           onSubmit={formik.handleSubmit}
           data-testid="measurement-information-form"
         >
-          <div className={classes.dialogTitle}>
-            <DialogTitle className={classes.title}>Information</DialogTitle>
-          </div>
-
-          <DialogContent>
-            <div className={flexEnd}>
-              <Typography className={classes.info}>
-                <span className={classes.asterisk}>*</span>
+          <div tw="flex pb-2 pl-6" style={{ fontFamily: "Rubik" }}>
+            <h2 tw="w-1/2 mb-0">Information</h2>
+            <div tw="w-1/2 self-end ">
+              <Typography
+                style={{
+                  fontSize: 14,
+                  fontWeight: 300,
+                  fontFamily: "Rubik",
+                  float: "right",
+                }}
+              >
+                <span style={{ color: "#D92F2F", marginRight: 3 }}>*</span>
                 Indicates required field
               </Typography>
             </div>
+          </div>
+          <Divider />
 
-            <div>
-              <Divider style={{ marginTop: 20, marginBottom: 20 }} />
-            </div>
-
+          <DialogContent>
             <Grid container spacing={4}>
               <Grid item xs={6}>
                 <Box sx={formRowGapped}>
@@ -460,7 +467,7 @@ export default function MeasureInformation() {
             type="submit"
             data-testid="measurement-information-save-button"
             disabled={!(formik.isValid && formik.dirty)}
-            style={{ marginTop: 20 }}
+            style={{ marginTop: 20, marginLeft: 22 }}
           >
             Save
           </Button>
@@ -517,6 +524,6 @@ export default function MeasureInformation() {
           autoHideDuration={6000}
         />
       </div>
-    </Content>
+    </div>
   );
 }

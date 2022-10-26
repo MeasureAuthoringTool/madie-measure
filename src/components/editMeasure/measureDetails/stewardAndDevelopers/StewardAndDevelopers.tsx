@@ -162,7 +162,7 @@ export default function StewardAndDevelopers() {
     >
       <div className="content">
         <div className="subTitle">
-          <h3>Steward & Developers</h3>
+          <h2>Steward & Developers</h2>
           <div className="required">
             <Typography
               style={{ fontSize: 14, fontWeight: 300, fontFamily: "Rubik" }}
