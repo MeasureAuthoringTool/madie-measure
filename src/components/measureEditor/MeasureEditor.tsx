@@ -11,7 +11,10 @@ import {
   ValidationResult,
   synchingEditorCqlContent,
 } from "@madie/madie-editor";
-import { Button } from "@madie/madie-design-system/dist/react";
+import {
+  Button,
+  MadieDiscardDialog,
+} from "@madie/madie-design-system/dist/react";
 import { Measure } from "@madie/madie-models";
 import { CqlCode, CqlCodeSystem } from "@madie/cql-antlr-parser/dist/src";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
@@ -20,6 +23,7 @@ import {
   useOktaTokens,
   measureStore,
   useDocumentTitle,
+  routeHandlerStore,
 } from "@madie/madie-util";
 import StatusHandler from "./StatusHandler";
 
@@ -88,9 +92,21 @@ const MeasureEditor = () => {
       subscription.unsubscribe();
     };
   }, []);
-
+  const [discardDialogOpen, setDiscardDialogOpen]: [
+    boolean,
+    Dispatch<SetStateAction<boolean>>
+  ] = useState(false);
   const [editorVal, setEditorVal]: [string, Dispatch<SetStateAction<string>>] =
     useState("");
+  const { updateRouteHandlerState } = routeHandlerStore;
+  useEffect(() => {
+    const initialMeasureValue = measure?.cql || "";
+    updateRouteHandlerState({
+      canTravel: editorVal === initialMeasureValue,
+      pendingRoute: "",
+    });
+  }, [measure, editorVal, updateRouteHandlerState]);
+
   const measureServiceApi = useMeasureServiceApi();
   // set success message
   const [success, setSuccess] = useState({
@@ -115,7 +131,7 @@ const MeasureEditor = () => {
   const [valuesetMsg, setValuesetMsg] = useState(null);
   const [errorMessage, setErrorMessage] = useState<string>(null);
 
-  // on load fetch elm translations results to display errors on editor
+  // on load fetch elm translations results to display errors on editor not just on load..
   useEffect(() => {
     updateElmAnnotations(measure?.cql).catch((err) => {
       console.error("An error occurred while translating CQL to ELM", err);
@@ -296,8 +312,9 @@ const MeasureEditor = () => {
               <Button
                 tw="m-2"
                 type="button"
-                onClick={() => resetCql()}
+                onClick={() => setDiscardDialogOpen(true)}
                 data-testid="reset-cql-btn"
+                disabled={editorVal === measure?.cql}
               >
                 Discard Changes
               </Button>
@@ -313,6 +330,14 @@ const MeasureEditor = () => {
           )}
         </div>
       </div>
+      <MadieDiscardDialog
+        open={discardDialogOpen}
+        onContinue={() => {
+          setDiscardDialogOpen(false);
+          resetCql();
+        }}
+        onClose={() => setDiscardDialogOpen(false)}
+      />
     </>
   );
 };

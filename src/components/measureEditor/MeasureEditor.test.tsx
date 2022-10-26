@@ -54,6 +54,15 @@ jest.mock("@madie/madie-util", () => ({
       return { unsubscribe: () => null };
     },
   },
+  routeHandlerStore: {
+    subscribe: (set) => {
+      // set(measure)
+      return { unsubscribe: () => null };
+    },
+    updateRouteHandlerState: () => null,
+    state: { canTravel: false, pendingPath: "" },
+    initialState: { canTravel: false, pendingPath: "" },
+  },
 }));
 
 const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
@@ -407,6 +416,13 @@ describe("MeasureEditor component", () => {
     });
     // click on cancel button
     fireEvent.click(getByTestId("reset-cql-btn"));
+    const discardDialog = await screen.getByTestId("discard-dialog");
+    expect(discardDialog).toBeInTheDocument();
+    const continueButton = await screen.getByTestId(
+      "discard-dialog-continue-button"
+    );
+    expect(continueButton).toBeInTheDocument();
+    fireEvent.click(continueButton);
     await waitFor(() => {
       // check for old value
       expect(measure.cql).toEqual(editorContainer.value);
