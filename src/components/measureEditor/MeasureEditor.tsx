@@ -342,9 +342,9 @@ const MeasureEditor = () => {
       </div>
       <MadieDiscardDialog
         open={discardDialogOpen}
-        onContinue={async () => {
-          await setEditorVal(measure?.cql || "");
-          await setDiscardDialogOpen(false);
+        onContinue={() => {
+          resetCql();
+          setDiscardDialogOpen(false);
         }}
         onClose={() => setDiscardDialogOpen(false)}
       />

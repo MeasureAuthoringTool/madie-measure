@@ -429,6 +429,33 @@ describe("MeasureEditor component", () => {
     });
   });
 
+  it("it closes the dialog without changing the cql", async () => {
+    const { getByTestId, queryByText } = renderEditor(measure);
+    const editorContainer = (await getByTestId(
+      "measure-editor"
+    )) as HTMLInputElement;
+    expect(measure.cql).toEqual(editorContainer.value);
+    // set new value to editor
+    fireEvent.change(getByTestId("measure-editor"), {
+      target: {
+        value: "library testCql version '2.0.000'",
+      },
+    });
+    // click on cancel button
+    fireEvent.click(getByTestId("reset-cql-btn"));
+    const discardDialog = await screen.getByTestId("discard-dialog");
+    expect(discardDialog).toBeInTheDocument();
+    const cancelButton = await screen.getByTestId(
+      "discard-dialog-cancel-button"
+    );
+    expect(queryByText("You have unsaved changes.")).toBeVisible();
+    expect(cancelButton).toBeInTheDocument();
+    fireEvent.click(cancelButton);
+    await waitFor(() => {
+      expect(queryByText("You have unsaved changes.")).not.toBeVisible();
+    });
+  });
+
   it("reports an error when save cql fails", async () => {
     // mock put call for errors
     mockedAxios.put.mockImplementation((args) => {
