@@ -116,7 +116,7 @@ MultipleSelectDropDown.propTypes = {
     name: PropTypes.string,
     value: PropTypes.any,
   }), // expects placeholder objects of { name: value } and inserts into the render item function.
-  defaultValue: PropTypes.string,
+  defaultValue: PropTypes.any,
   required: PropTypes.bool,
   disabled: PropTypes.bool,
   error: PropTypes.bool,
