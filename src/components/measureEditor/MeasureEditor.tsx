@@ -99,13 +99,22 @@ const MeasureEditor = () => {
   const [editorVal, setEditorVal]: [string, Dispatch<SetStateAction<string>>] =
     useState("");
   const { updateRouteHandlerState } = routeHandlerStore;
+  // We have a unique case where when we have a fresh measure the cql isn't an empty string. It's a null or undefined value.
+
+  const areLike = ((val1, val2) => {
+    // if  both measure cql are falsey values return true
+    if (!val1 && !val2) {
+      return true;
+    }
+    return val1 === val2;
+  })(measure?.cql, editorVal);
+
   useEffect(() => {
-    const initialMeasureValue = measure?.cql || "";
     updateRouteHandlerState({
-      canTravel: editorVal === initialMeasureValue,
+      canTravel: areLike,
       pendingRoute: "",
     });
-  }, [measure, editorVal, updateRouteHandlerState]);
+  }, [areLike, updateRouteHandlerState]);
 
   const measureServiceApi = useMeasureServiceApi();
   // set success message
@@ -314,7 +323,7 @@ const MeasureEditor = () => {
                 type="button"
                 onClick={() => setDiscardDialogOpen(true)}
                 data-testid="reset-cql-btn"
-                disabled={editorVal === measure?.cql}
+                disabled={areLike}
               >
                 Discard Changes
               </Button>
@@ -323,6 +332,7 @@ const MeasureEditor = () => {
                 buttonSize="md"
                 onClick={() => updateMeasureCql()}
                 data-testid="save-cql-btn"
+                disabled={areLike}
               >
                 Save
               </Button>
@@ -332,9 +342,9 @@ const MeasureEditor = () => {
       </div>
       <MadieDiscardDialog
         open={discardDialogOpen}
-        onContinue={() => {
-          setDiscardDialogOpen(false);
-          resetCql();
+        onContinue={async () => {
+          await setEditorVal(measure?.cql || "");
+          await setDiscardDialogOpen(false);
         }}
         onClose={() => setDiscardDialogOpen(false)}
       />
