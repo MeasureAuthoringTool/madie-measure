@@ -226,6 +226,7 @@ export default function MeasureInformation() {
         <HelperText
           aria-live="polite"
           data-testid={`${name}-helper-text`}
+          id={`${name}-helper-text`}
           text={formik.errors[name]?.toString()}
           isError={isError}
         />

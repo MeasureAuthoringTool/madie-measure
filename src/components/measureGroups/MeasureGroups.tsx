@@ -14,8 +14,10 @@ import {
   Link,
   Typography,
   Divider,
+  FormHelperText,
   Tabs,
   Tab,
+  TextField,
 } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import EditMeasureSideBarNav from "../editMeasure/measureDetails/EditMeasureSideBarNav";
@@ -593,10 +595,13 @@ const MeasureGroups = () => {
                     {!canEdit && formik.values.groupDescription}
                   </FieldSeparator>
                 </FormFieldInner>
-
                 <div tw="lg:col-start-1">
                   <MultipleSelectDropDown
                     values={Object.values(MeasureGroupTypes)}
+                    error={
+                      formik.touched.measureGroupTypes &&
+                      Boolean(formik.errors.measureGroupTypes)
+                    }
                     selectedValues={formik.values.measureGroupTypes}
                     formControl={formik.getFieldProps("measureGroupTypes")}
                     label="Type"
@@ -608,30 +613,44 @@ const MeasureGroups = () => {
                     required={true}
                     disabled={false}
                   />
+                  {formik.touched.measureGroupTypes &&
+                    formik.errors["measureGroupTypes"] && (
+                      <FormHelperText
+                        tabIndex={0}
+                        aria-live="polite"
+                        data-testid={`measure-group-type-helper-text`}
+                        id="measure-group-type-helper-text"
+                        error={true}
+                      >
+                        {formik.errors["measureGroupTypes"]}
+                      </FormHelperText>
+                    )}
                 </div>
 
                 {populationBasisValues && (
-                  <AutoComplete
-                    id="population-basis"
-                    label="Population Basis"
-                    placeHolder={{ name: "-", value: "" }}
-                    defaultValue={formik.values.populationBasis}
-                    required={true}
-                    disabled={false}
-                    {...formik.getFieldProps("populationBasis")}
-                    error={
-                      formik.touched.populationBasis &&
-                      Boolean(formik.errors.populationBasis)
-                    }
-                    helperText={
-                      formik.touched.populationBasis &&
-                      formik.errors.populationBasis
-                    }
-                    onChange={(_event: any, selectedVal: string | null) => {
-                      formik.setFieldValue("populationBasis", selectedVal);
-                    }}
-                    options={populationBasisValues}
-                  ></AutoComplete>
+                  <div>
+                    <AutoComplete
+                      id="population-basis"
+                      label="Population Basis"
+                      placeHolder={{ name: "-", value: "" }}
+                      defaultValue={formik.values.populationBasis}
+                      required={true}
+                      disabled={false}
+                      {...formik.getFieldProps("populationBasis")}
+                      error={
+                        formik.touched["population-basis"] &&
+                        Boolean(formik.errors.populations)
+                      }
+                      helperText={
+                        formik.touched["population-basis"] &&
+                        formik.errors.populations
+                      }
+                      onChange={(_event: any, selectedVal: string | null) => {
+                        formik.setFieldValue("populationBasis", selectedVal);
+                      }}
+                      options={populationBasisValues}
+                    />
+                  </div>
                 )}
 
                 {canEdit && (
@@ -642,7 +661,6 @@ const MeasureGroups = () => {
                     id="scoring-select"
                     inputProps={{
                       "data-testid": "scoring-select-input",
-                      "aria-required": "true",
                     }}
                     data-testid="scoring-select"
                     {...formik.getFieldProps("scoring")}
@@ -651,6 +669,9 @@ const MeasureGroups = () => {
                     }
                     helperText={formik.touched.scoring && formik.errors.scoring}
                     size="small"
+                    SelectDisplayProps={{
+                      "aria-required": "true",
+                    }}
                     onChange={(e) => {
                       const nextScoring = e.target.value;
                       const populations = getPopulationsForScoring(nextScoring);

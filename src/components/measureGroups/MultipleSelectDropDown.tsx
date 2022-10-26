@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import tw from "twin.macro";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import MenuItem from "@mui/material/MenuItem";
@@ -6,6 +6,7 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import { Checkbox, Link, ListItemText } from "@mui/material";
 import { InputLabel } from "@madie/madie-design-system/dist/react/";
+import { boolean } from "yup/lib/locale";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -51,6 +52,7 @@ const dropdownStyle = {
 
 export default function MultipleSelectDropDown(props: {
   values: string[];
+  error: boolean;
   selectedValues: string[];
   formControl: any;
   label: string;
@@ -70,8 +72,9 @@ export default function MultipleSelectDropDown(props: {
 
   return (
     <div>
-      <FormControl fullWidth sx={{ paddingRight: 2 }}>
+      <FormControl fullWidth error={props.error} sx={{ paddingRight: 2 }}>
         <InputLabel
+          error={props.error}
           id={`${props.id}-label`}
           htmlFor={props.id}
           required={props.required}
@@ -80,16 +83,18 @@ export default function MultipleSelectDropDown(props: {
         </InputLabel>
         {props.canEdit && (
           <Select
+            error={props.error}
             id={props.id}
             sx={dropdownStyle}
             required
             data-testid={`${props.id}-dropdown`}
             multiple
             displayEmpty
-            // aria-required={true}
-            // inputProps={{ "aria-required" : "true", "aria-hidden" : "false"}}
-            // aria-required={true}
             {...props.formControl}
+            SelectDisplayProps={{
+              "aria-required": props.required,
+              "aria-describedby": `${props.id}-helper-text`,
+            }}
             onChange={handleOnchange}
             aria-labelledby={`${props.id}-label`}
             renderValue={(selected: any) => {
