@@ -11,12 +11,7 @@ describe("MultipleSelectDropDown Component", () => {
         formControl={null}
         id="measure-group-type"
         label="Type"
-        required={false}
-        disabled={false}
-        error={true}
         options={selectOptions}
-        multipleSelect={false}
-        limitTags={2}
       />
     );
 

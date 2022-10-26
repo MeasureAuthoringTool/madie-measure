@@ -592,7 +592,7 @@ const MeasureGroups = () => {
                     id="measure-group-type"
                     label="Type"
                     placeHolder={{ name: "-", value: "" }}
-                    defaultValue=""
+                    defaultValue={formik.values.measureGroupTypes}
                     required={true}
                     disabled={!canEdit}
                     error={

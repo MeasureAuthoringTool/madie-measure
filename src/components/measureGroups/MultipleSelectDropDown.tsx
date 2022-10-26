@@ -40,7 +40,7 @@ const MultipleSelectDropDown = ({
   disabled = false,
   error = false,
   helperText = undefined,
-  options = [],
+  options,
   multipleSelect = true,
   limitTags = 1,
   formControl,
