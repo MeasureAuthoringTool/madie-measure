@@ -41,7 +41,6 @@ interface measureInformationForm {
   measureId: string;
   cmsId: string;
 }
-const Content = tw.div`col-span-5 py-6`;
 const Form = styled.form(() => [
   tw`my-8`,
   `max-width: 1360px;
@@ -84,8 +83,13 @@ export default function MeasureInformation() {
     },
     title: {
       fontFamily: "Rubik",
-      fontSize: 24,
+      fontSize: 32,
       padding: 0,
+    },
+    required: {
+      position: "absolute",
+      bottom: 8,
+      right: 12,
     },
     info: {
       fontSize: 14,
@@ -220,6 +224,7 @@ export default function MeasureInformation() {
     if (formik.touched[name] && formik.errors[name]) {
       return (
         <HelperText
+          aria-live="polite"
           data-testid={`${name}-helper-text`}
           text={formik.errors[name]?.toString()}
           isError={isError}
@@ -229,7 +234,7 @@ export default function MeasureInformation() {
   }
 
   return (
-    <Content>
+    <div tw="col-span-5 py-6 pr-8">
       <div tw="px-1 pt-1" data-testid="measure-information-edit">
         {genericErrorMessage && (
           <div tw="bg-red-500 pt-4 px-4 pb-4">
@@ -247,22 +252,25 @@ export default function MeasureInformation() {
           onSubmit={formik.handleSubmit}
           data-testid="measurement-information-form"
         >
-          <div className={classes.dialogTitle}>
-            <DialogTitle className={classes.title}>Information</DialogTitle>
-          </div>
-
-          <DialogContent>
-            <div className={flexEnd}>
-              <Typography className={classes.info}>
-                <span className={classes.asterisk}>*</span>
+          <div tw="flex pb-2 pl-6" style={{ fontFamily: "Rubik" }}>
+            <h2 tw="w-1/2 mb-0">Information</h2>
+            <div tw="w-1/2 self-end ">
+              <Typography
+                style={{
+                  fontSize: 14,
+                  fontWeight: 300,
+                  fontFamily: "Rubik",
+                  float: "right",
+                }}
+              >
+                <span style={{ color: "#D92F2F", marginRight: 3 }}>*</span>
                 Indicates required field
               </Typography>
             </div>
+          </div>
+          <Divider />
 
-            <div>
-              <Divider style={{ marginTop: 20, marginBottom: 20 }} />
-            </div>
-
+          <DialogContent>
             <Grid container spacing={4}>
               <Grid item xs={6}>
                 <Box sx={formRowGapped}>
@@ -272,7 +280,10 @@ export default function MeasureInformation() {
                     disabled={!canEdit}
                     label="Measure Name"
                     id="measureName"
-                    inputProps={{ "data-testid": "measure-name-input" }}
+                    inputProps={{
+                      "data-testid": "measure-name-input",
+                      "aria-required": "true",
+                    }}
                     helperText={formikErrorHandler("measureName", true)}
                     data-testid="measure-name-text-field"
                     size="small"
@@ -289,7 +300,10 @@ export default function MeasureInformation() {
                     label="eCQM Abbreviated Title"
                     id="ecqmTitle"
                     data-testid="ecqm-text-field"
-                    inputProps={{ "data-testid": "ecqm-input" }}
+                    inputProps={{
+                      "data-testid": "ecqm-input",
+                      "aria-required": "true",
+                    }}
                     helperText={formikErrorHandler("ecqmTitle", true)}
                     size="small"
                     error={
@@ -308,7 +322,10 @@ export default function MeasureInformation() {
                     label="Measure CQL Library Name"
                     id="cqlLibraryName"
                     data-testid="cql-library-name"
-                    inputProps={{ "data-testid": "cql-library-name-input" }}
+                    inputProps={{
+                      "data-testid": "cql-library-name-input",
+                      "aria-required": "true",
+                    }}
                     helperText={formikErrorHandler("cqlLibraryName", true)}
                     size="small"
                     error={
@@ -326,6 +343,7 @@ export default function MeasureInformation() {
                       disabled={!canEdit}
                       label="Measurement Period - Start Date"
                       inputFormat="MM/dd/yyyy"
+                      aria-required="true"
                       value={formik.values.measurementPeriodStart}
                       onChange={(startDate) => {
                         formik.setFieldValue(
@@ -336,10 +354,13 @@ export default function MeasureInformation() {
                       renderInput={(params) => {
                         const { onChange, ...formikFieldProps } =
                           formik.getFieldProps("measurementPeriodStart");
+                        const { inputProps } = params;
+                        inputProps["aria-required"] = true;
                         return (
                           <TextField
                             {...formikFieldProps}
                             {...params}
+                            inputProps={inputProps}
                             id="measurementPeriodStartDate"
                             required
                             data-testid="measurement-period-start"
@@ -365,10 +386,13 @@ export default function MeasureInformation() {
                       renderInput={(params) => {
                         const { onChange, ...formikFieldProps } =
                           formik.getFieldProps("measurementPeriodEnd");
+                        const { inputProps } = params;
+                        inputProps["aria-required"] = true;
                         return (
                           <TextField
                             {...formikFieldProps}
                             {...params}
+                            inputProps={inputProps}
                             id="measurementPeriodEndDate"
                             required
                             data-testid="measurement-period-end"
@@ -443,7 +467,7 @@ export default function MeasureInformation() {
             type="submit"
             data-testid="measurement-information-save-button"
             disabled={!(formik.isValid && formik.dirty)}
-            style={{ marginTop: 20 }}
+            style={{ marginTop: 20, marginLeft: 22 }}
           >
             Save
           </Button>
@@ -462,12 +486,18 @@ export default function MeasureInformation() {
 
         <MessageDiv>
           {successMessage && (
-            <SuccessText data-testid="measurement-information-success-message">
+            <SuccessText
+              data-testid="measurement-information-success-message"
+              aria-live="polite"
+            >
               {successMessage}
             </SuccessText>
           )}
           {errorMessage && (
-            <ErrorText data-testid="measurement-information-error-message">
+            <ErrorText
+              data-testid="measurement-information-error-message"
+              aria-live="polite"
+            >
               {errorMessage}
             </ErrorText>
           )}
@@ -481,6 +511,7 @@ export default function MeasureInformation() {
         />
         <Toast
           toastKey="measure-information-toast"
+          aria-live="polite"
           toastType={toastType}
           testId={
             toastType === "danger"
@@ -493,6 +524,6 @@ export default function MeasureInformation() {
           autoHideDuration={6000}
         />
       </div>
-    </Content>
+    </div>
   );
 }

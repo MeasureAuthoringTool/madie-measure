@@ -46,14 +46,11 @@ import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
 import MeasureGroupObservation from "./MeasureGroupObservation";
 import AutoComplete from "./AutoComplete";
 import * as _ from "lodash";
+import { MadieAlert } from "@madie/madie-design-system/dist/react";
 
 const ButtonSpacer = styled.span`
   margin-left: 15px;
 `;
-
-interface PropTypes {
-  isActive?: boolean;
-}
 
 const MenuItemContainer = tw.ul`bg-transparent flex pt-12 pb-4 border-b`;
 
@@ -64,12 +61,12 @@ interface ColSpanPopulationsType {
 
 const ColSpanPopulations = styled.div((props: ColSpanPopulationsType) => [
   props.isSecondInitialPopulation || props.isExclusionPop
-    ? tw`md:col-start-2`
-    : tw`md:col-start-1`,
+    ? tw`lg:col-start-2`
+    : tw`lg:col-start-1`,
 ]);
 
 // const FormField = tw.div`mt-6 grid grid-cols-4`;
-const FormFieldInner = tw.div`md:col-span-3`;
+const FormFieldInner = tw.div`lg:col-span-3`;
 const FieldLabel = tw.label`block capitalize text-sm font-medium text-slate-90`;
 const FieldSeparator = tw.div`mt-1`;
 const FieldInput = tw.input`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
@@ -527,8 +524,21 @@ const MeasureGroups = () => {
             {successMessage}
           </Alert>
         )}
+        {measure && (measure.cqlErrors || !measure?.cql) && (
+          <div style={{ margin: "17px 0 0 32px", width: "96.6%" }}>
+            <MadieAlert
+              type="error"
+              content={
+                <p aria-live="polite" data-testid="cql-has-errors-message">
+                  Please complete the CQL Editor process before continuing
+                </p>
+              }
+              canClose={false}
+            />
+          </div>
+        )}
 
-        <div tw="grid md:grid-cols-6 gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate bg-white">
+        <div tw="grid lg:grid-cols-6 gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate bg-white">
           <EditMeasureSideBarNav
             dirty={formik.dirty}
             links={measureGroups}
@@ -537,34 +547,32 @@ const MeasureGroups = () => {
             measure={measure}
             setSuccessMessage={setSuccessMessage}
           />
-          <div tw="md:col-span-5 pl-2 pr-2">
-            <div className="subTitle" style={{ marginTop: 30 }}>
-              <h3 data-testid="title">
+          <div tw="lg:col-span-5 pl-2 pr-2">
+            <div tw="flex pb-2 pt-6">
+              {/* eslint-disable-next-line */}
+              <h2 tw="w-1/2 mb-0" data-testid="title" id="title" tabIndex={0}>
                 Population Criteria {measureGroupNumber + 1}
-              </h3>
-              <div className="required">
+              </h2>
+              <div tw="w-1/2 self-end">
                 <Typography
                   style={{
                     fontSize: 14,
                     fontWeight: 300,
                     fontFamily: "Rubik",
                     float: "right",
-                    marginBottom: -10,
                   }}
                 >
                   <span style={{ color: "#D92F2F", marginRight: 3 }}>*</span>
                   Indicates required field
                 </Typography>
               </div>
-              <div>
-                <Divider style={{ marginTop: 30, marginBottom: 20 }} />
-              </div>
             </div>
+            <Divider style={{ marginBottom: 30 }} />
 
             {/* Form control later should be moved to own component and dynamically rendered by switch based on measure. */}
 
             <div>
-              <div tw="grid md:grid-cols-4 gap-4">
+              <div tw="grid lg:grid-cols-4 gap-4">
                 <FormFieldInner>
                   <FieldLabel htmlFor="measure-group-description">
                     Description
@@ -586,7 +594,7 @@ const MeasureGroups = () => {
                   </FieldSeparator>
                 </FormFieldInner>
 
-                <div tw="md:col-start-1">
+                <div tw="lg:col-start-1">
                   <MultipleSelectDropDown
                     formControl={formik.getFieldProps("measureGroupTypes")}
                     id="measure-group-type"
@@ -652,7 +660,10 @@ const MeasureGroups = () => {
                     required
                     label="Scoring"
                     id="scoring-select"
-                    inputProps={{ "data-testid": "scoring-select-input" }}
+                    inputProps={{
+                      "data-testid": "scoring-select-input",
+                      "aria-required": "true",
+                    }}
                     data-testid="scoring-select"
                     {...formik.getFieldProps("scoring")}
                     error={
@@ -815,7 +826,7 @@ const MeasureGroups = () => {
                 <FieldArray
                   name="populations"
                   render={(arrayHelpers) => (
-                    <div tw="grid md:grid-cols-4 gap-4 py-5 px-2">
+                    <div tw="grid lg:grid-cols-4 gap-4 py-5 px-2">
                       {formik.values.populations?.map((population, index) => {
                         const fieldProps = {
                           name: `populations[${index}].definition`,
@@ -861,7 +872,7 @@ const MeasureGroups = () => {
                           </React.Fragment>
                         );
                       })}
-                      <div tw="md:col-start-1">
+                      <div tw="lg:col-start-1">
                         <MeasureGroupObservation
                           canEdit={canEdit}
                           scoring={formik.values.scoring}
@@ -891,8 +902,8 @@ const MeasureGroups = () => {
                             formik.values.stratifications[i].description !==
                               deleteToken && (
                               <div key={i} tw="mt-6">
-                                <div tw="grid md:grid-cols-4 gap-4">
-                                  <div tw="md:col-span-1">
+                                <div tw="grid lg:grid-cols-4 gap-4">
+                                  <div tw="lg:col-span-1">
                                     <div tw="relative">
                                       {formik.values.stratifications.length >
                                         2 &&
@@ -927,6 +938,9 @@ const MeasureGroups = () => {
                                         placeHolder={{ name: "-", value: "" }}
                                         label={`Stratification ${i + 1}`}
                                         id={`Stratification-select-${i + 1}`}
+                                        aria-describedby={`Stratification-select-${
+                                          i + 1
+                                        }-helper-text`}
                                         error={Boolean(
                                           getIn(
                                             formik.errors,
@@ -957,6 +971,9 @@ const MeasureGroups = () => {
                                         placeHolder={{ name: "-", value: "" }}
                                         label={`Association ${i + 1}`}
                                         id={`association-select-${i + 1}`}
+                                        aria-describedby={`association-select-${
+                                          i + 1
+                                        }-helper-text`}
                                         inputProps={{
                                           "data-testid": `association-${
                                             i + 1
@@ -985,7 +1002,7 @@ const MeasureGroups = () => {
                                       />
                                     </div>
                                   </div>
-                                  <div tw="md:col-span-2">
+                                  <div tw="lg:col-span-2">
                                     <FieldLabel
                                       htmlFor={`stratification-${i}-description`}
                                     >
@@ -1048,14 +1065,18 @@ const MeasureGroups = () => {
 
               {activeTab === "reporting" && (
                 <div tw="grid grid-cols-4 mt-6">
-                  <div tw="md:col-span-3">
-                    <FieldLabel htmlFor="rate-aggregation">
+                  <div tw="lg:col-span-3">
+                    <FieldLabel
+                      htmlFor="rate-aggregation"
+                      id="rate-aggregation-label"
+                    >
                       Rate Aggregation
                     </FieldLabel>
                     <FieldSeparator>
                       {canEdit && (
                         <FieldInput
                           value={formik.values.rateAggregation}
+                          aria-labelledby="rate-aggregation-label"
                           type="text"
                           name="rate-aggregation"
                           id="rate-aggregation"
@@ -1095,7 +1116,7 @@ const MeasureGroups = () => {
             </div>
 
             {canEdit && (
-              <div tw="grid md:grid-cols-4 gap-4 items-center py-4">
+              <div tw="grid lg:grid-cols-4 gap-4 items-center py-4">
                 <Button
                   style={{ height: "100%", width: "30%" }}
                   variant="danger-primary"
@@ -1118,6 +1139,7 @@ const MeasureGroups = () => {
                   <span
                     tw="text-sm text-gray-600"
                     data-testid="save-measure-group-validation-message"
+                    aria-live="polite" //this triggers every time the user is there.. this intended?
                   >
                     {measureGroupSchemaValidator(
                       cqlDefinitionDataTypes
@@ -1126,7 +1148,7 @@ const MeasureGroups = () => {
                       : "You must set all required Populations."}
                   </span>
                 </ButtonSpacer>
-                <div tw="md:col-start-4 flex justify-around">
+                <div tw="lg:col-start-4 flex justify-around">
                   <Button
                     style={{ height: "80%", width: "50%" }}
                     className="cancel-button"
