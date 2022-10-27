@@ -41,7 +41,7 @@ const AutoComplete = ({
 }) => {
   return (
     <FormControl error={error} fullWidth sx={{ paddingRight: 2 }}>
-      <InputLabel htmlFor={`${id}`} required={required}>
+      <InputLabel htmlFor={`${id}`} id={`${id}-label`} required={required}>
         {label}
       </InputLabel>
       {!disabled && (
@@ -55,10 +55,20 @@ const AutoComplete = ({
           data-testid={`${id}-combo-box`}
           {...rest}
           options={options}
-          renderInput={(params) => <TextField {...params} label="" />}
+          renderInput={(params) => {
+            const { inputProps } = params;
+            inputProps["aria-required"] = required;
+            inputProps["aria-describedby"] = `${id}-helper-text`;
+            inputProps["aria-labelledby"] = `${id}-label`;
+            return <TextField {...params} inputProps={inputProps} label="" />;
+          }}
         />
       )}
-      {helperText && <FormHelperText>{helperText}</FormHelperText>}
+      {helperText && (
+        <FormHelperText aria-live="polite" id={`${id}-helper-text`}>
+          {helperText}
+        </FormHelperText>
+      )}
     </FormControl>
   );
 };

@@ -2,7 +2,8 @@
   margin-bottom: 10px;
   > #content {
     max-height: 125px;
-    overflow: scroll;
+    overflow: auto;
+    width: 100%;
     padding: 2px;
     .secondary {
       margin-bottom: 5px;
