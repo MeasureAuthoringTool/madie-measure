@@ -21,7 +21,7 @@ const returnTypeCheckOptions = (
       ) {
         return (
           definitionDataTypes[_.camelCase(value)].toLowerCase() ===
-          _.camelCase(populationBasis)?.toLowerCase()
+          populationBasis?.toLowerCase()
         );
       }
       return true;
