@@ -148,6 +148,7 @@ export interface DeleteMeasureGroupDialog {
 
 const MeasureGroups = () => {
   useDocumentTitle("MADiE Edit Measure Population Criteria");
+  const defaultPopulationBasis = "boolean";
   const [expressionDefinitions, setExpressionDefinitions] = useState<
     Array<ExpressionDefinition>
   >([]);
@@ -230,7 +231,7 @@ const MeasureGroups = () => {
             rateAggregation: "",
             improvementNotation: "",
             measureGroupTypes: [],
-            populationBasis: "Boolean",
+            populationBasis: defaultPopulationBasis,
             scoringUnit: "",
           },
         });
@@ -253,7 +254,7 @@ const MeasureGroups = () => {
         getEmptyStrat(),
       ],
       measureGroupTypes: group?.measureGroupTypes || [],
-      populationBasis: group?.populationBasis || "Boolean",
+      populationBasis: group?.populationBasis || defaultPopulationBasis,
       scoringUnit: group?.scoringUnit,
     } as Group,
     validationSchema: measureGroupSchemaValidator(cqlDefinitionDataTypes),
@@ -311,7 +312,7 @@ const MeasureGroups = () => {
           measureGroupTypes: [],
           rateAggregation: "",
           improvementNotation: "",
-          populationBasis: "Boolean",
+          populationBasis: defaultPopulationBasis,
           scoringUnit: "",
         },
       });
