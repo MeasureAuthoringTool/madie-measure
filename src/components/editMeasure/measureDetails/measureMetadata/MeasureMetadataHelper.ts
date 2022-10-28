@@ -1,12 +1,12 @@
 import { Measure } from "@madie/madie-models";
 
-export function mappingMeasureDataType(typeLower: string) {
-  return typeLower === "clinical-recommendation-statement"
+export function mappingMeasureMetaDataType(lowerCaseMeasureMetaData: string) {
+  return lowerCaseMeasureMetaData === "clinical-recommendation-statement"
     ? "clinicalRecommendation"
-    : typeLower;
+    : lowerCaseMeasureMetaData;
 }
 export default function getInitialValues(measure: Measure, typeLower: string) {
-  switch (mappingMeasureDataType(typeLower)) {
+  switch (mappingMeasureMetaDataType(typeLower)) {
     case "description":
       const description = measure?.measureMetaData?.description;
       return !!description ? description : "";
@@ -35,7 +35,7 @@ export const setMeasureMetadata = (
   typeLower: string,
   newValue: string
 ) => {
-  switch (mappingMeasureDataType(typeLower)) {
+  switch (mappingMeasureMetaDataType(typeLower)) {
     case "description":
       measure.measureMetaData.description = newValue;
       break;
