@@ -59,7 +59,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
     enableReinitialize: true,
     initialValues: { genericField: getInitialValues(measure, typeLower) },
     onSubmit: (values) => {
-      submitForm(values.genericField);
+      submitForm(values.genericField.trim());
     },
   });
   const { updateRouteHandlerState } = routeHandlerStore;
@@ -69,6 +69,13 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
       pendingRoute: "",
     });
   }, [formik.dirty]);
+
+  useEffect(() => {
+    if (!getInitialValues(measure, typeLower)) {
+      formik.setFieldValue("genericField", "");
+    }
+  }, [measureMetadataType]);
+
   const { resetForm } = formik;
   const submitForm = (genericField: string) => {
     measure.measureMetaData = { ...measureMetaData };
