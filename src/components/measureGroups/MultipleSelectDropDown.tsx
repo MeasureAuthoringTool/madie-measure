@@ -1,12 +1,9 @@
-import React, { ReactNode } from "react";
-import tw from "twin.macro";
-import OutlinedInput from "@mui/material/OutlinedInput";
+import React from "react";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import { Checkbox, Link, ListItemText } from "@mui/material";
 import { InputLabel } from "@madie/madie-design-system/dist/react/";
-import { boolean } from "yup/lib/locale";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
