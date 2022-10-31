@@ -639,11 +639,11 @@ const MeasureGroups = () => {
                       {...formik.getFieldProps("populationBasis")}
                       error={
                         formik.touched["population-basis"] &&
-                        Boolean(formik.errors.populations)
+                        Boolean(formik.errors.populationBasis)
                       }
                       helperText={
                         formik.touched["population-basis"] &&
-                        formik.errors.populations
+                        formik.errors.populationBasis
                       }
                       onChange={(_event: any, selectedVal: string | null) => {
                         formik.setFieldValue("populationBasis", selectedVal);
