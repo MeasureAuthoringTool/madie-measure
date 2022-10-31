@@ -62,8 +62,10 @@ export const measureGroupSchemaValidator = (
       1,
       "At least one measure group type is required."
     ),
-    populationBasis: Yup.string().required("Population Basis is required."),
-    populations: Yup.object().when(
+    populationBasis: Yup.string()
+      .nullable()
+      .required("Population Basis is required."),
+    populations: Yup.array().when(
       ["scoring", "populationBasis"],
       (scoring, populationBasis) => {
         switch (scoring) {
