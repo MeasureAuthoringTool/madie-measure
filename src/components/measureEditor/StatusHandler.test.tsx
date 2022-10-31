@@ -196,4 +196,61 @@ describe("StatusHandler Component", () => {
     );
     expect(errorList).toBeInTheDocument();
   });
+
+  test("status.success, errorMessage, and outbound annotatinos", () => {
+    const success = {
+      status: "success",
+      message: "",
+    };
+    const warningMessage =
+      "You forgot to cover the edge case for firehelpers that aren't fire helpers";
+    render(
+      <StatusHandler
+        success={success}
+        error={false}
+        errorMessage={warningMessage}
+        outboundAnnotations={annotationsObject}
+      />
+    );
+
+    const successHeader = getByTestId("generic-success-text-header");
+    const libraryWarning = queryByTestId("library-warning");
+    const successList = queryByTestId("generic-success-text-list");
+
+    expect(successHeader.textContent).toBe(
+      "Changes saved successfully but the following errors were found"
+    );
+    expect(libraryWarning?.textContent).toBe(warningMessage);
+
+    expect(successList).toBeInTheDocument();
+  });
+
+  test("status.success and errorMessage", () => {
+    const success = {
+      status: "success",
+      message: "",
+    };
+    const warningMessage =
+      "You forgot to cover the edge case for firehelpers that aren't fire helpers";
+
+    render(
+      <StatusHandler
+        success={success}
+        error={false}
+        errorMessage={warningMessage}
+        outboundAnnotations={[]}
+      />
+    );
+
+    const successHeader = getByTestId("generic-success-text-header");
+    const libraryWarning = queryByTestId("library-warning");
+    const successList = queryByTestId("generic-success-text-list");
+
+    expect(successHeader.textContent).toBe(
+      "Changes saved successfully but the following errors were found"
+    );
+    expect(libraryWarning?.textContent).toBe(warningMessage);
+
+    expect(successList).not.toBeInTheDocument();
+  });
 });

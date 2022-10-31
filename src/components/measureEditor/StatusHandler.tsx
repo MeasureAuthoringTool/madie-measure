@@ -18,7 +18,60 @@ const StatusHandler = ({
     return val.length > 0 ? "s" : "";
   };
   {
+    /*
+    success,
+    success, error, outbound
+    success, error,
+    success, outbound
+    success alone
+    */
     if (success.status === "success") {
+      if (errorMessage) {
+        if (outboundAnnotations.length > 0) {
+          const mappedMessages = outboundAnnotations.map((el) => (
+            <li>{transformAnnotation(el)}</li>
+          ));
+          return (
+            <MadieAlert
+              type="success"
+              content={
+                <div aria-live="polite">
+                  <h3 data-testid="generic-success-text-header">
+                    Changes saved successfully but the following errors were
+                    found
+                  </h3>
+                  <p className="secondary" data-testid="library-warning">
+                    {errorMessage}
+                  </p>
+                  <h4 data-testid="generic-success-text-sub-header">{`${
+                    outboundAnnotations.length
+                  } CQL error${isLength(outboundAnnotations)} found:`}</h4>
+                  <ul data-testid="generic-success-text-list">
+                    {mappedMessages}
+                  </ul>
+                </div>
+              }
+              canClose={false}
+            />
+          );
+        }
+        return (
+          <MadieAlert
+            type="success"
+            content={
+              <div aria-live="polite">
+                <h3 data-testid="generic-success-text-header">
+                  Changes saved successfully but the following errors were found
+                </h3>
+                <p className="secondary" data-testid="library-warning">
+                  {errorMessage}
+                </p>
+              </div>
+            }
+            canClose={false}
+          />
+        );
+      }
       if (outboundAnnotations && outboundAnnotations.length > 0) {
         const mappedMessages = outboundAnnotations.map((el) => (
           <li>{transformAnnotation(el)}</li>
@@ -48,7 +101,9 @@ const StatusHandler = ({
             canClose={false}
           />
         );
-      } else {
+      }
+      // we have an edge case in which we have an error message as well as a success
+      else {
         return (
           <MadieAlert
             type="success"
