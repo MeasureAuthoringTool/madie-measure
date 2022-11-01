@@ -1,13 +1,11 @@
 import React, { useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
-
 import { Measure } from "@madie/madie-models";
 import { useHistory } from "react-router-dom";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Chip, IconButton } from "@mui/material";
 import { TextField } from "@madie/madie-design-system/dist/react";
 import InputAdornment from "@material-ui/core/InputAdornment";
-import { IconButton } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
@@ -132,22 +130,16 @@ export default function MeasureList(props: {
                 </table>
               </form>
               <table tw="min-w-full" style={{ borderTop: "solid 1px #DDD" }}>
-                <thead>
+                <thead tw="bg-slate">
                   <tr>
                     <th scope="col" className="col-header">
                       Measure Name
                     </th>
                     <th scope="col" className="col-header">
-                      Model
-                    </th>
-                    <th scope="col" className="col-header">
                       Version
                     </th>
                     <th scope="col" className="col-header">
-                      Revision
-                    </th>
-                    <th scope="col" className="col-header">
-                      Status
+                      Model
                     </th>
                     <th scope="col" className="col-header">
                       Actions
@@ -162,18 +154,12 @@ export default function MeasureList(props: {
                       data-testid="row-item"
                       className={i % 2 === 0 ? "odd" : ""}
                     >
-                      <td>{measure.measureName}</td>
-                      <td>{measure.model}</td>
-                      <td>{measure.version}</td>
-                      <td>{measure.revisionNumber}</td>
+                      <td tw="w-7/12">{measure.measureName}</td>
                       <td>
-                        <div>
-                          <div className="activity">
-                            <div className="bubble active-bubble" />
-                            <div>{measure.active ? "Active" : "Inactive"}</div>
-                          </div>
-                        </div>
+                        {measure.version}
+                        <Chip tw="ml-6" className="chip-draft" label="Draft" />
                       </td>
+                      <td>{measure.model}</td>
                       <td>
                         <button
                           className="action-button"
@@ -183,10 +169,7 @@ export default function MeasureList(props: {
                           tw="text-blue-600 hover:text-blue-900"
                           data-testid={`edit-measure-${measure.id}`}
                         >
-                          <div className="action">View/Edit</div>
-                          <div className="chevron-container">
-                            <ExpandMoreIcon />
-                          </div>
+                          <div className="action">View</div>
                         </button>
                       </td>
                     </tr>

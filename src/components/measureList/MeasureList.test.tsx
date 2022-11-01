@@ -133,7 +133,7 @@ describe("Measure List component", () => {
     );
     const editButton = getByTestId(`edit-measure-${measures[0].id}`);
     expect(editButton).toBeInTheDocument();
-    expect(editButton).toHaveTextContent("View/Edit");
+    expect(editButton).toHaveTextContent("View");
     expect(window.location.href).toBe("http://localhost/");
     fireEvent.click(editButton);
     expect(mockPush).toHaveBeenCalledWith("/example");
