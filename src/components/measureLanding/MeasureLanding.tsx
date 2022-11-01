@@ -148,7 +148,16 @@ export default function MeasureLanding() {
           {/* spin or display */}
           {!initialLoad && (
             <div className="table">
-              <MeasureList measureList={measureList} />
+              <MeasureList
+                measureList={measureList}
+                setMeasureList={setMeasureList}
+                setTotalPages={setTotalPages}
+                setTotalItems={setTotalItems}
+                setVisibleItems={setVisibleItems}
+                setOffset={setOffset}
+                setInitialLoad={setInitialLoad}
+                activeTab={activeTab}
+              />
               <div className="pagination-container">
                 {totalItems > 0 && (
                   <Pagination
