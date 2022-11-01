@@ -527,7 +527,7 @@ const MeasureGroups = () => {
           </Alert>
         )}
         {measure && (measure.cqlErrors || !measure?.cql) && (
-          <div style={{ margin: "17px 0 0 32px", width: "96.6%" }}>
+          <div style={{ margin: "17px 0 0 32px", width: "96%" }}>
             <MadieAlert
               type="error"
               content={

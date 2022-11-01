@@ -8,7 +8,11 @@ import {
   useOktaTokens,
   routeHandlerStore,
 } from "@madie/madie-util";
-import { Button, Toast } from "@madie/madie-design-system/dist/react";
+import {
+  Button,
+  Toast,
+  MadieDiscardDialog,
+} from "@madie/madie-design-system/dist/react";
 import "./MeasureMetaData.scss";
 import _ from "lodash";
 const SubHeader = tw.p`mt-1 text-sm text-gray-500`;
@@ -33,6 +37,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
 
   let measureMetaData = measure?.measureMetaData || {};
   const measureServiceApi = useMeasureServiceApi();
+  const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
   // toast utilities
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
@@ -97,6 +102,11 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
       });
   };
 
+  const discardChanges = () => {
+    resetForm();
+    setDiscardDialogOpen(false);
+  };
+
   return (
     <form
       id="measure-meta-data-form"
@@ -122,14 +132,14 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
       </div>
       {canEdit && (
         <div className="form-actions">
-          <button
+          <Button
             className="cancel-button"
             data-testid="cancel-button"
             disabled={!formik.dirty}
-            onClick={() => resetForm()}
+            onClick={() => setDiscardDialogOpen(true)}
           >
             Discard Changes
-          </button>
+          </Button>
           <Button
             disabled={!(formik.isValid && formik.dirty)}
             type="submit"
@@ -140,6 +150,12 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
           </Button>
         </div>
       )}
+
+      <MadieDiscardDialog
+        open={discardDialogOpen}
+        onClose={() => setDiscardDialogOpen(false)}
+        onContinue={discardChanges}
+      />
       <Toast
         toastKey="measure-information-toast"
         toastType={toastType}

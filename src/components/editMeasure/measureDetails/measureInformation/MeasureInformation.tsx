@@ -9,6 +9,7 @@ import {
   Toast,
   TextField,
   ReadOnlyTextField,
+  MadieDiscardDialog,
 } from "@madie/madie-design-system/dist/react";
 import DeleteDialog from "./DeleteDialog";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -24,7 +25,11 @@ import {
 import { useFormik } from "formik";
 import { HelperText } from "@madie/madie-components";
 import { MeasureSchemaValidator } from "../../../../validations/MeasureSchemaValidator";
-import { measureStore, useOktaTokens } from "@madie/madie-util";
+import {
+  measureStore,
+  useOktaTokens,
+  routeHandlerStore,
+} from "@madie/madie-util";
 import classNames from "classnames";
 import { makeStyles } from "@mui/styles";
 import { Box } from "@mui/system";
@@ -122,6 +127,7 @@ export default function MeasureInformation() {
 
   // Dialog and toast utilities
   const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
+  const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
@@ -149,6 +155,15 @@ export default function MeasureInformation() {
     onSubmit: async (values: measureInformationForm) =>
       await handleSubmit(values),
   });
+  const { resetForm } = formik;
+
+  const { updateRouteHandlerState } = routeHandlerStore;
+  useEffect(() => {
+    updateRouteHandlerState({
+      canTravel: !formik.dirty,
+      pendingRoute: "",
+    });
+  }, [formik.dirty]);
 
   const isOwner = measure?.createdBy === userName;
   const canEdit =
@@ -165,6 +180,11 @@ export default function MeasureInformation() {
     setToastType(type);
     setToastMessage(message);
     setToastOpen(open);
+  };
+
+  const discardChanges = () => {
+    resetForm();
+    setDiscardDialogOpen(false);
   };
 
   const deleteMeasure = async () => {
@@ -464,6 +484,14 @@ export default function MeasureInformation() {
           </DialogContent>
 
           <Button
+            className="cancel-button"
+            data-testid="cancel-button"
+            disabled={!formik.dirty}
+            onClick={() => setDiscardDialogOpen(true)}
+          >
+            Discard Changes
+          </Button>
+          <Button
             className="qpp-c-button--cyan"
             type="submit"
             data-testid="measurement-information-save-button"
@@ -509,6 +537,11 @@ export default function MeasureInformation() {
           onClose={() => setDeleteOpen(false)}
           measureName={measure?.measureName}
           deleteMeasure={deleteMeasure}
+        />
+        <MadieDiscardDialog
+          open={discardDialogOpen}
+          onClose={() => setDiscardDialogOpen(false)}
+          onContinue={discardChanges}
         />
         <Toast
           toastKey="measure-information-toast"

@@ -2,7 +2,11 @@ import React, { useEffect, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
-import { Button, Toast } from "@madie/madie-design-system/dist/react";
+import {
+  Button,
+  Toast,
+  MadieDiscardDialog,
+} from "@madie/madie-design-system/dist/react";
 import {
   measureStore,
   routeHandlerStore,
@@ -78,6 +82,7 @@ export default function StewardAndDevelopers() {
     measure?.acls?.some(
       (acl) => acl.userId === userName && acl.roles.indexOf("SHARED_WITH") >= 0
     );
+  const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
@@ -137,6 +142,11 @@ export default function StewardAndDevelopers() {
       pendingRoute: "",
     });
   }, [formik.dirty]);
+
+  const discardChanges = () => {
+    resetForm();
+    setDiscardDialogOpen(false);
+  };
 
   // fetch organizations DB using measure service and sorts alphabetically
   useEffect(() => {
@@ -300,7 +310,7 @@ export default function StewardAndDevelopers() {
           className="cancel-button"
           data-testid="cancel-button"
           disabled={!formik.dirty}
-          onClick={() => resetForm()}
+          onClick={() => setDiscardDialogOpen(true)}
         >
           Discard Changes
         </Button>
@@ -313,6 +323,12 @@ export default function StewardAndDevelopers() {
           Save
         </Button>
       </div>
+      <MadieDiscardDialog
+        open={discardDialogOpen}
+        onClose={() => setDiscardDialogOpen(false)}
+        onContinue={discardChanges}
+        data-testid="steward-and-developers-discard-dialog"
+      />
       <Toast
         toastKey="steward-and-developers-toast"
         toastType={toastType}
