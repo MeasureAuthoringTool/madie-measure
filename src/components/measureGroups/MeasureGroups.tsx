@@ -149,6 +149,7 @@ export interface DeleteMeasureGroupDialog {
 
 const MeasureGroups = () => {
   useDocumentTitle("MADiE Edit Measure Population Criteria");
+  const defaultPopulationBasis = "boolean";
   const [expressionDefinitions, setExpressionDefinitions] = useState<
     Array<ExpressionDefinition>
   >([]);
@@ -231,7 +232,7 @@ const MeasureGroups = () => {
             rateAggregation: "",
             improvementNotation: "",
             measureGroupTypes: [],
-            populationBasis: "Boolean",
+            populationBasis: defaultPopulationBasis,
             scoringUnit: "",
           },
         });
@@ -254,7 +255,7 @@ const MeasureGroups = () => {
         getEmptyStrat(),
       ],
       measureGroupTypes: group?.measureGroupTypes || [],
-      populationBasis: group?.populationBasis || "Boolean",
+      populationBasis: group?.populationBasis || defaultPopulationBasis,
       scoringUnit: group?.scoringUnit,
     } as Group,
     validationSchema: measureGroupSchemaValidator(cqlDefinitionDataTypes),
@@ -312,7 +313,7 @@ const MeasureGroups = () => {
           measureGroupTypes: [],
           rateAggregation: "",
           improvementNotation: "",
-          populationBasis: "Boolean",
+          populationBasis: defaultPopulationBasis,
           scoringUnit: "",
         },
       });
@@ -593,7 +594,6 @@ const MeasureGroups = () => {
                     {!canEdit && formik.values.groupDescription}
                   </FieldSeparator>
                 </FormFieldInner>
-
                 <div tw="lg:col-start-1">
                   <MultipleSelectDropDown
                     formControl={formik.getFieldProps("measureGroupTypes")}
@@ -621,8 +621,10 @@ const MeasureGroups = () => {
                   ></MultipleSelectDropDown>
                   {formik.errors["measureGroupTypes"] && (
                     <FormHelperText
-                      data-testid="measureGroupTypes-helper-text"
-                      id="measureGroupTypes-helper-text"
+                      tabIndex={0}
+                      aria-live="polite"
+                      data-testid={`measure-group-type-helper-text`}
+                      id="measure-group-type-helper-text"
                       error={true}
                     >
                       {formik.errors["measureGroupTypes"]}
@@ -631,27 +633,29 @@ const MeasureGroups = () => {
                 </div>
 
                 {populationBasisValues && (
-                  <AutoComplete
-                    id="population-basis"
-                    label="Population Basis"
-                    placeHolder={{ name: "-", value: "" }}
-                    defaultValue={formik.values.populationBasis}
-                    required={true}
-                    disabled={false}
-                    {...formik.getFieldProps("populationBasis")}
-                    error={
-                      formik.touched.populationBasis &&
-                      Boolean(formik.errors.populationBasis)
-                    }
-                    helperText={
-                      formik.touched.populationBasis &&
-                      formik.errors.populationBasis
-                    }
-                    onChange={(_event: any, selectedVal: string | null) => {
-                      formik.setFieldValue("populationBasis", selectedVal);
-                    }}
-                    options={populationBasisValues}
-                  ></AutoComplete>
+                  <div>
+                    <AutoComplete
+                      id="population-basis"
+                      label="Population Basis"
+                      placeHolder={{ name: "-", value: "" }}
+                      defaultValue={formik.values.populationBasis}
+                      required={true}
+                      disabled={false}
+                      {...formik.getFieldProps("populationBasis")}
+                      error={
+                        formik.touched["population-basis"] &&
+                        Boolean(formik.errors.populationBasis)
+                      }
+                      helperText={
+                        formik.touched["population-basis"] &&
+                        formik.errors.populationBasis
+                      }
+                      onChange={(_event: any, selectedVal: string | null) => {
+                        formik.setFieldValue("populationBasis", selectedVal);
+                      }}
+                      options={populationBasisValues}
+                    />
+                  </div>
                 )}
 
                 {canEdit && (
@@ -662,7 +666,6 @@ const MeasureGroups = () => {
                     id="scoring-select"
                     inputProps={{
                       "data-testid": "scoring-select-input",
-                      "aria-required": "true",
                     }}
                     data-testid="scoring-select"
                     {...formik.getFieldProps("scoring")}
@@ -671,6 +674,9 @@ const MeasureGroups = () => {
                     }
                     helperText={formik.touched.scoring && formik.errors.scoring}
                     size="small"
+                    SelectDisplayProps={{
+                      "aria-required": "true",
+                    }}
                     onChange={(e) => {
                       const nextScoring = e.target.value;
                       const populations = getPopulationsForScoring(nextScoring);

@@ -11,7 +11,11 @@ import {
   ValidationResult,
   synchingEditorCqlContent,
 } from "@madie/madie-editor";
-import { Button } from "@madie/madie-design-system/dist/react";
+import {
+  Button,
+  MadieSpinner,
+  MadieDiscardDialog,
+} from "@madie/madie-design-system/dist/react";
 import { Measure } from "@madie/madie-models";
 import { CqlCode, CqlCodeSystem } from "@madie/cql-antlr-parser/dist/src";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
@@ -20,6 +24,7 @@ import {
   useOktaTokens,
   measureStore,
   useDocumentTitle,
+  routeHandlerStore,
 } from "@madie/madie-util";
 import StatusHandler from "./StatusHandler";
 
@@ -80,6 +85,7 @@ const MeasureEditor = () => {
   useDocumentTitle("MADiE Edit Measure CQL");
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   const { updateMeasure } = measureStore;
+  const [processing, setProcessing] = useState<boolean>(true);
   useEffect(() => {
     const subscription = measureStore.subscribe((measure) => {
       setMeasure(measure);
@@ -88,9 +94,30 @@ const MeasureEditor = () => {
       subscription.unsubscribe();
     };
   }, []);
-
+  const [discardDialogOpen, setDiscardDialogOpen]: [
+    boolean,
+    Dispatch<SetStateAction<boolean>>
+  ] = useState(false);
   const [editorVal, setEditorVal]: [string, Dispatch<SetStateAction<string>>] =
     useState("");
+  const { updateRouteHandlerState } = routeHandlerStore;
+  // We have a unique case where when we have a fresh measure the cql isn't an empty string. It's a null or undefined value.
+
+  const isCQLUnchanged = ((val1, val2) => {
+    // if  both measure cql are falsey values return true
+    if (!val1 && !val2) {
+      return true;
+    }
+    return val1 === val2;
+  })(measure?.cql, editorVal);
+
+  useEffect(() => {
+    updateRouteHandlerState({
+      canTravel: isCQLUnchanged,
+      pendingRoute: "",
+    });
+  }, [isCQLUnchanged, updateRouteHandlerState]);
+
   const measureServiceApi = useMeasureServiceApi();
   // set success message
   const [success, setSuccess] = useState({
@@ -115,7 +142,7 @@ const MeasureEditor = () => {
   const [valuesetMsg, setValuesetMsg] = useState(null);
   const [errorMessage, setErrorMessage] = useState<string>(null);
 
-  // on load fetch elm translations results to display errors on editor
+  // on load fetch elm translations results to display errors on editor not just on load..
   useEffect(() => {
     updateElmAnnotations(measure?.cql).catch((err) => {
       console.error("An error occurred while translating CQL to ELM", err);
@@ -124,6 +151,7 @@ const MeasureEditor = () => {
       setElmAnnotations([]);
     });
     setEditorVal(measure?.cql);
+    setProcessing(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [measure?.cql]);
 
@@ -161,6 +189,7 @@ const MeasureEditor = () => {
   };
 
   const updateMeasureCql = async () => {
+    setProcessing(true);
     try {
       const inSyncCql = await synchingEditorCqlContent(
         editorVal,
@@ -240,10 +269,9 @@ const MeasureEditor = () => {
       setErrorMessage(
         "Unable to parse CQL and translate CQL to ELM, CQL was not saved!"
       );
-      // setElmTranslationError(
-      //   "Unable to parse CQL and translate CQL to ELM, CQL was not saved!"
-      // ); // this is consoildated an an error message
       setElmAnnotations([]);
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -273,15 +301,28 @@ const MeasureEditor = () => {
             success={success}
             outboundAnnotations={outboundAnnotations}
           />
-          <MadieEditor
-            onChange={(val: string) => handleMadieEditorValue(val)}
-            value={editorVal}
-            inboundAnnotations={elmAnnotations}
-            inboundErrorMarkers={errorMarkers}
-            height="calc(100vh - 135px)"
-            readOnly={!canEdit}
-            setOutboundAnnotations={setOutboundAnnotations}
-          />
+          {!processing && (
+            <MadieEditor
+              onChange={(val: string) => handleMadieEditorValue(val)}
+              value={editorVal}
+              inboundAnnotations={elmAnnotations}
+              inboundErrorMarkers={errorMarkers}
+              height="calc(100vh - 135px)"
+              readOnly={!canEdit}
+              setOutboundAnnotations={setOutboundAnnotations}
+            />
+          )}
+          {processing && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                height: "calc(100vh - 135px)",
+              }}
+            >
+              <MadieSpinner style={{ height: 50, width: 50 }} />
+            </div>
+          )}
         </div>
         <div
           tw="flex h-24 bg-white w-full sticky bottom-0 left-0 z-10"
@@ -296,8 +337,9 @@ const MeasureEditor = () => {
               <Button
                 tw="m-2"
                 type="button"
-                onClick={() => resetCql()}
+                onClick={() => setDiscardDialogOpen(true)}
                 data-testid="reset-cql-btn"
+                disabled={isCQLUnchanged}
               >
                 Discard Changes
               </Button>
@@ -306,6 +348,7 @@ const MeasureEditor = () => {
                 buttonSize="md"
                 onClick={() => updateMeasureCql()}
                 data-testid="save-cql-btn"
+                disabled={isCQLUnchanged}
               >
                 Save
               </Button>
@@ -313,6 +356,14 @@ const MeasureEditor = () => {
           )}
         </div>
       </div>
+      <MadieDiscardDialog
+        open={discardDialogOpen}
+        onContinue={() => {
+          resetCql();
+          setDiscardDialogOpen(false);
+        }}
+        onClose={() => setDiscardDialogOpen(false)}
+      />
     </>
   );
 };

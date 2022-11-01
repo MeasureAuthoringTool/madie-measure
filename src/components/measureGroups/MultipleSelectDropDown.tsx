@@ -28,6 +28,9 @@ const autoCompleteStyles = {
     paddingTop: 1,
     paddingBottom: 1,
   },
+  "& input::placeholder": {
+    fontSize: "14px",
+  },
   width: "100%",
 };
 

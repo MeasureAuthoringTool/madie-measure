@@ -41,7 +41,12 @@ const AutoComplete = ({
 }) => {
   return (
     <FormControl error={error} fullWidth sx={{ paddingRight: 2 }}>
-      <InputLabel htmlFor={`${id}`} id={`${id}-label`} required={required}>
+      <InputLabel
+        htmlFor={`${id}`}
+        id={`${id}-label`}
+        required={required}
+        error={error}
+      >
         {label}
       </InputLabel>
       {!disabled && (
@@ -60,7 +65,14 @@ const AutoComplete = ({
             inputProps["aria-required"] = required;
             inputProps["aria-describedby"] = `${id}-helper-text`;
             inputProps["aria-labelledby"] = `${id}-label`;
-            return <TextField {...params} inputProps={inputProps} label="" />;
+            return (
+              <TextField
+                {...params}
+                inputProps={inputProps}
+                label=""
+                error={error}
+              />
+            );
           }}
         />
       )}

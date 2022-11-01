@@ -135,7 +135,7 @@ describe("MeasureMetadataHelper", () => {
   it("should retrieve guidance value", () => {
     const actual = getInitialValues(
       measure,
-      "clinical recommendation statement"
+      "clinical-recommendation-statement"
     );
     expect(actual).toBe(CLINICAL);
   });
@@ -190,7 +190,7 @@ describe("MeasureMetadataHelper", () => {
   });
 
   it("should reset clinicalRecommendation value", () => {
-    setMeasureMetadata(measure, "clinical recommendation statement", NEWVALUE);
+    setMeasureMetadata(measure, "clinical-recommendation-statement", NEWVALUE);
     expect(measure.measureMetaData.clinicalRecommendation).toBe(NEWVALUE);
   });
 

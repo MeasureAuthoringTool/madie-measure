@@ -86,7 +86,7 @@ jest.mock("@madie/madie-util", () => ({
 }));
 
 const populationBasisValues: string[] = [
-  "Boolean",
+  "boolean",
   "Encounter",
   "Medication Administration",
   "test-data-1",
@@ -123,7 +123,7 @@ describe("Measure Groups Page", () => {
       ],
       groupDescription: "",
       measureGroupTypes: [],
-      populationBasis: "Boolean",
+      populationBasis: "boolean",
       scoringUnit: "",
     };
 
@@ -749,11 +749,11 @@ describe("Measure Groups Page", () => {
   });
 
   test("Should be able to update initial population of a population group", async () => {
+    const populationBasis = "MedicationAdministration";
     group.id = "7p03-5r29-7O0I";
     group.scoringUnit = "testScoringUnit";
-    group.populationBasis = "Medication Administration";
+    group.populationBasis = populationBasis;
     measure.groups = [group];
-    const populationBasis = "Medication Administration";
     const { getByTestId, getByText } = renderMeasureGroupComponent();
     // initial population before update
     const groupPopulationInput = screen.getByTestId(
@@ -819,7 +819,7 @@ describe("Measure Groups Page", () => {
   });
 
   test("displaying a measure update warning modal while updating measure scoring and updating measure scoring for a measure group", async () => {
-    const populationBasis = "Medication Administration";
+    const populationBasis = "MedicationAdministration";
     const newGroup = {
       id: "7p03-5r29-7O0I",
       scoring: "Continuous Variable",
@@ -1041,7 +1041,7 @@ describe("Measure Groups Page", () => {
   test("Should report an error if the update population Group fails", async () => {
     group.id = "7p03-5r29-7O0I";
     group.measureGroupTypes = [MeasureGroupTypes.PROCESS];
-    group.populationBasis = "Medication Administration";
+    group.populationBasis = "MedicationAdministration";
     measure.groups = [group];
     renderMeasureGroupComponent();
 
@@ -1072,7 +1072,7 @@ describe("Measure Groups Page", () => {
   test("Should report an error if the update population Group fails due to group validation error", async () => {
     group.id = "7p03-5r29-7O0I";
     group.measureGroupTypes = [MeasureGroupTypes.PROCESS];
-    group.populationBasis = "Medication Administration";
+    group.populationBasis = "MedicationAdministration";
     measure.groups = [group];
     renderMeasureGroupComponent();
 
@@ -1617,7 +1617,7 @@ describe("Measure Groups Page", () => {
     ];
     measure.groups = [group];
     const errorMessage =
-      "The selected definition does not align with the Population Basis field selection of Boolean";
+      "The selected definition does not align with the Population Basis field selection of boolean";
     renderMeasureGroupComponent();
     // switch to stratification tab
     userEvent.click(screen.getByTestId("stratifications-tab"));
@@ -1632,7 +1632,7 @@ describe("Measure Groups Page", () => {
     expect(screen.queryByText(errorMessage)).toBeNull();
 
     // update population basis to not match cql define return type
-    await changePopulationBasis("Boolean");
+    await changePopulationBasis("boolean");
     // error shown
     expect(screen.queryByText(errorMessage)).not.toBeNull();
     // update population basis to match cql define return type
@@ -2099,7 +2099,7 @@ describe("Measure Groups Page", () => {
       ],
       groupDescription: "",
       measureGroupTypes: [MeasureGroupTypes.PROCESS],
-      populationBasis: "Boolean",
+      populationBasis: "boolean",
       scoringUnit: "",
     };
     measure.groups = [group1];
@@ -2130,7 +2130,7 @@ describe("Measure Groups Page", () => {
       ],
       groupDescription: "",
       measureGroupTypes: [MeasureGroupTypes.PROCESS],
-      populationBasis: "Boolean",
+      populationBasis: "boolean",
       scoringUnit: "",
     };
     measure.groups = [group1];
