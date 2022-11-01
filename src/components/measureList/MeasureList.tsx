@@ -11,14 +11,28 @@ import SearchIcon from "@mui/icons-material/Search";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 
 const searchInputStyle = {
-  m: 2,
-  "& .Mui-focused .MuiIconButton-root": {
-    color: "primary.main",
-  },
+  borderRadius: "3px",
+  height: 40,
+  border: "1px solid #DDDDDD",
   "& .MuiOutlinedInput-notchedOutline": {
     borderRadius: "3px",
     "& legend": {
       width: 0,
+    },
+  },
+  "& .MuiOutlinedInput-root": {
+    "&&": {
+      borderRadius: "3px",
+    },
+  },
+  "& .MuiInputBase-input": {
+    height: 40,
+    fontFamily: "Rubik",
+    fontSize: 14,
+    borderRadius: "3px",
+    padding: "9px 14px",
+    "&::placeholder": {
+      opacity: 0.6,
     },
   },
 };
@@ -100,7 +114,9 @@ export default function MeasureList(props: {
           <div tw="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
             <div>
               <form onSubmit={handleSubmit}>
-                <table style={{ marginLeft: 20, marginTop: 10 }}>
+                <table
+                  style={{ marginLeft: 20, marginTop: 20, marginBottom: 20 }}
+                >
                   <thead>
                     <tr>
                       <TextField
@@ -112,7 +128,6 @@ export default function MeasureList(props: {
                         placeholder="Search Measure"
                         type="search"
                         fullWidth
-                        size="small"
                         data-testid="measure-search-input"
                         label="Filter Measures"
                         variant="outlined"
@@ -121,6 +136,7 @@ export default function MeasureList(props: {
                         inputProps={{
                           "data-testid": "searchMeasure-input",
                           "aria-required": "false",
+                          "aria-describedby": "searchMeasure-helper-text",
                         }}
                         InputProps={searchInputProps}
                         sx={searchInputStyle}
