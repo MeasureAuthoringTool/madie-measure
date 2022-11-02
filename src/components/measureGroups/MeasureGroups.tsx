@@ -190,6 +190,13 @@ const MeasureGroups = () => {
   const [cqlDefinitionDataTypes, setCqlDefinitionDataTypes] =
     useState<CqlDefineDataTypes>();
 
+  const goBackToNav = (e) => {
+    if (e.shiftKey && e.keyCode == 9) {
+      e.preventDefault();
+      document.getElementById(measureGroupNumber.toString()).focus();
+    }
+  };
+
   useEffect(() => {
     setCqlDefinitionDataTypes(
       measureServiceApi.getReturnTypesForAllCqlDefinitions(measure?.elmJson)
@@ -551,7 +558,7 @@ const MeasureGroups = () => {
           <div tw="lg:col-span-5 pl-2 pr-2">
             <div tw="flex pb-2 pt-6">
               {/* eslint-disable-next-line */}
-              <h2 tw="w-1/2 mb-0" data-testid="title" id="title" tabIndex={0}>
+              <h2 tw="w-1/2 mb-0" data-testid="title" id="title">
                 Population Criteria {measureGroupNumber + 1}
               </h2>
               <div tw="w-1/2 self-end">
@@ -588,6 +595,7 @@ const MeasureGroups = () => {
                         autoComplete="group-description"
                         placeholder="Description"
                         data-testid="groupDescriptionInput"
+                        onKeyDown={goBackToNav}
                         {...formik.getFieldProps("groupDescription")}
                       />
                     )}

@@ -27,6 +27,7 @@ interface SidebarLink {
   title: string;
   href: string;
   dataTestId: string;
+  id: string;
 }
 
 export interface EditMeasureSideBarNavProps {
@@ -150,6 +151,7 @@ export default function EditMeasureSideBarNav(
                   key={linkInfo.title}
                   to={linkInfo.href}
                   data-testid={linkInfo.dataTestId}
+                  id={linkInfo.id}
                 >
                   {linkInfo.title}
                 </LinkEl>

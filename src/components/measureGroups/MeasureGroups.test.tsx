@@ -37,6 +37,8 @@ jest.mock("uuid", () => ({
   v4: jest.fn(),
 }));
 
+jest.setTimeout(40000);
+
 const serviceConfig: ServiceConfig = {
   measureService: {
     baseUrl: "example-service-url",

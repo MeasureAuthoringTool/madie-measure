@@ -6,6 +6,7 @@ import { Button, Toast } from "@madie/madie-design-system/dist/react";
 import {
   measureStore,
   routeHandlerStore,
+  useKeyPress,
   useOktaTokens,
 } from "@madie/madie-util";
 import { useFormik } from "formik";
@@ -121,6 +122,13 @@ export default function StewardAndDevelopers() {
       });
   };
 
+  const goBackToNav = (e) => {
+    if (e.shiftKey && e.keyCode == 9) {
+      e.preventDefault();
+      document.getElementById("sideNavMeasureSteward").focus();
+    }
+  };
+
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
     return () => {
@@ -185,6 +193,7 @@ export default function StewardAndDevelopers() {
                 options={organizations}
                 disabled={!canEdit}
                 sx={autoCompleteStyles}
+                onKeyDown={goBackToNav}
                 {...formik.getFieldProps("steward")}
                 onChange={(_event: any, selectedVal: string | null) => {
                   formik.setFieldValue("steward", selectedVal || "");
