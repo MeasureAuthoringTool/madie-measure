@@ -14,10 +14,9 @@ import {
   Link,
   Typography,
   Divider,
-  FormHelperText,
   Tabs,
   Tab,
-  TextField,
+  FormHelperText,
 } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import EditMeasureSideBarNav from "../editMeasure/measureDetails/EditMeasureSideBarNav";
@@ -597,34 +596,40 @@ const MeasureGroups = () => {
                 </FormFieldInner>
                 <div tw="lg:col-start-1">
                   <MultipleSelectDropDown
-                    values={Object.values(MeasureGroupTypes)}
+                    formControl={formik.getFieldProps("measureGroupTypes")}
+                    id="measure-group-type"
+                    label="Type"
+                    placeHolder={{ name: "-", value: "" }}
+                    defaultValue={formik.values.measureGroupTypes}
+                    required={true}
+                    disabled={!canEdit}
                     error={
                       formik.touched.measureGroupTypes &&
                       Boolean(formik.errors.measureGroupTypes)
                     }
-                    selectedValues={formik.values.measureGroupTypes}
-                    formControl={formik.getFieldProps("measureGroupTypes")}
-                    label="Type"
-                    id="measure-group-type"
-                    clearAll={() =>
-                      formik.setFieldValue("measureGroupTypes", [])
+                    helperText={
+                      formik.touched.measureGroupTypes &&
+                      formik.errors.measureGroupTypes
                     }
-                    canEdit={canEdit}
-                    required={true}
-                    disabled={false}
-                  />
-                  {formik.touched.measureGroupTypes &&
-                    formik.errors["measureGroupTypes"] && (
-                      <FormHelperText
-                        tabIndex={0}
-                        aria-live="polite"
-                        data-testid={`measure-group-type-helper-text`}
-                        id="measure-group-type-helper-text"
-                        error={true}
-                      >
-                        {formik.errors["measureGroupTypes"]}
-                      </FormHelperText>
-                    )}
+                    {...formik.getFieldProps("measureGroupTypes")}
+                    onChange={(_event: any, selectedVal: string | null) => {
+                      formik.setFieldValue("measureGroupTypes", selectedVal);
+                    }}
+                    options={Object.values(MeasureGroupTypes)}
+                    multipleSelect={true}
+                    limitTags={1}
+                  ></MultipleSelectDropDown>
+                  {formik.errors["measureGroupTypes"] && (
+                    <FormHelperText
+                      tabIndex={0}
+                      aria-live="polite"
+                      data-testid={`measure-group-type-helper-text`}
+                      id="measure-group-type-helper-text"
+                      error={true}
+                    >
+                      {formik.errors["measureGroupTypes"]}
+                    </FormHelperText>
+                  )}
                 </div>
 
                 {populationBasisValues && (
