@@ -102,15 +102,14 @@ const MeasureEditor = () => {
     useState("");
   const { updateRouteHandlerState } = routeHandlerStore;
   // We have a unique case where when we have a fresh measure the cql isn't an empty string. It's a null or undefined value.
-
-  const isCQLUnchanged = ((val1, val2) => {
+  const [isCQLUnchanged, setIsCQLUnchanged] = useState<boolean>(true);
+  const checkIfCQLUnchanged = (val1, val2) => {
     // if  both measure cql are falsey values return true
     if (!val1 && !val2) {
       return true;
     }
     return val1 === val2;
-  })(measure?.cql, editorVal);
-
+  };
   useEffect(() => {
     updateRouteHandlerState({
       canTravel: isCQLUnchanged,
@@ -242,6 +241,7 @@ const MeasureEditor = () => {
           .then(() => {
             updateMeasure(newMeasure);
             setEditorVal(newMeasure?.cql);
+            setIsCQLUnchanged(true);
             const successMessage =
               inSyncCql !== editorVal
                 ? {
@@ -280,10 +280,12 @@ const MeasureEditor = () => {
     setError(false);
     setEditorVal(val);
     setValuesetMsg(null);
+    setIsCQLUnchanged(checkIfCQLUnchanged(val, measure?.cql));
   };
 
   const resetCql = (): void => {
     setEditorVal(measure?.cql || "");
+    setIsCQLUnchanged(true);
   };
 
   return (
