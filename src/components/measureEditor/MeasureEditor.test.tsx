@@ -230,7 +230,7 @@ describe("MeasureEditor component", () => {
     await waitFor(() => {
       const successText = getByTestId("generic-success-text-header");
       expect(successText.textContent).toEqual(
-        "CQL updated successfully! Library Name and/or Version can not be updated in the CQL Editor. MADiE has overwritten the updated Library Name and/or Version."
+        "Changes saved successfully but the following errors were found"
       );
       expect(mockedAxios.put).toHaveBeenCalledTimes(1);
     });
@@ -266,7 +266,9 @@ describe("MeasureEditor component", () => {
     userEvent.click(saveButton);
     await waitFor(() => {
       const successMessage = getByTestId("generic-success-text-header");
-      expect(successMessage.textContent).toEqual("CQL saved successfully");
+      expect(successMessage.textContent).toEqual(
+        "Changes saved successfully but the following errors were found"
+      );
       expect(mockedAxios.put).toHaveBeenCalledTimes(1);
     });
   });
