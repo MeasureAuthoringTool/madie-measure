@@ -136,7 +136,6 @@ export default function MeasureList(props: {
                         inputProps={{
                           "data-testid": "searchMeasure-input",
                           "aria-required": "false",
-                          "aria-describedby": "searchMeasure-helper-text",
                         }}
                         InputProps={searchInputProps}
                         sx={searchInputStyle}
