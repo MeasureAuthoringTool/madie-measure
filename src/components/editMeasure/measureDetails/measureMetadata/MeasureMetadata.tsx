@@ -18,12 +18,13 @@ import _ from "lodash";
 const SubHeader = tw.p`mt-1 text-sm text-gray-500`;
 
 export interface MeasureMetadataProps {
+  measureMetadataId?: String;
   measureMetadataType?: String;
   header?: String;
 }
 
 export default function MeasureMetadata(props: MeasureMetadataProps) {
-  const { measureMetadataType, header } = props;
+  const { measureMetadataId, measureMetadataType, header } = props;
   const typeLower = _.kebabCase(measureMetadataType.toLowerCase());
 
   const { updateMeasure } = measureStore;
@@ -67,6 +68,14 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
       submitForm(values.genericField.trim());
     },
   });
+
+  const goBackToNav = (e) => {
+    if (e.shiftKey && e.keyCode == 9) {
+      e.preventDefault();
+      document.getElementById("sideNavMeasure" + measureMetadataId).focus();
+    }
+  };
+
   const { updateRouteHandlerState } = routeHandlerStore;
   useEffect(() => {
     updateRouteHandlerState({
@@ -127,6 +136,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
           value={formik.values.genericField}
           placeholder={`${measureMetadataType}`}
           data-testid={`measure${measureMetadataType}Input`}
+          onKeyDown={goBackToNav}
           {...formik.getFieldProps("genericField")}
         />
       </div>
