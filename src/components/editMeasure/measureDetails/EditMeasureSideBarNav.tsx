@@ -36,7 +36,6 @@ export interface EditMeasureSideBarNavProps {
   header?: String;
   measureGroupNumber?: number;
   setMeasureGroupNumber?: (value: number) => void;
-  setSuccessMessage?: (value: string) => void;
   measure?: Measure;
 }
 
@@ -49,7 +48,6 @@ export default function EditMeasureSideBarNav(
     measure,
     measureGroupNumber,
     setMeasureGroupNumber,
-    setSuccessMessage,
     dirty,
   } = props;
   const { pathname } = useLocation();
@@ -110,14 +108,12 @@ export default function EditMeasureSideBarNav(
         }`,
       },
     ]);
-    setSuccessMessage(undefined);
     onClose();
   };
 
   // we need to preserve the
   const handleMeasureGroupNavigation = (val: number) => {
     setMeasureGroupNumber(val);
-    setSuccessMessage(undefined);
     onClose();
   };
 
