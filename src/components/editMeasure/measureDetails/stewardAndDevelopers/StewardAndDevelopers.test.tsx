@@ -344,7 +344,7 @@ describe("Steward and Developers component", () => {
     expect(toastMessage).toHaveTextContent("Error updating measure");
   });
 
-  it.skip("should discard changes by click discard changes button", async () => {
+  it("should discard changes by click discard changes button", async () => {
     render(<StewardAndDevelopers />);
 
     // verifies if the fields are populated with existing data
@@ -363,9 +363,15 @@ describe("Steward and Developers component", () => {
     fireEvent.click(screen.getByTestId("cancel-button")); // revert steward changes
 
     expect(
-      screen.getByTestId("steward-and-developers-discard-dialog")
-    ).toBeInTheDocument();
+      await screen.findByRole("button", { name: "Yes, Discard All Changes" })
+    ).toBeEnabled();
+    expect(
+      await screen.findByRole("button", { name: "No, Keep Working" })
+    ).toBeEnabled();
 
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Yes, Discard All Changes" })
+    );
     expect(stewardComboBox).toHaveValue("GE Healthcare");
   });
 });

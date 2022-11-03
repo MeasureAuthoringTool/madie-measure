@@ -336,7 +336,6 @@ export default function StewardAndDevelopers() {
         open={discardDialogOpen}
         onClose={() => setDiscardDialogOpen(false)}
         onContinue={discardChanges}
-        data-testid="steward-and-developers-discard-dialog"
       />
       <Toast
         toastKey="steward-and-developers-toast"
