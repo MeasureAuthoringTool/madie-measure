@@ -13,6 +13,7 @@ import {
 } from "@madie/madie-editor";
 import {
   Button,
+  MadieSpinner,
   MadieDiscardDialog,
 } from "@madie/madie-design-system/dist/react";
 import { Measure } from "@madie/madie-models";
@@ -84,6 +85,7 @@ const MeasureEditor = () => {
   useDocumentTitle("MADiE Edit Measure CQL");
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   const { updateMeasure } = measureStore;
+  const [processing, setProcessing] = useState<boolean>(true);
   useEffect(() => {
     const subscription = measureStore.subscribe((measure) => {
       setMeasure(measure);
@@ -100,15 +102,14 @@ const MeasureEditor = () => {
     useState("");
   const { updateRouteHandlerState } = routeHandlerStore;
   // We have a unique case where when we have a fresh measure the cql isn't an empty string. It's a null or undefined value.
-
-  const isCQLUnchanged = ((val1, val2) => {
+  const [isCQLUnchanged, setIsCQLUnchanged] = useState<boolean>(true);
+  const checkIfCQLUnchanged = (val1, val2) => {
     // if  both measure cql are falsey values return true
     if (!val1 && !val2) {
       return true;
     }
     return val1 === val2;
-  })(measure?.cql, editorVal);
-
+  };
   useEffect(() => {
     updateRouteHandlerState({
       canTravel: isCQLUnchanged,
@@ -149,6 +150,7 @@ const MeasureEditor = () => {
       setElmAnnotations([]);
     });
     setEditorVal(measure?.cql);
+    setProcessing(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [measure?.cql]);
 
@@ -186,6 +188,7 @@ const MeasureEditor = () => {
   };
 
   const updateMeasureCql = async () => {
+    setProcessing(true);
     try {
       const inSyncCql = await synchingEditorCqlContent(
         editorVal,
@@ -238,6 +241,7 @@ const MeasureEditor = () => {
           .then(() => {
             updateMeasure(newMeasure);
             setEditorVal(newMeasure?.cql);
+            setIsCQLUnchanged(true);
             const successMessage =
               inSyncCql !== editorVal
                 ? {
@@ -265,10 +269,9 @@ const MeasureEditor = () => {
       setErrorMessage(
         "Unable to parse CQL and translate CQL to ELM, CQL was not saved!"
       );
-      // setElmTranslationError(
-      //   "Unable to parse CQL and translate CQL to ELM, CQL was not saved!"
-      // ); // this is consoildated an an error message
       setElmAnnotations([]);
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -277,10 +280,12 @@ const MeasureEditor = () => {
     setError(false);
     setEditorVal(val);
     setValuesetMsg(null);
+    setIsCQLUnchanged(checkIfCQLUnchanged(val, measure?.cql));
   };
 
   const resetCql = (): void => {
     setEditorVal(measure?.cql || "");
+    setIsCQLUnchanged(true);
   };
 
   return (
@@ -298,15 +303,28 @@ const MeasureEditor = () => {
             success={success}
             outboundAnnotations={outboundAnnotations}
           />
-          <MadieEditor
-            onChange={(val: string) => handleMadieEditorValue(val)}
-            value={editorVal}
-            inboundAnnotations={elmAnnotations}
-            inboundErrorMarkers={errorMarkers}
-            height="calc(100vh - 135px)"
-            readOnly={!canEdit}
-            setOutboundAnnotations={setOutboundAnnotations}
-          />
+          {!processing && (
+            <MadieEditor
+              onChange={(val: string) => handleMadieEditorValue(val)}
+              value={editorVal}
+              inboundAnnotations={elmAnnotations}
+              inboundErrorMarkers={errorMarkers}
+              height="calc(100vh - 135px)"
+              readOnly={!canEdit}
+              setOutboundAnnotations={setOutboundAnnotations}
+            />
+          )}
+          {processing && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                height: "calc(100vh - 135px)",
+              }}
+            >
+              <MadieSpinner style={{ height: 50, width: 50 }} />
+            </div>
+          )}
         </div>
         <div
           tw="flex h-24 bg-white w-full sticky bottom-0 left-0 z-10"

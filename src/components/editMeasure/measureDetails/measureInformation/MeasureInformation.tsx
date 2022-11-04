@@ -150,6 +150,13 @@ export default function MeasureInformation() {
       await handleSubmit(values),
   });
 
+  const goBackToNav = (e) => {
+    if (e.shiftKey && e.keyCode == 9) {
+      e.preventDefault();
+      document.getElementById("sideNavMeasureInformation").focus();
+    }
+  };
+
   const isOwner = measure?.createdBy === userName;
   const canEdit =
     isOwner ||
@@ -226,6 +233,7 @@ export default function MeasureInformation() {
         <HelperText
           aria-live="polite"
           data-testid={`${name}-helper-text`}
+          id={`${name}-helper-text`}
           text={formik.errors[name]?.toString()}
           isError={isError}
         />
@@ -287,6 +295,7 @@ export default function MeasureInformation() {
                     helperText={formikErrorHandler("measureName", true)}
                     data-testid="measure-name-text-field"
                     size="small"
+                    onKeyDown={goBackToNav}
                     error={
                       formik.touched.measureName &&
                       Boolean(formik.errors.measureName)

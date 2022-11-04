@@ -240,6 +240,35 @@ export class MeasureServiceApi {
 
     return {};
   }
+
+  async searchMeasuresByMeasureNameOrEcqmTitle(
+    filterByCurrentUser: boolean,
+    limit: number = 25,
+    page: number = 0,
+    searchCriteria: string
+  ): Promise<any> {
+    try {
+      const response = await axios.get<any>(
+        `${this.baseUrl}/measures/search/${searchCriteria}`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+          params: {
+            currentUser: filterByCurrentUser,
+            limit,
+            page,
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      const message = `Unable to search measures`;
+      console.error(message);
+      console.error(err);
+      throw new Error(message);
+    }
+  }
 }
 
 export default function useMeasureServiceApi(): MeasureServiceApi {

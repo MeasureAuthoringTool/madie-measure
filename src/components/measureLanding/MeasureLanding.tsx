@@ -100,12 +100,16 @@ export default function MeasureLanding() {
                 fontWeight: 700,
                 color: "#003366",
                 "& .MuiTabs-indicator": {
-                  height: "4px",
-                  backgroundColor: "#0073C8",
+                  height: "6px",
+                  backgroundColor: "#209FA6",
                 },
                 "& .Mui-selected": {
                   fontWeight: 500,
                   color: "#003366 !important",
+                },
+                "& .MuiTab-root": {
+                  textTransform: "none",
+                  fontSize: "16px",
                 },
               }}
             >
@@ -116,10 +120,6 @@ export default function MeasureLanding() {
                   borderRadius: "6px 0 0 0",
                   fontWeight: 400,
                   color: "#003366",
-                  "&:focus": {
-                    outline: "9px auto -webkit-focus-ring-color",
-                    outlineOffset: "-1px",
-                  },
                 }}
                 label={`My Measures`}
                 data-testid="my-measures-tab"
@@ -132,10 +132,6 @@ export default function MeasureLanding() {
                   borderRadius: "0 6px 0 0",
                   fontWeight: 400,
                   color: "#003366",
-                  "&:focus": {
-                    outline: "9px auto -webkit-focus-ring-color",
-                    outlineOffset: "-1px",
-                  },
                 }}
                 label="All Measures"
                 data-testid="all-measures-tab"
@@ -148,7 +144,16 @@ export default function MeasureLanding() {
           {/* spin or display */}
           {!initialLoad && (
             <div className="table">
-              <MeasureList measureList={measureList} />
+              <MeasureList
+                measureList={measureList}
+                setMeasureList={setMeasureList}
+                setTotalPages={setTotalPages}
+                setTotalItems={setTotalItems}
+                setVisibleItems={setVisibleItems}
+                setOffset={setOffset}
+                setInitialLoad={setInitialLoad}
+                activeTab={activeTab}
+              />
               <div className="pagination-container">
                 {totalItems > 0 && (
                   <Pagination

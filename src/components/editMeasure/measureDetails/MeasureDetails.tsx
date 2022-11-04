@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from "react";
 import tw from "twin.macro";
-import { Route, Switch, useRouteMatch, useHistory } from "react-router-dom";
+import {
+  Route,
+  Switch,
+  useRouteMatch,
+  useHistory,
+  Link,
+} from "react-router-dom";
 import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureMetadata from "./measureMetadata/MeasureMetadata";
 import EditMeasureSideBarNav from "./EditMeasureSideBarNav";
 import { routeHandlerStore, useDocumentTitle } from "@madie/madie-util";
 import StewardAndDevelopers from "./stewardAndDevelopers/StewardAndDevelopers";
+import { LinkSharp } from "@mui/icons-material";
 
 const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
 export interface RouteHandlerState {
@@ -28,41 +35,49 @@ export default function MeasureDetails() {
       title: "Information",
       href: path,
       dataTestId: "leftPanelMeasureInformation",
+      id: "sideNavMeasureInformation",
     },
     {
       title: "Steward & Developers",
       href: stewardLink,
       dataTestId: "leftPanelMeasureSteward",
+      id: "sideNavMeasureSteward",
     },
     {
       title: "Description",
       href: descriptionLink,
       dataTestId: "leftPanelMeasureDescription",
+      id: "sideNavMeasureDescription",
     },
     {
       title: "Copyright",
       href: copyrightLink,
       dataTestId: "leftPanelMeasureCopyright",
+      id: "sideNavMeasureCopyright",
     },
     {
       title: "Disclaimer",
       href: disclaimerLink,
       dataTestId: "leftPanelMeasureDisclaimer",
+      id: "sideNavMeasureDisclaimer",
     },
     {
       title: "Rationale",
       href: rationaleLink,
       dataTestId: "leftPanelMeasureRationale",
+      id: "sideNavMeasureRationale",
     },
     {
       title: "Guidance",
       href: guidanceLink,
       dataTestId: "leftPanelMeasureGuidance",
+      id: "sideNavMeasureGuidance",
     },
     {
       title: "Clinical Recommendation",
       href: clinicalLink,
       dataTestId: "leftPanelMeasureClinicalGuidance",
+      id: "sideNavMeasureClinicalRecommendation",
     },
   ];
   const history = useHistory();
@@ -102,33 +117,42 @@ export default function MeasureDetails() {
           </Route>
           <Route path={descriptionLink}>
             <MeasureMetadata
+              measureMetadataId="Description"
               measureMetadataType="Description"
               header="Description"
             />
           </Route>
           <Route path={copyrightLink}>
             <MeasureMetadata
+              measureMetadataId="Copyright"
               measureMetadataType="Copyright"
               header="Copyright"
             />
           </Route>
           <Route path={disclaimerLink}>
             <MeasureMetadata
+              measureMetadataId="Disclaimer"
               measureMetadataType="Disclaimer"
               header="Disclaimer"
             />
           </Route>
           <Route path={rationaleLink}>
             <MeasureMetadata
+              measureMetadataId="Rationale"
               measureMetadataType="Rationale"
               header="Rationale"
             />
           </Route>
           <Route path={guidanceLink}>
-            <MeasureMetadata measureMetadataType="Guidance" header="Guidance" />
+            <MeasureMetadata
+              measureMetadataId="Guidance"
+              measureMetadataType="Guidance"
+              header="Guidance"
+            />
           </Route>
           <Route path={clinicalLink}>
             <MeasureMetadata
+              measureMetadataId="ClinicalRecommendation"
               measureMetadataType="Clinical Recommendation Statement"
               header="Clinical Recommendation"
             />

@@ -233,7 +233,6 @@ describe("Measure Observation Details", () => {
     render(
       <MeasureObservationDetails
         name={"obs1"}
-        required={false}
         elmJson={null}
         measureObservation={null}
         canEdit
