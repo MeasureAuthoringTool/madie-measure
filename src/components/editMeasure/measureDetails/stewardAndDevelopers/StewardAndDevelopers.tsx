@@ -2,16 +2,19 @@ import React, { useEffect, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
-import { Button, Toast } from "@madie/madie-design-system/dist/react";
+import {
+  Button,
+  MadieDiscardDialog,
+  Toast,
+} from "@madie/madie-design-system/dist/react";
 import {
   measureStore,
   routeHandlerStore,
-  useKeyPress,
   useOktaTokens,
 } from "@madie/madie-util";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import "../measureMetadata/MeasureMetaData.scss";
+
 import {
   Autocomplete,
   Checkbox,
@@ -139,6 +142,8 @@ export default function StewardAndDevelopers() {
   // Route handle store will give warning message
   // if form is dirty and user ties to navigate across SPAs
   const { updateRouteHandlerState } = routeHandlerStore;
+  const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
+
   useEffect(() => {
     updateRouteHandlerState({
       canTravel: !formik.dirty,
@@ -164,7 +169,7 @@ export default function StewardAndDevelopers() {
 
   return (
     <form
-      id="measure-meta-data-form"
+      id="measure-details-form"
       onSubmit={formik.handleSubmit}
       data-testid="measure-steward-developers-form"
     >
@@ -309,7 +314,7 @@ export default function StewardAndDevelopers() {
           className="cancel-button"
           data-testid="cancel-button"
           disabled={!formik.dirty}
-          onClick={() => resetForm()}
+          onClick={() => setDiscardDialogOpen(true)}
         >
           Discard Changes
         </Button>
@@ -334,6 +339,14 @@ export default function StewardAndDevelopers() {
         message={toastMessage}
         onClose={onToastClose}
         autoHideDuration={6000}
+      />
+      <MadieDiscardDialog
+        open={discardDialogOpen}
+        onContinue={() => {
+          resetForm();
+          setDiscardDialogOpen(false);
+        }}
+        onClose={() => setDiscardDialogOpen(false)}
       />
     </form>
   );

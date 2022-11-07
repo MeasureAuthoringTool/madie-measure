@@ -33,6 +33,7 @@ const EditMeasureNav = () => {
 
   if (
     pathname !== `${url}/details` &&
+    pathname !== `${url}/details/model&measurement-period` &&
     pathname !== `${url}/cql-editor` &&
     pathname !== `${url}/groups` &&
     pathname !== `${url}/details/measure-steward` &&
@@ -41,6 +42,7 @@ const EditMeasureNav = () => {
     pathname !== `${url}/details/measure-disclaimer` &&
     pathname !== `${url}/details/measure-rationale` &&
     pathname !== `${url}/details/measure-guidance` &&
+    pathname !== `${url}/details/measure-clinical-recommendation` &&
     pathname !== `${url}/details/measure-clinical-recommendation` &&
     !pathname.startsWith(`${url}/test-cases`)
   ) {

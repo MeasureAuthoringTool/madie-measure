@@ -8,10 +8,12 @@ import {
   useOktaTokens,
   routeHandlerStore,
 } from "@madie/madie-util";
-import { Button, Toast } from "@madie/madie-design-system/dist/react";
-import "./MeasureMetaData.scss";
+import {
+  Button,
+  MadieDiscardDialog,
+  Toast,
+} from "@madie/madie-design-system/dist/react";
 import _ from "lodash";
-const SubHeader = tw.p`mt-1 text-sm text-gray-500`;
 
 export interface MeasureMetadataProps {
   measureMetadataId?: String;
@@ -72,6 +74,8 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
   };
 
   const { updateRouteHandlerState } = routeHandlerStore;
+  const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
+
   useEffect(() => {
     updateRouteHandlerState({
       canTravel: !formik.dirty,
@@ -108,7 +112,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
 
   return (
     <form
-      id="measure-meta-data-form"
+      id="measure-details-form"
       onSubmit={formik.handleSubmit}
       data-testid={`measure${measureMetadataType}`}
     >
@@ -132,14 +136,15 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
       </div>
       {canEdit && (
         <div className="form-actions">
-          <button
-            className="cancel-button"
-            data-testid="cancel-button"
+          <Button
+            variant="action"
             disabled={!formik.dirty}
-            onClick={() => resetForm()}
+            data-testid="cancel-button"
+            onClick={() => setDiscardDialogOpen(true)}
+            style={{ marginTop: 20, float: "right", marginRight: 32 }}
           >
             Discard Changes
-          </button>
+          </Button>
           <Button
             disabled={!(formik.isValid && formik.dirty)}
             type="submit"
@@ -162,6 +167,14 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
         message={toastMessage}
         onClose={onToastClose}
         autoHideDuration={6000}
+      />
+      <MadieDiscardDialog
+        open={discardDialogOpen}
+        onContinue={() => {
+          resetForm();
+          setDiscardDialogOpen(false);
+        }}
+        onClose={() => setDiscardDialogOpen(false)}
       />
     </form>
   );
