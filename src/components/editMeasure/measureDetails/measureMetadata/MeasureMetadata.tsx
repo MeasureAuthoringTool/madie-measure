@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import tw from "twin.macro";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import { useFormik } from "formik";
 import getInitialValues, { setMeasureMetadata } from "./MeasureMetadataHelper";
@@ -150,6 +149,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
             type="submit"
             variant="cyan"
             data-testid={`measure${measureMetadataType}Save`}
+            style={{ marginTop: 20, float: "right" }}
           >
             Save
           </Button>

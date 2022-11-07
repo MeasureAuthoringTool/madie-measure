@@ -15,7 +15,7 @@ import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import { Typography } from "@mui/material";
 import { useFormik } from "formik";
 import { HelperText } from "@madie/madie-components";
-import { MeasureSchemaValidator } from "../../../../validations/MeasureSchemaValidator";
+import { MeasurementPeriodValidator } from "../../../../validations/MeasurementPeriodValidator";
 import {
   measureStore,
   useOktaTokens,
@@ -24,12 +24,10 @@ import {
 import { Box } from "@mui/system";
 import { synchingEditorCqlContent } from "@madie/madie-editor";
 
-interface measureInformationForm {
+interface modelAndMeasurementPeriod {
   model: string;
   measurementPeriodStart: Date;
   measurementPeriodEnd: Date;
-  measureId: string;
-  cmsId: string;
 }
 
 const ModelAndMeasurementPeriod = () => {
@@ -70,22 +68,13 @@ const ModelAndMeasurementPeriod = () => {
     measurementPeriodStart: measure?.measurementPeriodStart,
     measurementPeriodEnd: measure?.measurementPeriodEnd,
     model: measure?.model,
-    // measureName: measure?.measureName,
-    // cqlLibraryName: measure?.cqlLibraryName,
-    // ecqmTitle: measure?.ecqmTitle,
-    // versionId:
-    //   measure?.versionId === null || measure?.versionId === undefined
-    //     ? measure?.id
-    //     : measure?.versionId,
-    // cmsId: measure?.cmsId,
-    // measureId: measure?.measureSetId,
-  } as measureInformationForm;
+  } as modelAndMeasurementPeriod;
 
   const formik = useFormik({
     initialValues: { ...INITIAL_VALUES },
-    validationSchema: MeasureSchemaValidator,
+    validationSchema: MeasurementPeriodValidator,
     enableReinitialize: true, // formik will auto set initial variables whenever measure delivers new results
-    onSubmit: async (values: measureInformationForm) =>
+    onSubmit: async (values: modelAndMeasurementPeriod) =>
       await handleSubmit(values),
   });
   const { resetForm } = formik;
@@ -126,14 +115,8 @@ const ModelAndMeasurementPeriod = () => {
     );
     const newMeasure: Measure = {
       ...measure,
-      versionId: values.versionId,
-      measureName: values.measureName,
-      cqlLibraryName: values.cqlLibraryName,
-      ecqmTitle: values.ecqmTitle,
       measurementPeriodStart: values.measurementPeriodStart,
       measurementPeriodEnd: values.measurementPeriodEnd,
-      cql: inSyncCql,
-      measureId: values.measureSetId,
     };
     measureServiceApi
       .updateMeasure(newMeasure)

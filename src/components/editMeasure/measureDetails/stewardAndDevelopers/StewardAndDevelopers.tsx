@@ -311,10 +311,11 @@ export default function StewardAndDevelopers() {
       </div>
       <div className="form-actions">
         <Button
-          className="cancel-button"
+          variant="action"
           data-testid="cancel-button"
           disabled={!formik.dirty}
           onClick={() => setDiscardDialogOpen(true)}
+          style={{ marginTop: 20, float: "right", marginRight: 32 }}
         >
           Discard Changes
         </Button>
@@ -323,6 +324,7 @@ export default function StewardAndDevelopers() {
           type="submit"
           variant="cyan"
           data-testid={`steward-and-developers-save`}
+          style={{ marginTop: 20, float: "right" }}
         >
           Save
         </Button>
