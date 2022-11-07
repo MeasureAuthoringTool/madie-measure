@@ -16,6 +16,11 @@ import { MemoryRouter } from "react-router";
 import userEvent from "@testing-library/user-event";
 import { useOktaTokens } from "@madie/madie-util";
 import { AxiosError, AxiosResponse } from "axios";
+import {
+  parseContent,
+  synchingEditorCqlContent,
+  validateContent,
+} from "@madie/madie-editor";
 
 const mockHistoryPush = jest.fn();
 
@@ -39,7 +44,17 @@ const measure = {
   createdBy: "john doe",
   measureSetId: "testMeasureId",
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
+  elmJson: "{library: TestCqlLibraryName}",
 } as unknown as Measure;
+
+jest.mock("@madie/madie-editor", () => ({
+  synchingEditorCqlContent: jest.fn().mockResolvedValue("modified cql"),
+  parseContent: jest.fn(() => []),
+  validateContent: jest.fn().mockResolvedValue({
+    errors: [],
+    translation: { library: "NewLibName" },
+  }),
+}));
 
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: jest.fn(() => ({
@@ -93,6 +108,53 @@ describe("MeasureInformation component", () => {
     findByText,
     queryByTestId,
   } = screen;
+
+  it("should regenerate ELM when the CQL Library Name is updated", async () => {
+    serviceApiMock = {
+      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
+    } as unknown as MeasureServiceApi;
+    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+
+    const testMeasure = {
+      ...measure,
+      versionId: "test measure",
+      measureId: undefined,
+      cql: "modified cql",
+    } as unknown as Measure;
+
+    render(<MeasureInformation />);
+
+    const cqlLibraryName = (await screen.findByRole("textbox", {
+      name: "Measure CQL Library Name",
+    })) as HTMLInputElement;
+    expect(cqlLibraryName.value).toEqual(testMeasure.cqlLibraryName);
+
+    const modifiedLibName = "NewLibName";
+    userEvent.clear(cqlLibraryName);
+    userEvent.type(cqlLibraryName, modifiedLibName);
+    expect(cqlLibraryName.value).not.toEqual(testMeasure.cqlLibraryName);
+    expect(cqlLibraryName.value).toEqual(modifiedLibName);
+
+    const saveButton = await screen.findByRole("button", { name: "Save" });
+    expect(saveButton).toBeInTheDocument();
+    await waitFor(() => expect(saveButton).toBeEnabled());
+
+    userEvent.click(saveButton);
+    await waitFor(() => expect(synchingEditorCqlContent).toBeCalled());
+    await waitFor(() => expect(parseContent).toBeCalled());
+
+    expect(
+      await screen.findByText("Measurement Information Updated Successfully")
+    ).toBeInTheDocument();
+
+    await waitFor(() =>
+      expect(serviceApiMock.updateMeasure).toBeCalledWith({
+        ...testMeasure,
+        cqlLibraryName: modifiedLibName,
+        elmJson: JSON.stringify({ library: modifiedLibName }),
+      })
+    );
+  });
 
   it("should render the component with measure's information populated", async () => {
     render(<MeasureInformation />);
