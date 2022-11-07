@@ -29,6 +29,10 @@ export default function MeasureLanding() {
   const [visibleItems, setVisibleItems] = useState<number>(0);
   const activeTab: number = values.tab ? Number(values.tab) : 0;
   const [offset, setOffset] = useState<number>(0);
+  const [searchCriteria, setSearchCriteria] = useState("");
+  const [currentLimit, setCurrentLimit] = useState(10);
+  const [currentPage, setCurrentPage] = useState(0);
+
   // pull info from some query url
   const curLimit = values.limit && Number(values.limit);
   const curPage = (values.page && Number(values.page)) || 1;
@@ -38,51 +42,68 @@ export default function MeasureLanding() {
   })();
   const canGoPrev = Number(values?.page) > 1;
   const handlePageChange = (e, v) => {
+    setCurrentPage(v - 1);
     history.push(`?tab=${activeTab}&page=${v}&limit=${values?.limit || 10}`);
   };
   const handleLimitChange = (e) => {
+    setCurrentLimit(e.target.value);
     history.push(`?tab=${activeTab}&page=${0}&limit=${e.target.value}`);
   };
 
   const retrieveMeasures = useCallback(
-    async (tab = 0, limit = 10, page = 0) => {
-      const data = await measureServiceApi.fetchMeasures(
-        tab === 0,
-        limit,
-        page
-      );
-      if (data) {
-        const {
-          content,
-          totalPages,
-          totalElements,
-          numberOfElements,
-          pageable,
-        } = data;
-        setTotalPages(totalPages);
-        setVisibleItems(numberOfElements);
-        setTotalItems(totalElements);
-        setMeasureList(content);
-        setOffset(pageable.offset);
-        setInitialLoad(false);
+    async (tab, limit, page, searchCriteria) => {
+      if (!searchCriteria) {
+        const data = await measureServiceApi.fetchMeasures(
+          tab === 0,
+          limit,
+          page
+        );
+        setPageProps(data);
+      } else {
+        const data =
+          await measureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle(
+            tab === 0,
+            limit,
+            page,
+            searchCriteria
+          );
+        setPageProps(data);
       }
     },
     [measureServiceApi]
   );
+  const setPageProps = (data) => {
+    if (data) {
+      const { content, totalPages, totalElements, numberOfElements, pageable } =
+        data;
+      setTotalPages(totalPages);
+      setTotalItems(totalElements);
+      setVisibleItems(numberOfElements);
+      setMeasureList(content);
+      setOffset(pageable.offset);
+      setInitialLoad(false);
+    }
+  };
 
   useEffect(() => {
-    retrieveMeasures(activeTab, curLimit, curPage - 1);
+    retrieveMeasures(
+      activeTab,
+      curLimit === undefined ? 10 : curLimit,
+      curPage - 1,
+      searchCriteria
+    );
   }, [retrieveMeasures, activeTab, curLimit, curPage, measureServiceApi]);
   // create is in a different app, so we need to listen for it.
   useEffect(() => {
     const createListener = () => {
-      retrieveMeasures();
+      retrieveMeasures(0, curLimit === undefined ? 10 : curLimit, 0, undefined);
     };
     window.addEventListener("create", createListener, false);
     return () => {
       window.removeEventListener("create", createListener, false);
     };
   }, []);
+
   const handleTabChange = (event, nextTab) => {
     const limit = values?.limit || 10;
     history.push(`?tab=${nextTab}&page=0&limit=${limit}`);
@@ -123,6 +144,9 @@ export default function MeasureLanding() {
                 }}
                 label={`My Measures`}
                 data-testid="my-measures-tab"
+                onClick={() => {
+                  setCurrentPage(0);
+                }}
               />
               <Tab
                 tabIndex={0}
@@ -135,6 +159,9 @@ export default function MeasureLanding() {
                 }}
                 label="All Measures"
                 data-testid="all-measures-tab"
+                onClick={() => {
+                  setCurrentPage(0);
+                }}
               />
             </Tabs>
           </div>
@@ -153,6 +180,10 @@ export default function MeasureLanding() {
                 setOffset={setOffset}
                 setInitialLoad={setInitialLoad}
                 activeTab={activeTab}
+                searchCriteria={searchCriteria}
+                setSearchCriteria={setSearchCriteria}
+                currentLimit={currentLimit}
+                currentPage={currentPage}
               />
               <div className="pagination-container">
                 {totalItems > 0 && (
