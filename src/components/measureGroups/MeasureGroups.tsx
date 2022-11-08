@@ -289,7 +289,6 @@ const MeasureGroups = () => {
     } as Group,
     validationSchema: measureGroupSchemaValidator(cqlDefinitionDataTypes),
     onSubmit: (group: Group) => {
-      // setSuccessMessage(undefined);
       window.scrollTo(0, 0);
       if (
         measure?.groups &&

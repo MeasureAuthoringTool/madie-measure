@@ -92,6 +92,7 @@ const setTotalItemsMock = jest.fn();
 const setVisibleItemsMock = jest.fn();
 const setOffsetMock = jest.fn();
 const setInitialLoadMock = jest.fn();
+const setSearchCriteriaMock = jest.fn();
 
 describe("Measure List component", () => {
   beforeEach(() => {
@@ -111,6 +112,10 @@ describe("Measure List component", () => {
         setOffset={setOffsetMock}
         setInitialLoad={setInitialLoadMock}
         activeTab={0}
+        searchCriteria="test"
+        setSearchCriteria={setSearchCriteriaMock}
+        currentLimit={10}
+        currentPage={0}
       />
     );
     measures.forEach((m) => {
@@ -129,6 +134,10 @@ describe("Measure List component", () => {
         setOffset={setOffsetMock}
         setInitialLoad={setInitialLoadMock}
         activeTab={0}
+        searchCriteria="test"
+        setSearchCriteria={setSearchCriteriaMock}
+        currentLimit={10}
+        currentPage={0}
       />
     );
     const editButton = getByTestId(`edit-measure-${measures[0].id}`);
@@ -150,6 +159,10 @@ describe("Measure List component", () => {
         setOffset={setOffsetMock}
         setInitialLoad={setInitialLoadMock}
         activeTab={0}
+        searchCriteria="test"
+        setSearchCriteria={setSearchCriteriaMock}
+        currentLimit={10}
+        currentPage={0}
       />
     );
 
@@ -180,6 +193,10 @@ describe("Measure List component", () => {
         setOffset={setOffsetMock}
         setInitialLoad={setInitialLoadMock}
         activeTab={0}
+        searchCriteria="test"
+        setSearchCriteria={setSearchCriteriaMock}
+        currentLimit={10}
+        currentPage={0}
       />
     );
 
@@ -198,7 +215,9 @@ describe("Measure List component", () => {
       name: /Clear-Search/i,
     });
     userEvent.click(clearButton);
-    expect(searchFieldInput.value).toBe("");
+    setTimeout(() => {
+      expect(searchFieldInput.value).toBe("");
+    }, 500);
 
     expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
       true,
@@ -218,6 +237,10 @@ describe("Measure List component", () => {
         setOffset={setOffsetMock}
         setInitialLoad={setInitialLoadMock}
         activeTab={0}
+        searchCriteria=""
+        setSearchCriteria={setSearchCriteriaMock}
+        currentLimit={10}
+        currentPage={0}
       />
     );
 

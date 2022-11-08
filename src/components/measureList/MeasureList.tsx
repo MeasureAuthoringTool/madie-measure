@@ -46,33 +46,44 @@ export default function MeasureList(props: {
   setOffset;
   setInitialLoad;
   activeTab: number;
+  searchCriteria: string;
+  setSearchCriteria;
+  currentLimit: number;
+  currentPage: number;
 }) {
   const history = useHistory();
-  const [searchCriteria, setSearchCriteria] = useState("");
+
   const measureServiceApi = useMeasureServiceApi();
 
   const handleClearClick = async (event) => {
-    setSearchCriteria("");
+    props.setSearchCriteria("");
     const data = await measureServiceApi.fetchMeasures(
       props.activeTab === 0,
-      10,
+      props.currentLimit,
       0
     );
     setPageProps(data);
+    history.push(
+      `?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`
+    );
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (searchCriteria) {
+    if (props.searchCriteria) {
       const data =
         await measureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle(
           props.activeTab === 0,
-          10,
+          props.currentLimit,
           0,
-          searchCriteria
+          props.searchCriteria
         );
       setPageProps(data);
     }
+
+    history.push(
+      `?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`
+    );
   };
   const setPageProps = (data) => {
     if (data) {
@@ -98,7 +109,7 @@ export default function MeasureList(props: {
       <IconButton
         aria-label="Clear-Search"
         sx={{
-          visibility: searchCriteria ? "visible" : "hidden",
+          visibility: props.searchCriteria ? "visible" : "hidden",
         }}
         onClick={handleClearClick}
       >
@@ -121,7 +132,7 @@ export default function MeasureList(props: {
                     <tr>
                       <TextField
                         onChange={(newValue) => {
-                          setSearchCriteria(newValue.target.value);
+                          props.setSearchCriteria(newValue.target.value);
                         }}
                         id="searchMeasure"
                         name="searchMeasure"
@@ -131,8 +142,8 @@ export default function MeasureList(props: {
                         data-testid="measure-search-input"
                         label="Filter Measures"
                         variant="outlined"
-                        defaultValue={searchCriteria}
-                        value={searchCriteria}
+                        defaultValue={props.searchCriteria}
+                        value={props.searchCriteria}
                         inputProps={{
                           "data-testid": "searchMeasure-input",
                           "aria-required": "false",
