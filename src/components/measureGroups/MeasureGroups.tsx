@@ -202,6 +202,7 @@ const MeasureGroups = () => {
       open: false,
       measureGroupNumber: undefined,
     });
+
   const [visibleStrats, setVisibleStrats] = useState<number>(2);
   // Todo option should be an Array when passing to AutoComplete.
   // warning during test cases
