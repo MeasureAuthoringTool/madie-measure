@@ -8,11 +8,8 @@ import useMeasureServiceApi, {
 import { Measure } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
 import { AxiosError, AxiosResponse } from "axios";
-import {
-  parseContent,
-  synchingEditorCqlContent,
-  validateContent,
-} from "@madie/madie-editor";
+import { parseContent, synchingEditorCqlContent } from "@madie/madie-editor";
+import userEvent from "@testing-library/user-event";
 
 const mockHistoryPush = jest.fn();
 
