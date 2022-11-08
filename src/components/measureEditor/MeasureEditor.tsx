@@ -337,8 +337,8 @@ const MeasureEditor = () => {
               style={{ alignItems: "end" }}
             >
               <Button
+                variant="outline"
                 tw="m-2"
-                type="button"
                 onClick={() => setDiscardDialogOpen(true)}
                 data-testid="reset-cql-btn"
                 disabled={isCQLUnchanged}
@@ -346,8 +346,8 @@ const MeasureEditor = () => {
                 Discard Changes
               </Button>
               <Button
+                variant="cyan"
                 tw="m-2"
-                buttonSize="md"
                 onClick={() => updateMeasureCql()}
                 data-testid="save-cql-btn"
                 disabled={isCQLUnchanged}

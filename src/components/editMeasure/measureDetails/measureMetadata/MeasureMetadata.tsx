@@ -132,14 +132,15 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
       </div>
       {canEdit && (
         <div className="form-actions">
-          <button
+          <Button
+            variant="outline"
             className="cancel-button"
             data-testid="cancel-button"
             disabled={!formik.dirty}
             onClick={() => resetForm()}
           >
             Discard Changes
-          </button>
+          </Button>
           <Button
             disabled={!(formik.isValid && formik.dirty)}
             type="submit"
