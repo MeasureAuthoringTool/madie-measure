@@ -265,7 +265,7 @@ describe("Measure Groups Page", () => {
     expect(scoringSelectInput.value).toBe(group.scoring);
 
     const cqlHasErrorsMessage = screen.getByTestId(
-      "cql-has-errors-message"
+      "error-alerts"
     ) as HTMLInputElement;
     expect(cqlHasErrorsMessage).toBeInTheDocument();
 
@@ -327,7 +327,7 @@ describe("Measure Groups Page", () => {
     await expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
 
-    const alert = await screen.findByTestId("success-alerts");
+    const alert = await screen.findByTestId("population-criteria-success");
 
     const expectedGroup = {
       id: null,
@@ -607,7 +607,7 @@ describe("Measure Groups Page", () => {
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
 
-    const alert = await screen.findByTestId("success-alerts");
+    const alert = await screen.findByTestId("population-criteria-success");
     expect(alert).toBeInTheDocument();
 
     const expectedGroup = {
@@ -657,10 +657,6 @@ describe("Measure Groups Page", () => {
     expect(
       screen.getByTestId("leftPanelMeasureInformation-MeasureGroup1")
     ).toBeInTheDocument();
-
-    // clear alert to reset for assertion after group 2 addition
-    userEvent.click(within(alert).getByTestId("CloseIcon"));
-    expect(screen.queryByTestId("success-alerts")).not.toBeInTheDocument();
 
     //adding measure group 2
 
@@ -712,7 +708,7 @@ describe("Measure Groups Page", () => {
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
 
-    const alert1 = await screen.findByTestId("success-alerts");
+    const alert1 = await screen.findByTestId("population-criteria-success");
     const expectedGroup2 = {
       id: null,
       populations: [
@@ -811,7 +807,7 @@ describe("Measure Groups Page", () => {
         expect.anything()
       );
     });
-    const alert = await screen.findByTestId("success-alerts");
+    const alert = await screen.findByTestId("population-criteria-success");
     expect(screen.getByTestId("group-form-submit-btn")).toBeDisabled();
     expect(screen.getByTestId("group-form-discard-btn")).toBeDisabled();
 
@@ -1864,7 +1860,7 @@ describe("Measure Groups Page", () => {
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
 
-    const alert = await screen.findByTestId("success-alerts");
+    const alert = await screen.findByTestId("population-criteria-success");
     expect(alert).toBeInTheDocument();
     expect(alert).toHaveTextContent(
       "Population details for this group saved successfully."
@@ -2013,7 +2009,7 @@ describe("Measure Groups Page", () => {
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
 
-    const alert = await screen.findByTestId("success-alerts");
+    const alert = await screen.findByTestId("population-criteria-success");
     expect(alert).toBeInTheDocument();
     expect(alert).toHaveTextContent(
       "Population details for this group saved successfully."
