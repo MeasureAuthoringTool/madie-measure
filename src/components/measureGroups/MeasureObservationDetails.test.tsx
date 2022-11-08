@@ -18,6 +18,7 @@ describe("Measure Observation Details", () => {
         required={false}
         elmJson={null}
         measureObservation={null}
+        canEdit={true}
       />
     );
 
@@ -39,6 +40,7 @@ describe("Measure Observation Details", () => {
         required={false}
         elmJson={elmJson}
         measureObservation={null}
+        canEdit={true}
       />
     );
 
@@ -62,6 +64,7 @@ describe("Measure Observation Details", () => {
         required={false}
         elmJson={elmJson}
         measureObservation={null}
+        canEdit={true}
       />
     );
 
@@ -87,6 +90,7 @@ describe("Measure Observation Details", () => {
         required={false}
         elmJson={elmJson}
         measureObservation={null}
+        canEdit={true}
       />
     );
 
@@ -112,6 +116,7 @@ describe("Measure Observation Details", () => {
         required={false}
         elmJson={elmJson}
         measureObservation={null}
+        canEdit={true}
       />
     );
 
@@ -138,6 +143,7 @@ describe("Measure Observation Details", () => {
         label="MyLabel"
         elmJson={elmJson}
         measureObservation={null}
+        canEdit={true}
       />
     );
 
@@ -213,7 +219,7 @@ describe("Measure Observation Details", () => {
         required={false}
         elmJson={elmJson}
         measureObservation={null}
-        canEdit
+        canEdit={true}
       />
     );
 
@@ -235,7 +241,7 @@ describe("Measure Observation Details", () => {
         name={"obs1"}
         elmJson={null}
         measureObservation={null}
-        canEdit
+        canEdit={true}
       />
     );
 
@@ -262,7 +268,7 @@ describe("Measure Observation Details", () => {
         required={false}
         elmJson={null}
         measureObservation={null}
-        canEdit
+        canEdit={true}
       />
     );
 
@@ -303,7 +309,7 @@ describe("Measure Observation Details", () => {
         elmJson={elmJson}
         measureObservation={measureObservation}
         onChange={handleChange}
-        canEdit
+        canEdit={true}
       />
     );
 
@@ -353,7 +359,7 @@ describe("Measure Observation Details", () => {
         required={false}
         elmJson={elmJson}
         measureObservation={measureObservation}
-        canEdit
+        canEdit={true}
       />
     );
 
@@ -395,7 +401,7 @@ describe("Measure Observation Details", () => {
         elmJson={elmJson}
         measureObservation={measureObservation}
         onChange={handleChange}
-        canEdit
+        canEdit={true}
       />
     );
 
@@ -437,7 +443,7 @@ describe("Measure Observation Details", () => {
         required={false}
         elmJson={elmJson}
         measureObservation={measureObservation}
-        canEdit
+        canEdit={true}
       />
     );
     const aggregateInput = screen.getByTestId(
@@ -475,7 +481,7 @@ describe("Measure Observation Details", () => {
         measureObservation={measureObservation}
         onChange={null}
         onRemove={handleRemove}
-        canEdit
+        canEdit={true}
       />
     );
 

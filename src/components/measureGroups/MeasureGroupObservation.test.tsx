@@ -112,6 +112,7 @@ describe("Measure Group Observation", () => {
         scoring={MeasureScoring.CONTINUOUS_VARIABLE}
         elmJson={elmJson}
         population={population}
+        canEdit={true}
       />
     );
 
@@ -339,6 +340,7 @@ describe("Measure Group Observation", () => {
         scoring={MeasureScoring.CONTINUOUS_VARIABLE}
         elmJson={elmJson}
         population={population}
+        canEdit={true}
       />
     );
 

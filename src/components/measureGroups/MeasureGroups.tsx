@@ -627,6 +627,8 @@ const MeasureGroups = () => {
                     multipleSelect={true}
                     limitTags={1}
                   ></MultipleSelectDropDown>
+                  {!canEdit && <div>{formik.values.measureGroupTypes}</div>}
+
                   {formik.errors["measureGroupTypes"] && (
                     <FormHelperText
                       tabIndex={0}
@@ -648,7 +650,7 @@ const MeasureGroups = () => {
                       placeHolder={{ name: "-", value: "" }}
                       defaultValue={formik.values.populationBasis}
                       required={true}
-                      disabled={false}
+                      disabled={!canEdit}
                       {...formik.getFieldProps("populationBasis")}
                       error={
                         formik.touched["population-basis"] &&
@@ -663,6 +665,7 @@ const MeasureGroups = () => {
                       }}
                       options={populationBasisValues}
                     />
+                    {!canEdit && <div>{formik.values.populationBasis}</div>}
                   </div>
                 )}
 
@@ -715,7 +718,16 @@ const MeasureGroups = () => {
                     })}
                   />
                 )}
-                {!canEdit && formik.values.scoring}
+                {!canEdit && (
+                  <div>
+                    <AutoComplete
+                      id="disabled-population-scoring"
+                      label="Scoring"
+                      disabled={true}
+                    />
+                    {formik.values.scoring}
+                  </div>
+                )}
 
                 <MeasureGroupScoringUnit
                   {...formik.getFieldProps("scoringUnit")}
@@ -861,6 +873,14 @@ const MeasureGroups = () => {
                               }
                               isExclusionPop={isExclusionPop}
                             >
+                              {!canEdit && (
+                                <AutoComplete
+                                  id="disabled-population-name-list-label"
+                                  label={population.name}
+                                  disabled={true}
+                                />
+                              )}
+
                               <Field
                                 {...fieldProps}
                                 component={GroupPopulation}

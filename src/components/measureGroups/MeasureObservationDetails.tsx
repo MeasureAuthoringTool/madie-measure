@@ -7,6 +7,7 @@ import {
   AGGREGATE_FUNCTION_KEYS,
 } from "@madie/madie-models";
 import { DSLink, Select } from "@madie/madie-design-system/dist/react";
+import AutoComplete from "./AutoComplete";
 
 const AGGREGATE_FUNCTIONS = Array.from(AGGREGATE_FUNCTION_KEYS.keys()).sort();
 
@@ -68,75 +69,103 @@ const MeasureObservationDetails = ({
             Remove
           </DSLink>
         )}
-        <Select
-          placeHolder={{ name: "-", value: "" }}
-          required={required}
-          readOnly={!canEdit}
-          label={label ? label : "Observation"}
-          id={`measure-observation-${name}`}
-          data-testid={`select-measure-observation-${name}`}
-          inputProps={{
-            "data-testid": `measure-observation-${name}-input`,
-          }}
-          style={{ width: 300 }}
-          value={measureObservation?.definition || ""}
-          onChange={(e) => {
-            if (onChange) {
-              onChange({
-                ...measureObservation,
-                definition: e.target.value,
-              });
-            }
-          }}
-          options={[
-            !required && (
-              <MenuItem key="-" value="">
-                -
-              </MenuItem>
-            ),
-            ...cqlFunctionNames.map((o) => (
-              <MenuItem key={o} value={o}>
-                {o}
-              </MenuItem>
-            )),
-          ]}
-        />
+        {canEdit && (
+          <Select
+            placeHolder={{ name: "-", value: "" }}
+            required={required}
+            disabled={!canEdit}
+            label={label ? label : "Observation"}
+            id={`measure-observation-${name}`}
+            data-testid={`select-measure-observation-${name}`}
+            inputProps={{
+              "data-testid": `measure-observation-${name}-input`,
+            }}
+            style={{ width: 300 }}
+            value={measureObservation?.definition || ""}
+            onChange={(e) => {
+              if (onChange) {
+                onChange({
+                  ...measureObservation,
+                  definition: e.target.value,
+                });
+              }
+            }}
+            options={[
+              !required && (
+                <MenuItem key="-" value="">
+                  -
+                </MenuItem>
+              ),
+              ...cqlFunctionNames.map((o) => (
+                <MenuItem key={o} value={o}>
+                  {o}
+                </MenuItem>
+              )),
+            ]}
+          />
+        )}
+        {!canEdit && (
+          <div>
+            <AutoComplete
+              label={label ? label : "Observation"}
+              id={`select-measure-observation-${name}-disabled`}
+              data-testid={`select-measure-observation-${name}-disabled`}
+              style={{ width: 300 }}
+              disabled={true}
+            />
+            {measureObservation?.definition || ""}
+          </div>
+        )}
       </div>
       <div tw="pb-3 px-8 pt-6">
-        <Select
-          placeHolder={{ name: "-", value: "" }}
-          readOnly={!canEdit}
-          required={required}
-          label="Aggregate Function"
-          id={`measure-observation-aggregate-${name}`}
-          data-testid={`select-measure-observation-aggregate-${name}`}
-          inputProps={{
-            "data-testid": `measure-observation-aggregate-${name}-input`,
-          }}
-          style={{ width: 300 }}
-          value={measureObservation?.aggregateMethod || ""}
-          onChange={(e) => {
-            if (onChange) {
-              onChange({
-                ...measureObservation,
-                aggregateMethod: e.target.value,
-              });
-            }
-          }}
-          size="small"
-          options={[
-            !required && (
-              <MenuItem key="-" value="">
-                -
-              </MenuItem>
-            ),
-            ...AGGREGATE_FUNCTIONS.map((o) => (
-              <MenuItem key={o} value={o}>
-                {o}
-              </MenuItem>
-            )),
-          ]}
-        />
+        {canEdit && (
+          <Select
+            placeHolder={{ name: "-", value: "" }}
+            disabled={!canEdit}
+            required={required}
+            label="Aggregate Function"
+            id={`measure-observation-aggregate-${name}`}
+            data-testid={`select-measure-observation-aggregate-${name}`}
+            inputProps={{
+              "data-testid": `measure-observation-aggregate-${name}-input`,
+            }}
+            style={{ width: 300 }}
+            value={measureObservation?.aggregateMethod || ""}
+            onChange={(e) => {
+              if (onChange) {
+                onChange({
+                  ...measureObservation,
+                  aggregateMethod: e.target.value,
+                });
+              }
+            }}
+            size="small"
+            options={[
+              !required && (
+                <MenuItem key="-" value="">
+                  -
+                </MenuItem>
+              ),
+              ...AGGREGATE_FUNCTIONS.map((o) => (
+                <MenuItem key={o} value={o}>
+                  {o}
+                </MenuItem>
+              )),
+            ]}
+          />
+        )}
+        {!canEdit && (
+          <div>
+            <AutoComplete
+              label="Aggregate Function"
+              id={`measure-observation-aggregate-${name}-disabled`}
+              data-testid={`select-measure-observation-aggregate-${name}-disabled`}
+              style={{ width: 300 }}
+              disabled={true}
+            />
+            {measureObservation?.aggregateMethod || ""}
+          </div>
+        )}
       </div>
     </>
   );
