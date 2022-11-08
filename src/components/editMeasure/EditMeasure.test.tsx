@@ -1,5 +1,6 @@
 import * as React from "react";
 import { render, fireEvent, cleanup, waitFor } from "@testing-library/react";
+import { act } from "react-dom/test-utils";
 import { MemoryRouter } from "react-router";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import EditMeasure from "./EditMeasure";
@@ -32,6 +33,7 @@ const serviceApiMock = {
   fetchMeasure: jest.fn().mockResolvedValue(measure),
   getAllPopulationBasisOptions: jest.fn().mockResolvedValue([]),
   getReturnTypesForAllCqlDefinitions: jest.fn().mockResolvedValue({}),
+  updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
 } as unknown as MeasureServiceApi;
 
 useMeasureServiceApiMock.mockImplementation(() => {
@@ -117,6 +119,33 @@ describe("EditMeasure Component", () => {
     expect(loading).toBeNull();
   });
 
+  it("should display a delete dialog when the event is triggered, discards.", async () => {
+    const { findByTestId, queryByTestId, queryByText } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <EditMeasure />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+    expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+    const loading = queryByTestId("loading");
+    expect(loading).toBeNull();
+    act(() => {
+      window.dispatchEvent(new Event("delete-measure"));
+    });
+    await waitFor(() =>
+      expect(queryByTestId("delete-measure-dialog-button")).toBeInTheDocument()
+    );
+    const cancelButton = await findByTestId("cancel-delete-measure-button");
+    fireEvent.click(cancelButton);
+    await waitFor(() => {
+      expect(queryByText("Are you sure you want to delete")).not.toBeVisible();
+    });
+  });
+
   it("should render edit measure menu with measure details page active by default", async () => {
     const { findByText } = render(
       <ApiContextProvider value={serviceConfig}>
@@ -160,6 +189,68 @@ describe("EditMeasure Component", () => {
     fireEvent.click(await findByText("Test Cases"));
     expect((await findByText("Test Cases")).classList).toContain("active");
     expect(document.body.textContent).toContain("Patient Component");
+  });
+
+  it("delete succeeds", async () => {
+    const { findByTestId, queryByTestId, getByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <EditMeasure />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+    expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+    const loading = queryByTestId("loading");
+    expect(loading).toBeNull();
+    act(() => {
+      window.dispatchEvent(new Event("delete-measure"));
+    });
+    await waitFor(() =>
+      expect(queryByTestId("delete-measure-dialog-button")).toBeInTheDocument()
+    );
+    const continueButton = await findByTestId("delete-measure-button-2");
+    fireEvent.click(continueButton);
+    await waitFor(() => {
+      expect(
+        getByTestId("edit-measure-information-success-text")
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("delete fails", async () => {
+    serviceApiMock.updateMeasure = jest.fn().mockRejectedValueOnce({
+      status: 500,
+      response: { data: { message: "update failed" } },
+    });
+    const { findByTestId, queryByTestId, getByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <EditMeasure />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+    expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+    const loading = queryByTestId("loading");
+    expect(loading).toBeNull();
+    act(() => {
+      window.dispatchEvent(new Event("delete-measure"));
+    });
+    await waitFor(() =>
+      expect(queryByTestId("delete-measure-dialog-button")).toBeInTheDocument()
+    );
+    const continueButton = await findByTestId("delete-measure-button-2");
+    fireEvent.click(continueButton);
+    await waitFor(() => {
+      expect(
+        getByTestId("edit-measure-information-generic-error-text")
+      ).toBeInTheDocument();
+    });
   });
 
   it("should redirect to 404", async () => {
