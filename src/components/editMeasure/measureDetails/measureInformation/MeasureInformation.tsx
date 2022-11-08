@@ -14,13 +14,7 @@ import DeleteDialog from "./DeleteDialog";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
-import {
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  Typography,
-} from "@mui/material";
+import { DialogContent, Divider, Grid, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import { HelperText } from "@madie/madie-components";
 import { MeasureSchemaValidator } from "../../../../validations/MeasureSchemaValidator";
@@ -28,7 +22,11 @@ import { measureStore, useOktaTokens } from "@madie/madie-util";
 import classNames from "classnames";
 import { makeStyles } from "@mui/styles";
 import { Box } from "@mui/system";
-import { synchingEditorCqlContent } from "@madie/madie-editor";
+import {
+  parseContent,
+  synchingEditorCqlContent,
+  validateContent,
+} from "@madie/madie-editor";
 import "./MeasureInformation.scss";
 
 interface measureInformationForm {
@@ -204,6 +202,19 @@ export default function MeasureInformation() {
       "0.0.000", //as the versioning is not implemented in measure for now we just send default value: 0.0.000
       "measureInformation"
     );
+
+    // Generate updated ELM when Library name is modified
+    //  and there are no CQL errors.
+    if (INITIAL_VALUES.cqlLibraryName !== values.cqlLibraryName) {
+      if (inSyncCql && inSyncCql.trim().length > 0) {
+        const cqlErrors = parseContent(inSyncCql);
+        const { errors, translation } = await validateContent(inSyncCql);
+        if (cqlErrors.length === 0 && errors.length === 0) {
+          var updatedElm = JSON.stringify(translation);
+        }
+      }
+    }
+
     const newMeasure: Measure = {
       ...measure,
       versionId: values.versionId,
@@ -213,6 +224,7 @@ export default function MeasureInformation() {
       measurementPeriodStart: values.measurementPeriodStart,
       measurementPeriodEnd: values.measurementPeriodEnd,
       cql: inSyncCql,
+      elmJson: updatedElm ? updatedElm : measure.elmJson,
       measureId: values.measureSetId,
     };
     measureServiceApi
