@@ -157,8 +157,6 @@ export default function MeasureInformation() {
       measureName: values.measureName,
       cqlLibraryName: values.cqlLibraryName,
       ecqmTitle: values.ecqmTitle,
-      measurementPeriodStart: values.measurementPeriodStart,
-      measurementPeriodEnd: values.measurementPeriodEnd,
       cql: inSyncCql,
       elmJson: updatedElm ? updatedElm : measure.elmJson,
       measureId: values.measureSetId,

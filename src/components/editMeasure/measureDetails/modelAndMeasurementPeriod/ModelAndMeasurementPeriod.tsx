@@ -22,7 +22,6 @@ import {
   routeHandlerStore,
 } from "@madie/madie-util";
 import { Box } from "@mui/system";
-import { synchingEditorCqlContent } from "@madie/madie-editor";
 
 interface modelAndMeasurementPeriod {
   model: string;
@@ -105,14 +104,6 @@ const ModelAndMeasurementPeriod = () => {
   };
 
   const handleSubmit = async (values) => {
-    const inSyncCql = await synchingEditorCqlContent(
-      "",
-      measure?.cql,
-      values.cqlLibraryName,
-      measure?.cqlLibraryName,
-      "0.0.000", //as the versioning is not implemented in measure for now we just send default value: 0.0.000
-      "measureInformation"
-    );
     const newMeasure: Measure = {
       ...measure,
       measurementPeriodStart: values.measurementPeriodStart,

@@ -116,6 +116,97 @@ describe("Model and Measurement Period component", () => {
     });
   });
 
+  it("saving measurement information successfully and displaying success message", async () => {
+    serviceApiMock = {
+      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
+    } as unknown as MeasureServiceApi;
+    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    measure.measurementPeriodEnd = null;
+    measure.measurementPeriodStart = null;
+    render(<ModelAndMeasurementPeriod />);
+    const measurementPeriodStartNode = getByTestId("measurement-period-start");
+    const measurementPeriodStartInput = within(
+      measurementPeriodStartNode
+    ).getByRole("textbox") as HTMLInputElement;
+    userEvent.type(measurementPeriodStartInput, "12/07/2009");
+    await act(async () => {
+      await waitFor(() =>
+        expect(measurementPeriodStartInput.value).toBe("12/07/2009")
+      );
+    });
+    const measurementPeriodEndNode = getByTestId("measurement-period-end");
+    const measurementPeriodEndInput = within(
+      measurementPeriodEndNode
+    ).getByRole("textbox") as HTMLInputElement;
+    userEvent.type(measurementPeriodEndInput, "12/07/2020");
+    await waitFor(() =>
+      expect(measurementPeriodEndInput.value).toBe("12/07/2020")
+    );
+
+    const createBtn = getByTestId("model-and-measurement-save-button");
+    expect(createBtn).toBeInTheDocument();
+    expect(createBtn).toBeEnabled();
+    act(() => {
+      fireEvent.click(createBtn);
+    });
+    await waitFor(
+      () =>
+        expect(
+          getByTestId("edit-measure-information-success-text")
+        ).toBeInTheDocument(),
+      {
+        timeout: 5000,
+      }
+    );
+  });
+
+  it("saving measurement information fails and displays error message", async () => {
+    serviceApiMock = {
+      updateMeasure: jest.fn().mockRejectedValueOnce({
+        status: 500,
+        response: { data: { message: "update failed" } },
+      }),
+    } as unknown as MeasureServiceApi;
+    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    measure.measurementPeriodEnd = null;
+    measure.measurementPeriodStart = null;
+    render(<ModelAndMeasurementPeriod />);
+    const measurementPeriodStartNode = getByTestId("measurement-period-start");
+    const measurementPeriodStartInput = within(
+      measurementPeriodStartNode
+    ).getByRole("textbox") as HTMLInputElement;
+    userEvent.type(measurementPeriodStartInput, "12/07/2009");
+    await act(async () => {
+      await waitFor(() =>
+        expect(measurementPeriodStartInput.value).toBe("12/07/2009")
+      );
+    });
+    const measurementPeriodEndNode = getByTestId("measurement-period-end");
+    const measurementPeriodEndInput = within(
+      measurementPeriodEndNode
+    ).getByRole("textbox") as HTMLInputElement;
+    userEvent.type(measurementPeriodEndInput, "12/07/2020");
+    await waitFor(() =>
+      expect(measurementPeriodEndInput.value).toBe("12/07/2020")
+    );
+
+    const createBtn = getByTestId("model-and-measurement-save-button");
+    expect(createBtn).toBeInTheDocument();
+    expect(createBtn).toBeEnabled();
+    act(() => {
+      fireEvent.click(createBtn);
+    });
+    await waitFor(
+      () =>
+        expect(
+          getByTestId("edit-measure-information-generic-error-text")
+        ).toBeInTheDocument(),
+      {
+        timeout: 5000,
+      }
+    );
+  });
+
   it("should render the component with a blank measure name", async () => {
     measure.measureName = "";
     render(<ModelAndMeasurementPeriod />);
