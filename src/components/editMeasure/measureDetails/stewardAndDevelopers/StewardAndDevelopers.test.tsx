@@ -247,9 +247,9 @@ describe("Steward and Developers component", () => {
       developersAutoComplete
     ).findByTitle("Clear");
     fireEvent.click(clearDevelopersButton);
-
+    fireEvent.blur(developersAutoComplete);
     // Actually save doesn't work, but it needs a clickable component to render helperText.
-    const saveButton = await screen.findByRole("button", { name: "Save" });
+    const saveButton = screen.getByTestId("steward-and-developers-save");
     fireEvent.click(saveButton);
     const helperText = await screen.findByTestId("developers-helper-text");
     expect(helperText).toHaveTextContent("At least one developer is required");
@@ -344,9 +344,8 @@ describe("Steward and Developers component", () => {
     expect(toastMessage).toHaveTextContent("Error updating measure");
   });
 
-  it("should discard changes by click discard changes button", async () => {
+  it("should discard changes by click discard changes button and continue", async () => {
     render(<StewardAndDevelopers />);
-
     // verifies if the fields are populated with existing data
     const stewardAutoComplete = await screen.findByTestId("steward");
     const stewardComboBox = within(stewardAutoComplete).getByRole("combobox");
@@ -361,7 +360,50 @@ describe("Steward and Developers component", () => {
     expect(stewardComboBox).toHaveValue("Joint Commission");
 
     fireEvent.click(screen.getByTestId("cancel-button")); // revert steward changes
+    const discardDialog = await screen.getByTestId("discard-dialog");
+    expect(discardDialog).toBeInTheDocument();
+    const continueButton = await screen.getByTestId(
+      "discard-dialog-continue-button"
+    );
+    expect(continueButton).toBeInTheDocument();
+    fireEvent.click(continueButton);
+    await waitFor(() => {
+      // check for old value
+      expect(stewardComboBox).toHaveValue("GE Healthcare");
+      // expect(measurementPeriodStartInput.value).toBe("");
+    });
+  });
 
+  it("should close the discard dialog on close", async () => {
+    render(<StewardAndDevelopers />);
+    // verifies if the fields are populated with existing data
+    const stewardAutoComplete = await screen.findByTestId("steward");
+    const stewardComboBox = within(stewardAutoComplete).getByRole("combobox");
     expect(stewardComboBox).toHaveValue("GE Healthcare");
+
+    fireEvent.keyDown(stewardAutoComplete, { key: "ArrowDown" });
+    // selects 2nd option
+    const stewardOptions = await screen.findAllByRole("option");
+    fireEvent.click(stewardOptions[1]);
+
+    // verifies that the value is updated
+    expect(stewardComboBox).toHaveValue("Joint Commission");
+
+    fireEvent.click(screen.getByTestId("cancel-button")); // revert steward changes
+    const cancelButton = screen.getByTestId("cancel-button");
+    expect(cancelButton).toBeInTheDocument();
+    expect(cancelButton).toBeEnabled();
+    fireEvent.click(cancelButton);
+    const discardDialog = await screen.getByTestId("discard-dialog");
+    expect(discardDialog).toBeInTheDocument();
+    expect(screen.queryByText("You have unsaved changes.")).toBeVisible();
+    const discardDialogCancelButton = screen.getByTestId(
+      "discard-dialog-cancel-button"
+    );
+    expect(discardDialogCancelButton).toBeInTheDocument();
+    fireEvent.click(discardDialogCancelButton);
+    await waitFor(() => {
+      expect(screen.queryByText("You have unsaved changes.")).not.toBeVisible();
+    });
   });
 });

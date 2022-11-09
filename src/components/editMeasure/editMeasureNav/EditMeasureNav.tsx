@@ -33,6 +33,7 @@ const EditMeasureNav = () => {
 
   if (
     pathname !== `${url}/details` &&
+    pathname !== `${url}/details/model&measurement-period` &&
     pathname !== `${url}/cql-editor` &&
     pathname !== `${url}/groups` &&
     pathname !== `${url}/details/measure-steward` &&

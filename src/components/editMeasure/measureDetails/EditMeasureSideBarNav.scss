@@ -31,3 +31,17 @@
     }
   }
 }
+
+.link-container {
+  // margin-bottom: 20px;
+  > .link-heading {
+    margin-bottom: 0;
+    margin-left: 13px;
+    font-family: "Rubik";
+    font-style: normal;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 24px;
+    color: #242424;
+  }
+}
