@@ -311,7 +311,7 @@ export default function StewardAndDevelopers() {
       </div>
       <div className="form-actions">
         <Button
-          variant="action"
+          variant="outline"
           data-testid="cancel-button"
           disabled={!formik.dirty}
           onClick={() => setDiscardDialogOpen(true)}

@@ -136,7 +136,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
       {canEdit && (
         <div className="form-actions">
           <Button
-            variant="action"
+            variant="outline"
             disabled={!formik.dirty}
             data-testid="cancel-button"
             onClick={() => setDiscardDialogOpen(true)}
