@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom";
 import * as React from "react";
-import { render } from "@testing-library/react";
+import { getByTestId, render } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { Route } from "react-router-dom";
 import MeasureDetails from "./MeasureDetails";
@@ -22,6 +22,7 @@ jest.mock("@madie/madie-util", () => ({
   },
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
+    getUserName: () => "fakefakefake@fakefakefake",
   }),
   routeHandlerStore: {
     subscribe: (set) => {
@@ -67,8 +68,22 @@ describe("MeasureDetails component", () => {
         </MemoryRouter>
       </ApiContextProvider>
     );
-
     expect(getByText("Mock Measure Info")).toBeTruthy();
+  });
+
+  it("should render the model and measurement component for the URL", () => {
+    const { getByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter
+          initialEntries={[{ pathname: "/foo/model&measurement-period" }]}
+        >
+          <Route path="/foo">
+            <MeasureDetails />
+          </Route>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    expect(getByTestId("model-measurement-form")).toBeInTheDocument();
   });
 
   it("should render the MeasureMetadata component for measure-description URL", () => {
@@ -86,6 +101,9 @@ describe("MeasureDetails component", () => {
 
     expect(getByText("Mock Measure Metadata")).toBeTruthy();
     expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
+    expect(
+      getByTestId("leftPanelModelAndMeasurementPeriod")
+    ).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureSteward")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureDisclaimer")).toBeInTheDocument();
@@ -106,6 +124,9 @@ describe("MeasureDetails component", () => {
 
     expect(getByText("Mock Measure Metadata")).toBeTruthy();
     expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
+    expect(
+      getByTestId("leftPanelModelAndMeasurementPeriod")
+    ).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureSteward")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureDisclaimer")).toBeInTheDocument();
@@ -128,6 +149,9 @@ describe("MeasureDetails component", () => {
 
     expect(getByText("Mock Measure Metadata")).toBeTruthy();
     expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
+    expect(
+      getByTestId("leftPanelModelAndMeasurementPeriod")
+    ).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureSteward")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureDisclaimer")).toBeInTheDocument();
@@ -148,6 +172,9 @@ describe("MeasureDetails component", () => {
 
     expect(getByText("Mock Measure Metadata")).toBeTruthy();
     expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
+    expect(
+      getByTestId("leftPanelModelAndMeasurementPeriod")
+    ).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureSteward")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureDisclaimer")).toBeInTheDocument();
@@ -168,6 +195,9 @@ describe("MeasureDetails component", () => {
 
     expect(getByText("Mock Measure Metadata")).toBeTruthy();
     expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
+    expect(
+      getByTestId("leftPanelModelAndMeasurementPeriod")
+    ).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureSteward")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureDisclaimer")).toBeInTheDocument();
