@@ -4,7 +4,7 @@ import "styled-components/macro";
 import { Measure } from "@madie/madie-models";
 import { useHistory } from "react-router-dom";
 import { Chip, IconButton } from "@mui/material";
-import { TextField } from "@madie/madie-design-system/dist/react";
+import { TextField, Button } from "@madie/madie-design-system/dist/react";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
@@ -187,16 +187,15 @@ export default function MeasureList(props: {
                       </td>
                       <td>{measure.model}</td>
                       <td>
-                        <button
-                          className="action-button"
+                        <Button
+                          variant="outline-secondary"
                           onClick={() => {
                             history.push(`/measures/${measure.id}/edit`);
                           }}
-                          tw="text-blue-600 hover:text-blue-900"
                           data-testid={`edit-measure-${measure.id}`}
                         >
-                          <div className="action">View</div>
-                        </button>
+                          View
+                        </Button>
                       </td>
                     </tr>
                   ))}

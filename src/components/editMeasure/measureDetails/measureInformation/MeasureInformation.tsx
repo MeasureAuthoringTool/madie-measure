@@ -314,7 +314,7 @@ export default function MeasureInformation() {
         <div className="form-actions">
           <Button
             onClick={() => setDiscardDialogOpen(true)}
-            variant="action"
+            variant="outline"
             data-testid="cancel-button"
             disabled={!formik.dirty}
             style={{ marginTop: 20, float: "right", marginRight: 32 }}
