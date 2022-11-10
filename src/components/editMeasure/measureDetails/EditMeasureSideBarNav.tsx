@@ -3,7 +3,8 @@ import tw from "twin.macro";
 import { Link as NavLink, useLocation } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import { Measure } from "@madie/madie-models";
-import "./EditMeasureSideBarNav.scss";
+//import "./EditMeasureSideBarNav.scss";
+import "../../common/madie-link.scss";
 import {
   DSLink,
   MadieDiscardDialog,
@@ -187,14 +188,14 @@ export default function EditMeasureSideBarNav(
               </LinkEl>
             );
           })}
-        <div className="right-col">
+        <div>
           <DSLink
-            className="new-measure-group"
+            className="madie-link"
             onClick={(e) => initiateBlankMeasureGroupClick(e)}
             data-testid="add-measure-group-button"
           >
-            <AddIcon className="add-icon" fontSize="small" />
-            &nbsp; Add Population Criteria
+            <AddIcon className="add-icon" fontSize="small" /> Add Population
+            Criteria
           </DSLink>
         </div>
       </Nav>

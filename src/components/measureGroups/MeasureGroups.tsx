@@ -11,7 +11,6 @@ import {
 import {
   Alert,
   MenuItem as MuiMenuItem,
-  Link,
   Typography,
   Divider,
   Tabs,
@@ -24,6 +23,7 @@ import {
   Button,
   MadieDiscardDialog,
   Select,
+  DSLink,
 } from "@madie/madie-design-system/dist/react/";
 import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
@@ -47,6 +47,7 @@ import MeasureGroupObservation from "./MeasureGroupObservation";
 import AutoComplete from "./AutoComplete";
 import * as _ from "lodash";
 import { MadieAlert } from "@madie/madie-design-system/dist/react";
+import "../common/madie-link.scss";
 
 const ButtonSpacer = styled.span`
   margin-left: 15px;
@@ -922,7 +923,8 @@ const MeasureGroups = () => {
                                       {formik.values.stratifications.length >
                                         2 &&
                                         visibleStrats > 2 && (
-                                          <Link
+                                          <DSLink
+                                            className="madie-link"
                                             sx={{
                                               position: "absolute",
                                               left: "117px",
@@ -945,7 +947,7 @@ const MeasureGroups = () => {
                                             data-testid="remove-strat-button"
                                           >
                                             Remove
-                                          </Link>
+                                          </DSLink>
                                         )}
                                       <Select
                                         readOnly={!canEdit}
@@ -1053,15 +1055,13 @@ const MeasureGroups = () => {
                         )}
                       {canEdit && (
                         <div tw="pt-4">
-                          <Link
+                          <DSLink
+                            className="madie-link"
                             sx={{
                               color: "#0073C8",
                               padding: "14px 0 14px 0",
                             }}
                             data-testid="add-strat-button"
-                            component="button"
-                            variant="body2"
-                            underline="hover"
                             onClick={(e) => {
                               e.preventDefault();
                               setVisibleStrats(visibleStrats + 1);
@@ -1069,7 +1069,7 @@ const MeasureGroups = () => {
                             }}
                           >
                             + Add Stratification
-                          </Link>
+                          </DSLink>
                         </div>
                       )}
                     </div>
