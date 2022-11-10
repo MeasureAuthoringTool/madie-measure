@@ -162,7 +162,7 @@ const MeasureGroups = () => {
   }, []);
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
-  const canEdit =
+  let canEdit =
     measure?.createdBy === userName ||
     measure?.acls?.some(
       (acl) => acl.userId === userName && acl.roles.indexOf("SHARED_WITH") >= 0
@@ -966,6 +966,7 @@ const MeasureGroups = () => {
                                     <div tw="relative">
                                       {formik.values.stratifications.length >
                                         2 &&
+                                        canEdit &&
                                         visibleStrats > 2 && (
                                           <Link
                                             sx={{
@@ -992,73 +993,108 @@ const MeasureGroups = () => {
                                             Remove
                                           </Link>
                                         )}
-                                      <Select
-                                        readOnly={!canEdit}
-                                        placeHolder={{ name: "-", value: "" }}
-                                        label={`Stratification ${i + 1}`}
-                                        id={`Stratification-select-${i + 1}`}
-                                        aria-describedby={`Stratification-select-${
-                                          i + 1
-                                        }-helper-text`}
-                                        error={Boolean(
-                                          getIn(
+                                      {canEdit && (
+                                        <Select
+                                          readOnly={!canEdit}
+                                          placeHolder={{ name: "-", value: "" }}
+                                          label={`Stratification ${i + 1}`}
+                                          id={`Stratification-select-${i + 1}`}
+                                          aria-describedby={`Stratification-select-${
+                                            i + 1
+                                          }-helper-text`}
+                                          error={Boolean(
+                                            getIn(
+                                              formik.errors,
+                                              `stratifications[${i}].cqlDefinition`
+                                            )
+                                          )}
+                                          helperText={getIn(
                                             formik.errors,
                                             `stratifications[${i}].cqlDefinition`
-                                          )
-                                        )}
-                                        helperText={getIn(
-                                          formik.errors,
-                                          `stratifications[${i}].cqlDefinition`
-                                        )}
-                                        inputProps={{
-                                          "data-testid": `stratification-${
-                                            i + 1
-                                          }-input`,
-                                        }}
-                                        {...formik.getFieldProps(
-                                          `stratifications[${i}].cqlDefinition`
-                                        )}
-                                        size="small"
-                                        options={stratificationOptions}
-                                      />
+                                          )}
+                                          inputProps={{
+                                            "data-testid": `stratification-${
+                                              i + 1
+                                            }-input`,
+                                          }}
+                                          {...formik.getFieldProps(
+                                            `stratifications[${i}].cqlDefinition`
+                                          )}
+                                          size="small"
+                                          options={stratificationOptions}
+                                        />
+                                      )}
+                                      {!canEdit && (
+                                        <div>
+                                          <AutoComplete
+                                            id={`Stratification-select-${
+                                              i + 1
+                                            }-disabled`}
+                                            label={`Stratification ${i + 1}`}
+                                            disabled={true}
+                                          />
+                                          {formik.values.stratifications[i]
+                                            .cqlDefinition
+                                            ? formik.values.stratifications[i]
+                                                .cqlDefinition
+                                            : "-"}
+                                        </div>
+                                      )}
                                     </div>
 
                                     {/*Association Select*/}
                                     <div tw="pt-4">
-                                      <Select
-                                        readOnly={!canEdit}
-                                        placeHolder={{ name: "-", value: "" }}
-                                        label={`Association ${i + 1}`}
-                                        id={`association-select-${i + 1}`}
-                                        aria-describedby={`association-select-${
-                                          i + 1
-                                        }-helper-text`}
-                                        inputProps={{
-                                          "data-testid": `association-${
+                                      {canEdit && (
+                                        <Select
+                                          readOnly={!canEdit}
+                                          placeHolder={{ name: "-", value: "" }}
+                                          label={`Association ${i + 1}`}
+                                          id={`association-select-${i + 1}`}
+                                          aria-describedby={`association-select-${
                                             i + 1
-                                          }-input`,
-                                        }}
-                                        {...formik.getFieldProps(
-                                          `stratifications[${i}].association`
-                                        )}
-                                        size="small"
-                                        renderValue={(value) =>
-                                          _.startCase(value)
-                                        }
-                                        options={
-                                          !!formik.values.scoring &&
-                                          associationSelect[
-                                            formik.values.scoring
-                                          ].map((opt, i) => (
-                                            <MuiMenuItem
-                                              key={`${opt}-${i}`}
-                                              value={`${opt}`}
-                                            >
-                                              {_.startCase(opt)}
-                                            </MuiMenuItem>
-                                          ))
-                                        }
-                                      />
+                                          }-helper-text`}
+                                          inputProps={{
+                                            "data-testid": `association-${
+                                              i + 1
+                                            }-input`,
+                                          }}
+                                          {...formik.getFieldProps(
+                                            `stratifications[${i}].association`
+                                          )}
+                                          size="small"
+                                          renderValue={(value) =>
+                                            _.startCase(value)
+                                          }
+                                          options={
+                                            !!formik.values.scoring &&
+                                            associationSelect[
+                                              formik.values.scoring
+                                            ].map((opt, i) => (
+                                              <MuiMenuItem
+                                                key={`${opt}-${i}`}
+                                                value={`${opt}`}
+                                              >
+                                                {_.startCase(opt)}
+                                              </MuiMenuItem>
+                                            ))
+                                          }
+                                        />
+                                      )}
+                                      {!canEdit && (
+                                        <div>
+                                          <AutoComplete
+                                            id={`association-select-${
+                                              i + 1
+                                            }-disabled`}
+                                            label={`Association ${i + 1}`}
+                                            disabled={true}
+                                          />
+                                          {
+                                            formik.values.stratifications[i]
+                                              .association
+                                          }
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
                                   <div tw="lg:col-span-2">
@@ -1089,6 +1125,19 @@ const MeasureGroups = () => {
                                             `stratifications[${i}].description`
                                           )}
                                         />
+                                      )}
+                                      {!canEdit && (
+                                        <div
+                                          style={{
+                                            height: "100%",
+                                            width: "100%",
+                                          }}
+                                        >
+                                          {
+                                            formik.values.stratifications[i]
+                                              .description
+                                          }
+                                        </div>
                                       )}
                                     </FieldSeparator>
                                   </div>
@@ -1145,6 +1194,7 @@ const MeasureGroups = () => {
                           {...formik.getFieldProps("rateAggregation")}
                         />
                       )}
+                      {!canEdit && <div>{formik.values.rateAggregation}</div>}
                     </FieldSeparator>
                   </div>
                   <div tw="pt-6 pb-6 col-start-1 col-end-2">
@@ -1168,7 +1218,17 @@ const MeasureGroups = () => {
                         )}
                       />
                     )}
-                    {!canEdit && formik.values.improvementNotation}
+                    {!canEdit && (
+                      <div>
+                        <FieldLabel
+                          htmlFor="improvement-notation"
+                          id="improvement-notation-label"
+                        >
+                          Improvement Notation
+                        </FieldLabel>
+                        {formik.values.improvementNotation}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
