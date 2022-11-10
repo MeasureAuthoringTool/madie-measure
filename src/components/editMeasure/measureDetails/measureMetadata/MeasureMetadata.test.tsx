@@ -243,7 +243,7 @@ describe("MeasureRationale component", () => {
     );
   });
 
-  it("should reset form on discard changes", () => {
+  it("should reset form on discard changes", async () => {
     render(
       <MeasureMetadataForm
         measureMetadataType="Clinical Recommendation Statement"
@@ -265,11 +265,62 @@ describe("MeasureRationale component", () => {
         target: { value: "test-value" },
       });
     });
+    fireEvent.blur(input);
     expectInputValue(input, "test-value");
     expect(cancelButton).toHaveProperty("disabled", false);
-    act(async () => {
-      fireEvent.click(cancelButton);
-      await waitFor(() => expectInputValue(input, ""));
+
+    fireEvent.click(cancelButton);
+    const discardDialog = await screen.getByTestId("discard-dialog");
+    expect(discardDialog).toBeInTheDocument();
+    const continueButton = await screen.getByTestId(
+      "discard-dialog-continue-button"
+    );
+    expect(continueButton).toBeInTheDocument();
+    fireEvent.click(continueButton);
+    await waitFor(() => {
+      // check for old value
+      expect(input.value).toBe("");
+    });
+  });
+
+  it("should close dialog on dialog cancel discard changes", async () => {
+    render(
+      <MeasureMetadataForm
+        measureMetadataType="Clinical Recommendation Statement"
+        header="Clinical Recommendation"
+      />
+    );
+
+    const result = getByTestId("measureClinical Recommendation Statement");
+    expect(result).toBeInTheDocument();
+    const cancelButton = getByTestId("cancel-button");
+
+    const input = getByTestId(
+      "measureClinical Recommendation StatementInput"
+    ) as HTMLTextAreaElement;
+    expectInputValue(input, "");
+    expect(cancelButton).toHaveProperty("disabled", true);
+    act(() => {
+      fireEvent.change(input, {
+        target: { value: "test-value" },
+      });
+    });
+    fireEvent.blur(input);
+    expectInputValue(input, "test-value");
+    expect(cancelButton).toHaveProperty("disabled", false);
+
+    fireEvent.click(cancelButton);
+    const discardDialog = await screen.getByTestId("discard-dialog");
+    expect(discardDialog).toBeInTheDocument();
+
+    expect(queryByText("You have unsaved changes.")).toBeVisible();
+    const discardDialogCancelButton = screen.getByTestId(
+      "discard-dialog-cancel-button"
+    );
+    expect(discardDialogCancelButton).toBeInTheDocument();
+    fireEvent.click(discardDialogCancelButton);
+    await waitFor(() => {
+      expect(queryByText("You have unsaved changes.")).not.toBeVisible();
     });
   });
 

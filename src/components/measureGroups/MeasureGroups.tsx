@@ -9,7 +9,6 @@ import {
   PopulationType,
 } from "@madie/madie-models";
 import {
-  Alert,
   MenuItem as MuiMenuItem,
   Typography,
   Divider,
@@ -46,7 +45,8 @@ import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
 import MeasureGroupObservation from "./MeasureGroupObservation";
 import AutoComplete from "./AutoComplete";
 import * as _ from "lodash";
-import { MadieAlert } from "@madie/madie-design-system/dist/react";
+import MeasureGroupAlerts from "./MeasureGroupAlerts";
+import { Toast } from "@madie/madie-design-system/dist/react";
 import "../common/madie-link.scss";
 
 const ButtonSpacer = styled.span`
@@ -169,8 +169,30 @@ const MeasureGroups = () => {
       (acl) => acl.userId === userName && acl.roles.indexOf("SHARED_WITH") >= 0
     );
   const measureServiceApi = useMeasureServiceApi();
-  const [genericErrorMessage, setGenericErrorMessage] = useState<string>();
-  const [successMessage, setSuccessMessage] = useState<string>();
+
+  const [alertMessage, setAlertMessage] = useState({
+    type: undefined,
+    message: undefined,
+    canClose: false,
+  });
+
+  // toast utilities
+  // toast is only used for success messages
+  // creating and updating PC
+  const [toastOpen, setToastOpen] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string>("");
+  const [toastType, setToastType] = useState<string>("danger");
+  const onToastClose = () => {
+    setToastType(null);
+    setToastMessage("");
+    setToastOpen(false);
+  };
+  const handleToast = (type, message, open) => {
+    setToastType(type);
+    setToastMessage(message);
+    setToastOpen(open);
+  };
+
   const [activeTab, setActiveTab] = useState<string>("populations");
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(0);
   const [group, setGroup] = useState<Group>();
@@ -181,6 +203,7 @@ const MeasureGroups = () => {
       open: false,
       measureGroupNumber: undefined,
     });
+
   const [visibleStrats, setVisibleStrats] = useState<number>(2);
   // Todo option should be an Array when passing to AutoComplete.
   // warning during test cases
@@ -268,7 +291,6 @@ const MeasureGroups = () => {
     } as Group,
     validationSchema: measureGroupSchemaValidator(cqlDefinitionDataTypes),
     onSubmit: (group: Group) => {
-      setSuccessMessage(undefined);
       window.scrollTo(0, 0);
       if (
         measure?.groups &&
@@ -305,7 +327,13 @@ const MeasureGroups = () => {
     measureServiceApi
       .getAllPopulationBasisOptions()
       .then((response) => setPopulationBasisValues(response))
-      .catch((err) => setGenericErrorMessage(err.message));
+      .catch((err) =>
+        setAlertMessage({
+          type: "error",
+          message: err.message,
+          canClose: false,
+        })
+      );
   }, []);
 
   // local discard check. Layout can't have access to a bound function
@@ -377,18 +405,22 @@ const MeasureGroups = () => {
           });
         })
         .then(() => {
-          setGenericErrorMessage("");
           setAssociationChanged(false);
           handleDialogClose();
-          setSuccessMessage(
-            "Population details for this group updated successfully."
+          handleToast(
+            "success",
+            "Population details for this group updated successfully.",
+            true
           );
           formik.resetForm();
           setActiveTab("populations");
         })
-
         .catch((error) => {
-          setGenericErrorMessage(error.message);
+          setAlertMessage({
+            type: "error",
+            message: error.message,
+            canClose: false,
+          });
         });
     } else {
       measureServiceApi
@@ -409,14 +441,18 @@ const MeasureGroups = () => {
             : setMeasureGroupNumber(0);
         })
         .then(() => {
-          setGenericErrorMessage("");
-          setSuccessMessage(
-            "Population details for this group saved successfully."
+          handleToast(
+            "success",
+            "Population details for this group saved successfully.",
+            true
           );
         })
-
         .catch((error) => {
-          setGenericErrorMessage(error.message);
+          setAlertMessage({
+            type: "error",
+            message: error.message,
+            canClose: false,
+          });
         });
     }
   };
@@ -488,8 +524,33 @@ const MeasureGroups = () => {
       }),
   ];
 
+  // sets alert message when CQL has any errors
+  useEffect(() => {
+    if (measure && (measure.cqlErrors || !measure?.cql)) {
+      setAlertMessage({
+        type: "error",
+        message: "Please complete the CQL Editor process before continuing",
+        canClose: false,
+      });
+    }
+  }, [measure]);
+
   return (
     <FormikProvider value={formik}>
+      <MeasureGroupAlerts {...alertMessage} />
+      <Toast
+        toastKey="population-criteria-toast"
+        toastType={toastType}
+        testId={
+          toastType === "danger"
+            ? `population-criteria-error`
+            : `population-criteria-success`
+        }
+        open={toastOpen}
+        message={toastMessage}
+        onClose={onToastClose}
+        autoHideDuration={6000}
+      />
       <form onSubmit={formik.handleSubmit}>
         {/* delete measure group warning dialog */}
         {deleteMeasureGroupDialog.open && (
@@ -512,41 +573,6 @@ const MeasureGroups = () => {
           />
         )}
 
-        {genericErrorMessage && (
-          <Alert
-            data-testid="error-alerts"
-            role="alert"
-            severity="error"
-            onClose={() => setGenericErrorMessage(undefined)}
-          >
-            {genericErrorMessage}
-          </Alert>
-        )}
-
-        {successMessage && (
-          <Alert
-            data-testid="success-alerts"
-            role="alert"
-            severity="success"
-            onClose={() => setSuccessMessage(undefined)}
-          >
-            {successMessage}
-          </Alert>
-        )}
-        {measure && (measure.cqlErrors || !measure?.cql) && (
-          <div style={{ margin: "17px 0 0 32px", width: "96%" }}>
-            <MadieAlert
-              type="error"
-              content={
-                <p aria-live="polite" data-testid="cql-has-errors-message">
-                  Please complete the CQL Editor process before continuing
-                </p>
-              }
-              canClose={false}
-            />
-          </div>
-        )}
-
         <div tw="grid lg:grid-cols-6 gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate bg-white">
           <EditMeasureSideBarNav
             dirty={formik.dirty}
@@ -554,7 +580,6 @@ const MeasureGroups = () => {
             measureGroupNumber={measureGroupNumber}
             setMeasureGroupNumber={setMeasureGroupNumber}
             measure={measure}
-            setSuccessMessage={setSuccessMessage}
           />
           <div tw="lg:col-span-5 pl-2 pr-2">
             <div tw="flex pb-2 pt-6">
@@ -1132,8 +1157,8 @@ const MeasureGroups = () => {
             {canEdit && (
               <div tw="grid lg:grid-cols-4 gap-4 items-center py-4">
                 <Button
-                  style={{ height: "100%", width: "30%" }}
-                  variant="danger-primary"
+                  style={{ width: "30%" }}
+                  variant="danger"
                   data-testid="group-form-delete-btn"
                   disabled={
                     measureGroupNumber >= measure?.groups?.length ||
@@ -1162,9 +1187,10 @@ const MeasureGroups = () => {
                       : "You must set all required Populations."}
                   </span>
                 </ButtonSpacer>
-                <div tw="lg:col-start-4 flex justify-around">
+                <div tw="lg:col-start-4 flex">
                   <Button
-                    style={{ height: "80%", width: "50%" }}
+                    tw="mx-2"
+                    variant="outline"
                     className="cancel-button"
                     disabled={!formik.dirty}
                     data-testid="group-form-discard-btn"
@@ -1173,8 +1199,9 @@ const MeasureGroups = () => {
                     Discard Changes
                   </Button>
                   <Button
-                    style={{ height: "80%", width: "30%", marginTop: "0px" }}
-                    className="cyan"
+                    tw="mx-2"
+                    style={{ marginTop: "0px" }}
+                    variant="cyan"
                     type="submit"
                     data-testid="group-form-submit-btn"
                     disabled={

@@ -11,8 +11,8 @@ import {
 } from "@madie/madie-design-system/dist/react";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
-const Title = tw.div`flex items-center flex-shrink-0 px-4 space-y-5 font-display`;
-const InnerWrapper = tw.div`mt-5 flex-grow flex flex-col`;
+
+const InnerWrapper = tw.div`flex-grow flex flex-col`;
 const Nav = tw.nav`flex-1 space-y-1 bg-slate`;
 const StyledNavLink = tw(
   NavLink
@@ -34,10 +34,9 @@ interface SidebarLink {
 export interface EditMeasureSideBarNavProps {
   dirty: Boolean;
   links: Array<any>; // needs to be changed since some links are actually measure groups.
-  header?: String;
+  details?: Boolean;
   measureGroupNumber?: number;
   setMeasureGroupNumber?: (value: number) => void;
-  setSuccessMessage?: (value: string) => void;
   measure?: Measure;
 }
 
@@ -46,13 +45,13 @@ export default function EditMeasureSideBarNav(
 ) {
   const {
     links,
-    header = "",
+    details = false,
     measure,
     measureGroupNumber,
     setMeasureGroupNumber,
-    setSuccessMessage,
     dirty,
   } = props;
+
   const { pathname } = useLocation();
   const [measureGroups, setMeasureGroups] = useState<any>();
   useEffect(() => {
@@ -111,14 +110,12 @@ export default function EditMeasureSideBarNav(
         }`,
       },
     ]);
-    setSuccessMessage(undefined);
     onClose();
   };
 
   // we need to preserve the
   const handleMeasureGroupNavigation = (val: number) => {
     setMeasureGroupNumber(val);
-    setSuccessMessage(undefined);
     onClose();
   };
 
@@ -135,35 +132,37 @@ export default function EditMeasureSideBarNav(
     setDiscardDialogOpen(false);
     setInitiatedPayload(null);
   };
-  // if no header, we don't need an outer wrapper
-  if (header) {
+  if (details) {
     return (
       <OuterWrapper>
-        {header && <Title>{header}</Title>}
         <InnerWrapper>
           <Nav aria-label="Sidebar">
-            {links.map((linkInfo) => {
-              let LinkEl = InactiveNavLink;
-              if (pathname === linkInfo.href) {
-                LinkEl = ActiveNavLink;
-              }
-              return (
-                <LinkEl
-                  key={linkInfo.title}
-                  to={linkInfo.href}
-                  data-testid={linkInfo.dataTestId}
-                  id={linkInfo.id}
-                >
-                  {linkInfo.title}
-                </LinkEl>
-              );
-            })}
+            {links.map((link) => (
+              <div className="link-container">
+                <h4 className="link-heading">{link.title}</h4>
+                {link.links.map((linkInfo) => {
+                  let LinkEl = InactiveNavLink;
+                  if (pathname === linkInfo.href) {
+                    LinkEl = ActiveNavLink;
+                  }
+                  return (
+                    <LinkEl
+                      key={linkInfo.title}
+                      to={linkInfo.href}
+                      data-testid={linkInfo.dataTestId}
+                      id={linkInfo.id}
+                    >
+                      {linkInfo.title}
+                    </LinkEl>
+                  );
+                })}
+              </div>
+            ))}
           </Nav>
         </InnerWrapper>
       </OuterWrapper>
     );
   }
-
   return (
     <OuterWrapper>
       <Nav aria-label="Sidebar">

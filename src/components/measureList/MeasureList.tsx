@@ -4,7 +4,7 @@ import "styled-components/macro";
 import { Measure } from "@madie/madie-models";
 import { useHistory } from "react-router-dom";
 import { Chip, IconButton } from "@mui/material";
-import { TextField } from "@madie/madie-design-system/dist/react";
+import { TextField, Button } from "@madie/madie-design-system/dist/react";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
@@ -46,33 +46,44 @@ export default function MeasureList(props: {
   setOffset;
   setInitialLoad;
   activeTab: number;
+  searchCriteria: string;
+  setSearchCriteria;
+  currentLimit: number;
+  currentPage: number;
 }) {
   const history = useHistory();
-  const [searchCriteria, setSearchCriteria] = useState("");
+
   const measureServiceApi = useMeasureServiceApi();
 
   const handleClearClick = async (event) => {
-    setSearchCriteria("");
+    props.setSearchCriteria("");
     const data = await measureServiceApi.fetchMeasures(
       props.activeTab === 0,
-      10,
+      props.currentLimit,
       0
     );
     setPageProps(data);
+    history.push(
+      `?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`
+    );
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (searchCriteria) {
+    if (props.searchCriteria) {
       const data =
         await measureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle(
           props.activeTab === 0,
-          10,
+          props.currentLimit,
           0,
-          searchCriteria
+          props.searchCriteria
         );
       setPageProps(data);
     }
+
+    history.push(
+      `?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`
+    );
   };
   const setPageProps = (data) => {
     if (data) {
@@ -98,7 +109,7 @@ export default function MeasureList(props: {
       <IconButton
         aria-label="Clear-Search"
         sx={{
-          visibility: searchCriteria ? "visible" : "hidden",
+          visibility: props.searchCriteria ? "visible" : "hidden",
         }}
         onClick={handleClearClick}
       >
@@ -121,7 +132,7 @@ export default function MeasureList(props: {
                     <tr>
                       <TextField
                         onChange={(newValue) => {
-                          setSearchCriteria(newValue.target.value);
+                          props.setSearchCriteria(newValue.target.value);
                         }}
                         id="searchMeasure"
                         name="searchMeasure"
@@ -131,8 +142,8 @@ export default function MeasureList(props: {
                         data-testid="measure-search-input"
                         label="Filter Measures"
                         variant="outlined"
-                        defaultValue={searchCriteria}
-                        value={searchCriteria}
+                        defaultValue={props.searchCriteria}
+                        value={props.searchCriteria}
                         inputProps={{
                           "data-testid": "searchMeasure-input",
                           "aria-required": "false",
@@ -176,16 +187,15 @@ export default function MeasureList(props: {
                       </td>
                       <td>{measure.model}</td>
                       <td>
-                        <button
-                          className="action-button"
+                        <Button
+                          variant="outline-secondary"
                           onClick={() => {
                             history.push(`/measures/${measure.id}/edit`);
                           }}
-                          tw="text-blue-600 hover:text-blue-900"
                           data-testid={`edit-measure-${measure.id}`}
                         >
-                          <div className="action">View</div>
-                        </button>
+                          View
+                        </Button>
                       </td>
                     </tr>
                   ))}

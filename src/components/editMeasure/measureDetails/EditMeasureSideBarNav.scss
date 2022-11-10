@@ -1,0 +1,47 @@
+.right-col {
+  align-self: center;
+
+  .new-measure-group {
+    position: absolute;
+    height: 16.52px;
+    font-family: "Rubik", sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 17px;
+    text-align: center;
+    color: #0073c8;
+
+    &:active {
+      background-color: #efefef;
+      color: #333;
+    }
+
+    &:focus {
+      border: 1px solid #0073c8;
+      box-shadow: rgb(203, 228, 255) 0 0 0 4px;
+    }
+
+    &:focus-visible {
+      outline: -webkit-focus-ring-color auto 1px;
+    }
+
+    .add-icon {
+      margin-right: 5px;
+      margin-top: -2px;
+    }
+  }
+}
+
+.link-container {
+  // margin-bottom: 20px;
+  > .link-heading {
+    margin-bottom: 0;
+    margin-left: 13px;
+    font-family: "Rubik";
+    font-style: normal;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 24px;
+    color: #242424;
+  }
+}
