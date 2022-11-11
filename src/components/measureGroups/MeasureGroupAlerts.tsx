@@ -13,15 +13,17 @@ const MeasureGroupAlerts = (props: MeasureGroupAlertsTypes) => {
   const dataTestId = props.type === "error" ? "error-alerts" : "success-alerts";
   return (
     <div tw="mx-8 my-4">
-      <MadieAlert
-        type={props.type}
-        content={
-          <p aria-live="polite" data-testid={dataTestId}>
-            {props.message}
-          </p>
-        }
-        canClose={props.canClose}
-      />
+      {props.message && (
+        <MadieAlert
+          type={props.type}
+          content={
+            <p aria-live="polite" data-testid={dataTestId}>
+              {props.message}
+            </p>
+          }
+          canClose={props.canClose}
+        />
+      )}
     </div>
   );
 };

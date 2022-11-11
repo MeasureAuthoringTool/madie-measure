@@ -1233,8 +1233,8 @@ const MeasureGroups = () => {
             {canEdit && (
               <div tw="grid lg:grid-cols-4 gap-4 items-center py-4">
                 <Button
-                  style={{ height: "100%", width: "30%" }}
-                  variant="danger-primary"
+                  style={{ width: "30%" }}
+                  variant="danger"
                   data-testid="group-form-delete-btn"
                   disabled={
                     measureGroupNumber >= measure?.groups?.length ||
@@ -1263,9 +1263,10 @@ const MeasureGroups = () => {
                       : "You must set all required Populations."}
                   </span>
                 </ButtonSpacer>
-                <div tw="lg:col-start-4 flex justify-around">
+                <div tw="lg:col-start-4 flex">
                   <Button
-                    style={{ height: "80%", width: "50%" }}
+                    tw="mx-2"
+                    variant="outline"
                     className="cancel-button"
                     disabled={!formik.dirty}
                     data-testid="group-form-discard-btn"
@@ -1274,8 +1275,9 @@ const MeasureGroups = () => {
                     Discard Changes
                   </Button>
                   <Button
-                    style={{ height: "80%", width: "30%", marginTop: "0px" }}
-                    className="cyan"
+                    tw="mx-2"
+                    style={{ marginTop: "0px" }}
+                    variant="cyan"
                     type="submit"
                     data-testid="group-form-submit-btn"
                     disabled={
