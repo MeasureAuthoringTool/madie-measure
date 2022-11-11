@@ -3,7 +3,7 @@ import tw from "twin.macro";
 import { Link as NavLink, useLocation } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import { Measure } from "@madie/madie-models";
-//import "./EditMeasureSideBarNav.scss";
+import "./EditMeasureSideBarNav.scss";
 import "../../common/madie-link.scss";
 import {
   DSLink,
