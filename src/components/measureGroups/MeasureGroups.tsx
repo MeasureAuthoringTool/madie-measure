@@ -745,11 +745,7 @@ const MeasureGroups = () => {
                 )}
                 {!canEdit && (
                   <div>
-                    <AutoComplete
-                      id="disabled-population-scoring"
-                      label="Scoring"
-                      disabled={true}
-                    />
+                    <FieldLabel htmlFor="Scoring-label">Scoring</FieldLabel>
                     {formik.values.scoring}
                   </div>
                 )}
@@ -899,11 +895,11 @@ const MeasureGroups = () => {
                               isExclusionPop={isExclusionPop}
                             >
                               {!canEdit && (
-                                <AutoComplete
-                                  id="disabled-population-name-list-label"
-                                  label={population.name}
-                                  disabled={true}
-                                />
+                                <FieldLabel
+                                  htmlFor={`disabled-${population.name}-label`}
+                                >
+                                  {population.name}
+                                </FieldLabel>
                               )}
 
                               <Field
@@ -1026,13 +1022,13 @@ const MeasureGroups = () => {
                                       )}
                                       {!canEdit && (
                                         <div>
-                                          <AutoComplete
-                                            id={`Stratification-select-${
+                                          <FieldLabel
+                                            htmlFor={`Stratification-select-${
                                               i + 1
                                             }-disabled`}
-                                            label={`Stratification ${i + 1}`}
-                                            disabled={true}
-                                          />
+                                          >
+                                            {`Stratification ${i + 1}`}
+                                          </FieldLabel>
                                           {formik.values.stratifications[i]
                                             .cqlDefinition
                                             ? formik.values.stratifications[i]
@@ -1082,13 +1078,13 @@ const MeasureGroups = () => {
                                       )}
                                       {!canEdit && (
                                         <div>
-                                          <AutoComplete
-                                            id={`association-select-${
+                                          <FieldLabel
+                                            htmlFor={`association-select-${
                                               i + 1
                                             }-disabled`}
-                                            label={`Association ${i + 1}`}
-                                            disabled={true}
-                                          />
+                                          >
+                                            {`Association ${i + 1}`}
+                                          </FieldLabel>
                                           {
                                             formik.values.stratifications[i]
                                               .association
