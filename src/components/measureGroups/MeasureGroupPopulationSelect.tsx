@@ -6,6 +6,7 @@ import { MenuItem } from "@mui/material";
 import { ExpressionDefinition } from "./MeasureGroups";
 import { DSLink, Select } from "@madie/madie-design-system/dist/react";
 import { InitialPopulationAssociationType } from "./GroupPopulation";
+import "../common/madie-link.scss";
 
 const SubTitle = styled.p`
   color: #505d68;
@@ -93,6 +94,7 @@ const MeasureGroupPopulationSelect = ({
         &nbsp;&nbsp;
         {isRemovable && (
           <DSLink
+            className="madie-link"
             data-testid={`remove_${field.name}`}
             onClick={(evt) => {
               removePopulation(evt);
@@ -131,6 +133,7 @@ const MeasureGroupPopulationSelect = ({
           {showAddPopulationLink && (
             <div tw="md:absolute -right-64 top-1.5 whitespace-pre px-7 py-5">
               <DSLink
+                className="madie-link"
                 data-testid={`add_${field.name}`}
                 onClick={(evt) => addPopulation(evt)}
               >
