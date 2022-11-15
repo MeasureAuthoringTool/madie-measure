@@ -49,6 +49,7 @@ const MeasureObservationDetails = ({
       <div tw="relative">
         {!required && canEdit && (
           <DSLink
+            className="madie-link"
             style={{
               position: "absolute",
               left: "13rem",
