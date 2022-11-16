@@ -650,7 +650,7 @@ const MeasureGroups = () => {
                     options={Object.values(MeasureGroupTypes)}
                     multipleSelect={true}
                     limitTags={1}
-                  ></MultipleSelectDropDown>
+                  />
                   {formik.errors["measureGroupTypes"] && (
                     <FormHelperText
                       tabIndex={0}
@@ -677,9 +677,7 @@ const MeasureGroups = () => {
                       helperText={formik.errors.populationBasis}
                       options={populationBasisValues}
                       {...formik.getFieldProps("populationBasis")}
-                      onChange={(_event: any, selectedVal: string | null) => {
-                        formik.setFieldValue("populationBasis", selectedVal);
-                      }}
+                      onChange={formik.setFieldValue}
                     />
                   </div>
                 )}
