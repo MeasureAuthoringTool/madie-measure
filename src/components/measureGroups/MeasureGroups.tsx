@@ -23,7 +23,8 @@ import {
   MadieDiscardDialog,
   Select,
   DSLink,
-} from "@madie/madie-design-system/dist/react/";
+  AutoComplete,
+} from "../../../../../madie-design-system/react/dist/react";
 import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { v4 as uuidv4 } from "uuid";
@@ -43,7 +44,7 @@ import { allPopulations, getPopulationsForScoring } from "./PopulationHelper";
 import GroupPopulation from "./GroupPopulation";
 import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
 import MeasureGroupObservation from "./MeasureGroupObservation";
-import AutoComplete from "./AutoComplete";
+// import AutoComplete from "./AutoComplete";
 import * as _ from "lodash";
 import MeasureGroupAlerts from "./MeasureGroupAlerts";
 import { Toast } from "@madie/madie-design-system/dist/react";
@@ -669,25 +670,19 @@ const MeasureGroups = () => {
                 {populationBasisValues && (
                   <div>
                     <AutoComplete
-                      id="population-basis"
+                      id="populationBasis"
+                      dataTestId="populationBasis"
                       label="Population Basis"
-                      placeHolder={{ name: "-", value: "" }}
-                      defaultValue={formik.values.populationBasis}
+                      placeholder="-"
                       required={true}
-                      disabled={false}
+                      disabled={!canEdit}
+                      error={formik.errors.populationBasis}
+                      helperText={formik.errors.populationBasis}
+                      options={populationBasisValues}
                       {...formik.getFieldProps("populationBasis")}
-                      error={
-                        formik.touched["population-basis"] &&
-                        Boolean(formik.errors.populationBasis)
-                      }
-                      helperText={
-                        formik.touched["population-basis"] &&
-                        formik.errors.populationBasis
-                      }
                       onChange={(_event: any, selectedVal: string | null) => {
                         formik.setFieldValue("populationBasis", selectedVal);
                       }}
-                      options={populationBasisValues}
                     />
                   </div>
                 )}
