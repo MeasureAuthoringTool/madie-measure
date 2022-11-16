@@ -28,7 +28,7 @@ import * as uuid from "uuid";
 import { getPopulationsForScoring } from "./PopulationHelper";
 import * as _ from "lodash";
 import { measureStore } from "@madie/madie-util";
-import { InitialPopulationAssociationType } from "./GroupPopulation";
+import { InitialPopulationAssociationType } from "./groupPopulations/GroupPopulation";
 
 // fix error about window.scrollto
 global.scrollTo = jest.fn();

@@ -41,9 +41,9 @@ import {
 import MultipleSelectDropDown from "./MultipleSelectDropDown";
 import MeasureGroupsWarningDialog from "./MeasureGroupWarningDialog";
 import { allPopulations, getPopulationsForScoring } from "./PopulationHelper";
-import GroupPopulation from "./GroupPopulation";
-import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
-import MeasureGroupObservation from "./MeasureGroupObservation";
+import GroupPopulation from "./groupPopulations/GroupPopulation";
+import MeasureGroupScoringUnit from "./scoringUnit/MeasureGroupScoringUnit";
+import MeasureGroupObservation from "./observation/MeasureGroupObservation";
 import * as _ from "lodash";
 import MeasureGroupAlerts from "./MeasureGroupAlerts";
 import { Toast } from "@madie/madie-design-system/dist/react";
