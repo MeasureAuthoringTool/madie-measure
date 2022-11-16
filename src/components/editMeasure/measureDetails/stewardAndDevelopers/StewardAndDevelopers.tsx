@@ -7,7 +7,7 @@ import {
   MadieDiscardDialog,
   Toast,
   AutoComplete,
-} from "../../../../../../../madie-design-system/react/dist/react";
+} from "@madie/madie-design-system/dist/react";
 import {
   measureStore,
   routeHandlerStore,
@@ -162,8 +162,8 @@ export default function StewardAndDevelopers() {
                 placeholder="-"
                 required={true}
                 disabled={!canEdit}
-                error={formik.errors["steward"]}
-                helperText={formik.errors["steward"]}
+                error={formik.touched.steward && formik.errors["steward"]}
+                helperText={formik.touched.steward && formik.errors["steward"]}
                 options={organizations}
                 {...formik.getFieldProps("steward")}
                 onChange={formik.setFieldValue}
@@ -179,8 +179,10 @@ export default function StewardAndDevelopers() {
                 placeholder="-"
                 required={true}
                 disabled={!canEdit}
-                error={formik.errors["developers"]}
-                helperText={formik.errors["developers"]}
+                error={formik.touched.developers && formik.errors["developers"]}
+                helperText={
+                  formik.touched.developers && formik.errors["developers"]
+                }
                 options={organizations}
                 {...formik.getFieldProps("developers")}
                 onChange={formik.setFieldValue}

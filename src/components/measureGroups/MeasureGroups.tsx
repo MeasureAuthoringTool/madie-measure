@@ -24,7 +24,8 @@ import {
   Select,
   DSLink,
   AutoComplete,
-} from "../../../../../madie-design-system/react/dist/react";
+  Toast,
+} from "@madie/madie-design-system/dist/react";
 import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { v4 as uuidv4 } from "uuid";
@@ -46,7 +47,6 @@ import MeasureGroupScoringUnit from "./scoringUnit/MeasureGroupScoringUnit";
 import MeasureGroupObservation from "./observation/MeasureGroupObservation";
 import * as _ from "lodash";
 import MeasureGroupAlerts from "./MeasureGroupAlerts";
-import { Toast } from "@madie/madie-design-system/dist/react";
 import "../common/madie-link.scss";
 
 const ButtonSpacer = styled.span`
