@@ -158,7 +158,7 @@ describe("Measure Groups Page", () => {
   const changePopulationBasis = async (value: string) => {
     let populationBasis;
     await waitFor(() => {
-      populationBasis = screen.getByTestId("population-basis-combo-box");
+      populationBasis = screen.getByTestId("populationBasis");
     });
     const populationBasisAutoComplete =
       within(populationBasis).getByRole("combobox");
