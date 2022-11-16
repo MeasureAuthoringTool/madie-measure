@@ -44,7 +44,6 @@ import { allPopulations, getPopulationsForScoring } from "./PopulationHelper";
 import GroupPopulation from "./GroupPopulation";
 import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
 import MeasureGroupObservation from "./MeasureGroupObservation";
-// import AutoComplete from "./AutoComplete";
 import * as _ from "lodash";
 import MeasureGroupAlerts from "./MeasureGroupAlerts";
 import { Toast } from "@madie/madie-design-system/dist/react";
@@ -206,8 +205,6 @@ const MeasureGroups = () => {
     });
 
   const [visibleStrats, setVisibleStrats] = useState<number>(2);
-  // Todo option should be an Array when passing to AutoComplete.
-  // warning during test cases
   const [populationBasisValues, setPopulationBasisValues] =
     useState<string[]>();
   const [associationChanged, setAssociationChanged] = useState(false);
