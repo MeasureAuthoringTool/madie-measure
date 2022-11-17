@@ -25,7 +25,7 @@ import {
   DSLink,
   AutoComplete,
   Toast,
-} from "../../../../../madie-design-system/react/dist/react";
+} from "@madie/madie-design-system/dist/react";
 import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { v4 as uuidv4 } from "uuid";

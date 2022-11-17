@@ -185,10 +185,8 @@ describe("Measure Groups Page", () => {
 
   test("Measure Group Scoring should not render options if user is not the measure owner", async () => {
     measure.createdBy = "AnotherUser@example.com";
-    const { queryAllByTestId } = await waitFor(() =>
-      renderMeasureGroupComponent()
-    );
-    const scoringSelectInput = queryAllByTestId("scoring-select-input");
+    await waitFor(() => renderMeasureGroupComponent());
+    const scoringSelectInput = screen.getByTestId("scoring-select-input");
     expect(scoringSelectInput).toBeDisabled();
   });
 

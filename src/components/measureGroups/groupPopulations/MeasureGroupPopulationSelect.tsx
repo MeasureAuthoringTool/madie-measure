@@ -4,10 +4,7 @@ import "styled-components/macro";
 import { kebabCase } from "lodash";
 import { MenuItem } from "@mui/material";
 import { ExpressionDefinition } from "../MeasureGroups";
-import {
-  DSLink,
-  Select,
-} from "../../../../../../madie-design-system/react/dist/react";
+import { DSLink, Select } from "@madie/madie-design-system/dist/react";
 import { InitialPopulationAssociationType } from "./GroupPopulation";
 import "../../common/madie-link.scss";
 

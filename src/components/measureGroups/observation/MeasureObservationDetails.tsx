@@ -6,10 +6,7 @@ import {
   MeasureObservation,
   AGGREGATE_FUNCTION_KEYS,
 } from "@madie/madie-models";
-import {
-  DSLink,
-  Select,
-} from "../../../../../../madie-design-system/react/dist/react";
+import { DSLink, Select } from "@madie/madie-design-system/dist/react";
 
 const AGGREGATE_FUNCTIONS = Array.from(AGGREGATE_FUNCTION_KEYS.keys()).sort();
 
