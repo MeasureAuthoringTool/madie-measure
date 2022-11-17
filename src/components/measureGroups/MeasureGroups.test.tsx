@@ -8,7 +8,6 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
-import { describe, expect, test } from "@jest/globals";
 import { isEqual } from "lodash";
 import MeasureGroups from "./MeasureGroups";
 import {
@@ -189,8 +188,8 @@ describe("Measure Groups Page", () => {
     const { queryAllByTestId } = await waitFor(() =>
       renderMeasureGroupComponent()
     );
-    const optionList = queryAllByTestId("scoring-select");
-    expect(optionList).toHaveLength(0);
+    const scoringSelectInput = queryAllByTestId("scoring-select-input");
+    expect(scoringSelectInput).toBeDisabled();
   });
 
   // Todo Need to fix this test case
@@ -1317,7 +1316,7 @@ describe("Measure Groups Page", () => {
       renderMeasureGroupComponent()
     );
     const inputField = queryByTestId("groupDescriptionInput");
-    expect(inputField).not.toBeInTheDocument();
+    expect(inputField).toBeDisabled();
   });
 
   test("Measure Group Save button should not render if user is not the measure owner", async () => {
