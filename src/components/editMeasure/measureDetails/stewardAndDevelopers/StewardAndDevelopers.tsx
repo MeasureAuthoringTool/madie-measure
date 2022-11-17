@@ -191,26 +191,28 @@ export default function StewardAndDevelopers() {
           </>
         )}
       </div>
-      <div className="form-actions">
-        <Button
-          variant="outline"
-          data-testid="cancel-button"
-          disabled={!formik.dirty}
-          onClick={() => setDiscardDialogOpen(true)}
-          style={{ marginTop: 20, float: "right", marginRight: 32 }}
-        >
-          Discard Changes
-        </Button>
-        <Button
-          disabled={!(formik.isValid && formik.dirty)}
-          type="submit"
-          variant="cyan"
-          data-testid={`steward-and-developers-save`}
-          style={{ marginTop: 20, float: "right" }}
-        >
-          Save
-        </Button>
-      </div>
+      {canEdit && (
+        <div className="form-actions">
+          <Button
+            variant="outline"
+            data-testid="cancel-button"
+            disabled={!formik.dirty}
+            onClick={() => setDiscardDialogOpen(true)}
+            style={{ marginTop: 20, float: "right", marginRight: 32 }}
+          >
+            Discard Changes
+          </Button>
+          <Button
+            disabled={!(formik.isValid && formik.dirty)}
+            type="submit"
+            variant="cyan"
+            data-testid={`steward-and-developers-save`}
+            style={{ marginTop: 20, float: "right" }}
+          >
+            Save
+          </Button>
+        </div>
+      )}
       <Toast
         toastKey="steward-and-developers-toast"
         toastType={toastType}

@@ -154,6 +154,7 @@ const MeasureGroups = () => {
   const [expressionDefinitions, setExpressionDefinitions] = useState<
     Array<ExpressionDefinition>
   >([]);
+  const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -401,6 +402,7 @@ const MeasureGroups = () => {
             ...measure,
             groups: updatedGroups,
           });
+          updateMeasure({ ...measure, groups: updatedGroups });
         })
         .then(() => {
           setAssociationChanged(false);
@@ -437,6 +439,7 @@ const MeasureGroups = () => {
           measure?.groups
             ? setMeasureGroupNumber(measure?.groups.length)
             : setMeasureGroupNumber(0);
+          updateMeasure({ ...measure, groups: updatedGroups });
         })
         .then(() => {
           handleToast(
