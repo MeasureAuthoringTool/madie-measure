@@ -6,7 +6,10 @@ import {
   MeasureObservation,
   AGGREGATE_FUNCTION_KEYS,
 } from "@madie/madie-models";
-import { DSLink, Select } from "@madie/madie-design-system/dist/react";
+import {
+  DSLink,
+  Select,
+} from "../../../../../../madie-design-system/react/dist/react";
 
 const AGGREGATE_FUNCTIONS = Array.from(AGGREGATE_FUNCTION_KEYS.keys()).sort();
 
@@ -72,7 +75,7 @@ const MeasureObservationDetails = ({
         <Select
           placeHolder={{ name: "-", value: "" }}
           required={required}
-          readOnly={!canEdit}
+          disabled={!canEdit}
           label={label ? label : "Observation"}
           id={`measure-observation-${name}`}
           data-testid={`select-measure-observation-${name}`}
@@ -106,7 +109,7 @@ const MeasureObservationDetails = ({
       <div tw="pb-3 px-8 pt-6">
         <Select
           placeHolder={{ name: "-", value: "" }}
-          readOnly={!canEdit}
+          disabled={!canEdit}
           required={required}
           label="Aggregate Function"
           id={`measure-observation-aggregate-${name}`}
