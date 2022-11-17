@@ -23,7 +23,9 @@ import {
   MadieDiscardDialog,
   Select,
   DSLink,
-} from "@madie/madie-design-system/dist/react/";
+  AutoComplete,
+  Toast,
+} from "@madie/madie-design-system/dist/react";
 import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { v4 as uuidv4 } from "uuid";
@@ -40,13 +42,11 @@ import {
 import MultipleSelectDropDown from "./MultipleSelectDropDown";
 import MeasureGroupsWarningDialog from "./MeasureGroupWarningDialog";
 import { allPopulations, getPopulationsForScoring } from "./PopulationHelper";
-import GroupPopulation from "./GroupPopulation";
-import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
-import MeasureGroupObservation from "./MeasureGroupObservation";
-import AutoComplete from "./AutoComplete";
+import GroupPopulation from "./groupPopulations/GroupPopulation";
+import MeasureGroupScoringUnit from "./scoringUnit/MeasureGroupScoringUnit";
+import MeasureGroupObservation from "./observation/MeasureGroupObservation";
 import * as _ from "lodash";
 import MeasureGroupAlerts from "./MeasureGroupAlerts";
-import { Toast } from "@madie/madie-design-system/dist/react";
 import "../common/madie-link.scss";
 
 const ButtonSpacer = styled.span`
@@ -206,8 +206,6 @@ const MeasureGroups = () => {
     });
 
   const [visibleStrats, setVisibleStrats] = useState<number>(2);
-  // Todo option should be an Array when passing to AutoComplete.
-  // warning during test cases
   const [populationBasisValues, setPopulationBasisValues] =
     useState<string[]>();
   const [associationChanged, setAssociationChanged] = useState(false);
@@ -655,7 +653,7 @@ const MeasureGroups = () => {
                     options={Object.values(MeasureGroupTypes)}
                     multipleSelect={true}
                     limitTags={1}
-                  ></MultipleSelectDropDown>
+                  />
                   {formik.errors["measureGroupTypes"] && (
                     <FormHelperText
                       tabIndex={0}
@@ -672,25 +670,17 @@ const MeasureGroups = () => {
                 {populationBasisValues && (
                   <div>
                     <AutoComplete
-                      id="population-basis"
+                      id="populationBasis"
+                      dataTestId="populationBasis"
                       label="Population Basis"
-                      placeHolder={{ name: "-", value: "" }}
-                      defaultValue={formik.values.populationBasis}
+                      placeholder="-"
                       required={true}
-                      disabled={false}
-                      {...formik.getFieldProps("populationBasis")}
-                      error={
-                        formik.touched["population-basis"] &&
-                        Boolean(formik.errors.populationBasis)
-                      }
-                      helperText={
-                        formik.touched["population-basis"] &&
-                        formik.errors.populationBasis
-                      }
-                      onChange={(_event: any, selectedVal: string | null) => {
-                        formik.setFieldValue("populationBasis", selectedVal);
-                      }}
+                      disabled={!canEdit}
+                      error={formik.errors.populationBasis}
+                      helperText={formik.errors.populationBasis}
                       options={populationBasisValues}
+                      {...formik.getFieldProps("populationBasis")}
+                      onChange={formik.setFieldValue}
                     />
                   </div>
                 )}

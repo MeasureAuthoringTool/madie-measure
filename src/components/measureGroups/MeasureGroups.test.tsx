@@ -28,7 +28,7 @@ import * as uuid from "uuid";
 import { getPopulationsForScoring } from "./PopulationHelper";
 import * as _ from "lodash";
 import { measureStore } from "@madie/madie-util";
-import { InitialPopulationAssociationType } from "./GroupPopulation";
+import { InitialPopulationAssociationType } from "./groupPopulations/GroupPopulation";
 
 // fix error about window.scrollto
 global.scrollTo = jest.fn();
@@ -158,7 +158,7 @@ describe("Measure Groups Page", () => {
   const changePopulationBasis = async (value: string) => {
     let populationBasis;
     await waitFor(() => {
-      populationBasis = screen.getByTestId("population-basis-combo-box");
+      populationBasis = screen.getByTestId("populationBasis");
     });
     const populationBasisAutoComplete =
       within(populationBasis).getByRole("combobox");
