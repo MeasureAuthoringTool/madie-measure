@@ -12,6 +12,7 @@ describe("EditMeasureSideBarNav", () => {
     jest.clearAllMocks();
   });
   const initialProps: EditMeasureSideBarNavProps = {
+    canEdit: true,
     dirty: true,
     links: [
       {

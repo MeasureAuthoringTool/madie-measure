@@ -123,10 +123,10 @@ describe("Measure Group Population Select Component", () => {
       />
     );
 
-    const populationSelect = screen.queryByTestId(
-      "population-select-population-test"
+    const populationSelectInput = screen.queryByTestId(
+      "select-measure-group-population-input"
     );
-    expect(populationSelect).not.toBeInTheDocument();
+    expect(populationSelectInput).toBeDisabled();
   });
 
   test("should display the default option value if passed and measure is editable", () => {

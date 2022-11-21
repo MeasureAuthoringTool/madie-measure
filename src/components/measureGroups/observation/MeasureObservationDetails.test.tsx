@@ -115,6 +115,7 @@ describe("Measure Observation Details", () => {
         name={"obs1"}
         required={false}
         elmJson={elmJson}
+        canEdit
         measureObservation={null}
         canEdit={true}
       />
@@ -142,6 +143,7 @@ describe("Measure Observation Details", () => {
         required={false}
         label="MyLabel"
         elmJson={elmJson}
+        canEdit
         measureObservation={null}
         canEdit={true}
       />
@@ -174,9 +176,9 @@ describe("Measure Observation Details", () => {
       <MeasureObservationDetails
         name={"obs1"}
         required={false}
+        canEdit
         elmJson={elmJson}
         measureObservation={null}
-        canEdit
       />
     );
 

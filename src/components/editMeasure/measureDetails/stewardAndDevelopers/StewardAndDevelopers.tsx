@@ -6,6 +6,7 @@ import {
   Button,
   MadieDiscardDialog,
   Toast,
+  AutoComplete,
 } from "@madie/madie-design-system/dist/react";
 import {
   measureStore,
@@ -14,41 +15,7 @@ import {
 } from "@madie/madie-util";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-
-import {
-  Autocomplete,
-  Checkbox,
-  FormHelperText,
-  TextField,
-  Typography,
-} from "@mui/material";
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
-
-const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-const checkedIcon = <CheckBoxIcon fontSize="small" />;
-
-const autoCompleteStyles = {
-  borderRadius: "3px",
-  height: 40,
-  border: "1px solid #DDDDDD",
-  "& .MuiOutlinedInput-notchedOutline": {
-    borderRadius: "3px",
-    "& legend": {
-      width: 0,
-    },
-  },
-  "& .MuiAutocomplete-inputFocused": {
-    border: "none",
-    boxShadow: "none",
-    outline: "none",
-  },
-  "& .MuiAutocomplete-inputRoot": {
-    paddingTop: 0,
-    paddingBottom: 0,
-  },
-  width: "50%",
-};
+import { Typography } from "@mui/material";
 
 const asterisk = { color: "#D92F2F", marginRight: 3 };
 
@@ -187,124 +154,39 @@ export default function StewardAndDevelopers() {
         </div>
         {organizations && (
           <>
-            <div tw="mb-4">
-              <span style={asterisk}>*</span>
-              <label htmlFor="steward" id="steward-label">
-                Steward
-              </label>
-              <Autocomplete
+            <div tw="mb-4 w-1/2">
+              <AutoComplete
                 id="steward"
-                data-testid="steward"
-                options={organizations}
+                dataTestId="steward"
+                label="Steward"
+                placeholder="-"
+                required={true}
                 disabled={!canEdit}
-                sx={autoCompleteStyles}
-                onKeyDown={goBackToNav}
+                error={formik.touched.steward && formik.errors["steward"]}
+                helperText={formik.touched.steward && formik.errors["steward"]}
+                options={organizations}
                 {...formik.getFieldProps("steward")}
-                onChange={(_event: any, selectedVal: string | null) => {
-                  formik.setFieldValue("steward", selectedVal || "");
-                }}
-                renderInput={(params) => {
-                  const { inputProps } = params;
-                  inputProps["aria-describedby"] = "steward-helper-text";
-                  inputProps["aria-labelledby"] = "steward-label";
-                  return (
-                    <TextField
-                      {...params}
-                      inputProps={inputProps}
-                      /* Setting the describedby here does make MacOS's VoiceOver
-                      read the helper text, but it also messes up the styling... */
-                      // inputProps={{ "aria-describedby": "steward-helper-text" }}
-                    />
-                  );
-                }}
-                renderOption={(props: any, option) => {
-                  const uniqueProps = {
-                    ...props,
-                    key: `${props.key}_${props.id}`,
-                  };
-                  return <li {...uniqueProps}>{option}</li>;
-                }}
+                onChange={formik.setFieldValue}
+                onKeyDown={goBackToNav}
               />
-              {formik.errors["steward"] && (
-                <FormHelperText
-                  tabIndex={0}
-                  aria-live="polite"
-                  data-testid={`steward-helper-text`}
-                  id="steward-helper-text"
-                  error={true}
-                >
-                  {formik.errors["steward"]}
-                </FormHelperText>
-              )}
             </div>
-            <div tw="mb-4">
-              <span style={asterisk}>*</span>
-              <label htmlFor="developers">Developers</label>
-              <Autocomplete
+            <div tw="mb-4 w-1/2">
+              <AutoComplete
                 multiple
                 id="developers"
-                disabled={!canEdit}
                 data-testid="developers"
+                label="Developers"
+                placeholder="-"
+                required={true}
+                disabled={!canEdit}
+                error={formik.touched.developers && formik.errors["developers"]}
+                helperText={
+                  formik.touched.developers && formik.errors["developers"]
+                }
                 options={organizations}
-                disableCloseOnSelect
-                getOptionLabel={(option) => option}
-                renderOption={(props: any, option, { selected }) => {
-                  const uniqueProps = {
-                    ...props,
-                    key: `${props.key}_${props.id}`,
-                  };
-                  return (
-                    <li {...uniqueProps}>
-                      <Checkbox
-                        icon={icon}
-                        checkedIcon={checkedIcon}
-                        style={{ marginRight: 8 }}
-                        checked={selected}
-                      />
-                      {option}
-                    </li>
-                  );
-                }}
                 {...formik.getFieldProps("developers")}
-                sx={{
-                  ...autoCompleteStyles,
-                  height: "auto",
-                  "& .MuiAutocomplete-inputRoot": {
-                    paddingTop: 1,
-                    paddingBottom: 1,
-                  },
-                }}
-                onChange={(_event: any, selectedVal: string | null) => {
-                  formik.setFieldValue("developers", selectedVal);
-                }}
-                renderInput={(params) => {
-                  const { inputProps } = params;
-                  inputProps["aria-required"] = true;
-                  inputProps["aria-describedby"] = "developers-helper-text";
-                  return (
-                    <TextField
-                      {...params}
-                      inputProps={inputProps}
-                      /* Setting the describedby here does make MacOS's VoiceOver
-                      read the helper text, but it also messes up the styling... */
-                      // inputProps={{
-                      //   "aria-describedby": "developers-helper-text",
-                      // }}
-                    />
-                  );
-                }}
+                onChange={formik.setFieldValue}
               />
-              {formik.errors["developers"] && (
-                <FormHelperText
-                  tabIndex={0}
-                  aria-live="polite"
-                  data-testid="developers-helper-text"
-                  id="developers-helper-text"
-                  error={true}
-                >
-                  {formik.errors["developers"]}
-                </FormHelperText>
-              )}
             </div>
           </>
         )}

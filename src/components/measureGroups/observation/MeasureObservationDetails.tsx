@@ -7,7 +7,6 @@ import {
   AGGREGATE_FUNCTION_KEYS,
 } from "@madie/madie-models";
 import { DSLink, Select } from "@madie/madie-design-system/dist/react";
-import AutoComplete from "./AutoComplete";
 
 const AGGREGATE_FUNCTIONS = Array.from(AGGREGATE_FUNCTION_KEYS.keys()).sort();
 

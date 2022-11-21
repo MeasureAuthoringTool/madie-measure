@@ -1,11 +1,11 @@
 import React from "react";
 import * as _ from "lodash";
 import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
-import { ExpressionDefinition } from "./MeasureGroups";
+import { ExpressionDefinition } from "../MeasureGroups";
 import { GroupScoring, Population, PopulationType } from "@madie/madie-models";
 import { FormikState, getIn } from "formik";
 import { FieldInputProps } from "formik/dist/types";
-import { findPopulations, isPopulationRequired } from "./PopulationHelper";
+import { findPopulations, isPopulationRequired } from "../PopulationHelper";
 import { v4 as uuidv4 } from "uuid";
 
 export enum InitialPopulationAssociationType {

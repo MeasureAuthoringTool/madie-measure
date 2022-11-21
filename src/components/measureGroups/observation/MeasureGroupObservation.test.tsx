@@ -45,6 +45,8 @@ describe("Measure Group Observation", () => {
   it("should not render for proportion scoring type", () => {
     render(
       <MeasureGroupObservation
+        canEdit={true}
+        linkMeasureObservationDisplay={null}
         scoring={MeasureScoring.PROPORTION}
         elmJson={null}
         population={null}
@@ -67,6 +69,8 @@ describe("Measure Group Observation", () => {
         scoring={MeasureScoring.CONTINUOUS_VARIABLE}
         elmJson={null}
         population={null}
+        canEdit={true}
+        linkMeasureObservationDisplay={null}
       />
     );
 
@@ -113,6 +117,7 @@ describe("Measure Group Observation", () => {
         elmJson={elmJson}
         population={population}
         canEdit={true}
+        linkMeasureObservationDisplay={null}
       />
     );
 
@@ -227,6 +232,8 @@ describe("Measure Group Observation", () => {
         scoring={MeasureScoring.RATIO}
         elmJson={elmJson}
         population={population}
+        canEdit={true}
+        linkMeasureObservationDisplay={null}
       />
     );
 
@@ -281,6 +288,8 @@ describe("Measure Group Observation", () => {
         scoring={MeasureScoring.CONTINUOUS_VARIABLE}
         elmJson={elmJson}
         population={null}
+        canEdit={true}
+        linkMeasureObservationDisplay={null}
       />
     );
 
@@ -341,6 +350,7 @@ describe("Measure Group Observation", () => {
         elmJson={elmJson}
         population={population}
         canEdit={true}
+        linkMeasureObservationDisplay={null}
       />
     );
 
@@ -378,6 +388,8 @@ describe("Measure Group Observation", () => {
         scoring={MeasureScoring.CONTINUOUS_VARIABLE}
         elmJson={null}
         population={null}
+        canEdit={true}
+        linkMeasureObservationDisplay={null}
       />
     );
 

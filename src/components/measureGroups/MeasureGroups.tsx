@@ -23,7 +23,9 @@ import {
   MadieDiscardDialog,
   Select,
   DSLink,
-} from "@madie/madie-design-system/dist/react/";
+  AutoComplete,
+  Toast,
+} from "@madie/madie-design-system/dist/react";
 import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { v4 as uuidv4 } from "uuid";
@@ -40,14 +42,13 @@ import {
 import MultipleSelectDropDown from "./MultipleSelectDropDown";
 import MeasureGroupsWarningDialog from "./MeasureGroupWarningDialog";
 import { allPopulations, getPopulationsForScoring } from "./PopulationHelper";
-import GroupPopulation from "./GroupPopulation";
-import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
-import MeasureGroupObservation from "./MeasureGroupObservation";
-import AutoComplete from "./AutoComplete";
+import GroupPopulation from "./groupPopulations/GroupPopulation";
+import MeasureGroupScoringUnit from "./scoringUnit/MeasureGroupScoringUnit";
+import MeasureGroupObservation from "./observation/MeasureGroupObservation";
 import * as _ from "lodash";
 import MeasureGroupAlerts from "./MeasureGroupAlerts";
-import { Toast } from "@madie/madie-design-system/dist/react";
 import "../common/madie-link.scss";
+import "./MeasureGroups.scss";
 
 const ButtonSpacer = styled.span`
   margin-left: 15px;
@@ -70,8 +71,8 @@ const ColSpanPopulations = styled.div((props: ColSpanPopulationsType) => [
 const FormFieldInner = tw.div`lg:col-span-3`;
 const FieldLabel = tw.label`block capitalize text-sm font-medium text-slate-90`;
 const FieldSeparator = tw.div`mt-1`;
-const FieldInput = tw.input`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
-const TextArea = tw.textarea`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
+const FieldInput = tw.input`disabled:bg-slate shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
+const TextArea = tw.textarea`disabled:bg-slate shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
 
 const deleteToken = "FDE8472A-6095-4292-ABF7-E35AD435F05F"; // randomly generated token for deleting
 
@@ -163,12 +164,14 @@ const MeasureGroups = () => {
     };
   }, []);
   const { getUserName } = useOktaTokens();
-  const userName = getUserName();
+  const userName = "Bad Actor" /*getUserName()*/;
   const canEdit =
-    measure?.createdBy === userName ||
+    measure?.createdBy === userName || (measure?.acls != null &&
     measure?.acls?.some(
       (acl) => acl.userId === userName && acl.roles.indexOf("SHARED_WITH") >= 0
-    );
+    ));
+    console.log(canEdit)
+    
   const measureServiceApi = useMeasureServiceApi();
 
   const [alertMessage, setAlertMessage] = useState({
@@ -206,8 +209,6 @@ const MeasureGroups = () => {
     });
 
   const [visibleStrats, setVisibleStrats] = useState<number>(2);
-  // Todo option should be an Array when passing to AutoComplete.
-  // warning during test cases
   const [populationBasisValues, setPopulationBasisValues] =
     useState<string[]>();
   const [associationChanged, setAssociationChanged] = useState(false);
@@ -578,6 +579,7 @@ const MeasureGroups = () => {
 
         <div tw="grid lg:grid-cols-6 gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate bg-white">
           <EditMeasureSideBarNav
+            canEdit={canEdit}
             dirty={formik.dirty}
             links={measureGroups}
             measureGroupNumber={measureGroupNumber}
@@ -586,7 +588,6 @@ const MeasureGroups = () => {
           />
           <div tw="lg:col-span-5 pl-2 pr-2">
             <div tw="flex pb-2 pt-6">
-              {/* eslint-disable-next-line */}
               <h2 tw="w-1/2 mb-0" data-testid="title" id="title">
                 Population Criteria {measureGroupNumber + 1}
               </h2>
@@ -615,19 +616,18 @@ const MeasureGroups = () => {
                     Description
                   </FieldLabel>
                   <FieldSeparator>
-                    {canEdit && (
-                      <TextArea
-                        style={{ height: "100px", width: "100%" }}
-                        value={formik.values.groupDescription}
-                        name="group-description"
-                        id="group-description"
-                        autoComplete="group-description"
-                        placeholder="Description"
-                        data-testid="groupDescriptionInput"
-                        onKeyDown={goBackToNav}
-                        {...formik.getFieldProps("groupDescription")}
-                      />
-                    )}
+                    <TextArea
+                      style={{ height: "100px", width: "100%" }}
+                      value={formik.values.groupDescription}
+                      name="group-description"
+                      id="group-description"
+                      autoComplete="group-description"
+                      disabled={!canEdit}
+                      placeholder="Description"
+                      data-testid="groupDescriptionInput"
+                      onKeyDown={goBackToNav}
+                      {...formik.getFieldProps("groupDescription")}
+                    />
                     {!canEdit && formik.values.groupDescription}
                   </FieldSeparator>
                 </FormFieldInner>
@@ -674,25 +674,23 @@ const MeasureGroups = () => {
                 {populationBasisValues && (
                   <div>
                     <AutoComplete
-                      id="population-basis"
+                      id="populationBasis"
+                      dataTestId="populationBasis"
                       label="Population Basis"
-                      placeHolder={{ name: "-", value: "" }}
-                      defaultValue={formik.values.populationBasis}
+                      placeholder="-"
                       required={true}
                       disabled={!canEdit}
-                      {...formik.getFieldProps("populationBasis")}
                       error={
-                        formik.touched["population-basis"] &&
-                        Boolean(formik.errors.populationBasis)
-                      }
-                      helperText={
-                        formik.touched["population-basis"] &&
+                        formik.touched.populationBasis &&
                         formik.errors.populationBasis
                       }
-                      onChange={(_event: any, selectedVal: string | null) => {
-                        formik.setFieldValue("populationBasis", selectedVal);
-                      }}
+                      helperText={
+                        formik.touched.populationBasis &&
+                        formik.errors.populationBasis
+                      }
                       options={populationBasisValues}
+                      {...formik.getFieldProps("populationBasis")}
+                      onChange={formik.setFieldValue}
                     />
                     {!canEdit && <div>{formik.values.populationBasis}</div>}
                   </div>
@@ -749,11 +747,11 @@ const MeasureGroups = () => {
                 )}
                 {!canEdit && (
                   <div>
-                    <FieldLabel htmlFor="Scoring-label">Scoring</FieldLabel>
+                    <FieldLabel htmlFor="Scoring-label"
+                     data-testid= "scoring-select-input-disabled">Scoring</FieldLabel>
                     {formik.values.scoring}
                   </div>
                 )}
-
                 <MeasureGroupScoringUnit
                   {...formik.getFieldProps("scoringUnit")}
                   onChange={(newValue) => {
@@ -1146,7 +1144,7 @@ const MeasureGroups = () => {
                               </div>
                             )
                         )}
-                      {canEdit && (
+                      {canEdit ? (
                         <div tw="pt-4">
                           <DSLink
                             className="madie-link"
@@ -1164,6 +1162,8 @@ const MeasureGroups = () => {
                             + Add Stratification
                           </DSLink>
                         </div>
+                      ) : (
+                        <div tw="p-4"></div>
                       )}
                     </div>
                   )}
