@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "twin.macro";
+import tw from "twin.macro";
 import "styled-components/macro";
 import { MenuItem } from "@mui/material";
 import {
@@ -43,7 +43,7 @@ const MeasureObservationDetails = ({
       setCqlFunctionNames(functions ? functions : []);
     }
   }, [elmJson]);
-
+  const FieldLabel = tw.label`block capitalize text-sm font-medium text-slate-90`;
   // todo elmJson doesn't have any functions
   return (
     <>
@@ -74,7 +74,6 @@ const MeasureObservationDetails = ({
           <Select
             placeHolder={{ name: "-", value: "" }}
             required={required}
-            disabled={!canEdit}
             label={label ? label : "Observation"}
             id={`measure-observation-${name}`}
             data-testid={`select-measure-observation-${name}`}
@@ -107,13 +106,12 @@ const MeasureObservationDetails = ({
         )}
         {!canEdit && (
           <div>
-            <AutoComplete
-              label={label ? label : "Observation"}
-              id={`select-measure-observation-${name}-disabled`}
+            <FieldLabel
+              htmlFor={`select-measure-observation-${name}-disabled`}
               data-testid={`select-measure-observation-${name}-disabled`}
-              style={{ width: 300 }}
-              disabled={true}
-            />
+            >
+              {label ? label : "Observation"}
+            </FieldLabel>
             {measureObservation?.definition || ""}
           </div>
         )}
@@ -157,13 +155,12 @@ const MeasureObservationDetails = ({
         )}
         {!canEdit && (
           <div>
-            <AutoComplete
-              label="Aggregate Function"
-              id={`measure-observation-aggregate-${name}-disabled`}
+            <FieldLabel
+              htmlFor={`measure-observation-aggregate-${name}-disabled`}
               data-testid={`select-measure-observation-aggregate-${name}-disabled`}
-              style={{ width: 300 }}
-              disabled={true}
-            />
+            >
+              Aggregate Function
+            </FieldLabel>
             {measureObservation?.aggregateMethod || ""}
           </div>
         )}

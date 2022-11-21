@@ -164,7 +164,7 @@ const MeasureGroups = () => {
   }, []);
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
-  let canEdit =
+  const canEdit =
     measure?.createdBy === userName ||
     measure?.acls?.some(
       (acl) => acl.userId === userName && acl.roles.indexOf("SHARED_WITH") >= 0
