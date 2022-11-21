@@ -48,6 +48,7 @@ import MeasureGroupObservation from "./observation/MeasureGroupObservation";
 import * as _ from "lodash";
 import MeasureGroupAlerts from "./MeasureGroupAlerts";
 import "../common/madie-link.scss";
+import "./MeasureGroups.scss";
 
 const ButtonSpacer = styled.span`
   margin-left: 15px;
@@ -70,8 +71,8 @@ const ColSpanPopulations = styled.div((props: ColSpanPopulationsType) => [
 const FormFieldInner = tw.div`lg:col-span-3`;
 const FieldLabel = tw.label`block capitalize text-sm font-medium text-slate-90`;
 const FieldSeparator = tw.div`mt-1`;
-const FieldInput = tw.input`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
-const TextArea = tw.textarea`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
+const FieldInput = tw.input`disabled:bg-slate shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
+const TextArea = tw.textarea`disabled:bg-slate shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
 
 const deleteToken = "FDE8472A-6095-4292-ABF7-E35AD435F05F"; // randomly generated token for deleting
 
@@ -576,6 +577,7 @@ const MeasureGroups = () => {
 
         <div tw="grid lg:grid-cols-6 gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate bg-white">
           <EditMeasureSideBarNav
+            canEdit={canEdit}
             dirty={formik.dirty}
             links={measureGroups}
             measureGroupNumber={measureGroupNumber}
@@ -584,7 +586,6 @@ const MeasureGroups = () => {
           />
           <div tw="lg:col-span-5 pl-2 pr-2">
             <div tw="flex pb-2 pt-6">
-              {/* eslint-disable-next-line */}
               <h2 tw="w-1/2 mb-0" data-testid="title" id="title">
                 Population Criteria {measureGroupNumber + 1}
               </h2>
@@ -613,19 +614,18 @@ const MeasureGroups = () => {
                     Description
                   </FieldLabel>
                   <FieldSeparator>
-                    {canEdit && (
-                      <TextArea
-                        style={{ height: "100px", width: "100%" }}
-                        value={formik.values.groupDescription}
-                        name="group-description"
-                        id="group-description"
-                        autoComplete="group-description"
-                        placeholder="Description"
-                        data-testid="groupDescriptionInput"
-                        onKeyDown={goBackToNav}
-                        {...formik.getFieldProps("groupDescription")}
-                      />
-                    )}
+                    <TextArea
+                      style={{ height: "100px", width: "100%" }}
+                      value={formik.values.groupDescription}
+                      name="group-description"
+                      id="group-description"
+                      autoComplete="group-description"
+                      disabled={!canEdit}
+                      placeholder="Description"
+                      data-testid="groupDescriptionInput"
+                      onKeyDown={goBackToNav}
+                      {...formik.getFieldProps("groupDescription")}
+                    />
                     {!canEdit && formik.values.groupDescription}
                   </FieldSeparator>
                 </FormFieldInner>
@@ -676,8 +676,14 @@ const MeasureGroups = () => {
                       placeholder="-"
                       required={true}
                       disabled={!canEdit}
-                      error={formik.errors.populationBasis}
-                      helperText={formik.errors.populationBasis}
+                      error={
+                        formik.touched.populationBasis &&
+                        formik.errors.populationBasis
+                      }
+                      helperText={
+                        formik.touched.populationBasis &&
+                        formik.errors.populationBasis
+                      }
                       options={populationBasisValues}
                       {...formik.getFieldProps("populationBasis")}
                       onChange={formik.setFieldValue}
@@ -685,56 +691,54 @@ const MeasureGroups = () => {
                   </div>
                 )}
 
-                {canEdit && (
-                  <Select
-                    placeHolder={{ name: "-", value: "" }}
-                    required
-                    label="Scoring"
-                    id="scoring-select"
-                    inputProps={{
-                      "data-testid": "scoring-select-input",
-                    }}
-                    data-testid="scoring-select"
-                    {...formik.getFieldProps("scoring")}
-                    error={
-                      formik.touched.scoring && Boolean(formik.errors.scoring)
-                    }
-                    helperText={formik.touched.scoring && formik.errors.scoring}
-                    size="small"
-                    SelectDisplayProps={{
-                      "aria-required": "true",
-                    }}
-                    onChange={(e) => {
-                      const nextScoring = e.target.value;
-                      const populations = getPopulationsForScoring(nextScoring);
-                      const observations =
-                        getDefaultObservationsForScoring(nextScoring);
-                      formik.setFieldValue("scoring", nextScoring);
-                      formik.setFieldValue(
-                        "populations",
-                        [...populations].map((p) => ({
-                          ...p,
-                          id: uuidv4(),
-                        }))
-                      );
-                      formik.setFieldValue("measureObservations", observations);
-                      formik.setFieldValue("stratifications", []);
-                      setActiveTab("populations");
-                    }}
-                    options={Object.keys(GroupScoring).map((scoring) => {
-                      return (
-                        <MuiMenuItem
-                          key={scoring}
-                          value={GroupScoring[scoring]}
-                          data-testid={`group-scoring-option-${scoring}`}
-                        >
-                          {GroupScoring[scoring]}
-                        </MuiMenuItem>
-                      );
-                    })}
-                  />
-                )}
-                {!canEdit && formik.values.scoring}
+                <Select
+                  placeHolder={{ name: "-", value: "" }}
+                  required
+                  label="Scoring"
+                  id="scoring-select"
+                  inputProps={{
+                    "data-testid": "scoring-select-input",
+                  }}
+                  disabled={!canEdit}
+                  data-testid="scoring-select"
+                  {...formik.getFieldProps("scoring")}
+                  error={
+                    formik.touched.scoring && Boolean(formik.errors.scoring)
+                  }
+                  helperText={formik.touched.scoring && formik.errors.scoring}
+                  size="small"
+                  SelectDisplayProps={{
+                    "aria-required": "true",
+                  }}
+                  onChange={(e) => {
+                    const nextScoring = e.target.value;
+                    const populations = getPopulationsForScoring(nextScoring);
+                    const observations =
+                      getDefaultObservationsForScoring(nextScoring);
+                    formik.setFieldValue("scoring", nextScoring);
+                    formik.setFieldValue(
+                      "populations",
+                      [...populations].map((p) => ({
+                        ...p,
+                        id: uuidv4(),
+                      }))
+                    );
+                    formik.setFieldValue("measureObservations", observations);
+                    formik.setFieldValue("stratifications", []);
+                    setActiveTab("populations");
+                  }}
+                  options={Object.keys(GroupScoring).map((scoring) => {
+                    return (
+                      <MuiMenuItem
+                        key={scoring}
+                        value={GroupScoring[scoring]}
+                        data-testid={`group-scoring-option-${scoring}`}
+                      >
+                        {GroupScoring[scoring]}
+                      </MuiMenuItem>
+                    );
+                  })}
+                />
 
                 <MeasureGroupScoringUnit
                   {...formik.getFieldProps("scoringUnit")}
@@ -968,7 +972,7 @@ const MeasureGroups = () => {
                                           </DSLink>
                                         )}
                                       <Select
-                                        readOnly={!canEdit}
+                                        disabled={!canEdit}
                                         placeHolder={{ name: "-", value: "" }}
                                         label={`Stratification ${i + 1}`}
                                         id={`Stratification-select-${i + 1}`}
@@ -1001,7 +1005,7 @@ const MeasureGroups = () => {
                                     {/*Association Select*/}
                                     <div tw="pt-4">
                                       <Select
-                                        readOnly={!canEdit}
+                                        disabled={!canEdit}
                                         placeHolder={{ name: "-", value: "" }}
                                         label={`Association ${i + 1}`}
                                         id={`association-select-${i + 1}`}
@@ -1043,35 +1047,30 @@ const MeasureGroups = () => {
                                       Stratification {i + 1} Description
                                     </FieldLabel>
                                     <FieldSeparator>
-                                      {canEdit && (
-                                        <textarea
-                                          style={{
-                                            height: "100%",
-                                            width: "100%",
-                                          }}
-                                          value={
-                                            formik.values.stratifications[i]
-                                              .description
-                                          }
-                                          readOnly={!canEdit}
-                                          name={`stratifications[${i}].description`}
-                                          id={`stratification-${i}-description`}
-                                          autoComplete="stratification-description"
-                                          placeholder="Enter Description"
-                                          data-testid="stratificationDescriptionText"
-                                          maxLength={5000}
-                                          {...formik.getFieldProps(
-                                            `stratifications[${i}].description`
-                                          )}
-                                        />
-                                      )}
+                                      <textarea
+                                        tw="disabled:bg-slate h-full w-full"
+                                        value={
+                                          formik.values.stratifications[i]
+                                            .description
+                                        }
+                                        disabled={!canEdit}
+                                        name={`stratifications[${i}].description`}
+                                        id={`stratification-${i}-description`}
+                                        autoComplete="stratification-description"
+                                        placeholder="Enter Description"
+                                        data-testid="stratificationDescriptionText"
+                                        maxLength={5000}
+                                        {...formik.getFieldProps(
+                                          `stratifications[${i}].description`
+                                        )}
+                                      />
                                     </FieldSeparator>
                                   </div>
                                 </div>
                               </div>
                             )
                         )}
-                      {canEdit && (
+                      {canEdit ? (
                         <div tw="pt-4">
                           <DSLink
                             className="madie-link"
@@ -1089,6 +1088,8 @@ const MeasureGroups = () => {
                             + Add Stratification
                           </DSLink>
                         </div>
+                      ) : (
+                        <div tw="p-4"></div>
                       )}
                     </div>
                   )}
@@ -1105,43 +1106,40 @@ const MeasureGroups = () => {
                       Rate Aggregation
                     </FieldLabel>
                     <FieldSeparator>
-                      {canEdit && (
-                        <FieldInput
-                          value={formik.values.rateAggregation}
-                          aria-labelledby="rate-aggregation-label"
-                          type="text"
-                          name="rate-aggregation"
-                          id="rate-aggregation"
-                          autoComplete="rate-aggregation"
-                          placeholder="Rate Aggregation"
-                          data-testid="rateAggregationText"
-                          {...formik.getFieldProps("rateAggregation")}
-                        />
-                      )}
+                      <FieldInput
+                        value={formik.values.rateAggregation}
+                        aria-labelledby="rate-aggregation-label"
+                        type="text"
+                        disabled={!canEdit}
+                        name="rate-aggregation"
+                        id="rate-aggregation"
+                        autoComplete="rate-aggregation"
+                        placeholder="Rate Aggregation"
+                        data-testid="rateAggregationText"
+                        {...formik.getFieldProps("rateAggregation")}
+                      />
                     </FieldSeparator>
                   </div>
                   <div tw="pt-6 pb-6 col-start-1 col-end-2">
-                    {canEdit && (
-                      <Select
-                        placeHolder={{ name: "-", value: "" }}
-                        label="Improvement Notation"
-                        id="improvement-notation-select"
-                        inputProps={{
-                          "data-testid": "improvement-notation-input",
-                        }}
-                        data-testid="improvement-notation-select"
-                        {...formik.getFieldProps("improvementNotation")}
-                        size="small"
-                        options={Object.values(improvementNotationOptions).map(
-                          (opt) => (
-                            <MuiMenuItem key={opt.label} value={opt.value}>
-                              {opt.label}
-                            </MuiMenuItem>
-                          )
-                        )}
-                      />
-                    )}
-                    {!canEdit && formik.values.improvementNotation}
+                    <Select
+                      placeHolder={{ name: "-", value: "" }}
+                      label="Improvement Notation"
+                      id="improvement-notation-select"
+                      inputProps={{
+                        "data-testid": "improvement-notation-input",
+                      }}
+                      disabled={!canEdit}
+                      data-testid="improvement-notation-select"
+                      {...formik.getFieldProps("improvementNotation")}
+                      size="small"
+                      options={Object.values(improvementNotationOptions).map(
+                        (opt) => (
+                          <MuiMenuItem key={opt.label} value={opt.value}>
+                            {opt.label}
+                          </MuiMenuItem>
+                        )
+                      )}
+                    />
                   </div>
                 </div>
               )}
