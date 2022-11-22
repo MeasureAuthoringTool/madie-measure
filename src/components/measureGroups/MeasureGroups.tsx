@@ -164,14 +164,15 @@ const MeasureGroups = () => {
     };
   }, []);
   const { getUserName } = useOktaTokens();
-  const userName = "Bad Actor" /*getUserName()*/;
+  const userName = getUserName();
   const canEdit =
-    measure?.createdBy === userName || (measure?.acls != null &&
-    measure?.acls?.some(
-      (acl) => acl.userId === userName && acl.roles.indexOf("SHARED_WITH") >= 0
-    ));
-    console.log(canEdit)
-    
+    measure?.createdBy === userName ||
+    (measure?.acls != null &&
+      measure?.acls?.some(
+        (acl) =>
+          acl.userId === userName && acl.roles.indexOf("SHARED_WITH") >= 0
+      ));
+
   const measureServiceApi = useMeasureServiceApi();
 
   const [alertMessage, setAlertMessage] = useState({
@@ -616,47 +617,58 @@ const MeasureGroups = () => {
                     Description
                   </FieldLabel>
                   <FieldSeparator>
-                    <TextArea
-                      style={{ height: "100px", width: "100%" }}
-                      value={formik.values.groupDescription}
-                      name="group-description"
-                      id="group-description"
-                      autoComplete="group-description"
-                      disabled={!canEdit}
-                      placeholder="Description"
-                      data-testid="groupDescriptionInput"
-                      onKeyDown={goBackToNav}
-                      {...formik.getFieldProps("groupDescription")}
-                    />
+                    {canEdit && (
+                      <TextArea
+                        style={{ height: "100px", width: "100%" }}
+                        value={formik.values.groupDescription}
+                        name="group-description"
+                        id="group-description"
+                        autoComplete="group-description"
+                        placeholder="Description"
+                        data-testid="groupDescriptionInput"
+                        onKeyDown={goBackToNav}
+                        {...formik.getFieldProps("groupDescription")}
+                      />
+                    )}
                     {!canEdit && formik.values.groupDescription}
                   </FieldSeparator>
                 </FormFieldInner>
                 <div tw="lg:col-start-1">
-                  <MultipleSelectDropDown
-                    formControl={formik.getFieldProps("measureGroupTypes")}
-                    id="measure-group-type"
-                    label="Type"
-                    placeHolder={{ name: "-", value: "" }}
-                    defaultValue={formik.values.measureGroupTypes}
-                    required={true}
-                    disabled={!canEdit}
-                    error={
-                      formik.touched.measureGroupTypes &&
-                      Boolean(formik.errors.measureGroupTypes)
-                    }
-                    helperText={
-                      formik.touched.measureGroupTypes &&
-                      formik.errors.measureGroupTypes
-                    }
-                    {...formik.getFieldProps("measureGroupTypes")}
-                    onChange={(_event: any, selectedVal: string | null) => {
-                      formik.setFieldValue("measureGroupTypes", selectedVal);
-                    }}
-                    options={Object.values(MeasureGroupTypes)}
-                    multipleSelect={true}
-                    limitTags={1}
-                  ></MultipleSelectDropDown>
-                  {!canEdit && <div>{formik.values.measureGroupTypes}</div>}
+                  {canEdit && (
+                    <MultipleSelectDropDown
+                      formControl={formik.getFieldProps("measureGroupTypes")}
+                      id="measure-group-type"
+                      label="Type"
+                      placeHolder={{ name: "-", value: "" }}
+                      defaultValue={formik.values.measureGroupTypes}
+                      required={true}
+                      error={
+                        formik.touched.measureGroupTypes &&
+                        Boolean(formik.errors.measureGroupTypes)
+                      }
+                      helperText={
+                        formik.touched.measureGroupTypes &&
+                        formik.errors.measureGroupTypes
+                      }
+                      {...formik.getFieldProps("measureGroupTypes")}
+                      onChange={(_event: any, selectedVal: string | null) => {
+                        formik.setFieldValue("measureGroupTypes", selectedVal);
+                      }}
+                      options={Object.values(MeasureGroupTypes)}
+                      multipleSelect={true}
+                      limitTags={1}
+                    ></MultipleSelectDropDown>
+                  )}
+
+                  {!canEdit && (
+                    <div>
+                      {" "}
+                      <FieldLabel htmlFor="measure-group-description">
+                        Measure Group Types
+                      </FieldLabel>
+                      {formik.values.measureGroupTypes}
+                    </div>
+                  )}
 
                   {formik.errors["measureGroupTypes"] && (
                     <FormHelperText
@@ -673,26 +685,38 @@ const MeasureGroups = () => {
 
                 {populationBasisValues && (
                   <div>
-                    <AutoComplete
-                      id="populationBasis"
-                      dataTestId="populationBasis"
-                      label="Population Basis"
-                      placeholder="-"
-                      required={true}
-                      disabled={!canEdit}
-                      error={
-                        formik.touched.populationBasis &&
-                        formik.errors.populationBasis
-                      }
-                      helperText={
-                        formik.touched.populationBasis &&
-                        formik.errors.populationBasis
-                      }
-                      options={populationBasisValues}
-                      {...formik.getFieldProps("populationBasis")}
-                      onChange={formik.setFieldValue}
-                    />
-                    {!canEdit && <div>{formik.values.populationBasis}</div>}
+                    {canEdit && (
+                      <AutoComplete
+                        id="populationBasis"
+                        dataTestId="populationBasis"
+                        label="Population Basis"
+                        placeholder="-"
+                        required={true}
+                        disabled={!canEdit}
+                        error={
+                          formik.touched.populationBasis &&
+                          formik.errors.populationBasis
+                        }
+                        helperText={
+                          formik.touched.populationBasis &&
+                          formik.errors.populationBasis
+                        }
+                        options={populationBasisValues}
+                        {...formik.getFieldProps("populationBasis")}
+                        onChange={formik.setFieldValue}
+                      />
+                    )}
+                    {!canEdit && (
+                      <div>
+                        <FieldLabel
+                          htmlFor="populationBasis-label"
+                          data-testid="populationBasis-disabled"
+                        >
+                          Population Basis
+                        </FieldLabel>
+                        {formik.values.populationBasis}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -747,9 +771,28 @@ const MeasureGroups = () => {
                 )}
                 {!canEdit && (
                   <div>
-                    <FieldLabel htmlFor="Scoring-label"
-                     data-testid= "scoring-select-input-disabled">Scoring</FieldLabel>
+                    <FieldLabel
+                      htmlFor="scoring-label"
+                      data-testid="scoring-select-input-disabled"
+                    >
+                      Scoring
+                    </FieldLabel>
                     {formik.values.scoring}
+                  </div>
+                )}
+                {!canEdit && (
+                  <div>
+                    <FieldLabel
+                      htmlFor="scoring-unit-label"
+                      data-testid="scoring-unit-input-disabled"
+                    >
+                      Scoring Unit
+                    </FieldLabel>
+                    <span>
+                      {formik.getFieldProps("scoringUnit").value == null
+                        ? ""
+                        : formik.getFieldProps("scoringUnit").value.label}
+                    </span>
                   </div>
                 )}
                 <MeasureGroupScoringUnit
@@ -897,27 +940,31 @@ const MeasureGroups = () => {
                               isExclusionPop={isExclusionPop}
                             >
                               {!canEdit && (
-                                <FieldLabel
-                                  htmlFor={`disabled-${population.name}-label`}
-                                >
-                                  {population.name}
-                                </FieldLabel>
+                                <div>
+                                  <FieldLabel
+                                    htmlFor={`${population.name}-label-disabled`}
+                                  >
+                                    {population.name}
+                                  </FieldLabel>
+                                  {population.definition}
+                                </div>
                               )}
-
-                              <Field
-                                {...fieldProps}
-                                component={GroupPopulation}
-                                cqlDefinitions={expressionDefinitions}
-                                populations={formik.values.populations}
-                                population={population}
-                                populationIndex={index}
-                                scoring={formik.values.scoring}
-                                canEdit={canEdit}
-                                insertCallback={arrayHelpers.insert}
-                                removeCallback={arrayHelpers.remove}
-                                replaceCallback={arrayHelpers.replace}
-                                setAssociationChanged={setAssociationChanged}
-                              />
+                              {canEdit && (
+                                <Field
+                                  {...fieldProps}
+                                  component={GroupPopulation}
+                                  cqlDefinitions={expressionDefinitions}
+                                  populations={formik.values.populations}
+                                  population={population}
+                                  populationIndex={index}
+                                  scoring={formik.values.scoring}
+                                  canEdit={canEdit}
+                                  insertCallback={arrayHelpers.insert}
+                                  removeCallback={arrayHelpers.remove}
+                                  replaceCallback={arrayHelpers.replace}
+                                  setAssociationChanged={setAssociationChanged}
+                                />
+                              )}
                               <MeasureGroupObservation
                                 canEdit={canEdit}
                                 scoring={formik.values.scoring}

@@ -185,12 +185,11 @@ describe("Measure Groups Page", () => {
   //SharedWith
   test.only("Measure Group Scoring should not render options if user is not the measure owner", async () => {
     measure.createdBy = "AnotherUser@example.com";
-    console.log(measure.acls)
     await waitFor(() => renderMeasureGroupComponent());
-    const scoringSelectInput = screen.getByTestId(
+    const scoringSelectInputDisabled = screen.getByTestId(
       "scoring-select-input-disabled"
     );
-    expect(scoringSelectInput).toBeInTheDocument();
+    expect(scoringSelectInputDisabled).toBeInTheDocument();
   });
 
   // Todo Need to fix this test case
