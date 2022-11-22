@@ -31,6 +31,10 @@ const autoCompleteStyles = {
   "& input::placeholder": {
     fontSize: "14px",
   },
+  "& .Mui-disabled": {
+    backgroundColor: "#EDEDED",
+    border: "#EDEDED",
+  },
   width: "100%",
 };
 
@@ -54,52 +58,50 @@ const MultipleSelectDropDown = ({
       <InputLabel htmlFor={`${id}`} required={required}>
         {label}
       </InputLabel>
-      {!disabled && (
-        <Autocomplete
-          size="small"
-          limitTags={limitTags}
-          multiple={multipleSelect}
-          sx={autoCompleteStyles}
-          disablePortal
-          id={id}
-          placeholder={placeHolder}
-          defaultValue={defaultValue}
-          disabled={disabled}
-          data-testid={`${id}-dropdown`}
-          options={options}
-          disableCloseOnSelect
-          getOptionLabel={(option) => option}
-          renderOption={(props: any, option, { selected }) => {
-            const uniqueProps = {
-              ...props,
-              key: `${props.key}_${props.id}`,
-            };
-            return (
-              <li {...uniqueProps}>
-                <Checkbox
-                  icon={icon}
-                  checkedIcon={checkedIcon}
-                  style={{ marginRight: 8 }}
-                  checked={selected}
-                />
-                {option}
-              </li>
-            );
-          }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              placeholder="Select All That Apply"
-              /* Setting the describedby here does make MacOS's VoiceOver
-                read the helper text, but it also messes up the styling for some reason... */
-              // inputProps={{
-              //   "aria-describedby": "measure-group-type-helper-text",
-              // }}
-            />
-          )}
-          {...rest}
-        />
-      )}
+      <Autocomplete
+        size="small"
+        limitTags={limitTags}
+        multiple={multipleSelect}
+        sx={autoCompleteStyles}
+        disablePortal
+        id={id}
+        placeholder={placeHolder}
+        defaultValue={defaultValue}
+        disabled={disabled}
+        data-testid={`${id}-dropdown`}
+        options={options}
+        disableCloseOnSelect
+        getOptionLabel={(option) => option}
+        renderOption={(props: any, option, { selected }) => {
+          const uniqueProps = {
+            ...props,
+            key: `${props.key}_${props.id}`,
+          };
+          return (
+            <li {...uniqueProps}>
+              <Checkbox
+                icon={icon}
+                checkedIcon={checkedIcon}
+                style={{ marginRight: 8 }}
+                checked={selected}
+              />
+              {option}
+            </li>
+          );
+        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            placeholder="Select All That Apply"
+            /* Setting the describedby here does make MacOS's VoiceOver
+              read the helper text, but it also messes up the styling for some reason... */
+            // inputProps={{
+            //   "aria-describedby": "measure-group-type-helper-text",
+            // }}
+          />
+        )}
+        {...rest}
+      />
       {helperText && (
         <FormHelperText
           data-testid={`${id}-helper-text`}

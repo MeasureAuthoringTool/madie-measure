@@ -190,7 +190,9 @@ export default function MeasureList(props: {
                         <Button
                           variant="outline-secondary"
                           onClick={() => {
-                            history.push(`/measures/${measure.id}/edit`);
+                            history.push(
+                              `/measures/${measure.id}/edit/details`
+                            );
                           }}
                           data-testid={`edit-measure-${measure.id}`}
                         >

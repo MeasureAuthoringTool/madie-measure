@@ -94,24 +94,22 @@ const MeasureGroupScoringUnit = ({
         <InputLabel id="scoring-unit-dropdown-label" required={false}>
           Scoring Unit
         </InputLabel>
-        {canEdit && (
-          <AsyncSelect
-            id="scoring-unit-dropdown"
-            styles={customStyles}
-            cacheOptions
-            loadOptions={loadOptions}
-            defaultOptions
-            placeholder="UCUM Code or Name"
-            onChange={(newValue: any) => {
-              onChange(newValue);
-            }}
-            value={value}
-            defaultInputValue={value}
-            isClearable={true}
-            aria-labelledby="scoring-unit-dropdown-label"
-          />
-        )}
-        {!canEdit && value?.label}
+        <AsyncSelect
+          id="scoring-unit-dropdown"
+          styles={customStyles}
+          isDisabled={!canEdit}
+          cacheOptions
+          loadOptions={loadOptions}
+          defaultOptions
+          placeholder="UCUM Code or Name"
+          onChange={(newValue: any) => {
+            onChange(newValue);
+          }}
+          value={value}
+          defaultInputValue={value}
+          isClearable={true}
+          aria-labelledby="scoring-unit-dropdown-label"
+        />
       </FormControl>
     </div>
   );

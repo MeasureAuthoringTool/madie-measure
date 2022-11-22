@@ -15,6 +15,7 @@ const InnerWrapper = tw.div`flex-grow flex flex-col`;
 const Nav = tw.nav`flex-1 space-y-1 bg-slate`;
 
 export interface EditMeasureSideBarNavProps {
+  canEdit?: Boolean;
   dirty: Boolean;
   links: Array<any>; // needs to be changed since some links are actually measure groups.
   details?: Boolean;
@@ -27,6 +28,7 @@ export default function EditMeasureSideBarNav(
   props: EditMeasureSideBarNavProps
 ) {
   const {
+    canEdit,
     links,
     details = false,
     measure,
@@ -174,14 +176,16 @@ export default function EditMeasureSideBarNav(
             );
           })}
         <div>
-          <DSLink
-            className="madie-link"
-            onClick={(e) => initiateBlankMeasureGroupClick(e)}
-            data-testid="add-measure-group-button"
-          >
-            <AddIcon className="add-icon" fontSize="small" /> Add Population
-            Criteria
-          </DSLink>
+          {canEdit && (
+            <DSLink
+              className="madie-link"
+              onClick={(e) => initiateBlankMeasureGroupClick(e)}
+              data-testid="add-measure-group-button"
+            >
+              <AddIcon className="add-icon" fontSize="small" /> Add Population
+              Criteria
+            </DSLink>
+          )}
         </div>
       </Nav>
       <MadieDiscardDialog

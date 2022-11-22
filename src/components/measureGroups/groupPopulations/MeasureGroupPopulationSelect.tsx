@@ -92,7 +92,7 @@ const MeasureGroupPopulationSelect = ({
       <div>
         <SecondIpLabel>Initial Population 2 </SecondIpLabel>
         &nbsp;&nbsp;
-        {isRemovable && (
+        {isRemovable && canEdit && (
           <DSLink
             className="madie-link"
             data-testid={`remove_${field.name}`}
@@ -109,100 +109,98 @@ const MeasureGroupPopulationSelect = ({
 
   return (
     <div data-testid="temp-test-id" tw="relative">
-      {canEdit && (
-        <>
-          <Select
-            placeHolder={{ name: "-", value: "" }}
-            required={required}
-            label={
-              label === "Initial Population 2"
-                ? removeSecondIPLabelTemplate()
-                : label
-            }
-            id={`${htmlId}-select`}
-            inputProps={{
-              "data-testid": `select-measure-group-population-input`,
-            }}
-            data-testid={htmlId}
-            {...field}
-            error={error}
-            helperText={helperText}
-            size="small"
-            options={menuItems}
-          />
-          {showAddPopulationLink && (
-            <div tw="md:absolute -right-64 top-1.5 whitespace-pre px-7 py-5">
-              <DSLink
-                className="madie-link"
-                data-testid={`add_${field.name}`}
-                onClick={(evt) => addPopulation(evt)}
-              >
-                + Add {label}
-              </DSLink>
+      <>
+        <Select
+          placeHolder={{ name: "-", value: "" }}
+          required={required}
+          disabled={!canEdit}
+          label={
+            label === "Initial Population 2"
+              ? removeSecondIPLabelTemplate()
+              : label
+          }
+          id={`${htmlId}-select`}
+          inputProps={{
+            "data-testid": `select-measure-group-population-input`,
+          }}
+          data-testid={htmlId}
+          {...field}
+          error={error}
+          helperText={helperText}
+          size="small"
+          options={menuItems}
+        />
+        {showAddPopulationLink && canEdit && (
+          <div tw="md:absolute -right-64 top-1.5 whitespace-pre px-7 py-5">
+            <DSLink
+              className="madie-link"
+              data-testid={`add_${field.name}`}
+              onClick={(evt) => addPopulation(evt)}
+            >
+              + Add {label}
+            </DSLink>
+          </div>
+        )}
+        {initialPopulationSize === 2 &&
+          label.includes("Initial Population") &&
+          scoring === "Ratio" && (
+            <div
+              data-testid={`measure-group-initial-population-association-${population.id}`}
+            >
+              <FieldSeparator style={{ marginLeft: 30 }}>
+                <div data-testid={`${label}`}>
+                  <SoftLabel>Association</SoftLabel>
+                </div>
+                <div
+                  style={{
+                    marginLeft: 15,
+                    fontSize: 16,
+                    fontFamily: "Rubik",
+                  }}
+                >
+                  <input
+                    type="radio"
+                    value={InitialPopulationAssociationType.DENOMINATOR}
+                    checked={
+                      population.associationType ===
+                      InitialPopulationAssociationType.DENOMINATOR
+                    }
+                    disabled={
+                      !canEdit || label.includes("Initial Population 2")
+                    }
+                    onChange={changeAssociation}
+                    data-testid={`${label}-${InitialPopulationAssociationType.DENOMINATOR}`}
+                  />
+                  &nbsp;
+                  {InitialPopulationAssociationType.DENOMINATOR}
+                </div>
+                <div
+                  style={{
+                    marginLeft: 15,
+                    fontSize: 16,
+                    fontFamily: "Rubik",
+                  }}
+                >
+                  <input
+                    type="radio"
+                    value={InitialPopulationAssociationType.NUMERATOR}
+                    checked={
+                      population.associationType ===
+                      InitialPopulationAssociationType.NUMERATOR
+                    }
+                    disabled={
+                      !canEdit || label.includes("Initial Population 2")
+                    }
+                    onChange={changeAssociation}
+                    data-testid={`${label}-${InitialPopulationAssociationType.NUMERATOR}`}
+                  />
+                  &nbsp;
+                  {InitialPopulationAssociationType.NUMERATOR}
+                </div>
+              </FieldSeparator>
             </div>
           )}
-          {initialPopulationSize === 2 &&
-            label.includes("Initial Population") &&
-            scoring === "Ratio" && (
-              <div
-                data-testid={`measure-group-initial-population-association-${population.id}`}
-              >
-                <FieldSeparator style={{ marginLeft: 30 }}>
-                  <div data-testid={`${label}`}>
-                    <SoftLabel>Association</SoftLabel>
-                  </div>
-                  <div
-                    style={{
-                      marginLeft: 15,
-                      fontSize: 16,
-                      fontFamily: "Rubik",
-                    }}
-                  >
-                    <input
-                      type="radio"
-                      value={InitialPopulationAssociationType.DENOMINATOR}
-                      checked={
-                        population.associationType ===
-                        InitialPopulationAssociationType.DENOMINATOR
-                      }
-                      disabled={
-                        !canEdit || label.includes("Initial Population 2")
-                      }
-                      onChange={changeAssociation}
-                      data-testid={`${label}-${InitialPopulationAssociationType.DENOMINATOR}`}
-                    />
-                    &nbsp;
-                    {InitialPopulationAssociationType.DENOMINATOR}
-                  </div>
-                  <div
-                    style={{
-                      marginLeft: 15,
-                      fontSize: 16,
-                      fontFamily: "Rubik",
-                    }}
-                  >
-                    <input
-                      type="radio"
-                      value={InitialPopulationAssociationType.NUMERATOR}
-                      checked={
-                        population.associationType ===
-                        InitialPopulationAssociationType.NUMERATOR
-                      }
-                      disabled={
-                        !canEdit || label.includes("Initial Population 2")
-                      }
-                      onChange={changeAssociation}
-                      data-testid={`${label}-${InitialPopulationAssociationType.NUMERATOR}`}
-                    />
-                    &nbsp;
-                    {InitialPopulationAssociationType.NUMERATOR}
-                  </div>
-                </FieldSeparator>
-              </div>
-            )}
-        </>
-      )}
-      {!canEdit && field.value}
+      </>
       {/* Todo what is subTitle?*/}
       {subTitle && <SubTitle>{subTitle}</SubTitle>}
     </div>
