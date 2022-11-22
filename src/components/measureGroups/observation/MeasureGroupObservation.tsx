@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useFormikContext } from "formik";
 import * as _ from "lodash";
 import { DSLink } from "@madie/madie-design-system/dist/react";
-import "../common/madie-link.scss";
+import "../../common/madie-link.scss";
 
 const MeasureGroupObservation = ({
   scoring,

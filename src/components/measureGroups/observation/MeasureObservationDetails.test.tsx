@@ -18,6 +18,7 @@ describe("Measure Observation Details", () => {
         required={false}
         elmJson={null}
         measureObservation={null}
+        canEdit
       />
     );
 
@@ -39,6 +40,7 @@ describe("Measure Observation Details", () => {
         required={false}
         elmJson={elmJson}
         measureObservation={null}
+        canEdit
       />
     );
 
@@ -62,6 +64,7 @@ describe("Measure Observation Details", () => {
         required={false}
         elmJson={elmJson}
         measureObservation={null}
+        canEdit
       />
     );
 
@@ -87,6 +90,7 @@ describe("Measure Observation Details", () => {
         required={false}
         elmJson={elmJson}
         measureObservation={null}
+        canEdit
       />
     );
 
@@ -111,6 +115,7 @@ describe("Measure Observation Details", () => {
         name={"obs1"}
         required={false}
         elmJson={elmJson}
+        canEdit
         measureObservation={null}
       />
     );
@@ -137,6 +142,7 @@ describe("Measure Observation Details", () => {
         required={false}
         label="MyLabel"
         elmJson={elmJson}
+        canEdit
         measureObservation={null}
       />
     );
@@ -168,9 +174,9 @@ describe("Measure Observation Details", () => {
       <MeasureObservationDetails
         name={"obs1"}
         required={false}
+        canEdit
         elmJson={elmJson}
         measureObservation={null}
-        canEdit
       />
     );
 
@@ -236,6 +242,7 @@ describe("Measure Observation Details", () => {
         elmJson={null}
         measureObservation={null}
         canEdit
+        required={false}
       />
     );
 

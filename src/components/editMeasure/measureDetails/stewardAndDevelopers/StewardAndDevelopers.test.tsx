@@ -233,6 +233,7 @@ describe("Steward and Developers component", () => {
       "Clear"
     );
     fireEvent.click(clearStewardButton);
+    fireEvent.click(screen.getByTestId("steward-and-developers-save"));
     expect(await screen.findByTestId("steward-helper-text")).toHaveTextContent(
       "Steward is required"
     );
