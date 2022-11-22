@@ -183,13 +183,17 @@ describe("Measure Groups Page", () => {
     expect(optionsList).toHaveLength(4);
   });
   //SharedWith
-  test.only("Measure Group Scoring should not render options if user is not the measure owner", async () => {
+  test("Measure Group Scoring should not render options if user is not the measure owner", async () => {
     measure.createdBy = "AnotherUser@example.com";
     await waitFor(() => renderMeasureGroupComponent());
     const scoringSelectInputDisabled = screen.getByTestId(
       "scoring-select-input-disabled"
     );
+    const populationBasisDisabled = screen.getByTestId(
+      "populationBasis-disabled"
+    );
     expect(scoringSelectInputDisabled).toBeInTheDocument();
+    expect(populationBasisDisabled).toBeInTheDocument();
   });
 
   // Todo Need to fix this test case
@@ -1315,8 +1319,8 @@ describe("Measure Groups Page", () => {
     const { queryByTestId } = await waitFor(() =>
       renderMeasureGroupComponent()
     );
-    const inputField = queryByTestId("groupDescriptionInput");
-    expect(inputField).toBeDisabled();
+    const inputField = queryByTestId("groupDescriptionInput-disabled");
+    expect(inputField).toBeInTheDocument();
   });
 
   test("Measure Group Save button should not render if user is not the measure owner", async () => {

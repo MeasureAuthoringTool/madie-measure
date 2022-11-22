@@ -630,7 +630,11 @@ const MeasureGroups = () => {
                         {...formik.getFieldProps("groupDescription")}
                       />
                     )}
-                    {!canEdit && formik.values.groupDescription}
+                    {!canEdit && (
+                      <span data-testid="groupDescriptionInput-disabled">
+                        {formik.values.groupDescription}
+                      </span>
+                    )}
                   </FieldSeparator>
                 </FormFieldInner>
                 <div tw="lg:col-start-1">
