@@ -13,6 +13,7 @@ describe("MeasureMetadataHelper", () => {
   const RATIONALE = "Test Rationale";
   const GUIDANCE = "Test Guidance";
   const CLINICAL = "Test Clinical";
+  const RISKADJUSTMENT = "Test Risk Adjustment";
   const NEWVALUE = "Test New Value";
 
   afterEach(cleanup);
@@ -25,6 +26,7 @@ describe("MeasureMetadataHelper", () => {
       rationale: RATIONALE,
       guidance: GUIDANCE,
       clinicalRecommendation: CLINICAL,
+      riskAdjustment: RISKADJUSTMENT,
     } as MeasureMetadata;
 
     measure = {
@@ -201,5 +203,17 @@ describe("MeasureMetadataHelper", () => {
     expect(measure.measureMetaData.disclaimer).toBe(DISCLAIMER);
     expect(measure.measureMetaData.rationale).toBe(RATIONALE);
     expect(measure.measureMetaData.guidance).toBe(GUIDANCE);
+  });
+
+  it("should retrieve riskAdjustment value", () => {
+    const actual = getInitialValues(measure, "risk-adjustment");
+    expect(actual).toBe(RISKADJUSTMENT);
+
+    const riskAdjustment = getInitialValues(null, "risk-adjustment");
+    expect(riskAdjustment).toBe("");
+  });
+  it("should reset riskAdjustment value", () => {
+    setMeasureMetadata(measure, "risk-adjustment", NEWVALUE);
+    expect(measure.measureMetaData?.riskAdjustment).toBe(NEWVALUE);
   });
 });

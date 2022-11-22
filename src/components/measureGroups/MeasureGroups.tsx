@@ -210,6 +210,18 @@ const MeasureGroups = () => {
     });
 
   const [visibleStrats, setVisibleStrats] = useState<number>(2);
+  useEffect(() => {
+    if (addStratClicked && visibleStrats > 2) {
+      document
+        .getElementById(`Stratification-select-${visibleStrats}`)
+        ?.focus();
+      setAddStratClicked(false);
+    }
+  }, [visibleStrats]);
+
+  // Todo option should be an Array when passing to AutoComplete.
+  // warning during test cases
+  const [addStratClicked, setAddStratClicked] = useState(false);
   const [populationBasisValues, setPopulationBasisValues] =
     useState<string[]>();
   const [associationChanged, setAssociationChanged] = useState(false);
@@ -1028,10 +1040,7 @@ const MeasureGroups = () => {
                                             underline="always"
                                             onClick={(e) => {
                                               e.preventDefault();
-                                              arrayHelpers.replace(
-                                                i,
-                                                deleteStrat
-                                              );
+                                              arrayHelpers.remove(i);
                                               setVisibleStrats(
                                                 visibleStrats - 1
                                               );
@@ -1207,6 +1216,7 @@ const MeasureGroups = () => {
                               e.preventDefault();
                               setVisibleStrats(visibleStrats + 1);
                               arrayHelpers.push(getEmptyStrat());
+                              setAddStratClicked(true);
                             }}
                           >
                             + Add Stratification
