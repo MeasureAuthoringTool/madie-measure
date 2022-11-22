@@ -130,6 +130,11 @@ export default function EditMeasureSideBarNav(
                   return (
                     <NavLink
                       key={linkInfo.title}
+                      onClick={(e) => {
+                        if (isActive) {
+                          e.preventDefault();
+                        }
+                      }}
                       to={linkInfo.href}
                       data-testid={linkInfo.dataTestId}
                       className={className}
