@@ -692,7 +692,6 @@ const MeasureGroups = () => {
                         label="Population Basis"
                         placeholder="-"
                         required={true}
-                        disabled={!canEdit}
                         error={
                           formik.touched.populationBasis &&
                           formik.errors.populationBasis
