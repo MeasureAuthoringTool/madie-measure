@@ -24,6 +24,7 @@ export default function MeasureDetails() {
   const rationaleLink = `${path}/measure-rationale`;
   const guidanceLink = `${path}/measure-guidance`;
   const clinicalLink = `${path}/measure-clinical-recommendation`;
+  const riskAdjustmentLink = `${path}/measure-risk-adjustment`;
 
   const links = [
     // General Information
@@ -77,6 +78,12 @@ export default function MeasureDetails() {
           href: clinicalLink,
           dataTestId: "leftPanelMeasureClinicalGuidance",
           id: "sideNavMeasureClinicalRecommendation",
+        },
+        {
+          title: "Risk Adjustment",
+          href: riskAdjustmentLink,
+          dataTestId: "leftPanelMeasureRiskAdjustment",
+          id: "sideNavMeasureRiskAdjustment",
         },
       ],
     },
@@ -173,6 +180,13 @@ export default function MeasureDetails() {
               measureMetadataId="ClinicalRecommendation"
               measureMetadataType="Clinical Recommendation Statement"
               header="Clinical Recommendation"
+            />
+          </Route>
+          <Route path={riskAdjustmentLink}>
+            <MeasureMetadata
+              measureMetadataId="RiskAdjustment"
+              measureMetadataType="Risk Adjustment"
+              header="Risk Adjustment"
             />
           </Route>
         </Switch>

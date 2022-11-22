@@ -24,6 +24,7 @@ const mockMetaData = {
   disclaimer: "Test Disclaimer",
   rationale: "Test Rationale",
   guidance: "Test Guidance",
+  riskAdjustment: "Test Risk Adjustment",
 };
 
 const mockMeasure = {
@@ -69,6 +70,7 @@ describe("MeasureRationale component", () => {
   const RATIONALE = "Test Rationale";
   const GUIDANCE = "Test Guidance";
   const NEWVALUE = "Test New Value";
+  const RISKADJUSTMENT = "Test Risk Adjustment";
 
   afterEach(cleanup);
 
