@@ -481,7 +481,7 @@ const MeasureGroups = () => {
     measureServiceApi
       .deleteMeasureGroup(measure?.groups[measureGroupNumber]?.id, measure.id)
       .then((response) => {
-        setMeasure(response);
+        updateMeasure(response);
         measure?.groups &&
           setMeasureGroupNumber(
             measureGroupNumber === 0 ? 0 : measureGroupNumber - 1
