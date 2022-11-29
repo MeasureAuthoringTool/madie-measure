@@ -85,6 +85,18 @@ export default function MeasureGroupsWarningDialog(
     subText: "Are you sure you want to Save Changes?",
     bottomInfo: "This action cannot be undone.",
     dataTestId: "update-measure-group-scoring",
+    cancelButtonText: "No, Keep Working",
+    confirmButtonText: "Yes, Save changes",
+  };
+
+  const popBasisChangeDialogText = {
+    title: "Change Population Basis?",
+    info: "Your Measure Population Basis is about to be saved and updated based on these changes. Any expected values on your test cases will be cleared for this measure group.",
+    subText: "Are you sure you want to Save Changes?",
+    bottomInfo: "This action cannot be undone.",
+    dataTestId: "update-measure-group-pop-basis",
+    cancelButtonText: "No, Keep Working",
+    confirmButtonText: "Yes, Save changes",
   };
 
   const deleteMeasureGroupDialogText = {
@@ -95,12 +107,22 @@ export default function MeasureGroupsWarningDialog(
     subText: "",
     bottomInfo: "This action cannot be undone.",
     dataTestId: "delete-measure-group",
+    cancelButtonText: "Keep Measure Group",
+    confirmButtonText: "Yes, Delete Measure Group",
   };
 
-  const dialogText =
-    modalType && modalType === "scoring"
-      ? scoringChangeDialogText
-      : deleteMeasureGroupDialogText;
+  const getDialogText = (modalType) => {
+    switch (modalType) {
+      case "scoring":
+        return scoringChangeDialogText;
+      case "popBasis":
+        return popBasisChangeDialogText;
+      default:
+        return deleteMeasureGroupDialogText;
+    }
+  };
+
+  const dialogText = getDialogText(modalType);
 
   return (
     <Dialog
@@ -135,9 +157,7 @@ export default function MeasureGroupsWarningDialog(
       <DialogActions classes={{ root: classes.actionsRoot }}>
         <Button
           type="button"
-          buttonTitle={
-            modalType === "scoring" ? "No, Keep Working" : "Keep Measure Group"
-          }
+          buttonTitle={dialogText?.cancelButtonText}
           variant="white"
           data-testid={`${dialogText?.dataTestId}-modal-cancel-btn`}
           onClick={onClose}
@@ -145,11 +165,7 @@ export default function MeasureGroupsWarningDialog(
         <Button
           style={{ background: "#424B5A", marginTop: 0 }}
           type="submit"
-          buttonTitle={
-            modalType === "scoring"
-              ? "Yes, Save changes"
-              : "Yes, Delete Measure Group"
-          }
+          buttonTitle={dialogText?.confirmButtonText}
           group-form-update-btn
           data-testid={`${dialogText?.dataTestId}-modal-agree-btn`}
           onClick={onSubmit}
