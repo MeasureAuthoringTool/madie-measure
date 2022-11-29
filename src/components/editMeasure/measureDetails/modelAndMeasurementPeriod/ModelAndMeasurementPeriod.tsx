@@ -103,6 +103,15 @@ const ModelAndMeasurementPeriod = () => {
     setToastOpen(open);
   };
 
+  const goBackToNav = (e) => {
+    if (e.shiftKey && e.keyCode == 9) {
+      e.preventDefault();
+      document
+        .getElementById("sideNavMeasureModelAndMeasurementPeriod")
+        .focus();
+    }
+  };
+
   const handleSubmit = async (values) => {
     const newMeasure: Measure = {
       ...measure,
@@ -175,6 +184,7 @@ const ModelAndMeasurementPeriod = () => {
             helperText={formikErrorHandler("model", true)}
             size="small"
             {...formik.getFieldProps("model")}
+            onKeyDown={goBackToNav}
           />
         </Box>
 
