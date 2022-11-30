@@ -14,6 +14,8 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import "./MeasureLanding.scss";
 import { useDocumentTitle } from "@madie/madie-util";
+import JSzip from "jszip";
+import { saveAs } from "file-saver";
 
 export default function MeasureLanding() {
   useDocumentTitle("MADiE Measures");
@@ -83,6 +85,18 @@ export default function MeasureLanding() {
       setOffset(pageable.offset);
       setInitialLoad(false);
     }
+  };
+
+  const Testing = (e) => {
+    const zip = new JSzip();
+    // var FileSaver = require('file-saver');
+    // var blob = new Blob(["Hello, world!"], {type: "text/plain;charset=utf-8"});
+    // FileSaver.saveAs(blob, "hello-world.zip");
+    zip.file("Hello.txt", "Hello World\n");
+    zip.generateAsync({ type: "blob" }).then(function (content) {
+      // see FileSaver.js
+      saveAs(content, "example.zip");
+    });
   };
 
   useEffect(() => {
@@ -211,6 +225,7 @@ export default function MeasureLanding() {
             <MadieSpinner style={{ height: 50, width: 50 }} />
           </div>
         )}
+        <button onClick={(e) => Testing(e)}>Hello</button>
       </div>
     </div>
   );
