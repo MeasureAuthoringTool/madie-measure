@@ -1328,17 +1328,18 @@ describe("Measure Groups Page", () => {
 
   test("should display default select for scoring unit", async () => {
     const { getByTestId } = await waitFor(() => renderMeasureGroupComponent());
-    const scoringUnit = getByTestId("measure-group-scoring-unit");
-    expect(scoringUnit.textContent).toBe("Scoring UnitUCUM Code or Name");
+    const scoringUnitLabel = getByTestId("scoring-unit-dropdown-label");
+    expect(scoringUnitLabel).toBeInTheDocument();
   });
 
   test("should display selected scoring unit", async () => {
     const { getByTestId } = await waitFor(() => renderMeasureGroupComponent());
 
-    const scoringUnit = getByTestId("measure-group-scoring-unit");
-    expect(scoringUnit.textContent).toBe("Scoring UnitUCUM Code or Name");
+    const scoringUnitLabel = getByTestId("scoring-unit-dropdown-label");
+    expect(scoringUnitLabel).toBeInTheDocument();
 
-    const scoringUnitInput = within(scoringUnit).getByRole("combobox");
+    const autoComplete = screen.getByTestId("scoring-unit-dropdown");
+    const scoringUnitInput = within(autoComplete).getByRole("combobox");
     expect(scoringUnitInput.getAttribute("value")).toBe("");
 
     fireEvent.change(scoringUnitInput, {
@@ -1896,7 +1897,7 @@ describe("Measure Groups Page", () => {
       groupDescription: "",
       stratifications: [],
       measureGroupTypes: ["Patient Reported Outcome"],
-      scoringUnit: "",
+      scoringUnit: null,
       rateAggregation: "",
       improvementNotation: "",
       populationBasis: "Encounter",
