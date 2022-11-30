@@ -195,7 +195,7 @@ const MeasureEditor = () => {
         measure?.cql,
         measure?.cqlLibraryName,
         "",
-        "0.0.000", //as the versioning is not implemented in measure for now we just send default value: 0.0.000
+        measure?.version,
         "measureEditor"
       );
 
