@@ -4,11 +4,17 @@ import "styled-components/macro";
 import { Measure } from "@madie/madie-models";
 import { useHistory } from "react-router-dom";
 import { Chip, IconButton } from "@mui/material";
-import { TextField, Button } from "@madie/madie-design-system/dist/react";
+import {
+  TextField,
+  Button,
+  Popover,
+} from "@madie/madie-design-system/dist/react";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
+import JSzip from "jszip";
+import { saveAs } from "file-saver";
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -52,6 +58,11 @@ export default function MeasureList(props: {
   currentPage: number;
 }) {
   const history = useHistory();
+
+  // Popover utilities
+  const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedMeasure, setSelectedMeasure] = useState<Measure>(null);
 
   const measureServiceApi = useMeasureServiceApi();
 
@@ -116,6 +127,39 @@ export default function MeasureList(props: {
         <ClearIcon />
       </IconButton>
     ),
+  };
+
+  const handleOpen = (
+    selected: Measure,
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    console.log(selected);
+    setSelectedMeasure(selected);
+    setAnchorEl(event.currentTarget);
+    setOptionsOpen(true);
+  };
+
+  const handleClose = () => {
+    setOptionsOpen(false);
+    setSelectedMeasure(null);
+    setAnchorEl(null);
+  };
+
+  const viewEditredirect = () => {
+    history.push(`/measures/${selectedMeasure.id}/edit/details`);
+    setOptionsOpen(false);
+  };
+
+  const zipData = () => {
+    const zip = new JSzip();
+    // var FileSaver = require('file-saver');
+    // var blob = new Blob(["Hello, world!"], {type: "text/plain;charset=utf-8"});
+    // FileSaver.saveAs(blob, "hello-world.zip");
+    zip.file("Hello.txt", "Hello World\n");
+    zip.generateAsync({ type: "blob" }).then(function (content) {
+      // see FileSaver.js
+      saveAs(content, "example.zip");
+    });
   };
 
   return (
@@ -189,20 +233,31 @@ export default function MeasureList(props: {
                       <td>
                         <Button
                           variant="outline-secondary"
-                          onClick={() => {
-                            history.push(
-                              `/measures/${measure.id}/edit/details`
-                            );
+                          onClick={(e) => {
+                            handleOpen(measure, e);
                           }}
                           data-testid={`edit-measure-${measure.id}`}
                         >
-                          View
+                          Select
                         </Button>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              <Popover
+                optionsOpen={optionsOpen}
+                anchorEl={anchorEl}
+                handleClose={handleClose}
+                canEdit={true}
+                otherSelectOptionProps={{
+                  label: "export",
+                  toImplementFunction: zipData,
+                }}
+                editViewSelectOptionProps={{
+                  toImplementFunction: viewEditredirect,
+                }}
+              />
             </div>
           </div>
         </div>
