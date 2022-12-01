@@ -172,7 +172,6 @@ export default function MeasureList(props: {
                     </th>
                   </tr>
                 </thead>
-
                 <tbody data-testid="table-body" className="table-body">
                   {props.measureList?.map((measure, i) => (
                     <tr
