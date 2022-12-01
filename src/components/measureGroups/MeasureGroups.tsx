@@ -725,29 +725,27 @@ const MeasureGroups = () => {
                     </FormHelperText>
                   )}
                 </div>
-                {populationBasisValues && (
-                  <div>
-                    <AutoComplete
-                      id="populationBasis"
-                      dataTestId="populationBasis"
-                      label="Population Basis"
-                      placeholder="-"
-                      required={true}
-                      disabled={!canEdit}
-                      error={
-                        formik.touched.populationBasis &&
-                        formik.errors.populationBasis
-                      }
-                      helperText={
-                        formik.touched.populationBasis &&
-                        formik.errors.populationBasis
-                      }
-                      options={populationBasisValues}
-                      {...formik.getFieldProps("populationBasis")}
-                      onChange={formik.setFieldValue}
-                    />
-                  </div>
-                )}
+                <div>
+                  <AutoComplete
+                    id="populationBasis"
+                    dataTestId="populationBasis"
+                    label="Population Basis"
+                    placeholder="-"
+                    required={true}
+                    disabled={!canEdit}
+                    error={
+                      formik.touched.populationBasis &&
+                      formik.errors.populationBasis
+                    }
+                    helperText={
+                      formik.touched.populationBasis &&
+                      formik.errors.populationBasis
+                    }
+                    options={populationBasisValues}
+                    {...formik.getFieldProps("populationBasis")}
+                    onChange={formik.setFieldValue}
+                  />
+                </div>
 
                 <Select
                   placeHolder={{ name: "-", value: "" }}
@@ -757,12 +755,12 @@ const MeasureGroups = () => {
                   inputProps={{
                     "data-testid": "scoring-select-input",
                   }}
-                  disabled={!canEdit}
                   data-testid="scoring-select"
                   {...formik.getFieldProps("scoring")}
                   error={
                     formik.touched.scoring && Boolean(formik.errors.scoring)
                   }
+                  disabled={!canEdit}
                   helperText={formik.touched.scoring && formik.errors.scoring}
                   size="small"
                   SelectDisplayProps={{

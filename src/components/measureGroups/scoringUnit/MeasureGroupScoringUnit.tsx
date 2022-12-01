@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { InputLabel } from "@madie/madie-design-system/dist/react/";
 import { Autocomplete, FormControl, TextField } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
@@ -53,6 +53,8 @@ const MeasureGroupScoringUnit = ({
   On save the auto complete will repackage this in the same way through onChange
   */
   const parsedValue = value?.value || null;
+  const [inputValue, setInputValue] = useState("");
+
   return (
     <div
       data-testid="measure-group-scoring-unit"
@@ -92,12 +94,18 @@ const MeasureGroupScoringUnit = ({
               }
               return [];
             }}
-            onChange={(e, v) => {
-              if (v) {
-                const label = `${v.code} ${v.name}`;
+            onChange={(event: any, values: any, reason: string) => {
+              event.preventDefault();
+              // We need to find a way to kill reason === create-option. This breaks it.
+              // if (reason === 'create-option') {
+              //   setInputValue('');
+              //   values[values.length - 1] = null;
+              // }
+              if (values && typeof values !== "string") {
+                const label = `${values.code} ${values.name}`;
                 const transformedResult = {
                   label,
-                  value: v,
+                  value: values,
                 };
                 onChange(transformedResult);
               } else {

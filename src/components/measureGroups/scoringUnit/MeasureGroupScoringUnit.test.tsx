@@ -1,5 +1,11 @@
 import * as React from "react";
-import { render, screen, within, fireEvent } from "@testing-library/react";
+import {
+  render,
+  screen,
+  within,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
 import { act } from "react-dom/test-utils";
 
