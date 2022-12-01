@@ -93,12 +93,16 @@ const MeasureGroupScoringUnit = ({
               return [];
             }}
             onChange={(event: any, values: any, reason: string) => {
-              const label = `${values.code} ${values.name}`;
-              const transformedResult = {
-                label,
-                value: values,
-              };
-              onChange(transformedResult);
+              if (values) {
+                const label = `${values.code} ${values.name}`;
+                const transformedResult = {
+                  label,
+                  value: values,
+                };
+                onChange(transformedResult);
+              } else {
+                onChange("");
+              }
             }}
             autoHighlight={true}
             id="scoring-unit-dropdown"
