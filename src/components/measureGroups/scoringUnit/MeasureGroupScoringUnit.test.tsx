@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState } from "react";
 import {
   render,
   screen,
@@ -41,6 +41,7 @@ describe("MeasureGroupScoringUnit Component", () => {
       system: "https://clinicaltables.nlm.nih.gov/",
     },
   };
+
   test("Should render scoring unit field", () => {
     const handleChange = jest.fn();
     render(
@@ -50,7 +51,6 @@ describe("MeasureGroupScoringUnit Component", () => {
         canEdit={true}
       />
     );
-
     const scoringUnitLabel = screen.getByTestId("scoring-unit-dropdown-label");
     expect(scoringUnitLabel).toBeInTheDocument();
     const scoringUnitInput = screen.getByRole("combobox");
@@ -92,18 +92,15 @@ describe("MeasureGroupScoringUnit Component", () => {
         options={options}
       />
     );
-    let autoComplete;
-    await waitFor(() => {
-      autoComplete = screen.getByTestId("scoring-unit-dropdown");
+    const autocomplete = screen.getByTestId("scoring-unit-dropdown");
+    const input = within(autocomplete).getByRole("combobox");
+    autocomplete.click();
+    autocomplete.focus();
+    fireEvent.change(input, { target: { value: "b" } });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
-    const scoringSelectAutoComplete =
-      within(autoComplete).getByRole("combobox");
-    autoComplete.focus();
-    fireEvent.change(scoringSelectAutoComplete, {
-      target: { value: "b" },
-    });
-    fireEvent.keyDown(autoComplete, { key: "ArrowDown" });
-    fireEvent.keyDown(autoComplete, { key: "Enter" });
-    expect(scoringSelectAutoComplete).toHaveValue("B bel");
+    fireEvent.click(screen.getAllByRole("option")[1]);
+    expect(input.value).toEqual("B bel");
   });
 });

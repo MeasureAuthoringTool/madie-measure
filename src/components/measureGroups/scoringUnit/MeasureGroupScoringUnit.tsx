@@ -53,7 +53,6 @@ const MeasureGroupScoringUnit = ({
   On save the auto complete will repackage this in the same way through onChange
   */
   const parsedValue = value?.value || null;
-  const [inputValue, setInputValue] = useState("");
 
   return (
     <div
@@ -74,7 +73,6 @@ const MeasureGroupScoringUnit = ({
             options={options}
             data-testid="scoring-unit-dropdown"
             popupIcon={<SearchIcon sx={{ color: "#1C2556" }} />}
-            freeSolo
             sx={autoCompleteStyles}
             value={parsedValue}
             getOptionLabel={(option: Option): string =>
@@ -95,22 +93,12 @@ const MeasureGroupScoringUnit = ({
               return [];
             }}
             onChange={(event: any, values: any, reason: string) => {
-              event.preventDefault();
-              // We need to find a way to kill reason === create-option. This breaks it.
-              // if (reason === 'create-option') {
-              //   setInputValue('');
-              //   values[values.length - 1] = null;
-              // }
-              if (values && typeof values !== "string") {
-                const label = `${values.code} ${values.name}`;
-                const transformedResult = {
-                  label,
-                  value: values,
-                };
-                onChange(transformedResult);
-              } else {
-                onChange("");
-              }
+              const label = `${values.code} ${values.name}`;
+              const transformedResult = {
+                label,
+                value: values,
+              };
+              onChange(transformedResult);
             }}
             autoHighlight={true}
             id="scoring-unit-dropdown"
