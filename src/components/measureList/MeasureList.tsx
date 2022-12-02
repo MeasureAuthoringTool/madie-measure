@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { Measure } from "@madie/madie-models";
-import { versionFormat } from "../util/versionFormat";
+import { versionFormat } from "../../utils/versionFormat";
 import { useHistory } from "react-router-dom";
 import { Chip, IconButton } from "@mui/material";
 import { TextField, Button } from "@madie/madie-design-system/dist/react";

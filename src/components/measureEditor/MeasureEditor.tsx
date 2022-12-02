@@ -26,7 +26,7 @@ import {
   useDocumentTitle,
   routeHandlerStore,
 } from "@madie/madie-util";
-import { versionFormat } from "../util/versionFormat";
+import { versionFormat } from "../../utils/versionFormat";
 import StatusHandler from "./StatusHandler";
 
 const MessageText = tw.p`text-sm font-medium`;

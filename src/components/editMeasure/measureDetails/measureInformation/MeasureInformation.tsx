@@ -18,7 +18,7 @@ import {
   useOktaTokens,
   routeHandlerStore,
 } from "@madie/madie-util";
-import { versionFormat } from "../../../util/versionFormat";
+import { versionFormat } from "../../../../utils/versionFormat";
 import { Box } from "@mui/system";
 import {
   parseContent,
