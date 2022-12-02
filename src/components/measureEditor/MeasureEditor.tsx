@@ -26,6 +26,7 @@ import {
   useDocumentTitle,
   routeHandlerStore,
 } from "@madie/madie-util";
+import { versionFormat } from "../util/versionFormat";
 import StatusHandler from "./StatusHandler";
 
 const MessageText = tw.p`text-sm font-medium`;
@@ -195,7 +196,7 @@ const MeasureEditor = () => {
         measure?.cql,
         measure?.cqlLibraryName,
         "",
-        measure?.version,
+        versionFormat(measure?.version, measure?.revisionNumber),
         "measureEditor"
       );
 

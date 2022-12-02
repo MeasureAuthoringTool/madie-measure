@@ -18,6 +18,7 @@ import {
   useOktaTokens,
   routeHandlerStore,
 } from "@madie/madie-util";
+import { versionFormat } from "../../../util/versionFormat";
 import { Box } from "@mui/system";
 import {
   parseContent,
@@ -135,7 +136,7 @@ export default function MeasureInformation() {
       measure?.cql,
       values.cqlLibraryName,
       measure?.cqlLibraryName,
-      measure?.version,
+      versionFormat(measure?.version, measure?.revisionNumber),
       "measureInformation"
     );
 
