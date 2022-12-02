@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import tw, { styled } from "twin.macro";
+import * as ucum from "@lhncbc/ucum-lhc";
 import "styled-components/macro";
 import {
   Measure,
@@ -299,7 +300,7 @@ const MeasureGroups = () => {
       ],
       measureGroupTypes: group?.measureGroupTypes || [],
       populationBasis: group?.populationBasis || defaultPopulationBasis,
-      scoringUnit: group?.scoringUnit,
+      scoringUnit: group?.scoringUnit || null, // autocomplete can't init with string
     } as Group,
     validationSchema: measureGroupSchemaValidator(cqlDefinitionDataTypes),
     onSubmit: (group: Group) => {
@@ -549,6 +550,52 @@ const MeasureGroups = () => {
     }
   }, [measure]);
 
+  /*
+  we consume the cs table, build in shape of {
+    label: ucumcode + name,
+    value: {
+      label: code + name,
+      guidance:
+      code: 
+      name:
+      system: 
+    }
+  }
+*/
+  const [ucumOptions, setUcumOptions] = useState([]);
+  const [ucumUnits, setUcumUnits] = useState([]);
+
+  const buildUcumUnits = useCallback(() => {
+    const options = [];
+
+    for (const [key, value] of Object.entries(ucumUnits)) {
+      const current = value;
+      const { csCode_, guidance_, name_ } = current;
+      const option = {
+        code: csCode_,
+        guidance: guidance_,
+        name: name_,
+        system: "https://clinicaltables.nlm.nih.gov/",
+      };
+      options.push(option);
+    }
+    setUcumOptions(options);
+  }, [ucumUnits, setUcumOptions]);
+
+  useEffect(() => {
+    if (ucumUnits) {
+      buildUcumUnits();
+    }
+  }, [ucumUnits, buildUcumUnits]);
+
+  useEffect(() => {
+    if (!ucumUnits.length) {
+      ucum.UcumLhcUtils.getInstance();
+      const unitCodes = ucum.UnitTables.getInstance().unitCodes_;
+      setUcumUnits(unitCodes);
+    }
+  }, [ucum, ucumUnits]);
+
   return (
     <FormikProvider value={formik}>
       <MeasureGroupAlerts {...alertMessage} />
@@ -678,30 +725,27 @@ const MeasureGroups = () => {
                     </FormHelperText>
                   )}
                 </div>
-
-                {populationBasisValues && (
-                  <div>
-                    <AutoComplete
-                      id="populationBasis"
-                      dataTestId="populationBasis"
-                      label="Population Basis"
-                      placeholder="-"
-                      required={true}
-                      disabled={!canEdit}
-                      error={
-                        formik.touched.populationBasis &&
-                        formik.errors.populationBasis
-                      }
-                      helperText={
-                        formik.touched.populationBasis &&
-                        formik.errors.populationBasis
-                      }
-                      options={populationBasisValues}
-                      {...formik.getFieldProps("populationBasis")}
-                      onChange={formik.setFieldValue}
-                    />
-                  </div>
-                )}
+                <div>
+                  <AutoComplete
+                    id="populationBasis"
+                    dataTestId="populationBasis"
+                    label="Population Basis"
+                    placeholder="-"
+                    required={true}
+                    disabled={!canEdit}
+                    error={
+                      formik.touched.populationBasis &&
+                      formik.errors.populationBasis
+                    }
+                    helperText={
+                      formik.touched.populationBasis &&
+                      formik.errors.populationBasis
+                    }
+                    options={populationBasisValues}
+                    {...formik.getFieldProps("populationBasis")}
+                    onChange={formik.setFieldValue}
+                  />
+                </div>
 
                 <Select
                   placeHolder={{ name: "-", value: "" }}
@@ -711,12 +755,12 @@ const MeasureGroups = () => {
                   inputProps={{
                     "data-testid": "scoring-select-input",
                   }}
-                  disabled={!canEdit}
                   data-testid="scoring-select"
                   {...formik.getFieldProps("scoring")}
                   error={
                     formik.touched.scoring && Boolean(formik.errors.scoring)
                   }
+                  disabled={!canEdit}
                   helperText={formik.touched.scoring && formik.errors.scoring}
                   size="small"
                   SelectDisplayProps={{
@@ -751,12 +795,13 @@ const MeasureGroups = () => {
                     );
                   })}
                 />
-
+                {/* no longer capable of errors */}
                 <MeasureGroupScoringUnit
                   {...formik.getFieldProps("scoringUnit")}
                   onChange={(newValue) => {
                     formik.setFieldValue("scoringUnit", newValue);
                   }}
+                  options={ucumOptions}
                   canEdit={canEdit}
                 />
               </div>
