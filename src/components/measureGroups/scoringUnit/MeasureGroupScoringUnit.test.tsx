@@ -1,9 +1,47 @@
-import * as React from "react";
-import { render, screen, within, fireEvent } from "@testing-library/react";
+import React, { useState } from "react";
+import {
+  render,
+  screen,
+  within,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
-import userEvent from "@testing-library/user-event";
+import { act } from "react-dom/test-utils";
 
 describe("MeasureGroupScoringUnit Component", () => {
+  const options = [
+    {
+      code: "B[V]",
+      guidance: "used to express power gain in electrical circuits",
+      name: "bel volt",
+      system: "https://clinicaltables.nlm.nih.gov/",
+    },
+    {
+      code: "B",
+      guidance:
+        "Logarithm of the ratio of power- or field-type quantities; usually expressed in decibels ",
+      name: "bel",
+      system: "https://clinicaltables.nlm.nih.gov/",
+    },
+    {
+      code: "mho",
+      guidance:
+        "unit of electric conductance (the inverse of electrical resistance) equal to ohm^-1",
+      name: "mho",
+      system: "https://clinicaltables.nlm.nih.gov/",
+    },
+  ];
+  const testValue = {
+    value: {
+      code: "mho",
+      guidance:
+        "unit of electric conductance (the inverse of electrical resistance) equal to ohm^-1",
+      name: "mho",
+      system: "https://clinicaltables.nlm.nih.gov/",
+    },
+  };
+
   test("Should render scoring unit field", () => {
     const handleChange = jest.fn();
     render(
@@ -13,88 +51,56 @@ describe("MeasureGroupScoringUnit Component", () => {
         canEdit={true}
       />
     );
-
-    const scoringUnitLabel = screen.getByText("Scoring Unit");
+    const scoringUnitLabel = screen.getByTestId("scoring-unit-dropdown-label");
     expect(scoringUnitLabel).toBeInTheDocument();
     const scoringUnitInput = screen.getByRole("combobox");
     expect(scoringUnitInput).toBeInTheDocument();
+  });
+
+  test("Should render scoring unit field with selected option", async () => {
+    const handleChange = jest.fn();
+    render(
+      <MeasureGroupScoringUnit
+        onChange={handleChange}
+        canEdit={true}
+        options={options}
+        value={testValue}
+      />
+    );
+    await act(async () => {
+      const scoringUnitLabel = screen.getByTestId(
+        "scoring-unit-dropdown-label"
+      );
+      expect(scoringUnitLabel).toBeInTheDocument();
+      const scoringAutoComplete = await screen.findByTestId(
+        "scoring-unit-dropdown"
+      );
+      const listBox = within(scoringAutoComplete).getByRole("combobox");
+      expect(listBox).toHaveValue(
+        `${testValue.value.code} ${testValue.value.name}`
+      );
+    });
   });
 
   test("Should render ucum options on click", async () => {
     const handleChange = jest.fn();
-
     render(
       <MeasureGroupScoringUnit
-        value={"Test Option1"}
+        value={null}
         onChange={handleChange}
         canEdit={true}
+        options={options}
       />
     );
-    const scoringUnitInput = screen.getByRole("combobox");
-    userEvent.click(scoringUnitInput);
-
-    expect(
-      await screen.findByRole("combobox", { expanded: true })
-    ).toBeInTheDocument();
-
-    expect(screen.getByText("%")).toBeInTheDocument();
-  });
-
-  test("Should filter options on input change", () => {
-    const handleChange = jest.fn();
-
-    const { getByTestId } = render(
-      <MeasureGroupScoringUnit
-        value={"Test Option1"}
-        onChange={handleChange}
-        canEdit={true}
-      />
-    );
-    const scoringUnit = getByTestId("measure-group-scoring-unit");
-    expect(scoringUnit.textContent).toBe("Scoring Unit");
-
-    const scoringUnitInput = within(scoringUnit).getByRole("combobox");
-    expect(scoringUnitInput.getAttribute("value")).toBe("Test Option1");
-
-    fireEvent.change(scoringUnitInput, {
-      target: { value: "cm" },
+    const autocomplete = screen.getByTestId("scoring-unit-dropdown");
+    const input = within(autocomplete).getByRole("combobox");
+    autocomplete.click();
+    autocomplete.focus();
+    fireEvent.change(input, { target: { value: "b" } });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
-    const ucumOptionText = screen.getByText("cm centimeter");
-    expect(ucumOptionText).toBeInTheDocument();
-
-    fireEvent.change(scoringUnitInput, {
-      target: { value: "k" },
-    });
-    const ucumOption1 = document.getElementById("react-select-4-option-0-0");
-    expect(ucumOption1).toBeInTheDocument();
-    const ucumOptionText1 = screen.getByText("[k] Boltzmann constant");
-    expect(ucumOptionText1).toBeInTheDocument();
-    const ucumOption2 = document.getElementById("react-select-4-option-0-1");
-    expect(ucumOption2).toBeInTheDocument();
-    const ucumOptionText2 = screen.getByText("[car_Au] carat of gold alloys");
-    expect(ucumOptionText2).toBeInTheDocument();
-  });
-
-  test("Should display Invalid Scoring Unit when user input is invalid", () => {
-    const handleChange = jest.fn();
-    render(
-      <MeasureGroupScoringUnit
-        value={""}
-        onChange={handleChange}
-        canEdit={true}
-      />
-    );
-
-    const scoringUnitLabel = screen.getByText("Scoring Unit");
-    expect(scoringUnitLabel).toBeInTheDocument();
-    const scoringUnitInput = screen.getByRole("combobox");
-    expect(scoringUnitInput).toBeInTheDocument();
-
-    fireEvent.change(scoringUnitInput, {
-      target: { value: "null" },
-    });
-
-    const scoringUnitOption = screen.getByText("Invalid Scoring Unit!");
-    expect(scoringUnitOption).toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole("option")[1]);
+    expect(input.value).toEqual("B bel");
   });
 });
