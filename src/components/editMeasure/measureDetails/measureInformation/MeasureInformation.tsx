@@ -18,6 +18,7 @@ import {
   useOktaTokens,
   routeHandlerStore,
 } from "@madie/madie-util";
+import { versionFormat } from "../../../../utils/versionFormat";
 import { Box } from "@mui/system";
 import {
   parseContent,
@@ -135,7 +136,7 @@ export default function MeasureInformation() {
       measure?.cql,
       values.cqlLibraryName,
       measure?.cqlLibraryName,
-      "0.0.000", //as the versioning is not implemented in measure for now we just send default value: 0.0.000
+      versionFormat(measure?.version, measure?.revisionNumber),
       "measureInformation"
     );
 
