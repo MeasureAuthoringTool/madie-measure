@@ -5,6 +5,7 @@ import MeasureList from "./MeasureList";
 import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
 import { oneItemResponse } from "../measureRoutes/mockMeasureResponses";
 import userEvent from "@testing-library/user-event";
+import { featureFlag } from "../../utils/featureFlag";
 
 import { v4 as uuid } from "uuid";
 
@@ -32,6 +33,11 @@ const mockMeasureServiceApi = {
 jest.mock("../../api/useMeasureServiceApi", () =>
   jest.fn(() => mockMeasureServiceApi)
 );
+
+//isMeasureExportEnabled,
+jest.mock("../../utils/featureFlag", () => ({
+  featureFlag: jest.fn(),
+}));
 
 const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
 
@@ -124,6 +130,10 @@ describe("Measure List component", () => {
   });
 
   it("should navigate to the edit measure screen on click of edit/view button", () => {
+    (featureFlag as jest.Mock).mockImplementation(() => {
+      return false;
+    });
+
     const { getByTestId } = render(
       <MeasureList
         measureList={measures}
@@ -145,6 +155,39 @@ describe("Measure List component", () => {
     expect(editButton).toHaveTextContent("View");
     expect(window.location.href).toBe("http://localhost/");
     fireEvent.click(editButton);
+    expect(mockPush).toHaveBeenCalledWith("/example");
+  });
+
+  it("should display the popover with options of export and view when feature flag is set to true", () => {
+    (featureFlag as jest.Mock).mockImplementation(() => {
+      return true;
+    });
+
+    const { getByTestId } = render(
+      <MeasureList
+        measureList={measures}
+        setMeasureList={setMeasureListMock}
+        setTotalPages={setTotalPagesMock}
+        setTotalItems={setTotalItemsMock}
+        setVisibleItems={setVisibleItemsMock}
+        setOffset={setOffsetMock}
+        setInitialLoad={setInitialLoadMock}
+        activeTab={0}
+        searchCriteria="test"
+        setSearchCriteria={setSearchCriteriaMock}
+        currentLimit={10}
+        currentPage={0}
+      />
+    );
+    const actionButton = getByTestId(`measure-action-${measures[0].id}`);
+    expect(actionButton).toBeInTheDocument();
+    expect(actionButton).toHaveTextContent("Select");
+    expect(window.location.href).toBe("http://localhost/");
+    fireEvent.click(actionButton);
+    expect(getByTestId(`edit-measure-${measures[0].id}`)).toBeInTheDocument();
+    expect(getByTestId(`export-measure-${measures[0].id}`)).toBeInTheDocument();
+    expect(window.location.href).toBe("http://localhost/");
+    fireEvent.click(getByTestId(`edit-measure-${measures[0].id}`));
     expect(mockPush).toHaveBeenCalledWith("/example");
   });
 

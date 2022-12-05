@@ -14,6 +14,7 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
+import { featureFlag } from "../../utils/featureFlag";
 import JSzip from "jszip";
 import { saveAs } from "file-saver";
 
@@ -134,7 +135,6 @@ export default function MeasureList(props: {
     selected: Measure,
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
-    console.log(selected);
     setSelectedMeasure(selected);
     setAnchorEl(event.currentTarget);
     setOptionsOpen(true);
@@ -147,19 +147,20 @@ export default function MeasureList(props: {
   };
 
   const viewEditredirect = () => {
-    history.push(`/measures/${selectedMeasure.id}/edit/details`);
+    history.push(`/measures/${selectedMeasure?.id}/edit/details`);
     setOptionsOpen(false);
   };
 
   const zipData = () => {
     const zip = new JSzip();
-    // var FileSaver = require('file-saver');
-    // var blob = new Blob(["Hello, world!"], {type: "text/plain;charset=utf-8"});
-    // FileSaver.saveAs(blob, "hello-world.zip");
-    zip.file("Hello.txt", "Hello World\n");
     zip.generateAsync({ type: "blob" }).then(function (content) {
-      // see FileSaver.js
-      saveAs(content, "example.zip");
+      saveAs(
+        content,
+        `${selectedMeasure?.ecqmTitle}-v${versionFormat(
+          selectedMeasure?.version,
+          selectedMeasure?.revisionNumber
+        )}-${selectedMeasure?.model}.zip`
+      );
     });
   };
 
@@ -238,11 +239,21 @@ export default function MeasureList(props: {
                         <Button
                           variant="outline-secondary"
                           onClick={(e) => {
-                            handleOpen(measure, e);
+                            if (featureFlag()) {
+                              handleOpen(measure, e);
+                            } else {
+                              history.push(
+                                `/measures/${measure.id}/edit/details`
+                              );
+                            }
                           }}
-                          data-testid={`edit-measure-${measure.id}`}
+                          data-testid={
+                            featureFlag()
+                              ? `measure-action-${measure.id}`
+                              : `edit-measure-${measure.id}`
+                          }
                         >
-                          Select
+                          {featureFlag() ? "Select" : "View"}
                         </Button>
                       </td>
                     </tr>
@@ -254,12 +265,15 @@ export default function MeasureList(props: {
                 anchorEl={anchorEl}
                 handleClose={handleClose}
                 canEdit={true}
-                otherSelectOptionProps={{
-                  label: "export",
-                  toImplementFunction: zipData,
-                }}
                 editViewSelectOptionProps={{
+                  label: "View",
                   toImplementFunction: viewEditredirect,
+                  dataTestId: `edit-measure-${selectedMeasure?.id}`,
+                }}
+                otherSelectOptionProps={{
+                  label: "Export",
+                  toImplementFunction: zipData,
+                  dataTestId: `export-measure-${selectedMeasure?.id}`,
                 }}
               />
             </div>
