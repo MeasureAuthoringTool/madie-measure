@@ -1328,23 +1328,26 @@ describe("Measure Groups Page", () => {
 
   test("should display default select for scoring unit", async () => {
     const { getByTestId } = await waitFor(() => renderMeasureGroupComponent());
-    const scoringUnit = getByTestId("measure-group-scoring-unit");
-    expect(scoringUnit.textContent).toBe("Scoring UnitUCUM Code or Name");
+    const scoringUnitLabel = getByTestId("scoring-unit-dropdown-label");
+    expect(scoringUnitLabel).toBeInTheDocument();
   });
 
   test("should display selected scoring unit", async () => {
     const { getByTestId } = await waitFor(() => renderMeasureGroupComponent());
 
-    const scoringUnit = getByTestId("measure-group-scoring-unit");
-    expect(scoringUnit.textContent).toBe("Scoring UnitUCUM Code or Name");
+    const scoringUnitLabel = getByTestId("scoring-unit-dropdown-label");
+    expect(scoringUnitLabel).toBeInTheDocument();
 
-    const scoringUnitInput = within(scoringUnit).getByRole("combobox");
-    expect(scoringUnitInput.getAttribute("value")).toBe("");
-
-    fireEvent.change(scoringUnitInput, {
-      target: { value: "cm" },
+    const autocomplete = screen.getByTestId("scoring-unit-dropdown");
+    const input = within(autocomplete).getByRole("combobox");
+    autocomplete.click();
+    autocomplete.focus();
+    fireEvent.change(input, { target: { value: "[pi" } });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
-    expect(scoringUnitInput.getAttribute("value")).toBe("cm");
+    fireEvent.click(screen.getAllByRole("option")[1]);
+    expect(input.value).toEqual("[pied] pied");
   });
 
   test("Add new group and click Discard button should discard the changes", async () => {
@@ -1896,7 +1899,7 @@ describe("Measure Groups Page", () => {
       groupDescription: "",
       stratifications: [],
       measureGroupTypes: ["Patient Reported Outcome"],
-      scoringUnit: "",
+      scoringUnit: null,
       rateAggregation: "",
       improvementNotation: "",
       populationBasis: "Encounter",
