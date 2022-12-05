@@ -41,7 +41,7 @@ export default function MeasureDetails() {
           title: "Model & Measurement Period",
           href: modelPeriodLink,
           dataTestId: "leftPanelModelAndMeasurementPeriod",
-          id: "sideNavMeasureInformation",
+          id: "sideNavMeasureModelAndMeasurementPeriod",
         },
         {
           title: "Steward & Developers",
