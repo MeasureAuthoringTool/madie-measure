@@ -741,7 +741,6 @@ const MeasureGroups = () => {
                   />
                 </div>
 
-
                 <Select
                   placeHolder={{ name: "Select Scoring", value: "" }}
                   required
