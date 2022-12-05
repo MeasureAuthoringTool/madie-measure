@@ -35,7 +35,7 @@ const StatusHandler = ({
             <MadieAlert
               type="success"
               content={
-                <div aria-live="polite">
+                <div aria-live="polite" role="alert">
                   <h3 data-testid="generic-success-text-header">
                     Changes saved successfully but the following errors were
                     found
@@ -59,7 +59,7 @@ const StatusHandler = ({
           <MadieAlert
             type="success"
             content={
-              <div aria-live="polite">
+              <div aria-live="polite" role="alert">
                 <h3 data-testid="generic-success-text-header">
                   Changes saved successfully but the following errors were found
                 </h3>
@@ -80,7 +80,7 @@ const StatusHandler = ({
           <MadieAlert
             type="success"
             content={
-              <div aria-live="polite">
+              <div aria-live="polite" role="alert">
                 <h3 data-testid="generic-success-text-header">
                   Changes saved successfully but the following errors were found
                 </h3>
@@ -108,7 +108,11 @@ const StatusHandler = ({
           <MadieAlert
             type="success"
             content={
-              <h3 aria-live="polite" data-testid="generic-success-text-header">
+              <h3
+                aria-live="polite"
+                data-testid="generic-success-text-header"
+                role="alert"
+              >
                 {success.message}
               </h3>
             }
@@ -131,7 +135,7 @@ const StatusHandler = ({
             <MadieAlert
               type="error"
               content={
-                <div aria-live="polite">
+                <div aria-live="polite" role="alert">
                   <h3 data-testid="generic-error-text-header">
                     {errorMessage}
                   </h3>
@@ -151,7 +155,11 @@ const StatusHandler = ({
             <MadieAlert
               type="error"
               content={
-                <h3 aria-live="polite" data-testid="generic-error-text-header">
+                <h3
+                  aria-live="polite"
+                  role="alert"
+                  data-testid="generic-error-text-header"
+                >
                   {errorMessage}
                 </h3>
               }
@@ -169,7 +177,7 @@ const StatusHandler = ({
           <MadieAlert
             type="error"
             content={
-              <div aria-live="polite">
+              <div aria-live="polite" role="alert">
                 <h3 data-testid="generic-error-text-header">
                   Errors were found within the CQL
                 </h3>
@@ -189,7 +197,11 @@ const StatusHandler = ({
           type="error"
           content={
             <>
-              <h3 aria-live="polite" data-testid="generic-error-text-header">
+              <h3
+                aria-live="polite"
+                role="alert"
+                data-testid="generic-error-text-header"
+              >
                 Errors were found within the CQL
               </h3>
             </>
@@ -208,7 +220,7 @@ const StatusHandler = ({
           <MadieAlert
             type="error"
             content={
-              <div aria-live="polite">
+              <div aria-live="polite" role="alert">
                 <h3 data-testid="generic-error-text-header">
                   Errors were found within the CQL
                 </h3>

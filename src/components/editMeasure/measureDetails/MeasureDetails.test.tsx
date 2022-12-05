@@ -204,4 +204,30 @@ describe("MeasureDetails component", () => {
     expect(getByTestId("leftPanelMeasureRationale")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureGuidance")).toBeInTheDocument();
   });
+
+  it("should render the MeasureMetadata component for measure-risk-adjustment URL", () => {
+    const { getByText, getByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter
+          initialEntries={[{ pathname: "/foo/measure-risk-adjustment" }]}
+        >
+          <Route path="/foo">
+            <MeasureDetails />
+          </Route>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    expect(getByText("Mock Measure Metadata")).toBeTruthy();
+    expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
+    expect(
+      getByTestId("leftPanelModelAndMeasurementPeriod")
+    ).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureSteward")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureDisclaimer")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureRationale")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureGuidance")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureRiskAdjustment")).toBeInTheDocument();
+  });
 });

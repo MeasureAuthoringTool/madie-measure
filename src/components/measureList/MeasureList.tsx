@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { Measure } from "@madie/madie-models";
+import { versionFormat } from "../../utils/versionFormat";
 import { useHistory } from "react-router-dom";
 import { Chip, IconButton } from "@mui/material";
 import { TextField, Button } from "@madie/madie-design-system/dist/react";
@@ -182,7 +183,10 @@ export default function MeasureList(props: {
                     >
                       <td tw="w-7/12">{measure.measureName}</td>
                       <td>
-                        {measure.version}
+                        {versionFormat(
+                          measure?.version,
+                          measure?.revisionNumber
+                        )}
                         <Chip tw="ml-6" className="chip-draft" label="Draft" />
                       </td>
                       <td>{measure.model}</td>
@@ -190,7 +194,9 @@ export default function MeasureList(props: {
                         <Button
                           variant="outline-secondary"
                           onClick={() => {
-                            history.push(`/measures/${measure.id}/edit`);
+                            history.push(
+                              `/measures/${measure.id}/edit/details`
+                            );
                           }}
                           data-testid={`edit-measure-${measure.id}`}
                         >

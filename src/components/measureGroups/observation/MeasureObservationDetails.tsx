@@ -49,6 +49,7 @@ const MeasureObservationDetails = ({
       <div tw="relative">
         {!required && canEdit && (
           <DSLink
+            className="madie-link"
             style={{
               position: "absolute",
               left: "13rem",
@@ -71,7 +72,7 @@ const MeasureObservationDetails = ({
         <Select
           placeHolder={{ name: "-", value: "" }}
           required={required}
-          readOnly={!canEdit}
+          disabled={!canEdit}
           label={label ? label : "Observation"}
           id={`measure-observation-${name}`}
           data-testid={`select-measure-observation-${name}`}
@@ -105,7 +106,7 @@ const MeasureObservationDetails = ({
       <div tw="pb-3 px-8 pt-6">
         <Select
           placeHolder={{ name: "-", value: "" }}
-          readOnly={!canEdit}
+          disabled={!canEdit}
           required={required}
           label="Aggregate Function"
           id={`measure-observation-aggregate-${name}`}

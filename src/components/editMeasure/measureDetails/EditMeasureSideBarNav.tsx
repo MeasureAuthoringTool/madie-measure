@@ -4,33 +4,18 @@ import { Link as NavLink, useLocation } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import { Measure } from "@madie/madie-models";
 import "./EditMeasureSideBarNav.scss";
+import "../../common/madie-link.scss";
 import {
   DSLink,
   MadieDiscardDialog,
 } from "@madie/madie-design-system/dist/react";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
-
 const InnerWrapper = tw.div`flex-grow flex flex-col`;
 const Nav = tw.nav`flex-1 space-y-1 bg-slate`;
-const StyledNavLink = tw(
-  NavLink
-)`flex items-center px-3 py-2 text-sm text-slate-80 border-l-8 no-underline hover:text-slate-90 hover:font-medium`;
-const ActiveNavLink = tw(StyledNavLink)`
-    bg-white
-    font-medium
-    border-teal-650
-    text-slate-90`;
-const InactiveNavLink = tw(StyledNavLink)` border-transparent`;
-
-interface SidebarLink {
-  title: string;
-  href: string;
-  dataTestId: string;
-  id: string;
-}
 
 export interface EditMeasureSideBarNavProps {
+  canEdit?: Boolean;
   dirty: Boolean;
   links: Array<any>; // needs to be changed since some links are actually measure groups.
   details?: Boolean;
@@ -43,6 +28,7 @@ export default function EditMeasureSideBarNav(
   props: EditMeasureSideBarNavProps
 ) {
   const {
+    canEdit,
     links,
     details = false,
     measure,
@@ -131,6 +117,7 @@ export default function EditMeasureSideBarNav(
     setDiscardDialogOpen(false);
     setInitiatedPayload(null);
   };
+
   if (details) {
     return (
       <OuterWrapper>
@@ -140,19 +127,23 @@ export default function EditMeasureSideBarNav(
               <div className="link-container">
                 <h4 className="link-heading">{link.title}</h4>
                 {link.links.map((linkInfo) => {
-                  let LinkEl = InactiveNavLink;
-                  if (pathname === linkInfo.href) {
-                    LinkEl = ActiveNavLink;
-                  }
+                  const isActive = pathname === linkInfo.href;
+                  const className = isActive ? "nav-link active" : "nav-link";
                   return (
-                    <LinkEl
+                    <NavLink
                       key={linkInfo.title}
+                      onClick={(e) => {
+                        if (isActive) {
+                          e.preventDefault();
+                        }
+                      }}
                       to={linkInfo.href}
                       data-testid={linkInfo.dataTestId}
+                      className={className}
                       id={linkInfo.id}
                     >
                       {linkInfo.title}
-                    </LinkEl>
+                    </NavLink>
                   );
                 })}
               </div>
@@ -167,34 +158,34 @@ export default function EditMeasureSideBarNav(
       <Nav aria-label="Sidebar">
         {measureGroups &&
           measureGroups.map((linkInfo, index) => {
-            let LinkEl = InactiveNavLink;
-            if (
+            const isActive =
               pathname.replace("groups", "measure-groups") === linkInfo.href &&
-              index === measureGroupNumber
-            ) {
-              LinkEl = ActiveNavLink;
-            }
+              index === measureGroupNumber;
+            const className = isActive ? "nav-link active" : "nav-link";
             return (
-              <LinkEl
+              <NavLink
                 key={linkInfo.title}
                 onClick={(e) => initiateNavigateGroupClick(e)}
                 to={linkInfo.href}
+                className={className}
                 id={index}
                 data-testid={linkInfo.dataTestId}
               >
                 <>{linkInfo.title}</>
-              </LinkEl>
+              </NavLink>
             );
           })}
-        <div className="right-col">
-          <DSLink
-            className="new-measure-group"
-            onClick={(e) => initiateBlankMeasureGroupClick(e)}
-            data-testid="add-measure-group-button"
-          >
-            <AddIcon className="add-icon" fontSize="small" />
-            &nbsp; Add Population Criteria
-          </DSLink>
+        <div>
+          {canEdit && (
+            <DSLink
+              className="madie-link"
+              onClick={(e) => initiateBlankMeasureGroupClick(e)}
+              data-testid="add-measure-group-button"
+            >
+              <AddIcon className="add-icon" fontSize="small" /> Add Population
+              Criteria
+            </DSLink>
+          )}
         </div>
       </Nav>
       <MadieDiscardDialog

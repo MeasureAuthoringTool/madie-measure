@@ -22,11 +22,11 @@ const measure = {
   id: "abcd-pqrs-xyz",
   measureHumanReadableId: "",
   measureSetId: "",
-  version: 1.0,
-  revisionNumber: 1.1,
+  version: "1.000",
+  revisionNumber: "1",
   state: "",
   measureName: "MSR001",
-  cql: "library testCql version '1.0.000'",
+  cql: "library testCql version '1.0.001'",
   cqlLibraryName: "",
   measureScoring: "",
   createdAt: "",
@@ -290,7 +290,7 @@ describe("MeasureEditor component", () => {
     (synchingEditorCqlContent as jest.Mock)
       .mockClear()
       .mockImplementation(() => {
-        return "library AdvancedIllnessandFrailtyExclusion version '0.0.000'";
+        return "library AdvancedIllnessandFrailtyExclusion version '1.0.001'";
       });
     renderEditor(measure);
     const issues = await screen.findByText("2 issues found with CQL");
@@ -315,7 +315,7 @@ describe("MeasureEditor component", () => {
     expect(mockedAxios.put).toHaveBeenCalledWith(
       "madie.com/measures/abcd-pqrs-xyz",
       {
-        cql: "library AdvancedIllnessandFrailtyExclusion version '0.0.000'",
+        cql: "library AdvancedIllnessandFrailtyExclusion version '1.0.001'",
         cqlErrors: true,
         cqlLibraryName: "",
         createdAt: "",
@@ -330,9 +330,9 @@ describe("MeasureEditor component", () => {
         measureScoring: "",
         measureSetId: "",
         model: "QI-Core v4.1.1",
-        revisionNumber: 1.1,
+        revisionNumber: "1",
         state: "",
-        version: 1,
+        version: "1.000",
         acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
       },
       { headers: { Authorization: "Bearer test.jwt" } }
@@ -355,7 +355,7 @@ describe("MeasureEditor component", () => {
     (synchingEditorCqlContent as jest.Mock)
       .mockClear()
       .mockImplementation(() => {
-        return "library AdvancedIllnessandFrailtyExclusion version '0.0.000'";
+        return "library AdvancedIllnessandFrailtyExclusion version '1.0.001'";
       });
 
     const { getByTestId } = renderEditor(measure);
@@ -380,7 +380,7 @@ describe("MeasureEditor component", () => {
     expect(mockedAxios.put).toHaveBeenCalledWith(
       "madie.com/measures/abcd-pqrs-xyz",
       {
-        cql: "library AdvancedIllnessandFrailtyExclusion version '0.0.000'",
+        cql: "library AdvancedIllnessandFrailtyExclusion version '1.0.001'",
         cqlErrors: true,
         cqlLibraryName: "",
         createdAt: "",
@@ -395,9 +395,9 @@ describe("MeasureEditor component", () => {
         measureScoring: "",
         measureSetId: "",
         model: "QI-Core v4.1.1",
-        revisionNumber: 1.1,
+        revisionNumber: "1",
         state: "",
-        version: 1,
+        version: "1.000",
         acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
       },
       { headers: { Authorization: "Bearer test.jwt" } }
