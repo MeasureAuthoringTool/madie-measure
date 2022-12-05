@@ -111,7 +111,7 @@ const MeasureGroupPopulationSelect = ({
     <div data-testid="temp-test-id" tw="relative">
       <>
         <Select
-          placeHolder={{ name: "-", value: "" }}
+          placeHolder={{ name: `Select ${label}`, value: "" }}
           required={required}
           disabled={!canEdit}
           label={
