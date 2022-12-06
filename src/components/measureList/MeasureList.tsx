@@ -146,7 +146,7 @@ export default function MeasureList(props: {
     setAnchorEl(null);
   };
 
-  const viewEditredirect = () => {
+  const viewEditRedirect = () => {
     history.push(`/measures/${selectedMeasure?.id}/edit/details`);
     setOptionsOpen(false);
   };
@@ -267,7 +267,7 @@ export default function MeasureList(props: {
                 canEdit={true}
                 editViewSelectOptionProps={{
                   label: "View",
-                  toImplementFunction: viewEditredirect,
+                  toImplementFunction: viewEditRedirect,
                   dataTestId: `edit-measure-${selectedMeasure?.id}`,
                 }}
                 otherSelectOptionProps={[
