@@ -813,6 +813,87 @@ describe("Measure Groups Page", () => {
     );
   });
 
+  test("displaying a measure update warning modal while updating population basis for a measure group", async () => {
+    const newGroup = {
+      id: "group-1",
+      scoring: "Cohort",
+      populations: [
+        {
+          id: "id-1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+        },
+      ],
+      groupDescription: "",
+      measureGroupTypes: [MeasureGroupTypes.PATIENT_REPORTED_OUTCOME],
+      populationBasis: "boolean",
+      scoringUnit: "",
+    };
+    measure.groups = [newGroup];
+
+    await waitFor(() => renderMeasureGroupComponent());
+    const popBasisSelect = screen.getByRole("combobox", {
+      name: "Population Basis",
+    }) as HTMLInputElement;
+    expect(popBasisSelect.value).toBe("boolean");
+    expect(screen.getByTestId("group-form-submit-btn")).toBeDisabled();
+
+    await changePopulationBasis("Encounter");
+    expect(popBasisSelect.value).toBe("Encounter");
+
+    const definitionToUpdate =
+      "Encounter With Age Range and Without VTE Diagnosis or Obstetrical Conditions";
+    // update initial population from dropdown
+    const groupPopulationInput = screen.getByTestId(
+      "select-measure-group-population-input"
+    ) as HTMLInputElement;
+    fireEvent.change(groupPopulationInput, {
+      target: { value: definitionToUpdate },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+    });
+
+    mockedAxios.put.mockResolvedValue({
+      data: {
+        id: "group-1",
+        scoring: "Cohort",
+        populations: [
+          {
+            id: "id-1",
+            name: PopulationType.INITIAL_POPULATION,
+            definition:
+              "Encounter With Age Range and Without VTE Diagnosis or Obstetrical Conditions",
+          },
+        ],
+        groupDescription: "",
+        measureGroupTypes: [MeasureGroupTypes.PATIENT_REPORTED_OUTCOME],
+        populationBasis: "Encounter",
+        scoringUnit: "",
+      },
+    });
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+    await waitFor(() => {}, { timeout: 5000 });
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("update-measure-group-pop-basis-dialog")
+      ).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("update-measure-group-pop-basis-modal-agree-btn")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("update-measure-group-pop-basis-modal-cancel-btn")
+      );
+    });
+  });
+
   test("displaying a measure update warning modal while updating measure scoring and updating measure scoring for a measure group", async () => {
     const populationBasis = "MedicationAdministration";
     const newGroup = {

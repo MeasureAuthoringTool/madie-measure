@@ -193,8 +193,10 @@ const MeasureGroups = () => {
   const [activeTab, setActiveTab] = useState<string>("populations");
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(0);
   const [group, setGroup] = useState<Group>();
-  const [updateMeasureGroupScoringDialog, setUpdateMeasureGroupScoringDialog] =
-    useState<boolean>(false);
+  const [groupWarningDialogProps, setGroupWarningDialogProps] = useState({
+    open: false,
+    modalType: null,
+  });
   const [deleteMeasureGroupDialog, setDeleteMeasureGroupDialog] =
     useState<DeleteMeasureGroupDialog>({
       open: false,
@@ -304,7 +306,20 @@ const MeasureGroups = () => {
         !(measureGroupNumber >= measure?.groups?.length) &&
         formik.values?.scoring !== measure?.groups[measureGroupNumber]?.scoring
       ) {
-        setUpdateMeasureGroupScoringDialog(true);
+        setGroupWarningDialogProps(() => ({
+          open: true,
+          modalType: "scoring",
+        }));
+      } else if (
+        measure?.groups &&
+        !(measureGroupNumber >= measure?.groups?.length) &&
+        formik.values?.populationBasis !==
+          measure?.groups[measureGroupNumber]?.populationBasis
+      ) {
+        setGroupWarningDialogProps(() => ({
+          open: true,
+          modalType: "popBasis",
+        }));
       } else {
         submitForm(group);
       }
@@ -467,7 +482,7 @@ const MeasureGroups = () => {
   };
 
   const handleDialogClose = () => {
-    setUpdateMeasureGroupScoringDialog(false);
+    setGroupWarningDialogProps({ open: false, modalType: null });
     setDeleteMeasureGroupDialog({ open: false });
   };
 
@@ -618,13 +633,13 @@ const MeasureGroups = () => {
           />
         )}
 
-        {/* scoring change warning dialog */}
-        {updateMeasureGroupScoringDialog && (
+        {/* breaking measure group change warning dialog */}
+        {groupWarningDialogProps?.open && (
           <MeasureGroupsWarningDialog
-            open={updateMeasureGroupScoringDialog}
+            open={groupWarningDialogProps?.open}
             onClose={handleDialogClose}
             onSubmit={() => submitForm(formik.values)}
-            modalType="scoring"
+            modalType={groupWarningDialogProps?.modalType}
           />
         )}
 
