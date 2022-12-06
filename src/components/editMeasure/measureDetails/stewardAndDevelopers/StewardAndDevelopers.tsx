@@ -21,7 +21,11 @@ const asterisk = { color: "#D92F2F", marginRight: 3 };
 
 // Need to have a "-" as placeholder if nothing is selected, but it doesn't have to be an option
 // Need to have 2 diff sizes of buttons
-export default function StewardAndDevelopers() {
+interface StewardAndDevelopersProps {
+  setErrorMessage: Function;
+}
+export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
+  const { setErrorMessage } = props;
   const measureServiceApi = useMeasureServiceApi();
   const [organizations, setOrganizations] = useState<string[]>();
   const [measure, setMeasure] = useState<any>(measureStore.state);
@@ -88,7 +92,7 @@ export default function StewardAndDevelopers() {
       })
       .catch(() => {
         const message = `Error updating measure "${measure.measureName}"`;
-        handleToast("danger", message, true);
+        setErrorMessage(message);
       });
   };
 
@@ -130,7 +134,7 @@ export default function StewardAndDevelopers() {
       })
       .catch(() => {
         const message = `Error fetching organizations`;
-        handleToast("danger", message, true);
+        setErrorMessage(message);
       });
   }, []);
 

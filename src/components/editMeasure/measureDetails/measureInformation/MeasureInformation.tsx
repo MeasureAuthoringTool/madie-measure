@@ -38,7 +38,12 @@ interface measureInformationForm {
   cmsId: string;
 }
 
-export default function MeasureInformation() {
+interface MeasureInformationProps {
+  setErrorMessage: Function;
+}
+
+export default function MeasureInformation(props: MeasureInformationProps) {
+  const { setErrorMessage } = props;
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
@@ -173,8 +178,9 @@ export default function MeasureInformation() {
         // updating measure will propagate update state site wide.
         updateMeasure(newMeasure);
       })
+      // update to alert
       .catch((err) => {
-        handleToast("danger", err.response.data.message, true);
+        setErrorMessage(err?.response?.data?.message?.toString());
       });
   };
 

@@ -5,12 +5,18 @@ import { Measure } from "@madie/madie-models";
 import { versionFormat } from "../../utils/versionFormat";
 import { useHistory } from "react-router-dom";
 import { Chip, IconButton } from "@mui/material";
-import { TextField, Button } from "@madie/madie-design-system/dist/react";
+import {
+  TextField,
+  Button,
+  Popover,
+} from "@madie/madie-design-system/dist/react";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
-import StatusHandler from "../measureEditor/StatusHandler";
+import { getFeatureFlag } from "../../utils/featureFlag";
+import JSzip from "jszip";
+import { saveAs } from "file-saver";
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -54,6 +60,11 @@ export default function MeasureList(props: {
   currentPage: number;
 }) {
   const history = useHistory();
+
+  // Popover utilities
+  const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedMeasure, setSelectedMeasure] = useState<Measure>(null);
 
   const measureServiceApi = useMeasureServiceApi();
 
@@ -125,6 +136,39 @@ export default function MeasureList(props: {
         <ClearIcon />
       </IconButton>
     ),
+  };
+
+  const handleOpen = (
+    selected: Measure,
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    setSelectedMeasure(selected);
+    setAnchorEl(event.currentTarget);
+    setOptionsOpen(true);
+  };
+
+  const handleClose = () => {
+    setOptionsOpen(false);
+    setSelectedMeasure(null);
+    setAnchorEl(null);
+  };
+
+  const viewEditRedirect = () => {
+    history.push(`/measures/${selectedMeasure?.id}/edit/details`);
+    setOptionsOpen(false);
+  };
+
+  const zipData = () => {
+    const zip = new JSzip();
+    zip.generateAsync({ type: "blob" }).then(function (content) {
+      saveAs(
+        content,
+        `${selectedMeasure?.ecqmTitle}-v${versionFormat(
+          selectedMeasure?.version,
+          selectedMeasure?.revisionNumber
+        )}-${selectedMeasure?.model}.zip`
+      );
+    });
   };
 
   return (
@@ -201,20 +245,46 @@ export default function MeasureList(props: {
                       <td>
                         <Button
                           variant="outline-secondary"
-                          onClick={() => {
-                            history.push(
-                              `/measures/${measure.id}/edit/details`
-                            );
+                          onClick={(e) => {
+                            if (getFeatureFlag("export")) {
+                              handleOpen(measure, e);
+                            } else {
+                              history.push(
+                                `/measures/${measure.id}/edit/details`
+                              );
+                            }
                           }}
-                          data-testid={`edit-measure-${measure.id}`}
+                          data-testid={
+                            getFeatureFlag("export")
+                              ? `measure-action-${measure.id}`
+                              : `edit-measure-${measure.id}`
+                          }
                         >
-                          View
+                          {getFeatureFlag("export") ? "Select" : "View"}
                         </Button>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              <Popover
+                optionsOpen={optionsOpen}
+                anchorEl={anchorEl}
+                handleClose={handleClose}
+                canEdit={true}
+                editViewSelectOptionProps={{
+                  label: "View",
+                  toImplementFunction: viewEditRedirect,
+                  dataTestId: `edit-measure-${selectedMeasure?.id}`,
+                }}
+                otherSelectOptionProps={[
+                  {
+                    label: "Export",
+                    toImplementFunction: zipData,
+                    dataTestId: `export-measure-${selectedMeasure?.id}`,
+                  },
+                ]}
+              />
             </div>
           </div>
         </div>

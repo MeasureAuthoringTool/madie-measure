@@ -16,6 +16,7 @@ import MeasureMetadataForm from "./MeasureMetadata";
 import { useOktaTokens } from "@madie/madie-util";
 
 jest.mock("../../../../api/useMeasureServiceApi");
+const setErrorMessage = jest.fn();
 const testUser = "john doe";
 const mockMetaData = {
   steward: "Test Steward",
@@ -95,7 +96,12 @@ describe("MeasureRationale component", () => {
     screen;
 
   it("Should render empty titles with empty props", () => {
-    render(<MeasureMetadataForm measureMetadataType="" />);
+    render(
+      <MeasureMetadataForm
+        measureMetadataType=""
+        setErrorMessage={setErrorMessage}
+      />
+    );
     expect(queryByText("Description")).toBeNull();
     expect(queryByText("Copyright")).toBeNull();
     expect(queryByText("Disclaimer")).toBeNull();
@@ -104,7 +110,12 @@ describe("MeasureRationale component", () => {
   });
 
   it("should render the MeasureMetadata component with the supplied rationale information", async () => {
-    render(<MeasureMetadataForm measureMetadataType="Rationale" />);
+    render(
+      <MeasureMetadataForm
+        measureMetadataType="Rationale"
+        setErrorMessage={setErrorMessage}
+      />
+    );
 
     expect(screen.getByTestId("measureRationale")).toBeInTheDocument();
 
@@ -122,7 +133,12 @@ describe("MeasureRationale component", () => {
 
   it("should default the measureMetadata if none is supplied", () => {
     mockMeasure.measureMetaData = {};
-    render(<MeasureMetadataForm measureMetadataType="Rationale" />);
+    render(
+      <MeasureMetadataForm
+        measureMetadataType="Rationale"
+        setErrorMessage={setErrorMessage}
+      />
+    );
 
     const input = getByTestId("measureRationaleInput") as HTMLTextAreaElement;
     expectInputValue(input, "");
@@ -139,7 +155,12 @@ describe("MeasureRationale component", () => {
   });
 
   it("Should display Description validation error when input is empty", async () => {
-    render(<MeasureMetadataForm measureMetadataType="Description" />);
+    render(
+      <MeasureMetadataForm
+        measureMetadataType="Description"
+        setErrorMessage={setErrorMessage}
+      />
+    );
 
     const input = getByTestId("measureDescriptionInput") as HTMLTextAreaElement;
     expectInputValue(input, "Test Description");
@@ -159,7 +180,12 @@ describe("MeasureRationale component", () => {
   });
 
   it("Should not display validation error and save empty input successfully for metadata that does not need validation", async () => {
-    render(<MeasureMetadataForm measureMetadataType="Copyright" />);
+    render(
+      <MeasureMetadataForm
+        measureMetadataType="Copyright"
+        setErrorMessage={setErrorMessage}
+      />
+    );
 
     const input = getByTestId("measureCopyrightInput") as HTMLTextAreaElement;
     expectInputValue(input, "Test Copyright");
@@ -190,7 +216,12 @@ describe("MeasureRationale component", () => {
   });
 
   it("should update the rationale input field when a user types a new value", async () => {
-    render(<MeasureMetadataForm measureMetadataType="Rationale" />);
+    render(
+      <MeasureMetadataForm
+        measureMetadataType="Rationale"
+        setErrorMessage={setErrorMessage}
+      />
+    );
 
     const input = getByTestId("measureRationaleInput") as HTMLTextAreaElement;
     await waitFor(() => expectInputValue(input, RATIONALE));
@@ -202,7 +233,12 @@ describe("MeasureRationale component", () => {
   });
 
   it("should save the rationale information when the form is submitted", async () => {
-    render(<MeasureMetadataForm measureMetadataType="Rationale" />);
+    render(
+      <MeasureMetadataForm
+        measureMetadataType="Rationale"
+        setErrorMessage={setErrorMessage}
+      />
+    );
     const input = getByTestId("measureRationaleInput");
     act(() => {
       fireEvent.change(input, {
@@ -231,7 +267,12 @@ describe("MeasureRationale component", () => {
   it("should render an error message if the measure rationale cannot be saved", async () => {
     serviceApiMock.updateMeasure = jest.fn().mockRejectedValue("Save error");
 
-    render(<MeasureMetadataForm measureMetadataType="Rationale" />);
+    render(
+      <MeasureMetadataForm
+        measureMetadataType="Rationale"
+        setErrorMessage={setErrorMessage}
+      />
+    );
     const input = getByTestId("measureRationaleInput");
     fireEvent.change(input, {
       target: { value: NEWVALUE },
@@ -239,10 +280,7 @@ describe("MeasureRationale component", () => {
     const save = getByTestId("measureRationaleSave");
     fireEvent.click(save);
 
-    const error = await findByTestId("measureRationaleError");
-    expect(error.textContent).toBe(
-      'Error updating measure "The Measure for Testing" for Rationale'
-    );
+    expect(setErrorMessage).toHaveBeenCalled;
   });
 
   it("should reset form on discard changes", async () => {
@@ -250,6 +288,7 @@ describe("MeasureRationale component", () => {
       <MeasureMetadataForm
         measureMetadataType="Clinical Recommendation Statement"
         header="Clinical Recommendation"
+        setErrorMessage={setErrorMessage}
       />
     );
 
@@ -290,6 +329,7 @@ describe("MeasureRationale component", () => {
       <MeasureMetadataForm
         measureMetadataType="Clinical Recommendation Statement"
         header="Clinical Recommendation"
+        setErrorMessage={setErrorMessage}
       />
     );
 
@@ -330,7 +370,12 @@ describe("MeasureRationale component", () => {
     useOktaTokens.mockImplementation(() => ({
       getUserName: () => "AnotherUser@example.com", //#nosec
     }));
-    render(<MeasureMetadataForm measureMetadataType="Rationale" />);
+    render(
+      <MeasureMetadataForm
+        measureMetadataType="Rationale"
+        setErrorMessage={setErrorMessage}
+      />
+    );
 
     const saveButton = screen.queryByText("measureRationaleSave");
     expect(saveButton).not.toBeInTheDocument();
@@ -340,7 +385,12 @@ describe("MeasureRationale component", () => {
     useOktaTokens.mockImplementation(() => ({
       getUserName: () => "AnotherUser@example.com", //#nosec
     }));
-    render(<MeasureMetadataForm measureMetadataType="Rationale" />);
+    render(
+      <MeasureMetadataForm
+        measureMetadataType="Rationale"
+        setErrorMessage={setErrorMessage}
+      />
+    );
 
     const input = screen.queryByText("measureRationaleInput");
     expect(input).not.toBeInTheDocument();
@@ -350,7 +400,12 @@ describe("MeasureRationale component", () => {
     useOktaTokens.mockImplementation(() => ({
       getUserName: () => "othertestuser@example.com", //#nosec
     }));
-    render(<MeasureMetadataForm measureMetadataType="Rationale" />);
+    render(
+      <MeasureMetadataForm
+        measureMetadataType="Rationale"
+        setErrorMessage={setErrorMessage}
+      />
+    );
 
     const saveButton = await screen.findByRole("button", { name: "Save" });
     await waitFor(() => expect(saveButton).toBeInTheDocument());
@@ -360,7 +415,12 @@ describe("MeasureRationale component", () => {
     useOktaTokens.mockImplementation(() => ({
       getUserName: () => "othertestuser@example.com", //#nosec
     }));
-    render(<MeasureMetadataForm measureMetadataType="Rationale" />);
+    render(
+      <MeasureMetadataForm
+        measureMetadataType="Rationale"
+        setErrorMessage={setErrorMessage}
+      />
+    );
 
     const input = await screen.findByRole("textbox", { name: "Rationale" });
     await waitFor(() => expect(input).toBeInTheDocument());

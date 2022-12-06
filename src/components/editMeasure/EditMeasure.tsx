@@ -17,7 +17,7 @@ import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { MadiePatient } from "@madie/madie-patient";
 import MeasureGroups from "../measureGroups/MeasureGroups";
 import { measureStore } from "@madie/madie-util";
-import { Toast } from "@madie/madie-design-system/dist/react";
+import { Toast, MadieAlert } from "@madie/madie-design-system/dist/react";
 import DeleteDialog from "./DeleteDialog";
 interface inputParams {
   id: string;
@@ -85,9 +85,11 @@ export default function EditMeasure() {
       if (e?.response?.data) {
         const { error, status, message } = e.response.data;
         const errorMessage = `${status}: ${error} ${message}`;
-        handleToast("danger", errorMessage, true);
+        setErrorMessage(errorMessage);
+        setDeleteOpen(false);
       } else {
-        handleToast("danger", e.toString(), true);
+        setErrorMessage(e.toString());
+        setDeleteOpen(false);
       }
     }
   };
@@ -102,14 +104,37 @@ export default function EditMeasure() {
     setToastOpen(open);
   };
 
+  // At this time it appears only possible to have a single error at a time because of the way state is updated.
+  const [errorMessage, setErrorMessage] = useState<string>("");
+
   const contentDiv = (
     <div data-testid="editMeasure">
       <div tw="relative -mt-12">
         <EditMeasureNav />
+        <div
+          style={{
+            marginLeft: "2rem",
+            marginRight: "2rem",
+            marginTop: "1.5rem",
+          }}
+        >
+          {errorMessage && (
+            <MadieAlert
+              type="error"
+              content={
+                <>
+                  <h5 tw="py-1">Error found</h5>
+                  <p data-testid="edit-measure-alert">{errorMessage}</p>
+                </>
+              }
+              canClose={false}
+            />
+          )}
+        </div>
         <Switch>
           <Redirect exact from={url} to={`${url}/details`} />
           <Route path={`${url}/details`}>
-            <MeasureDetails />
+            <MeasureDetails setErrorMessage={setErrorMessage} />
           </Route>
           <Route path={`${url}/cql-editor`}>
             <MeasureEditor />
