@@ -34,7 +34,6 @@ jest.mock("../../api/useMeasureServiceApi", () =>
   jest.fn(() => mockMeasureServiceApi)
 );
 
-//isMeasureExportEnabled,
 jest.mock("../../utils/featureFlag", () => ({
   getFeatureFlag: jest.fn(),
 }));
