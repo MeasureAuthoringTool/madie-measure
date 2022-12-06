@@ -252,6 +252,37 @@ describe("EditMeasure Component", () => {
     });
   });
 
+  it("delete fails without an error object", async () => {
+    serviceApiMock.updateMeasure = jest
+      .fn()
+      .mockRejectedValueOnce("I'm an error");
+    const { findByTestId, queryByTestId, getByTestId, queryByText } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <EditMeasure />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+    expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+    const loading = queryByTestId("loading");
+    expect(loading).toBeNull();
+    act(() => {
+      window.dispatchEvent(new Event("delete-measure"));
+    });
+    await waitFor(() =>
+      expect(queryByTestId("delete-measure-dialog-button")).toBeInTheDocument()
+    );
+    const continueButton = await findByTestId("delete-measure-button-2");
+    fireEvent.click(continueButton);
+    await waitFor(() => {
+      expect(queryByText("Are you sure you want to delete")).not.toBeVisible();
+      expect(getByTestId("edit-measure-alert")).toBeInTheDocument();
+    });
+  });
+
   it("should redirect to 404", async () => {
     const serviceApiRejectedMock = {
       fetchMeasure: jest.fn().mockRejectedValue("404"),
