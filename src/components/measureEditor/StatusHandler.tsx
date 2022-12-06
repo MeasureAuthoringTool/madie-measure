@@ -7,6 +7,7 @@ const StatusHandler = ({
   error,
   errorMessage,
   outboundAnnotations,
+  hasSubTitle,
 }) => {
   // success.status = fulfilled && elmTranslation errors
   const transformAnnotation = (annotation) => {
@@ -151,21 +152,48 @@ const StatusHandler = ({
             />
           );
         } else {
-          return (
-            <MadieAlert
-              type="error"
-              content={
-                <h3
-                  aria-live="polite"
-                  role="alert"
-                  data-testid="generic-error-text-header"
-                >
-                  {errorMessage}
-                </h3>
-              }
-              canClose={false}
-            />
-          );
+          if (hasSubTitle) {
+            return (
+              <MadieAlert
+                type="error"
+                content={
+                  <div aria-live="polite" role="alert">
+                    <h3
+                      aria-live="polite"
+                      role="alert"
+                      data-testid="generic-error-text-header"
+                    >
+                      {errorMessage}
+                    </h3>
+                    <h5 data-testid="generic-error-text-sub-header">
+                      Please reach out to{" "}
+                      <a href="https://oncprojectracking.healthit.gov/support/projects/BONNIEMAT/summary">
+                        MADiE helpdesk
+                      </a>{" "}
+                      for assistance.
+                    </h5>
+                  </div>
+                }
+                canClose={false}
+              />
+            );
+          } else {
+            return (
+              <MadieAlert
+                type="error"
+                content={
+                  <h3
+                    aria-live="polite"
+                    role="alert"
+                    data-testid="generic-error-text-header"
+                  >
+                    {errorMessage}
+                  </h3>
+                }
+                canClose={false}
+              />
+            );
+          }
         }
       }
       // if we have errors but no error message tied to it

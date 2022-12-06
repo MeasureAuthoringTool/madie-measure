@@ -208,6 +208,7 @@ export default function MeasureLanding() {
               errorMessage={errMsg}
               success={undefined}
               outboundAnnotations={[]}
+              hasSubTitle={true}
             />
           )}
 

@@ -31,6 +31,7 @@ describe("StatusHandler Component", () => {
         error={false}
         errorMessage={false}
         outboundAnnotations={[]}
+        hasSubTitle={false}
       />
     );
 
@@ -55,6 +56,7 @@ describe("StatusHandler Component", () => {
         error={false}
         errorMessage={false}
         outboundAnnotations={annotationsObject}
+        hasSubTitle={false}
       />
     );
 
@@ -85,6 +87,7 @@ describe("StatusHandler Component", () => {
         error={true}
         errorMessage={""}
         outboundAnnotations={[]}
+        hasSubTitle={false}
       />
     );
 
@@ -108,6 +111,7 @@ describe("StatusHandler Component", () => {
         error={true}
         errorMessage={""}
         outboundAnnotations={annotationsObject}
+        hasSubTitle={false}
       />
     );
 
@@ -134,6 +138,7 @@ describe("StatusHandler Component", () => {
         error={true}
         errorMessage={errorMessage}
         outboundAnnotations={[]}
+        hasSubTitle={false}
       />
     );
 
@@ -158,6 +163,7 @@ describe("StatusHandler Component", () => {
         error={true}
         errorMessage={errorMessage}
         outboundAnnotations={annotationsObject}
+        hasSubTitle={false}
       />
     );
 
@@ -183,6 +189,7 @@ describe("StatusHandler Component", () => {
         error={false}
         errorMessage=""
         outboundAnnotations={annotationsObject}
+        hasSubTitle={false}
       />
     );
 
@@ -210,6 +217,7 @@ describe("StatusHandler Component", () => {
         error={false}
         errorMessage={warningMessage}
         outboundAnnotations={annotationsObject}
+        hasSubTitle={false}
       />
     );
 
@@ -239,6 +247,7 @@ describe("StatusHandler Component", () => {
         error={false}
         errorMessage={warningMessage}
         outboundAnnotations={[]}
+        hasSubTitle={false}
       />
     );
 
@@ -252,5 +261,34 @@ describe("StatusHandler Component", () => {
     expect(libraryWarning?.textContent).toBe(warningMessage);
 
     expect(successList).not.toBeInTheDocument();
+  });
+
+  test("It displays an error message with provided error message and subtitle", () => {
+    const success = {
+      status: undefined,
+      message: "",
+    };
+    const errorMessage = "Something wrong with measure list page";
+    render(
+      <StatusHandler
+        success={success}
+        error={true}
+        errorMessage={errorMessage}
+        outboundAnnotations={[]}
+        hasSubTitle={true}
+      />
+    );
+    screen.debug();
+    const errorHeader = getByTestId("generic-error-text-header");
+    const errorSubHeader = getByTestId("generic-error-text-sub-header");
+    const subTitle = screen.getByText("MADiE helpdesk");
+
+    expect(errorHeader.textContent).toBe(errorMessage);
+    expect(errorSubHeader).toBeInTheDocument();
+    expect(subTitle).toBeInTheDocument();
+    expect(subTitle.closest("a")).toHaveAttribute(
+      "href",
+      "https://oncprojectracking.healthit.gov/support/projects/BONNIEMAT/summary"
+    );
   });
 });
