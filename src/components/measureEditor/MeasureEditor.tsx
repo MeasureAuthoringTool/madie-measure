@@ -26,6 +26,7 @@ import {
   useDocumentTitle,
   routeHandlerStore,
 } from "@madie/madie-util";
+import { versionFormat } from "../../utils/versionFormat";
 import StatusHandler from "./StatusHandler";
 
 const MessageText = tw.p`text-sm font-medium`;
@@ -195,7 +196,7 @@ const MeasureEditor = () => {
         measure?.cql,
         measure?.cqlLibraryName,
         "",
-        "0.0.000", //as the versioning is not implemented in measure for now we just send default value: 0.0.000
+        versionFormat(measure?.version, measure?.revisionNumber),
         "measureEditor"
       );
 
