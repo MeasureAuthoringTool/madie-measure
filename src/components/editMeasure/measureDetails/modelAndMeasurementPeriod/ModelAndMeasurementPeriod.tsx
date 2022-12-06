@@ -29,7 +29,12 @@ interface modelAndMeasurementPeriod {
   measurementPeriodEnd: Date;
 }
 
-const ModelAndMeasurementPeriod = () => {
+interface ModelAndMeasurementPeriodProps {
+  setErrorMessage: Function;
+}
+
+const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
+  const { setErrorMessage } = props;
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
@@ -130,8 +135,8 @@ const ModelAndMeasurementPeriod = () => {
         updateMeasure(newMeasure);
       })
       .catch((err) => {
-        // setErrorMessage(err.response.data.message);
-        handleToast("danger", err.response.data.message, true);
+        // alert here.
+        setErrorMessage(err?.response?.data?.message.toString());
       });
   };
 

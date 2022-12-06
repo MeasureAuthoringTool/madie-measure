@@ -15,6 +15,7 @@ jest.mock("./measureDetails/MeasureDetails");
 jest.mock("../measureEditor/MeasureEditor");
 jest.mock("../../api/useMeasureServiceApi");
 
+const setErrorMessage = jest.fn();
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 
@@ -247,9 +248,7 @@ describe("EditMeasure Component", () => {
     const continueButton = await findByTestId("delete-measure-button-2");
     fireEvent.click(continueButton);
     await waitFor(() => {
-      expect(
-        getByTestId("edit-measure-information-generic-error-text")
-      ).toBeInTheDocument();
+      expect(getByTestId("edit-measure-alert")).toBeInTheDocument();
     });
   });
 

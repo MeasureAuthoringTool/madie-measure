@@ -104,11 +104,11 @@ describe("Steward and Developers component", () => {
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
     mockMeasure.measureMetaData = { ...mockMetaData };
   });
-
+  const setErrorMessage = jest.fn();
   afterEach(() => jest.clearAllMocks());
 
   it("should render steward and developers form with disabled save and discard buttons", async () => {
-    render(<StewardAndDevelopers />);
+    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
     expect(await screen.findByTestId("measure-steward-developers-form"));
     expect(screen.getByRole("heading")).toHaveTextContent(
       "Steward & Developers"
@@ -128,7 +128,7 @@ describe("Steward and Developers component", () => {
   });
 
   it("should render steward and developers dropdown with organization list", async () => {
-    render(<StewardAndDevelopers />);
+    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
     const stewardDropDown = await screen.findByTestId("steward");
     fireEvent.keyDown(stewardDropDown, { key: "ArrowDown" });
 
@@ -156,17 +156,12 @@ describe("Steward and Developers component", () => {
     } as unknown as MeasureServiceApi;
 
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
-    render(<StewardAndDevelopers />);
-
-    const toastMessage = await screen.findByTestId(
-      "steward-and-developers-error"
+    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
+    await waitFor(() =>
+      expect(setErrorMessage).toHaveBeenCalledWith(
+        "Error fetching organizations"
+      )
     );
-    expect(toastMessage).toBeInTheDocument();
-    expect(toastMessage).toHaveTextContent("Error fetching organizations");
-
-    // verify if the toast message can be closed manually
-    fireEvent.click(screen.getByTestId("close-error-button"));
-    expect(toastMessage).not.toBeInTheDocument();
   });
 
   it("should disable dropdowns if the user does not have measure edit permissions", async () => {
@@ -174,7 +169,7 @@ describe("Steward and Developers component", () => {
       getUserName: () => "Test User 2", //#nosec
     }));
 
-    render(<StewardAndDevelopers />);
+    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
     const stewardAutoComplete = await screen.findByTestId("steward");
     const stewardComboBox = await within(stewardAutoComplete).getByRole(
       "combobox"
@@ -192,7 +187,7 @@ describe("Steward and Developers component", () => {
     useOktaTokens.mockImplementation(() => ({
       getUserName: () => "othertestuser@example.com", //#nosec
     }));
-    render(<StewardAndDevelopers />);
+    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
     const stewardAutoComplete = await screen.findByTestId("steward");
     const stewardComboBox = await within(stewardAutoComplete).findByRole(
       "combobox"
@@ -224,7 +219,7 @@ describe("Steward and Developers component", () => {
   });
 
   it("should display validation error messages, if the form is dirty and no options are selected", async () => {
-    render(<StewardAndDevelopers />);
+    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
 
     // verify if inline error is displayed if no steward is selected and save button is disabled
     const stewardAutoComplete = await screen.findByTestId("steward");
@@ -257,7 +252,7 @@ describe("Steward and Developers component", () => {
   });
 
   it("should enable save and discard button after updating options for steward and Developers", async () => {
-    render(<StewardAndDevelopers />);
+    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
     // Note that drop down options are alphabetically sorted
     await act(async () => {
       const stewardAutoComplete = await screen.findByTestId("steward");
@@ -322,7 +317,7 @@ describe("Steward and Developers component", () => {
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
 
-    render(<StewardAndDevelopers />);
+    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
     await act(async () => {
       const stewardAutoComplete = await screen.findByTestId("steward");
       fireEvent.keyDown(stewardAutoComplete, { key: "ArrowDown" });
@@ -338,15 +333,16 @@ describe("Steward and Developers component", () => {
       fireEvent.click(saveButton);
     });
 
-    const toastMessage = await screen.findByTestId(
-      "steward-and-developers-error"
-    );
-    expect(toastMessage).toBeInTheDocument();
-    expect(toastMessage).toHaveTextContent("Error updating measure");
+    expect(setErrorMessage).toHaveBeenCalled();
+    // const toastMessage = await screen.findByTestId(
+    //   "steward-and-developers-error"
+    // );
+    // expect(toastMessage).toBeInTheDocument();
+    // expect(toastMessage).toHaveTextContent("Error updating measure");
   });
 
   it("should discard changes by click discard changes button and continue", async () => {
-    render(<StewardAndDevelopers />);
+    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
     // verifies if the fields are populated with existing data
     const stewardAutoComplete = await screen.findByTestId("steward");
     const stewardComboBox = within(stewardAutoComplete).getByRole("combobox");
@@ -376,7 +372,7 @@ describe("Steward and Developers component", () => {
   });
 
   it("should close the discard dialog on close", async () => {
-    render(<StewardAndDevelopers />);
+    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
     // verifies if the fields are populated with existing data
     const stewardAutoComplete = await screen.findByTestId("steward");
     const stewardComboBox = within(stewardAutoComplete).getByRole("combobox");
