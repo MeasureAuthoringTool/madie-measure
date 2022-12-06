@@ -863,7 +863,8 @@ describe("Measure Groups Page", () => {
           {
             id: "id-1",
             name: PopulationType.INITIAL_POPULATION,
-            definition: "Encounter With Age Range and Without VTE Diagnosis or Obstetrical Conditions",
+            definition:
+              "Encounter With Age Range and Without VTE Diagnosis or Obstetrical Conditions",
           },
         ],
         groupDescription: "",
