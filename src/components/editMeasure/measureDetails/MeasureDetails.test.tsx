@@ -36,6 +36,7 @@ jest.mock("@madie/madie-util", () => ({
 }));
 const MeasureInformationMock = MeasureInformation as jest.Mock<JSX.Element>;
 const MeasureMetadataMock = MeasureMetadata as jest.Mock<JSX.Element>;
+const setErrorMessage = jest.fn();
 
 MeasureInformationMock.mockImplementation(() => {
   return <div>Mock Measure Info</div>;
@@ -63,7 +64,7 @@ describe("MeasureDetails component", () => {
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
           <Route path="/foo">
-            <MeasureDetails />
+            <MeasureDetails setErrorMessage={setErrorMessage} />
           </Route>
         </MemoryRouter>
       </ApiContextProvider>
@@ -78,7 +79,7 @@ describe("MeasureDetails component", () => {
           initialEntries={[{ pathname: "/foo/model&measurement-period" }]}
         >
           <Route path="/foo">
-            <MeasureDetails />
+            <MeasureDetails setErrorMessage={setErrorMessage} />
           </Route>
         </MemoryRouter>
       </ApiContextProvider>
@@ -93,7 +94,7 @@ describe("MeasureDetails component", () => {
           initialEntries={[{ pathname: "/foo/measure-description" }]}
         >
           <Route path="/foo">
-            <MeasureDetails />
+            <MeasureDetails setErrorMessage={setErrorMessage} />
           </Route>
         </MemoryRouter>
       </ApiContextProvider>
@@ -116,7 +117,7 @@ describe("MeasureDetails component", () => {
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={[{ pathname: "/foo/measure-copyright" }]}>
           <Route path="/foo">
-            <MeasureDetails />
+            <MeasureDetails setErrorMessage={setErrorMessage} />
           </Route>
         </MemoryRouter>
       </ApiContextProvider>
@@ -141,7 +142,7 @@ describe("MeasureDetails component", () => {
           initialEntries={[{ pathname: "/foo/measure-disclaimer" }]}
         >
           <Route path="/foo">
-            <MeasureDetails />
+            <MeasureDetails setErrorMessage={setErrorMessage} />
           </Route>
         </MemoryRouter>
       </ApiContextProvider>
@@ -164,7 +165,7 @@ describe("MeasureDetails component", () => {
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={[{ pathname: "/foo/measure-rationale" }]}>
           <Route path="/foo">
-            <MeasureDetails />
+            <MeasureDetails setErrorMessage={setErrorMessage} />
           </Route>
         </MemoryRouter>
       </ApiContextProvider>
@@ -187,7 +188,7 @@ describe("MeasureDetails component", () => {
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={[{ pathname: "/foo/measure-guidance" }]}>
           <Route path="/foo">
-            <MeasureDetails />
+            <MeasureDetails setErrorMessage={setErrorMessage} />
           </Route>
         </MemoryRouter>
       </ApiContextProvider>
@@ -212,7 +213,7 @@ describe("MeasureDetails component", () => {
           initialEntries={[{ pathname: "/foo/measure-risk-adjustment" }]}
         >
           <Route path="/foo">
-            <MeasureDetails />
+            <MeasureDetails setErrorMessage={setErrorMessage} />
           </Route>
         </MemoryRouter>
       </ApiContextProvider>
