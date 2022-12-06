@@ -270,11 +270,13 @@ export default function MeasureList(props: {
                   toImplementFunction: viewEditredirect,
                   dataTestId: `edit-measure-${selectedMeasure?.id}`,
                 }}
-                otherSelectOptionProps={{
-                  label: "Export",
-                  toImplementFunction: zipData,
-                  dataTestId: `export-measure-${selectedMeasure?.id}`,
-                }}
+                otherSelectOptionProps={[
+                  {
+                    label: "Export",
+                    toImplementFunction: zipData,
+                    dataTestId: `export-measure-${selectedMeasure?.id}`,
+                  },
+                ]}
               />
             </div>
           </div>
