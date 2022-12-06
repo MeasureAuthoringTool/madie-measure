@@ -1,6 +1,9 @@
 import React from "react";
 
-export function featureFlag() {
+export function getFeatureFlag(feature: string) {
   //for now it is set to default false until feature flag is implemented
-  return true;
+  if (feature === "export") {
+    return false;
+  }
+  return false;
 }

@@ -14,7 +14,7 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
-import { featureFlag } from "../../utils/featureFlag";
+import { getFeatureFlag } from "../../utils/featureFlag";
 import JSzip from "jszip";
 import { saveAs } from "file-saver";
 
@@ -239,7 +239,7 @@ export default function MeasureList(props: {
                         <Button
                           variant="outline-secondary"
                           onClick={(e) => {
-                            if (featureFlag()) {
+                            if (getFeatureFlag("export")) {
                               handleOpen(measure, e);
                             } else {
                               history.push(
@@ -248,12 +248,12 @@ export default function MeasureList(props: {
                             }
                           }}
                           data-testid={
-                            featureFlag()
+                            getFeatureFlag("export")
                               ? `measure-action-${measure.id}`
                               : `edit-measure-${measure.id}`
                           }
                         >
-                          {featureFlag() ? "Select" : "View"}
+                          {getFeatureFlag("export") ? "Select" : "View"}
                         </Button>
                       </td>
                     </tr>

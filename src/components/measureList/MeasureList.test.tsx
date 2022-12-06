@@ -5,7 +5,7 @@ import MeasureList from "./MeasureList";
 import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
 import { oneItemResponse } from "../measureRoutes/mockMeasureResponses";
 import userEvent from "@testing-library/user-event";
-import { featureFlag } from "../../utils/featureFlag";
+import { getFeatureFlag } from "../../utils/featureFlag";
 
 import { v4 as uuid } from "uuid";
 
@@ -36,7 +36,7 @@ jest.mock("../../api/useMeasureServiceApi", () =>
 
 //isMeasureExportEnabled,
 jest.mock("../../utils/featureFlag", () => ({
-  featureFlag: jest.fn(),
+  getFeatureFlag: jest.fn(),
 }));
 
 const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
@@ -130,7 +130,7 @@ describe("Measure List component", () => {
   });
 
   it("should navigate to the edit measure screen on click of edit/view button", () => {
-    (featureFlag as jest.Mock).mockImplementation(() => {
+    (getFeatureFlag as jest.Mock).mockImplementation(() => {
       return false;
     });
 
@@ -159,7 +159,7 @@ describe("Measure List component", () => {
   });
 
   it("should display the popover with options of export and view when feature flag is set to true", () => {
-    (featureFlag as jest.Mock).mockImplementation(() => {
+    (getFeatureFlag as jest.Mock).mockImplementation(() => {
       return true;
     });
 
