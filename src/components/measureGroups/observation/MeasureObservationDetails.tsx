@@ -70,7 +70,7 @@ const MeasureObservationDetails = ({
           </DSLink>
         )}
         <Select
-          placeHolder={{ name: "-", value: "" }}
+          placeHolder={{ name: "Select Observation", value: "" }}
           required={required}
           disabled={!canEdit}
           label={label ? label : "Observation"}
@@ -105,7 +105,7 @@ const MeasureObservationDetails = ({
       </div>
       <div tw="pb-3 px-8 pt-6">
         <Select
-          placeHolder={{ name: "-", value: "" }}
+          placeHolder={{ name: "Select Aggragate Function", value: "" }}
           disabled={!canEdit}
           required={required}
           label="Aggregate Function"

@@ -80,12 +80,6 @@ const deleteToken = "FDE8472A-6095-4292-ABF7-E35AD435F05F"; // randomly generate
 // provides dropdown options for Improvement Notation
 const improvementNotationOptions = [
   {
-    label: "-",
-    value: "",
-    subtitle: "Optional",
-    code: "",
-  },
-  {
     label: "Increased score indicates improvement",
     value: "Increased score indicates improvement",
     subtitle:
@@ -693,7 +687,7 @@ const MeasureGroups = () => {
                     formControl={formik.getFieldProps("measureGroupTypes")}
                     id="measure-group-type"
                     label="Type"
-                    placeHolder={{ name: "-", value: "" }}
+                    placeHolder={{ name: "Select Measure Group", value: "" }}
                     defaultValue={formik.values.measureGroupTypes}
                     required={true}
                     disabled={!canEdit}
@@ -730,7 +724,7 @@ const MeasureGroups = () => {
                     id="populationBasis"
                     dataTestId="populationBasis"
                     label="Population Basis"
-                    placeholder="-"
+                    placeholder="Select Population Basis"
                     required={true}
                     disabled={!canEdit}
                     error={
@@ -748,7 +742,7 @@ const MeasureGroups = () => {
                 </div>
 
                 <Select
-                  placeHolder={{ name: "-", value: "" }}
+                  placeHolder={{ name: "Select Scoring", value: "" }}
                   required
                   label="Scoring"
                   id="scoring-select"
@@ -1027,7 +1021,10 @@ const MeasureGroups = () => {
                                         )}
                                       <Select
                                         disabled={!canEdit}
-                                        placeHolder={{ name: "-", value: "" }}
+                                        placeHolder={{
+                                          name: "Select Definition",
+                                          value: "",
+                                        }}
                                         label={`Stratification ${i + 1}`}
                                         id={`Stratification-select-${i + 1}`}
                                         aria-describedby={`Stratification-select-${
@@ -1060,7 +1057,10 @@ const MeasureGroups = () => {
                                     <div tw="pt-4">
                                       <Select
                                         disabled={!canEdit}
-                                        placeHolder={{ name: "-", value: "" }}
+                                        placeHolder={{
+                                          name: "Select Association",
+                                          value: "",
+                                        }}
                                         label={`Association ${i + 1}`}
                                         id={`association-select-${i + 1}`}
                                         aria-describedby={`association-select-${
@@ -1177,7 +1177,10 @@ const MeasureGroups = () => {
                   </div>
                   <div tw="pt-6 pb-6 col-start-1 col-end-2">
                     <Select
-                      placeHolder={{ name: "-", value: "" }}
+                      placeHolder={{
+                        name: "Select Improvement Notation",
+                        value: "",
+                      }}
                       label="Improvement Notation"
                       id="improvement-notation-select"
                       inputProps={{
