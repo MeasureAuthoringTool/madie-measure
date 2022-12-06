@@ -55,12 +55,6 @@ export default function MeasureLanding() {
   const retrieveMeasures = useCallback(
     async (tab, limit, page, searchCriteria) => {
       if (!searchCriteria) {
-        // const data = await measureServiceApi.fetchMeasures(
-        //   tab === 0,
-        //   limit,
-        //   page
-        // );
-        // setPageProps(data);
         measureServiceApi
           .fetchMeasures(tab === 0, limit, page)
           .then((data) => {
@@ -71,14 +65,6 @@ export default function MeasureLanding() {
             setInitialLoad(false);
           });
       } else {
-        // const data =
-        //   await measureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle(
-        //     tab === 0,
-        //     limit,
-        //     page,
-        //     searchCriteria
-        //   );
-        // setPageProps(data);
         measureServiceApi
           .searchMeasuresByMeasureNameOrEcqmTitle(
             tab === 0,
@@ -136,15 +122,6 @@ export default function MeasureLanding() {
 
   return (
     <div id="measure-landing" data-testid="measure-landing">
-      {/* {errMsg && (
-        <StatusHandler
-          error={errMsg}
-          errorMessage={errMsg}
-          success={undefined}
-          outboundAnnotations={[]}
-        />
-      )} */}
-
       <div className="measure-table">
         <section tw="flex flex-row">
           <div>

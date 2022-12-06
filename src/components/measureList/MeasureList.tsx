@@ -59,12 +59,6 @@ export default function MeasureList(props: {
 
   const handleClearClick = async (event) => {
     props.setSearchCriteria("");
-    // const data = await measureServiceApi.fetchMeasures(
-    //   props.activeTab === 0,
-    //   props.currentLimit,
-    //   0
-    // );
-    // setPageProps(data);
     measureServiceApi
       .fetchMeasures(props.activeTab === 0, props.currentLimit, 0)
       .then((data) => {
@@ -81,14 +75,6 @@ export default function MeasureList(props: {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (props.searchCriteria) {
-      // const data =
-      //   await measureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle(
-      //     props.activeTab === 0,
-      //     props.currentLimit,
-      //     0,
-      //     props.searchCriteria
-      //   );
-      // setPageProps(data);
       measureServiceApi
         .searchMeasuresByMeasureNameOrEcqmTitle(
           props.activeTab === 0,
