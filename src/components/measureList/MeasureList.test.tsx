@@ -150,6 +150,7 @@ describe("Measure List component", () => {
         currentPage={0}
       />
     );
+
     const editButton = getByTestId(`edit-measure-${measures[0].id}`);
     expect(editButton).toBeInTheDocument();
     expect(editButton).toHaveTextContent("View");
@@ -179,6 +180,7 @@ describe("Measure List component", () => {
         currentPage={0}
       />
     );
+
     const actionButton = getByTestId(`measure-action-${measures[0].id}`);
     expect(actionButton).toBeInTheDocument();
     expect(actionButton).toHaveTextContent("Select");
