@@ -10,6 +10,7 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
+import StatusHandler from "../measureEditor/StatusHandler";
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -58,12 +59,20 @@ export default function MeasureList(props: {
 
   const handleClearClick = async (event) => {
     props.setSearchCriteria("");
-    const data = await measureServiceApi.fetchMeasures(
-      props.activeTab === 0,
-      props.currentLimit,
-      0
-    );
-    setPageProps(data);
+    // const data = await measureServiceApi.fetchMeasures(
+    //   props.activeTab === 0,
+    //   props.currentLimit,
+    //   0
+    // );
+    // setPageProps(data);
+    measureServiceApi
+      .fetchMeasures(props.activeTab === 0, props.currentLimit, 0)
+      .then((data) => {
+        setPageProps(data);
+      })
+      .catch((error: Error) => {
+        props.setInitialLoad(false);
+      });
     history.push(
       `?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`
     );
@@ -72,14 +81,27 @@ export default function MeasureList(props: {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (props.searchCriteria) {
-      const data =
-        await measureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle(
+      // const data =
+      //   await measureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle(
+      //     props.activeTab === 0,
+      //     props.currentLimit,
+      //     0,
+      //     props.searchCriteria
+      //   );
+      // setPageProps(data);
+      measureServiceApi
+        .searchMeasuresByMeasureNameOrEcqmTitle(
           props.activeTab === 0,
           props.currentLimit,
           0,
           props.searchCriteria
-        );
-      setPageProps(data);
+        )
+        .then((data) => {
+          setPageProps(data);
+        })
+        .catch((error: Error) => {
+          props.setInitialLoad(false);
+        });
     }
 
     history.push(

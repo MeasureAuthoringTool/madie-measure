@@ -255,4 +255,56 @@ describe("Measure List component", () => {
       mockMeasureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle
     ).not.toHaveBeenCalledWith(true, 10, 0, "");
   });
+
+  it("Clear search with error should still do the push", () => {
+    (mockMeasureServiceApi.fetchMeasures as jest.Mock)
+      .mockClear()
+      .mockRejectedValueOnce(new Error("Unable to fetch measures"));
+    (mockMeasureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle as jest.Mock)
+      .mockClear()
+      .mockRejectedValueOnce(new Error("Unable to fetch measures"));
+
+    const { getByTestId, getByText } = render(
+      <MeasureList
+        measureList={measures}
+        setMeasureList={setMeasureListMock}
+        setTotalPages={setTotalPagesMock}
+        setTotalItems={setTotalItemsMock}
+        setVisibleItems={setVisibleItemsMock}
+        setOffset={setOffsetMock}
+        setInitialLoad={setInitialLoadMock}
+        activeTab={0}
+        searchCriteria="test"
+        setSearchCriteria={setSearchCriteriaMock}
+        currentLimit={10}
+        currentPage={0}
+      />
+    );
+
+    const searchFieldInput = getByTestId("searchMeasure-input");
+    expect(searchFieldInput).toBeInTheDocument();
+    userEvent.type(searchFieldInput, "test");
+    expect(searchFieldInput.value).toBe("test");
+
+    fireEvent.submit(searchFieldInput);
+
+    measures.forEach((m) => {
+      expect(getByText(m.measureName)).toBeInTheDocument();
+    });
+
+    const clearButton = screen.getByRole("button", {
+      name: /Clear-Search/i,
+    });
+    userEvent.click(clearButton);
+    setTimeout(() => {
+      expect(searchFieldInput.value).toBe("");
+    }, 500);
+
+    expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
+      true,
+      10,
+      0
+    );
+    expect(mockPush).toHaveBeenCalledWith("/example");
+  });
 });

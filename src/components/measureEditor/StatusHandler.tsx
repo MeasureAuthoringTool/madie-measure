@@ -25,7 +25,7 @@ const StatusHandler = ({
     success, outbound
     success alone
     */
-    if (success.status === "success") {
+    if (success?.status === "success") {
       if (errorMessage) {
         if (outboundAnnotations.length > 0) {
           const mappedMessages = outboundAnnotations.map((el) => (
