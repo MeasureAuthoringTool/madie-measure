@@ -18,9 +18,11 @@ export interface MeasureMetadataProps {
   measureMetadataId?: String;
   measureMetadataType?: String;
   header?: String;
+  setErrorMessage: Function;
 }
 
 export default function MeasureMetadata(props: MeasureMetadataProps) {
+  const { setErrorMessage } = props;
   const { measureMetadataId, measureMetadataType, header } = props;
   const typeLower = _.kebabCase(measureMetadataType.toLowerCase());
 
@@ -105,7 +107,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
       })
       .catch((reason) => {
         const message = `Error updating measure "${measure.measureName}"`;
-        handleToast("danger", message + " for " + measureMetadataType, true);
+        setErrorMessage(message);
       });
   };
 

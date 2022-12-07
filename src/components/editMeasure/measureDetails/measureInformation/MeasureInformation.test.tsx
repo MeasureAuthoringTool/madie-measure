@@ -21,7 +21,7 @@ jest.mock("react-router-dom", () => ({
 }));
 
 jest.mock("../../../../api/useMeasureServiceApi");
-
+const setErrorMessage = jest.fn();
 const testUser = "john doe";
 const measure = {
   id: "test measure",
@@ -104,7 +104,7 @@ describe("MeasureInformation component", () => {
       cql: "modified cql",
     } as unknown as Measure;
 
-    render(<MeasureInformation />);
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
 
     const cqlLibraryName = (await screen.findByRole("textbox", {
       name: "Measure CQL Library Name",
@@ -139,7 +139,7 @@ describe("MeasureInformation component", () => {
   });
 
   it("should render the component with measure's information populated", async () => {
-    render(<MeasureInformation />);
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
 
     const result: HTMLElement = getByTestId("measure-information-form");
     expect(result).toBeInTheDocument();
@@ -167,7 +167,7 @@ describe("MeasureInformation component", () => {
 
   it("Should display measure Version ID when it is not null", async () => {
     measure.versionId = "testVersionId";
-    render(<MeasureInformation />);
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
 
     const result: HTMLElement = getByTestId("measure-information-form");
     expect(result).toBeInTheDocument();
@@ -183,7 +183,7 @@ describe("MeasureInformation component", () => {
 
   it("should render the component with a blank measure name", async () => {
     measure.measureName = "";
-    render(<MeasureInformation />);
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
     const result: HTMLElement = getByTestId("measure-information-form");
     expect(result).toBeInTheDocument();
     await act(async () => {
@@ -193,7 +193,7 @@ describe("MeasureInformation component", () => {
   });
 
   it("Check if the measurement information save button is present", () => {
-    render(<MeasureInformation />);
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
     const result: HTMLElement = getByTestId(
       "measurement-information-save-button"
     );
@@ -207,7 +207,7 @@ describe("MeasureInformation component", () => {
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
     measure.measureName = "";
 
-    render(<MeasureInformation />);
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
 
     await act(async () => {
       const input = await findByTestId("measure-name-input");
@@ -242,7 +242,7 @@ describe("MeasureInformation component", () => {
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
 
     measure.measureName = "";
-    render(<MeasureInformation />);
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
 
     await act(async () => {
       const input = await findByTestId("measure-name-input");
@@ -257,22 +257,16 @@ describe("MeasureInformation component", () => {
       });
     });
 
-    await waitFor(
-      () =>
-        expect(
-          getByTestId("edit-measure-information-generic-error-text")
-        ).toBeInTheDocument(),
-      {
-        timeout: 5000,
-      }
-    );
+    await waitFor(() => expect(setErrorMessage).toHaveBeenCalled(), {
+      timeout: 5000,
+    });
   });
 
   it("Should be editable if measure is shared with the user", () => {
     useOktaTokens.mockImplementationOnce(() => ({
       getUserName: () => "othertestuser@example.com", //#nosec
     }));
-    render(<MeasureInformation />);
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
     const result: HTMLElement = getByTestId("measure-information-form");
     expect(result).toBeInTheDocument();
 
@@ -289,7 +283,7 @@ describe("MeasureInformation component", () => {
   it("Discard dialog opens and succeeds", async () => {
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
     measure.measureName = "";
-    render(<MeasureInformation />);
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
     await act(async () => {
       const input = await findByTestId("measure-name-input");
       fireEvent.change(input, {
@@ -316,7 +310,7 @@ describe("MeasureInformation component", () => {
 
   it("Discard dialog opens and cancels", async () => {
     measure.measureName = "";
-    render(<MeasureInformation />);
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
     await act(async () => {
       const input = await findByTestId("measure-name-input");
       fireEvent.change(input, {
