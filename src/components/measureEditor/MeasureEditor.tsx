@@ -303,6 +303,7 @@ const MeasureEditor = () => {
             errorMessage={errorMessage}
             success={success}
             outboundAnnotations={outboundAnnotations}
+            hasSubTitle={false}
           />
           {!processing && (
             <MadieEditor

@@ -14,6 +14,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import "./MeasureLanding.scss";
 import { useDocumentTitle } from "@madie/madie-util";
+import StatusHandler from "../measureEditor/StatusHandler";
 
 export default function MeasureLanding() {
   useDocumentTitle("MADiE Measures");
@@ -32,6 +33,7 @@ export default function MeasureLanding() {
   const [searchCriteria, setSearchCriteria] = useState("");
   const [currentLimit, setCurrentLimit] = useState(10);
   const [currentPage, setCurrentPage] = useState(0);
+  const [errMsg, setErrMsg] = useState(undefined);
 
   // pull info from some query url
   const curLimit = values.limit && Number(values.limit);
@@ -53,21 +55,30 @@ export default function MeasureLanding() {
   const retrieveMeasures = useCallback(
     async (tab, limit, page, searchCriteria) => {
       if (!searchCriteria) {
-        const data = await measureServiceApi.fetchMeasures(
-          tab === 0,
-          limit,
-          page
-        );
-        setPageProps(data);
+        measureServiceApi
+          .fetchMeasures(tab === 0, limit, page)
+          .then((data) => {
+            setPageProps(data);
+          })
+          .catch((error: Error) => {
+            setErrMsg(error.message);
+            setInitialLoad(false);
+          });
       } else {
-        const data =
-          await measureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle(
+        measureServiceApi
+          .searchMeasuresByMeasureNameOrEcqmTitle(
             tab === 0,
             limit,
             page,
             searchCriteria
-          );
-        setPageProps(data);
+          )
+          .then((data) => {
+            setPageProps(data);
+          })
+          .catch((error) => {
+            setErrMsg(error.message);
+            setInitialLoad(false);
+          });
       }
     },
     [measureServiceApi]
@@ -168,6 +179,16 @@ export default function MeasureLanding() {
           <span tw="flex-grow" />
         </section>
         <div>
+          {errMsg && !initialLoad && (
+            <StatusHandler
+              error={errMsg}
+              errorMessage={errMsg}
+              success={undefined}
+              outboundAnnotations={[]}
+              hasSubTitle={true}
+            />
+          )}
+
           {/* spin or display */}
           {!initialLoad && (
             <div className="table">
