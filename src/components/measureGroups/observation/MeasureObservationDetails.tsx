@@ -105,7 +105,7 @@ const MeasureObservationDetails = ({
       </div>
       <div tw="pb-3 px-8 pt-6">
         <Select
-          placeHolder={{ name: "Select Aggragate Function", value: "" }}
+          placeHolder={{ name: "Select Aggregate Function", value: "" }}
           disabled={!canEdit}
           required={required}
           label="Aggregate Function"

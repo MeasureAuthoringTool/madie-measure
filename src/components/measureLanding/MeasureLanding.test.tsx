@@ -191,4 +191,54 @@ describe("Measure Page", () => {
     const measure1 = await screen.findByText("TestMeasure1");
     expect(measure1).toBeInTheDocument();
   });
+
+  it("Should display errors when fetching measures is rejected", async () => {
+    (mockMeasureServiceApi.fetchMeasures as jest.Mock)
+      .mockClear()
+      .mockRejectedValueOnce(new Error("Unable to fetch measures"));
+
+    await act(async () => {
+      render(
+        <ApiContextProvider value={serviceConfig}>
+          <MemoryRouter initialEntries={["/measures"]}>
+            <MeasureLanding />
+          </MemoryRouter>
+        </ApiContextProvider>
+      );
+
+      const error = await screen.findByTestId("generic-error-text-header");
+      expect(error).toBeInTheDocument();
+      const errorText = await screen.findByText("Unable to fetch measures");
+      expect(errorText).toBeInTheDocument();
+    });
+  });
+
+  test("Search measure should display errors when searching measures is rejected", async () => {
+    (mockMeasureServiceApi.fetchMeasures as jest.Mock)
+      .mockClear()
+      .mockRejectedValueOnce(new Error("Unable to fetch measures"));
+    (mockMeasureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle as jest.Mock)
+      .mockClear()
+      .mockRejectedValueOnce(new Error("Unable to fetch measures"));
+    await act(async () => {
+      render(
+        <ApiContextProvider value={serviceConfig}>
+          <MemoryRouter initialEntries={["/measures"]}>
+            <MeasureLanding />
+          </MemoryRouter>
+        </ApiContextProvider>
+      );
+    });
+    const searchFieldInput = screen.getByTestId("searchMeasure-input");
+    expect(searchFieldInput).toBeInTheDocument();
+    userEvent.type(searchFieldInput, "test");
+    expect(searchFieldInput.value).toBe("test");
+
+    fireEvent.submit(searchFieldInput);
+
+    const error = await screen.findByTestId("generic-error-text-header");
+    expect(error).toBeInTheDocument();
+    const errorText = await screen.findByText("Unable to fetch measures");
+    expect(errorText).toBeInTheDocument();
+  });
 });

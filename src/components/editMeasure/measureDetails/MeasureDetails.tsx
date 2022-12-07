@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
 import tw from "twin.macro";
-import { Route, Switch, useRouteMatch, useHistory } from "react-router-dom";
+import {
+  Route,
+  Switch,
+  useRouteMatch,
+  useHistory,
+  useLocation,
+} from "react-router-dom";
 import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureMetadata from "./measureMetadata/MeasureMetadata";
 import EditMeasureSideBarNav from "./EditMeasureSideBarNav";
@@ -13,7 +19,13 @@ export interface RouteHandlerState {
   canTravel: boolean;
   pendingRoute: string;
 }
-export default function MeasureDetails() {
+
+export interface MeasureDetailsProps {
+  setErrorMessage: Function;
+}
+
+export default function MeasureDetails(props: MeasureDetailsProps) {
+  const { setErrorMessage } = props;
   useDocumentTitle("MADiE Edit Measure Details");
   const { path } = useRouteMatch();
   const modelPeriodLink = `${path}/model&measurement-period`;
@@ -126,25 +138,34 @@ export default function MeasureDetails() {
     return unblock;
   }, []);
 
+  // blank our error message on navigation since we blank forms.
+  const location = useLocation();
+  const { pathname } = location;
+
+  useEffect(() => {
+    setErrorMessage("");
+  }, [pathname, setErrorMessage]);
+
   return (
     <>
       <Grid>
         <EditMeasureSideBarNav links={links} dirty={true} details />
         <Switch>
           <Route exact path={path}>
-            <MeasureInformation />
+            <MeasureInformation setErrorMessage={setErrorMessage} />
           </Route>
           <Route exact path={modelPeriodLink}>
-            <ModelAndMeasurementPeriod />
+            <ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />
           </Route>
           <Route path={stewardLink}>
-            <StewardAndDevelopers />
+            <StewardAndDevelopers setErrorMessage={setErrorMessage} />
           </Route>
           <Route path={descriptionLink}>
             <MeasureMetadata
               measureMetadataId="Description"
               measureMetadataType="Description"
               header="Description"
+              setErrorMessage={setErrorMessage}
             />
           </Route>
           <Route path={copyrightLink}>
@@ -152,6 +173,7 @@ export default function MeasureDetails() {
               measureMetadataId="Copyright"
               measureMetadataType="Copyright"
               header="Copyright"
+              setErrorMessage={setErrorMessage}
             />
           </Route>
           <Route path={disclaimerLink}>
@@ -159,6 +181,7 @@ export default function MeasureDetails() {
               measureMetadataId="Disclaimer"
               measureMetadataType="Disclaimer"
               header="Disclaimer"
+              setErrorMessage={setErrorMessage}
             />
           </Route>
           <Route path={rationaleLink}>
@@ -166,6 +189,7 @@ export default function MeasureDetails() {
               measureMetadataId="Rationale"
               measureMetadataType="Rationale"
               header="Rationale"
+              setErrorMessage={setErrorMessage}
             />
           </Route>
           <Route path={guidanceLink}>
@@ -173,6 +197,7 @@ export default function MeasureDetails() {
               measureMetadataId="Guidance"
               measureMetadataType="Guidance"
               header="Guidance"
+              setErrorMessage={setErrorMessage}
             />
           </Route>
           <Route path={clinicalLink}>
@@ -180,6 +205,7 @@ export default function MeasureDetails() {
               measureMetadataId="ClinicalRecommendation"
               measureMetadataType="Clinical Recommendation Statement"
               header="Clinical Recommendation"
+              setErrorMessage={setErrorMessage}
             />
           </Route>
           <Route path={riskAdjustmentLink}>
@@ -187,6 +213,7 @@ export default function MeasureDetails() {
               measureMetadataId="RiskAdjustment"
               measureMetadataType="Risk Adjustment"
               header="Risk Adjustment"
+              setErrorMessage={setErrorMessage}
             />
           </Route>
         </Switch>
