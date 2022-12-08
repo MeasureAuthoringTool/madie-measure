@@ -58,6 +58,7 @@ export default function MeasureList(props: {
   setSearchCriteria;
   currentLimit: number;
   currentPage: number;
+  setErrMsg;
 }) {
   const history = useHistory();
 
@@ -77,6 +78,7 @@ export default function MeasureList(props: {
       })
       .catch((error: Error) => {
         props.setInitialLoad(false);
+        props.setErrMsg("");
       });
     history.push(
       `?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`
@@ -98,6 +100,7 @@ export default function MeasureList(props: {
         })
         .catch((error: Error) => {
           props.setInitialLoad(false);
+          props.setErrMsg(error.message);
         });
     }
 
