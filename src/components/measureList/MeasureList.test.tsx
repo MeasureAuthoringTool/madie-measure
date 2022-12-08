@@ -98,6 +98,7 @@ const setVisibleItemsMock = jest.fn();
 const setOffsetMock = jest.fn();
 const setInitialLoadMock = jest.fn();
 const setSearchCriteriaMock = jest.fn();
+const setErrMsgMock = jest.fn();
 
 describe("Measure List component", () => {
   beforeEach(() => {
@@ -121,6 +122,7 @@ describe("Measure List component", () => {
         setSearchCriteria={setSearchCriteriaMock}
         currentLimit={10}
         currentPage={0}
+        setErrMsg={setErrMsgMock}
       />
     );
     measures.forEach((m) => {
@@ -147,6 +149,7 @@ describe("Measure List component", () => {
         setSearchCriteria={setSearchCriteriaMock}
         currentLimit={10}
         currentPage={0}
+        setErrMsg={setErrMsgMock}
       />
     );
 
@@ -177,6 +180,7 @@ describe("Measure List component", () => {
         setSearchCriteria={setSearchCriteriaMock}
         currentLimit={10}
         currentPage={0}
+        setErrMsg={setErrMsgMock}
       />
     );
 
@@ -207,6 +211,7 @@ describe("Measure List component", () => {
         setSearchCriteria={setSearchCriteriaMock}
         currentLimit={10}
         currentPage={0}
+        setErrMsg={setErrMsgMock}
       />
     );
 
@@ -241,6 +246,7 @@ describe("Measure List component", () => {
         setSearchCriteria={setSearchCriteriaMock}
         currentLimit={10}
         currentPage={0}
+        setErrMsg={setErrMsgMock}
       />
     );
 
@@ -285,6 +291,7 @@ describe("Measure List component", () => {
         setSearchCriteria={setSearchCriteriaMock}
         currentLimit={10}
         currentPage={0}
+        setErrMsg={setErrMsgMock}
       />
     );
 
@@ -322,6 +329,7 @@ describe("Measure List component", () => {
         setSearchCriteria={setSearchCriteriaMock}
         currentLimit={10}
         currentPage={0}
+        setErrMsg={setErrMsgMock}
       />
     );
 
