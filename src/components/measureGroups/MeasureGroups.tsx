@@ -158,7 +158,7 @@ const MeasureGroups = () => {
       subscription.unsubscribe();
     };
   }, []);
-  const canEdit = checkUserCanEdit(measure);
+  const canEdit = checkUserCanEdit(measure?.createdBy, measure?.acls);
   const measureServiceApi = useMeasureServiceApi();
 
   const [alertMessage, setAlertMessage] = useState({
