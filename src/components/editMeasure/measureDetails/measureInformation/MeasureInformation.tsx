@@ -15,8 +15,8 @@ import { HelperText } from "@madie/madie-components";
 import { MeasureSchemaValidator } from "../../../../validations/MeasureSchemaValidator";
 import {
   measureStore,
-  useOktaTokens,
   routeHandlerStore,
+  checkUserCanEdit,
 } from "@madie/madie-util";
 import { versionFormat } from "../../../../utils/versionFormat";
 import { Box } from "@mui/system";
@@ -53,9 +53,6 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       subscription.unsubscribe();
     };
   }, []);
-
-  const { getUserName } = useOktaTokens();
-  const userName = getUserName();
 
   const row = {
     display: "flex",
@@ -118,12 +115,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     }
   };
 
-  const isOwner = measure?.createdBy === userName;
-  const canEdit =
-    isOwner ||
-    measure?.acls?.some(
-      (acl) => acl.userId === userName && acl.roles.indexOf("SHARED_WITH") >= 0
-    );
+  const canEdit = checkUserCanEdit(measure);
   const onToastClose = () => {
     setToastType(null);
     setToastMessage("");

@@ -18,8 +18,8 @@ import { HelperText } from "@madie/madie-components";
 import { MeasurementPeriodValidator } from "../../../../validations/MeasurementPeriodValidator";
 import {
   measureStore,
-  useOktaTokens,
   routeHandlerStore,
+  checkUserCanEdit,
 } from "@madie/madie-util";
 import { Box } from "@mui/system";
 
@@ -44,8 +44,6 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
       subscription.unsubscribe();
     };
   }, []);
-  const { getUserName } = useOktaTokens();
-  const userName = getUserName();
 
   const row = {
     display: "flex",
@@ -91,12 +89,7 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
     });
   }, [formik.dirty]);
 
-  const isOwner = measure?.createdBy === userName;
-  const canEdit =
-    isOwner ||
-    measure?.acls?.some(
-      (acl) => acl.userId === userName && acl.roles.indexOf("SHARED_WITH") >= 0
-    );
+  const canEdit = checkUserCanEdit(measure);
   const onToastClose = () => {
     setToastType(null);
     setToastMessage("");

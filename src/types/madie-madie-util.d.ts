@@ -68,6 +68,8 @@ declare module "@madie/madie-util" {
     prevailOnMount?: boolean
   ): void;
 
+  export function checkUserCanEdit(measure: Measure): boolean;
+
   export const bootstrap: LifeCycleFn<void>;
   export const mount: LifeCycleFn<void>;
   export const unmount: LifeCycleFn<void>;

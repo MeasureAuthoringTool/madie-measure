@@ -21,10 +21,10 @@ import { CqlCode, CqlCodeSystem } from "@madie/cql-antlr-parser/dist/src";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import * as _ from "lodash";
 import {
-  useOktaTokens,
   measureStore,
   useDocumentTitle,
   routeHandlerStore,
+  checkUserCanEdit,
 } from "@madie/madie-util";
 import { versionFormat } from "../../utils/versionFormat";
 import StatusHandler from "./StatusHandler";
@@ -131,13 +131,7 @@ const MeasureEditor = () => {
   const [elmAnnotations, setElmAnnotations] = useState<EditorAnnotation[]>([]);
   // error markers control the error underlining in the editor.
   const [errorMarkers, setErrorMarkers] = useState<EditorErrorMarker[]>([]);
-  const { getUserName } = useOktaTokens();
-  const userName = getUserName();
-  const canEdit =
-    measure?.createdBy === userName ||
-    measure?.acls?.some(
-      (acl) => acl.userId === userName && acl.roles.indexOf("SHARED_WITH") >= 0
-    );
+  const canEdit = checkUserCanEdit(measure);
 
   const [valuesetMsg, setValuesetMsg] = useState(null);
   const [errorMessage, setErrorMessage] = useState<string>(null);

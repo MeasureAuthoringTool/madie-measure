@@ -35,10 +35,10 @@ import {
   CqlDefineDataTypes,
 } from "../../validations/MeasureGroupSchemaValidator";
 import {
-  useOktaTokens,
   measureStore,
   routeHandlerStore,
   useDocumentTitle,
+  checkUserCanEdit,
 } from "@madie/madie-util";
 import MultipleSelectDropDown from "./MultipleSelectDropDown";
 import MeasureGroupsWarningDialog from "./MeasureGroupWarningDialog";
@@ -158,13 +158,7 @@ const MeasureGroups = () => {
       subscription.unsubscribe();
     };
   }, []);
-  const { getUserName } = useOktaTokens();
-  const userName = getUserName();
-  const canEdit =
-    measure?.createdBy === userName ||
-    measure?.acls?.some(
-      (acl) => acl.userId === userName && acl.roles.indexOf("SHARED_WITH") >= 0
-    );
+  const canEdit = checkUserCanEdit(measure);
   const measureServiceApi = useMeasureServiceApi();
 
   const [alertMessage, setAlertMessage] = useState({

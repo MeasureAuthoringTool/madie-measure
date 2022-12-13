@@ -19,7 +19,6 @@ jest.mock("react-router-dom", () => ({
 
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: jest.fn(() => ({
-    getUserName: jest.fn(() => "TestUser@example.com"), //#nosec
     getAccessToken: () => "test.jwt",
   })),
 }));
