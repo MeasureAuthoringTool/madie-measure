@@ -66,13 +66,19 @@ describe("MeasureServiceApi Tests", () => {
   it("get return types for all cql definitions", () => {
     let returnTypes =
       measureServiceApi.getReturnTypesForAllCqlDefinitions(libraryElm);
-    expect(returnTypes["initialPopulation"]).toEqual("Encounter");
+    expect(returnTypes["initialPopulation"]).toEqual("Boolean");
 
-    expect(returnTypes["measurePopulation"]).toEqual("Encounter");
+    expect(returnTypes["firstBladderCancerStagingProcedure"]).toEqual(
+      "Procedure"
+    );
 
-    expect(returnTypes["measurePopulationExclusions"]).toEqual("Encounter");
+    expect(returnTypes["numerator"]).toEqual("Boolean");
 
-    expect(returnTypes["measureObservation"]).toEqual("Integer");
+    expect(returnTypes["firstBcgAdministered"]).toEqual(
+      "MedicationAdministration"
+    );
+
+    expect(returnTypes["normalizePeriod"]).toEqual("DateTime");
   });
 
   it("build error message from server side error response", () => {

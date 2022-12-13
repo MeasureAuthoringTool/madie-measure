@@ -221,14 +221,17 @@ export class MeasureServiceApi {
         if (definition.resultTypeName) {
           returnType[name] = definition.resultTypeName?.split("}")[1];
         } else if (definition.resultTypeSpecifier) {
-          const resultType = definition.resultTypeSpecifier.elementType.type;
-          if (resultType === "NamedTypeSpecifier") {
-            returnType[name] =
-              definition.resultTypeSpecifier.elementType.name?.split("}")[1];
-          } else {
-            returnType[name] = "NA";
+          for (const key in definition.resultTypeSpecifier) {
+            if (
+              definition.resultTypeSpecifier[key]?.type === "NamedTypeSpecifier"
+            ) {
+              returnType[name] =
+                definition.resultTypeSpecifier[key].name?.split("}")[1];
+            }
           }
-        } else {
+        }
+        // default to NA
+        if (!returnType[name]) {
           returnType[name] = "NA";
         }
         return {
