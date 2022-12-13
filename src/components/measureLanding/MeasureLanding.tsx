@@ -217,6 +217,7 @@ export default function MeasureLanding() {
                 setSearchCriteria={setSearchCriteria}
                 currentLimit={currentLimit}
                 currentPage={currentPage}
+                setErrMsg={setErrMsg}
               />
               <div className="pagination-container">
                 {totalItems > 0 && (

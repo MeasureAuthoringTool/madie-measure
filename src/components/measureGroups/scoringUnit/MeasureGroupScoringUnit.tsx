@@ -34,6 +34,7 @@ const MeasureGroupScoringUnit = ({
     "& .MuiAutocomplete-inputRoot": {
       paddingTop: 0,
       paddingBottom: 0,
+      backgroundColor: !canEdit ? "#EDEDED" : "",
     },
     width: "100%",
   };
@@ -59,7 +60,7 @@ const MeasureGroupScoringUnit = ({
       data-testid="measure-group-scoring-unit"
       style={{ paddingLeft: "16px" }}
     >
-      {canEdit && (
+      {
         <FormControl fullWidth>
           <InputLabel
             id="scoring-unit-dropdown-label"
@@ -69,7 +70,7 @@ const MeasureGroupScoringUnit = ({
             Scoring Unit
           </InputLabel>
           <Autocomplete
-            readOnly={!canEdit}
+            disabled={!canEdit}
             options={options}
             data-testid="scoring-unit-dropdown"
             popupIcon={<SearchIcon sx={{ color: "#1C2556" }} />}
@@ -116,6 +117,7 @@ const MeasureGroupScoringUnit = ({
                   {...params}
                   data-testid="measure-scoring-unit-text-input"
                   inputProps={inputProps}
+                  disabled={!canEdit}
                   sx={{
                     input: {
                       color: "#333",
@@ -132,7 +134,7 @@ const MeasureGroupScoringUnit = ({
             }}
           />
         </FormControl>
-      )}
+      }
     </div>
   );
 };
