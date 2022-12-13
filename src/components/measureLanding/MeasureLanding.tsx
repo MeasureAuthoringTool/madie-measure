@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import queryString from "query-string";
 import "twin.macro";
@@ -120,6 +126,12 @@ export default function MeasureLanding() {
     history.push(`?tab=${nextTab}&page=0&limit=${limit}`);
   };
 
+  // we need to tell our layout page that we've loaded to prevent strange tab order
+  useLayoutEffect(() => {
+    const event = new Event("measures-mount");
+    window.dispatchEvent(event);
+  }, []);
+
   return (
     <div id="measure-landing" data-testid="measure-landing">
       <div className="measure-table">
@@ -205,6 +217,7 @@ export default function MeasureLanding() {
                 setSearchCriteria={setSearchCriteria}
                 currentLimit={currentLimit}
                 currentPage={currentPage}
+                setErrMsg={setErrMsg}
               />
               <div className="pagination-container">
                 {totalItems > 0 && (
