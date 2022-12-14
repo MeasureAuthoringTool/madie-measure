@@ -24,7 +24,6 @@ jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
-    getUserName: () => "TestUser@example.com", //#nosec
   }),
 }));
 

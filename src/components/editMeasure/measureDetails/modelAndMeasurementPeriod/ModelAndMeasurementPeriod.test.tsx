@@ -13,7 +13,6 @@ import useMeasureServiceApi, {
 } from "../../../../api/useMeasureServiceApi";
 import { Measure } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
-import { useOktaTokens } from "@madie/madie-util";
 import { AxiosError, AxiosResponse } from "axios";
 
 const mockHistoryPush = jest.fn();
@@ -43,10 +42,9 @@ const measure = {
 } as unknown as Measure;
 
 jest.mock("@madie/madie-util", () => ({
-  useOktaTokens: jest.fn(() => ({
-    getUserName: jest.fn(() => "john doe"), //#nosec
-    getAccessToken: () => "test.jwt",
-  })),
+  checkUserCanEdit: jest.fn(() => {
+    return true;
+  }),
   useKeyPress: jest.fn(() => false),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
@@ -80,10 +78,6 @@ const axiosError: AxiosError = {
 } as unknown as AxiosError;
 
 let serviceApiMock: MeasureServiceApi;
-
-useOktaTokens.mockImplementation(() => ({
-  getUserName: () => testUser, // #nosec
-}));
 
 describe("Model and Measurement Period component", () => {
   afterEach(() => {

@@ -22,7 +22,9 @@ jest.mock("@madie/madie-util", () => ({
   },
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
-    getUserName: () => "fakefakefake@fakefakefake",
+  }),
+  checkUserCanEdit: jest.fn(() => {
+    return true;
   }),
   routeHandlerStore: {
     subscribe: (set) => {
