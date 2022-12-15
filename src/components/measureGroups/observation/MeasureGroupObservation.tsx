@@ -19,6 +19,7 @@ const MeasureGroupObservation = ({
   elmJson,
   canEdit,
   linkMeasureObservationDisplay,
+  errors,
 }) => {
   const formik = useFormikContext<any>();
   let observationName = "";
@@ -57,6 +58,8 @@ const MeasureGroupObservation = ({
     return null;
   }
 
+  let index = formik.values.measureObservations?.indexOf(measureObservation);
+  const error = index >= 0 ? formik.errors?.measureObservations?.[index] : null;
   // we either return measureObservation, or the means to create one at the moment.
   // We want three cases, MO, add, none
   return measureObservation ? (
@@ -64,6 +67,7 @@ const MeasureGroupObservation = ({
       <MeasureObservationDetails
         canEdit={canEdit}
         label={label}
+        errors={error ? error : ""}
         required={required}
         name={observationName}
         elmJson={elmJson}
