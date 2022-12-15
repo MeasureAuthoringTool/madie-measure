@@ -33,6 +33,7 @@ import { v4 as uuidv4 } from "uuid";
 import {
   measureGroupSchemaValidator,
   CqlDefineDataTypes,
+  CqlFunctionDataTypes,
 } from "../../validations/MeasureGroupSchemaValidator";
 import {
   useOktaTokens,
@@ -222,6 +223,8 @@ const MeasureGroups = () => {
 
   const [cqlDefinitionDataTypes, setCqlDefinitionDataTypes] =
     useState<CqlDefineDataTypes>();
+  const [cqlFunctionDataTypes, setCqlFunctionDataTypes] =
+    useState<CqlFunctionDataTypes>();
 
   const goBackToNav = (e) => {
     if (e.shiftKey && e.keyCode == 9) {
@@ -231,6 +234,9 @@ const MeasureGroups = () => {
   };
 
   useEffect(() => {
+    setCqlFunctionDataTypes(
+      measureServiceApi.getReturnTypesForAllCqlFunctions(measure?.elmJson)
+    );
     setCqlDefinitionDataTypes(
       measureServiceApi.getReturnTypesForAllCqlDefinitions(measure?.elmJson)
     );
@@ -298,7 +304,10 @@ const MeasureGroups = () => {
       populationBasis: group?.populationBasis || defaultPopulationBasis,
       scoringUnit: group?.scoringUnit || null, // autocomplete can't init with string
     } as Group,
-    validationSchema: measureGroupSchemaValidator(cqlDefinitionDataTypes),
+    validationSchema: measureGroupSchemaValidator(
+      cqlDefinitionDataTypes,
+      cqlFunctionDataTypes
+    ),
     onSubmit: (group: Group) => {
       window.scrollTo(0, 0);
       if (
@@ -605,6 +614,9 @@ const MeasureGroups = () => {
     }
   }, [ucum, ucumUnits]);
 
+  {
+    console.log(formik.errors);
+  }
   return (
     <FormikProvider value={formik}>
       <MeasureGroupAlerts {...alertMessage} />
@@ -964,12 +976,22 @@ const MeasureGroups = () => {
                                 replaceCallback={arrayHelpers.replace}
                                 setAssociationChanged={setAssociationChanged}
                               />
+                              {/* <Field
+                             component={MeasureGroupObservation}
+                             canEdit={canEdit}
+                             scoring={formik.values.scoring}
+                             population={population}
+                             elmJson={measure?.elmJson}
+                             linkMeasureObservationDisplay={true}
+                             errors={formik.errors}
+                           /> */}
                               <MeasureGroupObservation
                                 canEdit={canEdit}
                                 scoring={formik.values.scoring}
                                 population={population}
                                 elmJson={measure?.elmJson}
                                 linkMeasureObservationDisplay={true}
+                                errors={formik.errors}
                               />
                             </ColSpanPopulations>
                           </React.Fragment>
@@ -977,6 +999,7 @@ const MeasureGroups = () => {
                       })}
                       <div tw="lg:col-start-1">
                         <MeasureGroupObservation
+                          errors={formik.errors}
                           canEdit={canEdit}
                           scoring={formik.values.scoring}
                           population={
@@ -988,6 +1011,16 @@ const MeasureGroups = () => {
                           elmJson={measure?.elmJson}
                           linkMeasureObservationDisplay={null}
                         />
+                        {/* {Boolean(
+                                          getIn(
+                                            formik.errors,
+                                            `measureObservations[${0}].definition`
+                                          )
+                                        )}
+                                        {getIn(
+                                          formik.errors,
+                                          `measureObservations[${0}].definition`
+                                        )}  */}
                       </div>
                     </div>
                   )}
@@ -1245,7 +1278,8 @@ const MeasureGroups = () => {
                     aria-live="polite" //this triggers every time the user is there.. this intended?
                   >
                     {measureGroupSchemaValidator(
-                      cqlDefinitionDataTypes
+                      cqlDefinitionDataTypes,
+                      cqlFunctionDataTypes
                     ).isValidSync(formik.values)
                       ? ""
                       : "You must set all required Populations."}

@@ -6,6 +6,10 @@ export type CqlDefineDataTypes = {
   [key: string]: string;
 };
 
+export type CqlFunctionDataTypes = {
+  [key: string]: string;
+};
+
 const returnTypeCheckOptions = (
   populationBasis: string,
   definitionDataTypes: CqlDefineDataTypes
@@ -51,8 +55,49 @@ const createPopulationSchema = (
   );
 };
 
+const returnTypeFunctionCheckOptions = (populationBasis, functionDataTypes) => {
+  if (populationBasis?.toLowerCase() === "boolean") {
+    return {
+      name: "equalsToBooleam",
+      message: `Selected function can not have parameters`,
+      test: (value) => {
+        if (
+          value &&
+          functionDataTypes &&
+          functionDataTypes[_.camelCase(value)]
+        ) {
+          return (
+            functionDataTypes[_.camelCase(value)].toLowerCase() ===
+            populationBasis?.toLowerCase()
+          );
+        }
+        return true;
+      },
+    };
+  } else {
+    return {
+      name: "equalsToNonBoolean",
+      message: `Selected function must have exactly one parameter of type ${populationBasis}`,
+      test: (value) => {
+        if (
+          value &&
+          functionDataTypes &&
+          functionDataTypes[_.camelCase(value)]
+        ) {
+          return (
+            functionDataTypes[_.camelCase(value)].toLowerCase() ===
+            populationBasis?.toLowerCase()
+          );
+        }
+        return true;
+      },
+    };
+  }
+};
+
 export const measureGroupSchemaValidator = (
-  definitionDataTypes: CqlDefineDataTypes
+  definitionDataTypes: CqlDefineDataTypes,
+  functionDataTypes?: CqlFunctionDataTypes
 ) => {
   return Yup.object().shape({
     scoring: Yup.string()
@@ -96,50 +141,68 @@ export const measureGroupSchemaValidator = (
         }
       }
     ),
-    measureObservations: Yup.object().when("scoring", (scoring) => {
-      switch (scoring) {
-        case GroupScoring.CONTINUOUS_VARIABLE:
-          return Yup.array()
-            .of(
-              Yup.object().shape({
-                definition: Yup.string().required(
-                  "Measure Observation definition is required when an observation is added"
-                ),
-                aggregateMethod: Yup.string()
-                  .oneOf(Object.values(AggregateFunctionType))
-                  .required(
-                    "Aggregate Method is required for a measure observation"
-                  ),
-              })
-            )
-            .length(
-              1,
-              "Continuous Variable measure groups must have a single measure observation"
-            );
-        case GroupScoring.RATIO:
-          return Yup.array()
-            .of(
-              Yup.object().shape({
-                definition: Yup.string().required(
-                  "Measure Observation definition is required when an observation is added"
-                ),
-                aggregateMethod: Yup.string()
-                  .oneOf(Object.values(AggregateFunctionType))
-                  .required(
-                    "Aggregate Method is required for a measure observation"
-                  ),
-              })
-            )
-            .nullable()
-            .min(0)
-            .max(
-              2,
-              "Maximum of two measure observations on Ratio measure group"
-            );
-        default:
-          return Yup.array().nullable();
+    measureObservations: Yup.object().when(
+      ["scoring", "populationBasis"],
+      (scoring, populationBasis) => {
+        switch (scoring) {
+          case GroupScoring.CONTINUOUS_VARIABLE:
+            return Yup.array()
+              .of(
+                Yup.object().shape({
+                  definition: Yup.string()
+                    .required(
+                      "Measure Observation definition is required when an observation is added"
+                    )
+                    .test(
+                      returnTypeFunctionCheckOptions(
+                        populationBasis,
+                        functionDataTypes
+                      )
+                    ),
+                  aggregateMethod: Yup.string()
+                    .oneOf(Object.values(AggregateFunctionType))
+                    .required(
+                      "Aggregate Method is required for a measure observation"
+                    ),
+                })
+              )
+              .length(
+                1,
+                "Continuous Variable measure groups must have a single measure observation"
+              );
+          case GroupScoring.RATIO:
+            return Yup.array()
+              .of(
+                Yup.object().shape({
+                  definition: Yup.string()
+                    .required(
+                      "Measure Observation definition is required when an observation is added"
+                    )
+                    .test(
+                      returnTypeFunctionCheckOptions(
+                        populationBasis,
+                        functionDataTypes
+                      )
+                    ),
+
+                  aggregateMethod: Yup.string()
+                    .oneOf(Object.values(AggregateFunctionType))
+                    .required(
+                      "Aggregate Method is required for a measure observation"
+                    ),
+                })
+              )
+              .nullable()
+              .min(0)
+              .max(
+                2,
+                "Maximum of two measure observations on Ratio measure group"
+              );
+          default:
+            return Yup.array().nullable();
+        }
       }
-    }),
+    ),
     stratifications: Yup.object().when("populationBasis", (populationBasis) => {
       return Yup.array()
         .of(

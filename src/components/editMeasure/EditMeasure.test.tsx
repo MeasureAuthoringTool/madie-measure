@@ -180,7 +180,7 @@ describe("EditMeasure Component", () => {
       "library testCql version '1.0.000'"
     );
 
-    // Measure Groups Menu click action
+    // Measure Groups Menu click action --needs to be fixed
     fireEvent.click(await findByText("Population Criteria"));
     expect((await findByText("Population Criteria")).classList).toContain(
       "active"

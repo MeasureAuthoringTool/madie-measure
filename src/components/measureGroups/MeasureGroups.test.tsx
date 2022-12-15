@@ -1324,6 +1324,7 @@ describe("Measure Groups Page", () => {
     expect(screen.getByTestId("group-form-submit-btn")).not.toBeDisabled();
   });
 
+  //needs to be fixed
   test("Save button is disabled until all required CV populations are entered", async () => {
     renderMeasureGroupComponent();
     await changePopulationBasis("Encounter");
@@ -1865,6 +1866,7 @@ describe("Measure Groups Page", () => {
     expect(numeratorAggregateFunctionInput.value).toEqual("Average");
   });
 
+  //needs to be fixed
   test("measure observation should be included in persisted output for continuous variable", async () => {
     renderMeasureGroupComponent();
     await changePopulationBasis("Encounter");
@@ -2002,6 +2004,7 @@ describe("Measure Groups Page", () => {
     // );
   });
 
+  //needs to be fixed
   test("measure observation should be included in persisted output for ratio", async () => {
     renderMeasureGroupComponent();
     await changePopulationBasis("Encounter");

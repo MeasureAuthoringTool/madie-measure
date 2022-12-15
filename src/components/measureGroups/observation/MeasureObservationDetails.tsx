@@ -7,6 +7,7 @@ import {
   AGGREGATE_FUNCTION_KEYS,
 } from "@madie/madie-models";
 import { DSLink, Select } from "@madie/madie-design-system/dist/react";
+import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
 
 const AGGREGATE_FUNCTIONS = Array.from(AGGREGATE_FUNCTION_KEYS.keys()).sort();
 
@@ -19,6 +20,8 @@ export interface MeasureObservationProps {
   onChange?: (measureObservation) => void;
   onRemove?: (measureObservation) => void;
   canEdit: boolean;
+  errors;
+  //helperText;
 }
 
 const MeasureObservationDetails = ({
@@ -30,6 +33,7 @@ const MeasureObservationDetails = ({
   onChange,
   onRemove,
   canEdit,
+  errors,
 }: MeasureObservationProps) => {
   const [cqlFunctionNames, setCqlFunctionNames] = useState([]);
 
@@ -51,9 +55,9 @@ const MeasureObservationDetails = ({
           <DSLink
             className="madie-link"
             style={{
-              position: "absolute",
+              position: "relative",
               left: "13rem",
-              bottom: "2.5rem",
+              bottom: "-1.4rem",
               zIndex: "1",
             }}
             href=""
@@ -75,6 +79,9 @@ const MeasureObservationDetails = ({
           disabled={!canEdit}
           label={label ? label : "Observation"}
           id={`measure-observation-${name}`}
+          name={name}
+          error={!!errors.definition}
+          helperText={errors?.definition}
           data-testid={`select-measure-observation-${name}`}
           inputProps={{
             "data-testid": `measure-observation-${name}-input`,
