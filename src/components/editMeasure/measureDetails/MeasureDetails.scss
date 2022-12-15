@@ -44,6 +44,11 @@
       font-size: 14px;
       font-weight: 400;
       resize: both;
+      color: #333;
+      &::placeholder {
+        color: #717171;
+        opacity: 1;
+      }
     }
     label:not(.Mui-disabled) {
       font-weight: 500;

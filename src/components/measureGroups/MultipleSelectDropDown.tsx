@@ -89,17 +89,26 @@ const MultipleSelectDropDown = ({
             </li>
           );
         }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            placeholder="Select All That Apply"
-            /* Setting the describedby here does make MacOS's VoiceOver
-              read the helper text, but it also messes up the styling for some reason... */
-            // inputProps={{
-            //   "aria-describedby": "measure-group-type-helper-text",
-            // }}
-          />
-        )}
+        renderInput={(params) => {
+          const { inputProps } = params;
+          inputProps["aria-describedby"] = "measure-group-type-helper-text";
+          return (
+            <TextField
+              sx={{
+                "& .MuiInputBase-input": {
+                  opacity: 1,
+                  color: "#333",
+                  "&::placeholder": {
+                    opacity: 1,
+                    color: "#717171",
+                  },
+                },
+              }}
+              placeholder="Select All That Apply"
+              {...params}
+            />
+          );
+        }}
         {...rest}
       />
       {helperText && (

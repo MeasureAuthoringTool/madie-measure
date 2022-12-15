@@ -1,0 +1,8 @@
+// force an override on all text areas and inputs.
+textarea,
+input {
+  color: #333 !important;
+  &::placeholder {
+    color: #717171 !important;
+  }
+}
