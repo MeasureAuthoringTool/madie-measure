@@ -26,7 +26,7 @@ import axios from "axios";
 import * as uuid from "uuid";
 import { getPopulationsForScoring } from "./PopulationHelper";
 import * as _ from "lodash";
-import { measureStore } from "@madie/madie-util";
+import { measureStore, checkUserCanEdit } from "@madie/madie-util";
 import { InitialPopulationAssociationType } from "./groupPopulations/GroupPopulation";
 
 // fix error about window.scrollto
@@ -73,7 +73,9 @@ jest.mock("@madie/madie-util", () => ({
   },
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
-    getUserName: () => MEASURE_CREATEDBY,
+  }),
+  checkUserCanEdit: jest.fn(() => {
+    return true;
   }),
   routeHandlerStore: {
     subscribe: (set) => {
@@ -181,13 +183,6 @@ describe("Measure Groups Page", () => {
     userEvent.click(getByRole(scoringSelect, "button"));
     const optionsList = await screen.findAllByTestId(/group-scoring-option/i);
     expect(optionsList).toHaveLength(4);
-  });
-
-  test("Measure Group Scoring should not render options if user is not the measure owner", async () => {
-    measure.createdBy = "AnotherUser@example.com";
-    await waitFor(() => renderMeasureGroupComponent());
-    const scoringSelectInput = screen.getByTestId("scoring-select-input");
-    expect(scoringSelectInput).toBeDisabled();
   });
 
   // Todo Need to fix this test case
@@ -1390,24 +1385,6 @@ describe("Measure Groups Page", () => {
     expect(screen.getByTestId("group-form-submit-btn")).not.toBeDisabled();
   });
 
-  test("Measure Group Description should not render input field if user is not the measure owner", async () => {
-    measure.createdBy = "AnotherUser@example.com";
-    const { queryByTestId } = await waitFor(() =>
-      renderMeasureGroupComponent()
-    );
-    const inputField = queryByTestId("groupDescriptionInput");
-    expect(inputField).toBeDisabled();
-  });
-
-  test("Measure Group Save button should not render if user is not the measure owner", async () => {
-    measure.createdBy = "AnotherUser@example.com";
-    const { queryByTestId } = await waitFor(() =>
-      renderMeasureGroupComponent()
-    );
-    const saveButton = queryByTestId("group-form-submit-btn");
-    expect(saveButton).not.toBeInTheDocument();
-  });
-
   test("should display default select for scoring unit", async () => {
     const { getByTestId } = await waitFor(() => renderMeasureGroupComponent());
     const scoringUnitLabel = getByTestId("scoring-unit-dropdown-label");
@@ -2258,5 +2235,30 @@ describe("Measure Groups Page", () => {
       expect((ip1DenomAssociation as HTMLInputElement).checked).toEqual(false);
       expect((ip1NumerAssociation as HTMLInputElement).checked).toEqual(true);
     });
+  });
+
+  test("Measure Group Scoring should not render options if user is not the measure owner", async () => {
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
+    await waitFor(() => renderMeasureGroupComponent());
+    const scoringSelectInput = screen.getByTestId("scoring-select-input");
+    expect(scoringSelectInput).toBeDisabled();
+  });
+
+  test("Measure Group Description should not render input field if user is not the measure owner", async () => {
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
+    const { queryByTestId } = await waitFor(() =>
+      renderMeasureGroupComponent()
+    );
+    const inputField = queryByTestId("groupDescriptionInput");
+    expect(inputField).toBeDisabled();
+  });
+
+  test("Measure Group Save button should not render if user is not the measure owner", async () => {
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
+    const { queryByTestId } = await waitFor(() =>
+      renderMeasureGroupComponent()
+    );
+    const saveButton = queryByTestId("group-form-submit-btn");
+    expect(saveButton).not.toBeInTheDocument();
   });
 });

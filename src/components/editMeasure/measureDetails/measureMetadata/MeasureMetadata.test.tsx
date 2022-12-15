@@ -13,7 +13,7 @@ import useMeasureServiceApi, {
 } from "../../../../api/useMeasureServiceApi";
 import { Measure } from "@madie/madie-models";
 import MeasureMetadataForm from "./MeasureMetadata";
-import { useOktaTokens } from "@madie/madie-util";
+import { checkUserCanEdit } from "@madie/madie-util";
 
 jest.mock("../../../../api/useMeasureServiceApi");
 const setErrorMessage = jest.fn();
@@ -37,9 +37,9 @@ const mockMeasure = {
 } as Measure;
 
 jest.mock("@madie/madie-util", () => ({
-  useOktaTokens: jest.fn(() => ({
-    getUserName: jest.fn(() => testUser), //#nosec
-  })),
+  checkUserCanEdit: jest.fn(() => {
+    return true;
+  }),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: null,
@@ -367,9 +367,9 @@ describe("MeasureRationale component", () => {
   });
 
   it("Should have no Save button if user does not have measure edit permissions", () => {
-    useOktaTokens.mockImplementation(() => ({
-      getUserName: () => "AnotherUser@example.com", //#nosec
-    }));
+    (checkUserCanEdit as jest.Mock).mockImplementationOnce(() => {
+      return false;
+    });
     render(
       <MeasureMetadataForm
         measureMetadataType="Rationale"
@@ -382,9 +382,9 @@ describe("MeasureRationale component", () => {
   });
 
   it("Should have no input field if user does not have measure edit permissions", () => {
-    useOktaTokens.mockImplementation(() => ({
-      getUserName: () => "AnotherUser@example.com", //#nosec
-    }));
+    (checkUserCanEdit as jest.Mock).mockImplementationOnce(() => {
+      return false;
+    });
     render(
       <MeasureMetadataForm
         measureMetadataType="Rationale"
@@ -397,9 +397,9 @@ describe("MeasureRationale component", () => {
   });
 
   it("Should have Save button if the measure is shared with the user", async () => {
-    useOktaTokens.mockImplementation(() => ({
-      getUserName: () => "othertestuser@example.com", //#nosec
-    }));
+    (checkUserCanEdit as jest.Mock).mockImplementationOnce(() => {
+      return false;
+    });
     render(
       <MeasureMetadataForm
         measureMetadataType="Rationale"
@@ -412,9 +412,9 @@ describe("MeasureRationale component", () => {
   });
 
   it("Should have input field if the measure is shared with the user", async () => {
-    useOktaTokens.mockImplementation(() => ({
-      getUserName: () => "othertestuser@example.com", //#nosec
-    }));
+    (checkUserCanEdit as jest.Mock).mockImplementationOnce(() => {
+      return false;
+    });
     render(
       <MeasureMetadataForm
         measureMetadataType="Rationale"
