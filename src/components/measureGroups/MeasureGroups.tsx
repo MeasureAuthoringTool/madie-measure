@@ -607,7 +607,7 @@ const MeasureGroups = () => {
       setUcumUnits(unitCodes);
     }
   }, [ucum, ucumUnits]);
-  
+
   return (
     <FormikProvider value={formik}>
       <MeasureGroupAlerts {...alertMessage} />
