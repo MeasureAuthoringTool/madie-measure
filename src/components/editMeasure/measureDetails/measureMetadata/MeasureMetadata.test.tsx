@@ -207,12 +207,12 @@ describe("MeasureRationale component", () => {
         getByText("Measure Copyright Information Saved Successfully")
       ).toBeInTheDocument()
     );
-    const toastCloseButton = await screen.findByRole("button", {
-      name: "close",
-    });
+    const toastCloseButton = await screen.findByTestId("close-error-button");
     expect(toastCloseButton).toBeInTheDocument();
     fireEvent.click(toastCloseButton);
-    expect(toastCloseButton).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(toastCloseButton).not.toBeInTheDocument();
+    });
   });
 
   it("should update the rationale input field when a user types a new value", async () => {
