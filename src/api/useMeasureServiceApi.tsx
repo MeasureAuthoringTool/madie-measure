@@ -244,6 +244,40 @@ export class MeasureServiceApi {
     return {};
   }
 
+  getReturnTypesForAllCqlFunctions(elmJson: string): {
+    [key: string]: string;
+  } {
+    if (!elmJson) {
+      return {};
+    }
+
+    const elm = JSON.parse(elmJson);
+    const functions = elm.library?.statements?.def?.filter(
+      (func) => func.type === "FunctionDef"
+    );
+
+    if (functions) {
+      return functions.reduce((returnTypes, func) => {
+        const returnType = {};
+        const name = _.camelCase(_.trim(func.name));
+        if (func?.operand.length > 0 && func?.operand.length < 2) {
+          returnType[name] =
+            func.operand[0].operandTypeSpecifier?.name?.split("}")[1];
+        } else if (func?.operand.length < 1) {
+          returnType[name] = "Boolean";
+        } else {
+          returnType[name] = "N/A";
+        }
+        return {
+          ...returnTypes,
+          ...returnType,
+        };
+      }, {});
+    }
+
+    return {};
+  }
+
   async searchMeasuresByMeasureNameOrEcqmTitle(
     filterByCurrentUser: boolean,
     limit: number = 25,

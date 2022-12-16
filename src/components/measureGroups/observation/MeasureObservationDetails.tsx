@@ -19,6 +19,7 @@ export interface MeasureObservationProps {
   onChange?: (measureObservation) => void;
   onRemove?: (measureObservation) => void;
   canEdit: boolean;
+  errors;
 }
 
 const MeasureObservationDetails = ({
@@ -30,6 +31,7 @@ const MeasureObservationDetails = ({
   onChange,
   onRemove,
   canEdit,
+  errors,
 }: MeasureObservationProps) => {
   const [cqlFunctionNames, setCqlFunctionNames] = useState([]);
 
@@ -51,9 +53,9 @@ const MeasureObservationDetails = ({
           <DSLink
             className="madie-link"
             style={{
-              position: "absolute",
+              position: "relative",
               left: "13rem",
-              bottom: "2.5rem",
+              bottom: "-1.4rem",
               zIndex: "1",
             }}
             href=""
@@ -79,6 +81,8 @@ const MeasureObservationDetails = ({
           inputProps={{
             "data-testid": `measure-observation-${name}-input`,
           }}
+          error={!!errors?.definition}
+          helperText={errors?.definition}
           style={{ width: 300 }}
           value={measureObservation?.definition || ""}
           onChange={(e) => {
