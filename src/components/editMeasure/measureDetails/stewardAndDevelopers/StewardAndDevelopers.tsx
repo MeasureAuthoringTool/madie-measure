@@ -36,7 +36,7 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
   const onToastClose = () => {
-    setToastType(null);
+    setToastType("success");
     setToastMessage("");
     setToastOpen(false);
   };
@@ -223,6 +223,9 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
         message={toastMessage}
         onClose={onToastClose}
         autoHideDuration={6000}
+        closeButtonProps={{
+          "data-testid": "close-error-button",
+        }}
       />
       <MadieDiscardDialog
         open={discardDialogOpen}

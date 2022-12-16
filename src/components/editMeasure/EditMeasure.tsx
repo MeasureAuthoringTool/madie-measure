@@ -94,7 +94,7 @@ export default function EditMeasure() {
     }
   };
   const onToastClose = () => {
-    setToastType(null);
+    setToastType("danger");
     setToastMessage("");
     setToastOpen(false);
   };
@@ -162,6 +162,9 @@ export default function EditMeasure() {
             ? "edit-measure-information-generic-error-text"
             : "edit-measure-information-success-text"
         }
+        closeButtonProps={{
+          "data-testid": "close-error-button",
+        }}
         open={toastOpen}
         message={toastMessage}
         onClose={onToastClose}

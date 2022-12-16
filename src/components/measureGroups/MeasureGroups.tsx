@@ -175,7 +175,7 @@ const MeasureGroups = () => {
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
   const onToastClose = () => {
-    setToastType(null);
+    setToastType("danger");
     setToastMessage("");
     setToastOpen(false);
   };
@@ -623,6 +623,9 @@ const MeasureGroups = () => {
         message={toastMessage}
         onClose={onToastClose}
         autoHideDuration={6000}
+        closeButtonProps={{
+          "data-testid": "close-error-button",
+        }}
       />
       <form onSubmit={formik.handleSubmit}>
         {/* delete measure group warning dialog */}

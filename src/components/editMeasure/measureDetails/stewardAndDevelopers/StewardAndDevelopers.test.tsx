@@ -296,12 +296,12 @@ describe("Steward and Developers component", () => {
     ).toHaveTextContent(
       "Steward and Developers Information Saved Successfully"
     );
-    const toastCloseButton = await screen.findByRole("button", {
-      name: "close",
-    });
+    const toastCloseButton = await screen.findByTestId("close-error-button");
     expect(toastCloseButton).toBeInTheDocument();
     fireEvent.click(toastCloseButton);
-    expect(toastCloseButton).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(toastCloseButton).not.toBeInTheDocument();
+    });
   });
 
   it("should display error message in toast, if update to measure fails", async () => {
