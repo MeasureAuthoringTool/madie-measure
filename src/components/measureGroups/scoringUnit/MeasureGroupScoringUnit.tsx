@@ -18,7 +18,7 @@ const MeasureGroupScoringUnit = ({
 }: ScoringUnitProps) => {
   const autoCompleteStyles = {
     borderRadius: "3px",
-    height: 40,
+    minHeight: "40px",
     border: "1px solid #DDDDDD",
     "& .MuiOutlinedInput-notchedOutline": {
       borderRadius: "3px",
