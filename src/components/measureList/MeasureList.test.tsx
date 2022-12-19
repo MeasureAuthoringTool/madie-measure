@@ -1,11 +1,12 @@
 import * as React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { Measure, Model } from "@madie/madie-models";
 import MeasureList from "./MeasureList";
 import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
 import { oneItemResponse } from "../measureRoutes/mockMeasureResponses";
 import userEvent from "@testing-library/user-event";
 import { getFeatureFlag } from "../../utils/featureFlag";
+import { checkUserCanEdit } from "@madie/madie-util";
 
 import { v4 as uuid } from "uuid";
 
@@ -18,8 +19,8 @@ jest.mock("react-router-dom", () => ({
 }));
 
 jest.mock("@madie/madie-util", () => ({
+  checkUserCanEdit: jest.fn(),
   useOktaTokens: jest.fn(() => ({
-    getUserName: jest.fn(() => "TestUser@example.com"), //#nosec
     getAccessToken: () => "test.jwt",
   })),
 }));
@@ -161,8 +162,11 @@ describe("Measure List component", () => {
     expect(mockPush).toHaveBeenCalledWith("/example");
   });
 
-  it("should display the popover with options of export and view when feature flag is set to true", () => {
+  it("should display the popover with options of export and view when feature flag is set to true", async () => {
     (getFeatureFlag as jest.Mock).mockImplementation(() => {
+      return true;
+    });
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
       return true;
     });
 
@@ -189,10 +193,13 @@ describe("Measure List component", () => {
     expect(actionButton).toHaveTextContent("Select");
     expect(window.location.href).toBe("http://localhost/");
     fireEvent.click(actionButton);
-    expect(getByTestId(`edit-measure-${measures[0].id}`)).toBeInTheDocument();
+    expect(getByTestId(`view-measure-${measures[0].id}`)).toBeInTheDocument();
     expect(getByTestId(`export-measure-${measures[0].id}`)).toBeInTheDocument();
+    expect(
+      getByTestId(`create-version-measure-${measures[0].id}`)
+    ).toBeInTheDocument();
     expect(window.location.href).toBe("http://localhost/");
-    fireEvent.click(getByTestId(`edit-measure-${measures[0].id}`));
+    fireEvent.click(getByTestId(`view-measure-${measures[0].id}`));
     expect(mockPush).toHaveBeenCalledWith("/example");
   });
 

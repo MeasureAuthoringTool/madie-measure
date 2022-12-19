@@ -8,7 +8,7 @@ import {
 } from "@testing-library/react";
 import StewardAndDevelopers from "./StewardAndDevelopers";
 import { Measure } from "@madie/madie-models";
-import { useOktaTokens, measureStore } from "@madie/madie-util";
+import { checkUserCanEdit } from "@madie/madie-util";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../api/useMeasureServiceApi";
@@ -64,10 +64,7 @@ const mockMeasure = {
 } as Measure;
 
 jest.mock("@madie/madie-util", () => ({
-  useOktaTokens: jest.fn(() => ({
-    getUserName: jest.fn(() => "test user"), //#nosec
-    getAccessToken: () => "test.jwt",
-  })),
+  checkUserCanEdit: jest.fn(() => true),
   useKeyPress: jest.fn(() => false),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
@@ -89,10 +86,6 @@ jest.mock("@madie/madie-util", () => ({
   },
 }));
 
-useOktaTokens.mockImplementation(() => ({
-  getUserName: () => testUser, // #nosec
-}));
-
 let serviceApiMock: MeasureServiceApi;
 
 describe("Steward and Developers component", () => {
@@ -103,6 +96,7 @@ describe("Steward and Developers component", () => {
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
     mockMeasure.measureMetaData = { ...mockMetaData };
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => true);
   });
   const setErrorMessage = jest.fn();
   afterEach(() => jest.clearAllMocks());
@@ -165,10 +159,7 @@ describe("Steward and Developers component", () => {
   });
 
   it("should disable dropdowns if the user does not have measure edit permissions", async () => {
-    useOktaTokens.mockImplementation(() => ({
-      getUserName: () => "Test User 2", //#nosec
-    }));
-
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
     render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
     const stewardAutoComplete = await screen.findByTestId("steward");
     const stewardComboBox = await within(stewardAutoComplete).getByRole(
@@ -184,9 +175,6 @@ describe("Steward and Developers component", () => {
   });
 
   it("should not disable dropdowns if the measure is shared with the user", async () => {
-    useOktaTokens.mockImplementation(() => ({
-      getUserName: () => "othertestuser@example.com", //#nosec
-    }));
     render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
     const stewardAutoComplete = await screen.findByTestId("steward");
     const stewardComboBox = await within(stewardAutoComplete).findByRole(
@@ -308,12 +296,12 @@ describe("Steward and Developers component", () => {
     ).toHaveTextContent(
       "Steward and Developers Information Saved Successfully"
     );
-    const toastCloseButton = await screen.findByRole("button", {
-      name: "close",
-    });
+    const toastCloseButton = await screen.findByTestId("close-error-button");
     expect(toastCloseButton).toBeInTheDocument();
     fireEvent.click(toastCloseButton);
-    expect(toastCloseButton).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(toastCloseButton).not.toBeInTheDocument();
+    });
   });
 
   it("should display error message in toast, if update to measure fails", async () => {

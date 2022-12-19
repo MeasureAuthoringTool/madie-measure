@@ -4,8 +4,8 @@ import { useFormik } from "formik";
 import getInitialValues, { setMeasureMetadata } from "./MeasureMetadataHelper";
 import {
   measureStore,
-  useOktaTokens,
   routeHandlerStore,
+  checkUserCanEdit,
 } from "@madie/madie-util";
 import {
   Button,
@@ -42,7 +42,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
   const onToastClose = () => {
-    setToastType(null);
+    setToastType("danger");
     setToastMessage("");
     setToastOpen(false);
   };
@@ -52,13 +52,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
     setToastOpen(open);
   };
 
-  const { getUserName } = useOktaTokens();
-  const userName = getUserName();
-  const canEdit =
-    measure?.createdBy === userName ||
-    measure?.acls?.some(
-      (acl) => acl.userId === userName && acl.roles.indexOf("SHARED_WITH") >= 0
-    );
+  const canEdit = checkUserCanEdit(measure?.createdBy, measure?.acls);
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: { genericField: getInitialValues(measure, typeLower) },
@@ -169,6 +163,9 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
         message={toastMessage}
         onClose={onToastClose}
         autoHideDuration={6000}
+        closeButtonProps={{
+          "data-testid": "close-error-button",
+        }}
       />
       <MadieDiscardDialog
         open={discardDialogOpen}

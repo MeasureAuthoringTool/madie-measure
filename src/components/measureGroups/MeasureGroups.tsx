@@ -33,12 +33,13 @@ import { v4 as uuidv4 } from "uuid";
 import {
   measureGroupSchemaValidator,
   CqlDefineDataTypes,
+  CqlFunctionDataTypes,
 } from "../../validations/MeasureGroupSchemaValidator";
 import {
-  useOktaTokens,
   measureStore,
   routeHandlerStore,
   useDocumentTitle,
+  checkUserCanEdit,
 } from "@madie/madie-util";
 import MultipleSelectDropDown from "./MultipleSelectDropDown";
 import MeasureGroupsWarningDialog from "./MeasureGroupWarningDialog";
@@ -158,13 +159,7 @@ const MeasureGroups = () => {
       subscription.unsubscribe();
     };
   }, []);
-  const { getUserName } = useOktaTokens();
-  const userName = getUserName();
-  const canEdit =
-    measure?.createdBy === userName ||
-    measure?.acls?.some(
-      (acl) => acl.userId === userName && acl.roles.indexOf("SHARED_WITH") >= 0
-    );
+  const canEdit = checkUserCanEdit(measure?.createdBy, measure?.acls);
   const measureServiceApi = useMeasureServiceApi();
 
   const [alertMessage, setAlertMessage] = useState({
@@ -180,7 +175,7 @@ const MeasureGroups = () => {
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
   const onToastClose = () => {
-    setToastType(null);
+    setToastType("danger");
     setToastMessage("");
     setToastOpen(false);
   };
@@ -222,6 +217,8 @@ const MeasureGroups = () => {
 
   const [cqlDefinitionDataTypes, setCqlDefinitionDataTypes] =
     useState<CqlDefineDataTypes>();
+  const [cqlFunctionDataTypes, setCqlFunctionDataTypes] =
+    useState<CqlFunctionDataTypes>();
 
   const goBackToNav = (e) => {
     if (e.shiftKey && e.keyCode == 9) {
@@ -231,6 +228,9 @@ const MeasureGroups = () => {
   };
 
   useEffect(() => {
+    setCqlFunctionDataTypes(
+      measureServiceApi.getReturnTypesForAllCqlFunctions(measure?.elmJson)
+    );
     setCqlDefinitionDataTypes(
       measureServiceApi.getReturnTypesForAllCqlDefinitions(measure?.elmJson)
     );
@@ -298,7 +298,10 @@ const MeasureGroups = () => {
       populationBasis: group?.populationBasis || defaultPopulationBasis,
       scoringUnit: group?.scoringUnit || null, // autocomplete can't init with string
     } as Group,
-    validationSchema: measureGroupSchemaValidator(cqlDefinitionDataTypes),
+    validationSchema: measureGroupSchemaValidator(
+      cqlDefinitionDataTypes,
+      cqlFunctionDataTypes
+    ),
     onSubmit: (group: Group) => {
       window.scrollTo(0, 0);
       if (
@@ -620,6 +623,9 @@ const MeasureGroups = () => {
         message={toastMessage}
         onClose={onToastClose}
         autoHideDuration={6000}
+        closeButtonProps={{
+          "data-testid": "close-error-button",
+        }}
       />
       <form onSubmit={formik.handleSubmit}>
         {/* delete measure group warning dialog */}
@@ -970,6 +976,7 @@ const MeasureGroups = () => {
                                 population={population}
                                 elmJson={measure?.elmJson}
                                 linkMeasureObservationDisplay={true}
+                                errors={formik.errors}
                               />
                             </ColSpanPopulations>
                           </React.Fragment>
@@ -979,6 +986,7 @@ const MeasureGroups = () => {
                         <MeasureGroupObservation
                           canEdit={canEdit}
                           scoring={formik.values.scoring}
+                          errors={formik.errors}
                           population={
                             formik.values.populations?.filter(
                               (pop) =>
@@ -1245,7 +1253,8 @@ const MeasureGroups = () => {
                     aria-live="polite" //this triggers every time the user is there.. this intended?
                   >
                     {measureGroupSchemaValidator(
-                      cqlDefinitionDataTypes
+                      cqlDefinitionDataTypes,
+                      cqlFunctionDataTypes
                     ).isValidSync(formik.values)
                       ? ""
                       : "You must set all required Populations."}

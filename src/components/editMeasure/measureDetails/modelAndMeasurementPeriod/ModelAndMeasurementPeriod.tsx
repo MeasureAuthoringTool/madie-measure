@@ -12,14 +12,13 @@ import {
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
-import { Typography } from "@mui/material";
+import { FormHelperText, Typography } from "@mui/material";
 import { useFormik } from "formik";
-import { HelperText } from "@madie/madie-components";
 import { MeasurementPeriodValidator } from "../../../../validations/MeasurementPeriodValidator";
 import {
   measureStore,
-  useOktaTokens,
   routeHandlerStore,
+  checkUserCanEdit,
 } from "@madie/madie-util";
 import { Box } from "@mui/system";
 
@@ -44,8 +43,6 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
       subscription.unsubscribe();
     };
   }, []);
-  const { getUserName } = useOktaTokens();
-  const userName = getUserName();
 
   const row = {
     display: "flex",
@@ -91,14 +88,9 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
     });
   }, [formik.dirty]);
 
-  const isOwner = measure?.createdBy === userName;
-  const canEdit =
-    isOwner ||
-    measure?.acls?.some(
-      (acl) => acl.userId === userName && acl.roles.indexOf("SHARED_WITH") >= 0
-    );
+  const canEdit = checkUserCanEdit(measure?.createdBy, measure?.acls);
   const onToastClose = () => {
-    setToastType(null);
+    setToastType("danger");
     setToastMessage("");
     setToastOpen(false);
   };
@@ -146,17 +138,16 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
   function formikErrorHandler(name: string, isError: boolean) {
     if (formik.touched[name] && formik.errors[name]) {
       return (
-        <HelperText
+        <FormHelperText
           aria-live="polite"
-          data-testid={`${name}-helper-text`}
           id={`${name}-helper-text`}
-          text={formik.errors[name]?.toString()}
-          isError={isError}
+          data-testid={`${name}-helper-text`}
+          children={formik.errors[name]}
+          error={isError}
         />
       );
     }
   }
-
   return (
     <form
       id="measure-details-form"
@@ -298,6 +289,9 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
         message={toastMessage}
         onClose={onToastClose}
         autoHideDuration={10000}
+        closeButtonProps={{
+          "data-testid": "close-error-button",
+        }}
       />
       <MadieDiscardDialog
         open={discardDialogOpen}

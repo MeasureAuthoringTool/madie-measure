@@ -9,14 +9,13 @@ import {
   TextField,
   ReadOnlyTextField,
 } from "@madie/madie-design-system/dist/react";
-import { Typography } from "@mui/material";
+import { FormHelperText, Typography } from "@mui/material";
 import { useFormik } from "formik";
-import { HelperText } from "@madie/madie-components";
 import { MeasureSchemaValidator } from "../../../../validations/MeasureSchemaValidator";
 import {
   measureStore,
-  useOktaTokens,
   routeHandlerStore,
+  checkUserCanEdit,
 } from "@madie/madie-util";
 import { versionFormat } from "../../../../utils/versionFormat";
 import { Box } from "@mui/system";
@@ -53,9 +52,6 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       subscription.unsubscribe();
     };
   }, []);
-
-  const { getUserName } = useOktaTokens();
-  const userName = getUserName();
 
   const row = {
     display: "flex",
@@ -118,14 +114,9 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     }
   };
 
-  const isOwner = measure?.createdBy === userName;
-  const canEdit =
-    isOwner ||
-    measure?.acls?.some(
-      (acl) => acl.userId === userName && acl.roles.indexOf("SHARED_WITH") >= 0
-    );
+  const canEdit = checkUserCanEdit(measure?.createdBy, measure?.acls);
   const onToastClose = () => {
-    setToastType(null);
+    setToastType("danger");
     setToastMessage("");
     setToastOpen(false);
   };
@@ -187,17 +178,15 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   function formikErrorHandler(name: string, isError: boolean) {
     if (formik.touched[name] && formik.errors[name]) {
       return (
-        <HelperText
+        <FormHelperText
           aria-live="polite"
           data-testid={`${name}-helper-text`}
-          id={`${name}-helper-text`}
-          text={formik.errors[name]?.toString()}
-          isError={isError}
+          children={formik.errors[name]}
+          error={isError}
         />
       );
     }
   }
-
   return (
     <form
       id="measure-details-form"
@@ -352,6 +341,9 @@ export default function MeasureInformation(props: MeasureInformationProps) {
         message={toastMessage}
         onClose={onToastClose}
         autoHideDuration={10000}
+        closeButtonProps={{
+          "data-testid": "close-error-button",
+        }}
       />
       <MadieDiscardDialog
         open={discardDialogOpen}

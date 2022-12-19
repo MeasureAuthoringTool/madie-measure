@@ -6,7 +6,6 @@ import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../api/useMeasureServiceApi";
 import { Measure } from "@madie/madie-models";
-import { useOktaTokens } from "@madie/madie-util";
 import { AxiosError, AxiosResponse } from "axios";
 import { parseContent, synchingEditorCqlContent } from "@madie/madie-editor";
 import userEvent from "@testing-library/user-event";
@@ -47,7 +46,6 @@ jest.mock("@madie/madie-editor", () => ({
 
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: jest.fn(() => ({
-    getUserName: jest.fn(() => "john doe"), //#nosec
     getAccessToken: () => "test.jwt",
   })),
   useKeyPress: jest.fn(() => false),
@@ -69,6 +67,9 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: true, pendingPath: "" },
     initialState: { canTravel: true, pendingPath: "" },
   },
+  checkUserCanEdit: jest.fn(() => {
+    return true;
+  }),
 }));
 
 const useMeasureServiceApiMock =
@@ -83,10 +84,6 @@ const axiosError: AxiosError = {
 } as unknown as AxiosError;
 
 let serviceApiMock: MeasureServiceApi;
-
-useOktaTokens.mockImplementation(() => ({
-  getUserName: () => testUser, // #nosec
-}));
 
 describe("MeasureInformation component", () => {
   const { getByTestId, queryByText, findByTestId } = screen;
@@ -263,9 +260,6 @@ describe("MeasureInformation component", () => {
   });
 
   it("Should be editable if measure is shared with the user", () => {
-    useOktaTokens.mockImplementationOnce(() => ({
-      getUserName: () => "othertestuser@example.com", //#nosec
-    }));
     render(<MeasureInformation setErrorMessage={setErrorMessage} />);
     const result: HTMLElement = getByTestId("measure-information-form");
     expect(result).toBeInTheDocument();

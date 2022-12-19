@@ -16,7 +16,7 @@ import {
   synchingEditorCqlContent,
   ElmTranslationExternalError,
 } from "@madie/madie-editor";
-import { useOktaTokens, measureStore } from "@madie/madie-util";
+import { measureStore, checkUserCanEdit } from "@madie/madie-util";
 
 const measure = {
   id: "abcd-pqrs-xyz",
@@ -43,9 +43,11 @@ const measure = {
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
-    getUserName: jest.fn(() => "testuser@example.com"), //#nosec
     getAccessToken: () => "test.jwt",
   })),
+  checkUserCanEdit: jest.fn(() => {
+    return true;
+  }),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => measure),
@@ -634,9 +636,7 @@ describe("map elm errors to Ace Markers", () => {
 });
 
 it("Save button and Cancel button should not show if user is not the owner of the measure", () => {
-  useOktaTokens.mockImplementation(() => ({
-    getUserName: () => "AnotherUser@example.com", //#nosec
-  }));
+  (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
   renderEditor(measure);
 
   const cancelButton = screen.queryByTestId("reset-cql-btn");
@@ -646,9 +646,7 @@ it("Save button and Cancel button should not show if user is not the owner of th
 });
 
 it("Save button and Cancel button should show if measure is shared with the user", () => {
-  useOktaTokens.mockImplementation(() => ({
-    getUserName: () => "othertestuser@example.com", //#nosec
-  }));
+  (checkUserCanEdit as jest.Mock).mockImplementation(() => true);
   renderEditor(measure);
 
   const cancelButton = screen.queryByTestId("reset-cql-btn");

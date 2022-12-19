@@ -44,9 +44,9 @@ useMeasureServiceApiMock.mockImplementation(() => {
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
-    getUserName: jest.fn(() => "testuser@example.com"), //#nosec
     getAccessToken: () => "test.jwt",
   })),
+  checkUserCanEdit: jest.fn(),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => null),
@@ -178,12 +178,6 @@ describe("EditMeasure Component", () => {
     expect((await findByText("CQL Editor")).classList).toContain("active");
     expect(document.body.textContent).toContain(
       "library testCql version '1.0.000'"
-    );
-
-    // Measure Groups Menu click action
-    fireEvent.click(await findByText("Population Criteria"));
-    expect((await findByText("Population Criteria")).classList).toContain(
-      "active"
     );
 
     // Test Cases Menu click action
