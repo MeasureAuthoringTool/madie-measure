@@ -716,13 +716,12 @@ const MeasureGroups = () => {
                       formik.touched.measureGroupTypes &&
                       Boolean(formik.errors.measureGroupTypes)
                     }
-                    helperText={
-                      formik.touched.measureGroupTypes &&
-                      formik.errors.measureGroupTypes
-                    }
                     {...formik.getFieldProps("measureGroupTypes")}
                     onChange={(_event: any, selectedVal: string | null) => {
                       formik.setFieldValue("measureGroupTypes", selectedVal);
+                    }}
+                    onClose={() => {
+                      formik.touched.measureGroupTypes = true;
                     }}
                     options={Object.values(MeasureGroupTypes)}
                     multipleSelect={true}

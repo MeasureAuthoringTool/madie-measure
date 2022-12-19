@@ -55,7 +55,7 @@ const MultipleSelectDropDown = ({
 }) => {
   return (
     <FormControl error={error} fullWidth sx={{ paddingRight: 2 }}>
-      <InputLabel htmlFor={`${id}`} required={required}>
+      <InputLabel htmlFor={`${id}`} required={required} error={error}>
         {label}
       </InputLabel>
       <Autocomplete
@@ -92,6 +92,7 @@ const MultipleSelectDropDown = ({
         renderInput={(params) => {
           const { inputProps } = params;
           inputProps["aria-describedby"] = "measure-group-type-helper-text";
+          inputProps["aria-required"] = required;
           return (
             <TextField
               sx={{
@@ -106,6 +107,7 @@ const MultipleSelectDropDown = ({
               }}
               placeholder="Select All That Apply"
               {...params}
+              error={error}
             />
           );
         }}
@@ -115,6 +117,8 @@ const MultipleSelectDropDown = ({
         <FormHelperText
           data-testid={`${id}-helper-text`}
           id={`${id}-helper-text`}
+          aria-live="polite"
+          error
         >
           {helperText}
         </FormHelperText>
