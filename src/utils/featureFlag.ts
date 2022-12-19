@@ -3,7 +3,7 @@ export function getFeatureFlag(feature: string) {
   if (feature === "export") {
     return false;
   } else if (feature === "version") {
-    return true;
+    return false;
   }
   return false;
 }
