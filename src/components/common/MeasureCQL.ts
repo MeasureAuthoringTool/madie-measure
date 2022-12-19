@@ -3358,8 +3358,8 @@ export const ELM_JSON = `
               "operandTypeSpecifier": {
                 "localId": "116",
                 "locator": "74:39-74:45",
-                "resultTypeName": "{urn:hl7-org:elm-types:r1}Integer",
-                "name": "{urn:hl7-org:elm-types:r1}Integer",
+                "resultTypeName": "{urn:hl7-org:elm-types:r1}Encounter",
+                "name": "{urn:hl7-org:elm-types:r1}Encounter",
                 "type": "NamedTypeSpecifier"
               }
             }

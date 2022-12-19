@@ -17,6 +17,7 @@ import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { getFeatureFlag } from "../../utils/featureFlag";
 import JSzip from "jszip";
 import { saveAs } from "file-saver";
+import { checkUserCanEdit } from "@madie/madie-util";
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -66,6 +67,11 @@ export default function MeasureList(props: {
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedMeasure, setSelectedMeasure] = useState<Measure>(null);
+  const [canEdit, setCanEdit] = useState<boolean>(false);
+  const [
+    otherSelectOptionPropsForPopOver,
+    setOtherSelectOptionPropsForPopOver,
+  ] = useState(null);
 
   const measureServiceApi = useMeasureServiceApi();
 
@@ -145,15 +151,36 @@ export default function MeasureList(props: {
     selected: Measure,
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
+    setOptionsOpen(true);
     setSelectedMeasure(selected);
     setAnchorEl(event.currentTarget);
-    setOptionsOpen(true);
+    setCanEdit(checkUserCanEdit(selected?.createdBy, selected?.acls));
+    let options = [];
+    if (getFeatureFlag("export")) {
+      const exportButton = {
+        label: "Export",
+        toImplementFunction: zipData,
+        dataTestId: `export-measure-${selected?.id}`,
+      };
+      options.push(exportButton);
+    }
+    if (getFeatureFlag("version")) {
+      const versionButton = {
+        label: "Version",
+        toImplementFunction: createVersion,
+        dataTestId: `create-version-measure-${selected?.id}`,
+      };
+      options.push(versionButton);
+    }
+    setOtherSelectOptionPropsForPopOver(options);
   };
 
   const handleClose = () => {
+    setOtherSelectOptionPropsForPopOver(null);
     setOptionsOpen(false);
     setSelectedMeasure(null);
     setAnchorEl(null);
+    setCanEdit(false);
   };
 
   const viewEditRedirect = () => {
@@ -173,6 +200,8 @@ export default function MeasureList(props: {
       );
     });
   };
+
+  const createVersion = () => {};
 
   return (
     <div data-testid="measure-list">
@@ -248,8 +277,12 @@ export default function MeasureList(props: {
                       <td>
                         <Button
                           variant="outline-secondary"
+                          name="Select"
                           onClick={(e) => {
-                            if (getFeatureFlag("export")) {
+                            if (
+                              getFeatureFlag("export") ||
+                              getFeatureFlag("version")
+                            ) {
                               handleOpen(measure, e);
                             } else {
                               history.push(
@@ -258,12 +291,15 @@ export default function MeasureList(props: {
                             }
                           }}
                           data-testid={
-                            getFeatureFlag("export")
+                            getFeatureFlag("export") ||
+                            getFeatureFlag("version")
                               ? `measure-action-${measure.id}`
                               : `edit-measure-${measure.id}`
                           }
                         >
-                          {getFeatureFlag("export") ? "Select" : "View"}
+                          {getFeatureFlag("export") || getFeatureFlag("version")
+                            ? "Select"
+                            : "View"}
                         </Button>
                       </td>
                     </tr>
@@ -274,19 +310,13 @@ export default function MeasureList(props: {
                 optionsOpen={optionsOpen}
                 anchorEl={anchorEl}
                 handleClose={handleClose}
-                canEdit={true}
+                canEdit={canEdit}
                 editViewSelectOptionProps={{
                   label: "View",
                   toImplementFunction: viewEditRedirect,
-                  dataTestId: `edit-measure-${selectedMeasure?.id}`,
+                  dataTestId: `view-measure-${selectedMeasure?.id}`,
                 }}
-                otherSelectOptionProps={[
-                  {
-                    label: "Export",
-                    toImplementFunction: zipData,
-                    dataTestId: `export-measure-${selectedMeasure?.id}`,
-                  },
-                ]}
+                otherSelectOptionProps={otherSelectOptionPropsForPopOver}
               />
             </div>
           </div>
