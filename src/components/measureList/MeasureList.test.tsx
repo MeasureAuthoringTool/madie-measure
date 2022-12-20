@@ -158,7 +158,7 @@ describe("Measure List component", () => {
       elmTranslationService: { baseUrl: "" },
       measureService: { baseUrl: "" },
       terminologyService: { baseUrl: "" },
-      features: { export: true, measureVersioning: false },
+      features: { export: true, measureVersioning: true },
     };
 
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
