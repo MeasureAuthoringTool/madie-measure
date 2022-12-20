@@ -5,10 +5,10 @@ import MeasureList from "./MeasureList";
 import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
 import { oneItemResponse } from "../measureRoutes/mockMeasureResponses";
 import userEvent from "@testing-library/user-event";
-import { getFeatureFlag } from "../../utils/featureFlag";
 import { checkUserCanEdit } from "@madie/madie-util";
 
 import { v4 as uuid } from "uuid";
+import ServiceContext, { ServiceConfig } from "../../api/ServiceContext";
 
 const mockPush = jest.fn();
 jest.mock("react-router-dom", () => ({
@@ -34,11 +34,6 @@ const mockMeasureServiceApi = {
 jest.mock("../../api/useMeasureServiceApi", () =>
   jest.fn(() => mockMeasureServiceApi)
 );
-
-jest.mock("../../utils/featureFlag", () => ({
-  getFeatureFlag: jest.fn(),
-}));
-
 const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
 
 const measures: Measure[] = [
@@ -132,10 +127,6 @@ describe("Measure List component", () => {
   });
 
   it("should navigate to the edit measure screen on click of edit/view button", () => {
-    (getFeatureFlag as jest.Mock).mockImplementation(() => {
-      return false;
-    });
-
     const { getByTestId } = render(
       <MeasureList
         measureList={measures}
@@ -162,30 +153,36 @@ describe("Measure List component", () => {
     expect(mockPush).toHaveBeenCalledWith("/example");
   });
 
-  it("should display the popover with options of export and view when feature flag is set to true", async () => {
-    (getFeatureFlag as jest.Mock).mockImplementation(() => {
-      return true;
-    });
+  it("should display the popover with options of export and view when feature flag is set to true", () => {
+    const features: ServiceConfig = {
+      elmTranslationService: { baseUrl: "" },
+      measureService: { baseUrl: "" },
+      terminologyService: { baseUrl: "" },
+      features: { export: true, measureVersioning: false },
+    };
+
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
       return true;
     });
 
     const { getByTestId } = render(
-      <MeasureList
-        measureList={measures}
-        setMeasureList={setMeasureListMock}
-        setTotalPages={setTotalPagesMock}
-        setTotalItems={setTotalItemsMock}
-        setVisibleItems={setVisibleItemsMock}
-        setOffset={setOffsetMock}
-        setInitialLoad={setInitialLoadMock}
-        activeTab={0}
-        searchCriteria="test"
-        setSearchCriteria={setSearchCriteriaMock}
-        currentLimit={10}
-        currentPage={0}
-        setErrMsg={setErrMsgMock}
-      />
+      <ServiceContext.Provider value={features}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria="test"
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
     );
 
     const actionButton = getByTestId(`measure-action-${measures[0].id}`);
