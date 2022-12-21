@@ -16,6 +16,8 @@ import {
 import MeasureLanding from "./MeasureLanding";
 
 const serviceConfig: ServiceConfig = {
+  features: { export: false, measureVersioning: false },
+  terminologyService: { baseUrl: "example-service-url" },
   measureService: {
     baseUrl: "example-service-url",
   },

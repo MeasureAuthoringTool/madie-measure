@@ -14,7 +14,7 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
-import { getFeatureFlag } from "../../utils/featureFlag";
+import useFeature from "../../utils/useFeatureFlag";
 import JSzip from "jszip";
 import { saveAs } from "file-saver";
 import { checkUserCanEdit } from "@madie/madie-util";
@@ -74,6 +74,8 @@ export default function MeasureList(props: {
   ] = useState(null);
 
   const measureServiceApi = useMeasureServiceApi();
+  const exportFeature = useFeature("export");
+  const versioningFeature = useFeature("measureVersioning");
 
   const handleClearClick = async (event) => {
     props.setSearchCriteria("");
@@ -156,7 +158,7 @@ export default function MeasureList(props: {
     setAnchorEl(event.currentTarget);
     setCanEdit(checkUserCanEdit(selected?.createdBy, selected?.acls));
     let options = [];
-    if (getFeatureFlag("export")) {
+    if (exportFeature) {
       const exportButton = {
         label: "Export",
         toImplementFunction: zipData,
@@ -164,7 +166,7 @@ export default function MeasureList(props: {
       };
       options.push(exportButton);
     }
-    if (getFeatureFlag("version")) {
+    if (versioningFeature) {
       const versionButton = {
         label: "Version",
         toImplementFunction: createVersion,
@@ -279,10 +281,7 @@ export default function MeasureList(props: {
                           variant="outline-secondary"
                           name="Select"
                           onClick={(e) => {
-                            if (
-                              getFeatureFlag("export") ||
-                              getFeatureFlag("version")
-                            ) {
+                            if (exportFeature || versioningFeature) {
                               handleOpen(measure, e);
                             } else {
                               history.push(
@@ -291,13 +290,12 @@ export default function MeasureList(props: {
                             }
                           }}
                           data-testid={
-                            getFeatureFlag("export") ||
-                            getFeatureFlag("version")
+                            exportFeature || versioningFeature
                               ? `measure-action-${measure.id}`
                               : `edit-measure-${measure.id}`
                           }
                         >
-                          {getFeatureFlag("export") || getFeatureFlag("version")
+                          {exportFeature || versioningFeature
                             ? "Select"
                             : "View"}
                         </Button>
