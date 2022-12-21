@@ -9,6 +9,7 @@ import { Measure } from "@madie/madie-models";
 import { AxiosError, AxiosResponse } from "axios";
 import { parseContent, synchingEditorCqlContent } from "@madie/madie-editor";
 import userEvent from "@testing-library/user-event";
+import { checkUserCanEdit } from "@madie/madie-util";
 
 const mockHistoryPush = jest.fn();
 
@@ -33,6 +34,9 @@ const measure = {
   measureSetId: "testMeasureId",
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
   elmJson: "{library: TestCqlLibraryName}",
+  measureMetaData: {
+    experimental: false,
+  },
 } as unknown as Measure;
 
 jest.mock("@madie/madie-editor", () => ({
@@ -159,6 +163,11 @@ describe("MeasureInformation component", () => {
       expect(cqlLibraryNameText.value).toBe(measure.cqlLibraryName);
       const ecqmTitleText = getByTestId("ecqm-input") as HTMLInputElement;
       expect(ecqmTitleText.value).toBe(measure.ecqmTitle);
+
+      const experimentalInput = screen.getByRole("checkbox", {
+        name: "Experimental",
+      }) as HTMLInputElement;
+      expect(experimentalInput.value).toBe("false");
     });
   });
 
@@ -264,18 +273,60 @@ describe("MeasureInformation component", () => {
     const result: HTMLElement = getByTestId("measure-information-form");
     expect(result).toBeInTheDocument();
 
-    const text = getByTestId("measure-name-input") as HTMLInputElement;
-    expect(text.disabled).toBe(false);
+    const measureNameInput = getByTestId(
+      "measure-name-input"
+    ) as HTMLInputElement;
+    expect(measureNameInput).toBeEnabled();
+
     const cqlLibraryNameText = getByTestId(
       "cql-library-name-input"
     ) as HTMLInputElement;
-    expect(cqlLibraryNameText.disabled).toBe(false);
+    expect(cqlLibraryNameText).toBeEnabled();
+
     const ecqmTitleText = getByTestId("ecqm-input") as HTMLInputElement;
-    expect(ecqmTitleText.disabled).toBe(false);
+    expect(ecqmTitleText).toBeEnabled();
+
+    const experimentalInput = screen.getByRole("checkbox", {
+      name: "Experimental",
+    }) as HTMLInputElement;
+    expect(experimentalInput).toBeEnabled();
+    expect(experimentalInput.value).toBe("false");
+    userEvent.click(experimentalInput);
+    expect(experimentalInput.value).toBe("true");
+  });
+
+  it("Should disable all elements if measure is not shared with the user", () => {
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
+      return false;
+    });
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    const result: HTMLElement = getByTestId("measure-information-form");
+    expect(result).toBeInTheDocument();
+
+    const measureNameInput = getByTestId(
+      "measure-name-input"
+    ) as HTMLInputElement;
+    expect(measureNameInput).toBeDisabled();
+
+    const cqlLibraryNameText = getByTestId(
+      "cql-library-name-input"
+    ) as HTMLInputElement;
+    expect(cqlLibraryNameText).toBeDisabled();
+
+    const ecqmTitleText = getByTestId("ecqm-input") as HTMLInputElement;
+    expect(ecqmTitleText).toBeDisabled();
+
+    const experimentalInput = screen.getByRole("checkbox", {
+      name: "Experimental",
+    }) as HTMLInputElement;
+    expect(experimentalInput).toBeDisabled();
   });
 
   it("Discard dialog opens and succeeds", async () => {
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
+      return true;
+    });
     measure.measureName = "";
     render(<MeasureInformation setErrorMessage={setErrorMessage} />);
     await act(async () => {
