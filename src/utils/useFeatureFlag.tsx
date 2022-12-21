@@ -11,5 +11,5 @@ import useServiceConfig from "../api/useServiceConfig";
  */
 export default function useFeature(feature: string): boolean {
   const serviceConfig: ServiceConfig = useServiceConfig();
-  return serviceConfig?.features[feature] ?? false;
+  return serviceConfig?.features?.[feature] ?? false;
 }
