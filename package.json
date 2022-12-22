@@ -36,7 +36,6 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
     "@fortawesome/react-fontawesome": "^0.1.16",
     "@madie/madie-auth": "^0.0.1",
-    "@madie/madie-components": "^0.0.3",
     "@madie/madie-editor": "^0.0.1",
     "@madie/madie-root": "^0.0.2",
     "@mui/lab": "^5.0.0-alpha.73",
