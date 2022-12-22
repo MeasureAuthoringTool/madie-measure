@@ -158,7 +158,7 @@ export default function MeasureGroupsWarningDialog(
         <Button
           type="button"
           buttonTitle={dialogText?.cancelButtonText}
-          variant="white"
+          variant="outline"
           data-testid={`${dialogText?.dataTestId}-modal-cancel-btn`}
           onClick={onClose}
         >
@@ -166,6 +166,7 @@ export default function MeasureGroupsWarningDialog(
         </Button>
         <Button
           type="submit"
+          variant="danger-primary"
           buttonTitle={dialogText?.confirmButtonText}
           group-form-update-btn
           data-testid={`${dialogText?.dataTestId}-modal-agree-btn`}
