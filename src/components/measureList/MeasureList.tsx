@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { Measure } from "@madie/madie-models";
@@ -76,6 +76,7 @@ export default function MeasureList(props: {
   const measureServiceApi = useMeasureServiceApi();
   const exportFeature = useFeature("export");
   const versioningFeature = useFeature("measureVersioning");
+  const targetMeasure = useRef<Measure>();
 
   const handleClearClick = async (event) => {
     props.setSearchCriteria("");
@@ -149,6 +150,12 @@ export default function MeasureList(props: {
     ),
   };
 
+  useEffect(() => {
+    if (selectedMeasure) {
+      targetMeasure.current = selectedMeasure;
+    }
+  }, [selectedMeasure]);
+
   const handleOpen = (
     selected: Measure,
     event: React.MouseEvent<HTMLButtonElement>
@@ -195,10 +202,10 @@ export default function MeasureList(props: {
     zip.generateAsync({ type: "blob" }).then(function (content) {
       saveAs(
         content,
-        `${selectedMeasure?.ecqmTitle}-v${versionFormat(
-          selectedMeasure?.version,
-          selectedMeasure?.revisionNumber
-        )}-${selectedMeasure?.model}.zip`
+        `${targetMeasure.current?.ecqmTitle}-v${versionFormat(
+          targetMeasure.current?.version,
+          targetMeasure.current?.revisionNumber
+        )}-${targetMeasure.current?.model}.zip`
       );
     });
   };
