@@ -9,7 +9,12 @@ import {
   TextField,
   ReadOnlyTextField,
 } from "@madie/madie-design-system/dist/react";
-import { FormHelperText, Typography } from "@mui/material";
+import {
+  FormHelperText,
+  Typography,
+  FormControlLabel,
+  Checkbox,
+} from "@mui/material";
 import { useFormik } from "formik";
 import { MeasureSchemaValidator } from "../../../../validations/MeasureSchemaValidator";
 import {
@@ -35,6 +40,7 @@ interface measureInformationForm {
   measurementPeriodEnd: Date;
   measureId: string;
   cmsId: string;
+  experimental: boolean;
 }
 
 interface MeasureInformationProps {
@@ -86,6 +92,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
         : measure?.versionId,
     cmsId: measure?.cmsId,
     measureId: measure?.measureSetId,
+    experimental: measure?.measureMetaData?.experimental || false,
   } as measureInformationForm;
 
   const formik = useFormik({
@@ -157,6 +164,10 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       cql: inSyncCql,
       elmJson: updatedElm ? updatedElm : measure.elmJson,
       measureId: values.measureSetId,
+      measureMetaData: {
+        ...measure?.measureMetaData,
+        experimental: values.experimental,
+      },
     };
     measureServiceApi
       .updateMeasure(newMeasure)
@@ -303,6 +314,21 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             size="small"
             error={formik.touched.cmsId && Boolean(formik.errors.cmsId)}
             {...formik.getFieldProps("cmsId")}
+          />
+        </Box>
+        <Box sx={formRowGapped}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                {...formik.getFieldProps("experimental")}
+                checked={formik.values.experimental}
+                disabled={!canEdit}
+                name="experimental"
+                id="experimental"
+                data-testid="experimental"
+              />
+            }
+            label="Experimental"
           />
         </Box>
       </div>

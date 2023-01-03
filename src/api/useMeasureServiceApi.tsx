@@ -286,7 +286,7 @@ export class MeasureServiceApi {
   ): Promise<any> {
     try {
       const response = await axios.get<any>(
-        `${this.baseUrl}/measures/search/${searchCriteria}`,
+        `${this.baseUrl}/measures/search/${encodeURI(searchCriteria)}`,
         {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
