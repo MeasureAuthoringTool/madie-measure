@@ -3,7 +3,7 @@ import { libraryElm } from "./__mocks__/cqlLibraryElm";
 import axios from "axios";
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
-import { Measure } from "@madie/madie-models";
+import { Measure, Organization } from "@madie/madie-models";
 
 describe("MeasureServiceApi Tests", () => {
   afterEach(() => {
@@ -149,5 +149,74 @@ describe("MeasureServiceApi Tests", () => {
     } catch (error) {
       expect(error.message).toBe("Unable to search measures");
     }
+  });
+
+  it("test getAllPopulationBasisOptions error", async () => {
+    const resp = { status: 500, data: "failure", error: { message: "error" } };
+    mockedAxios.get.mockRejectedValueOnce(resp);
+
+    try {
+      await measureServiceApi.getAllPopulationBasisOptions();
+      expect(mockedAxios.get).toBeCalledTimes(1);
+    } catch (error) {
+      expect(error.message).toBe("Unable to fetch population basis options");
+    }
+  });
+
+  it("test getAllOrganizations success", async () => {
+    const organizations: Organization[] = [
+      {
+        id: "testId1",
+        name: "test organization 1",
+        oid: "testOid1",
+      },
+    ];
+    const resp = { status: 200, data: organizations };
+    mockedAxios.get.mockResolvedValueOnce(resp);
+
+    const returnedOrgList = measureServiceApi.getAllOrganizations();
+
+    expect(mockedAxios.get).toBeCalledTimes(1);
+    expect((await returnedOrgList).length).toEqual(1);
+  });
+
+  it("test getAllOrganizations error", async () => {
+    const resp = { status: 500, data: "failure", error: { message: "error" } };
+    mockedAxios.get.mockRejectedValueOnce(resp);
+
+    try {
+      await measureServiceApi.getAllOrganizations();
+      expect(mockedAxios.get).toBeCalledTimes(1);
+    } catch (error) {
+      expect(error.message).toBe("Unable to fetch organizations");
+    }
+  });
+
+  it("test getAllOrganizations error when returned list is empty", async () => {
+    const resp = { status: 200, data: [] };
+    mockedAxios.get.mockResolvedValueOnce(resp);
+
+    try {
+      await measureServiceApi.getAllOrganizations();
+      expect(mockedAxios.get).toBeCalledTimes(1);
+    } catch (error) {
+      expect(error.message).toBe("Unable to fetch organizations");
+    }
+  });
+
+  it("test createVersion success", async () => {
+    const measure: Measure = {
+      id: "testId",
+      measureName: "measure - A",
+      version: "1.001",
+      revisionNumber: 1,
+    } as Measure;
+
+    const resp = { status: 200, data: measure };
+    mockedAxios.put.mockResolvedValue(resp);
+
+    await measureServiceApi.createVersion("testId", "MAJOR");
+    expect(mockedAxios.put).toBeCalledTimes(1);
+    expect(resp.data).toEqual(measure);
   });
 });

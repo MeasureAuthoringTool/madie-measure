@@ -306,6 +306,18 @@ export class MeasureServiceApi {
       throw new Error(message);
     }
   }
+
+  async createVersion(id: string, versionType: string): Promise<Measure> {
+    return await axios.put(
+      `${this.baseUrl}/measures/version/${id}?versionType=${versionType}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${this.getAccessToken()}`,
+        },
+      }
+    );
+  }
 }
 
 export default function useMeasureServiceApi(): MeasureServiceApi {

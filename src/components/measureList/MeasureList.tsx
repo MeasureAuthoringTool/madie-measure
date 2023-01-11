@@ -18,6 +18,16 @@ import useFeature from "../../utils/useFeatureFlag";
 import JSzip from "jszip";
 import { saveAs } from "file-saver";
 import { checkUserCanEdit } from "@madie/madie-util";
+import CreatVersionDialog from "../createVersionDialog/CreateVersionDialog";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert, { AlertProps } from "@mui/material/Alert";
+
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  props,
+  ref
+) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -60,6 +70,7 @@ export default function MeasureList(props: {
   currentLimit: number;
   currentPage: number;
   setErrMsg;
+  onListUpdate;
 }) {
   const history = useHistory();
 
@@ -77,6 +88,28 @@ export default function MeasureList(props: {
   const exportFeature = useFeature("export");
   const versioningFeature = useFeature("measureVersioning");
   const targetMeasure = useRef<Measure>();
+
+  const [createVersionDialog, setCreateVersionDialog] = useState({
+    open: false,
+    measureId: "",
+  });
+  const handleDialogClose = () => {
+    setCreateVersionDialog({
+      open: false,
+      measureId: "",
+    });
+  };
+  const [snackBar, setSnackBar] = useState({
+    message: "",
+    open: false,
+    severity: null,
+  });
+  const handleSnackBarClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    setSnackBar({ ...snackBar, open: false });
+  };
 
   const handleClearClick = async (event) => {
     props.setSearchCriteria("");
@@ -210,7 +243,54 @@ export default function MeasureList(props: {
     });
   };
 
-  const createVersion = () => {};
+  const createVersion = async (versionType: string) => {
+    if (
+      versionType !== "major" &&
+      versionType !== "minor" &&
+      versionType !== "patch"
+    ) {
+      setCreateVersionDialog({
+        open: true,
+        measureId: targetMeasure.current?.id,
+      });
+      setOptionsOpen(false);
+    } else {
+      await measureServiceApi
+        .createVersion(targetMeasure.current?.id, versionType)
+        .then(async () => {
+          handleDialogClose();
+          await props.onListUpdate();
+          setSnackBar({
+            message: "New version of measure is Successfully created",
+            open: true,
+            severity: "success",
+          });
+        })
+        .catch((error) => {
+          handleDialogClose();
+          const errorData = error?.response;
+          if (errorData?.status === 400) {
+            setSnackBar({
+              message: "Requested measure cannot be versioned",
+              open: true,
+              severity: "error",
+            });
+          } else if (errorData?.status === 403) {
+            setSnackBar({
+              message: "User is unauthorized to create a version",
+              open: true,
+              severity: "error",
+            });
+          } else {
+            setSnackBar({
+              message: errorData?.message,
+              open: true,
+              severity: "error",
+            });
+          }
+        });
+    }
+  };
 
   return (
     <div data-testid="measure-list">
@@ -280,7 +360,15 @@ export default function MeasureList(props: {
                           measure?.version,
                           measure?.revisionNumber
                         )}
-                        <Chip tw="ml-6" className="chip-draft" label="Draft" />
+                        <Chip
+                          tw="ml-6"
+                          className="chip-draft"
+                          label={
+                            `${measure.measureMetaData?.draft}` === "true"
+                              ? "Draft"
+                              : "Non-Draft"
+                          }
+                        />
                       </td>
                       <td>{measure.model}</td>
                       <td>
@@ -324,6 +412,26 @@ export default function MeasureList(props: {
                 otherSelectOptionProps={otherSelectOptionPropsForPopOver}
               />
             </div>
+            <Snackbar
+              open={snackBar.open}
+              autoHideDuration={6000}
+              onClose={handleSnackBarClose}
+              data-testid="measure-list-snackBar"
+            >
+              <Alert
+                onClose={handleSnackBarClose}
+                severity={snackBar.severity}
+                sx={{ width: "100%" }}
+                data-testid="measure-list-Alert"
+              >
+                {snackBar.message}
+              </Alert>
+            </Snackbar>
+            <CreatVersionDialog
+              open={createVersionDialog.open}
+              onClose={handleDialogClose}
+              onSubmit={createVersion}
+            />
           </div>
         </div>
       </div>
