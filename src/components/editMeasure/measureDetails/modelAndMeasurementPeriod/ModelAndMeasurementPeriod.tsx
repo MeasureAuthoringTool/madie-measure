@@ -12,7 +12,7 @@ import {
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
-import { FormHelperText, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { useFormik } from "formik";
 import { MeasurementPeriodValidator } from "../../../../validations/MeasurementPeriodValidator";
 import {
@@ -137,15 +137,7 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
 
   function formikErrorHandler(name: string, isError: boolean) {
     if (formik.touched[name] && formik.errors[name]) {
-      return (
-        <FormHelperText
-          aria-live="polite"
-          id={`${name}-helper-text`}
-          data-testid={`${name}-helper-text`}
-          children={formik.errors[name]}
-          error={isError}
-        />
-      );
+      return `${formik.errors[name]}`;
     }
   }
   return (
@@ -200,20 +192,26 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
                 const { onChange, ...formikFieldProps } = formik.getFieldProps(
                   "measurementPeriodStart"
                 );
-                const { inputProps } = params;
-                inputProps["aria-required"] = true;
                 return (
                   <TextField
                     {...formikFieldProps}
                     {...params}
-                    inputProps={inputProps}
-                    id="measurementPeriodStartDate"
                     required
                     data-testid="measurement-period-start"
+                    error={
+                      formik.touched.measurementPeriodStart &&
+                      Boolean(formik.errors.measurementPeriodStart)
+                    }
                     helperText={formikErrorHandler(
                       "measurementPeriodStart",
                       true
                     )}
+                    InputProps={{
+                      "aria-describedby":
+                        "create-measure-period-start-helper-text",
+                      required: true,
+                      "aria-required": "true",
+                    }}
                   />
                 );
               }}
@@ -233,13 +231,14 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
                 const { onChange, ...formikFieldProps } = formik.getFieldProps(
                   "measurementPeriodEnd"
                 );
-                const { inputProps } = params;
-                inputProps["aria-required"] = true;
                 return (
                   <TextField
                     {...formikFieldProps}
                     {...params}
-                    inputProps={inputProps}
+                    error={
+                      formik.touched.measurementPeriodEnd &&
+                      Boolean(formik.errors.measurementPeriodEnd)
+                    }
                     id="measurementPeriodEndDate"
                     required
                     data-testid="measurement-period-end"
@@ -247,6 +246,12 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
                       "measurementPeriodEnd",
                       true
                     )}
+                    InputProps={{
+                      "aria-describedby":
+                        "create-measure-period-end-helper-text",
+                      required: true,
+                      "aria-required": "true",
+                    }}
                   />
                 );
               }}
