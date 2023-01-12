@@ -115,7 +115,7 @@ export default function EditMeasure() {
           style={{
             marginLeft: "2rem",
             marginRight: "2rem",
-            marginTop: "1.5rem",
+            marginTop: 16,
           }}
         >
           {errorMessage && (
