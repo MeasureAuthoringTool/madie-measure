@@ -26,7 +26,6 @@ import {
   routeHandlerStore,
   checkUserCanEdit,
 } from "@madie/madie-util";
-import { versionFormat } from "../../utils/versionFormat";
 import StatusHandler from "./StatusHandler";
 
 const MessageText = tw.p`text-sm font-medium`;
@@ -190,7 +189,7 @@ const MeasureEditor = () => {
         measure?.cql,
         measure?.cqlLibraryName,
         "",
-        versionFormat(measure?.version, measure?.revisionNumber),
+        measure?.version,
         "measureEditor"
       );
 
