@@ -22,7 +22,6 @@ import {
   routeHandlerStore,
   checkUserCanEdit,
 } from "@madie/madie-util";
-import { versionFormat } from "../../../../utils/versionFormat";
 import { Box } from "@mui/system";
 import {
   parseContent,
@@ -139,7 +138,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       measure?.cql,
       values.cqlLibraryName,
       measure?.cqlLibraryName,
-      versionFormat(measure?.version, measure?.revisionNumber),
+      measure?.version,
       "measureInformation"
     );
 

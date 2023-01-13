@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { Measure } from "@madie/madie-models";
-import { versionFormat } from "../../utils/versionFormat";
 import { useHistory } from "react-router-dom";
 import { Chip, IconButton } from "@mui/material";
 import {
@@ -232,10 +231,7 @@ export default function MeasureList(props: {
     zip.generateAsync({ type: "blob" }).then(function (content) {
       saveAs(
         content,
-        `${targetMeasure.current?.ecqmTitle}-v${versionFormat(
-          targetMeasure.current?.version,
-          targetMeasure.current?.revisionNumber
-        )}-${targetMeasure.current?.model}.zip`
+        `${targetMeasure.current?.ecqmTitle}-v${targetMeasure.current?.version}-${targetMeasure.current?.model}.zip`
       );
     });
   };
