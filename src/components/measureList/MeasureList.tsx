@@ -104,10 +104,7 @@ export default function MeasureList(props: {
     open: false,
     severity: null,
   });
-  const handleSnackBarClose = (
-    event?: React.SyntheticEvent | Event,
-    reason?: string
-  ) => {
+  const handleSnackBarClose = () => {
     setSnackBar({ ...snackBar, open: false });
   };
 
@@ -360,15 +357,13 @@ export default function MeasureList(props: {
                           measure?.version,
                           measure?.revisionNumber
                         )}
-                        <Chip
-                          tw="ml-6"
-                          className="chip-draft"
-                          label={
-                            `${measure.measureMetaData?.draft}` === "true"
-                              ? "Draft"
-                              : "Non-Draft"
-                          }
-                        />
+                        {`${measure.measureMetaData?.draft}` === "true" && (
+                          <Chip
+                            tw="ml-6"
+                            className="chip-draft"
+                            label="Draft"
+                          />
+                        )}
                       </td>
                       <td>{measure.model}</td>
                       <td>

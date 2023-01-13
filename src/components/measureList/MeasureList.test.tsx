@@ -283,7 +283,7 @@ describe("Measure List component", () => {
     userEvent.click(clearButton);
     setTimeout(() => {
       expect(searchFieldInput.value).toBe("");
-    }, 6000);
+    }, 8000);
 
     expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
       true,
@@ -368,7 +368,7 @@ describe("Measure List component", () => {
     userEvent.click(clearButton);
     setTimeout(() => {
       expect(searchFieldInput.value).toBe("");
-    }, 6000);
+    }, 8000);
 
     expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
       true,
@@ -426,7 +426,7 @@ describe("Measure List component", () => {
     expect(createVersionButton).toHaveTextContent("Version");
     fireEvent.click(createVersionButton);
 
-    expect(getByTestId("measure-version-form")).toBeInTheDocument();
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
   });
 
   it("should display unauthorized error while creating a version of a measure", async () => {

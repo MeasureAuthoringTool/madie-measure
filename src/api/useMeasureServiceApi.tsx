@@ -314,7 +314,7 @@ export class MeasureServiceApi {
 
   async createVersion(id: string, versionType: string): Promise<Measure> {
     return await axios.put(
-      `${this.baseUrl}/measures/version/${id}?versionType=${versionType}`,
+      `${this.baseUrl}/measures/${id}/version/?versionType=${versionType}`,
       {},
       {
         headers: {

@@ -19,7 +19,7 @@ import { makeStyles } from "@mui/styles";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import tw from "twin.macro";
-import { Button } from "@madie/madie-design-system/dist/react";
+import { MadieDialog } from "@madie/madie-design-system/dist/react";
 
 const useStyles = makeStyles({
   row: {
@@ -79,7 +79,6 @@ interface VersionType {
 }
 
 const MessageText = tw.p`text-sm font-medium`;
-const ErrorText = tw(MessageText)`text-red-800`;
 
 const CreatVersionDialog = ({ open, onClose, onSubmit }) => {
   const formik = useFormik({
@@ -98,35 +97,30 @@ const CreatVersionDialog = ({ open, onClose, onSubmit }) => {
 
   const classes = useStyles();
   const flexEnd = classNames(classes.row, classes.end);
-  const handleDialogClose = () => {
-    formik.resetForm();
-    onClose();
-  };
 
   return (
-    <Dialog
-      open={open}
-      data-testid="create-version-dialog"
-      maxWidth="sm"
-      fullWidth
-      classes={{
-        paper: classes.paper,
-      }}
-    >
-      <form
-        data-testid="measure-version-form"
-        onSubmit={formik.handleSubmit}
-        style={{ overflow: "scroll" }}
+    <div data-testid="create-version-dialog">
+      <MadieDialog
+        form
+        title="Create Version"
+        dialogProps={{
+          onClose,
+          open,
+          onSubmit: formik.handleSubmit,
+        }}
+        cancelButtonProps={{
+          variant: "secondary",
+          cancelText: "Cancel",
+          "data-testid": "create-version-cancel-button",
+        }}
+        continueButtonProps={{
+          variant: "cyan",
+          type: "submit",
+          "data-testid": "create-version-continue-button",
+          disabled: !(formik.isValid && formik.dirty),
+          continueText: "Continue",
+        }}
       >
-        <div className={classes.dialogTitle}>
-          <DialogTitle className={classes.title}>Create Version</DialogTitle>
-          <div>
-            <IconButton onClick={handleDialogClose}>
-              <CloseIcon className={classes.close} />
-            </IconButton>
-          </div>
-        </div>
-        <Divider />
         <DialogContent>
           <div className={flexEnd}>
             <Typography className={classes.info}>
@@ -159,30 +153,8 @@ const CreatVersionDialog = ({ open, onClose, onSubmit }) => {
             </RadioGroup>
           </div>
         </DialogContent>
-        <Divider className={classes.dividerBottom} />
-        <DialogActions classes={{ root: classes.actionsRoot }}>
-          <Button
-            variant="outline"
-            onClick={handleDialogClose}
-            data-testid="create-version-cancel-button"
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="cyan"
-            type="submit"
-            data-testid="create-version-continue-button"
-            disabled={!(formik.isValid && formik.dirty)}
-            style={{ marginTop: 0 }}
-          >
-            <span>
-              Continue
-              <ChevronRightIcon className={classes.chevron} />
-            </span>
-          </Button>
-        </DialogActions>
-      </form>
-    </Dialog>
+      </MadieDialog>
+    </div>
   );
 };
 
