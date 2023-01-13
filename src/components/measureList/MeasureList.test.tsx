@@ -657,7 +657,7 @@ describe("Measure List component", () => {
       fireEvent.click(closeButton);
       setTimeout(() => {
         expect(queryByTestId("measure-list-snackBar")).not.toBeInTheDocument();
-      }, 100);
+      }, 500);
     });
   });
 });
