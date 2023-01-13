@@ -14,7 +14,7 @@ import { routeHandlerStore, useDocumentTitle } from "@madie/madie-util";
 import StewardAndDevelopers from "./stewardAndDevelopers/StewardAndDevelopers";
 import ModelAndMeasurementPeriod from "./modelAndMeasurementPeriod/ModelAndMeasurementPeriod";
 import "./MeasureDetails.scss";
-const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
+const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
 export interface RouteHandlerState {
   canTravel: boolean;
   pendingRoute: string;
