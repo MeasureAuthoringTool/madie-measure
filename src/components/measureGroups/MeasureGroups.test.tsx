@@ -19,7 +19,7 @@ import {
   PopulationType,
 } from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route } from "react-router-dom";
 import { ELM_JSON, MeasureCQL } from "../common/MeasureCQL";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
@@ -48,6 +48,7 @@ const serviceConfig: ServiceConfig = {
   terminologyService: {
     baseUrl: "terminology-service.com",
   },
+  features: { populationCriteriaTabStructure: false },
 };
 
 const getEmptyStrat = () => ({
@@ -150,7 +151,9 @@ describe("Measure Groups Page", () => {
         initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
       >
         <ApiContextProvider value={serviceConfig}>
-          <MeasureGroups />
+          <Route path="/measures/test-measure/edit/groups">
+            <MeasureGroups />
+          </Route>
         </ApiContextProvider>
       </MemoryRouter>
     );
@@ -360,6 +363,8 @@ describe("Measure Groups Page", () => {
 
   test("Should create multiple group tabs on clicking add measure group ", async () => {
     await waitFor(() => renderMeasureGroupComponent());
+    // when populationCriteriaTabStructure flag is true
+    // userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteria"));
     await changePopulationBasis("Encounter");
     const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
     fireEvent.change(groupDescriptionInput, {
@@ -430,7 +435,8 @@ describe("Measure Groups Page", () => {
     group.groupDescription = "testDescription";
     measure.groups = [group];
     await waitFor(() => renderMeasureGroupComponent());
-
+    // when populationCriteriaTabStructure flag is true
+    //userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteria"));
     expect(screen.getByTestId("title").textContent).toBe(
       "Population Criteria 1"
     );
@@ -464,6 +470,8 @@ describe("Measure Groups Page", () => {
     measure.groups = [group];
     const { rerender } = renderMeasureGroupComponent();
 
+    // when populationCriteriaTabStructure flag is true
+    //userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteria"));
     expect(screen.getByTestId("title").textContent).toBe(
       "Population Criteria 1"
     );
@@ -504,13 +512,19 @@ describe("Measure Groups Page", () => {
 
     measure.groups = updatedMeasure.groups;
     rerender(
-      <MemoryRouter initialEntries={[{ pathname: "/" }]}>
+      <MemoryRouter
+        initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
+      >
         <ApiContextProvider value={serviceConfig}>
-          <MeasureGroups />
+          <Route path="/measures/test-measure/edit/groups">
+            <MeasureGroups />
+          </Route>
         </ApiContextProvider>
       </MemoryRouter>
     );
 
+    // when populationCriteriaTabStructure flag is true
+    // userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteria"));
     await waitFor(() => {
       expect(screen.getByTestId("groupDescriptionInput")).toHaveValue("");
       userEvent.click(screen.getByTestId("reporting-tab"));
@@ -553,6 +567,8 @@ describe("Measure Groups Page", () => {
   test("Should be able to save multiple groups  ", async () => {
     const populationBasis = "Encounter";
     renderMeasureGroupComponent();
+    // when populationCriteriaTabStructure flag is true
+    //userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteria"));
     await changePopulationBasis(populationBasis);
 
     // select a scoring
@@ -1413,6 +1429,9 @@ describe("Measure Groups Page", () => {
     group.groupDescription = "testDescription";
     measure.groups = [group];
     renderMeasureGroupComponent();
+
+    // when populationCriteriaTabStructure flag is true
+    //userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteria"));
     expect(screen.getByTestId("title").textContent).toBe(
       "Population Criteria 1"
     );
