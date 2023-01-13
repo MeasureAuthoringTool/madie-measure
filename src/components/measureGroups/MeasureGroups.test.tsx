@@ -364,7 +364,7 @@ describe("Measure Groups Page", () => {
   test("Should create multiple group tabs on clicking add measure group ", async () => {
     await waitFor(() => renderMeasureGroupComponent());
     // when populationCriteriaTabStructure flag is true
-    // userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteria"));
+    // userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     await changePopulationBasis("Encounter");
     const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
     fireEvent.change(groupDescriptionInput, {
@@ -436,7 +436,7 @@ describe("Measure Groups Page", () => {
     measure.groups = [group];
     await waitFor(() => renderMeasureGroupComponent());
     // when populationCriteriaTabStructure flag is true
-    //userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteria"));
+    //userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     expect(screen.getByTestId("title").textContent).toBe(
       "Population Criteria 1"
     );
@@ -471,7 +471,7 @@ describe("Measure Groups Page", () => {
     const { rerender } = renderMeasureGroupComponent();
 
     // when populationCriteriaTabStructure flag is true
-    //userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteria"));
+    //userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     expect(screen.getByTestId("title").textContent).toBe(
       "Population Criteria 1"
     );
@@ -524,7 +524,7 @@ describe("Measure Groups Page", () => {
     );
 
     // when populationCriteriaTabStructure flag is true
-    // userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteria"));
+    // userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     await waitFor(() => {
       expect(screen.getByTestId("groupDescriptionInput")).toHaveValue("");
       userEvent.click(screen.getByTestId("reporting-tab"));
@@ -564,11 +564,40 @@ describe("Measure Groups Page", () => {
     expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
   });
 
+  test("Navigating between the population criteria and risk adjustment tab", async () => {
+    serviceConfig.features.populationCriteriaTabStructure = true;
+    render(
+      <MemoryRouter
+        initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
+      >
+        <ApiContextProvider value={serviceConfig}>
+          <Route path="/measures/test-measure/edit/groups">
+            <MeasureGroups />
+          </Route>
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+    expect(
+      screen.getByTestId("leftPanelMeasurePopulationCriteriaTab")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("leftPanelMeasurePopulationsSupplementalDataTab")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("leftPanelMeasurePopulationsRiskAdjustmentTab")
+    ).toBeInTheDocument();
+    userEvent.click(
+      screen.getByTestId("leftPanelMeasurePopulationsRiskAdjustmentTab")
+    );
+    expect(screen.getByTestId("Risk Adjustment")).toBeInTheDocument();
+  });
+
   test("Should be able to save multiple groups  ", async () => {
     const populationBasis = "Encounter";
+    serviceConfig.features.populationCriteriaTabStructure = false;
     renderMeasureGroupComponent();
     // when populationCriteriaTabStructure flag is true
-    //userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteria"));
+    //userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     await changePopulationBasis(populationBasis);
 
     // select a scoring
@@ -1431,7 +1460,7 @@ describe("Measure Groups Page", () => {
     renderMeasureGroupComponent();
 
     // when populationCriteriaTabStructure flag is true
-    //userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteria"));
+    //userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     expect(screen.getByTestId("title").textContent).toBe(
       "Population Criteria 1"
     );

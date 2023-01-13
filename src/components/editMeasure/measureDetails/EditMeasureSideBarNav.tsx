@@ -54,19 +54,19 @@ export default function EditMeasureSideBarNav(
     {
       title: "Population Criteria",
       groups: measureGroups,
-      dataTestId: "leftPanelMeasurePopulationCriteria",
+      dataTestId: "leftPanelMeasurePopulationCriteriaTab",
       id: "sideNavMeasurePopulationCriteria",
     },
     {
       title: "Supplemental Data",
       href: `${urlPath}/supplemental-data`,
-      dataTestId: "leftPanelMeasurePopulationsSupplementalData",
+      dataTestId: "leftPanelMeasurePopulationsSupplementalDataTab",
       id: "sideNavMeasurePopulationsSupplementalData",
     },
     {
       title: "Risk Adjustment",
       href: `${urlPath}/risk-adjustment`,
-      dataTestId: "leftPanelMeasurePopulationsRiskAdjustment",
+      dataTestId: "leftPanelMeasurePopulationsRiskAdjustmentTab",
       id: "sideNavMeasurePopulationsRiskAdjustment",
     },
   ];

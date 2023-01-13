@@ -124,9 +124,9 @@ describe("EditMeasureSideBarNav", () => {
     await waitFor(() => RenderEditMeasureSideBarNav(initialProps));
     // when populationCriteriaTabStructure flag is true
     // expect(
-    //   getByTestId("leftPanelMeasurePopulationCriteria")
+    //   getByTestId("leftPanelMeasurePopulationCriteriaTab")
     // ).toBeInTheDocument();
-    // userEvent.click(getByTestId("leftPanelMeasurePopulationCriteria"));
+    // userEvent.click(getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     expect(getByText("Population Criteria 1")).toBeInTheDocument();
 
     const addButton = getByTestId("AddIcon");
@@ -150,9 +150,9 @@ describe("EditMeasureSideBarNav", () => {
     await waitFor(() => RenderEditMeasureSideBarNav(initialProps));
     // when populationCriteriaTabStructure flag is true
     // expect(
-    //   getByTestId("leftPanelMeasurePopulationCriteria")
+    //   getByTestId("leftPanelMeasurePopulationCriteriaTab")
     // ).toBeInTheDocument();
-    // userEvent.click(getByTestId("leftPanelMeasurePopulationCriteria"));
+    // userEvent.click(getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     expect(getByText("Population Criteria 1")).toBeInTheDocument();
     const navButton = getByTestId("leftPanelMeasureInformation-MeasureGroup1");
     expect(navButton).toBeInTheDocument();
@@ -174,15 +174,15 @@ describe("EditMeasureSideBarNav", () => {
     await waitFor(() => RenderEditMeasureSideBarNav(initialProps));
     // when populationCriteriaTabStructure flag is true
     // expect(
-    //   getByTestId("leftPanelMeasurePopulationCriteria")
+    //   getByTestId("leftPanelMeasurePopulationCriteriaTab")
     // ).toBeInTheDocument();
     // expect(
-    //   getByTestId("leftPanelMeasurePopulationsSupplementalData")
+    //   getByTestId("leftPanelMeasurePopulationsSupplementalDataTab")
     // ).toBeInTheDocument();
     // expect(
-    //   getByTestId("leftPanelMeasurePopulationsRiskAdjustment")
+    //   getByTestId("leftPanelMeasurePopulationsRiskAdjustmentTab")
     // ).toBeInTheDocument();
-    // userEvent.click(getByTestId("leftPanelMeasurePopulationCriteria"));
+    // userEvent.click(getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     expect(getByText("Population Criteria 1")).toBeInTheDocument();
     const navButton = getByTestId("leftPanelMeasureInformation-MeasureGroup1");
     expect(navButton).toBeInTheDocument();
@@ -205,9 +205,9 @@ describe("EditMeasureSideBarNav", () => {
     await waitFor(() => RenderEditMeasureSideBarNav(nonDirtyProps));
     // when populationCriteriaTabStructure flag is true
     // expect(
-    //   getByTestId("leftPanelMeasurePopulationCriteria")
+    //   getByTestId("leftPanelMeasurePopulationCriteriaTab")
     // ).toBeInTheDocument();
-    // userEvent.click(getByTestId("leftPanelMeasurePopulationCriteria"));
+    // userEvent.click(getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     expect(getByText("Population Criteria 1")).toBeInTheDocument();
     const navButton = getByTestId("leftPanelMeasureInformation-MeasureGroup1");
     expect(navButton).toBeInTheDocument();
