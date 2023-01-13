@@ -349,10 +349,7 @@ export default function MeasureList(props: {
                     >
                       <td tw="w-7/12">{measure.measureName}</td>
                       <td>
-                        {versionFormat(
-                          measure?.version,
-                          measure?.revisionNumber
-                        )}
+                        {measure?.version}
                         {`${measure.measureMetaData?.draft}` === "true" && (
                           <Chip
                             tw="ml-6"
