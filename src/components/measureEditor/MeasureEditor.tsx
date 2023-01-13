@@ -26,7 +26,6 @@ import {
   routeHandlerStore,
   checkUserCanEdit,
 } from "@madie/madie-util";
-import { versionFormat } from "../../utils/versionFormat";
 import StatusHandler from "./StatusHandler";
 
 const MessageText = tw.p`text-sm font-medium`;
@@ -190,7 +189,7 @@ const MeasureEditor = () => {
         measure?.cql,
         measure?.cqlLibraryName,
         "",
-        versionFormat(measure?.version, measure?.revisionNumber),
+        measure?.version,
         "measureEditor"
       );
 
@@ -285,7 +284,7 @@ const MeasureEditor = () => {
 
   return (
     <>
-      <div tw="flex flex-wrap mx-8 my-6 shadow-lg rounded-md border border-slate bg-white">
+      <div tw="flex flex-wrap mx-8 shadow-lg rounded-md border border-slate bg-white">
         <div tw="flex-none sm:w-full">
           {valuesetMsg && (
             <SuccessText data-testid="valueset-success">

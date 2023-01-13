@@ -9,12 +9,7 @@ import {
   TextField,
   ReadOnlyTextField,
 } from "@madie/madie-design-system/dist/react";
-import {
-  FormHelperText,
-  Typography,
-  FormControlLabel,
-  Checkbox,
-} from "@mui/material";
+import { Typography, FormControlLabel, Checkbox } from "@mui/material";
 import { useFormik } from "formik";
 import { MeasureSchemaValidator } from "../../../../validations/MeasureSchemaValidator";
 import {
@@ -22,7 +17,6 @@ import {
   routeHandlerStore,
   checkUserCanEdit,
 } from "@madie/madie-util";
-import { versionFormat } from "../../../../utils/versionFormat";
 import { Box } from "@mui/system";
 import {
   parseContent,
@@ -139,7 +133,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       measure?.cql,
       values.cqlLibraryName,
       measure?.cqlLibraryName,
-      versionFormat(measure?.version, measure?.revisionNumber),
+      measure?.version,
       "measureInformation"
     );
 
@@ -188,14 +182,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
 
   function formikErrorHandler(name: string, isError: boolean) {
     if (formik.touched[name] && formik.errors[name]) {
-      return (
-        <FormHelperText
-          aria-live="polite"
-          data-testid={`${name}-helper-text`}
-          children={formik.errors[name]}
-          error={isError}
-        />
-      );
+      return `${formik.errors[name]}`;
     }
   }
   return (
