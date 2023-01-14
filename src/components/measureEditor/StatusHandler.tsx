@@ -10,7 +10,6 @@ const StatusHandler = ({
   hasSubTitle,
 }) => {
   // success.status = fulfilled && elmTranslation errors
-  console.log("", outboundAnnotations);
   const transformAnnotation = (annotation) => {
     return `Row: ${annotation.row + 1}, Col:${annotation.column}: ${
       annotation.text
