@@ -769,7 +769,7 @@ const MeasureGroups = () => {
                   disabled={!canEdit}
                   helperText={
                     formik.touched.scoring &&
-                    formik.touched.scoring &&
+                    Boolean(formik.errors.scoring) &&
                     formik.errors.scoring
                   }
                   size="small"
