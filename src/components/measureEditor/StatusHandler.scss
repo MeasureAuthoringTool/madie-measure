@@ -1,5 +1,4 @@
 .madie-alert {
-  margin-bottom: 10px;
   > #content {
     max-height: 125px;
     overflow: auto;
@@ -26,5 +25,8 @@
       list-style-position: inside;
       list-style: disc;
     }
+  }
+  & #measures-alert {
+    margin-bottom: 24px;
   }
 }
