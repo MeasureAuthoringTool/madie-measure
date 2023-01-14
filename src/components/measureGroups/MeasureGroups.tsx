@@ -726,7 +726,7 @@ const MeasureGroups = () => {
                   }
                   helperText={
                     formik.touched.measureGroupTypes &&
-                    formik.touched.measureGroupTypes &&
+                    Boolean(formik.errors.measureGroupTypes) &&
                     formik.errors.measureGroupTypes
                   }
                   {...formik.getFieldProps("measureGroupTypes")}
