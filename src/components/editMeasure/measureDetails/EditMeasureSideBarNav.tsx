@@ -44,7 +44,7 @@ export default function EditMeasureSideBarNav(
 
   const { pathname } = useLocation();
   const [measureGroups, setMeasureGroups] = useState<any>();
-  const [showLinks, setShowLinks] = useState<boolean>(false);
+  const [showTabs, setShowTabs] = useState<boolean>(false);
   const history = useHistory();
   const populationCriteriaTabStructure = useFeature(
     "populationCriteriaTabStructure"
@@ -154,9 +154,9 @@ export default function EditMeasureSideBarNav(
     setInitiatedPayload(null);
   };
 
-  const handleClick = (tabInfo) => {
+  const handleTabClick = (tabInfo) => {
     if (tabInfo.groups) {
-      setShowLinks(!showLinks);
+      setShowTabs(!showTabs);
       history.push(`${urlPath}`);
     } else {
       history.push(tabInfo.href);
@@ -209,18 +209,21 @@ export default function EditMeasureSideBarNav(
                   <button
                     onClick={(e) => {
                       e.preventDefault();
-                      handleClick(tabRecord);
+                      handleTabClick(tabRecord);
                     }}
                     data-testId={tabRecord.dataTestId}
+                    className="tab-title"
                   >
                     {tabRecord.title}{" "}
-                    {tabRecord.groups &&
-                      (showLinks ? <ExpandMoreIcon /> : <ExpandLessIcon />)}
+                    <span className="tab-dropdown">
+                      {tabRecord.groups &&
+                        (showTabs ? <ExpandMoreIcon /> : <ExpandLessIcon />)}
+                    </span>
                   </button>
                 </div>
               )}
               {tabRecord.groups &&
-                (showLinks || !populationCriteriaTabStructure) && (
+                (showTabs || !populationCriteriaTabStructure) && (
                   <>
                     {tabRecord?.groups?.map((linkInfo, index) => {
                       const isActive =
