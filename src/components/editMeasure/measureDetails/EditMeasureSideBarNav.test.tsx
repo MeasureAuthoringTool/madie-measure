@@ -123,9 +123,6 @@ describe("EditMeasureSideBarNav", () => {
   test("Measure Group add click when dirty opens up a warning dialog, hitting cancel closes it", async () => {
     await waitFor(() => RenderEditMeasureSideBarNav(initialProps));
     // when populationCriteriaTabStructure flag is true
-    // expect(
-    //   getByTestId("leftPanelMeasurePopulationCriteriaTab")
-    // ).toBeInTheDocument();
     // userEvent.click(getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     expect(getByText("Population Criteria 1")).toBeInTheDocument();
 
@@ -149,9 +146,6 @@ describe("EditMeasureSideBarNav", () => {
   test("Measure Group nav click when dirty opens up a warning dialog, hitting cancel closes it", async () => {
     await waitFor(() => RenderEditMeasureSideBarNav(initialProps));
     // when populationCriteriaTabStructure flag is true
-    // expect(
-    //   getByTestId("leftPanelMeasurePopulationCriteriaTab")
-    // ).toBeInTheDocument();
     // userEvent.click(getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     expect(getByText("Population Criteria 1")).toBeInTheDocument();
     const navButton = getByTestId("leftPanelMeasureInformation-MeasureGroup1");
@@ -173,15 +167,6 @@ describe("EditMeasureSideBarNav", () => {
   test("Measure Group nav click when dirty opens up a warning dialog, hitting continue closes it", async () => {
     await waitFor(() => RenderEditMeasureSideBarNav(initialProps));
     // when populationCriteriaTabStructure flag is true
-    // expect(
-    //   getByTestId("leftPanelMeasurePopulationCriteriaTab")
-    // ).toBeInTheDocument();
-    // expect(
-    //   getByTestId("leftPanelMeasurePopulationsSupplementalDataTab")
-    // ).toBeInTheDocument();
-    // expect(
-    //   getByTestId("leftPanelMeasurePopulationsRiskAdjustmentTab")
-    // ).toBeInTheDocument();
     // userEvent.click(getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     expect(getByText("Population Criteria 1")).toBeInTheDocument();
     const navButton = getByTestId("leftPanelMeasureInformation-MeasureGroup1");
@@ -204,14 +189,47 @@ describe("EditMeasureSideBarNav", () => {
     const nonDirtyProps = { ...initialProps, dirty: false };
     await waitFor(() => RenderEditMeasureSideBarNav(nonDirtyProps));
     // when populationCriteriaTabStructure flag is true
-    // expect(
-    //   getByTestId("leftPanelMeasurePopulationCriteriaTab")
-    // ).toBeInTheDocument();
     // userEvent.click(getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     expect(getByText("Population Criteria 1")).toBeInTheDocument();
     const navButton = getByTestId("leftPanelMeasureInformation-MeasureGroup1");
     expect(navButton).toBeInTheDocument();
     fireEvent.click(navButton);
     expect(queryByText("You have unsaved changes.")).toBe(null);
+  });
+
+  test("Population Criteria page navigation between the tabs", async () => {
+    await waitFor(() =>
+      render(
+        <MemoryRouter
+          initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
+        >
+          <ServiceContext.Provider
+            value={{
+              elmTranslationService: { baseUrl: "" },
+              measureService: { baseUrl: "" },
+              terminologyService: { baseUrl: "" },
+              features: { populationCriteriaTabStructure: true },
+            }}
+          >
+            <EditMeasureSideBarNav {...initialProps} />
+          </ServiceContext.Provider>
+        </MemoryRouter>
+      )
+    );
+    expect(
+      getByTestId("leftPanelMeasurePopulationCriteriaTab")
+    ).toBeInTheDocument();
+    expect(
+      getByTestId("leftPanelMeasurePopulationsSupplementalDataTab")
+    ).toBeInTheDocument();
+    expect(
+      getByTestId("leftPanelMeasurePopulationsRiskAdjustmentTab")
+    ).toBeInTheDocument();
+    userEvent.click(getByTestId("leftPanelMeasurePopulationCriteriaTab"));
+    expect(getByText("Population Criteria 1")).toBeInTheDocument();
+    userEvent.click(
+      getByTestId("leftPanelMeasurePopulationsSupplementalDataTab")
+    );
+    expect(getByText("Supplemental Data")).toBeInTheDocument();
   });
 });
