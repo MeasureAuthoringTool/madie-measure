@@ -565,12 +565,24 @@ describe("Measure Groups Page", () => {
   });
 
   test("Navigating between the population criteria and risk adjustment tab", async () => {
-    serviceConfig.features.populationCriteriaTabStructure = true;
     render(
       <MemoryRouter
         initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
       >
-        <ApiContextProvider value={serviceConfig}>
+        <ApiContextProvider
+          value={{
+            measureService: {
+              baseUrl: "example-service-url",
+            },
+            elmTranslationService: {
+              baseUrl: "test-elm-service",
+            },
+            terminologyService: {
+              baseUrl: "terminology-service.com",
+            },
+            features: { populationCriteriaTabStructure: true },
+          }}
+        >
           <Route path="/measures/test-measure/edit/groups">
             <MeasureGroups />
           </Route>
@@ -594,7 +606,6 @@ describe("Measure Groups Page", () => {
 
   test("Should be able to save multiple groups  ", async () => {
     const populationBasis = "Encounter";
-    serviceConfig.features.populationCriteriaTabStructure = false;
     renderMeasureGroupComponent();
     // when populationCriteriaTabStructure flag is true
     //userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteriaTab"));
