@@ -19,7 +19,7 @@ import {
   PopulationType,
 } from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route } from "react-router-dom";
 import { ELM_JSON, MeasureCQL } from "../common/MeasureCQL";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
@@ -48,6 +48,7 @@ const serviceConfig: ServiceConfig = {
   terminologyService: {
     baseUrl: "terminology-service.com",
   },
+  features: { populationCriteriaTabs: false },
 };
 
 const getEmptyStrat = () => ({
@@ -150,7 +151,9 @@ describe("Measure Groups Page", () => {
         initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
       >
         <ApiContextProvider value={serviceConfig}>
-          <MeasureGroups />
+          <Route path="/measures/test-measure/edit/groups">
+            <MeasureGroups />
+          </Route>
         </ApiContextProvider>
       </MemoryRouter>
     );
@@ -360,6 +363,7 @@ describe("Measure Groups Page", () => {
 
   test("Should create multiple group tabs on clicking add measure group ", async () => {
     await waitFor(() => renderMeasureGroupComponent());
+
     await changePopulationBasis("Encounter");
     const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
     fireEvent.change(groupDescriptionInput, {
@@ -504,9 +508,13 @@ describe("Measure Groups Page", () => {
 
     measure.groups = updatedMeasure.groups;
     rerender(
-      <MemoryRouter initialEntries={[{ pathname: "/" }]}>
+      <MemoryRouter
+        initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
+      >
         <ApiContextProvider value={serviceConfig}>
-          <MeasureGroups />
+          <Route path="/measures/test-measure/edit/groups">
+            <MeasureGroups />
+          </Route>
         </ApiContextProvider>
       </MemoryRouter>
     );
@@ -548,6 +556,50 @@ describe("Measure Groups Page", () => {
       "Increased score indicates improvement"
     );
     expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
+  });
+
+  test("Navigating between the population criteria and risk adjustment tab", async () => {
+    render(
+      <MemoryRouter
+        initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
+      >
+        <ApiContextProvider
+          value={{
+            measureService: {
+              baseUrl: "example-service-url",
+            },
+            elmTranslationService: {
+              baseUrl: "test-elm-service",
+            },
+            terminologyService: {
+              baseUrl: "terminology-service.com",
+            },
+            features: { populationCriteriaTabs: true },
+          }}
+        >
+          <Route path="/measures/test-measure/edit/groups">
+            <MeasureGroups />
+          </Route>
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+    expect(
+      screen.getByTestId("leftPanelMeasurePopulationCriteriaTab")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("leftPanelMeasurePopulationsRiskAdjustmentTab")
+    ).toBeInTheDocument();
+    userEvent.click(
+      screen.getByTestId("leftPanelMeasurePopulationsRiskAdjustmentTab")
+    );
+    expect(screen.getByTestId("risk-adjustment")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("leftPanelMeasurePopulationsSupplementalDataTab")
+    ).toBeInTheDocument();
+    userEvent.click(
+      screen.getByTestId("leftPanelMeasurePopulationsSupplementalDataTab")
+    );
+    expect(screen.getByTestId("supplemental-data")).toBeInTheDocument();
   });
 
   test("Should be able to save multiple groups  ", async () => {
@@ -1413,6 +1465,7 @@ describe("Measure Groups Page", () => {
     group.groupDescription = "testDescription";
     measure.groups = [group];
     renderMeasureGroupComponent();
+
     expect(screen.getByTestId("title").textContent).toBe(
       "Population Criteria 1"
     );
