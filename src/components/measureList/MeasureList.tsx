@@ -8,6 +8,7 @@ import {
   TextField,
   Button,
   Popover,
+  Toast,
 } from "@madie/madie-design-system/dist/react";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -18,7 +19,6 @@ import JSzip from "jszip";
 import { saveAs } from "file-saver";
 import { checkUserCanEdit } from "@madie/madie-util";
 import CreatVersionDialog from "../createVersionDialog/CreateVersionDialog";
-import Snackbar from "@mui/material/Snackbar";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
@@ -98,13 +98,13 @@ export default function MeasureList(props: {
       measureId: "",
     });
   };
-  const [snackBar, setSnackBar] = useState({
-    message: "",
-    open: false,
-    severity: null,
-  });
-  const handleSnackBarClose = () => {
-    setSnackBar({ ...snackBar, open: false });
+  const [toastOpen, setToastOpen] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string>("");
+  const [toastType, setToastType] = useState<string>("danger");
+  const onToastClose = () => {
+    setToastType("danger");
+    setToastMessage("");
+    setToastOpen(false);
   };
 
   const handleClearClick = async (event) => {
@@ -253,33 +253,22 @@ export default function MeasureList(props: {
         .then(async () => {
           handleDialogClose();
           await props.onListUpdate();
-          setSnackBar({
-            message: "New version of measure is Successfully created",
-            open: true,
-            severity: "success",
-          });
+          setToastOpen(true);
+          setToastType("success");
+          setToastMessage("New version of measure is Successfully created");
         })
         .catch((error) => {
           handleDialogClose();
           const errorData = error?.response;
+          setToastOpen(true);
           if (errorData?.status === 400) {
-            setSnackBar({
-              message: "Requested measure cannot be versioned",
-              open: true,
-              severity: "error",
-            });
+            setToastMessage("Requested measure cannot be versioned");
           } else if (errorData?.status === 403) {
-            setSnackBar({
-              message: "User is unauthorized to create a version",
-              open: true,
-              severity: "error",
-            });
+            setToastMessage("User is unauthorized to create a version");
           } else {
-            setSnackBar({
-              message: errorData?.message,
-              open: true,
-              severity: "error",
-            });
+            setToastMessage(
+              errorData?.message ? errorData.message : "Server error!"
+            );
           }
         });
     }
@@ -400,21 +389,24 @@ export default function MeasureList(props: {
                 otherSelectOptionProps={otherSelectOptionPropsForPopOver}
               />
             </div>
-            <Snackbar
-              open={snackBar.open}
+            <Toast
+              toastKey="create-version-toast"
+              aria-live="polite"
+              toastType={toastType}
+              testId={
+                toastType === "danger"
+                  ? "create-version-error-text"
+                  : "create-version-success-text"
+              }
+              closeButtonProps={{
+                "data-testid": "close-toast-button",
+              }}
+              open={toastOpen}
+              message={toastMessage}
+              onClose={onToastClose}
               autoHideDuration={6000}
-              onClose={handleSnackBarClose}
-              data-testid="measure-list-snackBar"
-            >
-              <Alert
-                onClose={handleSnackBarClose}
-                severity={snackBar.severity}
-                sx={{ width: "100%" }}
-                data-testid="measure-list-Alert"
-              >
-                {snackBar.message}
-              </Alert>
-            </Snackbar>
+            />
+            ;
             <CreatVersionDialog
               open={createVersionDialog.open}
               onClose={handleDialogClose}

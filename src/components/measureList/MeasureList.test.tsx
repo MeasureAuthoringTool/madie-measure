@@ -476,7 +476,7 @@ describe("Measure List component", () => {
     fireEvent.click(getByLabelText("Major"));
     await waitFor(() => {
       fireEvent.click(getByTestId("create-version-continue-button"));
-      expect(getByTestId("measure-list-snackBar")).toHaveTextContent(
+      expect(getByTestId("create-version-error-text")).toHaveTextContent(
         "User is unauthorized to create a version"
       );
     });
@@ -532,7 +532,7 @@ describe("Measure List component", () => {
     fireEvent.click(getByLabelText("Major"));
     await waitFor(() => {
       fireEvent.click(getByTestId("create-version-continue-button"));
-      expect(getByTestId("measure-list-snackBar")).toHaveTextContent(
+      expect(getByTestId("create-version-error-text")).toHaveTextContent(
         "Requested measure cannot be versioned"
       );
     });
@@ -589,7 +589,7 @@ describe("Measure List component", () => {
     fireEvent.click(getByLabelText("Major"));
     await waitFor(() => {
       fireEvent.click(getByTestId("create-version-continue-button"));
-      expect(getByTestId("measure-list-snackBar")).toHaveTextContent(
+      expect(getByTestId("create-version-error-text")).toHaveTextContent(
         "server error"
       );
     });
@@ -620,7 +620,7 @@ describe("Measure List component", () => {
       return true;
     });
 
-    const { getByTestId, getByLabelText, getByTitle, queryByTestId } = render(
+    const { getByTestId, getByLabelText, queryByTestId } = render(
       <ServiceContext.Provider value={features}>
         <MeasureList
           measureList={measures}
@@ -646,14 +646,16 @@ describe("Measure List component", () => {
     fireEvent.click(getByLabelText("Major"));
     await waitFor(() => {
       fireEvent.click(getByTestId("create-version-continue-button"));
-      expect(getByTestId("measure-list-snackBar")).toHaveTextContent(
+      expect(getByTestId("create-version-success-text")).toHaveTextContent(
         "New version of measure is Successfully created"
       );
 
-      const closeButton = getByTitle("Close");
+      const closeButton = getByTestId("close-toast-button");
       fireEvent.click(closeButton);
       setTimeout(() => {
-        expect(queryByTestId("measure-list-snackBar")).not.toBeInTheDocument();
+        expect(
+          queryByTestId("create-version-success-text")
+        ).not.toBeInTheDocument();
       }, 500);
     });
   });
