@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { InputLabel } from "@madie/madie-design-system/dist/react/";
 import { Autocomplete, FormControl, TextField } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import { Formik } from "formik";
 
 export interface ScoringUnitProps {
   options?: any;
@@ -54,88 +55,90 @@ const MeasureGroupScoringUnit = ({
   On save the auto complete will repackage this in the same way through onChange
   */
   const parsedValue = value?.value || null;
-
   return (
-    <div
-      data-testid="measure-group-scoring-unit"
-      style={{ paddingLeft: "16px" }}
-    >
-      {
-        <FormControl fullWidth>
-          <InputLabel
-            id="scoring-unit-dropdown-label"
-            data-testid="scoring-unit-dropdown-label"
-            required={false}
-          >
-            Scoring Unit
-          </InputLabel>
-          <Autocomplete
-            disabled={!canEdit}
-            options={options}
-            data-testid="scoring-unit-dropdown"
-            popupIcon={<SearchIcon sx={{ color: "#1C2556" }} />}
-            sx={autoCompleteStyles}
-            value={parsedValue}
-            getOptionLabel={(option: Option): string =>
-              `${option.code} ${option.name}`
-            }
-            disablePortal
-            limitTags={10}
-            filterOptions={(options, state): any[] => {
-              const { inputValue } = state;
-              if (inputValue) {
-                const input = removeSpecificChars(inputValue);
-                const filteredOptions = options.filter((opt: Option) => {
-                  const match = removeSpecificChars(`${opt.code} ${opt.name}`);
-                  return match.includes(input);
-                });
-                return filteredOptions;
-              }
-              return [];
-            }}
-            onChange={(event: any, values: any, reason: string) => {
-              if (values) {
-                const label = `${values.code} ${values.name}`;
-                const transformedResult = {
-                  label,
-                  value: values,
-                };
-                onChange(transformedResult);
-              } else {
-                onChange("");
-              }
-            }}
-            autoHighlight={true}
-            id="scoring-unit-dropdown"
-            renderInput={(params) => {
-              const { inputProps } = params;
-              // inputProps["aria-required"] = false;
-              // inputProps["aria-describedby"] = ""; no description necessary
-              inputProps["aria-labelledby"] = "scoring-unit-dropdown-label";
-              return (
-                <TextField
-                  {...params}
-                  data-testid="measure-scoring-unit-text-input"
-                  inputProps={inputProps}
-                  disabled={!canEdit}
-                  sx={{
-                    input: {
-                      color: "#333",
-                      "&::placeholder": {
-                        opacity: 1,
-                        color: "#717171",
-                      },
-                    },
-                  }}
-                  placeholder="UCUM Code or Name"
-                  value={value ? `${value.code} ${value.name}` : ""}
-                />
-              );
-            }}
-          />
-        </FormControl>
-      }
-    </div>
+    // {
+    // data test id is now passed to formControl instead of wrapping div.
+    <FormControl fullWidth data-testid="measure-group-scoring-unit">
+      <div
+        style={{
+          width: 1,
+          display: "flex",
+          flexDirection: "column",
+          flexGrow: 1,
+        }}
+      />
+      <InputLabel
+        id="scoring-unit-dropdown-label"
+        data-testid="scoring-unit-dropdown-label"
+        required={false}
+      >
+        Scoring Unit
+      </InputLabel>
+      <Autocomplete
+        disabled={!canEdit}
+        options={options}
+        data-testid="scoring-unit-dropdown"
+        popupIcon={<SearchIcon sx={{ color: "#1C2556" }} />}
+        sx={autoCompleteStyles}
+        value={parsedValue}
+        getOptionLabel={(option: Option): string =>
+          `${option.code} ${option.name}`
+        }
+        disablePortal
+        limitTags={10}
+        filterOptions={(options, state): any[] => {
+          const { inputValue } = state;
+          if (inputValue) {
+            const input = removeSpecificChars(inputValue);
+            const filteredOptions = options.filter((opt: Option) => {
+              const match = removeSpecificChars(`${opt.code} ${opt.name}`);
+              return match.includes(input);
+            });
+            return filteredOptions;
+          }
+          return [];
+        }}
+        onChange={(event: any, values: any, reason: string) => {
+          if (values) {
+            const label = `${values.code} ${values.name}`;
+            const transformedResult = {
+              label,
+              value: values,
+            };
+            onChange(transformedResult);
+          } else {
+            onChange("");
+          }
+        }}
+        autoHighlight={true}
+        id="scoring-unit-dropdown"
+        renderInput={(params) => {
+          const { inputProps } = params;
+          // inputProps["aria-required"] = false;
+          // inputProps["aria-describedby"] = ""; no description necessary
+          inputProps["aria-labelledby"] = "scoring-unit-dropdown-label";
+          return (
+            <TextField
+              {...params}
+              data-testid="measure-scoring-unit-text-input"
+              inputProps={inputProps}
+              disabled={!canEdit}
+              sx={{
+                input: {
+                  color: "#333",
+                  "&::placeholder": {
+                    opacity: 1,
+                    color: "#717171",
+                  },
+                },
+              }}
+              placeholder="UCUM Code or Name"
+              value={value ? `${value.code} ${value.name}` : ""}
+            />
+          );
+        }}
+      />
+    </FormControl>
   );
 };
 

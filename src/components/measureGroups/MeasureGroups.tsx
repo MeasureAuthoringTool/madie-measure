@@ -15,7 +15,6 @@ import {
   Divider,
   Tabs,
   Tab,
-  FormHelperText,
 } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import EditMeasureSideBarNav from "../editMeasure/measureDetails/EditMeasureSideBarNav";
@@ -649,7 +648,7 @@ const MeasureGroups = () => {
           />
         )}
 
-        <div tw="grid lg:grid-cols-6 gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate bg-white">
+        <div tw="grid lg:grid-cols-6 gap-4 mx-8 shadow-lg rounded-md border border-slate bg-white">
           <EditMeasureSideBarNav
             canEdit={canEdit}
             dirty={formik.dirty}
@@ -682,7 +681,7 @@ const MeasureGroups = () => {
             {/* Form control later should be moved to own component and dynamically rendered by switch based on measure. */}
 
             <div>
-              <div tw="grid lg:grid-cols-4 gap-4">
+              <div>
                 <FormFieldInner>
                   <FieldLabel htmlFor="measure-group-description">
                     Description
@@ -703,65 +702,47 @@ const MeasureGroups = () => {
                     {!canEdit && formik.values.groupDescription}
                   </FieldSeparator>
                 </FormFieldInner>
-                <div tw="lg:col-start-1">
-                  <MultipleSelectDropDown
-                    formControl={formik.getFieldProps("measureGroupTypes")}
-                    id="measure-group-type"
-                    label="Type"
-                    placeHolder={{ name: "Select Measure Group", value: "" }}
-                    defaultValue={formik.values.measureGroupTypes}
-                    required={true}
-                    disabled={!canEdit}
-                    error={
-                      formik.touched.measureGroupTypes &&
-                      Boolean(formik.errors.measureGroupTypes)
-                    }
-                    helperText={
-                      formik.touched.measureGroupTypes &&
-                      formik.errors.measureGroupTypes
-                    }
-                    {...formik.getFieldProps("measureGroupTypes")}
-                    onChange={(_event: any, selectedVal: string | null) => {
-                      formik.setFieldValue("measureGroupTypes", selectedVal);
-                    }}
-                    options={Object.values(MeasureGroupTypes)}
-                    multipleSelect={true}
-                    limitTags={1}
-                  />
-                  {formik.errors["measureGroupTypes"] && (
-                    <FormHelperText
-                      tabIndex={0}
-                      aria-live="polite"
-                      data-testid={`measure-group-type-helper-text`}
-                      id="measure-group-type-helper-text"
-                      error={true}
-                    >
-                      {formik.errors["measureGroupTypes"]}
-                    </FormHelperText>
-                  )}
-                </div>
-                <div>
-                  <AutoComplete
-                    id="populationBasis"
-                    dataTestId="populationBasis"
-                    label="Population Basis"
-                    placeholder="Select Population Basis"
-                    required={true}
-                    disabled={!canEdit}
-                    error={
-                      formik.touched.populationBasis &&
-                      formik.errors.populationBasis
-                    }
-                    helperText={
-                      formik.touched.populationBasis &&
-                      formik.errors.populationBasis
-                    }
-                    options={populationBasisValues}
-                    {...formik.getFieldProps("populationBasis")}
-                    onChange={formik.setFieldValue}
-                  />
-                </div>
-
+              </div>
+              <div
+                style={{ display: "flex", flexDirection: "row", flexGrow: 1 }}
+              >
+                <MultipleSelectDropDown
+                  formControl={formik.getFieldProps("measureGroupTypes")}
+                  id="measure-group-type"
+                  label="Type"
+                  placeHolder={{ name: "Select Measure Group", value: "" }}
+                  defaultValue={formik.values.measureGroupTypes}
+                  required={true}
+                  disabled={!canEdit}
+                  error={
+                    formik.touched.measureGroupTypes &&
+                    Boolean(formik.errors.measureGroupTypes)
+                  }
+                  helperText={formik.errors.measureGroupTypes}
+                  {...formik.getFieldProps("measureGroupTypes")}
+                  onChange={(_event: any, selectedVal: string | null) => {
+                    formik.setFieldValue("measureGroupTypes", selectedVal);
+                  }}
+                  onClose={() =>
+                    formik.setFieldTouched("measureGroupTypes", true)
+                  }
+                  options={Object.values(MeasureGroupTypes)}
+                  multipleSelect={true}
+                  limitTags={1}
+                />
+                <AutoComplete
+                  id="populationBasis"
+                  dataTestId="populationBasis"
+                  label="Population Basis"
+                  placeholder="Select Population Basis"
+                  required={true}
+                  disabled={!canEdit}
+                  error={formik.errors.populationBasis}
+                  helperText={formik.errors.populationBasis}
+                  options={populationBasisValues}
+                  {...formik.getFieldProps("populationBasis")}
+                  onChange={formik.setFieldValue}
+                />
                 <Select
                   placeHolder={{ name: "Select Scoring", value: "" }}
                   required
@@ -776,7 +757,7 @@ const MeasureGroups = () => {
                     formik.touched.scoring && Boolean(formik.errors.scoring)
                   }
                   disabled={!canEdit}
-                  helperText={formik.touched.scoring && formik.errors.scoring}
+                  helperText={formik.errors.scoring}
                   size="small"
                   SelectDisplayProps={{
                     "aria-required": "true",
@@ -820,7 +801,6 @@ const MeasureGroups = () => {
                   canEdit={canEdit}
                 />
               </div>
-
               <div>
                 <MenuItemContainer>
                   <Tabs
