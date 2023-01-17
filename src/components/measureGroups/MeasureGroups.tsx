@@ -729,7 +729,13 @@ const MeasureGroups = () => {
                   </FormFieldInner>
                 </div>
                 <div
-                  style={{ display: "flex", flexDirection: "row", flexGrow: 1 }}
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    flexGrow: 1,
+                    marginTop: 44,
+                    columnGap: 33,
+                  }}
                 >
                   <MultipleSelectDropDown
                     formControl={formik.getFieldProps("measureGroupTypes")}
@@ -743,7 +749,11 @@ const MeasureGroups = () => {
                       formik.touched.measureGroupTypes &&
                       Boolean(formik.errors.measureGroupTypes)
                     }
-                    helperText={formik.errors.measureGroupTypes}
+                    helperText={
+                      formik.touched.measureGroupTypes &&
+                      Boolean(formik.errors.measureGroupTypes) &&
+                      formik.errors.measureGroupTypes
+                    }
                     {...formik.getFieldProps("measureGroupTypes")}
                     onChange={(_event: any, selectedVal: string | null) => {
                       formik.setFieldValue("measureGroupTypes", selectedVal);
@@ -782,7 +792,11 @@ const MeasureGroups = () => {
                       formik.touched.scoring && Boolean(formik.errors.scoring)
                     }
                     disabled={!canEdit}
-                    helperText={formik.errors.scoring}
+                    helperText={
+                      formik.touched.scoring &&
+                      Boolean(formik.errors.scoring) &&
+                      formik.errors.scoring
+                    }
                     size="small"
                     SelectDisplayProps={{
                       "aria-required": "true",
