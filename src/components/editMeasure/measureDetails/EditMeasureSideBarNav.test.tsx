@@ -122,8 +122,6 @@ describe("EditMeasureSideBarNav", () => {
 
   test("Measure Group add click when dirty opens up a warning dialog, hitting cancel closes it", async () => {
     await waitFor(() => RenderEditMeasureSideBarNav(initialProps));
-    // when populationCriteriaTabs flag is true
-    // userEvent.click(getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     expect(getByText("Population Criteria 1")).toBeInTheDocument();
 
     const addButton = getByTestId("AddIcon");
@@ -145,8 +143,6 @@ describe("EditMeasureSideBarNav", () => {
 
   test("Measure Group nav click when dirty opens up a warning dialog, hitting cancel closes it", async () => {
     await waitFor(() => RenderEditMeasureSideBarNav(initialProps));
-    // when populationCriteriaTabs flag is true
-    // userEvent.click(getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     expect(getByText("Population Criteria 1")).toBeInTheDocument();
     const navButton = getByTestId("leftPanelMeasureInformation-MeasureGroup1");
     expect(navButton).toBeInTheDocument();
@@ -166,8 +162,6 @@ describe("EditMeasureSideBarNav", () => {
 
   test("Measure Group nav click when dirty opens up a warning dialog, hitting continue closes it", async () => {
     await waitFor(() => RenderEditMeasureSideBarNav(initialProps));
-    // when populationCriteriaTabs flag is true
-    // userEvent.click(getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     expect(getByText("Population Criteria 1")).toBeInTheDocument();
     const navButton = getByTestId("leftPanelMeasureInformation-MeasureGroup1");
     expect(navButton).toBeInTheDocument();
@@ -188,8 +182,6 @@ describe("EditMeasureSideBarNav", () => {
   test("Measure navigation click without dirty does not render a dialog", async () => {
     const nonDirtyProps = { ...initialProps, dirty: false };
     await waitFor(() => RenderEditMeasureSideBarNav(nonDirtyProps));
-    // when populationCriteriaTabs flag is true
-    // userEvent.click(getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     expect(getByText("Population Criteria 1")).toBeInTheDocument();
     const navButton = getByTestId("leftPanelMeasureInformation-MeasureGroup1");
     expect(navButton).toBeInTheDocument();
