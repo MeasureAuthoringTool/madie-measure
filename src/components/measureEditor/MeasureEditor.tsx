@@ -284,6 +284,15 @@ const MeasureEditor = () => {
 
   return (
     <>
+      <div id="status-handler">
+        <StatusHandler
+          error={error}
+          errorMessage={errorMessage}
+          success={success}
+          outboundAnnotations={outboundAnnotations}
+          hasSubTitle={false}
+        />
+      </div>
       <div tw="flex flex-wrap mx-8 shadow-lg rounded-md border border-slate bg-white">
         <div tw="flex-none sm:w-full">
           {valuesetMsg && (
@@ -291,13 +300,6 @@ const MeasureEditor = () => {
               {valuesetMsg}
             </SuccessText>
           )}
-          <StatusHandler
-            error={error}
-            errorMessage={errorMessage}
-            success={success}
-            outboundAnnotations={outboundAnnotations}
-            hasSubTitle={false}
-          />
           {!processing && (
             <MadieEditor
               onChange={(val: string) => handleMadieEditorValue(val)}
