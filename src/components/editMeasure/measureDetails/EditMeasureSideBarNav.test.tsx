@@ -106,7 +106,7 @@ describe("EditMeasureSideBarNav", () => {
     elmTranslationService: { baseUrl: "" },
     measureService: { baseUrl: "" },
     terminologyService: { baseUrl: "" },
-    features: { populationCriteriaTabStructure: false },
+    features: { populationCriteriaTabs: false },
   };
   const RenderEditMeasureSideBarNav = (props) => {
     return render(
@@ -122,7 +122,7 @@ describe("EditMeasureSideBarNav", () => {
 
   test("Measure Group add click when dirty opens up a warning dialog, hitting cancel closes it", async () => {
     await waitFor(() => RenderEditMeasureSideBarNav(initialProps));
-    // when populationCriteriaTabStructure flag is true
+    // when populationCriteriaTabs flag is true
     // userEvent.click(getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     expect(getByText("Population Criteria 1")).toBeInTheDocument();
 
@@ -145,7 +145,7 @@ describe("EditMeasureSideBarNav", () => {
 
   test("Measure Group nav click when dirty opens up a warning dialog, hitting cancel closes it", async () => {
     await waitFor(() => RenderEditMeasureSideBarNav(initialProps));
-    // when populationCriteriaTabStructure flag is true
+    // when populationCriteriaTabs flag is true
     // userEvent.click(getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     expect(getByText("Population Criteria 1")).toBeInTheDocument();
     const navButton = getByTestId("leftPanelMeasureInformation-MeasureGroup1");
@@ -166,7 +166,7 @@ describe("EditMeasureSideBarNav", () => {
 
   test("Measure Group nav click when dirty opens up a warning dialog, hitting continue closes it", async () => {
     await waitFor(() => RenderEditMeasureSideBarNav(initialProps));
-    // when populationCriteriaTabStructure flag is true
+    // when populationCriteriaTabs flag is true
     // userEvent.click(getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     expect(getByText("Population Criteria 1")).toBeInTheDocument();
     const navButton = getByTestId("leftPanelMeasureInformation-MeasureGroup1");
@@ -188,7 +188,7 @@ describe("EditMeasureSideBarNav", () => {
   test("Measure navigation click without dirty does not render a dialog", async () => {
     const nonDirtyProps = { ...initialProps, dirty: false };
     await waitFor(() => RenderEditMeasureSideBarNav(nonDirtyProps));
-    // when populationCriteriaTabStructure flag is true
+    // when populationCriteriaTabs flag is true
     // userEvent.click(getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     expect(getByText("Population Criteria 1")).toBeInTheDocument();
     const navButton = getByTestId("leftPanelMeasureInformation-MeasureGroup1");
@@ -208,7 +208,7 @@ describe("EditMeasureSideBarNav", () => {
               elmTranslationService: { baseUrl: "" },
               measureService: { baseUrl: "" },
               terminologyService: { baseUrl: "" },
-              features: { populationCriteriaTabStructure: true },
+              features: { populationCriteriaTabs: true },
             }}
           >
             <EditMeasureSideBarNav {...initialProps} />

@@ -13,7 +13,7 @@ export interface ServiceConfig {
   features: {
     export: boolean;
     measureVersioning: boolean;
-    populationCriteriaTabStructure: boolean;
+    populationCriteriaTabs: boolean;
   };
 }
 

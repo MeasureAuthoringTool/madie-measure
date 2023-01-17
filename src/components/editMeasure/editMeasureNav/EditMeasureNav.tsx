@@ -31,9 +31,7 @@ const EditMeasureNav = () => {
   // TODO: try activeClassName of NavLink instead of manual path check
   const { pathname } = useLocation();
   let history = useHistory();
-  const populationCriteriaTabStructure = useFeature(
-    "populationCriteriaTabStructure"
-  );
+  const populationCriteriaTabs = useFeature("populationCriteriaTabs");
 
   if (
     pathname !== `${url}/details` &&
@@ -41,9 +39,8 @@ const EditMeasureNav = () => {
     pathname !== `${url}/cql-editor` &&
     pathname !== `${url}/groups` &&
     (pathname !== `${url}/groups/supplemental-data` ||
-      !populationCriteriaTabStructure) &&
-    (pathname !== `${url}/groups/risk-adjustment` ||
-      !populationCriteriaTabStructure) &&
+      !populationCriteriaTabs) &&
+    (pathname !== `${url}/groups/risk-adjustment` || !populationCriteriaTabs) &&
     pathname !== `${url}/details/measure-steward` &&
     pathname !== `${url}/details/measure-description` &&
     pathname !== `${url}/details/measure-copyright` &&

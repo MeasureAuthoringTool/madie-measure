@@ -46,9 +46,7 @@ export default function EditMeasureSideBarNav(
   const [measureGroups, setMeasureGroups] = useState<any>();
   const [showTabs, setShowTabs] = useState<boolean>(false);
   const history = useHistory();
-  const populationCriteriaTabStructure = useFeature(
-    "populationCriteriaTabStructure"
-  );
+  const populationCriteriaTabs = useFeature("populationCriteriaTabs");
 
   const measureGroupSideNavTabs = [
     {
@@ -204,7 +202,7 @@ export default function EditMeasureSideBarNav(
         {measureGroups &&
           measureGroupSideNavTabs?.map((tabRecord) => (
             <>
-              {populationCriteriaTabStructure && (
+              {populationCriteriaTabs && (
                 <div>
                   <button
                     onClick={(e) => {
@@ -223,45 +221,42 @@ export default function EditMeasureSideBarNav(
                   </button>
                 </div>
               )}
-              {tabRecord.groups &&
-                (showTabs || !populationCriteriaTabStructure) && (
-                  <>
-                    {tabRecord?.groups?.map((linkInfo, index) => {
-                      const isActive =
-                        pathname.replace("groups", "measure-groups") ===
-                          linkInfo.href && index === measureGroupNumber;
-                      const className = isActive
-                        ? "nav-link active"
-                        : "nav-link";
-                      return (
-                        <NavLink
-                          key={linkInfo.title}
-                          onClick={(e) => initiateNavigateGroupClick(e)}
-                          to={linkInfo.href}
-                          className={className}
-                          id={index}
-                          data-testid={linkInfo.dataTestId}
+              {tabRecord.groups && (showTabs || !populationCriteriaTabs) && (
+                <>
+                  {tabRecord?.groups?.map((linkInfo, index) => {
+                    const isActive =
+                      pathname.replace("groups", "measure-groups") ===
+                        linkInfo.href && index === measureGroupNumber;
+                    const className = isActive ? "nav-link active" : "nav-link";
+                    return (
+                      <NavLink
+                        key={linkInfo.title}
+                        onClick={(e) => initiateNavigateGroupClick(e)}
+                        to={linkInfo.href}
+                        className={className}
+                        id={index}
+                        data-testid={linkInfo.dataTestId}
+                      >
+                        <>{linkInfo.title}</>
+                      </NavLink>
+                    );
+                  })}
+                  {
+                    <div>
+                      {canEdit && (
+                        <DSLink
+                          className="madie-link"
+                          onClick={(e) => initiateBlankMeasureGroupClick(e)}
+                          data-testid="add-measure-group-button"
                         >
-                          <>{linkInfo.title}</>
-                        </NavLink>
-                      );
-                    })}
-                    {
-                      <div>
-                        {canEdit && (
-                          <DSLink
-                            className="madie-link"
-                            onClick={(e) => initiateBlankMeasureGroupClick(e)}
-                            data-testid="add-measure-group-button"
-                          >
-                            <AddIcon className="add-icon" fontSize="small" />{" "}
-                            Add Population Criteria
-                          </DSLink>
-                        )}
-                      </div>
-                    }
-                  </>
-                )}
+                          <AddIcon className="add-icon" fontSize="small" /> Add
+                          Population Criteria
+                        </DSLink>
+                      )}
+                    </div>
+                  }
+                </>
+              )}
             </>
           ))}
       </Nav>

@@ -48,7 +48,7 @@ const serviceConfig: ServiceConfig = {
   terminologyService: {
     baseUrl: "terminology-service.com",
   },
-  features: { populationCriteriaTabStructure: false },
+  features: { populationCriteriaTabs: false },
 };
 
 const getEmptyStrat = () => ({
@@ -363,7 +363,7 @@ describe("Measure Groups Page", () => {
 
   test("Should create multiple group tabs on clicking add measure group ", async () => {
     await waitFor(() => renderMeasureGroupComponent());
-    // when populationCriteriaTabStructure flag is true
+    // when populationCriteriaTabs flag is true
     // userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     await changePopulationBasis("Encounter");
     const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
@@ -435,7 +435,7 @@ describe("Measure Groups Page", () => {
     group.groupDescription = "testDescription";
     measure.groups = [group];
     await waitFor(() => renderMeasureGroupComponent());
-    // when populationCriteriaTabStructure flag is true
+    // when populationCriteriaTabs flag is true
     //userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     expect(screen.getByTestId("title").textContent).toBe(
       "Population Criteria 1"
@@ -470,7 +470,7 @@ describe("Measure Groups Page", () => {
     measure.groups = [group];
     const { rerender } = renderMeasureGroupComponent();
 
-    // when populationCriteriaTabStructure flag is true
+    // when populationCriteriaTabs flag is true
     //userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     expect(screen.getByTestId("title").textContent).toBe(
       "Population Criteria 1"
@@ -523,7 +523,7 @@ describe("Measure Groups Page", () => {
       </MemoryRouter>
     );
 
-    // when populationCriteriaTabStructure flag is true
+    // when populationCriteriaTabs flag is true
     // userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     await waitFor(() => {
       expect(screen.getByTestId("groupDescriptionInput")).toHaveValue("");
@@ -580,7 +580,7 @@ describe("Measure Groups Page", () => {
             terminologyService: {
               baseUrl: "terminology-service.com",
             },
-            features: { populationCriteriaTabStructure: true },
+            features: { populationCriteriaTabs: true },
           }}
         >
           <Route path="/measures/test-measure/edit/groups">
@@ -611,7 +611,7 @@ describe("Measure Groups Page", () => {
   test("Should be able to save multiple groups  ", async () => {
     const populationBasis = "Encounter";
     renderMeasureGroupComponent();
-    // when populationCriteriaTabStructure flag is true
+    // when populationCriteriaTabs flag is true
     //userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     await changePopulationBasis(populationBasis);
 
@@ -1474,7 +1474,7 @@ describe("Measure Groups Page", () => {
     measure.groups = [group];
     renderMeasureGroupComponent();
 
-    // when populationCriteriaTabStructure flag is true
+    // when populationCriteriaTabs flag is true
     //userEvent.click(screen.getByTestId("leftPanelMeasurePopulationCriteriaTab"));
     expect(screen.getByTestId("title").textContent).toBe(
       "Population Criteria 1"
