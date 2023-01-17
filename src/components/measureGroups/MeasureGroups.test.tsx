@@ -593,15 +593,19 @@ describe("Measure Groups Page", () => {
       screen.getByTestId("leftPanelMeasurePopulationCriteriaTab")
     ).toBeInTheDocument();
     expect(
-      screen.getByTestId("leftPanelMeasurePopulationsSupplementalDataTab")
-    ).toBeInTheDocument();
-    expect(
       screen.getByTestId("leftPanelMeasurePopulationsRiskAdjustmentTab")
     ).toBeInTheDocument();
     userEvent.click(
       screen.getByTestId("leftPanelMeasurePopulationsRiskAdjustmentTab")
     );
-    expect(screen.getByTestId("Risk Adjustment")).toBeInTheDocument();
+    expect(screen.getByTestId("risk-adjustment")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("leftPanelMeasurePopulationsSupplementalDataTab")
+    ).toBeInTheDocument();
+    userEvent.click(
+      screen.getByTestId("leftPanelMeasurePopulationsSupplementalDataTab")
+    );
+    expect(screen.getByTestId("supplemental-data")).toBeInTheDocument();
   });
 
   test("Should be able to save multiple groups  ", async () => {

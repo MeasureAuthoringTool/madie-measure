@@ -49,7 +49,7 @@ import MeasureGroupScoringUnit from "./scoringUnit/MeasureGroupScoringUnit";
 import MeasureGroupObservation from "./observation/MeasureGroupObservation";
 import * as _ from "lodash";
 import MeasureGroupAlerts from "./MeasureGroupAlerts";
-import Testing from "./Testing";
+import SupplementalElements from "./SupplementalElements";
 import "../common/madie-link.scss";
 import "./MeasureGroups.scss";
 
@@ -668,10 +668,16 @@ const MeasureGroups = () => {
 
           <Switch>
             <Route exact path={supplementalDataLink}>
-              <Testing title={"Supplemental Data"} />
+              <SupplementalElements
+                title="Supplemental Data"
+                dataTestId="supplemental-data"
+              />
             </Route>
             <Route exact path={riskAdjustmentLink}>
-              <Testing title="Risk Adjustment" />
+              <SupplementalElements
+                title="Risk Adjustment"
+                dataTestId="risk-adjustment"
+              />
             </Route>
           </Switch>
 

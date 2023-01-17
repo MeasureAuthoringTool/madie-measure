@@ -25,7 +25,7 @@ export interface EditMeasureSideBarNavProps {
   measureGroupNumber?: number;
   setMeasureGroupNumber?: (value: number) => void;
   measure?: Measure;
-  urlPath?: any;
+  urlPath?: string;
 }
 
 export default function EditMeasureSideBarNav(
@@ -213,6 +213,7 @@ export default function EditMeasureSideBarNav(
                     }}
                     data-testId={tabRecord.dataTestId}
                     className="tab-title"
+                    id={tabRecord.title}
                   >
                     {tabRecord.title}{" "}
                     <span className="tab-dropdown">
