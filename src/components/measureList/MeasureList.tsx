@@ -406,7 +406,6 @@ export default function MeasureList(props: {
               onClose={onToastClose}
               autoHideDuration={6000}
             />
-            ;
             <CreatVersionDialog
               open={createVersionDialog.open}
               onClose={handleDialogClose}
