@@ -6,6 +6,7 @@ import userEvent from "@testing-library/user-event";
 import EditMeasureSideBarNav, {
   EditMeasureSideBarNavProps,
 } from "./EditMeasureSideBarNav";
+import ServiceContext, { ServiceConfig } from "../../../api/ServiceContext";
 
 describe("EditMeasureSideBarNav", () => {
   afterEach(() => {
@@ -101,12 +102,20 @@ describe("EditMeasureSideBarNav", () => {
     },
   };
   const { getByTestId, getByText, queryByText } = screen;
+  const features: ServiceConfig = {
+    elmTranslationService: { baseUrl: "" },
+    measureService: { baseUrl: "" },
+    terminologyService: { baseUrl: "" },
+    features: { populationCriteriaTabs: false },
+  };
   const RenderEditMeasureSideBarNav = (props) => {
     return render(
       <MemoryRouter
         initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
       >
-        <EditMeasureSideBarNav {...props} />
+        <ServiceContext.Provider value={features}>
+          <EditMeasureSideBarNav {...props} />
+        </ServiceContext.Provider>
       </MemoryRouter>
     );
   };
@@ -178,5 +187,41 @@ describe("EditMeasureSideBarNav", () => {
     expect(navButton).toBeInTheDocument();
     fireEvent.click(navButton);
     expect(queryByText("You have unsaved changes.")).toBe(null);
+  });
+
+  test("Population Criteria page navigation between the tabs", async () => {
+    await waitFor(() =>
+      render(
+        <MemoryRouter
+          initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
+        >
+          <ServiceContext.Provider
+            value={{
+              elmTranslationService: { baseUrl: "" },
+              measureService: { baseUrl: "" },
+              terminologyService: { baseUrl: "" },
+              features: { populationCriteriaTabs: true },
+            }}
+          >
+            <EditMeasureSideBarNav {...initialProps} />
+          </ServiceContext.Provider>
+        </MemoryRouter>
+      )
+    );
+    expect(
+      getByTestId("leftPanelMeasurePopulationCriteriaTab")
+    ).toBeInTheDocument();
+    expect(
+      getByTestId("leftPanelMeasurePopulationsSupplementalDataTab")
+    ).toBeInTheDocument();
+    expect(
+      getByTestId("leftPanelMeasurePopulationsRiskAdjustmentTab")
+    ).toBeInTheDocument();
+    userEvent.click(getByTestId("leftPanelMeasurePopulationCriteriaTab"));
+    expect(getByText("Population Criteria 1")).toBeInTheDocument();
+    userEvent.click(
+      getByTestId("leftPanelMeasurePopulationsSupplementalDataTab")
+    );
+    expect(getByText("Supplemental Data")).toBeInTheDocument();
   });
 });

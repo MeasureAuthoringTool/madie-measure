@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
 import tw from "twin.macro";
-import { Link as NavLink, useLocation } from "react-router-dom";
+import { Link as NavLink, useLocation, useHistory } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { Measure } from "@madie/madie-models";
+import useFeature from "../../../utils/useFeatureFlag";
 import "./EditMeasureSideBarNav.scss";
 import "../../common/madie-link.scss";
 import {
@@ -22,6 +25,7 @@ export interface EditMeasureSideBarNavProps {
   measureGroupNumber?: number;
   setMeasureGroupNumber?: (value: number) => void;
   measure?: Measure;
+  urlPath?: string;
 }
 
 export default function EditMeasureSideBarNav(
@@ -35,10 +39,36 @@ export default function EditMeasureSideBarNav(
     measureGroupNumber,
     setMeasureGroupNumber,
     dirty,
+    urlPath,
   } = props;
 
   const { pathname } = useLocation();
   const [measureGroups, setMeasureGroups] = useState<any>();
+  const [showTabs, setShowTabs] = useState<boolean>(false);
+  const history = useHistory();
+  const populationCriteriaTabs = useFeature("populationCriteriaTabs");
+
+  const measureGroupSideNavTabs = [
+    {
+      title: "Population Criteria",
+      groups: measureGroups,
+      dataTestId: "leftPanelMeasurePopulationCriteriaTab",
+      id: "sideNavMeasurePopulationCriteria",
+    },
+    {
+      title: "Supplemental Data",
+      href: `${urlPath}/supplemental-data`,
+      dataTestId: "leftPanelMeasurePopulationsSupplementalDataTab",
+      id: "sideNavMeasurePopulationsSupplementalData",
+    },
+    {
+      title: "Risk Adjustment",
+      href: `${urlPath}/risk-adjustment`,
+      dataTestId: "leftPanelMeasurePopulationsRiskAdjustmentTab",
+      id: "sideNavMeasurePopulationsRiskAdjustment",
+    },
+  ];
+
   useEffect(() => {
     if (links) setMeasureGroups(links);
     if (!measure?.groups?.length) {
@@ -63,6 +93,7 @@ export default function EditMeasureSideBarNav(
       setInitiatedPayload({ action: "add", value: null });
       setDiscardDialogOpen(true);
     } else {
+      history.push(`${urlPath}`);
       addNewBlankMeasureGroup();
       const element = document.getElementById("title");
       element.focus();
@@ -79,7 +110,10 @@ export default function EditMeasureSideBarNav(
         setDiscardDialogOpen(true);
       } else {
         handleMeasureGroupNavigation(groupNumber);
+        history.push(`${urlPath}`);
       }
+    } else {
+      history.push(`${urlPath}`);
     }
   };
 
@@ -116,6 +150,15 @@ export default function EditMeasureSideBarNav(
   const onClose = () => {
     setDiscardDialogOpen(false);
     setInitiatedPayload(null);
+  };
+
+  const handleTabClick = (tabInfo) => {
+    if (tabInfo.groups) {
+      setShowTabs(!showTabs);
+      history.push(`${urlPath}`);
+    } else {
+      history.push(tabInfo.href);
+    }
   };
 
   if (details) {
@@ -157,36 +200,65 @@ export default function EditMeasureSideBarNav(
     <OuterWrapper>
       <Nav aria-label="Sidebar">
         {measureGroups &&
-          measureGroups.map((linkInfo, index) => {
-            const isActive =
-              pathname.replace("groups", "measure-groups") === linkInfo.href &&
-              index === measureGroupNumber;
-            const className = isActive ? "nav-link active" : "nav-link";
-            return (
-              <NavLink
-                key={linkInfo.title}
-                onClick={(e) => initiateNavigateGroupClick(e)}
-                to={linkInfo.href}
-                className={className}
-                id={index}
-                data-testid={linkInfo.dataTestId}
-              >
-                <>{linkInfo.title}</>
-              </NavLink>
-            );
-          })}
-        <div>
-          {canEdit && (
-            <DSLink
-              className="madie-link"
-              onClick={(e) => initiateBlankMeasureGroupClick(e)}
-              data-testid="add-measure-group-button"
-            >
-              <AddIcon className="add-icon" fontSize="small" /> Add Population
-              Criteria
-            </DSLink>
-          )}
-        </div>
+          measureGroupSideNavTabs?.map((tabRecord) => (
+            <>
+              {populationCriteriaTabs && (
+                <div>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleTabClick(tabRecord);
+                    }}
+                    data-testId={tabRecord.dataTestId}
+                    className="tab-title"
+                    id={tabRecord.title}
+                  >
+                    {tabRecord.title}{" "}
+                    <span className="tab-dropdown">
+                      {tabRecord.groups &&
+                        (showTabs ? <ExpandMoreIcon /> : <ExpandLessIcon />)}
+                    </span>
+                  </button>
+                </div>
+              )}
+              {tabRecord.groups && (showTabs || !populationCriteriaTabs) && (
+                <>
+                  {tabRecord?.groups?.map((linkInfo, index) => {
+                    const isActive =
+                      pathname.replace("groups", "measure-groups") ===
+                        linkInfo.href && index === measureGroupNumber;
+                    const className = isActive ? "nav-link active" : "nav-link";
+                    return (
+                      <NavLink
+                        key={linkInfo.title}
+                        onClick={(e) => initiateNavigateGroupClick(e)}
+                        to={linkInfo.href}
+                        className={className}
+                        id={index}
+                        data-testid={linkInfo.dataTestId}
+                      >
+                        <>{linkInfo.title}</>
+                      </NavLink>
+                    );
+                  })}
+                  {
+                    <div>
+                      {canEdit && (
+                        <DSLink
+                          className="madie-link"
+                          onClick={(e) => initiateBlankMeasureGroupClick(e)}
+                          data-testid="add-measure-group-button"
+                        >
+                          <AddIcon className="add-icon" fontSize="small" /> Add
+                          Population Criteria
+                        </DSLink>
+                      )}
+                    </div>
+                  }
+                </>
+              )}
+            </>
+          ))}
       </Nav>
       <MadieDiscardDialog
         open={discardDialogOpen}
