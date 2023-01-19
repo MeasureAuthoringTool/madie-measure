@@ -8,6 +8,7 @@ import {
   TextField,
   Button,
   Popover,
+  Toast,
 } from "@madie/madie-design-system/dist/react";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -17,6 +18,15 @@ import useFeature from "../../utils/useFeatureFlag";
 import JSzip from "jszip";
 import { saveAs } from "file-saver";
 import { checkUserCanEdit } from "@madie/madie-util";
+import CreatVersionDialog from "../createVersionDialog/CreateVersionDialog";
+import MuiAlert, { AlertProps } from "@mui/material/Alert";
+
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  props,
+  ref
+) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -59,6 +69,7 @@ export default function MeasureList(props: {
   currentLimit: number;
   currentPage: number;
   setErrMsg;
+  onListUpdate;
 }) {
   const history = useHistory();
 
@@ -76,6 +87,25 @@ export default function MeasureList(props: {
   const exportFeature = useFeature("export");
   const versioningFeature = useFeature("measureVersioning");
   const targetMeasure = useRef<Measure>();
+
+  const [createVersionDialog, setCreateVersionDialog] = useState({
+    open: false,
+    measureId: "",
+  });
+  const handleDialogClose = () => {
+    setCreateVersionDialog({
+      open: false,
+      measureId: "",
+    });
+  };
+  const [toastOpen, setToastOpen] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string>("");
+  const [toastType, setToastType] = useState<string>("danger");
+  const onToastClose = () => {
+    setToastType("danger");
+    setToastMessage("");
+    setToastOpen(false);
+  };
 
   const handleClearClick = async (event) => {
     props.setSearchCriteria("");
@@ -206,7 +236,43 @@ export default function MeasureList(props: {
     });
   };
 
-  const createVersion = () => {};
+  const createVersion = async (versionType: string) => {
+    if (
+      versionType !== "major" &&
+      versionType !== "minor" &&
+      versionType !== "patch"
+    ) {
+      setCreateVersionDialog({
+        open: true,
+        measureId: targetMeasure.current?.id,
+      });
+      setOptionsOpen(false);
+    } else {
+      await measureServiceApi
+        .createVersion(targetMeasure.current?.id, versionType)
+        .then(async () => {
+          handleDialogClose();
+          await props.onListUpdate();
+          setToastOpen(true);
+          setToastType("success");
+          setToastMessage("New version of measure is Successfully created");
+        })
+        .catch((error) => {
+          handleDialogClose();
+          const errorData = error?.response;
+          setToastOpen(true);
+          if (errorData?.status === 400) {
+            setToastMessage("Requested measure cannot be versioned");
+          } else if (errorData?.status === 403) {
+            setToastMessage("User is unauthorized to create a version");
+          } else {
+            setToastMessage(
+              errorData?.message ? errorData.message : "Server error!"
+            );
+          }
+        });
+    }
+  };
 
   return (
     <div data-testid="measure-list">
@@ -273,7 +339,13 @@ export default function MeasureList(props: {
                       <td tw="w-7/12">{measure.measureName}</td>
                       <td>
                         {measure?.version}
-                        <Chip tw="ml-6" className="chip-draft" label="Draft" />
+                        {`${measure.measureMetaData?.draft}` === "true" && (
+                          <Chip
+                            tw="ml-6"
+                            className="chip-draft"
+                            label="Draft"
+                          />
+                        )}
                       </td>
                       <td>{measure.model}</td>
                       <td>
@@ -317,6 +389,28 @@ export default function MeasureList(props: {
                 otherSelectOptionProps={otherSelectOptionPropsForPopOver}
               />
             </div>
+            <Toast
+              toastKey="create-version-toast"
+              aria-live="polite"
+              toastType={toastType}
+              testId={
+                toastType === "danger"
+                  ? "create-version-error-text"
+                  : "create-version-success-text"
+              }
+              closeButtonProps={{
+                "data-testid": "close-toast-button",
+              }}
+              open={toastOpen}
+              message={toastMessage}
+              onClose={onToastClose}
+              autoHideDuration={6000}
+            />
+            <CreatVersionDialog
+              open={createVersionDialog.open}
+              onClose={handleDialogClose}
+              onSubmit={createVersion}
+            />
           </div>
         </div>
       </div>
