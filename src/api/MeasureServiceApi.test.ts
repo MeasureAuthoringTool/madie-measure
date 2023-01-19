@@ -210,7 +210,7 @@ describe("MeasureServiceApi Tests", () => {
       measureName: "measure - A",
       version: "1.001",
       revisionNumber: 1,
-    } as Measure;
+    } as unknown as Measure;
 
     const resp = { status: 200, data: measure };
     mockedAxios.put.mockResolvedValue(resp);
