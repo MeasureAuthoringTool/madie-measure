@@ -57,6 +57,9 @@ const measures: Measure[] = [
     lastModifiedBy: null,
     model: "QDM",
     active: true,
+    measureMetaData: {
+      draft: true,
+    },
   },
   {
     id: "IDIDID2",
@@ -72,6 +75,9 @@ const measures: Measure[] = [
     lastModifiedBy: null,
     model: "FHIR",
     active: false,
+    measureMetaData: {
+      draft: true,
+    },
   },
   {
     id: "IDIDID3",
@@ -87,6 +93,9 @@ const measures: Measure[] = [
     lastModifiedBy: null,
     model: Model.QICORE.valueOf(),
     active: false,
+    measureMetaData: {
+      draft: false,
+    },
   },
 ];
 
@@ -164,7 +173,11 @@ describe("Measure List component", () => {
       elmTranslationService: { baseUrl: "" },
       measureService: { baseUrl: "" },
       terminologyService: { baseUrl: "" },
-      features: { export: true, measureVersioning: true },
+      features: {
+        export: true,
+        measureVersioning: true,
+        populationCriteriaTabs: false,
+      },
     };
 
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
@@ -380,7 +393,11 @@ describe("Measure List component", () => {
       elmTranslationService: { baseUrl: "" },
       measureService: { baseUrl: "" },
       terminologyService: { baseUrl: "" },
-      features: { export: true, measureVersioning: true },
+      features: {
+        export: true,
+        measureVersioning: true,
+        populationCriteriaTabs: false,
+      },
     };
 
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {

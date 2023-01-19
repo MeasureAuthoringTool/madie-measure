@@ -323,6 +323,18 @@ export class MeasureServiceApi {
       }
     );
   }
+
+  async draftMeasure(measureId: string, measureName: string): Promise<Measure> {
+    return await axios.post(
+      `${this.baseUrl}/measures/${measureId}/draft`,
+      { measureName: measureName },
+      {
+        headers: {
+          Authorization: `Bearer ${this.getAccessToken()}`,
+        },
+      }
+    );
+  }
 }
 
 export default function useMeasureServiceApi(): MeasureServiceApi {
