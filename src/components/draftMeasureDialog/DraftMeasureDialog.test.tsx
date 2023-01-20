@@ -5,9 +5,7 @@ import DraftMeasureDialog from "./DraftMeasureDialog";
 import { Measure } from "@madie/madie-models";
 
 describe("DraftMeasureDialog component", () => {
-  let measure: Measure;
-  let onCloseFn;
-  let onSubmitFn;
+  let measure: Measure, onCloseFn, onSubmitFn;
   beforeEach(() => {
     clearAllMocks();
     measure = {

@@ -427,14 +427,10 @@ export default function MeasureList(props: {
               />
             </div>
             <Toast
-              toastKey="create-version-toast"
+              toastKey="measure-action-toast"
               aria-live="polite"
               toastType={toastType}
-              testId={
-                toastType === "danger"
-                  ? "create-version-error-text"
-                  : "create-version-success-text"
-              }
+              testId={toastType === "danger" ? "error-toast" : "success-toast"}
               closeButtonProps={{
                 "data-testid": "close-toast-button",
               }}
