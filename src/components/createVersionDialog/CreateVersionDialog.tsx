@@ -11,7 +11,6 @@ import classNames from "classnames";
 import { makeStyles } from "@mui/styles";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import tw from "twin.macro";
 import { MadieDialog } from "@madie/madie-design-system/dist/react";
 
 const useStyles = makeStyles({
@@ -70,8 +69,6 @@ const useStyles = makeStyles({
 interface VersionType {
   type: string;
 }
-
-const MessageText = tw.p`text-sm font-medium`;
 
 const CreatVersionDialog = ({ open, onClose, onSubmit }) => {
   const formik = useFormik({
