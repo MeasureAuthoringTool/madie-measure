@@ -220,8 +220,8 @@ describe("MeasureServiceApi Tests", () => {
     expect(resp.data).toEqual(measure);
   });
 
-  it("createDraft success", async () => {
-    const measure: Measure = {
+  it("creates a draft for a measure", async () => {
+    const measure = {
       id: "1",
       measureName: "Measure - A",
     } as unknown as Measure;
