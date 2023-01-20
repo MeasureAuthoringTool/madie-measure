@@ -9,12 +9,7 @@ import {
   TextField,
   ReadOnlyTextField,
 } from "@madie/madie-design-system/dist/react";
-import {
-  FormHelperText,
-  Typography,
-  FormControlLabel,
-  Checkbox,
-} from "@mui/material";
+import { Typography, FormControlLabel, Checkbox } from "@mui/material";
 import { useFormik } from "formik";
 import { MeasureSchemaValidator } from "../../../../validations/MeasureSchemaValidator";
 import {
@@ -22,7 +17,6 @@ import {
   routeHandlerStore,
   checkUserCanEdit,
 } from "@madie/madie-util";
-import { versionFormat } from "../../../../utils/versionFormat";
 import { Box } from "@mui/system";
 import {
   parseContent,
@@ -139,7 +133,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       measure?.cql,
       values.cqlLibraryName,
       measure?.cqlLibraryName,
-      versionFormat(measure?.version, measure?.revisionNumber),
+      measure?.version,
       "measureInformation"
     );
 
@@ -188,16 +182,20 @@ export default function MeasureInformation(props: MeasureInformationProps) {
 
   function formikErrorHandler(name: string, isError: boolean) {
     if (formik.touched[name] && formik.errors[name]) {
-      return (
-        <FormHelperText
-          aria-live="polite"
-          data-testid={`${name}-helper-text`}
-          children={formik.errors[name]}
-          error={isError}
-        />
-      );
+      return `${formik.errors[name]}`;
     }
   }
+
+  // we create a state to track current focus. We only display helper text on focus and remove current focus on blur
+  const [focusedField, setFocusedField] = useState("");
+  const onBlur = (field) => {
+    setFocusedField("");
+    formik.setFieldTouched(field);
+  };
+  const onFocus = (field) => {
+    setFocusedField(field);
+  };
+
   return (
     <form
       id="measure-details-form"
@@ -221,6 +219,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
         </div>
         <Box sx={formRowGapped}>
           <TextField
+            onFocus={() => onFocus("measureName")}
             placeholder="Measure Name"
             required
             disabled={!canEdit}
@@ -230,7 +229,11 @@ export default function MeasureInformation(props: MeasureInformationProps) {
               "data-testid": "measure-name-input",
               "aria-required": "true",
             }}
-            helperText={formikErrorHandler("measureName", true)}
+            helperText={
+              (formik.touched["measureName"] ||
+                focusedField === "measureName") &&
+              formikErrorHandler("measureName", true)
+            }
             data-testid="measure-name-text-field"
             size="small"
             onKeyDown={goBackToNav}
@@ -238,8 +241,12 @@ export default function MeasureInformation(props: MeasureInformationProps) {
               formik.touched.measureName && Boolean(formik.errors.measureName)
             }
             {...formik.getFieldProps("measureName")}
+            onBlur={() => {
+              onBlur("measureName");
+            }}
           />
           <TextField
+            onFocus={() => onFocus("cqlLibraryName")}
             placeholder="Enter CQL Library Name"
             required
             disabled={!canEdit}
@@ -250,13 +257,20 @@ export default function MeasureInformation(props: MeasureInformationProps) {
               "data-testid": "cql-library-name-input",
               "aria-required": "true",
             }}
-            helperText={formikErrorHandler("cqlLibraryName", true)}
+            helperText={
+              formik.touched["cqlLibraryName"] &&
+              focusedField === "cqlLibraryName" &&
+              formikErrorHandler("cqlLibraryName", true)
+            }
             size="small"
             error={
               formik.touched.cqlLibraryName &&
               Boolean(formik.errors.cqlLibraryName)
             }
             {...formik.getFieldProps("cqlLibraryName")}
+            onBlur={() => {
+              onBlur("cqlLibraryName");
+            }}
           />
         </Box>
         <Box sx={formRowGapped}>

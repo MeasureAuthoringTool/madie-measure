@@ -1,7 +1,7 @@
 import React from "react";
-import { FormControl, Autocomplete, TextField, Checkbox } from "@mui/material";
+import { FormControl, Autocomplete, Checkbox } from "@mui/material";
 import PropTypes from "prop-types";
-import { InputLabel } from "@madie/madie-design-system/dist/react/";
+import { InputLabel, TextField } from "@madie/madie-design-system/dist/react/";
 import FormHelperText from "@mui/material/FormHelperText";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
@@ -11,7 +11,7 @@ const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const autoCompleteStyles = {
   borderRadius: "3px",
-  border: "1px solid #DDDDDD",
+  // border: "1px solid #DDDDDD",
   height: "auto",
   "& .MuiOutlinedInput-notchedOutline": {
     borderRadius: "3px",
@@ -51,13 +51,19 @@ const MultipleSelectDropDown = ({
   multipleSelect = true,
   limitTags = 1,
   formControl,
+  onClose,
   ...rest
 }) => {
   return (
-    <FormControl error={error} fullWidth sx={{ paddingRight: 2 }}>
-      <InputLabel htmlFor={`${id}`} required={required}>
-        {label}
-      </InputLabel>
+    <FormControl error={error} fullWidth>
+      <div
+        style={{
+          width: 1,
+          display: "flex",
+          flexDirection: "column",
+          flexGrow: 1,
+        }}
+      />
       <Autocomplete
         size="small"
         limitTags={limitTags}
@@ -65,6 +71,7 @@ const MultipleSelectDropDown = ({
         sx={autoCompleteStyles}
         disablePortal
         id={id}
+        onClose={onClose}
         placeholder={placeHolder}
         defaultValue={defaultValue}
         disabled={disabled}
@@ -94,31 +101,17 @@ const MultipleSelectDropDown = ({
           inputProps["aria-describedby"] = "measure-group-type-helper-text";
           return (
             <TextField
-              sx={{
-                "& .MuiInputBase-input": {
-                  opacity: 1,
-                  color: "#333",
-                  "&::placeholder": {
-                    opacity: 1,
-                    color: "#717171",
-                  },
-                },
-              }}
+              label={label}
               placeholder="Select All That Apply"
+              error={error}
               {...params}
+              required
+              helperText={helperText}
             />
           );
         }}
         {...rest}
       />
-      {helperText && (
-        <FormHelperText
-          data-testid={`${id}-helper-text`}
-          id={`${id}-helper-text`}
-        >
-          {helperText}
-        </FormHelperText>
-      )}
     </FormControl>
   );
 };

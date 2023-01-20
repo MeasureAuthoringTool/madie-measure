@@ -260,7 +260,12 @@ export class MeasureServiceApi {
       return functions.reduce((returnTypes, func) => {
         const returnType = {};
         const name = _.camelCase(_.trim(func.name));
-        if (func?.operand.length > 0 && func?.operand.length < 2) {
+        if (
+          func?.operand.length === 1 &&
+          _.camelCase(
+            func.operand[0].operandTypeSpecifier?.name?.split("}")[1]
+          ) !== "boolean"
+        ) {
           returnType[name] =
             func.operand[0].operandTypeSpecifier?.name?.split("}")[1];
         } else if (func?.operand.length < 1) {
@@ -305,6 +310,18 @@ export class MeasureServiceApi {
       console.error(err);
       throw new Error(message);
     }
+  }
+
+  async createVersion(id: string, versionType: string): Promise<Measure> {
+    return await axios.put(
+      `${this.baseUrl}/measures/${id}/version/?versionType=${versionType}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${this.getAccessToken()}`,
+        },
+      }
+    );
   }
 }
 

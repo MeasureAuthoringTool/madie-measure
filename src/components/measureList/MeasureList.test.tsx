@@ -2,7 +2,9 @@ import * as React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { Measure, Model } from "@madie/madie-models";
 import MeasureList from "./MeasureList";
-import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
+import useMeasureServiceApi, {
+  MeasureServiceApi,
+} from "../../api/useMeasureServiceApi";
 import { oneItemResponse } from "../measureRoutes/mockMeasureResponses";
 import userEvent from "@testing-library/user-event";
 import { checkUserCanEdit } from "@madie/madie-util";
@@ -24,11 +26,15 @@ jest.mock("@madie/madie-util", () => ({
     getAccessToken: () => "test.jwt",
   })),
 }));
+jest.mock("../../api/useMeasureServiceApi");
+const useMeasureServiceMock =
+  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 const mockMeasureServiceApi = {
   searchMeasuresByMeasureNameOrEcqmTitle: jest
     .fn()
     .mockResolvedValue(oneItemResponse),
   fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
+  createVersion: jest.fn().mockResolvedValue({}),
 } as unknown as MeasureServiceApi;
 
 jest.mock("../../api/useMeasureServiceApi", () =>
@@ -41,8 +47,7 @@ const measures: Measure[] = [
     id: "IDIDID1",
     measureHumanReadableId: null,
     measureSetId: "1",
-    version: 0,
-    revisionNumber: 0,
+    version: "0",
     state: "NEW",
     measureName: "new measure - A",
     cql: null,
@@ -57,8 +62,7 @@ const measures: Measure[] = [
     id: "IDIDID2",
     measureHumanReadableId: null,
     measureSetId: "2",
-    version: 0,
-    revisionNumber: 999999,
+    version: "0",
     state: "DRAFT",
     measureName: "draft measure - B",
     cql: null,
@@ -73,8 +77,7 @@ const measures: Measure[] = [
     id: "IDIDID3",
     measureHumanReadableId: null,
     measureSetId: "3",
-    version: 1.3,
-    revisionNumber: 0,
+    version: "1.3",
     state: "VERSIONED",
     measureName: "versioned measure - C",
     cql: null,
@@ -95,6 +98,7 @@ const setOffsetMock = jest.fn();
 const setInitialLoadMock = jest.fn();
 const setSearchCriteriaMock = jest.fn();
 const setErrMsgMock = jest.fn();
+const onListUpdateMock = jest.fn();
 
 describe("Measure List component", () => {
   beforeEach(() => {
@@ -119,6 +123,7 @@ describe("Measure List component", () => {
         currentLimit={10}
         currentPage={0}
         setErrMsg={setErrMsgMock}
+        onListUpdate={onListUpdateMock}
       />
     );
     measures.forEach((m) => {
@@ -142,6 +147,7 @@ describe("Measure List component", () => {
         currentLimit={10}
         currentPage={0}
         setErrMsg={setErrMsgMock}
+        onListUpdate={onListUpdateMock}
       />
     );
 
@@ -181,6 +187,7 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          onListUpdate={onListUpdateMock}
         />
       </ServiceContext.Provider>
     );
@@ -216,6 +223,7 @@ describe("Measure List component", () => {
         currentLimit={10}
         currentPage={0}
         setErrMsg={setErrMsgMock}
+        onListUpdate={onListUpdateMock}
       />
     );
 
@@ -251,6 +259,7 @@ describe("Measure List component", () => {
         currentLimit={10}
         currentPage={0}
         setErrMsg={setErrMsgMock}
+        onListUpdate={onListUpdateMock}
       />
     );
 
@@ -271,7 +280,7 @@ describe("Measure List component", () => {
     userEvent.click(clearButton);
     setTimeout(() => {
       expect(searchFieldInput.value).toBe("");
-    }, 500);
+    }, 8000);
 
     expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
       true,
@@ -296,6 +305,7 @@ describe("Measure List component", () => {
         currentLimit={10}
         currentPage={0}
         setErrMsg={setErrMsgMock}
+        onListUpdate={onListUpdateMock}
       />
     );
 
@@ -334,6 +344,7 @@ describe("Measure List component", () => {
         currentLimit={10}
         currentPage={0}
         setErrMsg={setErrMsgMock}
+        onListUpdate={onListUpdateMock}
       />
     );
 
@@ -354,7 +365,7 @@ describe("Measure List component", () => {
     userEvent.click(clearButton);
     setTimeout(() => {
       expect(searchFieldInput.value).toBe("");
-    }, 500);
+    }, 8000);
 
     expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
       true,
@@ -362,5 +373,290 @@ describe("Measure List component", () => {
       0
     );
     expect(mockPush).toHaveBeenCalledWith("/example");
+  });
+
+  it("should display create version dialog on click of version button", () => {
+    const features: ServiceConfig = {
+      elmTranslationService: { baseUrl: "" },
+      measureService: { baseUrl: "" },
+      terminologyService: { baseUrl: "" },
+      features: { export: true, measureVersioning: true },
+    };
+
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
+      return true;
+    });
+
+    const { getByTestId } = render(
+      <ServiceContext.Provider value={features}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria=""
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          onListUpdate={onListUpdateMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    const actionButton = getByTestId(`measure-action-${measures[0].id}`);
+    expect(actionButton).toBeInTheDocument();
+    expect(actionButton).toHaveTextContent("Select");
+    expect(window.location.href).toBe("http://localhost/");
+    fireEvent.click(actionButton);
+    expect(getByTestId(`view-measure-${measures[0].id}`)).toBeInTheDocument();
+    expect(getByTestId(`export-measure-${measures[0].id}`)).toBeInTheDocument();
+
+    const createVersionButton = getByTestId(
+      `create-version-measure-${measures[0].id}`
+    );
+    expect(createVersionButton).toBeInTheDocument();
+    expect(createVersionButton).toHaveTextContent("Version");
+    fireEvent.click(createVersionButton);
+
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+  });
+
+  it("should display unauthorized error while creating a version of a measure", async () => {
+    const error = {
+      response: {
+        status: 403,
+      },
+    };
+    const useMeasureServiceMockRejected = {
+      createVersion: jest.fn().mockRejectedValue(error),
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockRejected;
+    });
+
+    const features: ServiceConfig = {
+      elmTranslationService: { baseUrl: "" },
+      measureService: { baseUrl: "" },
+      terminologyService: { baseUrl: "" },
+      features: { export: true, measureVersioning: true },
+    };
+
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
+      return true;
+    });
+
+    const { getByTestId, getByLabelText } = render(
+      <ServiceContext.Provider value={features}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria=""
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          onListUpdate={onListUpdateMock}
+        />
+      </ServiceContext.Provider>
+    );
+    fireEvent.click(getByTestId(`measure-action-${measures[0].id}`));
+    fireEvent.click(getByTestId(`create-version-measure-${measures[0].id}`));
+    fireEvent.click(getByLabelText("Major"));
+    await waitFor(() => {
+      fireEvent.click(getByTestId("create-version-continue-button"));
+      expect(getByTestId("create-version-error-text")).toHaveTextContent(
+        "User is unauthorized to create a version"
+      );
+    });
+  });
+
+  it("should display bad request while creating a version of a measure", async () => {
+    const error = {
+      response: {
+        status: 400,
+      },
+    };
+    const useMeasureServiceMockRejected = {
+      createVersion: jest.fn().mockRejectedValue(error),
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockRejected;
+    });
+
+    const features: ServiceConfig = {
+      elmTranslationService: { baseUrl: "" },
+      measureService: { baseUrl: "" },
+      terminologyService: { baseUrl: "" },
+      features: { export: true, measureVersioning: true },
+    };
+
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
+      return true;
+    });
+
+    const { getByTestId, getByLabelText } = render(
+      <ServiceContext.Provider value={features}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria=""
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          onListUpdate={onListUpdateMock}
+        />
+      </ServiceContext.Provider>
+    );
+    fireEvent.click(getByTestId(`measure-action-${measures[0].id}`));
+    fireEvent.click(getByTestId(`create-version-measure-${measures[0].id}`));
+    fireEvent.click(getByLabelText("Major"));
+    await waitFor(() => {
+      fireEvent.click(getByTestId("create-version-continue-button"));
+      expect(getByTestId("create-version-error-text")).toHaveTextContent(
+        "Requested measure cannot be versioned"
+      );
+    });
+  });
+
+  it("should display other error while creating a version of a measure", async () => {
+    const error = {
+      response: {
+        status: 500,
+        message: "server error",
+      },
+    };
+    const useMeasureServiceMockRejected = {
+      createVersion: jest.fn().mockRejectedValue(error),
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockRejected;
+    });
+
+    const features: ServiceConfig = {
+      elmTranslationService: { baseUrl: "" },
+      measureService: { baseUrl: "" },
+      terminologyService: { baseUrl: "" },
+      features: { export: true, measureVersioning: true },
+    };
+
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
+      return true;
+    });
+
+    const { getByTestId, getByLabelText } = render(
+      <ServiceContext.Provider value={features}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria=""
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          onListUpdate={onListUpdateMock}
+        />
+      </ServiceContext.Provider>
+    );
+    fireEvent.click(getByTestId(`measure-action-${measures[0].id}`));
+    fireEvent.click(getByTestId(`create-version-measure-${measures[0].id}`));
+    fireEvent.click(getByLabelText("Major"));
+    await waitFor(() => {
+      fireEvent.click(getByTestId("create-version-continue-button"));
+      expect(getByTestId("create-version-error-text")).toHaveTextContent(
+        "server error"
+      );
+    });
+  });
+
+  it("should display success message while creating a version of a measure and message can be closed", async () => {
+    const success = {
+      response: {
+        data: {},
+      },
+    };
+    const useMeasureServiceMockRejected = {
+      createVersion: jest.fn().mockResolvedValue(success),
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockRejected;
+    });
+
+    const features: ServiceConfig = {
+      elmTranslationService: { baseUrl: "" },
+      measureService: { baseUrl: "" },
+      terminologyService: { baseUrl: "" },
+      features: { export: true, measureVersioning: true },
+    };
+
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
+      return true;
+    });
+
+    const { getByTestId, getByLabelText, queryByTestId } = render(
+      <ServiceContext.Provider value={features}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria=""
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          onListUpdate={onListUpdateMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    fireEvent.click(getByTestId(`measure-action-${measures[0].id}`));
+    fireEvent.click(getByTestId(`create-version-measure-${measures[0].id}`));
+    fireEvent.click(getByLabelText("Major"));
+    await waitFor(() => {
+      fireEvent.click(getByTestId("create-version-continue-button"));
+      expect(getByTestId("create-version-success-text")).toHaveTextContent(
+        "New version of measure is Successfully created"
+      );
+
+      const closeButton = getByTestId("close-toast-button");
+      fireEvent.click(closeButton);
+      setTimeout(() => {
+        expect(
+          queryByTestId("create-version-success-text")
+        ).not.toBeInTheDocument();
+      }, 500);
+    });
   });
 });

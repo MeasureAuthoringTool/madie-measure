@@ -19,6 +19,7 @@ import MeasureGroups from "../measureGroups/MeasureGroups";
 import { measureStore } from "@madie/madie-util";
 import { Toast, MadieAlert } from "@madie/madie-design-system/dist/react";
 import DeleteDialog from "./DeleteDialog";
+import NotFound from "../notfound/NotFound";
 interface inputParams {
   id: string;
 }
@@ -115,7 +116,7 @@ export default function EditMeasure() {
           style={{
             marginLeft: "2rem",
             marginRight: "2rem",
-            marginTop: "1.5rem",
+            marginTop: 16,
           }}
         >
           {errorMessage && (
@@ -142,8 +143,11 @@ export default function EditMeasure() {
           <Route path={`${url}/test-cases`}>
             <MadiePatient />
           </Route>
-          <Route path="*">
+          <Route path={`${url}/groups`}>
             <MeasureGroups />
+          </Route>
+          <Route path="*">
+            <NotFound />
           </Route>
         </Switch>
       </div>
