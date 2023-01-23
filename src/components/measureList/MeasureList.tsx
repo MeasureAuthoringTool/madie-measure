@@ -70,7 +70,6 @@ export default function MeasureList(props: {
   currentLimit: number;
   currentPage: number;
   setErrMsg;
-  //onListUpdate;
 }) {
   const history = useHistory();
 
@@ -150,20 +149,6 @@ export default function MeasureList(props: {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (props.searchCriteria) {
-      // measureServiceApi
-      //   .searchMeasuresByMeasureNameOrEcqmTitle(
-      //     props.activeTab === 0,
-      //     props.currentLimit,
-      //     0,
-      //     props.searchCriteria
-      //   )
-      //   .then((data) => {
-      //     setPageProps(data);
-      //   })
-      //   .catch((error: Error) => {
-      //     props.setInitialLoad(false);
-      //     props.setErrMsg(error.message);
-      //   });
       doSearch();
     }
 
@@ -330,7 +315,7 @@ export default function MeasureList(props: {
         setToastOpen(true);
         setToastType("success");
         setToastMessage("New draft created successfully.");
-        await props.onListUpdate();
+        doUpdateList();
       })
       .catch((error) => {
         const errorOb = error?.response?.data;
