@@ -1,11 +1,13 @@
 import * as Yup from "yup";
 
+export const MeasureNameSchema = Yup.string()
+  .max(500, "A Measure name cannot be more than 500 characters.")
+  .required("A Measure name is required.")
+  .matches(/[a-zA-Z]/, "A Measure name must contain at least one letter.")
+  .matches(/^((?!_).)*$/, "Measure Name must not contain '_' (underscores).");
+
 export const MeasureSchemaValidator = Yup.object().shape({
-  measureName: Yup.string()
-    .max(500, "A Measure name cannot be more than 500 characters.")
-    .required("A Measure name is required.")
-    .matches(/[a-zA-Z]/, "A Measure name must contain at least one letter.")
-    .matches(/^((?!_).)*$/, "Measure Name must not contain '_' (underscores)."),
+  measureName: MeasureNameSchema,
   cqlLibraryName: Yup.string()
     .required("Measure library name is required.")
     .matches(

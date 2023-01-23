@@ -57,6 +57,9 @@ const measures: Measure[] = [
     lastModifiedBy: null,
     model: "QDM",
     active: true,
+    measureMetaData: {
+      draft: true,
+    },
   },
   {
     id: "IDIDID2",
@@ -72,6 +75,9 @@ const measures: Measure[] = [
     lastModifiedBy: null,
     model: "FHIR",
     active: false,
+    measureMetaData: {
+      draft: true,
+    },
   },
   {
     id: "IDIDID3",
@@ -87,8 +93,22 @@ const measures: Measure[] = [
     lastModifiedBy: null,
     model: Model.QICORE.valueOf(),
     active: false,
+    measureMetaData: {
+      draft: false,
+    },
   },
 ];
+
+const serviceConfig: ServiceConfig = {
+  elmTranslationService: { baseUrl: "" },
+  measureService: { baseUrl: "" },
+  terminologyService: { baseUrl: "" },
+  features: {
+    export: true,
+    measureVersioning: true,
+    populationCriteriaTabs: false,
+  },
+};
 
 const setMeasureListMock = jest.fn();
 const setTotalPagesMock = jest.fn();
@@ -98,6 +118,7 @@ const setOffsetMock = jest.fn();
 const setInitialLoadMock = jest.fn();
 const setSearchCriteriaMock = jest.fn();
 const setErrMsgMock = jest.fn();
+const onListUpdateMock = jest.fn();
 
 describe("Measure List component", () => {
   beforeEach(() => {
@@ -106,70 +127,13 @@ describe("Measure List component", () => {
     });
   });
 
-  it("should display a list of measures", () => {
-    const { getByText } = render(
-      <MeasureList
-        measureList={measures}
-        setMeasureList={setMeasureListMock}
-        setTotalPages={setTotalPagesMock}
-        setTotalItems={setTotalItemsMock}
-        setVisibleItems={setVisibleItemsMock}
-        setOffset={setOffsetMock}
-        setInitialLoad={setInitialLoadMock}
-        activeTab={0}
-        searchCriteria="test"
-        setSearchCriteria={setSearchCriteriaMock}
-        currentLimit={10}
-        currentPage={0}
-        setErrMsg={setErrMsgMock}
-      />
-    );
-    measures.forEach((m) => {
-      expect(getByText(m.measureName)).toBeInTheDocument();
-    });
-  });
-
-  it("should navigate to the edit measure screen on click of edit/view button", () => {
-    const { getByTestId } = render(
-      <MeasureList
-        measureList={measures}
-        setMeasureList={setMeasureListMock}
-        setTotalPages={setTotalPagesMock}
-        setTotalItems={setTotalItemsMock}
-        setVisibleItems={setVisibleItemsMock}
-        setOffset={setOffsetMock}
-        setInitialLoad={setInitialLoadMock}
-        activeTab={0}
-        searchCriteria="test"
-        setSearchCriteria={setSearchCriteriaMock}
-        currentLimit={10}
-        currentPage={0}
-        setErrMsg={setErrMsgMock}
-      />
-    );
-
-    const editButton = getByTestId(`edit-measure-${measures[0].id}`);
-    expect(editButton).toBeInTheDocument();
-    expect(editButton).toHaveTextContent("View");
-    expect(window.location.href).toBe("http://localhost/");
-    fireEvent.click(editButton);
-    expect(mockPush).toHaveBeenCalledWith("/example");
-  });
-
-  it("should display the popover with options of export and view when feature flag is set to true", () => {
-    const features: ServiceConfig = {
-      elmTranslationService: { baseUrl: "" },
-      measureService: { baseUrl: "" },
-      terminologyService: { baseUrl: "" },
-      features: { export: true, measureVersioning: true },
-    };
-
+  const renderMeasureList = (searchCriteria?: string) => {
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
       return true;
     });
 
-    const { getByTestId } = render(
-      <ServiceContext.Provider value={features}>
+    render(
+      <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
           setMeasureList={setMeasureListMock}
@@ -179,50 +143,67 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setInitialLoad={setInitialLoadMock}
           activeTab={0}
-          searchCriteria="test"
+          searchCriteria={searchCriteria ? searchCriteria : ""}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          onListUpdate={onListUpdateMock}
         />
       </ServiceContext.Provider>
     );
+  };
 
-    const actionButton = getByTestId(`measure-action-${measures[0].id}`);
+  it("should display a list of measures", () => {
+    renderMeasureList();
+    measures.forEach((m) => {
+      expect(screen.getByText(m.measureName)).toBeInTheDocument();
+    });
+  });
+
+  it("should navigate to the edit measure screen on click of edit/view button", async () => {
+    renderMeasureList();
+    const selectButtons = await screen.findAllByRole("button", {
+      name: "Select",
+    });
+
+    fireEvent.click(selectButtons[0]);
+    const editButton = await screen.findByRole("button", {
+      name: "View",
+    });
+    expect(editButton).toBeInTheDocument();
+    expect(window.location.href).toBe("http://localhost/");
+    fireEvent.click(editButton);
+    expect(mockPush).toHaveBeenCalledWith("/example");
+  });
+
+  it("should display the popover with options of export and view when feature flag is set to true", () => {
+    renderMeasureList();
+    const actionButton = screen.getByTestId(`measure-action-${measures[0].id}`);
     expect(actionButton).toBeInTheDocument();
     expect(actionButton).toHaveTextContent("Select");
     expect(window.location.href).toBe("http://localhost/");
     fireEvent.click(actionButton);
-    expect(getByTestId(`view-measure-${measures[0].id}`)).toBeInTheDocument();
-    expect(getByTestId(`export-measure-${measures[0].id}`)).toBeInTheDocument();
     expect(
-      getByTestId(`create-version-measure-${measures[0].id}`)
+      screen.getByTestId(`view-measure-${measures[0].id}`)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId(`export-measure-${measures[0].id}`)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId(`create-version-measure-${measures[0].id}`)
     ).toBeInTheDocument();
     expect(window.location.href).toBe("http://localhost/");
-    fireEvent.click(getByTestId(`view-measure-${measures[0].id}`));
+    fireEvent.click(screen.getByTestId(`view-measure-${measures[0].id}`));
     expect(mockPush).toHaveBeenCalledWith("/example");
   });
 
   it("Search measure should display returned measures", () => {
-    const { getByTestId, getByText } = render(
-      <MeasureList
-        measureList={measures}
-        setMeasureList={setMeasureListMock}
-        setTotalPages={setTotalPagesMock}
-        setTotalItems={setTotalItemsMock}
-        setVisibleItems={setVisibleItemsMock}
-        setOffset={setOffsetMock}
-        setInitialLoad={setInitialLoadMock}
-        activeTab={0}
-        searchCriteria="test"
-        setSearchCriteria={setSearchCriteriaMock}
-        currentLimit={10}
-        currentPage={0}
-        setErrMsg={setErrMsgMock}
-      />
-    );
+    renderMeasureList("test");
 
-    const searchFieldInput = getByTestId("searchMeasure-input");
+    const searchFieldInput = screen.getByTestId(
+      "searchMeasure-input"
+    ) as HTMLInputElement;
     expect(searchFieldInput).toBeInTheDocument();
     userEvent.type(searchFieldInput, "test");
     expect(searchFieldInput.value).toBe("test");
@@ -230,7 +211,7 @@ describe("Measure List component", () => {
     fireEvent.submit(searchFieldInput);
 
     measures.forEach((m) => {
-      expect(getByText(m.measureName)).toBeInTheDocument();
+      expect(screen.getByText(m.measureName)).toBeInTheDocument();
     });
 
     expect(
@@ -239,25 +220,10 @@ describe("Measure List component", () => {
   });
 
   it("Clear search criteria should clear input field", () => {
-    const { getByTestId, getByText } = render(
-      <MeasureList
-        measureList={measures}
-        setMeasureList={setMeasureListMock}
-        setTotalPages={setTotalPagesMock}
-        setTotalItems={setTotalItemsMock}
-        setVisibleItems={setVisibleItemsMock}
-        setOffset={setOffsetMock}
-        setInitialLoad={setInitialLoadMock}
-        activeTab={0}
-        searchCriteria="test"
-        setSearchCriteria={setSearchCriteriaMock}
-        currentLimit={10}
-        currentPage={0}
-        setErrMsg={setErrMsgMock}
-      />
-    );
-
-    const searchFieldInput = getByTestId("searchMeasure-input");
+    renderMeasureList("test");
+    const searchFieldInput = screen.getByTestId(
+      "searchMeasure-input"
+    ) as HTMLInputElement;
     expect(searchFieldInput).toBeInTheDocument();
     userEvent.type(searchFieldInput, "test");
     expect(searchFieldInput.value).toBe("test");
@@ -265,7 +231,7 @@ describe("Measure List component", () => {
     fireEvent.submit(searchFieldInput);
 
     measures.forEach((m) => {
-      expect(getByText(m.measureName)).toBeInTheDocument();
+      expect(screen.getByText(m.measureName)).toBeInTheDocument();
     });
 
     const clearButton = screen.getByRole("button", {
@@ -284,26 +250,10 @@ describe("Measure List component", () => {
   });
 
   it("empty search criteria won't trigger search", () => {
-    const { getByTestId } = render(
-      <MeasureList
-        measureList={measures}
-        setMeasureList={setMeasureListMock}
-        setTotalPages={setTotalPagesMock}
-        setTotalItems={setTotalItemsMock}
-        setVisibleItems={setVisibleItemsMock}
-        setOffset={setOffsetMock}
-        setInitialLoad={setInitialLoadMock}
-        activeTab={0}
-        searchCriteria=""
-        setSearchCriteria={setSearchCriteriaMock}
-        currentLimit={10}
-        currentPage={0}
-        setErrMsg={setErrMsgMock}
-      />
-    );
-
-    const searchFieldInput = getByTestId("searchMeasure-input");
-    expect(searchFieldInput).toBeInTheDocument();
+    renderMeasureList();
+    const searchFieldInput = screen.getByTestId(
+      "searchMeasure-input"
+    ) as HTMLInputElement;
     userEvent.type(searchFieldInput, "");
     expect(searchFieldInput.value).toBe("");
 
@@ -322,33 +272,18 @@ describe("Measure List component", () => {
       .mockClear()
       .mockRejectedValueOnce(new Error("Unable to fetch measures"));
 
-    const { getByTestId, getByText } = render(
-      <MeasureList
-        measureList={measures}
-        setMeasureList={setMeasureListMock}
-        setTotalPages={setTotalPagesMock}
-        setTotalItems={setTotalItemsMock}
-        setVisibleItems={setVisibleItemsMock}
-        setOffset={setOffsetMock}
-        setInitialLoad={setInitialLoadMock}
-        activeTab={0}
-        searchCriteria="test"
-        setSearchCriteria={setSearchCriteriaMock}
-        currentLimit={10}
-        currentPage={0}
-        setErrMsg={setErrMsgMock}
-      />
-    );
+    renderMeasureList("test");
 
-    const searchFieldInput = getByTestId("searchMeasure-input");
-    expect(searchFieldInput).toBeInTheDocument();
+    const searchFieldInput = screen.getByTestId(
+      "searchMeasure-input"
+    ) as HTMLInputElement;
     userEvent.type(searchFieldInput, "test");
     expect(searchFieldInput.value).toBe("test");
 
     fireEvent.submit(searchFieldInput);
 
     measures.forEach((m) => {
-      expect(getByText(m.measureName)).toBeInTheDocument();
+      expect(screen.getByText(m.measureName)).toBeInTheDocument();
     });
 
     const clearButton = screen.getByRole("button", {
@@ -368,53 +303,27 @@ describe("Measure List component", () => {
   });
 
   it("should display create version dialog on click of version button", () => {
-    const features: ServiceConfig = {
-      elmTranslationService: { baseUrl: "" },
-      measureService: { baseUrl: "" },
-      terminologyService: { baseUrl: "" },
-      features: { export: true, measureVersioning: true },
-    };
-
-    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
-      return true;
-    });
-
-    const { getByTestId } = render(
-      <ServiceContext.Provider value={features}>
-        <MeasureList
-          measureList={measures}
-          setMeasureList={setMeasureListMock}
-          setTotalPages={setTotalPagesMock}
-          setTotalItems={setTotalItemsMock}
-          setVisibleItems={setVisibleItemsMock}
-          setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
-          activeTab={0}
-          searchCriteria=""
-          setSearchCriteria={setSearchCriteriaMock}
-          currentLimit={10}
-          currentPage={0}
-          setErrMsg={setErrMsgMock}
-        />
-      </ServiceContext.Provider>
-    );
-
-    const actionButton = getByTestId(`measure-action-${measures[0].id}`);
+    renderMeasureList();
+    const actionButton = screen.getByTestId(`measure-action-${measures[0].id}`);
     expect(actionButton).toBeInTheDocument();
     expect(actionButton).toHaveTextContent("Select");
     expect(window.location.href).toBe("http://localhost/");
     fireEvent.click(actionButton);
-    expect(getByTestId(`view-measure-${measures[0].id}`)).toBeInTheDocument();
-    expect(getByTestId(`export-measure-${measures[0].id}`)).toBeInTheDocument();
+    expect(
+      screen.getByTestId(`view-measure-${measures[0].id}`)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId(`export-measure-${measures[0].id}`)
+    ).toBeInTheDocument();
 
-    const createVersionButton = getByTestId(
+    const createVersionButton = screen.getByTestId(
       `create-version-measure-${measures[0].id}`
     );
     expect(createVersionButton).toBeInTheDocument();
     expect(createVersionButton).toHaveTextContent("Version");
     fireEvent.click(createVersionButton);
 
-    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+    expect(screen.getByTestId("create-version-dialog")).toBeInTheDocument();
   });
 
   it("should display unauthorized error while creating a version of a measure", async () => {
@@ -431,42 +340,15 @@ describe("Measure List component", () => {
       return useMeasureServiceMockRejected;
     });
 
-    const features: ServiceConfig = {
-      elmTranslationService: { baseUrl: "" },
-      measureService: { baseUrl: "" },
-      terminologyService: { baseUrl: "" },
-      features: { export: true, measureVersioning: true },
-    };
-
-    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
-      return true;
-    });
-
-    const { getByTestId, getByLabelText } = render(
-      <ServiceContext.Provider value={features}>
-        <MeasureList
-          measureList={measures}
-          setMeasureList={setMeasureListMock}
-          setTotalPages={setTotalPagesMock}
-          setTotalItems={setTotalItemsMock}
-          setVisibleItems={setVisibleItemsMock}
-          setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
-          activeTab={0}
-          searchCriteria=""
-          setSearchCriteria={setSearchCriteriaMock}
-          currentLimit={10}
-          currentPage={0}
-          setErrMsg={setErrMsgMock}
-        />
-      </ServiceContext.Provider>
+    renderMeasureList();
+    fireEvent.click(screen.getByTestId(`measure-action-${measures[0].id}`));
+    fireEvent.click(
+      screen.getByTestId(`create-version-measure-${measures[0].id}`)
     );
-    fireEvent.click(getByTestId(`measure-action-${measures[0].id}`));
-    fireEvent.click(getByTestId(`create-version-measure-${measures[0].id}`));
-    fireEvent.click(getByLabelText("Major"));
+    fireEvent.click(screen.getByLabelText("Major"));
     await waitFor(() => {
-      fireEvent.click(getByTestId("create-version-continue-button"));
-      expect(getByTestId("create-version-error-text")).toHaveTextContent(
+      fireEvent.click(screen.getByTestId("create-version-continue-button"));
+      expect(screen.getByTestId("error-toast")).toHaveTextContent(
         "User is unauthorized to create a version"
       );
     });
@@ -485,43 +367,15 @@ describe("Measure List component", () => {
     useMeasureServiceMock.mockImplementation(() => {
       return useMeasureServiceMockRejected;
     });
-
-    const features: ServiceConfig = {
-      elmTranslationService: { baseUrl: "" },
-      measureService: { baseUrl: "" },
-      terminologyService: { baseUrl: "" },
-      features: { export: true, measureVersioning: true },
-    };
-
-    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
-      return true;
-    });
-
-    const { getByTestId, getByLabelText } = render(
-      <ServiceContext.Provider value={features}>
-        <MeasureList
-          measureList={measures}
-          setMeasureList={setMeasureListMock}
-          setTotalPages={setTotalPagesMock}
-          setTotalItems={setTotalItemsMock}
-          setVisibleItems={setVisibleItemsMock}
-          setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
-          activeTab={0}
-          searchCriteria=""
-          setSearchCriteria={setSearchCriteriaMock}
-          currentLimit={10}
-          currentPage={0}
-          setErrMsg={setErrMsgMock}
-        />
-      </ServiceContext.Provider>
+    renderMeasureList();
+    fireEvent.click(screen.getByTestId(`measure-action-${measures[0].id}`));
+    fireEvent.click(
+      screen.getByTestId(`create-version-measure-${measures[0].id}`)
     );
-    fireEvent.click(getByTestId(`measure-action-${measures[0].id}`));
-    fireEvent.click(getByTestId(`create-version-measure-${measures[0].id}`));
-    fireEvent.click(getByLabelText("Major"));
+    fireEvent.click(screen.getByLabelText("Major"));
     await waitFor(() => {
-      fireEvent.click(getByTestId("create-version-continue-button"));
-      expect(getByTestId("create-version-error-text")).toHaveTextContent(
+      fireEvent.click(screen.getByTestId("create-version-continue-button"));
+      expect(screen.getByTestId("error-toast")).toHaveTextContent(
         "Requested measure cannot be versioned"
       );
     });
@@ -542,42 +396,15 @@ describe("Measure List component", () => {
       return useMeasureServiceMockRejected;
     });
 
-    const features: ServiceConfig = {
-      elmTranslationService: { baseUrl: "" },
-      measureService: { baseUrl: "" },
-      terminologyService: { baseUrl: "" },
-      features: { export: true, measureVersioning: true },
-    };
-
-    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
-      return true;
-    });
-
-    const { getByTestId, getByLabelText } = render(
-      <ServiceContext.Provider value={features}>
-        <MeasureList
-          measureList={measures}
-          setMeasureList={setMeasureListMock}
-          setTotalPages={setTotalPagesMock}
-          setTotalItems={setTotalItemsMock}
-          setVisibleItems={setVisibleItemsMock}
-          setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
-          activeTab={0}
-          searchCriteria=""
-          setSearchCriteria={setSearchCriteriaMock}
-          currentLimit={10}
-          currentPage={0}
-          setErrMsg={setErrMsgMock}
-        />
-      </ServiceContext.Provider>
+    renderMeasureList();
+    fireEvent.click(screen.getByTestId(`measure-action-${measures[0].id}`));
+    fireEvent.click(
+      screen.getByTestId(`create-version-measure-${measures[0].id}`)
     );
-    fireEvent.click(getByTestId(`measure-action-${measures[0].id}`));
-    fireEvent.click(getByTestId(`create-version-measure-${measures[0].id}`));
-    fireEvent.click(getByLabelText("Major"));
+    fireEvent.click(screen.getByLabelText("Major"));
     await waitFor(() => {
-      fireEvent.click(getByTestId("create-version-continue-button"));
-      expect(getByTestId("create-version-error-text")).toHaveTextContent(
+      fireEvent.click(screen.getByTestId("create-version-continue-button"));
+      expect(screen.getByTestId("error-toast")).toHaveTextContent(
         "server error"
       );
     });
@@ -596,56 +423,173 @@ describe("Measure List component", () => {
     useMeasureServiceMock.mockImplementation(() => {
       return useMeasureServiceMockRejected;
     });
-
-    const features: ServiceConfig = {
-      elmTranslationService: { baseUrl: "" },
-      measureService: { baseUrl: "" },
-      terminologyService: { baseUrl: "" },
-      features: { export: true, measureVersioning: true },
-    };
-
-    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
-      return true;
-    });
-
-    const { getByTestId, getByLabelText, queryByTestId } = render(
-      <ServiceContext.Provider value={features}>
-        <MeasureList
-          measureList={measures}
-          setMeasureList={setMeasureListMock}
-          setTotalPages={setTotalPagesMock}
-          setTotalItems={setTotalItemsMock}
-          setVisibleItems={setVisibleItemsMock}
-          setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
-          activeTab={0}
-          searchCriteria=""
-          setSearchCriteria={setSearchCriteriaMock}
-          currentLimit={10}
-          currentPage={0}
-          setErrMsg={setErrMsgMock}
-        />
-      </ServiceContext.Provider>
+    renderMeasureList();
+    fireEvent.click(screen.getByTestId(`measure-action-${measures[0].id}`));
+    fireEvent.click(
+      screen.getByTestId(`create-version-measure-${measures[0].id}`)
     );
-
-    fireEvent.click(getByTestId(`measure-action-${measures[0].id}`));
-    fireEvent.click(getByTestId(`create-version-measure-${measures[0].id}`));
-    fireEvent.click(getByLabelText("Major"));
+    fireEvent.click(screen.getByLabelText("Major"));
     await waitFor(() => {
-      fireEvent.click(getByTestId("create-version-continue-button"));
-      setTimeout(() => {
-        expect(getByTestId("create-version-success-text")).toHaveTextContent(
-          "New version of measure is Successfully created"
-        );
-      }, 500);
+      fireEvent.click(screen.getByTestId("create-version-continue-button"));
+      expect(screen.getByTestId("success-toast")).toHaveTextContent(
+        "New version of measure is Successfully created"
+      );
 
-      const closeButton = getByTestId("close-toast-button");
+      const closeButton = screen.getByTestId("close-toast-button");
       fireEvent.click(closeButton);
       setTimeout(() => {
         expect(
-          queryByTestId("create-version-success-text")
+          screen.queryByTestId("create-version-success-text")
         ).not.toBeInTheDocument();
       }, 500);
+    });
+  });
+
+  it("should display draft/version actions based on whether measure is draft or versioned", async () => {
+    renderMeasureList();
+    const selectButtons = await screen.findAllByRole("button", {
+      name: "Select",
+    });
+
+    // first measure should have Version action as this is a draft measure
+    fireEvent.click(selectButtons[0]);
+    const draftButton = await screen.findByRole("button", {
+      name: "Version",
+    });
+    expect(draftButton).toBeInTheDocument();
+
+    // second measure should have Version action as this is a draft measure
+    fireEvent.click(selectButtons[1]);
+    expect(
+      await screen.findByRole("button", {
+        name: "Version",
+      })
+    ).toBeInTheDocument();
+
+    // third measure should have Draft action as this is versioned measure
+    fireEvent.click(selectButtons[2]);
+    expect(
+      await screen.findByRole("button", {
+        name: "Draft",
+      })
+    ).toBeInTheDocument();
+  });
+
+  it("should display draft dialog on clicking Draft action", async () => {
+    renderMeasureList();
+    const selectButtons = await screen.findAllByRole("button", {
+      name: "Select",
+    });
+    fireEvent.click(selectButtons[2]);
+    const draftButton = await screen.findByRole("button", {
+      name: "Draft",
+    });
+    fireEvent.click(draftButton);
+    expect(screen.getByText("Create Draft")).toBeInTheDocument();
+    const measureName = (await screen.findByRole("textbox", {
+      name: "Measure Name",
+    })) as HTMLInputElement;
+    expect(measureName.value).toEqual(measures[2].measureName);
+    // close dialog
+    fireEvent.click(screen.getByText(/Cancel/i));
+  });
+
+  it("should create a measure draft successfully", async () => {
+    const success = {
+      response: {
+        data: {},
+      },
+    };
+    const useMeasureServiceMockResolved = {
+      draftMeasure: jest.fn().mockResolvedValue(success),
+    } as unknown as MeasureServiceApi;
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockResolved;
+    });
+    renderMeasureList();
+
+    const selectButtons = await screen.findAllByRole("button", {
+      name: "Select",
+    });
+    fireEvent.click(selectButtons[2]);
+    const draftButton = await screen.findByRole("button", {
+      name: "Draft",
+    });
+    fireEvent.click(draftButton);
+    expect(screen.getByText("Create Draft")).toBeInTheDocument();
+    fireEvent.click(screen.getByText(/Continue/i));
+    await waitFor(() => {
+      expect(screen.getByTestId("success-toast")).toHaveTextContent(
+        "New draft created successfully."
+      );
+    });
+  });
+
+  it("should display errors if draft creation fails with validation", async () => {
+    const error = {
+      response: {
+        status: 400,
+        data: {
+          message:
+            'Can not create a draft for the measure "Test". Only one draft is permitted per measure.',
+        },
+      },
+    };
+    const useMeasureServiceMockRejected = {
+      draftMeasure: jest.fn().mockRejectedValue(error),
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockRejected;
+    });
+    renderMeasureList();
+
+    const selectButtons = await screen.findAllByRole("button", {
+      name: "Select",
+    });
+    fireEvent.click(selectButtons[2]);
+    const draftButton = await screen.findByRole("button", {
+      name: "Draft",
+    });
+    fireEvent.click(draftButton);
+    expect(screen.getByText("Create Draft")).toBeInTheDocument();
+    fireEvent.click(screen.getByText(/Continue/i));
+    await waitFor(() => {
+      expect(screen.getByTestId("error-toast")).toHaveTextContent(
+        error.response.data.message
+      );
+    });
+  });
+
+  it("should display errors if service down or internal server errors", async () => {
+    const error = {
+      response: {
+        data: {},
+      },
+    };
+    const useMeasureServiceMockRejected = {
+      draftMeasure: jest.fn().mockRejectedValue(error),
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockRejected;
+    });
+
+    renderMeasureList();
+    const selectButtons = await screen.findAllByRole("button", {
+      name: "Select",
+    });
+    fireEvent.click(selectButtons[2]);
+    const draftButton = await screen.findByRole("button", {
+      name: "Draft",
+    });
+    fireEvent.click(draftButton);
+    expect(screen.getByText("Create Draft")).toBeInTheDocument();
+    fireEvent.click(screen.getByText(/Continue/i));
+    await waitFor(() => {
+      expect(screen.getByTestId("error-toast")).toHaveTextContent(
+        "An error occurred, please try again. If the error persists, please contact the help desk."
+      );
     });
   });
 });
