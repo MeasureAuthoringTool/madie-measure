@@ -59,6 +59,33 @@ describe("Create Version Dialog component", () => {
         onSubmit={jest.fn()}
       />
     );
+
+    expect(screen.getByTestId("create-version-dialog")).toBeInTheDocument();
+    const majorRadio: HTMLInputElement = screen.getByLabelText("Major");
+    const minorRadio: HTMLInputElement = screen.getByLabelText("Minor");
+    const patchRadio: HTMLInputElement = screen.getByLabelText("Patch");
+    expect(majorRadio.checked).toEqual(false);
+    act(() => {
+      fireEvent.click(majorRadio);
+    });
+    expect(majorRadio.checked).toEqual(true);
+    expect(minorRadio.checked).toEqual(false);
+    expect(patchRadio.checked).toEqual(false);
+
+    act(() => {
+      fireEvent.click(minorRadio);
+    });
+    expect(majorRadio.checked).toEqual(false);
+    expect(minorRadio.checked).toEqual(true);
+    expect(patchRadio.checked).toEqual(false);
+
+    act(() => {
+      fireEvent.click(patchRadio);
+    });
+    expect(majorRadio.checked).toEqual(false);
+    expect(minorRadio.checked).toEqual(false);
+    expect(patchRadio.checked).toEqual(true);
+
     fireEvent.click(screen.getByTestId("create-version-cancel-button"));
     expect(onCloseFn).toHaveBeenCalled();
   });

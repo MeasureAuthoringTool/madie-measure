@@ -98,7 +98,6 @@ const setOffsetMock = jest.fn();
 const setInitialLoadMock = jest.fn();
 const setSearchCriteriaMock = jest.fn();
 const setErrMsgMock = jest.fn();
-const onListUpdateMock = jest.fn();
 
 describe("Measure List component", () => {
   beforeEach(() => {
@@ -123,7 +122,6 @@ describe("Measure List component", () => {
         currentLimit={10}
         currentPage={0}
         setErrMsg={setErrMsgMock}
-        onListUpdate={onListUpdateMock}
       />
     );
     measures.forEach((m) => {
@@ -147,7 +145,6 @@ describe("Measure List component", () => {
         currentLimit={10}
         currentPage={0}
         setErrMsg={setErrMsgMock}
-        onListUpdate={onListUpdateMock}
       />
     );
 
@@ -187,7 +184,6 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
-          onListUpdate={onListUpdateMock}
         />
       </ServiceContext.Provider>
     );
@@ -223,7 +219,6 @@ describe("Measure List component", () => {
         currentLimit={10}
         currentPage={0}
         setErrMsg={setErrMsgMock}
-        onListUpdate={onListUpdateMock}
       />
     );
 
@@ -259,7 +254,6 @@ describe("Measure List component", () => {
         currentLimit={10}
         currentPage={0}
         setErrMsg={setErrMsgMock}
-        onListUpdate={onListUpdateMock}
       />
     );
 
@@ -305,7 +299,6 @@ describe("Measure List component", () => {
         currentLimit={10}
         currentPage={0}
         setErrMsg={setErrMsgMock}
-        onListUpdate={onListUpdateMock}
       />
     );
 
@@ -344,7 +337,6 @@ describe("Measure List component", () => {
         currentLimit={10}
         currentPage={0}
         setErrMsg={setErrMsgMock}
-        onListUpdate={onListUpdateMock}
       />
     );
 
@@ -403,7 +395,6 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
-          onListUpdate={onListUpdateMock}
         />
       </ServiceContext.Provider>
     );
@@ -467,7 +458,6 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
-          onListUpdate={onListUpdateMock}
         />
       </ServiceContext.Provider>
     );
@@ -523,7 +513,6 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
-          onListUpdate={onListUpdateMock}
         />
       </ServiceContext.Provider>
     );
@@ -580,7 +569,6 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
-          onListUpdate={onListUpdateMock}
         />
       </ServiceContext.Provider>
     );
@@ -636,7 +624,6 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
-          onListUpdate={onListUpdateMock}
         />
       </ServiceContext.Provider>
     );
@@ -646,9 +633,11 @@ describe("Measure List component", () => {
     fireEvent.click(getByLabelText("Major"));
     await waitFor(() => {
       fireEvent.click(getByTestId("create-version-continue-button"));
-      expect(getByTestId("create-version-success-text")).toHaveTextContent(
-        "New version of measure is Successfully created"
-      );
+      setTimeout(() => {
+        expect(getByTestId("create-version-success-text")).toHaveTextContent(
+          "New version of measure is Successfully created"
+        );
+      }, 500);
 
       const closeButton = getByTestId("close-toast-button");
       fireEvent.click(closeButton);

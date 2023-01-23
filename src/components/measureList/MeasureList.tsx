@@ -69,7 +69,7 @@ export default function MeasureList(props: {
   currentLimit: number;
   currentPage: number;
   setErrMsg;
-  onListUpdate;
+  //onListUpdate;
 }) {
   const history = useHistory();
 
@@ -123,23 +123,41 @@ export default function MeasureList(props: {
     );
   };
 
+  const doSearch = () => {
+    measureServiceApi
+      .searchMeasuresByMeasureNameOrEcqmTitle(
+        props.activeTab === 0,
+        props.currentLimit,
+        0,
+        props.searchCriteria
+      )
+      .then((data) => {
+        setPageProps(data);
+      })
+      .catch((error: Error) => {
+        props.setInitialLoad(false);
+        props.setErrMsg(error.message);
+      });
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (props.searchCriteria) {
-      measureServiceApi
-        .searchMeasuresByMeasureNameOrEcqmTitle(
-          props.activeTab === 0,
-          props.currentLimit,
-          0,
-          props.searchCriteria
-        )
-        .then((data) => {
-          setPageProps(data);
-        })
-        .catch((error: Error) => {
-          props.setInitialLoad(false);
-          props.setErrMsg(error.message);
-        });
+      // measureServiceApi
+      //   .searchMeasuresByMeasureNameOrEcqmTitle(
+      //     props.activeTab === 0,
+      //     props.currentLimit,
+      //     0,
+      //     props.searchCriteria
+      //   )
+      //   .then((data) => {
+      //     setPageProps(data);
+      //   })
+      //   .catch((error: Error) => {
+      //     props.setInitialLoad(false);
+      //     props.setErrMsg(error.message);
+      //   });
+      doSearch();
     }
 
     history.push(
@@ -236,6 +254,22 @@ export default function MeasureList(props: {
     });
   };
 
+  const doUpdateList = () => {
+    measureServiceApi
+      .fetchMeasures(
+        props.activeTab === 0,
+        props.currentLimit,
+        props.currentPage
+      )
+      .then((data) => {
+        setPageProps(data);
+      })
+      .catch((error: Error) => {
+        props.setInitialLoad(false);
+        props.setErrMsg(error.message);
+      });
+  };
+
   const createVersion = async (versionType: string) => {
     if (
       versionType !== "major" &&
@@ -252,10 +286,10 @@ export default function MeasureList(props: {
         .createVersion(targetMeasure.current?.id, versionType)
         .then(async () => {
           handleDialogClose();
-          await props.onListUpdate();
           setToastOpen(true);
           setToastType("success");
           setToastMessage("New version of measure is Successfully created");
+          doUpdateList();
         })
         .catch((error) => {
           handleDialogClose();
