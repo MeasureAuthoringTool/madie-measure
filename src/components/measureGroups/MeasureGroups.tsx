@@ -160,7 +160,11 @@ const MeasureGroups = () => {
       subscription.unsubscribe();
     };
   }, []);
-  const canEdit = checkUserCanEdit(measure?.createdBy, measure?.acls);
+  const canEdit = checkUserCanEdit(
+    measure?.createdBy,
+    measure?.acls,
+    measure?.version
+  );
   const measureServiceApi = useMeasureServiceApi();
   let location = useLocation();
   const { path } = useRouteMatch();

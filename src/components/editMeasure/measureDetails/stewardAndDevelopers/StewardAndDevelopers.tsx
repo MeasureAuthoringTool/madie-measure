@@ -46,7 +46,11 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
     setToastOpen(open);
   };
 
-  const canEdit = checkUserCanEdit(measure?.createdBy, measure?.acls);
+  const canEdit = checkUserCanEdit(
+    measure?.createdBy,
+    measure?.acls,
+    measure?.version
+  );
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {

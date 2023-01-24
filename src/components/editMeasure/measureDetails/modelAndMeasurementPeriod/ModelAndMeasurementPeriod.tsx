@@ -88,7 +88,11 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
     });
   }, [formik.dirty]);
 
-  const canEdit = checkUserCanEdit(measure?.createdBy, measure?.acls);
+  const canEdit = checkUserCanEdit(
+    measure?.createdBy,
+    measure?.acls,
+    measure?.version
+  );
   const onToastClose = () => {
     setToastType("danger");
     setToastMessage("");

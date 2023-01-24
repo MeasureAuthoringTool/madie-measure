@@ -52,7 +52,11 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
     setToastOpen(open);
   };
 
-  const canEdit = checkUserCanEdit(measure?.createdBy, measure?.acls);
+  const canEdit = checkUserCanEdit(
+    measure?.createdBy,
+    measure?.acls,
+    measure?.version
+  );
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: { genericField: getInitialValues(measure, typeLower) },

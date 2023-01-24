@@ -130,7 +130,11 @@ const MeasureEditor = () => {
   const [elmAnnotations, setElmAnnotations] = useState<EditorAnnotation[]>([]);
   // error markers control the error underlining in the editor.
   const [errorMarkers, setErrorMarkers] = useState<EditorErrorMarker[]>([]);
-  const canEdit = checkUserCanEdit(measure?.createdBy, measure?.acls);
+  const canEdit = checkUserCanEdit(
+    measure?.createdBy,
+    measure?.acls,
+    measure?.version
+  );
 
   const [valuesetMsg, setValuesetMsg] = useState(null);
   const [errorMessage, setErrorMessage] = useState<string>(null);
