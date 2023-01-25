@@ -20,6 +20,7 @@ import { saveAs } from "file-saver";
 import { checkUserCanEdit } from "@madie/madie-util";
 import CreatVersionDialog from "../createVersionDialog/CreateVersionDialog";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
+import DraftMeasureDialog from "../draftMeasureDialog/DraftMeasureDialog";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -92,10 +93,16 @@ export default function MeasureList(props: {
     open: false,
     measureId: "",
   });
+  const [draftMeasureDialog, setDraftMeasureDialog] = useState({
+    open: false,
+  });
   const handleDialogClose = () => {
     setCreateVersionDialog({
       open: false,
       measureId: "",
+    });
+    setDraftMeasureDialog({
+      open: false,
     });
   };
   const [toastOpen, setToastOpen] = useState<boolean>(false);
@@ -203,12 +210,19 @@ export default function MeasureList(props: {
       options.push(exportButton);
     }
     if (versioningFeature) {
-      const versionButton = {
-        label: "Version",
-        toImplementFunction: createVersion,
-        dataTestId: `create-version-measure-${selected?.id}`,
-      };
-      options.push(versionButton);
+      if (selected.measureMetaData.draft) {
+        options.push({
+          label: "Version",
+          toImplementFunction: createVersion,
+          dataTestId: `create-version-measure-${selected?.id}`,
+        });
+      } else {
+        options.push({
+          label: "Draft",
+          toImplementFunction: () => setDraftMeasureDialog({ open: true }),
+          dataTestId: `draft-measure-${selected?.id}`,
+        });
+      }
     }
     setOtherSelectOptionPropsForPopOver(options);
   };
@@ -272,6 +286,29 @@ export default function MeasureList(props: {
           }
         });
     }
+  };
+
+  const draftMeasure = async (measureName: string) => {
+    await measureServiceApi
+      .draftMeasure(targetMeasure.current?.id, measureName)
+      .then(async () => {
+        handleDialogClose();
+        setToastOpen(true);
+        setToastType("success");
+        setToastMessage("New draft created successfully.");
+        await props.onListUpdate();
+      })
+      .catch((error) => {
+        const errorOb = error?.response?.data;
+        setToastOpen(true);
+        if (errorOb?.message) {
+          setToastMessage(errorOb.message);
+        } else {
+          setToastMessage(
+            "An error occurred, please try again. If the error persists, please contact the help desk."
+          );
+        }
+      });
   };
 
   return (
@@ -390,14 +427,10 @@ export default function MeasureList(props: {
               />
             </div>
             <Toast
-              toastKey="create-version-toast"
+              toastKey="measure-action-toast"
               aria-live="polite"
               toastType={toastType}
-              testId={
-                toastType === "danger"
-                  ? "create-version-error-text"
-                  : "create-version-success-text"
-              }
+              testId={toastType === "danger" ? "error-toast" : "success-toast"}
               closeButtonProps={{
                 "data-testid": "close-toast-button",
               }}
@@ -410,6 +443,12 @@ export default function MeasureList(props: {
               open={createVersionDialog.open}
               onClose={handleDialogClose}
               onSubmit={createVersion}
+            />
+            <DraftMeasureDialog
+              open={draftMeasureDialog.open}
+              onClose={handleDialogClose}
+              onSubmit={draftMeasure}
+              measure={targetMeasure.current}
             />
           </div>
         </div>

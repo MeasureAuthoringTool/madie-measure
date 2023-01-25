@@ -210,13 +210,27 @@ describe("MeasureServiceApi Tests", () => {
       measureName: "measure - A",
       version: "1.001",
       revisionNumber: 1,
-    } as Measure;
+    } as unknown as Measure;
 
     const resp = { status: 200, data: measure };
     mockedAxios.put.mockResolvedValue(resp);
 
     await measureServiceApi.createVersion("testId", "MAJOR");
     expect(mockedAxios.put).toBeCalledTimes(1);
+    expect(resp.data).toEqual(measure);
+  });
+
+  it("creates a draft for a measure", async () => {
+    const measure = {
+      id: "1",
+      measureName: "Measure - A",
+    } as unknown as Measure;
+
+    const resp = { status: 200, data: measure };
+    mockedAxios.post.mockResolvedValue(resp);
+
+    await measureServiceApi.draftMeasure(measure.id, measure.measureName);
+    expect(mockedAxios.post).toBeCalledTimes(1);
     expect(resp.data).toEqual(measure);
   });
 });
