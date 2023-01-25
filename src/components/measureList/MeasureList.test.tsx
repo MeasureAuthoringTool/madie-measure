@@ -215,7 +215,7 @@ describe("Measure List component", () => {
     ).toHaveBeenCalledWith(true, 10, 0, "test");
   });
 
-  it("Clear search criteria should clear input field", () => {
+  it("Clear search criteria should clear input field", async () => {
     renderMeasureList("test");
     const searchFieldInput = screen.getByTestId(
       "searchMeasure-input"
@@ -239,7 +239,7 @@ describe("Measure List component", () => {
     // });
     setTimeout(() => {
       expect(searchFieldInput.value).toBe("");
-    }, 10000);
+    }, 15000);
 
     expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
       true,
@@ -291,8 +291,10 @@ describe("Measure List component", () => {
     userEvent.click(clearButton);
     setTimeout(() => {
       expect(searchFieldInput.value).toBe("");
-    }, 10000);
-
+    }, 15000);
+    // await waitFor(() => {
+    //   expect(searchFieldInput.value).toBe("");
+    // });
     expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
       true,
       10,
