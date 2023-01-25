@@ -7,7 +7,6 @@ import useMeasureServiceApi, {
 } from "../../api/useMeasureServiceApi";
 import { oneItemResponse } from "../measureRoutes/mockMeasureResponses";
 import userEvent from "@testing-library/user-event";
-import { checkUserCanEdit } from "@madie/madie-util";
 
 import { v4 as uuid } from "uuid";
 import ServiceContext, { ServiceConfig } from "../../api/ServiceContext";
@@ -21,10 +20,10 @@ jest.mock("react-router-dom", () => ({
 }));
 
 jest.mock("@madie/madie-util", () => ({
-  checkUserCanEdit: jest.fn(),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
   })),
+  checkUserCanEdit: jest.fn().mockImplementation(() => true),
 }));
 jest.mock("../../api/useMeasureServiceApi");
 const useMeasureServiceMock =
@@ -47,7 +46,7 @@ const measures: Measure[] = [
     id: "IDIDID1",
     measureHumanReadableId: null,
     measureSetId: "1",
-    version: "0",
+    version: "0.0.000",
     state: "NEW",
     measureName: "new measure - A",
     cql: null,
@@ -65,7 +64,7 @@ const measures: Measure[] = [
     id: "IDIDID2",
     measureHumanReadableId: null,
     measureSetId: "2",
-    version: "0",
+    version: "0.0.000",
     state: "DRAFT",
     measureName: "draft measure - B",
     cql: null,
@@ -128,10 +127,6 @@ describe("Measure List component", () => {
   });
 
   const renderMeasureList = (searchCriteria?: string) => {
-    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
-      return true;
-    });
-
     render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
@@ -219,7 +214,7 @@ describe("Measure List component", () => {
     ).toHaveBeenCalledWith(true, 10, 0, "test");
   });
 
-  it("Clear search criteria should clear input field", () => {
+  it("Clear search criteria should clear input field", async () => {
     renderMeasureList("test");
     const searchFieldInput = screen.getByTestId(
       "searchMeasure-input"
@@ -240,7 +235,7 @@ describe("Measure List component", () => {
     userEvent.click(clearButton);
     setTimeout(() => {
       expect(searchFieldInput.value).toBe("");
-    }, 8000);
+    }, 15000);
 
     expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
       true,
@@ -264,7 +259,7 @@ describe("Measure List component", () => {
     ).not.toHaveBeenCalledWith(true, 10, 0, "");
   });
 
-  it("Clear search with error should still do the push", () => {
+  it("Clear search with error should still do the push", async () => {
     (mockMeasureServiceApi.fetchMeasures as jest.Mock)
       .mockClear()
       .mockRejectedValueOnce(new Error("Unable to fetch measures"));
@@ -292,8 +287,7 @@ describe("Measure List component", () => {
     userEvent.click(clearButton);
     setTimeout(() => {
       expect(searchFieldInput.value).toBe("");
-    }, 8000);
-
+    }, 15000);
     expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
       true,
       10,
