@@ -203,8 +203,13 @@ export default function MeasureList(props: {
     setSelectedMeasure(selected);
     setAnchorEl(event.currentTarget);
     setCanEdit(
-      checkUserCanEdit(selected?.createdBy, selected?.acls, selected?.version)
+      checkUserCanEdit(
+        selected?.createdBy,
+        selected?.acls,
+        selected?.measureMetaData?.draft
+      )
     );
+
     let options = [];
     if (exportFeature) {
       const exportButton = {

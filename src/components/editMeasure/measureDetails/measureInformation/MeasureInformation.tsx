@@ -118,7 +118,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   const canEdit = checkUserCanEdit(
     measure?.createdBy,
     measure?.acls,
-    measure?.version
+    measure?.measureMetaData?.draft
   );
   const onToastClose = () => {
     setToastType("danger");

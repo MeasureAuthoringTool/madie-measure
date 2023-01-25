@@ -91,7 +91,7 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
   const canEdit = checkUserCanEdit(
     measure?.createdBy,
     measure?.acls,
-    measure?.version
+    measure?.measureMetaData?.draft
   );
   const onToastClose = () => {
     setToastType("danger");

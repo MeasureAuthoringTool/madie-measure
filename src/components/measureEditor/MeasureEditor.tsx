@@ -133,7 +133,7 @@ const MeasureEditor = () => {
   const canEdit = checkUserCanEdit(
     measure?.createdBy,
     measure?.acls,
-    measure?.version
+    measure?.measureMetaData?.draft
   );
 
   const [valuesetMsg, setValuesetMsg] = useState(null);
