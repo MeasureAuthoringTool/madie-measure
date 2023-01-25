@@ -127,17 +127,32 @@ const CreatVersionDialog = ({ open, onClose, onSubmit }) => {
             >
               <FormControlLabel
                 value="major"
-                control={<Radio name="type" />}
+                control={
+                  <Radio
+                    name="type"
+                    checked={formik.values.type === "major" ? true : false}
+                  />
+                }
                 label="Major"
               />
               <FormControlLabel
                 value="minor"
-                control={<Radio name="type" />}
+                control={
+                  <Radio
+                    name="type"
+                    checked={formik.values.type === "minor" ? true : false}
+                  />
+                }
                 label="Minor"
               />
               <FormControlLabel
                 value="patch"
-                control={<Radio name="type" />}
+                control={
+                  <Radio
+                    name="type"
+                    checked={formik.values.type === "patch" ? true : false}
+                  />
+                }
                 label="Patch"
               />
             </RadioGroup>
