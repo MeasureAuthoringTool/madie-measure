@@ -7,7 +7,6 @@ import useMeasureServiceApi, {
 } from "../../api/useMeasureServiceApi";
 import { oneItemResponse } from "../measureRoutes/mockMeasureResponses";
 import userEvent from "@testing-library/user-event";
-// import { checkUserCanEdit } from "@madie/madie-util";
 
 import { v4 as uuid } from "uuid";
 import ServiceContext, { ServiceConfig } from "../../api/ServiceContext";
@@ -234,9 +233,6 @@ describe("Measure List component", () => {
       name: /Clear-Search/i,
     });
     userEvent.click(clearButton);
-    // await waitFor(() => {
-    //   expect(searchFieldInput.value).toBe("");
-    // });
     setTimeout(() => {
       expect(searchFieldInput.value).toBe("");
     }, 15000);
@@ -292,9 +288,6 @@ describe("Measure List component", () => {
     setTimeout(() => {
       expect(searchFieldInput.value).toBe("");
     }, 15000);
-    // await waitFor(() => {
-    //   expect(searchFieldInput.value).toBe("");
-    // });
     expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
       true,
       10,
