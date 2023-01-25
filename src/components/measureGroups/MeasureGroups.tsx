@@ -18,7 +18,7 @@ import {
   Tab,
 } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
-import EditMeasureSideBarNav from "../editMeasure/measureDetails/EditMeasureSideBarNav";
+import EditMeasureSideBarNav from "./populationCriteriaSideNav/EditMeasureSideBarNav";
 import {
   Button,
   MadieDiscardDialog,

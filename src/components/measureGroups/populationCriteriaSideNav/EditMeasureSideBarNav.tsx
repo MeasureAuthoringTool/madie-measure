@@ -6,7 +6,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { Measure } from "@madie/madie-models";
 import useFeature from "../../../utils/useFeatureFlag";
-import "./EditMeasureSideBarNav.scss";
+import "../../editMeasure/measureDetails/EditMeasureSideBarNav.scss";
 import "../../common/madie-link.scss";
 import {
   DSLink,
@@ -14,7 +14,6 @@ import {
 } from "@madie/madie-design-system/dist/react";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
-const InnerWrapper = tw.div`flex-grow flex flex-col`;
 const Nav = tw.nav`flex-1 space-y-1 bg-slate`;
 
 export interface EditMeasureSideBarNavProps {
@@ -34,7 +33,6 @@ export default function EditMeasureSideBarNav(
   const {
     canEdit,
     links,
-    details = false,
     measure,
     measureGroupNumber,
     setMeasureGroupNumber,
@@ -161,41 +159,6 @@ export default function EditMeasureSideBarNav(
     }
   };
 
-  if (details) {
-    return (
-      <OuterWrapper>
-        <InnerWrapper>
-          <Nav aria-label="Sidebar">
-            {links.map((link) => (
-              <div className="link-container">
-                <h4 className="link-heading">{link.title}</h4>
-                {link.links.map((linkInfo) => {
-                  const isActive = pathname === linkInfo.href;
-                  const className = isActive ? "nav-link active" : "nav-link";
-                  return (
-                    <NavLink
-                      key={linkInfo.title}
-                      onClick={(e) => {
-                        if (isActive) {
-                          e.preventDefault();
-                        }
-                      }}
-                      to={linkInfo.href}
-                      data-testid={linkInfo.dataTestId}
-                      className={className}
-                      id={linkInfo.id}
-                    >
-                      {linkInfo.title}
-                    </NavLink>
-                  );
-                })}
-              </div>
-            ))}
-          </Nav>
-        </InnerWrapper>
-      </OuterWrapper>
-    );
-  }
   return (
     <OuterWrapper>
       <Nav aria-label="Sidebar">
