@@ -320,6 +320,7 @@ export default function MeasureList(props: {
     await measureServiceApi
       .draftMeasure(targetMeasure.current?.id, measureName)
       .then(async () => {
+        setOptionsOpen(false);
         handleDialogClose();
         setToastOpen(true);
         setToastType("success");

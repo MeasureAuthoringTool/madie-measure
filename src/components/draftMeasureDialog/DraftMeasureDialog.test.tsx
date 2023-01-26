@@ -1,4 +1,5 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import clearAllMocks = jest.clearAllMocks;
 import DraftMeasureDialog from "./DraftMeasureDialog";
@@ -43,7 +44,7 @@ describe("DraftMeasureDialog component", () => {
     const measureName = (await screen.findByRole("textbox", {
       name: "Measure Name",
     })) as HTMLInputElement;
-    fireEvent.change(measureName, { target: { value: "" } });
+    userEvent.clear(measureName);
     await waitFor(() => {
       expect(screen.getByTestId("measureName-helper-text")).toHaveTextContent(
         "A Measure name is required."
@@ -58,7 +59,8 @@ describe("DraftMeasureDialog component", () => {
       name: "Measure Name",
     })) as HTMLInputElement;
 
-    fireEvent.change(measureName, { target: { value: "123" } });
+    userEvent.clear(measureName);
+    userEvent.type(measureName, "123");
     await waitFor(() => {
       expect(screen.getByTestId("measureName-helper-text")).toHaveTextContent(
         "A Measure name must contain at least one letter."
@@ -73,7 +75,7 @@ describe("DraftMeasureDialog component", () => {
       name: "Measure Name",
     })) as HTMLInputElement;
 
-    fireEvent.change(measureName, { target: { value: "A_" } });
+    userEvent.type(measureName, "A_");
     await waitFor(() => {
       expect(screen.getByTestId("measureName-helper-text")).toHaveTextContent(
         "Measure Name must not contain '_' (underscores)."
@@ -83,13 +85,13 @@ describe("DraftMeasureDialog component", () => {
 
   it("should call model close handler on clicking cancel button", async () => {
     renderComponent();
-    fireEvent.click(screen.getByText(/Cancel/i));
+    userEvent.click(screen.getByText(/Cancel/i));
     expect(onCloseFn).toHaveBeenCalled();
   });
 
   it("should call onSubmit handler on clicking continue button", async () => {
     renderComponent();
-    fireEvent.click(screen.getByText(/Continue/i));
+    userEvent.click(screen.getByText(/Continue/i));
     await waitFor(() => {
       expect(onSubmitFn).toHaveBeenCalled();
     });
