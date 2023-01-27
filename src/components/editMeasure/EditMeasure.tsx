@@ -20,6 +20,8 @@ import { measureStore } from "@madie/madie-util";
 import { Toast, MadieAlert } from "@madie/madie-design-system/dist/react";
 import DeleteDialog from "./DeleteDialog";
 import NotFound from "../notfound/NotFound";
+import PopulationCriteria from "../populationCriteria/PopulationCriteria";
+import SupplementalElements from "../measureGroups/SupplementalElements";
 interface inputParams {
   id: string;
 }
@@ -144,8 +146,14 @@ export default function EditMeasure() {
           <Route path={`${url}/test-cases`}>
             <MadiePatient />
           </Route>
-          <Route path={`${url}/groups`}>
-            <MeasureGroups />
+          <Route
+            path={[
+              `${url}/groups`,
+              `${url}/supplemental-data`,
+              `${url}/risk-adjustment`,
+            ]}
+          >
+            <PopulationCriteria />
           </Route>
           <Route path="*">
             <NotFound />

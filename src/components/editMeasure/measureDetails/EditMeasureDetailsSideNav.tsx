@@ -16,7 +16,6 @@ export default function EditMeasureDetailsSideNav(
   props: EditMeasureDetailsSideNavProps
 ) {
   const { links } = props;
-
   const { pathname } = useLocation();
 
   return (
