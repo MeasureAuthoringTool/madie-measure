@@ -94,7 +94,11 @@ const EditMeasureNav = () => {
         </MenuItem>
         <MenuItem
           data-testid="groups-tab"
-          isActive={pathname.startsWith(`${url}/groups`)}
+          isActive={
+            pathname.startsWith(`${url}/groups`) ||
+            pathname.startsWith(`${url}/supplemental-data`) ||
+            pathname.startsWith(`${url}/risk-adjustment`)
+          }
         >
           <NavLinkCustom to={`${url}/groups`}>
             Population Criteria

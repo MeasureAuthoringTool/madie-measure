@@ -2,12 +2,12 @@ import * as React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import EditMeasureSideBarNav, {
+import PopulationCriteriaSideNav, {
   EditMeasureSideBarNavProps,
-} from "./EditMeasureSideBarNav";
+} from "./PopulationCriteriaSideNav";
 import ServiceContext, { ServiceConfig } from "../../../api/ServiceContext";
 
-describe("EditMeasureSideBarNav", () => {
+describe("PopulationCriteriaSideNav", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -113,7 +113,7 @@ describe("EditMeasureSideBarNav", () => {
         initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
       >
         <ServiceContext.Provider value={features}>
-          <EditMeasureSideBarNav {...props} />
+          <PopulationCriteriaSideNav {...props} />
         </ServiceContext.Provider>
       </MemoryRouter>
     );
@@ -202,7 +202,7 @@ describe("EditMeasureSideBarNav", () => {
               features: { populationCriteriaTabs: true },
             }}
           >
-            <EditMeasureSideBarNav {...initialProps} />
+            <PopulationCriteriaSideNav {...initialProps} />
           </ServiceContext.Provider>
         </MemoryRouter>
       )

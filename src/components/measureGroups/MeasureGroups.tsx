@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useState } from "react";
-import { Route, Switch, useRouteMatch, useLocation } from "react-router-dom";
+import { useRouteMatch, useLocation } from "react-router-dom";
 import tw, { styled } from "twin.macro";
 import * as ucum from "@lhncbc/ucum-lhc";
 import "styled-components/macro";
@@ -18,7 +18,6 @@ import {
   Tab,
 } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
-import EditMeasureSideBarNav from "./populationCriteriaSideNav/EditMeasureSideBarNav";
 import {
   Button,
   MadieDiscardDialog,
@@ -145,13 +144,12 @@ export interface DeleteMeasureGroupDialog {
   measureGroupNumber?: number;
 }
 
-interface MeasureGroupProps {
+export interface MeasureGroupProps {
   measureGroupNumber?: number;
   setMeasureGroupNumber?: (value: number) => void;
 }
 
 const MeasureGroups = (props: MeasureGroupProps) => {
-  debugger;
   useDocumentTitle("MADiE Edit Measure Population Criteria");
   const defaultPopulationBasis = "boolean";
   const [expressionDefinitions, setExpressionDefinitions] = useState<

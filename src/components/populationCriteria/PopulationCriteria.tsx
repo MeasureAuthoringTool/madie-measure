@@ -3,7 +3,7 @@ import tw from "twin.macro";
 import "styled-components/macro";
 import { Route, Switch, useLocation, useRouteMatch } from "react-router-dom";
 import SupplementalElements from "../measureGroups/SupplementalElements";
-import EditMeasureSideBarNav from "../measureGroups/populationCriteriaSideNav/EditMeasureSideBarNav";
+import PopulationCriteriaSideNav from "../measureGroups/populationCriteriaSideNav/PopulationCriteriaSideNav";
 import MeasureGroups from "../measureGroups/MeasureGroups";
 import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
@@ -33,19 +33,20 @@ export function PopulationCriteria() {
   /* This useEffect generates information required for left side nav bar
    * If a measure doesn't have any groups, then a new one is added. */
   useEffect(() => {
-    const measureGroups = measure?.groups
-      ? measure.groups?.map((_group, id) => ({
-          title: `Criteria ${id + 1}`,
-          href: groupsBaseUrl,
-          dataTestId: `leftPanelMeasureInformation-MeasureGroup${id + 1}`,
-        }))
-      : [
-          {
-            title: "Population Criteria 1",
+    const measureGroups =
+      measure?.groups && measure.groups.length > 0
+        ? measure.groups?.map((_group, id) => ({
+            title: `Criteria ${id + 1}`,
             href: groupsBaseUrl,
-            dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
-          },
-        ];
+            dataTestId: `leftPanelMeasureInformation-MeasureGroup${id + 1}`,
+          }))
+        : [
+            {
+              title: "Criteria 1",
+              href: groupsBaseUrl,
+              dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
+            },
+          ];
     setSideNavLinks([
       {
         title: "Population Criteria",
@@ -66,19 +67,13 @@ export function PopulationCriteria() {
         id: "sideNavMeasurePopulationsRiskAdjustment",
       },
     ]);
-  }, [
-    groupsBaseUrl,
-    measure?.groups,
-    riskAdjustmentBaseUrl,
-    supplementalDataBaseUrl,
-  ]);
+  }, [groupsBaseUrl, riskAdjustmentBaseUrl, supplementalDataBaseUrl]);
 
   return (
     <>
       <div tw="grid lg:grid-cols-6 gap-4 mx-8 shadow-lg rounded-md border border-slate bg-white">
-        <EditMeasureSideBarNav
+        <PopulationCriteriaSideNav
           canEdit={canEdit}
-          urlPath={path}
           sideNavLinks={sideNavLinks}
           setSideNavLinks={setSideNavLinks}
           measureGroupNumber={measureGroupNumber}

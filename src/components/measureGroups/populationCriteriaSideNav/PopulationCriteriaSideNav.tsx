@@ -13,7 +13,7 @@ import { DSLink } from "@madie/madie-design-system/dist/react";
 const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
 const Nav = tw.nav`flex-1 space-y-1 bg-slate`;
 
-export interface EditMeasureSideBarNavProps {
+export interface PopulationCriteriaSideNavProp {
   canEdit?: Boolean;
   dirty?: Boolean;
   sideNavLinks: Array<any>;
@@ -21,12 +21,11 @@ export interface EditMeasureSideBarNavProps {
   measureGroupNumber?: number;
   setMeasureGroupNumber?: (value: number) => void;
   measureId: string;
-  urlPath?: string;
 }
 
 // todo discard button is refreshing the page also its not stopping from navigation
-export default function EditMeasureSideBarNav(
-  props: EditMeasureSideBarNavProps
+export default function PopulationCriteriaSideNav(
+  props: PopulationCriteriaSideNavProp
 ) {
   const {
     canEdit,
@@ -35,11 +34,10 @@ export default function EditMeasureSideBarNav(
     measureId,
     measureGroupNumber,
     setMeasureGroupNumber,
-    dirty,
   } = props;
 
+  const dirty = false;
   const { pathname } = useLocation();
-  const [measureGroups, setMeasureGroups] = useState<any>();
   const [showPopulationCriteriaTabs, setShowPopulationCriteriaTabs] =
     useState<boolean>(false);
   const history = useHistory();
@@ -120,10 +118,10 @@ export default function EditMeasureSideBarNav(
   };
 
   // we need to preserve the
-  const handleMeasureGroupNavigation = (val: number) => {
-    setMeasureGroupNumber(val);
-    onClose();
-  };
+  // const handleMeasureGroupNavigation = (val: number) => {
+  //   setMeasureGroupNumber(val);
+  //   onClose();
+  // };
 
   // we need to pass a bound function to discard.
   // const onContinue = () => {
@@ -134,10 +132,10 @@ export default function EditMeasureSideBarNav(
   //   }
   // };
 
-  const onClose = () => {
-    setDiscardDialogOpen(false);
-    setInitiatedPayload(null);
-  };
+  // const onClose = () => {
+  //   setDiscardDialogOpen(false);
+  //   setInitiatedPayload(null);
+  // };
 
   const handlePopulationCriteriaCollapse = (tabInfo) => {
     if (tabInfo.title === "Population Criteria") {
@@ -160,7 +158,9 @@ export default function EditMeasureSideBarNav(
                     handlePopulationCriteriaCollapse(tab);
                   }}
                   data-testId={tab.dataTestId}
-                  className="tab-title"
+                  className={
+                    pathname === tab.href ? "tab-title active" : "tab-title "
+                  }
                   id={tab.title}
                   tw="px-2"
                 >
@@ -192,7 +192,6 @@ export default function EditMeasureSideBarNav(
                           onClick={(e) => initiateNavigateGroupClick(e)}
                           to={linkInfo.href}
                           className={className}
-                          tw="pl-7"
                           id={index}
                           data-testid={linkInfo.dataTestId}
                         >
