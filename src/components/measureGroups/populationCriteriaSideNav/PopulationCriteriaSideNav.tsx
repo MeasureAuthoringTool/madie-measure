@@ -8,7 +8,10 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import useFeature from "../../../utils/useFeatureFlag";
 import "../../editMeasure/measureDetails/EditMeasureSideBarNav.scss";
 import "../../common/madie-link.scss";
-import { DSLink } from "@madie/madie-design-system/dist/react";
+import {
+  DSLink,
+  MadieDiscardDialog,
+} from "@madie/madie-design-system/dist/react";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
 const Nav = tw.nav`flex-1 space-y-1 bg-slate`;
@@ -20,6 +23,7 @@ export interface PopulationCriteriaSideNavProp {
   measureGroupNumber?: number;
   setMeasureGroupNumber?: (value: number) => void;
   measureId: string;
+  isFormDirty: boolean;
 }
 
 // todo discard button is refreshing the page also its not stopping from navigation
@@ -33,9 +37,9 @@ export default function PopulationCriteriaSideNav(
     measureId,
     measureGroupNumber,
     setMeasureGroupNumber,
+    isFormDirty = false,
   } = props;
 
-  const dirty = false;
   const { pathname } = useLocation();
   const [showPopulationCriteriaTabs, setShowPopulationCriteriaTabs] =
     useState<boolean>(true);
@@ -44,23 +48,6 @@ export default function PopulationCriteriaSideNav(
     "populationCriteriaTabs"
   );
   const groupsBaseUrl = "/measures/" + measureId + "/edit/groups";
-
-  // If no groups are available, then create link information for new group
-  // side nav links has to be update with new group
-  // useEffect(() => {
-  //   if (sideNavLinks) {
-  //     if (!sideNavLinks[0]?.groups) {
-  //       sideNavLinks[0].groups = [
-  //         {
-  //           title: "Population Criteria 1",
-  //           href: `${groupsBaseUrl}`,
-  //           dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
-  //         },
-  //       ];
-  //       setSideNavLinks([...sideNavLinks]);
-  //     }
-  //   }
-  // }, [groupsBaseUrl, setSideNavLinks, sideNavLinks]);
   // a bool for when discard is open triggered by an initiated state
   const [discardDialogOpen, setDiscardDialogOpen] = useState<boolean>(false);
   // action payload? like a redux operation
@@ -68,40 +55,28 @@ export default function PopulationCriteriaSideNav(
 
   const initiateBlankMeasureGroupClick = (e) => {
     e.preventDefault();
-    if (dirty) {
+    if (isFormDirty) {
       setInitiatedPayload({ action: "add", value: null });
       setDiscardDialogOpen(true);
     } else {
       history.push(groupsBaseUrl);
       addNewBlankMeasureGroup();
-      const element = document.getElementById("title");
-      element.focus();
     }
   };
-
-  // const initiateNavigateGroupClick = (e) => {
-  //   e.preventDefault();
-  //   const groupNumber = Number(e.target.id);
-  //   // We don't want to trigger a warning if we're navigating to the same group
-  //   if (groupNumber !== measureGroupNumber) {
-  //     if (dirty) {
-  //       setInitiatedPayload({ action: "navigate", value: groupNumber });
-  //       setDiscardDialogOpen(true);
-  //     } else {
-  //       handleMeasureGroupNavigation(groupNumber);
-  //       history.push(`/measures/${measure.id}/edit/groups`);
-  //     }
-  //   } else {
-  //     // this navigates to the same group
-  //     history.push(`${urlPath}`);
-  //   }
-  // };
 
   const initiateNavigateGroupClick = (e) => {
     e.preventDefault();
     const groupNumber = Number(e.target.id);
-    setMeasureGroupNumber(groupNumber);
-    history.push(groupsBaseUrl);
+    if (groupNumber !== measureGroupNumber) {
+      if (isFormDirty) {
+        setInitiatedPayload({ action: "navigate", value: groupNumber });
+        setDiscardDialogOpen(true);
+      } else {
+        handleMeasureGroupNavigation(groupNumber);
+      }
+    } else {
+      handleMeasureGroupNavigation(groupNumber);
+    }
   };
 
   const addNewBlankMeasureGroup = () => {
@@ -114,27 +89,29 @@ export default function PopulationCriteriaSideNav(
     };
     sideNavLinks[0].groups = [...sideNavLinks[0].groups, newMeasureGroupLink];
     setSideNavLinks([...sideNavLinks]);
+    onClose();
   };
 
   // we need to preserve the
-  // const handleMeasureGroupNavigation = (val: number) => {
-  //   setMeasureGroupNumber(val);
-  //   onClose();
-  // };
+  const handleMeasureGroupNavigation = (val: number) => {
+    setMeasureGroupNumber(val);
+    history.push(groupsBaseUrl);
+    onClose();
+  };
 
   // we need to pass a bound function to discard.
-  // const onContinue = () => {
-  //   if (initiatedPayload.action === "add") {
-  //     addNewBlankMeasureGroup();
-  //   } else if (initiatedPayload.action === "navigate") {
-  //     handleMeasureGroupNavigation(initiatedPayload.value);
-  //   }
-  // };
+  const onContinue = () => {
+    if (initiatedPayload.action === "add") {
+      addNewBlankMeasureGroup();
+    } else if (initiatedPayload.action === "navigate") {
+      handleMeasureGroupNavigation(initiatedPayload.value);
+    }
+  };
 
-  // const onClose = () => {
-  //   setDiscardDialogOpen(false);
-  //   setInitiatedPayload(null);
-  // };
+  const onClose = () => {
+    setDiscardDialogOpen(false);
+    setInitiatedPayload(null);
+  };
 
   const handlePopulationCriteriaCollapse = (tabInfo) => {
     if (tabInfo.title === "Population Criteria") {
@@ -213,6 +190,11 @@ export default function PopulationCriteriaSideNav(
             </>
           ))}
       </Nav>
+      <MadieDiscardDialog
+        open={discardDialogOpen}
+        onClose={onClose}
+        onContinue={onContinue}
+      />
     </OuterWrapper>
   );
 }

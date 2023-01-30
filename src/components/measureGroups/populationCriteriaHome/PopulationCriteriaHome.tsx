@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import tw from "twin.macro";
+import "twin.macro";
 import "styled-components/macro";
 import { useRouteMatch } from "react-router-dom";
 import SupplementalElements from "../SupplementalElements";
@@ -22,6 +22,7 @@ export function PopulationCriteriaHome() {
   const canEdit: boolean = checkUserCanEdit(measure?.createdBy, measure?.acls);
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(0);
   const [sideNavLinks, setSideNavLinks] = useState<Array<any>>();
+  const [isFormDirty, setIsFormDirty] = useState<boolean>(false);
 
   const groupsBaseUrl = "/measures/" + measure?.id + "/edit/groups";
   const supplementalDataBaseUrl =
@@ -83,9 +84,11 @@ export function PopulationCriteriaHome() {
           measureGroupNumber={measureGroupNumber}
           setMeasureGroupNumber={setMeasureGroupNumber}
           measureId={measure?.id}
+          isFormDirty={isFormDirty}
         />
         {path.includes("/groups") && (
           <MeasureGroups
+            setIsFormDirty={setIsFormDirty}
             measureGroupNumber={measureGroupNumber}
             setMeasureGroupNumber={setMeasureGroupNumber}
           />
