@@ -15,13 +15,11 @@ import MeasureEditor from "../measureEditor/MeasureEditor";
 import { Measure } from "@madie/madie-models";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { MadiePatient } from "@madie/madie-patient";
-import MeasureGroups from "../measureGroups/MeasureGroups";
 import { measureStore } from "@madie/madie-util";
 import { Toast, MadieAlert } from "@madie/madie-design-system/dist/react";
 import DeleteDialog from "./DeleteDialog";
 import NotFound from "../notfound/NotFound";
-import PopulationCriteria from "../populationCriteria/PopulationCriteria";
-import SupplementalElements from "../measureGroups/SupplementalElements";
+import PopulationCriteriaHome from "../measureGroups/populationCriteriaHome/PopulationCriteriaHome";
 interface inputParams {
   id: string;
 }
@@ -153,7 +151,7 @@ export default function EditMeasure() {
               `${url}/risk-adjustment`,
             ]}
           >
-            <PopulationCriteria />
+            <PopulationCriteriaHome />
           </Route>
           <Route path="*">
             <NotFound />

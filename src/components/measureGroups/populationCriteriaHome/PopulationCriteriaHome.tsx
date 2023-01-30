@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import tw from "twin.macro";
 import "styled-components/macro";
-import { Route, Switch, useLocation, useRouteMatch } from "react-router-dom";
-import SupplementalElements from "../measureGroups/SupplementalElements";
-import PopulationCriteriaSideNav from "../measureGroups/populationCriteriaSideNav/PopulationCriteriaSideNav";
-import MeasureGroups from "../measureGroups/MeasureGroups";
+import { useRouteMatch } from "react-router-dom";
+import SupplementalElements from "../SupplementalElements";
+import PopulationCriteriaSideNav from "../populationCriteriaSideNav/PopulationCriteriaSideNav";
+import MeasureGroups from "../MeasureGroups";
 import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
 
-export function PopulationCriteria() {
+export function PopulationCriteriaHome() {
   const { path } = useRouteMatch();
 
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
@@ -23,7 +23,6 @@ export function PopulationCriteria() {
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(0);
   const [sideNavLinks, setSideNavLinks] = useState<Array<any>>();
 
-  // Local state to later populate the left nav and and govern routes based on group ids
   const groupsBaseUrl = "/measures/" + measure?.id + "/edit/groups";
   const supplementalDataBaseUrl =
     "/measures/" + measure?.id + "/edit/supplemental-data";
@@ -67,7 +66,12 @@ export function PopulationCriteria() {
         id: "sideNavMeasurePopulationsRiskAdjustment",
       },
     ]);
-  }, [groupsBaseUrl, riskAdjustmentBaseUrl, supplementalDataBaseUrl]);
+  }, [
+    groupsBaseUrl,
+    measure?.groups,
+    riskAdjustmentBaseUrl,
+    supplementalDataBaseUrl,
+  ]);
 
   return (
     <>
@@ -103,4 +107,4 @@ export function PopulationCriteria() {
   );
 }
 
-export default PopulationCriteria;
+export default PopulationCriteriaHome;

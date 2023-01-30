@@ -15,7 +15,6 @@ const Nav = tw.nav`flex-1 space-y-1 bg-slate`;
 
 export interface PopulationCriteriaSideNavProp {
   canEdit?: Boolean;
-  dirty?: Boolean;
   sideNavLinks: Array<any>;
   setSideNavLinks: (value: Array<any>) => void;
   measureGroupNumber?: number;
@@ -39,7 +38,7 @@ export default function PopulationCriteriaSideNav(
   const dirty = false;
   const { pathname } = useLocation();
   const [showPopulationCriteriaTabs, setShowPopulationCriteriaTabs] =
-    useState<boolean>(false);
+    useState<boolean>(true);
   const history = useHistory();
   const populationCriteriaTabsFeatureFlag = useFeature(
     "populationCriteriaTabs"

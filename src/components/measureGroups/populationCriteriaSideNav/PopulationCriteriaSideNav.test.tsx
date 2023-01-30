@@ -3,114 +3,66 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import PopulationCriteriaSideNav, {
-  EditMeasureSideBarNavProps,
+  PopulationCriteriaSideNavProp,
 } from "./PopulationCriteriaSideNav";
 import ServiceContext, { ServiceConfig } from "../../../api/ServiceContext";
+
+const groupsBaseUrl = "/measures/" + "testMeasureId" + "/edit/groups";
+const measureGroups = [
+  {
+    title: "Criteria 1",
+    href: groupsBaseUrl,
+    dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
+  },
+];
+const initialProps: PopulationCriteriaSideNavProp = {
+  canEdit: true,
+  sideNavLinks: [
+    {
+      title: "Population Criteria",
+      groups: measureGroups,
+      dataTestId: "leftPanelMeasurePopulationCriteriaTab",
+      id: "sideNavMeasurePopulationCriteria",
+    },
+    {
+      title: "Supplemental Data",
+      href: "supplementalDataBaseUrl",
+      dataTestId: "leftPanelMeasurePopulationsSupplementalDataTab",
+      id: "sideNavMeasurePopulationsSupplementalData",
+    },
+    {
+      title: "Risk Adjustment",
+      href: "riskAdjustmentBaseUrl",
+      dataTestId: "leftPanelMeasurePopulationsRiskAdjustmentTab",
+      id: "sideNavMeasurePopulationsRiskAdjustment",
+    },
+  ],
+  setSideNavLinks: jest.fn().mockImplementation((v) => v),
+  measureId: "testMeasureId",
+  measureGroupNumber: 3,
+  setMeasureGroupNumber: jest.fn().mockImplementation((v) => v),
+};
 
 describe("PopulationCriteriaSideNav", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
-  const initialProps: EditMeasureSideBarNavProps = {
-    canEdit: true,
-    dirty: true,
-    links: [
-      {
-        id: "test",
-        scoring: "Cohort",
-        populations: [
-          {
-            id: "fakeid",
-            name: "initialPopulation",
-            definition: "Denominator",
-            associationType: null,
-          },
-        ],
-        measureObservations: null,
-        groupDescription: "test",
-        improvementNotation: "",
-        rateAggregation: "",
-        measureGroupTypes: ["Patient Reported Outcome"],
-        scoringUnit: {
-          label: "Number",
-          value: {
-            code: "number",
-          },
-        },
-        stratifications: [],
-        populationBasis: null,
-        title: "Population Criteria 1",
-        href: "/measures/62e305056d85987a43a6060c/edit/measure-groups",
-        dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
-      },
-      {
-        id: "test1",
-        scoring: "Cohort",
-        populations: [
-          {
-            id: "fakeid1",
-            name: "initialPopulation",
-            definition: "Denominator",
-            associationType: null,
-          },
-        ],
-        measureObservations: null,
-        groupDescription: "test",
-        improvementNotation: "",
-        rateAggregation: "",
-        measureGroupTypes: ["Patient Reported Outcome"],
-        scoringUnit: {
-          label: "Number",
-          value: {
-            code: "number",
-          },
-        },
-        stratifications: [],
-        populationBasis: null,
-        title: "Population Criteria 1",
-        href: "/measures/62e305056d85987a43a6060c/edit/measure-groups",
-        dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
-      },
-    ],
-    measureGroupNumber: 3,
-    setMeasureGroupNumber: jest.fn().mockImplementation((v) => v),
-    setSuccessMessage: jest.fn().mockImplementation((v) => v),
-    measure: {
-      id: "6307c7f9d294b54360b7d014",
-      measureHumanReadableId: "",
-      measureSetId: "",
-      version: 1,
-      revisionNumber: 1,
-      state: "",
-      cqlLibraryName: "C44",
-      measureName: "TestMeasure99",
-      active: true,
-      cqlErrors: false,
-      cql: "null",
-      elmJson: "null",
-      eCqmTitle: "",
-      testCases: [],
-      groups: undefined,
-      createdAt: "2022-08-25T19:05:29.261Z",
-      createdBy: "fakeuser",
-      lastModifiedAt: "2022-08-25T19:05:29.261Z",
-      lastModifiedBy: "fakeuser",
-      measurementPeriodStart: new Date("2099-01-22T08:00:00.000+00:00"),
-      measurementPeriodEnd: new Date("2099-01-23T08:00:00.000+00:00"),
-      model: "",
-    },
-  };
   const { getByTestId, getByText, queryByText } = screen;
   const features: ServiceConfig = {
     elmTranslationService: { baseUrl: "" },
     measureService: { baseUrl: "" },
     terminologyService: { baseUrl: "" },
-    features: { populationCriteriaTabs: false },
+    features: {
+      export: false,
+      measureVersioning: false,
+      populationCriteriaTabs: true,
+    },
   };
+
   const RenderEditMeasureSideBarNav = (props) => {
     return render(
       <MemoryRouter
-        initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
+        initialEntries={[{ pathname: "/measures/testMeasureId/edit/groups" }]}
       >
         <ServiceContext.Provider value={features}>
           <PopulationCriteriaSideNav {...props} />
@@ -119,13 +71,31 @@ describe("PopulationCriteriaSideNav", () => {
     );
   };
 
-  test("Measure Group add click when dirty opens up a warning dialog, hitting cancel closes it", async () => {
+  test("Measure's Population Criteria are loaded along with Supplemental Data and Risk Adjustment", async () => {
     await waitFor(() => RenderEditMeasureSideBarNav(initialProps));
-    expect(getByText("Population Criteria 1")).toBeInTheDocument();
+    expect(getByText("Criteria 1")).toBeInTheDocument();
+    expect(getByText("Add Population Criteria")).toBeInTheDocument();
+    expect(getByText("Supplemental Data")).toBeInTheDocument();
+    expect(getByText("Risk Adjustment")).toBeInTheDocument();
+    const populationCriteria1 = getByTestId(
+      "leftPanelMeasureInformation-MeasureGroup1"
+    ) as HTMLAnchorElement;
+    console.log(populationCriteria1);
+    expect(populationCriteria1).toHaveClass("active");
+    // expect(populationCriteria1.classList.contains("nav-link active")).toBe(
+    //   true
+    // );
+  });
 
-    const addButton = getByTestId("AddIcon");
-    expect(addButton).toBeInTheDocument();
-    userEvent.click(getByTestId("add-measure-group-button"));
+  test("Measure Group add click when dirty opens up a warning dialog, hitting cancel closes it", async () => {
+    RenderEditMeasureSideBarNav(initialProps);
+    expect(getByText("Criteria 1")).toBeInTheDocument();
+
+    expect(getByTestId("AddIcon")).toBeInTheDocument();
+    const addNewPopulationCriteriaButton = screen.getByTestId(
+      "add-measure-group-button"
+    ) as HTMLAnchorElement;
+    userEvent.click(addNewPopulationCriteriaButton);
 
     const discardDialog = await getByTestId("discard-dialog");
     expect(discardDialog).toBeInTheDocument();
@@ -142,7 +112,7 @@ describe("PopulationCriteriaSideNav", () => {
 
   test("Measure Group nav click when dirty opens up a warning dialog, hitting cancel closes it", async () => {
     await waitFor(() => RenderEditMeasureSideBarNav(initialProps));
-    expect(getByText("Population Criteria 1")).toBeInTheDocument();
+    expect(getByText("Criteria 1")).toBeInTheDocument();
     const navButton = getByTestId("leftPanelMeasureInformation-MeasureGroup1");
     expect(navButton).toBeInTheDocument();
     fireEvent.click(navButton);
@@ -161,7 +131,7 @@ describe("PopulationCriteriaSideNav", () => {
 
   test("Measure Group nav click when dirty opens up a warning dialog, hitting continue closes it", async () => {
     await waitFor(() => RenderEditMeasureSideBarNav(initialProps));
-    expect(getByText("Population Criteria 1")).toBeInTheDocument();
+    expect(getByText("Criteria 1")).toBeInTheDocument();
     const navButton = getByTestId("leftPanelMeasureInformation-MeasureGroup1");
     expect(navButton).toBeInTheDocument();
     fireEvent.click(navButton);
@@ -180,8 +150,8 @@ describe("PopulationCriteriaSideNav", () => {
 
   test("Measure navigation click without dirty does not render a dialog", async () => {
     const nonDirtyProps = { ...initialProps, dirty: false };
-    await waitFor(() => RenderEditMeasureSideBarNav(nonDirtyProps));
-    expect(getByText("Population Criteria 1")).toBeInTheDocument();
+    RenderEditMeasureSideBarNav(nonDirtyProps);
+    expect(getByText("Criteria 1")).toBeInTheDocument();
     const navButton = getByTestId("leftPanelMeasureInformation-MeasureGroup1");
     expect(navButton).toBeInTheDocument();
     fireEvent.click(navButton);
@@ -189,24 +159,7 @@ describe("PopulationCriteriaSideNav", () => {
   });
 
   test("Population Criteria page navigation between the tabs", async () => {
-    await waitFor(() =>
-      render(
-        <MemoryRouter
-          initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
-        >
-          <ServiceContext.Provider
-            value={{
-              elmTranslationService: { baseUrl: "" },
-              measureService: { baseUrl: "" },
-              terminologyService: { baseUrl: "" },
-              features: { populationCriteriaTabs: true },
-            }}
-          >
-            <PopulationCriteriaSideNav {...initialProps} />
-          </ServiceContext.Provider>
-        </MemoryRouter>
-      )
-    );
+    RenderEditMeasureSideBarNav(initialProps);
     expect(
       getByTestId("leftPanelMeasurePopulationCriteriaTab")
     ).toBeInTheDocument();
@@ -216,8 +169,7 @@ describe("PopulationCriteriaSideNav", () => {
     expect(
       getByTestId("leftPanelMeasurePopulationsRiskAdjustmentTab")
     ).toBeInTheDocument();
-    userEvent.click(getByTestId("leftPanelMeasurePopulationCriteriaTab"));
-    expect(getByText("Population Criteria 1")).toBeInTheDocument();
+    expect(getByText("Criteria 1")).toBeInTheDocument();
     userEvent.click(
       getByTestId("leftPanelMeasurePopulationsSupplementalDataTab")
     );
