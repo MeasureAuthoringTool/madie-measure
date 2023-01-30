@@ -147,6 +147,7 @@ export interface DeleteMeasureGroupDialog {
 export interface MeasureGroupProps {
   measureGroupNumber?: number;
   setMeasureGroupNumber?: (value: number) => void;
+  setIsFormDirty?: (value: boolean) => void;
 }
 
 const MeasureGroups = (props: MeasureGroupProps) => {
@@ -339,13 +340,16 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     },
   });
   const { resetForm } = formik;
+
   // We want to update layout with a cannot travel flag while this is active
+  // setIsFormDirty is used for dirty check while navigating between different groups
   const { updateRouteHandlerState } = routeHandlerStore;
   useEffect(() => {
     updateRouteHandlerState({
       canTravel: !formik.dirty,
       pendingRoute: "",
     });
+    props.setIsFormDirty(formik.dirty);
   }, [formik.dirty]);
 
   useEffect(() => {
