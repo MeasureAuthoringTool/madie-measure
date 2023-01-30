@@ -371,7 +371,7 @@ export default function MeasureList(props: {
                     <tr
                       key={`${measure.id}-${i}`}
                       data-testid="row-item"
-                      className={i % 2 === 0 ? "odd" : ""}
+                      style={{ borderBottom: "solid 1px #AAA" }}
                     >
                       <td tw="w-7/12">{measure.measureName}</td>
                       <td>
