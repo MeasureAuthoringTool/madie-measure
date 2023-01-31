@@ -1,6 +1,6 @@
 import * as React from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter, Route, useLocation } from "react-router-dom";
+import { render, screen } from "@testing-library/react";
+import { MemoryRouter, Route } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import PopulationCriteriaHome from "./PopulationCriteriaHome";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
@@ -204,6 +204,5 @@ describe("PopulationCriteriaHome", () => {
       "Population Criteria 2"
     );
     expect(screen.getByTestId("groupDescriptionInput")).toHaveTextContent("");
-  });
   });
 });
