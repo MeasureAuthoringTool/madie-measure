@@ -218,7 +218,6 @@ export default function MeasureLanding() {
                 currentLimit={currentLimit}
                 currentPage={currentPage}
                 setErrMsg={setErrMsg}
-                onListUpdate={retrieveMeasures}
               />
               <div className="pagination-container">
                 {totalItems > 0 && (

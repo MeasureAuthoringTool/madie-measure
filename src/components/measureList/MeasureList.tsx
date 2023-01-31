@@ -70,7 +70,6 @@ export default function MeasureList(props: {
   currentLimit: number;
   currentPage: number;
   setErrMsg;
-  onListUpdate;
 }) {
   const history = useHistory();
 
@@ -79,10 +78,13 @@ export default function MeasureList(props: {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedMeasure, setSelectedMeasure] = useState<Measure>(null);
   const [canEdit, setCanEdit] = useState<boolean>(false);
+  // if user can edit and it is a version, then draft button
   const [
     otherSelectOptionPropsForPopOver,
     setOtherSelectOptionPropsForPopOver,
   ] = useState(null);
+  const [additionalSelectOptionProps, setAdditionalSelectOptionProps] =
+    useState(null);
 
   const measureServiceApi = useMeasureServiceApi();
   const exportFeature = useFeature("export");
@@ -130,23 +132,27 @@ export default function MeasureList(props: {
     );
   };
 
+  const doSearch = () => {
+    measureServiceApi
+      .searchMeasuresByMeasureNameOrEcqmTitle(
+        props.activeTab === 0,
+        props.currentLimit,
+        0,
+        props.searchCriteria
+      )
+      .then((data) => {
+        setPageProps(data);
+      })
+      .catch((error: Error) => {
+        props.setInitialLoad(false);
+        props.setErrMsg(error.message);
+      });
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (props.searchCriteria) {
-      measureServiceApi
-        .searchMeasuresByMeasureNameOrEcqmTitle(
-          props.activeTab === 0,
-          props.currentLimit,
-          0,
-          props.searchCriteria
-        )
-        .then((data) => {
-          setPageProps(data);
-        })
-        .catch((error: Error) => {
-          props.setInitialLoad(false);
-          props.setErrMsg(error.message);
-        });
+      doSearch();
     }
 
     history.push(
@@ -200,15 +206,20 @@ export default function MeasureList(props: {
     setSelectedMeasure(selected);
     setAnchorEl(event.currentTarget);
     setCanEdit(checkUserCanEdit(selected?.createdBy, selected?.acls));
+
     let options = [];
+    // additional options are outside the edit flag
+    let additionalOptions = [];
+    // always on if feature
     if (exportFeature) {
       const exportButton = {
         label: "Export",
         toImplementFunction: zipData,
         dataTestId: `export-measure-${selected?.id}`,
       };
-      options.push(exportButton);
+      additionalOptions.push(exportButton);
     }
+    // always on if feature
     if (versioningFeature) {
       if (selected.measureMetaData.draft) {
         options.push({
@@ -224,6 +235,7 @@ export default function MeasureList(props: {
         });
       }
     }
+    setAdditionalSelectOptionProps(additionalOptions);
     setOtherSelectOptionPropsForPopOver(options);
   };
 
@@ -250,6 +262,22 @@ export default function MeasureList(props: {
     });
   };
 
+  const doUpdateList = () => {
+    measureServiceApi
+      .fetchMeasures(
+        props.activeTab === 0,
+        props.currentLimit,
+        props.currentPage
+      )
+      .then((data) => {
+        setPageProps(data);
+      })
+      .catch((error: Error) => {
+        props.setInitialLoad(false);
+        props.setErrMsg(error.message);
+      });
+  };
+
   const createVersion = async (versionType: string) => {
     if (
       versionType !== "major" &&
@@ -266,10 +294,10 @@ export default function MeasureList(props: {
         .createVersion(targetMeasure.current?.id, versionType)
         .then(async () => {
           handleDialogClose();
-          await props.onListUpdate();
           setToastOpen(true);
           setToastType("success");
           setToastMessage("New version of measure is Successfully created");
+          doUpdateList();
         })
         .catch((error) => {
           handleDialogClose();
@@ -292,11 +320,12 @@ export default function MeasureList(props: {
     await measureServiceApi
       .draftMeasure(targetMeasure.current?.id, measureName)
       .then(async () => {
+        setOptionsOpen(false);
         handleDialogClose();
         setToastOpen(true);
         setToastType("success");
         setToastMessage("New draft created successfully.");
-        await props.onListUpdate();
+        doUpdateList();
       })
       .catch((error) => {
         const errorOb = error?.response?.data;
@@ -424,6 +453,7 @@ export default function MeasureList(props: {
                   dataTestId: `view-measure-${selectedMeasure?.id}`,
                 }}
                 otherSelectOptionProps={otherSelectOptionPropsForPopOver}
+                additionalSelectOptionProps={additionalSelectOptionProps}
               />
             </div>
             <Toast

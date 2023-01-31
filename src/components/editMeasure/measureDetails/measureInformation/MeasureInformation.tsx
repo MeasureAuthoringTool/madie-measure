@@ -115,7 +115,11 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     }
   };
 
-  const canEdit = checkUserCanEdit(measure?.createdBy, measure?.acls);
+  const canEdit = checkUserCanEdit(
+    measure?.createdBy,
+    measure?.acls,
+    measure?.measureMetaData?.draft
+  );
   const onToastClose = () => {
     setToastType("danger");
     setToastMessage("");
