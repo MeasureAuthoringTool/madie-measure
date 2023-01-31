@@ -515,7 +515,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           );
         handleDialogClose();
       });
-    props.setMeasureGroupNumber(measureGroupNumber - 1);
   };
 
   // // Local state to later populate the left nav and and govern routes based on group ids
