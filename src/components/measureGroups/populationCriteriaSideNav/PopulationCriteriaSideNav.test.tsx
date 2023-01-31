@@ -41,6 +41,7 @@ const initialProps: PopulationCriteriaSideNavProp = {
   measureId: "testMeasureId",
   measureGroupNumber: 3,
   setMeasureGroupNumber: jest.fn().mockImplementation((v) => v),
+  isFormDirty: false,
 };
 
 describe("PopulationCriteriaSideNav", () => {
@@ -48,7 +49,7 @@ describe("PopulationCriteriaSideNav", () => {
     jest.clearAllMocks();
   });
   const { getByTestId, getByText, queryByText } = screen;
-  const features: ServiceConfig = {
+  const serviceConfig: ServiceConfig = {
     elmTranslationService: { baseUrl: "" },
     measureService: { baseUrl: "" },
     terminologyService: { baseUrl: "" },
@@ -64,7 +65,7 @@ describe("PopulationCriteriaSideNav", () => {
       <MemoryRouter
         initialEntries={[{ pathname: "/measures/testMeasureId/edit/groups" }]}
       >
-        <ServiceContext.Provider value={features}>
+        <ServiceContext.Provider value={serviceConfig}>
           <PopulationCriteriaSideNav {...props} />
         </ServiceContext.Provider>
       </MemoryRouter>
@@ -77,11 +78,11 @@ describe("PopulationCriteriaSideNav", () => {
     expect(getByText("Add Population Criteria")).toBeInTheDocument();
     expect(getByText("Supplemental Data")).toBeInTheDocument();
     expect(getByText("Risk Adjustment")).toBeInTheDocument();
-    const populationCriteria1 = getByTestId(
-      "leftPanelMeasureInformation-MeasureGroup1"
-    ) as HTMLAnchorElement;
-    console.log(populationCriteria1);
-    expect(populationCriteria1).toHaveClass("active");
+    const criteria1 = screen.getByRole("link", {
+      name: /Criteria 1/i,
+    });
+    expect(criteria1).toBeInTheDocument();
+    expect(criteria1.classList.contains("active")).toBeTruthy();
     // expect(populationCriteria1.classList.contains("nav-link active")).toBe(
     //   true
     // );
