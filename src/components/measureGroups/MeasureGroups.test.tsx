@@ -565,52 +565,6 @@ describe("Measure Groups Page", () => {
     expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
   });
 
-  // todo rohit move this to home
-  test.skip("Navigating between the population criteria and risk adjustment tab", async () => {
-    render(
-      <MemoryRouter
-        initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
-      >
-        <ApiContextProvider
-          value={{
-            measureService: {
-              baseUrl: "example-service-url",
-            },
-            elmTranslationService: {
-              baseUrl: "test-elm-service",
-            },
-            terminologyService: {
-              baseUrl: "terminology-service.com",
-            },
-            features: {
-              export: false,
-              measureVersioning: false,
-              populationCriteriaTabs: true,
-            },
-          }}
-        >
-          <Route path="/measures/test-measure/edit/groups">
-            <MeasureGroups {...props} />
-          </Route>
-        </ApiContextProvider>
-      </MemoryRouter>
-    );
-    expect(
-      screen.getByTestId("leftPanelMeasurePopulationsRiskAdjustmentTab")
-    ).toBeInTheDocument();
-    userEvent.click(
-      screen.getByTestId("leftPanelMeasurePopulationsRiskAdjustmentTab")
-    );
-    expect(screen.getByTestId("risk-adjustment")).toBeInTheDocument();
-    expect(
-      screen.getByTestId("leftPanelMeasurePopulationsSupplementalDataTab")
-    ).toBeInTheDocument();
-    userEvent.click(
-      screen.getByTestId("leftPanelMeasurePopulationsSupplementalDataTab")
-    );
-    expect(screen.getByTestId("supplemental-data")).toBeInTheDocument();
-  });
-
   test("Should be able to save multiple groups  ", async () => {
     const populationBasis = "Encounter";
     const { rerender } = renderMeasureGroupComponent();

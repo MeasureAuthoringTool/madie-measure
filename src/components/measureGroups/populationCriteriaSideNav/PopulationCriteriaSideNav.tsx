@@ -130,7 +130,6 @@ export default function PopulationCriteriaSideNav(
               {populationCriteriaTabsFeatureFlag && (
                 <button
                   onClick={(e) => {
-                    e.preventDefault();
                     handlePopulationCriteriaCollapse(tab);
                   }}
                   data-testId={tab.dataTestId}
