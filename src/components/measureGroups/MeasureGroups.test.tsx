@@ -333,27 +333,6 @@ describe("Measure Groups Page", () => {
 
     const alert = await screen.findByTestId("population-criteria-success");
 
-    const expectedGroup = {
-      id: null,
-      populations: [
-        {
-          id: "id-1",
-          name: PopulationType.INITIAL_POPULATION,
-          definition: "Initial Population",
-          associationType: "hello",
-        },
-      ],
-      measureObservations: null,
-      scoring: "Cohort",
-      groupDescription: "new description",
-      stratifications: [],
-      measureGroupTypes: ["Patient Reported Outcome"],
-      scoringUnit: "",
-      rateAggregation: "",
-      improvementNotation: "",
-      populationBasis: populationBasis,
-    };
-
     expect(alert).toHaveTextContent(
       "Population details for this group saved successfully."
     );
@@ -1297,7 +1276,9 @@ describe("Measure Groups Page", () => {
     expect(scoringUnitLabel).toBeInTheDocument();
 
     const autocomplete = screen.getByTestId("scoring-unit-dropdown");
-    const input = within(autocomplete).getByRole("combobox");
+    const input = within(autocomplete).getByRole(
+      "combobox"
+    ) as HTMLInputElement;
     autocomplete.click();
     autocomplete.focus();
     fireEvent.change(input, { target: { value: "[pi" } });
@@ -1775,45 +1756,7 @@ describe("Measure Groups Page", () => {
     expect(alert).toHaveTextContent(
       "Population details for this group saved successfully."
     );
-    const expectedGroup = {
-      id: null,
-      populations: [
-        {
-          id: "uuid-2",
-          name: PopulationType.INITIAL_POPULATION,
-          definition: "Initial Population",
-          associationType: undefined,
-        },
-        {
-          id: "uuid-3",
-          name: PopulationType.MEASURE_POPULATION,
-          definition: "Denominator",
-          associationType: undefined,
-        },
-        {
-          id: "uuid-4",
-          name: PopulationType.MEASURE_POPULATION_EXCLUSION,
-          definition: "",
-          associationType: undefined,
-        },
-      ],
-      measureObservations: [
-        {
-          id: "uuid-1",
-          definition: "fun",
-          aggregateMethod: AggregateFunctionType.COUNT,
-          criteriaReference: null,
-        },
-      ],
-      scoring: "Continuous Variable",
-      groupDescription: "",
-      stratifications: [],
-      measureGroupTypes: ["Patient Reported Outcome"],
-      scoringUnit: null,
-      rateAggregation: "",
-      improvementNotation: "",
-      populationBasis: "Encounter",
-    };
+
     expect(mockedAxios.post.mock.calls[0][0]).toBe(
       "example-service-url/measures/test-measure/groups/"
     );
@@ -1924,58 +1867,7 @@ describe("Measure Groups Page", () => {
     expect(alert).toHaveTextContent(
       "Population details for this group saved successfully."
     );
-    const expectedGroup = {
-      id: null,
-      populations: [
-        {
-          id: "uuid-1",
-          name: PopulationType.INITIAL_POPULATION,
-          definition: "Initial Population",
-          // TODO: look into why this is the case - is this a bug?
-          associationType: undefined,
-        },
-        {
-          id: "uuid-2",
-          name: PopulationType.DENOMINATOR,
-          definition: "Denominator",
-          associationType: undefined,
-        },
-        {
-          id: "uuid-3",
-          name: PopulationType.DENOMINATOR_EXCLUSION,
-          definition: "",
-          associationType: undefined,
-        },
-        {
-          id: "uuid-4",
-          name: PopulationType.NUMERATOR,
-          definition: "Numerator",
-          associationType: undefined,
-        },
-        {
-          id: "uuid-5",
-          name: PopulationType.NUMERATOR_EXCLUSION,
-          definition: "",
-          associationType: undefined,
-        },
-      ],
-      measureObservations: [
-        {
-          id: "uuid-6",
-          definition: "fun",
-          aggregateMethod: AggregateFunctionType.MAXIMUM,
-          criteriaReference: "uuid-4",
-        },
-      ],
-      scoring: "Ratio",
-      groupDescription: "",
-      stratifications: [],
-      measureGroupTypes: ["Outcome"],
-      scoringUnit: "",
-      rateAggregation: "",
-      improvementNotation: "",
-      populationBasis: "Encounter",
-    };
+
     expect(mockedAxios.post.mock.calls[0][0]).toBe(
       "example-service-url/measures/test-measure/groups/"
     );
@@ -1985,12 +1877,6 @@ describe("Measure Groups Page", () => {
       expect.anything(),
       expect.anything()
     );
-    // expect(mockedAxios.post).toHaveBeenNthCalledWith(
-    //   1,
-    //   "example-service-url/measures/test-measure/groups/",
-    //   expectedGroup,
-    //   expect.anything()
-    // );
   }, 30000);
 
   test("should not show Initial Population Association for Ratio scoring when there is 1 Initial Population", async () => {

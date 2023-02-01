@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import tw from "twin.macro";
 import "styled-components/macro";
 import { Link as NavLink, useHistory, useLocation } from "react-router-dom";
@@ -26,7 +26,6 @@ export interface PopulationCriteriaSideNavProp {
   isFormDirty: boolean;
 }
 
-// todo discard button is refreshing the page also its not stopping from navigation
 export default function PopulationCriteriaSideNav(
   props: PopulationCriteriaSideNavProp
 ) {
@@ -129,7 +128,7 @@ export default function PopulationCriteriaSideNav(
             <>
               {populationCriteriaTabsFeatureFlag && (
                 <button
-                  onClick={(e) => {
+                  onClick={() => {
                     handlePopulationCriteriaCollapse(tab);
                   }}
                   data-testId={tab.dataTestId}

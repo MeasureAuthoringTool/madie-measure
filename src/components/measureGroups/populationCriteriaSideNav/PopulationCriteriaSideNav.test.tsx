@@ -1,17 +1,20 @@
 import * as React from "react";
-import {
-  fireEvent,
-  queryByTestId,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import PopulationCriteriaSideNav, {
   PopulationCriteriaSideNavProp,
 } from "./PopulationCriteriaSideNav";
 import ServiceContext, { ServiceConfig } from "../../../api/ServiceContext";
+
+const mockHistoryPush = jest.fn();
+
+jest.mock("react-router-dom", () => ({
+  ...(jest.requireActual("react-router-dom") as any),
+  useHistory: () => ({
+    push: mockHistoryPush,
+  }),
+}));
 
 const groupsBaseUrl = "/measures/" + "testMeasureId" + "/edit/groups";
 const measureGroups = [
@@ -37,13 +40,13 @@ const initialProps: PopulationCriteriaSideNavProp = {
     },
     {
       title: "Supplemental Data",
-      href: "supplementalDataBaseUrl",
+      href: "/measures/testMeasureId/edit/supplemental-data",
       dataTestId: "leftPanelMeasurePopulationsSupplementalDataTab",
       id: "sideNavMeasurePopulationsSupplementalData",
     },
     {
       title: "Risk Adjustment",
-      href: "riskAdjustmentBaseUrl",
+      href: "/measures/testMeasureId/edit/risk-adjustment",
       dataTestId: "leftPanelMeasurePopulationsRiskAdjustmentTab",
       id: "sideNavMeasurePopulationsRiskAdjustment",
     },
@@ -59,7 +62,6 @@ describe("PopulationCriteriaSideNav", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
-  const { getByTestId, getByText, queryByText } = screen;
   const serviceConfig: ServiceConfig = {
     elmTranslationService: { baseUrl: "" },
     measureService: { baseUrl: "" },
@@ -82,8 +84,6 @@ describe("PopulationCriteriaSideNav", () => {
       </MemoryRouter>
     );
   };
-
-  // todo Rohit check for same group navigation doesn't trigger a dialog
 
   it("Should load Population Criteria page along with Supplemental Data and Risk Adjustment", () => {
     RenderPopulationCriteriaSideNav(initialProps);
@@ -156,6 +156,16 @@ describe("PopulationCriteriaSideNav", () => {
       });
       expect(criteria2).toHaveClass("active");
     });
+
+    // navigate to Supplemental Data Elements
+    const supplementalDataNavButton = screen.getByRole("button", {
+      name: /supplemental data/i,
+    });
+    userEvent.click(supplementalDataNavButton);
+
+    expect(mockHistoryPush).toHaveBeenCalledWith(
+      "/measures/testMeasureId/edit/supplemental-data"
+    );
   });
 
   test("Measure Group add click when dirty opens up a warning dialog, hitting cancel closes it", () => {
@@ -166,13 +176,13 @@ describe("PopulationCriteriaSideNav", () => {
     expect(criteria1).toBeInTheDocument();
     expect(criteria1).toHaveClass("active");
 
-    expect(getByTestId("AddIcon")).toBeInTheDocument();
+    expect(screen.getByTestId("AddIcon")).toBeInTheDocument();
     const addNewPopulationCriteriaLink = screen.getByRole("link", {
       name: "Add Population Criteria",
     });
     userEvent.click(addNewPopulationCriteriaLink);
 
-    const discardDialog = getByTestId("discard-dialog");
+    const discardDialog = screen.getByTestId("discard-dialog");
     expect(discardDialog).toBeInTheDocument();
     expect(discardDialog).toHaveTextContent("You have unsaved changes.");
     expect(discardDialog).toHaveTextContent(
@@ -182,7 +192,7 @@ describe("PopulationCriteriaSideNav", () => {
       name: "No, Keep Working",
     });
     expect(cancelButton).toBeInTheDocument();
-    fireEvent.click(cancelButton);
+    userEvent.click(cancelButton);
 
     // verifies user is not navigated
     expect(criteria1).toHaveClass("active");
@@ -199,13 +209,13 @@ describe("PopulationCriteriaSideNav", () => {
     expect(criteria1).toBeInTheDocument();
     expect(criteria1).toHaveClass("active");
 
-    expect(getByTestId("AddIcon")).toBeInTheDocument();
+    expect(screen.getByTestId("AddIcon")).toBeInTheDocument();
     const addNewPopulationCriteriaLink = screen.getByRole("link", {
       name: "Add Population Criteria",
     });
     userEvent.click(addNewPopulationCriteriaLink);
 
-    const discardDialog = getByTestId("discard-dialog");
+    const discardDialog = screen.getByTestId("discard-dialog");
     expect(discardDialog).toBeInTheDocument();
     const continueButton = screen.getByRole("button", {
       name: "Yes, Discard All Changes",
@@ -270,7 +280,7 @@ describe("PopulationCriteriaSideNav", () => {
     });
     userEvent.click(criteria2);
 
-    const discardDialog = getByTestId("discard-dialog");
+    const discardDialog = screen.getByTestId("discard-dialog");
     expect(discardDialog).toBeInTheDocument();
     expect(discardDialog).toHaveTextContent("You have unsaved changes.");
     expect(discardDialog).toHaveTextContent(
@@ -280,7 +290,7 @@ describe("PopulationCriteriaSideNav", () => {
       name: "No, Keep Working",
     });
     expect(cancelButton).toBeInTheDocument();
-    fireEvent.click(cancelButton);
+    userEvent.click(cancelButton);
     // verifies user is not navigated
     expect(criteria1).toHaveClass("active");
   });
@@ -301,12 +311,12 @@ describe("PopulationCriteriaSideNav", () => {
     });
     userEvent.click(criteria2);
 
-    const discardDialog = getByTestId("discard-dialog");
+    const discardDialog = screen.getByTestId("discard-dialog");
     expect(discardDialog).toBeInTheDocument();
     const continueButton = screen.getByRole("button", {
       name: "Yes, Discard All Changes",
     });
-    fireEvent.click(continueButton);
+    userEvent.click(continueButton);
 
     // Since we cannot update state of measureGroupNumber which is maintained by parent component.
     // rerendering the PopulationCriteriaSideNav component with a new measureGroupNumber
