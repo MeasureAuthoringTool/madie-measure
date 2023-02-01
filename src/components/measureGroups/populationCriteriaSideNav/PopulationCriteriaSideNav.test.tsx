@@ -1,5 +1,11 @@
 import * as React from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  queryByTestId,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import PopulationCriteriaSideNav, {
@@ -77,6 +83,8 @@ describe("PopulationCriteriaSideNav", () => {
     );
   };
 
+  // todo Rohit check for same group navigation doesn't trigger a dialog
+
   it("Should load Population Criteria page along with Supplemental Data and Risk Adjustment", () => {
     RenderPopulationCriteriaSideNav(initialProps);
     expect(
@@ -114,6 +122,40 @@ describe("PopulationCriteriaSideNav", () => {
     expect(criteria1).toBeInTheDocument();
     userEvent.click(populationCriteriaCollapsableButton);
     expect(criteria1).not.toBeInTheDocument();
+  });
+
+  it("should navigate to different Criteria, if the form is not dirty", async () => {
+    const { rerender } = RenderPopulationCriteriaSideNav(initialProps);
+    const criteria1 = screen.queryByRole("link", {
+      name: /Criteria 1/i,
+    });
+    expect(criteria1).toBeInTheDocument();
+    expect(criteria1).toHaveClass("active");
+    const criteria2 = screen.queryByRole("link", {
+      name: /Criteria 2/i,
+    });
+    expect(criteria2).toBeInTheDocument();
+    expect(criteria2).not.toHaveClass("active");
+
+    userEvent.click(criteria2);
+
+    const reRenderProps = { ...initialProps, measureGroupNumber: 1 };
+    rerender(
+      <MemoryRouter
+        initialEntries={[{ pathname: "/measures/testMeasureId/edit/groups" }]}
+      >
+        <ServiceContext.Provider value={serviceConfig}>
+          <PopulationCriteriaSideNav {...reRenderProps} />
+        </ServiceContext.Provider>
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      const criteria2 = screen.getByRole("link", {
+        name: /Criteria 2/i,
+      });
+      expect(criteria2).toHaveClass("active");
+    });
   });
 
   test("Measure Group add click when dirty opens up a warning dialog, hitting cancel closes it", () => {
@@ -198,6 +240,21 @@ describe("PopulationCriteriaSideNav", () => {
       });
       expect(criteria3).toHaveClass("active");
     });
+  });
+
+  it("should not display discard dialog, when form is dirty and navigating to same Criteria", () => {
+    RenderPopulationCriteriaSideNav(initialProps);
+    const criteria1 = screen.queryByRole("link", {
+      name: /Criteria 1/i,
+    });
+    expect(criteria1).toBeInTheDocument();
+    expect(criteria1).toHaveClass("active");
+
+    userEvent.click(criteria1);
+
+    expect(criteria1).toHaveClass("active");
+    const discardDialog = screen.queryByTestId("discard-dialog");
+    expect(discardDialog).toBeNull();
   });
 
   test("Measure Group nav click when dirty opens up a warning dialog, hitting cancel closes it", () => {
