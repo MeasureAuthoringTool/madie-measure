@@ -64,7 +64,6 @@ const mockMeasure = {
 } as Measure;
 
 jest.mock("@madie/madie-util", () => ({
-  checkUserCanEdit: jest.fn(() => true),
   useKeyPress: jest.fn(() => false),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
@@ -84,6 +83,7 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: true, pendingPath: "" },
     initialState: { canTravel: true, pendingPath: "" },
   },
+  checkUserCanEdit: jest.fn(),
 }));
 
 let serviceApiMock: MeasureServiceApi;
@@ -96,12 +96,30 @@ describe("Steward and Developers component", () => {
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
     mockMeasure.measureMetaData = { ...mockMetaData };
-    (checkUserCanEdit as jest.Mock).mockImplementation(() => true);
   });
   const setErrorMessage = jest.fn();
   afterEach(() => jest.clearAllMocks());
 
+  it("should disable dropdowns if the user does not have measure edit permissions", async () => {
+    checkUserCanEdit.mockImplementationOnce(() => false);
+    await act(async () => {
+      render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
+      const stewardAutoComplete = await screen.findByTestId("steward");
+      const stewardComboBox = await within(stewardAutoComplete).getByRole(
+        "combobox"
+      );
+      await waitFor(() => expect(stewardComboBox).toBeDisabled());
+
+      const developersAutoComplete = await screen.findByTestId("developers");
+      const developersComboBox = await within(developersAutoComplete).getByRole(
+        "combobox"
+      );
+      await waitFor(() => expect(developersComboBox).toBeDisabled());
+    });
+  });
+
   it("should render steward and developers form with disabled save and discard buttons", async () => {
+    checkUserCanEdit.mockImplementation(() => true);
     render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
     expect(await screen.findByTestId("measure-steward-developers-form"));
     expect(screen.getByRole("heading")).toHaveTextContent(
@@ -158,23 +176,8 @@ describe("Steward and Developers component", () => {
     );
   });
 
-  it("should disable dropdowns if the user does not have measure edit permissions", async () => {
-    (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
-    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
-    const stewardAutoComplete = await screen.findByTestId("steward");
-    const stewardComboBox = await within(stewardAutoComplete).getByRole(
-      "combobox"
-    );
-    await waitFor(() => expect(stewardComboBox).toBeDisabled());
-
-    const developersAutoComplete = await screen.findByTestId("developers");
-    const developersComboBox = await within(developersAutoComplete).getByRole(
-      "combobox"
-    );
-    await waitFor(() => expect(developersComboBox).toBeDisabled());
-  });
-
   it("should not disable dropdowns if the measure is shared with the user", async () => {
+    checkUserCanEdit.mockImplementationOnce(() => true);
     render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
     const stewardAutoComplete = await screen.findByTestId("steward");
     const stewardComboBox = await within(stewardAutoComplete).findByRole(
@@ -190,6 +193,7 @@ describe("Steward and Developers component", () => {
   });
 
   it("should render steward and developers fields with values from DB", async () => {
+    checkUserCanEdit.mockImplementationOnce(() => true);
     render(<StewardAndDevelopers />);
     const stewardAutoComplete = await screen.findByTestId("steward");
     const stewardComboBox = within(stewardAutoComplete).getByRole("combobox");

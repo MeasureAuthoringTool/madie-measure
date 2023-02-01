@@ -57,6 +57,7 @@ export default function EditMeasure() {
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
   const [measure, setMeasure] = useState<any>(measureStore.state);
+
   useEffect(() => {
     const deleteListener = () => {
       setDeleteOpen(true);

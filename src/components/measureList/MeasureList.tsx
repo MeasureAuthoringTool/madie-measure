@@ -78,10 +78,13 @@ export default function MeasureList(props: {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedMeasure, setSelectedMeasure] = useState<Measure>(null);
   const [canEdit, setCanEdit] = useState<boolean>(false);
+  // if user can edit and it is a version, then draft button
   const [
     otherSelectOptionPropsForPopOver,
     setOtherSelectOptionPropsForPopOver,
   ] = useState(null);
+  const [additionalSelectOptionProps, setAdditionalSelectOptionProps] =
+    useState(null);
 
   const measureServiceApi = useMeasureServiceApi();
   const exportFeature = useFeature("export");
@@ -203,15 +206,20 @@ export default function MeasureList(props: {
     setSelectedMeasure(selected);
     setAnchorEl(event.currentTarget);
     setCanEdit(checkUserCanEdit(selected?.createdBy, selected?.acls));
+
     let options = [];
+    // additional options are outside the edit flag
+    let additionalOptions = [];
+    // always on if feature
     if (exportFeature) {
       const exportButton = {
         label: "Export",
         toImplementFunction: zipData,
         dataTestId: `export-measure-${selected?.id}`,
       };
-      options.push(exportButton);
+      additionalOptions.push(exportButton);
     }
+    // always on if feature
     if (versioningFeature) {
       if (selected.measureMetaData.draft) {
         options.push({
@@ -227,6 +235,7 @@ export default function MeasureList(props: {
         });
       }
     }
+    setAdditionalSelectOptionProps(additionalOptions);
     setOtherSelectOptionPropsForPopOver(options);
   };
 
@@ -311,6 +320,7 @@ export default function MeasureList(props: {
     await measureServiceApi
       .draftMeasure(targetMeasure.current?.id, measureName)
       .then(async () => {
+        setOptionsOpen(false);
         handleDialogClose();
         setToastOpen(true);
         setToastType("success");
@@ -390,7 +400,7 @@ export default function MeasureList(props: {
                     <tr
                       key={`${measure.id}-${i}`}
                       data-testid="row-item"
-                      className={i % 2 === 0 ? "odd" : ""}
+                      style={{ borderBottom: "solid 1px #AAA" }}
                     >
                       <td tw="w-7/12">{measure.measureName}</td>
                       <td>
@@ -443,6 +453,7 @@ export default function MeasureList(props: {
                   dataTestId: `view-measure-${selectedMeasure?.id}`,
                 }}
                 otherSelectOptionProps={otherSelectOptionPropsForPopOver}
+                additionalSelectOptionProps={additionalSelectOptionProps}
               />
             </div>
             <Toast
