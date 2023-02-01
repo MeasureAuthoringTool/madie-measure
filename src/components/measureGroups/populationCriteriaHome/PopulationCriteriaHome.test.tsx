@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { MemoryRouter, Route } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import PopulationCriteriaHome from "./PopulationCriteriaHome";
@@ -191,7 +191,9 @@ describe("PopulationCriteriaHome", () => {
     const addPopulationCriteriaLink = screen.getByRole("link", {
       name: "Add Population Criteria",
     });
-    userEvent.click(addPopulationCriteriaLink);
+    act(() => {
+      userEvent.click(addPopulationCriteriaLink);
+    });
 
     // verify if a new criteria is created and is active
     const criteria2 = screen.getByRole("link", {
