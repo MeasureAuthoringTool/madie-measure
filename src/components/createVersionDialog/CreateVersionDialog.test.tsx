@@ -20,6 +20,7 @@ describe("Create Version Dialog component", () => {
         open={true}
         onClose={jest.fn()}
         onSubmit={jest.fn()}
+        versionHelperText=""
       />
     );
     expect(screen.getByTestId("create-version-dialog")).toBeInTheDocument();
@@ -32,6 +33,7 @@ describe("Create Version Dialog component", () => {
         open={true}
         onClose={jest.fn()}
         onSubmit={jest.fn()}
+        versionHelperText=""
       />
     );
     expect(screen.getByTestId("create-version-dialog")).toBeInTheDocument();
@@ -57,6 +59,7 @@ describe("Create Version Dialog component", () => {
         open={true}
         onClose={onCloseFn}
         onSubmit={jest.fn()}
+        versionHelperText=""
       />
     );
 
@@ -97,6 +100,7 @@ describe("Create Version Dialog component", () => {
         open={true}
         onClose={jest.fn()}
         onSubmit={onSubmitFn}
+        versionHelperText=""
       />
     );
     expect(screen.getByTestId("create-version-dialog")).toBeInTheDocument();
@@ -119,5 +123,19 @@ describe("Create Version Dialog component", () => {
     await waitFor(() => {
       expect(onSubmitFn).toHaveBeenCalled();
     });
+  });
+
+  it("should display error text when versioning error is present", async () => {
+    const onSubmitFn = jest.fn();
+    render(
+      <CreateVersionDialog
+        open={true}
+        onClose={jest.fn()}
+        onSubmit={onSubmitFn}
+        versionHelperText="Something has gone wrong. Please insert sand in the disk drive to continue."
+      />
+    );
+    expect(screen.getByTestId("create-version-dialog")).toBeInTheDocument();
+    expect(screen.getByTestId("version-helper-text")).toBeInTheDocument();
   });
 });
