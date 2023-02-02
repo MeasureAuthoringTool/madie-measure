@@ -56,8 +56,10 @@ export const setMeasureMetadata = (
       break;
     case "clinicalRecommendation":
       measure.measureMetaData.clinicalRecommendation = newValue;
+      break;
     case "risk-adjustment":
       measure.measureMetaData.riskAdjustment = newValue;
+      break;
     default:
       break;
   }

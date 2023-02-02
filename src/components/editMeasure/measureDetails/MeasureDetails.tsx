@@ -88,7 +88,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
         {
           title: "Clinical Recommendation",
           href: clinicalLink,
-          dataTestId: "leftPanelMeasureClinicalGuidance",
+          dataTestId: "leftPanelMeasureClinicalRecommendation",
           id: "sideNavMeasureClinicalRecommendation",
         },
         {
