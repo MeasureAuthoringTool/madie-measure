@@ -559,6 +559,11 @@ describe("Measure List component", () => {
     const error = {
       response: {
         data: {},
+        request: {
+          responseText: {
+            message: "Insert sand in the disk drive to continue.",
+          },
+        },
       },
     };
     const useMeasureServiceMockRejected = {
