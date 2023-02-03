@@ -517,23 +517,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       });
   };
 
-  // // Local state to later populate the left nav and and govern routes based on group ids
-  // const baseURL = "/measures/" + measure?.id + "/edit/measure-groups";
-  // const measureGroups = measure?.groups
-  //   ? measure.groups?.map((group, id) => ({
-  //       ...group,
-  //       title: `Population Criteria ${id + 1}`,
-  //       href: `${baseURL}`,
-  //       dataTestId: `leftPanelMeasureInformation-MeasureGroup${id + 1}`,
-  //     }))
-  //   : [
-  //       {
-  //         title: "Population Criteria 1",
-  //         href: `${baseURL}`,
-  //         dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
-  //       },
-  //     ];
-
   const getDefaultObservationsForScoring = (scoring) => {
     if (scoring === GroupScoring.CONTINUOUS_VARIABLE) {
       return [
