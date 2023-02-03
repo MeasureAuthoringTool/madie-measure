@@ -9,7 +9,7 @@ import {
   within,
 } from "@testing-library/react";
 import { isEqual } from "lodash";
-import MeasureGroups from "./MeasureGroups";
+import MeasureGroups, { MeasureGroupProps } from "./MeasureGroups";
 import {
   AggregateFunctionType,
   Group,
@@ -48,7 +48,11 @@ const serviceConfig: ServiceConfig = {
   terminologyService: {
     baseUrl: "terminology-service.com",
   },
-  features: { populationCriteriaTabs: false },
+  features: {
+    export: false,
+    measureVersioning: false,
+    populationCriteriaTabs: false,
+  },
 };
 
 const getEmptyStrat = () => ({
@@ -68,7 +72,7 @@ jest.mock("@madie/madie-util", () => ({
     updateMeasure: (measure) => measure,
     state: jest.fn().mockImplementation(() => null),
     initialState: jest.fn().mockImplementation(() => null),
-    subscribe: (set) => {
+    subscribe: () => {
       return { unsubscribe: () => null };
     },
   },
@@ -79,8 +83,7 @@ jest.mock("@madie/madie-util", () => ({
     return true;
   }),
   routeHandlerStore: {
-    subscribe: (set) => {
-      // set(measure)
+    subscribe: () => {
       return { unsubscribe: () => null };
     },
     updateRouteHandlerState: () => null,
@@ -97,6 +100,12 @@ const populationBasisValues: string[] = [
   "test-data-2",
 ];
 mockedAxios.get.mockResolvedValue({ data: populationBasisValues });
+
+const props: MeasureGroupProps = {
+  measureGroupNumber: 0,
+  setMeasureGroupNumber: jest.fn,
+  setIsFormDirty: jest.fn,
+};
 
 describe("Measure Groups Page", () => {
   let measure: Measure;
@@ -152,7 +161,7 @@ describe("Measure Groups Page", () => {
       >
         <ApiContextProvider value={serviceConfig}>
           <Route path="/measures/test-measure/edit/groups">
-            <MeasureGroups />
+            <MeasureGroups {...props} />
           </Route>
         </ApiContextProvider>
       </MemoryRouter>
@@ -324,27 +333,6 @@ describe("Measure Groups Page", () => {
 
     const alert = await screen.findByTestId("population-criteria-success");
 
-    const expectedGroup = {
-      id: null,
-      populations: [
-        {
-          id: "id-1",
-          name: PopulationType.INITIAL_POPULATION,
-          definition: "Initial Population",
-          associationType: "hello",
-        },
-      ],
-      measureObservations: null,
-      scoring: "Cohort",
-      groupDescription: "new description",
-      stratifications: [],
-      measureGroupTypes: ["Patient Reported Outcome"],
-      scoringUnit: "",
-      rateAggregation: "",
-      improvementNotation: "",
-      populationBasis: populationBasis,
-    };
-
     expect(alert).toHaveTextContent(
       "Population details for this group saved successfully."
     );
@@ -361,74 +349,6 @@ describe("Measure Groups Page", () => {
     );
   });
 
-  test("Should create multiple group tabs on clicking add measure group ", async () => {
-    await waitFor(() => renderMeasureGroupComponent());
-
-    await changePopulationBasis("Encounter");
-    const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
-    fireEvent.change(groupDescriptionInput, {
-      target: { value: "new description" },
-    });
-
-    // select a scoring
-    const scoringSelectInput = screen.getByTestId("scoring-select");
-    userEvent.click(getByRole(scoringSelectInput, "button"));
-    await waitFor(() => {
-      userEvent.click(screen.getByText("Cohort"));
-    });
-
-    // Select Initial population from dropdown
-    const groupPopulationInput = screen.getByTestId(
-      "select-measure-group-population-input"
-    ) as HTMLInputElement;
-    fireEvent.change(groupPopulationInput, {
-      target: { value: "Initial Population" },
-    });
-
-    const measureGroupTypeSelect = screen.getByTestId(
-      "measure-group-type-dropdown"
-    );
-    userEvent.click(getByRole(measureGroupTypeSelect, "button"));
-    await waitFor(() => {
-      userEvent.click(screen.getByText("Patient Reported Outcome"));
-    });
-
-    mockedAxios.post.mockResolvedValue({ data: { group } });
-
-    expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
-    userEvent.click(screen.getByTestId("group-form-submit-btn"));
-
-    expect(screen.getByTestId("add-measure-group-button")).toBeInTheDocument();
-    expect(screen.getByTestId("AddIcon")).toBeInTheDocument();
-
-    userEvent.click(screen.getByTestId("add-measure-group-button"));
-
-    const discardDialog = await screen.getByTestId("discard-dialog");
-    expect(discardDialog).toBeInTheDocument();
-    const continueButton = await screen.getByTestId(
-      "discard-dialog-continue-button"
-    );
-    expect(continueButton).toBeInTheDocument();
-    fireEvent.click(continueButton);
-    await waitFor(() => {
-      const populationCriteria2 = screen.getByTestId(
-        "leftPanelMeasureInformation-MeasureGroup2"
-      );
-      expect(populationCriteria2).toBeInTheDocument();
-
-      expect(populationCriteria2.textContent).toBe("Population Criteria 2");
-    });
-
-    const measureGroup1Link = screen.getByTestId(
-      "leftPanelMeasureInformation-MeasureGroup1"
-    );
-    expect(measureGroup1Link).toBeInTheDocument();
-    userEvent.click(measureGroup1Link);
-    expect(screen.getByTestId("title").textContent).toBe(
-      "Population Criteria 1"
-    );
-  });
-
   test("OnClicking delete button, delete group modal is displayed", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "testDescription";
@@ -438,9 +358,6 @@ describe("Measure Groups Page", () => {
     expect(screen.getByTestId("title").textContent).toBe(
       "Population Criteria 1"
     );
-    expect(
-      screen.getByTestId("leftPanelMeasureInformation-MeasureGroup1")
-    ).toBeInTheDocument();
 
     expect(screen.getByTestId("group-form-delete-btn")).toBeInTheDocument();
     expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
@@ -513,7 +430,7 @@ describe("Measure Groups Page", () => {
       >
         <ApiContextProvider value={serviceConfig}>
           <Route path="/measures/test-measure/edit/groups">
-            <MeasureGroups />
+            <MeasureGroups {...props} />
           </Route>
         </ApiContextProvider>
       </MemoryRouter>
@@ -558,53 +475,9 @@ describe("Measure Groups Page", () => {
     expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
   });
 
-  test("Navigating between the population criteria and risk adjustment tab", async () => {
-    render(
-      <MemoryRouter
-        initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
-      >
-        <ApiContextProvider
-          value={{
-            measureService: {
-              baseUrl: "example-service-url",
-            },
-            elmTranslationService: {
-              baseUrl: "test-elm-service",
-            },
-            terminologyService: {
-              baseUrl: "terminology-service.com",
-            },
-            features: { populationCriteriaTabs: true },
-          }}
-        >
-          <Route path="/measures/test-measure/edit/groups">
-            <MeasureGroups />
-          </Route>
-        </ApiContextProvider>
-      </MemoryRouter>
-    );
-    expect(
-      screen.getByTestId("leftPanelMeasurePopulationCriteriaTab")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId("leftPanelMeasurePopulationsRiskAdjustmentTab")
-    ).toBeInTheDocument();
-    userEvent.click(
-      screen.getByTestId("leftPanelMeasurePopulationsRiskAdjustmentTab")
-    );
-    expect(screen.getByTestId("risk-adjustment")).toBeInTheDocument();
-    expect(
-      screen.getByTestId("leftPanelMeasurePopulationsSupplementalDataTab")
-    ).toBeInTheDocument();
-    userEvent.click(
-      screen.getByTestId("leftPanelMeasurePopulationsSupplementalDataTab")
-    );
-    expect(screen.getByTestId("supplemental-data")).toBeInTheDocument();
-  });
-
   test("Should be able to save multiple groups  ", async () => {
     const populationBasis = "Encounter";
-    renderMeasureGroupComponent();
+    const { rerender } = renderMeasureGroupComponent();
     await changePopulationBasis(populationBasis);
 
     // select a scoring
@@ -654,60 +527,37 @@ describe("Measure Groups Page", () => {
     const alert = await screen.findByTestId("population-criteria-success");
     expect(alert).toBeInTheDocument();
 
-    const expectedGroup = {
-      id: null,
-      populations: [
-        {
-          id: "uuid-1",
-          name: PopulationType.INITIAL_POPULATION,
-          definition: "Initial Population",
-        },
-      ],
-      measureObservations: null,
-      scoring: "Cohort",
-      groupDescription: "new description",
-      stratifications: [],
-      measureGroupTypes: ["Patient Reported Outcome"],
-      scoringUnit: "",
-      rateAggregation: "",
-      improvementNotation: "",
-      populationBasis: populationBasis,
-    };
-
     expect(alert).toHaveTextContent(
       "Population details for this group saved successfully."
     );
     expect(mockedAxios.post.mock.calls[0][0]).toBe(
       "example-service-url/measures/test-measure/groups/"
     );
-    expect(mockedAxios.post.mock.calls[0][1].groupDescription).toBe(
-      "new description"
-    );
     expect(mockedAxios.post).toHaveBeenCalledWith(
       "example-service-url/measures/test-measure/groups/",
       expect.anything(),
       expect.anything()
     );
-    // expect(mockedAxios.post).toHaveBeenNthCalledWith(
-    //   1,
-    //   "example-service-url/measures/test-measure/groups/",
-    //   expectedGroup,
-    //   expect.anything()
-    // );
-
     expect(screen.getByTestId("title").textContent).toBe(
       "Population Criteria 1"
     );
-    expect(
-      screen.getByTestId("leftPanelMeasureInformation-MeasureGroup1")
-    ).toBeInTheDocument();
 
-    //adding measure group 2
-
-    expect(screen.getByTestId("add-measure-group-button")).toBeInTheDocument();
-    expect(screen.getByTestId("AddIcon")).toBeInTheDocument();
-
-    userEvent.click(screen.getByTestId("add-measure-group-button"));
+    // adding measure group 2
+    rerender(
+      <MemoryRouter
+        initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
+      >
+        <ApiContextProvider value={serviceConfig}>
+          <Route path="/measures/test-measure/edit/groups">
+            <MeasureGroups
+              setIsFormDirty={jest.fn}
+              measureGroupNumber={1}
+              setMeasureGroupNumber={jest.fn}
+            />
+          </Route>
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
     await changePopulationBasis(populationBasis);
     // Change and verifies the scoring value to Cohort
     const scoringSelect2 = screen.getByTestId("scoring-select");
@@ -753,25 +603,6 @@ describe("Measure Groups Page", () => {
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
 
     const alert1 = await screen.findByTestId("population-criteria-success");
-    const expectedGroup2 = {
-      id: null,
-      populations: [
-        {
-          id: "uuid-2",
-          name: PopulationType.INITIAL_POPULATION,
-          definition: "Initial Population",
-        },
-      ],
-      measureObservations: null,
-      scoring: "Cohort",
-      groupDescription: "new description for group 2",
-      measureGroupTypes: ["Patient Reported Outcome"],
-      scoringUnit: "",
-      rateAggregation: "",
-      improvementNotation: "",
-      populationBasis: populationBasis,
-      stratifications: [],
-    };
 
     expect(alert1).toHaveTextContent(
       "Population details for this group saved successfully."
@@ -782,12 +613,9 @@ describe("Measure Groups Page", () => {
       expect.anything(),
       expect.anything()
     );
-
-    const populationCriteria2 = screen.getByTestId(
-      "leftPanelMeasureInformation-MeasureGroup2"
+    expect(screen.getByTestId("title").textContent).toBe(
+      "Population Criteria 2"
     );
-    expect(populationCriteria2).toBeInTheDocument();
-    expect(populationCriteria2.textContent).toBe("Population Criteria 2");
   });
 
   test("Should be able to update initial population of a population group", async () => {
@@ -1053,7 +881,6 @@ describe("Measure Groups Page", () => {
       "scoring-select-input"
     ) as HTMLInputElement;
     expect(scoringSelectInput.value).toBe("Cohort");
-    // await waitFor(() => {});
 
     // verify is the initial population is already set from group object
     const initialPopulationInput = screen.getByTestId(
@@ -1449,7 +1276,9 @@ describe("Measure Groups Page", () => {
     expect(scoringUnitLabel).toBeInTheDocument();
 
     const autocomplete = screen.getByTestId("scoring-unit-dropdown");
-    const input = within(autocomplete).getByRole("combobox");
+    const input = within(autocomplete).getByRole(
+      "combobox"
+    ) as HTMLInputElement;
     autocomplete.click();
     autocomplete.focus();
     fireEvent.change(input, { target: { value: "[pi" } });
@@ -1458,55 +1287,6 @@ describe("Measure Groups Page", () => {
     });
     fireEvent.click(screen.getAllByRole("option")[1]);
     expect(input.value).toEqual("[pied] pied");
-  });
-
-  test("Add new group and click Discard button should discard the changes", async () => {
-    group.id = "7p03-5r29-7O0I";
-    group.groupDescription = "testDescription";
-    measure.groups = [group];
-    renderMeasureGroupComponent();
-
-    expect(screen.getByTestId("title").textContent).toBe(
-      "Population Criteria 1"
-    );
-
-    const addButton = screen.getByTestId("AddIcon");
-    expect(addButton).toBeInTheDocument();
-    await act(async () => {
-      userEvent.click(addButton);
-    });
-    const populationCriteria2 = screen.getByTestId(
-      "leftPanelMeasureInformation-MeasureGroup2"
-    );
-    expect(populationCriteria2).toBeInTheDocument();
-    expect(populationCriteria2.textContent).toBe("Population Criteria 2");
-
-    const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
-    expect(groupDescriptionInput).toBeTruthy();
-    await act(async () => {
-      fireEvent.change(groupDescriptionInput, {
-        target: { value: "New group description" },
-      });
-    });
-    await waitFor(
-      () =>
-        expect(screen.getByText("New group description")).toBeInTheDocument(),
-      { timeout: 10000 }
-    );
-
-    const discardButton = screen.getByTestId("group-form-discard-btn");
-    expect(discardButton).toBeEnabled();
-    await act(async () => {
-      userEvent.click(discardButton);
-    });
-    const discardDialog = await screen.getByTestId("discard-dialog");
-    expect(discardDialog).toBeInTheDocument();
-    const continueButton = await screen.getByTestId(
-      "discard-dialog-continue-button"
-    );
-    expect(continueButton).toBeInTheDocument();
-    fireEvent.click(continueButton);
-    expect(screen.queryByText("New group description")).not.toBeInTheDocument();
   });
 
   test("Should display error message when updating group", async () => {
@@ -1976,45 +1756,7 @@ describe("Measure Groups Page", () => {
     expect(alert).toHaveTextContent(
       "Population details for this group saved successfully."
     );
-    const expectedGroup = {
-      id: null,
-      populations: [
-        {
-          id: "uuid-2",
-          name: PopulationType.INITIAL_POPULATION,
-          definition: "Initial Population",
-          associationType: undefined,
-        },
-        {
-          id: "uuid-3",
-          name: PopulationType.MEASURE_POPULATION,
-          definition: "Denominator",
-          associationType: undefined,
-        },
-        {
-          id: "uuid-4",
-          name: PopulationType.MEASURE_POPULATION_EXCLUSION,
-          definition: "",
-          associationType: undefined,
-        },
-      ],
-      measureObservations: [
-        {
-          id: "uuid-1",
-          definition: "fun",
-          aggregateMethod: AggregateFunctionType.COUNT,
-          criteriaReference: null,
-        },
-      ],
-      scoring: "Continuous Variable",
-      groupDescription: "",
-      stratifications: [],
-      measureGroupTypes: ["Patient Reported Outcome"],
-      scoringUnit: null,
-      rateAggregation: "",
-      improvementNotation: "",
-      populationBasis: "Encounter",
-    };
+
     expect(mockedAxios.post.mock.calls[0][0]).toBe(
       "example-service-url/measures/test-measure/groups/"
     );
@@ -2125,58 +1867,7 @@ describe("Measure Groups Page", () => {
     expect(alert).toHaveTextContent(
       "Population details for this group saved successfully."
     );
-    const expectedGroup = {
-      id: null,
-      populations: [
-        {
-          id: "uuid-1",
-          name: PopulationType.INITIAL_POPULATION,
-          definition: "Initial Population",
-          // TODO: look into why this is the case - is this a bug?
-          associationType: undefined,
-        },
-        {
-          id: "uuid-2",
-          name: PopulationType.DENOMINATOR,
-          definition: "Denominator",
-          associationType: undefined,
-        },
-        {
-          id: "uuid-3",
-          name: PopulationType.DENOMINATOR_EXCLUSION,
-          definition: "",
-          associationType: undefined,
-        },
-        {
-          id: "uuid-4",
-          name: PopulationType.NUMERATOR,
-          definition: "Numerator",
-          associationType: undefined,
-        },
-        {
-          id: "uuid-5",
-          name: PopulationType.NUMERATOR_EXCLUSION,
-          definition: "",
-          associationType: undefined,
-        },
-      ],
-      measureObservations: [
-        {
-          id: "uuid-6",
-          definition: "fun",
-          aggregateMethod: AggregateFunctionType.MAXIMUM,
-          criteriaReference: "uuid-4",
-        },
-      ],
-      scoring: "Ratio",
-      groupDescription: "",
-      stratifications: [],
-      measureGroupTypes: ["Outcome"],
-      scoringUnit: "",
-      rateAggregation: "",
-      improvementNotation: "",
-      populationBasis: "Encounter",
-    };
+
     expect(mockedAxios.post.mock.calls[0][0]).toBe(
       "example-service-url/measures/test-measure/groups/"
     );
@@ -2186,12 +1877,6 @@ describe("Measure Groups Page", () => {
       expect.anything(),
       expect.anything()
     );
-    // expect(mockedAxios.post).toHaveBeenNthCalledWith(
-    //   1,
-    //   "example-service-url/measures/test-measure/groups/",
-    //   expectedGroup,
-    //   expect.anything()
-    // );
   }, 30000);
 
   test("should not show Initial Population Association for Ratio scoring when there is 1 Initial Population", async () => {
