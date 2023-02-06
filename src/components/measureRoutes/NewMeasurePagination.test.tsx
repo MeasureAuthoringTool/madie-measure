@@ -12,7 +12,6 @@ import { mockPaginationResponses } from "./mockMeasureResponses";
 import { describe, expect, test } from "@jest/globals";
 
 const serviceConfig: ServiceConfig = {
-  features: { export: false, measureVersioning: false },
   terminologyService: { baseUrl: "example-service-url" },
   measureService: {
     baseUrl: "example-service-url",
@@ -27,6 +26,7 @@ jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),
+  useFeatureFlags: () => null, // Values of flags do not matter for these tests
 }));
 
 const mockMeasureServiceApi = {

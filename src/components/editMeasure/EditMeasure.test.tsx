@@ -46,6 +46,9 @@ jest.mock("@madie/madie-util", () => ({
     getAccessToken: () => "test.jwt",
   })),
   checkUserCanEdit: jest.fn(),
+  useFeatureFlags: () => ({
+    populationCriteriaTabs: true,
+  }),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => null),
@@ -72,11 +75,6 @@ const serviceConfig: ServiceConfig = {
     baseUrl: "",
   },
   terminologyService: { baseUrl: "" },
-  features: {
-    export: false,
-    measureVersioning: false,
-    populationCriteriaTabs: true,
-  },
 };
 
 // mocking useHistory

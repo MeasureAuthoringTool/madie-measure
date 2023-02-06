@@ -59,10 +59,10 @@ jest.mock("@madie/madie-util", () => ({
     initialState: null,
     updateMeasure: (measure) => measure,
   },
+  useFeatureFlags: () => null,
 }));
 
 const serviceConfig: ServiceConfig = {
-  features: { export: false, measureVersioning: false },
   terminologyService: { baseUrl: "example-service-url" },
   measureService: {
     baseUrl: "example-service-url",

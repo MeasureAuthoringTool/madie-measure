@@ -5,13 +5,13 @@ import { Link as NavLink, useHistory, useLocation } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import useFeature from "../../../utils/useFeatureFlag";
 import "../../editMeasure/measureDetails/EditMeasureSideBarNav.scss";
 import "../../common/madie-link.scss";
 import {
   DSLink,
   MadieDiscardDialog,
 } from "@madie/madie-design-system/dist/react";
+import { useFeatureFlags } from "@madie/madie-util";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
 const Nav = tw.nav`flex-1 space-y-1 bg-slate`;
@@ -43,9 +43,9 @@ export default function PopulationCriteriaSideNav(
   const [showPopulationCriteriaTabs, setShowPopulationCriteriaTabs] =
     useState<boolean>(true);
   const history = useHistory();
-  const populationCriteriaTabsFeatureFlag = useFeature(
-    "populationCriteriaTabs"
-  );
+  const featureFlags = useFeatureFlags();
+  const populationCriteriaTabsFeatureFlag =
+    !!featureFlags?.populationCriteriaTabs;
   const groupsBaseUrl = "/measures/" + measureId + "/edit/groups";
   // a bool for when discard is open triggered by an initiated state
   const [discardDialogOpen, setDiscardDialogOpen] = useState<boolean>(false);
