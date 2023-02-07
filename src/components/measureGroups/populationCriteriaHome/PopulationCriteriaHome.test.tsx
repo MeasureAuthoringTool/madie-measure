@@ -15,11 +15,6 @@ const serviceConfig: ServiceConfig = {
   terminologyService: {
     baseUrl: "terminology-service.com",
   },
-  features: {
-    export: false,
-    measureVersioning: false,
-    populationCriteriaTabs: true,
-  },
 };
 
 jest.mock("@madie/madie-util", () => ({
@@ -66,6 +61,9 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
   },
+  useFeatureFlags: () => ({
+    populationCriteriaTabs: true,
+  }),
 }));
 
 const renderPopulationCriteriaHomeComponent = () => {

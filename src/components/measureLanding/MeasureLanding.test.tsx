@@ -16,7 +16,6 @@ import {
 import MeasureLanding from "./MeasureLanding";
 
 const serviceConfig: ServiceConfig = {
-  features: { export: false, measureVersioning: false },
   terminologyService: { baseUrl: "example-service-url" },
   measureService: {
     baseUrl: "example-service-url",
@@ -28,6 +27,7 @@ const serviceConfig: ServiceConfig = {
 
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
+  useFeatureFlags: () => null,
 }));
 
 const mockMeasureServiceApi = {
