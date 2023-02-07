@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useState } from "react";
-import { Route, Switch, useRouteMatch, useLocation } from "react-router-dom";
+import { useRouteMatch, useLocation } from "react-router-dom";
 import tw, { styled } from "twin.macro";
 import * as ucum from "@lhncbc/ucum-lhc";
 import "styled-components/macro";
@@ -18,7 +18,6 @@ import {
   Tab,
 } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
-import EditMeasureSideBarNav from "../editMeasure/measureDetails/EditMeasureSideBarNav";
 import {
   Button,
   MadieDiscardDialog,
@@ -49,7 +48,6 @@ import MeasureGroupScoringUnit from "./scoringUnit/MeasureGroupScoringUnit";
 import MeasureGroupObservation from "./observation/MeasureGroupObservation";
 import * as _ from "lodash";
 import MeasureGroupAlerts from "./MeasureGroupAlerts";
-import SupplementalElements from "./SupplementalElements";
 import "../common/madie-link.scss";
 import "./MeasureGroups.scss";
 import RiskAdjustment from "./RiskAdjustment";
@@ -147,7 +145,13 @@ export interface DeleteMeasureGroupDialog {
   measureGroupNumber?: number;
 }
 
-const MeasureGroups = () => {
+export interface MeasureGroupProps {
+  measureGroupNumber?: number;
+  setMeasureGroupNumber?: (value: number) => void;
+  setIsFormDirty?: (value: boolean) => void;
+}
+
+const MeasureGroups = (props: MeasureGroupProps) => {
   useDocumentTitle("MADiE Edit Measure Population Criteria");
   const defaultPopulationBasis = "boolean";
   const [expressionDefinitions, setExpressionDefinitions] = useState<
@@ -169,9 +173,6 @@ const MeasureGroups = () => {
   const measureServiceApi = useMeasureServiceApi();
   let location = useLocation();
   const { path } = useRouteMatch();
-
-  const supplementalDataLink = `${path}/supplemental-data`;
-  const riskAdjustmentLink = `${path}/risk-adjustment`;
 
   const [alertMessage, setAlertMessage] = useState({
     type: undefined,
@@ -197,7 +198,7 @@ const MeasureGroups = () => {
   };
 
   const [activeTab, setActiveTab] = useState<string>("populations");
-  const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(0);
+  const measureGroupNumber = props.measureGroupNumber;
   const [group, setGroup] = useState<Group>();
   const [groupWarningDialogProps, setGroupWarningDialogProps] = useState({
     open: false,
@@ -340,13 +341,16 @@ const MeasureGroups = () => {
     },
   });
   const { resetForm } = formik;
+
   // We want to update layout with a cannot travel flag while this is active
+  // setIsFormDirty is used for dirty check while navigating between different groups
   const { updateRouteHandlerState } = routeHandlerStore;
   useEffect(() => {
     updateRouteHandlerState({
       canTravel: !formik.dirty,
       pendingRoute: "",
     });
+    props.setIsFormDirty(formik.dirty);
   }, [formik.dirty]);
 
   useEffect(() => {
@@ -474,8 +478,8 @@ const MeasureGroups = () => {
 
           //can be removed when validations for add new group is implemented
           measure?.groups
-            ? setMeasureGroupNumber(measure?.groups.length)
-            : setMeasureGroupNumber(0);
+            ? props.setMeasureGroupNumber(measure?.groups.length)
+            : props.setMeasureGroupNumber(0);
           updateMeasure({ ...measure, groups: updatedGroups });
         })
         .then(() => {
@@ -507,29 +511,12 @@ const MeasureGroups = () => {
       .then((response) => {
         updateMeasure(response);
         measure?.groups &&
-          setMeasureGroupNumber(
+          props.setMeasureGroupNumber(
             measureGroupNumber === 0 ? 0 : measureGroupNumber - 1
           );
         handleDialogClose();
       });
   };
-
-  // Local state to later populate the left nav and and govern routes based on group ids
-  const baseURL = "/measures/" + measure?.id + "/edit/measure-groups";
-  const measureGroups = measure?.groups
-    ? measure.groups?.map((group, id) => ({
-        ...group,
-        title: `Population Criteria ${id + 1}`,
-        href: `${baseURL}`,
-        dataTestId: `leftPanelMeasureInformation-MeasureGroup${id + 1}`,
-      }))
-    : [
-        {
-          title: "Population Criteria 1",
-          href: `${baseURL}`,
-          dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
-        },
-      ];
 
   const getDefaultObservationsForScoring = (scoring) => {
     if (scoring === GroupScoring.CONTINUOUS_VARIABLE) {
@@ -620,74 +607,48 @@ const MeasureGroups = () => {
   }, [ucum, ucumUnits]);
 
   return (
-    <FormikProvider value={formik}>
-      <MeasureGroupAlerts {...alertMessage} />
-      <Toast
-        toastKey="population-criteria-toast"
-        toastType={toastType}
-        testId={
-          toastType === "danger"
-            ? `population-criteria-error`
-            : `population-criteria-success`
-        }
-        open={toastOpen}
-        message={toastMessage}
-        onClose={onToastClose}
-        autoHideDuration={6000}
-        closeButtonProps={{
-          "data-testid": "close-error-button",
-        }}
-      />
-      <form onSubmit={formik.handleSubmit}>
-        {/* delete measure group warning dialog */}
-        {deleteMeasureGroupDialog.open && (
-          <MeasureGroupsWarningDialog
-            open={deleteMeasureGroupDialog.open}
-            onClose={handleDialogClose}
-            onSubmit={deleteMeasureGroup}
-            measureGroupNumber={deleteMeasureGroupDialog.measureGroupNumber}
-            modalType="deleteMeasureGroup"
-          />
-        )}
+    <div tw="lg:col-span-5 pl-2 pr-2">
+      <FormikProvider value={formik}>
+        <MeasureGroupAlerts {...alertMessage} />
+        <Toast
+          toastKey="population-criteria-toast"
+          toastType={toastType}
+          testId={
+            toastType === "danger"
+              ? `population-criteria-error`
+              : `population-criteria-success`
+          }
+          open={toastOpen}
+          message={toastMessage}
+          onClose={onToastClose}
+          autoHideDuration={6000}
+          closeButtonProps={{
+            "data-testid": "close-error-button",
+          }}
+        />
+        <form onSubmit={formik.handleSubmit}>
+          {/* delete measure group warning dialog */}
+          {deleteMeasureGroupDialog.open && (
+            <MeasureGroupsWarningDialog
+              open={deleteMeasureGroupDialog.open}
+              onClose={handleDialogClose}
+              onSubmit={deleteMeasureGroup}
+              measureGroupNumber={deleteMeasureGroupDialog.measureGroupNumber}
+              modalType="deleteMeasureGroup"
+            />
+          )}
 
-        {/* breaking measure group change warning dialog */}
-        {groupWarningDialogProps?.open && (
-          <MeasureGroupsWarningDialog
-            open={groupWarningDialogProps?.open}
-            onClose={handleDialogClose}
-            onSubmit={() => submitForm(formik.values)}
-            modalType={groupWarningDialogProps?.modalType}
-          />
-        )}
-
-        <div tw="grid lg:grid-cols-6 gap-4 mx-8 shadow-lg rounded-md border border-slate bg-white">
-          <EditMeasureSideBarNav
-            canEdit={canEdit}
-            urlPath={path}
-            dirty={formik.dirty}
-            links={measureGroups}
-            measureGroupNumber={measureGroupNumber}
-            setMeasureGroupNumber={setMeasureGroupNumber}
-            measure={measure}
-          />
-
-          <Switch>
-            <Route exact path={supplementalDataLink}>
-              <SupplementalElements
-                title="Supplemental Data"
-                dataTestId="supplemental-data"
-              />
-            </Route>
-            <Route exact path={riskAdjustmentLink}>
-              <RiskAdjustment
-                title="Risk Adjustment"
-                dataTestId="risk-adjustment"
-              />
-            </Route>
-          </Switch>
-
+          {/* breaking measure group change warning dialog */}
+          {groupWarningDialogProps?.open && (
+            <MeasureGroupsWarningDialog
+              open={groupWarningDialogProps?.open}
+              onClose={handleDialogClose}
+              onSubmit={() => submitForm(formik.values)}
+              modalType={groupWarningDialogProps?.modalType}
+            />
+          )}
           {location.pathname === path && (
-            <div tw="lg:col-span-5 pl-2 pr-2">
+            <>
               <div tw="flex pb-2 pt-6">
                 <h2 tw="w-1/2 mb-0" data-testid="title" id="title">
                   Population Criteria {measureGroupNumber + 1}
@@ -1313,18 +1274,18 @@ const MeasureGroups = () => {
                   </div>
                 </div>
               )}
-            </div>
+            </>
           )}
-        </div>
-      </form>
+        </form>
 
-      {/*Utility components*/}
-      <MadieDiscardDialog
-        open={discardDialogOpen}
-        onClose={() => setDiscardDialogOpen(false)}
-        onContinue={discardChanges}
-      />
-    </FormikProvider>
+        {/*Utility components*/}
+        <MadieDiscardDialog
+          open={discardDialogOpen}
+          onClose={() => setDiscardDialogOpen(false)}
+          onContinue={discardChanges}
+        />
+      </FormikProvider>
+    </div>
   );
 };
 

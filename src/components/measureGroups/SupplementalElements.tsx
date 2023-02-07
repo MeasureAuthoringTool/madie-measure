@@ -24,7 +24,9 @@ const FieldSeparator = tw.div`mt-1`;
 const TextArea = tw.textarea`disabled:bg-slate shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-500! rounded-md!`;
 
 interface SupplementalElementsProps {
-  setErrorMessage: Function;
+  title: string;
+  dataTestId: string;
+  setErrorMessage?: Function;
 }
 
 export default function SupplementalElements(props: SupplementalElementsProps) {
@@ -91,6 +93,7 @@ export default function SupplementalElements(props: SupplementalElementsProps) {
     const submitMeasure = {
       ...measure,
     };
+
     //to-do: update measure with new supplemental data elements
     measureServiceApi
       .updateMeasure(submitMeasure)
@@ -105,6 +108,7 @@ export default function SupplementalElements(props: SupplementalElementsProps) {
       .catch(() => {
         const message = `Error updating measure "${measure.measureName}"`;
         setErrorMessage(message);
+
         handleToast(
           "danger",
           `Error updating measure "${measure.measureName}"`,

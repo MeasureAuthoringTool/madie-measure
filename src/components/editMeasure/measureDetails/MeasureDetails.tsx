@@ -9,11 +9,11 @@ import {
 } from "react-router-dom";
 import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureMetadata from "./measureMetadata/MeasureMetadata";
-import EditMeasureSideBarNav from "./EditMeasureSideBarNav";
 import { routeHandlerStore, useDocumentTitle } from "@madie/madie-util";
 import StewardAndDevelopers from "./stewardAndDevelopers/StewardAndDevelopers";
 import ModelAndMeasurementPeriod from "./modelAndMeasurementPeriod/ModelAndMeasurementPeriod";
 import "./MeasureDetails.scss";
+import EditMeasureDetailsSideNav from "./EditMeasureDetailsSideNav";
 const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
 export interface RouteHandlerState {
   canTravel: boolean;
@@ -88,7 +88,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
         {
           title: "Clinical Recommendation",
           href: clinicalLink,
-          dataTestId: "leftPanelMeasureClinicalGuidance",
+          dataTestId: "leftPanelMeasureClinicalRecommendation",
           id: "sideNavMeasureClinicalRecommendation",
         },
         {
@@ -149,7 +149,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   return (
     <>
       <Grid>
-        <EditMeasureSideBarNav links={links} dirty={true} details />
+        <EditMeasureDetailsSideNav links={links} />
         <Switch>
           <Route exact path={path}>
             <MeasureInformation setErrorMessage={setErrorMessage} />
