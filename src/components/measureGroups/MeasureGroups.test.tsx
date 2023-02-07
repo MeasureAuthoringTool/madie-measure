@@ -599,7 +599,7 @@ describe("Measure Groups Page", () => {
     userEvent.click(
       screen.getByTestId("leftPanelMeasurePopulationsSupplementalDataTab")
     );
-    expect(screen.getByTestId("supplemental-data")).toBeInTheDocument();
+    expect(screen.getByTestId("supplemental-data-form")).toBeInTheDocument();
   });
 
   test("Should be able to save multiple groups  ", async () => {

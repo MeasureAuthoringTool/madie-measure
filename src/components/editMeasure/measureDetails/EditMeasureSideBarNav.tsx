@@ -210,7 +210,11 @@ export default function EditMeasureSideBarNav(
                       handleTabClick(tabRecord);
                     }}
                     data-testId={tabRecord.dataTestId}
-                    className="tab-title"
+                    className={
+                      pathname === tabRecord.href
+                        ? "side-bar-button active"
+                        : "tab-title"
+                    }
                     id={tabRecord.title}
                   >
                     {tabRecord.title}{" "}

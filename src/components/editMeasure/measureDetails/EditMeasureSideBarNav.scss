@@ -47,3 +47,20 @@ nav {
 .tab-dropdown {
   margin-left: 65px;
 }
+
+.side-bar-button {
+  text-decoration: none;
+  display: flex;
+  color: #333;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  padding: 5px 0px 5px 16px;
+
+  &.active {
+    font-weight: 500;
+    background-color: #fff;
+    padding-left: 10px;
+    border-left: solid 6px #209fa6;
+  }
+}

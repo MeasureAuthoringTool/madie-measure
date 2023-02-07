@@ -52,6 +52,7 @@ import MeasureGroupAlerts from "./MeasureGroupAlerts";
 import SupplementalElements from "./SupplementalElements";
 import "../common/madie-link.scss";
 import "./MeasureGroups.scss";
+import RiskAdjustment from "./RiskAdjustment";
 
 const ButtonSpacer = styled.span`
   margin-left: 15px;
@@ -678,7 +679,7 @@ const MeasureGroups = () => {
               />
             </Route>
             <Route exact path={riskAdjustmentLink}>
-              <SupplementalElements
+              <RiskAdjustment
                 title="Risk Adjustment"
                 dataTestId="risk-adjustment"
               />
