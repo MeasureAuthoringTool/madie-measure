@@ -1,0 +1,28 @@
+#risk-adjustment {
+  display: flex;
+  flex-direction: row;
+  column-gap: 32px;
+  > .left {
+    flex-basis: 39%;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+  > .right {
+    flex-basis: 55%;
+    flex-direction: column;
+    flex-grow: 1;
+    > .risk-container {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      > label {
+        font-family: Rubik, sans-serif;
+      }
+      > .risk-description {
+        margin-bottom: 10px;
+        width: 100%;
+        height: 55px;
+      }
+    }
+  }
+}
