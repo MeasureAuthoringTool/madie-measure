@@ -50,7 +50,6 @@ import * as _ from "lodash";
 import MeasureGroupAlerts from "./MeasureGroupAlerts";
 import "../common/madie-link.scss";
 import "./MeasureGroups.scss";
-import RiskAdjustment from "./RiskAdjustment";
 
 const ButtonSpacer = styled.span`
   margin-left: 15px;
