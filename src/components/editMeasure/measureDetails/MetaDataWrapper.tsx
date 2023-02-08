@@ -17,6 +17,7 @@ const MetaDataWrapper = ({
       id="measure-details-form"
       onSubmit={handleSubmit}
       data-testid={`measure-${header}`}
+      style={{ minHeight: 539 }}
     >
       <div className="content">
         <div className="subTitle">
