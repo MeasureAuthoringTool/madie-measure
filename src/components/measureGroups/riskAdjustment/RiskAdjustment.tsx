@@ -6,8 +6,8 @@ import {
   checkUserCanEdit,
 } from "@madie/madie-util";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
-import MetaDataWrapper from "../MetaDataWrapper";
-import MultipleSelectDropDown from "../../../measureGroups/MultipleSelectDropDown";
+import MetaDataWrapper from "../../editMeasure/measureDetails/MetaDataWrapper";
+import MultipleSelectDropDown from "../MultipleSelectDropDown";
 import RiskDefinition from "./RiskDefinition";
 import "./RiskAdjustment.scss";
 

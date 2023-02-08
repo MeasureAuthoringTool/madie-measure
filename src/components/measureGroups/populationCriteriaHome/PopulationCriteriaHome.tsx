@@ -7,6 +7,7 @@ import PopulationCriteriaSideNav from "../populationCriteriaSideNav/PopulationCr
 import MeasureGroups from "../MeasureGroups";
 import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
+import RiskAdjustment from "../riskAdjustment/RiskAdjustment";
 
 export function PopulationCriteriaHome() {
   const { path } = useRouteMatch();
@@ -99,12 +100,7 @@ export function PopulationCriteriaHome() {
             dataTestId="supplemental-data"
           />
         )}
-        {path.includes("/risk-adjustment") && (
-          <SupplementalElements
-            title="Risk Adjustment"
-            dataTestId="risk-adjustment"
-          />
-        )}
+        {path.includes("/risk-adjustment") && <RiskAdjustment />}
       </div>
     </>
   );

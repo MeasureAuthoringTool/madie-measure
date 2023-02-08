@@ -12,7 +12,6 @@ import MeasureMetadata from "./measureMetadata/MeasureMetadata";
 import { routeHandlerStore, useDocumentTitle } from "@madie/madie-util";
 import StewardAndDevelopers from "./stewardAndDevelopers/StewardAndDevelopers";
 import ModelAndMeasurementPeriod from "./modelAndMeasurementPeriod/ModelAndMeasurementPeriod";
-import RiskAdjustment from "../measureDetails/riskAdjustment/RiskAdjustment";
 import "./MeasureDetails.scss";
 import EditMeasureDetailsSideNav from "./EditMeasureDetailsSideNav";
 const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
@@ -210,7 +209,12 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
             />
           </Route>
           <Route path={riskAdjustmentLink}>
-            <RiskAdjustment />
+            <MeasureMetadata
+              measureMetadataId="RiskAdjustment"
+              measureMetadataType="Risk Adjustment"
+              header="Risk Adjustment"
+              setErrorMessage={setErrorMessage}
+            />
           </Route>
         </Switch>
       </Grid>

@@ -6,8 +6,6 @@ import RiskAdjustment from "./RiskAdjustment";
 import { Measure } from "@madie/madie-models";
 import { act } from "react-dom/test-utils";
 
-jest.mock("../../../../api/useMeasureServiceApi");
-
 const testMeasure = {
   id: "test measure",
   cql: `library C4r version '0.0.000'

@@ -221,6 +221,16 @@ describe("MeasureDetails component", () => {
       </ApiContextProvider>
     );
 
-    expect(getByTestId("risk-adjustment")).toBeTruthy();
+    expect(getByText("Mock Measure Metadata")).toBeTruthy();
+    expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
+    expect(
+      getByTestId("leftPanelModelAndMeasurementPeriod")
+    ).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureSteward")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureDisclaimer")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureRationale")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureGuidance")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureRiskAdjustment")).toBeInTheDocument();
   });
 });
