@@ -38,8 +38,10 @@ const EditMeasureNav = () => {
     pathname !== `${url}/details/model&measurement-period` &&
     pathname !== `${url}/cql-editor` &&
     pathname !== `${url}/groups` &&
-    (pathname !== `${url}/supplemental-data` || !populationCriteriaTabs) &&
-    (pathname !== `${url}/risk-adjustment` || !populationCriteriaTabs) &&
+    pathname !== `${url}/supplemental-data` &&
+    !populationCriteriaTabs &&
+    pathname !== `${url}/risk-adjustment` &&
+    !populationCriteriaTabs &&
     pathname !== `${url}/details/measure-steward` &&
     pathname !== `${url}/details/measure-description` &&
     pathname !== `${url}/details/measure-copyright` &&
