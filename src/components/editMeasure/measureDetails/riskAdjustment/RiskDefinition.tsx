@@ -1,10 +1,10 @@
 import React from "react";
 import { InputLabel } from "@madie/madie-design-system/dist/react";
 
-const RiskDefinition = ({ handleDescriptionChange, risk }) => {
+const RiskDefinition = ({ handleDescriptionChange, risk, key }) => {
   return (
-    <div className="risk-container">
-      <InputLabel htlmFor={`${risk.definition}-description`}>
+    <div className="risk-container" key={key}>
+      <InputLabel htlmfor={`${risk.definition}-description`}>
         {risk.definition} - Description
       </InputLabel>
       <textarea

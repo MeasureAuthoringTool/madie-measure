@@ -129,10 +129,11 @@ const RiskAdjustment = () => {
           />
         </div>
         <div className="right">
-          {formik.values.riskAdjustment.map((risk) => (
+          {formik.values.riskAdjustment.map((risk, i) => (
             <RiskDefinition
               handleDescriptionChange={handleDescriptionChange}
               risk={risk}
+              key={`${risk.definition}-description-${i}`}
             />
           ))}
         </div>

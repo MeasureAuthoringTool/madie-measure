@@ -4,6 +4,7 @@ import { describe, expect, test } from "@jest/globals";
 import userEvent from "@testing-library/user-event";
 import RiskAdjustment from "./RiskAdjustment";
 import { Measure } from "@madie/madie-models";
+import { act } from "react-dom/test-utils";
 
 jest.mock("../../../../api/useMeasureServiceApi");
 
@@ -80,28 +81,115 @@ describe("MetaDataWrapper", () => {
     return render(<RiskAdjustment />);
   };
 
-  test("RiskAdjustment renders with props, props trigger as expected", async () => {
+  test("RiskAdjustment renders with props, props trigger as expected, basic add remove work", async () => {
     await waitFor(() => RenderRiskAdjustment());
     const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
     expect(riskAdjustmentSelect).toBeInTheDocument();
-    const measureGroupTypeSelectButton = screen.getByRole("button", {
+    const riskAdjustmentButton = screen.getByRole("button", {
       name: "Open",
     });
 
-    userEvent.click(measureGroupTypeSelectButton);
+    act(() => {
+      userEvent.click(riskAdjustmentButton);
+    });
 
     expect(screen.getByText("Initial Population")).toBeInTheDocument();
     expect(screen.getByText("Initial PopulationOne")).toBeInTheDocument();
     expect(screen.getByText("Qualifying Encounters")).toBeInTheDocument();
 
-    userEvent.type(measureGroupTypeSelectButton, "Qua");
+    userEvent.type(riskAdjustmentButton, "Qua");
     expect(screen.getByText("Qualifying Encounters")).toBeInTheDocument();
     const target = screen.getByText("Qualifying Encounters");
-    userEvent.click(target);
+    act(() => {
+      userEvent.click(target);
+    });
     await waitFor(() => {
       expect(
         getByTestId("Qualifying Encounters-description")
       ).toBeInTheDocument();
     });
+    const cancelIcon = getByTestId("CancelIcon");
+    act(() => {
+      userEvent.click(cancelIcon);
+    });
+    await waitFor(() => {
+      expect(
+        queryByText("Qualifying Encounters - Description")
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  test("RiskAdjustment renders with props, props trigger as expected clear works", async () => {
+    await waitFor(() => RenderRiskAdjustment());
+    const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
+    expect(riskAdjustmentSelect).toBeInTheDocument();
+    const riskAdjustmentButton = screen.getByRole("button", {
+      name: "Open",
+    });
+
+    act(() => {
+      userEvent.click(riskAdjustmentButton);
+    });
+
+    expect(screen.getByText("Initial Population")).toBeInTheDocument();
+    expect(screen.getByText("Initial PopulationOne")).toBeInTheDocument();
+    expect(screen.getByText("Qualifying Encounters")).toBeInTheDocument();
+
+    userEvent.type(riskAdjustmentButton, "Qua");
+    expect(screen.getByText("Qualifying Encounters")).toBeInTheDocument();
+    const target = screen.getByText("Qualifying Encounters");
+    act(() => {
+      userEvent.click(target);
+    });
+    await waitFor(() => {
+      expect(
+        getByTestId("Qualifying Encounters-description")
+      ).toBeInTheDocument();
+    });
+    userEvent.click(riskAdjustmentButton);
+    const closeIcon = getByTestId("CloseIcon");
+    act(() => {
+      userEvent.click(closeIcon);
+    });
+    await waitFor(() => {
+      expect(
+        queryByText("Qualifying Encounters - Description")
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  test("RiskAdjustment description writing works.", async () => {
+    await waitFor(() => RenderRiskAdjustment());
+    const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
+    expect(riskAdjustmentSelect).toBeInTheDocument();
+    const riskAdjustmentButton = screen.getByRole("button", {
+      name: "Open",
+    });
+
+    act(() => {
+      userEvent.click(riskAdjustmentButton);
+    });
+    expect(screen.getByText("Qualifying Encounters")).toBeInTheDocument();
+    userEvent.type(riskAdjustmentButton, "Qua");
+    expect(screen.getByText("Qualifying Encounters")).toBeInTheDocument();
+    const target = screen.getByText("Qualifying Encounters");
+
+    act(() => {
+      userEvent.click(target);
+    });
+    await waitFor(() => {
+      expect(
+        getByTestId("Qualifying Encounters-description")
+      ).toBeInTheDocument();
+    });
+
+    const label = getByText("Qualifying Encounters - Description");
+    expect(label).toBeInTheDocument();
+    const textArea = getByTestId("Qualifying Encounters-description");
+    expect(textArea.value).toEqual("");
+    act(() => {
+      userEvent.type(textArea, "p");
+    });
+    expect(textArea.value).toEqual("p");
   });
 });

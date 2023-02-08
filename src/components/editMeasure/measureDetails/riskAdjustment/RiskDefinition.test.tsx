@@ -3,6 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, test } from "@jest/globals";
 import userEvent from "@testing-library/user-event";
 import RiskDefinition from "./RiskDefinition";
+import { act } from "react-dom/test-utils";
 
 describe("RiskDefinition", () => {
   afterEach(() => {
@@ -29,7 +30,9 @@ describe("RiskDefinition", () => {
     expect(label).toBeInTheDocument();
     const textArea = getByTestId("Smokers who quit not quitting-description");
     expect(textArea.value).toEqual(test1Props.risk.description);
-    userEvent.type(textArea, "p");
+    act(() => {
+      userEvent.type(textArea, "p");
+    });
     expect(test1Props.handleDescriptionChange).toHaveBeenCalledTimes(1);
   });
 });
