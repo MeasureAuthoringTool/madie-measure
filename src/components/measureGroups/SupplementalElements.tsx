@@ -278,7 +278,6 @@ export default function SupplementalElements(props: SupplementalElementsProps) {
                 </div>
               </div>
               <div id="description" className="right-box">
-                {/* {selectedSupplementalData.map((supData, i) => { */}
                 {formik.values.supplementalData?.map((supData, i) => {
                   return (
                     <div
