@@ -268,7 +268,7 @@ export class MeasureServiceApi {
         ) {
           const operandSpecifier = func.operand[0].operandTypeSpecifier;
           // argument type that we are checking must match population basis
-          // discarding list and interval is valid because we don't have any suitable value for them in population basis
+          // discarding list and interval as valid because we don't have any suitable value for them in population basis
           if (
             operandSpecifier?.name &&
             operandSpecifier?.type === "NamedTypeSpecifier"
