@@ -33,10 +33,6 @@ export default function SupplementalElements() {
   const { updateMeasure } = measureStore;
 
   const [allDefinitions, setAllDefinitions] = useState<string[]>([]);
-  const [selectedDefinitions, setSelectedDefinitions] = useState<string[]>([]);
-  const [selectedDescriptions, setSelectedDescriptions] = useState<string[]>(
-    []
-  );
   const [selectedSupplementalData, setSelectedSupplementalData] = useState<
     SupplementalData[]
   >([]);
@@ -91,8 +87,6 @@ export default function SupplementalElements() {
 
   useEffect(() => {
     if (measure?.supplementalData) {
-      setSelectedDefinitions(_.map(measure?.supplementalData, "definition"));
-      setSelectedDescriptions(_.map(measure?.supplementalData, "description"));
       setSelectedSupplementalData(measure?.supplementalData);
     }
   }, [measure]);
@@ -100,9 +94,7 @@ export default function SupplementalElements() {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
-      selectedSupplementalDefinitions: selectedDefinitions || [],
       supplementalData: measure?.supplementalData || [],
-      selectedDescriptions: selectedDescriptions || [],
     },
     onSubmit: (values) => {
       submitForm(values);
@@ -188,12 +180,8 @@ export default function SupplementalElements() {
         supData[i].description = value;
       }
     }
-    formik.setFieldValue("supplementalData", supData);
-
-    const descriptions = supData?.map((data) => {
-      return data.description;
-    });
-    formik.setFieldValue("selectedDescriptions", descriptions);
+    const newSupplementalData = cloneDeep(supData);
+    formik.setFieldValue("supplementalData", newSupplementalData);
   };
 
   return (
@@ -224,7 +212,7 @@ export default function SupplementalElements() {
                   id="supplementalDataElements"
                   data-testid="supplementalDataElements"
                   label="Definition"
-                  placeholder=""
+                  placeHolder={{ name: "", value: "" }}
                   required={false}
                   disabled={!canEdit}
                   value={formik.values.supplementalData.map(
@@ -232,13 +220,7 @@ export default function SupplementalElements() {
                   )}
                   limitTags={2}
                   options={allDefinitions}
-                  {...formik.getFieldProps("selectedSupplementalDefinitions")}
-                  onChange={(_event: any, selectedValues: string[] | null) => {
-                    formik.setFieldValue(
-                      "selectedSupplementalDefinitions",
-                      selectedValues
-                    );
-
+                  onChange={(_event: any, selectedValues: any | null) => {
                     handleDefinitionChange(selectedValues);
                   }}
                 />
@@ -330,7 +312,6 @@ export default function SupplementalElements() {
         open={discardDialogOpen}
         onContinue={() => {
           resetForm();
-          setSelectedDefinitions(selectedDefinitions);
           setSelectedSupplementalData(
             measure?.supplementalData ? measure?.supplementalData : []
           );
