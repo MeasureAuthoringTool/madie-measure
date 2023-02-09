@@ -27,15 +27,7 @@ const FieldLabel = tw.label`block capitalize text-sm font-medium text-slate-90`;
 const FieldSeparator = tw.div`mt-1`;
 const TextArea = tw.textarea`disabled:bg-slate shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-500! rounded-md!`;
 
-// interface SupplementalElementsProps {
-//   title: string;
-//   dataTestId: string;
-//   setErrorMessage?: Function;
-// }
-
-//export default function SupplementalElements(props: SupplementalElementsProps) {
 export default function SupplementalElements() {
-  //const { setErrorMessage } = props;
   const measureServiceApi = useMeasureServiceApi();
   const [measure, setMeasure] = useState<any>(measureStore.state);
   const { updateMeasure } = measureStore;
