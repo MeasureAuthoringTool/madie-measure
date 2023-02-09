@@ -611,7 +611,14 @@ describe("MeasureEditor component", () => {
       ).toBeInTheDocument()
     );
 
-    // measure.errors = [];
+    userEvent.click(screen.getByTestId("close-error-button"));
+    await waitFor(() =>
+      expect(
+        screen.queryByText(
+          "CQL return types do not match population criteria! Test Cases will not execute until this issue is resolved."
+        )
+      ).not.toBeInTheDocument()
+    );
   });
 });
 
