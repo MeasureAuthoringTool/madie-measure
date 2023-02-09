@@ -48,11 +48,6 @@ const serviceConfig: ServiceConfig = {
   terminologyService: {
     baseUrl: "terminology-service.com",
   },
-  features: {
-    export: false,
-    measureVersioning: false,
-    populationCriteriaTabs: false,
-  },
 };
 
 const getEmptyStrat = () => ({

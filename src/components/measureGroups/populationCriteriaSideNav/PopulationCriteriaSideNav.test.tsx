@@ -16,6 +16,12 @@ jest.mock("react-router-dom", () => ({
   }),
 }));
 
+jest.mock("@madie/madie-util", () => ({
+  useFeatureFlags: () => ({
+    populationCriteriaTabs: true,
+  }),
+}));
+
 const groupsBaseUrl = "/measures/" + "testMeasureId" + "/edit/groups";
 const measureGroups = [
   {
@@ -66,11 +72,6 @@ describe("PopulationCriteriaSideNav", () => {
     elmTranslationService: { baseUrl: "" },
     measureService: { baseUrl: "" },
     terminologyService: { baseUrl: "" },
-    features: {
-      export: false,
-      measureVersioning: false,
-      populationCriteriaTabs: true,
-    },
   };
 
   const RenderPopulationCriteriaSideNav = (props) => {
