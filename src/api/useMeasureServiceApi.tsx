@@ -266,8 +266,17 @@ export class MeasureServiceApi {
             func.operand[0].operandTypeSpecifier?.name?.split("}")[1]
           ) !== "boolean"
         ) {
-          returnType[name] =
-            func.operand[0].operandTypeSpecifier?.name?.split("}")[1];
+          const operandSpecifier = func.operand[0].operandTypeSpecifier;
+          // argument type that we are checking must match population basis
+          // discarding list and interval as valid because we don't have any suitable value for them in population basis
+          if (
+            operandSpecifier?.name &&
+            operandSpecifier?.type === "NamedTypeSpecifier"
+          ) {
+            returnType[name] = operandSpecifier?.name?.split("}")[1];
+          } else {
+            returnType[name] = "N/A";
+          }
         } else if (func?.operand.length < 1) {
           returnType[name] = "Boolean";
         } else {

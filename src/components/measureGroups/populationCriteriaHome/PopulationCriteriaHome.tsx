@@ -3,11 +3,11 @@ import "twin.macro";
 import "styled-components/macro";
 import { useRouteMatch } from "react-router-dom";
 import SupplementalElements from "../SupplementalElements";
-import RiskAdjustment from "../RiskAdjustment";
 import PopulationCriteriaSideNav from "../populationCriteriaSideNav/PopulationCriteriaSideNav";
 import MeasureGroups from "../MeasureGroups";
 import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
+import RiskAdjustment from "../riskAdjustment/RiskAdjustment";
 
 export function PopulationCriteriaHome() {
   const { path } = useRouteMatch();
@@ -95,12 +95,8 @@ export function PopulationCriteriaHome() {
           />
         )}
         {path.includes("/supplemental-data") && <SupplementalElements />}
-        {path.includes("/risk-adjustment") && (
-          <RiskAdjustment
-            title="Risk Adjustment"
-            dataTestId="risk-adjustment"
-          />
-        )}
+
+        {path.includes("/risk-adjustment") && <RiskAdjustment />}
       </div>
     </>
   );

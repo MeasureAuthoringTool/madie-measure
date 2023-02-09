@@ -105,7 +105,7 @@ const MultipleSelectDropDown = ({
               placeholder="Select All That Apply"
               error={error}
               {...params}
-              required
+              required={required}
               helperText={helperText}
             />
           );
