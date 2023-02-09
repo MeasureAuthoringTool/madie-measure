@@ -37,6 +37,14 @@ const mockMeasure = {
   cql: MeasureCQL,
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
 } as Measure;
+const mockSupplementalData = [
+  { definition: "Denominator", description: "test denom" },
+  {
+    definition:
+      "Encounter With Age Range and Without VTE Diagnosis or Obstetrical Conditions",
+    description: "",
+  },
+];
 
 jest.mock("@madie/madie-util", () => ({
   useKeyPress: jest.fn(() => false),
@@ -64,8 +72,6 @@ jest.mock("@madie/madie-util", () => ({
 let serviceApiMock: MeasureServiceApi;
 
 describe("Supplemental Elements component", () => {
-  let measure: Measure;
-
   beforeEach(() => {
     serviceApiMock = {
       updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
@@ -185,6 +191,7 @@ describe("Supplemental Elements component", () => {
 
     expect(serviceApiMock.updateMeasure).toHaveBeenCalledWith({
       ...mockMeasure,
+      supplementalData: mockSupplementalData,
     });
 
     expect(
@@ -343,7 +350,39 @@ describe("Supplemental Elements component", () => {
     });
   });
 
-  it("should display toast when there is no measure CQL", async () => {
+  it("should display supplemental data from DB", async () => {
+    mockMeasure.supplementalData = mockSupplementalData;
+
+    render(<SupplementalElements setErrorMessage={setErrorMessage} />);
+
+    await act(async () => {
+      const selectedDefinition1 = screen.getByRole("button", {
+        name: "Denominator",
+      });
+      expect(selectedDefinition1).toBeInTheDocument();
+      const selectedDefinition2 = screen.getByRole("button", {
+        name: "Encounter With Age Range and Without VTE Diagnosis or Obstetrical Conditions",
+      });
+      expect(selectedDefinition2).toBeInTheDocument();
+
+      const description1 = screen.getByTestId("Denominator");
+      expect(description1).toBeInTheDocument();
+      expect(description1).toHaveTextContent("test denom");
+      const descriptionLabel1 = screen.getByText("Denominator - Description");
+      expect(descriptionLabel1).toBeInTheDocument();
+      const description2 = screen.getByTestId(
+        "Encounter With Age Range and Without VTE Diagnosis or Obstetrical Conditions"
+      );
+      expect(description2).toBeInTheDocument();
+      expect(description2).toHaveTextContent("");
+      const descriptionLabel2 = screen.getByText(
+        "Encounter With Age Range and Without VTE Diagnosis or Obstetrical Conditions - Description"
+      );
+      expect(descriptionLabel1).toBeInTheDocument();
+    });
+  });
+
+  it("should display alert message when there is no measure CQL", async () => {
     mockMeasure.cql = "";
     render(<SupplementalElements setErrorMessage={setErrorMessage} />);
 
@@ -356,9 +395,9 @@ describe("Supplemental Elements component", () => {
       const supplementalOptions = await screen.queryAllByRole("option");
       expect(supplementalOptions).toHaveLength(0);
 
-      const errorToast = screen.getByTestId("supplementalDataElement-error");
-      expect(errorToast).toBeInTheDocument();
-      expect(errorToast).toHaveTextContent(
+      const errorAlert = screen.getByTestId("error-alerts");
+      expect(errorAlert).toBeInTheDocument();
+      expect(errorAlert).toHaveTextContent(
         "Please complete the CQL Editor process before continuing"
       );
     });

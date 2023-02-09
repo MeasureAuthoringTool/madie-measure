@@ -16,6 +16,9 @@ import { Typography } from "@mui/material";
 import "../editMeasure/measureDetails/MeasureDetails.scss";
 import tw from "twin.macro";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
+import { SupplementalData } from "@madie/madie-models";
+import cloneDeep from "lodash/cloneDeep";
+import MeasureGroupAlerts from "./MeasureGroupAlerts";
 
 const asterisk = { color: "#D92F2F", marginRight: 3 };
 const FormFieldInner = tw.div`lg:col-span-3`;
@@ -32,13 +35,23 @@ interface SupplementalElementsProps {
 export default function SupplementalElements(props: SupplementalElementsProps) {
   const { setErrorMessage } = props;
   const measureServiceApi = useMeasureServiceApi();
-  const [supplementalDataElementList, setSupplementalDataElementList] =
-    useState<string[]>([]);
   const [measure, setMeasure] = useState<any>(measureStore.state);
   const { updateMeasure } = measureStore;
 
-  const [selectedSupplementalDataList, setSelectedSupplementalDataList] =
-    useState<string[]>([]);
+  const [allDefinitions, setAllDefinitions] = useState<string[]>([]);
+  const [selectedDefinitions, setSelectedDefinitions] = useState<string[]>([]);
+  const [selectedDescriptions, setSelectedDescriptions] = useState<string[]>(
+    []
+  );
+  const [selectedSupplementalData, setSelectedSupplementalData] = useState<
+    SupplementalData[]
+  >([]);
+
+  const [alertMessage, setAlertMessage] = useState({
+    type: undefined,
+    message: undefined,
+    canClose: false,
+  });
 
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
@@ -60,18 +73,6 @@ export default function SupplementalElements(props: SupplementalElementsProps) {
     measure?.measureMetaData?.draft
   );
 
-  const formik = useFormik({
-    enableReinitialize: true,
-    initialValues: {
-      supplementalDataElements: [],
-      descriptions: [],
-    },
-    onSubmit: (values) => {
-      submitForm(values);
-    },
-  });
-  const { resetForm } = formik;
-
   useEffect(() => {
     if (measure?.cql) {
       const definitions = new CqlAntlr(measure.cql).parse()
@@ -79,22 +80,70 @@ export default function SupplementalElements(props: SupplementalElementsProps) {
       const defines = definitions
         .sort((a, b) => a.name.localeCompare(b.name))
         .map((opt, i) => opt.name.replace(/"/g, ""));
-      setSupplementalDataElementList(defines);
+      setAllDefinitions(defines);
     } else if (measure?.cql !== undefined) {
-      handleToast(
-        "danger",
-        `Please complete the CQL Editor process before continuing`,
-        true
+      // handleToast(
+      //   "danger",
+      //   `Please complete the CQL Editor process before continuing`,
+      //   true
+      // );
+      setAlertMessage({
+        type: "error",
+        message: "Please complete the CQL Editor process before continuing",
+        canClose: false,
+      });
+    }
+  }, [measure]);
+
+  useEffect(() => {
+    if (measure?.supplementalData) {
+      setSelectedDefinitions(
+        measure.supplementalData.map((supData) => {
+          return supData.definition;
+        })
       );
     }
   }, [measure]);
 
+  useEffect(() => {
+    if (measure?.supplementalData) {
+      setSelectedDescriptions(
+        measure.supplementalData.map((supData) => {
+          return supData.description;
+        })
+      );
+    }
+  }, [measure]);
+
+  useEffect(() => {
+    if (measure?.supplementalData) {
+      setSelectedSupplementalData(
+        measure.supplementalData.map((supData) => {
+          return supData;
+        })
+      );
+    }
+  }, [measure]);
+
+  const formik = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      selectedSupplementalDefinitions: selectedDefinitions || [],
+      supplementalData: measure?.supplementalData || [],
+      selectedDescriptions: selectedDescriptions || [],
+    },
+    onSubmit: (values) => {
+      submitForm(values);
+    },
+  });
+  const { resetForm } = formik;
+
   const submitForm = (values) => {
     const submitMeasure = {
       ...measure,
+      supplementalData: formik.values.supplementalData,
     };
 
-    //to-do: update measure with new supplemental data elements
     measureServiceApi
       .updateMeasure(submitMeasure)
       .then(() => {
@@ -136,12 +185,49 @@ export default function SupplementalElements(props: SupplementalElementsProps) {
     });
   }, [formik.dirty]);
 
-  const handleDesciptionChange = (field, value, index) => {
-    selectedSupplementalDataList.filter((selected) => {
-      if (selected === field) {
-        formik.setFieldValue(field, value);
+  const handleDefinitionChange = (selectedValues: string[]) => {
+    const oldSelectedSupDataList = cloneDeep(selectedSupplementalData);
+
+    const newList: SupplementalData[] = [];
+    selectedValues.forEach((selectedDefinition) => {
+      newList.push({
+        definition: selectedDefinition,
+        description: getDescriptionByDefinition(
+          selectedDefinition,
+          oldSelectedSupDataList
+        ),
+      });
+    });
+
+    setSelectedSupplementalData(newList);
+    formik.setFieldValue("supplementalData", newList);
+  };
+  const getDescriptionByDefinition = (
+    definition: string,
+    oldSelectedSupDataList: SupplementalData[]
+  ): string => {
+    let description = "";
+    oldSelectedSupDataList.forEach((selected) => {
+      if (definition === selected.definition) {
+        description = selected.description;
       }
     });
+    return description;
+  };
+
+  const handleDesciptionChange = (definition, value, index) => {
+    const supData = formik.values.supplementalData;
+    for (let i = 0; i < supData.length; i++) {
+      if (supData[i].definition === definition) {
+        supData[i].description = value;
+      }
+    }
+    formik.setFieldValue("supplementalData", supData);
+
+    const descriptions = supData?.map((data) => {
+      return data.description;
+    });
+    formik.setFieldValue("selectedDescriptions", descriptions);
   };
 
   return (
@@ -150,10 +236,11 @@ export default function SupplementalElements(props: SupplementalElementsProps) {
       onSubmit={formik.handleSubmit}
       data-testid="supplemental-data-form"
     >
+      <MeasureGroupAlerts {...alertMessage} />
       <div className="content">
         <div className="subTitle">
           <h2>Supplemental Data</h2>
-          <div className="required">
+          <div>
             <Typography
               style={{ fontSize: 14, fontWeight: 300, fontFamily: "Rubik" }}
             >
@@ -163,11 +250,12 @@ export default function SupplementalElements(props: SupplementalElementsProps) {
           </div>
         </div>
         <div>
-          {supplementalDataElementList && (
+          {allDefinitions && (
             <>
               <div tw="mb-4 w-1/2">
                 <div className="left-box">
                   <AutoComplete
+                    //formControl={formik.getFieldProps("supplementalData")}
                     multiple
                     id="supplementalDataElements"
                     data-testid="supplementalDataElements"
@@ -175,56 +263,61 @@ export default function SupplementalElements(props: SupplementalElementsProps) {
                     placeholder=""
                     required={false}
                     disabled={!canEdit}
-                    error={
-                      formik.touched.supplementalDataElements &&
-                      formik.errors["supplementalDataElements"]
-                    }
-                    helperText={
-                      formik.touched.supplementalDataElements &&
-                      formik.errors["supplementalDataElements"]
-                    }
-                    options={supplementalDataElementList}
-                    {...formik.getFieldProps("supplementalDataElements")}
+                    value={formik.values.supplementalData.map(
+                      (selected) => selected?.definition
+                    )}
+                    limitTags={2}
+                    options={allDefinitions}
+                    {...formik.getFieldProps("selectedSupplementalDefinitions")}
                     onChange={(
                       _event: any,
                       selectedValues: string[] | null
                     ) => {
                       formik.setFieldValue(
-                        "supplementalDataElements",
+                        "selectedSupplementalDefinitions",
                         selectedValues
                       );
-                      setSelectedSupplementalDataList(selectedValues);
+
+                      handleDefinitionChange(selectedValues);
                     }}
                   />
                 </div>
               </div>
               <div id="description" className="right-box">
-                {selectedSupplementalDataList.map((element, i) => {
+                {/* {selectedSupplementalData.map((supData, i) => { */}
+                {formik.values.supplementalData?.map((supData, i) => {
                   return (
                     <div
-                      key={element}
-                      id={element}
+                      key={`${supData.definition}-${i}`}
+                      id={`${supData.definition}-${i}`}
                       style={{ paddingBottom: 15 }}
                     >
                       <FormFieldInner>
-                        <FieldLabel htmlFor={element + " - Description"}>
-                          {element + " - Description"}
+                        <FieldLabel
+                          htmlFor={supData.definition + " - Description"}
+                        >
+                          {supData.definition + " - Description"}
                         </FieldLabel>
                         <FieldSeparator>
                           <TextArea
+                            //{...formik.getFieldProps("supplementalData")}
                             style={{ height: "100px", width: "100%" }}
-                            value={formik.values.descriptions[i]}
-                            name={element}
-                            id={element}
-                            autoComplete={element}
+                            value={
+                              formik.values.supplementalData[i]?.description
+                            }
+                            name={supData.definition}
+                            id={supData.definition}
                             disabled={!canEdit}
                             placeholder=""
-                            data-testid={element}
+                            data-testid={supData.definition}
                             onChange={(e) =>
-                              handleDesciptionChange(element, e.target.value, i)
+                              handleDesciptionChange(
+                                supData.definition,
+                                e.target.value,
+                                i
+                              )
                             }
                           />
-                          {formik.values.descriptions[i]}
                         </FieldSeparator>
                       </FormFieldInner>
                     </div>
@@ -249,7 +342,7 @@ export default function SupplementalElements(props: SupplementalElementsProps) {
             Discard Changes
           </Button>
           <Button
-            disabled={!(formik.isValid && formik.dirty)}
+            disabled={!formik.dirty}
             variant="cyan"
             data-testid={`supplementalDataElement-save`}
             style={{ marginTop: 20, float: "right" }}
@@ -281,12 +374,15 @@ export default function SupplementalElements(props: SupplementalElementsProps) {
         open={discardDialogOpen}
         onContinue={() => {
           resetForm();
-          setSelectedSupplementalDataList([]);
+          setSelectedDefinitions(selectedDefinitions);
+          setSelectedSupplementalData(
+            measure?.supplementalData ? measure?.supplementalData : []
+          );
           setDiscardDialogOpen(false);
         }}
         onClose={() => {
           setDiscardDialogOpen(false);
-          setSelectedSupplementalDataList(selectedSupplementalDataList);
+          //setSelectedDefinitions(selectedDefinitions);
         }}
       />
     </form>
