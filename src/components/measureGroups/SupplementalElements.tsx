@@ -19,6 +19,7 @@ import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import { SupplementalData } from "@madie/madie-models";
 import cloneDeep from "lodash/cloneDeep";
 import MeasureGroupAlerts from "./MeasureGroupAlerts";
+import * as _ from "lodash";
 
 const asterisk = { color: "#D92F2F", marginRight: 3 };
 const FormFieldInner = tw.div`lg:col-span-3`;
@@ -26,14 +27,15 @@ const FieldLabel = tw.label`block capitalize text-sm font-medium text-slate-90`;
 const FieldSeparator = tw.div`mt-1`;
 const TextArea = tw.textarea`disabled:bg-slate shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-500! rounded-md!`;
 
-interface SupplementalElementsProps {
-  title: string;
-  dataTestId: string;
-  setErrorMessage?: Function;
-}
+// interface SupplementalElementsProps {
+//   title: string;
+//   dataTestId: string;
+//   setErrorMessage?: Function;
+// }
 
-export default function SupplementalElements(props: SupplementalElementsProps) {
-  const { setErrorMessage } = props;
+//export default function SupplementalElements(props: SupplementalElementsProps) {
+export default function SupplementalElements() {
+  //const { setErrorMessage } = props;
   const measureServiceApi = useMeasureServiceApi();
   const [measure, setMeasure] = useState<any>(measureStore.state);
   const { updateMeasure } = measureStore;
@@ -81,7 +83,12 @@ export default function SupplementalElements(props: SupplementalElementsProps) {
         .sort((a, b) => a.name.localeCompare(b.name))
         .map((opt, i) => opt.name.replace(/"/g, ""));
       setAllDefinitions(defines);
-    } else if (measure?.cql !== undefined) {
+      setAlertMessage({
+        type: undefined,
+        message: undefined,
+        canClose: false,
+      });
+    } else {
       setAlertMessage({
         type: "error",
         message: "Please complete the CQL Editor process before continuing",
@@ -92,31 +99,9 @@ export default function SupplementalElements(props: SupplementalElementsProps) {
 
   useEffect(() => {
     if (measure?.supplementalData) {
-      setSelectedDefinitions(
-        measure.supplementalData.map((supData) => {
-          return supData.definition;
-        })
-      );
-    }
-  }, [measure]);
-
-  useEffect(() => {
-    if (measure?.supplementalData) {
-      setSelectedDescriptions(
-        measure.supplementalData.map((supData) => {
-          return supData.description;
-        })
-      );
-    }
-  }, [measure]);
-
-  useEffect(() => {
-    if (measure?.supplementalData) {
-      setSelectedSupplementalData(
-        measure.supplementalData.map((supData) => {
-          return supData;
-        })
-      );
+      setSelectedDefinitions(_.map(measure?.supplementalData, "definition"));
+      setSelectedDescriptions(_.map(measure?.supplementalData, "description"));
+      setSelectedSupplementalData(measure?.supplementalData);
     }
   }, [measure]);
 
@@ -151,13 +136,7 @@ export default function SupplementalElements(props: SupplementalElementsProps) {
       })
       .catch(() => {
         const message = `Error updating measure "${measure.measureName}"`;
-        setErrorMessage(message);
-
-        handleToast(
-          "danger",
-          `Error updating measure "${measure.measureName}"`,
-          true
-        );
+        handleToast("danger", message, true);
       });
   };
 
@@ -210,7 +189,7 @@ export default function SupplementalElements(props: SupplementalElementsProps) {
     return description;
   };
 
-  const handleDesciptionChange = (definition, value, index) => {
+  const handleDescriptionChange = (definition, value, index) => {
     const supData = formik.values.supplementalData;
     for (let i = 0; i < supData.length; i++) {
       if (supData[i].definition === definition) {
@@ -245,79 +224,72 @@ export default function SupplementalElements(props: SupplementalElementsProps) {
           </div>
         </div>
         <div>
-          {allDefinitions && (
-            <>
-              <div tw="mb-4 w-1/2">
-                <div className="left-box">
-                  <AutoComplete
-                    multiple
-                    id="supplementalDataElements"
-                    data-testid="supplementalDataElements"
-                    label="Definition"
-                    placeholder=""
-                    required={false}
-                    disabled={!canEdit}
-                    value={formik.values.supplementalData.map(
-                      (selected) => selected?.definition
-                    )}
-                    limitTags={2}
-                    options={allDefinitions}
-                    {...formik.getFieldProps("selectedSupplementalDefinitions")}
-                    onChange={(
-                      _event: any,
-                      selectedValues: string[] | null
-                    ) => {
-                      formik.setFieldValue(
-                        "selectedSupplementalDefinitions",
-                        selectedValues
-                      );
+          <>
+            <div tw="mb-4 w-1/2">
+              <div className="left-box">
+                <AutoComplete
+                  multiple
+                  id="supplementalDataElements"
+                  data-testid="supplementalDataElements"
+                  label="Definition"
+                  placeholder=""
+                  required={false}
+                  disabled={!canEdit}
+                  value={formik.values.supplementalData.map(
+                    (selected) => selected?.definition
+                  )}
+                  limitTags={2}
+                  options={allDefinitions}
+                  {...formik.getFieldProps("selectedSupplementalDefinitions")}
+                  onChange={(_event: any, selectedValues: string[] | null) => {
+                    formik.setFieldValue(
+                      "selectedSupplementalDefinitions",
+                      selectedValues
+                    );
 
-                      handleDefinitionChange(selectedValues);
-                    }}
-                  />
-                </div>
+                    handleDefinitionChange(selectedValues);
+                  }}
+                />
               </div>
-              <div id="description" className="right-box">
-                {formik.values.supplementalData?.map((supData, i) => {
-                  return (
-                    <div
-                      key={`${supData.definition}-${i}`}
-                      id={`${supData.definition}-${i}`}
-                      style={{ paddingBottom: 15 }}
-                    >
-                      <FormFieldInner>
-                        <FieldLabel
-                          htmlFor={supData.definition + " - Description"}
-                        >
-                          {supData.definition + " - Description"}
-                        </FieldLabel>
-                        <FieldSeparator>
-                          <TextArea
-                            style={{ height: "100px", width: "100%" }}
-                            value={
-                              formik.values.supplementalData[i]?.description
-                            }
-                            name={supData.definition}
-                            id={supData.definition}
-                            disabled={!canEdit}
-                            placeholder=""
-                            data-testid={supData.definition}
-                            onChange={(e) =>
-                              handleDesciptionChange(
-                                supData.definition,
-                                e.target.value,
-                                i
-                              )
-                            }
-                          />
-                        </FieldSeparator>
-                      </FormFieldInner>
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          )}
+            </div>
+            <div id="description" className="right-box">
+              {formik.values.supplementalData?.map((supData, i) => {
+                return (
+                  <div
+                    key={`${supData.definition}-${i}`}
+                    id={`${supData.definition}-${i}`}
+                    style={{ paddingBottom: 15 }}
+                  >
+                    <FormFieldInner>
+                      <FieldLabel
+                        htmlFor={supData.definition + " - Description"}
+                      >
+                        {supData.definition + " - Description"}
+                      </FieldLabel>
+                      <FieldSeparator>
+                        <TextArea
+                          style={{ height: "100px", width: "100%" }}
+                          value={formik.values.supplementalData[i]?.description}
+                          name={supData.description}
+                          id={supData.description}
+                          disabled={!canEdit}
+                          placeholder=""
+                          data-testid={supData.definition}
+                          onChange={(e) =>
+                            handleDescriptionChange(
+                              supData.definition,
+                              e.target.value,
+                              i
+                            )
+                          }
+                        />
+                      </FieldSeparator>
+                    </FormFieldInner>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         </div>
       </div>
       {canEdit && (

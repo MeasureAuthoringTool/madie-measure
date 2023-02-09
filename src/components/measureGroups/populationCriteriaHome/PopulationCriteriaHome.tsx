@@ -94,12 +94,7 @@ export function PopulationCriteriaHome() {
             setMeasureGroupNumber={setMeasureGroupNumber}
           />
         )}
-        {path.includes("/supplemental-data") && (
-          <SupplementalElements
-            title="Supplemental Data"
-            dataTestId="supplemental-data"
-          />
-        )}
+        {path.includes("/supplemental-data") && <SupplementalElements />}
         {path.includes("/risk-adjustment") && (
           <RiskAdjustment
             title="Risk Adjustment"

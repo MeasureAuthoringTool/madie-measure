@@ -78,7 +78,7 @@ describe("Supplemental Elements component", () => {
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
   });
-  const setErrorMessage = jest.fn();
+
   afterEach(() => jest.clearAllMocks());
 
   afterEach(() => {
@@ -88,7 +88,7 @@ describe("Supplemental Elements component", () => {
   it("should disable dropdowns if the user does not have measure edit permissions", async () => {
     checkUserCanEdit.mockImplementationOnce(() => false);
     await act(async () => {
-      render(<SupplementalElements setErrorMessage={setErrorMessage} />);
+      render(<SupplementalElements />);
       const supplementalAutoComplete = await screen.findByTestId(
         "supplementalDataElements"
       );
@@ -101,7 +101,7 @@ describe("Supplemental Elements component", () => {
 
   it("should render SupplementalElements form with disabled save and discard buttons", async () => {
     checkUserCanEdit.mockImplementation(() => true);
-    render(<SupplementalElements setErrorMessage={setErrorMessage} />);
+    render(<SupplementalElements />);
     expect(await screen.findByTestId("supplemental-data-form"));
     expect(screen.getByRole("heading")).toHaveTextContent("Supplemental Data");
 
@@ -119,7 +119,7 @@ describe("Supplemental Elements component", () => {
   });
 
   it("should render SupplementalElements dropdown with supplement data element list from measure CQL", async () => {
-    render(<SupplementalElements setErrorMessage={setErrorMessage} />);
+    render(<SupplementalElements />);
 
     await act(async () => {
       const supplementalDropdown = await screen.findByTestId(
@@ -147,7 +147,7 @@ describe("Supplemental Elements component", () => {
 
   it("should enable save and discard button after updating options for SupplementalElements", async () => {
     checkUserCanEdit.mockImplementation(() => true);
-    render(<SupplementalElements setErrorMessage={setErrorMessage} />);
+    render(<SupplementalElements />);
 
     await act(async () => {
       const supplementalDropdown = await screen.findByTestId(
@@ -214,7 +214,7 @@ describe("Supplemental Elements component", () => {
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
 
-    render(<SupplementalElements setErrorMessage={setErrorMessage} />);
+    render(<SupplementalElements />);
 
     await act(async () => {
       const supplementalDropdown = await screen.findByTestId(
@@ -255,7 +255,6 @@ describe("Supplemental Elements component", () => {
       fireEvent.click(saveButton);
     });
 
-    expect(setErrorMessage).toHaveBeenCalled();
     await waitFor(() => {
       const toastMessage = screen.findByTestId("supplementalDataElement-error");
     });
@@ -263,7 +262,7 @@ describe("Supplemental Elements component", () => {
 
   it("should discard changes by clicking discard changes button and continue", async () => {
     checkUserCanEdit.mockImplementation(() => true);
-    render(<SupplementalElements setErrorMessage={setErrorMessage} />);
+    render(<SupplementalElements />);
 
     await act(async () => {
       const supplementalDropdown = await screen.findByTestId(
@@ -309,7 +308,7 @@ describe("Supplemental Elements component", () => {
 
   it("should close the discard dialog on close", async () => {
     checkUserCanEdit.mockImplementation(() => true);
-    render(<SupplementalElements setErrorMessage={setErrorMessage} />);
+    render(<SupplementalElements />);
 
     const supplementalDropdown = await screen.findByTestId(
       "supplementalDataElements"
@@ -353,7 +352,7 @@ describe("Supplemental Elements component", () => {
   it("should display supplemental data from DB", async () => {
     mockMeasure.supplementalData = mockSupplementalData;
 
-    render(<SupplementalElements setErrorMessage={setErrorMessage} />);
+    render(<SupplementalElements />);
 
     await act(async () => {
       const selectedDefinition1 = screen.getByRole("button", {
@@ -384,7 +383,7 @@ describe("Supplemental Elements component", () => {
 
   it("should display alert message when there is no measure CQL", async () => {
     mockMeasure.cql = "";
-    render(<SupplementalElements setErrorMessage={setErrorMessage} />);
+    render(<SupplementalElements />);
 
     await act(async () => {
       const supplementalDropdown = await screen.findByTestId(
