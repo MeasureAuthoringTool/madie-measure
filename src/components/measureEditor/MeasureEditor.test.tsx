@@ -4,19 +4,19 @@ import MeasureEditor, {
   mapErrorsToAceAnnotations,
   mapErrorsToAceMarkers,
 } from "./MeasureEditor";
-import { Measure, Model } from "@madie/madie-models";
+import { Measure, MeasureErrorType } from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import axios from "axios";
 import { ElmTranslationError } from "./measureEditorUtils";
 import userEvent from "@testing-library/user-event";
 // @ts-ignore
 import {
-  parseContent,
-  validateContent,
-  synchingEditorCqlContent,
   ElmTranslationExternalError,
+  parseContent,
+  synchingEditorCqlContent,
+  validateContent,
 } from "@madie/madie-editor";
-import { measureStore, checkUserCanEdit } from "@madie/madie-util";
+import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 
 const measure = {
   id: "abcd-pqrs-xyz",
@@ -37,9 +37,7 @@ const measure = {
   measureMetaData: {},
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
 } as unknown as Measure;
-// } as Measure;
 
-// jest.mock("@madie/madie-util");
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
@@ -52,9 +50,9 @@ jest.mock("@madie/madie-util", () => ({
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => measure),
     initialState: jest.fn().mockImplementation(() => measure),
-    subscribe: (set) => {
+    subscribe: jest.fn().mockImplementation((set) => {
       return { unsubscribe: () => null };
-    },
+    }),
   },
   routeHandlerStore: {
     subscribe: (set) => {
@@ -236,6 +234,70 @@ describe("MeasureEditor component", () => {
       );
       expect(mockedAxios.put).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it("save measure with updated cql in editor on save button click and show return type error", async () => {
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        translation: { library: {} },
+      });
+    });
+
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => {
+        return "library testCql version '0.0.000'";
+      });
+
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({
+          data: {
+            ...measure,
+            errors: [MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES],
+          },
+        });
+      }
+    });
+
+    const { getByTestId } = renderEditor(measure);
+    const editorContainer = (await getByTestId(
+      "measure-editor"
+    )) as HTMLInputElement;
+    expect(measure.cql).toEqual(editorContainer.value);
+    fireEvent.change(getByTestId("measure-editor"), {
+      target: {
+        value: "library testCql versionss '0.0.000'",
+      },
+    });
+    fireEvent.click(getByTestId("save-cql-btn"));
+    await waitFor(() => {
+      const successText = getByTestId("generic-success-text-header");
+      expect(successText.textContent).toEqual(
+        "Changes saved successfully but the following errors were found"
+      );
+      expect(mockedAxios.put).toHaveBeenCalledTimes(1);
+    });
+
+    const subscribeCallback = (measureStore.subscribe as jest.Mock).mock
+      .calls[0][0];
+    if (subscribeCallback) {
+      subscribeCallback({
+        ...measure,
+        errors: [MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES],
+      });
+    } else {
+      fail("subscribe callback was undefined so cannot trigger the change!");
+    }
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(
+          "CQL return types do not match population criteria! Test Cases will not execute until this issue is resolved."
+        )
+      ).toBeInTheDocument()
+    );
   });
 
   it("should alert user if ELM translation fails on save", async () => {
@@ -520,6 +582,36 @@ describe("MeasureEditor component", () => {
       cqlToElmExternalErrors[0].message
     );
     expect(toastMessage).toBeInTheDocument();
+  });
+
+  it("should display toast for CQL Return Types error on measure", async () => {
+    measureStore.state.mockImplementationOnce(() => measure);
+
+    renderEditor(measure);
+    await waitFor(() => {
+      expect(measureStore.subscribe as jest.Mock).toHaveBeenCalled();
+    });
+
+    const subscribeCallback = (measureStore.subscribe as jest.Mock).mock
+      .calls[0][0];
+    if (subscribeCallback) {
+      subscribeCallback({
+        ...measure,
+        errors: [MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES],
+      });
+    } else {
+      fail("subscribe callback was undefined so cannot trigger the change!");
+    }
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(
+          "CQL return types do not match population criteria! Test Cases will not execute until this issue is resolved."
+        )
+      ).toBeInTheDocument()
+    );
+
+    // measure.errors = [];
   });
 });
 

@@ -15,8 +15,9 @@ import {
   Button,
   MadieSpinner,
   MadieDiscardDialog,
+  Toast,
 } from "@madie/madie-design-system/dist/react";
-import { Measure } from "@madie/madie-models";
+import { Measure, MeasureErrorType } from "@madie/madie-models";
 import { CqlCode, CqlCodeSystem } from "@madie/cql-antlr-parser/dist/src";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import * as _ from "lodash";
@@ -84,11 +85,23 @@ export interface CustomCqlCode extends Omit<CqlCode, "codeSystem"> {
 const MeasureEditor = () => {
   useDocumentTitle("MADiE Edit Measure CQL");
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
+
   const { updateMeasure } = measureStore;
   const [processing, setProcessing] = useState<boolean>(true);
   useEffect(() => {
-    const subscription = measureStore.subscribe((measure) => {
+    const subscription = measureStore.subscribe((measure: Measure) => {
       setMeasure(measure);
+      if (
+        measure?.errors?.length > 0 &&
+        measure.errors.includes(
+          MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+        )
+      ) {
+        setToastOpen(true);
+        setToastMessage(
+          "CQL return types do not match population criteria! Test Cases will not execute until this issue is resolved."
+        );
+      }
     });
     return () => {
       subscription.unsubscribe();
@@ -138,6 +151,11 @@ const MeasureEditor = () => {
 
   const [valuesetMsg, setValuesetMsg] = useState(null);
   const [errorMessage, setErrorMessage] = useState<string>(null);
+
+  // Toast utilities
+  const [toastOpen, setToastOpen] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string>("");
+  const [toastType, setToastType] = useState<string>("danger");
 
   // on load fetch elm translations results to display errors on editor not just on load..
   useEffect(() => {
@@ -236,8 +254,9 @@ const MeasureEditor = () => {
         };
         measureServiceApi
           .updateMeasure(newMeasure)
-          .then(() => {
-            updateMeasure(newMeasure);
+          .then((response: any) => {
+            const updatedMeasure = response.data;
+            updateMeasure(updatedMeasure);
             setEditorVal(newMeasure?.cql);
             setIsCQLUnchanged(true);
             const successMessage =
@@ -359,6 +378,23 @@ const MeasureEditor = () => {
           )}
         </div>
       </div>
+      <Toast
+        toastKey="measure-errors-toast"
+        aria-live="polite"
+        toastType={toastType}
+        testId="measure-errors-toast"
+        open={toastOpen}
+        message={toastMessage}
+        onClose={() => {
+          setToastType("danger");
+          setToastMessage("");
+          setToastOpen(false);
+        }}
+        autoHideDuration={10000}
+        closeButtonProps={{
+          "data-testid": "close-error-button",
+        }}
+      />
       <MadieDiscardDialog
         open={discardDialogOpen}
         onContinue={() => {
