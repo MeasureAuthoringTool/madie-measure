@@ -82,11 +82,6 @@ export default function SupplementalElements(props: SupplementalElementsProps) {
         .map((opt, i) => opt.name.replace(/"/g, ""));
       setAllDefinitions(defines);
     } else if (measure?.cql !== undefined) {
-      // handleToast(
-      //   "danger",
-      //   `Please complete the CQL Editor process before continuing`,
-      //   true
-      // );
       setAlertMessage({
         type: "error",
         message: "Please complete the CQL Editor process before continuing",
@@ -255,7 +250,6 @@ export default function SupplementalElements(props: SupplementalElementsProps) {
               <div tw="mb-4 w-1/2">
                 <div className="left-box">
                   <AutoComplete
-                    //formControl={formik.getFieldProps("supplementalData")}
                     multiple
                     id="supplementalDataElements"
                     data-testid="supplementalDataElements"
@@ -300,7 +294,6 @@ export default function SupplementalElements(props: SupplementalElementsProps) {
                         </FieldLabel>
                         <FieldSeparator>
                           <TextArea
-                            //{...formik.getFieldProps("supplementalData")}
                             style={{ height: "100px", width: "100%" }}
                             value={
                               formik.values.supplementalData[i]?.description
@@ -382,7 +375,6 @@ export default function SupplementalElements(props: SupplementalElementsProps) {
         }}
         onClose={() => {
           setDiscardDialogOpen(false);
-          //setSelectedDefinitions(selectedDefinitions);
         }}
       />
     </form>
