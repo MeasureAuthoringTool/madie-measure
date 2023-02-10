@@ -19,7 +19,6 @@ import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import { SupplementalData } from "@madie/madie-models";
 import cloneDeep from "lodash/cloneDeep";
 import MeasureGroupAlerts from "./MeasureGroupAlerts";
-import * as _ from "lodash";
 
 const asterisk = { color: "#D92F2F", marginRight: 3 };
 const FormFieldInner = tw.div`lg:col-span-3`;
@@ -244,8 +243,8 @@ export default function SupplementalElements() {
                         <TextArea
                           style={{ height: "100px", width: "100%" }}
                           value={formik.values.supplementalData[i]?.description}
-                          name={supData.description}
-                          id={supData.description}
+                          name={supData.definition}
+                          id={supData.definition}
                           disabled={!canEdit}
                           placeholder=""
                           data-testid={supData.definition}
