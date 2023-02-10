@@ -110,9 +110,8 @@ describe("MetaDataWrapper", () => {
     expect(screen.getByText("Initial PopulationOne")).toBeInTheDocument();
     expect(screen.getByText("Qualifying Encounters")).toBeInTheDocument();
 
-    userEvent.type(riskAdjustmentButton, "Qua");
-    expect(screen.getByText("Qualifying Encounters")).toBeInTheDocument();
     const target = screen.getByText("Qualifying Encounters");
+
     act(() => {
       userEvent.click(target);
     });
@@ -129,6 +128,44 @@ describe("MetaDataWrapper", () => {
       expect(
         queryByText("Qualifying Encounters - Description")
       ).not.toBeInTheDocument();
+    });
+  });
+
+  test("RiskAdjustment renders with props, props trigger as expected, basic add remove work", async () => {
+    await waitFor(() => RenderRiskAdjustment());
+    const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
+    expect(riskAdjustmentSelect).toBeInTheDocument();
+    const riskAdjustmentButton = screen.getByRole("button", {
+      name: "Open",
+    });
+
+    act(() => {
+      userEvent.click(riskAdjustmentButton);
+    });
+
+    expect(screen.getByText("Initial Population")).toBeInTheDocument();
+    expect(screen.getByText("Initial PopulationOne")).toBeInTheDocument();
+    expect(screen.getByText("Qualifying Encounters")).toBeInTheDocument();
+
+    const target = screen.getByText("Qualifying Encounters");
+    const initPopOne = screen.getByText("Initial PopulationOne");
+
+    act(() => {
+      userEvent.click(target);
+    });
+    await waitFor(() => {
+      expect(
+        getByTestId("Qualifying Encounters-description")
+      ).toBeInTheDocument();
+    });
+
+    act(() => {
+      userEvent.click(initPopOne);
+    });
+    await waitFor(() => {
+      expect(
+        getByTestId("Initial PopulationOne-description")
+      ).toBeInTheDocument();
     });
   });
 
@@ -428,6 +465,12 @@ describe("MetaDataWrapper", () => {
         timeout: 5000,
       }
     );
+    const toastCloseButton = await screen.findByTestId("close-error-button");
+    expect(toastCloseButton).toBeInTheDocument();
+    fireEvent.click(toastCloseButton);
+    await waitFor(() => {
+      expect(toastCloseButton).not.toBeInTheDocument();
+    });
   });
 
   // save fails
