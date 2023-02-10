@@ -1,11 +1,13 @@
 import * as React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { describe, expect, test } from "@jest/globals";
 import userEvent from "@testing-library/user-event";
 import RiskAdjustment from "./RiskAdjustment";
 import { Measure } from "@madie/madie-models";
 import { act } from "react-dom/test-utils";
-
+import useMeasureServiceApi, {
+  MeasureServiceApi,
+} from "../../../api/useMeasureServiceApi";
 const testMeasure = {
   id: "test measure",
   cql: `library C4r version '0.0.000'
@@ -41,8 +43,10 @@ const testMeasure = {
   measurementPeriodEnd: "12/02/2022",
   measureSetId: "testMeasureId",
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
+  riskAdjustments: [],
 } as unknown as Measure;
 
+jest.mock("../../../api/useMeasureServiceApi");
 jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn(() => {
     return true;
@@ -59,16 +63,27 @@ jest.mock("@madie/madie-util", () => ({
   },
   routeHandlerStore: {
     subscribe: (set) => {
-      set(testMeasure);
+      set({ canTravel: false, pendingPath: "" });
       return { unsubscribe: () => null };
     },
     updateRouteHandlerState: () => null,
-    state: { canTravel: true, pendingPath: "" },
-    initialState: { canTravel: true, pendingPath: "" },
+    state: { canTravel: false, pendingPath: "" },
+    initialState: { canTravel: false, pendingPath: "" },
   },
 }));
+const useMeasureServiceApiMock =
+  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
+let serviceApiMock: MeasureServiceApi;
 
 describe("MetaDataWrapper", () => {
+  beforeEach(() => {
+    serviceApiMock = {
+      updateMeasure: jest.fn().mockResolvedValue(undefined),
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    // mockMeasure.measureMetaData = { ...mockMetaData };
+  });
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -190,4 +205,106 @@ describe("MetaDataWrapper", () => {
     });
     expect(textArea.value).toEqual("p");
   });
+
+  test("Risk adjustment cancel discard works..", async () => {
+    await waitFor(() => RenderRiskAdjustment());
+    const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
+    expect(riskAdjustmentSelect).toBeInTheDocument();
+    const riskAdjustmentButton = screen.getByRole("button", {
+      name: "Open",
+    });
+
+    act(() => {
+      fireEvent.click(riskAdjustmentButton);
+    });
+    expect(screen.getByText("Qualifying Encounters")).toBeInTheDocument();
+    userEvent.type(riskAdjustmentButton, "Qua");
+    expect(screen.getByText("Qualifying Encounters")).toBeInTheDocument();
+    const target = screen.getByText("Qualifying Encounters");
+
+    act(() => {
+      fireEvent.click(target);
+    });
+    await waitFor(() => {
+      expect(
+        getByTestId("Qualifying Encounters-description")
+      ).toBeInTheDocument();
+    });
+
+    const label = getByText("Qualifying Encounters - Description");
+    expect(label).toBeInTheDocument();
+    const textArea = getByTestId("Qualifying Encounters-description");
+    expect(textArea.value).toEqual("");
+    act(() => {
+      userEvent.type(textArea, "p");
+    });
+    expect(textArea.value).toEqual("p");
+    const cancelButton = getByTestId("cancel-button");
+    expect(cancelButton).toHaveProperty("disabled", false);
+
+    fireEvent.click(cancelButton);
+    const discardDialog = await screen.getByTestId("discard-dialog");
+    expect(discardDialog).toBeInTheDocument();
+
+    expect(queryByText("You have unsaved changes.")).toBeVisible();
+    const discardDialogCancelButton = screen.getByTestId(
+      "discard-dialog-cancel-button"
+    );
+    expect(discardDialogCancelButton).toBeInTheDocument();
+    fireEvent.click(discardDialogCancelButton);
+    await waitFor(() => {
+      expect(queryByText("You have unsaved changes.")).not.toBeVisible();
+    });
+  });
+
+  // test("It should reset after discarding changes", async () => {
+  //   await waitFor(() => RenderRiskAdjustment());
+  //   const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
+  //   expect(riskAdjustmentSelect).toBeInTheDocument();
+  //   const riskAdjustmentButton = screen.getByRole("button", {
+  //     name: "Open",
+  //   });
+
+  //   act(() => {
+  //     fireEvent.click(riskAdjustmentButton);
+  //   });
+  //   expect(screen.getByText("Qualifying Encounters")).toBeInTheDocument();
+  //   userEvent.type(riskAdjustmentButton, "Qua");
+  //   expect(screen.getByText("Qualifying Encounters")).toBeInTheDocument();
+  //   const target = screen.getByText("Qualifying Encounters");
+
+  //   act(() => {
+  //     fireEvent.click(target);
+  //   });
+  //   await waitFor(() => {
+  //     expect(
+  //       getByTestId("Qualifying Encounters-description")
+  //     ).toBeInTheDocument();
+  //   });
+
+  //   const label = getByText("Qualifying Encounters - Description");
+  //   expect(label).toBeInTheDocument();
+  //   const textArea = getByTestId("Qualifying Encounters-description");
+  //   expect(textArea.value).toEqual("");
+  //   act(() => {
+  //     userEvent.type(textArea, "p");
+  //   });
+  //   expect(textArea.value).toEqual("p");
+  //   const cancelButton = getByTestId("cancel-button");
+
+  //   expect(cancelButton).toHaveProperty("disabled", false);
+
+  //   fireEvent.click(cancelButton);
+  //   const discardDialog = await screen.getByTestId("discard-dialog");
+  //   expect(discardDialog).toBeInTheDocument();
+  //   const continueButton = await screen.getByTestId(
+  //     "discard-dialog-continue-button"
+  //   );
+  //   expect(continueButton).toBeInTheDocument();
+  //   fireEvent.click(continueButton);
+  //   await waitFor(() => {
+  //     // check for old value
+  //     expect(textArea.value).toBe("");
+  //   });
+  // })
 });
