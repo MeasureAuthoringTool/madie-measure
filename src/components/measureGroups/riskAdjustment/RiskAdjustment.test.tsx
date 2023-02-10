@@ -257,54 +257,178 @@ describe("MetaDataWrapper", () => {
     });
   });
 
-  // test("It should reset after discarding changes", async () => {
-  //   await waitFor(() => RenderRiskAdjustment());
-  //   const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
-  //   expect(riskAdjustmentSelect).toBeInTheDocument();
-  //   const riskAdjustmentButton = screen.getByRole("button", {
-  //     name: "Open",
-  //   });
+  test("It should reset after discarding changes", async () => {
+    await waitFor(() => RenderRiskAdjustment());
+    const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
+    expect(riskAdjustmentSelect).toBeInTheDocument();
+    const riskAdjustmentButton = screen.getByRole("button", {
+      name: "Open",
+    });
 
-  //   act(() => {
-  //     fireEvent.click(riskAdjustmentButton);
-  //   });
-  //   expect(screen.getByText("Qualifying Encounters")).toBeInTheDocument();
-  //   userEvent.type(riskAdjustmentButton, "Qua");
-  //   expect(screen.getByText("Qualifying Encounters")).toBeInTheDocument();
-  //   const target = screen.getByText("Qualifying Encounters");
+    act(() => {
+      fireEvent.click(riskAdjustmentButton);
+    });
+    expect(screen.getByText("Qualifying Encounters")).toBeInTheDocument();
+    userEvent.type(riskAdjustmentButton, "Qua");
+    expect(screen.getByText("Qualifying Encounters")).toBeInTheDocument();
+    const target = screen.getByText("Qualifying Encounters");
 
-  //   act(() => {
-  //     fireEvent.click(target);
-  //   });
-  //   await waitFor(() => {
-  //     expect(
-  //       getByTestId("Qualifying Encounters-description")
-  //     ).toBeInTheDocument();
-  //   });
+    act(() => {
+      fireEvent.click(target);
+    });
+    await waitFor(() => {
+      expect(
+        getByTestId("Qualifying Encounters-description")
+      ).toBeInTheDocument();
+    });
 
-  //   const label = getByText("Qualifying Encounters - Description");
-  //   expect(label).toBeInTheDocument();
-  //   const textArea = getByTestId("Qualifying Encounters-description");
-  //   expect(textArea.value).toEqual("");
-  //   act(() => {
-  //     userEvent.type(textArea, "p");
-  //   });
-  //   expect(textArea.value).toEqual("p");
-  //   const cancelButton = getByTestId("cancel-button");
+    const label = getByText("Qualifying Encounters - Description");
+    expect(label).toBeInTheDocument();
+    const textArea = getByTestId("Qualifying Encounters-description");
+    expect(textArea.value).toEqual("");
 
-  //   expect(cancelButton).toHaveProperty("disabled", false);
+    act(() => {
+      fireEvent.change(textArea, {
+        target: { value: "test-value" },
+      });
+    });
+    expect(textArea.value).toEqual("test-value");
+    const cancelButton = getByTestId("cancel-button");
+    const saveButton = getByTestId(`measure-Risk Adjustment-save`);
 
-  //   fireEvent.click(cancelButton);
-  //   const discardDialog = await screen.getByTestId("discard-dialog");
-  //   expect(discardDialog).toBeInTheDocument();
-  //   const continueButton = await screen.getByTestId(
-  //     "discard-dialog-continue-button"
-  //   );
-  //   expect(continueButton).toBeInTheDocument();
-  //   fireEvent.click(continueButton);
-  //   await waitFor(() => {
-  //     // check for old value
-  //     expect(textArea.value).toBe("");
-  //   });
-  // })
+    expect(cancelButton).toHaveProperty("disabled", false);
+    expect(saveButton).toHaveProperty("disabled", false);
+
+    fireEvent.click(cancelButton);
+    const discardDialog = await screen.getByTestId("discard-dialog");
+    expect(discardDialog).toBeInTheDocument();
+    const continueButton = await screen.getByTestId(
+      "discard-dialog-continue-button"
+    );
+    expect(continueButton).toBeInTheDocument();
+    fireEvent.click(continueButton);
+    await waitFor(() => {
+      // check for old value
+      expect(cancelButton).toHaveProperty("disabled", true);
+      expect(saveButton).toHaveProperty("disabled", true);
+    });
+  });
+
+  it("Save fails as expected", async () => {
+    serviceApiMock = {
+      updateMeasure: jest.fn().mockRejectedValueOnce({
+        status: 500,
+        response: { data: { message: "Sand in disk drive" } },
+      }),
+    } as unknown as MeasureServiceApi;
+    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    await waitFor(() => RenderRiskAdjustment());
+    const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
+    expect(riskAdjustmentSelect).toBeInTheDocument();
+    const riskAdjustmentButton = screen.getByRole("button", {
+      name: "Open",
+    });
+
+    act(() => {
+      fireEvent.click(riskAdjustmentButton);
+    });
+    expect(screen.getByText("Qualifying Encounters")).toBeInTheDocument();
+    userEvent.type(riskAdjustmentButton, "Qua");
+    expect(screen.getByText("Qualifying Encounters")).toBeInTheDocument();
+    const target = screen.getByText("Qualifying Encounters");
+
+    act(() => {
+      fireEvent.click(target);
+    });
+    await waitFor(() => {
+      expect(
+        getByTestId("Qualifying Encounters-description")
+      ).toBeInTheDocument();
+    });
+
+    const label = getByText("Qualifying Encounters - Description");
+    expect(label).toBeInTheDocument();
+    const textArea = getByTestId("Qualifying Encounters-description");
+    act(() => {
+      fireEvent.change(textArea, {
+        target: { value: "test-value" },
+      });
+    });
+    expect(textArea.value).toEqual("test-value");
+    const cancelButton = getByTestId("cancel-button");
+    const saveButton = getByTestId(`measure-Risk Adjustment-save`);
+
+    expect(cancelButton).toHaveProperty("disabled", false);
+    expect(saveButton).toHaveProperty("disabled", false);
+
+    act(() => {
+      fireEvent.click(saveButton);
+    });
+    await waitFor(
+      () => expect(getByTestId("risk-adjustment-error")).toBeInTheDocument(),
+      {
+        timeout: 5000,
+      }
+    );
+  });
+
+  it("Save works as expected", async () => {
+    serviceApiMock = {
+      updateMeasure: jest.fn().mockResolvedValueOnce({
+        status: 200,
+        response: { data: { message: "update suceeded" } },
+      }),
+    } as unknown as MeasureServiceApi;
+    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    await waitFor(() => RenderRiskAdjustment());
+    const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
+    expect(riskAdjustmentSelect).toBeInTheDocument();
+    const riskAdjustmentButton = screen.getByRole("button", {
+      name: "Open",
+    });
+
+    act(() => {
+      fireEvent.click(riskAdjustmentButton);
+    });
+    expect(screen.getByText("Qualifying Encounters")).toBeInTheDocument();
+    userEvent.type(riskAdjustmentButton, "Qua");
+    expect(screen.getByText("Qualifying Encounters")).toBeInTheDocument();
+    const target = screen.getByText("Qualifying Encounters");
+
+    act(() => {
+      fireEvent.click(target);
+    });
+    await waitFor(() => {
+      expect(
+        getByTestId("Qualifying Encounters-description")
+      ).toBeInTheDocument();
+    });
+
+    const label = getByText("Qualifying Encounters - Description");
+    expect(label).toBeInTheDocument();
+    const textArea = getByTestId("Qualifying Encounters-description");
+    act(() => {
+      fireEvent.change(textArea, {
+        target: { value: "test-value" },
+      });
+    });
+    expect(textArea.value).toEqual("test-value");
+    const cancelButton = getByTestId("cancel-button");
+    const saveButton = getByTestId(`measure-Risk Adjustment-save`);
+
+    expect(cancelButton).toHaveProperty("disabled", false);
+    expect(saveButton).toHaveProperty("disabled", false);
+
+    act(() => {
+      fireEvent.click(saveButton);
+    });
+    await waitFor(
+      () => expect(getByTestId("risk-adjustment-success")).toBeInTheDocument(),
+      {
+        timeout: 5000,
+      }
+    );
+  });
+
+  // save fails
 });
