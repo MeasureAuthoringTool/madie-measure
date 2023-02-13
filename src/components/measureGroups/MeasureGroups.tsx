@@ -9,6 +9,7 @@ import {
   GroupScoring,
   MeasureGroupTypes,
   PopulationType,
+  MeasureErrorType,
 } from "@madie/madie-models";
 import {
   MenuItem as MuiMenuItem,
@@ -150,6 +151,12 @@ export interface MeasureGroupProps {
   setIsFormDirty?: (value: boolean) => void;
 }
 
+const INITIAL_ALERT_MESSAGE = {
+  type: undefined,
+  message: undefined,
+  canClose: false,
+};
+
 const MeasureGroups = (props: MeasureGroupProps) => {
   useDocumentTitle("MADiE Edit Measure Population Criteria");
   const defaultPopulationBasis = "boolean";
@@ -158,12 +165,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   >([]);
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
-  useEffect(() => {
-    const subscription = measureStore.subscribe(setMeasure);
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+
   const canEdit = checkUserCanEdit(
     measure?.createdBy,
     measure?.acls,
@@ -174,9 +176,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   const { path } = useRouteMatch();
 
   const [alertMessage, setAlertMessage] = useState({
-    type: undefined,
-    message: undefined,
-    canClose: false,
+    ...INITIAL_ALERT_MESSAGE,
   });
 
   // toast utilities
@@ -339,7 +339,20 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       }
     },
   });
-  const { resetForm } = formik;
+  const { resetForm, validateForm } = formik;
+
+  useEffect(() => {
+    if (measure?.groups && measure?.groups[measureGroupNumber]) {
+      validateForm();
+    }
+  }, [formik.values.populations, validateForm]);
+
+  useEffect(() => {
+    const subscription = measureStore.subscribe(setMeasure);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   // We want to update layout with a cannot travel flag while this is active
   // setIsFormDirty is used for dirty check while navigating between different groups
@@ -351,14 +364,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     });
     props.setIsFormDirty(formik.dirty);
   }, [formik.dirty]);
-
-  useEffect(() => {
-    if (measure?.cql) {
-      const definitions = new CqlAntlr(measure.cql).parse()
-        .expressionDefinitions;
-      setExpressionDefinitions(definitions);
-    }
-  }, [measure]);
 
   // Fetches all population basis options from db
   // Should be executed only on initial load of the component
@@ -403,6 +408,17 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     setDiscardDialogOpen(false);
   };
 
+  const updateMeasureFromDb = async (measureId) => {
+    try {
+      const updatedMeasure = await measureServiceApi.fetchMeasure(measureId);
+      setMeasure(updatedMeasure);
+      updateMeasure(updatedMeasure);
+      return updatedMeasure;
+    } catch (error) {
+      throw new Error("Error updating group");
+    }
+  };
+
   const submitForm = (group: Group) => {
     if (group.stratifications) {
       group.stratifications = group.stratifications.filter(
@@ -416,33 +432,11 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       group.id = measure?.groups[measureGroupNumber].id;
       measureServiceApi
         .updateGroup(group, measure.id)
-        .then((g: Group) => {
+        .then(async (g: Group) => {
           if (g === null || g.id === null) {
             throw new Error("Error updating group");
           }
-          const updatedGroups = measure?.groups.map((group) => {
-            if (group.id === g.id) {
-              return {
-                ...group,
-                groupDescription: g.groupDescription,
-                scoring: g.scoring,
-                populations: g.populations,
-                measureObservations: g.measureObservations,
-                rateAggregation: g.rateAggregation,
-                improvementNotation: g.improvementNotation,
-                stratifications: g.stratifications,
-                measureGroupTypes: g.measureGroupTypes || [],
-                populationBasis: g.populationBasis,
-                scoringUnit: g.scoringUnit,
-              };
-            }
-            return group;
-          });
-          setMeasure({
-            ...measure,
-            groups: updatedGroups,
-          });
-          updateMeasure({ ...measure, groups: updatedGroups });
+          await updateMeasureFromDb(measure.id);
         })
         .then(() => {
           setAssociationChanged(false);
@@ -465,21 +459,16 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     } else {
       measureServiceApi
         .createGroup(group, measure.id)
-        .then((g: Group) => {
+        .then(async (g: Group) => {
           if (g === null || g.id === null) {
             throw new Error("Error creating group");
           }
-          const updatedGroups = measure?.groups ? [...measure?.groups, g] : [g];
-          setMeasure({
-            ...measure,
-            groups: updatedGroups,
-          });
+          const updatedMeasure = await updateMeasureFromDb(measure.id);
 
           //can be removed when validations for add new group is implemented
-          measure?.groups
-            ? props.setMeasureGroupNumber(measure?.groups.length)
+          updatedMeasure?.groups
+            ? props.setMeasureGroupNumber(updatedMeasure?.groups.length)
             : props.setMeasureGroupNumber(0);
-          updateMeasure({ ...measure, groups: updatedGroups });
         })
         .then(() => {
           handleToast(
@@ -550,12 +539,30 @@ const MeasureGroups = (props: MeasureGroupProps) => {
 
   // sets alert message when CQL has any errors
   useEffect(() => {
+    setAlertMessage(() => ({ ...INITIAL_ALERT_MESSAGE }));
+    if (measure?.cql) {
+      const definitions = new CqlAntlr(measure.cql).parse()
+        .expressionDefinitions;
+      setExpressionDefinitions(definitions);
+    }
     if (measure && (measure.cqlErrors || !measure?.cql)) {
-      setAlertMessage({
+      setAlertMessage(() => ({
         type: "error",
         message: "Please complete the CQL Editor process before continuing",
         canClose: false,
-      });
+      }));
+    } else if (
+      measure &&
+      !!measure?.errors?.includes(
+        MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+      )
+    ) {
+      setAlertMessage(() => ({
+        type: "error",
+        message:
+          "One or more Population Criteria has a mismatch with CQL return types. Test Cases cannot be executed until this is resolved.",
+        canClose: false,
+      }));
     }
   }, [measure]);
 
@@ -565,9 +572,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     value: {
       label: code + name,
       guidance:
-      code: 
+      code:
       name:
-      system: 
+      system:
     }
   }
 */
