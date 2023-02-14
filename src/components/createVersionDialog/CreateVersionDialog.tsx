@@ -1,6 +1,8 @@
 import React from "react";
 import {
   DialogContent,
+  FormControl,
+  FormHelperText,
   Typography,
   FormLabel,
   RadioGroup,
@@ -70,7 +72,7 @@ interface VersionType {
   type: string;
 }
 
-const CreatVersionDialog = ({ open, onClose, onSubmit }) => {
+const CreatVersionDialog = ({ open, onClose, onSubmit, versionHelperText }) => {
   const formik = useFormik({
     initialValues: {
       type: "",
@@ -87,78 +89,98 @@ const CreatVersionDialog = ({ open, onClose, onSubmit }) => {
 
   const classes = useStyles();
   const flexEnd = classNames(classes.row, classes.end);
-
+  const error = !!versionHelperText;
   return (
     <div data-testid="create-version-dialog">
-      <MadieDialog
-        form
-        title="Create Version"
-        dialogProps={{
-          onClose,
-          open,
-          onSubmit: formik.handleSubmit,
-        }}
-        cancelButtonProps={{
-          variant: "secondary",
-          cancelText: "Cancel",
-          "data-testid": "create-version-cancel-button",
-        }}
-        continueButtonProps={{
-          variant: "cyan",
-          type: "submit",
-          "data-testid": "create-version-continue-button",
-          disabled: !(formik.isValid && formik.dirty),
-          continueText: "Continue",
-        }}
-      >
-        <DialogContent>
-          <div className={flexEnd}>
-            <Typography className={classes.info}>
-              <span className={classes.asterisk}>*</span>
-              Required field
-            </Typography>
-          </div>
-          <div>
-            <FormLabel id="radio-button-dialog">Select a version: </FormLabel>
-            <RadioGroup
-              aria-labelledby="radio-button-group"
-              data-testid="radio-button-group"
-              onChange={formik.handleChange}
+      <FormControl error={error}>
+        <MadieDialog
+          form
+          title="Create Version"
+          dialogProps={{
+            onClose,
+            open,
+            onSubmit: formik.handleSubmit,
+          }}
+          cancelButtonProps={{
+            variant: "secondary",
+            cancelText: "Cancel",
+            "data-testid": "create-version-cancel-button",
+          }}
+          continueButtonProps={{
+            variant: "cyan",
+            type: "submit",
+            "data-testid": "create-version-continue-button",
+            disabled: !(formik.isValid && formik.dirty),
+            continueText: "Continue",
+          }}
+        >
+          <DialogContent>
+            <div className={flexEnd}>
+              <Typography className={classes.info}>
+                <span className={classes.asterisk}>*</span>
+                Required field
+              </Typography>
+            </div>
+            <div>
+              <FormLabel id="radio-button-dialog">Select a version: </FormLabel>
+              <RadioGroup
+                aria-labelledby="radio-button-group"
+                data-testid="radio-button-group"
+                onChange={formik.handleChange}
+              >
+                <FormControlLabel
+                  value="major"
+                  control={
+                    <Radio
+                      name="type"
+                      checked={formik.values.type === "major" ? true : false}
+                    />
+                  }
+                  label="Major"
+                />
+                <FormControlLabel
+                  value="minor"
+                  control={
+                    <Radio
+                      name="type"
+                      checked={formik.values.type === "minor" ? true : false}
+                    />
+                  }
+                  label="Minor"
+                />
+                <FormControlLabel
+                  value="patch"
+                  control={
+                    <Radio
+                      name="type"
+                      checked={formik.values.type === "patch" ? true : false}
+                    />
+                  }
+                  label="Patch"
+                />
+              </RadioGroup>
+            </div>
+            <FormHelperText
+              tabIndex={0}
+              aria-live="polite"
+              id={`version-helper-text`}
+              data-testid={`version-helper-text`}
+              sx={[
+                {
+                  margin: "4px 0px 0px 0px",
+                  color: "#515151",
+                  lineHeight: 1,
+                },
+                error && {
+                  color: "#AE1C1C !important",
+                },
+              ]}
             >
-              <FormControlLabel
-                value="major"
-                control={
-                  <Radio
-                    name="type"
-                    checked={formik.values.type === "major" ? true : false}
-                  />
-                }
-                label="Major"
-              />
-              <FormControlLabel
-                value="minor"
-                control={
-                  <Radio
-                    name="type"
-                    checked={formik.values.type === "minor" ? true : false}
-                  />
-                }
-                label="Minor"
-              />
-              <FormControlLabel
-                value="patch"
-                control={
-                  <Radio
-                    name="type"
-                    checked={formik.values.type === "patch" ? true : false}
-                  />
-                }
-                label="Patch"
-              />
-            </RadioGroup>
-          </div>
-        </DialogContent>
-      </MadieDialog>
+              {versionHelperText}
+            </FormHelperText>
+          </DialogContent>
+        </MadieDialog>
+      </FormControl>
     </div>
   );
 };

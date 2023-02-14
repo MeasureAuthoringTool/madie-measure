@@ -6,8 +6,7 @@ import {
   useHistory,
 } from "react-router-dom";
 import tw, { styled } from "twin.macro";
-import { routeHandlerStore } from "@madie/madie-util";
-import useFeature from "../../../utils/useFeatureFlag";
+import { routeHandlerStore, useFeatureFlags } from "@madie/madie-util";
 export interface RouteHandlerState {
   canTravel: boolean;
   pendingRoute: string;
@@ -31,16 +30,16 @@ const EditMeasureNav = () => {
   // TODO: try activeClassName of NavLink instead of manual path check
   const { pathname } = useLocation();
   let history = useHistory();
-  const populationCriteriaTabs = useFeature("populationCriteriaTabs");
+  const featureFlags = useFeatureFlags();
+  const populationCriteriaTabs = !!featureFlags?.populationCriteriaTabs;
 
   if (
     pathname !== `${url}/details` &&
     pathname !== `${url}/details/model&measurement-period` &&
     pathname !== `${url}/cql-editor` &&
     pathname !== `${url}/groups` &&
-    (pathname !== `${url}/groups/supplemental-data` ||
-      !populationCriteriaTabs) &&
-    (pathname !== `${url}/groups/risk-adjustment` || !populationCriteriaTabs) &&
+    (pathname !== `${url}/supplemental-data` || !populationCriteriaTabs) &&
+    (pathname !== `${url}/risk-adjustment` || !populationCriteriaTabs) &&
     pathname !== `${url}/details/measure-steward` &&
     pathname !== `${url}/details/measure-description` &&
     pathname !== `${url}/details/measure-copyright` &&
@@ -95,7 +94,11 @@ const EditMeasureNav = () => {
         </MenuItem>
         <MenuItem
           data-testid="groups-tab"
-          isActive={pathname.startsWith(`${url}/groups`)}
+          isActive={
+            pathname.startsWith(`${url}/groups`) ||
+            pathname.startsWith(`${url}/supplemental-data`) ||
+            pathname.startsWith(`${url}/risk-adjustment`)
+          }
         >
           <NavLinkCustom to={`${url}/groups`}>
             Population Criteria

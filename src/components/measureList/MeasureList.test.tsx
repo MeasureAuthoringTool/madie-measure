@@ -24,6 +24,10 @@ jest.mock("@madie/madie-util", () => ({
     getAccessToken: () => "test.jwt",
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
+  useFeatureFlags: () => ({
+    export: true,
+    measureVersioning: true,
+  }),
 }));
 jest.mock("../../api/useMeasureServiceApi");
 const useMeasureServiceMock =
@@ -102,11 +106,6 @@ const serviceConfig: ServiceConfig = {
   elmTranslationService: { baseUrl: "" },
   measureService: { baseUrl: "" },
   terminologyService: { baseUrl: "" },
-  features: {
-    export: true,
-    measureVersioning: true,
-    populationCriteriaTabs: false,
-  },
 };
 
 const setMeasureListMock = jest.fn();
@@ -559,6 +558,11 @@ describe("Measure List component", () => {
     const error = {
       response: {
         data: {},
+        request: {
+          responseText: {
+            message: "Insert sand in the disk drive to continue.",
+          },
+        },
       },
     };
     const useMeasureServiceMockRejected = {

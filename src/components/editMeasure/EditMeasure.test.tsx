@@ -15,7 +15,6 @@ jest.mock("./measureDetails/MeasureDetails");
 jest.mock("../measureEditor/MeasureEditor");
 jest.mock("../../api/useMeasureServiceApi");
 
-const setErrorMessage = jest.fn();
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 
@@ -47,16 +46,19 @@ jest.mock("@madie/madie-util", () => ({
     getAccessToken: () => "test.jwt",
   })),
   checkUserCanEdit: jest.fn(),
+  useFeatureFlags: () => ({
+    populationCriteriaTabs: true,
+  }),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => null),
     initialState: jest.fn().mockImplementation(() => null),
-    subscribe: (set) => {
+    subscribe: () => {
       return { unsubscribe: () => null };
     },
   },
   routeHandlerStore: {
-    subscribe: (set) => {
+    subscribe: () => {
       return { unsubscribe: () => null };
     },
     updateRouteHandlerState: jest.fn((routeObj) => routeObj),

@@ -14,13 +14,13 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
-import useFeature from "../../utils/useFeatureFlag";
 import JSzip from "jszip";
 import { saveAs } from "file-saver";
-import { checkUserCanEdit } from "@madie/madie-util";
+import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
 import CreatVersionDialog from "../createVersionDialog/CreateVersionDialog";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import DraftMeasureDialog from "../draftMeasureDialog/DraftMeasureDialog";
+import versionErrorHelper from "../../utils/versionErrorHelper";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -87,14 +87,16 @@ export default function MeasureList(props: {
     useState(null);
 
   const measureServiceApi = useMeasureServiceApi();
-  const exportFeature = useFeature("export");
-  const versioningFeature = useFeature("measureVersioning");
+  const featureFlags = useFeatureFlags();
+  const exportFeature = !!featureFlags?.export;
+  const versioningFeature = !!featureFlags?.measureVersioning;
   const targetMeasure = useRef<Measure>();
 
   const [createVersionDialog, setCreateVersionDialog] = useState({
     open: false,
     measureId: "",
   });
+  const [versionHelperText, setVersionHelperText] = useState("");
   const [draftMeasureDialog, setDraftMeasureDialog] = useState({
     open: false,
   });
@@ -106,6 +108,7 @@ export default function MeasureList(props: {
     setDraftMeasureDialog({
       open: false,
     });
+    setVersionHelperText("");
   };
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
@@ -300,7 +303,6 @@ export default function MeasureList(props: {
           doUpdateList();
         })
         .catch((error) => {
-          handleDialogClose();
           const errorData = error?.response;
           setToastOpen(true);
           if (errorData?.status === 400) {
@@ -311,6 +313,10 @@ export default function MeasureList(props: {
             setToastMessage(
               errorData?.message ? errorData.message : "Server error!"
             );
+          }
+          const message = JSON.parse(errorData?.request?.responseText)?.message;
+          if (message) {
+            setVersionHelperText(versionErrorHelper(message));
           }
         });
     }
@@ -473,6 +479,7 @@ export default function MeasureList(props: {
               open={createVersionDialog.open}
               onClose={handleDialogClose}
               onSubmit={createVersion}
+              versionHelperText={versionHelperText}
             />
             <DraftMeasureDialog
               open={draftMeasureDialog.open}

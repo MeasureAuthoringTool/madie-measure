@@ -10,11 +10,6 @@ export interface ServiceConfig {
   terminologyService: {
     baseUrl: string;
   };
-  features: {
-    export: boolean;
-    measureVersioning: boolean;
-    populationCriteriaTabs: boolean;
-  };
 }
 
 const ServiceContext = createContext<ServiceConfig>(null);
