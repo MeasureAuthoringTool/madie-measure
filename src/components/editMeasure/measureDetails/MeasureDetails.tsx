@@ -36,7 +36,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   const rationaleLink = `${path}/measure-rationale`;
   const guidanceLink = `${path}/measure-guidance`;
   const clinicalLink = `${path}/measure-clinical-recommendation`;
-  const riskAdjustmentLink = `${path}/measure-risk-adjustment`;
+  // const riskAdjustmentLink = `${path}/measure-risk-adjustment`;
 
   const links = [
     // General Information
@@ -91,12 +91,12 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
           dataTestId: "leftPanelMeasureClinicalRecommendation",
           id: "sideNavMeasureClinicalRecommendation",
         },
-        {
-          title: "Risk Adjustment",
-          href: riskAdjustmentLink,
-          dataTestId: "leftPanelMeasureRiskAdjustment",
-          id: "sideNavMeasureRiskAdjustment",
-        },
+        // {
+        //   title: "Risk Adjustment",
+        //   href: riskAdjustmentLink,
+        //   dataTestId: "leftPanelMeasureRiskAdjustment",
+        //   id: "sideNavMeasureRiskAdjustment",
+        // },
       ],
     },
     // legal
@@ -208,14 +208,14 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               setErrorMessage={setErrorMessage}
             />
           </Route>
-          <Route path={riskAdjustmentLink}>
+          {/* <Route path={riskAdjustmentLink}>
             <MeasureMetadata
               measureMetadataId="RiskAdjustment"
               measureMetadataType="Risk Adjustment"
               header="Risk Adjustment"
               setErrorMessage={setErrorMessage}
             />
-          </Route>
+          </Route> */}
         </Switch>
       </Grid>
     </>
