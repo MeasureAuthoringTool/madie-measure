@@ -61,7 +61,6 @@ const MeasureObservationDetails = ({
           }}
           error={!!errors?.definition}
           helperText={errors?.definition}
-          style={{ width: 300 }}
           value={measureObservation?.definition || ""}
           onChange={(e) => {
             if (onChange) {
@@ -96,7 +95,6 @@ const MeasureObservationDetails = ({
           inputProps={{
             "data-testid": `measure-observation-aggregate-${name}-input`,
           }}
-          style={{ width: 300 }}
           value={measureObservation?.aggregateMethod || ""}
           onChange={(e) => {
             if (onChange) {
