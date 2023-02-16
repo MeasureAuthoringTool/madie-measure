@@ -61,13 +61,22 @@ const MenuItemContainer = tw.ul`bg-transparent flex pt-12 pb-4 border-b`;
 interface ColSpanPopulationsType {
   isExclusionPop?: boolean;
   isSecondInitialPopulation?: boolean;
+  children?: any;
 }
 
-const ColSpanPopulations = styled.div((props: ColSpanPopulationsType) => [
-  props.isSecondInitialPopulation || props.isExclusionPop
-    ? tw`lg:col-start-2`
-    : tw`lg:col-start-1`,
-]);
+const ColSpanPopulations = (props: ColSpanPopulationsType) => {
+  return (
+    <div
+      className={
+        props.isSecondInitialPopulation || props.isExclusionPop
+          ? "second"
+          : "first"
+      }
+    >
+      {props.children}
+    </div>
+  );
+};
 
 // const FormField = tw.div`mt-6 grid grid-cols-4`;
 const FormFieldInner = tw.div`lg:col-span-3`;
@@ -926,7 +935,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                   <FieldArray
                     name="populations"
                     render={(arrayHelpers) => (
-                      <div tw="grid lg:grid-cols-4 gap-4 py-5 px-2">
+                      <div id="populations-content">
                         {formik.values.populations?.map((population, index) => {
                           const fieldProps = {
                             name: `populations[${index}].definition`,
@@ -973,7 +982,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                             </React.Fragment>
                           );
                         })}
-                        <div tw="lg:col-start-1">
+                        <div>
                           <MeasureGroupObservation
                             canEdit={canEdit}
                             scoring={formik.values.scoring}

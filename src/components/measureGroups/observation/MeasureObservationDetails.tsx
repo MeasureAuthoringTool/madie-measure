@@ -48,29 +48,7 @@ const MeasureObservationDetails = ({
   // todo elmJson doesn't have any functions
   return (
     <>
-      <div tw="relative">
-        {!required && canEdit && (
-          <DSLink
-            className="madie-link"
-            style={{
-              position: "relative",
-              left: "13rem",
-              bottom: "-1.4rem",
-              zIndex: "1",
-            }}
-            href=""
-            variant="text"
-            onClick={(e) => {
-              e.preventDefault();
-              if (onRemove) {
-                onRemove(measureObservation);
-              }
-            }}
-            data-testid={`measure-observation-${name}-remove`}
-          >
-            Remove
-          </DSLink>
-        )}
+      <div className="first">
         <Select
           placeHolder={{ name: "Select Observation", value: "" }}
           required={required}
@@ -107,7 +85,7 @@ const MeasureObservationDetails = ({
           ]}
         />
       </div>
-      <div tw="pb-3 px-8 pt-6">
+      <div className="second">
         <Select
           placeHolder={{ name: "Select Aggregate Function", value: "" }}
           disabled={!canEdit}
@@ -143,6 +121,24 @@ const MeasureObservationDetails = ({
           ]}
         />
       </div>
+      {!required && canEdit && (
+        <div className="observation-button remove">
+          <DSLink
+            className="madie-link remove"
+            href=""
+            variant="text"
+            onClick={(e) => {
+              e.preventDefault();
+              if (onRemove) {
+                onRemove(measureObservation);
+              }
+            }}
+            data-testid={`measure-observation-${name}-remove`}
+          >
+            Remove
+          </DSLink>
+        </div>
+      )}
     </>
   );
 };

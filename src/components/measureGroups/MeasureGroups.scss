@@ -6,3 +6,23 @@ input {
     color: #717171 !important;
   }
 }
+
+#populations-content {
+  .second {
+    margin-left: 16px;
+  }
+
+  .first,
+  .second {
+    margin-top: 24px;
+    .observation-button {
+      margin-top: 24px;
+      .remove {
+        color: #d92f2f;
+      }
+      .add {
+        color: #0073c8;
+      }
+    }
+  }
+}
