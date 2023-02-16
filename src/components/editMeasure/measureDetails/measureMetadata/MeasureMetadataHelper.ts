@@ -25,9 +25,9 @@ export default function getInitialValues(measure: Measure, typeLower: string) {
     case "clinicalRecommendation":
       const clinical = measure?.measureMetaData?.clinicalRecommendation;
       return !!clinical ? clinical : "";
-    case "risk-adjustment":
-      const riskAdjustment = measure?.measureMetaData?.riskAdjustment;
-      return !!riskAdjustment ? riskAdjustment : "";
+    // case "risk-adjustment":
+    //   const riskAdjustment = measure?.measureMetaData?.riskAdjustment;
+    //   return !!riskAdjustment ? riskAdjustment : "";
     default:
       return "";
   }
@@ -57,9 +57,9 @@ export const setMeasureMetadata = (
     case "clinicalRecommendation":
       measure.measureMetaData.clinicalRecommendation = newValue;
       break;
-    case "risk-adjustment":
-      measure.measureMetaData.riskAdjustment = newValue;
-      break;
+    // case "risk-adjustment":
+    //   measure.measureMetaData.riskAdjustment = newValue;
+    //   break;
     default:
       break;
   }
