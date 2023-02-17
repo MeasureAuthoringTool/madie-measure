@@ -15,6 +15,7 @@ import {
   Group,
   GroupScoring,
   Measure,
+  MeasureErrorType,
   MeasureGroupTypes,
   PopulationType,
 } from "@madie/madie-models";
@@ -468,6 +469,33 @@ describe("Measure Groups Page", () => {
       "Increased score indicates improvement"
     );
     expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
+  });
+
+  test("should display error for CQL return type mismatch on load", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "Description Text";
+    group.rateAggregation = "Rate Aggregation Text";
+    group.improvementNotation = "Increased score indicates improvement";
+    measure.groups = [group];
+    measure.errors = [MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES];
+    renderMeasureGroupComponent();
+
+    expect(await screen.findByTestId("populations-tab")).toBeInTheDocument();
+
+    expect(
+      screen.getByTestId("measure-group-type-dropdown")
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("title").textContent).toBe(
+      "Population Criteria 1"
+    );
+
+    userEvent.click(screen.getByTestId("reporting-tab"));
+
+    expect(
+      await screen.findByText(
+        "One or more Population Criteria has a mismatch with CQL return types. Test Cases cannot be executed until this is resolved."
+      )
+    ).toBeInTheDocument();
   });
 
   test("Should be able to save multiple groups  ", async () => {

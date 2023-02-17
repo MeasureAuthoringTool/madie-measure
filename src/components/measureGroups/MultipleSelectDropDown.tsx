@@ -50,7 +50,7 @@ const MultipleSelectDropDown = ({
   options,
   multipleSelect = true,
   limitTags = 1,
-  formControl,
+  // formControl, // is not referenced, already passed as prop
   onClose,
   ...rest
 }) => {
@@ -105,7 +105,7 @@ const MultipleSelectDropDown = ({
               placeholder="Select All That Apply"
               error={error}
               {...params}
-              required
+              required={required}
               helperText={helperText}
             />
           );
@@ -131,7 +131,6 @@ MultipleSelectDropDown.propTypes = {
   options: PropTypes.arrayOf(PropTypes.string),
   multipleSelect: PropTypes.bool,
   limitTags: PropTypes.number,
-  formControl: PropTypes.any,
 };
 
 export default MultipleSelectDropDown;

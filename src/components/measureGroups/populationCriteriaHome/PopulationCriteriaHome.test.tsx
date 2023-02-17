@@ -141,7 +141,7 @@ describe("PopulationCriteriaHome", () => {
       name: /supplemental data/i,
     });
     // verifies if the SD component is loaded and the left nav link is active
-    expect(screen.getByTestId("supplemental-data")).toBeInTheDocument();
+    expect(screen.getByTestId("supplemental-data-form")).toBeInTheDocument();
     expect(supplementalDataButton.classList.contains("active")).toBeTruthy();
   });
 
