@@ -190,7 +190,18 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
               aria-required="true"
               value={formik.values.measurementPeriodStart}
               onChange={(startDate) => {
-                formik.setFieldValue("measurementPeriodStart", startDate);
+                const utcStartDate = new Date(
+                  Date.UTC(
+                    startDate.getFullYear(),
+                    startDate.getMonth(),
+                    startDate.getDate(),
+                    0,
+                    0,
+                    0,
+                    0
+                  )
+                );
+                formik.setFieldValue("measurementPeriodStart", utcStartDate);
               }}
               renderInput={(params) => {
                 const { onChange, ...formikFieldProps } = formik.getFieldProps(
@@ -229,7 +240,18 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
               inputFormat="MM/dd/yyyy"
               value={formik.values.measurementPeriodEnd}
               onChange={(endDate) => {
-                formik.setFieldValue("measurementPeriodEnd", endDate);
+                const utcEndDate = new Date(
+                  Date.UTC(
+                    endDate.getFullYear(),
+                    endDate.getMonth(),
+                    endDate.getDate(),
+                    0,
+                    0,
+                    0,
+                    0
+                  )
+                );
+                formik.setFieldValue("measurementPeriodEnd", utcEndDate);
               }}
               renderInput={(params) => {
                 const { onChange, ...formikFieldProps } = formik.getFieldProps(
