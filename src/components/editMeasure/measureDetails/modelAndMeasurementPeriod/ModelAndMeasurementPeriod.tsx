@@ -192,7 +192,6 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
               onChange={(startDate) => {
                 startDate.setHours(0, 0, 0, 0);
                 formik.setFieldValue("measurementPeriodStart", startDate);
-
               }}
               renderInput={(params) => {
                 const { onChange, ...formikFieldProps } = formik.getFieldProps(
