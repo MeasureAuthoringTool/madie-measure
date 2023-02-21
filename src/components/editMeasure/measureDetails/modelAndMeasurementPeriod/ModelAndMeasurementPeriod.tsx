@@ -21,7 +21,6 @@ import {
   checkUserCanEdit,
 } from "@madie/madie-util";
 import { Box } from "@mui/system";
-import { start } from "single-spa";
 
 interface modelAndMeasurementPeriod {
   model: string;
@@ -191,8 +190,9 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
               aria-required="true"
               value={formik.values.measurementPeriodStart}
               onChange={(startDate) => {
-                //startDate.setHours(0, 0, 0);
+                startDate.setHours(0, 0, 0, 0);
                 formik.setFieldValue("measurementPeriodStart", startDate);
+
               }}
               renderInput={(params) => {
                 const { onChange, ...formikFieldProps } = formik.getFieldProps(
@@ -231,7 +231,7 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
               inputFormat="MM/dd/yyyy"
               value={formik.values.measurementPeriodEnd}
               onChange={(endDate) => {
-                //endDate.setHours(23, 59, 59);
+                endDate.setHours(23, 59, 59);
                 formik.setFieldValue("measurementPeriodEnd", endDate);
               }}
               renderInput={(params) => {
