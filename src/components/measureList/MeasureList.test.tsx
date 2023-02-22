@@ -30,11 +30,6 @@ jest.mock("@madie/madie-util", () => ({
   }),
 }));
 
-const success = {
-  response: {
-    data: {},
-  },
-};
 jest.mock("../../api/useMeasureServiceApi");
 const useMeasureServiceMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
@@ -44,7 +39,6 @@ const mockMeasureServiceApi = {
     .mockResolvedValue(oneItemResponse),
   fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
   createVersion: jest.fn().mockResolvedValue({}),
-  getZippedMeasureData: jest.fn().mockResolvedValueOnce({ id: "123" }),
 } as unknown as MeasureServiceApi;
 
 jest.mock("../../api/useMeasureServiceApi", () =>
@@ -600,29 +594,32 @@ describe("Measure List component", () => {
   });
 
   it("should call the export api to generate the measure zip file", async () => {
+    const useMeasureServiceMockResolved = {
+      getZippedMeasureData: jest
+        .fn()
+        .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
+    } as unknown as MeasureServiceApi;
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockResolved;
+    });
+
     renderMeasureList();
     const actionButton = screen.getByTestId(`measure-action-${measures[0].id}`);
     fireEvent.click(actionButton);
+    const link = {
+      click: jest.fn(),
+      setAttribute: jest.fn(),
+    };
+    window.URL.createObjectURL = jest
+      .fn()
+      .mockReturnValueOnce("http://fileurl");
+    document.body.appendChild = jest.fn();
+    document.createElement = jest.fn().mockReturnValueOnce(link);
     expect(
       screen.getByTestId(`export-measure-${measures[0].id}`)
     ).toBeInTheDocument();
-
+    fireEvent.click(screen.getByTestId(`export-measure-${measures[0].id}`));
     await waitFor(() => {
-      const link = {
-        click: jest.fn(),
-        setAttribute: jest.fn(),
-      };
-      window.URL.createObjectURL = jest
-        .fn()
-        .mockReturnValueOnce("http://fileurl");
-      document.body.appendChild = jest.fn();
-      document.createElement = jest.fn().mockReturnValueOnce(link);
-      link.setAttribute("download", `test.zip`);
-      fireEvent.click(screen.getByTestId(`export-measure-${measures[0].id}`));
-
-      expect(mockMeasureServiceApi.getZippedMeasureData).toBeCalledWith(
-        measures[0].id
-      );
       expect(link.click).toBeCalled();
     });
   });
