@@ -21,6 +21,7 @@ import CreatVersionDialog from "../createVersionDialog/CreateVersionDialog";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import DraftMeasureDialog from "../draftMeasureDialog/DraftMeasureDialog";
 import versionErrorHelper from "../../utils/versionErrorHelper";
+import JSZip from "jszip";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -255,14 +256,23 @@ export default function MeasureList(props: {
     setOptionsOpen(false);
   };
 
-  const zipData = () => {
-    const zip = new JSzip();
-    zip.generateAsync({ type: "blob" }).then(function (content) {
-      saveAs(
-        content,
+  const zipData = async () => {
+    try {
+      const blobResponse = await measureServiceApi.getZippedMeasureData(
+        targetMeasure?.current?.id
+      );
+      const url = window.URL.createObjectURL(blobResponse);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
         `${targetMeasure.current?.ecqmTitle}-v${targetMeasure.current?.version}-${targetMeasure.current?.model}.zip`
       );
-    });
+      document.body.appendChild(link);
+      link.click();
+    } catch (err) {
+      console.log(err.msg);
+    }
   };
 
   const doUpdateList = () => {
