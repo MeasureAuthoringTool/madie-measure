@@ -852,6 +852,7 @@ describe("Measure Groups Page", () => {
           name: PopulationType.INITIAL_POPULATION,
           definition:
             "VTE Prophylaxis by Medication Administered or Device Applied",
+          description: "",
           associationType: undefined,
         },
       ],

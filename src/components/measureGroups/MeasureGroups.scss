@@ -26,3 +26,14 @@ input {
     }
   }
 }
+
+.population-col-gap-24 {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  column-gap: 24px;
+  > div:first-of-type {
+    width: 300px;
+    min-width: 300px;
+  }
+}

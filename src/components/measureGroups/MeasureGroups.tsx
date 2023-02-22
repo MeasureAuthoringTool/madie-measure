@@ -25,6 +25,7 @@ import {
   Select,
   DSLink,
   AutoComplete,
+  TextArea as MadieTextArea,
   Toast,
 } from "@madie/madie-design-system/dist/react";
 import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
@@ -49,6 +50,7 @@ import MeasureGroupScoringUnit from "./scoringUnit/MeasureGroupScoringUnit";
 import MeasureGroupObservation from "./observation/MeasureGroupObservation";
 import * as _ from "lodash";
 import MeasureGroupAlerts from "./MeasureGroupAlerts";
+import camelCaseConverter from "../../utils/camelCaseConverter";
 import "../common/madie-link.scss";
 import "./MeasureGroups.scss";
 
@@ -956,20 +958,55 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                 }
                                 isExclusionPop={isExclusionPop}
                               >
-                                <Field
-                                  {...fieldProps}
-                                  component={GroupPopulation}
-                                  cqlDefinitions={expressionDefinitions}
-                                  populations={formik.values.populations}
-                                  population={population}
-                                  populationIndex={index}
-                                  scoring={formik.values.scoring}
-                                  canEdit={canEdit}
-                                  insertCallback={arrayHelpers.insert}
-                                  removeCallback={arrayHelpers.remove}
-                                  replaceCallback={arrayHelpers.replace}
-                                  setAssociationChanged={setAssociationChanged}
-                                />
+                                <div className="population-col-gap-24">
+                                  <Field
+                                    {...fieldProps}
+                                    component={GroupPopulation}
+                                    cqlDefinitions={expressionDefinitions}
+                                    populations={formik.values.populations}
+                                    population={population}
+                                    populationIndex={index}
+                                    scoring={formik.values.scoring}
+                                    canEdit={canEdit}
+                                    insertCallback={arrayHelpers.insert}
+                                    removeCallback={arrayHelpers.remove}
+                                    replaceCallback={arrayHelpers.replace}
+                                    setAssociationChanged={
+                                      setAssociationChanged
+                                    }
+                                  />
+                                  <MadieTextArea
+                                    value={
+                                      formik.values.populations[index]
+                                        .description
+                                    }
+                                    label={
+                                      population?.name
+                                        ? `${camelCaseConverter(
+                                            population.name
+                                          )} Description`
+                                        : undefined
+                                    }
+                                    onChange={(_event: any) => {
+                                      const currentPopulations = [
+                                        ...formik.values.populations,
+                                      ];
+                                      currentPopulations[index].description =
+                                        _event.target.value;
+                                      formik.setFieldValue(
+                                        "populations",
+                                        currentPopulations
+                                      );
+                                    }}
+                                    name={`populations[${index}].description`}
+                                    id={`${population.name}-description`}
+                                    placeholder="-"
+                                    inputProps={{
+                                      "data-testid": `${population.name}-description`,
+                                    }}
+                                    data-testid="measure-name-text-field"
+                                  />
+                                </div>
                                 <MeasureGroupObservation
                                   canEdit={canEdit}
                                   scoring={formik.values.scoring}
