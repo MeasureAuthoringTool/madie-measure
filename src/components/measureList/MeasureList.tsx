@@ -14,14 +14,11 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
-import JSzip from "jszip";
-import { saveAs } from "file-saver";
 import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
 import CreatVersionDialog from "../createVersionDialog/CreateVersionDialog";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import DraftMeasureDialog from "../draftMeasureDialog/DraftMeasureDialog";
 import versionErrorHelper from "../../utils/versionErrorHelper";
-import JSZip from "jszip";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -257,22 +254,19 @@ export default function MeasureList(props: {
   };
 
   const zipData = async () => {
-    try {
-      const blobResponse = await measureServiceApi.getZippedMeasureData(
-        targetMeasure?.current?.id
-      );
-      const url = window.URL.createObjectURL(blobResponse);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute(
-        "download",
-        `${targetMeasure.current?.ecqmTitle}-v${targetMeasure.current?.version}-${targetMeasure.current?.model}.zip`
-      );
-      document.body.appendChild(link);
-      link.click();
-    } catch (err) {
-      console.log(err.msg);
-    }
+    // try catch block can be added here to customize the error message
+    const blobResponse = await measureServiceApi.getZippedMeasureData(
+      targetMeasure?.current?.id
+    );
+    const url = window.URL.createObjectURL(blobResponse);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute(
+      "download",
+      `${targetMeasure.current?.ecqmTitle}-v${targetMeasure.current?.version}-${targetMeasure.current?.model}.zip`
+    );
+    document.body.appendChild(link);
+    link.click();
   };
 
   const doUpdateList = () => {
