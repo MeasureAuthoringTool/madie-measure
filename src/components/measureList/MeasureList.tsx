@@ -254,19 +254,22 @@ export default function MeasureList(props: {
   };
 
   const zipData = async () => {
-    // try catch block can be added here to customize the error message
-    const blobResponse = await measureServiceApi.getZippedMeasureData(
-      targetMeasure?.current?.id
-    );
-    const url = window.URL.createObjectURL(blobResponse);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute(
-      "download",
-      `${targetMeasure.current?.ecqmTitle}-v${targetMeasure.current?.version}-${targetMeasure.current?.model}.zip`
-    );
-    document.body.appendChild(link);
-    link.click();
+    try {
+      const blobResponse = await measureServiceApi.getZippedMeasureData(
+        targetMeasure?.current?.id
+      );
+      const url = window.URL.createObjectURL(blobResponse);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `${targetMeasure.current?.ecqmTitle}-v${targetMeasure.current?.version}-${targetMeasure.current?.model}.zip`
+      );
+      document.body.appendChild(link);
+      link.click();
+    } catch (err) {
+      return err;
+    }
   };
 
   const doUpdateList = () => {
