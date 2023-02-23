@@ -39,6 +39,9 @@ const mockMeasureServiceApi = {
     .mockResolvedValue(oneItemResponse),
   fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
   createVersion: jest.fn().mockResolvedValue({}),
+  getMeasureExport: jest
+    .fn()
+    .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
 } as unknown as MeasureServiceApi;
 
 jest.mock("../../api/useMeasureServiceApi", () =>
@@ -51,6 +54,7 @@ const measures: Measure[] = [
   {
     id: "IDIDID1",
     measureHumanReadableId: null,
+    ecqmTitle: "ecqmTitleeee",
     measureSetId: "1",
     version: "0.0.000",
     state: "NEW",
@@ -124,6 +128,10 @@ describe("Measure List component", () => {
   beforeEach(() => {
     measures.forEach((m) => {
       m.measureHumanReadableId = uuid();
+    });
+
+    useMeasureServiceMock.mockReset().mockImplementation(() => {
+      return mockMeasureServiceApi;
     });
   });
 
@@ -593,14 +601,40 @@ describe("Measure List component", () => {
     });
   });
 
-  it("should call the export api to generate the measure zip file", async () => {
-    const useMeasureServiceMockResolved = {
-      getZippedMeasureData: jest
-        .fn()
-        .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
-    } as unknown as MeasureServiceApi;
+  it("should display the error when there is any issue in zipping the measure", async () => {
     useMeasureServiceMock.mockImplementation(() => {
-      return useMeasureServiceMockResolved;
+      return {
+        ...mockMeasureServiceApi,
+        getMeasureExport: jest
+          .fn()
+          .mockRejectedValue(new Error("Unable to zip the measure")),
+      };
+    });
+
+    renderMeasureList();
+    const actionButton = screen.getByTestId(`measure-action-${measures[0].id}`);
+    fireEvent.click(actionButton);
+    expect(
+      screen.getByTestId(`export-measure-${measures[0].id}`)
+    ).toBeInTheDocument();
+    try {
+      fireEvent.click(screen.getByTestId(`export-measure-${measures[0].id}`));
+      fail("Unable to zip the measure");
+    } catch (err) {
+      console.log(err);
+      expect(err).toHaveProperty("message", "Unable to zip the measure");
+    }
+  });
+
+  it("should call the export api to generate the measure zip file", async () => {
+    useMeasureServiceMock.mockImplementation(() => {
+      return {
+        ...mockMeasureServiceApi,
+        getMeasureExport: jest.fn().mockResolvedValue({
+          size: 635581,
+          type: "application/octet-stream",
+        }),
+      };
     });
 
     renderMeasureList();
@@ -624,3 +658,7 @@ describe("Measure List component", () => {
     });
   });
 });
+
+function fail(error: string) {
+  throw new Error(error);
+}

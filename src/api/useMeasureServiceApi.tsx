@@ -333,7 +333,7 @@ export class MeasureServiceApi {
     );
   }
 
-  async getZippedMeasureData(measureId: string): Promise<Blob> {
+  async getMeasureExport(measureId: string): Promise<Blob> {
     try {
       const response = await axios.get(
         `${this.baseUrl}/measures/${measureId}/exports`,

@@ -215,7 +215,7 @@ export default function MeasureList(props: {
     if (exportFeature) {
       const exportButton = {
         label: "Export",
-        toImplementFunction: zipData,
+        toImplementFunction: exportMeasure,
         dataTestId: `export-measure-${selected?.id}`,
       };
       additionalOptions.push(exportButton);
@@ -253,9 +253,9 @@ export default function MeasureList(props: {
     setOptionsOpen(false);
   };
 
-  const zipData = async () => {
+  const exportMeasure = async () => {
     try {
-      const blobResponse = await measureServiceApi.getZippedMeasureData(
+      const blobResponse = await measureServiceApi.getMeasureExport(
         targetMeasure?.current?.id
       );
       const url = window.URL.createObjectURL(blobResponse);
