@@ -51,8 +51,9 @@ import MeasureGroupObservation from "./observation/MeasureGroupObservation";
 import * as _ from "lodash";
 import MeasureGroupAlerts from "./MeasureGroupAlerts";
 import camelCaseConverter from "../../utils/camelCaseConverter";
+
 import "../common/madie-link.scss";
-import "./MeasureGroups.scss";
+import "./MeasureGroups.scss"; //247-249,387,400,430,438,476,903-907,1003-1008
 
 const ButtonSpacer = styled.span`
   margin-left: 15px;
@@ -933,7 +934,18 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                   </MenuItemContainer>
                 </div>
 
+                {/* Populations Tab */}
+
                 {activeTab === "populations" && (
+                  // to do: Condense poppulations Tab into a single component
+                  //   <PopulationsTab
+                  //   formik={formik} // avoid passing entire formik object
+                  //   canEdit={canEdit}
+                  //   measure={measure}
+                  //   expressionDefinitions={expressionDefinitions}
+                  //   GroupPopulation={GroupPopulation}
+                  //   setAssociationChanged={setAssociationChanged}
+                  //   />
                   <FieldArray
                     name="populations"
                     render={(arrayHelpers) => (

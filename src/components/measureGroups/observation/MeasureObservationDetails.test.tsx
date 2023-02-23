@@ -1,5 +1,6 @@
 import * as React from "react";
 import { render, getByRole, screen } from "@testing-library/react";
+import { Simulate } from "react-dom/test-utils";
 import userEvent from "@testing-library/user-event";
 import {
   MeasureObservation,
@@ -330,6 +331,51 @@ describe("Measure Observation Details", () => {
     expect(handleChange).toHaveBeenCalledWith({
       ...measureObservation,
       definition: "MyFunc1",
+    });
+  });
+
+  it("should fire change event for measure observation description change", async () => {
+    const elmJson = JSON.stringify({
+      library: {
+        statements: {
+          def: [
+            {
+              type: "FunctionDef",
+              name: "MyFunc1",
+            },
+            {
+              type: "FunctionDef",
+              name: "My Func 2",
+            },
+          ],
+        },
+      },
+    });
+
+    const measureObservation: MeasureObservation = {
+      id: "1234",
+      definition: null,
+    };
+    const handleChange = jest.fn();
+    render(
+      <MeasureObservationDetails
+        name={"obs1"}
+        required={false}
+        elmJson={elmJson}
+        measureObservation={measureObservation}
+        onChange={handleChange}
+        canEdit
+      />
+    );
+
+    const observationDescription = screen.getByTestId("obs1-description");
+    expect(observationDescription).toBeInTheDocument();
+
+    userEvent.paste(observationDescription, "newVal");
+    expect(handleChange).toHaveBeenCalledTimes(1);
+    expect(handleChange).toHaveBeenCalledWith({
+      ...measureObservation,
+      description: "newVal",
     });
   });
 
