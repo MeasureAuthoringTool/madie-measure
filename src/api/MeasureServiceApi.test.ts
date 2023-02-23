@@ -257,7 +257,7 @@ describe("MeasureServiceApi Tests", () => {
     mockedAxios.get.mockRejectedValueOnce(resp);
 
     try {
-      await measureServiceApi.getMeasureExport("IDIDID1");
+      await measureServiceApi.getMeasureExport("1");
       expect(mockedAxios.get).toBeCalledTimes(1);
     } catch (error) {
       expect(error.message).toBe("Unable to zip the measure");
