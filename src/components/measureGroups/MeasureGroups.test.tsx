@@ -127,6 +127,7 @@ describe("Measure Groups Page", () => {
           id: "id-1",
           name: PopulationType.INITIAL_POPULATION,
           definition: "Initial Population",
+          description: "",
         },
       ],
       groupDescription: "",
@@ -309,6 +310,16 @@ describe("Measure Groups Page", () => {
       target: { value: group.populations[0].definition },
     });
 
+    // Update the definition
+    const initialPopulationDescription = screen.getByTestId(
+      "initialPopulation-description"
+    );
+    expect(initialPopulationDescription).toBeInTheDocument();
+    act(() => {
+      userEvent.paste(initialPopulationDescription, "newVal");
+    });
+    expect(initialPopulationDescription.value).toBe("newVal");
+    // Select measure group type
     const measureGroupTypeSelect = screen.getByTestId(
       "measure-group-type-dropdown"
     );
@@ -679,6 +690,7 @@ describe("Measure Groups Page", () => {
           name: PopulationType.INITIAL_POPULATION,
           definition:
             "VTE Prophylaxis by Medication Administered or Device Applied",
+          description: "",
           associationType: undefined,
         },
       ],

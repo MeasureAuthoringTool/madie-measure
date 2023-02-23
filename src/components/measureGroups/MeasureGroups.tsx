@@ -1016,7 +1016,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                     inputProps={{
                                       "data-testid": `${population.name}-description`,
                                     }}
-                                    data-testid="measure-name-text-field"
+                                    data-testid={`${population.name}-description`}
                                   />
                                 </div>
                                 <MeasureGroupObservation
