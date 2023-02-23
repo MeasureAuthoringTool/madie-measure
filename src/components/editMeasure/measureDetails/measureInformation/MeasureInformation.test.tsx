@@ -130,6 +130,15 @@ describe("MeasureInformation component", () => {
       await screen.findByText("Measurement Information Updated Successfully")
     ).toBeInTheDocument();
 
+    const toastCloseButton = await screen.findByTestId("close-error-button");
+    expect(toastCloseButton).toBeInTheDocument();
+    act(() => {
+      fireEvent.click(toastCloseButton);
+    });
+    await waitFor(() => {
+      expect(toastCloseButton).not.toBeInTheDocument();
+    });
+
     await waitFor(() =>
       expect(serviceApiMock.updateMeasure).toBeCalledWith({
         ...testMeasure,

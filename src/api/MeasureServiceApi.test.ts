@@ -233,4 +233,34 @@ describe("MeasureServiceApi Tests", () => {
     expect(mockedAxios.post).toBeCalledTimes(1);
     expect(resp.data).toEqual(measure);
   });
+
+  it("test getMeasureExport success", async () => {
+    const zippedMeasureData = {
+      size: 635581,
+      type: "application/octet-stream",
+    };
+    const resp = { status: 200, data: zippedMeasureData };
+    mockedAxios.get.mockResolvedValue(resp);
+
+    const measureExportData = await measureServiceApi.getMeasureExport(
+      "IDIDID1"
+    );
+    expect(mockedAxios.get).toBeCalledTimes(1);
+    expect(measureExportData).toEqual(zippedMeasureData);
+  });
+
+  it("test getMeasureExport failure", async () => {
+    const resp = {
+      status: 500,
+      error: { message: "Unable to zip the measure" },
+    };
+    mockedAxios.get.mockRejectedValueOnce(resp);
+
+    try {
+      await measureServiceApi.getMeasureExport("1");
+      expect(mockedAxios.get).toBeCalledTimes(1);
+    } catch (error) {
+      expect(error.message).toBe("Unable to zip the measure");
+    }
+  });
 });
