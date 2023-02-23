@@ -181,7 +181,7 @@ describe("Measure List component", () => {
     expect(mockPush).toHaveBeenCalledWith("/example");
   });
 
-  it("should display the popover with options of export and view when feature flag is set to true", async () => {
+  it("should display the popover with options of export and view when feature flag is set to true", () => {
     renderMeasureList();
     const actionButton = screen.getByTestId(`measure-action-${measures[0].id}`);
     expect(actionButton).toBeInTheDocument();
@@ -621,7 +621,6 @@ describe("Measure List component", () => {
       fireEvent.click(screen.getByTestId(`export-measure-${measures[0].id}`));
       fail("Unable to zip the measure");
     } catch (err) {
-      console.log(err);
       expect(err).toHaveProperty("message", "Unable to zip the measure");
     }
   });
