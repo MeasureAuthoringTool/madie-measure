@@ -619,7 +619,6 @@ describe("Measure List component", () => {
     ).toBeInTheDocument();
     try {
       fireEvent.click(screen.getByTestId(`export-measure-${measures[0].id}`));
-      fail("Unable to zip the measure");
     } catch (err) {
       expect(err).toHaveProperty("message", "Unable to zip the measure");
     }
@@ -657,7 +656,3 @@ describe("Measure List component", () => {
     });
   });
 });
-
-function fail(error: string) {
-  throw new Error(error);
-}
