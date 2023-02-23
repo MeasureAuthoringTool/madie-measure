@@ -25,6 +25,7 @@ import {
   Select,
   DSLink,
   AutoComplete,
+  TextArea as MadieTextArea,
   Toast,
 } from "@madie/madie-design-system/dist/react";
 import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
@@ -49,8 +50,10 @@ import MeasureGroupScoringUnit from "./scoringUnit/MeasureGroupScoringUnit";
 import MeasureGroupObservation from "./observation/MeasureGroupObservation";
 import * as _ from "lodash";
 import MeasureGroupAlerts from "./MeasureGroupAlerts";
+import camelCaseConverter from "../../utils/camelCaseConverter";
+
 import "../common/madie-link.scss";
-import "./MeasureGroups.scss";
+import "./MeasureGroups.scss"; //247-249,387,400,430,438,476,903-907,1003-1008
 
 const ButtonSpacer = styled.span`
   margin-left: 15px;
@@ -61,13 +64,22 @@ const MenuItemContainer = tw.ul`bg-transparent flex pt-12 pb-4 border-b`;
 interface ColSpanPopulationsType {
   isExclusionPop?: boolean;
   isSecondInitialPopulation?: boolean;
+  children?: any;
 }
 
-const ColSpanPopulations = styled.div((props: ColSpanPopulationsType) => [
-  props.isSecondInitialPopulation || props.isExclusionPop
-    ? tw`lg:col-start-2`
-    : tw`lg:col-start-1`,
-]);
+const ColSpanPopulations = (props: ColSpanPopulationsType) => {
+  return (
+    <div
+      className={
+        props.isSecondInitialPopulation || props.isExclusionPop
+          ? "second"
+          : "first"
+      }
+    >
+      {props.children}
+    </div>
+  );
+};
 
 // const FormField = tw.div`mt-6 grid grid-cols-4`;
 const FormFieldInner = tw.div`lg:col-span-3`;
@@ -922,11 +934,22 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                   </MenuItemContainer>
                 </div>
 
+                {/* Populations Tab */}
+
                 {activeTab === "populations" && (
+                  // to do: Condense poppulations Tab into a single component
+                  //   <PopulationsTab
+                  //   formik={formik} // avoid passing entire formik object
+                  //   canEdit={canEdit}
+                  //   measure={measure}
+                  //   expressionDefinitions={expressionDefinitions}
+                  //   GroupPopulation={GroupPopulation}
+                  //   setAssociationChanged={setAssociationChanged}
+                  //   />
                   <FieldArray
                     name="populations"
                     render={(arrayHelpers) => (
-                      <div tw="grid lg:grid-cols-4 gap-4 py-5 px-2">
+                      <div id="populations-content">
                         {formik.values.populations?.map((population, index) => {
                           const fieldProps = {
                             name: `populations[${index}].definition`,
@@ -947,20 +970,55 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                 }
                                 isExclusionPop={isExclusionPop}
                               >
-                                <Field
-                                  {...fieldProps}
-                                  component={GroupPopulation}
-                                  cqlDefinitions={expressionDefinitions}
-                                  populations={formik.values.populations}
-                                  population={population}
-                                  populationIndex={index}
-                                  scoring={formik.values.scoring}
-                                  canEdit={canEdit}
-                                  insertCallback={arrayHelpers.insert}
-                                  removeCallback={arrayHelpers.remove}
-                                  replaceCallback={arrayHelpers.replace}
-                                  setAssociationChanged={setAssociationChanged}
-                                />
+                                <div className="population-col-gap-24">
+                                  <Field
+                                    {...fieldProps}
+                                    component={GroupPopulation}
+                                    cqlDefinitions={expressionDefinitions}
+                                    populations={formik.values.populations}
+                                    population={population}
+                                    populationIndex={index}
+                                    scoring={formik.values.scoring}
+                                    canEdit={canEdit}
+                                    insertCallback={arrayHelpers.insert}
+                                    removeCallback={arrayHelpers.remove}
+                                    replaceCallback={arrayHelpers.replace}
+                                    setAssociationChanged={
+                                      setAssociationChanged
+                                    }
+                                  />
+                                  <MadieTextArea
+                                    value={
+                                      formik.values.populations[index]
+                                        .description
+                                    }
+                                    label={
+                                      population?.name
+                                        ? `${camelCaseConverter(
+                                            population.name
+                                          )} Description`
+                                        : undefined
+                                    }
+                                    onChange={(_event: any) => {
+                                      const currentPopulations = [
+                                        ...formik.values.populations,
+                                      ];
+                                      currentPopulations[index].description =
+                                        _event.target.value;
+                                      formik.setFieldValue(
+                                        "populations",
+                                        currentPopulations
+                                      );
+                                    }}
+                                    name={`populations[${index}].description`}
+                                    id={`${population.name}-description`}
+                                    placeholder="-"
+                                    inputProps={{
+                                      "data-testid": `${population.name}-description`,
+                                    }}
+                                    data-testid={`${population.name}-description`}
+                                  />
+                                </div>
                                 <MeasureGroupObservation
                                   canEdit={canEdit}
                                   scoring={formik.values.scoring}
@@ -973,7 +1031,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                             </React.Fragment>
                           );
                         })}
-                        <div tw="lg:col-start-1">
+                        <div>
                           <MeasureGroupObservation
                             canEdit={canEdit}
                             scoring={formik.values.scoring}
