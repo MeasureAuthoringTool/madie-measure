@@ -39,7 +39,6 @@ const MeasureGroupObservation = ({
     label = `${population.name} ${label}`;
     observationName = population.name;
     criteriaReference = population.id;
-    style = { paddingLeft: 20, paddingTop: 30 };
     measureObservation = formik.values.measureObservations?.find(
       (mo) => mo.criteriaReference === population.id
     );
@@ -63,39 +62,37 @@ const MeasureGroupObservation = ({
   // we either return measureObservation, or the means to create one at the moment.
   // We want three cases, MO, add, none
   return measureObservation ? (
-    <div style={style}>
-      <MeasureObservationDetails
-        canEdit={canEdit}
-        label={label}
-        errors={error ? error : ""}
-        required={required}
-        name={observationName}
-        elmJson={elmJson}
-        measureObservation={measureObservation}
-        onChange={(nextObservation) => {
-          const updatedObservations = [
-            ...formik.values.measureObservations.filter(
-              (mo) => mo.id !== nextObservation.id
-            ),
-            nextObservation,
-          ];
-          formik.setFieldValue("measureObservations", updatedObservations);
-        }}
-        onRemove={(removedObservation) => {
-          const updatedObservations = [
-            ...formik.values.measureObservations.filter(
-              (mo) => mo.id !== removedObservation.id
-            ),
-          ];
-          formik.setFieldValue("measureObservations", updatedObservations);
-        }}
-      />
-    </div>
+    <MeasureObservationDetails
+      canEdit={canEdit}
+      label={label}
+      errors={error ? error : ""}
+      required={required}
+      name={observationName}
+      elmJson={elmJson}
+      measureObservation={measureObservation}
+      onChange={(nextObservation) => {
+        const updatedObservations = [
+          ...formik.values.measureObservations.filter(
+            (mo) => mo.id !== nextObservation.id
+          ),
+          nextObservation,
+        ];
+        formik.setFieldValue("measureObservations", updatedObservations);
+      }}
+      onRemove={(removedObservation) => {
+        const updatedObservations = [
+          ...formik.values.measureObservations.filter(
+            (mo) => mo.id !== removedObservation.id
+          ),
+        ];
+        formik.setFieldValue("measureObservations", updatedObservations);
+      }}
+    />
   ) : (
-    <div tw="mx-7">
+    <div className="observation-button add">
       {canEdit && (
         <DSLink
-          className="madie-link"
+          className="madie-link add"
           style={{ textDecoration: "none" }}
           href=""
           onClick={(e) => {

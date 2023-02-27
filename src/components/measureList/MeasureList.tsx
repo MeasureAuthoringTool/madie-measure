@@ -14,8 +14,6 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
-import JSzip from "jszip";
-import { saveAs } from "file-saver";
 import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
 import CreatVersionDialog from "../createVersionDialog/CreateVersionDialog";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
@@ -217,7 +215,7 @@ export default function MeasureList(props: {
     if (exportFeature) {
       const exportButton = {
         label: "Export",
-        toImplementFunction: zipData,
+        toImplementFunction: exportMeasure,
         dataTestId: `export-measure-${selected?.id}`,
       };
       additionalOptions.push(exportButton);
@@ -255,14 +253,23 @@ export default function MeasureList(props: {
     setOptionsOpen(false);
   };
 
-  const zipData = () => {
-    const zip = new JSzip();
-    zip.generateAsync({ type: "blob" }).then(function (content) {
-      saveAs(
-        content,
+  const exportMeasure = async () => {
+    try {
+      const blobResponse = await measureServiceApi.getMeasureExport(
+        targetMeasure?.current?.id
+      );
+      const url = window.URL.createObjectURL(blobResponse);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
         `${targetMeasure.current?.ecqmTitle}-v${targetMeasure.current?.version}-${targetMeasure.current?.model}.zip`
       );
-    });
+      document.body.appendChild(link);
+      link.click();
+    } catch (err) {
+      return err;
+    }
   };
 
   const doUpdateList = () => {
