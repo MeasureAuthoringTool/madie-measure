@@ -67,7 +67,7 @@ export const allPopulations = [
 export const findPopulations = (
   populations: Population[],
   populationType: PopulationType
-) => {
+): any => {
   return populations?.filter(
     (population) => population.name === populationType
   );

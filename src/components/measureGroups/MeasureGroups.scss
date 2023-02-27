@@ -15,8 +15,12 @@ input {
   .first,
   .second {
     margin-top: 24px;
-    .observation-button {
+    .add-population-button {
       margin-top: 24px;
+      .remove,
+      .add {
+        text-decoration: none;
+      }
       .remove {
         color: #d92f2f;
       }
@@ -32,6 +36,7 @@ input {
   flex-direction: row;
   flex-grow: 1;
   column-gap: 24px;
+  align-items: baseline;
   > div:first-of-type {
     width: 300px;
     min-width: 300px;
