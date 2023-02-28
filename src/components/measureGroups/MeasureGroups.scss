@@ -6,3 +6,34 @@ input {
     color: #717171 !important;
   }
 }
+
+#populations-content {
+  .second {
+    margin-left: 16px;
+  }
+
+  .first,
+  .second {
+    margin-top: 24px;
+    .observation-button {
+      margin-top: 24px;
+      .remove {
+        color: #d92f2f;
+      }
+      .add {
+        color: #0073c8;
+      }
+    }
+  }
+}
+
+.population-col-gap-24 {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  column-gap: 24px;
+  > div:first-of-type {
+    width: 300px;
+    min-width: 300px;
+  }
+}

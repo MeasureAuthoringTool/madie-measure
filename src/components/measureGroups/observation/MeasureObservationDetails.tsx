@@ -6,7 +6,12 @@ import {
   MeasureObservation,
   AGGREGATE_FUNCTION_KEYS,
 } from "@madie/madie-models";
-import { DSLink, Select } from "@madie/madie-design-system/dist/react";
+import {
+  DSLink,
+  Select,
+  TextArea,
+} from "@madie/madie-design-system/dist/react";
+import camelCaseConverter from "../../../utils/camelCaseConverter";
 
 const AGGREGATE_FUNCTIONS = Array.from(AGGREGATE_FUNCTION_KEYS.keys()).sort();
 
@@ -34,7 +39,6 @@ const MeasureObservationDetails = ({
   errors,
 }: MeasureObservationProps) => {
   const [cqlFunctionNames, setCqlFunctionNames] = useState([]);
-
   useEffect(() => {
     if (elmJson) {
       const elm = JSON.parse(elmJson);
@@ -48,66 +52,65 @@ const MeasureObservationDetails = ({
   // todo elmJson doesn't have any functions
   return (
     <>
-      <div tw="relative">
-        {!required && canEdit && (
-          <DSLink
-            className="madie-link"
-            style={{
-              position: "relative",
-              left: "13rem",
-              bottom: "-1.4rem",
-              zIndex: "1",
+      <div className="first">
+        <div className="population-col-gap-24">
+          <Select
+            placeHolder={{ name: "Select Observation", value: "" }}
+            required={required}
+            disabled={!canEdit}
+            label={label ? label : "Observation"}
+            id={`measure-observation-${name}`}
+            data-testid={`select-measure-observation-${name}`}
+            inputProps={{
+              "data-testid": `measure-observation-${name}-input`,
             }}
-            href=""
-            variant="text"
-            onClick={(e) => {
-              e.preventDefault();
-              if (onRemove) {
-                onRemove(measureObservation);
+            error={!!errors?.definition}
+            helperText={errors?.definition}
+            value={measureObservation?.definition || ""}
+            onChange={(e) => {
+              if (onChange) {
+                onChange({
+                  ...measureObservation,
+                  definition: e.target.value,
+                });
               }
             }}
-            data-testid={`measure-observation-${name}-remove`}
-          >
-            Remove
-          </DSLink>
-        )}
-        <Select
-          placeHolder={{ name: "Select Observation", value: "" }}
-          required={required}
-          disabled={!canEdit}
-          label={label ? label : "Observation"}
-          id={`measure-observation-${name}`}
-          data-testid={`select-measure-observation-${name}`}
-          inputProps={{
-            "data-testid": `measure-observation-${name}-input`,
-          }}
-          error={!!errors?.definition}
-          helperText={errors?.definition}
-          style={{ width: 300 }}
-          value={measureObservation?.definition || ""}
-          onChange={(e) => {
-            if (onChange) {
-              onChange({
-                ...measureObservation,
-                definition: e.target.value,
-              });
+            options={[
+              !required && (
+                <MenuItem key="-" value="">
+                  -
+                </MenuItem>
+              ),
+              ...cqlFunctionNames.map((o) => (
+                <MenuItem key={o} value={o}>
+                  {o}
+                </MenuItem>
+              )),
+            ]}
+          />
+          <TextArea
+            id={`${name}-description`}
+            data-testid={`${name}-description`}
+            name={`${name} Description`}
+            label={
+              label ? `${camelCaseConverter(label)} Description` : undefined
             }
-          }}
-          options={[
-            !required && (
-              <MenuItem key="-" value="">
-                -
-              </MenuItem>
-            ),
-            ...cqlFunctionNames.map((o) => (
-              <MenuItem key={o} value={o}>
-                {o}
-              </MenuItem>
-            )),
-          ]}
-        />
+            placeholder="-"
+            // to do: input following props
+            value={measureObservation?.description || ""}
+            onChange={(e) => {
+              if (onChange) {
+                onChange({
+                  ...measureObservation,
+                  description: e.target.value,
+                });
+              }
+            }}
+            inputProps={{ "data-testid": `${name}-description` }}
+          />
+        </div>
       </div>
-      <div tw="pb-3 px-8 pt-6">
+      <div className="second" style={{ width: 300 }}>
         <Select
           placeHolder={{ name: "Select Aggregate Function", value: "" }}
           disabled={!canEdit}
@@ -118,7 +121,6 @@ const MeasureObservationDetails = ({
           inputProps={{
             "data-testid": `measure-observation-aggregate-${name}-input`,
           }}
-          style={{ width: 300 }}
           value={measureObservation?.aggregateMethod || ""}
           onChange={(e) => {
             if (onChange) {
@@ -143,6 +145,24 @@ const MeasureObservationDetails = ({
           ]}
         />
       </div>
+      {!required && canEdit && (
+        <div className="observation-button remove">
+          <DSLink
+            className="madie-link remove"
+            href=""
+            variant="text"
+            onClick={(e) => {
+              e.preventDefault();
+              if (onRemove) {
+                onRemove(measureObservation);
+              }
+            }}
+            data-testid={`measure-observation-${name}-remove`}
+          >
+            Remove
+          </DSLink>
+        </div>
+      )}
     </>
   );
 };

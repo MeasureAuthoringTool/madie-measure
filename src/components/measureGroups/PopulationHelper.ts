@@ -8,41 +8,49 @@ export const initialPopulation = {
   id: "",
   name: PopulationType.INITIAL_POPULATION,
   definition: "",
+  description: "",
 };
 const denominator = {
   id: "",
   name: PopulationType.DENOMINATOR,
   definition: "",
+  description: "",
 };
 const denominatorExclusion = {
   id: "",
   name: PopulationType.DENOMINATOR_EXCLUSION,
   definition: "",
+  description: "",
 };
 const denominatorException = {
   id: "",
   name: PopulationType.DENOMINATOR_EXCEPTION,
   definition: "",
+  description: "",
 };
 const numerator = {
   id: "",
   name: PopulationType.NUMERATOR,
   definition: "",
+  description: "",
 };
 const numeratorExclusion = {
   id: "",
   name: PopulationType.NUMERATOR_EXCLUSION,
   definition: "",
+  description: "",
 };
 const measurePopulation = {
   id: "",
   name: PopulationType.MEASURE_POPULATION,
   definition: "",
+  description: "",
 };
 const measurePopulationExclusion = {
   id: "",
   name: PopulationType.MEASURE_POPULATION_EXCLUSION,
   definition: "",
+  description: "",
 };
 
 export const allPopulations = [

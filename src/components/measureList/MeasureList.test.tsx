@@ -29,6 +29,7 @@ jest.mock("@madie/madie-util", () => ({
     measureVersioning: true,
   }),
 }));
+
 jest.mock("../../api/useMeasureServiceApi");
 const useMeasureServiceMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
@@ -38,17 +39,22 @@ const mockMeasureServiceApi = {
     .mockResolvedValue(oneItemResponse),
   fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
   createVersion: jest.fn().mockResolvedValue({}),
+  getMeasureExport: jest
+    .fn()
+    .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
 } as unknown as MeasureServiceApi;
 
 jest.mock("../../api/useMeasureServiceApi", () =>
   jest.fn(() => mockMeasureServiceApi)
 );
+
 const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
 
 const measures: Measure[] = [
   {
     id: "IDIDID1",
     measureHumanReadableId: null,
+    ecqmTitle: "ecqmTitleeee",
     measureSetId: "1",
     version: "0.0.000",
     state: "NEW",
@@ -122,6 +128,10 @@ describe("Measure List component", () => {
   beforeEach(() => {
     measures.forEach((m) => {
       m.measureHumanReadableId = uuid();
+    });
+
+    useMeasureServiceMock.mockReset().mockImplementation(() => {
+      return mockMeasureServiceApi;
     });
   });
 
@@ -588,6 +598,61 @@ describe("Measure List component", () => {
       expect(screen.getByTestId("error-toast")).toHaveTextContent(
         "An error occurred, please try again. If the error persists, please contact the help desk."
       );
+    });
+  });
+
+  it("should display the error when there is any issue in zipping the measure", async () => {
+    useMeasureServiceMock.mockImplementation(() => {
+      return {
+        ...mockMeasureServiceApi,
+        getMeasureExport: jest
+          .fn()
+          .mockRejectedValue(new Error("Unable to zip the measure")),
+      };
+    });
+
+    renderMeasureList();
+    const actionButton = screen.getByTestId(`measure-action-${measures[0].id}`);
+    fireEvent.click(actionButton);
+    expect(
+      screen.getByTestId(`export-measure-${measures[0].id}`)
+    ).toBeInTheDocument();
+    try {
+      fireEvent.click(screen.getByTestId(`export-measure-${measures[0].id}`));
+    } catch (err) {
+      expect(err).toHaveProperty("message", "Unable to zip the measure");
+    }
+  });
+
+  it("should call the export api to generate the measure zip file", async () => {
+    useMeasureServiceMock.mockImplementation(() => {
+      return {
+        ...mockMeasureServiceApi,
+        getMeasureExport: jest.fn().mockResolvedValue({
+          size: 635581,
+          type: "application/octet-stream",
+        }),
+      };
+    });
+
+    renderMeasureList();
+    const actionButton = screen.getByTestId(`measure-action-${measures[0].id}`);
+    fireEvent.click(actionButton);
+    const link = {
+      click: jest.fn(),
+      setAttribute: jest.fn(),
+    };
+    window.URL.createObjectURL = jest
+      .fn()
+      .mockReturnValueOnce("http://fileurl");
+    document.body.appendChild = jest.fn();
+    document.createElement = jest.fn().mockReturnValueOnce(link);
+    expect(
+      screen.getByTestId(`export-measure-${measures[0].id}`)
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId(`export-measure-${measures[0].id}`));
+    await waitFor(() => {
+      expect(link.click).toBeCalled();
     });
   });
 });
