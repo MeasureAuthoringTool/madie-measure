@@ -40,7 +40,7 @@ const selectorProps = {
 };
 
 describe("Measure Group Population Select Component", () => {
-  test("Component loads when omitting default value and options.", () => {
+  test("Component loads when omitting default value and options.", async () => {
     const omitProps = {
       label: "Population Test",
       hidden: false,
@@ -48,15 +48,19 @@ describe("Measure Group Population Select Component", () => {
       name: "population-test",
       canEdit: true,
     };
+    const subTitle = "I am subtitle";
     render(
       <MeasureGroupPopulationSelect
         {...omitProps}
         onChange={mockOnChangeHandler}
+        subTitle={subTitle}
       />
     );
     expect(
       screen.getByTestId("select-measure-group-population-input")
     ).toHaveAttribute("required");
+    const result = await screen.findByText(subTitle);
+    expect(result).toBeInTheDocument();
   });
 
   test("Required inputs should indicate if they are required", async () => {
