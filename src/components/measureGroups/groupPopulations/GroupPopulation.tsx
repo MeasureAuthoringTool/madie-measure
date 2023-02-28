@@ -89,45 +89,6 @@ const GroupPopulation = ({
     return population.associationType;
   };
 
-  //find the other initial population (if any) and change the association type to the opposite
-  const changeAssociation = () => {
-    if (scoring === GroupScoring.RATIO) {
-      const ips = findPopulations(
-        populations,
-        PopulationType.INITIAL_POPULATION
-      );
-      if (ips && ips.length === 2) {
-        ips.forEach((ip) => {
-          if (ip.id !== population.id) {
-            if (
-              population.associationType ===
-              InitialPopulationAssociationType.DENOMINATOR
-            ) {
-              ip.associationType = InitialPopulationAssociationType.NUMERATOR;
-            } else if (
-              population.associationType ===
-              InitialPopulationAssociationType.NUMERATOR
-            ) {
-              ip.associationType = InitialPopulationAssociationType.DENOMINATOR;
-            }
-            const index = findIndex(ip, populations);
-            replaceCallback(index, ip);
-            setAssociationChanged(true);
-          }
-        });
-      } else {
-        replaceCallback(populationIndex, population);
-      }
-    }
-  };
-  const findIndex = (population: Population, populations: Population[]) => {
-    for (let index = 0; index < populations?.length; index++) {
-      const temp = populations[index];
-      if (population.id === temp.id) {
-        return index;
-      }
-    }
-  };
   const getInitialPopulationSize = () => {
     if (scoring === GroupScoring.RATIO) {
       const ips = findPopulations(
@@ -159,7 +120,6 @@ const GroupPopulation = ({
       scoring={scoring}
       population={population}
       initialPopulationSize={initialPopulationSize}
-      changeAssociationCallback={() => changeAssociation()}
     />
   );
 };
