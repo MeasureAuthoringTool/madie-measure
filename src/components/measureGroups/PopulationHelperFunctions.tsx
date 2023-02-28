@@ -1,4 +1,3 @@
-// import { insertCallback, removeCallback, replaceCallback } from
 import { GroupScoring, Population, PopulationType } from "@madie/madie-models";
 import { findPopulations } from "./PopulationHelper";
 import { v4 as uuidv4 } from "uuid";

@@ -2002,9 +2002,6 @@ describe("Measure Groups Page", () => {
       userEvent.click(addIpLink);
     });
     await waitFor(() => {
-      // expect(
-      //   screen.queryByTestId("measure-group-initial-population-association-id-1")
-      // ).toBeInTheDocument();
       expect((ip1DenomAssociation as HTMLInputElement).checked).toEqual(false);
       expect((ip1NumerAssociation as HTMLInputElement).checked).toEqual(true);
     });

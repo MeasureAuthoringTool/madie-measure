@@ -950,9 +950,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                           };
                           const descriptionName = `populations[${index}].description`;
 
-                          const descriptionFieldProps = {
-                            name: `populations[${index}].description`,
-                          };
                           // if the population is exclusion of something then it should be in col 2
                           const isExclusionPop = population.name
                             .toLowerCase()
@@ -988,7 +985,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                   />
                                   {/* PopulationDescription */}
                                   <GroupsDescription
-                                    name={descriptionFieldProps.name}
+                                    name={descriptionName}
                                     canEdit={canEdit}
                                     label={
                                       population?.name
