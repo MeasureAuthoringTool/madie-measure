@@ -1,34 +1,11 @@
 import { GroupScoring, Population, PopulationType } from "@madie/madie-models";
 import { findPopulations } from "./PopulationHelper";
-import { v4 as uuidv4 } from "uuid";
 import * as _ from "lodash";
 
 export enum InitialPopulationAssociationType {
   DENOMINATOR = "Denominator",
   NUMERATOR = "Numerator",
 }
-
-export const addPopulation = (insertCallback, scoring, population, index) => {
-  //scoring and population
-  // check scoring, population type and then invoke insert on index
-  let secondAssociation = undefined;
-  if (scoring === GroupScoring.RATIO) {
-    const ip = population;
-    if (ip?.associationType === InitialPopulationAssociationType.DENOMINATOR) {
-      secondAssociation = InitialPopulationAssociationType.NUMERATOR;
-    } else if (
-      ip?.associationType === InitialPopulationAssociationType.NUMERATOR
-    ) {
-      secondAssociation = InitialPopulationAssociationType.DENOMINATOR;
-    }
-  }
-  insertCallback(index + 1, {
-    id: uuidv4(),
-    name: population.name,
-    definition: "",
-    associationType: secondAssociation,
-  });
-};
 
 export const showAddPopulationLink = (
   scoring: string,
@@ -48,10 +25,6 @@ export const showAddPopulationLink = (
   return false;
 };
 
-export const removePopulationCallback = (removeCallback) => {
-  removeCallback;
-};
-
 export const findIndex = (
   population: Population,
   populations: Population[]
@@ -60,40 +33,6 @@ export const findIndex = (
     const temp = populations[index];
     if (population.id === temp.id) {
       return index;
-    }
-  }
-};
-export const changeAssociation = (
-  populationIndex,
-  scoring,
-  populations,
-  population,
-  replaceCallback,
-  setAssociationChanged
-) => {
-  if (scoring === GroupScoring.RATIO) {
-    const ips = findPopulations(populations, PopulationType.INITIAL_POPULATION);
-    if (ips && ips.length === 2) {
-      ips.forEach((ip) => {
-        if (ip.id !== population.id) {
-          if (
-            population.associationType ===
-            InitialPopulationAssociationType.DENOMINATOR
-          ) {
-            ip.associationType = InitialPopulationAssociationType.NUMERATOR;
-          } else if (
-            population.associationType ===
-            InitialPopulationAssociationType.NUMERATOR
-          ) {
-            ip.associationType = InitialPopulationAssociationType.DENOMINATOR;
-          }
-          const index = findIndex(ip, populations);
-          replaceCallback(index, ip);
-          setAssociationChanged(true);
-        }
-      });
-    } else {
-      replaceCallback(populationIndex, population);
     }
   }
 };
