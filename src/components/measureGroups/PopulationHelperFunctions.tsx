@@ -13,7 +13,6 @@ export const addPopulation = (insertCallback, scoring, population, index) => {
   // check scoring, population type and then invoke insert on index
   let secondAssociation = undefined;
   if (scoring === GroupScoring.RATIO) {
-    // const ip = populations[populationIndex];
     const ip = population;
     if (ip?.associationType === InitialPopulationAssociationType.DENOMINATOR) {
       secondAssociation = InitialPopulationAssociationType.NUMERATOR;
@@ -44,7 +43,6 @@ export const showAddPopulationLink = (
       ips &&
       ips.length === 1 &&
       population.name === PopulationType.INITIAL_POPULATION
-      // ips.name === PopulationType.INITIAL_POPULATION
     );
   }
   return false;
@@ -118,7 +116,6 @@ export const isPopulationRemovable = (
   if (scoring === GroupScoring.RATIO) {
     const ips = findPopulations(populations, PopulationType.INITIAL_POPULATION);
     // if there are 2 IPs, remove IP link is shown for second IP
-    // return ips && ips.length === 2 && populationIndex === 1;
     return ips && ips.length === 2 && index === 1;
   }
   return false;
