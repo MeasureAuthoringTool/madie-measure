@@ -6,7 +6,6 @@ import { GroupScoring, Population, PopulationType } from "@madie/madie-models";
 import { FormikState, getIn } from "formik";
 import { FieldInputProps } from "formik/dist/types";
 import { findPopulations, isPopulationRequired } from "../PopulationHelper";
-import { v4 as uuidv4 } from "uuid";
 
 export enum InitialPopulationAssociationType {
   DENOMINATOR = "Denominator",
@@ -37,8 +36,6 @@ const GroupPopulation = ({
   populationIndex,
   scoring,
   canEdit,
-  insertCallback,
-  removeCallback,
   replaceCallback,
   setAssociationChanged,
 }: Props) => {
@@ -56,42 +53,6 @@ const GroupPopulation = ({
     };
   };
 
-  const showAddPopulationLink = (
-    scoring: string,
-    populations: Population[]
-  ) => {
-    // For ratio group
-    if (scoring === GroupScoring.RATIO) {
-      const ips = findPopulations(
-        populations,
-        PopulationType.INITIAL_POPULATION
-      );
-      // if IP is one, add second IP link is shown
-      return (
-        ips &&
-        ips.length === 1 &&
-        population.name === PopulationType.INITIAL_POPULATION
-      );
-    }
-    return false;
-  };
-
-  const isPopulationRemovable = (
-    scoring: string,
-    populations: Population[]
-  ) => {
-    // for ratio measure
-    if (scoring === GroupScoring.RATIO) {
-      const ips = findPopulations(
-        populations,
-        PopulationType.INITIAL_POPULATION
-      );
-      // if there are 2 IPs, remove IP link is shown for second IP
-      return ips && ips.length === 2 && populationIndex === 1;
-    }
-    return false;
-  };
-
   // when new copy of this population is added, label needs to be adjusted
   // e.g. Initial Population becomes "Initial Population 1"
   // If more than one IP, second IP becomes "Initial Population 2"
@@ -105,29 +66,6 @@ const GroupPopulation = ({
       return `${label} ${populationIndex + 1}`;
     }
     return label;
-  };
-
-  // add copy of this population
-  const addPopulation = () => {
-    let secondAssociation = undefined;
-    if (scoring === GroupScoring.RATIO) {
-      const ip = populations[populationIndex];
-      if (
-        ip?.associationType === InitialPopulationAssociationType.DENOMINATOR
-      ) {
-        secondAssociation = InitialPopulationAssociationType.NUMERATOR;
-      } else if (
-        ip?.associationType === InitialPopulationAssociationType.NUMERATOR
-      ) {
-        secondAssociation = InitialPopulationAssociationType.DENOMINATOR;
-      }
-    }
-    insertCallback(populationIndex + 1, {
-      id: uuidv4(),
-      name: population.name,
-      definition: "",
-      associationType: secondAssociation,
-    });
   };
 
   const getAssociationType = (label) => {
@@ -151,45 +89,6 @@ const GroupPopulation = ({
     return population.associationType;
   };
 
-  //find the other initial population (if any) and change the association type to the opposite
-  const changeAssociation = () => {
-    if (scoring === GroupScoring.RATIO) {
-      const ips = findPopulations(
-        populations,
-        PopulationType.INITIAL_POPULATION
-      );
-      if (ips && ips.length === 2) {
-        ips.forEach((ip) => {
-          if (ip.id !== population.id) {
-            if (
-              population.associationType ===
-              InitialPopulationAssociationType.DENOMINATOR
-            ) {
-              ip.associationType = InitialPopulationAssociationType.NUMERATOR;
-            } else if (
-              population.associationType ===
-              InitialPopulationAssociationType.NUMERATOR
-            ) {
-              ip.associationType = InitialPopulationAssociationType.DENOMINATOR;
-            }
-            const index = findIndex(ip, populations);
-            replaceCallback(index, ip);
-            setAssociationChanged(true);
-          }
-        });
-      } else {
-        replaceCallback(populationIndex, population);
-      }
-    }
-  };
-  const findIndex = (population: Population, populations: Population[]) => {
-    for (let index = 0; index < populations?.length; index++) {
-      const temp = populations[index];
-      if (population.id === temp.id) {
-        return index;
-      }
-    }
-  };
   const getInitialPopulationSize = () => {
     if (scoring === GroupScoring.RATIO) {
       const ips = findPopulations(
@@ -207,8 +106,6 @@ const GroupPopulation = ({
   const showError =
     Boolean(error) &&
     (getIn(form.touched, field.name) || population.definition);
-  const isRemovable = isPopulationRemovable(scoring, populations);
-  const canBeAdded = showAddPopulationLink(scoring, populations);
   selectorProps.label = correctPopulationLabel(populations, population);
   population.associationType = getAssociationType(selectorProps.label);
   const initialPopulationSize = getInitialPopulationSize();
@@ -220,14 +117,9 @@ const GroupPopulation = ({
       helperText={showError ? error : ""}
       error={showError}
       canEdit={canEdit}
-      removePopulationCallback={() => removeCallback(populationIndex)}
-      isRemovable={isRemovable}
-      showAddPopulationLink={canBeAdded}
-      addPopulationCallback={addPopulation}
       scoring={scoring}
       population={population}
       initialPopulationSize={initialPopulationSize}
-      changeAssociationCallback={() => changeAssociation()}
     />
   );
 };

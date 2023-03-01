@@ -89,7 +89,7 @@ const MeasureGroupObservation = ({
       }}
     />
   ) : (
-    <div className="observation-button add">
+    <div className="add-population-button add">
       {canEdit && (
         <DSLink
           className="madie-link add"
