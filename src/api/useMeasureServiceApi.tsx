@@ -1,5 +1,6 @@
 import React from "react";
 import axios from "axios";
+import fail from "jest";
 import useServiceConfig from "./useServiceConfig";
 import { ServiceConfig } from "./ServiceContext";
 import { Measure, Group, Organization } from "@madie/madie-models";
@@ -25,6 +26,27 @@ export class MeasureServiceApi {
       console.error(message);
       console.error(err);
       throw new Error(err);
+    }
+  }
+
+  async fetchMeasureDraftStatuses(measureSetIds: string[]): Promise<any> {
+    const idsParam = measureSetIds.join(",");
+    console.log(`fetchMeasureDraftStatuses: [${idsParam}]`);
+    try {
+      const response = await axios.get<any>(`${this.baseUrl}/draftstatus`, {
+        headers: {
+          Authorization: `Bearer ${this.getAccessToken()}`,
+        },
+        params: {
+          measureSetIds: idsParam,
+        },
+      });
+      console.log("response", response);
+      return response.data;
+    } catch (err) {
+      const message = `Unable to fetch measure draft statuses`;
+      console.error(message, err);
+      throw new Error(message);
     }
   }
 
