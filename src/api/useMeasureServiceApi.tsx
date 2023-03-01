@@ -31,7 +31,6 @@ export class MeasureServiceApi {
 
   async fetchMeasureDraftStatuses(measureSetIds: string[]): Promise<any> {
     const idsParam = measureSetIds.join(",");
-    console.log(`fetchMeasureDraftStatuses: [${idsParam}]`);
     try {
       const response = await axios.get<any>(`${this.baseUrl}/draftstatus`, {
         headers: {
@@ -41,7 +40,6 @@ export class MeasureServiceApi {
           measureSetIds: idsParam,
         },
       });
-      console.log("response", response);
       return response.data;
     } catch (err) {
       const message = `Unable to fetch measure draft statuses`;
