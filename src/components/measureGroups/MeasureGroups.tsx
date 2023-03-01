@@ -25,7 +25,6 @@ import {
   Select,
   DSLink,
   AutoComplete,
-  TextArea as MadieTextArea,
   Toast,
 } from "@madie/madie-design-system/dist/react";
 import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
@@ -50,6 +49,10 @@ import MeasureGroupScoringUnit from "./scoringUnit/MeasureGroupScoringUnit";
 import MeasureGroupObservation from "./observation/MeasureGroupObservation";
 import * as _ from "lodash";
 import MeasureGroupAlerts from "./MeasureGroupAlerts";
+import AddRemovePopulation from "./groupPopulations/AddRemovePopulation";
+import GroupsDescription from "./GroupsDescription";
+
+// import Add
 import camelCaseConverter from "../../utils/camelCaseConverter";
 
 import "../common/madie-link.scss";
@@ -935,17 +938,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                 </div>
 
                 {/* Populations Tab */}
-
                 {activeTab === "populations" && (
                   // to do: Condense poppulations Tab into a single component
-                  //   <PopulationsTab
-                  //   formik={formik} // avoid passing entire formik object
-                  //   canEdit={canEdit}
-                  //   measure={measure}
-                  //   expressionDefinitions={expressionDefinitions}
-                  //   GroupPopulation={GroupPopulation}
-                  //   setAssociationChanged={setAssociationChanged}
-                  //   />
                   <FieldArray
                     name="populations"
                     render={(arrayHelpers) => (
@@ -954,6 +948,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                           const fieldProps = {
                             name: `populations[${index}].definition`,
                           };
+                          const descriptionName = `populations[${index}].description`;
+
                           // if the population is exclusion of something then it should be in col 2
                           const isExclusionPop = population.name
                             .toLowerCase()
@@ -971,8 +967,10 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                 isExclusionPop={isExclusionPop}
                               >
                                 <div className="population-col-gap-24">
+                                  {/* Population Definition */}
                                   <Field
                                     {...fieldProps}
+                                    descriptionName={descriptionName}
                                     component={GroupPopulation}
                                     cqlDefinitions={expressionDefinitions}
                                     populations={formik.values.populations}
@@ -980,18 +978,15 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                     populationIndex={index}
                                     scoring={formik.values.scoring}
                                     canEdit={canEdit}
-                                    insertCallback={arrayHelpers.insert}
-                                    removeCallback={arrayHelpers.remove}
                                     replaceCallback={arrayHelpers.replace}
                                     setAssociationChanged={
                                       setAssociationChanged
                                     }
                                   />
-                                  <MadieTextArea
-                                    value={
-                                      formik.values.populations[index]
-                                        .description
-                                    }
+                                  {/* PopulationDescription */}
+                                  <GroupsDescription
+                                    name={descriptionName}
+                                    canEdit={canEdit}
                                     label={
                                       population?.name
                                         ? `${camelCaseConverter(
@@ -999,26 +994,27 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                           )} Description`
                                         : undefined
                                     }
-                                    onChange={(_event: any) => {
-                                      const currentPopulations = [
-                                        ...formik.values.populations,
-                                      ];
-                                      currentPopulations[index].description =
-                                        _event.target.value;
-                                      formik.setFieldValue(
-                                        "populations",
-                                        currentPopulations
-                                      );
-                                    }}
-                                    name={`populations[${index}].description`}
-                                    id={`${population.name}-description`}
-                                    placeholder="-"
-                                    inputProps={{
-                                      "data-testid": `${population.name}-description`,
-                                    }}
-                                    data-testid={`${population.name}-description`}
+                                    setFieldValue={formik.setFieldValue}
+                                    value={
+                                      formik.values.populations[index]
+                                        .description
+                                    }
                                   />
                                 </div>
+                                {/* Single component for add and remove */}
+                                <AddRemovePopulation
+                                  field={fieldProps}
+                                  scoring={formik.values.scoring}
+                                  index={index}
+                                  populations={formik.values.populations}
+                                  population={population}
+                                  canEdit={canEdit}
+                                  insertCallback={arrayHelpers.insert}
+                                  removeCallback={arrayHelpers.remove}
+                                  replaceCallback={arrayHelpers.replace}
+                                  setAssociationChanged={setAssociationChanged}
+                                />
+                                {/* add or remove logic must live here */}
                                 <MeasureGroupObservation
                                   canEdit={canEdit}
                                   scoring={formik.values.scoring}

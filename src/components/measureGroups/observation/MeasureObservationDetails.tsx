@@ -146,7 +146,7 @@ const MeasureObservationDetails = ({
         />
       </div>
       {!required && canEdit && (
-        <div className="observation-button remove">
+        <div className="add-population-button remove">
           <DSLink
             className="madie-link remove"
             href=""
