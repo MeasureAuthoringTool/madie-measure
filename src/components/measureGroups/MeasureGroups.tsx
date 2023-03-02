@@ -799,6 +799,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                         [...populations].map((p) => ({
                           ...p,
                           id: uuidv4(),
+                          description: "",
                         }))
                       );
                       formik.setFieldValue("measureObservations", observations);
@@ -968,6 +969,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                               >
                                 <div className="population-col-gap-24">
                                   {/* Population Definition */}
+
                                   <Field
                                     {...fieldProps}
                                     descriptionName={descriptionName}
