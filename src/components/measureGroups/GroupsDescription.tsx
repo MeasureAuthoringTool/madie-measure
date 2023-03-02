@@ -10,7 +10,7 @@ type Props = {
   canEdit: Boolean;
 };
 
-const GroupsDescription = React.memo((props: Props) => {
+const GroupsDescription = (props: Props) => {
   const { name, value, setFieldValue, label, canEdit } = props;
   //   preserve a local copy of state. Update against formik values
   const [localText, setLocalText] = useState(value);
@@ -20,10 +20,13 @@ const GroupsDescription = React.memo((props: Props) => {
     (field, value) => setFieldValue(field, value),
     250
   );
-  // every 1 second after an udpate to our local text, we update the formik value
+  // every 250 ms after an udpate to our local text, we update the formik value
   useEffect(() => {
     debounced(name, localText);
   }, [localText]);
+  useEffect(() => {
+    setLocalText(value);
+  }, [value]);
 
   return (
     <TextArea
@@ -45,6 +48,6 @@ const GroupsDescription = React.memo((props: Props) => {
       data-testid={`${name}-description`}
     />
   );
-});
+};
 
 export default GroupsDescription;
