@@ -28,6 +28,25 @@ export class MeasureServiceApi {
     }
   }
 
+  async fetchMeasureDraftStatuses(measureSetIds: string[]): Promise<any> {
+    const idsParam = measureSetIds.join(",");
+    try {
+      const response = await axios.get<any>(`${this.baseUrl}/draftstatus`, {
+        headers: {
+          Authorization: `Bearer ${this.getAccessToken()}`,
+        },
+        params: {
+          measureSetIds: idsParam,
+        },
+      });
+      return response.data;
+    } catch (err) {
+      const message = `Unable to fetch measure draft statuses`;
+      console.error(message, err);
+      throw new Error(message);
+    }
+  }
+
   async fetchMeasures(
     filterByCurrentUser: boolean,
     limit: number = 25,
