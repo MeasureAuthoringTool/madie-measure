@@ -49,6 +49,45 @@ describe("MeasureServiceApi Tests", () => {
     }
   });
 
+  it("handles fetch measure draft status rejection", async () => {
+    const resp = { status: 500, data: "failure", error: { message: "error" } };
+    mockedAxios.get.mockRejectedValueOnce(resp);
+
+    try {
+      await measureServiceApi.fetchMeasureDraftStatuses([
+        "aaaaa",
+        "bbbbb",
+        "ccccc",
+      ]);
+      expect(false).toBeTruthy(); // expecting a failure
+    } catch (error) {
+      expect(error.message).toBe("Unable to fetch measure draft statuses");
+    }
+  });
+
+  it("fetches measure draft statuses", async () => {
+    const resp = {
+      status: 200,
+      data: {
+        aaaaa: true,
+        bbbbb: true,
+        ccccc: false,
+      },
+    };
+    mockedAxios.get.mockResolvedValueOnce(resp);
+
+    try {
+      const statuses = await measureServiceApi.fetchMeasureDraftStatuses([
+        "aaaaa",
+        "bbbbb",
+        "ccccc",
+      ]);
+      expect(statuses).toEqual(resp.data);
+    } catch (error) {
+      expect(error.message).toBe("Unable to fetch measure draft statuses");
+    }
+  });
+
   it("get return types for all cql definitions when no definition is found", () => {
     let returnTypes = measureServiceApi.getReturnTypesForAllCqlDefinitions("");
     expect(returnTypes).toEqual({});

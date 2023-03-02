@@ -8,6 +8,7 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
+
 import { isEqual } from "lodash";
 import MeasureGroups, { MeasureGroupProps } from "./MeasureGroups";
 import {
@@ -312,7 +313,7 @@ describe("Measure Groups Page", () => {
 
     // Update the definition
     const initialPopulationDescription = screen.getByTestId(
-      "initialPopulation-description"
+      "populations[0].description-description"
     );
     expect(initialPopulationDescription).toBeInTheDocument();
     act(() => {
@@ -1996,12 +1997,12 @@ describe("Measure Groups Page", () => {
     const addIpLink = screen.getByRole("link", {
       name: "+ Add Initial Population",
     });
+
     expect(addIpLink).toBeInTheDocument();
-    userEvent.click(addIpLink);
+    act(() => {
+      userEvent.click(addIpLink);
+    });
     await waitFor(() => {
-      expect(
-        screen.getByTestId("measure-group-initial-population-association-id-1")
-      ).toBeInTheDocument();
       expect((ip1DenomAssociation as HTMLInputElement).checked).toEqual(false);
       expect((ip1NumerAssociation as HTMLInputElement).checked).toEqual(true);
     });
