@@ -46,9 +46,9 @@ const AddRemovePopulation = ({
   const isRemovable = isPopulationRemovable(scoring, populations, index);
   const initialPopulationSize = getInitialPopulationSize(scoring, populations);
 
-  const removePopulation = (evt) => {
+  const removePopulation = (evt, index) => {
     evt.preventDefault();
-    removeCallback();
+    removeCallback(index);
   };
 
   const changeAssociationCallback = () => {
@@ -106,6 +106,7 @@ const AddRemovePopulation = ({
       id: uuidv4(),
       name: population.name,
       definition: "",
+      description: "",
       associationType: secondAssociation,
     });
   };
@@ -138,7 +139,7 @@ const AddRemovePopulation = ({
             data-testid={`remove_${field.name}`}
             onClick={(evt) => {
               evt.preventDefault();
-              removePopulation(evt);
+              removePopulation(evt, index);
             }}
           >
             Remove{" "}
