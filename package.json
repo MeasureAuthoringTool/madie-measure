@@ -84,7 +84,7 @@
     "react-router": "^5.3.4",
     "react-router-dom": "^5.3.4",
     "style-loader": "^3.3.1",
-    "styled-components": "^5.3.1",
+    "styled-components": "^5.3.7",
     "tailwindcss": "^2.2.9",
     "ts-config-single-spa": "^3.0.0",
     "twin.macro": "^2.7.0",
