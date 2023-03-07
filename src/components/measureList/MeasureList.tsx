@@ -255,20 +255,29 @@ export default function MeasureList(props: {
 
   const exportMeasure = async () => {
     try {
-      const blobResponse = await measureServiceApi.getMeasureExport(
-        targetMeasure?.current?.id
+      const { ecqmTitle, model, version } = targetMeasure?.current ?? {};
+      const url = window.URL.createObjectURL(
+        await measureServiceApi?.getMeasureExport(targetMeasure.current?.id)
       );
-      const url = window.URL.createObjectURL(blobResponse);
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute(
         "download",
-        `${targetMeasure.current?.ecqmTitle}-v${targetMeasure.current?.version}-${targetMeasure.current?.model}.zip`
+        `${ecqmTitle}-v${version}-${getModelFamily(model)}.zip`
       );
       document.body.appendChild(link);
       link.click();
     } catch (err) {
       return err;
+    }
+  };
+
+  const getModelFamily = (model: string) => {
+    if (model) {
+      const modelVersion = model?.split(" ")[1]?.split(".")[0]?.charAt(1);
+      return model && model.startsWith("QI-Core")
+        ? `FHIR${modelVersion}`
+        : `${model?.split(" ")[0]}${modelVersion}`;
     }
   };
 
