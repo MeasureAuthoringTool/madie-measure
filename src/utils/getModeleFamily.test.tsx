@@ -33,13 +33,11 @@ const measures: Measure[] = [
 describe("Check Modal Family", () => {
   it("checking if the model family is same as what provided when the model is not QI-Core", () => {
     const modelFamily = getModelFamily(measures[0].model);
-    console.log(modelFamily);
     expect(modelFamily).toBe("QDM4");
   });
 
   it("checking if the model family is maped to FHIR when the measure model is QI-Core", () => {
     const modelFamily = getModelFamily(measures[1].model);
-    console.log(modelFamily);
     expect(modelFamily).toBe("FHIR5");
   });
 });
