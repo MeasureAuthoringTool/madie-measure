@@ -130,7 +130,7 @@ describe("MeasureMetadataHelper", () => {
   });
 
   it("should retrieve guidance value", () => {
-    const actual = getInitialValues(measure, "guidance");
+    const actual = getInitialValues(measure, "guidance-usage");
     expect(actual).toBe(GUIDANCE);
   });
 
@@ -187,7 +187,7 @@ describe("MeasureMetadataHelper", () => {
   });
 
   it("should reset guidance value", () => {
-    setMeasureMetadata(measure, "guidance", NEWVALUE);
+    setMeasureMetadata(measure, "guidance-usage", NEWVALUE);
     expect(measure.measureMetaData.guidance).toBe(NEWVALUE);
   });
 

@@ -80,7 +80,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
           id: "sideNavMeasureRationale",
         },
         {
-          title: "Guidance",
+          title: "Guidance (Usage)",
           href: guidanceLink,
           dataTestId: "leftPanelMeasureGuidance",
           id: "sideNavMeasureGuidance",
@@ -195,8 +195,8 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
           <Route path={guidanceLink}>
             <MeasureMetadata
               measureMetadataId="Guidance"
-              measureMetadataType="Guidance"
-              header="Guidance"
+              measureMetadataType="Guidance (Usage)"
+              header="Guidance (Usage)"
               setErrorMessage={setErrorMessage}
             />
           </Route>
