@@ -19,6 +19,7 @@ import CreatVersionDialog from "../createVersionDialog/CreateVersionDialog";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import DraftMeasureDialog from "../draftMeasureDialog/DraftMeasureDialog";
 import versionErrorHelper from "../../utils/versionErrorHelper";
+import getModelFamily from "../../utils/measureModelHelpers";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -255,18 +256,19 @@ export default function MeasureList(props: {
 
   const exportMeasure = async () => {
     try {
-      const blobResponse = await measureServiceApi.getMeasureExport(
-        targetMeasure?.current?.id
+      const { ecqmTitle, model, version } = targetMeasure?.current ?? {};
+      const url = window.URL.createObjectURL(
+        await measureServiceApi?.getMeasureExport(targetMeasure.current?.id)
       );
-      const url = window.URL.createObjectURL(blobResponse);
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute(
         "download",
-        `${targetMeasure.current?.ecqmTitle}-v${targetMeasure.current?.version}-${targetMeasure.current?.model}.zip`
+        `${ecqmTitle}-v${version}-${getModelFamily(model)}.zip`
       );
       document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     } catch (err) {
       return err;
     }
