@@ -19,6 +19,7 @@ import CreatVersionDialog from "../createVersionDialog/CreateVersionDialog";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import DraftMeasureDialog from "../draftMeasureDialog/DraftMeasureDialog";
 import versionErrorHelper from "../../utils/versionErrorHelper";
+import getModelFamily from "../../utils/getModelFamily";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -269,15 +270,6 @@ export default function MeasureList(props: {
       link.click();
     } catch (err) {
       return err;
-    }
-  };
-
-  const getModelFamily = (model: string) => {
-    if (model) {
-      const modelVersion = model?.split(" ")[1]?.split(".")[0]?.charAt(1);
-      return model && model.startsWith("QI-Core")
-        ? `FHIR${modelVersion}`
-        : `${model?.split(" ")[0]}${modelVersion}`;
     }
   };
 
