@@ -30,7 +30,7 @@ const measures: Measure[] = [
   },
 ];
 
-describe("Measure List component", () => {
+describe("Check Modal Family", () => {
   it("checking if the model family is same as what provided when the model is not QI-Core", () => {
     const modelFamily = getModelFamily(measures[0].model);
     console.log(modelFamily);
