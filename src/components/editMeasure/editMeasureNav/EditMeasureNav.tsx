@@ -47,6 +47,7 @@ const EditMeasureNav = () => {
     pathname !== `${url}/details/measure-rationale` &&
     pathname !== `${url}/details/measure-guidance` &&
     pathname !== `${url}/details/measure-clinical-recommendation` &&
+    pathname !== `${url}/review-info` &&
     //pathname !== `${url}/details/measure-risk-adjustment` &&
     !pathname.startsWith(`${url}/test-cases`)
   ) {
@@ -109,6 +110,12 @@ const EditMeasureNav = () => {
           isActive={pathname.startsWith(`${url}/test-cases`)}
         >
           <NavLinkCustom to={`${url}/test-cases`}>Test Cases</NavLinkCustom>
+        </MenuItem>
+        <MenuItem
+          data-testid="review-tab"
+          isActive={pathname.startsWith(`${url}/review-info`)}
+        >
+          <NavLinkCustom to={`${url}/review-info`}>Review Info</NavLinkCustom>
         </MenuItem>
       </MenuItemContainer>
     </div>
