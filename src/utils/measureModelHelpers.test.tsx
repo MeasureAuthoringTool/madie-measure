@@ -1,5 +1,5 @@
 import { Measure } from "@madie/madie-models";
-import getModelFamily from "./getModelFamily";
+import getModelFamily from "./measureModelHelpers";
 
 const measures: Measure[] = [
   {

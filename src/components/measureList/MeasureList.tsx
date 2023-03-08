@@ -19,7 +19,7 @@ import CreatVersionDialog from "../createVersionDialog/CreateVersionDialog";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import DraftMeasureDialog from "../draftMeasureDialog/DraftMeasureDialog";
 import versionErrorHelper from "../../utils/versionErrorHelper";
-import getModelFamily from "../../utils/getModelFamily";
+import getModelFamily from "../../utils/measureModelHelpers";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
