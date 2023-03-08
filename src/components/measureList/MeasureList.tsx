@@ -268,6 +268,7 @@ export default function MeasureList(props: {
       );
       document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     } catch (err) {
       return err;
     }
