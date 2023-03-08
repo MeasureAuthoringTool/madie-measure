@@ -4,7 +4,7 @@ import "../measureDetails/MeasureDetails.scss";
 
 const ReviewInfo = () => {
   return (
-    <div id="meta-data-container">
+    <div id="review-info" data-testid="review-info">
       <MetaDataWrapper
         header="Review Info"
         canEdit={false}
