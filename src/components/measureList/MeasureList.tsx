@@ -258,10 +258,10 @@ export default function MeasureList(props: {
   const exportMeasure = async () => {
     try {
       const { ecqmTitle, model, version } = targetMeasure?.current ?? {};
-      const outdata = await measureServiceApi?.getMeasureExport(
+      const exportData = await measureServiceApi?.getMeasureExport(
         targetMeasure.current?.id
       );
-      const url = window.URL.createObjectURL(outdata);
+      const url = window.URL.createObjectURL(exportData);
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute(
@@ -296,44 +296,6 @@ export default function MeasureList(props: {
         setToastMessage(
           "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists."
         );
-    }
-  };
-
-  const handleExportMeasureError = (
-    err: any,
-    targetedMeasure: any,
-    setToastOpen: any,
-    setToastType: any,
-    setToastMessage: any
-  ) => {
-    const errorStatus = err.response?.status;
-    setToastOpen(true);
-    setToastType("danger");
-
-    if (errorStatus === 409) {
-      const isEmptyCql = _.isEmpty(targetedMeasure?.cql);
-
-      if (!isEmptyCql && _.isEmpty(targetedMeasure?.groups)) {
-        setToastMessage(
-          "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain Population Criteria."
-        );
-      } else if (
-        targetedMeasure?.cqlErrors ||
-        targetedMeasure?.errors ||
-        (!isEmptyCql && !_.isEmpty(targetedMeasure?.groups))
-      ) {
-        setToastMessage(
-          "Unable to Export measure. Measure Bundle could not be generated as Measure contains errors."
-        );
-      } else {
-        setToastMessage(
-          "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain CQL."
-        );
-      }
-    } else {
-      setToastMessage(
-        "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists."
-      );
     }
   };
 
