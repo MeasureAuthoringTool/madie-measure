@@ -291,7 +291,6 @@ describe("MeasureServiceApi Tests", () => {
   it("test getMeasureExport failure", async () => {
     const resp = {
       status: 500,
-      error: { message: "Unable to zip the measure" },
     };
     mockedAxios.get.mockRejectedValueOnce(resp);
 
@@ -299,7 +298,7 @@ describe("MeasureServiceApi Tests", () => {
       await measureServiceApi.getMeasureExport("1");
       expect(mockedAxios.get).toBeCalledTimes(1);
     } catch (error) {
-      expect(error.message).toBe("Unable to zip the measure");
+      expect(error.status).toBe(500);
     }
   });
 });
