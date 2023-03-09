@@ -20,6 +20,7 @@ import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import DraftMeasureDialog from "../draftMeasureDialog/DraftMeasureDialog";
 import versionErrorHelper from "../../utils/versionErrorHelper";
 import getModelFamily from "../../utils/measureModelHelpers";
+import _ from "lodash";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -257,9 +258,10 @@ export default function MeasureList(props: {
   const exportMeasure = async () => {
     try {
       const { ecqmTitle, model, version } = targetMeasure?.current ?? {};
-      const url = window.URL.createObjectURL(
-        await measureServiceApi?.getMeasureExport(targetMeasure.current?.id)
+      const outdata = await measureServiceApi?.getMeasureExport(
+        targetMeasure.current?.id
       );
+      const url = window.URL.createObjectURL(outdata);
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute(
@@ -268,9 +270,70 @@ export default function MeasureList(props: {
       );
       document.body.appendChild(link);
       link.click();
+      setToastOpen(true);
+      setToastType("success");
+      setToastMessage("Measure exported successfully");
       document.body.removeChild(link);
     } catch (err) {
-      return err;
+      const errorStatus = err.response?.status;
+      const targetedMeasure = targetMeasure.current;
+      setToastOpen(true);
+      setToastType("danger");
+      if (errorStatus === 409 && !_.isEmpty(targetMeasure.current?.cql)) {
+        if (_.isEmpty(targetedMeasure?.groups))
+          setToastMessage(
+            "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain Population Criteria."
+          );
+        else if (targetedMeasure?.cqlErrors || targetedMeasure?.errors)
+          setToastMessage(
+            "Unable to Export measure. Measure Bundle could not be generated as Measure contains errors."
+          );
+      } else if (errorStatus === 409 && _.isEmpty(targetedMeasure?.cql))
+        setToastMessage(
+          "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain CQL."
+        );
+      else
+        setToastMessage(
+          "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists."
+        );
+    }
+  };
+
+  const handleExportMeasureError = (
+    err: any,
+    targetedMeasure: any,
+    setToastOpen: any,
+    setToastType: any,
+    setToastMessage: any
+  ) => {
+    const errorStatus = err.response?.status;
+    setToastOpen(true);
+    setToastType("danger");
+
+    if (errorStatus === 409) {
+      const isEmptyCql = _.isEmpty(targetedMeasure?.cql);
+
+      if (!isEmptyCql && _.isEmpty(targetedMeasure?.groups)) {
+        setToastMessage(
+          "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain Population Criteria."
+        );
+      } else if (
+        targetedMeasure?.cqlErrors ||
+        targetedMeasure?.errors ||
+        (!isEmptyCql && !_.isEmpty(targetedMeasure?.groups))
+      ) {
+        setToastMessage(
+          "Unable to Export measure. Measure Bundle could not be generated as Measure contains errors."
+        );
+      } else {
+        setToastMessage(
+          "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain CQL."
+        );
+      }
+    } else {
+      setToastMessage(
+        "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists."
+      );
     }
   };
 
