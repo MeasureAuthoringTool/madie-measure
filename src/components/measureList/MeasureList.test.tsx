@@ -49,7 +49,13 @@ jest.mock("../../api/useMeasureServiceApi", () =>
 );
 
 const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
-
+const testGroup = [
+  {
+    id: "test",
+    scoring: "Cohort",
+    measureGroupTypes: ["OUTCOME"],
+  },
+];
 const measures: Measure[] = [
   {
     id: "IDIDID1",
@@ -77,7 +83,7 @@ const measures: Measure[] = [
     version: "0.0.000",
     state: "DRAFT",
     measureName: "draft measure - B",
-    cql: null,
+    cql: "Sample Cql",
     createdAt: null,
     createdBy: null,
     lastModifiedAt: null,
@@ -96,6 +102,8 @@ const measures: Measure[] = [
     state: "VERSIONED",
     measureName: "versioned measure - C",
     cql: "Sample Cql",
+    cqlErrors: true,
+    groups: [testGroup],
     createdAt: null,
     createdBy: null,
     lastModifiedAt: null,
@@ -629,7 +637,7 @@ describe("Measure List component", () => {
     });
   });
 
-  it("should display the error when there are no associated population criteria while exporting the measure", async () => {
+  it("should display the error when there are return type mismatch or errors in cql while exporting the measure", async () => {
     const error = {
       response: {
         status: 409,
@@ -650,6 +658,34 @@ describe("Measure List component", () => {
       screen.getByTestId(`export-measure-${measures[2].id}`)
     ).toBeInTheDocument();
     fireEvent.click(screen.getByTestId(`export-measure-${measures[2].id}`));
+    await waitFor(() => {
+      expect(screen.getByTestId("error-toast")).toHaveTextContent(
+        "Unable to Export measure. Measure Bundle could not be generated as Measure contains errors."
+      );
+    });
+  });
+
+  it("should display the error when there are no associated population criteria while exporting the measure", async () => {
+    const error = {
+      response: {
+        status: 409,
+      },
+    };
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return {
+        ...mockMeasureServiceApi,
+        getMeasureExport: jest.fn().mockRejectedValue(error),
+      };
+    });
+
+    renderMeasureList();
+    const actionButton = screen.getByTestId(`measure-action-${measures[1].id}`);
+    fireEvent.click(actionButton);
+    expect(
+      screen.getByTestId(`export-measure-${measures[1].id}`)
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId(`export-measure-${measures[1].id}`));
     await waitFor(() => {
       expect(screen.getByTestId("error-toast")).toHaveTextContent(
         "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain Population Criteria."
@@ -685,13 +721,18 @@ describe("Measure List component", () => {
   });
 
   it("should call the export api to generate the measure zip file", async () => {
+    const success = {
+      response: {
+        data: {
+          size: 635581,
+          type: "application/octet-stream",
+        },
+      },
+    };
     useMeasureServiceMock.mockImplementation(() => {
       return {
         ...mockMeasureServiceApi,
-        getMeasureExport: jest.fn().mockResolvedValue({
-          size: 635581,
-          type: "application/octet-stream",
-        }),
+        getMeasureExport: jest.fn().mockResolvedValue(success),
       };
     });
 

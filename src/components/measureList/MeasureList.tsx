@@ -279,23 +279,29 @@ export default function MeasureList(props: {
       const targetedMeasure = targetMeasure.current;
       setToastOpen(true);
       setToastType("danger");
-      if (errorStatus === 409 && !_.isEmpty(targetMeasure.current?.cql)) {
-        if (_.isEmpty(targetedMeasure?.groups))
+      if (errorStatus === 409) {
+        if (_.isEmpty(targetMeasure.current?.cql)) {
+          setToastMessage(
+            "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain CQL."
+          );
+        } else if (_.isEmpty(targetedMeasure?.groups)) {
           setToastMessage(
             "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain Population Criteria."
           );
-        else if (targetedMeasure?.cqlErrors || targetedMeasure?.errors)
+        } else if (targetedMeasure?.cqlErrors || targetedMeasure?.errors) {
           setToastMessage(
             "Unable to Export measure. Measure Bundle could not be generated as Measure contains errors."
           );
-      } else if (errorStatus === 409 && _.isEmpty(targetedMeasure?.cql))
-        setToastMessage(
-          "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain CQL."
-        );
-      else
+        } else {
+          setToastMessage(
+            "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists."
+          );
+        }
+      } else {
         setToastMessage(
           "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists."
         );
+      }
     }
   };
 
