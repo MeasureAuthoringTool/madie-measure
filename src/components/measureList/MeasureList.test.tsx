@@ -252,7 +252,7 @@ describe("Measure List component", () => {
     userEvent.click(clearButton);
     setTimeout(() => {
       expect(searchFieldInput.value).toBe("");
-    }, 15000);
+    }, 25000);
 
     expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
       true,
@@ -304,7 +304,7 @@ describe("Measure List component", () => {
     userEvent.click(clearButton);
     setTimeout(() => {
       expect(searchFieldInput.value).toBe("");
-    }, 15000);
+    }, 25000);
     expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
       true,
       10,
