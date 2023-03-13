@@ -21,7 +21,7 @@ const testMeasure = {
   measurementPeriodStart: "01/01/2023",
   measurementPeriodEnd: "12/31/2023",
   measureSetId: "testMeasureSetId",
-  acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
+  acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }], //#nosec
   programUseContext: {
     code: "ep-ec",
     display: "EP/EC",
