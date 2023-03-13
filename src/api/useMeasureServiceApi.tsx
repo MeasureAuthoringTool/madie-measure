@@ -353,23 +353,16 @@ export class MeasureServiceApi {
   }
 
   async getMeasureExport(measureId: string): Promise<Blob> {
-    try {
-      const response = await axios.get(
-        `${this.baseUrl}/measures/${measureId}/exports`,
-        {
-          headers: {
-            Authorization: `Bearer ${this.getAccessToken()}`,
-          },
-          responseType: "blob",
-        }
-      );
-      return response.data;
-    } catch (err) {
-      const message = `Unable to zip the measure`;
-      console.error(message);
-      console.error(err);
-      throw new Error(message);
-    }
+    const response = await axios.get(
+      `${this.baseUrl}/measures/${measureId}/exports`,
+      {
+        headers: {
+          Authorization: `Bearer ${this.getAccessToken()}`,
+        },
+        responseType: "blob",
+      }
+    );
+    return response.data;
   }
 
   async draftMeasure(measureId: string, measureName: string): Promise<Measure> {
