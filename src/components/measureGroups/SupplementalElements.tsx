@@ -133,7 +133,7 @@ export default function SupplementalElements() {
         );
       })
       .catch((err) => {
-        const message = `Error updating measure "${measure.measureName}": ${err}`;
+        const message = `Error updating measure "${measure.measureName}"`;
         handleToast("danger", message, true);
       });
   };
