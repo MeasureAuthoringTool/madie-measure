@@ -16,6 +16,7 @@ import {
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Typography } from "@mui/material";
+import { Organization } from "@madie/madie-models";
 
 const asterisk = { color: "#D92F2F", marginRight: 3 };
 
@@ -27,7 +28,7 @@ interface StewardAndDevelopersProps {
 export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
   const { setErrorMessage } = props;
   const measureServiceApi = useMeasureServiceApi();
-  const [organizations, setOrganizations] = useState<string[]>();
+  const [organizations, setOrganizations] = useState<Organization[]>();
   const [measure, setMeasure] = useState<any>(measureStore.state);
   const { updateMeasure } = measureStore;
 
@@ -54,8 +55,10 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
-      steward: measure?.measureMetaData?.steward || "",
-      developers: measure?.measureMetaData?.developers || [],
+      steward: measure?.measureMetaData?.steward?.name || "",
+      developers:
+        measure?.measureMetaData?.developers?.map((element) => element.name) ||
+        [],
     },
     validationSchema: Yup.object({
       steward: Yup.string().required("Steward is required"),
@@ -73,8 +76,10 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
       ...measure,
       measureMetaData: {
         ...measure.measureMetaData,
-        steward: values.steward,
-        developers: values.developers,
+        steward: organizations.find((org) => org.name === values.steward),
+        developers: organizations.filter((org) =>
+          values.developers?.includes(org.name)
+        ),
       },
     };
 
@@ -125,9 +130,9 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
     measureServiceApi
       .getAllOrganizations()
       .then((response) => {
-        const organizationsList = response
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .map((element) => element.name);
+        const organizationsList = response.sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
         setOrganizations(organizationsList);
       })
       .catch(() => {
@@ -166,7 +171,7 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
                 disabled={!canEdit}
                 error={formik.touched.steward && formik.errors["steward"]}
                 helperText={formik.touched.steward && formik.errors["steward"]}
-                options={organizations}
+                options={organizations.map((element) => element.name)}
                 {...formik.getFieldProps("steward")}
                 onChange={formik.setFieldValue}
                 onKeyDown={goBackToNav}
@@ -185,7 +190,7 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
                 helperText={
                   formik.touched.developers && formik.errors["developers"]
                 }
-                options={organizations}
+                options={organizations.map((element) => element.name)}
                 {...formik.getFieldProps("developers")}
                 onChange={formik.setFieldValue}
               />
