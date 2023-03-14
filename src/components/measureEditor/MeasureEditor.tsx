@@ -102,6 +102,15 @@ const MeasureEditor = () => {
           "CQL return types do not match population criteria! Test Cases will not execute until this issue is resolved."
         );
       }
+      if (
+        measure?.errors?.length > 0 &&
+        measure.errors.includes(MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA)
+      ) {
+        setToastOpen(true);
+        setToastMessage(
+          "Supplemental Data Elements or Risk Adjustment Variables in the Population Criteria section are invalid. Please check and update these values. Test cases will not execute until this issue is resolved."
+        );
+      }
     });
     return () => {
       subscription.unsubscribe();
