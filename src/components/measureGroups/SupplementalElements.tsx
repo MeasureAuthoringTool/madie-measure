@@ -16,7 +16,7 @@ import { Typography } from "@mui/material";
 import "../editMeasure/measureDetails/MeasureDetails.scss";
 import tw from "twin.macro";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
-import { SupplementalData } from "@madie/madie-models";
+import { SupplementalData, Measure } from "@madie/madie-models";
 import cloneDeep from "lodash/cloneDeep";
 import MeasureGroupAlerts from "./MeasureGroupAlerts";
 
@@ -28,8 +28,8 @@ const TextArea = tw.textarea`disabled:bg-slate shadow-sm focus:ring-primary-500 
 
 export default function SupplementalElements() {
   const measureServiceApi = useMeasureServiceApi();
-  const [measure, setMeasure] = useState<any>(measureStore.state);
   const { updateMeasure } = measureStore;
+  const [measure, setMeasure] = useState<any>(measureStore.state);
 
   const [allDefinitions, setAllDefinitions] = useState<string[]>([]);
   const [selectedSupplementalData, setSelectedSupplementalData] = useState<
@@ -100,7 +100,15 @@ export default function SupplementalElements() {
     },
   });
   const { resetForm } = formik;
-
+  const updateMeasureFromDb = async (measureId) => {
+    try {
+      const updatedMeasure = await measureServiceApi.fetchMeasure(measureId);
+      updateMeasure(updatedMeasure);
+      return updatedMeasure;
+    } catch (error) {
+      throw new Error("AError updating measure");
+    }
+  };
   const submitForm = (values) => {
     const submitMeasure = {
       ...measure,
@@ -109,16 +117,23 @@ export default function SupplementalElements() {
 
     measureServiceApi
       .updateMeasure(submitMeasure)
+      .then(async (response) => {
+        if (response === null || response.status != 200) {
+          throw new Error(
+            "EError updating measure, response was null, or non 200"
+          );
+        }
+        await updateMeasureFromDb(submitMeasure.id);
+      })
       .then(() => {
         handleToast(
           "success",
           `Supplement Data Element Information Saved Successfully`,
           true
         );
-        updateMeasure(submitMeasure);
       })
-      .catch(() => {
-        const message = `Error updating measure "${measure.measureName}"`;
+      .catch((err) => {
+        const message = `Error updating measure "${measure.measureName}": ${err}`;
         handleToast("danger", message, true);
       });
   };
