@@ -20,6 +20,7 @@ import { Toast, MadieAlert } from "@madie/madie-design-system/dist/react";
 import DeleteDialog from "./DeleteDialog";
 import NotFound from "../notfound/NotFound";
 import PopulationCriteriaHome from "../measureGroups/populationCriteriaHome/PopulationCriteriaHome";
+import ReviewInfo from "./reviewInfo/ReviewInfo";
 interface inputParams {
   id: string;
 }
@@ -152,6 +153,9 @@ export default function EditMeasure() {
             ]}
           >
             <PopulationCriteriaHome />
+          </Route>
+          <Route path={`${url}/review-info`}>
+            <ReviewInfo />
           </Route>
           <Route path="*">
             <NotFound />

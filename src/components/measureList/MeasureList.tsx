@@ -19,6 +19,8 @@ import CreatVersionDialog from "../createVersionDialog/CreateVersionDialog";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import DraftMeasureDialog from "../draftMeasureDialog/DraftMeasureDialog";
 import versionErrorHelper from "../../utils/versionErrorHelper";
+import getModelFamily from "../../utils/measureModelHelpers";
+import _ from "lodash";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -255,20 +257,51 @@ export default function MeasureList(props: {
 
   const exportMeasure = async () => {
     try {
-      const blobResponse = await measureServiceApi.getMeasureExport(
-        targetMeasure?.current?.id
+      const { ecqmTitle, model, version } = targetMeasure?.current ?? {};
+      const exportData = await measureServiceApi?.getMeasureExport(
+        targetMeasure.current?.id
       );
-      const url = window.URL.createObjectURL(blobResponse);
+      const url = window.URL.createObjectURL(exportData);
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute(
         "download",
-        `${targetMeasure.current?.ecqmTitle}-v${targetMeasure.current?.version}-${targetMeasure.current?.model}.zip`
+        `${ecqmTitle}-v${version}-${getModelFamily(model)}.zip`
       );
       document.body.appendChild(link);
       link.click();
+      setToastOpen(true);
+      setToastType("success");
+      setToastMessage("Measure exported successfully");
+      document.body.removeChild(link);
     } catch (err) {
-      return err;
+      const errorStatus = err.response?.status;
+      const targetedMeasure = targetMeasure.current;
+      setToastOpen(true);
+      setToastType("danger");
+      if (errorStatus === 409) {
+        if (_.isEmpty(targetMeasure.current?.cql)) {
+          setToastMessage(
+            "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain CQL."
+          );
+        } else if (_.isEmpty(targetedMeasure?.groups)) {
+          setToastMessage(
+            "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain Population Criteria."
+          );
+        } else if (targetedMeasure?.cqlErrors || targetedMeasure?.errors) {
+          setToastMessage(
+            "Unable to Export measure. Measure Bundle could not be generated as Measure contains errors."
+          );
+        } else {
+          setToastMessage(
+            "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists."
+          );
+        }
+      } else {
+        setToastMessage(
+          "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists."
+        );
+      }
     }
   };
 
