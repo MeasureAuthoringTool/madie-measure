@@ -106,7 +106,7 @@ export default function SupplementalElements() {
       updateMeasure(updatedMeasure);
       return updatedMeasure;
     } catch (error) {
-      throw new Error("AError updating measure");
+      throw new Error("Error updating measure");
     }
   };
   const submitForm = (values) => {
@@ -120,7 +120,7 @@ export default function SupplementalElements() {
       .then(async (response) => {
         if (response === null || response.status != 200) {
           throw new Error(
-            "EError updating measure, response was null, or non 200"
+            "Error updating measure, response was null, or non 200"
           );
         }
         await updateMeasureFromDb(submitMeasure.id);
