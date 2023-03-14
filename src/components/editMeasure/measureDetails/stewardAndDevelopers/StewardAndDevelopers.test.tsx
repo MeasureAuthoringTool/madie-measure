@@ -290,9 +290,6 @@ describe("Steward and Developers component", () => {
         developersAutoComplete
       ).queryByRole("button", { name: "Joint Commission" });
       expect(selectedDevelopersOption2).not.toBe(null);
-
-      const div = await screen.getByTestId("form-actions-1");
-      screen.debug(div);
       const saveButton = await screen.findByRole("button", { name: "Save" });
       expect(saveButton).toBeEnabled();
       fireEvent.click(saveButton);

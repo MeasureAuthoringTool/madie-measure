@@ -198,10 +198,8 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
           </>
         )}
       </div>
-      <div data-testid="form-actions-1">
-        <span>canEdit: {canEdit ? "Yes" : "No"}</span>
       {canEdit && (
-        <div className="form-actions" data-testid="form-actions-2">
+        <div className="form-actions">
           <Button
             variant="outline"
             data-testid="cancel-button"
@@ -222,7 +220,6 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
           </Button>
         </div>
       )}
-      </div>
       <Toast
         toastKey="steward-and-developers-toast"
         toastType={toastType}
