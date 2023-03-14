@@ -7,7 +7,7 @@ import {
   within,
 } from "@testing-library/react";
 import StewardAndDevelopers from "./StewardAndDevelopers";
-import { Measure } from "@madie/madie-models";
+import { Measure, MeasureMetadata, Organization } from "@madie/madie-models";
 import { checkUserCanEdit } from "@madie/madie-util";
 import useMeasureServiceApi, {
   MeasureServiceApi,
@@ -27,34 +27,43 @@ jest.mock("../../../../api/useMeasureServiceApi");
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 
-const organizationList = [
+const organizationList: Organization[] = [
   {
+    id: "1",
     name: "Net-Integrated Consulting, Inc.",
     oid: "1.2.3.4",
+    url: "nic.com",
   },
   {
+    id: "2",
     name: "GE Healthcare",
     oid: "1.2.840.113619",
+    url: "gh.com",
   },
   {
+    id: "3",
     name: "The Joint Commission",
     oid: "1.3.6.1.4.1.33895",
+    url: "tjc.com",
   },
   {
+    id: "4",
     name: "Joint Commission",
     oid: "1.3.6.1.4.1.33895.1.3.0",
+    url: "jc.com",
   },
 ];
 const testUser = "test user";
 const mockMetaData = {
-  steward: "GE Healthcare",
-  developers: ["GE Healthcare", "Joint Commission"],
+  steward: organizationList[1],
+  developers: organizationList.slice(1, 3),
   description: "Test Description",
   copyright: "Test Copyright",
   disclaimer: "Test Disclaimer",
   rationale: "Test Rationale",
   guidance: "Test Guidance",
-};
+} as unknown as MeasureMetadata;
+
 const mockMeasure = {
   id: "TestMeasureId",
   measureName: "The Measure for Testing",
@@ -194,7 +203,7 @@ describe("Steward and Developers component", () => {
 
   it("should render steward and developers fields with values from DB", async () => {
     checkUserCanEdit.mockImplementationOnce(() => true);
-    render(<StewardAndDevelopers />);
+    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
     const stewardAutoComplete = await screen.findByTestId("steward");
     const stewardComboBox = within(stewardAutoComplete).getByRole("combobox");
     expect(stewardComboBox).toHaveValue("GE Healthcare");
@@ -206,7 +215,7 @@ describe("Steward and Developers component", () => {
     expect(selectedDevelopersOption1).not.toBe(null);
     const selectedDevelopersOption2 = within(
       developersAutoComplete
-    ).queryByRole("button", { name: "Joint Commission" });
+    ).queryByRole("button", { name: "The Joint Commission" });
     expect(selectedDevelopersOption2).not.toBe(null);
   });
 
@@ -244,6 +253,7 @@ describe("Steward and Developers component", () => {
   });
 
   it("should enable save and discard button after updating options for steward and Developers", async () => {
+    checkUserCanEdit.mockImplementation(() => true);
     render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
     // Note that drop down options are alphabetically sorted
     await act(async () => {
@@ -261,11 +271,11 @@ describe("Steward and Developers component", () => {
 
       const developersOptions = await screen.findAllByRole("option");
       // deselecting existing options
-      fireEvent.click(developersOptions[0]);
-      fireEvent.click(developersOptions[1]);
+      fireEvent.click(developersOptions[0]); // GE
+      fireEvent.click(developersOptions[3]); // The JC
       // selects 1st & 3rd options
-      fireEvent.click(developersOptions[2]);
-      fireEvent.click(developersOptions[3]);
+      fireEvent.click(developersOptions[1]); // JC
+      fireEvent.click(developersOptions[2]); // NIC
       fireEvent.keyDown(developersAutoComplete, {
         key: "Escape",
         code: "Escape",
@@ -278,9 +288,11 @@ describe("Steward and Developers component", () => {
       expect(selectedDevelopersOption1).not.toBe(null);
       const selectedDevelopersOption2 = within(
         developersAutoComplete
-      ).queryByRole("button", { name: "The Joint Commission" });
+      ).queryByRole("button", { name: "Joint Commission" });
       expect(selectedDevelopersOption2).not.toBe(null);
 
+      const div = await screen.getByTestId("form-actions-1");
+      screen.debug(div);
       const saveButton = await screen.findByRole("button", { name: "Save" });
       expect(saveButton).toBeEnabled();
       fireEvent.click(saveButton);
@@ -290,8 +302,8 @@ describe("Steward and Developers component", () => {
       ...mockMeasure,
       measureMetaData: {
         ...mockMetaData,
-        steward: "Joint Commission",
-        developers: ["Net-Integrated Consulting, Inc.", "The Joint Commission"],
+        steward: organizationList[1],
+        developers: organizationList.slice(1, 3),
       },
     });
 
