@@ -5,6 +5,7 @@ module.exports = {
   transform: {
     "^.+\\.(j|t)sx?$": "babel-jest",
     "^.+\\.js?$": require.resolve("babel-jest"),
+    "^.+\\.svg$": "<rootDir>/svgTransform.js",
   },
   transformIgnorePatterns: ["node_modules/(?!formik)/"],
   moduleNameMapper: {

@@ -3,6 +3,7 @@ import { Measure } from "@madie/madie-models";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import "styled-components/macro";
 import {
+  AutoComplete,
   Button,
   MadieDiscardDialog,
   Toast,
@@ -16,6 +17,7 @@ import {
   measureStore,
   routeHandlerStore,
   checkUserCanEdit,
+  PROGRAM_USE_CONTEXTS,
 } from "@madie/madie-util";
 import { Box } from "@mui/system";
 import {
@@ -35,6 +37,7 @@ interface measureInformationForm {
   measureId: string;
   cmsId: string;
   experimental: boolean;
+  programUseContext: any;
 }
 
 interface MeasureInformationProps {
@@ -46,6 +49,9 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
+  const programUseContextOptions: string[] = PROGRAM_USE_CONTEXTS.map(
+    (puc) => puc.display
+  );
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
     return () => {
@@ -87,6 +93,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     cmsId: measure?.cmsId,
     measureId: measure?.measureSetId,
     experimental: measure?.measureMetaData?.experimental || false,
+    programUseContext: measure?.programUseContext || [],
   } as measureInformationForm;
 
   const formik = useFormik({
@@ -348,6 +355,37 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             }
             label="Experimental"
           />
+        </Box>
+        <Box sx={formRowGapped}>
+          <AutoComplete
+            formControl={formik.getFieldProps("programUseContext")}
+            id="programUseContext"
+            dataTestId="programUseContext"
+            label="Program Use Context"
+            placeHolder="-"
+            required={false}
+            disabled={!canEdit}
+            error={false}
+            helperText=""
+            multipleSelect={false}
+            limitTags={1}
+            options={programUseContextOptions}
+            value={formik.values?.programUseContext?.display ?? null}
+            onClose={() => {}}
+            onChange={(id, value) => {
+              if (value) {
+                formik.setFieldValue(
+                  "programUseContext",
+                  PROGRAM_USE_CONTEXTS.find((puc) => value === puc.display)
+                );
+              } else {
+                formik.setFieldValue("programUseContext", []);
+              }
+            }}
+          />
+          <div />
+          <div />
+          <div />
         </Box>
       </div>
       {canEdit && (
