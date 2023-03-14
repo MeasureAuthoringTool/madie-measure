@@ -71,10 +71,16 @@ jest.mock("@madie/madie-util", () => ({
 
 let serviceApiMock: MeasureServiceApi;
 
+const measure = {
+  id: "measure ID",
+  createdBy: "testuser@example.com",
+} as Measure;
+
 describe("Supplemental Elements component", () => {
   beforeEach(() => {
     serviceApiMock = {
       updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
+      fetchMeasure: jest.fn().mockResolvedValue(measure),
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
   });

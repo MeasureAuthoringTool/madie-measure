@@ -284,13 +284,16 @@ export default function MeasureList(props: {
           setToastMessage(
             "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain CQL."
           );
+        } else if (
+          targetedMeasure?.cqlErrors ||
+          !_.isEmpty(targetedMeasure?.errors)
+        ) {
+          setToastMessage(
+            "Unable to Export measure. Measure Bundle could not be generated as Measure contains errors."
+          );
         } else if (_.isEmpty(targetedMeasure?.groups)) {
           setToastMessage(
             "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain Population Criteria."
-          );
-        } else if (targetedMeasure?.cqlErrors || targetedMeasure?.errors) {
-          setToastMessage(
-            "Unable to Export measure. Measure Bundle could not be generated as Measure contains errors."
           );
         } else {
           setToastMessage(
