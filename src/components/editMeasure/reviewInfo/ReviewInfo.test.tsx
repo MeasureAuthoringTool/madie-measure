@@ -10,8 +10,6 @@ const testMeasure = {
   measureName: "the measure for testing",
   cqlLibraryName: "TestCqlLibraryName",
   ecqmTitle: "ecqmTitle",
-  measurementPeriodStart: "01/01/2023",
-  measurementPeriodEnd: "12/31/2023",
   reviewMetaData: {
     approvalDate: "2029-02-12T08:00:00.000+00:00",
     lastReviewDate: "2021-01-11T08:00:00.000+00:00",
@@ -80,7 +78,7 @@ describe("Review Info component", () => {
     await waitFor(() => RenderReviewInfo());
     expect(queryByText("Approval Date")).toBeVisible();
     expect(queryByText("Last Review Date")).toBeVisible();
-    expect(getByTestId("approval-date-input").value).toBe("1/1/2023");
-    expect(getByTestId("review-date-input").value).toBe("12/31/2023");
+    expect(getByTestId("approval-date-input").value).toBe("2/12/2029");
+    expect(getByTestId("review-date-input").value).toBe("1/11/2021");
   });
 });
