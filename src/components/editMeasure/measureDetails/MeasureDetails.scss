@@ -1,6 +1,81 @@
 #review-info {
   box-shadow: 0px 4px 8px rgba(85, 85, 85, 0.25);
   margin: 32px;
+  font-family: Rubik, sans-serif;
+  #measure-details-form {
+    margin: 32px;
+    .content {
+      display: flex;
+      flex-direction: column;
+      > .form-row {
+        flex-direction: row;
+        column-gap: 20px;
+        > .info-item {
+          flex-direction: column;
+          > div {
+            > .help-image {
+              cursor: help;
+              display: flex;
+              flex-direction: row;
+              align-items: flex-start;
+              position: relative;
+              width: fit-content;
+              margin-left: 3px;
+              > img {
+                margin-left: 5px;
+              }
+              > label {
+                cursor: help;
+                font-size: 14px;
+                font-weight: 500;
+                color: #333;
+                margin-bottom: 18px;
+              }
+              &:hover {
+                cursor: help;
+                .more-text {
+                  visibility: visible;
+                }
+              }
+              > .more-text {
+                visibility: hidden;
+                background-color: #333;
+                border-radius: 3px;
+                color: #fff;
+                text-align: center;
+                font-size: 14px;
+                padding: 8px 16px;
+                white-space: nowrap;
+                top: 27px;
+                right: -3px;
+                position: absolute;
+                z-index: 1;
+                &:after {
+                  content: "";
+                  width: 9px;
+                  height: 9px;
+                  position: absolute;
+                  background-color: #333;
+                  right: 6px;
+                  top: -4px;
+                  z-index: 2;
+                  rotate: 45deg;
+                }
+              }
+            }
+          }
+          > input {
+            min-width: 375px;
+            display: block;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 17px;
+            color: #242424;
+          }
+        }
+      }
+    }
+  }
 }
 #measure-details-form {
   font-family: Rubik, sans-serif;
@@ -23,6 +98,7 @@
       border-bottom: solid 1px #ddd;
       position: relative;
       h2 {
+        font-size: 24px;
         border: none;
         margin: 0;
         padding: 0;
