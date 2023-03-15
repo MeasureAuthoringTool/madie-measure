@@ -1,5 +1,11 @@
 import * as React from "react";
-import { render, fireEvent, waitFor, screen } from "@testing-library/react";
+import {
+  render,
+  fireEvent,
+  waitFor,
+  screen,
+  within,
+} from "@testing-library/react";
 import { act } from "react-dom/test-utils";
 import MeasureInformation from "./MeasureInformation";
 import useMeasureServiceApi, {
@@ -33,6 +39,12 @@ const measure = {
   createdBy: "john doe",
   measureSetId: "testMeasureId",
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
+  programUseContext: {
+    code: "ep-ec",
+    display: "EP/EC",
+    codeSystem:
+      "http://hl7.org/fhir/us/cqfmeasures/CodeSystem/quality-programs",
+  },
   elmJson: "{library: TestCqlLibraryName}",
   measureMetaData: {
     experimental: false,
@@ -71,6 +83,20 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: true, pendingPath: "" },
     initialState: { canTravel: true, pendingPath: "" },
   },
+  PROGRAM_USE_CONTEXTS: [
+    {
+      code: "mips",
+      display: "MIPS",
+      codeSystem:
+        "http://hl7.org/fhir/us/cqfmeasures/CodeSystem/quality-programs",
+    },
+    {
+      code: "ep-ec",
+      display: "EP/EC",
+      codeSystem:
+        "http://hl7.org/fhir/us/cqfmeasures/CodeSystem/quality-programs",
+    },
+  ],
   checkUserCanEdit: jest.fn(() => {
     return true;
   }),
@@ -90,7 +116,8 @@ const axiosError: AxiosError = {
 let serviceApiMock: MeasureServiceApi;
 
 describe("MeasureInformation component", () => {
-  const { getByTestId, queryByText, findByTestId } = screen;
+  const { getByTestId, queryByText, findByTestId, getByRole, getByText } =
+    screen;
 
   it("should regenerate ELM when the CQL Library Name is updated", async () => {
     serviceApiMock = {
@@ -331,6 +358,103 @@ describe("MeasureInformation component", () => {
     expect(experimentalInput).toBeDisabled();
   });
 
+  test("Click on dropdown displays different options", async () => {
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
+      return true;
+    });
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+
+    const programUseContextSelect = screen.getByTestId("programUseContext");
+    expect(programUseContextSelect).toBeInTheDocument();
+    const programUseContextButton = screen.getByRole("button", {
+      name: "Open",
+    });
+
+    act(() => {
+      userEvent.click(programUseContextButton);
+    });
+
+    expect(getByText("MIPS")).toBeInTheDocument();
+    expect(getByText("EP/EC")).toBeInTheDocument();
+  });
+  test("Click Clear icon clears selected value and Discard and Save buttons are disabled", async () => {
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
+      return true;
+    });
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+
+    const programUseContextSelect = getByTestId("programUseContext");
+    expect(programUseContextSelect).toBeInTheDocument();
+    const programUseContextButton = getByRole("button", {
+      name: "Open",
+    });
+
+    act(() => {
+      userEvent.click(programUseContextButton);
+    });
+
+    expect(getByText("MIPS")).toBeInTheDocument();
+    expect(getByText("EP/EC")).toBeInTheDocument();
+    const programUseContextOptions = await screen.findAllByRole("option");
+    expect(programUseContextOptions.length).toBe(2);
+
+    const programUseContextComboBox = within(programUseContextSelect).getByRole(
+      "combobox"
+    );
+    expect(programUseContextComboBox).toHaveValue("EP/EC");
+
+    const closeIcon = getByTestId("CloseIcon");
+    act(() => {
+      userEvent.click(closeIcon);
+    });
+    expect(programUseContextComboBox).not.toHaveValue("EP/EC");
+  });
+  test("Click Save button will save the change", async () => {
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
+      return true;
+    });
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+
+    const programUseContextSelect = getByTestId("programUseContext");
+    expect(programUseContextSelect).toBeInTheDocument();
+    const programUseContextButton = getByRole("button", {
+      name: "Open",
+    });
+
+    act(() => {
+      userEvent.click(programUseContextButton);
+    });
+
+    expect(getByText("MIPS")).toBeInTheDocument();
+    expect(getByText("EP/EC")).toBeInTheDocument();
+    const programUseContextOptions = await screen.findAllByRole("option");
+    expect(programUseContextOptions.length).toBe(2);
+
+    const programUseContextComboBox = within(programUseContextSelect).getByRole(
+      "combobox"
+    );
+    expect(programUseContextComboBox).toHaveValue("EP/EC");
+
+    const changed = screen.getByText("MIPS");
+
+    act(() => {
+      userEvent.click(changed);
+    });
+    expect(programUseContextComboBox).not.toHaveValue("EP/EC");
+    expect(programUseContextComboBox).toHaveValue("MIPS");
+
+    const discardButton = screen.getByRole("button", {
+      name: "Discard Changes",
+    }) as HTMLButtonElement;
+    expect(discardButton).toBeEnabled();
+    const saveButton = screen.getByRole("button", {
+      name: "Save",
+    }) as HTMLButtonElement;
+    expect(saveButton).toBeEnabled();
+    act(() => {
+      fireEvent.click(saveButton);
+    });
+  });
   it("Discard dialog opens and succeeds", async () => {
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
