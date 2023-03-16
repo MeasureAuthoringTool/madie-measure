@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Measure } from "@madie/madie-models";
+import { Endorsement, Measure } from "@madie/madie-models";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import "styled-components/macro";
 import {
@@ -38,6 +38,7 @@ interface measureInformationForm {
   cmsId: string;
   experimental: boolean;
   programUseContext: any;
+  endorsements: Array<Endorsement>;
 }
 
 interface MeasureInformationProps {
@@ -47,6 +48,8 @@ interface MeasureInformationProps {
 export default function MeasureInformation(props: MeasureInformationProps) {
   const { setErrorMessage } = props;
   const measureServiceApi = useMeasureServiceApi();
+  const [endorsers, setEndorsers] = useState<string[]>();
+  const [endorsementIdRequired, setEndorsementIdRequired] = useState<boolean>();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
   const programUseContextOptions: string[] = PROGRAM_USE_CONTEXTS.map(
@@ -94,6 +97,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     measureId: measure?.measureSetId,
     experimental: measure?.measureMetaData?.experimental || false,
     programUseContext: measure?.programUseContext || null,
+    endorsements: measure?.measureMetaData?.endorsements || [],
   } as measureInformationForm;
 
   const formik = useFormik({
@@ -122,11 +126,45 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     }
   };
 
+  // fetch endorsers DB using measure service and sorts alphabetically
+  useEffect(() => {
+    measureServiceApi
+      .getAllEndorsers()
+      .then((response) => {
+        const endorsers = response
+          .sort((a, b) =>
+            a.endorserOrganization.localeCompare(b.endorserOrganization)
+          )
+          .map((element) => element.endorserOrganization);
+        setEndorsers(endorsers);
+      })
+      .catch(() => {
+        const message = `Error fetching endorsers`;
+        setErrorMessage(message);
+      });
+  }, []);
+
   const canEdit = checkUserCanEdit(
     measure?.createdBy,
     measure?.acls,
     measure?.measureMetaData?.draft
   );
+
+  const handleEndorserChange = (selectedValue: string) => {
+    const newList: Endorsement[] = [];
+    newList.push({
+      endorser: selectedValue,
+    });
+
+    formik.setFieldValue("endorsements", newList);
+    if (selectedValue === "-" || selectedValue === "") {
+      setEndorsementIdRequired(false);
+      formik.setFieldValue("endorsementId", "");
+    } else {
+      setEndorsementIdRequired(true);
+    }
+  };
+
   const onToastClose = () => {
     setToastType("danger");
     setToastMessage("");
@@ -173,6 +211,12 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       measureMetaData: {
         ...measure?.measureMetaData,
         experimental: values.experimental,
+        endorsements: [
+          {
+            endorser: values.endorser,
+            endorsementId: values.endorsementNumber,
+          },
+        ],
       },
     };
     measureServiceApi
@@ -385,6 +429,57 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             }}
           />
           <div />
+          <div />
+          <div />
+        </Box>
+        <Box sx={formRowGapped}>
+          <AutoComplete
+            id="endorser"
+            dataTestId="endorser"
+            label="Endorsing Organization"
+            placeholder="-"
+            required={true}
+            disabled={!canEdit}
+            error={formik.touched.endorsements && formik.errors["endorsements"]}
+            helperText={
+              formik.touched.endorsements && formik.errors["endorsements"]
+            }
+            options={endorsers}
+            value={formik.values.endorsements.map(
+              (selected) => selected?.endorser
+            )}
+            onChange={(_event: any, selectedValues: any | null) => {
+              handleEndorserChange(selectedValues);
+            }}
+            onKeyDown={goBackToNav}
+          />
+          <TextField
+            onFocus={() => onFocus("endorsementId")}
+            placeholder="-"
+            required
+            disabled={!canEdit || !endorsementIdRequired}
+            label="Endorsement #"
+            id="endorsementId"
+            inputProps={{
+              "data-testid": "endorsement-number-input",
+              "aria-required": "true",
+            }}
+            helperText={
+              (formik.touched["endorsementId"] ||
+                focusedField === "endorsementId") &&
+              formikErrorHandler("endorsementId", true)
+            }
+            data-testid="endorsement-number-text-field"
+            size="small"
+            onKeyDown={goBackToNav}
+            error={
+              formik.touched.endorsements && Boolean(formik.errors.endorsements)
+            }
+            {...formik.getFieldProps("endorsementId")}
+            onBlur={() => {
+              onBlur("endorsementId");
+            }}
+          />
           <div />
           <div />
         </Box>
