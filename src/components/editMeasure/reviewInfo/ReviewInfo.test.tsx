@@ -2,7 +2,7 @@ import * as React from "react";
 import ReviewInfo from "./ReviewInfo";
 import { render, screen, waitFor } from "@testing-library/react";
 import { Measure } from "@madie/madie-models";
-
+import { measureStore } from "@madie/madie-util";
 const testMeasure = {
   id: "testMeasureId",
   createdBy: "testCreatedBy",
@@ -80,5 +80,14 @@ describe("Review Info component", () => {
     expect(queryByText("Last Review Date")).toBeVisible();
     expect(getByTestId("approval-date-input").value).toBe("2/12/2029");
     expect(getByTestId("review-date-input").value).toBe("1/11/2021");
+  });
+  test("Renders with missing information", async () => {
+    const updatedMeasure = { ...testMeasure, reviewMetaData: null };
+    measureStore.state.mockImplementation(() => updatedMeasure);
+    await waitFor(() => RenderReviewInfo());
+    expect(queryByText("Approval Date")).toBeVisible();
+    expect(queryByText("Last Review Date")).toBeVisible();
+    expect(getByTestId("approval-date-input").value).toBe("-");
+    expect(getByTestId("review-date-input").value).toBe("-");
   });
 });
