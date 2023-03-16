@@ -93,7 +93,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     cmsId: measure?.cmsId,
     measureId: measure?.measureSetId,
     experimental: measure?.measureMetaData?.experimental || false,
-    programUseContext: measure?.programUseContext || [],
+    programUseContext: measure?.programUseContext || null,
   } as measureInformationForm;
 
   const formik = useFormik({
@@ -380,7 +380,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
                   PROGRAM_USE_CONTEXTS.find((puc) => value === puc.display)
                 );
               } else {
-                formik.setFieldValue("programUseContext", []);
+                formik.setFieldValue("programUseContext", null);
               }
             }}
           />
