@@ -21,6 +21,7 @@ const ReviewInfoItem = ({ label, helperText, date, testId }) => {
         value={dateTime}
         readOnly
         aria-describedby={`${testId}-helper-text`}
+        aria-labelledby={`${testId}-label`}
       />
     </article>
   );
