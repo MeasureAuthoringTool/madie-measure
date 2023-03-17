@@ -89,7 +89,7 @@ export default function MeasureList(props: {
   const measureServiceApi = useMeasureServiceApi();
   const featureFlags = useFeatureFlags();
   const exportFeature = !!featureFlags?.export;
-  const versioningFeature = !!featureFlags?.measureVersioning;
+  // const versioningFeature = !!featureFlags?.measureVersioning;
   const targetMeasure = useRef<Measure>();
 
   const [createVersionDialog, setCreateVersionDialog] = useState({
@@ -223,21 +223,21 @@ export default function MeasureList(props: {
       additionalOptions.push(exportButton);
     }
     // always on if feature
-    if (versioningFeature) {
-      if (selected.measureMetaData.draft) {
-        options.push({
-          label: "Version",
-          toImplementFunction: createVersion,
-          dataTestId: `create-version-measure-${selected?.id}`,
-        });
-      } else {
-        options.push({
-          label: "Draft",
-          toImplementFunction: () => setDraftMeasureDialog({ open: true }),
-          dataTestId: `draft-measure-${selected?.id}`,
-        });
-      }
+    //  if (versioningFeature) {
+    if (selected.measureMetaData.draft) {
+      options.push({
+        label: "Version",
+        toImplementFunction: createVersion,
+        dataTestId: `create-version-measure-${selected?.id}`,
+      });
+    } else {
+      options.push({
+        label: "Draft",
+        toImplementFunction: () => setDraftMeasureDialog({ open: true }),
+        dataTestId: `draft-measure-${selected?.id}`,
+      });
     }
+    // }
     setAdditionalSelectOptionProps(additionalOptions);
     setOtherSelectOptionPropsForPopOver(options);
   };
@@ -468,23 +468,24 @@ export default function MeasureList(props: {
                           variant="outline-secondary"
                           name="Select"
                           onClick={(e) => {
-                            if (exportFeature || versioningFeature) {
-                              handleOpen(measure, e);
-                            } else {
-                              history.push(
-                                `/measures/${measure.id}/edit/details`
-                              );
-                            }
+                            //if (exportFeature || versioningFeature) {
+                            handleOpen(measure, e);
+                            // } else {
+                            //   history.push(
+                            //     `/measures/${measure.id}/edit/details`
+                            //   );
+                            // }
                           }}
                           data-testid={
-                            exportFeature || versioningFeature
-                              ? `measure-action-${measure.id}`
-                              : `edit-measure-${measure.id}`
+                            //   exportFeature || versioningFeature?
+                            `measure-action-${measure.id}`
+                            // : `edit-measure-${measure.id}`
                           }
                         >
-                          {exportFeature || versioningFeature
+                          Select
+                          {/* {exportFeature || versioningFeature
                             ? "Select"
-                            : "View"}
+                            : "View"} */}
                         </Button>
                       </td>
                     </tr>
