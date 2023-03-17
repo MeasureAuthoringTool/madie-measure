@@ -3,7 +3,11 @@ import { libraryElm } from "./__mocks__/cqlLibraryElm";
 import axios from "axios";
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
-import { Measure, Organization } from "@madie/madie-models";
+import {
+  EndorsementOrganization,
+  Measure,
+  Organization,
+} from "@madie/madie-models";
 
 describe("MeasureServiceApi Tests", () => {
   afterEach(() => {
@@ -299,6 +303,46 @@ describe("MeasureServiceApi Tests", () => {
       expect(mockedAxios.get).toBeCalledTimes(1);
     } catch (error) {
       expect(error.status).toBe(500);
+    }
+  });
+
+  it("test getAllEndorsers success", async () => {
+    const endorsers: EndorsementOrganization[] = [
+      {
+        id: "testId1",
+        endorserOrganization: "test organization 1",
+      },
+    ];
+    const resp = { status: 200, data: endorsers };
+    mockedAxios.get.mockResolvedValueOnce(resp);
+
+    const returnedOrgList = measureServiceApi.getAllEndorsers();
+
+    expect(mockedAxios.get).toBeCalledTimes(1);
+    expect((await returnedOrgList).length).toEqual(1);
+  });
+
+  it("test getAllEndorsers error", async () => {
+    const resp = { status: 500, data: "failure", error: { message: "error" } };
+    mockedAxios.get.mockRejectedValueOnce(resp);
+
+    try {
+      await measureServiceApi.getAllEndorsers();
+      expect(mockedAxios.get).toBeCalledTimes(1);
+    } catch (error) {
+      expect(error.message).toBe("Unable to fetch endorsers");
+    }
+  });
+
+  it("test getAllEndorsers error when returned list is empty", async () => {
+    const resp = { status: 200, data: [] };
+    mockedAxios.get.mockResolvedValueOnce(resp);
+
+    try {
+      await measureServiceApi.getAllEndorsers();
+      expect(mockedAxios.get).toBeCalledTimes(1);
+    } catch (error) {
+      expect(error.message).toBe("Unable to fetch endorsers");
     }
   });
 });
