@@ -48,6 +48,12 @@ const measure = {
   elmJson: "{library: TestCqlLibraryName}",
   measureMetaData: {
     experimental: false,
+    endorsements: [
+      {
+        endorsementId: "NQF",
+        endorser: "1234",
+      },
+    ],
   },
 } as unknown as Measure;
 
@@ -105,6 +111,15 @@ jest.mock("@madie/madie-util", () => ({
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 
+const endorserList = [
+  {
+    endorserOrganization: "-",
+  },
+  {
+    endorserOrganization: "NQF",
+  },
+];
+
 const axiosError: AxiosError = {
   response: {
     status: 500,
@@ -116,11 +131,18 @@ const axiosError: AxiosError = {
 let serviceApiMock: MeasureServiceApi;
 
 describe("MeasureInformation component", () => {
+  beforeEach(() => {
+    serviceApiMock = {
+      getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
+    } as unknown as MeasureServiceApi;
+    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+  });
   const { getByTestId, queryByText, findByTestId, getByRole, getByText } =
     screen;
 
   it("should regenerate ELM when the CQL Library Name is updated", async () => {
     serviceApiMock = {
+      getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
       updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
@@ -171,6 +193,16 @@ describe("MeasureInformation component", () => {
         ...testMeasure,
         cqlLibraryName: modifiedLibName,
         elmJson: JSON.stringify({ library: modifiedLibName }),
+        // This can be removed after MAT-5396
+        measureMetaData: {
+          experimental: false,
+          endorsements: [
+            {
+              endorsementId: undefined,
+              endorser: undefined,
+            },
+          ],
+        },
       })
     );
   });
@@ -244,6 +276,7 @@ describe("MeasureInformation component", () => {
 
   it("saving measurement information successfully and displaying success message", async () => {
     serviceApiMock = {
+      getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
       updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
@@ -276,6 +309,7 @@ describe("MeasureInformation component", () => {
 
   it("should display error message when updating failed", async () => {
     serviceApiMock = {
+      getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
       updateMeasure: jest.fn().mockRejectedValueOnce({
         status: 500,
         response: { data: { message: "update failed" } },
@@ -329,33 +363,48 @@ describe("MeasureInformation component", () => {
     expect(experimentalInput.value).toBe("false");
     userEvent.click(experimentalInput);
     expect(experimentalInput.value).toBe("true");
+
+    const endorser = getByTestId("endorser") as HTMLInputElement;
+    expect(endorser).toBeEnabled();
   });
 
-  it("Should disable all elements if measure is not shared with the user", () => {
+  it("Should disable all elements if measure is not shared with the user", async () => {
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
       return false;
     });
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
-    const result: HTMLElement = getByTestId("measure-information-form");
-    expect(result).toBeInTheDocument();
+    await act(async () => {
+      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+      const result: HTMLElement = getByTestId("measure-information-form");
+      expect(result).toBeInTheDocument();
 
-    const measureNameInput = getByTestId(
-      "measure-name-input"
-    ) as HTMLInputElement;
-    expect(measureNameInput).toBeDisabled();
+      const measureNameInput = getByTestId(
+        "measure-name-input"
+      ) as HTMLInputElement;
+      expect(measureNameInput).toBeDisabled();
 
-    const cqlLibraryNameText = getByTestId(
-      "cql-library-name-input"
-    ) as HTMLInputElement;
-    expect(cqlLibraryNameText).toBeDisabled();
+      const cqlLibraryNameText = getByTestId(
+        "cql-library-name-input"
+      ) as HTMLInputElement;
+      expect(cqlLibraryNameText).toBeDisabled();
 
-    const ecqmTitleText = getByTestId("ecqm-input") as HTMLInputElement;
-    expect(ecqmTitleText).toBeDisabled();
+      const ecqmTitleText = getByTestId("ecqm-input") as HTMLInputElement;
+      expect(ecqmTitleText).toBeDisabled();
 
-    const experimentalInput = screen.getByRole("checkbox", {
-      name: "Experimental",
-    }) as HTMLInputElement;
-    expect(experimentalInput).toBeDisabled();
+      const experimentalInput = screen.getByRole("checkbox", {
+        name: "Experimental",
+      }) as HTMLInputElement;
+      expect(experimentalInput).toBeDisabled();
+
+      const endorserAutoComplete = getByTestId("endorser") as HTMLInputElement;
+      const endorserComboBox =
+        within(endorserAutoComplete).getByRole("combobox");
+      expect(endorserComboBox).toBeDisabled();
+
+      const endorserId = getByTestId(
+        "endorsement-number-input"
+      ) as HTMLInputElement;
+      expect(endorserId).toBeDisabled();
+    });
   });
 
   test("Click on dropdown displays different options", async () => {
@@ -366,9 +415,12 @@ describe("MeasureInformation component", () => {
 
     const programUseContextSelect = screen.getByTestId("programUseContext");
     expect(programUseContextSelect).toBeInTheDocument();
-    const programUseContextButton = screen.getByRole("button", {
-      name: "Open",
-    });
+    const programUseContextButton = within(programUseContextSelect).getByRole(
+      "button",
+      {
+        name: "Open",
+      }
+    );
 
     act(() => {
       userEvent.click(programUseContextButton);
@@ -385,9 +437,12 @@ describe("MeasureInformation component", () => {
 
     const programUseContextSelect = getByTestId("programUseContext");
     expect(programUseContextSelect).toBeInTheDocument();
-    const programUseContextButton = getByRole("button", {
-      name: "Open",
-    });
+    const programUseContextButton = within(programUseContextSelect).getByRole(
+      "button",
+      {
+        name: "Open",
+      }
+    );
 
     act(() => {
       userEvent.click(programUseContextButton);
@@ -403,7 +458,7 @@ describe("MeasureInformation component", () => {
     );
     expect(programUseContextComboBox).toHaveValue("EP/EC");
 
-    const closeIcon = getByTestId("CloseIcon");
+    const closeIcon = within(programUseContextSelect).getByTestId("CloseIcon");
     act(() => {
       userEvent.click(closeIcon);
     });
@@ -417,9 +472,12 @@ describe("MeasureInformation component", () => {
 
     const programUseContextSelect = getByTestId("programUseContext");
     expect(programUseContextSelect).toBeInTheDocument();
-    const programUseContextButton = getByRole("button", {
-      name: "Open",
-    });
+    const programUseContextButton = within(programUseContextSelect).getByRole(
+      "button",
+      {
+        name: "Open",
+      }
+    );
 
     act(() => {
       userEvent.click(programUseContextButton);
@@ -509,6 +567,60 @@ describe("MeasureInformation component", () => {
     fireEvent.click(discardDialogCancelButton);
     await waitFor(() => {
       expect(queryByText("You have unsaved changes.")).not.toBeVisible();
+    });
+  });
+
+  it("should render endorser dropdown with endorser list", async () => {
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    const endorserDropDown = await screen.findByTestId("endorser");
+    fireEvent.keyDown(endorserDropDown, { key: "ArrowDown" });
+
+    const endorserOptions = await screen.findAllByRole("option");
+    expect(endorserOptions).toHaveLength(2);
+
+    // equivalent to pressing escape on keyboard
+    fireEvent.keyDown(endorserDropDown, {
+      key: "Escape",
+      code: "Escape",
+      charCode: 27,
+    });
+  });
+
+  it("should disable endorserId when endorser is unselected", async () => {
+    checkUserCanEdit.mockImplementationOnce(() => true);
+    await act(async () => {
+      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+      const endorserAutoComplete = await screen.findByTestId("endorser");
+      const endorserId = getByTestId(
+        "endorsement-number-input"
+      ) as HTMLInputElement;
+
+      fireEvent.keyDown(endorserAutoComplete, { key: "ArrowDown" });
+      // selects 2nd option
+      const endorserOptions = await screen.findAllByRole("option");
+      fireEvent.click(endorserOptions[1]);
+
+      // verifies if the option is selected
+      const endorserComboBox =
+        within(endorserAutoComplete).getByRole("combobox");
+      expect(endorserComboBox).toHaveValue("NQF");
+      //verifies endorserId was enabled
+      expect(endorserId).toBeEnabled();
+      //Add input for endorserId
+      fireEvent.change(endorserId, {
+        target: { value: "1234" },
+      });
+      expect(endorserId).not.toHaveValue("");
+
+      // select 1st option
+      fireEvent.keyDown(endorserAutoComplete, { key: "ArrowDown" });
+      const endorserOptions2 = await screen.findAllByRole("option");
+      fireEvent.click(endorserOptions2[0]);
+
+      // verifies if the option is selected and endorserId has been cleared and disabled
+      expect(endorserComboBox).toHaveValue("-");
+      expect(endorserId).toBeDisabled();
+      expect(endorserId).toHaveValue("");
     });
   });
 });
