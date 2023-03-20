@@ -25,22 +25,18 @@ const ReviewInfo = () => {
       >
         <>
           <div className="form-row">
-            {measure?.reviewMetaData?.approvalDate && (
-              <ReviewInfoItem
-                label="Approval Date"
-                date={measure?.reviewMetaData?.approvalDate}
-                helperText="Set when versioning"
-                testId="approval-date-input"
-              />
-            )}
-            {measure?.reviewMetaData?.lastReviewDate && (
-              <ReviewInfoItem
-                label="Last Review Date"
-                date={measure?.reviewMetaData?.lastReviewDate}
-                helperText="Set when versioning"
-                testId="review-date-input"
-              />
-            )}
+            <ReviewInfoItem
+              label="Approval Date"
+              date={measure?.reviewMetaData?.approvalDate}
+              helperText="Set when versioning"
+              testId="approval-date-input"
+            />
+            <ReviewInfoItem
+              label="Last Review Date"
+              date={measure?.reviewMetaData?.lastReviewDate}
+              helperText="Set when versioning"
+              testId="review-date-input"
+            />
             {/* to do, figure out how to do finalized date for QI core 
             <ReviewInfoItem label={} date={}/>*/}
           </div>

@@ -2,7 +2,12 @@ import React from "react";
 import axios from "axios";
 import useServiceConfig from "./useServiceConfig";
 import { ServiceConfig } from "./ServiceContext";
-import { Measure, Group, Organization } from "@madie/madie-models";
+import {
+  Measure,
+  Group,
+  Organization,
+  EndorsementOrganization,
+} from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
 import _ from "lodash";
 
@@ -220,6 +225,26 @@ export class MeasureServiceApi {
         err,
         "Unable to fetch organizations"
       );
+      throw new Error(message);
+    }
+  }
+
+  async getAllEndorsers(): Promise<EndorsementOrganization[]> {
+    try {
+      const response = await axios.get<EndorsementOrganization[]>(
+        `${this.baseUrl}/endorsements`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      if (response?.data.length < 1) {
+        throw new Error("Unable to fetch endorsers");
+      }
+      return response?.data;
+    } catch (err) {
+      const message = this.buildErrorMessage(err, "Unable to fetch endorsers");
       throw new Error(message);
     }
   }
