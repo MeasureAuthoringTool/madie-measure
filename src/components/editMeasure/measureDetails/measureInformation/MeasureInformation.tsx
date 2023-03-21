@@ -39,6 +39,7 @@ interface measureInformationForm {
   experimental: boolean;
   programUseContext: any;
   endorsements: Array<Endorsement>;
+  endorsementId: string;
 }
 
 interface MeasureInformationProps {
@@ -49,6 +50,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   const { setErrorMessage } = props;
   const measureServiceApi = useMeasureServiceApi();
   const [endorsers, setEndorsers] = useState<string[]>();
+  const [endorsementOptions, setEndorsementOptions] = useState<Endorsement[]>();
   const [endorsementIdRequired, setEndorsementIdRequired] = useState<boolean>();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
@@ -98,6 +100,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     experimental: measure?.measureMetaData?.experimental || false,
     programUseContext: measure?.programUseContext || null,
     endorsements: measure?.measureMetaData?.endorsements || [],
+    endorsementId: measure?.measureMetaData?.endorsements?.[0]?.endorsementId,
   } as measureInformationForm;
 
   const formik = useFormik({
@@ -151,13 +154,17 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   );
 
   const handleEndorserChange = (selectedValue: string) => {
+    if (selectedValue === "" || selectedValue === "-") {
+      selectedValue = null;
+    }
     const newList: Endorsement[] = [];
     newList.push({
       endorser: selectedValue,
     });
 
     formik.setFieldValue("endorsements", newList);
-    if (selectedValue === "-" || selectedValue === "") {
+    //if (selectedValue === "-" || selectedValue === "") {
+    if (selectedValue === null) {
       setEndorsementIdRequired(false);
       formik.setFieldValue("endorsementId", "");
     } else {
@@ -177,6 +184,28 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   };
 
   const handleSubmit = async (values) => {
+    if (
+      values.endorsements[0].endorser !== null &&
+      values.endorsementId === ""
+    ) {
+      handleToast("danger", "Endorser Number is Required", true);
+      return;
+    }
+    if (values.endorsements[0].endorser === "" && values.endorsementId !== "") {
+      handleToast(
+        "danger",
+        "Endorser Organization is set to None, Endorser Number must not contain a value",
+        true
+      );
+      return;
+    }
+    if (values.endorsementId !== "") {
+      const stripped = values.endorsementId.replace(/^[0-9a-zA-Z]*$/, "");
+      if (stripped && stripped.length > 0) {
+        handleToast("danger", "Endorser Number must be alpha numeric", true);
+        return;
+      }
+    }
     const inSyncCql = await synchingEditorCqlContent(
       "",
       measure?.cql,
@@ -213,8 +242,8 @@ export default function MeasureInformation(props: MeasureInformationProps) {
         experimental: values.experimental,
         endorsements: [
           {
-            endorser: values.endorser,
-            endorsementId: values.endorsementNumber,
+            endorser: values.endorsements[0].endorser,
+            endorsementId: values.endorsementId,
           },
         ],
       },
