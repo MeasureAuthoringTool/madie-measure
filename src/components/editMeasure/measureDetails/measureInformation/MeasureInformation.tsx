@@ -182,86 +182,93 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     setToastOpen(open);
   };
 
-  const handleSubmit = async (values) => {
-    if (
-      values.endorsements[0].endorser !== null &&
-      values.endorsementId === ""
-    ) {
+  const validateEndorser = (
+    endorser: string,
+    endorsementId: string
+  ): boolean => {
+    if (endorser !== null && endorsementId === "") {
       handleToast("danger", "Endorser Number is Required", true);
-      return;
+      return false;
     }
-    if (values.endorsements[0].endorser === "" && values.endorsementId !== "") {
+    if (endorser === "" && endorsementId !== "") {
       handleToast(
         "danger",
         "Endorser Organization is set to None, Endorser Number must not contain a value",
         true
       );
-      return;
+      return false;
     }
-    if (values.endorsementId !== "") {
-      const stripped = values.endorsementId.replace(/^[0-9a-zA-Z]*$/, "");
+    if (endorsementId !== "") {
+      const stripped = endorsementId.replace(/^[0-9a-zA-Z]*$/, "");
       if (stripped && stripped.length > 0) {
         handleToast("danger", "Endorser Number must be alpha numeric", true);
-        return;
+        return false;
       }
     }
-    const inSyncCql = await synchingEditorCqlContent(
-      "",
-      measure?.cql,
-      values.cqlLibraryName,
-      measure?.cqlLibraryName,
-      measure?.version,
-      "measureInformation"
-    );
+    return true;
+  };
+  const handleSubmit = async (values) => {
+    if (
+      validateEndorser(values.endorsements[0].endorser, values.endorsementId)
+    ) {
+      const inSyncCql = await synchingEditorCqlContent(
+        "",
+        measure?.cql,
+        values.cqlLibraryName,
+        measure?.cqlLibraryName,
+        measure?.version,
+        "measureInformation"
+      );
 
-    // Generate updated ELM when Library name is modified
-    //  and there are no CQL errors.
-    if (INITIAL_VALUES.cqlLibraryName !== values.cqlLibraryName) {
-      if (inSyncCql && inSyncCql.trim().length > 0) {
-        const cqlErrors = parseContent(inSyncCql);
-        const { errors, translation } = await validateContent(inSyncCql);
-        if (cqlErrors.length === 0 && errors.length === 0) {
-          var updatedElm = JSON.stringify(translation);
+      // Generate updated ELM when Library name is modified
+      //  and there are no CQL errors.
+      if (INITIAL_VALUES.cqlLibraryName !== values.cqlLibraryName) {
+        if (inSyncCql && inSyncCql.trim().length > 0) {
+          const cqlErrors = parseContent(inSyncCql);
+          const { errors, translation } = await validateContent(inSyncCql);
+          if (cqlErrors.length === 0 && errors.length === 0) {
+            var updatedElm = JSON.stringify(translation);
+          }
         }
       }
-    }
 
-    const newMeasure: Measure = {
-      ...measure,
-      versionId: values.versionId,
-      measureName: values.measureName,
-      cqlLibraryName: values.cqlLibraryName,
-      ecqmTitle: values.ecqmTitle,
-      cql: inSyncCql,
-      elmJson: updatedElm ? updatedElm : measure.elmJson,
-      measureId: values.measureSetId,
-      programUseContext: values.programUseContext,
-      measureMetaData: {
-        ...measure?.measureMetaData,
-        experimental: values.experimental,
-        endorsements: [
-          {
-            endorser: values.endorsements[0].endorser,
-            endorsementId: values.endorsementId,
-          },
-        ],
-      },
-    };
-    measureServiceApi
-      .updateMeasure(newMeasure)
-      .then(() => {
-        handleToast(
-          "success",
-          "Measurement Information Updated Successfully",
-          true
-        );
-        // updating measure will propagate update state site wide.
-        updateMeasure(newMeasure);
-      })
-      // update to alert
-      .catch((err) => {
-        setErrorMessage(err?.response?.data?.message?.toString());
-      });
+      const newMeasure: Measure = {
+        ...measure,
+        versionId: values.versionId,
+        measureName: values.measureName,
+        cqlLibraryName: values.cqlLibraryName,
+        ecqmTitle: values.ecqmTitle,
+        cql: inSyncCql,
+        elmJson: updatedElm ? updatedElm : measure.elmJson,
+        measureId: values.measureSetId,
+        programUseContext: values.programUseContext,
+        measureMetaData: {
+          ...measure?.measureMetaData,
+          experimental: values.experimental,
+          endorsements: [
+            {
+              endorser: values.endorsements[0].endorser,
+              endorsementId: values.endorsementId,
+            },
+          ],
+        },
+      };
+      measureServiceApi
+        .updateMeasure(newMeasure)
+        .then(() => {
+          handleToast(
+            "success",
+            "Measurement Information Updated Successfully",
+            true
+          );
+          // updating measure will propagate update state site wide.
+          updateMeasure(newMeasure);
+        })
+        // update to alert
+        .catch((err) => {
+          setErrorMessage(err?.response?.data?.message?.toString());
+        });
+    }
   };
 
   function formikErrorHandler(name: string, isError: boolean) {
