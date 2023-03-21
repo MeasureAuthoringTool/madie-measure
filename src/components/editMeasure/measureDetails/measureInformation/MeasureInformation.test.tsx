@@ -198,8 +198,6 @@ describe("MeasureInformation component", () => {
           experimental: false,
           endorsements: [
             {
-              // endorsementId: undefined,
-              // endorser: undefined,
               endorsementId: "NQF",
               endorser: "1234",
             },
@@ -620,7 +618,6 @@ describe("MeasureInformation component", () => {
       fireEvent.click(endorserOptions2[0]);
 
       // verifies if the option is selected and endorserId has been cleared and disabled
-      //expect(endorserComboBox).toHaveValue("-");
       expect(endorserComboBox).toHaveValue("");
       expect(endorserId).toBeDisabled();
       expect(endorserId).toHaveValue("");

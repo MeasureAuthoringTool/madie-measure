@@ -163,7 +163,6 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     });
 
     formik.setFieldValue("endorsements", newList);
-    //if (selectedValue === "-" || selectedValue === "") {
     if (selectedValue === null) {
       setEndorsementIdRequired(false);
       formik.setFieldValue("endorsementId", "");
