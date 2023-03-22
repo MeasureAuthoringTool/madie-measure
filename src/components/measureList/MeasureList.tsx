@@ -21,6 +21,7 @@ import DraftMeasureDialog from "../draftMeasureDialog/DraftMeasureDialog";
 import versionErrorHelper from "../../utils/versionErrorHelper";
 import getModelFamily from "../../utils/measureModelHelpers";
 import _ from "lodash";
+import ExportDialog from "./ExportDialog";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -255,11 +256,21 @@ export default function MeasureList(props: {
     setOptionsOpen(false);
   };
 
+  const [downloadState, setDownloadState] = useState(null); // state of dialog
+  const [failureMessage, setFailureMessage] = useState(null); // message to pass to dialog
+  // Ref required or value will be lost on all state changes.
+  const abortController = useRef(null);
+
   const exportMeasure = async () => {
+    setFailureMessage(null);
+    setDownloadState("downloading");
     try {
+      // we need to generate an abort controller for this call and bind it in the context of our ref
+      abortController.current = new AbortController();
       const { ecqmTitle, model, version } = targetMeasure?.current ?? {};
       const exportData = await measureServiceApi?.getMeasureExport(
-        targetMeasure.current?.id
+        targetMeasure.current?.id,
+        abortController.current.signal
       );
       const url = window.URL.createObjectURL(exportData);
       const link = document.createElement("a");
@@ -273,39 +284,60 @@ export default function MeasureList(props: {
       setToastOpen(true);
       setToastType("success");
       setToastMessage("Measure exported successfully");
+      setDownloadState("success");
       document.body.removeChild(link);
     } catch (err) {
       const errorStatus = err.response?.status;
       const targetedMeasure = targetMeasure.current;
-      setToastOpen(true);
-      setToastType("danger");
-      if (errorStatus === 409) {
-        if (_.isEmpty(targetMeasure.current?.cql)) {
-          setToastMessage(
-            "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain CQL."
-          );
-        } else if (
-          targetedMeasure?.cqlErrors ||
-          !_.isEmpty(targetedMeasure?.errors)
-        ) {
-          setToastMessage(
-            "Unable to Export measure. Measure Bundle could not be generated as Measure contains errors."
-          );
-        } else if (_.isEmpty(targetedMeasure?.groups)) {
-          setToastMessage(
-            "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain Population Criteria."
-          );
-        } else {
-          setToastMessage(
-            "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists."
-          );
-        }
+      if (err.message === "canceled") {
+        setToastOpen(false);
+        setDownloadState(null);
       } else {
-        setToastMessage(
-          "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists."
-        );
+        setToastOpen(true);
+        setToastType("danger");
+        setDownloadState("failure");
+        if (errorStatus === 409) {
+          if (_.isEmpty(targetMeasure.current?.cql)) {
+            const message =
+              "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain CQL.";
+            setToastMessage(message);
+            setFailureMessage(message);
+          } else if (
+            targetedMeasure?.cqlErrors ||
+            !_.isEmpty(targetedMeasure?.errors)
+          ) {
+            const message =
+              "Unable to Export measure. Measure Bundle could not be generated as Measure contains errors.";
+            setToastMessage(message);
+            setFailureMessage(message);
+          } else if (_.isEmpty(targetedMeasure?.groups)) {
+            const message =
+              "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain Population Criteria.";
+            setToastMessage(message);
+            setFailureMessage(message);
+          } else {
+            const message =
+              "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists.";
+            setToastMessage(message);
+            setFailureMessage(message);
+          }
+        } else {
+          const message =
+            "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists.";
+          setToastMessage(message);
+          setFailureMessage(message);
+        }
       }
     }
+  };
+
+  const handleContinueDialog = () => {
+    setDownloadState(null);
+    setFailureMessage(null);
+  };
+  const handleCancelDialog = () => {
+    abortController.current && abortController.current.abort();
+    handleContinueDialog();
   };
 
   const doUpdateList = () => {
@@ -533,6 +565,14 @@ export default function MeasureList(props: {
           </div>
         </div>
       </div>
+      <ExportDialog
+        failureMessage={failureMessage}
+        measureName={targetMeasure?.current?.measureName}
+        downloadState={downloadState}
+        open={Boolean(downloadState)}
+        handleContinueDialog={handleContinueDialog}
+        handleCancelDialog={handleCancelDialog}
+      />
     </div>
   );
 }

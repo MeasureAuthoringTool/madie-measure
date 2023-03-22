@@ -10,6 +10,7 @@ import {
 } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
 import _ from "lodash";
+// const AbortController = require("abort-controller")
 
 export class MeasureServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
@@ -376,8 +377,8 @@ export class MeasureServiceApi {
       }
     );
   }
-
-  async getMeasureExport(measureId: string): Promise<Blob> {
+  // add abort signal.
+  async getMeasureExport(measureId: string, signal): Promise<Blob> {
     const response = await axios.get(
       `${this.baseUrl}/measures/${measureId}/exports`,
       {
@@ -385,6 +386,7 @@ export class MeasureServiceApi {
           Authorization: `Bearer ${this.getAccessToken()}`,
         },
         responseType: "blob",
+        signal,
       }
     );
     return response.data;
