@@ -1,0 +1,31 @@
+#export-dialog-content {
+  display: flex;
+  flex-direction: column;
+  > .loading-title {
+    font-size: 14px;
+  }
+  > .spinner {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 5px;
+    margin-top: 14px;
+    column-gap: 8px;
+    margin-bottom: 0;
+
+    > span,
+    p {
+      display: flex;
+      margin-bottom: 0;
+      font-size: 14px;
+    }
+    p {
+      font-weight: 500;
+    }
+  }
+  .error-message {
+    color: #d92f2f;
+    font-weight: 400;
+    font-size: 16px;
+  }
+}
