@@ -166,8 +166,13 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     if (selectedValue === null) {
       setEndorsementIdRequired(false);
       formik.setFieldValue("endorsementId", "");
+      formik.setFieldValue("endorserSystemId", null);
     } else {
       setEndorsementIdRequired(true);
+      formik.setFieldValue(
+        "endorserSystemId",
+        "https://madie.cms.gov/measure/nqfId"
+      );
     }
   };
 
@@ -249,6 +254,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             {
               endorser: values.endorsements[0].endorser,
               endorsementId: values.endorsementId,
+              endorserSystemId: values.endorserSystemId,
             },
           ],
         },
