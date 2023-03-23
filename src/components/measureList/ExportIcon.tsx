@@ -6,7 +6,12 @@ import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 // success, fail, downloading
 const ExportIcon = (props: { downloadState: string }) => {
   const { downloadState } = props;
-  let content = <CircularProgress sx={{ height: "40px", width: "40px" }} />;
+  let content = (
+    <CircularProgress
+      sx={{ height: "40px", width: "40px" }}
+      data-testid="circular-progress"
+    />
+  );
 
   if (downloadState === "success") {
     content = (

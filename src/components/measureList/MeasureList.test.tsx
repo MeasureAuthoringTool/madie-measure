@@ -16,7 +16,9 @@ import userEvent from "@testing-library/user-event";
 import { v4 as uuid } from "uuid";
 import ServiceContext, { ServiceConfig } from "../../api/ServiceContext";
 import { act } from "react-dom/test-utils";
+import { unmount } from "@madie/madie-components";
 
+// CSSStyleDeclaration
 const mockPush = jest.fn();
 jest.mock("react-router-dom", () => ({
   useHistory: () => {
@@ -154,8 +156,8 @@ describe("Measure List component", () => {
     cleanup();
   });
 
-  const renderMeasureList = (searchCriteria?: string) => {
-    render(
+  it("should display a list of measures", () => {
+    const { getByText, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -166,7 +168,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setInitialLoad={setInitialLoadMock}
           activeTab={0}
-          searchCriteria={searchCriteria ? searchCriteria : ""}
+          searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -174,56 +176,105 @@ describe("Measure List component", () => {
         />
       </ServiceContext.Provider>
     );
-  };
-
-  it("should display a list of measures", () => {
-    renderMeasureList();
     measures.forEach((m) => {
-      expect(screen.getByText(m.measureName)).toBeInTheDocument();
+      expect(getByText(m.measureName)).toBeInTheDocument();
     });
+    unmount();
   });
 
   it("should navigate to the edit measure screen on click of edit/view button", async () => {
-    renderMeasureList();
-    const selectButtons = await screen.findAllByRole("button", {
+    const { findByRole, findAllByRole, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const selectButtons = await findAllByRole("button", {
       name: "Select",
     });
 
     fireEvent.click(selectButtons[0]);
-    const editButton = await screen.findByRole("button", {
+    const editButton = await findByRole("button", {
       name: "View",
     });
     expect(editButton).toBeInTheDocument();
     expect(window.location.href).toBe("http://localhost/");
     fireEvent.click(editButton);
     expect(mockPush).toHaveBeenCalledWith("/example");
+    unmount();
   });
 
   it("should display the popover with options of export and view when feature flag is set to true", () => {
-    renderMeasureList();
-    const actionButton = screen.getByTestId(`measure-action-${measures[0].id}`);
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const actionButton = getByTestId(`measure-action-${measures[0].id}`);
     expect(actionButton).toBeInTheDocument();
     expect(actionButton).toHaveTextContent("Select");
     expect(window.location.href).toBe("http://localhost/");
     fireEvent.click(actionButton);
+    expect(getByTestId(`view-measure-${measures[0].id}`)).toBeInTheDocument();
+    expect(getByTestId(`export-measure-${measures[0].id}`)).toBeInTheDocument();
     expect(
-      screen.getByTestId(`view-measure-${measures[0].id}`)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId(`export-measure-${measures[0].id}`)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId(`create-version-measure-${measures[0].id}`)
+      getByTestId(`create-version-measure-${measures[0].id}`)
     ).toBeInTheDocument();
     expect(window.location.href).toBe("http://localhost/");
-    fireEvent.click(screen.getByTestId(`view-measure-${measures[0].id}`));
+    fireEvent.click(getByTestId(`view-measure-${measures[0].id}`));
     expect(mockPush).toHaveBeenCalledWith("/example");
+    unmount();
   });
 
   it("Search measure should display returned measures", () => {
-    renderMeasureList("test");
+    const { getByTestId, getByText, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={"test"}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
 
-    const searchFieldInput = screen.getByTestId(
+    const searchFieldInput = getByTestId(
       "searchMeasure-input"
     ) as HTMLInputElement;
     expect(searchFieldInput).toBeInTheDocument();
@@ -233,17 +284,36 @@ describe("Measure List component", () => {
     fireEvent.submit(searchFieldInput);
 
     measures.forEach((m) => {
-      expect(screen.getByText(m.measureName)).toBeInTheDocument();
+      expect(getByText(m.measureName)).toBeInTheDocument();
     });
 
     expect(
       mockMeasureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle
     ).toHaveBeenCalledWith(true, 10, 0, "test");
+    unmount();
   });
 
   it("Clear search criteria should clear input field", async () => {
-    renderMeasureList("test");
-    const searchFieldInput = screen.getByTestId(
+    const { getByTestId, getByText, getByRole, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={"test"}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const searchFieldInput = getByTestId(
       "searchMeasure-input"
     ) as HTMLInputElement;
     expect(searchFieldInput).toBeInTheDocument();
@@ -253,10 +323,10 @@ describe("Measure List component", () => {
     fireEvent.submit(searchFieldInput);
 
     measures.forEach((m) => {
-      expect(screen.getByText(m.measureName)).toBeInTheDocument();
+      expect(getByText(m.measureName)).toBeInTheDocument();
     });
 
-    const clearButton = screen.getByRole("button", {
+    const clearButton = getByRole("button", {
       name: /Clear-Search/i,
     });
     userEvent.click(clearButton);
@@ -269,11 +339,30 @@ describe("Measure List component", () => {
       10,
       0
     );
+    unmount();
   });
 
   it("empty search criteria won't trigger search", () => {
-    renderMeasureList();
-    const searchFieldInput = screen.getByTestId(
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const searchFieldInput = getByTestId(
       "searchMeasure-input"
     ) as HTMLInputElement;
     userEvent.type(searchFieldInput, "");
@@ -284,6 +373,7 @@ describe("Measure List component", () => {
     expect(
       mockMeasureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle
     ).not.toHaveBeenCalledWith(true, 10, 0, "");
+    unmount();
   });
 
   it("Clear search with error should still do the push", async () => {
@@ -293,10 +383,27 @@ describe("Measure List component", () => {
     (mockMeasureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle as jest.Mock)
       .mockClear()
       .mockRejectedValueOnce(new Error("Unable to fetch measures"));
+    const { getByTestId, getByRole, getByText, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={"test"}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
 
-    renderMeasureList("test");
-
-    const searchFieldInput = screen.getByTestId(
+    const searchFieldInput = getByTestId(
       "searchMeasure-input"
     ) as HTMLInputElement;
     userEvent.type(searchFieldInput, "test");
@@ -305,10 +412,10 @@ describe("Measure List component", () => {
     fireEvent.submit(searchFieldInput);
 
     measures.forEach((m) => {
-      expect(screen.getByText(m.measureName)).toBeInTheDocument();
+      expect(getByText(m.measureName)).toBeInTheDocument();
     });
 
-    const clearButton = screen.getByRole("button", {
+    const clearButton = getByRole("button", {
       name: /Clear-Search/i,
     });
     userEvent.click(clearButton);
@@ -321,30 +428,46 @@ describe("Measure List component", () => {
       0
     );
     expect(mockPush).toHaveBeenCalledWith("/example");
+    unmount();
   });
 
   it("should display create version dialog on click of version button", () => {
-    renderMeasureList();
-    const actionButton = screen.getByTestId(`measure-action-${measures[0].id}`);
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const actionButton = getByTestId(`measure-action-${measures[0].id}`);
     expect(actionButton).toBeInTheDocument();
     expect(actionButton).toHaveTextContent("Select");
     expect(window.location.href).toBe("http://localhost/");
     fireEvent.click(actionButton);
-    expect(
-      screen.getByTestId(`view-measure-${measures[0].id}`)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId(`export-measure-${measures[0].id}`)
-    ).toBeInTheDocument();
+    expect(getByTestId(`view-measure-${measures[0].id}`)).toBeInTheDocument();
+    expect(getByTestId(`export-measure-${measures[0].id}`)).toBeInTheDocument();
 
-    const createVersionButton = screen.getByTestId(
+    const createVersionButton = getByTestId(
       `create-version-measure-${measures[0].id}`
     );
     expect(createVersionButton).toBeInTheDocument();
     expect(createVersionButton).toHaveTextContent("Version");
     fireEvent.click(createVersionButton);
 
-    expect(screen.getByTestId("create-version-dialog")).toBeInTheDocument();
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+    unmount();
   });
 
   it("should display unauthorized error while creating a version of a measure", async () => {
@@ -361,18 +484,35 @@ describe("Measure List component", () => {
       return useMeasureServiceMockRejected;
     });
 
-    renderMeasureList();
-    fireEvent.click(screen.getByTestId(`measure-action-${measures[0].id}`));
-    fireEvent.click(
-      screen.getByTestId(`create-version-measure-${measures[0].id}`)
+    const { getByTestId, getByLabelText, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
     );
-    fireEvent.click(screen.getByLabelText("Major"));
+    fireEvent.click(getByTestId(`measure-action-${measures[0].id}`));
+    fireEvent.click(getByTestId(`create-version-measure-${measures[0].id}`));
+    fireEvent.click(getByLabelText("Major"));
     await waitFor(() => {
-      fireEvent.click(screen.getByTestId("create-version-continue-button"));
-      expect(screen.getByTestId("error-toast")).toHaveTextContent(
+      fireEvent.click(getByTestId("create-version-continue-button"));
+      expect(getByTestId("error-toast")).toHaveTextContent(
         "User is unauthorized to create a version"
       );
     });
+    unmount();
   });
 
   it("should display bad request while creating a version of a measure", async () => {
@@ -388,18 +528,38 @@ describe("Measure List component", () => {
     useMeasureServiceMock.mockImplementation(() => {
       return useMeasureServiceMockRejected;
     });
-    renderMeasureList();
-    fireEvent.click(screen.getByTestId(`measure-action-${measures[0].id}`));
+
+    const { getByTestId, getByLabelText, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    fireEvent.click(getByTestId(`measure-action-${measures[0].id}`));
     fireEvent.click(
       screen.getByTestId(`create-version-measure-${measures[0].id}`)
     );
-    fireEvent.click(screen.getByLabelText("Major"));
+    fireEvent.click(getByLabelText("Major"));
     await waitFor(() => {
-      fireEvent.click(screen.getByTestId("create-version-continue-button"));
-      expect(screen.getByTestId("error-toast")).toHaveTextContent(
+      fireEvent.click(getByTestId("create-version-continue-button"));
+      expect(getByTestId("error-toast")).toHaveTextContent(
         "Requested measure cannot be versioned"
       );
     });
+    unmount();
   });
 
   it("should display other error while creating a version of a measure", async () => {
@@ -417,18 +577,33 @@ describe("Measure List component", () => {
       return useMeasureServiceMockRejected;
     });
 
-    renderMeasureList();
-    fireEvent.click(screen.getByTestId(`measure-action-${measures[0].id}`));
-    fireEvent.click(
-      screen.getByTestId(`create-version-measure-${measures[0].id}`)
+    const { getByTestId, getByLabelText, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
     );
-    fireEvent.click(screen.getByLabelText("Major"));
+    fireEvent.click(getByTestId(`measure-action-${measures[0].id}`));
+    fireEvent.click(getByTestId(`create-version-measure-${measures[0].id}`));
+    fireEvent.click(getByLabelText("Major"));
     await waitFor(() => {
-      fireEvent.click(screen.getByTestId("create-version-continue-button"));
-      expect(screen.getByTestId("error-toast")).toHaveTextContent(
-        "server error"
-      );
+      fireEvent.click(getByTestId("create-version-continue-button"));
+      expect(getByTestId("error-toast")).toHaveTextContent("server error");
     });
+    unmount();
   });
 
   it("should display success message while creating a version of a measure and message can be closed", async () => {
@@ -444,37 +619,72 @@ describe("Measure List component", () => {
     useMeasureServiceMock.mockImplementation(() => {
       return useMeasureServiceMockRejected;
     });
-    renderMeasureList();
-    fireEvent.click(screen.getByTestId(`measure-action-${measures[0].id}`));
-    fireEvent.click(
-      screen.getByTestId(`create-version-measure-${measures[0].id}`)
+    const { getByTestId, getByLabelText, queryByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
     );
-    fireEvent.click(screen.getByLabelText("Major"));
+    fireEvent.click(getByTestId(`measure-action-${measures[0].id}`));
+    fireEvent.click(getByTestId(`create-version-measure-${measures[0].id}`));
+    fireEvent.click(getByLabelText("Major"));
     await waitFor(() => {
-      fireEvent.click(screen.getByTestId("create-version-continue-button"));
-      expect(screen.getByTestId("success-toast")).toHaveTextContent(
+      fireEvent.click(getByTestId("create-version-continue-button"));
+      expect(getByTestId("success-toast")).toHaveTextContent(
         "New version of measure is Successfully created"
       );
 
-      const closeButton = screen.getByTestId("close-toast-button");
+      const closeButton = getByTestId("close-toast-button");
       fireEvent.click(closeButton);
       setTimeout(() => {
         expect(
-          screen.queryByTestId("create-version-success-text")
+          queryByTestId("create-version-success-text")
         ).not.toBeInTheDocument();
       }, 500);
     });
+    unmount();
   });
 
   it("should display draft/version actions based on whether measure is draft or versioned", async () => {
-    renderMeasureList();
-    const selectButtons = await screen.findAllByRole("button", {
+    const { findByRole, findAllByRole, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const selectButtons = await findAllByRole("button", {
       name: "Select",
     });
 
     // first measure should have Version action as this is a draft measure
     fireEvent.click(selectButtons[0]);
-    const draftButton = await screen.findByRole("button", {
+    const draftButton = await findByRole("button", {
       name: "Version",
     });
     expect(draftButton).toBeInTheDocument();
@@ -482,7 +692,7 @@ describe("Measure List component", () => {
     // second measure should have Version action as this is a draft measure
     fireEvent.click(selectButtons[1]);
     expect(
-      await screen.findByRole("button", {
+      await findByRole("button", {
         name: "Version",
       })
     ).toBeInTheDocument();
@@ -490,29 +700,49 @@ describe("Measure List component", () => {
     // third measure should have Draft action as this is versioned measure
     fireEvent.click(selectButtons[2]);
     expect(
-      await screen.findByRole("button", {
+      await findByRole("button", {
         name: "Draft",
       })
     ).toBeInTheDocument();
+    unmount();
   });
 
   it("should display draft dialog on clicking Draft action", async () => {
-    renderMeasureList();
-    const selectButtons = await screen.findAllByRole("button", {
+    const { findByRole, findAllByRole, getByText, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const selectButtons = await findAllByRole("button", {
       name: "Select",
     });
     fireEvent.click(selectButtons[2]);
-    const draftButton = await screen.findByRole("button", {
+    const draftButton = await findByRole("button", {
       name: "Draft",
     });
     fireEvent.click(draftButton);
-    expect(screen.getByText("Create Draft")).toBeInTheDocument();
+    expect(getByText("Create Draft")).toBeInTheDocument();
     const measureName = (await screen.findByRole("textbox", {
       name: "Measure Name",
     })) as HTMLInputElement;
     expect(measureName.value).toEqual(measures[2].measureName);
     // close dialog
-    fireEvent.click(screen.getByText(/Cancel/i));
+    fireEvent.click(getByText(/Cancel/i));
+    unmount();
   });
 
   it("should create a measure draft successfully", async () => {
@@ -527,23 +757,43 @@ describe("Measure List component", () => {
     useMeasureServiceMock.mockImplementation(() => {
       return useMeasureServiceMockResolved;
     });
-    renderMeasureList();
+    const { getByTestId, getByText, findByRole, findAllByRole, unmount } =
+      render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={measures}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setInitialLoad={setInitialLoadMock}
+            activeTab={0}
+            searchCriteria={""}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            setErrMsg={setErrMsgMock}
+          />
+        </ServiceContext.Provider>
+      );
 
-    const selectButtons = await screen.findAllByRole("button", {
+    const selectButtons = await findAllByRole("button", {
       name: "Select",
     });
     fireEvent.click(selectButtons[2]);
-    const draftButton = await screen.findByRole("button", {
+    const draftButton = await findByRole("button", {
       name: "Draft",
     });
     fireEvent.click(draftButton);
-    expect(screen.getByText("Create Draft")).toBeInTheDocument();
-    fireEvent.click(screen.getByText(/Continue/i));
+    expect(getByText("Create Draft")).toBeInTheDocument();
+    fireEvent.click(getByText(/Continue/i));
     await waitFor(() => {
-      expect(screen.getByTestId("success-toast")).toHaveTextContent(
+      expect(getByTestId("success-toast")).toHaveTextContent(
         "New draft created successfully."
       );
     });
+    unmount();
   });
 
   it("should display errors if draft creation fails with validation", async () => {
@@ -563,23 +813,43 @@ describe("Measure List component", () => {
     useMeasureServiceMock.mockImplementation(() => {
       return useMeasureServiceMockRejected;
     });
-    renderMeasureList();
+    const { getByTestId, getByText, findByRole, findAllByRole, unmount } =
+      render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={measures}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setInitialLoad={setInitialLoadMock}
+            activeTab={0}
+            searchCriteria={""}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            setErrMsg={setErrMsgMock}
+          />
+        </ServiceContext.Provider>
+      );
 
-    const selectButtons = await screen.findAllByRole("button", {
+    const selectButtons = await findAllByRole("button", {
       name: "Select",
     });
     fireEvent.click(selectButtons[2]);
-    const draftButton = await screen.findByRole("button", {
+    const draftButton = await findByRole("button", {
       name: "Draft",
     });
     fireEvent.click(draftButton);
-    expect(screen.getByText("Create Draft")).toBeInTheDocument();
-    fireEvent.click(screen.getByText(/Continue/i));
+    expect(getByText("Create Draft")).toBeInTheDocument();
+    fireEvent.click(getByText(/Continue/i));
     await waitFor(() => {
-      expect(screen.getByTestId("error-toast")).toHaveTextContent(
+      expect(getByTestId("error-toast")).toHaveTextContent(
         error.response.data.message
       );
     });
+    unmount();
   });
 
   it("should display errors if service down or internal server errors", async () => {
@@ -601,22 +871,42 @@ describe("Measure List component", () => {
       return useMeasureServiceMockRejected;
     });
 
-    renderMeasureList();
-    const selectButtons = await screen.findAllByRole("button", {
+    const { getByTestId, getByText, findByRole, findAllByRole, unmount } =
+      render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={measures}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setInitialLoad={setInitialLoadMock}
+            activeTab={0}
+            searchCriteria={""}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            setErrMsg={setErrMsgMock}
+          />
+        </ServiceContext.Provider>
+      );
+    const selectButtons = await findAllByRole("button", {
       name: "Select",
     });
     fireEvent.click(selectButtons[2]);
-    const draftButton = await screen.findByRole("button", {
+    const draftButton = await findByRole("button", {
       name: "Draft",
     });
     fireEvent.click(draftButton);
-    expect(screen.getByText("Create Draft")).toBeInTheDocument();
-    fireEvent.click(screen.getByText(/Continue/i));
+    expect(getByText("Create Draft")).toBeInTheDocument();
+    fireEvent.click(getByText(/Continue/i));
     await waitFor(() => {
-      expect(screen.getByTestId("error-toast")).toHaveTextContent(
+      expect(getByTestId("error-toast")).toHaveTextContent(
         "An error occurred, please try again. If the error persists, please contact the help desk."
       );
     });
+    unmount();
   });
 
   it("should display the error when cql is empty while exporting the measure", async () => {
@@ -633,18 +923,35 @@ describe("Measure List component", () => {
       };
     });
 
-    renderMeasureList();
-    const actionButton = screen.getByTestId(`measure-action-${measures[0].id}`);
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const actionButton = getByTestId(`measure-action-${measures[0].id}`);
     fireEvent.click(actionButton);
-    expect(
-      screen.getByTestId(`export-measure-${measures[0].id}`)
-    ).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId(`export-measure-${measures[0].id}`));
+    expect(getByTestId(`export-measure-${measures[0].id}`)).toBeInTheDocument();
+    fireEvent.click(getByTestId(`export-measure-${measures[0].id}`));
     await waitFor(() => {
-      expect(screen.getByTestId("error-toast")).toHaveTextContent(
+      expect(getByTestId("error-toast")).toHaveTextContent(
         "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain CQL."
       );
     });
+    unmount();
   });
 
   it("should display the error when there are return type mismatch or errors in cql while exporting the measure", async () => {
@@ -661,18 +968,37 @@ describe("Measure List component", () => {
       };
     });
 
-    renderMeasureList();
-    const actionButton = screen.getByTestId(`measure-action-${measures[2].id}`);
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const actionButton = getByTestId(`measure-action-${measures[2].id}`);
     fireEvent.click(actionButton);
     expect(
       screen.getByTestId(`export-measure-${measures[2].id}`)
     ).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId(`export-measure-${measures[2].id}`));
+    fireEvent.click(getByTestId(`export-measure-${measures[2].id}`));
     await waitFor(() => {
-      expect(screen.getByTestId("error-toast")).toHaveTextContent(
+      expect(getByTestId("error-toast")).toHaveTextContent(
         "Unable to Export measure. Measure Bundle could not be generated as Measure contains errors."
       );
     });
+    unmount();
   });
 
   it("should display the error when there are no associated population criteria while exporting the measure", async () => {
@@ -689,18 +1015,35 @@ describe("Measure List component", () => {
       };
     });
 
-    renderMeasureList();
-    const actionButton = screen.getByTestId(`measure-action-${measures[1].id}`);
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const actionButton = getByTestId(`measure-action-${measures[1].id}`);
     fireEvent.click(actionButton);
-    expect(
-      screen.getByTestId(`export-measure-${measures[1].id}`)
-    ).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId(`export-measure-${measures[1].id}`));
+    expect(getByTestId(`export-measure-${measures[1].id}`)).toBeInTheDocument();
+    fireEvent.click(getByTestId(`export-measure-${measures[1].id}`));
     await waitFor(() => {
-      expect(screen.getByTestId("error-toast")).toHaveTextContent(
+      expect(getByTestId("error-toast")).toHaveTextContent(
         "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain Population Criteria."
       );
     });
+    unmount();
   });
 
   it("should display the error when there are no associated libraries in hapi fhir or if the server is down while exporting the measure", async () => {
@@ -717,20 +1060,37 @@ describe("Measure List component", () => {
       };
     });
 
-    renderMeasureList();
-    fireEvent.click(screen.getByTestId(`measure-action-${measures[2].id}`));
-    expect(
-      screen.getByTestId(`export-measure-${measures[2].id}`)
-    ).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId(`export-measure-${measures[2].id}`));
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    fireEvent.click(getByTestId(`measure-action-${measures[2].id}`));
+    expect(getByTestId(`export-measure-${measures[2].id}`)).toBeInTheDocument();
+    fireEvent.click(getByTestId(`export-measure-${measures[2].id}`));
     await waitFor(() => {
-      expect(screen.getByTestId("error-toast")).toHaveTextContent(
+      expect(getByTestId("error-toast")).toHaveTextContent(
         "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists."
       );
     });
+    unmount();
   });
   // this test has been passing based on side effects. changing the order that it works in breaks all other tests.
-  it.skip("should call the export api to generate the measure zip file", async () => {
+  it("should call the export api to generate the measure zip file", async () => {
     const success = {
       response: {
         data: {
@@ -746,28 +1106,60 @@ describe("Measure List component", () => {
       };
     });
 
-    renderMeasureList();
-    const actionButton = screen.getByTestId(`measure-action-${measures[0].id}`);
+    const { getByTestId, getByText, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    const actionButton = getByTestId(`measure-action-${measures[0].id}`);
     act(() => {
       fireEvent.click(actionButton);
     });
-    const link = {
-      click: jest.fn(),
-      setAttribute: jest.fn(),
-    };
+    // const link: HTMLElement = <a href="test" onClick={onClick}/>
+    // this passes the opacity check however it will fail TypeError: Cannot set properties of undefined (setting '__reactFiber$rso6nblf2w')
+    // the issue is not adding the element to the page. The issue is creating an element that is element like enough not to get broken during the screen dim caused by dialog window overlay.
+    // const link: HTMLElement = {
+    //   click: jest.fn(),
+    //   setAttribute: jest.fn(),
+    //   // @ts-ignore
+    //   style: {
+    //     opacity: ""
+    //   },
+    //   _reactFiber$km9e5r2xooa: {
+
+    //   }
+    // };
     window.URL.createObjectURL = jest
       .fn()
       .mockReturnValueOnce("http://fileurl");
-    document.body.appendChild = jest.fn();
-    document.createElement = jest.fn().mockReturnValueOnce(link);
-    expect(
-      screen.getByTestId(`export-measure-${measures[0].id}`)
-    ).toBeInTheDocument();
+    // document.body.appendChild = jest.fn();
+    // document.createElement = jest.fn().mockReturnValueOnce(link); // this line crashes..
+    const exportButton = getByTestId(`export-measure-${measures[0].id}`);
+    expect(exportButton).toBeInTheDocument();
     act(() => {
-      fireEvent.click(screen.getByTestId(`export-measure-${measures[0].id}`));
+      // document.createElement = jest.fn().mockReturnValueOnce(link); // this line crashes..
+      fireEvent.click(exportButton);
     });
     await waitFor(() => {
-      expect(link.click).toBeCalled();
+      // expect(getByTestId("export-download-link")).toBeInTheDocument()
+      // expect(onClick).toBeCalled();
+      expect(getByText("Measure exported successfully")).toBeInTheDocument();
     });
+    unmount();
   });
 });
