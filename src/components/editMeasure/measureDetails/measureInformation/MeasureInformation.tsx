@@ -50,7 +50,6 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   const { setErrorMessage } = props;
   const measureServiceApi = useMeasureServiceApi();
   const [endorsers, setEndorsers] = useState<string[]>();
-  const [endorsementOptions, setEndorsementOptions] = useState<Endorsement[]>();
   const [endorsementIdRequired, setEndorsementIdRequired] = useState<boolean>();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
@@ -63,7 +62,6 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       subscription.unsubscribe();
     };
   }, []);
-
   const row = {
     display: "flex",
     flexDirection: "row",
@@ -191,7 +189,8 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     endorser: string,
     endorsementId: string
   ): boolean => {
-    if (endorser !== null && endorsementId === "") {
+    // empty string needs to be considered
+    if (endorser && endorsementId === "") {
       handleToast("danger", "Endorser Number is Required", true);
       return false;
     }
@@ -203,7 +202,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       );
       return false;
     }
-    if (endorsementId !== "") {
+    if (endorsementId) {
       const stripped = endorsementId.replace(/^[0-9a-zA-Z]*$/, "");
       if (stripped && stripped.length > 0) {
         handleToast("danger", "Endorser Number must be alpha numeric", true);
@@ -213,9 +212,15 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     return true;
   };
   const handleSubmit = async (values) => {
-    if (
-      validateEndorser(values.endorsements[0].endorser, values.endorsementId)
-    ) {
+    let endorsersValid = true;
+    // we only want to validate this field if it's not an empty array.
+    if (values.endorsements.length > 0) {
+      endorsersValid = validateEndorser(
+        values.endorsements[0]?.endorser,
+        values.endorsementId
+      );
+    }
+    if (endorsersValid) {
       const inSyncCql = await synchingEditorCqlContent(
         "",
         measure?.cql,
@@ -224,7 +229,6 @@ export default function MeasureInformation(props: MeasureInformationProps) {
         measure?.version,
         "measureInformation"
       );
-
       // Generate updated ELM when Library name is modified
       //  and there are no CQL errors.
       if (INITIAL_VALUES.cqlLibraryName !== values.cqlLibraryName) {
@@ -252,9 +256,10 @@ export default function MeasureInformation(props: MeasureInformationProps) {
           experimental: values.experimental,
           endorsements: [
             {
-              endorser: values.endorsements[0].endorser,
-              endorsementId: values.endorsementId,
-              endorserSystemId: values.endorserSystemId,
+              endorser: values.endorsements[0]?.endorser || "",
+              endorsementId: values.endorsementId || "",
+              endorserSystemId:
+                values.endorsements[0]?.endorserSystemId || null,
             },
           ],
         },
