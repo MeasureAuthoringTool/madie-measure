@@ -192,7 +192,9 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     // empty string needs to be considered
     if (
       endorser &&
-      (endorsementId === "" || endorsementId === undefined)
+      (endorsementId === "" ||
+        endorsementId === undefined ||
+        endorsementId === null)
     ) {
       handleToast("danger", "Endorser Number is Required", true);
       return false;
