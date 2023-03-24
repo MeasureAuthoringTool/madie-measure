@@ -15,7 +15,7 @@ import { Measure } from "@madie/madie-models";
 import { AxiosError, AxiosResponse } from "axios";
 import { parseContent, synchingEditorCqlContent } from "@madie/madie-editor";
 import userEvent from "@testing-library/user-event";
-import { checkUserCanEdit } from "@madie/madie-util";
+import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 
 const mockHistoryPush = jest.fn();
 
@@ -72,9 +72,9 @@ jest.mock("@madie/madie-util", () => ({
   })),
   useKeyPress: jest.fn(() => false),
   measureStore: {
-    updateMeasure: jest.fn((measure) => measure),
-    state: jest.fn().mockImplementation(() => measure),
-    initialState: jest.fn().mockImplementation(() => null),
+    updateMeasure: jest.fn(),
+    state: jest.fn(),
+    initialState: jest.fn(),
     subscribe: (set) => {
       // set(measure)
       return { unsubscribe: () => null };
@@ -82,7 +82,7 @@ jest.mock("@madie/madie-util", () => ({
   },
   routeHandlerStore: {
     subscribe: (set) => {
-      set(measure);
+      set();
       return { unsubscribe: () => null };
     },
     updateRouteHandlerState: () => null,
@@ -140,7 +140,90 @@ describe("MeasureInformation component", () => {
   const { getByTestId, queryByText, findByTestId, getByRole, getByText } =
     screen;
 
+  it("Toast error shows when endorsing organization is not null and endorsement Id is empty", async () => {
+    measureStore.state.mockImplementationOnce(() => measure);
+    checkUserCanEdit.mockImplementationOnce(() => true);
+    await act(async () => {
+      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+      const endorserAutoComplete = await screen.findByTestId("endorser");
+      const endorserId = getByTestId(
+        "endorsement-number-input"
+      ) as HTMLInputElement;
+
+      fireEvent.keyDown(endorserAutoComplete, { key: "ArrowDown" });
+      // selects 2nd option
+      const endorserOptions = await screen.findAllByRole("option");
+      fireEvent.click(endorserOptions[1]);
+
+      // verifies if the option is selected
+      const endorserComboBox =
+        within(endorserAutoComplete).getByRole("combobox");
+      expect(endorserComboBox).toHaveValue("NQF");
+      //verifies endorserId was enabled
+      expect(endorserId).toBeEnabled();
+      //clear endorserId
+      fireEvent.change(endorserId, {
+        target: { value: "" },
+      });
+      expect(endorserId).toHaveValue("");
+
+      const saveButton = await screen.findByRole("button", { name: "Save" });
+      expect(saveButton).toBeInTheDocument();
+      await waitFor(() => expect(saveButton).toBeEnabled());
+      act(() => {
+        fireEvent.click(saveButton);
+      });
+      // previous implementation depended on setTimeout.
+      await waitFor(() => {
+        expect(
+          screen.getByText("Endorser Number is Required")
+        ).toBeInTheDocument();
+      });
+    });
+  });
+
+  it("Toast error shows when endorsement Id is not alphanumeric", async () => {
+    measureStore.state.mockImplementationOnce(() => measure);
+    checkUserCanEdit.mockImplementationOnce(() => true);
+    await act(async () => {
+      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+      const endorserAutoComplete = await screen.findByTestId("endorser");
+      const endorserId = getByTestId(
+        "endorsement-number-input"
+      ) as HTMLInputElement;
+
+      fireEvent.keyDown(endorserAutoComplete, { key: "ArrowDown" });
+      // selects 2nd option
+      const endorserOptions = await screen.findAllByRole("option");
+      fireEvent.click(endorserOptions[1]);
+
+      // verifies if the option is selected
+      const endorserComboBox =
+        within(endorserAutoComplete).getByRole("combobox");
+      expect(endorserComboBox).toHaveValue("NQF");
+      //verifies endorserId was enabled
+      expect(endorserId).toBeEnabled();
+      //change endorserId
+      fireEvent.change(endorserId, {
+        target: { value: "test 1" },
+      });
+      expect(endorserId).toHaveValue("test 1");
+
+      const saveButton = await screen.findByRole("button", { name: "Save" });
+      expect(saveButton).toBeInTheDocument();
+      await waitFor(() => expect(saveButton).toBeEnabled());
+
+      userEvent.click(saveButton);
+      await waitFor(() => {
+        expect(
+          screen.getByText("Endorser Number must be alpha numeric")
+        ).toBeInTheDocument();
+      });
+    });
+  });
+
   it("should regenerate ELM when the CQL Library Name is updated", async () => {
+    measureStore.state.mockImplementation(() => measure);
     serviceApiMock = {
       getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
       updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
@@ -176,7 +259,7 @@ describe("MeasureInformation component", () => {
     await waitFor(() => expect(parseContent).toBeCalled());
 
     expect(
-      await screen.findByText("Measurement Information Updated Successfully")
+      await screen.getByText("Measurement Information Updated Successfully")
     ).toBeInTheDocument();
 
     const toastCloseButton = await screen.findByTestId("close-error-button");
@@ -200,6 +283,7 @@ describe("MeasureInformation component", () => {
             {
               endorsementId: "NQF",
               endorser: "1234",
+              endorserSystemId: null,
             },
           ],
         },
@@ -621,86 +705,6 @@ describe("MeasureInformation component", () => {
       expect(endorserComboBox).toHaveValue("");
       expect(endorserId).toBeDisabled();
       expect(endorserId).toHaveValue("");
-    });
-  });
-
-  it("Toast error shows when endorsing organization is not null and endorsement Id is empty", async () => {
-    checkUserCanEdit.mockImplementationOnce(() => true);
-    await act(async () => {
-      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
-      const endorserAutoComplete = await screen.findByTestId("endorser");
-      const endorserId = getByTestId(
-        "endorsement-number-input"
-      ) as HTMLInputElement;
-
-      fireEvent.keyDown(endorserAutoComplete, { key: "ArrowDown" });
-      // selects 2nd option
-      const endorserOptions = await screen.findAllByRole("option");
-      fireEvent.click(endorserOptions[1]);
-
-      // verifies if the option is selected
-      const endorserComboBox =
-        within(endorserAutoComplete).getByRole("combobox");
-      expect(endorserComboBox).toHaveValue("NQF");
-      //verifies endorserId was enabled
-      expect(endorserId).toBeEnabled();
-      //clear endorserId
-      fireEvent.change(endorserId, {
-        target: { value: "" },
-      });
-      expect(endorserId).toHaveValue("");
-
-      const saveButton = await screen.findByRole("button", { name: "Save" });
-      expect(saveButton).toBeInTheDocument();
-      await waitFor(() => expect(saveButton).toBeEnabled());
-
-      userEvent.click(saveButton);
-
-      setTimeout(() => {
-        expect(
-          screen.findByText("Endorser Number is Required")
-        ).toBeInTheDocument();
-      }, 1000);
-    });
-  });
-
-  it("Toast error shows when endorsement Id is not alphanumeric", async () => {
-    checkUserCanEdit.mockImplementationOnce(() => true);
-    await act(async () => {
-      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
-      const endorserAutoComplete = await screen.findByTestId("endorser");
-      const endorserId = getByTestId(
-        "endorsement-number-input"
-      ) as HTMLInputElement;
-
-      fireEvent.keyDown(endorserAutoComplete, { key: "ArrowDown" });
-      // selects 2nd option
-      const endorserOptions = await screen.findAllByRole("option");
-      fireEvent.click(endorserOptions[1]);
-
-      // verifies if the option is selected
-      const endorserComboBox =
-        within(endorserAutoComplete).getByRole("combobox");
-      expect(endorserComboBox).toHaveValue("NQF");
-      //verifies endorserId was enabled
-      expect(endorserId).toBeEnabled();
-      //change endorserId
-      fireEvent.change(endorserId, {
-        target: { value: "test 1" },
-      });
-      expect(endorserId).toHaveValue("test 1");
-
-      const saveButton = await screen.findByRole("button", { name: "Save" });
-      expect(saveButton).toBeInTheDocument();
-      await waitFor(() => expect(saveButton).toBeEnabled());
-
-      userEvent.click(saveButton);
-
-      setTimeout(() => {
-        expect(
-          screen.findByText("Endorser Number must be alpha numeric")
-        ).toBeInTheDocument();
-      }, 1000);
     });
   });
 });
