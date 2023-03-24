@@ -190,7 +190,12 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     endorsementId: string
   ): boolean => {
     // empty string needs to be considered
-    if (endorser && endorsementId === "") {
+    if (
+      endorser &&
+      (endorsementId === "" ||
+        endorsementId === undefined ||
+        endorsementId === null)
+    ) {
       handleToast("danger", "Endorser Number is Required", true);
       return false;
     }
