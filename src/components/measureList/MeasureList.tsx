@@ -315,6 +315,32 @@ export default function MeasureList(props: {
               "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain Population Criteria.";
             setToastMessage(message);
             setFailureMessage(message);
+          } else if (_.isEmpty(targetedMeasure?.measureMetaData?.developers)) {
+            const message =
+              "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain any Measure Developers.";
+            setToastMessage(message);
+            setFailureMessage(message);
+          } else if (_.isEmpty(targetedMeasure?.measureMetaData?.steward)) {
+            const message =
+              "Unable to Export measure. Measure Bundle could not be generated as Measure does not have a Stewart.";
+            setToastMessage(message);
+            setFailureMessage(message);
+          } else if (_.isEmpty(targetedMeasure?.measureMetaData?.description)) {
+            const message =
+              "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain a Description.";
+            setToastMessage(message);
+            setFailureMessage(message);
+          } else if (
+            targetedMeasure.groups.filter(
+              (group) =>
+                group.measureGroupTypes === null ||
+                _.isEmpty(group.measureGroupTypes)
+            ).length > 0
+          ) {
+            const message =
+              "Unable to Export measure. Measure Bundle could not be generated as at least one Population Criteria does not contain a Type.";
+            setToastMessage(message);
+            setFailureMessage(message);
           } else {
             const message =
               "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists.";
