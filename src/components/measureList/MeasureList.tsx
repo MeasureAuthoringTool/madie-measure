@@ -297,53 +297,73 @@ export default function MeasureList(props: {
         setToastType("danger");
         setDownloadState("failure");
         if (errorStatus === 409) {
+          const missing = [];
           if (_.isEmpty(targetMeasure.current?.cql)) {
-            const message =
-              "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain CQL.";
-            setToastMessage(message);
-            setFailureMessage(message);
-          } else if (
+            // const message =
+            //   "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain CQL.";
+            //   setToastMessage(message);
+            //   setFailureMessage(message);
+            missing.push("Missing CQL");
+          }
+          if (
             targetedMeasure?.cqlErrors ||
             !_.isEmpty(targetedMeasure?.errors)
           ) {
-            const message =
-              "Unable to Export measure. Measure Bundle could not be generated as Measure contains errors.";
-            setToastMessage(message);
-            setFailureMessage(message);
-          } else if (_.isEmpty(targetedMeasure?.groups)) {
-            const message =
-              "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain Population Criteria.";
-            setToastMessage(message);
-            setFailureMessage(message);
-          } else if (_.isEmpty(targetedMeasure?.measureMetaData?.developers)) {
-            const message =
-              "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain any Measure Developers.";
-            setToastMessage(message);
-            setFailureMessage(message);
-          } else if (_.isEmpty(targetedMeasure?.measureMetaData?.steward)) {
-            const message =
-              "Unable to Export measure. Measure Bundle could not be generated as Measure does not have a Stewart.";
-            setToastMessage(message);
-            setFailureMessage(message);
-          } else if (_.isEmpty(targetedMeasure?.measureMetaData?.description)) {
-            const message =
-              "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain a Description.";
-            setToastMessage(message);
-            setFailureMessage(message);
-          } else if (
+            // const message =
+            // "Unable to Export measure. Measure Bundle could not be generated as Measure contains errors.";
+            // setToastMessage(message);
+            // setFailureMessage(message);
+            missing.push("Contains Errors");
+          }
+          if (_.isEmpty(targetedMeasure?.groups)) {
+            // const message =
+            //   "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain Population Criteria.";
+            //   setToastMessage(message);
+            //   setFailureMessage(message);
+            missing.push("Missing Population Criteria");
+          }
+          if (_.isEmpty(targetedMeasure?.measureMetaData.developers)) {
+            // const message =
+            //   "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain any Measure Developers.";
+            //   setToastMessage(message);
+            //   setFailureMessage(message);
+            missing.push("Missing Measure Developers");
+          }
+          if (_.isEmpty(targetedMeasure?.measureMetaData.steward)) {
+            // const message =
+            //   "Unable to Export measure. Measure Bundle could not be generated as Measure does not have a Steward.";
+            //   setToastMessage(message);
+            //   setFailureMessage(message);
+            missing.push("Missing Steward");
+          }
+          if (_.isEmpty(targetedMeasure?.measureMetaData.description)) {
+            // const message =
+            //   "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain a Description.";
+            //   setToastMessage(message);
+            //   setFailureMessage(message);
+            missing.push("Missing Description");
+          }
+          if (
             targetedMeasure.groups.filter(
               (group) =>
                 group.measureGroupTypes === null ||
                 _.isEmpty(group.measureGroupTypes)
             ).length > 0
           ) {
-            const message =
-              "Unable to Export measure. Measure Bundle could not be generated as at least one Population Criteria does not contain a Type.";
-            setToastMessage(message);
-            setFailureMessage(message);
-          } else {
+            // const message =
+            //   "Unable to Export measure. Measure Bundle could not be generated as at least one Population Criteria does not contain a Type.";
+            //   setToastMessage(message);
+            //   setFailureMessage(message);
+            missing.push("At least one Popultaion Criteria is missing Type");
+          }
+          if (missing.length <= 0) {
             const message =
               "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists.";
+            setToastMessage(message);
+            setFailureMessage(message);
+          }
+          if (missing.length > 0) {
+            const message = messageGenerator(missing);
             setToastMessage(message);
             setFailureMessage(message);
           }
@@ -356,7 +376,12 @@ export default function MeasureList(props: {
       }
     }
   };
+  const messageGenerator = (missing: String[]) => {
+    let returnMessage = `Unable to Export measure. Measure Bundle could not be generated as Measure:\n`;
 
+    missing.forEach((miss) => (returnMessage += `• ${miss}\n`));
+    return returnMessage;
+  };
   const handleContinueDialog = () => {
     setDownloadState(null);
     setFailureMessage(null);
