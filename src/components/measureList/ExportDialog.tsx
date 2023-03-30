@@ -83,7 +83,20 @@ const ExportDialog = ({
               <span style={{ fontSize: 14 }}>{measureName}</span>
             </div>
           </div>
-          <span className="error-message">{failureMessage}</span>
+          {typeof failureMessage == "string" && (
+            <span className="error-message">{failureMessage}</span>
+          )}
+          {typeof failureMessage == "object" && failureMessage && (
+            <span className="error-message">
+              Unable to Export measure. Measure Bundle could not be generated as
+              Measure:
+              <ul>
+                {failureMessage.map((miss) => (
+                  <li>{miss}</li>
+                ))}
+              </ul>
+            </span>
+          )}
         </div>
       </DialogContent>
       <Divider />

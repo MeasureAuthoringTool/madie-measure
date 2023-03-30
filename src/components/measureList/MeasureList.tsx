@@ -344,6 +344,7 @@ export default function MeasureList(props: {
             missing.push("Missing Description");
           }
           if (
+            targetedMeasure.groups &&
             targetedMeasure.groups.filter(
               (group) =>
                 group.measureGroupTypes === null ||
@@ -361,11 +362,11 @@ export default function MeasureList(props: {
               "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists.";
             setToastMessage(message);
             setFailureMessage(message);
-          }
-          if (missing.length > 0) {
-            const message = messageGenerator(missing);
-            setToastMessage(message);
-            setFailureMessage(message);
+          } else if (missing.length > 0) {
+            setToastMessage(
+              "Unable to Export measure. Measure Bundle could not be generated due to the below problem(s)."
+            );
+            setFailureMessage(missing);
           }
         } else {
           const message =
@@ -375,12 +376,6 @@ export default function MeasureList(props: {
         }
       }
     }
-  };
-  const messageGenerator = (missing: String[]) => {
-    let returnMessage = `Unable to Export measure. Measure Bundle could not be generated as Measure:\n`;
-
-    missing.forEach((miss) => (returnMessage += `• ${miss}\n`));
-    return returnMessage;
   };
   const handleContinueDialog = () => {
     setDownloadState(null);

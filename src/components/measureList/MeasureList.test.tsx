@@ -948,7 +948,7 @@ describe("Measure List component", () => {
     fireEvent.click(getByTestId(`export-measure-${measures[0].id}`));
     await waitFor(() => {
       expect(getByTestId("error-toast")).toHaveTextContent(
-        "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain CQL."
+        "Unable to Export measure. Measure Bundle could not be generated due to the below problem(s)."
       );
     });
     unmount();
@@ -995,7 +995,7 @@ describe("Measure List component", () => {
     fireEvent.click(getByTestId(`export-measure-${measures[2].id}`));
     await waitFor(() => {
       expect(getByTestId("error-toast")).toHaveTextContent(
-        "Unable to Export measure. Measure Bundle could not be generated as Measure contains errors."
+        "Unable to Export measure. Measure Bundle could not be generated due to the below problem(s)."
       );
     });
     unmount();
@@ -1040,7 +1040,7 @@ describe("Measure List component", () => {
     fireEvent.click(getByTestId(`export-measure-${measures[1].id}`));
     await waitFor(() => {
       expect(getByTestId("error-toast")).toHaveTextContent(
-        "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain Population Criteria."
+        "Unable to Export measure. Measure Bundle could not be generated due to the below problem(s)."
       );
     });
     unmount();
