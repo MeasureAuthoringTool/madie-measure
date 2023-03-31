@@ -27,5 +27,8 @@
     color: #d92f2f;
     font-weight: 400;
     font-size: 16px;
+    > ul {
+      list-style: inside;
+    }
   }
 }

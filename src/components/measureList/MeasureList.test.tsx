@@ -947,8 +947,8 @@ describe("Measure List component", () => {
     expect(getByTestId(`export-measure-${measures[0].id}`)).toBeInTheDocument();
     fireEvent.click(getByTestId(`export-measure-${measures[0].id}`));
     await waitFor(() => {
-      expect(getByTestId("error-toast")).toHaveTextContent(
-        "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain CQL."
+      expect(getByTestId("error-message")).toHaveTextContent(
+        "Unable to Export measure.Missing CQLMissing Population CriteriaMissing Measure DevelopersMissing StewardMissing Description"
       );
     });
     unmount();
@@ -994,8 +994,8 @@ describe("Measure List component", () => {
     ).toBeInTheDocument();
     fireEvent.click(getByTestId(`export-measure-${measures[2].id}`));
     await waitFor(() => {
-      expect(getByTestId("error-toast")).toHaveTextContent(
-        "Unable to Export measure. Measure Bundle could not be generated as Measure contains errors."
+      expect(getByTestId("error-message")).toHaveTextContent(
+        "Unable to Export measure.Contains ErrorsMissing Measure DevelopersMissing StewardMissing DescriptionAt least one Population Criteria is missing Type"
       );
     });
     unmount();
@@ -1039,8 +1039,8 @@ describe("Measure List component", () => {
     expect(getByTestId(`export-measure-${measures[1].id}`)).toBeInTheDocument();
     fireEvent.click(getByTestId(`export-measure-${measures[1].id}`));
     await waitFor(() => {
-      expect(getByTestId("error-toast")).toHaveTextContent(
-        "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain Population Criteria."
+      expect(getByTestId("error-message")).toHaveTextContent(
+        "Unable to Export measure.Missing Population CriteriaMissing Measure DevelopersMissing StewardMissing Description"
       );
     });
     unmount();
@@ -1083,7 +1083,7 @@ describe("Measure List component", () => {
     expect(getByTestId(`export-measure-${measures[2].id}`)).toBeInTheDocument();
     fireEvent.click(getByTestId(`export-measure-${measures[2].id}`));
     await waitFor(() => {
-      expect(getByTestId("error-toast")).toHaveTextContent(
+      expect(getByTestId("error-message")).toHaveTextContent(
         "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists."
       );
     });
