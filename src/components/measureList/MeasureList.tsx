@@ -14,7 +14,7 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
-import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
+import { checkUserCanEdit } from "@madie/madie-util";
 import CreatVersionDialog from "../createVersionDialog/CreateVersionDialog";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import DraftMeasureDialog from "../draftMeasureDialog/DraftMeasureDialog";
@@ -88,8 +88,6 @@ export default function MeasureList(props: {
     useState(null);
 
   const measureServiceApi = useMeasureServiceApi();
-  const featureFlags = useFeatureFlags();
-  const versioningFeature = !!featureFlags?.measureVersioning;
   const targetMeasure = useRef<Measure>();
 
   const [createVersionDialog, setCreateVersionDialog] = useState({
@@ -221,20 +219,18 @@ export default function MeasureList(props: {
     };
     additionalOptions.push(exportButton);
     // always on if feature
-    if (versioningFeature) {
-      if (selected.measureMetaData.draft) {
-        options.push({
-          label: "Version",
-          toImplementFunction: createVersion,
-          dataTestId: `create-version-measure-${selected?.id}`,
-        });
-      } else {
-        options.push({
-          label: "Draft",
-          toImplementFunction: () => setDraftMeasureDialog({ open: true }),
-          dataTestId: `draft-measure-${selected?.id}`,
-        });
-      }
+    if (selected.measureMetaData.draft) {
+      options.push({
+        label: "Version",
+        toImplementFunction: createVersion,
+        dataTestId: `create-version-measure-${selected?.id}`,
+      });
+    } else {
+      options.push({
+        label: "Draft",
+        toImplementFunction: () => setDraftMeasureDialog({ open: true }),
+        dataTestId: `draft-measure-${selected?.id}`,
+      });
     }
     setAdditionalSelectOptionProps(additionalOptions);
     setOtherSelectOptionPropsForPopOver(options);
