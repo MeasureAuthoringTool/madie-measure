@@ -89,7 +89,6 @@ export default function MeasureList(props: {
 
   const measureServiceApi = useMeasureServiceApi();
   const featureFlags = useFeatureFlags();
-  const exportFeature = !!featureFlags?.export;
   const versioningFeature = !!featureFlags?.measureVersioning;
   const targetMeasure = useRef<Measure>();
 
@@ -215,14 +214,12 @@ export default function MeasureList(props: {
     // additional options are outside the edit flag
     let additionalOptions = [];
     // always on if feature
-    if (exportFeature) {
-      const exportButton = {
-        label: "Export",
-        toImplementFunction: exportMeasure,
-        dataTestId: `export-measure-${selected?.id}`,
-      };
-      additionalOptions.push(exportButton);
-    }
+    const exportButton = {
+      label: "Export",
+      toImplementFunction: exportMeasure,
+      dataTestId: `export-measure-${selected?.id}`,
+    };
+    additionalOptions.push(exportButton);
     // always on if feature
     if (versioningFeature) {
       if (selected.measureMetaData.draft) {
@@ -512,23 +509,11 @@ export default function MeasureList(props: {
                           variant="outline-secondary"
                           name="Select"
                           onClick={(e) => {
-                            if (exportFeature || versioningFeature) {
-                              handleOpen(measure, e);
-                            } else {
-                              history.push(
-                                `/measures/${measure.id}/edit/details`
-                              );
-                            }
+                            handleOpen(measure, e);
                           }}
-                          data-testid={
-                            exportFeature || versioningFeature
-                              ? `measure-action-${measure.id}`
-                              : `edit-measure-${measure.id}`
-                          }
+                          data-testid={`measure-action-${measure.id}`}
                         >
-                          {exportFeature || versioningFeature
-                            ? "Select"
-                            : "View"}
+                          Select
                         </Button>
                       </td>
                     </tr>
