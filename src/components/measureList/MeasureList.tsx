@@ -293,7 +293,6 @@ export default function MeasureList(props: {
         setToastOpen(false);
         setDownloadState(null);
       } else {
-        setToastOpen(true);
         setToastType("danger");
         setDownloadState("failure");
         if (errorStatus === 409) {
@@ -327,23 +326,18 @@ export default function MeasureList(props: {
                 _.isEmpty(group.measureGroupTypes)
             ).length > 0
           ) {
-            missing.push("At least one Popultaion Criteria is missing Type");
+            missing.push("At least one Population Criteria is missing Type");
           }
           if (missing.length <= 0) {
             const message =
               "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists.";
-            setToastMessage(message);
             setFailureMessage(message);
           } else if (missing.length > 0) {
-            setToastMessage(
-              "Unable to Export measure. Measure Bundle could not be generated due to the below problem(s)."
-            );
             setFailureMessage(missing);
           }
         } else {
           const message =
             "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists.";
-          setToastMessage(message);
           setFailureMessage(message);
         }
       }
