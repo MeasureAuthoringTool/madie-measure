@@ -93,7 +93,7 @@ const ExportDialog = ({
               Unable to Export measure.
               <ul>
                 {failureMessage.map((miss) => (
-                  <li>• {miss}</li>
+                  <li>{miss}</li>
                 ))}
               </ul>
             </span>

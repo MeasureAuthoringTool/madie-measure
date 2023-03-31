@@ -948,7 +948,7 @@ describe("Measure List component", () => {
     fireEvent.click(getByTestId(`export-measure-${measures[0].id}`));
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
-        "Unable to Export measure.• Missing CQL• Missing Population Criteria• Missing Measure Developers• Missing Steward• Missing Description"
+        "Unable to Export measure.Missing CQLMissing Population CriteriaMissing Measure DevelopersMissing StewardMissing Description"
       );
     });
     unmount();
@@ -995,7 +995,7 @@ describe("Measure List component", () => {
     fireEvent.click(getByTestId(`export-measure-${measures[2].id}`));
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
-        "Unable to Export measure.• Contains Errors• Missing Measure Developers• Missing Steward• Missing Description• At least one Population Criteria is missing Type"
+        "Unable to Export measure.Contains ErrorsMissing Measure DevelopersMissing StewardMissing DescriptionAt least one Population Criteria is missing Type"
       );
     });
     unmount();
@@ -1040,7 +1040,7 @@ describe("Measure List component", () => {
     fireEvent.click(getByTestId(`export-measure-${measures[1].id}`));
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
-        "Unable to Export measure.• Missing Population Criteria• Missing Measure Developers• Missing Steward• Missing Description"
+        "Unable to Export measure.Missing Population CriteriaMissing Measure DevelopersMissing StewardMissing Description"
       );
     });
     unmount();
