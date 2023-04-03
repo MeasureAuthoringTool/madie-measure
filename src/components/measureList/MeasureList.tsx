@@ -304,7 +304,7 @@ export default function MeasureList(props: {
             targetedMeasure?.cqlErrors ||
             !_.isEmpty(targetedMeasure?.errors)
           ) {
-            missing.push("Contains Errors");
+            missing.push("CQL Contains Errors");
           }
           if (_.isEmpty(targetedMeasure?.groups)) {
             missing.push("Missing Population Criteria");

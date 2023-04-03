@@ -995,7 +995,7 @@ describe("Measure List component", () => {
     fireEvent.click(getByTestId(`export-measure-${measures[2].id}`));
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
-        "Unable to Export measure.Contains ErrorsMissing Measure DevelopersMissing StewardMissing DescriptionAt least one Population Criteria is missing Type"
+        "Unable to Export measure.CQL Contains ErrorsMissing Measure DevelopersMissing StewardMissing DescriptionAt least one Population Criteria is missing Type"
       );
     });
     unmount();
