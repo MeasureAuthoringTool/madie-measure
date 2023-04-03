@@ -293,44 +293,56 @@ export default function MeasureList(props: {
         setToastOpen(false);
         setDownloadState(null);
       } else {
-        setToastOpen(true);
         setToastType("danger");
         setDownloadState("failure");
         if (errorStatus === 409) {
+          const missing = [];
           if (_.isEmpty(targetMeasure.current?.cql)) {
-            const message =
-              "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain CQL.";
-            setToastMessage(message);
-            setFailureMessage(message);
-          } else if (
+            missing.push("Missing CQL");
+          }
+          if (
             targetedMeasure?.cqlErrors ||
             !_.isEmpty(targetedMeasure?.errors)
           ) {
-            const message =
-              "Unable to Export measure. Measure Bundle could not be generated as Measure contains errors.";
-            setToastMessage(message);
-            setFailureMessage(message);
-          } else if (_.isEmpty(targetedMeasure?.groups)) {
-            const message =
-              "Unable to Export measure. Measure Bundle could not be generated as Measure does not contain Population Criteria.";
-            setToastMessage(message);
-            setFailureMessage(message);
-          } else {
+            missing.push("Contains Errors");
+          }
+          if (_.isEmpty(targetedMeasure?.groups)) {
+            missing.push("Missing Population Criteria");
+          }
+          if (_.isEmpty(targetedMeasure?.measureMetaData.developers)) {
+            missing.push("Missing Measure Developers");
+          }
+          if (_.isEmpty(targetedMeasure?.measureMetaData.steward)) {
+            missing.push("Missing Steward");
+          }
+          if (_.isEmpty(targetedMeasure?.measureMetaData.description)) {
+            missing.push("Missing Description");
+          }
+          if (
+            targetedMeasure.groups &&
+            targetedMeasure.groups.filter(
+              (group) =>
+                group.measureGroupTypes === null ||
+                _.isEmpty(group.measureGroupTypes)
+            ).length > 0
+          ) {
+            missing.push("At least one Population Criteria is missing Type");
+          }
+          if (missing.length <= 0) {
             const message =
               "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists.";
-            setToastMessage(message);
             setFailureMessage(message);
+          } else if (missing.length > 0) {
+            setFailureMessage(missing);
           }
         } else {
           const message =
             "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists.";
-          setToastMessage(message);
           setFailureMessage(message);
         }
       }
     }
   };
-
   const handleContinueDialog = () => {
     setDownloadState(null);
     setFailureMessage(null);

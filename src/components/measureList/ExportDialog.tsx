@@ -83,7 +83,21 @@ const ExportDialog = ({
               <span style={{ fontSize: 14 }}>{measureName}</span>
             </div>
           </div>
-          <span className="error-message">{failureMessage}</span>
+          {typeof failureMessage == "string" && (
+            <span className="error-message" data-testid="error-message">
+              {failureMessage}
+            </span>
+          )}
+          {typeof failureMessage == "object" && failureMessage && (
+            <span className="error-message" data-testid="error-message">
+              Unable to Export measure.
+              <ul>
+                {failureMessage.map((miss) => (
+                  <li>{miss}</li>
+                ))}
+              </ul>
+            </span>
+          )}
         </div>
       </DialogContent>
       <Divider />
