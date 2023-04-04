@@ -14,7 +14,7 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
-import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
+import { checkUserCanEdit } from "@madie/madie-util";
 import CreatVersionDialog from "../createVersionDialog/CreateVersionDialog";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import DraftMeasureDialog from "../draftMeasureDialog/DraftMeasureDialog";
@@ -88,9 +88,6 @@ export default function MeasureList(props: {
     useState(null);
 
   const measureServiceApi = useMeasureServiceApi();
-  const featureFlags = useFeatureFlags();
-  const exportFeature = !!featureFlags?.export;
-  const versioningFeature = !!featureFlags?.measureVersioning;
   const targetMeasure = useRef<Measure>();
 
   const [createVersionDialog, setCreateVersionDialog] = useState({
@@ -215,29 +212,25 @@ export default function MeasureList(props: {
     // additional options are outside the edit flag
     let additionalOptions = [];
     // always on if feature
-    if (exportFeature) {
-      const exportButton = {
-        label: "Export",
-        toImplementFunction: exportMeasure,
-        dataTestId: `export-measure-${selected?.id}`,
-      };
-      additionalOptions.push(exportButton);
-    }
+    const exportButton = {
+      label: "Export",
+      toImplementFunction: exportMeasure,
+      dataTestId: `export-measure-${selected?.id}`,
+    };
+    additionalOptions.push(exportButton);
     // always on if feature
-    if (versioningFeature) {
-      if (selected.measureMetaData.draft) {
-        options.push({
-          label: "Version",
-          toImplementFunction: createVersion,
-          dataTestId: `create-version-measure-${selected?.id}`,
-        });
-      } else {
-        options.push({
-          label: "Draft",
-          toImplementFunction: () => setDraftMeasureDialog({ open: true }),
-          dataTestId: `draft-measure-${selected?.id}`,
-        });
-      }
+    if (selected.measureMetaData.draft) {
+      options.push({
+        label: "Version",
+        toImplementFunction: createVersion,
+        dataTestId: `create-version-measure-${selected?.id}`,
+      });
+    } else {
+      options.push({
+        label: "Draft",
+        toImplementFunction: () => setDraftMeasureDialog({ open: true }),
+        dataTestId: `draft-measure-${selected?.id}`,
+      });
     }
     setAdditionalSelectOptionProps(additionalOptions);
     setOtherSelectOptionPropsForPopOver(options);
@@ -512,23 +505,11 @@ export default function MeasureList(props: {
                           variant="outline-secondary"
                           name="Select"
                           onClick={(e) => {
-                            if (exportFeature || versioningFeature) {
-                              handleOpen(measure, e);
-                            } else {
-                              history.push(
-                                `/measures/${measure.id}/edit/details`
-                              );
-                            }
+                            handleOpen(measure, e);
                           }}
-                          data-testid={
-                            exportFeature || versioningFeature
-                              ? `measure-action-${measure.id}`
-                              : `edit-measure-${measure.id}`
-                          }
+                          data-testid={`measure-action-${measure.id}`}
                         >
-                          {exportFeature || versioningFeature
-                            ? "Select"
-                            : "View"}
+                          Select
                         </Button>
                       </td>
                     </tr>
