@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { Measure } from "@madie/madie-models";
@@ -72,6 +72,32 @@ export default function MeasureList(props: {
   currentPage: number;
   setErrMsg;
 }) {
+  const measureServiceApi = useRef(useMeasureServiceApi()).current; //needs to be ref or triggers jest. throws warn
+  // CanDraftLookup will be an object who's keys are measureSetIds, to check weather we can draft M
+  const [canDraftLookup, setCanDraftLookup] = useState<object>({});
+
+  const buildLookup = useCallback(
+    async (measureList) => {
+      const measureSetList = measureList.map((m) => m.measureSetId);
+      try {
+        const results = await measureServiceApi.fetchMeasureDraftStatuses(
+          measureSetList
+        );
+        if (results) {
+          setCanDraftLookup(results);
+        }
+      } catch (e) {
+        console.warn("Error fetching draft statuses: ", e);
+      }
+    },
+    [measureServiceApi]
+  );
+  useEffect(() => {
+    if (props.measureList && measureServiceApi) {
+      buildLookup(props.measureList);
+    }
+  }, [props.measureList, measureServiceApi]);
+
   const history = useHistory();
 
   // Popover utilities
@@ -87,7 +113,6 @@ export default function MeasureList(props: {
   const [additionalSelectOptionProps, setAdditionalSelectOptionProps] =
     useState(null);
 
-  const measureServiceApi = useMeasureServiceApi();
   const targetMeasure = useRef<Measure>();
 
   const [createVersionDialog, setCreateVersionDialog] = useState({
@@ -199,7 +224,7 @@ export default function MeasureList(props: {
     }
   }, [selectedMeasure]);
 
-  const handleOpen = (
+  const handleOpen = async (
     selected: Measure,
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
@@ -225,7 +250,9 @@ export default function MeasureList(props: {
         toImplementFunction: createVersion,
         dataTestId: `create-version-measure-${selected?.id}`,
       });
-    } else {
+      // draft should only be available if no other measureSet is in draft, by call
+    }
+    if (canDraftLookup[selected?.measureSetId]) {
       options.push({
         label: "Draft",
         toImplementFunction: () => setDraftMeasureDialog({ open: true }),
