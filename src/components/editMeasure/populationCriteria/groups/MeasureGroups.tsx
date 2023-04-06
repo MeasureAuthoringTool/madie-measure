@@ -28,22 +28,25 @@ import {
   Toast,
 } from "@madie/madie-design-system/dist/react";
 import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
-import useMeasureServiceApi from "../../api/useMeasureServiceApi";
+import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import { v4 as uuidv4 } from "uuid";
 import {
   measureGroupSchemaValidator,
   CqlDefineDataTypes,
   CqlFunctionDataTypes,
-} from "../../validations/MeasureGroupSchemaValidator";
+} from "../../../../validations/MeasureGroupSchemaValidator";
 import {
   measureStore,
   routeHandlerStore,
   useDocumentTitle,
   checkUserCanEdit,
 } from "@madie/madie-util";
-import MultipleSelectDropDown from "./MultipleSelectDropDown";
+import MultipleSelectDropDown from "./../MultipleSelectDropDown";
 import MeasureGroupsWarningDialog from "./MeasureGroupWarningDialog";
-import { allPopulations, getPopulationsForScoring } from "./PopulationHelper";
+import {
+  allPopulations,
+  getPopulationsForScoring,
+} from "./../PopulationHelper";
 import GroupPopulation from "./groupPopulations/GroupPopulation";
 import MeasureGroupScoringUnit from "./scoringUnit/MeasureGroupScoringUnit";
 import MeasureGroupObservation from "./observation/MeasureGroupObservation";
@@ -53,9 +56,9 @@ import AddRemovePopulation from "./groupPopulations/AddRemovePopulation";
 import GroupsDescription from "./GroupsDescription";
 
 // import Add
-import camelCaseConverter from "../../utils/camelCaseConverter";
+import camelCaseConverter from "../../../../utils/camelCaseConverter";
 
-import "../common/madie-link.scss";
+import "../../../common/madie-link.scss";
 import "./MeasureGroups.scss"; //247-249,387,400,430,438,476,903-907,1003-1008
 
 const ButtonSpacer = styled.span`

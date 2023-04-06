@@ -5,7 +5,7 @@ import { makeStyles } from "@mui/styles";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { MadieDialog, TextField } from "@madie/madie-design-system/dist/react";
-import { MeasureNameSchema } from "../../validations/MeasureSchemaValidator";
+import { MeasureNameSchema } from "../../../../validations/MeasureSchemaValidator";
 
 const useStyles = makeStyles({
   requiredIndicator: {

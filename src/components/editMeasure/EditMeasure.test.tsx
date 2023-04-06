@@ -8,11 +8,11 @@ import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../api/useMeasureServiceApi";
 import { Measure } from "@madie/madie-models";
-import MeasureEditor from "../measureEditor/MeasureEditor";
+import MeasureEditor from "./editor/MeasureEditor";
 import { measureStore } from "@madie/madie-util";
 
-jest.mock("./measureDetails/MeasureDetails");
-jest.mock("../measureEditor/MeasureEditor");
+jest.mock("./details/MeasureDetails");
+jest.mock("./editor/MeasureEditor");
 jest.mock("../../api/useMeasureServiceApi");
 
 const useMeasureServiceApiMock =

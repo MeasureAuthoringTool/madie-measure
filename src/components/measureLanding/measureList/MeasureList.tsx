@@ -13,15 +13,15 @@ import {
 import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
-import useMeasureServiceApi from "../../api/useMeasureServiceApi";
+import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 import { checkUserCanEdit } from "@madie/madie-util";
-import CreatVersionDialog from "../createVersionDialog/CreateVersionDialog";
+import CreatVersionDialog from "./createVersionDialog/CreateVersionDialog";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
-import DraftMeasureDialog from "../draftMeasureDialog/DraftMeasureDialog";
-import versionErrorHelper from "../../utils/versionErrorHelper";
-import getModelFamily from "../../utils/measureModelHelpers";
+import DraftMeasureDialog from "./draftMeasureDialog/DraftMeasureDialog";
+import versionErrorHelper from "../../../utils/versionErrorHelper";
+import getModelFamily from "../../../utils/measureModelHelpers";
 import _ from "lodash";
-import ExportDialog from "./ExportDialog";
+import ExportDialog from "./exportDialog/ExportDialog";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,

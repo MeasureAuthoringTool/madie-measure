@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 import PopulationCriteriaSideNav, {
   PopulationCriteriaSideNavProp,
 } from "./PopulationCriteriaSideNav";
-import ServiceContext, { ServiceConfig } from "../../../api/ServiceContext";
+import ServiceContext, { ServiceConfig } from "../../../../api/ServiceContext";
 
 const mockHistoryPush = jest.fn();
 

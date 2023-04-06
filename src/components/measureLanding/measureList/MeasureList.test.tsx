@@ -10,11 +10,11 @@ import { Measure, Model } from "@madie/madie-models";
 import MeasureList from "./MeasureList";
 import useMeasureServiceApi, {
   MeasureServiceApi,
-} from "../../api/useMeasureServiceApi";
-import { oneItemResponse } from "../measureRoutes/mockMeasureResponses";
+} from "../../../api/useMeasureServiceApi";
+import { oneItemResponse } from "../../../__mocks__/mockMeasureResponses";
 import userEvent from "@testing-library/user-event";
 import { v4 as uuid } from "uuid";
-import ServiceContext, { ServiceConfig } from "../../api/ServiceContext";
+import ServiceContext, { ServiceConfig } from "../../../api/ServiceContext";
 import { act } from "react-dom/test-utils";
 import { unmount } from "@madie/madie-components";
 
@@ -38,7 +38,7 @@ jest.mock("@madie/madie-util", () => ({
   }),
 }));
 
-jest.mock("../../api/useMeasureServiceApi");
+jest.mock("../../../api/useMeasureServiceApi");
 const useMeasureServiceMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 const mockMeasureServiceApi = {
@@ -52,7 +52,7 @@ const mockMeasureServiceApi = {
     .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
 } as unknown as MeasureServiceApi;
 
-jest.mock("../../api/useMeasureServiceApi", () =>
+jest.mock("../../../api/useMeasureServiceApi", () =>
   jest.fn(() => mockMeasureServiceApi)
 );
 

@@ -5,8 +5,8 @@ import { Link as NavLink, useHistory, useLocation } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import "../../editMeasure/measureDetails/EditMeasureSideBarNav.scss";
-import "../../common/madie-link.scss";
+import "../../details/EditMeasureSideBarNav.scss";
+import "../../../common/madie-link.scss";
 import {
   DSLink,
   MadieDiscardDialog,

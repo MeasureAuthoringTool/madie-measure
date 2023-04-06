@@ -5,9 +5,9 @@ import { DSLink } from "@madie/madie-design-system/dist/react";
 import tw, { styled } from "twin.macro";
 import { v4 as uuidv4 } from "uuid";
 import * as _ from "lodash";
-import { findPopulations } from "../PopulationHelper";
+import { findPopulations } from "../../PopulationHelper";
 import "styled-components/macro";
-import "../../common/madie-link.scss";
+import "../../../../common/madie-link.scss";
 
 import {
   findIndex,
@@ -16,7 +16,7 @@ import {
   showAddPopulationLink,
   correctPopulationLabel,
   getAssociationType,
-} from "../PopulationHelperFunctions";
+} from "../../PopulationHelperFunctions";
 
 const FieldSeparator = tw.div`mt-1`;
 const SoftLabel = styled.label`
