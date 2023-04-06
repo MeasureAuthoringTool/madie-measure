@@ -11,7 +11,7 @@ import MeasureList from "./MeasureList";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../api/useMeasureServiceApi";
-import { oneItemResponse } from "../../../__mocks__/mockMeasureResponses";
+import { oneItemResponse } from "../../__mocks__/mockMeasureResponses";
 import userEvent from "@testing-library/user-event";
 import { v4 as uuid } from "uuid";
 import ServiceContext, { ServiceConfig } from "../../../api/ServiceContext";

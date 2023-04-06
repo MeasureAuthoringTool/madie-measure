@@ -12,7 +12,7 @@ import { act } from "react-dom/test-utils";
 import {
   oneItemResponse,
   multipleItemsResponse,
-} from "../../__mocks__/mockMeasureResponses";
+} from "../__mocks__/mockMeasureResponses";
 import MeasureLanding from "./MeasureLanding";
 
 const serviceConfig: ServiceConfig = {

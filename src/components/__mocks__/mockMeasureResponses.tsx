@@ -1,5 +1,5 @@
 import { Model } from "@madie/madie-models";
-import bulkCreate from "../components/__mocks__/bulkCreate";
+import bulkCreate from "./bulkCreate";
 
 const singleMeasure = [
   {
