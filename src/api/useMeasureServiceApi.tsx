@@ -37,14 +37,17 @@ export class MeasureServiceApi {
   async fetchMeasureDraftStatuses(measureSetIds: string[]): Promise<any> {
     const idsParam = measureSetIds.join(",");
     try {
-      const response = await axios.get<any>(`${this.baseUrl}/draftstatus`, {
-        headers: {
-          Authorization: `Bearer ${this.getAccessToken()}`,
-        },
-        params: {
-          measureSetIds: idsParam,
-        },
-      });
+      const response = await axios.get<any>(
+        `${this.baseUrl}/measures/draftstatus`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+          params: {
+            measureSetIds: idsParam,
+          },
+        }
+      );
       return response.data;
     } catch (err) {
       const message = `Unable to fetch measure draft statuses`;
