@@ -47,6 +47,11 @@ const mockMeasureServiceApi = {
     .mockResolvedValue(oneItemResponse),
   fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
   createVersion: jest.fn().mockResolvedValue({}),
+  fetchMeasureDraftStatuses: jest.fn().mockResolvedValue({
+    "1": true,
+    "2": true,
+    "3": true,
+  }),
   getMeasureExport: jest
     .fn()
     .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
@@ -205,8 +210,9 @@ describe("Measure List component", () => {
     const selectButtons = await findAllByRole("button", {
       name: "Select",
     });
-
-    fireEvent.click(selectButtons[0]);
+    act(() => {
+      fireEvent.click(selectButtons[0]);
+    });
     const editButton = await findByRole("button", {
       name: "View",
     });
@@ -753,6 +759,9 @@ describe("Measure List component", () => {
     };
     const useMeasureServiceMockResolved = {
       draftMeasure: jest.fn().mockResolvedValue(success),
+      fetchMeasureDraftStatuses: jest
+        .fn()
+        .mockResolvedValue({ "1": true, "2": true, "3": true }),
     } as unknown as MeasureServiceApi;
     useMeasureServiceMock.mockImplementation(() => {
       return useMeasureServiceMockResolved;
@@ -808,6 +817,9 @@ describe("Measure List component", () => {
     };
     const useMeasureServiceMockRejected = {
       draftMeasure: jest.fn().mockRejectedValue(error),
+      fetchMeasureDraftStatuses: jest
+        .fn()
+        .mockResolvedValue({ "1": true, "2": true, "3": true }),
     } as unknown as MeasureServiceApi;
 
     useMeasureServiceMock.mockImplementation(() => {
@@ -863,8 +875,12 @@ describe("Measure List component", () => {
         },
       },
     };
+    // this method blanks out all other parts of measureService
     const useMeasureServiceMockRejected = {
       draftMeasure: jest.fn().mockRejectedValue(error),
+      fetchMeasureDraftStatuses: jest
+        .fn()
+        .mockResolvedValue({ "1": true, "2": true, "3": true }),
     } as unknown as MeasureServiceApi;
 
     useMeasureServiceMock.mockImplementation(() => {

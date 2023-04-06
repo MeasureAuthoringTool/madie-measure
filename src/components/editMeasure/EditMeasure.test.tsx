@@ -10,6 +10,7 @@ import useMeasureServiceApi, {
 import { Measure } from "@madie/madie-models";
 import MeasureEditor from "./editor/MeasureEditor";
 import { measureStore } from "@madie/madie-util";
+import { ExpressionTermContext } from "@madie/cql-antlr-parser/dist/generated";
 
 jest.mock("./details/MeasureDetails");
 jest.mock("./editor/MeasureEditor");
@@ -214,6 +215,15 @@ describe("EditMeasure Component", () => {
       expect(
         getByTestId("edit-measure-information-success-text")
       ).toBeInTheDocument();
+    });
+    const closeButton = getByTestId("close-error-button");
+    act(() => {
+      fireEvent.click(closeButton);
+    });
+
+    await waitFor(() => {
+      const closeButton = queryByTestId('"close-error-button"');
+      expect(closeButton).not.toBeInTheDocument();
     });
   });
 
