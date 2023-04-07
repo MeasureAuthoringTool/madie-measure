@@ -7,7 +7,7 @@ import { Measure } from "@madie/madie-models";
 import { act } from "react-dom/test-utils";
 import useMeasureServiceApi, {
   MeasureServiceApi,
-} from "../../../api/useMeasureServiceApi";
+} from "../../../../api/useMeasureServiceApi";
 const testMeasure = {
   id: "test measure",
   cql: `library C4r version '0.0.000'
@@ -46,7 +46,7 @@ const testMeasure = {
   riskAdjustments: [],
 } as unknown as Measure;
 
-jest.mock("../../../api/useMeasureServiceApi");
+jest.mock("../../../../api/useMeasureServiceApi");
 jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn(() => {
     return true;

@@ -8,12 +8,12 @@ import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../api/useMeasureServiceApi";
 import { Measure } from "@madie/madie-models";
-import MeasureEditor from "../measureEditor/MeasureEditor";
+import MeasureEditor from "./editor/MeasureEditor";
 import { measureStore } from "@madie/madie-util";
 import { ExpressionTermContext } from "@madie/cql-antlr-parser/dist/generated";
 
-jest.mock("./measureDetails/MeasureDetails");
-jest.mock("../measureEditor/MeasureEditor");
+jest.mock("./details/MeasureDetails");
+jest.mock("./editor/MeasureEditor");
 jest.mock("../../api/useMeasureServiceApi");
 
 const useMeasureServiceApiMock =

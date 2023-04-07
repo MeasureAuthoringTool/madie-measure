@@ -8,7 +8,7 @@ import { MeasureRoutes } from "./MeasureRoutes";
 import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import { act } from "react-dom/test-utils";
-import { mockPaginationResponses } from "./mockMeasureResponses";
+import { mockPaginationResponses } from "../__mocks__/mockMeasureResponses";
 import { describe, expect, test } from "@jest/globals";
 
 const serviceConfig: ServiceConfig = {

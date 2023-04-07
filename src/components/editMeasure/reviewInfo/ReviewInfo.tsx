@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import MetaDataWrapper from "../measureDetails/MetaDataWrapper";
+import MetaDataWrapper from "../details/MetaDataWrapper";
 import ReviewInfoItem from "./ReviewInfoItem";
-import "../measureDetails/MeasureDetails.scss";
+import "../details/MeasureDetails.scss";
 import { measureStore } from "@madie/madie-util";
 
 const ReviewInfo = () => {

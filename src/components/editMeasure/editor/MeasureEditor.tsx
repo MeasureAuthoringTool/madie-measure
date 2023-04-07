@@ -19,7 +19,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import { Measure, MeasureErrorType } from "@madie/madie-models";
 import { CqlCode, CqlCodeSystem } from "@madie/cql-antlr-parser/dist/src";
-import useMeasureServiceApi from "../../api/useMeasureServiceApi";
+import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 import * as _ from "lodash";
 import {
   measureStore,

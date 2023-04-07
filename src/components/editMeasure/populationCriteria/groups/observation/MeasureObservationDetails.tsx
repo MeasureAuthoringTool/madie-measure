@@ -11,7 +11,7 @@ import {
   Select,
   TextArea,
 } from "@madie/madie-design-system/dist/react";
-import camelCaseConverter from "../../../utils/camelCaseConverter";
+import camelCaseConverter from "../../../../../utils/camelCaseConverter";
 
 const AGGREGATE_FUNCTIONS = Array.from(AGGREGATE_FUNCTION_KEYS.keys()).sort();
 
