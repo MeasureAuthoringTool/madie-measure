@@ -9,7 +9,7 @@ import { useHistory, useLocation } from "react-router-dom";
 import queryString from "query-string";
 import "twin.macro";
 import "styled-components/macro";
-import MeasureList from "../measureList/MeasureList";
+import MeasureList from "./measureList/MeasureList";
 import { Measure } from "@madie/madie-models";
 
 import { Tab, Tabs } from "@mui/material";
@@ -20,7 +20,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import "./MeasureLanding.scss";
 import { useDocumentTitle } from "@madie/madie-util";
-import StatusHandler from "../measureEditor/StatusHandler";
+import StatusHandler from "../editMeasure/editor/StatusHandler";
 
 export default function MeasureLanding() {
   useDocumentTitle("MADiE Measures");

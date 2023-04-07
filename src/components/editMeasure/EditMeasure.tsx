@@ -9,9 +9,9 @@ import {
 } from "react-router-dom";
 import "twin.macro";
 import "styled-components/macro";
-import EditMeasureNav from "./editMeasureNav/EditMeasureNav";
-import MeasureDetails from "./measureDetails/MeasureDetails";
-import MeasureEditor from "../measureEditor/MeasureEditor";
+import EditMeasureNav from "./EditMeasureNav";
+import MeasureDetails from "./details/MeasureDetails";
+import MeasureEditor from "./editor/MeasureEditor";
 import { Measure } from "@madie/madie-models";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { MadiePatient } from "@madie/madie-patient";
@@ -19,7 +19,7 @@ import { measureStore } from "@madie/madie-util";
 import { Toast, MadieAlert } from "@madie/madie-design-system/dist/react";
 import DeleteDialog from "./DeleteDialog";
 import NotFound from "../notfound/NotFound";
-import PopulationCriteriaHome from "../measureGroups/populationCriteriaHome/PopulationCriteriaHome";
+import PopulationCriteriaHome from "./populationCriteria/PopulationCriteriaHome";
 import ReviewInfo from "./reviewInfo/ReviewInfo";
 interface inputParams {
   id: string;

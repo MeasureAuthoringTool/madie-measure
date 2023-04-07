@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { useRouteMatch } from "react-router-dom";
-import SupplementalElements from "../SupplementalElements";
-import PopulationCriteriaSideNav from "../populationCriteriaSideNav/PopulationCriteriaSideNav";
-import MeasureGroups from "../MeasureGroups";
+import SupplementalElements from "./supplementalData/SupplementalElements";
+import PopulationCriteriaSideNav from "./populationCriteriaSideNav/PopulationCriteriaSideNav";
+import MeasureGroups from "./groups/MeasureGroups";
 import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
-import RiskAdjustment from "../riskAdjustment/RiskAdjustment";
+import RiskAdjustment from "./riskAdjustment/RiskAdjustment";
 
 export function PopulationCriteriaHome() {
   const { path } = useRouteMatch();

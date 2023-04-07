@@ -5,7 +5,7 @@ import { ExpressionDefinition } from "../MeasureGroups";
 import { GroupScoring, Population, PopulationType } from "@madie/madie-models";
 import { FormikState, getIn } from "formik";
 import { FieldInputProps } from "formik/dist/types";
-import { findPopulations, isPopulationRequired } from "../PopulationHelper";
+import { findPopulations, isPopulationRequired } from "../../PopulationHelper";
 
 export enum InitialPopulationAssociationType {
   DENOMINATOR = "Denominator",

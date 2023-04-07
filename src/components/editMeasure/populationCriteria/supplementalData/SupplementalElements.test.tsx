@@ -11,9 +11,9 @@ import { Measure } from "@madie/madie-models";
 import { checkUserCanEdit } from "@madie/madie-util";
 import useMeasureServiceApi, {
   MeasureServiceApi,
-} from "../../api/useMeasureServiceApi";
+} from "../../../../api/useMeasureServiceApi";
 import { act } from "react-dom/test-utils";
-import { MeasureCQL } from "../common/MeasureCQL";
+import { MeasureCQL } from "../../../common/MeasureCQL";
 import userEvent from "@testing-library/user-event";
 
 const mockHistoryPush = jest.fn();
@@ -25,7 +25,7 @@ jest.mock("react-router-dom", () => ({
   }),
 }));
 
-jest.mock("../../api/useMeasureServiceApi");
+jest.mock("../../../../api/useMeasureServiceApi");
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 

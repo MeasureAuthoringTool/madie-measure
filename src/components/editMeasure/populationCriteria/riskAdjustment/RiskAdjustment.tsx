@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
-import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
+import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import {
   measureStore,
   routeHandlerStore,
   checkUserCanEdit,
 } from "@madie/madie-util";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
-import MetaDataWrapper from "../../editMeasure/measureDetails/MetaDataWrapper";
+import MetaDataWrapper from "../../details/MetaDataWrapper";
 import MultipleSelectDropDown from "../MultipleSelectDropDown";
 import RiskDefinition from "./RiskDefinition";
 import {

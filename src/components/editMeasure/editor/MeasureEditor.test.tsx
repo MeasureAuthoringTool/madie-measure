@@ -5,7 +5,7 @@ import MeasureEditor, {
   mapErrorsToAceMarkers,
 } from "./MeasureEditor";
 import { Measure, MeasureErrorType } from "@madie/madie-models";
-import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
+import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
 import axios from "axios";
 import { ElmTranslationError } from "./measureEditorUtils";
 import userEvent from "@testing-library/user-event";
