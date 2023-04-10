@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   DialogContent,
   FormControl,
@@ -8,12 +8,16 @@ import {
   RadioGroup,
   Radio,
   FormControlLabel,
+  Backdrop,
 } from "@mui/material";
 import classNames from "classnames";
 import { makeStyles } from "@mui/styles";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { MadieDialog } from "@madie/madie-design-system/dist/react";
+import {
+  MadieDialog,
+  MadieSpinner,
+} from "@madie/madie-design-system/dist/react";
 
 const useStyles = makeStyles({
   row: {
@@ -72,7 +76,13 @@ interface VersionType {
   type: string;
 }
 
-const CreatVersionDialog = ({ open, onClose, onSubmit, versionHelperText }) => {
+const CreatVersionDialog = ({
+  open,
+  onClose,
+  onSubmit,
+  versionHelperText,
+  loading,
+}) => {
   const formik = useFormik({
     initialValues: {
       type: "",
@@ -179,6 +189,12 @@ const CreatVersionDialog = ({ open, onClose, onSubmit, versionHelperText }) => {
               {versionHelperText}
             </FormHelperText>
           </DialogContent>
+          <Backdrop
+            sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+            open={loading}
+          >
+            <MadieSpinner style={{ height: 50, width: 50 }} />
+          </Backdrop>
         </MadieDialog>
       </FormControl>
     </div>

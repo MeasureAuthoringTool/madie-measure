@@ -10,6 +10,7 @@ import {
   Popover,
   Toast,
 } from "@madie/madie-design-system/dist/react";
+
 import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
@@ -105,6 +106,7 @@ export default function MeasureList(props: {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedMeasure, setSelectedMeasure] = useState<Measure>(null);
   const [canEdit, setCanEdit] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   // if user can edit and it is a version, then draft button
   const [
     otherSelectOptionPropsForPopOver,
@@ -389,6 +391,7 @@ export default function MeasureList(props: {
   };
 
   const createVersion = async (versionType: string) => {
+    setLoading(true);
     if (
       versionType !== "major" &&
       versionType !== "minor" &&
@@ -399,6 +402,7 @@ export default function MeasureList(props: {
         measureId: targetMeasure.current?.id,
       });
       setOptionsOpen(false);
+      setLoading(false);
     } else {
       await measureServiceApi
         .createVersion(targetMeasure.current?.id, versionType)
@@ -406,12 +410,14 @@ export default function MeasureList(props: {
           handleDialogClose();
           setToastOpen(true);
           setToastType("success");
+          setLoading(false);
           setToastMessage("New version of measure is Successfully created");
           doUpdateList();
         })
         .catch((error) => {
           const errorData = error?.response;
           setToastOpen(true);
+          setLoading(false);
           if (errorData?.status === 400) {
             setToastMessage("Requested measure cannot be versioned");
           } else if (errorData?.status === 403) {
@@ -575,6 +581,7 @@ export default function MeasureList(props: {
               onClose={handleDialogClose}
               onSubmit={createVersion}
               versionHelperText={versionHelperText}
+              loading={loading}
             />
             <DraftMeasureDialog
               open={draftMeasureDialog.open}
