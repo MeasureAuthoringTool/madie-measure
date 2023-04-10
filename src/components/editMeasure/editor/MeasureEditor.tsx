@@ -1,5 +1,4 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import tw from "twin.macro";
 import "styled-components/macro";
 import {
   EditorAnnotation,
@@ -28,9 +27,7 @@ import {
   checkUserCanEdit,
 } from "@madie/madie-util";
 import StatusHandler from "./StatusHandler";
-
-const MessageText = tw.p`text-sm font-medium`;
-const SuccessText = tw(MessageText)`text-green-800`;
+import { SuccessText } from "../../../styles/editMeasure/editor";
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
