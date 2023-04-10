@@ -1,6 +1,5 @@
 import React, { useEffect, useCallback, useState } from "react";
 import { useRouteMatch, useLocation } from "react-router-dom";
-import tw, { styled } from "twin.macro";
 import * as ucum from "@lhncbc/ucum-lhc";
 import "styled-components/macro";
 import {
@@ -60,12 +59,15 @@ import camelCaseConverter from "../../../../utils/camelCaseConverter";
 
 import "../../../common/madie-link.scss";
 import "./MeasureGroups.scss"; //247-249,387,400,430,438,476,903-907,1003-1008
-
-const ButtonSpacer = styled.span`
-  margin-left: 15px;
-`;
-
-const MenuItemContainer = tw.ul`bg-transparent flex pt-12 pb-4 border-b`;
+import {
+  ButtonSpacer,
+  FormFieldInner,
+  FieldInput,
+  FieldLabel,
+  FieldSeparator,
+  MenuItemContainer,
+  TextArea,
+} from "../../../../styles/editMeasure/populationCriteria/groups";
 
 interface ColSpanPopulationsType {
   isExclusionPop?: boolean;
@@ -86,13 +88,6 @@ const ColSpanPopulations = (props: ColSpanPopulationsType) => {
     </div>
   );
 };
-
-// const FormField = tw.div`mt-6 grid grid-cols-4`;
-const FormFieldInner = tw.div`lg:col-span-3`;
-const FieldLabel = tw.label`block capitalize text-sm font-medium text-slate-90`;
-const FieldSeparator = tw.div`mt-1`;
-const FieldInput = tw.input`disabled:bg-slate shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
-const TextArea = tw.textarea`disabled:bg-slate shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300! rounded-md!`;
 
 const deleteToken = "FDE8472A-6095-4292-ABF7-E35AD435F05F"; // randomly generated token for deleting
 

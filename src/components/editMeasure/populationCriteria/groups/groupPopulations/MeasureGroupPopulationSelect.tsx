@@ -1,17 +1,15 @@
 import React from "react";
-import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import { kebabCase } from "lodash";
 import { MenuItem } from "@mui/material";
 import { ExpressionDefinition } from "../MeasureGroups";
 import { Select } from "@madie/madie-design-system/dist/react";
-
-const SubTitle = styled.p`
-  color: #505d68;
-  font-size: 11px;
-  margin-top: 20px;
-  max-width: 405px;
-`;
+import {
+  SubTitle,
+  SecondIpLabel,
+  FieldSeparator,
+  SoftLabel,
+} from "../../../../../styles/editMeasure/populationCriteria/groups/groupPopulations";
 
 type Props = {
   label: string;
@@ -23,15 +21,6 @@ type Props = {
   options?: Array<ExpressionDefinition>;
   error?: boolean;
 };
-
-const SecondIpLabel = tw.span`text-black-50`;
-const FieldSeparator = tw.div`mt-1`;
-const SoftLabel = styled.label`
-  display: block;
-  margin-bottom: 5px;
-  font-size: 12px;
-  color: rgba(66, 75, 90, 0.7);
-`;
 
 const MeasureGroupPopulationSelect = ({
   field,
