@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback, useState } from "react";
 import { useRouteMatch, useLocation } from "react-router-dom";
+import tw, { styled } from "twin.macro";
 import * as ucum from "@lhncbc/ucum-lhc";
 import "styled-components/macro";
 import {
@@ -67,7 +68,7 @@ import {
   FieldSeparator,
   MenuItemContainer,
   TextArea,
-} from "../../../../styles/editMeasure/populationCriteria/groups";
+} from "../../../../styles/editMeasure/populationCriteria/groups/index";
 
 interface ColSpanPopulationsType {
   isExclusionPop?: boolean;
