@@ -90,23 +90,23 @@ describe("PopulationCriteriaHome", () => {
     ).toBeInTheDocument();
 
     //by default Criteria 1 should be selected and its associated form should be displayed
-    const criteria1 = screen.getByRole("link", {
+    const criteria1 = screen.getByRole("tab", {
       name: /Criteria 1/i,
     });
     expect(criteria1).toBeInTheDocument();
-    expect(criteria1.classList.contains("active")).toBeTruthy();
+    expect(criteria1).toHaveAttribute("aria-selected", "true");
     expect(screen.getByText("test description")).toBeInTheDocument();
     expect(
       screen.getByTestId("select-measure-group-population-input")
     ).toHaveValue("Initial Population");
 
     expect(
-      screen.getByRole("button", {
+      screen.getByRole("tab", {
         name: /supplemental data/i,
       })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", {
+      screen.getByRole("tab", {
         name: /risk adjustment/i,
       })
     ).toBeInTheDocument();
@@ -133,16 +133,16 @@ describe("PopulationCriteriaHome", () => {
       })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", {
+      screen.getByRole("tab", {
         name: /Criteria 1/i,
       })
     ).toBeInTheDocument();
-    const supplementalDataButton = screen.getByRole("button", {
+    const supplementalDataButton = screen.getByRole("tab", {
       name: /supplemental data/i,
     });
     // verifies if the SD component is loaded and the left nav link is active
     expect(screen.getByTestId("supplemental-data-form")).toBeInTheDocument();
-    expect(supplementalDataButton.classList.contains("active")).toBeTruthy();
+    expect(supplementalDataButton).toHaveAttribute("aria-selected", "true");
   });
 
   it("should render Risk Adjustment component", () => {
@@ -166,25 +166,25 @@ describe("PopulationCriteriaHome", () => {
       })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", {
+      screen.getByRole("tab", {
         name: /Criteria 1/i,
       })
     ).toBeInTheDocument();
-    const riskAdjustmentButton = screen.getByRole("button", {
+    const riskAdjustmentButton = screen.getByRole("tab", {
       name: /risk adjustment/i,
     });
     // verifies if the Risk Adjustment component is loaded and the left nav link is active
     expect(screen.getByTestId("risk-adjustment")).toBeInTheDocument();
-    expect(riskAdjustmentButton.classList.contains("active")).toBeTruthy();
+    expect(riskAdjustmentButton).toHaveAttribute("aria-selected", "true");
   });
 
   it("should render a new form for population criteria, onclick of Add Population Criteria link", () => {
     renderPopulationCriteriaHomeComponent();
-    const criteria1 = screen.getByRole("link", {
+    const criteria1 = screen.getByRole("tab", {
       name: /Criteria 1/i,
     });
     expect(criteria1).toBeInTheDocument();
-    expect(criteria1.classList.contains("active")).toBeTruthy();
+    expect(criteria1).toHaveAttribute("aria-selected", "true");
 
     const addPopulationCriteriaLink = screen.getByRole("link", {
       name: "Add Population Criteria",
@@ -194,11 +194,11 @@ describe("PopulationCriteriaHome", () => {
     });
 
     // verify if a new criteria is created and is active
-    const criteria2 = screen.getByRole("link", {
+    const criteria2 = screen.getByRole("tab", {
       name: /Criteria 2/i,
     });
     expect(criteria2).toBeInTheDocument();
-    expect(criteria2.classList.contains("active")).toBeTruthy();
+    expect(criteria2).toHaveAttribute("aria-selected", "true");
 
     expect(screen.getByRole("heading")).toHaveTextContent(
       "Population Criteria 2"

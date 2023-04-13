@@ -93,20 +93,20 @@ describe("PopulationCriteriaSideNav", () => {
         name: /Population Criteria/i,
       })
     ).toBeInTheDocument();
-    const criteria1 = screen.getByRole("link", {
+    const criteria1 = screen.getByRole("tab", {
       name: /Criteria 1/i,
     });
     expect(criteria1).toBeInTheDocument();
     // Initially state -> Criteria 1 will be active
-    expect(criteria1).toHaveClass("active");
+    expect(criteria1).toHaveAttribute("aria-selected", "true");
 
     expect(
-      screen.getByRole("button", {
+      screen.getByRole("tab", {
         name: /supplemental data/i,
       })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", {
+      screen.getByRole("tab", {
         name: /risk adjustment/i,
       })
     ).toBeInTheDocument();
@@ -117,7 +117,7 @@ describe("PopulationCriteriaSideNav", () => {
     const populationCriteriaCollapsableButton = screen.getByRole("button", {
       name: /Population Criteria/i,
     });
-    const criteria1 = screen.queryByRole("link", {
+    const criteria1 = screen.queryByRole("tab", {
       name: /Criteria 1/i,
     });
     expect(criteria1).toBeInTheDocument();
@@ -127,16 +127,16 @@ describe("PopulationCriteriaSideNav", () => {
 
   it("should navigate to different Criteria, if the form is not dirty", async () => {
     const { rerender } = RenderPopulationCriteriaSideNav(initialProps);
-    const criteria1 = screen.queryByRole("link", {
+    const criteria1 = screen.queryByRole("tab", {
       name: /Criteria 1/i,
     });
     expect(criteria1).toBeInTheDocument();
-    expect(criteria1).toHaveClass("active");
-    const criteria2 = screen.queryByRole("link", {
+    expect(criteria1).toHaveAttribute("aria-selected", "true");
+    const criteria2 = screen.queryByRole("tab", {
       name: /Criteria 2/i,
     });
     expect(criteria2).toBeInTheDocument();
-    expect(criteria2).not.toHaveClass("active");
+    expect(criteria2).toHaveAttribute("aria-selected", "false");
 
     userEvent.click(criteria2);
 
@@ -152,10 +152,10 @@ describe("PopulationCriteriaSideNav", () => {
     );
 
     await waitFor(() => {
-      const criteria2 = screen.getByRole("link", {
+      const criteria2 = screen.getByRole("tab", {
         name: /Criteria 2/i,
       });
-      expect(criteria2).toHaveClass("active");
+      expect(criteria2).toHaveAttribute("aria-selected", "true");
     });
 
     // navigate to Supplemental Data Elements
@@ -171,11 +171,11 @@ describe("PopulationCriteriaSideNav", () => {
 
   test("Measure Group add click when dirty opens up a warning dialog, hitting cancel closes it", () => {
     RenderPopulationCriteriaSideNav({ ...initialProps, isFormDirty: true });
-    const criteria1 = screen.queryByRole("link", {
+    const criteria1 = screen.queryByRole("tab", {
       name: /Criteria 1/i,
     });
     expect(criteria1).toBeInTheDocument();
-    expect(criteria1).toHaveClass("active");
+    expect(criteria1).toHaveAttribute("aria-selected", "true");
 
     expect(screen.getByTestId("AddIcon")).toBeInTheDocument();
     const addNewPopulationCriteriaLink = screen.getByRole("link", {
@@ -196,7 +196,7 @@ describe("PopulationCriteriaSideNav", () => {
     userEvent.click(cancelButton);
 
     // verifies user is not navigated
-    expect(criteria1).toHaveClass("active");
+    expect(criteria1).toHaveAttribute("aria-selected", "true");
   });
 
   test("Measure Group add click when dirty opens up a warning dialog, hitting continue closes it and navigates", async () => {
@@ -204,11 +204,11 @@ describe("PopulationCriteriaSideNav", () => {
       ...initialProps,
       isFormDirty: true,
     });
-    const criteria1 = screen.queryByRole("link", {
+    const criteria1 = screen.queryByRole("tab", {
       name: /Criteria 1/i,
     });
     expect(criteria1).toBeInTheDocument();
-    expect(criteria1).toHaveClass("active");
+    expect(criteria1).toHaveAttribute("aria-selected", "true");
 
     expect(screen.getByTestId("AddIcon")).toBeInTheDocument();
     const addNewPopulationCriteriaLink = screen.getByRole("link", {
@@ -246,37 +246,37 @@ describe("PopulationCriteriaSideNav", () => {
     );
 
     await waitFor(() => {
-      const criteria3 = screen.getByRole("link", {
+      const criteria3 = screen.getByRole("tab", {
         name: /Criteria 3/i,
       });
-      expect(criteria3).toHaveClass("active");
+      expect(criteria3).toHaveAttribute("aria-selected", "true");
     });
   });
 
   it("should not display discard dialog, when form is dirty and navigating to same Criteria", () => {
     RenderPopulationCriteriaSideNav(initialProps);
-    const criteria1 = screen.queryByRole("link", {
+    const criteria1 = screen.queryByRole("tab", {
       name: /Criteria 1/i,
     });
     expect(criteria1).toBeInTheDocument();
-    expect(criteria1).toHaveClass("active");
+    expect(criteria1).toHaveAttribute("aria-selected", "true");
 
     userEvent.click(criteria1);
 
-    expect(criteria1).toHaveClass("active");
+    expect(criteria1).toHaveAttribute("aria-selected", "true");
     const discardDialog = screen.queryByTestId("discard-dialog");
     expect(discardDialog).toBeNull();
   });
 
   test("Measure Group nav click when dirty opens up a warning dialog, hitting cancel closes it", () => {
     RenderPopulationCriteriaSideNav({ ...initialProps, isFormDirty: true });
-    const criteria1 = screen.queryByRole("link", {
+    const criteria1 = screen.queryByRole("tab", {
       name: /Criteria 1/i,
     });
     expect(criteria1).toBeInTheDocument();
-    expect(criteria1).toHaveClass("active");
+    expect(criteria1).toHaveAttribute("aria-selected", "true");
 
-    const criteria2 = screen.queryByRole("link", {
+    const criteria2 = screen.queryByRole("tab", {
       name: /Criteria 2/i,
     });
     userEvent.click(criteria2);
@@ -293,7 +293,7 @@ describe("PopulationCriteriaSideNav", () => {
     expect(cancelButton).toBeInTheDocument();
     userEvent.click(cancelButton);
     // verifies user is not navigated
-    expect(criteria1).toHaveClass("active");
+    expect(criteria1).toHaveAttribute("aria-selected", "true");
   });
 
   test("Measure Group nav click when dirty opens up a warning dialog, hitting continue closes it and navigates", () => {
@@ -301,13 +301,13 @@ describe("PopulationCriteriaSideNav", () => {
       ...initialProps,
       isFormDirty: true,
     });
-    const criteria1 = screen.queryByRole("link", {
+    const criteria1 = screen.queryByRole("tab", {
       name: /Criteria 1/i,
     });
     expect(criteria1).toBeInTheDocument();
-    expect(criteria1).toHaveClass("active");
+    expect(criteria1).toHaveAttribute("aria-selected", "true");
 
-    const criteria2 = screen.queryByRole("link", {
+    const criteria2 = screen.queryByRole("tab", {
       name: /Criteria 2/i,
     });
     userEvent.click(criteria2);
@@ -331,6 +331,6 @@ describe("PopulationCriteriaSideNav", () => {
         </ServiceContext.Provider>
       </MemoryRouter>
     );
-    expect(criteria2).toHaveClass("active");
+    expect(criteria2).toHaveAttribute("aria-selected", "true");
   });
 });

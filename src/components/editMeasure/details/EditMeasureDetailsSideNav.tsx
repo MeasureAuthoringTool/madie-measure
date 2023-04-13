@@ -1,6 +1,7 @@
 import React from "react";
 import tw from "twin.macro";
-import { Link as NavLink, useLocation } from "react-router-dom";
+import { useLocation, useHistory } from "react-router-dom";
+import { Tab, Tabs } from "@madie/madie-design-system/dist/react";
 import "./EditMeasureSideBarNav.scss";
 import "../../common/madie-link.scss";
 
@@ -17,7 +18,11 @@ export default function EditMeasureDetailsSideNav(
 ) {
   const { links } = props;
   const { pathname } = useLocation();
+  const history = useHistory();
 
+  const handleChange = (e, v) => {
+    history.push(v);
+  };
   return (
     <OuterWrapper>
       <InnerWrapper>
@@ -25,26 +30,24 @@ export default function EditMeasureDetailsSideNav(
           {links.map((link) => (
             <div className="link-container">
               <h4 className="link-heading">{link.title}</h4>
-              {link.links.map((linkInfo) => {
-                const isActive = pathname === linkInfo.href;
-                const className = isActive ? "nav-link active" : "nav-link";
-                return (
-                  <NavLink
-                    key={linkInfo.title}
-                    onClick={(e) => {
-                      if (isActive) {
-                        e.preventDefault();
-                      }
-                    }}
-                    to={linkInfo.href}
-                    data-testid={linkInfo.dataTestId}
-                    className={className}
-                    id={linkInfo.id}
-                  >
-                    {linkInfo.title}
-                  </NavLink>
-                );
-              })}
+              <Tabs
+                type="C"
+                orientation="vertical"
+                value={pathname}
+                onChange={handleChange}
+              >
+                {link.links.map((linkInfo) => {
+                  return (
+                    <Tab
+                      label={linkInfo.title}
+                      type="C"
+                      value={linkInfo.href}
+                      id={linkInfo.id}
+                      data-testid={linkInfo.dataTestId}
+                    />
+                  );
+                })}
+              </Tabs>
             </div>
           ))}
         </Nav>

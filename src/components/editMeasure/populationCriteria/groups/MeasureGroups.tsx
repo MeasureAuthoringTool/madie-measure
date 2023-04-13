@@ -11,13 +11,7 @@ import {
   PopulationType,
   MeasureErrorType,
 } from "@madie/madie-models";
-import {
-  MenuItem as MuiMenuItem,
-  Typography,
-  Divider,
-  Tabs,
-  Tab,
-} from "@mui/material";
+import { MenuItem as MuiMenuItem, Typography, Divider } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import {
   Button,
@@ -26,6 +20,8 @@ import {
   DSLink,
   AutoComplete,
   Toast,
+  Tab,
+  Tabs,
 } from "@madie/madie-design-system/dist/react";
 import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
@@ -856,40 +852,12 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                 </div>
                 <div>
                   <MenuItemContainer>
-                    <Tabs
-                      value={activeTab}
-                      sx={{
-                        fontWeight: 700,
-                        color: "#003366",
-                        "&:focus": {
-                          color: "red",
-                        },
-                        "& .MuiTabs-indicator": {
-                          height: "4px",
-                          backgroundColor: "#209FA6",
-                        },
-                        "& .Mui-selected": {
-                          fontWeight: 500,
-                          color: "#003366 !important",
-                          outline: "none",
-                        },
-                      }}
-                    >
+                    <Tabs value={activeTab} type="B">
                       <Tab
                         role="tabpanel"
+                        type="B"
                         aria-label="Populations tab panel"
                         tabIndex={0}
-                        sx={{
-                          padding: "24px 21px",
-                          fontFamily: "Rubik, sans serif",
-                          borderRadius: "6px 0 0 0",
-                          fontWeight: 400,
-                          color: "#003366",
-                          "&:focus": {
-                            outline: "5px auto -webkit-focus-ring-color",
-                            outlineOffset: "-2px",
-                          },
-                        }}
                         label={`Populations 
                 ${
                   !!formik.errors.populations && activeTab !== "populations"
@@ -907,18 +875,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                           role="tabpanel"
                           aria-label="Stratifications tab panel"
                           tabIndex={0}
-                          sx={{
-                            padding: "24px 21px",
-                            fontFamily: "Rubik, sans serif",
-                            borderRadius: "0 6px 0 0",
-                            fontWeight: 400,
-                            color: "#003366",
-                            "&:focus": {
-                              outline: "5px auto -webkit-focus-ring-color",
-                              outlineOffset: "-2px",
-                            },
-                          }}
                           label="Stratifications"
+                          type="B"
                           data-testid="stratifications-tab"
                           onClick={() => {
                             setActiveTab("stratification");
@@ -944,17 +902,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                         role="tabpanel"
                         tabIndex={0}
                         aria-label="Reporting tab panel"
-                        sx={{
-                          padding: "24px 21px",
-                          fontFamily: "Rubik, sans serif",
-                          borderRadius: "0 6px 0 0",
-                          fontWeight: 400,
-                          color: "#003366",
-                          "&:focus": {
-                            outline: "5px auto -webkit-focus-ring-color",
-                            outlineOffset: "-2px",
-                          },
-                        }}
+                        type="B"
                         label="Reporting"
                         data-testid="reporting-tab"
                         onClick={() => setActiveTab("reporting")}
