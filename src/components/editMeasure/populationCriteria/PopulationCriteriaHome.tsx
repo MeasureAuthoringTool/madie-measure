@@ -26,10 +26,6 @@ export function PopulationCriteriaHome() {
   const [isFormDirty, setIsFormDirty] = useState<boolean>(false);
 
   const groupsBaseUrl = "/measures/" + measure?.id + "/edit/groups";
-  const supplementalDataBaseUrl =
-    "/measures/" + measure?.id + "/edit/supplemental-data";
-  const riskAdjustmentBaseUrl =
-    "/measures/" + measure?.id + "/edit/risk-adjustment";
 
   /* This useEffect generates information required for left side nav bar
    * If a measure doesn't have any groups, then a new one is added. */
@@ -55,25 +51,8 @@ export function PopulationCriteriaHome() {
         dataTestId: "leftPanelMeasurePopulationCriteriaTab",
         id: "sideNavMeasurePopulationCriteria",
       },
-      {
-        title: "Supplemental Data",
-        href: supplementalDataBaseUrl,
-        dataTestId: "leftPanelMeasurePopulationsSupplementalDataTab",
-        id: "sideNavMeasurePopulationsSupplementalData",
-      },
-      {
-        title: "Risk Adjustment",
-        href: riskAdjustmentBaseUrl,
-        dataTestId: "leftPanelMeasurePopulationsRiskAdjustmentTab",
-        id: "sideNavMeasurePopulationsRiskAdjustment",
-      },
     ]);
-  }, [
-    groupsBaseUrl,
-    measure?.groups,
-    riskAdjustmentBaseUrl,
-    supplementalDataBaseUrl,
-  ]);
+  }, [groupsBaseUrl, measure?.groups]);
 
   return (
     <>

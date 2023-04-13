@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import tw from "twin.macro";
+import tw, { styled } from "twin.macro";
 import "styled-components/macro";
-import { Link as NavLink, useHistory, useLocation } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
@@ -10,6 +10,8 @@ import "../../../common/madie-link.scss";
 import {
   DSLink,
   MadieDiscardDialog,
+  Tabs,
+  Tab,
 } from "@madie/madie-design-system/dist/react";
 import { useFeatureFlags } from "@madie/madie-util";
 
@@ -38,7 +40,6 @@ export default function PopulationCriteriaSideNav(
     setMeasureGroupNumber,
     isFormDirty = false,
   } = props;
-
   const { pathname } = useLocation();
   const [showPopulationCriteriaTabs, setShowPopulationCriteriaTabs] =
     useState<boolean>(true);
@@ -119,6 +120,26 @@ export default function PopulationCriteriaSideNav(
       history.push(tabInfo.href);
     }
   };
+  const supplementalDataBaseUrl =
+    "/measures/" + measureId + "/edit/supplemental-data";
+  const riskAdjustmentBaseUrl =
+    "/measures/" + measureId + "/edit/risk-adjustment";
+  const additionalLinks = [
+    {
+      label: "Supplemental Data",
+      value: supplementalDataBaseUrl,
+      dataTestId: "leftPanelMeasurePopulationsSupplementalDataTab",
+      id: "sideNavMeasurePopulationsSupplementalData",
+    },
+    {
+      label: "Risk Adjustment",
+      value: riskAdjustmentBaseUrl,
+      dataTestId: "leftPanelMeasurePopulationsRiskAdjustmentTab",
+      id: "sideNavMeasurePopulationsRiskAdjustment",
+    },
+  ];
+
+  // for tracking active secondary link
 
   return (
     <OuterWrapper>
@@ -153,26 +174,29 @@ export default function PopulationCriteriaSideNav(
                 (showPopulationCriteriaTabs ||
                   !populationCriteriaTabsFeatureFlag) && (
                   <>
-                    {tab?.groups?.map((linkInfo, index) => {
-                      const isActive =
-                        pathname === linkInfo.href &&
-                        index === measureGroupNumber;
-                      const className = isActive
-                        ? "nav-link active"
-                        : "nav-link";
-                      return (
-                        <NavLink
-                          key={linkInfo.title}
-                          onClick={(e) => initiateNavigateGroupClick(e)}
-                          to={linkInfo.href}
-                          className={className}
-                          id={index}
-                          data-testid={linkInfo.dataTestId}
-                        >
-                          {linkInfo.title}
-                        </NavLink>
-                      );
-                    })}
+                    <Tabs
+                      type="C"
+                      size="standard"
+                      orientation="vertical"
+                      value={
+                        pathname === groupsBaseUrl ? measureGroupNumber : null
+                      }
+                    >
+                      {tab?.groups?.map((linkInfo, index) => {
+                        return (
+                          <Tab
+                            value={index}
+                            key={linkInfo.title}
+                            onClick={(e) => initiateNavigateGroupClick(e)}
+                            type="C"
+                            orientation="vertical"
+                            id={index}
+                            label={linkInfo.title}
+                            data-testid={linkInfo.dataTestId}
+                          />
+                        );
+                      })}
+                    </Tabs>
                     {canEdit && (
                       <DSLink
                         className="madie-link"
@@ -187,6 +211,20 @@ export default function PopulationCriteriaSideNav(
                 )}
             </>
           ))}
+        {(showPopulationCriteriaTabs || !populationCriteriaTabsFeatureFlag) && (
+          <Tabs
+            type="C"
+            orientation="vertical"
+            value={pathname}
+            onChange={(e, v) => {
+              history.push(v);
+            }}
+          >
+            {additionalLinks.map((l) => {
+              return <Tab {...l} type="B" />;
+            })}
+          </Tabs>
+        )}
       </Nav>
       <MadieDiscardDialog
         open={discardDialogOpen}
