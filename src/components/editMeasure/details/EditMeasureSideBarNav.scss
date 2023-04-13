@@ -1,0 +1,63 @@
+.link-container,
+nav {
+  display: flex;
+  flex-direction: column;
+  .MuiButtonBase-root {
+    text-align: left;
+    align-items: flex-start;
+    line-height: normal !important;
+    min-height: 48px;
+    height: fit-content;
+  }
+
+  > .link-heading {
+    margin-bottom: 0;
+    margin-left: 13px;
+    font-family: "Rubik";
+    font-style: normal;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 24px;
+    color: #242424;
+  }
+
+  > .nav-link {
+    text-decoration: none;
+    display: flex;
+    color: #333;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 24px;
+    padding: 5px 0px 5px 16px;
+
+    &.active {
+      font-weight: 500;
+      background-color: #fff;
+      padding-left: 10px;
+      border-left: solid 6px #209fa6;
+    }
+  }
+}
+
+.tab-title {
+  color: #515151;
+  margin-left: 8px;
+  margin-top: 15px;
+  margin-bottom: 4px;
+  font-family: "Rubik";
+  font-style: "normal";
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+
+  &.active {
+    font-weight: 500;
+    background-color: #fff;
+    padding-left: 10px;
+    border-left: solid 6px #209fa6;
+  }
+}
+
+.tab-dropdown {
+  margin-left: 65px;
+}

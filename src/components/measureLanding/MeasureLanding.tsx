@@ -9,18 +9,19 @@ import { useHistory, useLocation } from "react-router-dom";
 import queryString from "query-string";
 import "twin.macro";
 import "styled-components/macro";
-import MeasureList from "../measureList/MeasureList";
+import MeasureList from "./measureList/MeasureList";
 import { Measure } from "@madie/madie-models";
 
-import { Tab, Tabs } from "@mui/material";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import {
   Pagination,
   MadieSpinner,
+  Tabs,
+  Tab,
 } from "@madie/madie-design-system/dist/react";
 import "./MeasureLanding.scss";
 import { useDocumentTitle } from "@madie/madie-util";
-import StatusHandler from "../measureEditor/StatusHandler";
+import StatusHandler from "../editMeasure/editor/StatusHandler";
 
 export default function MeasureLanding() {
   useDocumentTitle("MADiE Measures");
@@ -140,34 +141,9 @@ export default function MeasureLanding() {
           style={{ borderBottom: "1px solid #b0b0b0" }}
         >
           <div>
-            <Tabs
-              value={activeTab}
-              onChange={handleTabChange}
-              sx={{
-                fontWeight: 700,
-                color: "#003366",
-                "& .MuiTabs-indicator": {
-                  height: "6px",
-                  backgroundColor: "#209FA6",
-                },
-                "& .Mui-selected": {
-                  fontWeight: 500,
-                  color: "#003366 !important",
-                },
-                "& .MuiTab-root": {
-                  textTransform: "none",
-                  fontSize: "16px",
-                },
-              }}
-            >
+            <Tabs value={activeTab} onChange={handleTabChange} type="B">
               <Tab
-                sx={{
-                  padding: "24px 21px",
-                  fontFamily: "Rubik, sans serif",
-                  borderRadius: "6px 0 0 0",
-                  fontWeight: 400,
-                  color: "#003366",
-                }}
+                type="B"
                 label={`My Measures`}
                 data-testid="my-measures-tab"
                 onClick={() => {
@@ -176,13 +152,7 @@ export default function MeasureLanding() {
               />
               <Tab
                 tabIndex={0}
-                sx={{
-                  padding: "24px 21px",
-                  fontFamily: "Rubik, sans serif",
-                  borderRadius: "0 6px 0 0",
-                  fontWeight: 400,
-                  color: "#003366",
-                }}
+                type="B"
                 label="All Measures"
                 data-testid="all-measures-tab"
                 onClick={() => {

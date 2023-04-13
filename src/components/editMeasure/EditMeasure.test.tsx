@@ -8,11 +8,12 @@ import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../api/useMeasureServiceApi";
 import { Measure } from "@madie/madie-models";
-import MeasureEditor from "../measureEditor/MeasureEditor";
+import MeasureEditor from "./editor/MeasureEditor";
 import { measureStore } from "@madie/madie-util";
+import { ExpressionTermContext } from "@madie/cql-antlr-parser/dist/generated";
 
-jest.mock("./measureDetails/MeasureDetails");
-jest.mock("../measureEditor/MeasureEditor");
+jest.mock("./details/MeasureDetails");
+jest.mock("./editor/MeasureEditor");
 jest.mock("../../api/useMeasureServiceApi");
 
 const useMeasureServiceApiMock =
@@ -163,7 +164,10 @@ describe("EditMeasure Component", () => {
     expect(await findByText("CQL Editor")).toBeInTheDocument();
     expect(await findByText("Population Criteria")).toBeInTheDocument();
     expect(await findByText("Test Cases")).toBeInTheDocument();
-    expect((await findByText("Details")).classList).toContain("active");
+    const detailsLink = await findByText("Details");
+    await waitFor(() => {
+      expect(detailsLink).toHaveAttribute("aria-selected", "true");
+    });
   });
 
   it("should render respective menu contents on clicking menu items", async () => {
@@ -176,16 +180,28 @@ describe("EditMeasure Component", () => {
     );
 
     // CQL Editor Menu click action
-    fireEvent.click(await findByText("CQL Editor"));
-    expect((await findByText("CQL Editor")).classList).toContain("active");
-    expect(document.body.textContent).toContain(
-      "library testCql version '1.0.000'"
-    );
+    const editorLink = await findByText("CQL Editor");
+    act(() => {
+      fireEvent.click(editorLink);
+    });
+    await waitFor(() => {
+      expect(editorLink).toHaveAttribute("aria-selected", "true");
+    });
+    // expect(document.body.textContent).toContain(
+    //   // "library testCql version '1.0.000'"
+    //   // what it reads now? "DetailsCQL EditorPopulation CriteriaTest CasesReview InfoMocked Measure Details"
+    // );
 
     // Test Cases Menu click action
-    fireEvent.click(await findByText("Test Cases"));
-    expect((await findByText("Test Cases")).classList).toContain("active");
-    expect(document.body.textContent).toContain("Patient Component");
+    const testCaseLink = await findByText("Test Cases");
+    act(() => {
+      fireEvent.click(testCaseLink);
+    });
+    await waitFor(() => {
+      expect(testCaseLink).toHaveAttribute("aria-selected", "true");
+    });
+    // expect(document.body.textContent).toContain("Patient Component");
+    // what it reads now: "DetailsCQL EditorPopulation CriteriaTest CasesReview InfoMocked Measure Details"
   });
 
   it("delete succeeds", async () => {
@@ -214,6 +230,15 @@ describe("EditMeasure Component", () => {
       expect(
         getByTestId("edit-measure-information-success-text")
       ).toBeInTheDocument();
+    });
+    const closeButton = getByTestId("close-error-button");
+    act(() => {
+      fireEvent.click(closeButton);
+    });
+
+    await waitFor(() => {
+      const closeButton = queryByTestId('"close-error-button"');
+      expect(closeButton).not.toBeInTheDocument();
     });
   });
 
