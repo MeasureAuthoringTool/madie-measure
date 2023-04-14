@@ -24,6 +24,7 @@ jest.mock("@madie/madie-util", () => ({
     state: {
       id: "testMeasureId",
       measureName: "the measure for testing",
+      model: "QDM v5.6",
       groups: [
         {
           id: "testGroupId",
@@ -63,6 +64,7 @@ jest.mock("@madie/madie-util", () => ({
   },
   useFeatureFlags: () => ({
     populationCriteriaTabs: true,
+    qdm: true,
   }),
 }));
 
@@ -83,6 +85,11 @@ const renderPopulationCriteriaHomeComponent = () => {
 describe("PopulationCriteriaHome", () => {
   it("should render Measure Groups component with group from measure along with side nav", () => {
     renderPopulationCriteriaHomeComponent();
+    expect(
+      screen.getByRole("button", {
+        name: /Base Configuration/i,
+      })
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("button", {
         name: /Population Criteria/i,
@@ -205,4 +212,36 @@ describe("PopulationCriteriaHome", () => {
     );
     expect(screen.getByTestId("groupDescriptionInput")).toHaveTextContent("");
   });
+});
+
+it("should render Base Configuration if it is a QDM measure", () => {
+  render(
+    <MemoryRouter
+      initialEntries={[
+        { pathname: "/measures/testMeasureId/edit/base-configuration" },
+      ]}
+    >
+      <ApiContextProvider value={serviceConfig}>
+        <Route path={["/measures/testMeasureId/edit/base-configuration"]}>
+          <PopulationCriteriaHome />
+        </Route>
+      </ApiContextProvider>
+    </MemoryRouter>
+  );
+  // verifies if the side nav is created
+  expect(
+    screen.getByRole("button", {
+      name: /Population Criteria/i,
+    })
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("link", {
+      name: /Criteria 1/i,
+    })
+  ).toBeInTheDocument();
+  const baseConfigurationButton = screen.getByRole("button", {
+    name: /Base Configuration/i,
+  });
+  // verifies if the SD component is loaded and the left nav link is active
+  expect(baseConfigurationButton.classList.contains("active")).toBeTruthy();
 });

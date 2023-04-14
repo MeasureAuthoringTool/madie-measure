@@ -6,8 +6,9 @@ import SupplementalElements from "./supplementalData/SupplementalElements";
 import PopulationCriteriaSideNav from "./populationCriteriaSideNav/PopulationCriteriaSideNav";
 import MeasureGroups from "./groups/MeasureGroups";
 import { checkUserCanEdit, measureStore } from "@madie/madie-util";
-import { Measure } from "@madie/madie-models";
+import { Measure, Model } from "@madie/madie-models";
 import RiskAdjustment from "./riskAdjustment/RiskAdjustment";
+import BaseConfiguration from "./baseConfiguration/BaseConfiguration";
 
 export function PopulationCriteriaHome() {
   const { path } = useRouteMatch();
@@ -25,11 +26,17 @@ export function PopulationCriteriaHome() {
   const [sideNavLinks, setSideNavLinks] = useState<Array<any>>();
   const [isFormDirty, setIsFormDirty] = useState<boolean>(false);
 
+  const baseConfigurationUrl =
+    "/measures/" + measure?.id + "/edit/base-configuration";
   const groupsBaseUrl = "/measures/" + measure?.id + "/edit/groups";
   const supplementalDataBaseUrl =
     "/measures/" + measure?.id + "/edit/supplemental-data";
   const riskAdjustmentBaseUrl =
     "/measures/" + measure?.id + "/edit/risk-adjustment";
+
+  const isQDM = (): boolean => {
+    return measure?.model === Model.QDM_5_6;
+  };
 
   /* This useEffect generates information required for left side nav bar
    * If a measure doesn't have any groups, then a new one is added. */
@@ -48,7 +55,15 @@ export function PopulationCriteriaHome() {
               dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
             },
           ];
-    setSideNavLinks([
+    const navOptions = [
+      isQDM()
+        ? {
+            title: "Base Configuration",
+            href: baseConfigurationUrl,
+            dataTestId: "leftPanelMeasureBaseConfigurationTab",
+            id: "sideNavMeasureBaseConfiguration",
+          }
+        : "",
       {
         title: "Population Criteria",
         groups: measureGroups,
@@ -67,8 +82,11 @@ export function PopulationCriteriaHome() {
         dataTestId: "leftPanelMeasurePopulationsRiskAdjustmentTab",
         id: "sideNavMeasurePopulationsRiskAdjustment",
       },
-    ]);
+    ];
+
+    setSideNavLinks(navOptions.filter((obj) => Object.keys(obj).length !== 0));
   }, [
+    baseConfigurationUrl,
     groupsBaseUrl,
     measure?.groups,
     riskAdjustmentBaseUrl,
@@ -87,6 +105,8 @@ export function PopulationCriteriaHome() {
           measureId={measure?.id}
           isFormDirty={isFormDirty}
         />
+        {path.includes("/base-configuration") && <BaseConfiguration />}
+
         {path.includes("/groups") && (
           <MeasureGroups
             setIsFormDirty={setIsFormDirty}
