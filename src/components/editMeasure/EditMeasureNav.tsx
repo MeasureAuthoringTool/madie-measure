@@ -144,6 +144,7 @@ const EditMeasureNav = () => {
             type="A"
             size="large"
             label="Review Info"
+            component={NavLink}
           />
         </Tabs>
       </div>
