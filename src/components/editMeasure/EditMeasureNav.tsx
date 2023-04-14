@@ -22,10 +22,6 @@ const MenuItem = styled.li((props: PropTypes) => [
   props.isActive && tw`bg-slate text-slate-90 font-medium hover:bg-slate`,
 ]);
 
-const NavLinkCustom = tw(
-  NavLink
-)`py-3.5 px-8 inline-block no-underline text-inherit text-sm hover:text-inherit focus:text-inherit focus:no-underline`;
-
 const EditMeasureNav = () => {
   const { url } = useRouteMatch();
   // TODO: try activeClassName of NavLink instead of manual path check
@@ -99,7 +95,7 @@ const EditMeasureNav = () => {
     }
   }, [pathname]);
   const handleChange = (e, v) => {
-    history.push(v);
+    // history.push(v);
     setSelected(v);
   };
   return (
@@ -108,34 +104,43 @@ const EditMeasureNav = () => {
         <Tabs value={selected} onChange={handleChange} type="A" size="large">
           <Tab
             value={`${url}/details`}
+            to={`${url}/details`}
             data-testid="measure-details-tab"
             type="A"
             size="large"
             label="Details"
+            component={NavLink}
           />
           <Tab
             value={`${url}/cql-editor`}
+            to={`${url}/cql-editor`}
             data-testid="cql-editor-tab"
             type="A"
             size="large"
             label="CQL Editor"
+            component={NavLink}
           />
           <Tab
             value={`${url}/groups`}
+            to={`${url}/groups`}
             data-testid="groups-tab"
             type="A"
             size="large"
             label="Population Criteria"
+            component={NavLink}
           />
           <Tab
             value={`${url}/test-cases`}
+            to={`${url}/test-cases`}
             data-testid="patients-tab"
             type="A"
             size="large"
             label="Test Cases"
+            component={NavLink}
           />
           <Tab
             value={`${url}/review-info`}
+            to={`${url}/review-info`}
             data-testid="review-tab"
             type="A"
             size="large"
