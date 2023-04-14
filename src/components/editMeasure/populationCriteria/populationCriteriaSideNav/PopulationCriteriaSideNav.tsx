@@ -211,7 +211,7 @@ export default function PopulationCriteriaSideNav(
                 )}
             </>
           ))}
-        {(showPopulationCriteriaTabs || !populationCriteriaTabsFeatureFlag) && (
+        {populationCriteriaTabsFeatureFlag && (
           <Tabs
             type="C"
             orientation="vertical"
