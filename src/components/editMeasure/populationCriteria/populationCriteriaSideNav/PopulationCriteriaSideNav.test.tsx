@@ -62,6 +62,7 @@ const initialProps: PopulationCriteriaSideNavProp = {
   measureGroupNumber: 0,
   setMeasureGroupNumber: jest.fn().mockImplementation((v) => v),
   isFormDirty: false,
+  isQDM: false,
 };
 
 describe("PopulationCriteriaSideNav", () => {
@@ -332,5 +333,13 @@ describe("PopulationCriteriaSideNav", () => {
       </MemoryRouter>
     );
     expect(criteria2).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("Should render base configuration tab", () => {
+    RenderPopulationCriteriaSideNav({ ...initialProps, isQDM: true });
+    const baseConfiguration = screen.queryByRole("tab", {
+      name: /Base Configuration/i,
+    });
+    expect(baseConfiguration).toBeInTheDocument();
   });
 });

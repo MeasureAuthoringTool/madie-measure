@@ -27,6 +27,7 @@ export interface PopulationCriteriaSideNavProp {
   setMeasureGroupNumber?: (value: number) => void;
   measureId: string;
   isFormDirty: boolean;
+  isQDM: boolean;
 }
 
 export default function PopulationCriteriaSideNav(
@@ -40,6 +41,7 @@ export default function PopulationCriteriaSideNav(
     measureGroupNumber,
     setMeasureGroupNumber,
     isFormDirty = false,
+    isQDM,
   } = props;
   const { pathname } = useLocation();
   const [showPopulationCriteriaTabs, setShowPopulationCriteriaTabs] =
@@ -126,6 +128,9 @@ export default function PopulationCriteriaSideNav(
       history.push(tabInfo.href);
     }
   };
+
+  const baseConfigurationUrl =
+    "/measures/" + measureId + "/edit/base-configuration";
   const supplementalDataBaseUrl =
     "/measures/" + measureId + "/edit/supplemental-data";
   const riskAdjustmentBaseUrl =
@@ -150,6 +155,24 @@ export default function PopulationCriteriaSideNav(
   return (
     <OuterWrapper>
       <Nav aria-label="Sidebar">
+        {isQDM && (
+          <Tabs
+            type="C"
+            orientation="vertical"
+            value={pathname}
+            onChange={(e, v) => {
+              history.push(v);
+            }}
+          >
+            <Tab
+              type="C"
+              label="Base Configuration"
+              value={baseConfigurationUrl}
+              dataTestId="leftPanelMeasureBaseConfigurationTab"
+              id="sideNavMeasureBaseConfiguration"
+            />
+          </Tabs>
+        )}
         {sideNavLinks &&
           sideNavLinks?.map((tab) => (
             <>

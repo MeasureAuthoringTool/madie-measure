@@ -72,6 +72,7 @@ export function PopulationCriteriaHome() {
           setMeasureGroupNumber={setMeasureGroupNumber}
           measureId={measure?.id}
           isFormDirty={isFormDirty}
+          isQDM={isQDM()}
         />
         {path.includes("/base-configuration") && <BaseConfiguration />}
 

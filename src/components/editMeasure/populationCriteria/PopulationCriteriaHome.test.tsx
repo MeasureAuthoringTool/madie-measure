@@ -86,7 +86,7 @@ describe("PopulationCriteriaHome", () => {
   it("should render Measure Groups component with group from measure along with side nav", () => {
     renderPopulationCriteriaHomeComponent();
     expect(
-      screen.getByRole("button", {
+      screen.getByRole("tab", {
         name: /Base Configuration/i,
       })
     ).toBeInTheDocument();
@@ -235,11 +235,11 @@ it("should render Base Configuration if it is a QDM measure", () => {
     })
   ).toBeInTheDocument();
   expect(
-    screen.getByRole("link", {
+    screen.getByRole("tab", {
       name: /Criteria 1/i,
     })
   ).toBeInTheDocument();
-  const baseConfigurationButton = screen.getByRole("button", {
+  const baseConfigurationButton = screen.getByRole("tab", {
     name: /Base Configuration/i,
   });
   // verifies if the SD component is loaded and the left nav link is active
