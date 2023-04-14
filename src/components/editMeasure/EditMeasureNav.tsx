@@ -95,7 +95,6 @@ const EditMeasureNav = () => {
     }
   }, [pathname]);
   const handleChange = (e, v) => {
-    // history.push(v);
     setSelected(v);
   };
   return (
