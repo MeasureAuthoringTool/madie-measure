@@ -187,10 +187,9 @@ describe("EditMeasure Component", () => {
     await waitFor(() => {
       expect(editorLink).toHaveAttribute("aria-selected", "true");
     });
-    // expect(document.body.textContent).toContain(
-    //   // "library testCql version '1.0.000'"
-    //   // what it reads now? "DetailsCQL EditorPopulation CriteriaTest CasesReview InfoMocked Measure Details"
-    // );
+    expect(document.body.textContent).toContain(
+      "library testCql version '1.0.000'"
+    );
 
     // Test Cases Menu click action
     const testCaseLink = await findByText("Test Cases");
@@ -200,8 +199,7 @@ describe("EditMeasure Component", () => {
     await waitFor(() => {
       expect(testCaseLink).toHaveAttribute("aria-selected", "true");
     });
-    // expect(document.body.textContent).toContain("Patient Component");
-    // what it reads now: "DetailsCQL EditorPopulation CriteriaTest CasesReview InfoMocked Measure Details"
+    expect(document.body.textContent).toContain("Patient Component");
   });
 
   it("delete succeeds", async () => {
