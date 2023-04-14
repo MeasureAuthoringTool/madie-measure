@@ -21,6 +21,8 @@ import DeleteDialog from "./DeleteDialog";
 import NotFound from "../notfound/NotFound";
 import PopulationCriteriaHome from "./populationCriteria/PopulationCriteriaHome";
 import ReviewInfo from "./reviewInfo/ReviewInfo";
+import "./EditMeasure.scss";
+
 interface inputParams {
   id: string;
 }
