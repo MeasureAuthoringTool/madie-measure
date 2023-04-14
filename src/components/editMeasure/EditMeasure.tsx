@@ -112,7 +112,7 @@ export default function EditMeasure() {
 
   const contentDiv = (
     <div data-testid="editMeasure">
-      <div tw="relative -mt-12">
+      <div tw="relative" style={{ marginTop: "-60px" }}>
         <EditMeasureNav />
         <div
           style={{
