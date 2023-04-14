@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import tw, { styled } from "twin.macro";
 import { routeHandlerStore, useFeatureFlags } from "@madie/madie-util";
+import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
 export interface RouteHandlerState {
   canTravel: boolean;
   pendingRoute: string;
@@ -20,10 +21,6 @@ const MenuItem = styled.li((props: PropTypes) => [
   tw`mr-1 text-white bg-[rgba(0, 32, 64, 0.5)] rounded-t-md hover:bg-[rgba(0,6,13, 0.5)]`,
   props.isActive && tw`bg-slate text-slate-90 font-medium hover:bg-slate`,
 ]);
-
-const NavLinkCustom = tw(
-  NavLink
-)`py-3.5 px-8 inline-block no-underline text-inherit text-sm hover:text-inherit focus:text-inherit focus:no-underline`;
 
 const EditMeasureNav = () => {
   const { url } = useRouteMatch();
@@ -79,46 +76,79 @@ const EditMeasureNav = () => {
     routeHandlerState.canTravel,
     routeHandlerState.pendingRoute,
   ]);
+  const [selected, setSelected] = useState<string>("");
+  useEffect(() => {
+    // groups
+    if (
+      pathname.startsWith(`${url}/groups`) ||
+      pathname.startsWith(`${url}/supplemental-data`) ||
+      pathname.startsWith(`${url}/risk-adjustment`)
+    ) {
+      setSelected(`${url}/groups`);
+    } else if (pathname.startsWith(`${url}/details`)) {
+      setSelected(`${url}/details`);
+    } else if (pathname === `${url}/cql-editor`) {
+      setSelected(`${url}/cql-editor`);
+    } else if (pathname.startsWith(`${url}/test-cases`)) {
+      setSelected(`${url}/test-cases`);
+    } else if (pathname.startsWith(`${url}/review-info`)) {
+      setSelected(`${url}/review-info`);
+    }
+  }, [pathname]);
+  const handleChange = (e, v) => {
+    setSelected(v);
+  };
   return (
     <div>
-      <MenuItemContainer>
-        <MenuItem
-          data-testid="measure-details-tab"
-          isActive={pathname.startsWith(`${url}/details`)}
-        >
-          <NavLinkCustom to={`${url}/details`}>Details</NavLinkCustom>
-        </MenuItem>
-        <MenuItem
-          data-testid="cql-editor-tab"
-          isActive={pathname === `${url}/cql-editor`}
-        >
-          <NavLinkCustom to={`${url}/cql-editor`}>CQL Editor</NavLinkCustom>
-        </MenuItem>
-        <MenuItem
-          data-testid="groups-tab"
-          isActive={
-            pathname.startsWith(`${url}/groups`) ||
-            pathname.startsWith(`${url}/supplemental-data`) ||
-            pathname.startsWith(`${url}/risk-adjustment`)
-          }
-        >
-          <NavLinkCustom to={`${url}/groups`}>
-            Population Criteria
-          </NavLinkCustom>
-        </MenuItem>
-        <MenuItem
-          data-testid="patients-tab"
-          isActive={pathname.startsWith(`${url}/test-cases`)}
-        >
-          <NavLinkCustom to={`${url}/test-cases`}>Test Cases</NavLinkCustom>
-        </MenuItem>
-        <MenuItem
-          data-testid="review-tab"
-          isActive={pathname.startsWith(`${url}/review-info`)}
-        >
-          <NavLinkCustom to={`${url}/review-info`}>Review Info</NavLinkCustom>
-        </MenuItem>
-      </MenuItemContainer>
+      <div style={{ marginLeft: "32px" }}>
+        <Tabs value={selected} onChange={handleChange} type="A" size="large">
+          <Tab
+            value={`${url}/details`}
+            to={`${url}/details`}
+            data-testid="measure-details-tab"
+            type="A"
+            size="large"
+            label="Details"
+            component={NavLink}
+          />
+          <Tab
+            value={`${url}/cql-editor`}
+            to={`${url}/cql-editor`}
+            data-testid="cql-editor-tab"
+            type="A"
+            size="large"
+            label="CQL Editor"
+            component={NavLink}
+          />
+          <Tab
+            value={`${url}/groups`}
+            to={`${url}/groups`}
+            data-testid="groups-tab"
+            type="A"
+            size="large"
+            label="Population Criteria"
+            component={NavLink}
+          />
+          <Tab
+            value={`${url}/test-cases`}
+            to={`${url}/test-cases`}
+            data-testid="patients-tab"
+            type="A"
+            size="large"
+            label="Test Cases"
+            component={NavLink}
+          />
+          <Tab
+            value={`${url}/review-info`}
+            to={`${url}/review-info`}
+            data-testid="review-tab"
+            type="A"
+            size="large"
+            label="Review Info"
+            component={NavLink}
+          />
+        </Tabs>
+      </div>
     </div>
   );
 };

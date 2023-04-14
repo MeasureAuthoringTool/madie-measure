@@ -2,6 +2,13 @@
 nav {
   display: flex;
   flex-direction: column;
+  .MuiButtonBase-root {
+    text-align: left;
+    align-items: flex-start;
+    line-height: normal !important;
+    min-height: 48px;
+    height: fit-content;
+  }
 
   > .link-heading {
     margin-bottom: 0;

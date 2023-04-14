@@ -164,7 +164,10 @@ describe("EditMeasure Component", () => {
     expect(await findByText("CQL Editor")).toBeInTheDocument();
     expect(await findByText("Population Criteria")).toBeInTheDocument();
     expect(await findByText("Test Cases")).toBeInTheDocument();
-    expect((await findByText("Details")).classList).toContain("active");
+    const detailsLink = await findByText("Details");
+    await waitFor(() => {
+      expect(detailsLink).toHaveAttribute("aria-selected", "true");
+    });
   });
 
   it("should render respective menu contents on clicking menu items", async () => {
@@ -177,15 +180,25 @@ describe("EditMeasure Component", () => {
     );
 
     // CQL Editor Menu click action
-    fireEvent.click(await findByText("CQL Editor"));
-    expect((await findByText("CQL Editor")).classList).toContain("active");
+    const editorLink = await findByText("CQL Editor");
+    act(() => {
+      fireEvent.click(editorLink);
+    });
+    await waitFor(() => {
+      expect(editorLink).toHaveAttribute("aria-selected", "true");
+    });
     expect(document.body.textContent).toContain(
       "library testCql version '1.0.000'"
     );
 
     // Test Cases Menu click action
-    fireEvent.click(await findByText("Test Cases"));
-    expect((await findByText("Test Cases")).classList).toContain("active");
+    const testCaseLink = await findByText("Test Cases");
+    act(() => {
+      fireEvent.click(testCaseLink);
+    });
+    await waitFor(() => {
+      expect(testCaseLink).toHaveAttribute("aria-selected", "true");
+    });
     expect(document.body.textContent).toContain("Patient Component");
   });
 

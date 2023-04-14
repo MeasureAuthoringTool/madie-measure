@@ -21,6 +21,8 @@ import DeleteDialog from "./DeleteDialog";
 import NotFound from "../notfound/NotFound";
 import PopulationCriteriaHome from "./populationCriteria/PopulationCriteriaHome";
 import ReviewInfo from "./reviewInfo/ReviewInfo";
+import "./EditMeasure.scss";
+
 interface inputParams {
   id: string;
 }
@@ -112,7 +114,7 @@ export default function EditMeasure() {
 
   const contentDiv = (
     <div data-testid="editMeasure">
-      <div tw="relative -mt-12">
+      <div tw="relative" style={{ marginTop: "-60px" }}>
         <EditMeasureNav />
         <div
           style={{

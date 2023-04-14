@@ -29,10 +29,6 @@ export function PopulationCriteriaHome() {
   const baseConfigurationUrl =
     "/measures/" + measure?.id + "/edit/base-configuration";
   const groupsBaseUrl = "/measures/" + measure?.id + "/edit/groups";
-  const supplementalDataBaseUrl =
-    "/measures/" + measure?.id + "/edit/supplemental-data";
-  const riskAdjustmentBaseUrl =
-    "/measures/" + measure?.id + "/edit/risk-adjustment";
 
   const isQDM = (): boolean => {
     return measure?.model === Model.QDM_5_6;
@@ -55,43 +51,15 @@ export function PopulationCriteriaHome() {
               dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
             },
           ];
-    const navOptions = [
-      isQDM()
-        ? {
-            title: "Base Configuration",
-            href: baseConfigurationUrl,
-            dataTestId: "leftPanelMeasureBaseConfigurationTab",
-            id: "sideNavMeasureBaseConfiguration",
-          }
-        : "",
+    setSideNavLinks([
       {
         title: "Population Criteria",
         groups: measureGroups,
         dataTestId: "leftPanelMeasurePopulationCriteriaTab",
         id: "sideNavMeasurePopulationCriteria",
       },
-      {
-        title: "Supplemental Data",
-        href: supplementalDataBaseUrl,
-        dataTestId: "leftPanelMeasurePopulationsSupplementalDataTab",
-        id: "sideNavMeasurePopulationsSupplementalData",
-      },
-      {
-        title: "Risk Adjustment",
-        href: riskAdjustmentBaseUrl,
-        dataTestId: "leftPanelMeasurePopulationsRiskAdjustmentTab",
-        id: "sideNavMeasurePopulationsRiskAdjustment",
-      },
-    ];
-
-    setSideNavLinks(navOptions.filter((obj) => Object.keys(obj).length !== 0));
-  }, [
-    baseConfigurationUrl,
-    groupsBaseUrl,
-    measure?.groups,
-    riskAdjustmentBaseUrl,
-    supplementalDataBaseUrl,
-  ]);
+    ]);
+  }, [groupsBaseUrl, measure?.groups]);
 
   return (
     <>
