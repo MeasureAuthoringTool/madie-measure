@@ -152,6 +152,7 @@ export default function EditMeasure() {
               `${url}/groups`,
               `${url}/supplemental-data`,
               `${url}/risk-adjustment`,
+              `${url}/base-configuration`,
             ]}
           >
             <PopulationCriteriaHome />
