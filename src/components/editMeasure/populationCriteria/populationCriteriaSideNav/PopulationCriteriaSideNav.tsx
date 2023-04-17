@@ -14,6 +14,7 @@ import {
   Tab,
 } from "@madie/madie-design-system/dist/react";
 import { useFeatureFlags } from "@madie/madie-util";
+import { forEach } from "lodash";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
 const Nav = tw.nav`flex-1 space-y-1 bg-slate`;
@@ -26,6 +27,7 @@ export interface PopulationCriteriaSideNavProp {
   setMeasureGroupNumber?: (value: number) => void;
   measureId: string;
   isFormDirty: boolean;
+  isQDM: boolean;
 }
 
 export default function PopulationCriteriaSideNav(
@@ -39,6 +41,7 @@ export default function PopulationCriteriaSideNav(
     measureGroupNumber,
     setMeasureGroupNumber,
     isFormDirty = false,
+    isQDM,
   } = props;
   const { pathname } = useLocation();
   const [showPopulationCriteriaTabs, setShowPopulationCriteriaTabs] =
@@ -80,14 +83,19 @@ export default function PopulationCriteriaSideNav(
   };
 
   const addNewBlankMeasureGroup = () => {
-    const newMeasureGroupNumber = sideNavLinks[0].groups.length + 1;
-    setMeasureGroupNumber(sideNavLinks[0].groups.length);
+    var measureGroups = sideNavLinks.find((link) => link.groups);
+    const index = sideNavLinks.indexOf(measureGroups);
+    const newMeasureGroupNumber = measureGroups.groups.length + 1;
+    setMeasureGroupNumber(measureGroups.groups.length);
     const newMeasureGroupLink = {
       title: `Criteria ${newMeasureGroupNumber}`,
       href: groupsBaseUrl,
       dataTestId: `leftPanelMeasureInformation-MeasureGroup${newMeasureGroupNumber}`,
     };
-    sideNavLinks[0].groups = [...sideNavLinks[0].groups, newMeasureGroupLink];
+    sideNavLinks[index].groups = [
+      ...sideNavLinks[index].groups,
+      newMeasureGroupLink,
+    ];
     setSideNavLinks([...sideNavLinks]);
     onClose();
   };
@@ -120,6 +128,9 @@ export default function PopulationCriteriaSideNav(
       history.push(tabInfo.href);
     }
   };
+
+  const baseConfigurationUrl =
+    "/measures/" + measureId + "/edit/base-configuration";
   const supplementalDataBaseUrl =
     "/measures/" + measureId + "/edit/supplemental-data";
   const riskAdjustmentBaseUrl =
@@ -144,6 +155,24 @@ export default function PopulationCriteriaSideNav(
   return (
     <OuterWrapper>
       <Nav aria-label="Sidebar">
+        {isQDM && (
+          <Tabs
+            type="C"
+            orientation="vertical"
+            value={pathname}
+            onChange={(e, v) => {
+              history.push(v);
+            }}
+          >
+            <Tab
+              type="C"
+              label="Base Configuration"
+              value={baseConfigurationUrl}
+              dataTestId="leftPanelMeasureBaseConfigurationTab"
+              id="sideNavMeasureBaseConfiguration"
+            />
+          </Tabs>
+        )}
         {sideNavLinks &&
           sideNavLinks?.map((tab) => (
             <>
@@ -211,7 +240,7 @@ export default function PopulationCriteriaSideNav(
                 )}
             </>
           ))}
-        {(showPopulationCriteriaTabs || !populationCriteriaTabsFeatureFlag) && (
+        {populationCriteriaTabsFeatureFlag && (
           <Tabs
             type="C"
             orientation="vertical"

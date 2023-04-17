@@ -24,6 +24,7 @@ jest.mock("@madie/madie-util", () => ({
     state: {
       id: "testMeasureId",
       measureName: "the measure for testing",
+      model: "QDM v5.6",
       groups: [
         {
           id: "testGroupId",
@@ -63,6 +64,7 @@ jest.mock("@madie/madie-util", () => ({
   },
   useFeatureFlags: () => ({
     populationCriteriaTabs: true,
+    qdm: true,
   }),
 }));
 
@@ -83,6 +85,11 @@ const renderPopulationCriteriaHomeComponent = () => {
 describe("PopulationCriteriaHome", () => {
   it("should render Measure Groups component with group from measure along with side nav", () => {
     renderPopulationCriteriaHomeComponent();
+    expect(
+      screen.getByRole("tab", {
+        name: /Base Configuration/i,
+      })
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("button", {
         name: /Population Criteria/i,
