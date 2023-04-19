@@ -144,6 +144,13 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
       return `${formik.errors[name]}`;
     }
   }
+
+  const makeUTCDate = (date) => {
+    return `${
+      date.getUTCMonth() + 1
+    }/${date.getUTCDate()}/${date.getUTCFullYear()}`;
+  };
+
   return (
     <form
       id="measure-details-form"
@@ -188,7 +195,11 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
               label="Measurement Period - Start Date"
               inputFormat="MM/dd/yyyy"
               aria-required="true"
-              value={formik.values.measurementPeriodStart}
+              value={
+                formik.values.measurementPeriodStart
+                  ? makeUTCDate(new Date(formik.values.measurementPeriodStart))
+                  : formik.values.measurementPeriodStart
+              }
               onChange={(startDate) => {
                 formik.setFieldValue("measurementPeriodStart", startDate);
               }}
@@ -227,7 +238,12 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
               disabled={!canEdit}
               label="Measurement Period - End Date"
               inputFormat="MM/dd/yyyy"
-              value={formik.values.measurementPeriodEnd}
+              aria-required="true"
+              value={
+                formik.values.measurementPeriodEnd
+                  ? makeUTCDate(new Date(formik.values.measurementPeriodEnd))
+                  : formik.values.measurementPeriodEnd
+              }
               onChange={(endDate) => {
                 formik.setFieldValue("measurementPeriodEnd", endDate);
               }}
