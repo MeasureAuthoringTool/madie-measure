@@ -10,8 +10,6 @@ import { Measure, Model } from "@madie/madie-models";
 import RiskAdjustment from "./riskAdjustment/RiskAdjustment";
 import BaseConfiguration from "./baseConfiguration/BaseConfiguration";
 import QDMReporting from "./QDMReporting";
-import { Backdrop } from "@mui/material";
-import { MadieSpinner } from "@madie/madie-design-system/dist/react";
 
 export function PopulationCriteriaHome() {
   const { path } = useRouteMatch();

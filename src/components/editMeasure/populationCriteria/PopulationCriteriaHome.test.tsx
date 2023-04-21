@@ -268,7 +268,7 @@ describe("PopulationCriteriaHome", () => {
         </ApiContextProvider>
       </MemoryRouter>
     );
-    // verifies if the side nav is created and Reportin is not available
+    // verifies if the side nav is created and base configuration is not available
     expect(
       screen.queryByRole("tab", {
         name: /Base Configuration/i,
