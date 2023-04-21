@@ -27,10 +27,7 @@ export function PopulationCriteriaHome() {
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(0);
   const [sideNavLinks, setSideNavLinks] = useState<Array<any>>();
   const [isFormDirty, setIsFormDirty] = useState<boolean>(false);
-  const [isQdm, setQdm] = useState<boolean>();
 
-  const baseConfigurationUrl =
-    "/measures/" + measure?.id + "/edit/base-configuration";
   const groupsBaseUrl = "/measures/" + measure?.id + "/edit/groups";
 
   const isQDM = (): boolean => {

@@ -89,7 +89,6 @@ jest.mock("@madie/madie-util", () => ({
   },
   useFeatureFlags: () => ({
     populationCriteriaTabs: true,
-    qdm: true,
   }),
 }));
 
