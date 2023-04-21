@@ -4,6 +4,8 @@ import { MemoryRouter, Route } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import PopulationCriteriaHome from "./PopulationCriteriaHome";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
+import { measureStore } from "@madie/madie-util";
+import { Model } from "@madie/madie-models";
 
 const serviceConfig: ServiceConfig = {
   measureService: {
@@ -15,6 +17,29 @@ const serviceConfig: ServiceConfig = {
   terminologyService: {
     baseUrl: "terminology-service.com",
   },
+};
+
+const qiCoreMeasure = {
+  id: "testMeasureId",
+  measureName: "the measure for testing",
+  model: Model.QICORE,
+  groups: [
+    {
+      id: "testGroupId",
+      scoring: "Cohort",
+      populations: [
+        {
+          id: "id-1",
+          name: "initialPopulation",
+          definition: "Initial Population",
+        },
+      ],
+      groupDescription: "test description",
+      measureGroupTypes: ["Outcome"],
+      populationBasis: "boolean",
+      scoringUnit: "",
+    },
+  ],
 };
 
 jest.mock("@madie/madie-util", () => ({
@@ -183,6 +208,60 @@ describe("PopulationCriteriaHome", () => {
     // verifies if the Risk Adjustment component is loaded and the left nav link is active
     expect(screen.getByTestId("risk-adjustment")).toBeInTheDocument();
     expect(riskAdjustmentButton).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("should render Reporting component only for QDM measures", () => {
+    render(
+      <MemoryRouter
+        initialEntries={[
+          { pathname: "/measures/testMeasureId/edit/reporting" },
+        ]}
+      >
+        <ApiContextProvider value={serviceConfig}>
+          <Route path={["/measures/testMeasureId/edit/reporting"]}>
+            <PopulationCriteriaHome />
+          </Route>
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+    // verifies if the side nav is created and reporting tab is available
+    expect(
+      screen.getByRole("tab", {
+        name: /Reporting/i,
+      })
+    ).toBeInTheDocument();
+    const reportingTab = screen.getByRole("tab", {
+      name: /Reporting/i,
+    });
+    // verifies if the Reporting component is loaded and the left nav link is active
+    expect(
+      screen.getByText("Reporting for QDM. Coming Soon!!")
+    ).toBeInTheDocument();
+    expect(reportingTab).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("should not render Reporting component for non-QDM measures", () => {
+    const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
+    mockedMeasureState.state = { ...qiCoreMeasure };
+    render(
+      <MemoryRouter
+        initialEntries={[
+          { pathname: "/measures/testMeasureId/edit/reporting" },
+        ]}
+      >
+        <ApiContextProvider value={serviceConfig}>
+          <Route path={["/measures/testMeasureId/edit/reporting"]}>
+            <PopulationCriteriaHome />
+          </Route>
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+    // verifies if the side nav is created and Reportin is not available
+    expect(
+      screen.queryByRole("tab", {
+        name: /Reporting/i,
+      })
+    ).toBeNull();
   });
 
   it("should render a new form for population criteria, onclick of Add Population Criteria link", () => {

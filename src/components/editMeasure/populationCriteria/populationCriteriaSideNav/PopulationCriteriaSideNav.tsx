@@ -135,6 +135,7 @@ export default function PopulationCriteriaSideNav(
     "/measures/" + measureId + "/edit/supplemental-data";
   const riskAdjustmentBaseUrl =
     "/measures/" + measureId + "/edit/risk-adjustment";
+  const QdmReportingBaseUrl = "/measures/" + measureId + "/edit/reporting";
   const additionalLinks = [
     {
       label: "Supplemental Data",
@@ -240,6 +241,24 @@ export default function PopulationCriteriaSideNav(
                 )}
             </>
           ))}
+        {isQDM && (
+          <Tabs
+            type="C"
+            orientation="vertical"
+            value={pathname}
+            onChange={(e, v) => {
+              history.push(v);
+            }}
+          >
+            <Tab
+              type="C"
+              label="Reporting"
+              value={QdmReportingBaseUrl}
+              dataTestId="leftPanelMeasureReportingTab"
+              id="sideNavMeasureReporting"
+            />
+          </Tabs>
+        )}
         {populationCriteriaTabsFeatureFlag && (
           <Tabs
             type="C"
