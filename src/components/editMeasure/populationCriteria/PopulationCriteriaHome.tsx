@@ -10,6 +10,8 @@ import { Measure, Model } from "@madie/madie-models";
 import RiskAdjustment from "./riskAdjustment/RiskAdjustment";
 import BaseConfiguration from "./baseConfiguration/BaseConfiguration";
 import QDMReporting from "./QDMReporting";
+import { Backdrop } from "@mui/material";
+import { MadieSpinner } from "@madie/madie-design-system/dist/react";
 
 export function PopulationCriteriaHome() {
   const { path } = useRouteMatch();
@@ -61,11 +63,15 @@ export function PopulationCriteriaHome() {
     ]);
   }, [groupsBaseUrl, measure?.groups]);
 
-  const renderReportingComponent = () => {
+  const renderQdmComponents = () => {
     if (measure) {
-      return isQDM() ? <QDMReporting /> : history.push("/404");
+      if (path.includes("/base-configuration")) {
+        return isQDM() ? <BaseConfiguration /> : history.push("/404");
+      } else if (path.includes("reporting")) {
+        return isQDM() ? <QDMReporting /> : history.push("/404");
+      }
     } else {
-      return "loading";
+      return <div data-testid="loading">Loading...</div>;
     }
   };
 
@@ -82,7 +88,7 @@ export function PopulationCriteriaHome() {
           isFormDirty={isFormDirty}
           isQDM={isQDM()}
         />
-        {path.includes("/base-configuration") && <BaseConfiguration />}
+        {path.includes("/base-configuration") && renderQdmComponents()}
         {path.includes("/groups") && (
           <MeasureGroups
             setIsFormDirty={setIsFormDirty}
@@ -90,7 +96,7 @@ export function PopulationCriteriaHome() {
             setMeasureGroupNumber={setMeasureGroupNumber}
           />
         )}
-        {path.includes("/reporting") && renderReportingComponent()}
+        {path.includes("/reporting") && renderQdmComponents()}
         {path.includes("/supplemental-data") && <SupplementalElements />}
         {path.includes("/risk-adjustment") && <RiskAdjustment />}
       </div>
