@@ -19,10 +19,10 @@ const serviceConfig: ServiceConfig = {
   },
 };
 
-const qiCoreMeasure = {
+const qdmMeasure = {
   id: "testMeasureId",
   measureName: "the measure for testing",
-  model: Model.QICORE,
+  model: Model.QDM_5_6,
   groups: [
     {
       id: "testGroupId",
@@ -49,7 +49,7 @@ jest.mock("@madie/madie-util", () => ({
     state: {
       id: "testMeasureId",
       measureName: "the measure for testing",
-      model: "QDM v5.6",
+      model: "QI-Core v4.1.1",
       groups: [
         {
           id: "testGroupId",
@@ -109,11 +109,6 @@ const renderPopulationCriteriaHomeComponent = () => {
 describe("PopulationCriteriaHome", () => {
   it("should render Measure Groups component with group from measure along with side nav", () => {
     renderPopulationCriteriaHomeComponent();
-    expect(
-      screen.getByRole("tab", {
-        name: /Base Configuration/i,
-      })
-    ).toBeInTheDocument();
     expect(
       screen.getByRole("button", {
         name: /Population Criteria/i,
@@ -209,60 +204,6 @@ describe("PopulationCriteriaHome", () => {
     expect(riskAdjustmentButton).toHaveAttribute("aria-selected", "true");
   });
 
-  it("should render Reporting component only for QDM measures", () => {
-    render(
-      <MemoryRouter
-        initialEntries={[
-          { pathname: "/measures/testMeasureId/edit/reporting" },
-        ]}
-      >
-        <ApiContextProvider value={serviceConfig}>
-          <Route path={["/measures/testMeasureId/edit/reporting"]}>
-            <PopulationCriteriaHome />
-          </Route>
-        </ApiContextProvider>
-      </MemoryRouter>
-    );
-    // verifies if the side nav is created and reporting tab is available
-    expect(
-      screen.getByRole("tab", {
-        name: /Reporting/i,
-      })
-    ).toBeInTheDocument();
-    const reportingTab = screen.getByRole("tab", {
-      name: /Reporting/i,
-    });
-    // verifies if the Reporting component is loaded and the left nav link is active
-    expect(
-      screen.getByText("Reporting for QDM. Coming Soon!!")
-    ).toBeInTheDocument();
-    expect(reportingTab).toHaveAttribute("aria-selected", "true");
-  });
-
-  it("should not render Reporting component for non-QDM measures", () => {
-    const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
-    mockedMeasureState.state = { ...qiCoreMeasure };
-    render(
-      <MemoryRouter
-        initialEntries={[
-          { pathname: "/measures/testMeasureId/edit/reporting" },
-        ]}
-      >
-        <ApiContextProvider value={serviceConfig}>
-          <Route path={["/measures/testMeasureId/edit/reporting"]}>
-            <PopulationCriteriaHome />
-          </Route>
-        </ApiContextProvider>
-      </MemoryRouter>
-    );
-    // verifies if the side nav is created and Reportin is not available
-    expect(
-      screen.queryByRole("tab", {
-        name: /Reporting/i,
-      })
-    ).toBeNull();
-  });
-
   it("should render a new form for population criteria, onclick of Add Population Criteria link", () => {
     renderPopulationCriteriaHomeComponent();
     const criteria1 = screen.getByRole("tab", {
@@ -289,5 +230,102 @@ describe("PopulationCriteriaHome", () => {
       "Population Criteria 2"
     );
     expect(screen.getByTestId("groupDescriptionInput")).toHaveTextContent("");
+  });
+
+  it("should not render Reporting component for non-QDM measures", () => {
+    render(
+      <MemoryRouter
+        initialEntries={[
+          { pathname: "/measures/testMeasureId/edit/reporting" },
+        ]}
+      >
+        <ApiContextProvider value={serviceConfig}>
+          <Route path={["/measures/testMeasureId/edit/reporting"]}>
+            <PopulationCriteriaHome />
+          </Route>
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+    // verifies if the side nav is created and Reportin is not available
+    expect(
+      screen.queryByRole("tab", {
+        name: /Reporting/i,
+      })
+    ).toBeNull();
+  });
+
+  it("should not render base configuration component for non-QDM measures", () => {
+    render(
+      <MemoryRouter
+        initialEntries={[
+          { pathname: "/measures/testMeasureId/edit/base-configuration" },
+        ]}
+      >
+        <ApiContextProvider value={serviceConfig}>
+          <Route path={["/measures/testMeasureId/edit/base-configuration"]}>
+            <PopulationCriteriaHome />
+          </Route>
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+    // verifies if the side nav is created and Reportin is not available
+    expect(
+      screen.queryByRole("tab", {
+        name: /Base Configuration/i,
+      })
+    ).toBeNull();
+  });
+
+  // tests for QDM measures, since this test case uses a mock which returns QDM measure
+  // all further test cases will have QDMMeasure being returned from Measure store.
+  it("should render Reporting component only for QDM measures", () => {
+    const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
+    mockedMeasureState.state = { ...qdmMeasure };
+    render(
+      <MemoryRouter
+        initialEntries={[
+          { pathname: "/measures/testMeasureId/edit/reporting" },
+        ]}
+      >
+        <ApiContextProvider value={serviceConfig}>
+          <Route path={["/measures/testMeasureId/edit/reporting"]}>
+            <PopulationCriteriaHome />
+          </Route>
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+    // verifies if the side nav is created and reporting tab is available
+    const reportingTab = screen.getByRole("tab", {
+      name: /Reporting/i,
+    });
+    expect(reportingTab).toBeInTheDocument();
+    // verifies if the Reporting component is loaded and the left nav link is active
+    expect(
+      screen.getByText("Reporting for QDM. Coming Soon!!")
+    ).toBeInTheDocument();
+    expect(reportingTab).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("should render base configuration component only for QDM measures", () => {
+    render(
+      <MemoryRouter
+        initialEntries={[
+          { pathname: "/measures/testMeasureId/edit/base-configuration" },
+        ]}
+      >
+        <ApiContextProvider value={serviceConfig}>
+          <Route path={["/measures/testMeasureId/edit/base-configuration"]}>
+            <PopulationCriteriaHome />
+          </Route>
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+    // verifies if the side nav is created and reporting tab is available
+    const baseConfigurationTab = screen.getByRole("tab", {
+      name: /Base Configuration/i,
+    });
+    expect(baseConfigurationTab).toBeInTheDocument();
+    // verifies if the left nav link is active
+    expect(baseConfigurationTab).toHaveAttribute("aria-selected", "true");
   });
 });
