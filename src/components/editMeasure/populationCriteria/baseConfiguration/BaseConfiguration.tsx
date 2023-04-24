@@ -44,7 +44,7 @@ const BaseConfiguration = () => {
   );
 
   const INITIAL_VALUES = {
-    scoring: measure?.scoring || "",
+    scoring: "",
   };
 
   const formik = useFormik({
