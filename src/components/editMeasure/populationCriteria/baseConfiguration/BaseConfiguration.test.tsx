@@ -34,7 +34,7 @@ const measure = {
   measurementPeriodEnd: "12/02/2022",
   createdBy: "john doe",
   measureSetId: "testMeasureId",
-  acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
+  acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }], //#nosec
 } as unknown as Measure;
 
 jest.mock("@madie/madie-editor", () => ({
