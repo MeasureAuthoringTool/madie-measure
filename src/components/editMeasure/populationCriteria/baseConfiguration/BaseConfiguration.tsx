@@ -81,7 +81,6 @@ const BaseConfiguration = () => {
   const handleSubmit = async (values) => {
     const newMeasure: Measure = {
       ...measure,
-      scoring: values.scoring,
     };
 
     measureServiceApi

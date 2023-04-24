@@ -217,7 +217,6 @@ describe("MeasureInformation component", () => {
     await waitFor(() =>
       expect(serviceApiMock.updateMeasure).toBeCalledWith({
         ...measure,
-        scoring: "Cohort",
       })
     );
 
@@ -272,7 +271,6 @@ describe("MeasureInformation component", () => {
     await waitFor(() =>
       expect(serviceApiMock.updateMeasure).toBeCalledWith({
         ...measure,
-        scoring: "Cohort",
       })
     );
 
