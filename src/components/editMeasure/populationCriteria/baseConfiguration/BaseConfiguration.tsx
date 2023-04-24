@@ -16,7 +16,7 @@ import {
   Toast,
 } from "@madie/madie-design-system/dist/react";
 
-interface baseConfigurationForm {
+interface BaseConfigurationForm {
   scoring: string;
 }
 
@@ -44,14 +44,14 @@ const BaseConfiguration = () => {
   );
 
   const INITIAL_VALUES = {
-    scoring: "",
+    scoring: measure?.scoring || "",
   };
 
   const formik = useFormik({
     initialValues: { ...INITIAL_VALUES },
     validationSchema: QDMMeasureSchemaValidator,
     enableReinitialize: true,
-    onSubmit: async (values: baseConfigurationForm) =>
+    onSubmit: async (values: BaseConfigurationForm) =>
       await handleSubmit(values),
   });
   const { resetForm } = formik;
@@ -81,6 +81,7 @@ const BaseConfiguration = () => {
   const handleSubmit = async (values) => {
     const newMeasure: Measure = {
       ...measure,
+      scoring: values.scoring,
     };
 
     measureServiceApi
@@ -88,7 +89,7 @@ const BaseConfiguration = () => {
       .then(() => {
         handleToast(
           "success",
-          "Measurement Base Configuration Updated Successfully",
+          "Measure Base Configuration Updated Successfully",
           true
         );
         // updating measure will propagate update state site wide.
@@ -98,7 +99,7 @@ const BaseConfiguration = () => {
       .catch((err) => {
         handleToast(
           "danger",
-          "Error updating Measurement Base Configuration: " +
+          "Error updating Measure Base Configuration: " +
             err?.response?.data?.message?.toString(),
           true
         );
@@ -115,7 +116,7 @@ const BaseConfiguration = () => {
       onCancel={onCancel}
     >
       <form
-        id="measure-details-form"
+        id="measure-base-configuration-form"
         onSubmit={formik.handleSubmit}
         data-testid="base-configuration-form"
       >
@@ -150,7 +151,6 @@ const BaseConfiguration = () => {
 
               formik.setFieldValue("scoring", nextScoring);
             }}
-            value={formik.values.scoring}
             options={Object.keys(GroupScoring).map((scoring) => {
               return (
                 <MuiMenuItem

@@ -79,13 +79,15 @@ const useMeasureServiceApiMock =
 
 let serviceApiMock: MeasureServiceApi;
 
-describe("MeasureInformation component", () => {
+describe("Base Configuration component", () => {
   const { getByTestId, findByTestId, findAllByTestId, getByText } = screen;
 
-  test("Measure Group Scoring renders to correct options length, and defaults to empty string", async () => {
+  beforeEach(() => {
     measureStore.state.mockImplementationOnce(() => measure);
     checkUserCanEdit.mockImplementationOnce(() => true);
+  });
 
+  test("Measure Group Scoring renders to correct options length, and defaults to empty string", async () => {
     render(<BaseConfiguration />);
 
     const scoringSelectInput = getByTestId(
@@ -105,9 +107,6 @@ describe("MeasureInformation component", () => {
   });
 
   test("Change of Measure Group Scoring enables Discard button and click Discard resets the form", async () => {
-    measureStore.state.mockImplementationOnce(() => measure);
-    checkUserCanEdit.mockImplementationOnce(() => true);
-
     render(<BaseConfiguration />);
 
     const scoringSelectInput = getByTestId(
@@ -138,15 +137,12 @@ describe("MeasureInformation component", () => {
     const continueButton = await getByTestId("discard-dialog-continue-button");
     expect(continueButton).toBeInTheDocument();
     fireEvent.click(continueButton);
-    // await waitFor(() => {
-    //   expect(scoringSelectInput.value).toBe("");
-    // });
+    await waitFor(() => {
+      expect(scoringSelectInput.value).toBe("");
+    });
   });
 
   test("Discard change then click Keep Working", async () => {
-    measureStore.state.mockImplementationOnce(() => measure);
-    checkUserCanEdit.mockImplementationOnce(() => true);
-
     render(<BaseConfiguration />);
 
     const scoringSelectInput = getByTestId(
@@ -184,8 +180,6 @@ describe("MeasureInformation component", () => {
   });
 
   test("Change of Measure Group Scoring enables Save button and saving measure scoring successfully displays success message", async () => {
-    measureStore.state.mockImplementationOnce(() => measure);
-    checkUserCanEdit.mockImplementationOnce(() => true);
     serviceApiMock = {
       updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
     } as unknown as MeasureServiceApi;
@@ -217,11 +211,12 @@ describe("MeasureInformation component", () => {
     await waitFor(() =>
       expect(serviceApiMock.updateMeasure).toBeCalledWith({
         ...measure,
+        scoring: "Cohort",
       })
     );
 
     expect(
-      await getByText("Measurement Base Configuration Updated Successfully")
+      await getByText("Measure Base Configuration Updated Successfully")
     ).toBeInTheDocument();
 
     const toastCloseButton = await findByTestId("close-error-button");
@@ -235,8 +230,6 @@ describe("MeasureInformation component", () => {
   });
 
   test("Save measure scoring with failure will display error message", async () => {
-    measureStore.state.mockImplementationOnce(() => measure);
-    checkUserCanEdit.mockImplementationOnce(() => true);
     serviceApiMock = {
       updateMeasure: jest.fn().mockRejectedValueOnce({
         status: 500,
@@ -271,12 +264,13 @@ describe("MeasureInformation component", () => {
     await waitFor(() =>
       expect(serviceApiMock.updateMeasure).toBeCalledWith({
         ...measure,
+        scoring: "Cohort",
       })
     );
 
     expect(
       await getByText(
-        "Error updating Measurement Base Configuration: update failed"
+        "Error updating Measure Base Configuration: update failed"
       )
     ).toBeInTheDocument();
     const toastCloseButton = await findByTestId("close-error-button");
