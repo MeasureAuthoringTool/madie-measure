@@ -52,7 +52,7 @@ jest.mock("@madie/madie-util", () => ({
   useKeyPress: jest.fn(() => false),
   measureStore: {
     updateMeasure: jest.fn(),
-    state: jest.fn(),
+    state: jest.fn().mockImplementation(() => measure),
     initialState: jest.fn(),
     subscribe: (set) => {
       return { unsubscribe: () => null };
@@ -80,11 +80,6 @@ let serviceApiMock: MeasureServiceApi;
 
 describe("Base Configuration component", () => {
   const { getByTestId, findByTestId, findAllByTestId, getByText } = screen;
-
-  beforeEach(() => {
-    measureStore.state.mockImplementationOnce(() => measure);
-    checkUserCanEdit.mockImplementationOnce(() => true);
-  });
 
   test("Measure Group Scoring renders to correct options length, and defaults to empty string", async () => {
     render(<BaseConfiguration />);
