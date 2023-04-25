@@ -165,13 +165,13 @@ const BaseConfiguration = () => {
           />
         </div>
         <Toast
-          toastKey="measure-information-toast"
+          toastKey="base-configuration-toast"
           aria-live="polite"
           toastType={toastType}
           testId={
             toastType === "danger"
-              ? "edit-measure-information-generic-error-text"
-              : "edit-measure-information-success-text"
+              ? "edit-base-configuration-generic-error-text"
+              : "edit-base-configuration-success-text"
           }
           open={toastOpen}
           message={toastMessage}
