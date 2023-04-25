@@ -173,7 +173,7 @@ describe("Base Configuration component", () => {
     });
   });
 
-  test("Change of Measure Group Scoring enables Save button and saving measure scoring successfully displays success message", async () => {
+  test("Changes to Base Configuration enables Save button and saving successfully displays success message", async () => {
     serviceApiMock = {
       updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
     } as unknown as MeasureServiceApi;
@@ -196,6 +196,25 @@ describe("Base Configuration component", () => {
     });
     expect(scoringSelectInput.value).toBe("Cohort");
 
+    const baseConfigurationTypesSelect = screen.getByTestId(
+      "base-configuration-types-dropdown"
+    );
+    expect(baseConfigurationTypesSelect).toBeInTheDocument();
+    const baseConfigurationTypesButton = within(
+      baseConfigurationTypesSelect
+    ).getByTitle("Open");
+
+    act(() => {
+      userEvent.click(baseConfigurationTypesButton);
+    });
+
+    expect(screen.getByText("Structure")).toBeInTheDocument();
+    const target = screen.getByText("Structure");
+
+    act(() => {
+      userEvent.click(target);
+    });
+
     const saveButton = getByTestId("measure-Base Configuration-save");
     expect(saveButton).toBeInTheDocument();
     await waitFor(() => expect(saveButton).toBeEnabled());
@@ -206,6 +225,7 @@ describe("Base Configuration component", () => {
       expect(serviceApiMock.updateMeasure).toBeCalledWith({
         ...measure,
         scoring: "Cohort",
+        baseConfigurationTypes: ["Structure"],
       })
     );
 
@@ -249,6 +269,25 @@ describe("Base Configuration component", () => {
     });
     expect(scoringSelectInput.value).toBe("Cohort");
 
+    const baseConfigurationTypesSelect = screen.getByTestId(
+      "base-configuration-types-dropdown"
+    );
+    expect(baseConfigurationTypesSelect).toBeInTheDocument();
+    const baseConfigurationTypesButton = within(
+      baseConfigurationTypesSelect
+    ).getByTitle("Open");
+
+    act(() => {
+      userEvent.click(baseConfigurationTypesButton);
+    });
+
+    expect(screen.getByText("Structure")).toBeInTheDocument();
+    const target = screen.getByText("Structure");
+
+    act(() => {
+      userEvent.click(target);
+    });
+
     const saveButton = getByTestId("measure-Base Configuration-save");
     expect(saveButton).toBeInTheDocument();
     await waitFor(() => expect(saveButton).toBeEnabled());
@@ -259,6 +298,7 @@ describe("Base Configuration component", () => {
       expect(serviceApiMock.updateMeasure).toBeCalledWith({
         ...measure,
         scoring: "Cohort",
+        baseConfigurationTypes: ["Structure"],
       })
     );
 
