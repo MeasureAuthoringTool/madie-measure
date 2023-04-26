@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
-import { Measure, GroupScoring } from "@madie/madie-models";
+import {
+  Measure,
+  GroupScoring,
+  BaseConfigurationTypes,
+} from "@madie/madie-models";
 import {
   measureStore,
   checkUserCanEdit,
@@ -10,14 +14,17 @@ import { MenuItem as MuiMenuItem } from "@mui/material";
 import MetaDataWrapper from "../../../editMeasure/details/MetaDataWrapper";
 import { QDMMeasureSchemaValidator } from "../../../../validations/QDMMeasureSchemaValidator";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
+import MultipleSelectDropDown from "../MultipleSelectDropDown";
 import {
   Select,
   MadieDiscardDialog,
   Toast,
 } from "@madie/madie-design-system/dist/react";
+import "./BaseConfiguration.scss";
 
 interface BaseConfigurationForm {
   scoring: string;
+  baseConfigurationTypes: BaseConfigurationTypes[];
 }
 
 const BaseConfiguration = () => {
@@ -45,6 +52,7 @@ const BaseConfiguration = () => {
 
   const INITIAL_VALUES = {
     scoring: measure?.scoring || "",
+    baseConfigurationTypes: measure?.baseConfigurationTypes || [],
   };
 
   const formik = useFormik({
@@ -82,6 +90,7 @@ const BaseConfiguration = () => {
     const newMeasure: Measure = {
       ...measure,
       scoring: values.scoring,
+      baseConfigurationTypes: values.baseConfigurationTypes,
     };
 
     measureServiceApi
@@ -120,49 +129,78 @@ const BaseConfiguration = () => {
         onSubmit={formik.handleSubmit}
         data-testid="base-configuration-form"
       >
-        <div
-          id="base-configuration"
-          data-testid="base-configuration"
-          style={{ width: "30%" }}
-        >
-          <Select
-            placeHolder={{ name: "Select Scoring", value: "" }}
-            required
-            label="Scoring"
-            id="scoring-select"
-            inputProps={{
-              "data-testid": "scoring-select-input",
-            }}
-            data-testid="scoring-select"
-            {...formik.getFieldProps("scoring")}
-            error={formik.touched.scoring && Boolean(formik.errors.scoring)}
-            disabled={!canEdit}
-            helperText={
-              formik.touched.scoring &&
-              Boolean(formik.errors.scoring) &&
-              formik.errors.scoring
-            }
-            size="small"
-            SelectDisplayProps={{
-              "aria-required": "true",
-            }}
-            onChange={(e) => {
-              const nextScoring = e.target.value;
+        <div id="base-configuration" data-testid="base-configuration">
+          <div className="left">
+            <MultipleSelectDropDown
+              formControl={formik.getFieldProps("baseConfigurationTypes")}
+              id="base-configuration-types"
+              label="Type"
+              placeHolder={{ name: "", value: "" }}
+              defaultValue={formik.values.baseConfigurationTypes}
+              required={true}
+              disabled={!canEdit}
+              error={
+                formik.touched.baseConfigurationTypes &&
+                Boolean(formik.errors.baseConfigurationTypes)
+              }
+              helperText={
+                formik.touched.baseConfigurationTypes &&
+                Boolean(formik.errors.baseConfigurationTypes) &&
+                formik.errors.baseConfigurationTypes
+              }
+              {...formik.getFieldProps("baseConfigurationTypes")}
+              onChange={(_event: any, selectedVal: string | null) => {
+                formik.setFieldValue("baseConfigurationTypes", selectedVal);
+              }}
+              onClose={() =>
+                formik.setFieldTouched("baseConfigurationTypes", true)
+              }
+              options={Object.values(BaseConfigurationTypes)}
+              multipleSelect={true}
+              limitTags={1}
+            />
+          </div>
+          <div className="center">
+            <Select
+              placeHolder={{ name: "Select Scoring", value: "" }}
+              required
+              label="Scoring"
+              id="scoring-select"
+              inputProps={{
+                "data-testid": "scoring-select-input",
+              }}
+              data-testid="scoring-select"
+              {...formik.getFieldProps("scoring")}
+              error={formik.touched.scoring && Boolean(formik.errors.scoring)}
+              disabled={!canEdit}
+              helperText={
+                formik.touched.scoring &&
+                Boolean(formik.errors.scoring) &&
+                formik.errors.scoring
+              }
+              size="small"
+              SelectDisplayProps={{
+                "aria-required": "true",
+              }}
+              onChange={(e) => {
+                const nextScoring = e.target.value;
 
-              formik.setFieldValue("scoring", nextScoring);
-            }}
-            options={Object.keys(GroupScoring).map((scoring) => {
-              return (
-                <MuiMenuItem
-                  key={scoring}
-                  value={GroupScoring[scoring]}
-                  data-testid={`scoring-option-${scoring}`}
-                >
-                  {GroupScoring[scoring]}
-                </MuiMenuItem>
-              );
-            })}
-          />
+                formik.setFieldValue("scoring", nextScoring);
+              }}
+              options={Object.keys(GroupScoring).map((scoring) => {
+                return (
+                  <MuiMenuItem
+                    key={scoring}
+                    value={GroupScoring[scoring]}
+                    data-testid={`scoring-option-${scoring}`}
+                  >
+                    {GroupScoring[scoring]}
+                  </MuiMenuItem>
+                );
+              })}
+            />
+          </div>
+          <div className="right"></div>
         </div>
         <Toast
           toastKey="base-configuration-toast"
