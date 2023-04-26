@@ -16,7 +16,6 @@ import userEvent from "@testing-library/user-event";
 import { v4 as uuid } from "uuid";
 import ServiceContext, { ServiceConfig } from "../../../api/ServiceContext";
 import { act } from "react-dom/test-utils";
-import { unmount } from "@madie/madie-components";
 
 // CSSStyleDeclaration
 const mockPush = jest.fn();
@@ -143,7 +142,6 @@ const setOffsetMock = jest.fn();
 const setInitialLoadMock = jest.fn();
 const setSearchCriteriaMock = jest.fn();
 const setErrMsgMock = jest.fn();
-const onListUpdateMock = jest.fn();
 
 describe("Measure List component", () => {
   beforeEach(() => {
@@ -1146,20 +1144,6 @@ describe("Measure List component", () => {
     act(() => {
       fireEvent.click(actionButton);
     });
-    // const link: HTMLElement = <a href="test" onClick={onClick}/>
-    // this passes the opacity check however it will fail TypeError: Cannot set properties of undefined (setting '__reactFiber$rso6nblf2w')
-    // the issue is not adding the element to the page. The issue is creating an element that is element like enough not to get broken during the screen dim caused by dialog window overlay.
-    // const link: HTMLElement = {
-    //   click: jest.fn(),
-    //   setAttribute: jest.fn(),
-    //   // @ts-ignore
-    //   style: {
-    //     opacity: ""
-    //   },
-    //   _reactFiber$km9e5r2xooa: {
-
-    //   }
-    // };
     window.URL.createObjectURL = jest
       .fn()
       .mockReturnValueOnce("http://fileurl");
