@@ -205,7 +205,7 @@ const BaseConfiguration = () => {
               row
               id="patient-basis"
               dataTestId="patient-basis"
-              label="Patient Basis:"
+              label="Patient Basis"
               required={true}
               options={[
                 { label: "Yes", value: true },
