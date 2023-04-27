@@ -13,7 +13,6 @@ import useMeasureServiceApi, {
 } from "../../../../api/useMeasureServiceApi";
 import { Measure } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
-import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 
 const mockHistoryPush = jest.fn();
 
@@ -79,7 +78,13 @@ const useMeasureServiceApiMock =
 let serviceApiMock: MeasureServiceApi;
 
 describe("Base Configuration component", () => {
-  const { getByTestId, findByTestId, findAllByTestId, getByText } = screen;
+  const {
+    getByTestId,
+    findByTestId,
+    findAllByTestId,
+    getByText,
+    getByLabelText,
+  } = screen;
 
   test("Measure Group Scoring renders to correct options length, and defaults to empty string", async () => {
     render(<BaseConfiguration />);
@@ -196,7 +201,7 @@ describe("Base Configuration component", () => {
     });
     expect(scoringSelectInput.value).toBe("Cohort");
 
-    const baseConfigurationTypesSelect = screen.getByTestId(
+    const baseConfigurationTypesSelect = getByTestId(
       "base-configuration-types-dropdown"
     );
     expect(baseConfigurationTypesSelect).toBeInTheDocument();
@@ -204,28 +209,23 @@ describe("Base Configuration component", () => {
       baseConfigurationTypesSelect
     ).getByTitle("Open");
 
-    act(() => {
-      userEvent.click(baseConfigurationTypesButton);
-    });
+    userEvent.click(baseConfigurationTypesButton);
+    expect(getByText("Structure")).toBeInTheDocument();
+    userEvent.click(getByText("Structure"));
 
-    expect(screen.getByText("Structure")).toBeInTheDocument();
-    const target = screen.getByText("Structure");
-
-    act(() => {
-      userEvent.click(target);
-    });
+    // setting patient basis to true
+    userEvent.click(getByLabelText("Yes"));
 
     const saveButton = getByTestId("measure-Base Configuration-save");
     expect(saveButton).toBeInTheDocument();
     await waitFor(() => expect(saveButton).toBeEnabled());
-    act(() => {
-      fireEvent.click(saveButton);
-    });
+    fireEvent.click(saveButton);
     await waitFor(() =>
       expect(serviceApiMock.updateMeasure).toBeCalledWith({
         ...measure,
         scoring: "Cohort",
         baseConfigurationTypes: ["Structure"],
+        patientBasis: "true",
       })
     );
 
@@ -235,9 +235,7 @@ describe("Base Configuration component", () => {
 
     const toastCloseButton = await findByTestId("close-error-button");
     expect(toastCloseButton).toBeInTheDocument();
-    act(() => {
-      fireEvent.click(toastCloseButton);
-    });
+    fireEvent.click(toastCloseButton);
     await waitFor(() => {
       expect(toastCloseButton).not.toBeInTheDocument();
     });
@@ -277,28 +275,26 @@ describe("Base Configuration component", () => {
       baseConfigurationTypesSelect
     ).getByTitle("Open");
 
-    act(() => {
-      userEvent.click(baseConfigurationTypesButton);
-    });
+    userEvent.click(baseConfigurationTypesButton);
 
     expect(screen.getByText("Structure")).toBeInTheDocument();
     const target = screen.getByText("Structure");
 
-    act(() => {
-      userEvent.click(target);
-    });
+    userEvent.click(target);
+
+    // setting patient basis to true
+    userEvent.click(getByLabelText("No"));
 
     const saveButton = getByTestId("measure-Base Configuration-save");
     expect(saveButton).toBeInTheDocument();
     await waitFor(() => expect(saveButton).toBeEnabled());
-    act(() => {
-      fireEvent.click(saveButton);
-    });
+    fireEvent.click(saveButton);
     await waitFor(() =>
       expect(serviceApiMock.updateMeasure).toBeCalledWith({
         ...measure,
         scoring: "Cohort",
         baseConfigurationTypes: ["Structure"],
+        patientBasis: "false",
       })
     );
 
@@ -309,9 +305,7 @@ describe("Base Configuration component", () => {
     ).toBeInTheDocument();
     const toastCloseButton = await findByTestId("close-error-button");
     expect(toastCloseButton).toBeInTheDocument();
-    act(() => {
-      fireEvent.click(toastCloseButton);
-    });
+    fireEvent.click(toastCloseButton);
     await waitFor(() => {
       expect(toastCloseButton).not.toBeInTheDocument();
     });
