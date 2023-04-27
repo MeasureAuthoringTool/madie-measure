@@ -6,6 +6,7 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 import {
   EndorsementOrganization,
   Measure,
+  Model,
   Organization,
 } from "@madie/madie-models";
 
@@ -272,7 +273,11 @@ describe("MeasureServiceApi Tests", () => {
     const resp = { status: 200, data: measure };
     mockedAxios.post.mockResolvedValue(resp);
 
-    await measureServiceApi.draftMeasure(measure.id, measure.measureName);
+    await measureServiceApi.draftMeasure(
+      measure.id,
+      Model.QICORE,
+      measure.measureName
+    );
     expect(mockedAxios.post).toBeCalledTimes(1);
     expect(resp.data).toEqual(measure);
   });
@@ -286,7 +291,8 @@ describe("MeasureServiceApi Tests", () => {
     mockedAxios.get.mockResolvedValue(resp);
 
     const measureExportData = await measureServiceApi.getMeasureExport(
-      "IDIDID1"
+      "IDIDID1",
+      new AbortController().signal
     );
     expect(mockedAxios.get).toBeCalledTimes(1);
     expect(measureExportData).toEqual(zippedMeasureData);
@@ -299,7 +305,10 @@ describe("MeasureServiceApi Tests", () => {
     mockedAxios.get.mockRejectedValueOnce(resp);
 
     try {
-      await measureServiceApi.getMeasureExport("1");
+      await measureServiceApi.getMeasureExport(
+        "1",
+        new AbortController().signal
+      );
       expect(mockedAxios.get).toBeCalledTimes(1);
     } catch (error) {
       expect(error.status).toBe(500);
