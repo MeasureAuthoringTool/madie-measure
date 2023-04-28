@@ -19,7 +19,7 @@ import {
   Select,
   MadieDiscardDialog,
   Toast,
-  RadioButton
+  RadioButton,
 } from "@madie/madie-design-system/dist/react";
 import "./BaseConfiguration.scss";
 
