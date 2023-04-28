@@ -21,5 +21,6 @@ export default function versionErrorHelper(errorMessage: string): string {
     humanReadbleOutput =
       "Please include valid test cases to version before versioning this measure.";
   }
+  console.log("create lint issue")
   return humanReadbleOutput;
 }
