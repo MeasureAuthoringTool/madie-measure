@@ -51,9 +51,9 @@ jest.mock("@madie/madie-util", () => ({
   useKeyPress: jest.fn(() => false),
   measureStore: {
     updateMeasure: jest.fn(),
-    state: jest.fn().mockImplementation(() => measure),
+    state: measure,
     initialState: jest.fn(),
-    subscribe: (set) => {
+    subscribe: () => {
       return { unsubscribe: () => null };
     },
   },

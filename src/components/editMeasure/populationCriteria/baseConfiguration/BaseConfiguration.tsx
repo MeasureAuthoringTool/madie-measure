@@ -26,7 +26,7 @@ import "./BaseConfiguration.scss";
 interface BaseConfigurationForm {
   scoring: string;
   baseConfigurationTypes: BaseConfigurationTypes[];
-  patientBasis: boolean;
+  patientBasis: string;
 }
 
 const BaseConfiguration = () => {
@@ -56,7 +56,7 @@ const BaseConfiguration = () => {
     initialValues: {
       scoring: measure?.scoring || "",
       baseConfigurationTypes: measure?.baseConfigurationTypes || [],
-      patientBasis: measure?.patientBasis,
+      patientBasis: measure?.patientBasis || "true",
     },
     validationSchema: QDMMeasureSchemaValidator,
     onSubmit: async (values: BaseConfigurationForm) =>
@@ -206,7 +206,7 @@ const BaseConfiguration = () => {
               id="patient-basis"
               dataTestId="patient-basis"
               label="Patient Basis"
-              required={true}
+              required
               options={[
                 { label: "Yes", value: true },
                 { label: "No", value: false },

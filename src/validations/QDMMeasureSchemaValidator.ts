@@ -13,5 +13,5 @@ const QDMBaseConfigurationTypesSchema = Yup.array().min(
 export const QDMMeasureSchemaValidator = Yup.object().shape({
   scoring: QDMMeasureScoringSchema,
   baseConfigurationTypes: QDMBaseConfigurationTypesSchema,
-  patientBasis: Yup.boolean().required("Patient Basis field is required"),
+  patientBasis: Yup.boolean().required("Patient Basis is required"),
 });
