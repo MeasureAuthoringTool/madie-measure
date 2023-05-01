@@ -74,9 +74,9 @@ export function PopulationCriteriaHome() {
     () =>
       lazy(() => {
         if (measure?.model.includes("QDM")) {
-          return import("./groups/QDMMeasureGroups");
+          return import("./groups/QDM/QDMMeasureGroups");
         } else {
-          return import("./groups/QICoreMeasureGroups");
+          return import("./groups/QICore/QICoreMeasureGroups");
         }
       }),
     [measure?.model]

@@ -7,7 +7,6 @@ import {
   Measure,
   Group,
   GroupScoring,
-  MeasureGroupTypes,
   PopulationType,
   MeasureErrorType,
 } from "@madie/madie-models";
@@ -18,41 +17,41 @@ import {
   MadieDiscardDialog,
   Select,
   DSLink,
-  AutoComplete,
   Toast,
   Tab,
   Tabs,
 } from "@madie/madie-design-system/dist/react";
 import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
-import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
+import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
 import { v4 as uuidv4 } from "uuid";
 import {
   measureGroupSchemaValidator,
   CqlDefineDataTypes,
   CqlFunctionDataTypes,
-} from "../../../../validations/MeasureGroupSchemaValidator";
+} from "../../../../../validations/MeasureGroupSchemaValidator";
 import {
   measureStore,
   routeHandlerStore,
   useDocumentTitle,
   checkUserCanEdit,
 } from "@madie/madie-util";
-import MultipleSelectDropDown from "../MultipleSelectDropDown";
-import MeasureGroupsWarningDialog from "./MeasureGroupWarningDialog";
-import { allPopulations, getPopulationsForScoring } from "../PopulationHelper";
-import GroupPopulation from "./groupPopulations/GroupPopulation";
-import MeasureGroupScoringUnit from "./scoringUnit/MeasureGroupScoringUnit";
-import MeasureGroupObservation from "./observation/MeasureGroupObservation";
+import MeasureGroupsWarningDialog from "../MeasureGroupWarningDialog";
+import {
+  allPopulations,
+  getPopulationsForScoring,
+} from "../../PopulationHelper";
+import GroupPopulation from "../groupPopulations/GroupPopulation";
+import MeasureGroupObservation from "../observation/MeasureGroupObservation";
 import * as _ from "lodash";
-import MeasureGroupAlerts from "./MeasureGroupAlerts";
-import AddRemovePopulation from "./groupPopulations/AddRemovePopulation";
-import GroupsDescription from "./GroupsDescription";
+import MeasureGroupAlerts from "../MeasureGroupAlerts";
+import AddRemovePopulation from "../groupPopulations/AddRemovePopulation";
+import GroupsDescription from "../GroupsDescription";
 
 // import Add
-import camelCaseConverter from "../../../../utils/camelCaseConverter";
+import camelCaseConverter from "../../../../../utils/camelCaseConverter";
 
-import "../../../common/madie-link.scss";
-import "./MeasureGroups.scss"; //247-249,387,400,430,438,476,903-907,1003-1008
+import "../../../../common/madie-link.scss";
+import "../MeasureGroups.scss"; //247-249,387,400,430,438,476,903-907,1003-1008
 import {
   ButtonSpacer,
   FormFieldInner,
@@ -61,7 +60,7 @@ import {
   FieldSeparator,
   MenuItemContainer,
   TextArea,
-} from "../../../../styles/editMeasure/populationCriteria/groups/index";
+} from "../../../../../styles/editMeasure/populationCriteria/groups/index";
 
 interface ColSpanPopulationsType {
   isExclusionPop?: boolean;
@@ -388,7 +387,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       subscription.unsubscribe();
     };
   }, []);
-
+  //   console.log('the measure is', measure)
   // We want to update layout with a cannot travel flag while this is active
   // setIsFormDirty is used for dirty check while navigating between different groups
   const { updateRouteHandlerState } = routeHandlerStore;
@@ -647,7 +646,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   }, [ucum, ucumUnits]);
 
   return (
-    <div tw="lg:col-span-5 pl-2 pr-2" data-testid="qi-core-groups">
+    <div tw="lg:col-span-5 pl-2 pr-2" data-testid="qdm-groups">
       <FormikProvider value={formik}>
         <MeasureGroupAlerts {...alertMessage} />
         <Toast
@@ -743,47 +742,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                     columnGap: 33,
                   }}
                 >
-                  <MultipleSelectDropDown
-                    formControl={formik.getFieldProps("measureGroupTypes")}
-                    id="measure-group-type"
-                    label="Type"
-                    placeHolder={{ name: "Select Measure Group", value: "" }}
-                    defaultValue={formik.values.measureGroupTypes}
-                    required={true}
-                    disabled={!canEdit}
-                    error={
-                      formik.touched.measureGroupTypes &&
-                      Boolean(formik.errors.measureGroupTypes)
-                    }
-                    helperText={
-                      formik.touched.measureGroupTypes &&
-                      Boolean(formik.errors.measureGroupTypes) &&
-                      formik.errors.measureGroupTypes
-                    }
-                    {...formik.getFieldProps("measureGroupTypes")}
-                    onChange={(_event: any, selectedVal: string | null) => {
-                      formik.setFieldValue("measureGroupTypes", selectedVal);
-                    }}
-                    onClose={() =>
-                      formik.setFieldTouched("measureGroupTypes", true)
-                    }
-                    options={Object.values(MeasureGroupTypes)}
-                    multipleSelect={true}
-                    limitTags={1}
-                  />
-                  <AutoComplete
-                    id="populationBasis"
-                    dataTestId="populationBasis"
-                    label="Population Basis"
-                    placeholder="Select Population Basis"
-                    required={true}
-                    disabled={!canEdit}
-                    error={formik.errors.populationBasis}
-                    helperText={formik.errors.populationBasis}
-                    options={populationBasisValues}
-                    {...formik.getFieldProps("populationBasis")}
-                    onChange={formik.setFieldValue}
-                  />
+                  {/* no longer capable of errors */}
                   <Select
                     placeHolder={{ name: "Select Scoring", value: "" }}
                     required
@@ -837,15 +796,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                       );
                     })}
                   />
-                  {/* no longer capable of errors */}
-                  <MeasureGroupScoringUnit
-                    {...formik.getFieldProps("scoringUnit")}
-                    onChange={(newValue) => {
-                      formik.setFieldValue("scoringUnit", newValue);
-                    }}
-                    options={ucumOptions}
-                    canEdit={canEdit}
-                  />
+                  <div style={{ display: "inline-flex", width: "100%" }} />
+                  <div style={{ display: "inline-flex", width: "100%" }} />
+                  <div style={{ display: "inline-flex", width: "100%" }} />
                 </div>
                 <div>
                   <MenuItemContainer>

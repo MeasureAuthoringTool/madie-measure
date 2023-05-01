@@ -2,7 +2,7 @@ import React from "react";
 import tw, { styled } from "twin.macro";
 import * as _ from "lodash";
 import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
-import { ExpressionDefinition } from "../QICoreMeasureGroups";
+import { ExpressionDefinition } from ".././QICore/QICoreMeasureGroups";
 import { GroupScoring, Population, PopulationType } from "@madie/madie-models";
 import { FormikState, getIn } from "formik";
 import { FieldInputProps } from "formik/dist/types";

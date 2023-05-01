@@ -23,16 +23,16 @@ import {
 import {
   ApiContextProvider,
   ServiceConfig,
-} from "../../../../api/ServiceContext";
+} from "../../../../../api/ServiceContext";
 import { MemoryRouter, Route } from "react-router-dom";
-import { ELM_JSON, MeasureCQL } from "../../../common/MeasureCQL";
+import { ELM_JSON, MeasureCQL } from "../../../../common/MeasureCQL";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
 import * as uuid from "uuid";
-import { getPopulationsForScoring } from "../PopulationHelper";
+import { getPopulationsForScoring } from "../../PopulationHelper";
 import * as _ from "lodash";
 import { measureStore, checkUserCanEdit } from "@madie/madie-util";
-import { InitialPopulationAssociationType } from "./groupPopulations/GroupPopulation";
+import { InitialPopulationAssociationType } from "../groupPopulations/GroupPopulation";
 // fix error about window.scrollto
 global.scrollTo = jest.fn();
 
