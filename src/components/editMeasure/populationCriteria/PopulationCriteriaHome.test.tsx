@@ -4,7 +4,7 @@ import { MemoryRouter, Route } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
 import PopulationCriteriaWrapper from "./PopulationCriteriaWrapper";
-import { jssPreset } from "@mui/styles";
+import { measureStore } from "@madie/madie-util";
 
 const serviceConfig: ServiceConfig = {
   measureService: {
@@ -17,12 +17,6 @@ const serviceConfig: ServiceConfig = {
     baseUrl: "terminology-service.com",
   },
 };
-//  Jest and suspense play poorly together. It needs to be mocked.
-// jest.mock('react', () => {
-//   const React = jest.requireActual('react');
-//   React.Suspense = ({ children }) => children;
-//   return React;
-// });
 
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
@@ -111,11 +105,10 @@ const renderPopulationCriteriaHomeComponent = async () => {
 };
 
 describe("PopulationCriteriaHome", () => {
-  const { findByRole, findByTestId } = screen;
+  const { findByTestId } = screen;
   it("should render Measure Groups component with group from measure along with side nav", async () => {
     renderPopulationCriteriaHomeComponent();
 
-    // const baseConfigTab = await findByRole("tab", { name: "Base Configuration"})
     const baseConfigTab = await findByTestId(
       "leftPanelMeasureBaseConfigurationTab"
     );
@@ -240,5 +233,39 @@ describe("PopulationCriteriaHome", () => {
       "Population Criteria 2"
     );
     expect(screen.getByTestId("groupDescriptionInput")).toHaveTextContent("");
+  });
+
+  it("Should render a QDM specific page for QDM measures", async () => {
+    renderPopulationCriteriaHomeComponent();
+    const QDMPage = await findByTestId("qdm-groups");
+    expect(QDMPage).toBeInTheDocument();
+  });
+
+  it("Should render a QI-Core specific page for QI-Core measures", async () => {
+    measureStore.state.mockImplementationOnce(() => ({
+      id: "testMeasureId",
+      measureName: "the measure for testing",
+      model: "QI-Core v4.1.1",
+      groups: [
+        {
+          id: "testGroupId",
+          scoring: "Cohort",
+          populations: [
+            {
+              id: "id-1",
+              name: "initialPopulation",
+              definition: "Initial Population",
+            },
+          ],
+          groupDescription: "test description",
+          measureGroupTypes: ["Outcome"],
+          populationBasis: "boolean",
+          scoringUnit: "",
+        },
+      ],
+    }));
+    renderPopulationCriteriaHomeComponent();
+    const QICorePage = await findByTestId("qi-core-groups");
+    expect(QICorePage).toBeInTheDocument();
   });
 });

@@ -647,8 +647,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   }, [ucum, ucumUnits]);
 
   return (
-    <div tw="lg:col-span-5 pl-2 pr-2">
-      QICOReQICOREQICORE
+    <div tw="lg:col-span-5 pl-2 pr-2" data-testid="qi-core-groups">
       <FormikProvider value={formik}>
         <MeasureGroupAlerts {...alertMessage} />
         <Toast
