@@ -1,4 +1,4 @@
-import React, { Suspense } from "React";
+import React, { Suspense } from "react";
 
 import PopulationCriteriaHome from "./PopulationCriteriaHome";
 const PopulationCriteriaWrapper = () => {
