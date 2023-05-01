@@ -37,12 +37,9 @@ import {
   useDocumentTitle,
   checkUserCanEdit,
 } from "@madie/madie-util";
-import MultipleSelectDropDown from "./../MultipleSelectDropDown";
+import MultipleSelectDropDown from "../MultipleSelectDropDown";
 import MeasureGroupsWarningDialog from "./MeasureGroupWarningDialog";
-import {
-  allPopulations,
-  getPopulationsForScoring,
-} from "./../PopulationHelper";
+import { allPopulations, getPopulationsForScoring } from "../PopulationHelper";
 import GroupPopulation from "./groupPopulations/GroupPopulation";
 import MeasureGroupScoringUnit from "./scoringUnit/MeasureGroupScoringUnit";
 import MeasureGroupObservation from "./observation/MeasureGroupObservation";
@@ -651,6 +648,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
 
   return (
     <div tw="lg:col-span-5 pl-2 pr-2">
+      QICOReQICOREQICORE
       <FormikProvider value={formik}>
         <MeasureGroupAlerts {...alertMessage} />
         <Toast

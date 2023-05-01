@@ -2,8 +2,9 @@ import * as React from "react";
 import { act, render, screen } from "@testing-library/react";
 import { MemoryRouter, Route } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import PopulationCriteriaHome from "./PopulationCriteriaHome";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
+import PopulationCriteriaWrapper from "./PopulationCriteriaWrapper";
+import { jssPreset } from "@mui/styles";
 
 const serviceConfig: ServiceConfig = {
   measureService: {
@@ -16,12 +17,18 @@ const serviceConfig: ServiceConfig = {
     baseUrl: "terminology-service.com",
   },
 };
+//  Jest and suspense play poorly together. It needs to be mocked.
+// jest.mock('react', () => {
+//   const React = jest.requireActual('react');
+//   React.Suspense = ({ children }) => children;
+//   return React;
+// });
 
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
   measureStore: {
     updateMeasure: (measure) => measure,
-    state: {
+    state: jest.fn().mockImplementation(() => ({
       id: "testMeasureId",
       measureName: "the measure for testing",
       model: "QDM v5.6",
@@ -42,8 +49,29 @@ jest.mock("@madie/madie-util", () => ({
           scoringUnit: "",
         },
       ],
-    },
-    initialState: jest.fn().mockImplementation(() => null),
+    })),
+    initialState: jest.fn().mockImplementation(() => ({
+      id: "testMeasureId",
+      measureName: "the measure for testing",
+      model: "QDM v5.6",
+      groups: [
+        {
+          id: "testGroupId",
+          scoring: "Cohort",
+          populations: [
+            {
+              id: "id-1",
+              name: "initialPopulation",
+              definition: "Initial Population",
+            },
+          ],
+          groupDescription: "test description",
+          measureGroupTypes: ["Outcome"],
+          populationBasis: "boolean",
+          scoringUnit: "",
+        },
+      ],
+    })),
     subscribe: () => {
       return { unsubscribe: () => null };
     },
@@ -68,14 +96,14 @@ jest.mock("@madie/madie-util", () => ({
   }),
 }));
 
-const renderPopulationCriteriaHomeComponent = () => {
-  render(
+const renderPopulationCriteriaHomeComponent = async () => {
+  await render(
     <MemoryRouter
       initialEntries={[{ pathname: "/measures/testMeasureId/edit/groups" }]}
     >
       <ApiContextProvider value={serviceConfig}>
         <Route path={["/measures/testMeasureId/edit/groups"]}>
-          <PopulationCriteriaHome />
+          <PopulationCriteriaWrapper />
         </Route>
       </ApiContextProvider>
     </MemoryRouter>
@@ -83,18 +111,19 @@ const renderPopulationCriteriaHomeComponent = () => {
 };
 
 describe("PopulationCriteriaHome", () => {
-  it("should render Measure Groups component with group from measure along with side nav", () => {
+  const { findByRole, findByTestId } = screen;
+  it("should render Measure Groups component with group from measure along with side nav", async () => {
     renderPopulationCriteriaHomeComponent();
-    expect(
-      screen.getByRole("tab", {
-        name: /Base Configuration/i,
-      })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", {
-        name: /Population Criteria/i,
-      })
-    ).toBeInTheDocument();
+
+    // const baseConfigTab = await findByRole("tab", { name: "Base Configuration"})
+    const baseConfigTab = await findByTestId(
+      "leftPanelMeasureBaseConfigurationTab"
+    );
+    expect(baseConfigTab).toBeInTheDocument();
+    const populationCriteriaTab = await findByTestId(
+      "leftPanelMeasurePopulationCriteriaTab"
+    );
+    expect(populationCriteriaTab).toBeInTheDocument();
 
     //by default Criteria 1 should be selected and its associated form should be displayed
     const criteria1 = screen.getByRole("tab", {
@@ -119,8 +148,8 @@ describe("PopulationCriteriaHome", () => {
     ).toBeInTheDocument();
   });
 
-  it("should render Supplemental Data component", () => {
-    render(
+  it("should render Supplemental Data component", async () => {
+    await render(
       <MemoryRouter
         initialEntries={[
           { pathname: "/measures/testMeasureId/edit/supplemental-data" },
@@ -128,7 +157,7 @@ describe("PopulationCriteriaHome", () => {
       >
         <ApiContextProvider value={serviceConfig}>
           <Route path={["/measures/testMeasureId/edit/supplemental-data"]}>
-            <PopulationCriteriaHome />
+            <PopulationCriteriaWrapper />
           </Route>
         </ApiContextProvider>
       </MemoryRouter>
@@ -152,8 +181,8 @@ describe("PopulationCriteriaHome", () => {
     expect(supplementalDataButton).toHaveAttribute("aria-selected", "true");
   });
 
-  it("should render Risk Adjustment component", () => {
-    render(
+  it("should render Risk Adjustment component", async () => {
+    await render(
       <MemoryRouter
         initialEntries={[
           { pathname: "/measures/testMeasureId/edit/risk-adjustment" },
@@ -161,7 +190,7 @@ describe("PopulationCriteriaHome", () => {
       >
         <ApiContextProvider value={serviceConfig}>
           <Route path={["/measures/testMeasureId/edit/risk-adjustment"]}>
-            <PopulationCriteriaHome />
+            <PopulationCriteriaWrapper />
           </Route>
         </ApiContextProvider>
       </MemoryRouter>
@@ -185,11 +214,11 @@ describe("PopulationCriteriaHome", () => {
     expect(riskAdjustmentButton).toHaveAttribute("aria-selected", "true");
   });
 
-  it("should render a new form for population criteria, onclick of Add Population Criteria link", () => {
+  it("should render a new form for population criteria, onclick of Add Population Criteria link", async () => {
     renderPopulationCriteriaHomeComponent();
-    const criteria1 = screen.getByRole("tab", {
-      name: /Criteria 1/i,
-    });
+    const criteria1 = await findByTestId(
+      "leftPanelMeasureInformation-MeasureGroup1"
+    );
     expect(criteria1).toBeInTheDocument();
     expect(criteria1).toHaveAttribute("aria-selected", "true");
 

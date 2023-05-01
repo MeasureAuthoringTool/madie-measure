@@ -2,7 +2,7 @@ import React from "react";
 import "styled-components/macro";
 import { kebabCase } from "lodash";
 import { MenuItem } from "@mui/material";
-import { ExpressionDefinition } from "../MeasureGroups";
+import { ExpressionDefinition } from "../QICoreMeasureGroups";
 import { Select } from "@madie/madie-design-system/dist/react";
 import {
   SubTitle,
