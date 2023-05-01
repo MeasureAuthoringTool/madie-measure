@@ -19,10 +19,7 @@ export function PopulationCriteriaHome() {
       subscription.unsubscribe();
     };
   }, []);
-  // const [model, setModel] = useState("");
-  // useEffect(() => {
-  //   setModel(measure?.model);
-  // }, [measure?.model]);
+
   const canEdit: boolean = checkUserCanEdit(measure?.createdBy, measure?.acls);
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(0);
   const [sideNavLinks, setSideNavLinks] = useState<Array<any>>();
@@ -69,7 +66,6 @@ export function PopulationCriteriaHome() {
   // lets dynamically load our measureGroups component based on weather it's QDM or QICore
   // this needs to be memoized as it loses state otherwise and refreshes on change
 
-  // console.log('what is model?????;', model)
   const MeasureGroupsComponent = useMemo(
     () =>
       lazy(() => {
@@ -83,7 +79,6 @@ export function PopulationCriteriaHome() {
   );
 
   return (
-    // <Suspense fallback={<div>loading</div>}>
     <div tw="grid lg:grid-cols-6 gap-4 mx-8 shadow-lg rounded-md border border-slate bg-white">
       <PopulationCriteriaSideNav
         canEdit={canEdit}
@@ -111,7 +106,6 @@ export function PopulationCriteriaHome() {
 
       {path.includes("/risk-adjustment") && <RiskAdjustment />}
     </div>
-    // </Suspense>
   );
 }
 

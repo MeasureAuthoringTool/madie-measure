@@ -16,7 +16,6 @@ import {
   Group,
   GroupScoring,
   Measure,
-  MeasureErrorType,
   MeasureGroupTypes,
   PopulationType,
 } from "@madie/madie-models";
