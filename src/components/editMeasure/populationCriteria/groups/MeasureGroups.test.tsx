@@ -347,13 +347,13 @@ describe("Measure Groups Page", () => {
       "Population details for this group saved successfully."
     );
     expect(mockedAxios.post.mock.calls[0][0]).toBe(
-      "example-service-url/measures/test-measure/groups/"
+      "example-service-url/measures/test-measure/groups"
     );
     expect(mockedAxios.post.mock.calls[0][1].groupDescription).toBe(
       "new description"
     );
     expect(mockedAxios.post).toHaveBeenCalledWith(
-      "example-service-url/measures/test-measure/groups/",
+      "example-service-url/measures/test-measure/groups",
       expect.anything(),
       expect.anything()
     );
@@ -568,10 +568,10 @@ describe("Measure Groups Page", () => {
       "Population details for this group saved successfully."
     );
     expect(mockedAxios.post.mock.calls[0][0]).toBe(
-      "example-service-url/measures/test-measure/groups/"
+      "example-service-url/measures/test-measure/groups"
     );
     expect(mockedAxios.post).toHaveBeenCalledWith(
-      "example-service-url/measures/test-measure/groups/",
+      "example-service-url/measures/test-measure/groups",
       expect.anything(),
       expect.anything()
     );
@@ -646,7 +646,7 @@ describe("Measure Groups Page", () => {
     );
     expect(mockedAxios.post).toHaveBeenNthCalledWith(
       1,
-      "example-service-url/measures/test-measure/groups/",
+      "example-service-url/measures/test-measure/groups",
       expect.anything(),
       expect.anything()
     );
@@ -712,7 +712,7 @@ describe("Measure Groups Page", () => {
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
     await waitFor(() => {
       expect(mockedAxios.put).toHaveBeenCalledWith(
-        "example-service-url/measures/test-measure/groups/",
+        "example-service-url/measures/test-measure/groups",
         expectedGroup,
         expect.anything()
       );
@@ -900,7 +900,7 @@ describe("Measure Groups Page", () => {
     );
 
     expect(mockedAxios.put).toHaveBeenCalledWith(
-      "example-service-url/measures/test-measure/groups/",
+      "example-service-url/measures/test-measure/groups",
       expectedGroup,
       expect.anything()
     );
@@ -1797,20 +1797,14 @@ describe("Measure Groups Page", () => {
     );
 
     expect(mockedAxios.post.mock.calls[0][0]).toBe(
-      "example-service-url/measures/test-measure/groups/"
+      "example-service-url/measures/test-measure/groups"
     );
     expect(mockedAxios.post.mock.calls[0][1].groupDescription).toBe("");
     expect(mockedAxios.post).toHaveBeenCalledWith(
-      "example-service-url/measures/test-measure/groups/",
+      "example-service-url/measures/test-measure/groups",
       expect.anything(),
       expect.anything()
     );
-    // expect(mockedAxios.post).toHaveBeenNthCalledWith(
-    //   1,
-    //   "example-service-url/measures/test-measure/groups/",
-    //   expectedGroup,
-    //   expect.anything()
-    // );
   });
 
   test("measure observation should be included in persisted output for ratio", async () => {
@@ -1908,11 +1902,11 @@ describe("Measure Groups Page", () => {
     );
 
     expect(mockedAxios.post.mock.calls[0][0]).toBe(
-      "example-service-url/measures/test-measure/groups/"
+      "example-service-url/measures/test-measure/groups"
     );
     expect(mockedAxios.post.mock.calls[0][1].groupDescription).toBe("");
     expect(mockedAxios.post).toHaveBeenCalledWith(
-      "example-service-url/measures/test-measure/groups/",
+      "example-service-url/measures/test-measure/groups",
       expect.anything(),
       expect.anything()
     );
