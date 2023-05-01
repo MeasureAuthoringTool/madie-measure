@@ -11,7 +11,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import DesktopDatePicker from "@mui/lab/DesktopDatePicker";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import AdapterDateFns from "@mui/lab/AdapterDateFns";
 import { Typography } from "@mui/material";
 import { useFormik } from "formik";
 import { MeasurementPeriodValidator } from "../../../../validations/MeasurementPeriodValidator";
