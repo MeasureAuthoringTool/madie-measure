@@ -282,7 +282,7 @@ describe("Base Configuration component", () => {
 
     userEvent.click(target);
 
-    // setting patient basis to true
+    // setting patient basis to false
     userEvent.click(getByLabelText("No"));
 
     const saveButton = getByTestId("measure-Base Configuration-save");
