@@ -322,6 +322,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       cqlDefinitionDataTypes,
       cqlFunctionDataTypes
     ),
+    // enableReinitialize: true,
     onSubmit: (group: Group) => {
       window.scrollTo(0, 0);
       if (
@@ -348,6 +349,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       }
     },
   });
+
   const { resetForm, validateForm } = formik;
 
   useEffect(() => {
@@ -847,6 +849,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                     }}
                     options={ucumOptions}
                     canEdit={canEdit}
+                    placeholder="UCUM Code or Name"
                   />
                 </div>
                 <div>

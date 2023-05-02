@@ -1,4 +1,10 @@
-import React, { useEffect, useCallback, useState } from "react";
+import React, {
+  useEffect,
+  useCallback,
+  useState,
+  useMemo,
+  useRef,
+} from "react";
 import { useRouteMatch, useLocation } from "react-router-dom";
 import tw, { styled } from "twin.macro";
 import * as ucum from "@lhncbc/ucum-lhc";
@@ -46,6 +52,7 @@ import * as _ from "lodash";
 import MeasureGroupAlerts from "../MeasureGroupAlerts";
 import AddRemovePopulation from "../groupPopulations/AddRemovePopulation";
 import GroupsDescription from "../GroupsDescription";
+import MeasureGroupScoringUnit from "../scoringUnit/MeasureGroupScoringUnit";
 
 // import Add
 import camelCaseConverter from "../../../../../utils/camelCaseConverter";
@@ -110,6 +117,14 @@ const getEmptyStrat = () => ({
   association: PopulationType.INITIAL_POPULATION,
   id: uuidv4(),
 });
+
+const getEmptyStrats = (n: number) => {
+  const strats = [];
+  for (let i = 0; i < n; i++) {
+    strats.push(getEmptyStrat());
+  }
+  return strats;
+};
 
 export const deleteStrat = {
   cqlDefinition: "delete",
@@ -253,6 +268,11 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     );
   }, [measure?.elmJson]);
 
+  // we're going to pass this to initial values to prevent infinite rerenders on enableReinit
+  const getFirstTwoStrats = useMemo(() => {
+    return getEmptyStrats(2);
+  }, [getEmptyStrat]);
+
   useEffect(() => {
     if (measure?.groups && measure?.groups[measureGroupNumber]) {
       setGroup(measure?.groups[measureGroupNumber]);
@@ -285,7 +305,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
             populations: [],
             measureObservations: null,
             groupDescription: "",
-            stratifications: [getEmptyStrat(), getEmptyStrat()],
+            stratifications: getFirstTwoStrats,
             rateAggregation: "",
             improvementNotation: "",
             measureGroupTypes: [],
@@ -298,23 +318,42 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     setActiveTab("populations");
   }, [measureGroupNumber, measure?.groups]);
 
+  const getDefaultObservationsForScoring = (scoring) => {
+    if (scoring === GroupScoring.CONTINUOUS_VARIABLE) {
+      return [
+        {
+          id: uuidv4(),
+          criteriaReference: null,
+        },
+      ];
+    } else {
+      return null;
+    }
+  };
+  // need to memoize this or it will cause an infinite loop as a reinitialized value.
+  const memoizedObservation = useMemo(() => {
+    if (!measure?.scoring) {
+      return null;
+    }
+    return getDefaultObservationsForScoring(measure.scoring);
+  }, [measure?.scoring]);
+
   const formik = useFormik({
     initialValues: {
       id: group?.id || null,
-      scoring: group?.scoring || "",
-      populations: allPopulations,
-      measureObservations: null,
+      scoring: measure?.scoring || "",
+      populations: getPopulationsForScoring(measure?.scoring) || "",
+      measureObservations: memoizedObservation,
       rateAggregation: group?.rateAggregation || "",
       improvementNotation: group?.improvementNotation || "",
       groupDescription: group?.groupDescription,
-      stratifications: group?.stratifications || [
-        getEmptyStrat(),
-        getEmptyStrat(),
-      ],
-      measureGroupTypes: group?.measureGroupTypes || [],
+      stratifications: group?.stratifications || getFirstTwoStrats,
+      measureGroupTypes: measure?.baseConfigurationTypes || [],
       populationBasis: group?.populationBasis || defaultPopulationBasis,
-      scoringUnit: group?.scoringUnit || null, // autocomplete can't init with string
-    } as Group,
+      scoringUnit: group?.scoringUnit || "", // autocomplete can't init with string
+      // } as Group, // to do: fix this to work as Group
+    } as any,
+    enableReinitialize: true,
     validationSchema: measureGroupSchemaValidator(
       cqlDefinitionDataTypes,
       cqlFunctionDataTypes
@@ -346,7 +385,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     },
   });
   const { resetForm, validateForm } = formik;
-
   useEffect(() => {
     if (measure?.groups && measure?.groups[measureGroupNumber]) {
       validateForm();
@@ -387,7 +425,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       subscription.unsubscribe();
     };
   }, []);
-  //   console.log('the measure is', measure)
   // We want to update layout with a cannot travel flag while this is active
   // setIsFormDirty is used for dirty check while navigating between different groups
   const { updateRouteHandlerState } = routeHandlerStore;
@@ -413,7 +450,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
         })
       );
   }, []);
-
   // local discard check. Layout can't have access to a bound function
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
   const discardChanges = () => {
@@ -539,19 +575,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       });
   };
 
-  const getDefaultObservationsForScoring = (scoring) => {
-    if (scoring === GroupScoring.CONTINUOUS_VARIABLE) {
-      return [
-        {
-          id: uuidv4(),
-          criteriaReference: null,
-        },
-      ];
-    } else {
-      return null;
-    }
-  };
-
   // Provides dropdown options for stratification
   // contains a default value along with all available CQL Definitions
   const stratificationOptions = [
@@ -644,7 +667,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       setUcumUnits(unitCodes);
     }
   }, [ucum, ucumUnits]);
-
   return (
     <div tw="lg:col-span-5 pl-2 pr-2" data-testid="qdm-groups">
       <FormikProvider value={formik}>
@@ -742,59 +764,14 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                     columnGap: 33,
                   }}
                 >
-                  {/* no longer capable of errors */}
-                  <Select
-                    placeHolder={{ name: "Select Scoring", value: "" }}
-                    required
-                    label="Scoring"
-                    id="scoring-select"
-                    inputProps={{
-                      "data-testid": "scoring-select-input",
+                  <MeasureGroupScoringUnit
+                    placeholder="Search"
+                    {...formik.getFieldProps("scoringUnit")}
+                    onChange={(newValue) => {
+                      formik.setFieldValue("scoringUnit", newValue);
                     }}
-                    data-testid="scoring-select"
-                    {...formik.getFieldProps("scoring")}
-                    error={
-                      formik.touched.scoring && Boolean(formik.errors.scoring)
-                    }
-                    disabled={!canEdit}
-                    helperText={
-                      formik.touched.scoring &&
-                      Boolean(formik.errors.scoring) &&
-                      formik.errors.scoring
-                    }
-                    size="small"
-                    SelectDisplayProps={{
-                      "aria-required": "true",
-                    }}
-                    onChange={(e) => {
-                      const nextScoring = e.target.value;
-                      const populations = getPopulationsForScoring(nextScoring);
-                      const observations =
-                        getDefaultObservationsForScoring(nextScoring);
-                      formik.setFieldValue("scoring", nextScoring);
-                      formik.setFieldValue(
-                        "populations",
-                        [...populations].map((p) => ({
-                          ...p,
-                          id: uuidv4(),
-                          description: "",
-                        }))
-                      );
-                      formik.setFieldValue("measureObservations", observations);
-                      formik.setFieldValue("stratifications", []);
-                      setActiveTab("populations");
-                    }}
-                    options={Object.keys(GroupScoring).map((scoring) => {
-                      return (
-                        <MuiMenuItem
-                          key={scoring}
-                          value={GroupScoring[scoring]}
-                          data-testid={`group-scoring-option-${scoring}`}
-                        >
-                          {GroupScoring[scoring]}
-                        </MuiMenuItem>
-                      );
-                    })}
+                    options={ucumOptions}
+                    canEdit={canEdit}
                   />
                   <div style={{ display: "inline-flex", width: "100%" }} />
                   <div style={{ display: "inline-flex", width: "100%" }} />
