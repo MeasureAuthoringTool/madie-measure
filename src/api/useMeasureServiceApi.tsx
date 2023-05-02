@@ -10,7 +10,6 @@ import {
 } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
 import _ from "lodash";
-// const AbortController = require("abort-controller")
 
 export class MeasureServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
@@ -92,7 +91,7 @@ export class MeasureServiceApi {
   async createGroup(group: Group, measureId: string): Promise<Group> {
     try {
       const response = await axios.post<Group>(
-        `${this.baseUrl}/measures/${measureId}/groups/`,
+        `${this.baseUrl}/measures/${measureId}/groups`,
         group,
         {
           headers: {
@@ -149,7 +148,7 @@ export class MeasureServiceApi {
   async updateGroup(group: Group, measureId: string): Promise<Group> {
     try {
       const response = await axios.put<Group>(
-        `${this.baseUrl}/measures/${measureId}/groups/`,
+        `${this.baseUrl}/measures/${measureId}/groups`,
         group,
         {
           headers: {
@@ -371,7 +370,7 @@ export class MeasureServiceApi {
 
   async createVersion(id: string, versionType: string): Promise<Measure> {
     return await axios.put(
-      `${this.baseUrl}/measures/${id}/version/?versionType=${versionType}`,
+      `${this.baseUrl}/measures/${id}/version?versionType=${versionType}`,
       {},
       {
         headers: {
@@ -395,10 +394,14 @@ export class MeasureServiceApi {
     return response.data;
   }
 
-  async draftMeasure(measureId: string, measureName: string): Promise<Measure> {
+  async draftMeasure(
+    measureId: string,
+    model: string,
+    measureName: string
+  ): Promise<Measure> {
     return await axios.post(
       `${this.baseUrl}/measures/${measureId}/draft`,
-      { measureName: measureName },
+      { measureName: measureName, model: model },
       {
         headers: {
           Authorization: `Bearer ${this.getAccessToken()}`,

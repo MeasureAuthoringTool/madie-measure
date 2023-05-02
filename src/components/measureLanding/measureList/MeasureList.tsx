@@ -17,19 +17,11 @@ import SearchIcon from "@mui/icons-material/Search";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 import { checkUserCanEdit } from "@madie/madie-util";
 import CreatVersionDialog from "./createVersionDialog/CreateVersionDialog";
-import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import DraftMeasureDialog from "./draftMeasureDialog/DraftMeasureDialog";
 import versionErrorHelper from "../../../utils/versionErrorHelper";
 import getModelFamily from "../../../utils/measureModelHelpers";
 import _ from "lodash";
 import ExportDialog from "./exportDialog/ExportDialog";
-
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  props,
-  ref
-) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -437,7 +429,11 @@ export default function MeasureList(props: {
 
   const draftMeasure = async (measureName: string) => {
     await measureServiceApi
-      .draftMeasure(targetMeasure.current?.id, measureName)
+      .draftMeasure(
+        targetMeasure.current?.id,
+        targetMeasure.current.model,
+        measureName
+      )
       .then(async () => {
         setOptionsOpen(false);
         handleDialogClose();
