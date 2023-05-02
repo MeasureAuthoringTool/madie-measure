@@ -19,12 +19,14 @@ import {
   Select,
   MadieDiscardDialog,
   Toast,
+  RadioButton,
 } from "@madie/madie-design-system/dist/react";
 import "./BaseConfiguration.scss";
 
 interface BaseConfigurationForm {
   scoring: string;
   baseConfigurationTypes: BaseConfigurationTypes[];
+  patientBasis: string;
 }
 
 const BaseConfiguration = () => {
@@ -50,15 +52,13 @@ const BaseConfiguration = () => {
     measure?.measureMetaData?.draft
   );
 
-  const INITIAL_VALUES = {
-    scoring: measure?.scoring || "",
-    baseConfigurationTypes: measure?.baseConfigurationTypes || [],
-  };
-
   const formik = useFormik({
-    initialValues: { ...INITIAL_VALUES },
+    initialValues: {
+      scoring: measure?.scoring || "",
+      baseConfigurationTypes: measure?.baseConfigurationTypes || [],
+      patientBasis: measure?.patientBasis || "true",
+    },
     validationSchema: QDMMeasureSchemaValidator,
-    enableReinitialize: true,
     onSubmit: async (values: BaseConfigurationForm) =>
       await handleSubmit(values),
   });
@@ -91,6 +91,7 @@ const BaseConfiguration = () => {
       ...measure,
       scoring: values.scoring,
       baseConfigurationTypes: values.baseConfigurationTypes,
+      patientBasis: values.patientBasis,
     };
 
     measureServiceApi
@@ -200,7 +201,31 @@ const BaseConfiguration = () => {
               })}
             />
           </div>
-          <div className="right"></div>
+          <div className="right">
+            <RadioButton
+              row
+              id="patient-basis"
+              dataTestId="patient-basis"
+              label="Patient Basis"
+              required
+              options={[
+                { label: "Yes", value: true },
+                { label: "No", value: false },
+              ]}
+              value={formik.values.patientBasis}
+              onChange={formik.handleChange("patientBasis")}
+              error={
+                formik.touched.patientBasis &&
+                Boolean(formik.errors.patientBasis)
+              }
+              disabled={!canEdit}
+              helperText={
+                formik.touched.patientBasis &&
+                Boolean(formik.errors.patientBasis) &&
+                formik.errors.patientBasis
+              }
+            />
+          </div>
         </div>
         <Toast
           toastKey="base-configuration-toast"

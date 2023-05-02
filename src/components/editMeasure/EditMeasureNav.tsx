@@ -82,7 +82,8 @@ const EditMeasureNav = () => {
     if (
       pathname.startsWith(`${url}/groups`) ||
       pathname.startsWith(`${url}/supplemental-data`) ||
-      pathname.startsWith(`${url}/risk-adjustment`)
+      pathname.startsWith(`${url}/risk-adjustment`) ||
+      pathname.startsWith(`${url}/base-configuration`)
     ) {
       setSelected(`${url}/groups`);
     } else if (pathname.startsWith(`${url}/details`)) {
