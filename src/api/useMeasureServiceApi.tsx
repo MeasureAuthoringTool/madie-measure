@@ -91,7 +91,7 @@ export class MeasureServiceApi {
   async createGroup(group: Group, measureId: string): Promise<Group> {
     try {
       const response = await axios.post<Group>(
-        `${this.baseUrl}/measures/${measureId}/groups/`,
+        `${this.baseUrl}/measures/${measureId}/groups`,
         group,
         {
           headers: {
@@ -148,7 +148,7 @@ export class MeasureServiceApi {
   async updateGroup(group: Group, measureId: string): Promise<Group> {
     try {
       const response = await axios.put<Group>(
-        `${this.baseUrl}/measures/${measureId}/groups/`,
+        `${this.baseUrl}/measures/${measureId}/groups`,
         group,
         {
           headers: {
@@ -370,7 +370,7 @@ export class MeasureServiceApi {
 
   async createVersion(id: string, versionType: string): Promise<Measure> {
     return await axios.put(
-      `${this.baseUrl}/measures/${id}/version/?versionType=${versionType}`,
+      `${this.baseUrl}/measures/${id}/version?versionType=${versionType}`,
       {},
       {
         headers: {
