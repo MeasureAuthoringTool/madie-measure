@@ -2,7 +2,7 @@ import React from "react";
 import tw, { styled } from "twin.macro";
 import * as _ from "lodash";
 import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
-import { ExpressionDefinition } from "../MeasureGroups";
+import { ExpressionDefinition } from ".././QICore/QICoreMeasureGroups";
 import { GroupScoring, Population, PopulationType } from "@madie/madie-models";
 import { FormikState, getIn } from "formik";
 import { FieldInputProps } from "formik/dist/types";
@@ -25,7 +25,6 @@ type Props = {
   insertCallback: any;
   removeCallback: any;
   replaceCallback: any;
-  setAssociationChanged: (value: boolean) => void;
 };
 
 const GroupPopulation = ({
@@ -38,7 +37,6 @@ const GroupPopulation = ({
   scoring,
   canEdit,
   replaceCallback,
-  setAssociationChanged,
 }: Props) => {
   // Helper function do determine the properties for a select item
   const populationSelectorProperties = (fieldProps: any, scoring: string) => {
