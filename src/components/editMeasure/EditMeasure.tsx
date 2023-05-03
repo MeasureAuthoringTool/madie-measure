@@ -152,10 +152,10 @@ export default function EditMeasure() {
               `${url}/supplemental-data`,
               `${url}/risk-adjustment`,
               `${url}/base-configuration`,
+              `${url}/reporting`,
             ]}
           >
             <PopulationCriteriaWrapper />
-            {/* <PopulationCriteriaHome /> */}
           </Route>
           <Route path={`${url}/review-info`}>
             <ReviewInfo />
