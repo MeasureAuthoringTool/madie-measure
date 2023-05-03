@@ -37,7 +37,8 @@ const EditMeasureNav = () => {
     pathname !== `${url}/groups` &&
     (pathname !== `${url}/supplemental-data` || !populationCriteriaTabs) &&
     (pathname !== `${url}/risk-adjustment` || !populationCriteriaTabs) &&
-    (pathname !== `${url}/base-configuration` || !populationCriteriaTabs) &&
+    pathname !== `${url}/base-configuration` &&
+    pathname !== `${url}/reporting` &&
     pathname !== `${url}/details/measure-steward` &&
     pathname !== `${url}/details/measure-description` &&
     pathname !== `${url}/details/measure-copyright` &&
@@ -46,7 +47,6 @@ const EditMeasureNav = () => {
     pathname !== `${url}/details/measure-guidance` &&
     pathname !== `${url}/details/measure-clinical-recommendation` &&
     pathname !== `${url}/review-info` &&
-    //pathname !== `${url}/details/measure-risk-adjustment` &&
     !pathname.startsWith(`${url}/test-cases`)
   ) {
     history.push("/404");

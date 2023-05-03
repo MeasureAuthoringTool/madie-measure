@@ -50,6 +50,7 @@ export default function PopulationCriteriaSideNav(
   const populationCriteriaTabsFeatureFlag =
     !!featureFlags?.populationCriteriaTabs;
   const groupsBaseUrl = "/measures/" + measureId + "/edit/groups";
+  const QdmReportingBaseUrl = "/measures/" + measureId + "/edit/reporting";
   // a bool for when discard is open triggered by an initiated state
   const [discardDialogOpen, setDiscardDialogOpen] = useState<boolean>(false);
   // action payload? like a redux operation
@@ -239,6 +240,24 @@ export default function PopulationCriteriaSideNav(
                 )}
             </>
           ))}
+        {isQDM && (
+          <Tabs
+            type="C"
+            orientation="vertical"
+            value={pathname}
+            onChange={(e, v) => {
+              history.push(v);
+            }}
+          >
+            <Tab
+              type="C"
+              label="Reporting"
+              value={QdmReportingBaseUrl}
+              dataTestId="leftPanelMeasureReportingTab"
+              id="sideNavMeasureReporting"
+            />
+          </Tabs>
+        )}
         {populationCriteriaTabsFeatureFlag && (
           <Tabs
             type="C"
