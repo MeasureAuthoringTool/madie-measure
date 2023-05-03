@@ -524,7 +524,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           });
         });
     } else {
-      group.populations[0].id = uuidv4();
+      group.populations.forEach((population) => {
+        population.id = uuidv4();
+      });
       measureServiceApi
         .createGroup(group, measure.id)
         .then(async (g: Group) => {
