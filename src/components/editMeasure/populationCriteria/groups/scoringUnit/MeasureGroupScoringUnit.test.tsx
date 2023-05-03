@@ -49,6 +49,7 @@ describe("MeasureGroupScoringUnit Component", () => {
         value={"Test Option1"}
         onChange={handleChange}
         canEdit={true}
+        placeholder="test"
       />
     );
     const scoringUnitLabel = screen.getByTestId("scoring-unit-dropdown-label");
@@ -65,6 +66,7 @@ describe("MeasureGroupScoringUnit Component", () => {
         canEdit={true}
         options={options}
         value={testValue}
+        placeholder="test"
       />
     );
     await act(async () => {
@@ -90,6 +92,7 @@ describe("MeasureGroupScoringUnit Component", () => {
         onChange={handleChange}
         canEdit={true}
         options={options}
+        placeholder="test"
       />
     );
     const autocomplete = screen.getByTestId("scoring-unit-dropdown");

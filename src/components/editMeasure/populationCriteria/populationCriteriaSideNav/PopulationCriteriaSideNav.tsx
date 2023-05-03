@@ -14,7 +14,6 @@ import {
   Tab,
 } from "@madie/madie-design-system/dist/react";
 import { useFeatureFlags } from "@madie/madie-util";
-import { forEach } from "lodash";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
 const Nav = tw.nav`flex-1 space-y-1 bg-slate`;
@@ -168,7 +167,7 @@ export default function PopulationCriteriaSideNav(
               type="C"
               label="Base Configuration"
               value={baseConfigurationUrl}
-              dataTestId="leftPanelMeasureBaseConfigurationTab"
+              data-testId="leftPanelMeasureBaseConfigurationTab"
               id="sideNavMeasureBaseConfiguration"
             />
           </Tabs>
@@ -255,6 +254,7 @@ export default function PopulationCriteriaSideNav(
           </Tabs>
         )}
       </Nav>
+
       <MadieDiscardDialog
         open={discardDialogOpen}
         onClose={onClose}

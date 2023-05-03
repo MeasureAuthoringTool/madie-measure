@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import {
   Redirect,
   Route,
@@ -19,10 +19,9 @@ import { measureStore } from "@madie/madie-util";
 import { Toast, MadieAlert } from "@madie/madie-design-system/dist/react";
 import DeleteDialog from "./DeleteDialog";
 import NotFound from "../notfound/NotFound";
-import PopulationCriteriaHome from "./populationCriteria/PopulationCriteriaHome";
 import ReviewInfo from "./reviewInfo/ReviewInfo";
 import "./EditMeasure.scss";
-
+import PopulationCriteriaWrapper from "./populationCriteria/PopulationCriteriaWrapper";
 interface inputParams {
   id: string;
 }
@@ -155,7 +154,8 @@ export default function EditMeasure() {
               `${url}/base-configuration`,
             ]}
           >
-            <PopulationCriteriaHome />
+            <PopulationCriteriaWrapper />
+            {/* <PopulationCriteriaHome /> */}
           </Route>
           <Route path={`${url}/review-info`}>
             <ReviewInfo />
@@ -190,5 +190,6 @@ export default function EditMeasure() {
       />
     </div>
   );
+
   return loading ? loadingDiv : contentDiv;
 }

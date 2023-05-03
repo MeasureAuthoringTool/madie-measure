@@ -56,8 +56,9 @@ const BaseConfiguration = () => {
     initialValues: {
       scoring: measure?.scoring || "",
       baseConfigurationTypes: measure?.baseConfigurationTypes || [],
-      patientBasis: measure?.patientBasis || "true",
+      patientBasis: measure?.patientBasis ? "true" : "false",
     },
+    enableReinitialize: true,
     validationSchema: QDMMeasureSchemaValidator,
     onSubmit: async (values: BaseConfigurationForm) =>
       await handleSubmit(values),

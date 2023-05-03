@@ -9,6 +9,7 @@ export interface ScoringUnitProps {
   value: any;
   onChange: (newValue: any) => void;
   canEdit: boolean;
+  placeholder: string;
 }
 
 const MeasureGroupScoringUnit = ({
@@ -16,6 +17,7 @@ const MeasureGroupScoringUnit = ({
   value,
   onChange,
   canEdit,
+  placeholder,
 }: ScoringUnitProps) => {
   const autoCompleteStyles = {
     borderRadius: "3px",
@@ -132,7 +134,7 @@ const MeasureGroupScoringUnit = ({
                   },
                 },
               }}
-              placeholder="UCUM Code or Name"
+              placeholder={placeholder}
               value={value ? `${value.code} ${value.name}` : ""}
             />
           );
