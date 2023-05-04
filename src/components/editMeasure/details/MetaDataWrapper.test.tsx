@@ -24,10 +24,12 @@ describe("MetaDataWrapper", () => {
     expect(screen.getByText("MetaDataTitle")).toBeInTheDocument();
     expect(screen.getByText("Some content")).toBeInTheDocument();
 
-    const cancelButton = screen.getByTestId("cancel-button");
+    const cancelButton = screen.getByRole("button", {
+      name: "Discard Changes",
+    });
     expect(cancelButton).toBeEnabled();
 
-    const submitButton = screen.getByTestId("measure-MetaDataTitle-save");
+    const submitButton = screen.getByRole("button", { name: "Save" });
     expect(submitButton).toBeEnabled();
 
     userEvent.click(submitButton);
@@ -45,8 +47,12 @@ describe("MetaDataWrapper", () => {
     };
     render(<MetaDataWrapper {...newMetaDataProps} />);
 
-    expect(screen.getByText("Discard Changes")).toBeDisabled();
-    expect(screen.getByText("Save")).toBeDisabled();
+    expect(
+      screen.getByRole("button", {
+        name: "Discard Changes",
+      })
+    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
   });
 
   it("Should disable save button if the form is dirty but not valid", async () => {
@@ -58,8 +64,12 @@ describe("MetaDataWrapper", () => {
     };
     render(<MetaDataWrapper {...newMetaDataProps} />);
 
-    expect(screen.getByText("Save")).toBeDisabled();
-    expect(screen.getByText("Discard Changes")).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", {
+        name: "Discard Changes",
+      })
+    ).toBeEnabled();
   });
 
   it("Should disable save and discard button for a user who cannot edit", async () => {
@@ -71,7 +81,11 @@ describe("MetaDataWrapper", () => {
     };
     render(<MetaDataWrapper {...newMetaDataProps} />);
 
-    expect(screen.getByText("Discard Changes")).toBeDisabled();
-    expect(screen.getByText("Save")).toBeDisabled();
+    expect(
+      screen.getByRole("button", {
+        name: "Discard Changes",
+      })
+    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
   });
 });
