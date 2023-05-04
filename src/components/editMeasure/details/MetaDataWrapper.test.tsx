@@ -1,66 +1,77 @@
 import * as React from "react";
-import { queryByTestId, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, test } from "@jest/globals";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import MetaDataWrapper from "./MetaDataWrapper";
+
+const metaDataProps = {
+  header: "MetaDataTitle",
+  canEdit: true,
+  children: <div>Some content</div>,
+  dirty: true,
+  isValid: true,
+  handleSubmit: jest.fn(),
+  onCancel: jest.fn(),
+};
 
 describe("MetaDataWrapper", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  const { getByTestId, getByText, queryByText } = screen;
+  it("Should enable save and discard changes button based on selected props", async () => {
+    render(<MetaDataWrapper {...metaDataProps} />);
 
-  const RenderMetaDataWrapper = (props) => {
-    return render(<MetaDataWrapper {...props} />);
-  };
+    expect(screen.getByText("MetaDataTitle")).toBeInTheDocument();
+    expect(screen.getByText("Some content")).toBeInTheDocument();
 
-  test("MetaDataWrapper renders with props, props trigger as expected", async () => {
-    const MetaDataProps = {
-      header: "MetaDataTitle",
-      canEdit: true,
-      children: <div>Some content</div>,
-      dirty: true,
-      isValid: true,
-      handleSubmit: jest.fn(),
-      onCancel: jest.fn(),
-    };
-    await waitFor(() => RenderMetaDataWrapper(MetaDataProps));
+    const cancelButton = screen.getByTestId("cancel-button");
+    expect(cancelButton).toBeEnabled();
 
-    const header = getByText("MetaDataTitle");
-    expect(header).toBeInTheDocument();
-
-    const cancelButton = getByTestId("cancel-button");
-    expect(cancelButton).toBeInTheDocument();
-
-    const submitButton = getByTestId("measure-MetaDataTitle-save");
-    expect(submitButton).toBeInTheDocument();
+    const submitButton = screen.getByTestId("measure-MetaDataTitle-save");
+    expect(submitButton).toBeEnabled();
 
     userEvent.click(submitButton);
     userEvent.click(cancelButton);
-    expect(MetaDataProps.handleSubmit).toHaveBeenCalledTimes(1);
-    expect(MetaDataProps.onCancel).toHaveBeenCalledTimes(1);
+    expect(metaDataProps.handleSubmit).toHaveBeenCalledTimes(1);
+    expect(metaDataProps.onCancel).toHaveBeenCalledTimes(1);
   });
 
-  test("MetaDataWrapper renders with props, props trigger as expected", async () => {
-    const MetaDataProps = {
-      header: "MetaDataTitle",
-      canEdit: false,
-      children: <div>Some content</div>,
+  it("Should disable save and discard buttons if the form is not dirty", async () => {
+    const newMetaDataProps = {
+      ...metaDataProps,
+      canEdit: true,
       dirty: false,
       isValid: false,
-      handleSubmit: jest.fn(),
-      onCancel: jest.fn(),
     };
-    await waitFor(() => RenderMetaDataWrapper(MetaDataProps));
+    render(<MetaDataWrapper {...newMetaDataProps} />);
 
-    const header = getByText("MetaDataTitle");
-    expect(header).toBeInTheDocument();
+    expect(screen.getByText("Discard Changes")).toBeDisabled();
+    expect(screen.getByText("Save")).toBeDisabled();
+  });
 
-    const cancelButton = queryByText("Discard Changes");
-    expect(cancelButton).toBeNull();
+  it("Should disable save button if the form is dirty but not valid", async () => {
+    const newMetaDataProps = {
+      ...metaDataProps,
+      canEdit: true,
+      dirty: true,
+      isValid: false,
+    };
+    render(<MetaDataWrapper {...newMetaDataProps} />);
 
-    const submitButton = queryByText("Save");
-    expect(submitButton).toBeNull();
+    expect(screen.getByText("Save")).toBeDisabled();
+    expect(screen.getByText("Discard Changes")).toBeEnabled();
+  });
+
+  it("Should disable save and discard button for a user who cannot edit", async () => {
+    const newMetaDataProps = {
+      ...metaDataProps,
+      canEdit: false,
+      dirty: false,
+      isValid: false,
+    };
+    render(<MetaDataWrapper {...newMetaDataProps} />);
+
+    expect(screen.getByText("Discard Changes")).toBeDisabled();
+    expect(screen.getByText("Save")).toBeDisabled();
   });
 });
