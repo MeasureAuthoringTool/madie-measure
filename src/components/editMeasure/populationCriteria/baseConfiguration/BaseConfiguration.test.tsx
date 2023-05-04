@@ -179,7 +179,6 @@ describe("Base Configuration component", () => {
   });
 
   test("Changes to Base Configuration enables Save button and saving successfully displays success message", async () => {
-    jest.setTimeout(50000);
     serviceApiMock = {
       updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
     } as unknown as MeasureServiceApi;
