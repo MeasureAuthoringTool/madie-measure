@@ -8,6 +8,7 @@ import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 import { Measure, Model } from "@madie/madie-models";
 import RiskAdjustment from "./riskAdjustment/RiskAdjustment";
 import BaseConfiguration from "./baseConfiguration/BaseConfiguration";
+import QDMReporting from "./QDMReporting/QDMReporting";
 
 export function PopulationCriteriaHome() {
   const { path } = useRouteMatch();
@@ -25,8 +26,6 @@ export function PopulationCriteriaHome() {
   const [sideNavLinks, setSideNavLinks] = useState<Array<any>>();
   const [isFormDirty, setIsFormDirty] = useState<boolean>(false);
 
-  const baseConfigurationUrl =
-    "/measures/" + measure?.id + "/edit/base-configuration";
   const groupsBaseUrl = "/measures/" + measure?.id + "/edit/groups";
 
   // this works for a specific QDM version
@@ -92,6 +91,7 @@ export function PopulationCriteriaHome() {
       />
       {/* path can be independent of nav */}
       {path.includes("/base-configuration") && <BaseConfiguration />}
+
       {/* we will load A measureGroups component*/}
       {path.includes("/groups") && (
         <MeasureGroupsComponent
@@ -102,6 +102,8 @@ export function PopulationCriteriaHome() {
       )}
       {/* what's a better way to say if QDM or QICore? 
           To do: Find a more elegant solution for future when we have more than two models to avoid if else if else. */}
+      {path.includes("reporting") && <QDMReporting />}
+
       {path.includes("/supplemental-data") && <SupplementalElements />}
 
       {path.includes("/risk-adjustment") && <RiskAdjustment />}
