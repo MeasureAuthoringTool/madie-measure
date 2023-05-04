@@ -55,7 +55,7 @@ import MeasureGroupScoringUnit from "../scoringUnit/MeasureGroupScoringUnit";
 import camelCaseConverter from "../../../../../utils/camelCaseConverter";
 
 import "../../../../common/madie-link.scss";
-import "../MeasureGroups.scss"; //247-249,387,400,430,438,476,903-907,1003-1008
+import "../MeasureGroups.scss";
 import {
   ButtonSpacer,
   FormFieldInner,
@@ -602,10 +602,26 @@ const MeasureGroups = (props: MeasureGroupProps) => {
         .expressionDefinitions;
       setExpressionDefinitions(definitions);
     }
-    if (measure && (measure.cqlErrors || !measure?.cql)) {
+    if (measure && (measure.cqlErrors || !measure?.cql) && !measure?.scoring) {
+      // bad cql and bad base config step
+      setAlertMessage(() => ({
+        type: "error",
+        message:
+          "Please complete the CQL Editor process and Base Configuration tab before continuing",
+        canClose: false,
+      }));
+    } else if (measure && (measure.cqlErrors || !measure?.cql)) {
+      // bad cql only
       setAlertMessage(() => ({
         type: "error",
         message: "Please complete the CQL Editor process before continuing",
+        canClose: false,
+      }));
+    } else if (!measure?.scoring) {
+      // bad scoring only (added furing base configuration step)
+      setAlertMessage(() => ({
+        type: "error",
+        message: "Please complete the Base Configuration tab before continuing",
         canClose: false,
       }));
     } else if (
