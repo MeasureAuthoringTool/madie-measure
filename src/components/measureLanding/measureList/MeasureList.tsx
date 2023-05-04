@@ -153,6 +153,7 @@ export default function MeasureList(props: {
   };
 
   const doSearch = () => {
+    props.setErrMsg();
     measureServiceApi
       .searchMeasuresByMeasureNameOrEcqmTitle(
         props.activeTab === 0,
