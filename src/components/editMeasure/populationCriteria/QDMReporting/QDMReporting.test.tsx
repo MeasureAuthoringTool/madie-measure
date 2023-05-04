@@ -109,7 +109,7 @@ describe("QDMReporting component", () => {
   });
 
   test("Discard change then click Keep Working", async () => {
-    render(<BaseConfiguration />);
+    render(<QDMReporting />);
 
     const rateAggregation = getByTestId(
       "rateAggregationText"
