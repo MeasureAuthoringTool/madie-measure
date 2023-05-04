@@ -67,6 +67,10 @@ export default function PopulationCriteriaSideNav(
     }
   };
 
+  const handleMeasureGroupNavigation = (val: number) => {
+    setMeasureGroupNumber(val);
+  };
+
   const initiateNavigateGroupClick = (e) => {
     e.preventDefault();
     const groupNumber = Number(e.target.id);
@@ -100,13 +104,6 @@ export default function PopulationCriteriaSideNav(
     onClose();
   };
 
-  // we need to preserve the
-  const handleMeasureGroupNavigation = (val: number) => {
-    setMeasureGroupNumber(val);
-    history.push(groupsBaseUrl);
-    onClose();
-  };
-
   // we need to pass a bound function to discard.
   const onContinue = () => {
     if (initiatedPayload.action === "add") {
@@ -114,6 +111,7 @@ export default function PopulationCriteriaSideNav(
     } else if (initiatedPayload.action === "navigate") {
       handleMeasureGroupNavigation(initiatedPayload.value);
     }
+    onClose();
   };
 
   const onClose = () => {
