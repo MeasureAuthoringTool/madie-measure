@@ -80,7 +80,7 @@ describe("QDMReporting component", () => {
   });
 
   test("Change enables Discard button and click Discard resets the form", async () => {
-    render(<BaseConfiguration />);
+    render(<QDMReporting />);
 
     const rateAggregation = getByTestId(
       "rateAggregationText"
@@ -145,7 +145,7 @@ describe("QDMReporting component", () => {
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
 
-    render(<BaseConfiguration />);
+    render(<QDMReporting />);
 
     const rateAggregation = getByTestId(
       "rateAggregationText"
@@ -188,7 +188,7 @@ describe("QDMReporting component", () => {
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
 
-    render(<BaseConfiguration />);
+    render(<QDMReporting />);
 
     const rateAggregation = getByTestId(
       "rateAggregationText"
