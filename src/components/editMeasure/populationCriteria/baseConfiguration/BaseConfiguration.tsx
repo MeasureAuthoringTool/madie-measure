@@ -56,7 +56,7 @@ const BaseConfiguration = () => {
     initialValues: {
       scoring: measure?.scoring || "",
       baseConfigurationTypes: measure?.baseConfigurationTypes || [],
-      patientBasis: measure?.patientBasis ? "true" : "false",
+      patientBasis: measure?.patientBasis || "true",
     },
     enableReinitialize: true,
     validationSchema: QDMMeasureSchemaValidator,

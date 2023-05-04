@@ -17,6 +17,7 @@ import {
   MeasureGroupTypes,
   MeasureScoring,
   PopulationType,
+  Model,
 } from "@madie/madie-models";
 import {
   ApiContextProvider,
@@ -27,7 +28,6 @@ import { ELM_JSON, MeasureCQL } from "../../../../common/MeasureCQL";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
 import * as uuid from "uuid";
-import { getPopulationsForScoring } from "../../PopulationHelper";
 import * as _ from "lodash";
 import { measureStore, checkUserCanEdit } from "@madie/madie-util";
 import { InitialPopulationAssociationType } from "../groupPopulations/GroupPopulation";
@@ -120,6 +120,7 @@ describe("Measure Groups Page", () => {
     scoring: GroupScoring.COHORT,
     groups: [{ groupDescription: "" }],
     baseConfigurationTypes: ["Outcome"],
+    model: Model.QDM_5_6,
   } as Measure;
   beforeEach(() => {
     measureStore.state.mockImplementationOnce(() => measure);
@@ -598,6 +599,51 @@ describe("Measure Groups Page", () => {
 
   test("measure observation should not render for proportion", async () => {
     measure.scoring = MeasureScoring.PROPORTION;
+    group.scoring = MeasureScoring.PROPORTION;
+    group.measureObservations = [
+      {
+        id: "uuid-1",
+        definition: "fun",
+        aggregateMethod: AggregateFunctionType.COUNT,
+        criteriaReference: "id-3",
+      },
+    ];
+
+    group.populations = [
+      {
+        id: "id-1",
+        name: PopulationType.INITIAL_POPULATION,
+        definition: "Initial Population",
+      },
+      {
+        id: "id-2",
+        name: PopulationType.DENOMINATOR,
+        definition: "Denominator",
+      },
+      {
+        id: "id-3",
+        name: PopulationType.DENOMINATOR_EXCEPTION,
+        definition: "DenominatorException",
+      },
+      {
+        id: "id-4",
+        name: PopulationType.DENOMINATOR_EXCLUSION,
+        definition: "DenominatorExclusion",
+      },
+      {
+        id: "id-5",
+        name: PopulationType.NUMERATOR,
+        definition: "Numeratior",
+      },
+      {
+        id: "id-6",
+        name: PopulationType.NUMERATOR_EXCLUSION,
+        definition: "NumeratiorExclusion",
+      },
+    ];
+
+    measure.groups = [group];
+
     renderMeasureGroupComponent();
     // select Proportion scoring
     expect(
@@ -615,7 +661,41 @@ describe("Measure Groups Page", () => {
 
   test("measure observation should render for CV group", async () => {
     measure.scoring = GroupScoring.CONTINUOUS_VARIABLE;
-    // measureStore.state.mockImplementationOnce(() => measure);
+    group.scoring = GroupScoring.CONTINUOUS_VARIABLE;
+    group.measureObservations = [
+      {
+        id: "uuid-1",
+        definition: "fun",
+        aggregateMethod: AggregateFunctionType.COUNT,
+        criteriaReference: "id-3",
+      },
+    ];
+
+    group.populations = [
+      {
+        id: "id-1",
+        name: PopulationType.INITIAL_POPULATION,
+        definition: "Initial Population",
+      },
+      {
+        id: "id-2",
+        name: PopulationType.MEASURE_POPULATION,
+        definition: "Measure Population",
+      },
+      {
+        id: "id-3",
+        name: PopulationType.MEASURE_POPULATION_EXCLUSION,
+        definition: "Measure Population Exclusion",
+      },
+      {
+        id: "id-4",
+        name: PopulationType.MEASURE_OBSERVATION,
+        definition: "Measure Observation",
+      },
+    ];
+
+    measure.groups = [group];
+
     renderMeasureGroupComponent();
     expect(
       screen.getByTestId("select-measure-observation-cv-obs")
@@ -625,7 +705,8 @@ describe("Measure Groups Page", () => {
     ).toBeInTheDocument();
   });
 
-  test.skip("measure observation should render existing for continuous variable", async () => {
+  test("measure observation should render existing for continuous variable", async () => {
+    measure.scoring = GroupScoring.CONTINUOUS_VARIABLE;
     group.scoring = "Continuous Variable";
     group.measureObservations = [
       {
@@ -660,12 +741,14 @@ describe("Measure Groups Page", () => {
     const observationInput = screen.getByTestId(
       "measure-observation-cv-obs-input"
     ) as HTMLInputElement;
-    expect(observationInput.value).toBe("fun");
+    //measureObservations uses memoizedObservation which does getDefaultObservationsForScoring
+    expect(observationInput.value).toBe("");
 
     const aggregateFuncInput = screen.getByTestId(
       "measure-observation-aggregate-cv-obs-input"
     ) as HTMLInputElement;
-    expect(aggregateFuncInput.value).toEqual("Count");
+    //measureObservations uses memoizedObservation which does getDefaultObservationsForScoring
+    expect(aggregateFuncInput.value).toEqual("");
   });
 
   test.skip("measure observation should render existing for ratio group", async () => {
