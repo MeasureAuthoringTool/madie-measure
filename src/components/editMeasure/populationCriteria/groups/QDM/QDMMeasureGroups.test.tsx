@@ -903,4 +903,36 @@ describe("Measure Groups Page", () => {
     const saveButton = queryByTestId("group-form-submit-btn");
     expect(saveButton).not.toBeInTheDocument();
   });
+
+  test("Should trigger error for bad scoring configuration", async () => {
+    measure.scoring = null;
+    renderMeasureGroupComponent();
+    const alert = await screen.findByTestId("error-alerts");
+    expect(alert).toBeInTheDocument();
+    expect(alert).toHaveTextContent(
+      "Please complete the Base Configuration tab before continuing"
+    );
+  });
+
+  test("Shuold trigger error for bad CQL", async () => {
+    measure.cql = null;
+    measure.scoring = GroupScoring.COHORT;
+    renderMeasureGroupComponent();
+    const alert = await screen.findByTestId("error-alerts");
+    expect(alert).toBeInTheDocument();
+    expect(alert).toHaveTextContent(
+      "Please complete the CQL Editor process before continuing"
+    );
+  });
+
+  test("Should trigger error for bad CQL and bad scoring configuration", async () => {
+    measure.cql = null;
+    measure.scoring = null;
+    renderMeasureGroupComponent();
+    const alert = await screen.findByTestId("error-alerts");
+    expect(alert).toBeInTheDocument();
+    expect(alert).toHaveTextContent(
+      "Please complete the CQL Editor process and Base Configuration tab before continuing"
+    );
+  });
 });
