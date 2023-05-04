@@ -42,10 +42,7 @@ import {
   checkUserCanEdit,
 } from "@madie/madie-util";
 import MeasureGroupsWarningDialog from "../MeasureGroupWarningDialog";
-import {
-  allPopulations,
-  getPopulationsForScoring,
-} from "../../PopulationHelper";
+import { getPopulationsForScoring } from "../../PopulationHelper";
 import GroupPopulation from "../groupPopulations/GroupPopulation";
 import MeasureGroupObservation from "../observation/MeasureGroupObservation";
 import * as _ from "lodash";
@@ -58,7 +55,7 @@ import MeasureGroupScoringUnit from "../scoringUnit/MeasureGroupScoringUnit";
 import camelCaseConverter from "../../../../../utils/camelCaseConverter";
 
 import "../../../../common/madie-link.scss";
-import "../MeasureGroups.scss"; //247-249,387,400,430,438,476,903-907,1003-1008
+import "../MeasureGroups.scss";
 import {
   ButtonSpacer,
   FormFieldInner,
@@ -342,13 +339,14 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     initialValues: {
       id: group?.id || null,
       scoring: measure?.scoring || "",
-      populations: getPopulationsForScoring(measure?.scoring) || "",
+      populations: measure?.groups?.[measureGroupNumber].populations
+        ? measure?.groups?.[measureGroupNumber].populations
+        : getPopulationsForScoring(measure?.scoring),
       measureObservations: memoizedObservation,
       rateAggregation: group?.rateAggregation || "",
       improvementNotation: group?.improvementNotation || "",
       groupDescription: group?.groupDescription,
       stratifications: group?.stratifications || getFirstTwoStrats,
-      measureGroupTypes: measure?.baseConfigurationTypes || [],
       populationBasis: group?.populationBasis || defaultPopulationBasis,
       scoringUnit: group?.scoringUnit || "", // autocomplete can't init with string
       // } as Group, // to do: fix this to work as Group
@@ -526,6 +524,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           });
         });
     } else {
+      group.populations.forEach((population) => {
+        population.id = uuidv4();
+      });
       measureServiceApi
         .createGroup(group, measure.id)
         .then(async (g: Group) => {
@@ -601,10 +602,26 @@ const MeasureGroups = (props: MeasureGroupProps) => {
         .expressionDefinitions;
       setExpressionDefinitions(definitions);
     }
-    if (measure && (measure.cqlErrors || !measure?.cql)) {
+    if (measure && (measure.cqlErrors || !measure?.cql) && !measure?.scoring) {
+      // bad cql and bad base config step
+      setAlertMessage(() => ({
+        type: "error",
+        message:
+          "Please complete the CQL Editor process and Base Configuration tab before continuing",
+        canClose: false,
+      }));
+    } else if (measure && (measure.cqlErrors || !measure?.cql)) {
+      // bad cql only
       setAlertMessage(() => ({
         type: "error",
         message: "Please complete the CQL Editor process before continuing",
+        canClose: false,
+      }));
+    } else if (!measure?.scoring) {
+      // bad scoring only (added furing base configuration step)
+      setAlertMessage(() => ({
+        type: "error",
+        message: "Please complete the Base Configuration tab before continuing",
         canClose: false,
       }));
     } else if (
