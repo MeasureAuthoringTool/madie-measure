@@ -25,28 +25,26 @@ const MetaDataWrapper = ({
         </div>
         {children}
       </div>
-      {canEdit && (
-        <div className="form-actions">
-          <Button
-            variant="outline"
-            disabled={!dirty}
-            data-testid="cancel-button"
-            onClick={onCancel}
-            style={{ marginTop: 20, float: "right", marginRight: 32 }}
-          >
-            Discard Changes
-          </Button>
-          <Button
-            disabled={!(isValid && dirty)}
-            type="submit"
-            variant="cyan"
-            data-testid={`measure-${header}-save`}
-            style={{ marginTop: 20, float: "right" }}
-          >
-            Save
-          </Button>
-        </div>
-      )}
+      <div className="form-actions">
+        <Button
+          variant="outline"
+          disabled={!dirty || !canEdit}
+          data-testid="cancel-button"
+          onClick={onCancel}
+          style={{ marginTop: 20, float: "right", marginRight: 32 }}
+        >
+          Discard Changes
+        </Button>
+        <Button
+          disabled={!(isValid && dirty) || !canEdit}
+          type="submit"
+          variant="cyan"
+          data-testid={`measure-${header}-save`}
+          style={{ marginTop: 20, float: "right" }}
+        >
+          Save
+        </Button>
+      </div>
     </form>
   );
 };
