@@ -42,10 +42,7 @@ import {
   checkUserCanEdit,
 } from "@madie/madie-util";
 import MeasureGroupsWarningDialog from "../MeasureGroupWarningDialog";
-import {
-  allPopulations,
-  getPopulationsForScoring,
-} from "../../PopulationHelper";
+import { getPopulationsForScoring } from "../../PopulationHelper";
 import GroupPopulation from "../groupPopulations/GroupPopulation";
 import MeasureGroupObservation from "../observation/MeasureGroupObservation";
 import * as _ from "lodash";
@@ -342,13 +339,14 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     initialValues: {
       id: group?.id || null,
       scoring: measure?.scoring || "",
-      populations: getPopulationsForScoring(measure?.scoring) || "",
+      populations: measure?.groups?.[measureGroupNumber].populations
+        ? measure?.groups?.[measureGroupNumber].populations
+        : getPopulationsForScoring(measure?.scoring),
       measureObservations: memoizedObservation,
       rateAggregation: group?.rateAggregation || "",
       improvementNotation: group?.improvementNotation || "",
       groupDescription: group?.groupDescription,
       stratifications: group?.stratifications || getFirstTwoStrats,
-      measureGroupTypes: measure?.baseConfigurationTypes || [],
       populationBasis: group?.populationBasis || defaultPopulationBasis,
       scoringUnit: group?.scoringUnit || "", // autocomplete can't init with string
       // } as Group, // to do: fix this to work as Group
@@ -526,6 +524,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           });
         });
     } else {
+      group.populations.forEach((population) => {
+        population.id = uuidv4();
+      });
       measureServiceApi
         .createGroup(group, measure.id)
         .then(async (g: Group) => {
