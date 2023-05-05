@@ -7,8 +7,6 @@ import useMeasureServiceApi, {
 import { Measure } from "@madie/madie-models";
 import QDMReporting from "./QDMReporting";
 
-const mockHistoryPush = jest.fn();
-
 jest.mock("../../../../api/useMeasureServiceApi");
 const measure = {
   id: "test measure",
@@ -21,15 +19,6 @@ const measure = {
   measureSetId: "testMeasureId",
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }], //#nosec
 } as unknown as Measure;
-
-jest.mock("@madie/madie-editor", () => ({
-  synchingEditorCqlContent: jest.fn().mockResolvedValue("modified cql"),
-  parseContent: jest.fn(() => []),
-  validateContent: jest.fn().mockResolvedValue({
-    errors: [],
-    translation: { library: "NewLibName" },
-  }),
-}));
 
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: jest.fn(() => ({
@@ -65,20 +54,24 @@ const useMeasureServiceApiMock =
 let serviceApiMock: MeasureServiceApi;
 
 describe("QDMReporting component", () => {
-  const { getByTestId, findByTestId, getByText, getByRole } = screen;
+  const { getByText, getByRole } = screen;
 
   test("QDMReporting renders to correctly with defaults", async () => {
     render(<QDMReporting />);
 
-    expect(getByTestId("rateAggregationText")).toHaveValue("");
+    const rateAggregation = getByRole("textbox", {
+      name: "Rate Aggregation",
+    }) as HTMLInputElement;
+
+    expect(rateAggregation).toHaveValue("");
   });
 
   test("Change enables Discard button and click Discard resets the form", async () => {
     render(<QDMReporting />);
 
-    const rateAggregation = getByTestId(
-      "rateAggregationText"
-    ) as HTMLInputElement;
+    const rateAggregation = getByRole("textbox", {
+      name: "Rate Aggregation",
+    }) as HTMLInputElement;
 
     fireEvent.change(rateAggregation, {
       target: { value: "Test" },
@@ -92,44 +85,53 @@ describe("QDMReporting component", () => {
     await waitFor(() => expect(cancelButton).toBeEnabled());
     fireEvent.click(cancelButton);
 
-    const discardDialog = await getByTestId("discard-dialog");
+    const discardDialog = await getByRole("dialog", {
+      name: "Discard Changes?",
+    });
     expect(discardDialog).toBeInTheDocument();
-    const continueButton = await getByTestId("discard-dialog-continue-button");
+
+    const continueButton = await getByRole("button", {
+      name: "No, Keep Working",
+    });
     expect(continueButton).toBeInTheDocument();
     fireEvent.click(continueButton);
     await waitFor(() => {
-      expect(rateAggregation.value).toBe("");
+      expect(rateAggregation.value).toBe("Test");
     });
   });
 
   test("Discard change then click Keep Working", async () => {
     render(<QDMReporting />);
 
-    const rateAggregation = getByTestId(
-      "rateAggregationText"
-    ) as HTMLInputElement;
+    const rateAggregation = getByRole("textbox", {
+      name: "Rate Aggregation",
+    }) as HTMLInputElement;
 
     fireEvent.change(rateAggregation, {
       target: { value: "Test" },
     });
     expect(rateAggregation.value).toBe("Test");
 
-    const cancelButton = getByTestId("cancel-button");
+    const cancelButton = getByRole("button", {
+      name: "Discard Changes",
+    });
     expect(cancelButton).toBeInTheDocument();
     await waitFor(() => expect(cancelButton).toBeEnabled());
     act(() => {
       fireEvent.click(cancelButton);
     });
 
-    const discardDialog = await getByTestId("discard-dialog");
+    const discardDialog = await getByRole("dialog", {
+      name: "Discard Changes?",
+    });
     expect(discardDialog).toBeInTheDocument();
-    const discardCancelButton = await getByTestId(
-      "discard-dialog-cancel-button"
-    );
-    expect(discardCancelButton).toBeInTheDocument();
+
+    const discardCancelButton = await getByRole("button", {
+      name: "Yes, Discard All Changes",
+    });
     fireEvent.click(discardCancelButton);
     await waitFor(() => {
-      expect(rateAggregation.value).toBe("Test");
+      expect(rateAggregation.value).toBe("");
     });
   });
 
@@ -141,16 +143,18 @@ describe("QDMReporting component", () => {
 
     render(<QDMReporting />);
 
-    const rateAggregation = getByTestId(
-      "rateAggregationText"
-    ) as HTMLInputElement;
+    const rateAggregation = getByRole("textbox", {
+      name: "Rate Aggregation",
+    }) as HTMLInputElement;
 
     fireEvent.change(rateAggregation, {
       target: { value: "Test" },
     });
     expect(rateAggregation.value).toBe("Test");
 
-    const saveButton = getByTestId("measure-Reporting-save");
+    const saveButton = getByRole("button", {
+      name: "Save",
+    });
     expect(saveButton).toBeInTheDocument();
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
@@ -165,7 +169,9 @@ describe("QDMReporting component", () => {
       await getByText("Measure Reporting Updated Successfully")
     ).toBeInTheDocument();
 
-    const toastCloseButton = await findByTestId("close-error-button");
+    const toastCloseButton = await getByRole("button", {
+      name: "",
+    });
     expect(toastCloseButton).toBeInTheDocument();
     fireEvent.click(toastCloseButton);
     await waitFor(() => {
@@ -184,16 +190,18 @@ describe("QDMReporting component", () => {
 
     render(<QDMReporting />);
 
-    const rateAggregation = getByTestId(
-      "rateAggregationText"
-    ) as HTMLInputElement;
+    const rateAggregation = getByRole("textbox", {
+      name: "Rate Aggregation",
+    }) as HTMLInputElement;
 
     fireEvent.change(rateAggregation, {
       target: { value: "Test" },
     });
     expect(rateAggregation.value).toBe("Test");
 
-    const saveButton = getByTestId("measure-Reporting-save");
+    const saveButton = getByRole("button", {
+      name: "Save",
+    });
     expect(saveButton).toBeInTheDocument();
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
@@ -207,7 +215,9 @@ describe("QDMReporting component", () => {
     expect(
       await getByText("Error updating Measure Reporting: update failed")
     ).toBeInTheDocument();
-    const toastCloseButton = await findByTestId("close-error-button");
+    const toastCloseButton = await getByRole("button", {
+      name: "",
+    });
     expect(toastCloseButton).toBeInTheDocument();
     fireEvent.click(toastCloseButton);
     await waitFor(() => {
