@@ -271,44 +271,24 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   }, [getEmptyStrat]);
 
   useEffect(() => {
+    // works
     if (measure?.groups && measure?.groups[measureGroupNumber]) {
+      // if we change to a measureGroup, by changing measureGroupNumber in sidenav
+      // now that reinit is set up properly, just changing group, updates the form and formstate accurately
       setGroup(measure?.groups[measureGroupNumber]);
-      resetForm({
-        values: {
-          ...measure?.groups[measureGroupNumber],
-          groupDescription:
-            measure?.groups[measureGroupNumber].groupDescription || "",
-          scoringUnit: measure?.groups[measureGroupNumber].scoringUnit || "",
-          measureGroupTypes:
-            measure?.groups[measureGroupNumber].measureGroupTypes || [],
-          populations: measure?.groups[measureGroupNumber].populations || [],
-          measureObservations:
-            measure?.groups[measureGroupNumber].measureObservations || null,
-          improvementNotation:
-            measure?.groups[measureGroupNumber].improvementNotation || "",
-        },
-      });
-      setVisibleStrats(
-        measure.groups[measureGroupNumber].stratifications
-          ? measure.groups[measureGroupNumber].stratifications.length
-          : 2
-      );
     } else {
       if (measureGroupNumber >= measure?.groups?.length || !measure?.groups) {
-        resetForm({
-          values: {
-            id: null,
-            scoring: "",
-            populations: [],
-            measureObservations: null,
-            groupDescription: "",
-            stratifications: getFirstTwoStrats,
-            rateAggregation: "",
-            improvementNotation: "",
-            measureGroupTypes: [],
-            populationBasis: defaultPopulationBasis,
-            scoringUnit: "",
-          },
+        // we update the group with some default values, and the form is smart enough to reinit
+        setGroup({
+          id: null,
+          groupDescription: "",
+          scoring: "",
+          measureGroupTypes: [],
+          rateAggregation: "",
+          improvementNotation: "",
+          populationBasis: defaultPopulationBasis,
+          scoringUnit: "",
+          stratifications: getFirstTwoStrats,
         });
       }
     }
@@ -339,18 +319,17 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     initialValues: {
       id: group?.id || null,
       scoring: measure?.scoring || "",
-      populations: measure?.groups?.[measureGroupNumber].populations
-        ? measure?.groups?.[measureGroupNumber].populations
+      populations: group?.populations
+        ? group.populations
         : getPopulationsForScoring(measure?.scoring),
-      measureObservations: memoizedObservation,
+      measureObservations: group?.measureObservations || memoizedObservation,
       rateAggregation: group?.rateAggregation || "",
       improvementNotation: group?.improvementNotation || "",
-      groupDescription: group?.groupDescription,
+      groupDescription: group?.groupDescription || "",
       stratifications: group?.stratifications || getFirstTwoStrats,
       populationBasis: group?.populationBasis || defaultPopulationBasis,
-      scoringUnit: group?.scoringUnit || "", // autocomplete can't init with string
-      // } as Group, // to do: fix this to work as Group
-    } as any,
+      scoringUnit: group?.scoringUnit || "", // autocomplete can init with string
+    } as Group,
     enableReinitialize: true,
     validationSchema: measureGroupSchemaValidator(
       cqlDefinitionDataTypes,
@@ -966,7 +945,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                     )}
                   />
                 )}
-
                 {activeTab === "stratification" && (
                   <FieldArray
                     name="stratifications"
@@ -982,31 +960,31 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                     <div tw="lg:col-span-1">
                                       <div tw="relative">
                                         {formik.values.stratifications.length >
-                                          2 &&
-                                          visibleStrats > 2 && (
-                                            <DSLink
-                                              className="madie-link"
-                                              sx={{
-                                                position: "absolute",
-                                                left: "117px",
-                                                zIndex: "1",
-                                                textDecoration: "none",
-                                              }}
-                                              component="button"
-                                              underline="always"
-                                              onClick={(e) => {
-                                                e.preventDefault();
-                                                arrayHelpers.remove(i);
-                                                setVisibleStrats(
-                                                  visibleStrats - 1
-                                                );
-                                              }}
-                                              variant="body2"
-                                              data-testid="remove-strat-button"
-                                            >
-                                              Remove
-                                            </DSLink>
-                                          )}
+                                          2 && (
+                                          // visibleStrats > 2 &&
+                                          <DSLink
+                                            className="madie-link"
+                                            sx={{
+                                              position: "absolute",
+                                              left: "117px",
+                                              zIndex: "1",
+                                              textDecoration: "none",
+                                            }}
+                                            component="button"
+                                            underline="always"
+                                            onClick={(e) => {
+                                              e.preventDefault();
+                                              arrayHelpers.remove(i);
+                                              setVisibleStrats(
+                                                visibleStrats - 1
+                                              );
+                                            }}
+                                            variant="body2"
+                                            data-testid="remove-strat-button"
+                                          >
+                                            Remove
+                                          </DSLink>
+                                        )}
                                         <Select
                                           disabled={!canEdit}
                                           placeHolder={{

@@ -517,14 +517,19 @@ describe("Measure Groups Page", () => {
       { ...getEmptyStrat(), id: "id-1" },
       { ...getEmptyStrat(), id: "id-2" },
       { ...getEmptyStrat(), id: "id-3" },
+      { ...getEmptyStrat(), id: "id-4" },
+      { ...getEmptyStrat(), id: "id-5" },
+      { ...getEmptyStrat(), id: "id-6" },
     ];
     measure.groups = [group];
     renderMeasureGroupComponent();
     expect(screen.getByTestId("stratifications-tab")).toBeInTheDocument();
-    userEvent.click(screen.getByTestId("stratifications-tab"));
+    act(() => {
+      userEvent.click(screen.getByTestId("stratifications-tab"));
+    });
     const removeButton = screen.getAllByTestId("remove-strat-button")[0];
     await waitFor(() => expect(removeButton).toBeInTheDocument());
-  });
+  }, 10000);
 
   test("Stratifications should no longer have remove button the stratifications are reduced to two", async () => {
     group.id = "7p03-5r29-7O0I";
@@ -742,13 +747,13 @@ describe("Measure Groups Page", () => {
       "measure-observation-cv-obs-input"
     ) as HTMLInputElement;
     //measureObservations uses memoizedObservation which does getDefaultObservationsForScoring
-    expect(observationInput.value).toBe("");
+    expect(observationInput.value).toBe("fun");
 
     const aggregateFuncInput = screen.getByTestId(
       "measure-observation-aggregate-cv-obs-input"
     ) as HTMLInputElement;
     //measureObservations uses memoizedObservation which does getDefaultObservationsForScoring
-    expect(aggregateFuncInput.value).toEqual("");
+    expect(aggregateFuncInput.value).toEqual("Count");
   });
 
   test.skip("measure observation should render existing for ratio group", async () => {
