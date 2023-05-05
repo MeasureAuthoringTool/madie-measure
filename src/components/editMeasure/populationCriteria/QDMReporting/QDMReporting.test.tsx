@@ -9,12 +9,6 @@ import QDMReporting from "./QDMReporting";
 
 const mockHistoryPush = jest.fn();
 
-jest.mock("react-router-dom", () => ({
-  useHistory: () => ({
-    push: mockHistoryPush,
-  }),
-}));
-
 jest.mock("../../../../api/useMeasureServiceApi");
 const measure = {
   id: "test measure",
@@ -71,7 +65,7 @@ const useMeasureServiceApiMock =
 let serviceApiMock: MeasureServiceApi;
 
 describe("QDMReporting component", () => {
-  const { getByTestId, findByTestId, getByText } = screen;
+  const { getByTestId, findByTestId, getByText, getByRole } = screen;
 
   test("QDMReporting renders to correctly with defaults", async () => {
     render(<QDMReporting />);
@@ -91,12 +85,12 @@ describe("QDMReporting component", () => {
     });
     expect(rateAggregation.value).toBe("Test");
 
-    const cancelButton = getByTestId("cancel-button");
+    const cancelButton = getByRole("button", {
+      name: "Discard Changes",
+    });
     expect(cancelButton).toBeInTheDocument();
     await waitFor(() => expect(cancelButton).toBeEnabled());
-    act(() => {
-      fireEvent.click(cancelButton);
-    });
+    fireEvent.click(cancelButton);
 
     const discardDialog = await getByTestId("discard-dialog");
     expect(discardDialog).toBeInTheDocument();

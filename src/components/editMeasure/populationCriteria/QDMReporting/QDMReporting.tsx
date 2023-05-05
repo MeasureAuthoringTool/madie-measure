@@ -7,7 +7,6 @@ import {
   routeHandlerStore,
 } from "@madie/madie-util";
 import MetaDataWrapper from "../../../editMeasure/details/MetaDataWrapper";
-import { QDMMeasureSchemaValidator } from "../../../../validations/QDMMeasureSchemaValidator";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import {
   MadieDiscardDialog,
@@ -125,7 +124,7 @@ const QDMReporting = () => {
             </FieldLabel>
             <FieldSeparator>
               <FieldInput
-                value={formik.values.rateAggregation}
+                {...formik.getFieldProps("rateAggregation")}
                 aria-labelledby="rate-aggregation-label"
                 type="text"
                 disabled={!canEdit}
