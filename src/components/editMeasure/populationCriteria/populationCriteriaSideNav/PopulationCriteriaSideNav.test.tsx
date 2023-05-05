@@ -6,6 +6,7 @@ import PopulationCriteriaSideNav, {
   PopulationCriteriaSideNavProp,
 } from "./PopulationCriteriaSideNav";
 import ServiceContext, { ServiceConfig } from "../../../../api/ServiceContext";
+import { act } from "react-dom/test-utils";
 
 const mockHistoryPush = jest.fn();
 
@@ -341,5 +342,50 @@ describe("PopulationCriteriaSideNav", () => {
       name: /Base Configuration/i,
     });
     expect(baseConfiguration).toBeInTheDocument();
+  });
+
+  it("Should work correctly on edge case", async () => {
+    const rerenderForEdge = (props) => {
+      return render(
+        <MemoryRouter
+          initialEntries={[
+            { pathname: "/measures/testMeasureId/edit/base-configuration" },
+          ]}
+        >
+          <ServiceContext.Provider value={serviceConfig}>
+            <PopulationCriteriaSideNav {...props} />
+          </ServiceContext.Provider>
+        </MemoryRouter>
+      );
+    };
+    const { rerender } = rerenderForEdge({ ...initialProps, isQDM: true });
+    const baseConfiguration = screen.queryByRole("tab", {
+      name: /Base Configuration/i,
+    });
+    expect(baseConfiguration).toBeInTheDocument();
+
+    const criteria2 = screen.queryByRole("tab", {
+      name: /Criteria 2/i,
+    });
+    expect(criteria2).toBeInTheDocument();
+    expect(criteria2).toHaveAttribute("aria-selected", "false");
+
+    userEvent.click(criteria2);
+
+    const reRenderProps = { ...initialProps, measureGroupNumber: 1 };
+
+    rerender(
+      <MemoryRouter
+        initialEntries={[{ pathname: "/measures/testMeasureId/edit/groups" }]}
+      >
+        <ServiceContext.Provider value={serviceConfig}>
+          <PopulationCriteriaSideNav {...reRenderProps} />
+        </ServiceContext.Provider>
+      </MemoryRouter>
+    );
+
+    expect(mockHistoryPush).toHaveBeenCalledWith(
+      "/measures/testMeasureId/edit/groups"
+    );
   });
 });
