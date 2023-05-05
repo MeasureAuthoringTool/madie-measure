@@ -1,0 +1,23 @@
+#reporting {
+  display: flex;
+  flex-direction: row;
+  column-gap: 32px;
+  > .left {
+    flex-basis: 39%;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+  > .right {
+    flex-basis: 55%;
+    flex-direction: column;
+    flex-grow: 1;
+    > .reporting-container {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      > label {
+        font-family: Rubik, sans-serif;
+      }
+    }
+  }
+}
