@@ -225,7 +225,7 @@ describe("Base Configuration component", () => {
         ...measure,
         scoring: "Cohort",
         baseConfigurationTypes: ["Structure"],
-        patientBasis: "true",
+        patientBasis: true,
       })
     );
 
@@ -267,7 +267,7 @@ describe("Base Configuration component", () => {
     });
     expect(scoringSelectInput.value).toBe("Cohort");
 
-    const baseConfigurationTypesSelect = screen.getByTestId(
+    const baseConfigurationTypesSelect = getByTestId(
       "base-configuration-types-dropdown"
     );
     expect(baseConfigurationTypesSelect).toBeInTheDocument();
@@ -277,8 +277,8 @@ describe("Base Configuration component", () => {
 
     userEvent.click(baseConfigurationTypesButton);
 
-    expect(screen.getByText("Structure")).toBeInTheDocument();
-    const target = screen.getByText("Structure");
+    expect(getByText("Structure")).toBeInTheDocument();
+    const target = getByText("Structure");
 
     userEvent.click(target);
 
@@ -294,7 +294,7 @@ describe("Base Configuration component", () => {
         ...measure,
         scoring: "Cohort",
         baseConfigurationTypes: ["Structure"],
-        patientBasis: "false",
+        patientBasis: false,
       })
     );
 
@@ -309,5 +309,172 @@ describe("Base Configuration component", () => {
     await waitFor(() => {
       expect(toastCloseButton).not.toBeInTheDocument();
     });
+  });
+
+  test("change measure scoring will prompt warning dialog", async () => {
+    serviceApiMock = {
+      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
+    } as unknown as MeasureServiceApi;
+    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+
+    render(<BaseConfiguration />);
+
+    const scoringSelectInput = getByTestId(
+      "scoring-select-input"
+    ) as HTMLInputElement;
+
+    const scoringSelect = getByTestId("scoring-select");
+    const scoringSelectDropdown = within(scoringSelect).getByRole(
+      "button"
+    ) as HTMLInputElement;
+    userEvent.click(scoringSelectDropdown);
+
+    fireEvent.change(scoringSelectInput, {
+      target: { value: "Cohort" },
+    });
+    expect(scoringSelectInput.value).toBe("Cohort");
+
+    const baseConfigurationTypesSelect = getByTestId(
+      "base-configuration-types-dropdown"
+    );
+    expect(baseConfigurationTypesSelect).toBeInTheDocument();
+    const baseConfigurationTypesButton = within(
+      baseConfigurationTypesSelect
+    ).getByTitle("Open");
+
+    userEvent.click(baseConfigurationTypesButton);
+    expect(getByText("Structure")).toBeInTheDocument();
+    userEvent.click(getByText("Structure"));
+
+    userEvent.click(getByLabelText("Yes"));
+
+    const saveButton = getByTestId("measure-Base Configuration-save");
+    expect(saveButton).toBeInTheDocument();
+    await waitFor(() => expect(saveButton).toBeEnabled());
+    fireEvent.click(saveButton);
+    await waitFor(() =>
+      expect(serviceApiMock.updateMeasure).toBeCalledWith({
+        ...measure,
+        scoring: "Cohort",
+        baseConfigurationTypes: ["Structure"],
+        patientBasis: true,
+      })
+    );
+
+    expect(
+      await getByText("Measure Base Configuration Updated Successfully")
+    ).toBeInTheDocument();
+
+    const toastCloseButton = await findByTestId("close-error-button");
+    expect(toastCloseButton).toBeInTheDocument();
+    fireEvent.click(toastCloseButton);
+    await waitFor(() => {
+      expect(toastCloseButton).not.toBeInTheDocument();
+    });
+
+    userEvent.click(scoringSelectDropdown);
+    fireEvent.change(scoringSelectInput, {
+      target: { value: "Ratio" },
+    });
+    expect(scoringSelectInput.value).toBe("Ratio");
+
+    const changeScoringDialog = getByTestId(
+      "update-measure-group-scoring-dialog"
+    );
+    expect(changeScoringDialog).toBeInTheDocument();
+    expect(getByText("Change Scoring?")).toBeInTheDocument();
+    const changeScoringModalCloseButton = getByTestId(
+      "update-measure-group-scoring-modal-cancel-btn"
+    );
+    expect(changeScoringModalCloseButton).toBeInTheDocument();
+    const changeScoringModalSaveButton = getByTestId(
+      "update-measure-group-scoring-modal-agree-btn"
+    );
+    expect(changeScoringModalSaveButton).toBeInTheDocument();
+  });
+
+  test("click on change scoring warning dialog close button will close the dialog", async () => {
+    serviceApiMock = {
+      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
+    } as unknown as MeasureServiceApi;
+    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+
+    render(<BaseConfiguration />);
+
+    const scoringSelectInput = getByTestId(
+      "scoring-select-input"
+    ) as HTMLInputElement;
+
+    const scoringSelect = getByTestId("scoring-select");
+    const scoringSelectDropdown = within(scoringSelect).getByRole(
+      "button"
+    ) as HTMLInputElement;
+    userEvent.click(scoringSelectDropdown);
+
+    fireEvent.change(scoringSelectInput, {
+      target: { value: "Cohort" },
+    });
+    expect(scoringSelectInput.value).toBe("Cohort");
+
+    const baseConfigurationTypesSelect = getByTestId(
+      "base-configuration-types-dropdown"
+    );
+    expect(baseConfigurationTypesSelect).toBeInTheDocument();
+    const baseConfigurationTypesButton = within(
+      baseConfigurationTypesSelect
+    ).getByTitle("Open");
+
+    userEvent.click(baseConfigurationTypesButton);
+    expect(getByText("Structure")).toBeInTheDocument();
+    userEvent.click(getByText("Structure"));
+
+    userEvent.click(getByLabelText("Yes"));
+
+    const saveButton = getByTestId("measure-Base Configuration-save");
+    expect(saveButton).toBeInTheDocument();
+    await waitFor(() => expect(saveButton).toBeEnabled());
+    fireEvent.click(saveButton);
+    await waitFor(() =>
+      expect(serviceApiMock.updateMeasure).toBeCalledWith({
+        ...measure,
+        scoring: "Cohort",
+        baseConfigurationTypes: ["Structure"],
+        patientBasis: true,
+      })
+    );
+
+    expect(
+      await getByText("Measure Base Configuration Updated Successfully")
+    ).toBeInTheDocument();
+
+    const toastCloseButton = await findByTestId("close-error-button");
+    expect(toastCloseButton).toBeInTheDocument();
+    fireEvent.click(toastCloseButton);
+    await waitFor(() => {
+      expect(toastCloseButton).not.toBeInTheDocument();
+    });
+
+    userEvent.click(scoringSelectDropdown);
+    fireEvent.change(scoringSelectInput, {
+      target: { value: "Ratio" },
+    });
+    expect(scoringSelectInput.value).toBe("Ratio");
+
+    const changeScoringDialog = getByTestId(
+      "update-measure-group-scoring-dialog"
+    );
+    expect(changeScoringDialog).toBeInTheDocument();
+    expect(getByText("Change Scoring?")).toBeInTheDocument();
+    const changeScoringModalCloseButton = getByTestId(
+      "update-measure-group-scoring-modal-cancel-btn"
+    );
+    expect(changeScoringModalCloseButton).toBeInTheDocument();
+    const changeScoringModalSaveButton = getByTestId(
+      "update-measure-group-scoring-modal-agree-btn"
+    );
+    expect(changeScoringModalSaveButton).toBeInTheDocument();
+
+    userEvent.click(changeScoringModalCloseButton);
+    expect(changeScoringDialog).not.toBeInTheDocument();
   });
 });

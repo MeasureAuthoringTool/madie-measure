@@ -22,11 +22,15 @@ import {
   RadioButton,
 } from "@madie/madie-design-system/dist/react";
 import "./BaseConfiguration.scss";
+import MeasureGroupsWarningDialog from "../groups/MeasureGroupWarningDialog";
 
 interface BaseConfigurationForm {
   scoring: string;
   baseConfigurationTypes: BaseConfigurationTypes[];
   patientBasis: string;
+}
+interface ChangeScoringDialog {
+  open?: boolean;
 }
 
 const BaseConfiguration = () => {
@@ -39,6 +43,11 @@ const BaseConfiguration = () => {
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
   const { updateRouteHandlerState } = routeHandlerStore;
+  const [currentScoring, setCurrentScoring] = useState<string>();
+  const [changeScoringDialog, setChangeScoringDialog] =
+    useState<ChangeScoringDialog>({
+      open: false,
+    });
 
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -51,6 +60,11 @@ const BaseConfiguration = () => {
     measure?.acls,
     measure?.measureMetaData?.draft
   );
+  useEffect(() => {
+    if (measure && measure.scoring) {
+      setCurrentScoring(measure.scoring);
+    }
+  }, [measure]);
 
   const formik = useFormik({
     initialValues: {
@@ -60,8 +74,7 @@ const BaseConfiguration = () => {
     },
     enableReinitialize: true,
     validationSchema: QDMMeasureSchemaValidator,
-    onSubmit: async (values: BaseConfigurationForm) =>
-      await handleSubmit(values),
+    onSubmit: async (values: BaseConfigurationForm) => await handleSubmit(),
   });
   const { resetForm } = formik;
 
@@ -87,12 +100,20 @@ const BaseConfiguration = () => {
     setToastOpen(open);
   };
 
-  const handleSubmit = async (values) => {
+  const handleDialogClose = () => {
+    setChangeScoringDialog({ open: false });
+  };
+
+  const handleSubmit = async () => {
+    changeScoringDialog.open = false;
+    if (formik.values.scoring !== currentScoring && measure.groups !== null) {
+      measure.groups = null;
+    }
     const newMeasure: Measure = {
       ...measure,
-      scoring: values.scoring,
-      baseConfigurationTypes: values.baseConfigurationTypes,
-      patientBasis: values.patientBasis,
+      scoring: formik.values.scoring,
+      baseConfigurationTypes: formik.values.baseConfigurationTypes,
+      patientBasis: formik.values.patientBasis === "true" ? true : false,
     };
 
     measureServiceApi
@@ -105,6 +126,7 @@ const BaseConfiguration = () => {
         );
         // updating measure will propagate update state site wide.
         updateMeasure(newMeasure);
+        setCurrentScoring(newMeasure.scoring);
       })
       // update to alert
       .catch((err) => {
@@ -186,8 +208,13 @@ const BaseConfiguration = () => {
               }}
               onChange={(e) => {
                 const nextScoring = e.target.value;
-
                 formik.setFieldValue("scoring", nextScoring);
+                if (
+                  currentScoring != undefined &&
+                  nextScoring !== currentScoring
+                ) {
+                  changeScoringDialog.open = true;
+                }
               }}
               options={Object.keys(GroupScoring).map((scoring) => {
                 return (
@@ -255,6 +282,14 @@ const BaseConfiguration = () => {
             setDiscardDialogOpen(false);
           }}
         />
+        {changeScoringDialog.open && (
+          <MeasureGroupsWarningDialog
+            open={changeScoringDialog.open}
+            onClose={handleDialogClose}
+            onSubmit={handleSubmit}
+            modalType="scoring"
+          />
+        )}
       </form>
     </MetaDataWrapper>
   );
