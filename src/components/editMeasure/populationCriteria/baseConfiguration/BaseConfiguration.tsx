@@ -113,7 +113,7 @@ const BaseConfiguration = () => {
       ...measure,
       scoring: formik.values.scoring,
       baseConfigurationTypes: formik.values.baseConfigurationTypes,
-      patientBasis: formik.values.patientBasis === "true" ? true : false,
+      patientBasis: formik.values.patientBasis === "true",
     };
 
     measureServiceApi
