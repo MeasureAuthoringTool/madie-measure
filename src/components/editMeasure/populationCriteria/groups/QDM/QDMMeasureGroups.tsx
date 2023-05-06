@@ -961,7 +961,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                       <div tw="relative">
                                         {formik.values.stratifications.length >
                                           2 && (
-                                          // visibleStrats > 2 &&
                                           <DSLink
                                             className="madie-link"
                                             sx={{
