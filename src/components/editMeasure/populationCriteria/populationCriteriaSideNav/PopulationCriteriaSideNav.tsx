@@ -74,6 +74,10 @@ export default function PopulationCriteriaSideNav(
   const initiateNavigateGroupClick = (e) => {
     e.preventDefault();
     const groupNumber = Number(e.target.id);
+    // edge case
+    if (pathname !== groupsBaseUrl) {
+      history.push(groupsBaseUrl);
+    }
     if (groupNumber !== measureGroupNumber) {
       if (isFormDirty) {
         setInitiatedPayload({ action: "navigate", value: groupNumber });
