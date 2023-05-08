@@ -29,9 +29,6 @@ interface BaseConfigurationForm {
   baseConfigurationTypes: BaseConfigurationTypes[];
   patientBasis: string;
 }
-interface ChangeScoringDialog {
-  open?: boolean;
-}
 
 const BaseConfiguration = () => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
@@ -44,10 +41,7 @@ const BaseConfiguration = () => {
   const [toastType, setToastType] = useState<string>("danger");
   const { updateRouteHandlerState } = routeHandlerStore;
   const [currentScoring, setCurrentScoring] = useState<string>();
-  const [changeScoringDialog, setChangeScoringDialog] =
-    useState<ChangeScoringDialog>({
-      open: false,
-    });
+  const [changeScoringDialog, setChangeScoringDialog] = useState(false);
 
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -101,11 +95,11 @@ const BaseConfiguration = () => {
   };
 
   const handleDialogClose = () => {
-    setChangeScoringDialog({ open: false });
+    setChangeScoringDialog(false);
   };
 
   const handleSubmit = async () => {
-    changeScoringDialog.open = false;
+    setChangeScoringDialog(false);
     if (formik.values.scoring !== currentScoring && measure.groups !== null) {
       measure.groups = null;
     }
@@ -213,7 +207,7 @@ const BaseConfiguration = () => {
                   currentScoring != undefined &&
                   nextScoring !== currentScoring
                 ) {
-                  changeScoringDialog.open = true;
+                  setChangeScoringDialog(true);
                 }
               }}
               options={Object.keys(GroupScoring).map((scoring) => {
@@ -282,9 +276,9 @@ const BaseConfiguration = () => {
             setDiscardDialogOpen(false);
           }}
         />
-        {changeScoringDialog.open && (
+        {changeScoringDialog && (
           <MeasureGroupsWarningDialog
-            open={changeScoringDialog.open}
+            open={changeScoringDialog}
             onClose={handleDialogClose}
             onSubmit={handleSubmit}
             modalType="scoring"
