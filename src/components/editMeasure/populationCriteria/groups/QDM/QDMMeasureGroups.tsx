@@ -290,6 +290,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           scoringUnit: "",
           stratifications: getFirstTwoStrats,
         });
+        resetForm();
       }
     }
     setActiveTab("populations");
