@@ -257,9 +257,7 @@ describe("PopulationCriteriaHome", () => {
     });
     expect(reportingTab).toBeInTheDocument();
     // verifies if the Reporting component is loaded and the left nav link is active
-    expect(
-      screen.getByText("Reporting for QDM. Coming Soon!!")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Rate Aggregation")).toBeInTheDocument();
     expect(reportingTab).toHaveAttribute("aria-selected", "true");
   });
 
