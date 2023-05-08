@@ -539,11 +539,6 @@ describe("Base Configuration component", () => {
       expect(toastCloseButton).not.toBeInTheDocument();
     });
 
-    // userEvent.click(scoringSelectDropdown);
-    // fireEvent.change(scoringSelectInput, {
-    //   target: { value: "Ratio" },
-    // });
-    // expect(scoringSelectInput.value).toBe("Ratio");
     userEvent.click(getByLabelText("No"));
 
     const changePatientBasisDialog = getByTestId(
