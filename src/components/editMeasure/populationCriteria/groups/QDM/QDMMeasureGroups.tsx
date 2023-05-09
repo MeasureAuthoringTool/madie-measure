@@ -1,10 +1,4 @@
-import React, {
-  useEffect,
-  useCallback,
-  useState,
-  useMemo,
-  useRef,
-} from "react";
+import React, { useEffect, useCallback, useState, useMemo } from "react";
 import { useRouteMatch, useLocation } from "react-router-dom";
 import tw, { styled } from "twin.macro";
 import * as ucum from "@lhncbc/ucum-lhc";
@@ -474,7 +468,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           strat.description !== deleteToken
       );
     }
-
     if (measure?.groups && !(measureGroupNumber >= measure?.groups?.length)) {
       group.id = measure?.groups[measureGroupNumber].id;
       measureServiceApi
@@ -1060,32 +1053,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                         />
                                       </div>
                                     </div>
-                                    <div tw="lg:col-span-2">
-                                      <FieldLabel
-                                        htmlFor={`stratification-${i}-description`}
-                                      >
-                                        Stratification {i + 1} Description
-                                      </FieldLabel>
-                                      <FieldSeparator>
-                                        <textarea
-                                          tw="disabled:bg-slate h-full w-full"
-                                          value={
-                                            formik.values.stratifications[i]
-                                              .description
-                                          }
-                                          disabled={!canEdit}
-                                          name={`stratifications[${i}].description`}
-                                          id={`stratification-${i}-description`}
-                                          autoComplete="stratification-description"
-                                          placeholder="Enter Description"
-                                          data-testid="stratificationDescriptionText"
-                                          maxLength={5000}
-                                          {...formik.getFieldProps(
-                                            `stratifications[${i}].description`
-                                          )}
-                                        />
-                                      </FieldSeparator>
-                                    </div>
+                                    <div tw="lg:col-span-2" />
                                   </div>
                                 </div>
                               )
