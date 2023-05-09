@@ -103,14 +103,29 @@ const BaseConfiguration = () => {
   };
 
   const handleSubmit = async () => {
-    setChangeScoringDialog(false);
     if (
-      (formik.values.scoring !== currentScoring ||
-        formik.values.patientBasis !== `${currentPatientBasis}`) &&
-      measure.groups !== null
+      currentScoring != undefined &&
+      formik.values.scoring !== currentScoring
     ) {
+      setChangeScoringDialog(true);
+      setCurrentScoring(formik.values.scoring);
+      setWarningDialogModalType("scoring");
       measure.groups = null;
+      return;
     }
+
+    if (
+      currentPatientBasis != undefined &&
+      formik.values.patientBasis !== String(currentPatientBasis)
+    ) {
+      setChangeScoringDialog(true);
+      setCurrentPatientBasis(formik.values.patientBasis === "true");
+      setWarningDialogModalType("patientBasis");
+      measure.groups = null;
+      return;
+    }
+    setChangeScoringDialog(false);
+
     const newMeasure: Measure = {
       ...measure,
       scoring: formik.values.scoring,
@@ -212,13 +227,6 @@ const BaseConfiguration = () => {
               onChange={(e) => {
                 const nextScoring = e.target.value;
                 formik.setFieldValue("scoring", nextScoring);
-                if (
-                  currentScoring != undefined &&
-                  nextScoring !== currentScoring
-                ) {
-                  setChangeScoringDialog(true);
-                  setWarningDialogModalType("scoring");
-                }
               }}
               options={Object.keys(GroupScoring).map((scoring) => {
                 return (
@@ -248,13 +256,6 @@ const BaseConfiguration = () => {
               onChange={(e) => {
                 const nextPatientBasis = e.target.value;
                 formik.setFieldValue("patientBasis", nextPatientBasis);
-                if (
-                  currentPatientBasis != undefined &&
-                  nextPatientBasis !== currentPatientBasis
-                ) {
-                  setChangeScoringDialog(true);
-                  setWarningDialogModalType("patientBasis");
-                }
               }}
               error={
                 formik.touched.patientBasis &&
