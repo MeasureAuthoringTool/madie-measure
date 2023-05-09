@@ -99,10 +99,18 @@ const BaseConfiguration = () => {
   };
 
   const handleSubmit = async () => {
-    setChangeScoringDialog(false);
-    if (formik.values.scoring !== currentScoring && measure.groups !== null) {
-      measure.groups = null;
+    if (
+      currentScoring != undefined &&
+      formik.values.scoring !== currentScoring
+    ) {
+      setChangeScoringDialog(true);
+      setCurrentScoring(formik.values.scoring);
+      return;
     }
+    setChangeScoringDialog(false);
+
+    measure.groups = null;
+
     const newMeasure: Measure = {
       ...measure,
       scoring: formik.values.scoring,
@@ -203,12 +211,6 @@ const BaseConfiguration = () => {
               onChange={(e) => {
                 const nextScoring = e.target.value;
                 formik.setFieldValue("scoring", nextScoring);
-                if (
-                  currentScoring != undefined &&
-                  nextScoring !== currentScoring
-                ) {
-                  setChangeScoringDialog(true);
-                }
               }}
               options={Object.keys(GroupScoring).map((scoring) => {
                 return (
