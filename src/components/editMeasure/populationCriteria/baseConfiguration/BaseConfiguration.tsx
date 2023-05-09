@@ -42,6 +42,9 @@ const BaseConfiguration = () => {
   const { updateRouteHandlerState } = routeHandlerStore;
   const [currentScoring, setCurrentScoring] = useState<string>();
   const [changeScoringDialog, setChangeScoringDialog] = useState(false);
+  const [warningDialogModalType, setWarningDialogModalType] = useState("");
+  const [currentPatientBasis, setCurrentPatientBasis] =
+    useState<boolean>(undefined);
 
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -57,6 +60,7 @@ const BaseConfiguration = () => {
   useEffect(() => {
     if (measure && measure.scoring) {
       setCurrentScoring(measure.scoring);
+      setCurrentPatientBasis(measure.patientBasis);
     }
   }, [measure]);
 
@@ -100,7 +104,11 @@ const BaseConfiguration = () => {
 
   const handleSubmit = async () => {
     setChangeScoringDialog(false);
-    if (formik.values.scoring !== currentScoring && measure.groups !== null) {
+    if (
+      (formik.values.scoring !== currentScoring ||
+        formik.values.patientBasis !== `${currentPatientBasis}`) &&
+      measure.groups !== null
+    ) {
       measure.groups = null;
     }
     const newMeasure: Measure = {
@@ -121,6 +129,7 @@ const BaseConfiguration = () => {
         // updating measure will propagate update state site wide.
         updateMeasure(newMeasure);
         setCurrentScoring(newMeasure.scoring);
+        setCurrentPatientBasis(newMeasure.patientBasis);
       })
       // update to alert
       .catch((err) => {
@@ -208,6 +217,7 @@ const BaseConfiguration = () => {
                   nextScoring !== currentScoring
                 ) {
                   setChangeScoringDialog(true);
+                  setWarningDialogModalType("scoring");
                 }
               }}
               options={Object.keys(GroupScoring).map((scoring) => {
@@ -235,7 +245,17 @@ const BaseConfiguration = () => {
                 { label: "No", value: false },
               ]}
               value={formik.values.patientBasis}
-              onChange={formik.handleChange("patientBasis")}
+              onChange={(e) => {
+                const nextPatientBasis = e.target.value;
+                formik.setFieldValue("patientBasis", nextPatientBasis);
+                if (
+                  currentPatientBasis != undefined &&
+                  nextPatientBasis !== currentPatientBasis
+                ) {
+                  setChangeScoringDialog(true);
+                  setWarningDialogModalType("patientBasis");
+                }
+              }}
               error={
                 formik.touched.patientBasis &&
                 Boolean(formik.errors.patientBasis)
@@ -281,7 +301,7 @@ const BaseConfiguration = () => {
             open={changeScoringDialog}
             onClose={handleDialogClose}
             onSubmit={handleSubmit}
-            modalType="scoring"
+            modalType={warningDialogModalType}
           />
         )}
       </form>

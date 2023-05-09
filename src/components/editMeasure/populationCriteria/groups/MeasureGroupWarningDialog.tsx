@@ -111,12 +111,24 @@ export default function MeasureGroupsWarningDialog(
     confirmButtonText: "Yes, Delete Measure Group",
   };
 
+  const patientBasisChangeDialogText = {
+    title: "Change Patient Basis?",
+    info: "Your Measure Patient Basis is about to be saved and updated based on these changes. Any expected values on your test cases will be cleared for this measure.",
+    subText: "Are you sure you want to Save Changes?",
+    bottomInfo: "This action cannot be undone.",
+    dataTestId: "update-measure-group-patient-basis",
+    cancelButtonText: "No, Keep Working",
+    confirmButtonText: "Yes, Save changes",
+  };
+
   const getDialogText = (modalType) => {
     switch (modalType) {
       case "scoring":
         return scoringChangeDialogText;
       case "popBasis":
         return popBasisChangeDialogText;
+      case "patientBasis":
+        return patientBasisChangeDialogText;
       default:
         return deleteMeasureGroupDialogText;
     }
