@@ -99,6 +99,8 @@ const BaseConfiguration = () => {
   };
 
   const handleDialogClose = () => {
+    setCurrentScoring(measure?.scoring);
+    setCurrentPatientBasis(measure?.patientBasis);
     setChangeScoringDialog(false);
   };
 
