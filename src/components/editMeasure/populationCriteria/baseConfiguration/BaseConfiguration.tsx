@@ -24,12 +24,6 @@ import {
 import "./BaseConfiguration.scss";
 import MeasureGroupsWarningDialog from "../groups/MeasureGroupWarningDialog";
 
-interface BaseConfigurationForm {
-  scoring: string;
-  baseConfigurationTypes: BaseConfigurationTypes[];
-  patientBasis: string;
-}
-
 const BaseConfiguration = () => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
@@ -40,7 +34,6 @@ const BaseConfiguration = () => {
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
   const { updateRouteHandlerState } = routeHandlerStore;
-  const [currentScoring, setCurrentScoring] = useState<string>();
   const [changeScoringDialog, setChangeScoringDialog] = useState(false);
 
   useEffect(() => {
@@ -54,11 +47,6 @@ const BaseConfiguration = () => {
     measure?.acls,
     measure?.measureMetaData?.draft
   );
-  useEffect(() => {
-    if (measure && measure.scoring) {
-      setCurrentScoring(measure.scoring);
-    }
-  }, [measure]);
 
   const formik = useFormik({
     initialValues: {
@@ -68,7 +56,7 @@ const BaseConfiguration = () => {
     },
     enableReinitialize: true,
     validationSchema: QDMMeasureSchemaValidator,
-    onSubmit: async (values: BaseConfigurationForm) => await handleSubmit(),
+    onSubmit: () => handleSubmit(),
   });
   const { resetForm } = formik;
 
@@ -95,12 +83,16 @@ const BaseConfiguration = () => {
   };
 
   const handleDialogClose = () => {
+    formik.setFieldValue("scoring", measure?.scoring);
     setChangeScoringDialog(false);
   };
 
-  const handleSubmit = async () => {
+  const handleDialogSubmit = () => {
     setChangeScoringDialog(false);
-    if (formik.values.scoring !== currentScoring && measure.groups !== null) {
+  };
+
+  const handleSubmit = () => {
+    if (formik.values.scoring !== measure?.scoring && measure.groups !== null) {
       measure.groups = null;
     }
     const newMeasure: Measure = {
@@ -120,7 +112,6 @@ const BaseConfiguration = () => {
         );
         // updating measure will propagate update state site wide.
         updateMeasure(newMeasure);
-        setCurrentScoring(newMeasure.scoring);
       })
       // update to alert
       .catch((err) => {
@@ -204,8 +195,8 @@ const BaseConfiguration = () => {
                 const nextScoring = e.target.value;
                 formik.setFieldValue("scoring", nextScoring);
                 if (
-                  currentScoring != undefined &&
-                  nextScoring !== currentScoring
+                  measure?.scoring != undefined &&
+                  nextScoring !== measure?.scoring
                 ) {
                   setChangeScoringDialog(true);
                 }
@@ -280,7 +271,7 @@ const BaseConfiguration = () => {
           <MeasureGroupsWarningDialog
             open={changeScoringDialog}
             onClose={handleDialogClose}
-            onSubmit={handleSubmit}
+            onSubmit={handleDialogSubmit}
             modalType="scoring"
           />
         )}
