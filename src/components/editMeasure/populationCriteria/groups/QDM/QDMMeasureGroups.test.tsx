@@ -119,7 +119,8 @@ describe("Measure Groups Page", () => {
     createdBy: MEASURE_CREATEDBY,
     scoring: GroupScoring.COHORT,
     groups: [{ groupDescription: "" }],
-    baseConfigurationTypes: ["Outcome"],
+    baseConfigurationTypes: ["Outcome", "Patient Reported Outcome"],
+    patientBasis: true,
     model: Model.QDM_5_6,
   } as Measure;
   beforeEach(() => {
@@ -193,9 +194,6 @@ describe("Measure Groups Page", () => {
       target: { value: "new description" },
     });
 
-    // select a scoring selected
-    // measureStore.state.mockImplementationOnce(() => measure);
-
     // Select Initial population from dropdown
     const groupPopulationInput = screen.getByTestId(
       "select-measure-group-population-input"
@@ -213,13 +211,11 @@ describe("Measure Groups Page", () => {
       userEvent.paste(initialPopulationDescription, "newVal");
     });
     expect(initialPopulationDescription.value).toBe("newVal");
-    // Select measure group type
     expect(screen.getByTestId("group-form-delete-btn")).toBeInTheDocument();
-    expect(screen.getByTestId("group-form-delete-btn")).toBeDisabled();
-
+    expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled(); // enabled
     mockedAxios.post.mockResolvedValue({ data: { group } });
 
-    // saving a  measure..
+    // submit the form
     await expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
 
@@ -229,13 +225,13 @@ describe("Measure Groups Page", () => {
       "Population details for this group saved successfully."
     );
     expect(mockedAxios.post.mock.calls[0][0]).toBe(
-      "example-service-url/measures/test-measure/groups/"
+      "example-service-url/measures/test-measure/groups"
     );
     expect(mockedAxios.post.mock.calls[0][1].groupDescription).toBe(
       "new description"
     );
     expect(mockedAxios.post).toHaveBeenCalledWith(
-      "example-service-url/measures/test-measure/groups/",
+      "example-service-url/measures/test-measure/groups",
       expect.anything(),
       expect.anything()
     );
@@ -271,7 +267,7 @@ describe("Measure Groups Page", () => {
     );
   });
 
-  test.skip("On clicking delete button, measure group should be deleted", async () => {
+  test("On clicking delete button, measure group should be deleted", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "testDescription";
     measure.groups = [group];
@@ -336,7 +332,7 @@ describe("Measure Groups Page", () => {
     });
   });
 
-  test.skip("On clicking discard button,should be able to discard the changes", async () => {
+  test("On clicking discard button,should be able to discard the changes", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "testDescription";
     group.rateAggregation = "Rate Aggregation Text";
@@ -756,7 +752,7 @@ describe("Measure Groups Page", () => {
     expect(aggregateFuncInput.value).toEqual("Count");
   });
 
-  test.skip("measure observation should render existing for ratio group", async () => {
+  test("measure observation should render existing for ratio group", async () => {
     group.scoring = "Ratio";
     measure.scoring = MeasureScoring.RATIO;
     group.measureObservations = [
@@ -825,7 +821,7 @@ describe("Measure Groups Page", () => {
     await waitFor(() => expect(association1).not.toBeInTheDocument());
   });
 
-  test.skip("should show Initial Population Association for Ratio scoring when there are 2 Initial Populations and can change values", async () => {
+  test("should show Initial Population Association for Ratio scoring when there are 2 Initial Populations and can change values", async () => {
     const group1: Group = {
       id: "1",
       scoring: "Ratio",
