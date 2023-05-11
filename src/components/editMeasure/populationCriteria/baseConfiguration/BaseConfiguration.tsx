@@ -112,7 +112,6 @@ const BaseConfiguration = () => {
       setChangeScoringDialog(true);
       setCurrentScoring(formik.values.scoring);
       setWarningDialogModalType("scoring");
-      measure.groups = null;
       return;
     }
 
@@ -123,10 +122,15 @@ const BaseConfiguration = () => {
       setChangeScoringDialog(true);
       setCurrentPatientBasis(formik.values.patientBasis === "true");
       setWarningDialogModalType("patientBasis");
-      measure.groups = null;
       return;
     }
     setChangeScoringDialog(false);
+    if (
+      formik.values.scoring !== measure?.scoring ||
+      formik.values.patientBasis !== String(measure?.patientBasis)
+    ) {
+      measure.groups = null;
+    }
 
     const newMeasure: Measure = {
       ...measure,
