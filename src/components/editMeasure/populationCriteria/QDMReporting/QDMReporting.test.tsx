@@ -1,13 +1,24 @@
 import * as React from "react";
-import { render, fireEvent, waitFor, screen } from "@testing-library/react";
+import {
+  render,
+  fireEvent,
+  waitFor,
+  screen,
+  getByRole,
+  getByLabelText,
+  within,
+} from "@testing-library/react";
 import { act } from "react-dom/test-utils";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../api/useMeasureServiceApi";
 import { Measure } from "@madie/madie-models";
 import QDMReporting from "./QDMReporting";
+import userEvent from "@testing-library/user-event";
+import { measureStore } from "@madie/madie-util";
 
 jest.mock("../../../../api/useMeasureServiceApi");
+
 const measure = {
   id: "test measure",
   measureName: "the measure for testing",
@@ -54,7 +65,10 @@ const useMeasureServiceApiMock =
 let serviceApiMock: MeasureServiceApi;
 
 describe("QDMReporting component", () => {
-  const { getByText, getByRole } = screen;
+  beforeEach(() => {
+    measureStore.state = jest.fn().mockImplementation(() => measure);
+  });
+  const { getByText, getByRole, getByLabelText } = screen;
 
   test("QDMReporting renders to correctly with defaults", async () => {
     render(<QDMReporting />);
@@ -62,11 +76,37 @@ describe("QDMReporting component", () => {
     const rateAggregation = getByRole("textbox", {
       name: "Rate Aggregation",
     }) as HTMLInputElement;
-
     expect(rateAggregation).toHaveValue("");
+
+    const improvementNotation = getByLabelText(
+      "Improvement Notation"
+    ) as HTMLSelectElement;
+    expect(improvementNotation).toHaveTextContent("-");
   });
 
-  test("Change enables Discard button and click Discard resets the form", async () => {
+  test("QDMReporting renders values correctly from measureStore", async () => {
+    const newMeasure = {
+      ...measure,
+      rateAggregation: "Example Rate Aggregation",
+      improvementNotation: "Increased score indicates improvement",
+    };
+    measureStore.state = jest.fn().mockImplementation(() => newMeasure);
+    render(<QDMReporting />);
+
+    const rateAggregation = getByRole("textbox", {
+      name: "Rate Aggregation",
+    }) as HTMLInputElement;
+    expect(rateAggregation).toHaveValue("Example Rate Aggregation");
+
+    const improvementNotation = getByLabelText(
+      "Improvement Notation"
+    ) as HTMLSelectElement;
+    expect(improvementNotation).toHaveTextContent(
+      "Increased score indicates improvement"
+    );
+  });
+
+  test("Change enables Discard button and Keep working action should retain changes", async () => {
     render(<QDMReporting />);
 
     const rateAggregation = getByRole("textbox", {
@@ -77,6 +117,8 @@ describe("QDMReporting component", () => {
       target: { value: "Test" },
     });
     expect(rateAggregation.value).toBe("Test");
+
+    await selectAnOptionForImprovementNotation();
 
     const cancelButton = getByRole("button", {
       name: "Discard Changes",
@@ -97,10 +139,13 @@ describe("QDMReporting component", () => {
     fireEvent.click(continueButton);
     await waitFor(() => {
       expect(rateAggregation.value).toBe("Test");
+      expect(getByLabelText("Improvement Notation")).toHaveTextContent(
+        "Decreased score indicates improvement"
+      );
     });
   });
 
-  test("Discard change then click Keep Working", async () => {
+  test("Change enables Discard button and Discard changes action should discard changes", async () => {
     render(<QDMReporting />);
 
     const rateAggregation = getByRole("textbox", {
@@ -111,6 +156,8 @@ describe("QDMReporting component", () => {
       target: { value: "Test" },
     });
     expect(rateAggregation.value).toBe("Test");
+
+    await selectAnOptionForImprovementNotation();
 
     const cancelButton = getByRole("button", {
       name: "Discard Changes",
@@ -132,6 +179,7 @@ describe("QDMReporting component", () => {
     fireEvent.click(discardCancelButton);
     await waitFor(() => {
       expect(rateAggregation.value).toBe("");
+      expect(getByLabelText("Improvement Notation")).toHaveTextContent("-");
     });
   });
 
@@ -152,6 +200,8 @@ describe("QDMReporting component", () => {
     });
     expect(rateAggregation.value).toBe("Test");
 
+    await selectAnOptionForImprovementNotation();
+
     const saveButton = getByRole("button", {
       name: "Save",
     });
@@ -162,6 +212,7 @@ describe("QDMReporting component", () => {
       expect(serviceApiMock.updateMeasure).toBeCalledWith({
         ...measure,
         rateAggregation: "Test",
+        improvementNotation: "Decreased score indicates improvement",
       })
     );
 
@@ -199,6 +250,8 @@ describe("QDMReporting component", () => {
     });
     expect(rateAggregation.value).toBe("Test");
 
+    await selectAnOptionForImprovementNotation();
+
     const saveButton = getByRole("button", {
       name: "Save",
     });
@@ -209,6 +262,7 @@ describe("QDMReporting component", () => {
       expect(serviceApiMock.updateMeasure).toBeCalledWith({
         ...measure,
         rateAggregation: "Test",
+        improvementNotation: "Decreased score indicates improvement",
       })
     );
 
@@ -225,3 +279,23 @@ describe("QDMReporting component", () => {
     });
   });
 });
+
+const selectAnOptionForImprovementNotation = async () => {
+  // verifies default value and selects a new value from options
+  const improvementNotation = screen.getByLabelText(
+    "Improvement Notation"
+  ) as HTMLSelectElement;
+  expect(improvementNotation).toHaveTextContent("-");
+  userEvent.click(improvementNotation);
+  const improvementNotationOptions = await screen.findByRole("listbox", {
+    name: "Improvement Notation",
+  });
+  userEvent.click(
+    within(improvementNotationOptions).getByRole("option", {
+      name: "Decreased score indicates improvement",
+    })
+  );
+  expect(await improvementNotation).toHaveTextContent(
+    "Decreased score indicates improvement"
+  );
+};
