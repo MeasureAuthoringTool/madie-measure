@@ -9,6 +9,7 @@ import {
 import MetaDataWrapper from "../../../editMeasure/details/MetaDataWrapper";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import {
+  Select,
   MadieDiscardDialog,
   Toast,
 } from "@madie/madie-design-system/dist/react";
@@ -18,9 +19,34 @@ import {
   FieldLabel,
   FieldSeparator,
 } from "../../../../styles/editMeasure/populationCriteria/supplementalData";
+import { MenuItem as MuiMenuItem } from "@mui/material";
+
+const improvementNotationOptions = [
+  {
+    label: "-",
+    value: "",
+    subtitle: null,
+    code: null,
+  },
+  {
+    label: "Increased score indicates improvement",
+    value: "Increased score indicates improvement",
+    subtitle:
+      "Improvement is indicated as an increase in the score or measurement (e.g. Higher score indicates better quality).",
+    code: "increase",
+  },
+  {
+    label: "Decreased score indicates improvement",
+    value: "Decreased score indicates improvement",
+    subtitle:
+      "Improvement is indicated as a decrease in the score or measurement (e.g. Lower score indicates better quality).",
+    code: "decrease",
+  },
+];
 
 interface ReportingForm {
   rateAggregation: string;
+  improvementNotation: string;
 }
 
 const QDMReporting = () => {
@@ -46,12 +72,11 @@ const QDMReporting = () => {
     measure?.measureMetaData?.draft
   );
 
-  const INITIAL_VALUES = {
-    rateAggregation: measure?.rateAggregation || "",
-  };
-
   const formik = useFormik({
-    initialValues: { ...INITIAL_VALUES },
+    initialValues: {
+      rateAggregation: measure?.rateAggregation || "",
+      improvementNotation: measure?.improvementNotation || "",
+    },
     enableReinitialize: true,
     onSubmit: async (values: ReportingForm) => await handleSubmit(values),
   });
@@ -83,6 +108,7 @@ const QDMReporting = () => {
     const newMeasure: Measure = {
       ...measure,
       rateAggregation: values.rateAggregation,
+      improvementNotation: values.improvementNotation,
     };
 
     measureServiceApi
@@ -137,7 +163,26 @@ const QDMReporting = () => {
               />
             </FieldSeparator>
           </div>
-          <div className="right"></div>
+          <div className="right">
+            <Select
+              name="Improvement Notation"
+              placeHolder={{ name: "-", value: "" }}
+              label="Improvement Notation"
+              id="improvement-notation-select"
+              inputProps={{
+                "data-testid": "improvement-notation-input",
+              }}
+              disabled={!canEdit}
+              data-testid="improvement-notation-select"
+              {...formik.getFieldProps("improvementNotation")}
+              size="small"
+              options={Object.values(improvementNotationOptions).map((opt) => (
+                <MuiMenuItem key={opt.label} value={opt.value}>
+                  {opt.label}
+                </MuiMenuItem>
+              ))}
+            />
+          </div>
         </div>
         <Toast
           toastKey="reporting-toast"
