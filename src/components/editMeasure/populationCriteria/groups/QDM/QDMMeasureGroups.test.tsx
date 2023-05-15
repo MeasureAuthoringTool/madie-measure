@@ -111,7 +111,8 @@ describe("Measure Groups Page", () => {
     createdBy: MEASURE_CREATEDBY,
     scoring: GroupScoring.COHORT,
     groups: [{ groupDescription: "" }],
-    baseConfigurationTypes: ["Outcome"],
+    baseConfigurationTypes: ["Outcome", "Patient Reported Outcome"],
+    patientBasis: true,
     model: Model.QDM_5_6,
   } as Measure;
   beforeEach(() => {
@@ -507,9 +508,6 @@ describe("Measure Groups Page", () => {
     fireEvent.change(groupDescriptionInput, {
       target: { value: "new description" },
     });
-
-    // select a scoring selected
-    // measureStore.state.mockImplementationOnce(() => measure);
 
     // Select Initial population from dropdown
     const groupPopulationInput = screen.getByTestId(
@@ -1119,7 +1117,7 @@ describe("Measure Groups Page", () => {
     await waitFor(() => expect(association1).not.toBeInTheDocument());
   });
 
-  test.skip("should show Initial Population Association for Ratio scoring when there are 2 Initial Populations and can change values", async () => {
+  test("should show Initial Population Association for Ratio scoring when there are 2 Initial Populations and can change values", async () => {
     const group1: Group = {
       id: "1",
       scoring: "Ratio",
