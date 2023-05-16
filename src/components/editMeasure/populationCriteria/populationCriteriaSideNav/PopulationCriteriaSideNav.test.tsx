@@ -376,7 +376,7 @@ describe("PopulationCriteriaSideNav", () => {
 
     rerender(
       <MemoryRouter
-        initialEntries={[{ pathname: "/measures/testMeasureId/edit/groups" }]}
+        initialEntries={[{ pathname: "/measures/testMeasureId/edit/groups/2" }]}
       >
         <ServiceContext.Provider value={serviceConfig}>
           <PopulationCriteriaSideNav {...reRenderProps} />
@@ -385,7 +385,7 @@ describe("PopulationCriteriaSideNav", () => {
     );
 
     expect(mockHistoryPush).toHaveBeenCalledWith(
-      "/measures/testMeasureId/edit/groups"
+      "/measures/testMeasureId/edit/groups/2"
     );
   });
 });
