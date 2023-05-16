@@ -208,7 +208,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     setToastMessage(message);
     setToastOpen(open);
   };
-  console.log(props.measureGroupNumber);
 
   const groupsBaseUrl = "/measures/" + props.measureId + "/edit/groups";
   const history = useHistory();

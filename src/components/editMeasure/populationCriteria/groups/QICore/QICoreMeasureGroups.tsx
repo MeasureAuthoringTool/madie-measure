@@ -189,8 +189,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     ...INITIAL_ALERT_MESSAGE,
   });
 
-  console.log(props.measureGroupNumber);
-
   // toast utilities
   // toast is only used for success messages
   // creating and updating PC
@@ -403,7 +401,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   // setIsFormDirty is used for dirty check while navigating between different groups
   const { updateRouteHandlerState } = routeHandlerStore;
   useEffect(() => {
-    console.log("here", formik.dirty);
     updateRouteHandlerState({
       canTravel: !formik.dirty,
       pendingRoute: "",
