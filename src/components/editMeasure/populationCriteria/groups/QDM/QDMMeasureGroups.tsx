@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useState, useMemo } from "react";
-import { useRouteMatch, useLocation } from "react-router-dom";
+import { useRouteMatch, useLocation, useHistory } from "react-router-dom";
 import tw, { styled } from "twin.macro";
 import * as ucum from "@lhncbc/ucum-lhc";
 import "styled-components/macro";
@@ -161,6 +161,7 @@ export interface MeasureGroupProps {
   measureGroupNumber?: number;
   setMeasureGroupNumber?: (value: number) => void;
   setIsFormDirty?: (value: boolean) => void;
+  measureId: string;
 }
 
 const INITIAL_ALERT_MESSAGE = {
@@ -207,9 +208,13 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     setToastMessage(message);
     setToastOpen(open);
   };
+  console.log(props.measureGroupNumber);
 
+  const groupsBaseUrl = "/measures/" + props.measureId + "/edit/groups";
+  const history = useHistory();
   const [activeTab, setActiveTab] = useState<string>("populations");
-  const measureGroupNumber = props.measureGroupNumber;
+  const measureGroupNumber =
+    props.measureGroupNumber - 1 < 0 ? 0 : props.measureGroupNumber;
   const [group, setGroup] = useState<Group>();
   const [groupWarningDialogProps, setGroupWarningDialogProps] = useState({
     open: false,
@@ -265,6 +270,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   }, [getEmptyStrat]);
 
   useEffect(() => {
+    //console.log(measureGroupNumber, "here", props.measureGroupNumber);
     // works
     if (measure?.groups && measure?.groups[measureGroupNumber]) {
       // if we change to a measureGroup, by changing measureGroupNumber in sidenav
@@ -512,6 +518,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           updatedMeasure?.groups
             ? props.setMeasureGroupNumber(updatedMeasure?.groups.length - 1)
             : props.setMeasureGroupNumber(0);
+
+          //history.push(groupsBaseUrl + "/" + updatedMeasure?.groups.length);
         })
         .then(() => {
           handleToast(
@@ -541,10 +549,15 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       .deleteMeasureGroup(measure?.groups[measureGroupNumber]?.id, measure.id)
       .then((response) => {
         updateMeasure(response);
-        measure?.groups &&
-          props.setMeasureGroupNumber(
-            measureGroupNumber === 0 ? 0 : measureGroupNumber - 1
-          );
+        // measure?.groups &&
+        //   props.setMeasureGroupNumber(
+        //     measureGroupNumber === 0 ? 0 : measureGroupNumber - 1
+        //   );
+        history.push(
+          groupsBaseUrl +
+            "/" +
+            (measureGroupNumber === 0 ? 1 : measureGroupNumber)
+        );
         handleDialogClose();
       });
   };
@@ -698,7 +711,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
               modalType={groupWarningDialogProps?.modalType}
             />
           )}
-          {location.pathname === path && (
+          {path.includes("/groups") && (
             <>
               <div tw="flex pb-2 pt-6">
                 <h2 tw="w-1/2 mb-0" data-testid="title" id="title">

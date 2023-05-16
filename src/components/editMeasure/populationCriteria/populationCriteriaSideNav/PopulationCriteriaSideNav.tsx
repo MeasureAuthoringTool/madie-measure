@@ -62,13 +62,12 @@ export default function PopulationCriteriaSideNav(
       setInitiatedPayload({ action: "add", value: null });
       setDiscardDialogOpen(true);
     } else {
-      history.push(groupsBaseUrl);
       addNewBlankMeasureGroup();
     }
   };
 
   const handleMeasureGroupNavigation = (val: number) => {
-    setMeasureGroupNumber(val);
+    //setMeasureGroupNumber(val);
   };
 
   const initiateNavigateGroupClick = (e) => {
@@ -76,7 +75,7 @@ export default function PopulationCriteriaSideNav(
     const groupNumber = Number(e.target.id);
     // edge case
     if (pathname !== groupsBaseUrl) {
-      history.push(groupsBaseUrl);
+      history.push(groupsBaseUrl + "/" + (groupNumber + 1));
     }
     if (groupNumber !== measureGroupNumber) {
       if (isFormDirty) {
@@ -88,16 +87,17 @@ export default function PopulationCriteriaSideNav(
     } else {
       handleMeasureGroupNavigation(groupNumber);
     }
+    history.push(groupsBaseUrl + "/" + (groupNumber + 1));
   };
 
   const addNewBlankMeasureGroup = () => {
     var measureGroups = sideNavLinks.find((link) => link.groups);
     const index = sideNavLinks.indexOf(measureGroups);
     const newMeasureGroupNumber = measureGroups.groups.length + 1;
-    setMeasureGroupNumber(measureGroups.groups.length);
+    //setMeasureGroupNumber(measureGroups.groups.length);
     const newMeasureGroupLink = {
       title: `Criteria ${newMeasureGroupNumber}`,
-      href: groupsBaseUrl,
+      href: groupsBaseUrl + "/" + newMeasureGroupNumber,
       dataTestId: `leftPanelMeasureInformation-MeasureGroup${newMeasureGroupNumber}`,
     };
     sideNavLinks[index].groups = [
@@ -106,6 +106,7 @@ export default function PopulationCriteriaSideNav(
     ];
     setSideNavLinks([...sideNavLinks]);
     onClose();
+    history.push(groupsBaseUrl + "/" + newMeasureGroupNumber);
   };
 
   // we need to pass a bound function to discard.
