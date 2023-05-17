@@ -22,7 +22,7 @@ const measure = {
   id: "abcd-pqrs-xyz",
   measureHumanReadableId: "",
   measureSetId: "",
-  version: "1.000",
+  version: "1.0.000",
   revisionNumber: "1",
   state: "",
   measureName: "MSR001",
@@ -372,7 +372,7 @@ describe("MeasureEditor component", () => {
     const saveButton = screen.getByRole("button", { name: "Save" });
     userEvent.click(saveButton);
     const saveSuccess = await screen.findByText(
-      "CQL updated successfully! Library Name and/or Version can not be updated in the CQL Editor. MADiE has overwritten the updated Library Name and/or Version."
+      "CQL updated successfully! Library Statement or Using Statement were incorrect. MADiE has overwritten them to ensure proper CQL."
     );
     expect(saveSuccess).toBeInTheDocument();
     expect(mockedAxios.put).toHaveBeenCalledTimes(1);
@@ -437,7 +437,7 @@ describe("MeasureEditor component", () => {
     const saveButton = screen.getByRole("button", { name: "Save" });
     userEvent.click(saveButton);
     const saveSuccess = await screen.findByText(
-      "CQL updated successfully! Library Name and/or Version can not be updated in the CQL Editor. MADiE has overwritten the updated Library Name and/or Version."
+      "CQL updated successfully! Library Statement or Using Statement were incorrect. MADiE has overwritten them to ensure proper CQL."
     );
     expect(saveSuccess).toBeInTheDocument();
     expect(mockedAxios.put).toHaveBeenCalledTimes(1);
