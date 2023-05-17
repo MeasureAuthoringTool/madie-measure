@@ -67,7 +67,7 @@ export default function PopulationCriteriaSideNav(
   };
 
   const handleMeasureGroupNavigation = (val: number) => {
-    //setMeasureGroupNumber(val);
+    setMeasureGroupNumber(val);
   };
 
   const initiateNavigateGroupClick = (e) => {
@@ -94,7 +94,7 @@ export default function PopulationCriteriaSideNav(
     var measureGroups = sideNavLinks.find((link) => link.groups);
     const index = sideNavLinks.indexOf(measureGroups);
     const newMeasureGroupNumber = measureGroups.groups.length + 1;
-    //setMeasureGroupNumber(measureGroups.groups.length);
+    setMeasureGroupNumber(measureGroups.groups.length);
     const newMeasureGroupLink = {
       title: `Criteria ${newMeasureGroupNumber}`,
       href: groupsBaseUrl + "/" + newMeasureGroupNumber,
@@ -211,7 +211,7 @@ export default function PopulationCriteriaSideNav(
                       size="standard"
                       orientation="vertical"
                       value={
-                        pathname === groupsBaseUrl ? measureGroupNumber : null
+                        pathname.includes("/groups") ? measureGroupNumber : null
                       }
                     >
                       {tab?.groups?.map((linkInfo, index) => {

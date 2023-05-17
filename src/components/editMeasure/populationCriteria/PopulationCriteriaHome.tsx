@@ -27,9 +27,13 @@ export function PopulationCriteriaHome() {
 
   let history = useHistory();
   const canEdit: boolean = checkUserCanEdit(measure?.createdBy, measure?.acls);
-  const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(
-    +gid - 1
-  );
+  const [measureGroupNumber, setMeasureGroupNumber] = useState<any>(() => {
+    if (path.includes("/groups") && +gid) {
+      return +gid - 1;
+    } else {
+      history.push("/404");
+    }
+  });
   const [sideNavLinks, setSideNavLinks] = useState<Array<any>>();
   const [isFormDirty, setIsFormDirty] = useState<boolean>(false);
 
@@ -69,15 +73,16 @@ export function PopulationCriteriaHome() {
     ]);
   }, [groupsBaseUrl, measure?.groups]);
 
-  useEffect(() => {
-    if (path.includes("/groups")) {
-      if (+gid) {
-        setMeasureGroupNumber(+gid - 1);
-      } else {
-        history.push("/404");
-      }
-    }
-  }, [location.pathname]);
+  // useEffect(() => {
+  //   if (path.includes("/groups")) {
+  //     if (+gid) {
+  //       console.log("here")
+  //       setMeasureGroupNumber(+gid - 1);
+  //     } else {
+  //       history.push("/404");
+  //     }
+  //   }
+  // }, [location.pathname]);
 
   // lets dynamically load our measureGroups component based on weather it's QDM or QICore
   // this needs to be memoized as it loses state otherwise and refreshes on change

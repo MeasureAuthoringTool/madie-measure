@@ -514,9 +514,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           const updatedMeasure = await updateMeasureFromDb(measure.id);
 
           //can be removed when validations for add new group is implemented
-          // updatedMeasure?.groups
-          //   ? props.setMeasureGroupNumber(updatedMeasure?.groups.length - 1)
-          //   : props.setMeasureGroupNumber(0);
+          updatedMeasure?.groups
+            ? props.setMeasureGroupNumber(updatedMeasure?.groups.length - 1)
+            : props.setMeasureGroupNumber(0);
           return updatedMeasure;
         })
         .then((updatedMeasure) => {
@@ -548,10 +548,10 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       .deleteMeasureGroup(measure?.groups[measureGroupNumber]?.id, measure.id)
       .then((response) => {
         updateMeasure(response);
-        // measure?.groups &&
-        //   props.setMeasureGroupNumber(
-        //     measureGroupNumber === 0 ? 0 : measureGroupNumber - 1
-        //   );
+        measure?.groups &&
+          props.setMeasureGroupNumber(
+            measureGroupNumber === 0 ? 0 : measureGroupNumber - 1
+          );
         history.push(
           groupsBaseUrl +
             "/" +
@@ -560,7 +560,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
         handleDialogClose();
       });
   };
-
 
   //Testing on load redirect to previous page
   // useEffect(() => {
