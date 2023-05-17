@@ -517,7 +517,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           // updatedMeasure?.groups
           //   ? props.setMeasureGroupNumber(updatedMeasure?.groups.length - 1)
           //   : props.setMeasureGroupNumber(0);
-          return updatedMeasure
+          return updatedMeasure;
         })
         .then((updatedMeasure) => {
           handleToast(
