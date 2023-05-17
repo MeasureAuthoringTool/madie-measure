@@ -10,13 +10,13 @@ import RiskAdjustment from "./riskAdjustment/RiskAdjustment";
 import BaseConfiguration from "./baseConfiguration/BaseConfiguration";
 import QDMReporting from "./QDMReporting/QDMReporting";
 
-interface groupInputParams {
-  gid: string;
+interface GroupInputParams {
+  groupNumber: string;
 }
 
 export function PopulationCriteriaHome() {
   const { path } = useRouteMatch();
-  const { gid } = useParams<groupInputParams>();
+  const { groupNumber } = useParams<GroupInputParams>();
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -29,8 +29,8 @@ export function PopulationCriteriaHome() {
   const canEdit: boolean = checkUserCanEdit(measure?.createdBy, measure?.acls);
   const [measureGroupNumber, setMeasureGroupNumber] = useState<any>(() => {
     if (path.includes("/groups")) {
-      if (+gid) {
-        return +gid - 1;
+      if (+groupNumber) {
+        return +groupNumber - 1;
       } else {
         history.push("/404");
       }

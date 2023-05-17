@@ -148,7 +148,7 @@ export default function EditMeasure() {
           </Route>
           <Route
             path={[
-              `${url}/groups/:gid`,
+              `${url}/groups/:groupNumber`,
               `${url}/supplemental-data`,
               `${url}/risk-adjustment`,
               `${url}/base-configuration`,
