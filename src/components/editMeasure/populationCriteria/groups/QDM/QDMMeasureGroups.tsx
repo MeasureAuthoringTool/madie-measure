@@ -561,6 +561,22 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       });
   };
 
+
+  //Testing on load redirect to previous page
+  // useEffect(() => {
+  //   console.log("here", measureGroupNumber);
+  //   const handleBeforeUnload = (event) => {
+  //     event.preventDefault();
+  //     window.history.go(-1);
+  //   };
+
+  //   window.addEventListener("beforeunload", handleBeforeUnload);
+
+  //   return () => {
+  //     window.removeEventListener("beforeunload", handleBeforeUnload);
+  //   };
+  // }, []);
+
   // Provides dropdown options for stratification
   // contains a default value along with all available CQL Definitions
   const stratificationOptions = [

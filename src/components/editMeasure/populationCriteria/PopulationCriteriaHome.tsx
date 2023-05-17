@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo, lazy, Suspense } from "react";
 import "twin.macro";
 import "styled-components/macro";
-import { useParams, useRouteMatch } from "react-router-dom";
+import { useHistory, useParams, useRouteMatch } from "react-router-dom";
 import SupplementalElements from "./supplementalData/SupplementalElements";
 import PopulationCriteriaSideNav from "./populationCriteriaSideNav/PopulationCriteriaSideNav";
 import { checkUserCanEdit, measureStore } from "@madie/madie-util";
@@ -25,6 +25,7 @@ export function PopulationCriteriaHome() {
     };
   }, []);
 
+  let history = useHistory();
   const canEdit: boolean = checkUserCanEdit(measure?.createdBy, measure?.acls);
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(
     +gid - 1
@@ -69,7 +70,13 @@ export function PopulationCriteriaHome() {
   }, [groupsBaseUrl, measure?.groups]);
 
   useEffect(() => {
-    setMeasureGroupNumber(+gid - 1);
+    if (path.includes("/groups")) {
+      if (+gid) {
+        setMeasureGroupNumber(+gid - 1);
+      } else {
+        history.push("/404");
+      }
+    }
   }, [location.pathname]);
 
   // lets dynamically load our measureGroups component based on weather it's QDM or QICore
