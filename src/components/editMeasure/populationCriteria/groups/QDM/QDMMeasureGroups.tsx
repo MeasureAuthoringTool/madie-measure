@@ -25,10 +25,10 @@ import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
 import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
 import { v4 as uuidv4 } from "uuid";
 import {
-  measureGroupSchemaValidator,
+  qdmMeasureGroupSchemaValidator,
   CqlDefineDataTypes,
   CqlFunctionDataTypes,
-} from "../../../../../validations/MeasureGroupSchemaValidator";
+} from "../../../../../validations/QDMMeasureGroupSchemaValidator";
 import {
   measureStore,
   routeHandlerStore,
@@ -171,7 +171,7 @@ const INITIAL_ALERT_MESSAGE = {
 
 const MeasureGroups = (props: MeasureGroupProps) => {
   useDocumentTitle("MADiE Edit Measure Population Criteria");
-  const defaultPopulationBasis = "boolean";
+  const defaultPopulationBasis = "true";
   const [expressionDefinitions, setExpressionDefinitions] = useState<
     Array<ExpressionDefinition>
   >([]);
@@ -269,6 +269,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     if (measure?.groups && measure?.groups[measureGroupNumber]) {
       // if we change to a measureGroup, by changing measureGroupNumber in sidenav
       // now that reinit is set up properly, just changing group, updates the form and formstate accurately
+      measure.groups[measureGroupNumber].scoring = measure?.scoring;
+      measure.groups[measureGroupNumber].populationBasis =
+        String(measure?.patientBasis) || "true";
       setGroup(measure?.groups[measureGroupNumber]);
     } else {
       if (measureGroupNumber >= measure?.groups?.length || !measure?.groups) {
@@ -276,7 +279,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
         setGroup({
           id: null,
           groupDescription: "",
-          scoring: "",
+          scoring: measure?.scoring,
           measureGroupTypes: [],
           rateAggregation: "",
           improvementNotation: "",
@@ -322,11 +325,11 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       improvementNotation: group?.improvementNotation || "",
       groupDescription: group?.groupDescription || "",
       stratifications: group?.stratifications || getFirstTwoStrats,
-      populationBasis: group?.populationBasis || defaultPopulationBasis,
+      populationBasis: String(measure?.patientBasis) || "true",
       scoringUnit: group?.scoringUnit || "", // autocomplete can init with string
     } as Group,
     enableReinitialize: true,
-    validationSchema: measureGroupSchemaValidator(
+    validationSchema: qdmMeasureGroupSchemaValidator(
       cqlDefinitionDataTypes,
       cqlFunctionDataTypes
     ),
@@ -408,20 +411,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     props.setIsFormDirty(formik.dirty);
   }, [formik.dirty]);
 
-  // Fetches all population basis options from db
-  // Should be executed only on initial load of the component
-  useEffect(() => {
-    measureServiceApi
-      .getAllPopulationBasisOptions()
-      .then((response) => setPopulationBasisValues(response))
-      .catch((err) =>
-        setAlertMessage({
-          type: "error",
-          message: err.message,
-          canClose: false,
-        })
-      );
-  }, []);
   // local discard check. Layout can't have access to a bound function
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
   const discardChanges = () => {
@@ -1163,7 +1152,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                       data-testid="save-measure-group-validation-message"
                       aria-live="polite" //this triggers every time the user is there.. this intended?
                     >
-                      {measureGroupSchemaValidator(
+                      {qdmMeasureGroupSchemaValidator(
                         cqlDefinitionDataTypes,
                         cqlFunctionDataTypes
                       ).isValidSync(formik.values)

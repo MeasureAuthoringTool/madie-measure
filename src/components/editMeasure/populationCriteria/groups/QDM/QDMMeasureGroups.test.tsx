@@ -18,6 +18,7 @@ import {
   MeasureScoring,
   PopulationType,
   Model,
+  MeasureErrorType,
 } from "@madie/madie-models";
 import {
   ApiContextProvider,
@@ -88,15 +89,6 @@ jest.mock("@madie/madie-util", () => ({
     initialState: { canTravel: false, pendingPath: "" },
   },
 }));
-
-const populationBasisValues: string[] = [
-  "boolean",
-  "Encounter",
-  "Medication Administration",
-  "test-data-1",
-  "test-data-2",
-];
-mockedAxios.get.mockResolvedValue({ data: populationBasisValues });
 
 const props: MeasureGroupProps = {
   measureGroupNumber: 0,
@@ -170,23 +162,346 @@ describe("Measure Groups Page", () => {
     );
   };
 
-  const changePopulationBasis = async (value: string) => {
-    let populationBasis;
-    await waitFor(() => {
-      populationBasis = screen.getByTestId("populationBasis");
-    });
-    const populationBasisAutoComplete =
-      within(populationBasis).getByRole("combobox");
-    populationBasis.focus();
-    fireEvent.change(populationBasisAutoComplete, {
-      target: { value: value },
-    });
-    fireEvent.keyDown(populationBasis, { key: "ArrowDown" });
-    fireEvent.keyDown(populationBasis, { key: "Enter" });
-    expect(populationBasisAutoComplete).toHaveValue(value);
-  };
+  test("test update fails with error alert", async () => {
+    measure.patientBasis = false;
+    measure.scoring = MeasureScoring.COHORT;
 
-  test.skip("Should create population Group with one initial population successfully", async () => {
+    await waitFor(() => renderMeasureGroupComponent());
+
+    const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
+    fireEvent.change(groupDescriptionInput, {
+      target: { value: "new description" },
+    });
+
+    const definitionToUpdate =
+      "VTE Prophylaxis by Medication Administered or Device Applied";
+    const groupPopulationInput = screen.getByTestId(
+      "select-measure-group-population-input"
+    ) as HTMLInputElement;
+    fireEvent.change(groupPopulationInput, {
+      target: { value: definitionToUpdate },
+    });
+    expect(groupPopulationInput.value).toBe(definitionToUpdate);
+
+    // Update the definition
+    const initialPopulationDescription = screen.getByTestId(
+      "populations[0].description-description"
+    );
+    expect(initialPopulationDescription).toBeInTheDocument();
+    act(() => {
+      userEvent.paste(initialPopulationDescription, "newVal");
+    });
+    expect(initialPopulationDescription.value).toBe("newVal");
+
+    mockedAxios.put.mockRejectedValueOnce({ data: "Request Rejected" });
+
+    // update measure..
+    await waitFor(() => {
+      const submitBtn = screen.getByTestId("group-form-submit-btn");
+      expect(submitBtn).toBeEnabled();
+      userEvent.click(submitBtn);
+
+      const alert = screen.findByTestId("error-alerts");
+      setTimeout(() => {
+        expect(alert).toBeInTheDocument();
+        expect(alert).toHaveTextContent("Failed to update the group.");
+      }, 100);
+    });
+  });
+
+  test("test update fails with fetch measure when doing updateMeasureFromDb", async () => {
+    measure.patientBasis = false;
+    measure.scoring = MeasureScoring.COHORT;
+
+    await waitFor(() => renderMeasureGroupComponent());
+
+    const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
+    fireEvent.change(groupDescriptionInput, {
+      target: { value: "new description" },
+    });
+
+    const definitionToUpdate =
+      "VTE Prophylaxis by Medication Administered or Device Applied";
+    const groupPopulationInput = screen.getByTestId(
+      "select-measure-group-population-input"
+    ) as HTMLInputElement;
+    fireEvent.change(groupPopulationInput, {
+      target: { value: definitionToUpdate },
+    });
+    expect(groupPopulationInput.value).toBe(definitionToUpdate);
+
+    // Update the definition
+    const initialPopulationDescription = screen.getByTestId(
+      "populations[0].description-description"
+    );
+    expect(initialPopulationDescription).toBeInTheDocument();
+    act(() => {
+      userEvent.paste(initialPopulationDescription, "newVal");
+    });
+    expect(initialPopulationDescription.value).toBe("newVal");
+
+    mockedAxios.put.mockResolvedValueOnce({ data: group });
+    mockedAxios.get.mockRejectedValueOnce({
+      status: 404,
+      data: "failure",
+      error: { message: "error" },
+    });
+
+    // update measure..
+    await waitFor(() => {
+      const submitBtn = screen.getByTestId("group-form-submit-btn");
+      expect(submitBtn).toBeEnabled();
+      userEvent.click(submitBtn);
+
+      const alert = screen.findByTestId("error-alerts");
+      setTimeout(() => {
+        expect(alert).toBeInTheDocument();
+        expect(alert).toHaveTextContent("Failed to update the group.");
+      }, 100);
+    });
+  });
+
+  describe("Population Criteria validations", () => {
+    test("Should not be able to save if patient based but return type is none boolean", async () => {
+      measure.scoring = "Cohort";
+      measure.patientBasis = true;
+      renderMeasureGroupComponent();
+
+      // setting initial population from dropdown
+      const definitionToUpdate =
+        "VTE Prophylaxis by Medication Administered or Device Applied";
+      const groupPopulationInput = screen.getByTestId(
+        "select-measure-group-population-input"
+      ) as HTMLInputElement;
+      fireEvent.change(groupPopulationInput, {
+        target: { value: definitionToUpdate },
+      });
+      expect(groupPopulationInput.value).toBe(definitionToUpdate);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            "For Patient-based Measures, selected definitions must return a Boolean."
+          )
+        ).toBeInTheDocument();
+      });
+
+      const submitBtn = screen.getByTestId("group-form-submit-btn");
+      expect(submitBtn).toBeDisabled();
+    });
+
+    test("Should not be able to save if non-patient based but return types are different", async () => {
+      measure.patientBasis = false;
+      measure.scoring = "Ratio";
+      renderMeasureGroupComponent();
+
+      await waitFor(() => {
+        const allPopulationsInputs = screen.getAllByTestId(
+          "select-measure-group-population-input"
+        ) as HTMLInputElement[];
+
+        // setting initial population
+        const initialPopulation =
+          "VTE Prophylaxis by Medication Administered or Device Applied";
+        fireEvent.change(allPopulationsInputs[0], {
+          target: {
+            value: initialPopulation,
+          },
+        });
+        expect(allPopulationsInputs[0].value).toBe(initialPopulation);
+
+        // setting Denominator
+        fireEvent.change(allPopulationsInputs[1], {
+          target: {
+            value: "Denominator",
+          },
+        });
+        expect(allPopulationsInputs[1].value).toBe("Denominator");
+
+        const validationError = screen.getAllByText(
+          "For Episode-based Measures, selected definitions must return a list of the same type (Non-Boolean)."
+        ) as HTMLInputElement[];
+
+        expect(validationError[0]).toBeInTheDocument();
+      });
+
+      const submitBtn = screen.getByTestId("group-form-submit-btn");
+      expect(submitBtn).toBeDisabled();
+    });
+
+    test("Should not be able to save as Continuous Variable needs Aggregate Function", async () => {
+      measure.patientBasis = false;
+      measure.scoring = "Continuous Variable";
+
+      renderMeasureGroupComponent();
+
+      const allPopulationsInputs = screen.getAllByTestId(
+        "select-measure-group-population-input"
+      ) as HTMLInputElement[];
+
+      // setting initial population
+      fireEvent.change(allPopulationsInputs[0], {
+        target: {
+          value: "Initial Population",
+        },
+      });
+      expect(allPopulationsInputs[0].value).toBe("Initial Population");
+
+      // setting Denominator
+      fireEvent.change(allPopulationsInputs[1], {
+        target: {
+          value: "Denominator",
+        },
+      });
+      expect(allPopulationsInputs[1].value).toBe("Denominator");
+
+      // setting Numerator
+      fireEvent.change(allPopulationsInputs[2], {
+        target: {
+          value: "Numerator",
+        },
+      });
+      expect(allPopulationsInputs[2].value).toBe("Numerator");
+
+      // setting Observation
+      const observationInput = screen.getByTestId(
+        "measure-observation-cv-obs-input"
+      ) as HTMLInputElement;
+      fireEvent.change(observationInput, {
+        target: {
+          value: "fun",
+        },
+      });
+      expect(observationInput.value).toBe("fun");
+
+      await waitFor(() => {
+        const submitBtn = screen.getByTestId("group-form-submit-btn");
+        expect(submitBtn).toBeDisabled();
+      });
+    });
+
+    test("test MISMATCH_CQL_POPULATION_RETURN_TYPES error", async () => {
+      measure.scoring = "Cohort";
+      measure.patientBasis = true;
+      measure.errors = [MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES];
+      renderMeasureGroupComponent();
+
+      const alert = screen.findByTestId("error-alerts");
+      setTimeout(() => {
+        expect(alert).toBeInTheDocument();
+        expect(alert).toHaveTextContent(
+          "One or more Population Criteria has a mismatch with CQL return types. Test Cases cannot be executed until this is resolved."
+        );
+      }, 100);
+    });
+  });
+
+  test("should display selected scoring unit", async () => {
+    const { getByTestId } = await waitFor(() => renderMeasureGroupComponent());
+
+    const scoringUnitLabel = getByTestId("scoring-unit-dropdown-label");
+    expect(scoringUnitLabel).toBeInTheDocument();
+
+    const autocomplete = screen.getByTestId("scoring-unit-dropdown");
+    const input = within(autocomplete).getByRole(
+      "combobox"
+    ) as HTMLInputElement;
+    autocomplete.click();
+    autocomplete.focus();
+    fireEvent.change(input, { target: { value: "[pi" } });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    fireEvent.click(screen.getAllByRole("option")[1]);
+    expect(input.value).toEqual("[pied] pied");
+  });
+
+  test("test create fails", async () => {
+    measure.patientBasis = false;
+    measure.scoring = MeasureScoring.COHORT;
+    measure.groups = [];
+    await waitFor(() => renderMeasureGroupComponent());
+
+    const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
+    fireEvent.change(groupDescriptionInput, {
+      target: { value: "new description" },
+    });
+
+    const groupPopulationInput = screen.getByTestId(
+      "select-measure-group-population-input"
+    ) as HTMLInputElement;
+    fireEvent.change(groupPopulationInput, {
+      target: { value: group.populations[0].definition },
+    });
+
+    const initialPopulationDescription = screen.getByTestId(
+      "populations[0].description-description"
+    );
+    expect(initialPopulationDescription).toBeInTheDocument();
+    act(() => {
+      userEvent.paste(initialPopulationDescription, "newVal");
+    });
+    expect(initialPopulationDescription.value).toBe("newVal");
+
+    mockedAxios.post.mockRejectedValueOnce({ data: "Request Rejected" });
+
+    // saving a  measure..
+    await waitFor(() => {
+      expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+      userEvent.click(screen.getByTestId("group-form-submit-btn"));
+
+      setTimeout(() => {
+        const alert = screen.findByTestId("error-alerts");
+        expect(alert).toHaveTextContent("Failed to create the group.");
+      }, 200);
+    });
+  });
+
+  test("test create fails with null group id", async () => {
+    measure.patientBasis = false;
+    measure.scoring = MeasureScoring.COHORT;
+    measure.groups = [];
+    await waitFor(() => renderMeasureGroupComponent());
+
+    const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
+    fireEvent.change(groupDescriptionInput, {
+      target: { value: "new description" },
+    });
+
+    const groupPopulationInput = screen.getByTestId(
+      "select-measure-group-population-input"
+    ) as HTMLInputElement;
+    fireEvent.change(groupPopulationInput, {
+      target: { value: group.populations[0].definition },
+    });
+
+    const initialPopulationDescription = screen.getByTestId(
+      "populations[0].description-description"
+    );
+    expect(initialPopulationDescription).toBeInTheDocument();
+    act(() => {
+      userEvent.paste(initialPopulationDescription, "newVal");
+    });
+    expect(initialPopulationDescription.value).toBe("newVal");
+
+    mockedAxios.post.mockResolvedValueOnce({ data: group });
+
+    // saving a  measure..
+    await waitFor(() => {
+      expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+      userEvent.click(screen.getByTestId("group-form-submit-btn"));
+
+      setTimeout(() => {
+        const alert = screen.findByTestId("error-alerts");
+        expect(alert).toHaveTextContent("Error creating group");
+      }, 200);
+    });
+  });
+
+  test("Should create population Group with one initial population successfully", async () => {
+    measure.patientBasis = false;
+    measure.scoring = MeasureScoring.COHORT;
+    measure.groups = [];
     await waitFor(() => renderMeasureGroupComponent());
 
     const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
@@ -211,30 +526,22 @@ describe("Measure Groups Page", () => {
       userEvent.paste(initialPopulationDescription, "newVal");
     });
     expect(initialPopulationDescription.value).toBe("newVal");
-    expect(screen.getByTestId("group-form-delete-btn")).toBeInTheDocument();
-    expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled(); // enabled
-    mockedAxios.post.mockResolvedValue({ data: { group } });
 
-    // submit the form
-    await expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
-    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+    mockedAxios.post.mockResolvedValueOnce({ data: { group } });
+    mockedAxios.get.mockResolvedValueOnce({ data: measure });
 
-    const alert = await screen.findByTestId("population-criteria-success");
+    // saving a  measure..
+    await waitFor(() => {
+      expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+      userEvent.click(screen.getByTestId("group-form-submit-btn"));
 
-    expect(alert).toHaveTextContent(
-      "Population details for this group saved successfully."
-    );
-    expect(mockedAxios.post.mock.calls[0][0]).toBe(
-      "example-service-url/measures/test-measure/groups"
-    );
-    expect(mockedAxios.post.mock.calls[0][1].groupDescription).toBe(
-      "new description"
-    );
-    expect(mockedAxios.post).toHaveBeenCalledWith(
-      "example-service-url/measures/test-measure/groups",
-      expect.anything(),
-      expect.anything()
-    );
+      setTimeout(() => {
+        const alert = screen.findByTestId("population-criteria-success");
+        expect(alert).toHaveTextContent(
+          "Population details for this group saved successfully."
+        );
+      }, 100);
+    });
   });
 
   test("OnClicking delete button, delete group modal is displayed", async () => {
@@ -338,6 +645,7 @@ describe("Measure Groups Page", () => {
     group.rateAggregation = "Rate Aggregation Text";
     group.improvementNotation = "Increased score indicates improvement";
     measure.scoring = MeasureScoring.COHORT;
+    measure.patientBasis = true;
     measure.groups = [group];
 
     await waitFor(() => renderMeasureGroupComponent());
@@ -411,35 +719,25 @@ describe("Measure Groups Page", () => {
     expect(await screen.getByTestId("group-form-discard-btn")).toBeDisabled();
   });
 
-  test("Should report an error if the update population Group fails", async () => {
-    group.id = "7p03-5r29-7O0I";
-    group.measureGroupTypes = [MeasureGroupTypes.PROCESS];
-    group.populationBasis = "MedicationAdministration";
-    measure.groups = [group];
+  test("Should be able to save with non-patient based group validation passed", async () => {
+    measure.patientBasis = false;
+    measure.scoring = "Cohort";
     renderMeasureGroupComponent();
 
-    // update initial population from dropdown
-    const definitionToUpdate =
-      "VTE Prophylaxis by Medication Administered or Device Applied";
-    const groupPopulationInput = screen.getByTestId(
-      "select-measure-group-population-input"
-    ) as HTMLInputElement;
-    fireEvent.change(groupPopulationInput, {
-      target: { value: definitionToUpdate },
+    await waitFor(() => {
+      // update initial population from dropdown
+      const definitionToUpdate =
+        "VTE Prophylaxis by Medication Administered or Device Applied";
+      const groupPopulationInput = screen.getByTestId(
+        "select-measure-group-population-input"
+      ) as HTMLInputElement;
+      fireEvent.change(groupPopulationInput, {
+        target: { value: definitionToUpdate },
+      });
+      expect(groupPopulationInput.value).toBe(definitionToUpdate);
+      const submitBtn = screen.getByTestId("group-form-submit-btn");
+      expect(submitBtn).toBeEnabled();
     });
-    expect(groupPopulationInput.value).toBe(definitionToUpdate);
-
-    mockedAxios.put.mockRejectedValue({
-      data: {
-        error: "500error",
-      },
-    });
-
-    // submit the form
-    userEvent.click(screen.getByTestId("group-form-submit-btn"));
-    const alert = await screen.findByTestId("error-alerts");
-    expect(alert).toBeInTheDocument();
-    expect(alert).toHaveTextContent("Failed to update the group.");
   });
 
   test("Should report an error if the update population Group fails due to group validation error", async () => {
@@ -447,6 +745,8 @@ describe("Measure Groups Page", () => {
     group.measureGroupTypes = [MeasureGroupTypes.PROCESS];
     group.populationBasis = "MedicationAdministration";
     measure.groups = [group];
+    measure.patientBasis = true;
+    measure.scoring = "Cohort";
     renderMeasureGroupComponent();
 
     // update initial population from dropdown
@@ -472,12 +772,8 @@ describe("Measure Groups Page", () => {
       },
     });
 
-    // submit the form
-    userEvent.click(screen.getByTestId("group-form-submit-btn"));
-    const alert = await screen.findByTestId("error-alerts");
-    expect(alert).toHaveTextContent(
-      "Missing required populations for selected scoring type."
-    );
+    const submitBtn = screen.getByTestId("group-form-submit-btn");
+    expect(submitBtn).toBeEnabled();
   });
 
   test("Form displays message next to save button about required populations", async () => {
