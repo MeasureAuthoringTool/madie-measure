@@ -102,6 +102,8 @@ const props: MeasureGroupProps = {
   measureGroupNumber: 0,
   setMeasureGroupNumber: jest.fn,
   setIsFormDirty: jest.fn,
+  measureId: "testMeasureId",
+  sideNavLinks: jest.fn,
 };
 
 describe("Measure Groups Page", () => {
