@@ -29,7 +29,7 @@ export function PopulationCriteriaHome() {
   const canEdit: boolean = checkUserCanEdit(measure?.createdBy, measure?.acls);
   const [measureGroupNumber, setMeasureGroupNumber] = useState<any>(() => {
     if (path.includes("/groups")) {
-      if (+groupNumber) {
+      if (+groupNumber && +groupNumber > 0) {
         return +groupNumber - 1;
       } else {
         history.push("/404");
@@ -75,17 +75,6 @@ export function PopulationCriteriaHome() {
     ]);
   }, [groupsBaseUrl, measure?.groups]);
 
-  // useEffect(() => {
-  //   if (path.includes("/groups")) {
-  //     if (+gid) {
-  //       console.log("here")
-  //       setMeasureGroupNumber(+gid - 1);
-  //     } else {
-  //       history.push("/404");
-  //     }
-  //   }
-  // }, [location.pathname]);
-
   // lets dynamically load our measureGroups component based on weather it's QDM or QICore
   // this needs to be memoized as it loses state otherwise and refreshes on change
 
@@ -123,6 +112,7 @@ export function PopulationCriteriaHome() {
           measureGroupNumber={measureGroupNumber}
           setMeasureGroupNumber={setMeasureGroupNumber}
           measureId={measure?.id}
+          sideNavLinks={sideNavLinks}
         />
       )}
       {/* what's a better way to say if QDM or QICore? 

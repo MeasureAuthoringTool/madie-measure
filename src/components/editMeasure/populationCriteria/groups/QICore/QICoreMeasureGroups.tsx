@@ -159,6 +159,7 @@ export interface MeasureGroupProps {
   setMeasureGroupNumber?: (value: number) => void;
   setIsFormDirty?: (value: boolean) => void;
   measureId?: string;
+  sideNavLinks: any;
 }
 
 const INITIAL_ALERT_MESSAGE = {
@@ -259,6 +260,14 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       measureServiceApi.getReturnTypesForAllCqlDefinitions(measure?.elmJson)
     );
   }, [measure?.elmJson]);
+
+  useEffect(() => {
+    // on page refresh redirects to last PC created
+    if (measureGroupNumber > props.sideNavLinks[0]?.groups?.length) {
+      props.setMeasureGroupNumber(props.sideNavLinks[0]?.groups?.length - 1);
+      history.push(groupsBaseUrl + "/" + props.sideNavLinks[0]?.groups?.length);
+    }
+  }, [props.sideNavLinks && props.sideNavLinks[0]?.groups?.length]);
 
   useEffect(() => {
     if (measure?.groups && measure?.groups[measureGroupNumber]) {

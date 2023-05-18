@@ -162,6 +162,7 @@ export interface MeasureGroupProps {
   setMeasureGroupNumber?: (value: number) => void;
   setIsFormDirty?: (value: boolean) => void;
   measureId: string;
+  sideNavLinks: any;
 }
 
 const INITIAL_ALERT_MESSAGE = {
@@ -263,13 +264,20 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     );
   }, [measure?.elmJson]);
 
+  useEffect(() => {
+    // on page refresh redirects to last PC created
+    if (measureGroupNumber > props.sideNavLinks[0]?.groups?.length) {
+      props.setMeasureGroupNumber(props.sideNavLinks[0]?.groups?.length - 1);
+      history.push(groupsBaseUrl + "/" + props.sideNavLinks[0]?.groups?.length);
+    }
+  }, [props.sideNavLinks && props.sideNavLinks[0]?.groups?.length]);
+
   // we're going to pass this to initial values to prevent infinite rerenders on enableReinit
   const getFirstTwoStrats = useMemo(() => {
     return getEmptyStrats(2);
   }, [getEmptyStrat]);
 
   useEffect(() => {
-    //console.log(measureGroupNumber, "here", props.measureGroupNumber);
     // works
     if (measure?.groups && measure?.groups[measureGroupNumber]) {
       // if we change to a measureGroup, by changing measureGroupNumber in sidenav
@@ -560,21 +568,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
         handleDialogClose();
       });
   };
-
-  //Testing on load redirect to previous page
-  // useEffect(() => {
-  //   console.log("here", measureGroupNumber);
-  //   const handleBeforeUnload = (event) => {
-  //     event.preventDefault();
-  //     window.history.go(-1);
-  //   };
-
-  //   window.addEventListener("beforeunload", handleBeforeUnload);
-
-  //   return () => {
-  //     window.removeEventListener("beforeunload", handleBeforeUnload);
-  //   };
-  // }, []);
 
   // Provides dropdown options for stratification
   // contains a default value along with all available CQL Definitions
