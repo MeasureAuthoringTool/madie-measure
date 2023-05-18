@@ -159,10 +159,10 @@ describe("Measure Groups Page", () => {
   const renderMeasureGroupComponent = () => {
     return render(
       <MemoryRouter
-        initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
+        initialEntries={[{ pathname: "/measures/test-measure/edit/groups/1" }]}
       >
         <ApiContextProvider value={serviceConfig}>
-          <Route path="/measures/test-measure/edit/groups">
+          <Route path="/measures/test-measure/edit/groups/:groupNumber">
             <MeasureGroups {...props} />
           </Route>
         </ApiContextProvider>
