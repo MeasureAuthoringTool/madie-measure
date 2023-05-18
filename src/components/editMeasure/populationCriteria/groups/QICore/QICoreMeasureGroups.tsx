@@ -176,6 +176,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   >([]);
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
+  const [refreshFlag, setRefreshFlag] = useState<boolean>(true);
 
   const canEdit = checkUserCanEdit(
     measure?.createdBy,
@@ -223,6 +224,13 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       measureGroupNumber: undefined,
     });
 
+  // console.log(
+  //   "measureGroupNumbe: ",
+  //   measureGroupNumber,
+  //   "props value after -1 from url:",
+  //   props.measureGroupNumber
+  // );
+
   const [visibleStrats, setVisibleStrats] = useState<number>(2);
   useEffect(() => {
     if (addStratClicked && visibleStrats > 2) {
@@ -261,13 +269,19 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     );
   }, [measure?.elmJson]);
 
-  useEffect(() => {
-    // on page refresh redirects to last PC created
-    if (measureGroupNumber > props.sideNavLinks[0]?.groups?.length) {
-      props.setMeasureGroupNumber(props.sideNavLinks[0]?.groups?.length - 1);
-      history.push(groupsBaseUrl + "/" + props.sideNavLinks[0]?.groups?.length);
-    }
-  }, [props.sideNavLinks && props.sideNavLinks[0]?.groups?.length]);
+  // useEffect(() => {
+  //   // on page refresh redirects to last PC created
+  //   console.log(measure?.groups && measure?.groups.length)
+
+  //     console.log("mgpnumber", measureGroupNumber, "sidenav:",props.sideNavLinks[0]?.groups?.length);
+  //     if (measure?.groups && measure?.groups.length && measureGroupNumber > props.sideNavLinks[0]?.groups?.length) {
+  //       console.log("mgpnumber", measureGroupNumber+1, "sidenav:",props.sideNavLinks[0]?.groups?.length);
+  //       props.setMeasureGroupNumber(measure?.groups.length - 1);
+  //       history.push(groupsBaseUrl + "/" + (measure?.groups.length));
+
+  //   }
+
+  // }, [props.sideNavLinks && props.sideNavLinks[0]?.groups?.length,measure?.groups]);
 
   useEffect(() => {
     if (measure?.groups && measure?.groups[measureGroupNumber]) {
@@ -410,6 +424,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   // setIsFormDirty is used for dirty check while navigating between different groups
   const { updateRouteHandlerState } = routeHandlerStore;
   useEffect(() => {
+    //console.log("inside QDM:", formik.dirty);
     updateRouteHandlerState({
       canTravel: !formik.dirty,
       pendingRoute: "",

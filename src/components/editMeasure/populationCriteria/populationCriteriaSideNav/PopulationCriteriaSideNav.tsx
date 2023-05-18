@@ -62,6 +62,7 @@ export default function PopulationCriteriaSideNav(
       setInitiatedPayload({ action: "add", value: null });
       setDiscardDialogOpen(true);
     } else {
+      // console.log("here initiate")
       addNewBlankMeasureGroup();
     }
   };
@@ -73,21 +74,19 @@ export default function PopulationCriteriaSideNav(
   const initiateNavigateGroupClick = (e) => {
     e.preventDefault();
     const groupNumber = Number(e.target.id);
-    // edge case
-    if (pathname !== groupsBaseUrl) {
-      history.push(groupsBaseUrl + "/" + (groupNumber + 1));
-    }
     if (groupNumber !== measureGroupNumber) {
       if (isFormDirty) {
+        // console.log("could be main")
         setInitiatedPayload({ action: "navigate", value: groupNumber });
         setDiscardDialogOpen(true);
       } else {
         handleMeasureGroupNavigation(groupNumber);
+        history.push(groupsBaseUrl + "/" + (groupNumber + 1));
       }
     } else {
       handleMeasureGroupNavigation(groupNumber);
+      history.push(groupsBaseUrl + "/" + (groupNumber + 1));
     }
-    history.push(groupsBaseUrl + "/" + (groupNumber + 1));
   };
 
   const addNewBlankMeasureGroup = () => {
@@ -105,13 +104,18 @@ export default function PopulationCriteriaSideNav(
       newMeasureGroupLink,
     ];
     setSideNavLinks([...sideNavLinks]);
+    //console.log("in addnew  blank measure group", newMeasureGroupNumber)
+
+    //history.replace(groupsBaseUrl + "/" + newMeasureGroupNumber);
     onClose();
-    history.push(groupsBaseUrl + "/" + newMeasureGroupNumber);
+    initiatedPayload?.action !== "add" &&
+      history.push(groupsBaseUrl + "/" + newMeasureGroupNumber);
   };
 
   // we need to pass a bound function to discard.
   const onContinue = () => {
     if (initiatedPayload.action === "add") {
+      //console.log("on continue")
       addNewBlankMeasureGroup();
     } else if (initiatedPayload.action === "navigate") {
       handleMeasureGroupNavigation(initiatedPayload.value);
