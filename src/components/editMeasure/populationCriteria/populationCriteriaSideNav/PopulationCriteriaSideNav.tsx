@@ -51,36 +51,21 @@ export default function PopulationCriteriaSideNav(
     !!featureFlags?.populationCriteriaTabs;
   const groupsBaseUrl = "/measures/" + measureId + "/edit/groups";
   const QdmReportingBaseUrl = "/measures/" + measureId + "/edit/reporting";
-  // a bool for when discard is open triggered by an initiated state
-  const [discardDialogOpen, setDiscardDialogOpen] = useState<boolean>(false);
-  // action payload? like a redux operation
-  const [initiatedPayload, setInitiatedPayload] = useState<any>(null);
 
   const initiateBlankMeasureGroupClick = (e) => {
     e.preventDefault();
-    if (isFormDirty) {
-      setInitiatedPayload({ action: "add", value: null });
-      setDiscardDialogOpen(true);
-    } else {
-      addNewBlankMeasureGroup();
-    }
+    addNewBlankMeasureGroup();
   };
 
   const handleMeasureGroupNavigation = (val: number) => {
-    setMeasureGroupNumber(val);
+    history.push(groupsBaseUrl + "/" + (val + 1));
   };
 
   const initiateNavigateGroupClick = (e) => {
     e.preventDefault();
     const groupNumber = Number(e.target.id);
     if (groupNumber !== measureGroupNumber) {
-      if (isFormDirty) {
-        setInitiatedPayload({ action: "navigate", value: groupNumber });
-        setDiscardDialogOpen(true);
-      } else {
-        handleMeasureGroupNavigation(groupNumber);
-        history.push(groupsBaseUrl + "/" + (groupNumber + 1));
-      }
+      history.push(groupsBaseUrl + "/" + (groupNumber + 1));
     } else {
       handleMeasureGroupNavigation(groupNumber);
       history.push(groupsBaseUrl + "/" + (groupNumber + 1));
@@ -91,7 +76,6 @@ export default function PopulationCriteriaSideNav(
     var measureGroups = sideNavLinks.find((link) => link.groups);
     const index = sideNavLinks.indexOf(measureGroups);
     const newMeasureGroupNumber = measureGroups.groups.length + 1;
-    setMeasureGroupNumber(measureGroups.groups.length);
     const newMeasureGroupLink = {
       title: `Criteria ${newMeasureGroupNumber}`,
       href: groupsBaseUrl + "/" + newMeasureGroupNumber,
@@ -102,24 +86,7 @@ export default function PopulationCriteriaSideNav(
       newMeasureGroupLink,
     ];
     setSideNavLinks([...sideNavLinks]);
-    onClose();
-    initiatedPayload?.action !== "add" &&
-      history.push(groupsBaseUrl + "/" + newMeasureGroupNumber);
-  };
-
-  // we need to pass a bound function to discard.
-  const onContinue = () => {
-    if (initiatedPayload.action === "add") {
-      addNewBlankMeasureGroup();
-    } else if (initiatedPayload.action === "navigate") {
-      handleMeasureGroupNavigation(initiatedPayload.value);
-    }
-    onClose();
-  };
-
-  const onClose = () => {
-    setDiscardDialogOpen(false);
-    setInitiatedPayload(null);
+    history.push(groupsBaseUrl + "/" + newMeasureGroupNumber);
   };
 
   const handlePopulationCriteriaCollapse = (tabInfo) => {
@@ -274,12 +241,6 @@ export default function PopulationCriteriaSideNav(
           </Tabs>
         )}
       </Nav>
-
-      <MadieDiscardDialog
-        open={discardDialogOpen}
-        onClose={onClose}
-        onContinue={onContinue}
-      />
     </OuterWrapper>
   );
 }

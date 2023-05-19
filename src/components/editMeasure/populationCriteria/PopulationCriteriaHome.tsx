@@ -27,15 +27,7 @@ export function PopulationCriteriaHome() {
 
   let history = useHistory();
   const canEdit: boolean = checkUserCanEdit(measure?.createdBy, measure?.acls);
-  const [measureGroupNumber, setMeasureGroupNumber] = useState<any>(() => {
-    if (path.includes("/groups")) {
-      if (+groupNumber && +groupNumber > 0) {
-        return +groupNumber - 1;
-      } else {
-        history.push("/404");
-      }
-    }
-  });
+  const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(null);
   const [sideNavLinks, setSideNavLinks] = useState<Array<any>>();
   const [isFormDirty, setIsFormDirty] = useState<boolean>(false);
 
@@ -47,6 +39,18 @@ export function PopulationCriteriaHome() {
     // return measure?.model === Model.QDM_5_6;
     return measure?.model.includes("QDM");
   })();
+
+  useEffect(() => {
+    if (path.includes("/groups")) {
+      if (+groupNumber && +groupNumber > 0) {
+        setMeasureGroupNumber(+groupNumber - 1);
+      } else {
+        history.push("/404");
+      }
+    } else {
+      setMeasureGroupNumber(null);
+    }
+  }, [groupNumber]);
 
   /* This useEffect generates information required for left side nav bar
    * If a measure doesn't have any groups, then a new one is added. */
