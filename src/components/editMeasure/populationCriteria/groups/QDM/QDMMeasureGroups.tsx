@@ -162,7 +162,6 @@ export interface MeasureGroupProps {
   setMeasureGroupNumber?: (value: number) => void;
   setIsFormDirty?: (value: boolean) => void;
   measureId: string;
-  sideNavLinks: any;
 }
 
 const INITIAL_ALERT_MESSAGE = {
@@ -263,14 +262,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       measureServiceApi.getReturnTypesForAllCqlDefinitions(measure?.elmJson)
     );
   }, [measure?.elmJson]);
-
-  // useEffect(() => {
-  //   // on page refresh redirects to last PC created
-  //   if (measureGroupNumber+1 > props.sideNavLinks[0]?.groups?.length) {
-  //     props.setMeasureGroupNumber(props.sideNavLinks[0]?.groups?.length - 1);
-  //     history.push(groupsBaseUrl + "/" + props.sideNavLinks[0]?.groups?.length);
-  //   }
-  // }, [props.sideNavLinks && props.sideNavLinks[0]?.groups?.length]);
 
   // we're going to pass this to initial values to prevent infinite rerenders on enableReinit
   const getFirstTwoStrats = useMemo(() => {
@@ -417,7 +408,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   // setIsFormDirty is used for dirty check while navigating between different groups
   const { updateRouteHandlerState } = routeHandlerStore;
   useEffect(() => {
-    //console.log("inside QDM:", formik.dirty);
     updateRouteHandlerState({
       canTravel: !formik.dirty,
       pendingRoute: "",

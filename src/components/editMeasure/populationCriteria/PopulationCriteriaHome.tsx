@@ -112,7 +112,6 @@ export function PopulationCriteriaHome() {
           measureGroupNumber={measureGroupNumber}
           setMeasureGroupNumber={setMeasureGroupNumber}
           measureId={measure?.id}
-          sideNavLinks={sideNavLinks}
         />
       )}
       {/* what's a better way to say if QDM or QICore? 

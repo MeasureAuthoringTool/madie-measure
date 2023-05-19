@@ -62,7 +62,6 @@ export default function PopulationCriteriaSideNav(
       setInitiatedPayload({ action: "add", value: null });
       setDiscardDialogOpen(true);
     } else {
-      // console.log("here initiate")
       addNewBlankMeasureGroup();
     }
   };
@@ -76,7 +75,6 @@ export default function PopulationCriteriaSideNav(
     const groupNumber = Number(e.target.id);
     if (groupNumber !== measureGroupNumber) {
       if (isFormDirty) {
-        // console.log("could be main")
         setInitiatedPayload({ action: "navigate", value: groupNumber });
         setDiscardDialogOpen(true);
       } else {
@@ -104,9 +102,6 @@ export default function PopulationCriteriaSideNav(
       newMeasureGroupLink,
     ];
     setSideNavLinks([...sideNavLinks]);
-    //console.log("in addnew  blank measure group", newMeasureGroupNumber)
-
-    //history.replace(groupsBaseUrl + "/" + newMeasureGroupNumber);
     onClose();
     initiatedPayload?.action !== "add" &&
       history.push(groupsBaseUrl + "/" + newMeasureGroupNumber);
@@ -115,7 +110,6 @@ export default function PopulationCriteriaSideNav(
   // we need to pass a bound function to discard.
   const onContinue = () => {
     if (initiatedPayload.action === "add") {
-      //console.log("on continue")
       addNewBlankMeasureGroup();
     } else if (initiatedPayload.action === "navigate") {
       handleMeasureGroupNavigation(initiatedPayload.value);
