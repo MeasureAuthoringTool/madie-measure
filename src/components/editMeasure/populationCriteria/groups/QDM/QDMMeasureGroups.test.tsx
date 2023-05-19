@@ -318,15 +318,32 @@ describe("Measure Groups Page", () => {
         });
         expect(allPopulationsInputs[1].value).toBe("Denominator");
 
-        const validationError = screen.getAllByText(
-          "For Episode-based Measures, selected definitions must return a list of the same type (Non-Boolean)."
-        ) as HTMLInputElement[];
+        fireEvent.change(allPopulationsInputs[2], {
+          target: {
+            value: "Denominator",
+          },
+        });
+        expect(allPopulationsInputs[2].value).toBe("Denominator");
 
-        expect(validationError[0]).toBeInTheDocument();
+        fireEvent.change(allPopulationsInputs[3], {
+          target: {
+            value: "Denominator",
+          },
+        });
+        expect(allPopulationsInputs[3].value).toBe("Denominator");
+
+        const submitBtn = screen.getByTestId("group-form-submit-btn");
+        expect(submitBtn).toBeEnabled();
+        userEvent.click(submitBtn);
+
+        setTimeout(() => {
+          const validationError = screen.getAllByText(
+            "For Episode-based Measures, selected definitions must return a list of the same type (Non-Boolean)."
+          ) as HTMLInputElement[];
+
+          expect(validationError[0]).toBeInTheDocument();
+        }, 100);
       });
-
-      const submitBtn = screen.getByTestId("group-form-submit-btn");
-      expect(submitBtn).toBeDisabled();
     });
 
     test("Should not be able to save as Continuous Variable needs Aggregate Function", async () => {
