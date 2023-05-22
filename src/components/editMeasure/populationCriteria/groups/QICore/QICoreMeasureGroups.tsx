@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useState } from "react";
-import { useRouteMatch, useLocation } from "react-router-dom";
+import { useRouteMatch, useLocation, useHistory } from "react-router-dom";
 import tw, { styled } from "twin.macro";
 import * as ucum from "@lhncbc/ucum-lhc";
 import "styled-components/macro";
@@ -158,6 +158,7 @@ export interface MeasureGroupProps {
   measureGroupNumber?: number;
   setMeasureGroupNumber?: (value: number) => void;
   setIsFormDirty?: (value: boolean) => void;
+  measureId?: string;
 }
 
 const INITIAL_ALERT_MESSAGE = {
@@ -174,6 +175,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   >([]);
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
+  const [refreshFlag, setRefreshFlag] = useState<boolean>(true);
 
   const canEdit = checkUserCanEdit(
     measure?.createdBy,
@@ -205,8 +207,11 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     setToastOpen(open);
   };
 
+  const groupsBaseUrl = "/measures/" + props.measureId + "/edit/groups";
+  const history = useHistory();
   const [activeTab, setActiveTab] = useState<string>("populations");
-  const measureGroupNumber = props.measureGroupNumber;
+  const measureGroupNumber =
+    props.measureGroupNumber - 1 < 0 ? 0 : props.measureGroupNumber;
   const [group, setGroup] = useState<Group>();
   const [groupWarningDialogProps, setGroupWarningDialogProps] = useState({
     open: false,
@@ -503,17 +508,15 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           }
           const updatedMeasure = await updateMeasureFromDb(measure.id);
 
-          //can be removed when validations for add new group is implemented
-          updatedMeasure?.groups
-            ? props.setMeasureGroupNumber(updatedMeasure?.groups.length - 1)
-            : props.setMeasureGroupNumber(0);
+          return updatedMeasure;
         })
-        .then(() => {
+        .then((updatedMeasure) => {
           handleToast(
             "success",
             "Population details for this group saved successfully.",
             true
           );
+          history.push(groupsBaseUrl + "/" + updatedMeasure?.groups.length);
         })
         .catch((error) => {
           setAlertMessage({
@@ -536,10 +539,11 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       .deleteMeasureGroup(measure?.groups[measureGroupNumber]?.id, measure.id)
       .then((response) => {
         updateMeasure(response);
-        measure?.groups &&
-          props.setMeasureGroupNumber(
-            measureGroupNumber === 0 ? 0 : measureGroupNumber - 1
-          );
+        history.push(
+          groupsBaseUrl +
+            "/" +
+            (measureGroupNumber === 0 ? 1 : measureGroupNumber)
+        );
         handleDialogClose();
       });
   };
@@ -691,7 +695,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
               modalType={groupWarningDialogProps?.modalType}
             />
           )}
-          {location.pathname === path && (
+          {path.includes("/groups") && (
             <>
               <div tw="flex pb-2 pt-6">
                 <h2 tw="w-1/2 mb-0" data-testid="title" id="title">
