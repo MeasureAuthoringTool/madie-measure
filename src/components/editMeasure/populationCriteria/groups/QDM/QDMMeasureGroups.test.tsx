@@ -290,6 +290,33 @@ describe("Measure Groups Page", () => {
       expect(submitBtn).toBeDisabled();
     });
 
+    test("Should not be able to save if non-patient based but return type is boolean", async () => {
+      measure.scoring = "Cohort";
+      measure.patientBasis = false;
+      renderMeasureGroupComponent();
+
+      // setting initial population from dropdown
+      const definitionToUpdate = "boolIpp";
+      const groupPopulationInput = screen.getByTestId(
+        "select-measure-group-population-input"
+      ) as HTMLInputElement;
+      fireEvent.change(groupPopulationInput, {
+        target: { value: definitionToUpdate },
+      });
+      expect(groupPopulationInput.value).toBe(definitionToUpdate);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            "For Episode-based Measures, selected definitions must return a list of the same type (Non-Boolean)."
+          )
+        ).toBeInTheDocument();
+      });
+
+      const submitBtn = screen.getByTestId("group-form-submit-btn");
+      expect(submitBtn).toBeDisabled();
+    });
+
     test("Should not be able to save if non-patient based but return types are different", async () => {
       measure.patientBasis = false;
       measure.scoring = "Ratio";

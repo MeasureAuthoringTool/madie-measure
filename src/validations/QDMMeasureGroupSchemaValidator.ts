@@ -99,8 +99,7 @@ const returnTypeFunctionCheckOptions = (populationBasis, functionDataTypes) => {
           functionDataTypes[_.camelCase(value)]
         ) {
           return (
-            functionDataTypes[_.camelCase(value)].toLowerCase() ===
-            `${populationBasis}`.toLowerCase()
+            functionDataTypes[_.camelCase(value)].toLowerCase() === "boolean"
           );
         }
         return true;
