@@ -14,6 +14,7 @@ import {
   ElmTranslationExternalError,
   parseContent,
   synchingEditorCqlContent,
+  isUsingEmpty,
   validateContent,
 } from "@madie/madie-editor";
 import { checkUserCanEdit, measureStore } from "@madie/madie-util";
@@ -396,7 +397,7 @@ describe("MeasureEditor component", () => {
         model: "QI-Core v4.1.1",
         revisionNumber: "1",
         state: "",
-        version: "1.000",
+        version: "1.0.000",
         acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
       },
       { headers: { Authorization: "Bearer test.jwt" } }
@@ -419,8 +420,10 @@ describe("MeasureEditor component", () => {
     (synchingEditorCqlContent as jest.Mock)
       .mockClear()
       .mockImplementation(() => {
-        return "library AdvancedIllnessandFrailtyExclusion version '1.0.001'";
+        return "library AdvancedIllnessandFrailtyExclusion version '1.0.001'\nusing QI-Core version '4.1.1'";
       });
+
+    isUsingEmpty.mockClear().mockImplementation(() => false);
 
     const { getByTestId } = renderEditor(measure);
     const editorContainer = (await getByTestId(
@@ -430,7 +433,7 @@ describe("MeasureEditor component", () => {
     fireEvent.change(getByTestId("measure-editor"), {
       target: {
         value:
-          "library AdvancedIllnessandFrailtyExclusion versiontest '5.0.000'",
+          "library AdvancedIllnessandFrailtyExclusion versiontest '5.0.000'\nusing QI-Core version '4.1.1'",
       },
     });
     parseContent.mockClear().mockImplementation(() => ["Test error"]);
@@ -444,7 +447,7 @@ describe("MeasureEditor component", () => {
     expect(mockedAxios.put).toHaveBeenCalledWith(
       "madie.com/measures/abcd-pqrs-xyz",
       {
-        cql: "library AdvancedIllnessandFrailtyExclusion version '1.0.001'",
+        cql: "library AdvancedIllnessandFrailtyExclusion version '1.0.001'\nusing QI-Core version '4.1.1'",
         cqlErrors: true,
         cqlLibraryName: "",
         createdAt: "",
@@ -461,7 +464,7 @@ describe("MeasureEditor component", () => {
         model: "QI-Core v4.1.1",
         revisionNumber: "1",
         state: "",
-        version: "1.000",
+        version: "1.0.000",
         acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
       },
       { headers: { Authorization: "Bearer test.jwt" } }

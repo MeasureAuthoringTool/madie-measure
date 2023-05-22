@@ -3,6 +3,7 @@ import React, { ChangeEvent } from "react";
 export const parseContent = jest.fn().mockImplementation((content) => []);
 export const validateContent = jest.fn().mockImplementation((content) => []);
 export const synchingEditorCqlContent = jest.fn();
+export const isUsingEmpty = jest.fn();
 
 export function MadieEditor({ onChange, value, inboundAnnotations }) {
   return (
