@@ -7,12 +7,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import "../../details/EditMeasureSideBarNav.scss";
 import "../../../common/madie-link.scss";
-import {
-  DSLink,
-  MadieDiscardDialog,
-  Tabs,
-  Tab,
-} from "@madie/madie-design-system/dist/react";
+import { DSLink, Tabs, Tab } from "@madie/madie-design-system/dist/react";
 import { useFeatureFlags } from "@madie/madie-util";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
