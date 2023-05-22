@@ -27,12 +27,12 @@ const groupsBaseUrl = "/measures/" + "testMeasureId" + "/edit/groups";
 const measureGroups = [
   {
     title: "Criteria 1",
-    href: groupsBaseUrl+"/1",
+    href: groupsBaseUrl + "/1",
     dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
   },
   {
     title: "Criteria 2",
-    href: groupsBaseUrl+"/2",
+    href: groupsBaseUrl + "/2",
     dataTestId: "leftPanelMeasureInformation-MeasureGroup2",
   },
 ];
