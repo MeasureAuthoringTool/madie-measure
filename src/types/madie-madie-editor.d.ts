@@ -81,8 +81,12 @@ declare module "@madie/madie-editor" {
     libraryName: string,
     existingCqlLibraryName: string,
     versionString: string,
+    usingName: string,
+    usingVersion: string,
     triggeredFrom: string
   ) => any;
+
+  export function isUsingEmpty(editorVal: string): boolean;
 
   export const MadieEditor: FC<{
     value: string;
