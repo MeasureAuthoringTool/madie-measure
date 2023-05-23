@@ -235,7 +235,9 @@ export default function MeasureList(props: {
     setOptionsOpen(true);
     setSelectedMeasure(selected);
     setAnchorEl(event.currentTarget);
-    setCanEdit(checkUserCanEdit(selected?.createdBy, selected?.acls));
+    setCanEdit(
+      checkUserCanEdit(selected?.measureSet?.owner, selected?.measureSet?.acls)
+    );
 
     let options = [];
     // additional options are outside the edit flag

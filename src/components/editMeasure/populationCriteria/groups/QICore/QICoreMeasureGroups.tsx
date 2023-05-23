@@ -178,8 +178,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   const [refreshFlag, setRefreshFlag] = useState<boolean>(true);
 
   const canEdit = checkUserCanEdit(
-    measure?.createdBy,
-    measure?.acls,
+    measure?.measureSet?.owner,
+    measure?.measureSet?.acls,
     measure?.measureMetaData?.draft
   );
   const measureServiceApi = useMeasureServiceApi();

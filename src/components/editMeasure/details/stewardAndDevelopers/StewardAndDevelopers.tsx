@@ -48,8 +48,8 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
   };
 
   const canEdit = checkUserCanEdit(
-    measure?.createdBy,
-    measure?.acls,
+    measure?.measureSet?.owner,
+    measure?.measureSet?.acls,
     measure?.measureMetaData?.draft
   );
   const formik = useFormik({
