@@ -53,8 +53,8 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
   };
 
   const canEdit = checkUserCanEdit(
-    measure?.createdBy,
-    measure?.acls,
+    measure?.measureSet?.owner,
+    measure?.measureSet?.acls,
     measure?.measureMetaData?.draft
   );
   const formik = useFormik({

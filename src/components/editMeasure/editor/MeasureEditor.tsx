@@ -158,8 +158,8 @@ const MeasureEditor = () => {
   // error markers control the error underlining in the editor.
   const [errorMarkers, setErrorMarkers] = useState<EditorErrorMarker[]>([]);
   const canEdit = checkUserCanEdit(
-    measure?.createdBy,
-    measure?.acls,
+    measure?.measureSet?.owner,
+    measure?.measureSet?.acls,
     measure?.measureMetaData?.draft
   );
 

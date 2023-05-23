@@ -72,8 +72,8 @@ const RiskAdjustment = () => {
 
   const { resetForm } = formik;
   const canEdit = checkUserCanEdit(
-    measure?.createdBy,
-    measure?.acls,
+    measure?.measureSet?.owner,
+    measure?.measureSet?.acls,
     measure?.measureMetaData?.draft
   );
 
