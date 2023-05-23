@@ -301,6 +301,48 @@ describe("MeasureEditor component", () => {
     );
   });
 
+  it("save measure with updated cql in editor on save button click and show error for missing using", async () => {
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        translation: { library: {} },
+      });
+    });
+
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => {
+        return "library testCql version '0.0.000'";
+      });
+
+    isUsingEmpty.mockClear().mockImplementation(() => true);
+
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measure });
+      }
+    });
+
+    const { getByTestId } = renderEditor(measure);
+    const editorContainer = (await getByTestId(
+      "measure-editor"
+    )) as HTMLInputElement;
+    expect(measure.cql).toEqual(editorContainer.value);
+    fireEvent.change(getByTestId("measure-editor"), {
+      target: {
+        value: "library testCql versionss '0.0.000'",
+      },
+    });
+    fireEvent.click(getByTestId("save-cql-btn"));
+    await waitFor(() => {
+      const successText = getByTestId("generic-success-text-header");
+      expect(successText.textContent).toEqual(
+        "Changes saved successfully but the following errors were found"
+      );
+      expect(mockedAxios.put).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it("should alert user if ELM translation fails on save", async () => {
     mockedAxios.put.mockImplementation((args) => {
       if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
@@ -422,8 +464,6 @@ describe("MeasureEditor component", () => {
       .mockImplementation(() => {
         return "library AdvancedIllnessandFrailtyExclusion version '1.0.001'\nusing QI-Core version '4.1.1'";
       });
-
-    isUsingEmpty.mockClear().mockImplementation(() => false);
 
     const { getByTestId } = renderEditor(measure);
     const editorContainer = (await getByTestId(

@@ -277,7 +277,6 @@ const MeasureEditor = () => {
             updateMeasure(updatedMeasure);
             setEditorVal(newMeasure?.cql);
             setIsCQLUnchanged(true);
-            let message: string;
             if (isUsingEmpty(editorVal)) {
               setSuccess({
                 status: "success",
