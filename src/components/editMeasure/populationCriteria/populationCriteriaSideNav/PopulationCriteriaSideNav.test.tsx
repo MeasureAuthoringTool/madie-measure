@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { getByRole, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import PopulationCriteriaSideNav, {
@@ -27,12 +27,12 @@ const groupsBaseUrl = "/measures/" + "testMeasureId" + "/edit/groups";
 const measureGroups = [
   {
     title: "Criteria 1",
-    href: groupsBaseUrl,
+    href: groupsBaseUrl + "/1",
     dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
   },
   {
     title: "Criteria 2",
-    href: groupsBaseUrl,
+    href: groupsBaseUrl + "/2",
     dataTestId: "leftPanelMeasureInformation-MeasureGroup2",
   },
 ];
@@ -79,7 +79,7 @@ describe("PopulationCriteriaSideNav", () => {
   const RenderPopulationCriteriaSideNav = (props) => {
     return render(
       <MemoryRouter
-        initialEntries={[{ pathname: "/measures/testMeasureId/edit/groups" }]}
+        initialEntries={[{ pathname: "/measures/testMeasureId/edit/groups/1" }]}
       >
         <ServiceContext.Provider value={serviceConfig}>
           <PopulationCriteriaSideNav {...props} />
@@ -145,7 +145,7 @@ describe("PopulationCriteriaSideNav", () => {
     const reRenderProps = { ...initialProps, measureGroupNumber: 1 };
     rerender(
       <MemoryRouter
-        initialEntries={[{ pathname: "/measures/testMeasureId/edit/groups" }]}
+        initialEntries={[{ pathname: "/measures/testMeasureId/edit/groups/2" }]}
       >
         <ServiceContext.Provider value={serviceConfig}>
           <PopulationCriteriaSideNav {...reRenderProps} />
@@ -171,90 +171,6 @@ describe("PopulationCriteriaSideNav", () => {
     );
   });
 
-  test("Measure Group add click when dirty opens up a warning dialog, hitting cancel closes it", () => {
-    RenderPopulationCriteriaSideNav({ ...initialProps, isFormDirty: true });
-    const criteria1 = screen.queryByRole("tab", {
-      name: /Criteria 1/i,
-    });
-    expect(criteria1).toBeInTheDocument();
-    expect(criteria1).toHaveAttribute("aria-selected", "true");
-
-    expect(screen.getByTestId("AddIcon")).toBeInTheDocument();
-    const addNewPopulationCriteriaLink = screen.getByRole("link", {
-      name: "Add Population Criteria",
-    });
-    userEvent.click(addNewPopulationCriteriaLink);
-
-    const discardDialog = screen.getByTestId("discard-dialog");
-    expect(discardDialog).toBeInTheDocument();
-    expect(discardDialog).toHaveTextContent("You have unsaved changes.");
-    expect(discardDialog).toHaveTextContent(
-      "Are you sure you want to discard your changes?"
-    );
-    const cancelButton = screen.getByRole("button", {
-      name: "No, Keep Working",
-    });
-    expect(cancelButton).toBeInTheDocument();
-    userEvent.click(cancelButton);
-
-    // verifies user is not navigated
-    expect(criteria1).toHaveAttribute("aria-selected", "true");
-  });
-
-  test("Measure Group add click when dirty opens up a warning dialog, hitting continue closes it and navigates", async () => {
-    const { rerender } = RenderPopulationCriteriaSideNav({
-      ...initialProps,
-      isFormDirty: true,
-    });
-    const criteria1 = screen.queryByRole("tab", {
-      name: /Criteria 1/i,
-    });
-    expect(criteria1).toBeInTheDocument();
-    expect(criteria1).toHaveAttribute("aria-selected", "true");
-
-    expect(screen.getByTestId("AddIcon")).toBeInTheDocument();
-    const addNewPopulationCriteriaLink = screen.getByRole("link", {
-      name: "Add Population Criteria",
-    });
-    userEvent.click(addNewPopulationCriteriaLink);
-
-    const discardDialog = screen.getByTestId("discard-dialog");
-    expect(discardDialog).toBeInTheDocument();
-    const continueButton = screen.getByRole("button", {
-      name: "Yes, Discard All Changes",
-    });
-    userEvent.click(continueButton);
-
-    /*
-      Onclick of continueButton, state of measureGroupNumber is updated, which is maintained by parent component.
-      work around -> rerendering the PopulationCriteriaSideNav component with a new measureGroupNumber
-    */
-    const newMeasureGroupLink = {
-      title: `Criteria 2`,
-      href: groupsBaseUrl,
-      dataTestId: `leftPanelMeasureInformation-MeasureGroup2`,
-    };
-    measureGroups.push(newMeasureGroupLink);
-    // initialProps.sideNavLinks[0].groups = measureGroups;
-    const reRenderProps = { ...initialProps, measureGroupNumber: 2 };
-    rerender(
-      <MemoryRouter
-        initialEntries={[{ pathname: "/measures/testMeasureId/edit/groups" }]}
-      >
-        <ServiceContext.Provider value={serviceConfig}>
-          <PopulationCriteriaSideNav {...reRenderProps} />
-        </ServiceContext.Provider>
-      </MemoryRouter>
-    );
-
-    await waitFor(() => {
-      const criteria3 = screen.getByRole("tab", {
-        name: /Criteria 3/i,
-      });
-      expect(criteria3).toHaveAttribute("aria-selected", "true");
-    });
-  });
-
   it("should not display discard dialog, when form is dirty and navigating to same Criteria", () => {
     RenderPopulationCriteriaSideNav(initialProps);
     const criteria1 = screen.queryByRole("tab", {
@@ -268,72 +184,6 @@ describe("PopulationCriteriaSideNav", () => {
     expect(criteria1).toHaveAttribute("aria-selected", "true");
     const discardDialog = screen.queryByTestId("discard-dialog");
     expect(discardDialog).toBeNull();
-  });
-
-  test("Measure Group nav click when dirty opens up a warning dialog, hitting cancel closes it", () => {
-    RenderPopulationCriteriaSideNav({ ...initialProps, isFormDirty: true });
-    const criteria1 = screen.queryByRole("tab", {
-      name: /Criteria 1/i,
-    });
-    expect(criteria1).toBeInTheDocument();
-    expect(criteria1).toHaveAttribute("aria-selected", "true");
-
-    const criteria2 = screen.queryByRole("tab", {
-      name: /Criteria 2/i,
-    });
-    userEvent.click(criteria2);
-
-    const discardDialog = screen.getByTestId("discard-dialog");
-    expect(discardDialog).toBeInTheDocument();
-    expect(discardDialog).toHaveTextContent("You have unsaved changes.");
-    expect(discardDialog).toHaveTextContent(
-      "Are you sure you want to discard your changes?"
-    );
-    const cancelButton = screen.getByRole("button", {
-      name: "No, Keep Working",
-    });
-    expect(cancelButton).toBeInTheDocument();
-    userEvent.click(cancelButton);
-    // verifies user is not navigated
-    expect(criteria1).toHaveAttribute("aria-selected", "true");
-  });
-
-  test("Measure Group nav click when dirty opens up a warning dialog, hitting continue closes it and navigates", () => {
-    const { rerender } = RenderPopulationCriteriaSideNav({
-      ...initialProps,
-      isFormDirty: true,
-    });
-    const criteria1 = screen.queryByRole("tab", {
-      name: /Criteria 1/i,
-    });
-    expect(criteria1).toBeInTheDocument();
-    expect(criteria1).toHaveAttribute("aria-selected", "true");
-
-    const criteria2 = screen.queryByRole("tab", {
-      name: /Criteria 2/i,
-    });
-    userEvent.click(criteria2);
-
-    const discardDialog = screen.getByTestId("discard-dialog");
-    expect(discardDialog).toBeInTheDocument();
-    const continueButton = screen.getByRole("button", {
-      name: "Yes, Discard All Changes",
-    });
-    userEvent.click(continueButton);
-
-    // Since we cannot update state of measureGroupNumber which is maintained by parent component.
-    // rerendering the PopulationCriteriaSideNav component with a new measureGroupNumber
-    const reRenderProps = { ...initialProps, measureGroupNumber: 1 };
-    rerender(
-      <MemoryRouter
-        initialEntries={[{ pathname: "/measures/testMeasureId/edit/groups" }]}
-      >
-        <ServiceContext.Provider value={serviceConfig}>
-          <PopulationCriteriaSideNav {...reRenderProps} />
-        </ServiceContext.Provider>
-      </MemoryRouter>
-    );
-    expect(criteria2).toHaveAttribute("aria-selected", "true");
   });
 
   it("Should render base configuration tab", () => {
@@ -376,7 +226,7 @@ describe("PopulationCriteriaSideNav", () => {
 
     rerender(
       <MemoryRouter
-        initialEntries={[{ pathname: "/measures/testMeasureId/edit/groups" }]}
+        initialEntries={[{ pathname: "/measures/testMeasureId/edit/groups/2" }]}
       >
         <ServiceContext.Provider value={serviceConfig}>
           <PopulationCriteriaSideNav {...reRenderProps} />
@@ -385,7 +235,7 @@ describe("PopulationCriteriaSideNav", () => {
     );
 
     expect(mockHistoryPush).toHaveBeenCalledWith(
-      "/measures/testMeasureId/edit/groups"
+      "/measures/testMeasureId/edit/groups/2"
     );
   });
 });

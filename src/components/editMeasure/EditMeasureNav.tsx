@@ -34,7 +34,6 @@ const EditMeasureNav = () => {
     pathname !== `${url}/details` &&
     pathname !== `${url}/details/model&measurement-period` &&
     pathname !== `${url}/cql-editor` &&
-    pathname !== `${url}/groups` &&
     (pathname !== `${url}/supplemental-data` || !populationCriteriaTabs) &&
     (pathname !== `${url}/risk-adjustment` || !populationCriteriaTabs) &&
     pathname !== `${url}/base-configuration` &&
@@ -47,7 +46,8 @@ const EditMeasureNav = () => {
     pathname !== `${url}/details/measure-guidance` &&
     pathname !== `${url}/details/measure-clinical-recommendation` &&
     pathname !== `${url}/review-info` &&
-    !pathname.startsWith(`${url}/test-cases`)
+    !pathname.startsWith(`${url}/test-cases`) &&
+    !pathname.startsWith(`${url}/groups`)
   ) {
     history.push("/404");
   }
@@ -122,8 +122,8 @@ const EditMeasureNav = () => {
             component={NavLink}
           />
           <Tab
-            value={`${url}/groups`}
-            to={`${url}/groups`}
+            value={`${url}/groups/1`}
+            to={`${url}/groups/1`}
             data-testid="groups-tab"
             type="A"
             size="large"
