@@ -489,10 +489,14 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     const stratificationReturnTypes = getReturnTypesStrats(stratifications);
     const returnTypesSet = new Set([...populationReturnTypes]);
     if (observationReturnTypes && observationReturnTypes.length > 0) {
-      returnTypesSet.add(observationReturnTypes);
+      observationReturnTypes.forEach((type) => {
+        returnTypesSet.add(type);
+      });
     }
     if (stratificationReturnTypes && stratificationReturnTypes.length > 0) {
-      returnTypesSet.add(stratificationReturnTypes);
+      stratificationReturnTypes.forEach((type) => {
+        returnTypesSet.add(type);
+      });
     }
 
     if (returnTypesSet.size > 1) {
