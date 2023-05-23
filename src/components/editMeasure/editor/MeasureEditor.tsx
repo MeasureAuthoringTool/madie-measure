@@ -10,6 +10,7 @@ import {
   ElmTranslationError,
   ValidationResult,
   synchingEditorCqlContent,
+  isUsingEmpty,
 } from "@madie/madie-editor";
 import {
   Button,
@@ -219,12 +220,16 @@ const MeasureEditor = () => {
   const updateMeasureCql = async () => {
     setProcessing(true);
     try {
+      //Get model name and version
+      const using = measure?.model.split(" v");
       const inSyncCql = await synchingEditorCqlContent(
         editorVal,
         measure?.cql,
         measure?.cqlLibraryName,
         "",
         measure?.version,
+        using[0],
+        using[1],
         "measureEditor"
       );
 
@@ -272,15 +277,24 @@ const MeasureEditor = () => {
             updateMeasure(updatedMeasure);
             setEditorVal(newMeasure?.cql);
             setIsCQLUnchanged(true);
-            const successMessage =
-              inSyncCql !== editorVal
-                ? {
-                    status: "success",
-                    message:
-                      "CQL updated successfully! Library Name and/or Version can not be updated in the CQL Editor. MADiE has overwritten the updated Library Name and/or Version.",
-                  }
-                : { status: "success", message: "CQL saved successfully" };
-            setSuccess(successMessage);
+            if (isUsingEmpty(editorVal)) {
+              setSuccess({
+                status: "success",
+                message:
+                  "CQL updated successfully but was missing a Using statement.  Please add in a valid model and version.",
+              });
+            } else {
+              const successMessage =
+                inSyncCql !== editorVal
+                  ? {
+                      status: "success",
+                      message:
+                        "CQL updated successfully! Library Statement or Using Statement were incorrect. MADiE has overwritten them to ensure proper CQL.",
+                    }
+                  : { status: "success", message: "CQL saved successfully" };
+
+              setSuccess(successMessage);
+            }
           })
           .catch((reason) => {
             // inner failure

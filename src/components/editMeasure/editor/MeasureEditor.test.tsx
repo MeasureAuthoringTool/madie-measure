@@ -14,6 +14,7 @@ import {
   ElmTranslationExternalError,
   parseContent,
   synchingEditorCqlContent,
+  isUsingEmpty,
   validateContent,
 } from "@madie/madie-editor";
 import { checkUserCanEdit, measureStore } from "@madie/madie-util";
@@ -22,7 +23,7 @@ const measure = {
   id: "abcd-pqrs-xyz",
   measureHumanReadableId: "",
   measureSetId: "",
-  version: "1.000",
+  version: "1.0.000",
   revisionNumber: "1",
   state: "",
   measureName: "MSR001",
@@ -300,6 +301,48 @@ describe("MeasureEditor component", () => {
     );
   });
 
+  it("save measure with updated cql in editor on save button click and show error for missing using", async () => {
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        translation: { library: {} },
+      });
+    });
+
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => {
+        return "library testCql version '0.0.000'";
+      });
+
+    isUsingEmpty.mockClear().mockImplementation(() => true);
+
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measure });
+      }
+    });
+
+    const { getByTestId } = renderEditor(measure);
+    const editorContainer = (await getByTestId(
+      "measure-editor"
+    )) as HTMLInputElement;
+    expect(measure.cql).toEqual(editorContainer.value);
+    fireEvent.change(getByTestId("measure-editor"), {
+      target: {
+        value: "library testCql versionss '0.0.000'",
+      },
+    });
+    fireEvent.click(getByTestId("save-cql-btn"));
+    await waitFor(() => {
+      const successText = getByTestId("generic-success-text-header");
+      expect(successText.textContent).toEqual(
+        "Changes saved successfully but the following errors were found"
+      );
+      expect(mockedAxios.put).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it("should alert user if ELM translation fails on save", async () => {
     mockedAxios.put.mockImplementation((args) => {
       if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
@@ -354,8 +397,11 @@ describe("MeasureEditor component", () => {
     (synchingEditorCqlContent as jest.Mock)
       .mockClear()
       .mockImplementation(() => {
-        return "library AdvancedIllnessandFrailtyExclusion version '1.0.001'";
+        return "library AdvancedIllnessandFrailtyExclusion version '1.0.001'\nusing QI-Core version '4.1.1'";
       });
+
+    isUsingEmpty.mockClear().mockImplementation(() => false);
+
     renderEditor(measure);
     const issues = await screen.findByText("2 issues found with CQL");
     expect(issues).toBeInTheDocument();
@@ -366,20 +412,20 @@ describe("MeasureEditor component", () => {
     fireEvent.change(screen.getByTestId("measure-editor"), {
       target: {
         value:
-          "library AdvancedIllnessandFrailtyExclusion_QICore4 version '5.0.000'",
+          "library AdvancedIllnessandFrailtyExclusion_QICore4 version '5.0.000'\nusing QI-Core version '4.1.1'",
       },
     });
     const saveButton = screen.getByRole("button", { name: "Save" });
     userEvent.click(saveButton);
     const saveSuccess = await screen.findByText(
-      "CQL updated successfully! Library Name and/or Version can not be updated in the CQL Editor. MADiE has overwritten the updated Library Name and/or Version."
+      "CQL updated successfully! Library Statement or Using Statement were incorrect. MADiE has overwritten them to ensure proper CQL."
     );
     expect(saveSuccess).toBeInTheDocument();
     expect(mockedAxios.put).toHaveBeenCalledTimes(1);
     expect(mockedAxios.put).toHaveBeenCalledWith(
       "madie.com/measures/abcd-pqrs-xyz",
       {
-        cql: "library AdvancedIllnessandFrailtyExclusion version '1.0.001'",
+        cql: "library AdvancedIllnessandFrailtyExclusion version '1.0.001'\nusing QI-Core version '4.1.1'",
         cqlErrors: true,
         cqlLibraryName: "",
         createdAt: "",
@@ -396,7 +442,7 @@ describe("MeasureEditor component", () => {
         model: "QI-Core v4.1.1",
         revisionNumber: "1",
         state: "",
-        version: "1.000",
+        version: "1.0.000",
         acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
       },
       { headers: { Authorization: "Bearer test.jwt" } }
@@ -419,8 +465,10 @@ describe("MeasureEditor component", () => {
     (synchingEditorCqlContent as jest.Mock)
       .mockClear()
       .mockImplementation(() => {
-        return "library AdvancedIllnessandFrailtyExclusion version '1.0.001'";
+        return "library AdvancedIllnessandFrailtyExclusion version '1.0.001'\nusing QI-Core version '4.1.1'";
       });
+
+    isUsingEmpty.mockClear().mockImplementation(() => false);
 
     const { getByTestId } = renderEditor(measure);
     const editorContainer = (await getByTestId(
@@ -430,21 +478,21 @@ describe("MeasureEditor component", () => {
     fireEvent.change(getByTestId("measure-editor"), {
       target: {
         value:
-          "library AdvancedIllnessandFrailtyExclusion versiontest '5.0.000'",
+          "library AdvancedIllnessandFrailtyExclusion versiontest '5.0.000'\nusing QI-Core version '4.1.1'",
       },
     });
     parseContent.mockClear().mockImplementation(() => ["Test error"]);
     const saveButton = screen.getByRole("button", { name: "Save" });
     userEvent.click(saveButton);
     const saveSuccess = await screen.findByText(
-      "CQL updated successfully! Library Name and/or Version can not be updated in the CQL Editor. MADiE has overwritten the updated Library Name and/or Version."
+      "CQL updated successfully! Library Statement or Using Statement were incorrect. MADiE has overwritten them to ensure proper CQL."
     );
     expect(saveSuccess).toBeInTheDocument();
     expect(mockedAxios.put).toHaveBeenCalledTimes(1);
     expect(mockedAxios.put).toHaveBeenCalledWith(
       "madie.com/measures/abcd-pqrs-xyz",
       {
-        cql: "library AdvancedIllnessandFrailtyExclusion version '1.0.001'",
+        cql: "library AdvancedIllnessandFrailtyExclusion version '1.0.001'\nusing QI-Core version '4.1.1'",
         cqlErrors: true,
         cqlLibraryName: "",
         createdAt: "",
@@ -461,7 +509,7 @@ describe("MeasureEditor component", () => {
         model: "QI-Core v4.1.1",
         revisionNumber: "1",
         state: "",
-        version: "1.000",
+        version: "1.0.000",
         acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
       },
       { headers: { Authorization: "Bearer test.jwt" } }
