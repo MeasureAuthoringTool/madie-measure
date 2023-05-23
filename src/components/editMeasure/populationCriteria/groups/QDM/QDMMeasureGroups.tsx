@@ -452,55 +452,42 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     }
   };
 
+  const getReturnTypes = (
+    populations: Array<Population | MeasureObservation>
+  ) => {
+    return populations.reduce((returnTypes, population) => {
+      const definition = _.camelCase(_.trim(population?.definition));
+      const returnType = cqlDefinitionDataTypes[definition];
+      if (returnType) {
+        returnTypes.push(returnType);
+      }
+      return returnTypes;
+    }, []);
+  };
+  const getReturnTypesStrats = (populations: Array<Stratification>) => {
+    return populations.reduce((returnTypes, population) => {
+      const definition = _.camelCase(_.trim(population?.cqlDefinition));
+      const returnType = cqlDefinitionDataTypes[definition];
+      if (returnType) {
+        returnTypes.push(returnType);
+      }
+      return returnTypes;
+    }, []);
+  };
+
   const validatePopulations = (
     populations: Population[],
     measureObservations: MeasureObservation[],
     stratifications?: Stratification[]
   ): string => {
-    const returnTypesSet: Set<String> = new Set();
-    populations.forEach((population) => {
-      if (population.definition !== undefined) {
-        const name = population.name;
-        const definition = population?.definition;
-        let newDefintion = "";
-        if (definition) {
-          let firstString = definition.substring(0, definition.indexOf(" "));
-          if (firstString) {
-            firstString = firstString.toLowerCase();
-          }
-          const secondString = definition.substring(
-            definition.indexOf(" ") + 1
-          );
-          if (secondString) {
-            secondString.replace(" ", "");
-          }
-          newDefintion = firstString + secondString;
-        }
-        const returnType = cqlDefinitionDataTypes[_.camelCase(newDefintion)];
-
-        if (returnType !== undefined) {
-          returnTypesSet.add(returnType);
-        }
-      }
-    });
-    if (measureObservations && measureObservations.length > 0) {
-      measureObservations.forEach((observation) => {
-        const returnType =
-          cqlDefinitionDataTypes[_.camelCase(observation.definition)];
-        if (returnType !== undefined) {
-          returnTypesSet.add(returnType);
-        }
-      });
-    }
-    if (stratifications && stratifications.length > 0) {
-      stratifications.forEach((stratification) => {
-        const returnType =
-          cqlDefinitionDataTypes[_.camelCase(stratification.cqlDefinition)];
-        if (returnType !== undefined) {
-          returnTypesSet.add(returnType);
-        }
-      });
-    }
+    const populationReturnTypes = getReturnTypes(populations);
+    const observationReturnTypes = getReturnTypes(measureObservations);
+    const stratificationReturnTypes = getReturnTypesStrats(stratifications);
+    const returnTypesSet = new Set([
+      ...populationReturnTypes,
+      ...observationReturnTypes,
+      ...stratificationReturnTypes,
+    ]);
 
     if (returnTypesSet.size > 1) {
       return "For Episode-based Measures, selected definitions must return a list of the same type.";
