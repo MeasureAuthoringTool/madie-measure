@@ -221,12 +221,15 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       );
     }
     if (endorsersValid) {
+      const using = measure?.model.split(" v");
       const inSyncCql = await synchingEditorCqlContent(
         "",
         measure?.cql,
         values.cqlLibraryName,
         measure?.cqlLibraryName,
         measure?.version,
+        using[0],
+        using[1],
         "measureInformation"
       );
       // Generate updated ELM when Library name is modified

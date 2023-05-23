@@ -33,6 +33,7 @@ const measure = {
   id: "test measure",
   measureName: "the measure for testing",
   cqlLibraryName: "TestCqlLibraryName",
+  model: "QI-Core v4.1.1",
   ecqmTitle: "ecqmTitle",
   measurementPeriodStart: "01/01/2022",
   measurementPeriodEnd: "12/02/2022",
