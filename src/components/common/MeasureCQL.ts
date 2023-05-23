@@ -48,6 +48,9 @@ define "Encounter With Age Range and Without VTE Diagnosis or Obstetrical Condit
 define "Denominator":
   "Initial Population"
 
+define "boolIpp":
+  true
+
 define "Numerator":
   "Encounter With VTE Prophylaxis Received on Day of or Day After Admission or Procedure"
 
@@ -1692,6 +1695,32 @@ export const ELM_JSON = `
                 "type": "NamedTypeSpecifier"
               }
             }
+          }
+        },
+        {
+          "localId" : "49",
+          "locator" : "37:1-38:6",
+          "resultTypeName" : "{urn:hl7-org:elm-types:r1}Boolean",
+          "name" : "boolIpp",
+          "context" : "Patient",
+          "accessLevel" : "Public",
+          "annotation" : [ {
+            "type" : "Annotation",
+            "s" : {
+              "r" : "49",
+              "s" : [ {
+                "r" : "48",
+                "value" : [ "", "define ", "\\"boolIpp\\"", ":\\n  ", "true" ]
+              } ]
+            }
+          } ],
+          "expression" : {
+            "localId" : "48",
+            "locator" : "38:3-38:6",
+            "resultTypeName" : "{urn:hl7-org:elm-types:r1}Boolean",
+            "valueType" : "{urn:hl7-org:elm-types:r1}Boolean",
+            "value" : "true",
+            "type" : "Literal"
           }
         },
         {

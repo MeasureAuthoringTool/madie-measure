@@ -9,6 +9,9 @@ import {
   GroupScoring,
   PopulationType,
   MeasureErrorType,
+  Population,
+  MeasureObservation,
+  Stratification,
 } from "@madie/madie-models";
 import { MenuItem as MuiMenuItem, Typography, Divider } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
@@ -453,6 +456,51 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     }
   };
 
+  const getReturnTypes = (
+    populations: Array<Population | MeasureObservation>
+  ) => {
+    return populations?.reduce((returnTypes, population) => {
+      const definition = _.camelCase(_.trim(population?.definition));
+      const returnType = cqlDefinitionDataTypes[definition];
+      if (returnType) {
+        returnTypes.push(returnType);
+      }
+      return returnTypes;
+    }, []);
+  };
+  const getReturnTypesStrats = (populations: Array<Stratification>) => {
+    return populations?.reduce((returnTypes, population) => {
+      const definition = _.camelCase(_.trim(population?.cqlDefinition));
+      const returnType = cqlDefinitionDataTypes[definition];
+      if (returnType) {
+        returnTypes.push(returnType);
+      }
+      return returnTypes;
+    }, []);
+  };
+
+  const validatePopulations = (
+    populations: Population[],
+    measureObservations: MeasureObservation[],
+    stratifications?: Stratification[]
+  ): string => {
+    const populationReturnTypes = getReturnTypes(populations) || [];
+    const observationReturnTypes = getReturnTypes(measureObservations) || [];
+    const stratificationReturnTypes =
+      getReturnTypesStrats(stratifications) || [];
+    const returnTypesSet = new Set([
+      ...populationReturnTypes,
+      ...observationReturnTypes,
+      ...stratificationReturnTypes,
+    ]);
+
+    if (returnTypesSet.size > 1) {
+      return "For Episode-based Measures, selected definitions must return a list of the same type.";
+    } else {
+      return undefined;
+    }
+  };
+
   const submitForm = (group: Group) => {
     if (group.stratifications) {
       group.stratifications = group.stratifications.filter(
@@ -460,6 +508,18 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           (!!strat.description || !!strat.cqlDefinition) &&
           strat.description !== deleteToken
       );
+    }
+
+    if (measure?.patientBasis === false && group?.populations) {
+      const validationError = validatePopulations(
+        group?.populations,
+        group?.measureObservations,
+        group?.stratifications
+      );
+      if (validationError !== undefined) {
+        handleToast("danger", validationError, true);
+        return;
+      }
     }
     if (measure?.groups && !(measureGroupNumber >= measure?.groups?.length)) {
       group.id = measure?.groups[measureGroupNumber].id;

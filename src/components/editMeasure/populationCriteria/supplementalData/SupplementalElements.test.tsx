@@ -134,10 +134,10 @@ describe("Supplemental Elements component", () => {
       fireEvent.keyDown(supplementalDropdown, { key: "ArrowDown" });
 
       const supplementalOptions = await screen.findAllByRole("option");
-      expect(supplementalOptions).toHaveLength(10);
+      expect(supplementalOptions).toHaveLength(11);
 
-      fireEvent.click(supplementalOptions[0]);
       fireEvent.click(supplementalOptions[1]);
+      fireEvent.click(supplementalOptions[2]);
       const selectedSupplementalOption1 = within(
         supplementalDropdown
       ).queryByRole("button", { name: "Denominator" });
@@ -162,8 +162,8 @@ describe("Supplemental Elements component", () => {
       fireEvent.keyDown(supplementalDropdown, { key: "ArrowDown" });
 
       const supplementalOptions = await screen.findAllByRole("option");
-      fireEvent.click(supplementalOptions[0]);
       fireEvent.click(supplementalOptions[1]);
+      fireEvent.click(supplementalOptions[2]);
       fireEvent.keyDown(supplementalDropdown, {
         key: "Escape",
         code: "Escape",
@@ -229,8 +229,8 @@ describe("Supplemental Elements component", () => {
       fireEvent.keyDown(supplementalDropdown, { key: "ArrowDown" });
 
       const supplementalOptions = await screen.findAllByRole("option");
-      fireEvent.click(supplementalOptions[0]);
       fireEvent.click(supplementalOptions[1]);
+      fireEvent.click(supplementalOptions[2]);
       fireEvent.keyDown(supplementalDropdown, {
         key: "Escape",
         code: "Escape",
@@ -277,10 +277,10 @@ describe("Supplemental Elements component", () => {
       fireEvent.keyDown(supplementalDropdown, { key: "ArrowDown" });
 
       const supplementalOptions = await screen.findAllByRole("option");
-      expect(supplementalOptions).toHaveLength(10);
+      expect(supplementalOptions).toHaveLength(11);
 
-      fireEvent.click(supplementalOptions[0]);
       fireEvent.click(supplementalOptions[1]);
+      fireEvent.click(supplementalOptions[2]);
       const selectedSupplementalOption1 = within(
         supplementalDropdown
       ).queryByRole("button", { name: "Denominator" });
@@ -322,10 +322,10 @@ describe("Supplemental Elements component", () => {
     fireEvent.keyDown(supplementalDropdown, { key: "ArrowDown" });
 
     const supplementalOptions = await screen.findAllByRole("option");
-    expect(supplementalOptions).toHaveLength(10);
+    expect(supplementalOptions).toHaveLength(11);
 
-    fireEvent.click(supplementalOptions[0]);
     fireEvent.click(supplementalOptions[1]);
+    fireEvent.click(supplementalOptions[2]);
     const selectedSupplementalOption1 = within(
       supplementalDropdown
     ).queryByRole("button", { name: "Denominator" });
