@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import "twin.macro";
 import "styled-components/macro";
-import { Measure } from "@madie/madie-models";
+import { Measure, Model } from "@madie/madie-models";
 import { useHistory } from "react-router-dom";
 import { Chip, IconButton } from "@mui/material";
 import {
@@ -15,7 +15,7 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
-import { checkUserCanEdit } from "@madie/madie-util";
+import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
 import CreatVersionDialog from "./createVersionDialog/CreateVersionDialog";
 import DraftMeasureDialog from "./draftMeasureDialog/DraftMeasureDialog";
 import versionErrorHelper from "../../../utils/versionErrorHelper";
@@ -218,7 +218,16 @@ export default function MeasureList(props: {
       targetMeasure.current = selectedMeasure;
     }
   }, [selectedMeasure]);
-
+  const featureFlags = useFeatureFlags();
+  // put export and version behind a flag for qdm
+  const shouldAllowAction = (measure: Measure, flag: boolean) => {
+    // pass in current model and barring flag
+    // we only want to block in case model === qdm & it's flag is false
+    if (measure.model === Model.QDM_5_6 && !flag) {
+      return false;
+    }
+    return true;
+  };
   const handleOpen = async (
     selected: Measure,
     event: React.MouseEvent<HTMLButtonElement>
@@ -239,14 +248,19 @@ export default function MeasureList(props: {
       toImplementFunction: exportMeasure,
       dataTestId: `export-measure-${selected?.id}`,
     };
-    additionalOptions.push(exportButton);
+    if (shouldAllowAction(selected, featureFlags.qdmExport)) {
+      additionalOptions.push(exportButton);
+    }
     // always on if feature
     if (selected.measureMetaData.draft) {
-      options.push({
+      const versionButton = {
         label: "Version",
         toImplementFunction: createVersion,
         dataTestId: `create-version-measure-${selected?.id}`,
-      });
+      };
+      if (shouldAllowAction(selected, featureFlags.qdmVersioning)) {
+        options.push(versionButton);
+      }
       // draft should only be available if no other measureSet is in draft, by call
     }
     if (canDraftLookup[selected?.measureSetId]) {
