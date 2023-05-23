@@ -11,6 +11,7 @@ import {
   MeasureErrorType,
   Population,
   MeasureObservation,
+  Stratification,
 } from "@madie/madie-models";
 import { MenuItem as MuiMenuItem, Typography, Divider } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
@@ -453,11 +454,12 @@ const MeasureGroups = (props: MeasureGroupProps) => {
 
   const validatePopulations = (
     populations: Population[],
-    measureObservations: MeasureObservation[]
+    measureObservations: MeasureObservation[],
+    stratifications?: Stratification[]
   ): string => {
     const returnTypesSet: Set<String> = new Set();
     populations.forEach((population) => {
-      if (population.definition != undefined) {
+      if (population.definition !== undefined) {
         const name = population.name;
         const definition = population?.definition;
         let newDefintion = "";
@@ -490,6 +492,15 @@ const MeasureGroups = (props: MeasureGroupProps) => {
         }
       });
     }
+    if (stratifications && stratifications.length > 0) {
+      stratifications.forEach((stratification) => {
+        const returnType =
+          cqlDefinitionDataTypes[_.camelCase(stratification.cqlDefinition)];
+        if (returnType !== undefined) {
+          returnTypesSet.add(returnType);
+        }
+      });
+    }
 
     if (returnTypesSet.size > 1) {
       return "For Episode-based Measures, selected definitions must return a list of the same type.";
@@ -510,10 +521,11 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     if (measure?.patientBasis === false && group?.populations) {
       const validationError = validatePopulations(
         group?.populations,
-        group?.measureObservations
+        group?.measureObservations,
+        group?.stratifications
       );
-      if (validationError) {
-        handleToast("error", validationError, false);
+      if (validationError !== undefined) {
+        handleToast("danger", validationError, true);
         return;
       }
     }
