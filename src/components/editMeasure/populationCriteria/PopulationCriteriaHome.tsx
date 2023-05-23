@@ -26,7 +26,10 @@ export function PopulationCriteriaHome() {
   }, []);
 
   let history = useHistory();
-  const canEdit: boolean = checkUserCanEdit(measure?.createdBy, measure?.acls);
+  const canEdit: boolean = checkUserCanEdit(
+    measure?.measureSet?.owner,
+    measure?.measureSet?.acls
+  );
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(null);
   const [sideNavLinks, setSideNavLinks] = useState<Array<any>>();
   const [isFormDirty, setIsFormDirty] = useState<boolean>(false);

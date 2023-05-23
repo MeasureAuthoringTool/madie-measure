@@ -146,8 +146,8 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   }, []);
 
   const canEdit = checkUserCanEdit(
-    measure?.createdBy,
-    measure?.acls,
+    measure?.measureSet?.owner,
+    measure?.measureSet?.acls,
     measure?.measureMetaData?.draft
   );
 
