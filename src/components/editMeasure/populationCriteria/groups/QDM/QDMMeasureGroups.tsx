@@ -484,20 +484,15 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     measureObservations: MeasureObservation[],
     stratifications?: Stratification[]
   ): string => {
-    const populationReturnTypes = getReturnTypes(populations);
-    const observationReturnTypes = getReturnTypes(measureObservations);
-    const stratificationReturnTypes = getReturnTypesStrats(stratifications);
-    const returnTypesSet = new Set([...populationReturnTypes]);
-    if (observationReturnTypes && observationReturnTypes.length > 0) {
-      observationReturnTypes.forEach((type) => {
-        returnTypesSet.add(type);
-      });
-    }
-    if (stratificationReturnTypes && stratificationReturnTypes.length > 0) {
-      stratificationReturnTypes.forEach((type) => {
-        returnTypesSet.add(type);
-      });
-    }
+    const populationReturnTypes = getReturnTypes(populations) || [];
+    const observationReturnTypes = getReturnTypes(measureObservations) || [];
+    const stratificationReturnTypes =
+      getReturnTypesStrats(stratifications) || [];
+    const returnTypesSet = new Set([
+      ...populationReturnTypes,
+      ...observationReturnTypes,
+      ...stratificationReturnTypes,
+    ]);
 
     if (returnTypesSet.size > 1) {
       return "For Episode-based Measures, selected definitions must return a list of the same type.";
