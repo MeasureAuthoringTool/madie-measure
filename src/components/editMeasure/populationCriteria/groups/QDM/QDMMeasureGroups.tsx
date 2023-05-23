@@ -459,7 +459,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   const getReturnTypes = (
     populations: Array<Population | MeasureObservation>
   ) => {
-    return populations.reduce((returnTypes, population) => {
+    return populations?.reduce((returnTypes, population) => {
       const definition = _.camelCase(_.trim(population?.definition));
       const returnType = cqlDefinitionDataTypes[definition];
       if (returnType) {
@@ -469,7 +469,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     }, []);
   };
   const getReturnTypesStrats = (populations: Array<Stratification>) => {
-    return populations.reduce((returnTypes, population) => {
+    return populations?.reduce((returnTypes, population) => {
       const definition = _.camelCase(_.trim(population?.cqlDefinition));
       const returnType = cqlDefinitionDataTypes[definition];
       if (returnType) {
@@ -487,11 +487,13 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     const populationReturnTypes = getReturnTypes(populations);
     const observationReturnTypes = getReturnTypes(measureObservations);
     const stratificationReturnTypes = getReturnTypesStrats(stratifications);
-    const returnTypesSet = new Set([
-      ...populationReturnTypes,
-      ...observationReturnTypes,
-      ...stratificationReturnTypes,
-    ]);
+    const returnTypesSet = new Set([...populationReturnTypes]);
+    if (observationReturnTypes && observationReturnTypes.length > 0) {
+      returnTypesSet.add(observationReturnTypes);
+    }
+    if (stratificationReturnTypes && stratificationReturnTypes.length > 0) {
+      returnTypesSet.add(stratificationReturnTypes);
+    }
 
     if (returnTypesSet.size > 1) {
       return "For Episode-based Measures, selected definitions must return a list of the same type.";

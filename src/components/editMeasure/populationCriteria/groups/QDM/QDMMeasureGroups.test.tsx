@@ -439,6 +439,83 @@ describe("Measure Groups Page", () => {
         );
       }, 100);
     });
+
+    test("Should not be able to save if non-patient based but return types are different with Stratifications", async () => {
+      measure.patientBasis = false;
+      measure.scoring = "Cohort";
+
+      renderMeasureGroupComponent();
+      const groupPopulationInput = screen.getByTestId(
+        "select-measure-group-population-input"
+      ) as HTMLInputElement;
+      fireEvent.change(groupPopulationInput, {
+        target: {
+          value: "VTE Prophylaxis by Medication Administered or Device Applied",
+        },
+      });
+
+      userEvent.click(screen.getByTestId("stratifications-tab"));
+
+      const strat1Input = screen.getByTestId("stratification-1-input");
+      fireEvent.change(strat1Input, {
+        target: {
+          value: "boolIpp",
+        },
+      });
+
+      await waitFor(() => {
+        const submitBtn = screen.getByTestId("group-form-submit-btn");
+        expect(submitBtn).toBeDisabled();
+      });
+    });
+
+    test("Should not be able to save with non-patient based stratification return type is not the same", async () => {
+      measure.patientBasis = false;
+      measure.scoring = "Cohort";
+      renderMeasureGroupComponent();
+
+      await waitFor(() => {
+        // update initial population from dropdown
+        const definitionToUpdate =
+          "VTE Prophylaxis by Medication Administered or Device Applied";
+        const groupPopulationInput = screen.getByTestId(
+          "select-measure-group-population-input"
+        ) as HTMLInputElement;
+        fireEvent.change(groupPopulationInput, {
+          target: { value: definitionToUpdate },
+        });
+        expect(groupPopulationInput.value).toBe(definitionToUpdate);
+        const submitBtn = screen.getByTestId("group-form-submit-btn");
+
+        userEvent.click(screen.getByTestId("stratifications-tab"));
+
+        expect(submitBtn).toBeEnabled();
+        userEvent.click(submitBtn);
+
+        const strat1Input = screen.getByTestId("stratification-1-input");
+        fireEvent.change(strat1Input, {
+          target: {
+            value: "boolIpp",
+          },
+        });
+        const association1Input = screen.getByTestId("association-1-input");
+        fireEvent.change(association1Input, {
+          target: {
+            value: definitionToUpdate,
+          },
+        });
+
+        expect(submitBtn).toBeEnabled();
+        userEvent.click(submitBtn);
+
+        setTimeout(() => {
+          const alert = screen.findByTestId("error-alerts");
+          expect(alert).toHaveTextContent(
+            "For Episode-based Measures, selected definitions must return a list of the same type."
+          );
+        }, 500);
+      });
+    });
   });
 
   test("should display selected scoring unit", async () => {
