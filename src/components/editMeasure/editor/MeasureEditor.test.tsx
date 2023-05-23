@@ -397,8 +397,11 @@ describe("MeasureEditor component", () => {
     (synchingEditorCqlContent as jest.Mock)
       .mockClear()
       .mockImplementation(() => {
-        return "library AdvancedIllnessandFrailtyExclusion version '1.0.001'";
+        return "library AdvancedIllnessandFrailtyExclusion version '1.0.001'\nusing QI-Core version '4.1.1'";
       });
+
+    isUsingEmpty.mockClear().mockImplementation(() => false);
+
     renderEditor(measure);
     const issues = await screen.findByText("2 issues found with CQL");
     expect(issues).toBeInTheDocument();
@@ -409,7 +412,7 @@ describe("MeasureEditor component", () => {
     fireEvent.change(screen.getByTestId("measure-editor"), {
       target: {
         value:
-          "library AdvancedIllnessandFrailtyExclusion_QICore4 version '5.0.000'",
+          "library AdvancedIllnessandFrailtyExclusion_QICore4 version '5.0.000'\nusing QI-Core version '4.1.1'",
       },
     });
     const saveButton = screen.getByRole("button", { name: "Save" });
@@ -422,7 +425,7 @@ describe("MeasureEditor component", () => {
     expect(mockedAxios.put).toHaveBeenCalledWith(
       "madie.com/measures/abcd-pqrs-xyz",
       {
-        cql: "library AdvancedIllnessandFrailtyExclusion version '1.0.001'",
+        cql: "library AdvancedIllnessandFrailtyExclusion version '1.0.001'\nusing QI-Core version '4.1.1'",
         cqlErrors: true,
         cqlLibraryName: "",
         createdAt: "",
@@ -464,6 +467,8 @@ describe("MeasureEditor component", () => {
       .mockImplementation(() => {
         return "library AdvancedIllnessandFrailtyExclusion version '1.0.001'\nusing QI-Core version '4.1.1'";
       });
+
+    isUsingEmpty.mockClear().mockImplementation(() => false);
 
     const { getByTestId } = renderEditor(measure);
     const editorContainer = (await getByTestId(
