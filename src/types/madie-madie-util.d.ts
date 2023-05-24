@@ -13,6 +13,9 @@ declare module "@madie/madie-util" {
   interface FeatureFlags {
     export: boolean;
     populationCriteriaTabs: boolean;
+    qdm: boolean;
+    qdmExport: boolean;
+    qdmVersioning: boolean;
   }
 
   export interface ServiceConfig {

@@ -291,6 +291,33 @@ describe("Measure Groups Page", () => {
       expect(submitBtn).toBeDisabled();
     });
 
+    test("Should not be able to save if non-patient based but return type is boolean", async () => {
+      measure.scoring = "Cohort";
+      measure.patientBasis = false;
+      renderMeasureGroupComponent();
+
+      // setting initial population from dropdown
+      const definitionToUpdate = "boolIpp";
+      const groupPopulationInput = screen.getByTestId(
+        "select-measure-group-population-input"
+      ) as HTMLInputElement;
+      fireEvent.change(groupPopulationInput, {
+        target: { value: definitionToUpdate },
+      });
+      expect(groupPopulationInput.value).toBe(definitionToUpdate);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            "For Episode-based Measures, selected definitions must return a list of the same type (Non-Boolean)."
+          )
+        ).toBeInTheDocument();
+      });
+
+      const submitBtn = screen.getByTestId("group-form-submit-btn");
+      expect(submitBtn).toBeDisabled();
+    });
+
     test("Should not be able to save if non-patient based but return types are different", async () => {
       measure.patientBasis = false;
       measure.scoring = "Ratio";
@@ -319,15 +346,32 @@ describe("Measure Groups Page", () => {
         });
         expect(allPopulationsInputs[1].value).toBe("Denominator");
 
-        const validationError = screen.getAllByText(
-          "For Episode-based Measures, selected definitions must return a list of the same type (Non-Boolean)."
-        ) as HTMLInputElement[];
+        fireEvent.change(allPopulationsInputs[2], {
+          target: {
+            value: "Denominator",
+          },
+        });
+        expect(allPopulationsInputs[2].value).toBe("Denominator");
 
-        expect(validationError[0]).toBeInTheDocument();
+        fireEvent.change(allPopulationsInputs[3], {
+          target: {
+            value: "Denominator",
+          },
+        });
+        expect(allPopulationsInputs[3].value).toBe("Denominator");
+
+        const submitBtn = screen.getByTestId("group-form-submit-btn");
+        expect(submitBtn).toBeEnabled();
+        userEvent.click(submitBtn);
+
+        setTimeout(() => {
+          const validationError = screen.getAllByText(
+            "For Episode-based Measures, selected definitions must return a list of the same type (Non-Boolean)."
+          ) as HTMLInputElement[];
+
+          expect(validationError[0]).toBeInTheDocument();
+        }, 100);
       });
-
-      const submitBtn = screen.getByTestId("group-form-submit-btn");
-      expect(submitBtn).toBeDisabled();
     });
 
     test("Should not be able to save as Continuous Variable needs Aggregate Function", async () => {
@@ -394,6 +438,83 @@ describe("Measure Groups Page", () => {
           "One or more Population Criteria has a mismatch with CQL return types. Test Cases cannot be executed until this is resolved."
         );
       }, 100);
+    });
+
+    test("Should not be able to save if non-patient based but return types are different with Stratifications", async () => {
+      measure.patientBasis = false;
+      measure.scoring = "Cohort";
+
+      renderMeasureGroupComponent();
+      const groupPopulationInput = screen.getByTestId(
+        "select-measure-group-population-input"
+      ) as HTMLInputElement;
+      fireEvent.change(groupPopulationInput, {
+        target: {
+          value: "VTE Prophylaxis by Medication Administered or Device Applied",
+        },
+      });
+
+      userEvent.click(screen.getByTestId("stratifications-tab"));
+
+      const strat1Input = screen.getByTestId("stratification-1-input");
+      fireEvent.change(strat1Input, {
+        target: {
+          value: "boolIpp",
+        },
+      });
+
+      await waitFor(() => {
+        const submitBtn = screen.getByTestId("group-form-submit-btn");
+        expect(submitBtn).toBeDisabled();
+      });
+    });
+
+    test("Should not be able to save with non-patient based stratification return type is not the same", async () => {
+      measure.patientBasis = false;
+      measure.scoring = "Cohort";
+      renderMeasureGroupComponent();
+
+      await waitFor(() => {
+        // update initial population from dropdown
+        const definitionToUpdate =
+          "VTE Prophylaxis by Medication Administered or Device Applied";
+        const groupPopulationInput = screen.getByTestId(
+          "select-measure-group-population-input"
+        ) as HTMLInputElement;
+        fireEvent.change(groupPopulationInput, {
+          target: { value: definitionToUpdate },
+        });
+        expect(groupPopulationInput.value).toBe(definitionToUpdate);
+        const submitBtn = screen.getByTestId("group-form-submit-btn");
+
+        userEvent.click(screen.getByTestId("stratifications-tab"));
+
+        expect(submitBtn).toBeEnabled();
+        userEvent.click(submitBtn);
+
+        const strat1Input = screen.getByTestId("stratification-1-input");
+        fireEvent.change(strat1Input, {
+          target: {
+            value: "boolIpp",
+          },
+        });
+        const association1Input = screen.getByTestId("association-1-input");
+        fireEvent.change(association1Input, {
+          target: {
+            value: definitionToUpdate,
+          },
+        });
+
+        expect(submitBtn).toBeEnabled();
+        userEvent.click(submitBtn);
+
+        setTimeout(() => {
+          const alert = screen.findByTestId("error-alerts");
+          expect(alert).toHaveTextContent(
+            "For Episode-based Measures, selected definitions must return a list of the same type."
+          );
+        }, 500);
+      });
     });
   });
 

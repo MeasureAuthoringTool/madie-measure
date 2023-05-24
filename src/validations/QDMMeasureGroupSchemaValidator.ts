@@ -8,7 +8,6 @@ export type CqlDefineDataTypes = {
 export type CqlFunctionDataTypes = {
   [key: string]: string;
 };
-const returnTypesSet: Set<String> = new Set();
 
 const patientBasedReturnTypeCheckOptions = (
   definitionDataTypes: CqlDefineDataTypes
@@ -46,11 +45,6 @@ const episodeBasedReturnTypeCheckOptions = (
         if (
           definitionDataTypes[_.camelCase(value)].toLowerCase() === "boolean"
         ) {
-          return false;
-        }
-        returnTypesSet.add(definitionDataTypes[_.camelCase(value)]);
-
-        if (returnTypesSet.size > 1) {
           return false;
         }
       }
@@ -105,8 +99,7 @@ const returnTypeFunctionCheckOptions = (populationBasis, functionDataTypes) => {
           functionDataTypes[_.camelCase(value)]
         ) {
           return (
-            functionDataTypes[_.camelCase(value)].toLowerCase() ===
-            `${populationBasis}`.toLowerCase()
+            functionDataTypes[_.camelCase(value)].toLowerCase() === "boolean"
           );
         }
         return true;

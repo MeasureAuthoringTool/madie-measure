@@ -5,6 +5,7 @@ import {
   screen,
   waitFor,
   cleanup,
+  findByTestId,
 } from "@testing-library/react";
 import { Measure, Model } from "@madie/madie-models";
 import MeasureList from "./MeasureList";
@@ -34,6 +35,8 @@ jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: () => ({
     export: true,
     measureVersioning: true,
+    qdmExport: false,
+    qdmVersioning: false,
   }),
 }));
 
@@ -121,6 +124,26 @@ const measures: Measure[] = [
     lastModifiedAt: null,
     lastModifiedBy: null,
     model: Model.QICORE.valueOf(),
+    active: false,
+    measureMetaData: {
+      draft: false,
+    },
+  },
+  {
+    id: "IDIDID4",
+    measureHumanReadableId: null,
+    measureSetId: "4",
+    version: "1.3",
+    state: "DRAFT",
+    measureName: "versioned measure - D",
+    cql: "Sample Cql",
+    cqlErrors: true,
+    groups: [testGroup],
+    createdAt: null,
+    createdBy: null,
+    lastModifiedAt: null,
+    lastModifiedBy: null,
+    model: Model.QDM_5_6,
     active: false,
     measureMetaData: {
       draft: false,
@@ -1147,19 +1170,46 @@ describe("Measure List component", () => {
     window.URL.createObjectURL = jest
       .fn()
       .mockReturnValueOnce("http://fileurl");
-    // document.body.appendChild = jest.fn();
-    // document.createElement = jest.fn().mockReturnValueOnce(link); // this line crashes..
     const exportButton = getByTestId(`export-measure-${measures[0].id}`);
     expect(exportButton).toBeInTheDocument();
     act(() => {
-      // document.createElement = jest.fn().mockReturnValueOnce(link); // this line crashes..
       fireEvent.click(exportButton);
     });
     await waitFor(() => {
-      // expect(getByTestId("export-download-link")).toBeInTheDocument()
-      // expect(onClick).toBeCalled();
       expect(getByText("Measure exported successfully")).toBeInTheDocument();
     });
     unmount();
+  });
+  it("should not have export or version", async () => {
+    const { getByTestId } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const actionButton = getByTestId(`measure-action-${measures[3].id}`);
+    expect(actionButton).toBeInTheDocument();
+    expect(actionButton).toHaveTextContent("Select");
+    expect(window.location.href).toBe("http://localhost/");
+    fireEvent.click(actionButton);
+    expect(
+      screen.findByTestId(`export-measure-${measures[3].id}`)
+    ).rejects.toThrow();
+    expect(
+      screen.findByTestId(`create-version-measure-${measures[3].id}`)
+    ).rejects.toThrow();
   });
 });
