@@ -48,7 +48,38 @@ describe("StatusHandler Component", () => {
     const success = {
       status: "success",
       message:
-        "CQL updated successfully! Library Name and/or Version can not be updated in the CQL Editor. MADiE has overwritten the updated Library Name and/or Version.",
+        "CQL updated successfully! Library Statement or Using Statement were incorrect. MADiE has overwritten them to ensure proper CQL.",
+    };
+    render(
+      <StatusHandler
+        success={success}
+        error={false}
+        errorMessage={false}
+        outboundAnnotations={annotationsObject}
+        hasSubTitle={false}
+      />
+    );
+
+    const successHeader = getByTestId("generic-success-text-header");
+    const successSubHeader = queryByTestId("generic-success-text-sub-header");
+    const libraryWarning = queryByTestId("library-warning");
+    const successList = queryByTestId("generic-success-text-list");
+
+    expect(successHeader.textContent).toBe(
+      "Changes saved successfully but the following errors were found"
+    );
+    expect(libraryWarning?.textContent).toBe(success.message);
+    expect(successSubHeader?.textContent).toBe(
+      `${annotationsObject.length} CQL errors found:`
+    );
+    expect(successList).toBeInTheDocument();
+  });
+
+  test("It displays a generic success message and a using warning if a library warning exists when no error or messages present, also displays a list of annotations", () => {
+    const success = {
+      status: "success",
+      message:
+        "CQL updated successfully but was missing a Using statement.  Please add in a valid model and version.",
     };
     render(
       <StatusHandler

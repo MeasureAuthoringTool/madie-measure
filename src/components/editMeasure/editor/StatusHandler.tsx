@@ -86,7 +86,13 @@ const StatusHandler = ({
                   Changes saved successfully but the following errors were found
                 </h3>
                 {success.message ===
-                  "CQL updated successfully! Library Name and/or Version can not be updated in the CQL Editor. MADiE has overwritten the updated Library Name and/or Version." && (
+                  "CQL updated successfully but was missing a Using statement.  Please add in a valid model and version." && (
+                  <p className="secondary" data-testid="library-warning">
+                    {success.message}
+                  </p>
+                )}
+                {success.message ===
+                  "CQL updated successfully! Library Statement or Using Statement were incorrect. MADiE has overwritten them to ensure proper CQL." && (
                   <p className="secondary" data-testid="library-warning">
                     {success.message}
                   </p>
