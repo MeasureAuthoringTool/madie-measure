@@ -102,7 +102,7 @@ const EditMeasureNav = () => {
 
   return (
     <div>
-      <div style={{ marginLeft: "32px" }}>
+      <div style={{ marginLeft: "32px" }} id="edit-measure-nav-a">
         <Tabs value={selected} onChange={handleChange} type="A" size="large">
           <Tab
             value={`${url}/details`}
