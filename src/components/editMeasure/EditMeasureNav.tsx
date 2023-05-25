@@ -99,9 +99,10 @@ const EditMeasureNav = () => {
   const handleChange = (e, v) => {
     setSelected(v);
   };
+
   return (
     <div>
-      <div style={{ marginLeft: "32px" }}>
+      <div style={{ marginLeft: "32px" }} id="edit-measure-nav-a">
         <Tabs value={selected} onChange={handleChange} type="A" size="large">
           <Tab
             value={`${url}/details`}
@@ -122,7 +123,7 @@ const EditMeasureNav = () => {
             component={NavLink}
           />
           <Tab
-            value={`${url}/groups/1`}
+            value={`${url}/groups`}
             to={`${url}/groups/1`}
             data-testid="groups-tab"
             type="A"
