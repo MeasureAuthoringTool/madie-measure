@@ -2,12 +2,13 @@ import * as React from "react";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { describe, expect, test } from "@jest/globals";
 import userEvent from "@testing-library/user-event";
-import RiskAdjustment from "./RiskAdjustment";
+import RiskAdjustment from "./QdmRiskAdjustment";
 import { Measure } from "@madie/madie-models";
 import { act } from "react-dom/test-utils";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../../api/useMeasureServiceApi";
+// import useMeasureServiceApi, {
+//   MeasureServiceApi,
+// } from "../../../../api/useMeasureServiceApi";
+
 const testMeasure = {
   id: "test measure",
   cql: `library C4r version '0.0.000'
