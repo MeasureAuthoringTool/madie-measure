@@ -16,7 +16,7 @@ import {
   MadieDiscardDialog,
   Toast,
 } from "@madie/madie-design-system/dist/react";
-import { Measure } from "../../../../../../../madie-models/src/Measure";
+import { Measure } from "@madie/madie-models";
 import { TextArea } from "../../../../../styles/editMeasure/populationCriteria/groups";
 
 const QdmRiskAdjustment = () => {
