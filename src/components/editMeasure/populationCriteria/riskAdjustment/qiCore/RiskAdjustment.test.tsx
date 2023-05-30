@@ -46,7 +46,7 @@ const testMeasure = {
   riskAdjustments: [],
 } as unknown as Measure;
 
-jest.mock("../../../../api/useMeasureServiceApi");
+jest.mock("../../../../../api/useMeasureServiceApi");
 jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn(() => {
     return true;

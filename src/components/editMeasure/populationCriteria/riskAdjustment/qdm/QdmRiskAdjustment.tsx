@@ -18,6 +18,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import { Measure } from "../../../../../../../madie-models/src/Measure";
 import { TextArea } from "../../../../../styles/editMeasure/populationCriteria/groups";
+
 const QdmRiskAdjustment = () => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   const [definitions, setDefinitions] = useState([]);
@@ -113,7 +114,6 @@ const QdmRiskAdjustment = () => {
   }, [formik.dirty]);
 
   const onCancel = () => {
-    resetForm();
     setDiscardDialogOpen(true);
   };
 
