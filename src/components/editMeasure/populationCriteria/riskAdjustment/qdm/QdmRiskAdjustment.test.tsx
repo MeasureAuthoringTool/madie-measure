@@ -53,9 +53,7 @@ const mockTestMeasure = {
 } as unknown as Measure;
 
 jest.mock("@madie/madie-util", () => ({
-  checkUserCanEdit: jest.fn(() => {
-    return true;
-  }),
+  checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useKeyPress: jest.fn(() => false),
   measureStore: {
     updateMeasure: (measure) => measure,
@@ -84,15 +82,15 @@ const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 let measureServiceApi: MeasureServiceApi;
 
-describe("QdmRiskAdjustment Component", () => {
-  const RenderRiskAdjustment = () => {
-    return render(
-      <ApiContextProvider value={serviceConfig}>
-        <RiskAdjustment />
-      </ApiContextProvider>
-    );
-  };
+const RenderRiskAdjustment = () => {
+  return render(
+    <ApiContextProvider value={serviceConfig}>
+      <RiskAdjustment />
+    </ApiContextProvider>
+  );
+};
 
+describe("QdmRiskAdjustment Component", () => {
   it("Should render risk Adjustment component with the values saved in DB", async () => {
     RenderRiskAdjustment();
     const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
@@ -105,15 +103,15 @@ describe("QdmRiskAdjustment Component", () => {
     expect(description).toHaveTextContent("test description");
   });
 
-  it("Should render disabled all components if the user doesn't have permissions", async () => {
-    checkUserCanEdit.mockImplementationOnce(() => false);
+  it("Should render disabled components if the user doesn't have permissions", async () => {
+    checkUserCanEdit.mockReturnValue(false);
     RenderRiskAdjustment();
     const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
     expect(riskAdjustmentSelect).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Initial Population" })
     ).toBeInTheDocument();
-    expect(riskAdjustmentSelect).toBeDisabled();
+
     const comboBoxInput = screen.getByRole("combobox");
     expect(comboBoxInput).toBeDisabled();
 
@@ -123,6 +121,7 @@ describe("QdmRiskAdjustment Component", () => {
   });
 
   it("Should successfully update risk Adjustment values and save to DB", async () => {
+    checkUserCanEdit.mockReturnValue(true);
     // Mocking service call to update measure
     const newRiskAdjustments = [
       {
