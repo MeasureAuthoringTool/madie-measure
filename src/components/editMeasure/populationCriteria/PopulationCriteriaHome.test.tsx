@@ -95,11 +95,11 @@ jest.mock("@madie/madie-util", () => ({
   }),
 }));
 
-const renderPopulationCriteriaHomeComponent = async (
+const renderPopulationCriteriaHomeComponent = (
   routePath: string,
   browserUrlPath: string
 ) => {
-  await render(
+  render(
     <MemoryRouter
       initialEntries={[
         { pathname: `/measures/testMeasureId/edit/${browserUrlPath}` },
@@ -180,7 +180,7 @@ describe("PopulationCriteriaHome", () => {
     renderPopulationCriteriaHomeComponent("risk-adjustment", "risk-adjustment");
     // verifies if the side nav is created
     expect(
-      screen.getByRole("button", {
+      await screen.findByRole("button", {
         name: /Population Criteria/i,
       })
     ).toBeInTheDocument();
