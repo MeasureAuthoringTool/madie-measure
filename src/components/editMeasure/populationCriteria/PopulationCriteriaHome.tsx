@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, lazy, Suspense } from "react";
+import React, { lazy, useEffect, useMemo, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { useHistory, useParams, useRouteMatch } from "react-router-dom";
@@ -6,7 +6,6 @@ import SupplementalElements from "./supplementalData/SupplementalElements";
 import PopulationCriteriaSideNav from "./populationCriteriaSideNav/PopulationCriteriaSideNav";
 import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 import { Measure, Model } from "@madie/madie-models";
-import RiskAdjustment from "./riskAdjustment/RiskAdjustment";
 import BaseConfiguration from "./baseConfiguration/BaseConfiguration";
 import QDMReporting from "./QDMReporting/QDMReporting";
 
@@ -28,7 +27,8 @@ export function PopulationCriteriaHome() {
   let history = useHistory();
   const canEdit: boolean = checkUserCanEdit(
     measure?.measureSet?.owner,
-    measure?.measureSet?.acls
+    measure?.measureSet?.acls,
+    measure?.measureMetaData?.draft
   );
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(null);
   const [sideNavLinks, setSideNavLinks] = useState<Array<any>>();
@@ -97,6 +97,18 @@ export function PopulationCriteriaHome() {
     [measure?.model]
   );
 
+  const RiskAdjustmentComponent = useMemo(
+    () =>
+      lazy(() => {
+        if (measure?.model === Model.QDM_5_6) {
+          return import("./riskAdjustment/qdm/QdmRiskAdjustment");
+        } else {
+          return import("./riskAdjustment/qiCore/RiskAdjustment");
+        }
+      }),
+    [measure?.model]
+  );
+
   return (
     <div tw="grid lg:grid-cols-6 gap-4 mx-8 shadow-lg rounded-md border border-slate bg-white">
       <PopulationCriteriaSideNav
@@ -127,7 +139,7 @@ export function PopulationCriteriaHome() {
 
       {path.includes("/supplemental-data") && <SupplementalElements />}
 
-      {path.includes("/risk-adjustment") && <RiskAdjustment />}
+      {path.includes("/risk-adjustment") && <RiskAdjustmentComponent />}
     </div>
   );
 }
