@@ -4,6 +4,7 @@ import {
   MadieDiscardDialog,
   Toast,
   AutoComplete,
+  TextArea,
 } from "@madie/madie-design-system/dist/react";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import {
@@ -23,7 +24,6 @@ import {
   FormFieldInner,
   FieldLabel,
   FieldSeparator,
-  TextArea,
 } from "../../../../styles/editMeasure/populationCriteria/supplementalData";
 
 const asterisk = { color: "#D92F2F", marginRight: 3 };
@@ -258,7 +258,6 @@ export default function SupplementalElements() {
                       </FieldLabel>
                       <FieldSeparator>
                         <TextArea
-                          style={{ height: "100px", width: "100%" }}
                           value={formik.values.supplementalData[i]?.description}
                           name={supData.definition}
                           id={supData.definition}

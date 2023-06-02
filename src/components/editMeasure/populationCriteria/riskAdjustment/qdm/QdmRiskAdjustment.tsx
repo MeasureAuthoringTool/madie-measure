@@ -15,9 +15,10 @@ import {
   InputLabel,
   MadieDiscardDialog,
   Toast,
+  TextArea,
 } from "@madie/madie-design-system/dist/react";
 import { Measure } from "@madie/madie-models";
-import { TextArea } from "../../../../../styles/editMeasure/populationCriteria/groups";
+//import {  } from "../../../../../styles/editMeasure/populationCriteria/groups";
 
 const QdmRiskAdjustment = () => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
