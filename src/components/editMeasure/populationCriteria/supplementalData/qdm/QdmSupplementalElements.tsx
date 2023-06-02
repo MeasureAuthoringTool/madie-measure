@@ -20,7 +20,7 @@ import { Measure } from "@madie/madie-models";
 import { TextArea } from "../../../../../styles/editMeasure/populationCriteria/supplementalData";
 import MetaDataWrapper from "../../../details/MetaDataWrapper";
 import MultipleSelectDropDown from "../../MultipleSelectDropDown";
-import "./QDMSupplementalElements.scss";
+import "./QdmSupplementalElements.scss";
 
 const QdmSupplementalElements = () => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
