@@ -18,7 +18,6 @@ import {
   TextArea,
 } from "@madie/madie-design-system/dist/react";
 import { Measure } from "@madie/madie-models";
-//import {  } from "../../../../../styles/editMeasure/populationCriteria/groups";
 
 const QdmRiskAdjustment = () => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
