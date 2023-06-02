@@ -25,7 +25,7 @@ jest.mock("react-router-dom", () => ({
   }),
 }));
 
-jest.mock("../../../../api/useMeasureServiceApi");
+jest.mock("../../../../../api/useMeasureServiceApi");
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 
