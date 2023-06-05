@@ -6,7 +6,7 @@ import {
   AutoComplete,
   TextArea,
 } from "@madie/madie-design-system/dist/react";
-import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
+import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
 import {
   measureStore,
   routeHandlerStore,
@@ -15,16 +15,16 @@ import {
 import { useFormik } from "formik";
 import { Typography } from "@mui/material";
 import tw, { styled } from "twin.macro";
-import "../../details/MeasureDetails.scss";
+import "../../../details/MeasureDetails.scss";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import { SupplementalData, Measure } from "@madie/madie-models";
 import cloneDeep from "lodash/cloneDeep";
-import MeasureGroupAlerts from "../groups/MeasureGroupAlerts";
+import MeasureGroupAlerts from "../../groups/MeasureGroupAlerts";
 import {
   FormFieldInner,
   FieldLabel,
   FieldSeparator,
-} from "../../../../styles/editMeasure/populationCriteria/supplementalData";
+} from "../../../../../styles/editMeasure/populationCriteria/supplementalData";
 
 const asterisk = { color: "#D92F2F", marginRight: 3 };
 

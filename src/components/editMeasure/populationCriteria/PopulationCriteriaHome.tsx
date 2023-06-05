@@ -2,7 +2,7 @@ import React, { lazy, useEffect, useMemo, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { useHistory, useParams, useRouteMatch } from "react-router-dom";
-import SupplementalElements from "./supplementalData/SupplementalElements";
+import SupplementalElements from "./supplementalData/qiCore/SupplementalElements";
 import PopulationCriteriaSideNav from "./populationCriteriaSideNav/PopulationCriteriaSideNav";
 import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 import { Measure, Model } from "@madie/madie-models";
@@ -109,6 +109,18 @@ export function PopulationCriteriaHome() {
     [measure?.model]
   );
 
+  const SupplementalElementsComponent = useMemo(
+    () =>
+      lazy(() => {
+        if (measure?.model === Model.QDM_5_6) {
+          return import("./supplementalData/qdm/QdmSupplementalElements");
+        } else {
+          return import("./supplementalData/qiCore/SupplementalElements");
+        }
+      }),
+    [measure?.model]
+  );
+
   return (
     <div tw="grid lg:grid-cols-6 gap-4 mx-8 shadow-lg rounded-md border border-slate bg-white">
       <PopulationCriteriaSideNav
@@ -137,7 +149,7 @@ export function PopulationCriteriaHome() {
           To do: Find a more elegant solution for future when we have more than two models to avoid if else if else. */}
       {path.includes("reporting") && <QDMReporting />}
 
-      {path.includes("/supplemental-data") && <SupplementalElements />}
+      {path.includes("/supplemental-data") && <SupplementalElementsComponent />}
 
       {path.includes("/risk-adjustment") && <RiskAdjustmentComponent />}
     </div>

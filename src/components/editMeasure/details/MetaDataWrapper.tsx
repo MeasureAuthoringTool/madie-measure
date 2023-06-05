@@ -1,5 +1,6 @@
 import React from "react";
 import { Button } from "@madie/madie-design-system/dist/react";
+import { Typography } from "@mui/material";
 
 const MetaDataWrapper = ({
   header,
@@ -22,6 +23,14 @@ const MetaDataWrapper = ({
       <div className="content">
         <div className="subTitle">
           <h2>{header}</h2>
+          <div>
+            <Typography
+              style={{ fontSize: 14, fontWeight: 300, fontFamily: "Rubik" }}
+            >
+              <span style={{ color: "#D92F2F", marginRight: 3 }}>*</span>
+              Indicates required field
+            </Typography>
+          </div>
         </div>
         {children}
       </div>
