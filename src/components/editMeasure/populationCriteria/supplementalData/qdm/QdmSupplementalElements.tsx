@@ -137,7 +137,6 @@ const QdmSupplementalElements = () => {
             id="supplemental-data"
             label="Definition"
             placeHolder={{ name: "", value: "" }}
-            required={true}
             disabled={!canEdit}
             error={false}
             helperText=""
@@ -180,7 +179,6 @@ const QdmSupplementalElements = () => {
         <div className="right">
           <InputLabel
             htmlFor="supplementalDataDescription"
-            required={true}
             style={{ placeContent: "flex-end" }}
           >
             Description
