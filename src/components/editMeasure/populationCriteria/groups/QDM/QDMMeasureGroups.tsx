@@ -23,6 +23,7 @@ import {
   Toast,
   Tab,
   Tabs,
+  TextArea,
 } from "@madie/madie-design-system/dist/react";
 import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
 import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
@@ -60,7 +61,6 @@ import {
   FieldLabel,
   FieldSeparator,
   MenuItemContainer,
-  TextArea,
 } from "../../../../../styles/editMeasure/populationCriteria/groups/index";
 
 interface ColSpanPopulationsType {
@@ -790,7 +790,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                     </FieldLabel>
                     <FieldSeparator>
                       <TextArea
-                        style={{ height: "100px", width: "100%" }}
                         value={formik.values.groupDescription}
                         name="group-description"
                         id="group-description"
