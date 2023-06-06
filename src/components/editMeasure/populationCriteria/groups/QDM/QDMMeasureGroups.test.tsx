@@ -755,16 +755,12 @@ describe("Measure Groups Page", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("groupDescriptionInput")).toHaveValue("");
-      userEvent.click(screen.getByTestId("reporting-tab"));
-      expect(screen.getByTestId("rateAggregationText")).toHaveValue("");
-      expect(screen.getByTestId("group-form-delete-btn")).toBeDisabled();
     });
   });
 
   test("On clicking discard button,should be able to discard the changes", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "testDescription";
-    group.rateAggregation = "Rate Aggregation Text";
     group.improvementNotation = "Increased score indicates improvement";
     measure.scoring = MeasureScoring.COHORT;
     measure.patientBasis = true;
@@ -789,13 +785,6 @@ describe("Measure Groups Page", () => {
     userEvent.click(getByRole(initialPopulationSelect, "button"));
     userEvent.click(screen.getByText(definitionToUpdate));
     expect(initialPopulationInput.value).toBe(definitionToUpdate);
-
-    // update data in Reporting tab
-    userEvent.click(screen.getByTestId("reporting-tab"));
-    const rateAggregationInput = screen.getByTestId("rateAggregationText");
-    fireEvent.change(rateAggregationInput, {
-      target: { value: "New rate aggregation text" },
-    });
 
     // Discard changed / test onClose
     expect(screen.getByTestId("group-form-discard-btn")).toBeEnabled();
@@ -824,11 +813,6 @@ describe("Measure Groups Page", () => {
       },
       { timeout: 10000 }
     );
-
-    expect(screen.getByTestId("rateAggregationText")).toHaveValue(
-      group.rateAggregation
-    );
-
     // navigate to population and verify initial population is reverted to value from group object
     userEvent.click(screen.getByTestId("populations-tab"));
     expect(
@@ -909,7 +893,6 @@ describe("Measure Groups Page", () => {
   test("Stratifications Should Not Have Remove Button if there are only two", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "Description Text";
-    group.rateAggregation = "Rate Aggregation Text";
     group.improvementNotation = "Increased score indicates improvement";
     group.stratifications = [
       { ...getEmptyStrat(), id: "id-1" },
@@ -925,7 +908,6 @@ describe("Measure Groups Page", () => {
   test("Stratifications should have remove button if there are more than two", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "Description Text";
-    group.rateAggregation = "Rate Aggregation Text";
     group.improvementNotation = "Increased score indicates improvement";
     group.stratifications = [
       { ...getEmptyStrat(), id: "id-1" },
@@ -948,7 +930,6 @@ describe("Measure Groups Page", () => {
   test("Stratifications should no longer have remove button the stratifications are reduced to two", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "Description Text";
-    group.rateAggregation = "Rate Aggregation Text";
     group.improvementNotation = "Increased score indicates improvement";
     group.stratifications = [
       { ...getEmptyStrat(), id: "id-1" },
@@ -969,7 +950,6 @@ describe("Measure Groups Page", () => {
   test("Stratifications should show add button if total increased to >2", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "Description Text";
-    group.rateAggregation = "Rate Aggregation Text";
     group.improvementNotation = "Increased score indicates improvement";
     group.stratifications = [
       { ...getEmptyStrat(), id: "id-1" },
@@ -989,7 +969,6 @@ describe("Measure Groups Page", () => {
   test("If stratification is empty, auto populate two empty stratifications", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "Description Text";
-    group.rateAggregation = "Rate Aggregation Text";
     group.improvementNotation = "Increased score indicates improvement";
     group.stratifications = [];
     measure.groups = [group];
