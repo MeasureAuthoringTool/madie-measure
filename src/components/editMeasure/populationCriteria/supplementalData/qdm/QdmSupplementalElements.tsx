@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
+import "twin.macro";
+import "styled-components/macro";
 import {
-  Button,
   MadieDiscardDialog,
   Toast,
-  AutoComplete,
   InputLabel,
   TextArea,
 } from "@madie/madie-design-system/dist/react";
@@ -20,7 +20,6 @@ import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import { Measure } from "@madie/madie-models";
 import MetaDataWrapper from "../../../details/MetaDataWrapper";
 import MultipleSelectDropDown from "../../MultipleSelectDropDown";
-import "./QdmSupplementalElements.scss";
 
 const QdmSupplementalElements = () => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
@@ -129,71 +128,72 @@ const QdmSupplementalElements = () => {
       handleSubmit={formik.handleSubmit}
       onCancel={onCancel}
     >
-      <div id="measure-supplemental-data-wrapper">
-        <div className="left">
-          <MultipleSelectDropDown
-            formControl={formik.getFieldProps("supplementalData")}
-            value={formik.values.supplementalData?.map((sd) => sd?.definition)}
-            id="supplemental-data"
-            label="Definition"
-            placeHolder={{ name: "", value: "" }}
-            disabled={!canEdit}
-            error={false}
-            helperText=""
-            multipleSelect={true}
-            limitTags={1}
-            options={definitions}
-            onClose={() => {}}
-            onChange={(e, v, r) => {
-              if (r === "removeOption") {
-                const copiedValues = formik.values.supplementalData.slice();
-                // find out what v is not present in copiedValues
-                const filteredValues = copiedValues.filter((val) => {
-                  return v.includes(val.definition);
-                });
-                formik.setFieldValue("supplementalData", filteredValues);
-              }
-              if (r === "selectOption") {
-                const copiedValues = formik.values.supplementalData.slice();
-                // we don't seem to have a good way of knowing exactly what was selected, but we can compare
-                const selectedOption = v.filter((v) => {
-                  for (let i = 0; i < copiedValues.length; i++) {
-                    if (copiedValues[i].definition === v) {
-                      return false;
-                    }
-                  }
-                  return true;
-                });
-                copiedValues.push({
-                  definition: selectedOption[0],
-                  description: "",
-                });
-                formik.setFieldValue("supplementalData", copiedValues);
-              }
-              if (r === "clear") {
-                formik.setFieldValue("supplementalData", []);
-              }
-            }}
-          />
-        </div>
-        <div className="right">
-          <InputLabel
-            htmlFor="supplementalDataDescription"
-            style={{ placeContent: "flex-end" }}
-          >
-            Description
-          </InputLabel>
-          <TextArea
-            {...formik.getFieldProps("supplementalDataDescription")}
-            name="supplementalDataDescription"
-            id="supplementalDataDescription"
-            disabled={!canEdit}
-            placeholder="Description"
-            data-testid="supplementalDataDescription"
-            className="supplemental-data-description"
-          />
-        </div>
+      <div tw="flex flex-col">
+        <InputLabel
+          htmlFor="supplementalDataDescription"
+          style={{ placeContent: "flex-end" }}
+        >
+          Description
+        </InputLabel>
+        <TextArea
+          style={{ height: "100px", width: "100%" }}
+          {...formik.getFieldProps("supplementalDataDescription")}
+          name="supplementalDataDescription"
+          id="supplementalDataDescription"
+          disabled={!canEdit}
+          placeholder="Description"
+          data-testid="supplementalDataDescription"
+          className="supplemental-data-description"
+        />
       </div>
+
+      <div tw="flex mt-6 w-1/4">
+        <MultipleSelectDropDown
+          formControl={formik.getFieldProps("supplementalData")}
+          value={formik.values.supplementalData?.map((sd) => sd?.definition)}
+          id="supplemental-data"
+          label="Definition"
+          placeHolder={{ name: "", value: "" }}
+          disabled={!canEdit}
+          error={false}
+          helperText=""
+          multipleSelect={true}
+          limitTags={1}
+          options={definitions}
+          onClose={() => {}}
+          onChange={(e, v, r) => {
+            if (r === "removeOption") {
+              const copiedValues = formik.values.supplementalData.slice();
+              // find out what v is not present in copiedValues
+              const filteredValues = copiedValues.filter((val) => {
+                return v.includes(val.definition);
+              });
+              formik.setFieldValue("supplementalData", filteredValues);
+            }
+            if (r === "selectOption") {
+              const copiedValues = formik.values.supplementalData.slice();
+              // we don't seem to have a good way of knowing exactly what was selected, but we can compare
+              const selectedOption = v.filter((v) => {
+                for (let i = 0; i < copiedValues.length; i++) {
+                  if (copiedValues[i].definition === v) {
+                    return false;
+                  }
+                }
+                return true;
+              });
+              copiedValues.push({
+                definition: selectedOption[0],
+                description: "",
+              });
+              formik.setFieldValue("supplementalData", copiedValues);
+            }
+            if (r === "clear") {
+              formik.setFieldValue("supplementalData", []);
+            }
+          }}
+        />
+      </div>
+
       <Toast
         toastKey="supplemental-data-toast"
         toastType={toastType}
