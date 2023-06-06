@@ -11,6 +11,7 @@ import {
   Button,
   MadieDiscardDialog,
   Toast,
+  TextArea,
 } from "@madie/madie-design-system/dist/react";
 import _ from "lodash";
 
@@ -120,7 +121,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
           <h2>{header}</h2>
         </div>
         <label htmlFor={`measure-${typeLower}`}>{measureMetadataType}</label>
-        <textarea
+        <TextArea
           readOnly={!canEdit}
           name={`measure-${typeLower}`}
           id={`measure-${typeLower}`}

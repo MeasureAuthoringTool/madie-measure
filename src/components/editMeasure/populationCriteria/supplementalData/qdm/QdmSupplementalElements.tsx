@@ -5,6 +5,7 @@ import {
   Toast,
   AutoComplete,
   InputLabel,
+  TextArea,
 } from "@madie/madie-design-system/dist/react";
 import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
 import {
@@ -17,7 +18,6 @@ import tw, { styled } from "twin.macro";
 import "../../../details/MeasureDetails.scss";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import { Measure } from "@madie/madie-models";
-import { TextArea } from "../../../../../styles/editMeasure/populationCriteria/supplementalData";
 import MetaDataWrapper from "../../../details/MetaDataWrapper";
 import MultipleSelectDropDown from "../../MultipleSelectDropDown";
 import "./QdmSupplementalElements.scss";
@@ -186,7 +186,6 @@ const QdmSupplementalElements = () => {
             Description
           </InputLabel>
           <TextArea
-            style={{ height: "100px", width: "100%" }}
             {...formik.getFieldProps("supplementalDataDescription")}
             name="supplementalDataDescription"
             id="supplementalDataDescription"
