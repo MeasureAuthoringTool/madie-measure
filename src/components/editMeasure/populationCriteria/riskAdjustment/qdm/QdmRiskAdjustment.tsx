@@ -129,14 +129,12 @@ const QdmRiskAdjustment = () => {
       <div tw="flex flex-col">
         <InputLabel htlmfor="riskAdjustmentDescription">Description</InputLabel>
         <TextArea
-          style={{ height: "100px", width: "100%" }}
           {...formik.getFieldProps("riskAdjustmentDescription")}
           name="riskAdjustmentDescription"
           id="riskAdjustmentDescription"
           disabled={!canEdit}
           placeholder="Description"
           data-testid="riskAdjustmentDescription"
-          className="risk-description"
         />
       </div>
       <div tw="flex mt-6 w-1/4">

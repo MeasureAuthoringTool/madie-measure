@@ -135,14 +135,12 @@ const QdmSupplementalElements = () => {
           Description
         </InputLabel>
         <TextArea
-          style={{ height: "100px", width: "100%" }}
           {...formik.getFieldProps("supplementalDataDescription")}
           name="supplementalDataDescription"
           id="supplementalDataDescription"
           disabled={!canEdit}
           placeholder="Description"
           data-testid="supplementalDataDescription"
-          className="supplemental-data-description"
         />
       </div>
 
