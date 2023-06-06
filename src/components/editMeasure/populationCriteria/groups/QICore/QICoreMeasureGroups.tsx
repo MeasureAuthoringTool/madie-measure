@@ -1150,7 +1150,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                         Stratification {i + 1} Description
                                       </FieldLabel>
                                       <FieldSeparator>
-                                        <textarea
+                                        <TextArea
                                           tw="disabled:bg-slate h-full w-full"
                                           value={
                                             formik.values.stratifications[i]
