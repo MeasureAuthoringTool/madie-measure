@@ -14,7 +14,6 @@ import {
   checkUserCanEdit,
 } from "@madie/madie-util";
 import { useFormik } from "formik";
-import tw, { styled } from "twin.macro";
 import "../../../details/MeasureDetails.scss";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import { Measure } from "@madie/madie-models";
