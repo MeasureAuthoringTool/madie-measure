@@ -135,6 +135,7 @@ const QdmRiskAdjustment = () => {
           disabled={!canEdit}
           placeholder="Description"
           data-testid="riskAdjustmentDescription"
+          className="risk-description"
         />
       </div>
       <div tw="flex mt-6 w-1/4">
