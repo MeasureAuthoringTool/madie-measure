@@ -114,7 +114,7 @@ export default function EditMeasure() {
   const contentDiv = (
     <div data-testid="editMeasure">
       <div tw="relative" style={{ marginTop: "-60px" }}>
-        <EditMeasureNav />
+        <EditMeasureNav isQDM={measure?.model?.includes("QDM")} />
         <div
           style={{
             marginLeft: "2rem",
