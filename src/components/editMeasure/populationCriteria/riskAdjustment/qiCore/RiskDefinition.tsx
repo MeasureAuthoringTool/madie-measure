@@ -1,7 +1,7 @@
 import React from "react";
 import { InputLabel, TextArea } from "@madie/madie-design-system/dist/react";
 
-const RiskDefinition = ({ handleDescriptionChange, risk, key }) => {
+const RiskDefinition = ({ handleDescriptionChange, risk, key, i }) => {
   return (
     <div className="risk-container" key={key}>
       <InputLabel htlmfor={`${risk.definition}-description`}>
@@ -14,6 +14,7 @@ const RiskDefinition = ({ handleDescriptionChange, risk, key }) => {
         }}
         id={`${risk.definition}-description`}
         data-testid={`${risk.definition}-description`}
+        className="risk-description"
       />
     </div>
   );
