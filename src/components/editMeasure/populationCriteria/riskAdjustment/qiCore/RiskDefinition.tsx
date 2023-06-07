@@ -14,6 +14,7 @@ const RiskDefinition = ({ handleDescriptionChange, risk, key }) => {
         }}
         id={`${risk.definition}-description`}
         data-testid={`${risk.definition}-description`}
+        className="risk-description"
       />
     </div>
   );

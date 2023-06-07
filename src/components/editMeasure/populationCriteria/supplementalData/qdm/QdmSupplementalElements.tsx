@@ -141,6 +141,7 @@ const QdmSupplementalElements = () => {
           disabled={!canEdit}
           placeholder="Description"
           data-testid="supplementalDataDescription"
+          className="supplemental-data-description"
         />
       </div>
 
