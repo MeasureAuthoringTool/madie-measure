@@ -22,7 +22,7 @@ const MenuItem = styled.li((props: PropTypes) => [
   props.isActive && tw`bg-slate text-slate-90 font-medium hover:bg-slate`,
 ]);
 
-const EditMeasureNav = () => {
+const EditMeasureNav = ({ isQDM }) => {
   const { url } = useRouteMatch();
   // TODO: try activeClassName of NavLink instead of manual path check
   const { pathname } = useLocation();
@@ -99,6 +99,9 @@ const EditMeasureNav = () => {
   const handleChange = (e, v) => {
     setSelected(v);
   };
+  const qdmNavTo = () => {
+    isQDM ? `${url}/base-configuration` : `${url}/groups/1`;
+  };
 
   return (
     <div>
@@ -124,7 +127,7 @@ const EditMeasureNav = () => {
           />
           <Tab
             value={`${url}/groups`}
-            to={`${url}/groups/1`}
+            to={isQDM ? `${url}/base-configuration` : `${url}/groups/1`}
             data-testid="groups-tab"
             type="A"
             size="large"

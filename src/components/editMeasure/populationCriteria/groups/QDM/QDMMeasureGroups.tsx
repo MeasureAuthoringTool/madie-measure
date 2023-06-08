@@ -874,16 +874,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                           value="stratification"
                         />
                       )}
-                      <Tab
-                        role="tabpanel"
-                        tabIndex={0}
-                        aria-label="Reporting tab panel"
-                        type="B"
-                        label="Reporting"
-                        data-testid="reporting-tab"
-                        onClick={() => setActiveTab("reporting")}
-                        value="reporting"
-                      />
                     </Tabs>
                   </MenuItemContainer>
                 </div>
@@ -1142,57 +1132,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                       </div>
                     )}
                   />
-                )}
-
-                {activeTab === "reporting" && (
-                  <div tw="grid grid-cols-4 mt-6">
-                    <div tw="lg:col-span-3">
-                      <FieldLabel
-                        htmlFor="rate-aggregation"
-                        id="rate-aggregation-label"
-                      >
-                        Rate Aggregation
-                      </FieldLabel>
-                      <FieldSeparator>
-                        <FieldInput
-                          value={formik.values.rateAggregation}
-                          aria-labelledby="rate-aggregation-label"
-                          type="text"
-                          disabled={!canEdit}
-                          name="rate-aggregation"
-                          id="rate-aggregation"
-                          autoComplete="rate-aggregation"
-                          placeholder="Rate Aggregation"
-                          data-testid="rateAggregationText"
-                          {...formik.getFieldProps("rateAggregation")}
-                        />
-                      </FieldSeparator>
-                    </div>
-                    <div tw="pt-6 pb-6 col-start-1 col-end-2">
-                      <Select
-                        placeHolder={{
-                          name: "Select Improvement Notation",
-                          value: "",
-                        }}
-                        label="Improvement Notation"
-                        id="improvement-notation-select"
-                        inputProps={{
-                          "data-testid": "improvement-notation-input",
-                        }}
-                        disabled={!canEdit}
-                        data-testid="improvement-notation-select"
-                        {...formik.getFieldProps("improvementNotation")}
-                        size="small"
-                        options={Object.values(improvementNotationOptions).map(
-                          (opt) => (
-                            <MuiMenuItem key={opt.label} value={opt.value}>
-                              {opt.label}
-                            </MuiMenuItem>
-                          )
-                        )}
-                      />
-                    </div>
-                  </div>
                 )}
               </div>
 
