@@ -329,7 +329,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     initialValues: {
       id: group?.id || null,
       scoring: measure?.scoring || "",
-      populations: group?.populations,
+      populations: group?.populations
+        ? group.populations
+        : getPopulationsForScoring(measure?.scoring),
       measureObservations: group?.measureObservations || memoizedObservation,
       rateAggregation: group?.rateAggregation || "",
       improvementNotation: group?.improvementNotation || "",
