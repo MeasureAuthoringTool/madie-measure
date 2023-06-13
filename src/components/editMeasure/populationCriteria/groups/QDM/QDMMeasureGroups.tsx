@@ -293,6 +293,11 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           populationBasis: defaultPopulationBasis,
           scoringUnit: "",
           stratifications: getFirstTwoStrats,
+          populations: getPopulationsForScoring(measure?.scoring).map((p) => ({
+            ...p,
+            id: uuidv4(),
+            description: "",
+          })),
         });
         resetForm();
       }
@@ -403,6 +408,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
         );
       }
     });
+
     return () => {
       subscription.unsubscribe();
     };
@@ -550,9 +556,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           });
         });
     } else {
-      group.populations.forEach((population) => {
-        population.id = uuidv4();
-      });
       measureServiceApi
         .createGroup(group, measure.id)
         .then(async (g: Group) => {
