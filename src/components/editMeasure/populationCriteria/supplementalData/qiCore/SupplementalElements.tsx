@@ -176,6 +176,7 @@ export default function SupplementalElements() {
     setSelectedSupplementalData(newList);
     formik.setFieldValue("supplementalData", newList);
   };
+
   const getDescriptionByDefinition = (
     definition: string,
     oldSelectedSupDataList: SupplementalData[]
@@ -189,15 +190,14 @@ export default function SupplementalElements() {
     return description;
   };
 
-  const handleDescriptionChange = (definition, value, index) => {
+  const handleDescriptionChange = (definition, value) => {
     const supData = formik.values.supplementalData;
     for (let i = 0; i < supData.length; i++) {
       if (supData[i].definition === definition) {
         supData[i].description = value;
       }
     }
-    const newSupplementalData = cloneDeep(supData);
-    formik.setFieldValue("supplementalData", newSupplementalData);
+    formik.setFieldValue("supplementalData", supData);
   };
 
   return (
@@ -267,8 +267,7 @@ export default function SupplementalElements() {
                           onChange={(e) =>
                             handleDescriptionChange(
                               supData.definition,
-                              e.target.value,
-                              i
+                              e.target.value
                             )
                           }
                         />
