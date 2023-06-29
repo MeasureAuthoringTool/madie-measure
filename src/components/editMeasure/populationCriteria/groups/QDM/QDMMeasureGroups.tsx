@@ -85,30 +85,6 @@ const ColSpanPopulations = (props: ColSpanPopulationsType) => {
 
 const deleteToken = "FDE8472A-6095-4292-ABF7-E35AD435F05F"; // randomly generated token for deleting
 
-// provides dropdown options for Improvement Notation
-const improvementNotationOptions = [
-  {
-    label: "-",
-    value: "",
-    subtitle: null,
-    code: null,
-  },
-  {
-    label: "Increased score indicates improvement",
-    value: "Increased score indicates improvement",
-    subtitle:
-      "Improvement is indicated as an increase in the score or measurement (e.g. Higher score indicates better quality).",
-    code: "increase",
-  },
-  {
-    label: "Decreased score indicates improvement",
-    value: "Decreased score indicates improvement",
-    subtitle:
-      "Improvement is indicated as a decrease in the score or measurement (e.g. Lower score indicates better quality).",
-    code: "decrease",
-  },
-];
-
 // default value for any association is Initial population
 // TODO: figure out why it is being called on every rerender
 const getEmptyStrat = () => ({
