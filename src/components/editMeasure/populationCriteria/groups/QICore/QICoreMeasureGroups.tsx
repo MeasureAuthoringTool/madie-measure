@@ -10,6 +10,7 @@ import {
   PopulationType,
   MeasureErrorType,
   MeasureGroupTypes,
+  MeasureScoring,
 } from "@madie/madie-models";
 import { MenuItem as MuiMenuItem, Typography, Divider } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
@@ -175,6 +176,17 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   >([]);
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
+  // one additional step to check the measure is proportion, and if so verify the sort order for existing measures for a ui enhancement
+  const modifyMeasure = (measure) => {
+    console.log("measure is", measure);
+    setMeasure(measure);
+  };
+  useEffect(() => {
+    const subscription = measureStore.subscribe(modifyMeasure);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
   const [refreshFlag, setRefreshFlag] = useState<boolean>(true);
 
   const canEdit = checkUserCanEdit(
@@ -263,6 +275,15 @@ const MeasureGroups = (props: MeasureGroupProps) => {
 
   useEffect(() => {
     if (measure?.groups && measure?.groups[measureGroupNumber]) {
+      // manually sort group populations in existing groups on retrieval
+      const group = measure?.groups[measureGroupNumber];
+      group.populations.sort((a, b) => {
+        return (
+          allPopulations.findIndex((all) => all.name === a.name) -
+          allPopulations.findIndex((all) => all.name === b.name)
+        );
+      });
+      // here we need to modify the order of measure groups on initial db
       setGroup(measure?.groups[measureGroupNumber]);
       resetForm({
         values: {
@@ -443,6 +464,10 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       });
     } else {
       // resetting form with data from DB
+      console.log(
+        "measure?.groups[measureGroupNumber]measure,",
+        measure?.groups[measureGroupNumber]
+      );
       resetForm({
         values: {
           ...measure?.groups[measureGroupNumber],
@@ -925,6 +950,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                     render={(arrayHelpers) => (
                       <div id="populations-content">
                         {formik.values.populations?.map((population, index) => {
+                          // console.log('formik.values', formik.values.populations)
                           const fieldProps = {
                             name: `populations[${index}].definition`,
                           };
