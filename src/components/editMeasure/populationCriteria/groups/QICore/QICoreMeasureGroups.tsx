@@ -178,7 +178,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   // one additional step to check the measure is proportion, and if so verify the sort order for existing measures for a ui enhancement
   const modifyMeasure = (measure) => {
-    console.log("measure is", measure);
     setMeasure(measure);
   };
   useEffect(() => {
@@ -464,10 +463,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       });
     } else {
       // resetting form with data from DB
-      console.log(
-        "measure?.groups[measureGroupNumber]measure,",
-        measure?.groups[measureGroupNumber]
-      );
       resetForm({
         values: {
           ...measure?.groups[measureGroupNumber],
