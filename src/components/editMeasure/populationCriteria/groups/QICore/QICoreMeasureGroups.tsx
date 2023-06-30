@@ -176,12 +176,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   >([]);
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
-  // one additional step to check the measure is proportion, and if so verify the sort order for existing measures for a ui enhancement
-  const modifyMeasure = (measure) => {
-    setMeasure(measure);
-  };
   useEffect(() => {
-    const subscription = measureStore.subscribe(modifyMeasure);
+    const subscription = measureStore.subscribe(setMeasure);
     return () => {
       subscription.unsubscribe();
     };
@@ -945,7 +941,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                     render={(arrayHelpers) => (
                       <div id="populations-content">
                         {formik.values.populations?.map((population, index) => {
-                          // console.log('formik.values', formik.values.populations)
                           const fieldProps = {
                             name: `populations[${index}].definition`,
                           };
