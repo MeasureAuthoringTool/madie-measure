@@ -91,6 +91,12 @@ const deleteToken = "FDE8472A-6095-4292-ABF7-E35AD435F05F"; // randomly generate
 // provides dropdown options for Improvement Notation
 const improvementNotationOptions = [
   {
+    label: "-",
+    value: "",
+    subtitle: null,
+    code: null,
+  },
+  {
     label: "Increased score indicates improvement",
     value: "Increased score indicates improvement",
     subtitle:
