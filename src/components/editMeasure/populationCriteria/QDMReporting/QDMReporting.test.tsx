@@ -81,7 +81,9 @@ describe("QDMReporting component", () => {
     const improvementNotation = getByLabelText(
       "Improvement Notation"
     ) as HTMLSelectElement;
-    expect(improvementNotation).toHaveTextContent("-");
+    expect(improvementNotation).toHaveTextContent(
+      "Select Improvement Notation"
+    );
   });
 
   test("QDMReporting renders values correctly from measureStore", async () => {
@@ -179,7 +181,9 @@ describe("QDMReporting component", () => {
     fireEvent.click(discardCancelButton);
     await waitFor(() => {
       expect(rateAggregation.value).toBe("");
-      expect(getByLabelText("Improvement Notation")).toHaveTextContent("-");
+      expect(getByLabelText("Improvement Notation")).toHaveTextContent(
+        "Select Improvement Notation"
+      );
     });
   });
 
@@ -285,7 +289,7 @@ const selectAnOptionForImprovementNotation = async () => {
   const improvementNotation = screen.getByLabelText(
     "Improvement Notation"
   ) as HTMLSelectElement;
-  expect(improvementNotation).toHaveTextContent("-");
+  expect(improvementNotation).toHaveTextContent("Select Improvement Notation");
   userEvent.click(improvementNotation);
   const improvementNotationOptions = await screen.findByRole("listbox", {
     name: "Improvement Notation",
