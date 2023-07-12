@@ -1153,7 +1153,6 @@ describe("Measure Groups Page", () => {
     const allPopulationsInputs = screen.getAllByTestId(
       "select-measure-group-population-input"
     ) as HTMLInputElement[];
-
     // setting initial population
     fireEvent.change(allPopulationsInputs[0], {
       target: {
@@ -1169,10 +1168,9 @@ describe("Measure Groups Page", () => {
     // Required population numerator is still not selected
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
 
-    fireEvent.change(allPopulationsInputs[4], {
+    fireEvent.change(allPopulationsInputs[3], {
       target: { value: "Numerator" },
     });
-
     // Select a measure group type
     const measureGroupTypeSelect = screen.getByTestId(
       "measure-group-type-dropdown"
@@ -1181,7 +1179,6 @@ describe("Measure Groups Page", () => {
     await waitFor(() => {
       userEvent.click(screen.getByText("Patient Reported Outcome"));
     });
-
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
   });
 

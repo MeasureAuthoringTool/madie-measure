@@ -57,11 +57,11 @@ export const allPopulations = [
   initialPopulation,
   denominator,
   denominatorExclusion,
-  denominatorException,
   numerator,
   numeratorExclusion,
   measurePopulation,
   measurePopulationExclusion,
+  denominatorException,
 ];
 
 export const findPopulations = (
@@ -100,9 +100,9 @@ export const getPopulationsForScoring = (scoring: string): Population[] => {
         initialPopulation,
         denominator,
         denominatorExclusion,
-        denominatorException,
         numerator,
         numeratorExclusion,
+        denominatorException,
       ];
       break;
     case MeasureScoring.CONTINUOUS_VARIABLE:
