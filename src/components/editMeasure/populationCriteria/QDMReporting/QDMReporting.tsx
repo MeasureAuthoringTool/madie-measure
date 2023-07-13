@@ -166,7 +166,7 @@ const QDMReporting = () => {
           <div className="right">
             <Select
               name="Improvement Notation"
-              placeHolder={{ name: "-", value: "" }}
+              placeHolder={{ name: "Select Improvement Notation", value: "" }}
               label="Improvement Notation"
               id="improvement-notation-select"
               inputProps={{
