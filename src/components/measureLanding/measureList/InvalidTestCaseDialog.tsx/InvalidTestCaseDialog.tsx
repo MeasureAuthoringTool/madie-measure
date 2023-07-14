@@ -6,9 +6,10 @@ interface InvalidTestCaseDialogProps {
   open: boolean;
   onClose: Function;
   onContinue: Function;
+  versionType: String;
 }
 const InvalidTestCaseDialog = (props: InvalidTestCaseDialogProps) => {
-  const { open, onClose, onContinue } = props;
+  const { open, onClose, onContinue, versionType } = props;
   return (
     <MadieDialog
       title="Version Measures with Invalid Test Cases?"
@@ -21,14 +22,16 @@ const InvalidTestCaseDialog = (props: InvalidTestCaseDialogProps) => {
         variant: "secondary",
         onClick: onClose,
         cancelText: "No, I want to fix my Test Cases",
-        "data-testid": "discard-dialog-cancel-button",
+        "data-testid": "invalid-test-dialog-cancel-button",
       }}
       continueButtonProps={{
         variant: "primary",
         type: "submit",
-        "data-testid": "discard-dialog-continue-button",
+        "data-testid": "invalid-test-dialog-continue-button",
         continueText: "Yes, Version My Measure",
-        onClick: onContinue,
+        onClick: () => {
+          onContinue(versionType);
+        },
       }}
     >
       <div id="discard-changes-dialog-body">

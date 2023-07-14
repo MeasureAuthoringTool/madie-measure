@@ -423,7 +423,7 @@ export default function MeasureList(props: {
     }
   };
 
-  const createVersion = () => {
+  const createVersion = (versionType: string) => {
     return measureServiceApi
       .createVersion(targetMeasure.current?.id, versionType)
       .then((r) => {
@@ -441,7 +441,6 @@ export default function MeasureList(props: {
 
   // given a version and target, check if possible
   const checkCreateVersion = async (versionType: string) => {
-    setVersionType(versionType);
     setLoading(true);
     if (
       versionType !== "major" &&
@@ -459,12 +458,12 @@ export default function MeasureList(props: {
         .checkValidVersion(targetMeasure.current?.id, versionType)
         .then(async (successResponse) => {
           // if we get a 202, we have invalid test cases, but no other issues so we can create it
-          if (successResponse.status === 202) {
+          if (successResponse?.status === 202) {
             setInvalidTestCaseOpen(true);
           }
           // we assume standard 200 success case, we create the version
           else {
-            createVersion();
+            createVersion(versionType);
           }
         })
         .catch((error) => {
@@ -622,6 +621,7 @@ export default function MeasureList(props: {
               open={invalidTestCaseOpen}
               onContinue={createVersion}
               onClose={handleDialogClose}
+              versionType={versionType}
             />
             <CreatVersionDialog
               open={createVersionDialog.open}
