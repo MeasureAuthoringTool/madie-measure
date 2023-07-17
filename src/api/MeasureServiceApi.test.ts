@@ -249,13 +249,6 @@ describe("MeasureServiceApi Tests", () => {
   });
 
   it("test checkValidVersion success", async () => {
-    const measure: Measure = {
-      id: "testId",
-      measureName: "measure - A",
-      version: "1.001",
-      revisionNumber: 1,
-    } as unknown as Measure;
-
     const resp = { status: 200 };
     mockedAxios.post.mockResolvedValue(resp);
 
