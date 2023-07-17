@@ -250,10 +250,10 @@ describe("MeasureServiceApi Tests", () => {
 
   it("test checkValidVersion success", async () => {
     const resp = { status: 200 };
-    mockedAxios.post.mockResolvedValue(resp);
+    mockedAxios.get.mockResolvedValue(resp);
 
     await measureServiceApi.checkValidVersion("testId", "MAJOR");
-    expect(mockedAxios.post).toBeCalledTimes(1);
+    expect(mockedAxios.get).toBeCalledTimes(1);
     expect(resp.status).toEqual(200);
   });
 

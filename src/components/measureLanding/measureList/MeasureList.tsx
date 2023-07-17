@@ -459,6 +459,7 @@ export default function MeasureList(props: {
         .then(async (successResponse) => {
           // if we get a 202, we have invalid test cases, but no other issues so we can create it
           if (successResponse?.status === 202) {
+            setVersionType(versionType);
             setInvalidTestCaseOpen(true);
           }
           // we assume standard 200 success case, we create the version

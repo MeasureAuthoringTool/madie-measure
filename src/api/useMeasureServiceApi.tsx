@@ -370,9 +370,8 @@ export class MeasureServiceApi {
 
   // this expects endpoint should return a success or error message, no content
   async checkValidVersion(id: string, versionType: string): Promise<any> {
-    return await axios.post(
+    return await axios.get<any>(
       `${this.baseUrl}/measures/${id}/version?versionType=${versionType}`,
-      {},
       {
         headers: {
           Authorization: `Bearer ${this.getAccessToken()}`,
