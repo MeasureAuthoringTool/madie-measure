@@ -49,6 +49,7 @@ const mockMeasureServiceApi = {
     .mockResolvedValue(oneItemResponse),
   fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
   createVersion: jest.fn().mockResolvedValue({}),
+  checkValidVersion: jest.fn().mockResolvedValue({}),
   fetchMeasureDraftStatuses: jest.fn().mockResolvedValue({
     "1": true,
     "2": true,
@@ -150,7 +151,12 @@ const measures: Measure[] = [
     },
   },
 ];
-
+const checkValidSuccess = {
+  status: 200,
+  response: {
+    data: {},
+  },
+};
 const serviceConfig: ServiceConfig = {
   elmTranslationService: { baseUrl: "" },
   measureService: { baseUrl: "" },
@@ -505,6 +511,7 @@ describe("Measure List component", () => {
     };
     const useMeasureServiceMockRejected = {
       createVersion: jest.fn().mockRejectedValue(error),
+      checkValidVersion: jest.fn().mockRejectedValue(error),
     } as unknown as MeasureServiceApi;
 
     useMeasureServiceMock.mockImplementation(() => {
@@ -550,6 +557,7 @@ describe("Measure List component", () => {
     };
     const useMeasureServiceMockRejected = {
       createVersion: jest.fn().mockRejectedValue(error),
+      checkValidVersion: jest.fn().mockRejectedValue(error),
     } as unknown as MeasureServiceApi;
 
     useMeasureServiceMock.mockImplementation(() => {
@@ -598,6 +606,7 @@ describe("Measure List component", () => {
     };
     const useMeasureServiceMockRejected = {
       createVersion: jest.fn().mockRejectedValue(error),
+      checkValidVersion: jest.fn().mockRejectedValue(error),
     } as unknown as MeasureServiceApi;
 
     useMeasureServiceMock.mockImplementation(() => {
@@ -641,6 +650,8 @@ describe("Measure List component", () => {
     };
     const useMeasureServiceMockRejected = {
       createVersion: jest.fn().mockResolvedValue(success),
+      checkValidVersion: jest.fn().mockResolvedValue(checkValidSuccess),
+      fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
     } as unknown as MeasureServiceApi;
 
     useMeasureServiceMock.mockImplementation(() => {
@@ -674,6 +685,73 @@ describe("Measure List component", () => {
         "New version of measure is Successfully created"
       );
 
+      const closeButton = getByTestId("close-toast-button");
+      fireEvent.click(closeButton);
+      setTimeout(() => {
+        expect(
+          queryByTestId("create-version-success-text")
+        ).not.toBeInTheDocument();
+      }, 500);
+    });
+    unmount();
+  });
+
+  it("should handle invalid test cases dialog", async () => {
+    const invalidTestCaseResponse = {
+      response: {},
+      status: 202,
+    };
+    const success = {
+      response: {
+        data: {},
+      },
+    };
+    const useMeasureServiceMockRejected = {
+      checkValidVersion: jest.fn().mockResolvedValue(invalidTestCaseResponse),
+      createVersion: jest.fn().mockResolvedValue(success),
+      fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockRejected;
+    });
+    const { getByTestId, getByLabelText, queryByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    fireEvent.click(getByTestId(`measure-action-${measures[0].id}`));
+    fireEvent.click(getByTestId(`create-version-measure-${measures[0].id}`));
+    fireEvent.click(getByLabelText("Major"));
+    await waitFor(() => {
+      fireEvent.click(getByTestId("create-version-continue-button"));
+      expect(
+        screen.getByTestId("invalid-test-case-dialog")
+      ).toBeInTheDocument();
+      act(() => {
+        fireEvent.click(
+          screen.getByTestId("invalid-test-dialog-continue-button")
+        );
+      });
+    });
+    await waitFor(() => {
+      expect(getByTestId("success-toast")).toHaveTextContent(
+        "New version of measure is Successfully created"
+      );
       const closeButton = getByTestId("close-toast-button");
       fireEvent.click(closeButton);
       setTimeout(() => {

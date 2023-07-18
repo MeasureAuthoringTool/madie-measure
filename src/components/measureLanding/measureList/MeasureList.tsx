@@ -11,6 +11,7 @@ import {
   Toast,
 } from "@madie/madie-design-system/dist/react";
 
+import InvalidTestCaseDialog from "./InvalidTestCaseDialog.tsx/InvalidTestCaseDialog";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
@@ -126,6 +127,7 @@ export default function MeasureList(props: {
       open: false,
     });
     setVersionHelperText("");
+    setInvalidTestCaseOpen(false);
   };
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
@@ -255,7 +257,7 @@ export default function MeasureList(props: {
     if (selected.measureMetaData.draft) {
       const versionButton = {
         label: "Version",
-        toImplementFunction: createVersion,
+        toImplementFunction: checkCreateVersion,
         dataTestId: `create-version-measure-${selected?.id}`,
       };
       if (shouldAllowAction(selected, featureFlags.qdmVersioning)) {
@@ -399,7 +401,46 @@ export default function MeasureList(props: {
       });
   };
 
-  const createVersion = async (versionType: string) => {
+  const [invalidTestCaseOpen, setInvalidTestCaseOpen] =
+    useState<boolean>(false);
+  // we need to preserver version type as invalid test case dialog will not be aware of it
+  const [versionType, setVersionType] = useState<string>(null);
+
+  const handleCreateError = (error) => {
+    const errorData = error?.response;
+    setToastOpen(true);
+    setLoading(false);
+    if (errorData?.status === 400) {
+      setToastMessage("Requested measure cannot be versioned");
+    } else if (errorData?.status === 403) {
+      setToastMessage("User is unauthorized to create a version");
+    } else {
+      setToastMessage(errorData?.message ? errorData.message : "Server error!");
+    }
+    const message = JSON.parse(errorData?.request?.responseText)?.message;
+    if (message) {
+      setVersionHelperText(versionErrorHelper(message));
+    }
+  };
+
+  const createVersion = (versionType: string) => {
+    return measureServiceApi
+      .createVersion(targetMeasure.current?.id, versionType)
+      .then((r) => {
+        handleDialogClose();
+        setToastOpen(true);
+        setToastType("success");
+        setLoading(false);
+        setToastMessage("New version of measure is Successfully created");
+        doUpdateList();
+      })
+      .catch((error) => {
+        handleCreateError(error);
+      });
+  };
+
+  // given a version and target, check if possible
+  const checkCreateVersion = async (versionType: string) => {
     setLoading(true);
     if (
       versionType !== "major" &&
@@ -414,32 +455,20 @@ export default function MeasureList(props: {
       setLoading(false);
     } else {
       await measureServiceApi
-        .createVersion(targetMeasure.current?.id, versionType)
-        .then(async () => {
-          handleDialogClose();
-          setToastOpen(true);
-          setToastType("success");
-          setLoading(false);
-          setToastMessage("New version of measure is Successfully created");
-          doUpdateList();
+        .checkValidVersion(targetMeasure.current?.id, versionType)
+        .then(async (successResponse) => {
+          // if we get a 202, we have invalid test cases, but no other issues so we can create it
+          if (successResponse?.status === 202) {
+            setVersionType(versionType);
+            setInvalidTestCaseOpen(true);
+          }
+          // we assume standard 200 success case, we create the version
+          else {
+            createVersion(versionType);
+          }
         })
         .catch((error) => {
-          const errorData = error?.response;
-          setToastOpen(true);
-          setLoading(false);
-          if (errorData?.status === 400) {
-            setToastMessage("Requested measure cannot be versioned");
-          } else if (errorData?.status === 403) {
-            setToastMessage("User is unauthorized to create a version");
-          } else {
-            setToastMessage(
-              errorData?.message ? errorData.message : "Server error!"
-            );
-          }
-          const message = JSON.parse(errorData?.request?.responseText)?.message;
-          if (message) {
-            setVersionHelperText(versionErrorHelper(message));
-          }
+          handleCreateError(error);
         });
     }
   };
@@ -589,10 +618,16 @@ export default function MeasureList(props: {
               onClose={onToastClose}
               autoHideDuration={6000}
             />
+            <InvalidTestCaseDialog
+              open={invalidTestCaseOpen}
+              onContinue={createVersion}
+              onClose={handleDialogClose}
+              versionType={versionType}
+            />
             <CreatVersionDialog
               open={createVersionDialog.open}
               onClose={handleDialogClose}
-              onSubmit={createVersion}
+              onSubmit={checkCreateVersion}
               versionHelperText={versionHelperText}
               loading={loading}
             />

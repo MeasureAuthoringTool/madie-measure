@@ -248,6 +248,15 @@ describe("MeasureServiceApi Tests", () => {
     }
   });
 
+  it("test checkValidVersion success", async () => {
+    const resp = { status: 200 };
+    mockedAxios.get.mockResolvedValue(resp);
+
+    await measureServiceApi.checkValidVersion("testId", "MAJOR");
+    expect(mockedAxios.get).toBeCalledTimes(1);
+    expect(resp.status).toEqual(200);
+  });
+
   it("test createVersion success", async () => {
     const measure: Measure = {
       id: "testId",
