@@ -424,6 +424,7 @@ export default function MeasureList(props: {
   };
 
   const createVersion = (versionType: string) => {
+    setLoading(true);
     return measureServiceApi
       .createVersion(targetMeasure.current?.id, versionType)
       .then((r) => {
@@ -457,6 +458,7 @@ export default function MeasureList(props: {
       await measureServiceApi
         .checkValidVersion(targetMeasure.current?.id, versionType)
         .then(async (successResponse) => {
+          setLoading(false);
           // if we get a 202, we have invalid test cases, but no other issues so we can create it
           if (successResponse?.status === 202) {
             setVersionType(versionType);
@@ -623,6 +625,7 @@ export default function MeasureList(props: {
               onContinue={createVersion}
               onClose={handleDialogClose}
               versionType={versionType}
+              loading={loading}
             />
             <CreatVersionDialog
               open={createVersionDialog.open}
