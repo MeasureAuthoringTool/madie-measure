@@ -445,11 +445,15 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   };
 
   const getReturnTypes = (
-    populations: Array<Population | MeasureObservation>
+    populations: Array<Population | MeasureObservation>,
+    type: string
   ) => {
     return populations?.reduce((returnTypes, population) => {
       const definition = _.camelCase(_.trim(population?.definition));
-      const returnType = cqlDefinitionDataTypes[definition];
+      const returnType =
+        type === "population"
+          ? cqlDefinitionDataTypes[definition]
+          : cqlFunctionDataTypes[definition];
       if (returnType) {
         returnTypes.push(returnType);
       }
@@ -472,8 +476,10 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     measureObservations: MeasureObservation[],
     stratifications?: Stratification[]
   ): string => {
-    const populationReturnTypes = getReturnTypes(populations) || [];
-    const observationReturnTypes = getReturnTypes(measureObservations) || [];
+    const populationReturnTypes =
+      getReturnTypes(populations, "population") || [];
+    const observationReturnTypes =
+      getReturnTypes(measureObservations, "observation") || [];
     const stratificationReturnTypes =
       getReturnTypesStrats(stratifications) || [];
     const returnTypesSet = new Set([
