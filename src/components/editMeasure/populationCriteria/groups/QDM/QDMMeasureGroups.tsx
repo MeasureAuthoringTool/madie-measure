@@ -489,7 +489,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     ]);
 
     if (returnTypesSet.size > 1) {
-      return "For Episode-based Measures, selected definitions must return a list of the same type.";
+      return "For Episode-based Measures, selected definitions must return a list of the same type and Measure Observations input parameter must also be equal to that same type.";
     } else {
       return undefined;
     }

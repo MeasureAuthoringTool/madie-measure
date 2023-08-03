@@ -511,7 +511,7 @@ describe("Measure Groups Page", () => {
         setTimeout(() => {
           const alert = screen.findByTestId("error-alerts");
           expect(alert).toHaveTextContent(
-            "For Episode-based Measures, selected definitions must return a list of the same type."
+            "For Episode-based Measures, selected definitions must return a list of the same type and Measure Observations input parameter must also be equal to that same type."
           );
         }, 500);
       });
