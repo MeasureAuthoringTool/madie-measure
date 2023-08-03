@@ -108,7 +108,7 @@ const returnTypeFunctionCheckOptions = (populationBasis, functionDataTypes) => {
   } else {
     return {
       name: "equalsToNonBoolean",
-      message: `Selected function must have exactly one parameter of type ${populationBasis}`,
+      message: `Selected function must have a parameter`,
       test: (value) => {
         if (
           value &&
