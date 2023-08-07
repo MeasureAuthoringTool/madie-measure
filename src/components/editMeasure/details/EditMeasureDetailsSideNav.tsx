@@ -25,7 +25,7 @@ export default function EditMeasureDetailsSideNav(
   };
   return (
     <OuterWrapper>
-      <InnerWrapper>
+      <InnerWrapper id="edit-measure-details-side-nav">
         <Nav aria-label="Sidebar">
           {links.map((link) => (
             <div className="link-container">
