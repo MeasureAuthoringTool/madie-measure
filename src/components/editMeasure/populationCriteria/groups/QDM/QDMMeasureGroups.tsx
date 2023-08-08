@@ -90,7 +90,7 @@ const deleteToken = "FDE8472A-6095-4292-ABF7-E35AD435F05F"; // randomly generate
 const getEmptyStrat = () => ({
   cqlDefinition: "",
   description: "",
-  association: PopulationType.INITIAL_POPULATION,
+  association: null,
   id: uuidv4(),
 });
 
@@ -105,7 +105,7 @@ const getEmptyStrats = (n: number) => {
 export const deleteStrat = {
   cqlDefinition: "delete",
   description: deleteToken,
-  association: PopulationType.INITIAL_POPULATION,
+  association: null,
   id: "",
 };
 
@@ -1049,47 +1049,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                           )}
                                           size="small"
                                           options={stratificationOptions}
-                                        />
-                                      </div>
-
-                                      {/*Association Select*/}
-                                      <div tw="pt-4">
-                                        <Select
-                                          disabled={!canEdit}
-                                          placeHolder={{
-                                            name: "Select Association",
-                                            value: "",
-                                          }}
-                                          label={`Association ${i + 1}`}
-                                          id={`association-select-${i + 1}`}
-                                          aria-describedby={`association-select-${
-                                            i + 1
-                                          }-helper-text`}
-                                          inputProps={{
-                                            "data-testid": `association-${
-                                              i + 1
-                                            }-input`,
-                                          }}
-                                          {...formik.getFieldProps(
-                                            `stratifications[${i}].association`
-                                          )}
-                                          size="small"
-                                          renderValue={(value) =>
-                                            _.startCase(value)
-                                          }
-                                          options={
-                                            !!formik.values.scoring &&
-                                            associationSelect[
-                                              formik.values.scoring
-                                            ].map((opt, i) => (
-                                              <MuiMenuItem
-                                                key={`${opt}-${i}`}
-                                                value={`${opt}`}
-                                              >
-                                                {_.startCase(opt)}
-                                              </MuiMenuItem>
-                                            ))
-                                          }
                                         />
                                       </div>
                                     </div>

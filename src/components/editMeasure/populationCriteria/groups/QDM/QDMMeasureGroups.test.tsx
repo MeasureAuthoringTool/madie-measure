@@ -56,7 +56,7 @@ const serviceConfig: ServiceConfig = {
 const getEmptyStrat = () => ({
   cqlDefinition: "",
   description: "",
-  association: PopulationType.INITIAL_POPULATION,
+  association: null,
   id: "",
 });
 
@@ -488,22 +488,6 @@ describe("Measure Groups Page", () => {
         const submitBtn = screen.getByTestId("group-form-submit-btn");
 
         userEvent.click(screen.getByTestId("stratifications-tab"));
-
-        expect(submitBtn).toBeEnabled();
-        userEvent.click(submitBtn);
-
-        const strat1Input = screen.getByTestId("stratification-1-input");
-        fireEvent.change(strat1Input, {
-          target: {
-            value: "boolIpp",
-          },
-        });
-        const association1Input = screen.getByTestId("association-1-input");
-        fireEvent.change(association1Input, {
-          target: {
-            value: definitionToUpdate,
-          },
-        });
 
         expect(submitBtn).toBeEnabled();
         userEvent.click(submitBtn);
@@ -980,7 +964,7 @@ describe("Measure Groups Page", () => {
     expect(group.stratifications[0]).toEqual({
       ...getEmptyStrat(),
       id: "uuid-3",
-      association: PopulationType.INITIAL_POPULATION,
+      association: null,
     });
   });
 
