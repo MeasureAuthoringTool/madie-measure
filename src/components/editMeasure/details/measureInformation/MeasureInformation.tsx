@@ -17,7 +17,6 @@ import {
   measureStore,
   routeHandlerStore,
   checkUserCanEdit,
-  PROGRAM_USE_CONTEXTS,
 } from "@madie/madie-util";
 import { Box } from "@mui/system";
 import {
@@ -53,9 +52,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   const [endorsementIdRequired, setEndorsementIdRequired] = useState<boolean>();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
-  const programUseContextOptions: string[] = PROGRAM_USE_CONTEXTS.map(
-    (puc) => puc.display
-  );
+
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
     return () => {
@@ -450,37 +447,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             label="Experimental"
           />
         </Box>
-        <Box sx={formRowGapped}>
-          <AutoComplete
-            formControl={formik.getFieldProps("programUseContext")}
-            id="programUseContext"
-            dataTestId="programUseContext"
-            label="Program Use Context"
-            placeHolder="-"
-            required={false}
-            disabled={!canEdit}
-            error={false}
-            helperText=""
-            multipleSelect={false}
-            limitTags={1}
-            options={programUseContextOptions}
-            value={formik.values?.programUseContext?.display ?? null}
-            onClose={() => {}}
-            onChange={(id, value) => {
-              if (value) {
-                formik.setFieldValue(
-                  "programUseContext",
-                  PROGRAM_USE_CONTEXTS.find((puc) => value === puc.display)
-                );
-              } else {
-                formik.setFieldValue("programUseContext", null);
-              }
-            }}
-          />
-          <div />
-          <div />
-          <div />
-        </Box>
+
         <Box sx={formRowGapped}>
           <AutoComplete
             id="endorser"

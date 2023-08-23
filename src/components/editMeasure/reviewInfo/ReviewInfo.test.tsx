@@ -16,12 +16,6 @@ const testMeasure = {
   },
   measureSetId: "testMeasureSetId",
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }], //#nosec
-  programUseContext: {
-    code: "ep-ec",
-    display: "EP/EC",
-    codeSystem:
-      "http://hl7.org/fhir/us/cqfmeasures/CodeSystem/quality-programs",
-  },
 } as unknown as Measure;
 
 jest.mock("@madie/madie-util", () => ({
@@ -47,20 +41,6 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
   },
-  PROGRAM_USE_CONTEXTS: [
-    {
-      code: "mips",
-      display: "MIPS",
-      codeSystem:
-        "http://hl7.org/fhir/us/cqfmeasures/CodeSystem/quality-programs",
-    },
-    {
-      code: "ep-ec",
-      display: "EP/EC",
-      codeSystem:
-        "http://hl7.org/fhir/us/cqfmeasures/CodeSystem/quality-programs",
-    },
-  ],
 }));
 
 describe("Review Info component", () => {
