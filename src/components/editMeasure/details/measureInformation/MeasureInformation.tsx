@@ -36,7 +36,6 @@ interface measureInformationForm {
   measureId: string;
   cmsId: string;
   experimental: boolean;
-  programUseContext: any;
   endorsements: Array<Endorsement>;
   endorsementId: string;
 }
@@ -93,7 +92,6 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     cmsId: measure?.cmsId,
     measureId: measure?.measureSetId,
     experimental: measure?.measureMetaData?.experimental || false,
-    programUseContext: measure?.programUseContext || null,
     endorsements: measure?.measureMetaData?.endorsements || [],
     endorsementId: measure?.measureMetaData?.endorsements?.[0]?.endorsementId,
   } as measureInformationForm;
@@ -250,7 +248,6 @@ export default function MeasureInformation(props: MeasureInformationProps) {
         cql: inSyncCql,
         elmJson: updatedElm ? updatedElm : measure.elmJson,
         measureId: values.measureSetId,
-        programUseContext: values.programUseContext,
         measureMetaData: {
           ...measure?.measureMetaData,
           experimental: values.experimental,

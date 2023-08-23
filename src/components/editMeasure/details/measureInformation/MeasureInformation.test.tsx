@@ -217,7 +217,6 @@ describe("MeasureInformation component", () => {
       versionId: "test measure",
       measureId: undefined,
       cql: "modified cql",
-      programUseContext: null,
     } as unknown as Measure;
 
     render(<MeasureInformation setErrorMessage={setErrorMessage} />);
