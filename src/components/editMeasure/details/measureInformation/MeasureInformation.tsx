@@ -361,11 +361,14 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             inputProps={{
               "data-testid": "cql-library-name-input",
               "aria-required": "true",
+              maxLength: 64,
             }}
             helperText={
-              formik.touched["cqlLibraryName"] &&
-              focusedField === "cqlLibraryName" &&
-              formikErrorHandler("cqlLibraryName", true)
+              (formik.touched["cqlLibraryName"] &&
+                focusedField === "cqlLibraryName" &&
+                formikErrorHandler("cqlLibraryName", true)) ||
+              (formik.values?.cqlLibraryName?.length > 64 &&
+                "A Measure Libary Name cannot be more than 64 characters")
             }
             size="small"
             error={
