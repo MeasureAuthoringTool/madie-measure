@@ -40,12 +40,6 @@ const measure = {
   createdBy: "john doe",
   measureSetId: "testMeasureId",
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
-  programUseContext: {
-    code: "ep-ec",
-    display: "EP/EC",
-    codeSystem:
-      "http://hl7.org/fhir/us/cqfmeasures/CodeSystem/quality-programs",
-  },
   elmJson: "{library: TestCqlLibraryName}",
   measureMetaData: {
     experimental: false,
@@ -90,20 +84,7 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: true, pendingPath: "" },
     initialState: { canTravel: true, pendingPath: "" },
   },
-  PROGRAM_USE_CONTEXTS: [
-    {
-      code: "mips",
-      display: "MIPS",
-      codeSystem:
-        "http://hl7.org/fhir/us/cqfmeasures/CodeSystem/quality-programs",
-    },
-    {
-      code: "ep-ec",
-      display: "EP/EC",
-      codeSystem:
-        "http://hl7.org/fhir/us/cqfmeasures/CodeSystem/quality-programs",
-    },
-  ],
+
   checkUserCanEdit: jest.fn(() => {
     return true;
   }),
@@ -497,22 +478,26 @@ describe("MeasureInformation component", () => {
       return true;
     });
     render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    const endorserAutoComplete = await screen.findByTestId("endorser");
+    const endorserId = getByTestId(
+      "endorsement-number-input"
+    ) as HTMLInputElement;
 
-    const programUseContextSelect = screen.getByTestId("programUseContext");
-    expect(programUseContextSelect).toBeInTheDocument();
-    const programUseContextButton = within(programUseContextSelect).getByRole(
-      "button",
-      {
-        name: "Open",
-      }
-    );
+    fireEvent.keyDown(endorserAutoComplete, { key: "ArrowDown" });
+    // selects 2nd option
+    const endorserOptions = await screen.findAllByRole("option");
+    fireEvent.click(endorserOptions[1]);
 
-    act(() => {
-      userEvent.click(programUseContextButton);
+    // verifies if the option is selected
+    const endorserComboBox = within(endorserAutoComplete).getByRole("combobox");
+    expect(endorserComboBox).toHaveValue("NQF");
+    //verifies endorserId was enabled
+    expect(endorserId).toBeEnabled();
+    //enter endorserId
+    fireEvent.change(endorserId, {
+      target: { value: "1" },
     });
-
-    expect(getByText("MIPS")).toBeInTheDocument();
-    expect(getByText("EP/EC")).toBeInTheDocument();
+    expect(endorserId).toHaveValue("1");
   });
   test("Click Clear icon clears selected value and Discard and Save buttons are disabled", async () => {
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
@@ -520,34 +505,32 @@ describe("MeasureInformation component", () => {
     });
     render(<MeasureInformation setErrorMessage={setErrorMessage} />);
 
-    const programUseContextSelect = getByTestId("programUseContext");
-    expect(programUseContextSelect).toBeInTheDocument();
-    const programUseContextButton = within(programUseContextSelect).getByRole(
-      "button",
-      {
-        name: "Open",
-      }
-    );
+    const endorserAutoComplete = await screen.findByTestId("endorser");
 
-    act(() => {
-      userEvent.click(programUseContextButton);
+    fireEvent.keyDown(endorserAutoComplete, { key: "ArrowDown" });
+    // selects 2nd option
+    const endorserOptions = await screen.findAllByRole("option");
+    fireEvent.click(endorserOptions[1]);
+
+    // verifies if the option is selected
+    const endorserComboBox = within(endorserAutoComplete).getByRole("combobox");
+    expect(endorserComboBox).toHaveValue("NQF");
+
+    const endorserId = getByTestId(
+      "endorsement-number-input"
+    ) as HTMLInputElement;
+    //verifies endorserId was enabled
+    expect(endorserId).toBeEnabled();
+    //enter endorserId
+    fireEvent.change(endorserId, {
+      target: { value: "1" },
     });
+    expect(endorserId).toHaveValue("1");
 
-    expect(getByText("MIPS")).toBeInTheDocument();
-    expect(getByText("EP/EC")).toBeInTheDocument();
-    const programUseContextOptions = await screen.findAllByRole("option");
-    expect(programUseContextOptions.length).toBe(2);
-
-    const programUseContextComboBox = within(programUseContextSelect).getByRole(
-      "combobox"
-    );
-    expect(programUseContextComboBox).toHaveValue("EP/EC");
-
-    const closeIcon = within(programUseContextSelect).getByTestId("CloseIcon");
-    act(() => {
-      userEvent.click(closeIcon);
-    });
-    expect(programUseContextComboBox).not.toHaveValue("EP/EC");
+    const clearButton = screen.getByTestId("CloseIcon") as HTMLButtonElement;
+    fireEvent.click(clearButton);
+    expect(endorserComboBox).toHaveValue("");
+    expect(endorserId).toHaveValue("");
   });
   test("Click Save button will save the change", async () => {
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
@@ -555,36 +538,26 @@ describe("MeasureInformation component", () => {
     });
     render(<MeasureInformation setErrorMessage={setErrorMessage} />);
 
-    const programUseContextSelect = getByTestId("programUseContext");
-    expect(programUseContextSelect).toBeInTheDocument();
-    const programUseContextButton = within(programUseContextSelect).getByRole(
-      "button",
-      {
-        name: "Open",
-      }
-    );
+    const endorserAutoComplete = await screen.findByTestId("endorser");
+    const endorserId = getByTestId(
+      "endorsement-number-input"
+    ) as HTMLInputElement;
 
-    act(() => {
-      userEvent.click(programUseContextButton);
+    fireEvent.keyDown(endorserAutoComplete, { key: "ArrowDown" });
+    // selects 2nd option
+    const endorserOptions = await screen.findAllByRole("option");
+    fireEvent.click(endorserOptions[1]);
+
+    // verifies if the option is selected
+    const endorserComboBox = within(endorserAutoComplete).getByRole("combobox");
+    expect(endorserComboBox).toHaveValue("NQF");
+    //verifies endorserId was enabled
+    expect(endorserId).toBeEnabled();
+    //enter endorserId
+    fireEvent.change(endorserId, {
+      target: { value: "1" },
     });
-
-    expect(getByText("MIPS")).toBeInTheDocument();
-    expect(getByText("EP/EC")).toBeInTheDocument();
-    const programUseContextOptions = await screen.findAllByRole("option");
-    expect(programUseContextOptions.length).toBe(2);
-
-    const programUseContextComboBox = within(programUseContextSelect).getByRole(
-      "combobox"
-    );
-    expect(programUseContextComboBox).toHaveValue("EP/EC");
-
-    const changed = screen.getByText("MIPS");
-
-    act(() => {
-      userEvent.click(changed);
-    });
-    expect(programUseContextComboBox).not.toHaveValue("EP/EC");
-    expect(programUseContextComboBox).toHaveValue("MIPS");
+    expect(endorserId).toHaveValue("1");
 
     const discardButton = screen.getByRole("button", {
       name: "Discard Changes",
