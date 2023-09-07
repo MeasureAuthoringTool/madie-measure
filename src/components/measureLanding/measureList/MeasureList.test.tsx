@@ -215,7 +215,7 @@ describe("Measure List component", () => {
   });
 
   it("should navigate to the edit measure screen on click of edit/view button", async () => {
-    const { findByRole, findAllByRole, unmount } = render(
+    const { findByRole, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -234,11 +234,11 @@ describe("Measure List component", () => {
         />
       </ServiceContext.Provider>
     );
-    const selectButtons = await findAllByRole("button", {
-      name: "Select",
+    const selectButton1 = await findByRole("button", {
+      name: "Measure draft measure - B version 0.0.000 draft status true Select",
     });
     act(() => {
-      fireEvent.click(selectButtons[0]);
+      fireEvent.click(selectButton1);
     });
     const editButton = await findByRole("button", {
       name: "View",
@@ -764,7 +764,7 @@ describe("Measure List component", () => {
   });
 
   it("should display draft/version actions based on whether measure is draft or versioned", async () => {
-    const { findByRole, findAllByRole, unmount } = render(
+    const { findByRole, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -783,37 +783,20 @@ describe("Measure List component", () => {
         />
       </ServiceContext.Provider>
     );
-    const selectButtons = await findAllByRole("button", {
-      name: "Select",
+    const selectButton0 = await findByRole("button", {
+      name: "Measure new measure - A version 0.0.000 draft status true Select",
     });
 
     // first measure should have Version action as this is a draft measure
-    fireEvent.click(selectButtons[0]);
-    const draftButton = await findByRole("button", {
+    fireEvent.click(selectButton0);
+    const versionButton = await findByRole("button", {
       name: "Version",
     });
-    expect(draftButton).toBeInTheDocument();
-
-    // second measure should have Version action as this is a draft measure
-    fireEvent.click(selectButtons[1]);
-    expect(
-      await findByRole("button", {
-        name: "Version",
-      })
-    ).toBeInTheDocument();
-
-    // third measure should have Draft action as this is versioned measure
-    fireEvent.click(selectButtons[2]);
-    expect(
-      await findByRole("button", {
-        name: "Draft",
-      })
-    ).toBeInTheDocument();
-    unmount();
+    expect(versionButton).toBeInTheDocument();
   });
 
   it("should display draft dialog on clicking Draft action", async () => {
-    const { findByRole, findAllByRole, getByText, unmount } = render(
+    const { findByRole, getByText, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -832,10 +815,10 @@ describe("Measure List component", () => {
         />
       </ServiceContext.Provider>
     );
-    const selectButtons = await findAllByRole("button", {
-      name: "Select",
+    const selectButton2 = await findByRole("button", {
+      name: "Measure versioned measure - C version 1.3 draft status false Select",
     });
-    fireEvent.click(selectButtons[2]);
+    fireEvent.click(selectButton2);
     const draftButton = await findByRole("button", {
       name: "Draft",
     });
@@ -865,31 +848,30 @@ describe("Measure List component", () => {
     useMeasureServiceMock.mockImplementation(() => {
       return useMeasureServiceMockResolved;
     });
-    const { getByTestId, getByText, findByRole, findAllByRole, unmount } =
-      render(
-        <ServiceContext.Provider value={serviceConfig}>
-          <MeasureList
-            measureList={measures}
-            setMeasureList={setMeasureListMock}
-            setTotalPages={setTotalPagesMock}
-            setTotalItems={setTotalItemsMock}
-            setVisibleItems={setVisibleItemsMock}
-            setOffset={setOffsetMock}
-            setInitialLoad={setInitialLoadMock}
-            activeTab={0}
-            searchCriteria={""}
-            setSearchCriteria={setSearchCriteriaMock}
-            currentLimit={10}
-            currentPage={0}
-            setErrMsg={setErrMsgMock}
-          />
-        </ServiceContext.Provider>
-      );
+    const { getByTestId, getByText, findByRole, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
 
-    const selectButtons = await findAllByRole("button", {
-      name: "Select",
+    const selectButton2 = await findByRole("button", {
+      name: "Measure versioned measure - C version 1.3 draft status false Select",
     });
-    fireEvent.click(selectButtons[2]);
+    fireEvent.click(selectButton2);
     const draftButton = await findByRole("button", {
       name: "Draft",
     });
@@ -924,31 +906,30 @@ describe("Measure List component", () => {
     useMeasureServiceMock.mockImplementation(() => {
       return useMeasureServiceMockRejected;
     });
-    const { getByTestId, getByText, findByRole, findAllByRole, unmount } =
-      render(
-        <ServiceContext.Provider value={serviceConfig}>
-          <MeasureList
-            measureList={measures}
-            setMeasureList={setMeasureListMock}
-            setTotalPages={setTotalPagesMock}
-            setTotalItems={setTotalItemsMock}
-            setVisibleItems={setVisibleItemsMock}
-            setOffset={setOffsetMock}
-            setInitialLoad={setInitialLoadMock}
-            activeTab={0}
-            searchCriteria={""}
-            setSearchCriteria={setSearchCriteriaMock}
-            currentLimit={10}
-            currentPage={0}
-            setErrMsg={setErrMsgMock}
-          />
-        </ServiceContext.Provider>
-      );
+    const { getByTestId, getByText, findByRole, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
 
-    const selectButtons = await findAllByRole("button", {
-      name: "Select",
+    const selectButton2 = await findByRole("button", {
+      name: "Measure versioned measure - C version 1.3 draft status false Select",
     });
-    fireEvent.click(selectButtons[2]);
+    fireEvent.click(selectButton2);
     const draftButton = await findByRole("button", {
       name: "Draft",
     });
@@ -986,30 +967,29 @@ describe("Measure List component", () => {
       return useMeasureServiceMockRejected;
     });
 
-    const { getByTestId, getByText, findByRole, findAllByRole, unmount } =
-      render(
-        <ServiceContext.Provider value={serviceConfig}>
-          <MeasureList
-            measureList={measures}
-            setMeasureList={setMeasureListMock}
-            setTotalPages={setTotalPagesMock}
-            setTotalItems={setTotalItemsMock}
-            setVisibleItems={setVisibleItemsMock}
-            setOffset={setOffsetMock}
-            setInitialLoad={setInitialLoadMock}
-            activeTab={0}
-            searchCriteria={""}
-            setSearchCriteria={setSearchCriteriaMock}
-            currentLimit={10}
-            currentPage={0}
-            setErrMsg={setErrMsgMock}
-          />
-        </ServiceContext.Provider>
-      );
-    const selectButtons = await findAllByRole("button", {
-      name: "Select",
+    const { getByTestId, getByText, findByRole, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const selectButton2 = await findByRole("button", {
+      name: "Measure versioned measure - C version 1.3 draft status false Select",
     });
-    fireEvent.click(selectButtons[2]);
+    fireEvent.click(selectButton2);
     const draftButton = await findByRole("button", {
       name: "Draft",
     });

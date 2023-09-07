@@ -61,6 +61,7 @@ const multipleMeasures = [
     model: Model.QICORE,
     revisionNumber: "1",
     version: "1.000",
+    measureMetaData: { draft: true },
   },
   {
     id: "measureId2",
@@ -68,6 +69,7 @@ const multipleMeasures = [
     createdBy: TESTUSER1,
     model: Model.QICORE,
     version: "1.0.000",
+    measureMetaData: { draft: true },
   },
   {
     id: "measureId3",
@@ -76,6 +78,7 @@ const multipleMeasures = [
     model: Model.QICORE,
     revisionNumber: "3",
     version: "1.000",
+    measureMetaData: { draft: true },
   },
   {
     id: "measureId4",
@@ -83,6 +86,7 @@ const multipleMeasures = [
     createdBy: TESTUSER1,
     model: Model.QICORE,
     version: "1.0.000",
+    measureMetaData: { draft: true },
   },
   {
     id: "measureId5",
@@ -91,6 +95,7 @@ const multipleMeasures = [
     model: Model.QICORE,
     revisionNumber: "4",
     version: "1.000",
+    measureMetaData: { draft: true },
   },
   {
     id: "measureId6",
@@ -98,6 +103,7 @@ const multipleMeasures = [
     createdBy: TESTUSER1,
     model: Model.QICORE,
     version: "1.0.000",
+    measureMetaData: { draft: true },
   },
   {
     id: "measureId7",
@@ -105,6 +111,7 @@ const multipleMeasures = [
     createdBy: TESTUSER1,
     model: Model.QICORE,
     version: "2.0.000",
+    measureMetaData: { draft: true },
   },
   {
     id: "measureId8",
@@ -112,6 +119,7 @@ const multipleMeasures = [
     createdBy: TESTUSER1,
     model: Model.QICORE,
     version: "0.0.000",
+    measureMetaData: { draft: true },
   },
   {
     id: "measureId9",
@@ -119,27 +127,31 @@ const multipleMeasures = [
     createdBy: TESTUSER1,
     model: Model.QICORE,
     version: "0.0.000",
+    measureMetaData: { draft: true },
   },
   {
     id: "measureId10",
-    measureName: "TestMeasure10",
-    createdBy: TESTUSER1,
-    model: Model.QICORE,
-    version: "1.0.000",
-  },
-  {
-    id: "measureId11",
     measureName: "TestMeasure11",
     createdBy: TESTUSER1,
     model: Model.QICORE,
     version: "1.0.000",
+    measureMetaData: { draft: true },
   },
   {
-    id: "measureId12",
+    id: "measureId11",
     measureName: "TestMeasure12",
     createdBy: TESTUSER1,
     model: Model.QICORE,
     version: "1.0.000",
+    measureMetaData: { draft: true },
+  },
+  {
+    id: "measureId12",
+    measureName: "TestMeasure13",
+    createdBy: TESTUSER1,
+    model: Model.QICORE,
+    version: "1.0.000",
+    measureMetaData: { draft: true },
   },
 ];
 

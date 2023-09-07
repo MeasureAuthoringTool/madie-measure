@@ -585,7 +585,10 @@ export default function MeasureList(props: {
                             handleOpen(measure, e);
                           }}
                           data-testid={`measure-action-${measure.id}`}
-                          aria-label={`Measure ${measure.measureName} version ${measure.version} draft status ${measure.measureMetaData.draft} Select`}
+                          aria-label={`Measure ${measure?.measureName} version ${measure?.version} draft status ${measure?.measureMetaData?.draft} Select`}
+                          role="button"
+                          aria-role="button"
+                          tab-index={0}
                         >
                           Select
                         </Button>
