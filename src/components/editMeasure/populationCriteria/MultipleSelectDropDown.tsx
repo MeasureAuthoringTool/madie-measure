@@ -65,7 +65,7 @@ const MultipleSelectDropDown = ({
         }}
       />
       <Autocomplete
-        aria-aria-required
+        aria-required
         size="small"
         limitTags={limitTags}
         multiple={multipleSelect}
