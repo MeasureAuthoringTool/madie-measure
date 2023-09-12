@@ -963,7 +963,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                               >
                                 <div className="population-col-gap-24">
                                   {/* Population Definition */}
-                                  {console.log("fieldprops", fieldProps)}
                                   <Field
                                     {...fieldProps}
                                     descriptionName={descriptionName}
