@@ -57,6 +57,9 @@ const MeasureObservationDetails = ({
           <Select
             placeHolder={{ name: "Select Observation", value: "" }}
             required={required}
+            SelectDisplayProps={{
+              "aria-required": required ? true : false,
+            }}
             disabled={!canEdit}
             label={label ? label : "Observation"}
             id={`measure-observation-${name}`}

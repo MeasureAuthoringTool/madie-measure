@@ -879,30 +879,27 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                 </div>
                 <div>
                   <MenuItemContainer>
-                    <Tabs value={activeTab} type="B">
+                    <Tabs value={activeTab} type="B" size="large">
                       <Tab
-                        role="tabpanel"
+                        value="populations"
                         type="B"
-                        aria-label="Populations tab panel"
-                        tabIndex={0}
+                        data-testid="populations-tab"
                         label={`Populations 
                 ${
                   !!formik.errors.populations && activeTab !== "populations"
                     ? "🚫"
                     : ""
                 }`}
-                        data-testid="populations-tab"
                         onClick={() => {
                           setActiveTab("populations");
                         }}
-                        value="populations"
                       />
+
                       {formik.values.scoring !== "Ratio" && (
                         <Tab
-                          role="tabpanel"
-                          aria-label="Stratifications tab panel"
                           tabIndex={0}
                           label="Stratifications"
+                          value="stratification"
                           type="B"
                           data-testid="stratifications-tab"
                           onClick={() => {
@@ -922,13 +919,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                               setVisibleStrats(2);
                             }
                           }}
-                          value="stratification"
                         />
                       )}
                       <Tab
-                        role="tabpanel"
-                        tabIndex={0}
-                        aria-label="Reporting tab panel"
                         type="B"
                         label="Reporting"
                         data-testid="reporting-tab"
@@ -970,7 +963,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                               >
                                 <div className="population-col-gap-24">
                                   {/* Population Definition */}
-
+                                  {console.log("fieldprops", fieldProps)}
                                   <Field
                                     {...fieldProps}
                                     descriptionName={descriptionName}

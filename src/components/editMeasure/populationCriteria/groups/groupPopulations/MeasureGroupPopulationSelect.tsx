@@ -59,7 +59,6 @@ const MeasureGroupPopulationSelect = ({
       </div>
     );
   };
-
   return (
     <div data-testid="temp-test-id" tw="relative">
       <div className="population-col-gap-24">
@@ -75,6 +74,9 @@ const MeasureGroupPopulationSelect = ({
           id={`${htmlId}-select`}
           inputProps={{
             "data-testid": `select-measure-group-population-input`,
+          }}
+          SelectDisplayProps={{
+            "aria-required": required ? true : false,
           }}
           data-testid={htmlId}
           {...field}

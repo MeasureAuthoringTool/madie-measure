@@ -65,6 +65,7 @@ const MultipleSelectDropDown = ({
         }}
       />
       <Autocomplete
+        aria-aria-required
         size="small"
         limitTags={limitTags}
         multiple={multipleSelect}
@@ -98,6 +99,7 @@ const MultipleSelectDropDown = ({
         }}
         renderInput={(params) => {
           const { inputProps } = params;
+          inputProps["aria-required"] = required;
           inputProps["aria-describedby"] = "measure-group-type-helper-text";
           return (
             <TextField
