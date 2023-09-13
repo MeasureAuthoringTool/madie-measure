@@ -204,6 +204,8 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
                 formik.setFieldValue("measurementPeriodStart", startDate);
               }}
               renderInput={(params) => {
+                const { inputProps } = params;
+                inputProps["aria-required"] = true;
                 const { onChange, ...formikFieldProps } = formik.getFieldProps(
                   "measurementPeriodStart"
                 );
@@ -248,6 +250,8 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
                 formik.setFieldValue("measurementPeriodEnd", endDate);
               }}
               renderInput={(params) => {
+                const { inputProps } = params;
+                inputProps["aria-required"] = true;
                 const { onChange, ...formikFieldProps } = formik.getFieldProps(
                   "measurementPeriodEnd"
                 );
