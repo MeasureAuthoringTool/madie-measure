@@ -158,8 +158,9 @@ describe("QdmRiskAdjustment Component", () => {
       within(riskAdjustmentSelect).getByTitle("Open");
 
     userEvent.click(riskAdjustmentButton);
-    const targetOption = screen.getByRole("option", { name: "SDE Ethnicity" });
-    userEvent.click(targetOption);
+    await waitFor(() => {
+      userEvent.click(screen.getByText("SDE Ethnicity"));
+    });
     expect(
       screen.getByRole("button", { name: "SDE Ethnicity" })
     ).toBeInTheDocument();
@@ -257,8 +258,9 @@ describe("QdmRiskAdjustment Component", () => {
       within(riskAdjustmentSelect).getByTitle("Open");
 
     userEvent.click(riskAdjustmentButton);
-    const targetOption = screen.getByRole("option", { name: "SDE Ethnicity" });
-    userEvent.click(targetOption);
+    await waitFor(() => {
+      userEvent.click(screen.getByText("SDE Ethnicity"));
+    });
     userEvent.click(riskAdjustmentButton); // To collapse the dropdown
     expect(
       screen.getByRole("button", { name: "SDE Ethnicity" })
@@ -309,8 +311,9 @@ describe("QdmRiskAdjustment Component", () => {
       within(riskAdjustmentSelect).getByTitle("Open");
 
     userEvent.click(riskAdjustmentButton);
-    const targetOption = screen.getByRole("option", { name: "SDE Ethnicity" });
-    userEvent.click(targetOption);
+    await waitFor(() => {
+      userEvent.click(screen.getByText("SDE Ethnicity"));
+    });
     userEvent.click(riskAdjustmentButton); // To collapse the dropdown
     expect(
       screen.getByRole("button", { name: "SDE Ethnicity" })
