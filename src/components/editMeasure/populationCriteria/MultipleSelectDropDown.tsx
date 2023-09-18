@@ -88,7 +88,9 @@ const MultipleSelectDropDown = ({
           return (
             <li
               {...uniqueProps}
-              aria-label={`option ${option} ${selected ? "selected" : ""}`}
+              aria-label={`option ${option} ${
+                selected ? "selected" : "not selected"
+              }`}
             >
               <Checkbox
                 icon={icon}
