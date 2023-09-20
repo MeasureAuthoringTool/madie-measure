@@ -219,8 +219,7 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
                 renderInput={(params) => {
                   const { inputProps } = params;
                   inputProps["aria-required"] = "true";
-                  inputProps["aria-describedby"] =
-                    "measure-group-type-helper-text";
+                  inputProps["aria-describedby"] = "developers-text";
                   inputProps[
                     "aria-label"
                   ] = `Developers multiple developers can be selected`;
