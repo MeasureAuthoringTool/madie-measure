@@ -57,7 +57,6 @@ describe("Measure Page", () => {
           </MemoryRouter>
         </ApiContextProvider>
       );
-      const abortController = new AbortController();
       const measure1 = await screen.findByText("TestMeasure1");
       expect(measure1).toBeInTheDocument();
       expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
@@ -151,7 +150,6 @@ describe("Measure Page", () => {
         </ApiContextProvider>
       );
     });
-    const abortController = new AbortController();
     const event = new Event("create");
     window.dispatchEvent(event);
     expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
