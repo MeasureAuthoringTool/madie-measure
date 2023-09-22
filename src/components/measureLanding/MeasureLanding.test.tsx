@@ -25,6 +25,8 @@ const serviceConfig: ServiceConfig = {
   },
 };
 
+const abortController = new AbortController();
+
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
   useFeatureFlags: () => null,
@@ -60,7 +62,8 @@ describe("Measure Page", () => {
       expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
         true,
         10,
-        0
+        0,
+        abortController.signal
       );
       const myMeasuresTab = screen.getByRole("tab", { name: "My Measures" });
       expect(myMeasuresTab).toBeInTheDocument();
@@ -95,7 +98,8 @@ describe("Measure Page", () => {
       expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
         true,
         10,
-        0
+        0,
+        abortController.signal
       );
       const myMeasuresTab = await findByTestId("my-measures-tab");
       userEvent.click(myMeasuresTab);
@@ -108,7 +112,8 @@ describe("Measure Page", () => {
         expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
           false,
           10,
-          0
+          0,
+          abortController.signal
         )
       );
     });
@@ -132,7 +137,7 @@ describe("Measure Page", () => {
     fireEvent.submit(searchFieldInput);
     expect(
       mockMeasureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle
-    ).toHaveBeenCalledWith(true, 10, 0, "test");
+    ).toHaveBeenCalledWith(true, 10, 0, "test", abortController.signal);
   });
 
   test("Create event triggers the event listener", async () => {
@@ -150,7 +155,8 @@ describe("Measure Page", () => {
     expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
       true,
       10,
-      0
+      0,
+      abortController.signal
     );
   });
   test("test pagination page button", async () => {

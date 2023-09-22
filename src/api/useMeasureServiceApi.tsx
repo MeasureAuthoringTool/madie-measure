@@ -58,7 +58,8 @@ export class MeasureServiceApi {
   async fetchMeasures(
     filterByCurrentUser: boolean,
     limit: number = 25,
-    page: number = 0
+    page: number = 0,
+    signal
   ): Promise<any> {
     try {
       const response = await axios.get<any>(`${this.baseUrl}/measures`, {
@@ -69,6 +70,7 @@ export class MeasureServiceApi {
           currentUser: filterByCurrentUser,
           limit,
           page,
+          signal,
         },
       });
       return response.data;
@@ -343,7 +345,8 @@ export class MeasureServiceApi {
     filterByCurrentUser: boolean,
     limit: number = 25,
     page: number = 0,
-    searchCriteria: string
+    searchCriteria: string,
+    signal
   ): Promise<any> {
     try {
       const response = await axios.get<any>(
@@ -356,6 +359,7 @@ export class MeasureServiceApi {
             currentUser: filterByCurrentUser,
             limit,
             page,
+            signal,
           },
         }
       );
