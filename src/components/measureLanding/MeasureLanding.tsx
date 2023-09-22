@@ -41,6 +41,7 @@ export default function MeasureLanding() {
   const [currentLimit, setCurrentLimit] = useState(10);
   const [currentPage, setCurrentPage] = useState(0);
   const [errMsg, setErrMsg] = useState(undefined);
+  const abortController = useRef(null);
 
   // pull info from some query url
   const curLimit = values.limit && Number(values.limit);
@@ -61,9 +62,10 @@ export default function MeasureLanding() {
 
   const retrieveMeasures = useCallback(
     async (tab, limit, page, searchCriteria) => {
+      abortController.current = new AbortController();
       if (!searchCriteria) {
         measureServiceApi
-          .fetchMeasures(tab === 0, limit, page)
+          .fetchMeasures(tab === 0, limit, page, abortController.current.signal)
           .then((data) => {
             setPageProps(data);
           })
@@ -77,7 +79,8 @@ export default function MeasureLanding() {
             tab === 0,
             limit,
             page,
-            searchCriteria
+            searchCriteria,
+            abortController.current.signal
           )
           .then((data) => {
             setPageProps(data);
@@ -123,8 +126,11 @@ export default function MeasureLanding() {
   }, []);
 
   const handleTabChange = (event, nextTab) => {
+    setMeasureList(null);
+    // setInitialLoad(true);
     const limit = values?.limit || 10;
     history.push(`?tab=${nextTab}&page=0&limit=${limit}`);
+    abortController.current && abortController.current.abort();
   };
 
   // we need to tell our layout page that we've loaded to prevent strange tab order

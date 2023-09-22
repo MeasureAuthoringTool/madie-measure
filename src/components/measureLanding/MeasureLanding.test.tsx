@@ -25,6 +25,8 @@ const serviceConfig: ServiceConfig = {
   },
 };
 
+const abortController = new AbortController();
+
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
   useFeatureFlags: () => null,
@@ -55,12 +57,14 @@ describe("Measure Page", () => {
           </MemoryRouter>
         </ApiContextProvider>
       );
+      const abortController = new AbortController();
       const measure1 = await screen.findByText("TestMeasure1");
       expect(measure1).toBeInTheDocument();
       expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
         true,
         10,
-        0
+        0,
+        abortController.signal
       );
       const myMeasuresTab = screen.getByRole("tab", { name: "My Measures" });
       expect(myMeasuresTab).toBeInTheDocument();
@@ -95,7 +99,8 @@ describe("Measure Page", () => {
       expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
         true,
         10,
-        0
+        0,
+        abortController.signal
       );
       const myMeasuresTab = await findByTestId("my-measures-tab");
       userEvent.click(myMeasuresTab);
@@ -108,7 +113,8 @@ describe("Measure Page", () => {
         expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
           false,
           10,
-          0
+          0,
+          abortController.signal
         )
       );
     });
@@ -132,7 +138,7 @@ describe("Measure Page", () => {
     fireEvent.submit(searchFieldInput);
     expect(
       mockMeasureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle
-    ).toHaveBeenCalledWith(true, 10, 0, "test");
+    ).toHaveBeenCalledWith(true, 10, 0, "test", abortController.signal);
   });
 
   test("Create event triggers the event listener", async () => {
@@ -145,12 +151,14 @@ describe("Measure Page", () => {
         </ApiContextProvider>
       );
     });
+    const abortController = new AbortController();
     const event = new Event("create");
     window.dispatchEvent(event);
     expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
       true,
       10,
-      0
+      0,
+      abortController.signal
     );
   });
   test("test pagination page button", async () => {

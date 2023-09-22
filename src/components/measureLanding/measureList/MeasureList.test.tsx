@@ -162,6 +162,7 @@ const serviceConfig: ServiceConfig = {
   measureService: { baseUrl: "" },
   terminologyService: { baseUrl: "" },
 };
+const abortController = new AbortController();
 
 const setMeasureListMock = jest.fn();
 const setTotalPagesMock = jest.fn();
@@ -322,7 +323,7 @@ describe("Measure List component", () => {
 
     expect(
       mockMeasureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle
-    ).toHaveBeenCalledWith(true, 10, 0, "test");
+    ).toHaveBeenCalledWith(true, 10, 0, "test", abortController.signal);
     unmount();
   });
 
@@ -370,7 +371,8 @@ describe("Measure List component", () => {
     expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
       true,
       10,
-      0
+      0,
+      abortController.signal
     );
     unmount();
   });
@@ -458,7 +460,8 @@ describe("Measure List component", () => {
     expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
       true,
       10,
-      0
+      0,
+      abortController.signal
     );
     expect(mockPush).toHaveBeenCalledWith("/example");
     unmount();
