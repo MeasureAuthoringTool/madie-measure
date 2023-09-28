@@ -231,7 +231,7 @@ describe("MeasureEditor component", () => {
     await waitFor(() => {
       const successText = getByTestId("generic-success-text-header");
       expect(successText.textContent).toEqual(
-        "Changes saved successfully but the following errors were found"
+        "Changes saved successfully but the following issues were found"
       );
       expect(mockedAxios.put).toHaveBeenCalledTimes(1);
     });
@@ -276,7 +276,7 @@ describe("MeasureEditor component", () => {
     await waitFor(() => {
       const successText = getByTestId("generic-success-text-header");
       expect(successText.textContent).toEqual(
-        "Changes saved successfully but the following errors were found"
+        "Changes saved successfully but the following issues were found"
       );
       expect(mockedAxios.put).toHaveBeenCalledTimes(1);
     });
@@ -337,7 +337,7 @@ describe("MeasureEditor component", () => {
     await waitFor(() => {
       const successText = getByTestId("generic-success-text-header");
       expect(successText.textContent).toEqual(
-        "Changes saved successfully but the following errors were found"
+        "Changes saved successfully but the following issues were found"
       );
       expect(mockedAxios.put).toHaveBeenCalledTimes(1);
     });
@@ -374,7 +374,7 @@ describe("MeasureEditor component", () => {
     await waitFor(() => {
       const successMessage = getByTestId("generic-success-text-header");
       expect(successMessage.textContent).toEqual(
-        "Changes saved successfully but the following errors were found"
+        "Changes saved successfully but the following issues were found"
       );
       expect(mockedAxios.put).toHaveBeenCalledTimes(1);
     });
