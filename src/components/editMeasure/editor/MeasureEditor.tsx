@@ -195,7 +195,8 @@ const MeasureEditor = () => {
       // right now we are only displaying the external errors related to included libraries
       // and only the first error returned by elm translator
       if (errors?.length > 0 || externalErrors?.length > 0) {
-        setError(true);
+        const ElmErrors = _.filter(errors, { errorSeverity: "Error" });
+        setError(!_.isEmpty(ElmErrors));
       }
       setErrorMessage(externalErrors[0]?.message);
       if (isLoggedInUMLS(errors)) {
