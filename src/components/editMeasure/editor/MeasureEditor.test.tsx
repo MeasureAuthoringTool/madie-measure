@@ -107,7 +107,7 @@ const elmTransaltionErrors: ElmTranslationError[] = [
     startChar: 7,
     endLine: 24,
     endChar: 15,
-    errorSeverity: "Warning",
+    errorSeverity: "Error",
     errorType: "ELM",
     message: "Test Warning 123",
     targetIncludeLibraryId: "TestLibrary_QICore",
