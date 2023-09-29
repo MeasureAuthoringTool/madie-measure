@@ -1,6 +1,68 @@
 import React from "react";
 import { MadieAlert } from "@madie/madie-design-system/dist/react";
-import "./StatusHandler.scss";
+import * as _ from "lodash";
+
+const generateMadieAlertWithContent = (
+  type,
+  header,
+  secondaryMessage,
+  outboundAnnotations
+) => {
+  const errorAnnotation = _.filter(outboundAnnotations, { type: "error" });
+  const errors = errorAnnotation?.map((el) => (
+    <li>{transformAnnotation(el)}</li>
+  ));
+  const warningAnnotation = _.filter(outboundAnnotations, {
+    type: "warning",
+  });
+  const warnings = warningAnnotation?.map((el) => {
+    return <li>{transformAnnotation(el)}</li>;
+  });
+  return (
+    <MadieAlert
+      type={type}
+      content={
+        <div aria-live="polite" role="alert">
+          <h3
+            aria-live="polite"
+            role="alert"
+            data-testid={`generic-${type}-text-header`}
+          >
+            {header}
+          </h3>
+          {secondaryMessage && (
+            <p className="secondary" data-testid="library-warning">
+              {secondaryMessage}
+            </p>
+          )}
+          {errors?.length > 0 && (
+            <>
+              <h6>
+                ({errors.length}) Error{errors.length > 1 ? "s" : ""}:
+              </h6>
+              <ul data-testid={`generic-errors-text-list`}>{errors}</ul>
+            </>
+          )}
+          {warnings?.length > 0 && (
+            <>
+              <h6>
+                ({warnings.length}) Warning{warnings.length > 1 ? "s" : ""}:
+              </h6>
+              <ul data-testid={`generic-warnings-text-list`}>{warnings}</ul>
+            </>
+          )}
+        </div>
+      }
+      canClose={false}
+    />
+  );
+};
+
+export const transformAnnotation = (annotation) => {
+  return `Row: ${annotation.row + 1}, Col:${annotation.column}: ${
+    annotation.text
+  }`;
+};
 
 const StatusHandler = ({
   success,
@@ -9,185 +71,83 @@ const StatusHandler = ({
   outboundAnnotations,
   hasSubTitle,
 }) => {
-  // success.status = fulfilled && elmTranslation errors
-  const transformAnnotation = (annotation) => {
-    return `Row: ${annotation.row + 1}, Col:${annotation.column}: ${
-      annotation.text
-    }`;
-  };
-  const isLength = (val) => {
-    return val.length > 0 ? "s" : "";
-  };
-  {
-    /*
+  /*
     success,
     success, error, outbound
     success, error,
     success, outbound
     success alone
-    */
-    if (success?.status === "success") {
-      if (errorMessage) {
-        if (outboundAnnotations.length > 0) {
-          const mappedMessages = outboundAnnotations.map((el) => (
-            <li>{transformAnnotation(el)}</li>
-          ));
-          return (
-            <MadieAlert
-              type="success"
-              content={
-                <div aria-live="polite" role="alert">
-                  <h3 data-testid="generic-success-text-header">
-                    Changes saved successfully but the following errors were
-                    found
-                  </h3>
-                  <p className="secondary" data-testid="library-warning">
-                    {errorMessage}
-                  </p>
-                  <h4 data-testid="generic-success-text-sub-header">{`${
-                    outboundAnnotations.length
-                  } CQL error${isLength(outboundAnnotations)} found:`}</h4>
-                  <ul data-testid="generic-success-text-list">
-                    {mappedMessages}
-                  </ul>
-                </div>
-              }
-              canClose={false}
-            />
-          );
-        }
-        return (
-          <MadieAlert
-            type="success"
-            content={
-              <div aria-live="polite" role="alert">
-                <h3 data-testid="generic-success-text-header">
-                  Changes saved successfully but the following errors were found
-                </h3>
-                <p className="secondary" data-testid="library-warning">
-                  {errorMessage}
-                </p>
-              </div>
-            }
-            canClose={false}
-          />
+  */
+  if (success?.status === "success") {
+    if (errorMessage) {
+      if (outboundAnnotations?.length > 0) {
+        // Succesfully saved with errorMessage and outBoundAnnotations
+        return generateMadieAlertWithContent(
+          success.status,
+          "Changes saved successfully but the following issues were found",
+          errorMessage,
+          outboundAnnotations
+        );
+      } else {
+        // Succesfully saved with errorMessage
+        return generateMadieAlertWithContent(
+          success.status,
+          "Changes saved successfully but the following issues were found",
+          errorMessage,
+          null
         );
       }
-      if (outboundAnnotations && outboundAnnotations.length > 0) {
-        const mappedMessages = outboundAnnotations.map((el) => (
-          <li>{transformAnnotation(el)}</li>
-        ));
-        return (
-          <MadieAlert
-            type="success"
-            content={
-              <div aria-live="polite" role="alert">
-                <h3 data-testid="generic-success-text-header">
-                  Changes saved successfully but the following errors were found
-                </h3>
-                {success.message ===
-                  "CQL updated successfully but was missing a Using statement.  Please add in a valid model and version." && (
-                  <p className="secondary" data-testid="library-warning">
-                    {success.message}
-                  </p>
-                )}
-                {success.message ===
-                  "CQL updated successfully! Library Statement or Using Statement were incorrect. MADiE has overwritten them to ensure proper CQL." && (
-                  <p className="secondary" data-testid="library-warning">
-                    {success.message}
-                  </p>
-                )}
-                <h4 data-testid="generic-success-text-sub-header">{`${
-                  outboundAnnotations.length
-                } CQL error${isLength(outboundAnnotations)} found:`}</h4>
-                <ul data-testid="generic-success-text-list">
-                  {mappedMessages}
-                </ul>
-              </div>
-            }
-            canClose={false}
-          />
+    } else if (outboundAnnotations && outboundAnnotations.length > 0) {
+      // Succesfully saved with outboundAnnotations and a warning messages
+      if (
+        success.message ===
+          "CQL updated successfully but was missing a Using statement. Please add in a valid model and version." ||
+        success.message ===
+          "CQL updated successfully! Library Statement or Using Statement were incorrect. MADiE has overwritten them to ensure proper CQL."
+      ) {
+        return generateMadieAlertWithContent(
+          success.status,
+          "Changes saved successfully but the following issues were found",
+          success.message,
+          outboundAnnotations
+        );
+      } else {
+        return generateMadieAlertWithContent(
+          success.status,
+          "Changes saved successfully but the following issues were found",
+          null,
+          outboundAnnotations
         );
       }
-      // we have an edge case in which we have an error message as well as a success
-      else {
-        return (
-          <MadieAlert
-            type="success"
-            content={
-              <h3
-                aria-live="polite"
-                data-testid="generic-success-text-header"
-                role="alert"
-              >
-                {success.message}
-              </h3>
-            }
-            canClose={false}
-          />
-        );
-      }
+    } else {
+      // Successfully saved with no errorMessage or outBoundAnnotations
+      return generateMadieAlertWithContent(
+        success.status,
+        success.message,
+        null,
+        null
+      );
     }
   }
 
-  {
-    // if there's ANY error flag
-    if (error) {
-      if (errorMessage) {
-        if (outboundAnnotations && outboundAnnotations.length > 0) {
-          const mappedMessages = outboundAnnotations.map((el) => (
-            <li>{transformAnnotation(el)}</li>
-          ));
+  if (error) {
+    if (errorMessage) {
+      if (outboundAnnotations?.length > 0) {
+        // Has errorMessage and outboundAnnotations
+        return generateMadieAlertWithContent(
+          "error",
+          errorMessage,
+          null,
+          outboundAnnotations
+        );
+      } else {
+        // Has errorMessage but no outboundAnnotations
+        if (hasSubTitle) {
           return (
             <MadieAlert
               type="error"
               content={
                 <div aria-live="polite" role="alert">
-                  <h3 data-testid="generic-error-text-header">
-                    {errorMessage}
-                  </h3>
-                  <h4 data-testid="generic-error-text-sub-header">{`${
-                    outboundAnnotations.length
-                  } CQL error${isLength(outboundAnnotations)} found:`}</h4>
-                  <ul data-testid="generic-error-text-list">
-                    {mappedMessages}
-                  </ul>
-                </div>
-              }
-              canClose={false}
-            />
-          );
-        } else {
-          if (hasSubTitle) {
-            return (
-              <MadieAlert
-                type="error"
-                content={
-                  <div aria-live="polite" role="alert">
-                    <h3
-                      aria-live="polite"
-                      role="alert"
-                      data-testid="generic-error-text-header"
-                    >
-                      {errorMessage}
-                    </h3>
-                    <h5 data-testid="generic-error-text-sub-header">
-                      Please reach out to{" "}
-                      <a href="https://oncprojectracking.healthit.gov/support/projects/BONNIEMAT/summary">
-                        MADiE helpdesk
-                      </a>{" "}
-                      for assistance.
-                    </h5>
-                  </div>
-                }
-                canClose={false}
-              />
-            );
-          } else {
-            return (
-              <MadieAlert
-                type="error"
-                content={
                   <h3
                     aria-live="polite"
                     role="alert"
@@ -195,81 +155,55 @@ const StatusHandler = ({
                   >
                     {errorMessage}
                   </h3>
-                }
-                canClose={false}
-              />
-            );
-          }
+                  <h5 data-testid="generic-error-text-sub-header">
+                    Please reach out to{" "}
+                    <a href="https://oncprojectracking.healthit.gov/support/projects/BONNIEMAT/summary">
+                      MADiE helpdesk
+                    </a>{" "}
+                    for assistance.
+                  </h5>
+                </div>
+              }
+              canClose={false}
+            />
+          );
+        } else {
+          return generateMadieAlertWithContent(
+            "error",
+            errorMessage,
+            null,
+            null
+          );
         }
       }
-      // if we have errors but no error message tied to it
-      if (outboundAnnotations && outboundAnnotations.length > 0) {
-        const mappedMessages = outboundAnnotations.map((el) => (
-          <li>{transformAnnotation(el)}</li>
-        ));
-        return (
-          <MadieAlert
-            type="error"
-            content={
-              <div aria-live="polite" role="alert">
-                <h3 data-testid="generic-error-text-header">
-                  Errors were found within the CQL
-                </h3>
-                <h4 data-testid="generic-error-text-sub-header">{`${
-                  outboundAnnotations.length
-                } CQL error${isLength(outboundAnnotations)} found:`}</h4>
-                <ul data-testid="generic-error-text-list">{mappedMessages}</ul>
-              </div>
-            }
-            canClose={false}
-          />
-        );
-      }
-      //   if error flag is true but no information is supplied and no annotations provided
-      return (
-        <MadieAlert
-          type="error"
-          content={
-            <>
-              <h3
-                aria-live="polite"
-                role="alert"
-                data-testid="generic-error-text-header"
-              >
-                Errors were found within the CQL
-              </h3>
-            </>
-          }
-          canClose={false}
-        />
+    } else if (outboundAnnotations && outboundAnnotations.length > 0) {
+      // Has outboundAnnotations but no errorMessage
+      return generateMadieAlertWithContent(
+        "error",
+        "Following issues were found within the CQL",
+        null,
+        outboundAnnotations
+      );
+    } else {
+      // Error flag is true but no errorMessage and no outboundAnnotations are provided
+      return generateMadieAlertWithContent(
+        "error",
+        "Errors were found within the CQL",
+        null,
+        null
       );
     }
+  } else {
     // if the error flag is not true, but we still have errors within the cql
-    else {
-      if (outboundAnnotations.length > 0) {
-        const mappedMessages = outboundAnnotations.map((el) => (
-          <li>{transformAnnotation(el)}</li>
-        ));
-        return (
-          <MadieAlert
-            type="error"
-            content={
-              <div aria-live="polite" role="alert">
-                <h3 data-testid="generic-error-text-header">
-                  Errors were found within the CQL
-                </h3>
-                <h4 data-testid="generic-error-text-sub-header">{`${
-                  outboundAnnotations.length
-                } CQL error${isLength(outboundAnnotations)} found:`}</h4>
-                <ul data-testid="generic-error-text-list">{mappedMessages}</ul>
-              </div>
-            }
-            canClose={false}
-          />
-        );
-      }
-      return <div />;
+    if (outboundAnnotations && outboundAnnotations.length > 0) {
+      return generateMadieAlertWithContent(
+        "error",
+        "Following issues were found within the CQL",
+        null,
+        outboundAnnotations
+      );
     }
+    return <></>;
   }
 };
 

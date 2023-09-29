@@ -195,7 +195,8 @@ const MeasureEditor = () => {
       // right now we are only displaying the external errors related to included libraries
       // and only the first error returned by elm translator
       if (errors?.length > 0 || externalErrors?.length > 0) {
-        setError(true);
+        const elmErrors = _.filter(errors, { errorSeverity: "Error" });
+        setError(!_.isEmpty(elmErrors) || externalErrors.length > 0);
       }
       setErrorMessage(externalErrors[0]?.message);
       if (isLoggedInUMLS(errors)) {
@@ -257,9 +258,13 @@ const MeasureEditor = () => {
 
       const validationResult: ValidationResult =
         results[0].status === "fulfilled" ? results[0].value : null;
+
+      // cqlErrors flag is turned ON either the CQL has external Errors or at least 1 error whose errorSeverity is "Error"
+      // Warnings are ignored and doesn't affect cqlErrors flag
       const cqlElmErrors =
-        !_.isEmpty(validationResult?.errors) ||
-        !_.isEmpty(validationResult?.externalErrors);
+        !_.isEmpty(
+          _.filter(validationResult?.errors, { errorSeverity: "Error" })
+        ) || !_.isEmpty(validationResult?.externalErrors);
 
       if (editorVal !== measure.cql) {
         const cqlErrors = parseErrors || cqlElmErrors;
