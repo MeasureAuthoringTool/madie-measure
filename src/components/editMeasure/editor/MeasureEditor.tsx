@@ -286,7 +286,7 @@ const MeasureEditor = () => {
               setSuccess({
                 status: "success",
                 message:
-                  "CQL updated successfully but was missing a Using statement.  Please add in a valid model and version.",
+                  "CQL updated successfully but was missing a Using statement. Please add in a valid model and version.",
               });
             } else {
               const successMessage =

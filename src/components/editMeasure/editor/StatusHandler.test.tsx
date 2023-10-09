@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import StatusHandler, { transformAnnotation } from "./StatusHandler";
 
 describe("StatusHandler Component", () => {
@@ -118,7 +118,7 @@ describe("StatusHandler Component", () => {
     );
   });
 
-  it("Should display a generic success message and a using warning if a library warning exists when no error or messages present, also displays a list of annotations", () => {
+  it("Should display a generic success message and a using warning if a library warning exists when no error or messages present, also displays a list of annotations", async () => {
     const success = {
       status: "success",
       message:
@@ -137,9 +137,11 @@ describe("StatusHandler Component", () => {
     expect(getByTestId("generic-success-text-header")).toHaveTextContent(
       "Changes saved successfully but the following issues were found"
     );
-    expect(screen.getByTestId("library-warning")).toHaveTextContent(
-      success.message
-    );
+    await waitFor(() => {
+      expect(screen.getByTestId("library-warning")).toHaveTextContent(
+        success.message
+      );
+    });
     const errorsList = screen.getByTestId("generic-errors-text-list");
     expect(errorsList).toBeInTheDocument();
     expect(errorsList).toHaveTextContent(
