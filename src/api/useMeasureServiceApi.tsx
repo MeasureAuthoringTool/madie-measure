@@ -359,8 +359,8 @@ export class MeasureServiceApi {
             currentUser: filterByCurrentUser,
             limit,
             page,
-            signal,
           },
+          signal: signal,
         }
       );
       return response.data;

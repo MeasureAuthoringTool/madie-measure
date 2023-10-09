@@ -42,6 +42,7 @@ export default function MeasureLanding() {
   const [currentPage, setCurrentPage] = useState(0);
   const [errMsg, setErrMsg] = useState(undefined);
   const abortController = useRef(null);
+  const [loading, setLoading] = useState(false);
 
   // pull info from some query url
   const curLimit = values.limit && Number(values.limit);
@@ -64,16 +65,20 @@ export default function MeasureLanding() {
     async (tab, limit, page, searchCriteria) => {
       abortController.current = new AbortController();
       if (!searchCriteria) {
+        setLoading(true);
         measureServiceApi
           .fetchMeasures(tab === 0, limit, page, abortController.current.signal)
           .then((data) => {
             setPageProps(data);
+            setLoading(false);
           })
           .catch((error: Error) => {
             setErrMsg(error.message);
             setInitialLoad(false);
+            setLoading(false);
           });
       } else {
+        setLoading(true);
         measureServiceApi
           .searchMeasuresByMeasureNameOrEcqmTitle(
             tab === 0,
@@ -84,10 +89,12 @@ export default function MeasureLanding() {
           )
           .then((data) => {
             setPageProps(data);
+            setLoading(false);
           })
           .catch((error) => {
             setErrMsg(error.message);
             setInitialLoad(false);
+            setLoading(false);
           });
       }
     },
@@ -126,11 +133,12 @@ export default function MeasureLanding() {
   }, []);
 
   const handleTabChange = (event, nextTab) => {
-    setMeasureList(null);
-    // setInitialLoad(true);
-    const limit = values?.limit || 10;
-    history.push(`?tab=${nextTab}&page=0&limit=${limit}`);
-    abortController.current && abortController.current.abort();
+    abortController.current.abort();
+    if (!loading) {
+      setMeasureList(null);
+      const limit = values?.limit || 10;
+      history.push(`?tab=${nextTab}&page=0&limit=${limit}`);
+    }
   };
 
   // we need to tell our layout page that we've loaded to prevent strange tab order
