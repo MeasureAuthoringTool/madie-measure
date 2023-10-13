@@ -47,10 +47,36 @@ describe("MeasureServiceApi Tests", () => {
     mockedAxios.get.mockRejectedValueOnce(resp);
 
     try {
-      await measureServiceApi.fetchMeasures(true, 25, 0);
+      await measureServiceApi.fetchMeasures(
+        true,
+        25,
+        0,
+        new AbortController().signal
+      );
       expect(mockedAxios.get).toBeCalledTimes(1);
     } catch (error) {
       expect(error.message).toBe("Unable to fetch measures");
+    }
+  });
+
+  it("test fetchMeasures cancels", async () => {
+    const resp = {
+      status: 500,
+      data: "failure",
+      message: "canceled",
+    };
+    mockedAxios.get.mockRejectedValueOnce(resp);
+
+    try {
+      await measureServiceApi.fetchMeasures(
+        true,
+        25,
+        0,
+        new AbortController().signal
+      );
+      expect(mockedAxios.get).toBeCalledTimes(1);
+    } catch (error) {
+      expect(error.message).toBe("canceled");
     }
   });
 
@@ -172,7 +198,8 @@ describe("MeasureServiceApi Tests", () => {
         true,
         25,
         0,
-        "test"
+        "test",
+        new AbortController().signal
       );
     expect(mockedAxios.get).toBeCalledTimes(1);
     expect(measuresList).toEqual(measures);
@@ -187,11 +214,34 @@ describe("MeasureServiceApi Tests", () => {
         true,
         25,
         0,
-        "test"
+        "test",
+        new AbortController().signal
       );
       expect(mockedAxios.get).toBeCalledTimes(1);
     } catch (error) {
       expect(error.message).toBe("Unable to search measures");
+    }
+  });
+
+  it("test searchMeasuresByMeasureNameOrEcqmTitle cancels", async () => {
+    const resp = {
+      status: 500,
+      data: "failure",
+      message: "canceled",
+    };
+    mockedAxios.get.mockRejectedValueOnce(resp);
+
+    try {
+      await measureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle(
+        true,
+        25,
+        0,
+        "test",
+        new AbortController().signal
+      );
+      expect(mockedAxios.get).toBeCalledTimes(1);
+    } catch (error) {
+      expect(error.message).toBe("canceled");
     }
   });
 

@@ -369,6 +369,9 @@ export class MeasureServiceApi {
       );
       return response.data;
     } catch (err) {
+      if (err.message === "canceled") {
+        throw new Error(err.message);
+      }
       const message = `Unable to search measures`;
       console.error(message);
       console.error(err);
