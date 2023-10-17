@@ -221,6 +221,27 @@ describe("Measure Page", () => {
     });
   });
 
+  it("Should not display errors when fetching measures is canceled", async () => {
+    (mockMeasureServiceApi.fetchMeasures as jest.Mock)
+      .mockClear()
+      .mockRejectedValueOnce(new Error("canceled"));
+
+    await act(async () => {
+      render(
+        <ApiContextProvider value={serviceConfig}>
+          <MemoryRouter initialEntries={["/measures"]}>
+            <MeasureLanding />
+          </MemoryRouter>
+        </ApiContextProvider>
+      );
+
+      expect(
+        await screen.queryByTestId("generic-error-text-header")
+      ).toBeNull();
+      expect(await screen.queryByText("Unable to fetch measures")).toBeNull();
+    });
+  });
+
   test("Search measure should display errors when searching measures is rejected", async () => {
     (mockMeasureServiceApi.fetchMeasures as jest.Mock)
       .mockClear()
@@ -249,4 +270,31 @@ describe("Measure Page", () => {
     const errorText = await screen.findByText("Unable to fetch measures");
     expect(errorText).toBeInTheDocument();
   });
+});
+
+test("Search measure should not display errors when searching measures is canceled", async () => {
+  (mockMeasureServiceApi.fetchMeasures as jest.Mock)
+    .mockClear()
+    .mockRejectedValueOnce(new Error("canceled"));
+  (mockMeasureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle as jest.Mock)
+    .mockClear()
+    .mockRejectedValueOnce(new Error("canceled"));
+  await act(async () => {
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/measures"]}>
+          <MeasureLanding />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+  });
+  const searchFieldInput = screen.getByTestId("searchMeasure-input");
+  expect(searchFieldInput).toBeInTheDocument();
+  userEvent.type(searchFieldInput, "test");
+  expect(searchFieldInput.value).toBe("test");
+
+  fireEvent.submit(searchFieldInput);
+
+  expect(await screen.queryByTestId("generic-error-text-header")).toBeNull();
+  expect(await screen.queryByText("Unable to fetch measures")).toBeNull();
 });

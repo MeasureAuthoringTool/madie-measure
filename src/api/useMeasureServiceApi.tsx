@@ -70,14 +70,18 @@ export class MeasureServiceApi {
           currentUser: filterByCurrentUser,
           limit,
           page,
-          signal,
         },
+        signal,
       });
       return response.data;
     } catch (err) {
+      if (err.message === "canceled") {
+        throw new Error(err.message);
+      }
       const message = `Unable to fetch measures`;
       console.error(message);
       console.error(err);
+
       throw new Error(message);
     }
   }
@@ -359,12 +363,15 @@ export class MeasureServiceApi {
             currentUser: filterByCurrentUser,
             limit,
             page,
-            signal,
           },
+          signal,
         }
       );
       return response.data;
     } catch (err) {
+      if (err.message === "canceled") {
+        throw new Error(err.message);
+      }
       const message = `Unable to search measures`;
       console.error(message);
       console.error(err);

@@ -64,13 +64,16 @@ export default function MeasureLanding() {
     async (tab, limit, page, searchCriteria) => {
       abortController.current = new AbortController();
       if (!searchCriteria) {
+        setErrMsg(null);
         measureServiceApi
           .fetchMeasures(tab === 0, limit, page, abortController.current.signal)
           .then((data) => {
             setPageProps(data);
           })
           .catch((error: Error) => {
-            setErrMsg(error.message);
+            if (error.message != "canceled") {
+              setErrMsg(error.message);
+            }
             setInitialLoad(false);
           });
       } else {
@@ -86,7 +89,9 @@ export default function MeasureLanding() {
             setPageProps(data);
           })
           .catch((error) => {
-            setErrMsg(error.message);
+            if (error.message != "canceled") {
+              setErrMsg(error.message);
+            }
             setInitialLoad(false);
           });
       }
@@ -126,11 +131,10 @@ export default function MeasureLanding() {
   }, []);
 
   const handleTabChange = (event, nextTab) => {
+    abortController.current.abort();
     setMeasureList(null);
-    // setInitialLoad(true);
     const limit = values?.limit || 10;
     history.push(`?tab=${nextTab}&page=0&limit=${limit}`);
-    abortController.current && abortController.current.abort();
   };
 
   // we need to tell our layout page that we've loaded to prevent strange tab order
