@@ -38,6 +38,8 @@ const bulkCreate = (count: number) => {
     newMeasure.measureName = mockMeasureName();
     newMeasure.model = mockModel;
     newMeasure.cqlLibraryName = mockLibraryName();
+    newMeasure.version = "1.0.0";
+    newMeasure.measureMetaData = { draft: true };
     measures.push(newMeasure);
   }
   return measures;

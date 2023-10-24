@@ -165,8 +165,9 @@ describe("QdmSupplementalElements Component", () => {
     ).getByTitle("Open");
 
     userEvent.click(supplementalDataButton);
-    const targetOption = screen.getByRole("option", { name: "SDE Ethnicity" });
-    userEvent.click(targetOption);
+    await waitFor(() => {
+      userEvent.click(screen.getByText("SDE Ethnicity"));
+    });
     expect(
       screen.getByRole("button", { name: "SDE Ethnicity" })
     ).toBeInTheDocument();
@@ -269,8 +270,9 @@ describe("QdmSupplementalElements Component", () => {
     );
 
     userEvent.click(supplementalDataButton);
-    const targetOption = screen.getByRole("option", { name: "SDE Ethnicity" });
-    userEvent.click(targetOption);
+    await waitFor(() => {
+      userEvent.click(screen.getByText("SDE Ethnicity"));
+    });
     userEvent.click(supplementalDataButton); // To collapse the dropdown
     expect(
       screen.getByRole("button", { name: "SDE Ethnicity" })
@@ -324,8 +326,9 @@ describe("QdmSupplementalElements Component", () => {
     );
 
     userEvent.click(supplementalDataButton);
-    const targetOption = screen.getByRole("option", { name: "SDE Ethnicity" });
-    userEvent.click(targetOption);
+    await waitFor(() => {
+      userEvent.click(screen.getByText("SDE Ethnicity"));
+    });
     userEvent.click(supplementalDataButton); // To collapse the dropdown
     expect(
       screen.getByRole("button", { name: "SDE Ethnicity" })

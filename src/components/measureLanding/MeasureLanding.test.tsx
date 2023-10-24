@@ -25,6 +25,8 @@ const serviceConfig: ServiceConfig = {
   },
 };
 
+const abortController = new AbortController();
+
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
   useFeatureFlags: () => null,
@@ -60,7 +62,8 @@ describe("Measure Page", () => {
       expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
         true,
         10,
-        0
+        0,
+        abortController.signal
       );
       const myMeasuresTab = screen.getByRole("tab", { name: "My Measures" });
       expect(myMeasuresTab).toBeInTheDocument();
@@ -95,7 +98,8 @@ describe("Measure Page", () => {
       expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
         true,
         10,
-        0
+        0,
+        abortController.signal
       );
       const myMeasuresTab = await findByTestId("my-measures-tab");
       userEvent.click(myMeasuresTab);
@@ -108,7 +112,8 @@ describe("Measure Page", () => {
         expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
           false,
           10,
-          0
+          0,
+          abortController.signal
         )
       );
     });
@@ -132,7 +137,7 @@ describe("Measure Page", () => {
     fireEvent.submit(searchFieldInput);
     expect(
       mockMeasureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle
-    ).toHaveBeenCalledWith(true, 10, 0, "test");
+    ).toHaveBeenCalledWith(true, 10, 0, "test", abortController.signal);
   });
 
   test("Create event triggers the event listener", async () => {
@@ -150,7 +155,8 @@ describe("Measure Page", () => {
     expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
       true,
       10,
-      0
+      0,
+      abortController.signal
     );
   });
   test("test pagination page button", async () => {
@@ -215,6 +221,27 @@ describe("Measure Page", () => {
     });
   });
 
+  it("Should not display errors when fetching measures is canceled", async () => {
+    (mockMeasureServiceApi.fetchMeasures as jest.Mock)
+      .mockClear()
+      .mockRejectedValueOnce(new Error("canceled"));
+
+    await act(async () => {
+      render(
+        <ApiContextProvider value={serviceConfig}>
+          <MemoryRouter initialEntries={["/measures"]}>
+            <MeasureLanding />
+          </MemoryRouter>
+        </ApiContextProvider>
+      );
+
+      expect(
+        await screen.queryByTestId("generic-error-text-header")
+      ).toBeNull();
+      expect(await screen.queryByText("Unable to fetch measures")).toBeNull();
+    });
+  });
+
   test("Search measure should display errors when searching measures is rejected", async () => {
     (mockMeasureServiceApi.fetchMeasures as jest.Mock)
       .mockClear()
@@ -243,4 +270,31 @@ describe("Measure Page", () => {
     const errorText = await screen.findByText("Unable to fetch measures");
     expect(errorText).toBeInTheDocument();
   });
+});
+
+test("Search measure should not display errors when searching measures is canceled", async () => {
+  (mockMeasureServiceApi.fetchMeasures as jest.Mock)
+    .mockClear()
+    .mockRejectedValueOnce(new Error("canceled"));
+  (mockMeasureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle as jest.Mock)
+    .mockClear()
+    .mockRejectedValueOnce(new Error("canceled"));
+  await act(async () => {
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/measures"]}>
+          <MeasureLanding />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+  });
+  const searchFieldInput = screen.getByTestId("searchMeasure-input");
+  expect(searchFieldInput).toBeInTheDocument();
+  userEvent.type(searchFieldInput, "test");
+  expect(searchFieldInput.value).toBe("test");
+
+  fireEvent.submit(searchFieldInput);
+
+  expect(await screen.queryByTestId("generic-error-text-header")).toBeNull();
+  expect(await screen.queryByText("Unable to fetch measures")).toBeNull();
 });

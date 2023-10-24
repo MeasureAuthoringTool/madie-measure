@@ -204,11 +204,14 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
                 formik.setFieldValue("measurementPeriodStart", startDate);
               }}
               renderInput={(params) => {
+                const { inputProps } = params;
+                inputProps["aria-required"] = true;
                 const { onChange, ...formikFieldProps } = formik.getFieldProps(
                   "measurementPeriodStart"
                 );
                 return (
                   <TextField
+                    id="measurement-period-start"
                     {...formikFieldProps}
                     {...params}
                     required
@@ -223,7 +226,7 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
                     )}
                     InputProps={{
                       "aria-describedby":
-                        "create-measure-period-start-helper-text",
+                        "measurement-period-start-helper-text",
                       required: true,
                       "aria-required": "true",
                     }}
@@ -238,7 +241,6 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
               disabled={!canEdit}
               label="Measurement Period - End Date"
               inputFormat="MM/dd/yyyy"
-              aria-required="true"
               value={
                 formik.values.measurementPeriodEnd
                   ? makeUTCDate(new Date(formik.values.measurementPeriodEnd))
@@ -248,27 +250,28 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
                 formik.setFieldValue("measurementPeriodEnd", endDate);
               }}
               renderInput={(params) => {
+                const { inputProps } = params;
+                inputProps["aria-required"] = true;
                 const { onChange, ...formikFieldProps } = formik.getFieldProps(
                   "measurementPeriodEnd"
                 );
                 return (
                   <TextField
+                    id="measurement-period-end"
                     {...formikFieldProps}
                     {...params}
+                    required
+                    data-testid="measurement-period-end"
                     error={
                       formik.touched.measurementPeriodEnd &&
                       Boolean(formik.errors.measurementPeriodEnd)
                     }
-                    id="measurementPeriodEndDate"
-                    required
-                    data-testid="measurement-period-end"
                     helperText={formikErrorHandler(
                       "measurementPeriodEnd",
                       true
                     )}
                     InputProps={{
-                      "aria-describedby":
-                        "create-measure-period-end-helper-text",
+                      "aria-describedby": "measurement-period-end-helper-text",
                       required: true,
                       "aria-required": "true",
                     }}

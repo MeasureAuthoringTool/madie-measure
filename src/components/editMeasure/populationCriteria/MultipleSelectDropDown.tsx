@@ -9,7 +9,7 @@ import CheckBoxIcon from "@mui/icons-material/CheckBox";
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
-const autoCompleteStyles = {
+export const autoCompleteStyles = {
   borderRadius: "3px",
   // border: "1px solid #DDDDDD",
   height: "auto",
@@ -65,6 +65,7 @@ const MultipleSelectDropDown = ({
         }}
       />
       <Autocomplete
+        aria-required
         size="small"
         limitTags={limitTags}
         multiple={multipleSelect}
@@ -85,7 +86,12 @@ const MultipleSelectDropDown = ({
             key: `${props.key}_${props.id}`,
           };
           return (
-            <li {...uniqueProps}>
+            <li
+              {...uniqueProps}
+              aria-label={`option ${option} ${
+                selected ? "selected" : "not selected"
+              }`}
+            >
               <Checkbox
                 icon={icon}
                 checkedIcon={checkedIcon}
@@ -98,10 +104,12 @@ const MultipleSelectDropDown = ({
         }}
         renderInput={(params) => {
           const { inputProps } = params;
+          inputProps["aria-required"] = required;
           inputProps["aria-describedby"] = "measure-group-type-helper-text";
+          inputProps["aria-label"] = "Types multiple types can be selected";
           return (
             <TextField
-              label={label}
+              label={`${label} ${required ? "required" : ""}`}
               placeholder="Select All That Apply"
               error={error}
               {...params}

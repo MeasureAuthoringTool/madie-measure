@@ -139,9 +139,15 @@ export default function MeasureList(props: {
   };
 
   const handleClearClick = async (event) => {
+    abortController.current = new AbortController();
     props.setSearchCriteria("");
     measureServiceApi
-      .fetchMeasures(props.activeTab === 0, props.currentLimit, 0)
+      .fetchMeasures(
+        props.activeTab === 0,
+        props.currentLimit,
+        0,
+        abortController.current.signal
+      )
       .then((data) => {
         setPageProps(data);
       })
@@ -155,13 +161,15 @@ export default function MeasureList(props: {
   };
 
   const doSearch = () => {
+    abortController.current = new AbortController();
     props.setErrMsg();
     measureServiceApi
       .searchMeasuresByMeasureNameOrEcqmTitle(
         props.activeTab === 0,
         props.currentLimit,
         0,
-        props.searchCriteria
+        props.searchCriteria,
+        abortController.current.signal
       )
       .then((data) => {
         setPageProps(data);
@@ -386,11 +394,13 @@ export default function MeasureList(props: {
   };
 
   const doUpdateList = () => {
+    abortController.current = new AbortController();
     measureServiceApi
       .fetchMeasures(
         props.activeTab === 0,
         props.currentLimit,
-        props.currentPage
+        props.currentPage,
+        abortController.current.signal
       )
       .then((data) => {
         setPageProps(data);
@@ -585,6 +595,9 @@ export default function MeasureList(props: {
                             handleOpen(measure, e);
                           }}
                           data-testid={`measure-action-${measure.id}`}
+                          aria-label={`Measure ${measure?.measureName} version ${measure?.version} draft status ${measure?.measureMetaData?.draft} Select`}
+                          role="button"
+                          tab-index={0}
                         >
                           Select
                         </Button>

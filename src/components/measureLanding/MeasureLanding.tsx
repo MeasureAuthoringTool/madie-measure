@@ -41,6 +41,7 @@ export default function MeasureLanding() {
   const [currentLimit, setCurrentLimit] = useState(10);
   const [currentPage, setCurrentPage] = useState(0);
   const [errMsg, setErrMsg] = useState(undefined);
+  const abortController = useRef(null);
 
   // pull info from some query url
   const curLimit = values.limit && Number(values.limit);
@@ -61,14 +62,18 @@ export default function MeasureLanding() {
 
   const retrieveMeasures = useCallback(
     async (tab, limit, page, searchCriteria) => {
+      abortController.current = new AbortController();
       if (!searchCriteria) {
+        setErrMsg(null);
         measureServiceApi
-          .fetchMeasures(tab === 0, limit, page)
+          .fetchMeasures(tab === 0, limit, page, abortController.current.signal)
           .then((data) => {
             setPageProps(data);
           })
           .catch((error: Error) => {
-            setErrMsg(error.message);
+            if (error.message != "canceled") {
+              setErrMsg(error.message);
+            }
             setInitialLoad(false);
           });
       } else {
@@ -77,13 +82,16 @@ export default function MeasureLanding() {
             tab === 0,
             limit,
             page,
-            searchCriteria
+            searchCriteria,
+            abortController.current.signal
           )
           .then((data) => {
             setPageProps(data);
           })
           .catch((error) => {
-            setErrMsg(error.message);
+            if (error.message != "canceled") {
+              setErrMsg(error.message);
+            }
             setInitialLoad(false);
           });
       }
@@ -123,6 +131,8 @@ export default function MeasureLanding() {
   }, []);
 
   const handleTabChange = (event, nextTab) => {
+    abortController.current.abort();
+    setMeasureList(null);
     const limit = values?.limit || 10;
     history.push(`?tab=${nextTab}&page=0&limit=${limit}`);
   };

@@ -58,7 +58,8 @@ export class MeasureServiceApi {
   async fetchMeasures(
     filterByCurrentUser: boolean,
     limit: number = 25,
-    page: number = 0
+    page: number = 0,
+    signal
   ): Promise<any> {
     try {
       const response = await axios.get<any>(`${this.baseUrl}/measures`, {
@@ -70,12 +71,17 @@ export class MeasureServiceApi {
           limit,
           page,
         },
+        signal,
       });
       return response.data;
     } catch (err) {
+      if (err.message === "canceled") {
+        throw new Error(err.message);
+      }
       const message = `Unable to fetch measures`;
       console.error(message);
       console.error(err);
+
       throw new Error(message);
     }
   }
@@ -343,7 +349,8 @@ export class MeasureServiceApi {
     filterByCurrentUser: boolean,
     limit: number = 25,
     page: number = 0,
-    searchCriteria: string
+    searchCriteria: string,
+    signal
   ): Promise<any> {
     try {
       const response = await axios.get<any>(
@@ -357,10 +364,14 @@ export class MeasureServiceApi {
             limit,
             page,
           },
+          signal,
         }
       );
       return response.data;
     } catch (err) {
+      if (err.message === "canceled") {
+        throw new Error(err.message);
+      }
       const message = `Unable to search measures`;
       console.error(message);
       console.error(err);

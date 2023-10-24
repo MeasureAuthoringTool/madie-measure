@@ -1,6 +1,6 @@
 import tw, { styled } from "twin.macro";
 
-export const MenuItemContainer = tw.ul`bg-transparent flex pt-12 pb-4 border-b`;
+export const MenuItemContainer = tw.div`bg-transparent flex pt-12 pb-4 border-b`;
 
 // const FormField = tw.div`mt-6 grid grid-cols-4`;
 export const FormFieldInner = tw.div`lg:col-span-3`;

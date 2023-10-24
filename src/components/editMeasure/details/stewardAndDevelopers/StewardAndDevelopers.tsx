@@ -5,6 +5,7 @@ import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import {
   Button,
   MadieDiscardDialog,
+  TextField,
   Toast,
   AutoComplete,
 } from "@madie/madie-design-system/dist/react";
@@ -15,11 +16,15 @@ import {
 } from "@madie/madie-util";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Typography } from "@mui/material";
+import { Checkbox, Typography } from "@mui/material";
 import { Organization } from "@madie/madie-models";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import { autoCompleteStyles } from "../../populationCriteria/MultipleSelectDropDown";
 
 const asterisk = { color: "#D92F2F", marginRight: 3 };
-
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const checkedIcon = <CheckBoxIcon fontSize="small" />;
 // Need to have a "-" as placeholder if nothing is selected, but it doesn't have to be an option
 // Need to have 2 diff sizes of buttons
 interface StewardAndDevelopersProps {
@@ -159,6 +164,7 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
             </Typography>
           </div>
         </div>
+        {/* stewrd and developers role select for checkbox */}
         {organizations && (
           <>
             <div tw="mb-4 w-1/2">
@@ -177,21 +183,61 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
                 onKeyDown={goBackToNav}
               />
             </div>
-            <div tw="mb-4 w-1/2">
+            <div tw="mb-4 w-1/2" style={{ border: "none" }}>
               <AutoComplete
                 multiple
                 id="developers"
                 data-testid="developers"
-                label="Developers"
+                sx={autoCompleteStyles}
                 placeholder="-"
-                required={true}
                 disabled={!canEdit}
                 error={formik.touched.developers && formik.errors["developers"]}
-                helperText={
-                  formik.touched.developers && formik.errors["developers"]
-                }
                 options={organizations.map((element) => element.name)}
+                renderOption={(props: any, option, { selected }) => {
+                  const uniqueProps = {
+                    ...props,
+                    key: `${props.key}_${props.id}`,
+                  };
+                  return (
+                    <li
+                      {...uniqueProps}
+                      aria-label={`option ${option} ${
+                        selected ? "selected" : "not selected"
+                      }`}
+                    >
+                      <Checkbox
+                        icon={icon}
+                        checkedIcon={checkedIcon}
+                        style={{ marginRight: 8 }}
+                        checked={selected}
+                      />
+                      {option}
+                    </li>
+                  );
+                }}
                 {...formik.getFieldProps("developers")}
+                renderInput={(params) => {
+                  const { inputProps } = params;
+                  inputProps["aria-required"] = "true";
+                  inputProps["aria-describedby"] = "developers-text";
+                  inputProps[
+                    "aria-label"
+                  ] = `Developers multiple developers can be selected`;
+                  return (
+                    <TextField
+                      label="Developers"
+                      placeholder="Select All That Apply"
+                      error={
+                        formik.touched.developers && formik.errors["developers"]
+                      }
+                      {...params}
+                      required={true}
+                      helperText={
+                        formik.touched.developers && formik.errors["developers"]
+                      }
+                    />
+                  );
+                }}
                 onChange={formik.setFieldValue}
               />
             </div>
