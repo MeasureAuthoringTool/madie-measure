@@ -515,6 +515,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
         return;
       }
     }
+    group.measureObservations = orderingMeasureGroupObservations(group);
     if (measure?.groups && !(measureGroupNumber >= measure?.groups?.length)) {
       group.id = measure?.groups[measureGroupNumber].id;
       measureServiceApi
@@ -574,6 +575,16 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           });
         });
     }
+  };
+
+  const orderingMeasureGroupObservations = (group: Group) => {
+    return group.populations
+      .map((population) => {
+        return group.measureObservations.find(
+          (observation) => population.id === observation.criteriaReference
+        );
+      })
+      .filter(Boolean);
   };
 
   const handleDialogClose = () => {
