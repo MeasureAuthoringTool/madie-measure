@@ -12,6 +12,7 @@ import {
   Population,
   MeasureObservation,
   Stratification,
+  MeasureScoring,
 } from "@madie/madie-models";
 import { MenuItem as MuiMenuItem, Typography, Divider } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
@@ -515,7 +516,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
         return;
       }
     }
-    group.measureObservations = orderingMeasureGroupObservations(group);
+    if (group.scoring === MeasureScoring.RATIO) {
+      group.measureObservations = sortObservations(group);
+    }
     if (measure?.groups && !(measureGroupNumber >= measure?.groups?.length)) {
       group.id = measure?.groups[measureGroupNumber].id;
       measureServiceApi
@@ -577,10 +580,11 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     }
   };
 
-  const orderingMeasureGroupObservations = (group: Group) => {
+  // sort observations to follow [denom observation, numer observation] order
+  const sortObservations = (group: Group) => {
     return group.populations
       .map((population) => {
-        return group.measureObservations.find(
+        return group.measureObservations?.find(
           (observation) => population.id === observation.criteriaReference
         );
       })
