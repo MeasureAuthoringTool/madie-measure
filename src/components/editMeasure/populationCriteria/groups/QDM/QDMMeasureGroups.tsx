@@ -580,7 +580,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   const orderingMeasureGroupObservations = (group: Group) => {
     return group.populations
       .map((population) => {
-        return group.measureObservations.find(
+        return group.measureObservations?.find(
           (observation) => population.id === observation.criteriaReference
         );
       })
