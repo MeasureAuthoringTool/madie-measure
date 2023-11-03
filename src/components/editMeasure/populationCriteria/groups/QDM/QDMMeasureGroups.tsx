@@ -517,7 +517,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       }
     }
     if (group.scoring === MeasureScoring.RATIO) {
-      group.measureObservations = orderingMeasureGroupObservations(group);
+      group.measureObservations = sortObservations(group);
     }
     if (measure?.groups && !(measureGroupNumber >= measure?.groups?.length)) {
       group.id = measure?.groups[measureGroupNumber].id;
@@ -580,7 +580,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     }
   };
 
-  const orderingMeasureGroupObservations = (group: Group) => {
+  // sort observations to follow [denom observation, numer observation] order
+  const sortObservations = (group: Group) => {
     return group.populations
       .map((population) => {
         return group.measureObservations?.find(
