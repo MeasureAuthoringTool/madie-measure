@@ -56,6 +56,7 @@ const useStyles = makeStyles({
 
   dividerBottom: {
     marginTop: 5,
+    borderColor: "#8c8c8c",
   },
   actionsRoot: {
     padding: 16,

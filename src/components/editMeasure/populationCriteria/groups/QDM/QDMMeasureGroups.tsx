@@ -784,7 +784,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                   </Typography>
                 </div>
               </div>
-              <Divider style={{ marginBottom: 30 }} />
+              <Divider style={{ marginBottom: 30, borderColor: "#8c8c8c" }} />
 
               {/* Form control later should be moved to own component and dynamically rendered by switch based on measure. */}
 
