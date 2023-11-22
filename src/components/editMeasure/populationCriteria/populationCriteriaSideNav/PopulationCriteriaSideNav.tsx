@@ -192,6 +192,7 @@ export default function PopulationCriteriaSideNav(
                     {canEdit && (
                       <DSLink
                         className="madie-link"
+                        style={{ color: "#125496" }}
                         onClick={(e) => initiateBlankMeasureGroupClick(e)}
                         data-testid="add-measure-group-button"
                       >

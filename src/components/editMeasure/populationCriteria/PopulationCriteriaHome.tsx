@@ -122,7 +122,14 @@ export function PopulationCriteriaHome() {
   );
 
   return (
-    <div tw="grid lg:grid-cols-6 gap-4 mx-8 shadow-lg rounded-md border border-slate bg-white">
+    <div
+      tw="grid lg:grid-cols-6 gap-4 mx-8 shadow-lg rounded-md border bg-white"
+      style={{
+        borderColor: "#8c8c8c",
+        borderRadius: "4px",
+        overflow: "hidden",
+      }}
+    >
       <PopulationCriteriaSideNav
         canEdit={canEdit}
         sideNavLinks={sideNavLinks}

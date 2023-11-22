@@ -25,7 +25,7 @@ import {
   FieldLabel,
   FieldSeparator,
 } from "../../../../../styles/editMeasure/populationCriteria/supplementalData";
-
+import { autoCompleteStyles } from "../../MultipleSelectDropDown";
 const asterisk = { color: "#D92F2F", marginRight: 3 };
 
 export default function SupplementalElements() {
@@ -228,6 +228,7 @@ export default function SupplementalElements() {
                   id="supplementalDataElements"
                   data-testid="supplementalDataElements"
                   label="Definition"
+                  sx={autoCompleteStyles}
                   placeHolder={{ name: "", value: "" }}
                   required={false}
                   disabled={!canEdit}
