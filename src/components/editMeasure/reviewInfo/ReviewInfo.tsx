@@ -4,6 +4,8 @@ import ReviewInfoItem from "./ReviewInfoItem";
 import "../details/MeasureDetails.scss";
 import { measureStore } from "@madie/madie-util";
 
+// The tab and link to this component were removed in MAT-6402.
+// However, we will be reviving it at some point in the future.
 const ReviewInfo = () => {
   const [measure, setMeasure] = useState<any>(measureStore.state);
   useEffect(() => {

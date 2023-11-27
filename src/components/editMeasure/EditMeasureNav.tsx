@@ -143,15 +143,6 @@ const EditMeasureNav = ({ isQDM }) => {
             label="Test Cases"
             component={NavLink}
           />
-          <Tab
-            value={`${url}/review-info`}
-            to={`${url}/review-info`}
-            data-testid="review-tab"
-            type="A"
-            size="large"
-            label="Review Info"
-            component={NavLink}
-          />
         </Tabs>
       </div>
     </div>
