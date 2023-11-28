@@ -1122,7 +1122,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                   </Button>
                   <ButtonSpacer>
                     <span
-                      tw="text-sm text-gray-600"
+                      tw="text-sm"
+                      style={{ color: "#717171" }}
                       data-testid="save-measure-group-validation-message"
                       aria-live="polite" //this triggers every time the user is there.. this intended?
                     >
