@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import "twin.macro";
+import "styled-components/macro";
 import { useFormik } from "formik";
 import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
 import {
@@ -9,13 +11,12 @@ import {
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import MetaDataWrapper from "../../../details/MetaDataWrapper";
 import MultipleSelectDropDown from "../../MultipleSelectDropDown";
-import RiskDefinition from "./RiskDefinition";
 import {
+  InputLabel,
   MadieDiscardDialog,
   Toast,
+  TextArea,
 } from "@madie/madie-design-system/dist/react";
-import cloneDeep from "lodash/cloneDeep";
-import "./RiskAdjustment.scss";
 
 const RiskAdjustment = () => {
   const [measure, setMeasure] = useState<any>(measureStore.state);
@@ -43,32 +44,40 @@ const RiskAdjustment = () => {
   }, [measure]);
 
   const formik = useFormik({
-    enableReinitialize: true,
     initialValues: {
       riskAdjustments: measure?.riskAdjustments || [],
+      riskAdjustmentDescription: measure?.riskAdjustmentDescription || "",
     },
+    enableReinitialize: true,
     validateOnChange: true,
-    onSubmit: ({ riskAdjustments }) => {
-      const modifiedMeasure = { ...measure, riskAdjustments };
-      measureServiceApi
-        .updateMeasure(modifiedMeasure)
-        .then((response: any) => {
-          const { data, status } = response;
-          if (status === 200 || status === 201) {
-            updateMeasure(data);
-            handleToast(
-              "success",
-              `Measure Risk Adjustments have been Saved Successfully`,
-              true
-            );
-          }
-        })
-        .catch((reason) => {
-          const message = `Error updating measure "${modifiedMeasure.measureName}": ${reason}`;
-          handleToast("danger", message, true);
-        });
-    },
+    onSubmit: (values) => handleSubmit(values),
   });
+
+  const handleSubmit = (values) => {
+    const modifiedMeasure = {
+      ...measure,
+      riskAdjustments: values.riskAdjustments,
+      riskAdjustmentDescription: values.riskAdjustmentDescription,
+    };
+
+    measureServiceApi
+      .updateMeasure(modifiedMeasure)
+      .then((response: any) => {
+        const { data, status } = response;
+        if (status === 200 || status === 201) {
+          updateMeasure(data);
+          handleToast(
+            "success",
+            `Measure Risk Adjustments have been Saved Successfully`,
+            true
+          );
+        }
+      })
+      .catch((reason) => {
+        const message = `Error updating measure "${modifiedMeasure.measureName}": ${reason}`;
+        handleToast("danger", message, true);
+      });
+  };
 
   const { resetForm } = formik;
   const canEdit = checkUserCanEdit(
@@ -102,29 +111,8 @@ const RiskAdjustment = () => {
       pendingRoute: "",
     });
   }, [formik.dirty]);
-  /*
-        risk adjustment will be a list of objects
-        [
-            {
-                definition: "string",
-                description: "string"
-            }
-        ]
 
-    */
-
-  const handleDescriptionChange = (v, definition) => {
-    const copiedValues = cloneDeep(formik.values.riskAdjustments);
-    for (let i = 0; i < copiedValues.length; i++) {
-      if (copiedValues[i].definition === definition) {
-        copiedValues[i].description = v;
-      }
-    }
-    formik.setFieldTouched("riskAdjustments", true);
-    formik.setFieldValue("riskAdjustments", copiedValues);
-  };
   const onCancel = () => {
-    resetForm();
     setDiscardDialogOpen(true);
   };
 
@@ -137,67 +125,62 @@ const RiskAdjustment = () => {
       handleSubmit={formik.handleSubmit}
       onCancel={onCancel}
     >
-      <div id="risk-adjustment" data-testid="risk-adjustment">
-        {/* 521 left side */}
-        <div className="left">
-          <MultipleSelectDropDown
-            formControl={formik.getFieldProps("riskAdjustments")}
-            value={formik.values.riskAdjustments.map(
-              (risk) => risk?.definition
-            )}
-            id="risk-adjustment"
-            label="Definition"
-            placeHolder={{ name: "", value: "" }}
-            required={false}
-            disabled={!canEdit}
-            error={false}
-            helperText=""
-            multipleSelect={true}
-            limitTags={1}
-            options={definitions}
-            onClose={() => {}}
-            onChange={(e, v, r) => {
-              // const { textContent } = e.target; // this doesn't work because of our check marks.
-              if (r === "removeOption") {
-                const copiedValues = formik.values.riskAdjustments.slice();
-                // find out what v is not present in copiedValues
-                const filteredValues = copiedValues.filter((val) => {
-                  return v.includes(val.definition);
-                });
-                formik.setFieldValue("riskAdjustments", filteredValues);
-              }
-              if (r === "selectOption") {
-                const copiedValues = formik.values.riskAdjustments.slice();
-                // we don't seem to have a good way of knowing exactly what was selected, but we can compare
-                const selectedOption = v.filter((v) => {
-                  for (let i = 0; i < copiedValues.length; i++) {
-                    if (copiedValues[i].definition === v) {
-                      return false;
-                    }
+      <div tw="flex flex-col" id="risk-adjustment" data-testid="risk-adjustment">
+        <InputLabel htlmfor="riskAdjustmentDescription">Description</InputLabel>
+        <TextArea
+          {...formik.getFieldProps("riskAdjustmentDescription")}
+          name="riskAdjustmentDescription"
+          id="riskAdjustmentDescription"
+          disabled={!canEdit}
+          placeholder="Description"
+          data-testid="riskAdjustmentDescription"
+          className="risk-description"
+        />
+      </div>
+      <div tw="flex mt-6 w-1/4">
+        <MultipleSelectDropDown
+          formControl={formik.getFieldProps("riskAdjustments")}
+          value={formik.values.riskAdjustments.map((risk) => risk?.definition)}
+          id="risk-adjustment"
+          label="Definition"
+          placeHolder={{ name: "", value: "" }}
+          required={false}
+          disabled={!canEdit}
+          error={false}
+          helperText=""
+          multipleSelect={true}
+          limitTags={1}
+          options={definitions}
+          onClose={() => {}}
+          onChange={(e, v, r) => {
+            if (r === "removeOption") {
+              const copiedValues = formik.values.riskAdjustments.slice();
+              const filteredValues = copiedValues.filter((val) => {
+                return v.includes(val.definition);
+              });
+              formik.setFieldValue("riskAdjustments", filteredValues);
+            }
+            if (r === "selectOption") {
+              const copiedValues = formik.values.riskAdjustments.slice();
+              const selectedOption = v.filter((v) => {
+                for (let i = 0; i < copiedValues.length; i++) {
+                  if (copiedValues[i].definition === v) {
+                    return false;
                   }
-                  return true;
-                });
-                copiedValues.push({
-                  definition: selectedOption[0],
-                  description: "",
-                });
-                formik.setFieldValue("riskAdjustments", copiedValues);
-              }
-              if (r === "clear") {
-                formik.setFieldValue("riskAdjustments", []);
-              }
-            }}
-          />
-        </div>
-        <div className="right">
-          {formik.values.riskAdjustments.map((risk, i) => (
-            <RiskDefinition
-              handleDescriptionChange={handleDescriptionChange}
-              risk={risk}
-              key={`${risk.definition}-description-${i}`}
-            />
-          ))}
-        </div>
+                }
+                return true;
+              });
+              copiedValues.push({
+                definition: selectedOption[0],
+                description: "",
+              });
+              formik.setFieldValue("riskAdjustments", copiedValues);
+            }
+            if (r === "clear") {
+              formik.setFieldValue("riskAdjustments", []);
+            }
+          }}
+        />
       </div>
       <Toast
         toastKey="risk-adjustment-toast"
