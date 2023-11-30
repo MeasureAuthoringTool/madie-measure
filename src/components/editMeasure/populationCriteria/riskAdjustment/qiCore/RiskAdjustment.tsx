@@ -125,7 +125,11 @@ const RiskAdjustment = () => {
       handleSubmit={formik.handleSubmit}
       onCancel={onCancel}
     >
-      <div tw="flex flex-col" id="risk-adjustment" data-testid="risk-adjustment">
+      <div
+        tw="flex flex-col"
+        id="risk-adjustment"
+        data-testid="risk-adjustment"
+      >
         <InputLabel htlmfor="riskAdjustmentDescription">Description</InputLabel>
         <TextArea
           {...formik.getFieldProps("riskAdjustmentDescription")}
