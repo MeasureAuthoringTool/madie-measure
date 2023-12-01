@@ -7,6 +7,7 @@ import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 import { Measure, Model } from "@madie/madie-models";
 import BaseConfiguration from "./baseConfiguration/BaseConfiguration";
 import QDMReporting from "./QDMReporting/QDMReporting";
+import SupplementalData from "./supplementalData/SupplementalData";
 
 interface GroupInputParams {
   groupNumber: string;
@@ -108,19 +109,6 @@ export function PopulationCriteriaHome() {
     [measure?.model]
   );
 
-  const SupplementalElementsComponent = useMemo(
-    () =>
-      lazy(() => {
-        if (
-          measure?.model === Model.QDM_5_6 ||
-          measure?.model === Model.QICORE
-        ) {
-          return import("./supplementalData/SupplementalData");
-        }
-      }),
-    [measure?.model]
-  );
-
   return (
     <div
       tw="grid lg:grid-cols-6 gap-4 mx-8 shadow-lg rounded-md border bg-white"
@@ -156,7 +144,7 @@ export function PopulationCriteriaHome() {
           To do: Find a more elegant solution for future when we have more than two models to avoid if else if else. */}
       {path.includes("reporting") && <QDMReporting />}
 
-      {path.includes("/supplemental-data") && <SupplementalElementsComponent />}
+      {path.includes("/supplemental-data") && <SupplementalData />}
 
       {path.includes("/risk-adjustment") && <RiskAdjustmentComponent />}
     </div>
