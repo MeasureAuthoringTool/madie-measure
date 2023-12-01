@@ -1,6 +1,7 @@
 import * as React from "react";
 import { MeasureCQL } from "../../../../common/MeasureCQL";
 import {
+  act,
   render,
   screen,
   waitFor,
@@ -120,7 +121,7 @@ describe("QdmRiskAdjustment Component", () => {
     expect(description).toBeDisabled();
   });
 
-  it("Should successfully update risk Adjustment values and save to DB", async () => {
+  it("Should successfully update risk Adjustment values and save to DB on 200", async () => {
     checkUserCanEdit.mockReturnValue(true);
     // Mocking service call to update measure
     const newRiskAdjustments = [
@@ -143,6 +144,104 @@ describe("QdmRiskAdjustment Component", () => {
       updateMeasure: jest
         .fn()
         .mockResolvedValueOnce({ status: 200, data: updatedMeasure }),
+    } as unknown as MeasureServiceApi;
+    useMeasureServiceApiMock.mockImplementation(() => measureServiceApi);
+
+    RenderRiskAdjustment();
+
+    // Verifies if RA already loads values from store and able to add new
+    const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
+    expect(riskAdjustmentSelect).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Initial Population" })
+    ).toBeInTheDocument();
+    const riskAdjustmentButton =
+      within(riskAdjustmentSelect).getByTitle("Open");
+
+    userEvent.click(riskAdjustmentButton);
+    await waitFor(() => {
+      userEvent.click(screen.getByText("SDE Ethnicity"));
+    });
+    expect(
+      screen.getByRole("button", { name: "SDE Ethnicity" })
+    ).toBeInTheDocument();
+
+    // Verifies if RA description already loads values from store and able to update
+    const description = screen.getByTestId("riskAdjustmentDescription");
+    expect(description).toHaveTextContent("test description");
+    fireEvent.change(description, {
+      target: { value: "Updated test description" },
+    });
+
+    // save button
+    const saveButton = screen.getByRole("button", { name: "Save" });
+    expect(saveButton).toBeEnabled();
+    userEvent.click(saveButton);
+
+    // verifies if success toast message is displayed
+    await waitFor(
+      () =>
+        expect(
+          screen.getByTestId("risk-adjustment-success")
+        ).toBeInTheDocument(),
+      {
+        timeout: 5000,
+      }
+    );
+    const toastCloseButton = await screen.findByTestId("close-error-button");
+    expect(toastCloseButton).toBeInTheDocument();
+    fireEvent.click(toastCloseButton);
+    await waitFor(() => {
+      expect(toastCloseButton).not.toBeInTheDocument();
+    });
+
+    await waitFor(() =>
+      expect(measureServiceApi.updateMeasure).toBeCalledWith({
+        ...updatedMeasure,
+      })
+    );
+  });
+
+  it("Should render disabled components if the user doesn't have permissions", async () => {
+    checkUserCanEdit.mockReturnValue(false);
+    RenderRiskAdjustment();
+    const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
+    expect(riskAdjustmentSelect).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Initial Population" })
+    ).toBeInTheDocument();
+
+    const comboBoxInput = screen.getByRole("combobox");
+    expect(comboBoxInput).toBeDisabled();
+
+    const description = screen.getByTestId("riskAdjustmentDescription");
+    expect(description).toHaveTextContent("test description");
+    expect(description).toBeDisabled();
+  });
+
+  it("Should successfully update risk Adjustment values and save to DB on 201", async () => {
+    checkUserCanEdit.mockReturnValue(true);
+    // Mocking service call to update measure
+    const newRiskAdjustments = [
+      {
+        definition: "Initial Population",
+        description: "",
+      },
+      {
+        definition: "SDE Ethnicity",
+        description: "",
+      },
+    ];
+    const newRiskAdjustmentDescription = "Updated test description";
+    const updatedMeasure = {
+      ...mockTestMeasure,
+      riskAdjustments: newRiskAdjustments,
+      riskAdjustmentDescription: newRiskAdjustmentDescription,
+    };
+    measureServiceApi = {
+      updateMeasure: jest
+        .fn()
+        .mockResolvedValueOnce({ status: 201, data: updatedMeasure }),
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => measureServiceApi);
 
@@ -352,6 +451,38 @@ describe("QdmRiskAdjustment Component", () => {
         screen.getByRole("button", { name: "Initial Population" })
       ).toBeInTheDocument();
       expect(screen.queryByText("+1")).not.toBeInTheDocument(); // We are limiting the selected options displayed
+    });
+  });
+
+  it("should allow users to add and delete a value using the chip delete icon", async () => {
+    checkUserCanEdit.mockReturnValue(true);
+    // Mocking service call to update measure
+    useMeasureServiceApiMock.mockImplementation(() => measureServiceApi);
+    RenderRiskAdjustment();
+
+    // Verifies if RA already loads values from store and able to add new
+    const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
+    expect(riskAdjustmentSelect).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Initial Population" })
+    ).toBeInTheDocument();
+    const riskAdjustmentButton =
+      within(riskAdjustmentSelect).getByTitle("Open");
+
+    userEvent.click(riskAdjustmentButton);
+    await waitFor(() => {
+      userEvent.click(screen.getByText("SDE Ethnicity"));
+    });
+    expect(
+      screen.getByRole("button", { name: "SDE Ethnicity" })
+    ).toBeInTheDocument();
+
+    act(async () => {
+      const deleteButton = await screen.findByTestId("CancelIcon");
+      userEvent.click(deleteButton);
+      expect(
+        screen.queryByRole("button", { name: "SDE Ethnicity" })
+      ).not.toBeInTheDocument();
     });
   });
 });
