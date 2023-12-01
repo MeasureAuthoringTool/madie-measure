@@ -1,25 +1,26 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { useFormik } from "formik";
-import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
+import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import {
+  checkUserCanEdit,
   measureStore,
   routeHandlerStore,
-  checkUserCanEdit,
 } from "@madie/madie-util";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
-import MetaDataWrapper from "../../../details/MetaDataWrapper";
-import MultipleSelectDropDown from "../../MultipleSelectDropDown";
+import MetaDataWrapper from "../../details/MetaDataWrapper";
+import MultipleSelectDropDown from "../MultipleSelectDropDown";
 import {
   InputLabel,
   MadieDiscardDialog,
   Toast,
   TextArea,
 } from "@madie/madie-design-system/dist/react";
+import { Measure } from "@madie/madie-models";
 
 const RiskAdjustment = () => {
-  const [measure, setMeasure] = useState<any>(measureStore.state);
+  const [measure, setMeasure] = useState<Measure>(measureStore.state);
   const [definitions, setDefinitions] = useState([]);
   const { updateMeasure } = measureStore;
   const measureServiceApi = useMeasureServiceApi();
@@ -31,13 +32,19 @@ const RiskAdjustment = () => {
     };
   }, []);
 
+  const canEdit = checkUserCanEdit(
+    measure?.measureSet?.owner,
+    measure?.measureSet?.acls,
+    measure?.measureMetaData?.draft
+  );
+
+  // Fetching definitions from CQL to populate dropdown
   useEffect(() => {
     if (measure?.cql) {
       const definitions = new CqlAntlr(measure?.cql).parse()
         .expressionDefinitions;
       const mappedDefinitions = definitions.map(({ name }) => {
-        const parsedName = JSON.parse(name);
-        return parsedName;
+        return JSON.parse(name);
       });
       setDefinitions(mappedDefinitions);
     }
@@ -52,6 +59,7 @@ const RiskAdjustment = () => {
     validateOnChange: true,
     onSubmit: (values) => handleSubmit(values),
   });
+  const { resetForm } = formik;
 
   const handleSubmit = (values) => {
     const modifiedMeasure = {
@@ -78,13 +86,6 @@ const RiskAdjustment = () => {
         handleToast("danger", message, true);
       });
   };
-
-  const { resetForm } = formik;
-  const canEdit = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
-  );
 
   // toast utilities
   // toast is only used for success messages
@@ -125,11 +126,7 @@ const RiskAdjustment = () => {
       handleSubmit={formik.handleSubmit}
       onCancel={onCancel}
     >
-      <div
-        tw="flex flex-col"
-        id="risk-adjustment"
-        data-testid="risk-adjustment"
-      >
+      <div tw="flex flex-col" data-testid="risk-adjustment">
         <InputLabel htlmfor="riskAdjustmentDescription">Description</InputLabel>
         <TextArea
           {...formik.getFieldProps("riskAdjustmentDescription")}
@@ -144,7 +141,7 @@ const RiskAdjustment = () => {
       <div tw="flex mt-6 w-1/4">
         <MultipleSelectDropDown
           formControl={formik.getFieldProps("riskAdjustments")}
-          value={formik.values.riskAdjustments.map((risk) => risk?.definition)}
+          value={formik.values.riskAdjustments?.map((ra) => ra?.definition)}
           id="risk-adjustment"
           label="Definition"
           placeHolder={{ name: "", value: "" }}
@@ -159,6 +156,7 @@ const RiskAdjustment = () => {
           onChange={(e, v, r) => {
             if (r === "removeOption") {
               const copiedValues = formik.values.riskAdjustments.slice();
+              // find out what v is not present in copiedValues
               const filteredValues = copiedValues.filter((val) => {
                 return v.includes(val.definition);
               });
@@ -166,6 +164,7 @@ const RiskAdjustment = () => {
             }
             if (r === "selectOption") {
               const copiedValues = formik.values.riskAdjustments.slice();
+              // we don't seem to have a good way of knowing exactly what was selected, but we can compare
               const selectedOption = v.filter((v) => {
                 for (let i = 0; i < copiedValues.length; i++) {
                   if (copiedValues[i].definition === v) {
