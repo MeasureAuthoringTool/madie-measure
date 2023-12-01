@@ -9,7 +9,7 @@ import {
   within,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import RiskAdjustment from "./QDMRiskAdjustment";
+import RiskAdjustment from "./QdmRiskAdjustment";
 import { Measure } from "@madie/madie-models";
 import {
   ServiceConfig,
