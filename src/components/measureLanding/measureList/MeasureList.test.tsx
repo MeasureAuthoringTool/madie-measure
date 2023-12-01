@@ -33,10 +33,7 @@ jest.mock("@madie/madie-util", () => ({
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useFeatureFlags: () => ({
-    export: true,
-    measureVersioning: true,
     qdmExport: false,
-    qdmVersioning: false,
   }),
 }));
 
