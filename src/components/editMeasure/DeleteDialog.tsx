@@ -62,11 +62,11 @@ const DeleteDialog = (props: DeleteDialogProps) => {
           <CloseIcon />
         </IconButton>
       </div>
-      <Divider />
+      <Divider sx={{ borderColor: "#8c8c8c" }} />
       <p className="message">
         Are you sure you want to delete <strong>{measureName}?</strong>
       </p>
-      <Divider />
+      <Divider sx={{ borderColor: "#8c8c8c" }} />
       <DialogActions>
         <Button
           variant="secondary"

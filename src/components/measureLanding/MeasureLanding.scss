@@ -4,11 +4,12 @@
 
 .measure-table {
   background-color: #fff;
-  border: 1px solid rgba(151, 151, 151, 0.17);
+  border: 1px solid #8c8c8c;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   margin: 0 32px 32px 32px;
   border-radius: 6px;
   margin-top: -64px;
+  overflow: hidden;
 
   > div {
     > .table {
@@ -30,7 +31,7 @@
         box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
         border: 1px solid rgba(151, 151, 151, 0.17);
         border-width: 0 1px 1px 1px;
-        border-top: solid 1px #ddd;
+        border-top: solid 1px #8c8c8c;
       }
     }
   }

@@ -27,9 +27,9 @@ import ExportDialog from "./exportDialog/ExportDialog";
 const searchInputStyle = {
   borderRadius: "3px",
   height: 40,
-  border: "1px solid #DDDDDD",
   "& .MuiOutlinedInput-notchedOutline": {
     borderRadius: "3px",
+    borderColor: "#8C8C8C",
     "& legend": {
       width: 0,
     },
@@ -46,7 +46,8 @@ const searchInputStyle = {
     borderRadius: "3px",
     padding: "9px 14px",
     "&::placeholder": {
-      opacity: 0.6,
+      opacity: 1,
+      color: "#717171",
     },
   },
 };
@@ -547,7 +548,7 @@ export default function MeasureList(props: {
                   </thead>
                 </table>
               </form>
-              <table tw="min-w-full" style={{ borderTop: "solid 1px #DDD" }}>
+              <table tw="min-w-full" style={{ borderTop: "solid 1px #8c8c8c" }}>
                 <thead tw="bg-slate">
                   <tr>
                     <th scope="col" className="col-header">
@@ -570,7 +571,7 @@ export default function MeasureList(props: {
                     <tr
                       key={`${measure.id}-${i}`}
                       data-testid="row-item"
-                      style={{ borderBottom: "solid 1px #AAA" }}
+                      style={{ borderTop: "solid 1px #8c8c8c" }}
                     >
                       <td tw="w-7/12">{measure.measureName}</td>
                       <td>

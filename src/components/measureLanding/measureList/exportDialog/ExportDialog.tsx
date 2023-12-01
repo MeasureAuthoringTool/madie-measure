@@ -70,11 +70,11 @@ const ExportDialog = ({
           {headerMap[downloadState]}
         </DialogTitle>
       </Box>
-      <Divider />
+      <Divider sx={{ borderColor: "#8c8c8c" }} />
       <DialogContent sx={{ padding: "32px" }}>
         <div id="export-dialog-content">
           <div className="loading-title">{messageMap[downloadState]}</div>
-          <div className="spinner" style={{ border: "solid 1px #B0B0B0" }}>
+          <div className="spinner" style={{ border: "solid 1px #8c8c8c" }}>
             <ExportIcon downloadState={downloadState} />
             <div>
               {/* below appears in one mockup but not UAT */}
@@ -100,7 +100,7 @@ const ExportDialog = ({
           )}
         </div>
       </DialogContent>
-      <Divider />
+      <Divider sx={{ borderColor: "#8c8c8c" }} />
       <DialogActions
         sx={{
           padding: "16px",

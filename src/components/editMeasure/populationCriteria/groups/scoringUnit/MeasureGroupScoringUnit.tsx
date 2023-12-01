@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { InputLabel } from "@madie/madie-design-system/dist/react/";
-import { Autocomplete, FormControl, TextField } from "@mui/material";
+import { InputLabel, TextField } from "@madie/madie-design-system/dist/react/";
+import { Autocomplete, FormControl } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { Formik } from "formik";
 
@@ -20,9 +20,9 @@ const MeasureGroupScoringUnit = ({
   placeholder,
 }: ScoringUnitProps) => {
   const autoCompleteStyles = {
-    borderRadius: "3px",
     minHeight: "40px",
-    border: "1px solid #DDDDDD",
+    borderRadius: "3px",
+    height: "auto",
     "& .MuiOutlinedInput-notchedOutline": {
       borderRadius: "3px",
       "& legend": {
@@ -126,7 +126,16 @@ const MeasureGroupScoringUnit = ({
               inputProps={inputProps}
               disabled={!canEdit}
               sx={{
-                input: {
+                border: "none",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderRadius: "3px",
+                  borderColor: "#8C8C8C",
+                  "& legend": {
+                    width: 0,
+                  },
+                },
+                "& .MuiInputBase-input": {
+                  opacity: 1,
                   color: "#333",
                   "&::placeholder": {
                     opacity: 1,

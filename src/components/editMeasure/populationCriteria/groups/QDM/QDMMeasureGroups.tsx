@@ -784,7 +784,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                   </Typography>
                 </div>
               </div>
-              <Divider style={{ marginBottom: 30 }} />
+              <Divider style={{ marginBottom: 30, borderColor: "#8c8c8c" }} />
 
               {/* Form control later should be moved to own component and dynamically rendered by switch based on measure. */}
 
@@ -1122,7 +1122,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                   </Button>
                   <ButtonSpacer>
                     <span
-                      tw="text-sm text-gray-600"
+                      tw="text-sm"
+                      style={{ color: "#717171" }}
                       data-testid="save-measure-group-validation-message"
                       aria-live="polite" //this triggers every time the user is there.. this intended?
                     >

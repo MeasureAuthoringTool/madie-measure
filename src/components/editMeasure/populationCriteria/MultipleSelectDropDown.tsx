@@ -11,7 +11,6 @@ const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 export const autoCompleteStyles = {
   borderRadius: "3px",
-  // border: "1px solid #DDDDDD",
   height: "auto",
   "& .MuiOutlinedInput-notchedOutline": {
     borderRadius: "3px",
@@ -34,6 +33,9 @@ export const autoCompleteStyles = {
   "& .Mui-disabled": {
     backgroundColor: "#EDEDED",
     border: "#EDEDED",
+  },
+  "& .MuiChip-deleteIcon": {
+    color: "#757575 !important",
   },
   width: "100%",
 };
