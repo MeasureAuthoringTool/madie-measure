@@ -1,5 +1,5 @@
 import * as React from "react";
-import { MeasureCQL } from "../../../../common/MeasureCQL";
+import { MeasureCQL } from "../../../common/MeasureCQL";
 import {
   render,
   screen,
@@ -12,12 +12,12 @@ import { Measure } from "@madie/madie-models";
 import {
   ServiceConfig,
   ApiContextProvider,
-} from "../../../../../api/ServiceContext";
+} from "../../../../api/ServiceContext";
 import useMeasureServiceApi, {
   MeasureServiceApi,
-} from "../../../../../api/useMeasureServiceApi";
+} from "../../../../api/useMeasureServiceApi";
 import { checkUserCanEdit } from "@madie/madie-util";
-import QdmSupplementalElements from "../qdm/QdmSupplementalElements";
+import SupplementalData from "./SupplementalData";
 
 const serviceConfig: ServiceConfig = {
   measureService: {
@@ -77,7 +77,7 @@ jest.mock("@madie/madie-util", () => ({
   },
 }));
 
-jest.mock("../../../../../api/useMeasureServiceApi");
+jest.mock("../../../../api/useMeasureServiceApi");
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 let measureServiceApi: MeasureServiceApi;
@@ -85,13 +85,13 @@ let measureServiceApi: MeasureServiceApi;
 const RenderSupplementalElements = () => {
   return render(
     <ApiContextProvider value={serviceConfig}>
-      <QdmSupplementalElements />
+      <SupplementalData />
     </ApiContextProvider>
   );
 };
 
-describe("QdmSupplementalElements Component", () => {
-  it("Should render Supplemental Elements component with the values saved in DB", async () => {
+describe("SupplementalData Component", () => {
+  it("Should render Supplemental Data component with the values saved in DB", async () => {
     RenderSupplementalElements();
     const suppolementalElementsSelect = screen.getByTestId(
       "supplemental-data-dropdown"

@@ -2,7 +2,6 @@ import React, { lazy, useEffect, useMemo, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { useHistory, useParams, useRouteMatch } from "react-router-dom";
-import SupplementalElements from "./supplementalData/qiCore/SupplementalElements";
 import PopulationCriteriaSideNav from "./populationCriteriaSideNav/PopulationCriteriaSideNav";
 import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 import { Measure, Model } from "@madie/madie-models";
@@ -112,10 +111,11 @@ export function PopulationCriteriaHome() {
   const SupplementalElementsComponent = useMemo(
     () =>
       lazy(() => {
-        if (measure?.model === Model.QDM_5_6) {
-          return import("./supplementalData/qdm/QdmSupplementalElements");
-        } else {
-          return import("./supplementalData/qiCore/SupplementalElements");
+        if (
+          measure?.model === Model.QDM_5_6 ||
+          measure?.model === Model.QICORE
+        ) {
+          return import("./supplementalData/SupplementalData");
         }
       }),
     [measure?.model]
