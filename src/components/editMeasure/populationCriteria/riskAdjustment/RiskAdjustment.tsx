@@ -2,15 +2,15 @@ import React, { useEffect, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { useFormik } from "formik";
-import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
+import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import {
   checkUserCanEdit,
   measureStore,
   routeHandlerStore,
 } from "@madie/madie-util";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
-import MetaDataWrapper from "../../../details/MetaDataWrapper";
-import MultipleSelectDropDown from "../../MultipleSelectDropDown";
+import MetaDataWrapper from "../../details/MetaDataWrapper";
+import MultipleSelectDropDown from "../MultipleSelectDropDown";
 import {
   InputLabel,
   MadieDiscardDialog,
@@ -19,7 +19,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import { Measure } from "@madie/madie-models";
 
-const QdmRiskAdjustment = () => {
+const RiskAdjustment = () => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   const [definitions, setDefinitions] = useState([]);
   const { updateMeasure } = measureStore;
@@ -126,7 +126,7 @@ const QdmRiskAdjustment = () => {
       handleSubmit={formik.handleSubmit}
       onCancel={onCancel}
     >
-      <div tw="flex flex-col">
+      <div tw="flex flex-col" data-testid="risk-adjustment">
         <InputLabel htlmfor="riskAdjustmentDescription">Description</InputLabel>
         <TextArea
           {...formik.getFieldProps("riskAdjustmentDescription")}
@@ -213,4 +213,4 @@ const QdmRiskAdjustment = () => {
   );
 };
 
-export default QdmRiskAdjustment;
+export default RiskAdjustment;
