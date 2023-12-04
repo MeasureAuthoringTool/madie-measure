@@ -7,20 +7,20 @@ import {
   InputLabel,
   TextArea,
 } from "@madie/madie-design-system/dist/react";
-import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
+import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import {
   measureStore,
   routeHandlerStore,
   checkUserCanEdit,
 } from "@madie/madie-util";
 import { useFormik } from "formik";
-import "../../../details/MeasureDetails.scss";
+import "../../details/MeasureDetails.scss";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import { Measure } from "@madie/madie-models";
-import MetaDataWrapper from "../../../details/MetaDataWrapper";
-import MultipleSelectDropDown from "../../MultipleSelectDropDown";
+import MetaDataWrapper from "../../details/MetaDataWrapper";
+import MultipleSelectDropDown from "../MultipleSelectDropDown";
 
-const QdmSupplementalElements = () => {
+const SupplementalData = () => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   const [definitions, setDefinitions] = useState([]);
   const { updateMeasure } = measureStore;
@@ -220,4 +220,4 @@ const QdmSupplementalElements = () => {
   );
 };
 
-export default QdmSupplementalElements;
+export default SupplementalData;
