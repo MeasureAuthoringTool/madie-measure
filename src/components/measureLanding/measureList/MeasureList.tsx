@@ -264,14 +264,11 @@ export default function MeasureList(props: {
     }
     // always on if feature
     if (selected.measureMetaData.draft) {
-      const versionButton = {
+      options.push({
         label: "Version",
         toImplementFunction: checkCreateVersion,
         dataTestId: `create-version-measure-${selected?.id}`,
-      };
-      if (shouldAllowAction(selected, featureFlags.qdmVersioning)) {
-        options.push(versionButton);
-      }
+      });
       // draft should only be available if no other measureSet is in draft, by call
     }
     if (canDraftLookup[selected?.measureSetId]) {
