@@ -8,7 +8,6 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import "../../details/EditMeasureSideBarNav.scss";
 import "../../../common/madie-link.scss";
 import { DSLink, Tabs, Tab } from "@madie/madie-design-system/dist/react";
-import { useFeatureFlags } from "@madie/madie-util";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
 const Nav = tw.nav`flex-1 space-y-1 bg-slate`;
@@ -41,9 +40,7 @@ export default function PopulationCriteriaSideNav(
   const [showPopulationCriteriaTabs, setShowPopulationCriteriaTabs] =
     useState<boolean>(true);
   const history = useHistory();
-  const featureFlags = useFeatureFlags();
-  const populationCriteriaTabsFeatureFlag =
-    !!featureFlags?.populationCriteriaTabs;
+  const populationCriteriaTabsFeatureFlag = false;
   const groupsBaseUrl = "/measures/" + measureId + "/edit/groups";
   const QdmReportingBaseUrl = "/measures/" + measureId + "/edit/reporting";
 
@@ -139,32 +136,29 @@ export default function PopulationCriteriaSideNav(
         {sideNavLinks &&
           sideNavLinks?.map((tab) => (
             <>
-              {populationCriteriaTabsFeatureFlag && (
-                <button
-                  onClick={() => {
-                    handlePopulationCriteriaCollapse(tab);
-                  }}
-                  data-testId={tab.dataTestId}
-                  className={
-                    pathname === tab.href ? "tab-title active" : "tab-title "
-                  }
-                  id={tab.title}
-                  tw="px-2"
-                >
-                  {tab.title}
-                  <span className="tab-dropdown">
-                    {tab.title === "Population Criteria" &&
-                      (showPopulationCriteriaTabs ? (
-                        <ExpandLessIcon />
-                      ) : (
-                        <ExpandMoreIcon />
-                      ))}
-                  </span>
-                </button>
-              )}
+              <button
+                onClick={() => {
+                  handlePopulationCriteriaCollapse(tab);
+                }}
+                data-testId={tab.dataTestId}
+                className={
+                  pathname === tab.href ? "tab-title active" : "tab-title "
+                }
+                id={tab.title}
+                tw="px-2"
+              >
+                {tab.title}
+                <span className="tab-dropdown">
+                  {tab.title === "Population Criteria" &&
+                    (showPopulationCriteriaTabs ? (
+                      <ExpandLessIcon />
+                    ) : (
+                      <ExpandMoreIcon />
+                    ))}
+                </span>
+              </button>
               {tab.title === "Population Criteria" &&
-                (showPopulationCriteriaTabs ||
-                  !populationCriteriaTabsFeatureFlag) && (
+                showPopulationCriteriaTabs && (
                   <>
                     <Tabs
                       type="C"
@@ -222,20 +216,19 @@ export default function PopulationCriteriaSideNav(
             />
           </Tabs>
         )}
-        {populationCriteriaTabsFeatureFlag && (
-          <Tabs
-            type="C"
-            orientation="vertical"
-            value={pathname}
-            onChange={(e, v) => {
-              history.push(v);
-            }}
-          >
-            {additionalLinks.map((l) => {
-              return <Tab {...l} type="B" />;
-            })}
-          </Tabs>
-        )}
+
+        <Tabs
+          type="C"
+          orientation="vertical"
+          value={pathname}
+          onChange={(e, v) => {
+            history.push(v);
+          }}
+        >
+          {additionalLinks.map((l) => {
+            return <Tab {...l} type="B" />;
+          })}
+        </Tabs>
       </Nav>
     </OuterWrapper>
   );
