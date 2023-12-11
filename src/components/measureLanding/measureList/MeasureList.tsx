@@ -301,6 +301,37 @@ export default function MeasureList(props: {
   const abortController = useRef(null);
 
   const exportMeasure = async () => {
+    if (targetMeasure.current?.model === Model.QDM_5_6) {
+      exportQDMMeasure();
+    } else {
+      exportQICoreMeasure();
+    }
+  };
+
+  const downloadZipFile = (exportData, ecqmTitle, model, version) => {
+    const url = window.URL.createObjectURL(exportData);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute(
+      "download",
+      `${ecqmTitle}-v${version}-${getModelFamily(model)}.zip`
+    );
+    document.body.appendChild(link);
+    link.click();
+    setToastOpen(true);
+    setToastType("success");
+    setToastMessage("Measure exported successfully");
+    setDownloadState("success");
+    document.body.removeChild(link);
+  };
+
+  const exportQDMMeasure = () => {
+    const { ecqmTitle, model, version } = targetMeasure?.current ?? {};
+    const blob = new Blob([new Uint8Array([])], { type: "application/zip" });
+    downloadZipFile(blob, ecqmTitle, model, version);
+  };
+
+  const exportQICoreMeasure = async () => {
     setFailureMessage(null);
     setDownloadState("downloading");
     try {
@@ -311,20 +342,7 @@ export default function MeasureList(props: {
         targetMeasure.current?.id,
         abortController.current.signal
       );
-      const url = window.URL.createObjectURL(exportData);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute(
-        "download",
-        `${ecqmTitle}-v${version}-${getModelFamily(model)}.zip`
-      );
-      document.body.appendChild(link);
-      link.click();
-      setToastOpen(true);
-      setToastType("success");
-      setToastMessage("Measure exported successfully");
-      setDownloadState("success");
-      document.body.removeChild(link);
+      downloadZipFile(exportData, ecqmTitle, model, version);
     } catch (err) {
       const errorStatus = err.response?.status;
       const targetedMeasure = targetMeasure.current;
