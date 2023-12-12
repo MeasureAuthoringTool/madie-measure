@@ -14,7 +14,12 @@ import {
   Stratification,
   MeasureScoring,
 } from "@madie/madie-models";
-import { MenuItem as MuiMenuItem, Typography, Divider } from "@mui/material";
+import {
+  MenuItem as MuiMenuItem,
+  Typography,
+  Divider,
+  FormControl,
+} from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import {
   Button,
@@ -678,51 +683,12 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     }
   }, [measure]);
 
-  /*
-  we consume the cs table, build in shape of {
-    label: ucumcode + name,
-    value: {
-      label: code + name,
-      guidance:
-      code:
-      name:
-      system:
+  const fnHelperText = (helperText: any): string => {
+    if (Boolean(formik.errors.scoringUnit)) {
+      return `${JSON.stringify(helperText.value)}`;
     }
-  }
-*/
-  const [ucumOptions, setUcumOptions] = useState([]);
-  const [ucumUnits, setUcumUnits] = useState([]);
-
-  const buildUcumUnits = useCallback(() => {
-    const options = [];
-
-    for (const [key, value] of Object.entries(ucumUnits)) {
-      const current = value;
-      const { csCode_, guidance_, name_ } = current;
-      const option = {
-        code: csCode_,
-        guidance: guidance_,
-        name: name_,
-        system: "https://clinicaltables.nlm.nih.gov/",
-      };
-      options.push(option);
-    }
-    setUcumOptions(options);
-  }, [ucumUnits, setUcumOptions]);
-
-  useEffect(() => {
-    if (ucumUnits) {
-      buildUcumUnits();
-    }
-  }, [ucumUnits, buildUcumUnits]);
-
-  useEffect(() => {
-    if (!ucumUnits.length) {
-      ucum.UcumLhcUtils.getInstance();
-      const unitCodes = ucum.UnitTables.getInstance().unitCodes_;
-      setUcumUnits(unitCodes);
-    }
-  }, [ucum, ucumUnits]);
+    return undefined;
+  };
   return (
     <div tw="lg:col-span-5 pl-2 pr-2" data-testid="qdm-groups">
       <FormikProvider value={formik}>
@@ -820,14 +786,16 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                   }}
                 >
                   <MeasureGroupScoringUnit
+                    error={Boolean(formik.errors.scoringUnit)}
+                    helperText={fnHelperText(formik.errors.scoringUnit)}
                     placeholder="Search"
                     {...formik.getFieldProps("scoringUnit")}
                     onChange={(newValue) => {
                       formik.setFieldValue("scoringUnit", newValue);
                     }}
-                    options={ucumOptions}
                     canEdit={canEdit}
                   />
+
                   <div style={{ display: "inline-flex", width: "100%" }} />
                   <div style={{ display: "inline-flex", width: "100%" }} />
                   <div style={{ display: "inline-flex", width: "100%" }} />

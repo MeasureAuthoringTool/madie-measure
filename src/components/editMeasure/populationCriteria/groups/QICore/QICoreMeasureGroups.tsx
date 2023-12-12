@@ -868,11 +868,19 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                   />
                   {/* no longer capable of errors */}
                   <MeasureGroupScoringUnit
+                    error={
+                      formik.touched.scoringUnit &&
+                      Boolean(formik.errors.scoringUnit)
+                    }
+                    helperText={
+                      formik.touched.scoringUnit &&
+                      Boolean(formik.errors.scoringUnit) &&
+                      formik.errors.scoringUnit
+                    }
                     {...formik.getFieldProps("scoringUnit")}
                     onChange={(newValue) => {
                       formik.setFieldValue("scoringUnit", newValue);
                     }}
-                    options={ucumOptions}
                     canEdit={canEdit}
                     placeholder="UCUM Code or Name"
                   />

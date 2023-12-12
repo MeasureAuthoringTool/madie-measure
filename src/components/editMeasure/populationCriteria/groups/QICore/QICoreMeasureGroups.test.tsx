@@ -1302,28 +1302,8 @@ describe("Measure Groups Page", () => {
 
   test("should display default select for scoring unit", async () => {
     const { getByTestId } = await waitFor(() => renderMeasureGroupComponent());
-    const scoringUnitLabel = getByTestId("scoring-unit-dropdown-label");
+    const scoringUnitLabel = getByTestId("scoring-unit-text-input");
     expect(scoringUnitLabel).toBeInTheDocument();
-  });
-
-  test("should display selected scoring unit", async () => {
-    const { getByTestId } = await waitFor(() => renderMeasureGroupComponent());
-
-    const scoringUnitLabel = getByTestId("scoring-unit-dropdown-label");
-    expect(scoringUnitLabel).toBeInTheDocument();
-
-    const autocomplete = screen.getByTestId("scoring-unit-dropdown");
-    const input = within(autocomplete).getByRole(
-      "combobox"
-    ) as HTMLInputElement;
-    autocomplete.click();
-    autocomplete.focus();
-    fireEvent.change(input, { target: { value: "[pi" } });
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
-    fireEvent.click(screen.getAllByRole("option")[1]);
-    expect(input.value).toEqual("[pied] pied");
   });
 
   test("Should display error message when updating group", async () => {

@@ -52,58 +52,7 @@ describe("MeasureGroupScoringUnit Component", () => {
         placeholder="test"
       />
     );
-    const scoringUnitLabel = screen.getByTestId("scoring-unit-dropdown-label");
-    expect(scoringUnitLabel).toBeInTheDocument();
-    const scoringUnitInput = screen.getByRole("combobox");
+    const scoringUnitInput = screen.getByLabelText("Scoring Unit");
     expect(scoringUnitInput).toBeInTheDocument();
-  });
-
-  test("Should render scoring unit field with selected option", async () => {
-    const handleChange = jest.fn();
-    render(
-      <MeasureGroupScoringUnit
-        onChange={handleChange}
-        canEdit={true}
-        options={options}
-        value={testValue}
-        placeholder="test"
-      />
-    );
-    await act(async () => {
-      const scoringUnitLabel = screen.getByTestId(
-        "scoring-unit-dropdown-label"
-      );
-      expect(scoringUnitLabel).toBeInTheDocument();
-      const scoringAutoComplete = await screen.findByTestId(
-        "scoring-unit-dropdown"
-      );
-      const listBox = within(scoringAutoComplete).getByRole("combobox");
-      expect(listBox).toHaveValue(
-        `${testValue.value.code} ${testValue.value.name}`
-      );
-    });
-  });
-
-  test("Should render ucum options on click", async () => {
-    const handleChange = jest.fn();
-    render(
-      <MeasureGroupScoringUnit
-        value={null}
-        onChange={handleChange}
-        canEdit={true}
-        options={options}
-        placeholder="test"
-      />
-    );
-    const autocomplete = screen.getByTestId("scoring-unit-dropdown");
-    const input = within(autocomplete).getByRole("combobox");
-    autocomplete.click();
-    autocomplete.focus();
-    fireEvent.change(input, { target: { value: "b" } });
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
-    fireEvent.click(screen.getAllByRole("option")[1]);
-    expect(input.value).toEqual("B bel");
   });
 });

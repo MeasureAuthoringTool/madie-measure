@@ -1,6 +1,7 @@
 import * as Yup from "yup";
 import { AggregateFunctionType, GroupScoring } from "@madie/madie-models";
 import _ from "lodash";
+import * as ucum from "@lhncbc/ucum-lhc";
 
 export type CqlDefineDataTypes = {
   [key: string]: string;
@@ -137,6 +138,37 @@ export const qdmMeasureGroupSchemaValidator = (
     populationBasis: Yup.string()
       .nullable()
       .required("Patient Basis is required."),
+
+    scoringUnit: Yup.object().shape({
+      value: Yup.object().test("test-compare a few values", function (value) {
+        var parseResp = ucum.UcumLhcUtils.getInstance().validateUnitString(
+          value?.code,
+          true
+        );
+
+        if (!value?.code || (value?.code && parseResp.status === "valid")) {
+          return true;
+        } else {
+          //create a message from
+          if (parseResp?.suggestions) {
+            let errorMsg: string = parseResp.suggestions[0]?.msg + ": ";
+
+            parseResp.suggestions[0].units.forEach((value) => {
+              errorMsg += value[0] + ", ";
+            });
+            return this.createError({
+              message: errorMsg,
+              path: "scoringUnit.value", // Fieldname
+            });
+          } else {
+            return this.createError({
+              message: parseResp.msg[0],
+              path: "scoringUnit.value", // Fieldname
+            });
+          }
+        }
+      }),
+    }),
 
     populations: Yup.array().when(
       ["scoring", "populationBasis"],
