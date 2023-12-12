@@ -264,14 +264,11 @@ export default function MeasureList(props: {
     }
     // always on if feature
     if (selected.measureMetaData.draft) {
-      const versionButton = {
+      options.push({
         label: "Version",
         toImplementFunction: checkCreateVersion,
         dataTestId: `create-version-measure-${selected?.id}`,
-      };
-      if (shouldAllowAction(selected, featureFlags.qdmVersioning)) {
-        options.push(versionButton);
-      }
+      });
       // draft should only be available if no other measureSet is in draft, by call
     }
     if (canDraftLookup[selected?.measureSetId]) {
@@ -304,6 +301,37 @@ export default function MeasureList(props: {
   const abortController = useRef(null);
 
   const exportMeasure = async () => {
+    if (targetMeasure.current?.model === Model.QDM_5_6) {
+      exportQDMMeasure();
+    } else {
+      exportQICoreMeasure();
+    }
+  };
+
+  const downloadZipFile = (exportData, ecqmTitle, model, version) => {
+    const url = window.URL.createObjectURL(exportData);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute(
+      "download",
+      `${ecqmTitle}-v${version}-${getModelFamily(model)}.zip`
+    );
+    document.body.appendChild(link);
+    link.click();
+    setToastOpen(true);
+    setToastType("success");
+    setToastMessage("Measure exported successfully");
+    setDownloadState("success");
+    document.body.removeChild(link);
+  };
+
+  const exportQDMMeasure = () => {
+    const { ecqmTitle, model, version } = targetMeasure?.current ?? {};
+    const blob = new Blob([new Uint8Array([])], { type: "application/zip" });
+    downloadZipFile(blob, ecqmTitle, model, version);
+  };
+
+  const exportQICoreMeasure = async () => {
     setFailureMessage(null);
     setDownloadState("downloading");
     try {
@@ -314,20 +342,7 @@ export default function MeasureList(props: {
         targetMeasure.current?.id,
         abortController.current.signal
       );
-      const url = window.URL.createObjectURL(exportData);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute(
-        "download",
-        `${ecqmTitle}-v${version}-${getModelFamily(model)}.zip`
-      );
-      document.body.appendChild(link);
-      link.click();
-      setToastOpen(true);
-      setToastType("success");
-      setToastMessage("Measure exported successfully");
-      setDownloadState("success");
-      document.body.removeChild(link);
+      downloadZipFile(exportData, ecqmTitle, model, version);
     } catch (err) {
       const errorStatus = err.response?.status;
       const targetedMeasure = targetMeasure.current;

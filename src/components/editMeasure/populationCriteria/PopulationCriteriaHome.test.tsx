@@ -90,9 +90,7 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
   },
-  useFeatureFlags: () => ({
-    populationCriteriaTabs: true,
-  }),
+  useFeatureFlags: () => ({}),
 }));
 
 const renderPopulationCriteriaHomeComponent = async (

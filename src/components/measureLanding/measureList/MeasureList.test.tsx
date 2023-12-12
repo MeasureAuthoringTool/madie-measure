@@ -17,6 +17,7 @@ import userEvent from "@testing-library/user-event";
 import { v4 as uuid } from "uuid";
 import ServiceContext, { ServiceConfig } from "../../../api/ServiceContext";
 import { act } from "react-dom/test-utils";
+import { useFeatureFlags } from "@madie/madie-util";
 
 // CSSStyleDeclaration
 const mockPush = jest.fn();
@@ -33,10 +34,7 @@ jest.mock("@madie/madie-util", () => ({
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useFeatureFlags: () => ({
-    export: true,
-    measureVersioning: true,
-    qdmExport: false,
-    qdmVersioning: false,
+    qdmExport: true,
   }),
 }));
 
@@ -1241,7 +1239,7 @@ describe("Measure List component", () => {
     });
     unmount();
   });
-  it("should not have export or version", async () => {
+  it("should download empty zip file when QDM export is clicked", async () => {
     const { getByTestId } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
@@ -1266,11 +1264,15 @@ describe("Measure List component", () => {
     expect(actionButton).toHaveTextContent("Select");
     expect(window.location.href).toBe("http://localhost/");
     fireEvent.click(actionButton);
-    expect(
-      screen.findByTestId(`export-measure-${measures[3].id}`)
-    ).rejects.toThrow();
-    expect(
-      screen.findByTestId(`create-version-measure-${measures[3].id}`)
-    ).rejects.toThrow();
+
+    expect(getByTestId(`view-measure-${measures[3].id}`)).toBeInTheDocument();
+    expect(getByTestId(`export-measure-${measures[3].id}`)).toBeInTheDocument();
+
+    window.URL.createObjectURL = jest.fn();
+    window.URL.revokeObjectURL = jest.fn();
+    expect(window.location.href).toBe("http://localhost/");
+    fireEvent.click(getByTestId(`export-measure-${measures[3].id}`));
+
+    expect(window.URL.createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
   });
 });
