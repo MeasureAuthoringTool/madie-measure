@@ -146,6 +146,7 @@ const AddRemovePopulation = ({
           </DSLink>
         </div>
       )}
+
       {initialPopulationSize === 2 &&
         label.includes("Initial Population") &&
         scoring === "Ratio" && (

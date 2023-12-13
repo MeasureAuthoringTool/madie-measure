@@ -98,25 +98,25 @@ const props: MeasureGroupProps = {
 };
 
 describe("Measure Groups Page", () => {
-  let measure: Measure;
-
   afterEach(() => {
     jest.clearAllMocks();
   });
-  measure = {
-    id: "test-measure",
-    measureName: "the measure for testing",
-    cql: MeasureCQL,
-    elmJson: ELM_JSON,
-    createdBy: MEASURE_CREATEDBY,
-    scoring: GroupScoring.COHORT,
-    groups: [{ groupDescription: "" }],
-    baseConfigurationTypes: ["Outcome", "Patient Reported Outcome"],
-    patientBasis: true,
-    model: Model.QDM_5_6,
-  } as Measure;
+
+  let measure: Measure;
   let group: Group;
   beforeEach(() => {
+    measure = {
+      id: "test-measure",
+      measureName: "the measure for testing",
+      cql: MeasureCQL,
+      elmJson: ELM_JSON,
+      createdBy: MEASURE_CREATEDBY,
+      scoring: GroupScoring.COHORT,
+      groups: [{ groupDescription: "" }],
+      baseConfigurationTypes: ["Outcome", "Patient Reported Outcome"],
+      patientBasis: true,
+      model: Model.QDM_5_6,
+    } as Measure;
     group = {
       id: null,
       scoring: "Cohort",
@@ -133,6 +133,7 @@ describe("Measure Groups Page", () => {
       populationBasis: "boolean",
       scoringUnit: "",
     };
+
     measureStore.state.mockImplementationOnce(() => measure);
 
     const mockUuid = require("uuid") as { v4: jest.Mock<string, []> };
@@ -1209,7 +1210,7 @@ describe("Measure Groups Page", () => {
       expect(numeratorAggregateFunctionInput.value).toEqual("Average");
     });
 
-    test.skip("should not show Initial Population Association for Ratio scoring when there is 1 Initial Population", async () => {
+    test("should not show Initial Population Association for Ratio scoring when there is 1 Initial Population", async () => {
       const group1: Group = {
         id: "1",
         scoring: "Ratio",
@@ -1236,7 +1237,9 @@ describe("Measure Groups Page", () => {
       await waitFor(() => expect(association1).not.toBeInTheDocument());
     });
 
-    test.skip("should show Initial Population Association for Ratio scoring when there are 2 Initial Populations and can change values", async () => {
+    test("should show Initial Population Association for Ratio scoring when there are 2 Initial Populations and can change values", async () => {
+      measure.scoring = "Ratio";
+
       const group1: Group = {
         id: "1",
         scoring: "Ratio",
