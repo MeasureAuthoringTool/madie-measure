@@ -51,7 +51,6 @@ import GroupPopulation from "../groupPopulations/GroupPopulation";
 import MeasureGroupObservation from "../observation/MeasureGroupObservation";
 import * as _ from "lodash";
 import MeasureGroupAlerts from "../MeasureGroupAlerts";
-import AddRemovePopulation from "../groupPopulations/AddRemovePopulation";
 import GroupsDescription from "../GroupsDescription";
 import MeasureGroupScoringUnit from "../scoringUnit/MeasureGroupScoringUnit";
 
@@ -917,19 +916,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                     }
                                   />
                                 </div>
-                                {/* Single component for add and remove */}
-                                <AddRemovePopulation
-                                  field={fieldProps}
-                                  scoring={formik.values.scoring}
-                                  index={index}
-                                  populations={formik.values.populations}
-                                  population={population}
-                                  canEdit={canEdit}
-                                  insertCallback={arrayHelpers.insert}
-                                  removeCallback={arrayHelpers.remove}
-                                  replaceCallback={arrayHelpers.replace}
-                                  setAssociationChanged={setAssociationChanged}
-                                />
                                 {/* add or remove logic must live here */}
                                 <MeasureGroupObservation
                                   canEdit={canEdit}
