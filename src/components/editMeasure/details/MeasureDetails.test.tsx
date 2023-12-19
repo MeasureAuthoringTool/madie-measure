@@ -20,6 +20,7 @@ jest.mock("@madie/madie-util", () => ({
       return { unsubscribe: () => null };
     },
   },
+  useFeatureFlags: () => ({}),
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),
