@@ -76,7 +76,7 @@ const MeasureGroupScoringUnit = ({
         label="Scoring Unit"
         id="scoring-unit-text-input"
         placeholder={placeholder}
-        value={value?.value?.code}
+        value={value?.value?.code || ""}
         onChange={(event: any) => {
           const label = `${event.target.value}`;
           const transformedResult = {
