@@ -7,6 +7,7 @@ import MeasureDetails from "./MeasureDetails";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
 import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureMetadata from "./measureMetadata/MeasureMetadata";
+import { useFeatureFlags } from "@madie/madie-util";
 
 jest.mock("./measureInformation/MeasureInformation");
 jest.mock("./measureMetadata/MeasureMetadata");
@@ -20,7 +21,7 @@ jest.mock("@madie/madie-util", () => ({
       return { unsubscribe: () => null };
     },
   },
-  useFeatureFlags: () => ({}),
+  useFeatureFlags: jest.fn(),
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),
@@ -60,6 +61,10 @@ const serviceConfig: ServiceConfig = {
     baseUrl: "base.url",
   },
 };
+
+beforeEach(() => {
+  useFeatureFlags.mockReturnValue({ qdmMeasureDefinitions: true });
+});
 
 describe("MeasureDetails component", () => {
   it("should render the MeasureInformation component for default URL", () => {
@@ -209,29 +214,21 @@ describe("MeasureDetails component", () => {
     expect(getByTestId("leftPanelMeasureGuidance")).toBeInTheDocument();
   });
 
-  // it("should render the MeasureMetadata component for measure-risk-adjustment URL", () => {
-  //   const { getByText, getByTestId } = render(
-  //     <ApiContextProvider value={serviceConfig}>
-  //       <MemoryRouter
-  //         initialEntries={[{ pathname: "/foo/measure-risk-adjustment" }]}
-  //       >
-  //         <Route path="/foo">
-  //           <MeasureDetails setErrorMessage={setErrorMessage} />
-  //         </Route>
-  //       </MemoryRouter>
-  //     </ApiContextProvider>
-  //   );
+  it("should render the MeasureMetadata component for measure-definitions", () => {
+    const { getByText, getByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter
+          initialEntries={[{ pathname: "/foo/measure-definitions" }]}
+        >
+          <Route path="/foo">
+            <MeasureDetails setErrorMessage={setErrorMessage} />
+          </Route>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
 
-  //   expect(getByText("Mock Measure Metadata")).toBeTruthy();
-  //   expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
-  //   expect(
-  //     getByTestId("leftPanelModelAndMeasurementPeriod")
-  //   ).toBeInTheDocument();
-  //   expect(getByTestId("leftPanelMeasureSteward")).toBeInTheDocument();
-  //   expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
-  //   expect(getByTestId("leftPanelMeasureDisclaimer")).toBeInTheDocument();
-  //   expect(getByTestId("leftPanelMeasureRationale")).toBeInTheDocument();
-  //   expect(getByTestId("leftPanelMeasureGuidance")).toBeInTheDocument();
-  //   expect(getByTestId("leftPanelMeasureRiskAdjustment")).toBeInTheDocument();
-  // });
+    expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
+    expect(getByTestId("leftPanelQDMMeasureDefinitions")).toBeInTheDocument();
+    expect(getByTestId("measure-definition-terms")).toBeInTheDocument();
+  });
 });
