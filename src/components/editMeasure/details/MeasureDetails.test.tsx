@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom";
 import * as React from "react";
-import { getByTestId, render } from "@testing-library/react";
+import { getByTestId, queryByTestId, render } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { Route } from "react-router-dom";
 import MeasureDetails from "./MeasureDetails";
@@ -215,7 +215,7 @@ describe("MeasureDetails component", () => {
   });
 
   it("should render the MeasureMetadata component for measure-definitions", () => {
-    const { getByText, getByTestId } = render(
+    const { getByTestId } = render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter
           initialEntries={[{ pathname: "/foo/measure-definitions" }]}
@@ -230,5 +230,26 @@ describe("MeasureDetails component", () => {
     expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
     expect(getByTestId("leftPanelQDMMeasureDefinitions")).toBeInTheDocument();
     expect(getByTestId("measure-definition-terms")).toBeInTheDocument();
+  });
+
+  it("should not render the component for measure-definitions", () => {
+    useFeatureFlags.mockReturnValue({ qdmMeasureDefinitions: false });
+    const { getByTestId, queryByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
+          <Route path="/foo">
+            <MeasureDetails setErrorMessage={setErrorMessage} />
+          </Route>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
+    const leftPanelQDMMeasureDefinitions = queryByTestId(
+      "leftPanelQDMMeasureDefinitions"
+    );
+    expect(leftPanelQDMMeasureDefinitions).toBeNull();
+    const measureDefinitionTerms = queryByTestId("measure-definition-terms");
+    expect(measureDefinitionTerms).toBeNull();
   });
 });
