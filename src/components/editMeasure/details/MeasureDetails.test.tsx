@@ -1,12 +1,13 @@
 import "@testing-library/jest-dom";
 import * as React from "react";
-import { getByTestId, render } from "@testing-library/react";
+import { getByTestId, queryByTestId, render } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { Route } from "react-router-dom";
 import MeasureDetails from "./MeasureDetails";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
 import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureMetadata from "./measureMetadata/MeasureMetadata";
+import { useFeatureFlags } from "@madie/madie-util";
 
 jest.mock("./measureInformation/MeasureInformation");
 jest.mock("./measureMetadata/MeasureMetadata");
@@ -20,6 +21,7 @@ jest.mock("@madie/madie-util", () => ({
       return { unsubscribe: () => null };
     },
   },
+  useFeatureFlags: jest.fn(),
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),
@@ -59,6 +61,10 @@ const serviceConfig: ServiceConfig = {
     baseUrl: "base.url",
   },
 };
+
+beforeEach(() => {
+  useFeatureFlags.mockReturnValue({ qdmMeasureDefinitions: true });
+});
 
 describe("MeasureDetails component", () => {
   it("should render the MeasureInformation component for default URL", () => {
@@ -208,29 +214,42 @@ describe("MeasureDetails component", () => {
     expect(getByTestId("leftPanelMeasureGuidance")).toBeInTheDocument();
   });
 
-  // it("should render the MeasureMetadata component for measure-risk-adjustment URL", () => {
-  //   const { getByText, getByTestId } = render(
-  //     <ApiContextProvider value={serviceConfig}>
-  //       <MemoryRouter
-  //         initialEntries={[{ pathname: "/foo/measure-risk-adjustment" }]}
-  //       >
-  //         <Route path="/foo">
-  //           <MeasureDetails setErrorMessage={setErrorMessage} />
-  //         </Route>
-  //       </MemoryRouter>
-  //     </ApiContextProvider>
-  //   );
+  it("should render the MeasureMetadata component for measure-definitions", () => {
+    const { getByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter
+          initialEntries={[{ pathname: "/foo/measure-definitions" }]}
+        >
+          <Route path="/foo">
+            <MeasureDetails setErrorMessage={setErrorMessage} />
+          </Route>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
 
-  //   expect(getByText("Mock Measure Metadata")).toBeTruthy();
-  //   expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
-  //   expect(
-  //     getByTestId("leftPanelModelAndMeasurementPeriod")
-  //   ).toBeInTheDocument();
-  //   expect(getByTestId("leftPanelMeasureSteward")).toBeInTheDocument();
-  //   expect(getByTestId("leftPanelMeasureDescription")).toBeInTheDocument();
-  //   expect(getByTestId("leftPanelMeasureDisclaimer")).toBeInTheDocument();
-  //   expect(getByTestId("leftPanelMeasureRationale")).toBeInTheDocument();
-  //   expect(getByTestId("leftPanelMeasureGuidance")).toBeInTheDocument();
-  //   expect(getByTestId("leftPanelMeasureRiskAdjustment")).toBeInTheDocument();
-  // });
+    expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
+    expect(getByTestId("leftPanelQDMMeasureDefinitions")).toBeInTheDocument();
+    expect(getByTestId("measure-definition-terms")).toBeInTheDocument();
+  });
+
+  it("should not render the component for measure-definitions", () => {
+    useFeatureFlags.mockReturnValue({ qdmMeasureDefinitions: false });
+    const { getByTestId, queryByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
+          <Route path="/foo">
+            <MeasureDetails setErrorMessage={setErrorMessage} />
+          </Route>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
+    const leftPanelQDMMeasureDefinitions = queryByTestId(
+      "leftPanelQDMMeasureDefinitions"
+    );
+    expect(leftPanelQDMMeasureDefinitions).toBeNull();
+    const measureDefinitionTerms = queryByTestId("measure-definition-terms");
+    expect(measureDefinitionTerms).toBeNull();
+  });
 });
