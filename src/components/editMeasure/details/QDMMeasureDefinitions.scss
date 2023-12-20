@@ -9,6 +9,7 @@ $border-color: #8c8c8c;
 
   .definition-table {
     min-width: 100%;
+
     > thead {
       font-weight: 500;
       font-size: 14px;
@@ -16,10 +17,12 @@ $border-color: #8c8c8c;
       border-bottom: solid 1px $border-color;
       text-align: left;
     }
+
     th,
     td {
       padding: 1.2rem 1.4rem;
     }
+
     > .col-header {
       color: #2d3540;
       font-family: Rubik, sans-serif;
@@ -28,6 +31,7 @@ $border-color: #8c8c8c;
       text-align: left;
     }
   }
+
   tbody > p {
     text-align: center;
     padding: 1.2rem;
