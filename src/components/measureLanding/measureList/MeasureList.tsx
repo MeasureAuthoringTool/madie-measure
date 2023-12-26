@@ -300,14 +300,6 @@ export default function MeasureList(props: {
   // Ref required or value will be lost on all state changes.
   const abortController = useRef(null);
 
-  const exportMeasure = async () => {
-    if (targetMeasure.current?.model === Model.QDM_5_6) {
-      exportQDMMeasure();
-    } else {
-      exportQICoreMeasure();
-    }
-  };
-
   const downloadZipFile = (exportData, ecqmTitle, model, version) => {
     const url = window.URL.createObjectURL(exportData);
     const link = document.createElement("a");
@@ -325,13 +317,7 @@ export default function MeasureList(props: {
     document.body.removeChild(link);
   };
 
-  const exportQDMMeasure = () => {
-    const { ecqmTitle, model, version } = targetMeasure?.current ?? {};
-    const blob = new Blob([new Uint8Array([])], { type: "application/zip" });
-    downloadZipFile(blob, ecqmTitle, model, version);
-  };
-
-  const exportQICoreMeasure = async () => {
+  const exportMeasure = async () => {
     setFailureMessage(null);
     setDownloadState("downloading");
     try {
@@ -387,14 +373,14 @@ export default function MeasureList(props: {
           }
           if (missing.length <= 0) {
             const message =
-              "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists.";
+              "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists.";
             setFailureMessage(message);
           } else if (missing.length > 0) {
             setFailureMessage(missing);
           }
         } else {
           const message =
-            "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists.";
+            "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists.";
           setFailureMessage(message);
         }
       }
