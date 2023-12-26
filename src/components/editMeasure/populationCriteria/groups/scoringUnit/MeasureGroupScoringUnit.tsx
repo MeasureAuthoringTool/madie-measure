@@ -1,9 +1,5 @@
 import React, { useState } from "react";
-import { InputLabel, TextField } from "@madie/madie-design-system/dist/react/";
-import { Autocomplete, FormControl } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import { Formik } from "formik";
-import { HelperText } from "@madie/madie-components";
+import { TextField } from "@madie/madie-design-system/dist/react/";
 
 export interface ScoringUnitProps {
   value: any;
@@ -26,22 +22,6 @@ const MeasureGroupScoringUnit = ({
     minHeight: "40px",
     borderRadius: "3px",
     height: "auto",
-    "& .MuiOutlinedInput-notchedOutline": {
-      borderRadius: "3px",
-      "& legend": {
-        width: 0,
-      },
-    },
-    "& .MuiAutocomplete-inputFocused": {
-      border: "none",
-      boxShadow: "none",
-      outline: "none",
-    },
-    "& .MuiAutocomplete-inputRoot": {
-      paddingTop: 0,
-      paddingBottom: 0,
-      backgroundColor: !canEdit ? "#EDEDED" : "",
-    },
     width: "100%",
   };
   interface Option {
@@ -51,13 +31,6 @@ const MeasureGroupScoringUnit = ({
     system: string;
   }
 
-  const removeSpecificChars = (string) => {
-    return string.trim().replace("-", "").replace(".", "");
-  };
-
-  const fnHelperText = (helperText: any) => {
-    return helperText;
-  };
   /* The value is passed to auto complete as
   / {label: "code + name", value: {code, guidance, name, system}}
   To prevent backwards compatability issues this pattern will stay. The auto complete will expect this
@@ -76,7 +49,7 @@ const MeasureGroupScoringUnit = ({
         label="Scoring Unit"
         id="scoring-unit-text-input"
         placeholder={placeholder}
-        value={value?.value?.code}
+        value={value?.value?.code || ""}
         onChange={(event: any) => {
           const label = `${event.target.value}`;
           const transformedResult = {

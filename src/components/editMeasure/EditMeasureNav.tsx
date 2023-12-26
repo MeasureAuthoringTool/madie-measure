@@ -42,6 +42,7 @@ const EditMeasureNav = ({ isQDM }) => {
     pathname !== `${url}/details/measure-disclaimer` &&
     pathname !== `${url}/details/measure-rationale` &&
     pathname !== `${url}/details/measure-guidance` &&
+    pathname !== `${url}/details/measure-definitions` &&
     pathname !== `${url}/details/measure-clinical-recommendation` &&
     pathname !== `${url}/review-info` &&
     !pathname.startsWith(`${url}/test-cases`) &&
