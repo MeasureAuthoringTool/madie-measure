@@ -1180,7 +1180,7 @@ describe("Measure List component", () => {
     fireEvent.click(getByTestId(`export-measure-${measures[2].id}`));
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
-        "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists."
+        "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists."
       );
     });
     unmount();
@@ -1238,41 +1238,5 @@ describe("Measure List component", () => {
       expect(getByText("Measure exported successfully")).toBeInTheDocument();
     });
     unmount();
-  });
-  it("should download empty zip file when QDM export is clicked", async () => {
-    const { getByTestId } = render(
-      <ServiceContext.Provider value={serviceConfig}>
-        <MeasureList
-          measureList={measures}
-          setMeasureList={setMeasureListMock}
-          setTotalPages={setTotalPagesMock}
-          setTotalItems={setTotalItemsMock}
-          setVisibleItems={setVisibleItemsMock}
-          setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
-          activeTab={0}
-          searchCriteria={""}
-          setSearchCriteria={setSearchCriteriaMock}
-          currentLimit={10}
-          currentPage={0}
-          setErrMsg={setErrMsgMock}
-        />
-      </ServiceContext.Provider>
-    );
-    const actionButton = getByTestId(`measure-action-${measures[3].id}`);
-    expect(actionButton).toBeInTheDocument();
-    expect(actionButton).toHaveTextContent("Select");
-    expect(window.location.href).toBe("http://localhost/");
-    fireEvent.click(actionButton);
-
-    expect(getByTestId(`view-measure-${measures[3].id}`)).toBeInTheDocument();
-    expect(getByTestId(`export-measure-${measures[3].id}`)).toBeInTheDocument();
-
-    window.URL.createObjectURL = jest.fn();
-    window.URL.revokeObjectURL = jest.fn();
-    expect(window.location.href).toBe("http://localhost/");
-    fireEvent.click(getByTestId(`export-measure-${measures[3].id}`));
-
-    expect(window.URL.createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
   });
 });

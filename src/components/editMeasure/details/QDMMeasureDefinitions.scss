@@ -1,0 +1,39 @@
+$border-color: #8c8c8c;
+
+#qdm-measure-definitions {
+  > .top-row {
+    display: flex;
+    flex-direction: row-reverse;
+    margin-bottom: 32px;
+  }
+
+  .definition-table {
+    min-width: 100%;
+
+    > thead {
+      font-weight: 500;
+      font-size: 14px;
+      background-color: #ededed;
+      border-bottom: solid 1px $border-color;
+      text-align: left;
+    }
+
+    th,
+    td {
+      padding: 1.2rem 1.4rem;
+    }
+
+    > .col-header {
+      color: #2d3540;
+      font-family: Rubik, sans-serif;
+      font-size: 14.4px;
+      font-weight: 700;
+      text-align: left;
+    }
+  }
+
+  tbody > p {
+    text-align: center;
+    padding: 1.2rem;
+  }
+}
