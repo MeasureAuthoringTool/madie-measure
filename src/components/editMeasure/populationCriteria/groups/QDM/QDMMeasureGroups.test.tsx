@@ -6,7 +6,6 @@ import {
   render,
   screen,
   waitFor,
-  within,
 } from "@testing-library/react";
 import MeasureGroups, { MeasureGroupProps } from "./QDMMeasureGroups";
 import {
@@ -32,7 +31,6 @@ import { ELM_JSON, MeasureCQL } from "../../../../common/MeasureCQL";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
 import * as uuid from "uuid";
-import * as _ from "lodash";
 import { measureStore, checkUserCanEdit } from "@madie/madie-util";
 import { InitialPopulationAssociationType } from "../groupPopulations/GroupPopulation";
 // fix error about window.scrollto
@@ -798,13 +796,8 @@ describe("Ratio Population Criteria validations", () => {
           name: PopulationType.INITIAL_POPULATION,
           definition: "Initial Population",
         },
-        {
-          id: "id-2",
-          name: PopulationType.INITIAL_POPULATION,
-          definition: "Initial Population",
-        },
       ],
-      groupDescription: "Ratio Group with two Initial Populations",
+      groupDescription: "Ratio Group",
       measureGroupTypes: [MeasureGroupTypes.PROCESS],
       populationBasis: "boolean",
       scoringUnit: "",
@@ -877,50 +870,6 @@ describe("Ratio Population Criteria validations", () => {
       "measure-group-initial-population-association-id-1"
     );
     await waitFor(() => expect(association1).not.toBeInTheDocument());
-  });
-  test("should show Initial Population Association for Ratio scoring when there are 2 Initial Populations and can change values", async () => {
-    renderMeasureGroupComponent();
-
-    const association1 = screen.getByTestId(
-      "measure-group-initial-population-association-id-1"
-    );
-    expect(association1).toBeInTheDocument();
-    const ip1DenomAssociation = screen.getByTestId(
-      "Initial Population 1-Denominator"
-    );
-    const ip1NumerAssociation = screen.getByTestId(
-      "Initial Population 1-Numerator"
-    );
-    expect(ip1DenomAssociation).toHaveAttribute("checked", "");
-    expect(ip1NumerAssociation).not.toHaveAttribute("checked", "");
-    expect((ip1DenomAssociation as HTMLInputElement).checked).toEqual(true);
-    expect((ip1NumerAssociation as HTMLInputElement).checked).toEqual(false);
-
-    fireEvent.click(ip1NumerAssociation);
-    await waitFor(() => {
-      expect((ip1NumerAssociation as HTMLInputElement).checked).toEqual(true);
-      expect((ip1DenomAssociation as HTMLInputElement).checked).toEqual(false);
-    });
-
-    // delete the IP2
-    const removeIpLink = screen.getByRole("link", { name: /Remove/ });
-    expect(removeIpLink).toBeInTheDocument();
-    userEvent.click(removeIpLink);
-    expect(association1).not.toBeInTheDocument();
-
-    // add second IP
-    const addIpLink = screen.getByRole("link", {
-      name: "+ Add Initial Population",
-    });
-
-    expect(addIpLink).toBeInTheDocument();
-    act(() => {
-      userEvent.click(addIpLink);
-    });
-    await waitFor(() => {
-      expect((ip1DenomAssociation as HTMLInputElement).checked).toEqual(false);
-      expect((ip1NumerAssociation as HTMLInputElement).checked).toEqual(true);
-    });
   });
 });
 describe("Cohort Population Criteria validations", () => {

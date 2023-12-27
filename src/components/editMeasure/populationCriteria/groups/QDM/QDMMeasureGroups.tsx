@@ -1,7 +1,6 @@
-import React, { useEffect, useCallback, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useRouteMatch, useLocation, useHistory } from "react-router-dom";
-import tw, { styled } from "twin.macro";
-import * as ucum from "@lhncbc/ucum-lhc";
+import tw from "twin.macro";
 import "styled-components/macro";
 import {
   Measure,
@@ -14,12 +13,7 @@ import {
   Stratification,
   MeasureScoring,
 } from "@madie/madie-models";
-import {
-  MenuItem as MuiMenuItem,
-  Typography,
-  Divider,
-  FormControl,
-} from "@mui/material";
+import { MenuItem as MuiMenuItem, Typography, Divider } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import {
   Button,
@@ -62,7 +56,6 @@ import "../MeasureGroups.scss";
 import {
   ButtonSpacer,
   FormFieldInner,
-  FieldInput,
   FieldLabel,
   FieldSeparator,
   MenuItemContainer,
@@ -228,9 +221,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   // Todo option should be an Array when passing to AutoComplete.
   // warning during test cases
   const [addStratClicked, setAddStratClicked] = useState(false);
-  const [populationBasisValues, setPopulationBasisValues] =
-    useState<string[]>();
-  const [associationChanged, setAssociationChanged] = useState(false);
 
   const [cqlDefinitionDataTypes, setCqlDefinitionDataTypes] =
     useState<CqlDefineDataTypes>();
@@ -534,7 +524,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           await updateMeasureFromDb(measure.id);
         })
         .then(() => {
-          setAssociationChanged(false);
           handleDialogClose();
           handleToast(
             "success",
@@ -894,9 +883,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                     scoring={formik.values.scoring}
                                     canEdit={canEdit}
                                     replaceCallback={arrayHelpers.replace}
-                                    setAssociationChanged={
-                                      setAssociationChanged
-                                    }
                                   />
                                   {/* PopulationDescription */}
                                   <GroupsDescription
@@ -1106,12 +1092,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                       variant="cyan"
                       type="submit"
                       data-testid="group-form-submit-btn"
-                      disabled={
-                        !(
-                          formik.isValid &&
-                          (formik.dirty || associationChanged)
-                        )
-                      }
+                      disabled={!(formik.isValid && formik.dirty)}
                     >
                       Save
                     </Button>
