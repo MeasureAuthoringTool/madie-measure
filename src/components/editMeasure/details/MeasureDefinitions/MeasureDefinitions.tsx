@@ -66,19 +66,31 @@ const MeasureDefinitions = (props) => {
     term: "",
     definition: "",
   } as MeasureDefinition;
-  let measureMetaData = measure?.measureMetaData || {};
   const [measureDefinitions, setMeasureDefinitions] = useState<
     MeasureDefinition[]
-  >([]);
+  >(measure?.measureMetaData?.measureDefinitions || []);
 
+  // we ideally will always make a new copy of the measure. Lets just listen for that update and then write our definitions to local state.
+  useEffect(() => {
+    if (measure?.measureMetaData?.measureDefinitions) {
+      const copiedDefinitions = [
+        ...measure?.measureMetaData?.measureDefinitions,
+      ];
+      setMeasureDefinitions(copiedDefinitions);
+    }
+  }, [setMeasureDefinitions, measure]);
   const handleSubmit = (values: MeasureDefinition) => {
-    const copiedMetaData = { ...measureMetaData };
+    // make a copy of the metaData
+    const copiedMetaData = { ...measure?.measureMetaDatameasureMetaData };
+    // confirm it has the measureDefinitions key
     if (
       copiedMetaData.hasOwnProperty("measureDefinitions") &&
       Array.isArray(copiedMetaData.measureDefinitions)
     ) {
+      // if it does exist we push to it
       copiedMetaData.measureDefinitions.push(values);
     } else {
+      // if none exist, we will init our the array
       copiedMetaData.measureDefinitions = [values];
     }
     const modifiedMeasure = {
@@ -99,6 +111,8 @@ const MeasureDefinitions = (props) => {
       })
       .catch((reason) => {
         const message = `Error updating measure "${measure.measureName}"`;
+        // to do: some sort of error handling
+        // console.warn(`Error updating measure : ${reason}`);
         setErrorMessage(message);
       });
   };
@@ -113,11 +127,15 @@ const MeasureDefinitions = (props) => {
 
   const formik = useFormik({
     initialValues: { ...INITIAL_VALUES },
-
     validationSchema: MeasureDefininitionsValidator,
     onSubmit: async (values: MeasureDefinition) => await handleSubmit(values),
   });
 
+  function formikErrorHandler(name: string, isError: boolean) {
+    if (formik.touched[name] && formik.errors[name]) {
+      return `${formik.errors[name]}`;
+    }
+  }
   const [open, setOpen] = useState<boolean>(false);
   const toggleOpen = () => {
     setOpen(!open);
@@ -171,12 +189,6 @@ const MeasureDefinitions = (props) => {
     managePagination();
   }, [measureDefinitions, currentPage, currentLimit]);
 
-  useEffect(() => {
-    if (measureMetaData.measureDefinitions) {
-      setMeasureDefinitions(measureMetaData.measureDefinitions);
-    }
-  }, [setMeasureDefinitions, measureMetaData]);
-
   const canGoNext = (() => {
     return currentPage < totalPages;
   })();
@@ -190,7 +202,6 @@ const MeasureDefinitions = (props) => {
     setCurrentPage(1);
     history.push(`?page=${1}&limit=${e.target.value}`);
   };
-
   return (
     <div
       id="measure-details-form"
@@ -213,6 +224,7 @@ const MeasureDefinitions = (props) => {
           <div className="top-row">
             <Button
               id="create-definition"
+              disabled={!canEdit}
               variant="outline-filled"
               className="page-header-action-button"
               data-testid="create-definition-button"
@@ -233,17 +245,24 @@ const MeasureDefinitions = (props) => {
                 </th>
               </tr>
             </thead>
-            <tbody>
-              {visibleDefinitions?.length > 0 ? (
-                visibleDefinitions?.map((measureDefinition) => (
-                  <MeasureDefinitionRow measureDefinition={measureDefinition} />
+            <tbody data-testId="measure-definitions-table-body">
+              {visibleDefinitions.length > 0 ? (
+                visibleDefinitions.map((measureDefinition, index) => (
+                  <MeasureDefinitionRow
+                    measureDefinition={measureDefinition}
+                    key={`${measureDefinition.term}-${index}`}
+                  />
                 ))
               ) : (
-                <p>
+                <p data-testId="empty-definitions">
                   There are currently no definitions. Click the (Add Term)
                   button above to add one.
                 </p>
               )}
+              <p data-testId="empty-definitions">
+                There are currently no definitions. Click the (Add Term) button
+                above to add one.
+              </p>
             </tbody>
           </table>
         </div>
@@ -301,8 +320,13 @@ const MeasureDefinitions = (props) => {
               disabled={!canEdit}
               label="Term"
               id="qdm-measure-term"
-              // name="qdm-measure-term"
-              error={Boolean(formik.errors.term)}
+              data-testid="qdm-measure-term"
+              inputProps={{
+                "data-testid": "qdm-measure-term-input",
+                "aria-describedby": "qdm-measure-term-helper-text",
+              }}
+              helperText={formikErrorHandler("term", true)}
+              error={formik.touched.term && Boolean(formik.errors.term)}
               {...formik.getFieldProps("term")}
             />
             <TextArea
@@ -310,11 +334,17 @@ const MeasureDefinitions = (props) => {
               disabled={!canEdit}
               label="Definition"
               readOnly={!canEdit}
-              error={Boolean(formik.errors.definition)}
-              // name="qdm-measure-definition"
               id="qdm-measure-definition"
-              placeholder=""
               data-testid="qdm-measure-definition"
+              inputProps={{
+                "data-testid": "qdm-measure-definition-input",
+                "aria-describedby": "qdm-measure-definition-helper-text",
+              }}
+              placeholder=""
+              error={
+                formik.touched.definition && Boolean(formik.errors.definition)
+              }
+              helperText={formikErrorHandler("definition", true)}
               {...formik.getFieldProps("definition")}
             />
           </div>
