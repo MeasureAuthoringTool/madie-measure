@@ -17,9 +17,8 @@ import MeasureDefinitions from "./MeasureDefinitions";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../api/useMeasureServiceApi";
-import { Measure } from "@madie/madie-models";
 import { measureStore, checkUserCanEdit } from "@madie/madie-util";
-import { MeasureDefinition } from "@madie/madie-models";
+import { Measure, MeasureDefinition } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 
 jest.mock("../../../../api/useMeasureServiceApi");
