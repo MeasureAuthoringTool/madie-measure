@@ -81,7 +81,7 @@ const MeasureDefinitions = (props) => {
   }, [setMeasureDefinitions, measure]);
   const handleSubmit = (values: MeasureDefinition) => {
     // make a copy of the metaData
-    const copiedMetaData = { ...measure?.measureMetaDatameasureMetaData };
+    const copiedMetaData = { ...measure?.measureMetaData };
     // confirm it has the measureDefinitions key
     if (
       copiedMetaData.hasOwnProperty("measureDefinitions") &&
@@ -104,13 +104,14 @@ const MeasureDefinitions = (props) => {
         const { status, data } = res;
         if (status === 200) {
           handleToast("success", `Measure Definition Saved Successfully`, true);
-          updateMeasure(modifiedMeasure);
+          updateMeasure(data);
           toggleOpen();
           formik.resetForm();
         }
       })
       .catch((reason) => {
         const message = `Error updating measure "${measure.measureName}"`;
+        handleToast("danger", message, true);
         // to do: some sort of error handling
         // console.warn(`Error updating measure : ${reason}`);
         setErrorMessage(message);
@@ -246,7 +247,7 @@ const MeasureDefinitions = (props) => {
               </tr>
             </thead>
             <tbody data-testId="measure-definitions-table-body">
-              {visibleDefinitions.length > 0 ? (
+              {visibleDefinitions?.length > 0 ? (
                 visibleDefinitions.map((measureDefinition, index) => (
                   <MeasureDefinitionRow
                     measureDefinition={measureDefinition}
@@ -259,10 +260,6 @@ const MeasureDefinitions = (props) => {
                   button above to add one.
                 </p>
               )}
-              <p data-testId="empty-definitions">
-                There are currently no definitions. Click the (Add Term) button
-                above to add one.
-              </p>
             </tbody>
           </table>
         </div>
@@ -308,9 +305,13 @@ const MeasureDefinitions = (props) => {
           id: "add-measure-definition-dialog",
           onSubmit: formik.handleSubmit,
         }}
-        cancelButtonProps={{ cancelText: "Discard Changes" }}
+        cancelButtonProps={{
+          cancelText: "Discard Changes",
+          "data-testid": "cancel-button",
+        }}
         continueButtonProps={{
           continueText: "Save",
+          "data-testid": "save-button",
           disabled: !(formik.isValid && formik.dirty),
         }}
         children={
