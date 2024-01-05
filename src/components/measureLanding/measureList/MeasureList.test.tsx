@@ -17,6 +17,7 @@ import userEvent from "@testing-library/user-event";
 import { v4 as uuid } from "uuid";
 import ServiceContext, { ServiceConfig } from "../../../api/ServiceContext";
 import { act } from "react-dom/test-utils";
+import { useFeatureFlags } from "@madie/madie-util";
 
 // CSSStyleDeclaration
 const mockPush = jest.fn();
@@ -33,10 +34,7 @@ jest.mock("@madie/madie-util", () => ({
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useFeatureFlags: () => ({
-    export: true,
-    measureVersioning: true,
-    qdmExport: false,
-    qdmVersioning: false,
+    qdmExport: true,
   }),
 }));
 
@@ -1182,7 +1180,7 @@ describe("Measure List component", () => {
     fireEvent.click(getByTestId(`export-measure-${measures[2].id}`));
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
-        "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists."
+        "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists."
       );
     });
     unmount();
@@ -1240,37 +1238,5 @@ describe("Measure List component", () => {
       expect(getByText("Measure exported successfully")).toBeInTheDocument();
     });
     unmount();
-  });
-  it("should not have export or version", async () => {
-    const { getByTestId } = render(
-      <ServiceContext.Provider value={serviceConfig}>
-        <MeasureList
-          measureList={measures}
-          setMeasureList={setMeasureListMock}
-          setTotalPages={setTotalPagesMock}
-          setTotalItems={setTotalItemsMock}
-          setVisibleItems={setVisibleItemsMock}
-          setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
-          activeTab={0}
-          searchCriteria={""}
-          setSearchCriteria={setSearchCriteriaMock}
-          currentLimit={10}
-          currentPage={0}
-          setErrMsg={setErrMsgMock}
-        />
-      </ServiceContext.Provider>
-    );
-    const actionButton = getByTestId(`measure-action-${measures[3].id}`);
-    expect(actionButton).toBeInTheDocument();
-    expect(actionButton).toHaveTextContent("Select");
-    expect(window.location.href).toBe("http://localhost/");
-    fireEvent.click(actionButton);
-    expect(
-      screen.findByTestId(`export-measure-${measures[3].id}`)
-    ).rejects.toThrow();
-    expect(
-      screen.findByTestId(`create-version-measure-${measures[3].id}`)
-    ).rejects.toThrow();
   });
 });

@@ -264,14 +264,11 @@ export default function MeasureList(props: {
     }
     // always on if feature
     if (selected.measureMetaData.draft) {
-      const versionButton = {
+      options.push({
         label: "Version",
         toImplementFunction: checkCreateVersion,
         dataTestId: `create-version-measure-${selected?.id}`,
-      };
-      if (shouldAllowAction(selected, featureFlags.qdmVersioning)) {
-        options.push(versionButton);
-      }
+      });
       // draft should only be available if no other measureSet is in draft, by call
     }
     if (canDraftLookup[selected?.measureSetId]) {
@@ -303,6 +300,23 @@ export default function MeasureList(props: {
   // Ref required or value will be lost on all state changes.
   const abortController = useRef(null);
 
+  const downloadZipFile = (exportData, ecqmTitle, model, version) => {
+    const url = window.URL.createObjectURL(exportData);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute(
+      "download",
+      `${ecqmTitle}-v${version}-${getModelFamily(model)}.zip`
+    );
+    document.body.appendChild(link);
+    link.click();
+    setToastOpen(true);
+    setToastType("success");
+    setToastMessage("Measure exported successfully");
+    setDownloadState("success");
+    document.body.removeChild(link);
+  };
+
   const exportMeasure = async () => {
     setFailureMessage(null);
     setDownloadState("downloading");
@@ -314,20 +328,7 @@ export default function MeasureList(props: {
         targetMeasure.current?.id,
         abortController.current.signal
       );
-      const url = window.URL.createObjectURL(exportData);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute(
-        "download",
-        `${ecqmTitle}-v${version}-${getModelFamily(model)}.zip`
-      );
-      document.body.appendChild(link);
-      link.click();
-      setToastOpen(true);
-      setToastType("success");
-      setToastMessage("Measure exported successfully");
-      setDownloadState("success");
-      document.body.removeChild(link);
+      downloadZipFile(exportData, ecqmTitle, model, version);
     } catch (err) {
       const errorStatus = err.response?.status;
       const targetedMeasure = targetMeasure.current;
@@ -372,14 +373,14 @@ export default function MeasureList(props: {
           }
           if (missing.length <= 0) {
             const message =
-              "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists.";
+              "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists.";
             setFailureMessage(message);
           } else if (missing.length > 0) {
             setFailureMessage(missing);
           }
         } else {
           const message =
-            "Unable to Export measure. Measure Bundle could not be generated. Please try again and contact the Help Desk if the problem persists.";
+            "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists.";
           setFailureMessage(message);
         }
       }

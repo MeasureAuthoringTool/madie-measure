@@ -47,9 +47,7 @@ jest.mock("@madie/madie-util", () => ({
     getAccessToken: () => "test.jwt",
   })),
   checkUserCanEdit: jest.fn(),
-  useFeatureFlags: () => ({
-    populationCriteriaTabs: true,
-  }),
+  useFeatureFlags: () => ({}),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => null),

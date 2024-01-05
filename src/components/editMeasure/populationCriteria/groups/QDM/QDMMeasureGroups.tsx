@@ -1,7 +1,6 @@
-import React, { useEffect, useCallback, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useRouteMatch, useLocation, useHistory } from "react-router-dom";
-import tw, { styled } from "twin.macro";
-import * as ucum from "@lhncbc/ucum-lhc";
+import tw from "twin.macro";
 import "styled-components/macro";
 import {
   Measure,
@@ -46,7 +45,6 @@ import GroupPopulation from "../groupPopulations/GroupPopulation";
 import MeasureGroupObservation from "../observation/MeasureGroupObservation";
 import * as _ from "lodash";
 import MeasureGroupAlerts from "../MeasureGroupAlerts";
-import AddRemovePopulation from "../groupPopulations/AddRemovePopulation";
 import GroupsDescription from "../GroupsDescription";
 import MeasureGroupScoringUnit from "../scoringUnit/MeasureGroupScoringUnit";
 
@@ -58,7 +56,6 @@ import "../MeasureGroups.scss";
 import {
   ButtonSpacer,
   FormFieldInner,
-  FieldInput,
   FieldLabel,
   FieldSeparator,
   MenuItemContainer,
@@ -224,9 +221,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   // Todo option should be an Array when passing to AutoComplete.
   // warning during test cases
   const [addStratClicked, setAddStratClicked] = useState(false);
-  const [populationBasisValues, setPopulationBasisValues] =
-    useState<string[]>();
-  const [associationChanged, setAssociationChanged] = useState(false);
 
   const [cqlDefinitionDataTypes, setCqlDefinitionDataTypes] =
     useState<CqlDefineDataTypes>();
@@ -530,7 +524,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           await updateMeasureFromDb(measure.id);
         })
         .then(() => {
-          setAssociationChanged(false);
           handleDialogClose();
           handleToast(
             "success",
@@ -678,51 +671,12 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     }
   }, [measure]);
 
-  /*
-  we consume the cs table, build in shape of {
-    label: ucumcode + name,
-    value: {
-      label: code + name,
-      guidance:
-      code:
-      name:
-      system:
+  const fnHelperText = (helperText: any): string => {
+    if (Boolean(formik.errors.scoringUnit)) {
+      return `${JSON.stringify(helperText.value)}`;
     }
-  }
-*/
-  const [ucumOptions, setUcumOptions] = useState([]);
-  const [ucumUnits, setUcumUnits] = useState([]);
-
-  const buildUcumUnits = useCallback(() => {
-    const options = [];
-
-    for (const [key, value] of Object.entries(ucumUnits)) {
-      const current = value;
-      const { csCode_, guidance_, name_ } = current;
-      const option = {
-        code: csCode_,
-        guidance: guidance_,
-        name: name_,
-        system: "https://clinicaltables.nlm.nih.gov/",
-      };
-      options.push(option);
-    }
-    setUcumOptions(options);
-  }, [ucumUnits, setUcumOptions]);
-
-  useEffect(() => {
-    if (ucumUnits) {
-      buildUcumUnits();
-    }
-  }, [ucumUnits, buildUcumUnits]);
-
-  useEffect(() => {
-    if (!ucumUnits.length) {
-      ucum.UcumLhcUtils.getInstance();
-      const unitCodes = ucum.UnitTables.getInstance().unitCodes_;
-      setUcumUnits(unitCodes);
-    }
-  }, [ucum, ucumUnits]);
+    return undefined;
+  };
   return (
     <div tw="lg:col-span-5 pl-2 pr-2" data-testid="qdm-groups">
       <FormikProvider value={formik}>
@@ -820,14 +774,16 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                   }}
                 >
                   <MeasureGroupScoringUnit
+                    error={Boolean(formik.errors.scoringUnit)}
+                    helperText={fnHelperText(formik.errors.scoringUnit)}
                     placeholder="Search"
                     {...formik.getFieldProps("scoringUnit")}
                     onChange={(newValue) => {
                       formik.setFieldValue("scoringUnit", newValue);
                     }}
-                    options={ucumOptions}
                     canEdit={canEdit}
                   />
+
                   <div style={{ display: "inline-flex", width: "100%" }} />
                   <div style={{ display: "inline-flex", width: "100%" }} />
                   <div style={{ display: "inline-flex", width: "100%" }} />
@@ -927,9 +883,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                     scoring={formik.values.scoring}
                                     canEdit={canEdit}
                                     replaceCallback={arrayHelpers.replace}
-                                    setAssociationChanged={
-                                      setAssociationChanged
-                                    }
                                   />
                                   {/* PopulationDescription */}
                                   <GroupsDescription
@@ -949,19 +902,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                     }
                                   />
                                 </div>
-                                {/* Single component for add and remove */}
-                                <AddRemovePopulation
-                                  field={fieldProps}
-                                  scoring={formik.values.scoring}
-                                  index={index}
-                                  populations={formik.values.populations}
-                                  population={population}
-                                  canEdit={canEdit}
-                                  insertCallback={arrayHelpers.insert}
-                                  removeCallback={arrayHelpers.remove}
-                                  replaceCallback={arrayHelpers.replace}
-                                  setAssociationChanged={setAssociationChanged}
-                                />
                                 {/* add or remove logic must live here */}
                                 <MeasureGroupObservation
                                   canEdit={canEdit}
@@ -1152,12 +1092,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                       variant="cyan"
                       type="submit"
                       data-testid="group-form-submit-btn"
-                      disabled={
-                        !(
-                          formik.isValid &&
-                          (formik.dirty || associationChanged)
-                        )
-                      }
+                      disabled={!(formik.isValid && formik.dirty)}
                     >
                       Save
                     </Button>

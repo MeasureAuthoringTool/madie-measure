@@ -6,7 +6,7 @@ import {
   useHistory,
 } from "react-router-dom";
 import tw, { styled } from "twin.macro";
-import { routeHandlerStore, useFeatureFlags } from "@madie/madie-util";
+import { routeHandlerStore } from "@madie/madie-util";
 import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
 export interface RouteHandlerState {
   canTravel: boolean;
@@ -27,15 +27,13 @@ const EditMeasureNav = ({ isQDM }) => {
   // TODO: try activeClassName of NavLink instead of manual path check
   const { pathname } = useLocation();
   let history = useHistory();
-  const featureFlags = useFeatureFlags();
-  const populationCriteriaTabs = !!featureFlags?.populationCriteriaTabs;
 
   if (
     pathname !== `${url}/details` &&
     pathname !== `${url}/details/model&measurement-period` &&
     pathname !== `${url}/cql-editor` &&
-    (pathname !== `${url}/supplemental-data` || !populationCriteriaTabs) &&
-    (pathname !== `${url}/risk-adjustment` || !populationCriteriaTabs) &&
+    pathname !== `${url}/supplemental-data` &&
+    pathname !== `${url}/risk-adjustment` &&
     pathname !== `${url}/base-configuration` &&
     pathname !== `${url}/reporting` &&
     pathname !== `${url}/details/measure-steward` &&
@@ -44,6 +42,7 @@ const EditMeasureNav = ({ isQDM }) => {
     pathname !== `${url}/details/measure-disclaimer` &&
     pathname !== `${url}/details/measure-rationale` &&
     pathname !== `${url}/details/measure-guidance` &&
+    pathname !== `${url}/details/measure-definitions` &&
     pathname !== `${url}/details/measure-clinical-recommendation` &&
     pathname !== `${url}/review-info` &&
     !pathname.startsWith(`${url}/test-cases`) &&

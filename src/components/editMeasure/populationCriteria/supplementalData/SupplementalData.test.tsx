@@ -1,5 +1,5 @@
 import * as React from "react";
-import { MeasureCQL } from "../../../../common/MeasureCQL";
+import { MeasureCQL } from "../../../common/MeasureCQL";
 import {
   render,
   screen,
@@ -8,16 +8,16 @@ import {
   within,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import RiskAdjustment from "./QdmRiskAdjustment";
 import { Measure } from "@madie/madie-models";
 import {
   ServiceConfig,
   ApiContextProvider,
-} from "../../../../../api/ServiceContext";
+} from "../../../../api/ServiceContext";
 import useMeasureServiceApi, {
   MeasureServiceApi,
-} from "../../../../../api/useMeasureServiceApi";
+} from "../../../../api/useMeasureServiceApi";
 import { checkUserCanEdit } from "@madie/madie-util";
+import SupplementalData from "./SupplementalData";
 
 const serviceConfig: ServiceConfig = {
   measureService: {
@@ -43,13 +43,13 @@ const mockTestMeasure = {
   measureSetId: "testMeasureId",
   cql: MeasureCQL,
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
-  riskAdjustments: [
+  supplementalData: [
     {
       definition: "Initial Population",
       description: "",
     },
   ],
-  riskAdjustmentDescription: "test description",
+  supplementalDataDescription: "test description",
 } as unknown as Measure;
 
 jest.mock("@madie/madie-util", () => ({
@@ -77,37 +77,41 @@ jest.mock("@madie/madie-util", () => ({
   },
 }));
 
-jest.mock("../../../../../api/useMeasureServiceApi");
+jest.mock("../../../../api/useMeasureServiceApi");
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 let measureServiceApi: MeasureServiceApi;
 
-const RenderRiskAdjustment = () => {
+const RenderSupplementalElements = () => {
   return render(
     <ApiContextProvider value={serviceConfig}>
-      <RiskAdjustment />
+      <SupplementalData />
     </ApiContextProvider>
   );
 };
 
-describe("QdmRiskAdjustment Component", () => {
-  it("Should render risk Adjustment component with the values saved in DB", async () => {
-    RenderRiskAdjustment();
-    const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
-    expect(riskAdjustmentSelect).toBeInTheDocument();
+describe("SupplementalData Component", () => {
+  it("Should render Supplemental Data component with the values saved in DB", async () => {
+    RenderSupplementalElements();
+    const suppolementalElementsSelect = screen.getByTestId(
+      "supplemental-data-dropdown"
+    );
+    expect(suppolementalElementsSelect).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Initial Population" })
     ).toBeInTheDocument();
 
-    const description = screen.getByTestId("riskAdjustmentDescription");
+    const description = screen.getByTestId("supplementalDataDescription");
     expect(description).toHaveTextContent("test description");
   });
 
   it("Should render disabled components if the user doesn't have permissions", async () => {
     checkUserCanEdit.mockReturnValue(false);
-    RenderRiskAdjustment();
-    const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
-    expect(riskAdjustmentSelect).toBeInTheDocument();
+    RenderSupplementalElements();
+    const suppolementalElementsSelect = screen.getByTestId(
+      "supplemental-data-dropdown"
+    );
+    expect(suppolementalElementsSelect).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Initial Population" })
     ).toBeInTheDocument();
@@ -115,15 +119,15 @@ describe("QdmRiskAdjustment Component", () => {
     const comboBoxInput = screen.getByRole("combobox");
     expect(comboBoxInput).toBeDisabled();
 
-    const description = screen.getByTestId("riskAdjustmentDescription");
+    const description = screen.getByTestId("supplementalDataDescription");
     expect(description).toHaveTextContent("test description");
     expect(description).toBeDisabled();
   });
 
-  it("Should successfully update risk Adjustment values and save to DB", async () => {
+  it("Should successfully update supplemental Elements values and save to DB", async () => {
     checkUserCanEdit.mockReturnValue(true);
     // Mocking service call to update measure
-    const newRiskAdjustments = [
+    const newSupplementalData = [
       {
         definition: "Initial Population",
         description: "",
@@ -133,11 +137,11 @@ describe("QdmRiskAdjustment Component", () => {
         description: "",
       },
     ];
-    const newRiskAdjustmentDescription = "Updated test description";
+    const newSupplementalDataDescription = "Updated test description";
     const updatedMeasure = {
       ...mockTestMeasure,
-      riskAdjustments: newRiskAdjustments,
-      riskAdjustmentDescription: newRiskAdjustmentDescription,
+      supplementalData: newSupplementalData,
+      supplementalDataDescription: newSupplementalDataDescription,
     };
     measureServiceApi = {
       updateMeasure: jest
@@ -146,18 +150,21 @@ describe("QdmRiskAdjustment Component", () => {
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => measureServiceApi);
 
-    RenderRiskAdjustment();
+    RenderSupplementalElements();
 
-    // Verifies if RA already loads values from store and able to add new
-    const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
-    expect(riskAdjustmentSelect).toBeInTheDocument();
+    // Verifies if SE already loads values from store and able to add new
+    const suppolementalElementsSelect = screen.getByTestId(
+      "supplemental-data-dropdown"
+    );
+    expect(suppolementalElementsSelect).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Initial Population" })
     ).toBeInTheDocument();
-    const riskAdjustmentButton =
-      within(riskAdjustmentSelect).getByTitle("Open");
+    const supplementalDataButton = within(
+      suppolementalElementsSelect
+    ).getByTitle("Open");
 
-    userEvent.click(riskAdjustmentButton);
+    userEvent.click(supplementalDataButton);
     await waitFor(() => {
       userEvent.click(screen.getByText("SDE Ethnicity"));
     });
@@ -165,8 +172,8 @@ describe("QdmRiskAdjustment Component", () => {
       screen.getByRole("button", { name: "SDE Ethnicity" })
     ).toBeInTheDocument();
 
-    // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByTestId("riskAdjustmentDescription");
+    // Verifies if SD description already loads values from store and able to update
+    const description = screen.getByTestId("supplementalDataDescription");
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
       target: { value: "Updated test description" },
@@ -181,7 +188,7 @@ describe("QdmRiskAdjustment Component", () => {
     await waitFor(
       () =>
         expect(
-          screen.getByTestId("risk-adjustment-success")
+          screen.getByTestId("supplemental-data-success")
         ).toBeInTheDocument(),
       {
         timeout: 5000,
@@ -201,16 +208,16 @@ describe("QdmRiskAdjustment Component", () => {
     );
   });
 
-  it("Should fail an update to risk adjustment values because of unexpected internal server issues", async () => {
+  it("Should fail an update to supplemental data values because of unexpected internal server issues", async () => {
     measureServiceApi = {
       updateMeasure: jest.fn().mockRejectedValue({ status: 500, data: null }),
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => measureServiceApi);
 
-    RenderRiskAdjustment();
+    RenderSupplementalElements();
 
-    // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByTestId("riskAdjustmentDescription");
+    // Verifies if SD description already loads values from store and able to update
+    const description = screen.getByTestId("supplementalDataDescription");
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
       target: { value: "Updated test description" },
@@ -225,14 +232,16 @@ describe("QdmRiskAdjustment Component", () => {
     await waitFor(() =>
       expect(measureServiceApi.updateMeasure).toBeCalledWith({
         ...mockTestMeasure,
-        riskAdjustmentDescription: "Updated test description",
+        supplementalDataDescription: "Updated test description",
       })
     );
 
     // verifies if error toast message is displayed because of service failure
     await waitFor(
       () =>
-        expect(screen.getByTestId("risk-adjustment-error")).toBeInTheDocument(),
+        expect(
+          screen.getByTestId("supplemental-data-error")
+        ).toBeInTheDocument(),
       {
         timeout: 5000,
       }
@@ -246,28 +255,31 @@ describe("QdmRiskAdjustment Component", () => {
   });
 
   it("Should not discard changes on click of cancel button on discard model", async () => {
-    RenderRiskAdjustment();
+    RenderSupplementalElements();
 
-    // Verifies if RA already loads values from store and able to add new
-    const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
-    expect(riskAdjustmentSelect).toBeInTheDocument();
+    // Verifies if SD already loads values from store and able to add new
+    const supplementalDataSelect = screen.getByTestId(
+      "supplemental-data-dropdown"
+    );
+    expect(supplementalDataSelect).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Initial Population" })
     ).toBeInTheDocument();
-    const riskAdjustmentButton =
-      within(riskAdjustmentSelect).getByTitle("Open");
+    const supplementalDataButton = within(supplementalDataSelect).getByTitle(
+      "Open"
+    );
 
-    userEvent.click(riskAdjustmentButton);
+    userEvent.click(supplementalDataButton);
     await waitFor(() => {
       userEvent.click(screen.getByText("SDE Ethnicity"));
     });
-    userEvent.click(riskAdjustmentButton); // To collapse the dropdown
+    userEvent.click(supplementalDataButton); // To collapse the dropdown
     expect(
       screen.getByRole("button", { name: "SDE Ethnicity" })
     ).toBeInTheDocument();
 
-    // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByTestId("riskAdjustmentDescription");
+    // Verifies if SD description already loads values from store and able to update
+    const description = screen.getByTestId("supplementalDataDescription");
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
       target: { value: "Updated test description" },
@@ -299,28 +311,31 @@ describe("QdmRiskAdjustment Component", () => {
   });
 
   it("should reset after discarding changes", async () => {
-    RenderRiskAdjustment();
+    RenderSupplementalElements();
 
-    // Verifies if RA already loads values from store and able to add new
-    const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
-    expect(riskAdjustmentSelect).toBeInTheDocument();
+    // Verifies if SD already loads values from store and able to add new
+    const supplementalDataSelect = screen.getByTestId(
+      "supplemental-data-dropdown"
+    );
+    expect(supplementalDataSelect).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Initial Population" })
     ).toBeInTheDocument();
-    const riskAdjustmentButton =
-      within(riskAdjustmentSelect).getByTitle("Open");
+    const supplementalDataButton = within(supplementalDataSelect).getByTitle(
+      "Open"
+    );
 
-    userEvent.click(riskAdjustmentButton);
+    userEvent.click(supplementalDataButton);
     await waitFor(() => {
       userEvent.click(screen.getByText("SDE Ethnicity"));
     });
-    userEvent.click(riskAdjustmentButton); // To collapse the dropdown
+    userEvent.click(supplementalDataButton); // To collapse the dropdown
     expect(
       screen.getByRole("button", { name: "SDE Ethnicity" })
     ).toBeInTheDocument();
 
-    // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByTestId("riskAdjustmentDescription");
+    // Verifies if SD description already loads values from store and able to update
+    const description = screen.getByTestId("supplementalDataDescription");
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
       target: { value: "Updated test description" },

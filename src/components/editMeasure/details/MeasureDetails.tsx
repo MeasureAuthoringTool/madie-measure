@@ -9,11 +9,16 @@ import {
 } from "react-router-dom";
 import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureMetadata from "./measureMetadata/MeasureMetadata";
-import { routeHandlerStore, useDocumentTitle } from "@madie/madie-util";
+import {
+  routeHandlerStore,
+  useDocumentTitle,
+  useFeatureFlags,
+} from "@madie/madie-util";
 import StewardAndDevelopers from "./stewardAndDevelopers/StewardAndDevelopers";
 import ModelAndMeasurementPeriod from "./modelAndMeasurementPeriod/ModelAndMeasurementPeriod";
 import "./MeasureDetails.scss";
 import EditMeasureDetailsSideNav from "./EditMeasureDetailsSideNav";
+import QDMMeasureDefinitions from "./QDMMeasureDefinitions";
 const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
 export interface RouteHandlerState {
   canTravel: boolean;
@@ -36,6 +41,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   const rationaleLink = `${path}/measure-rationale`;
   const guidanceLink = `${path}/measure-guidance`;
   const clinicalLink = `${path}/measure-clinical-recommendation`;
+  const definitionsLink = `${path}/measure-definitions`;
   // const riskAdjustmentLink = `${path}/measure-risk-adjustment`;
 
   const links = [
@@ -85,6 +91,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
           dataTestId: "leftPanelMeasureGuidance",
           id: "sideNavMeasureGuidance",
         },
+        //
         {
           title: "Clinical Recommendation",
           href: clinicalLink,
@@ -118,6 +125,15 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
       ],
     },
   ];
+  const featureFlags = useFeatureFlags();
+  if (featureFlags?.qdmMeasureDefinitions) {
+    links[1].links.splice(3, 0, {
+      title: "Definition (Terms)",
+      href: definitionsLink,
+      dataTestId: "leftPanelQDMMeasureDefinitions",
+      id: "sideNavQDMMeasureDefinitions",
+    });
+  }
   const history = useHistory();
   const [routeHandlerState, setRouteHandlerState] = useState<RouteHandlerState>(
     routeHandlerStore.state
@@ -208,6 +224,11 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               setErrorMessage={setErrorMessage}
             />
           </Route>
+          {featureFlags.qdmMeasureDefinitions && (
+            <Route path={definitionsLink}>
+              <QDMMeasureDefinitions />
+            </Route>
+          )}
           {/* <Route path={riskAdjustmentLink}>
             <MeasureMetadata
               measureMetadataId="RiskAdjustment"

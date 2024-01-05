@@ -90,9 +90,7 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
   },
-  useFeatureFlags: () => ({
-    populationCriteriaTabs: true,
-  }),
+  useFeatureFlags: () => ({}),
 }));
 
 const renderPopulationCriteriaHomeComponent = async (
@@ -172,7 +170,6 @@ describe("PopulationCriteriaHome", () => {
       name: /supplemental data/i,
     });
     // verifies if the SD component is loaded and the left nav link is active
-    expect(screen.getByTestId("supplemental-data-form")).toBeInTheDocument();
     expect(supplementalDataButton).toHaveAttribute("aria-selected", "true");
   });
 
