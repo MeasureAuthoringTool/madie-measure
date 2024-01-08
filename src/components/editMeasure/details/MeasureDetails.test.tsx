@@ -232,6 +232,24 @@ describe("MeasureDetails component", () => {
     expect(getByTestId("measure-definition-terms")).toBeInTheDocument();
   });
 
+  it("should render the MeasureMetadata component for references", () => {
+    const { getByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter
+          initialEntries={[{ pathname: "/foo/measure-references" }]}
+        >
+          <Route path="/foo">
+            <MeasureDetails setErrorMessage={setErrorMessage} />
+          </Route>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
+    expect(getByTestId("leftPanelQDMMeasureDefinitions")).toBeInTheDocument();
+    expect(getByTestId("measure-references")).toBeInTheDocument();
+  });
+
   it("should not render the component for measure-definitions", () => {
     useFeatureFlags.mockReturnValue({ qdmMeasureDefinitions: false });
     const { getByTestId, queryByTestId } = render(
@@ -249,7 +267,7 @@ describe("MeasureDetails component", () => {
       "leftPanelQDMMeasureDefinitions"
     );
     expect(leftPanelQDMMeasureDefinitions).toBeNull();
-    const measureDefinitionTerms = queryByTestId("measure-definition-terms");
+    const measureDefinitionTerms = queryByTestId("measure-definitions");
     expect(measureDefinitionTerms).toBeNull();
   });
 });
