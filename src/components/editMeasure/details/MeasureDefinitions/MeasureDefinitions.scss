@@ -18,6 +18,14 @@ $border-color: #8c8c8c;
       text-align: left;
     }
 
+    tbody > tr {
+      border-bottom: solid 1px $border-color;
+    }
+
+    tbody > tr:last-of-type {
+      border-bottom: solid 1px transparent;
+    }
+
     th,
     td {
       padding: 1.2rem 1.4rem;
@@ -35,5 +43,23 @@ $border-color: #8c8c8c;
   tbody > p {
     text-align: center;
     padding: 1.2rem;
+  }
+}
+
+.pagination-container {
+  display: flex;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(151, 151, 151, 0.17);
+  border-width: 0 1px 1px 1px;
+  border-top: solid 1px #8c8c8c;
+}
+
+#add-measure-definition-dialog {
+  .MuiButtonBase-root > svg {
+    color: #d92f2f;
+  }
+
+  .MuiFormControl-root:first-of-type {
+    margin-bottom: 24px;
   }
 }
