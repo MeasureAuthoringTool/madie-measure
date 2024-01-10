@@ -5,34 +5,13 @@ import MeasureDefinitionRow from "./MeasureMetaDataRow";
 afterEach(cleanup);
 
 describe("Measure MetaData Row Component", () => {
-  it("Measure Definition Row renders at all", async () => {
+  it("Measure MetaData rows renders at all", async () => {
     const { getByText } = render(
-      <MeasureDefinitionRow
-        value={{
-          term: "term",
-          definition: "I'm a measure definition",
-        }}
-        type="definition"
-      />
+      <MeasureDefinitionRow name="name" description="description" />
     );
-    const term = getByText("term");
-    expect(term).toBeInTheDocument();
-    const definition = getByText("I'm a measure definition");
-    expect(definition).toBeInTheDocument();
-  });
-  it("Measure Definition Row renders at all", async () => {
-    const { getByText } = render(
-      <MeasureDefinitionRow
-        value={{
-          referenceType: "Criteria",
-          referenceText: "I'm a reference",
-        }}
-        type="reference"
-      />
-    );
-    const criteria = getByText("Criteria");
-    expect(criteria).toBeInTheDocument();
-    const reference = getByText("I'm a reference");
-    expect(reference).toBeInTheDocument();
+    const name = getByText("name");
+    expect(name).toBeInTheDocument();
+    const description = getByText("description");
+    expect(description).toBeInTheDocument();
   });
 });

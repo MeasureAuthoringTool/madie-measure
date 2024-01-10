@@ -3,24 +3,18 @@ import React from "react";
 // measureMetaData.measureDefinition = [{term, definition}];
 // measureMetaData.measureReferences = [{referenceText, ReferenceType}]
 
-const MeasureMetaDataRow = ({ value, type }) => {
-  if (type === "definition") {
-    const { term, definition } = value;
-    return (
-      <tr>
-        <td>{term}</td>
-        <td>{definition}</td>
-      </tr>
-    );
-  } else {
-    const { referenceType, referenceText } = value;
-    return (
-      <tr>
-        <td>{referenceType}</td>
-        <td>{referenceText}</td>
-      </tr>
-    );
-  }
-};
+interface MeasureMetaDataRowProps {
+  name: string;
+  description: string;
+}
 
+const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
+  const { name, description } = props;
+  return (
+    <tr>
+      <td>{name}</td>
+      <td>{description}</td>
+    </tr>
+  );
+};
 export default MeasureMetaDataRow;

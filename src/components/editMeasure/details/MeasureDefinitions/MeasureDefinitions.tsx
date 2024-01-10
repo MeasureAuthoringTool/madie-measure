@@ -20,8 +20,8 @@ import { MeasureDefininitionsValidator } from "./MeasureDefinitionsValidator";
 import "../MeasureMetaDataTable.scss";
 
 interface MeasureDefinition {
-  definition: String;
-  term: String;
+  definition: string;
+  term: string;
 }
 
 // This component should likely be reused for QICore. At that time it would make sense to pull conditionally import validation logic and whatever else may be different.
@@ -250,8 +250,8 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
               {visibleDefinitions?.length > 0 ? (
                 visibleDefinitions.map((measureDefinition, index) => (
                   <MeasureMetaDataRow
-                    value={measureDefinition}
-                    type="definition"
+                    name={measureDefinition.term}
+                    description={measureDefinition.definition}
                     key={`${measureDefinition.term}-${index}`}
                   />
                 ))

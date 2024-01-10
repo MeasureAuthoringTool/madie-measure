@@ -280,9 +280,9 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
               {visibleReferences?.length > 0 ? (
                 visibleReferences.map((reference) => (
                   <MeasureMetaDataRow
-                    value={reference}
+                    name={reference.referenceType}
+                    description={reference.referenceText}
                     key={reference.id}
-                    type="reference"
                   />
                 ))
               ) : (
@@ -359,20 +359,11 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
               data-testid={`measure-referenceType`}
               disabled={!canEdit}
               required
-              //   SelectDisplayProps={{
-              //     "aria-required": "true",
-              //   }}
+              SelectDisplayProps={{
+                "aria-required": "true",
+              }}
               {...formik.getFieldProps("referenceType")}
               options={REFERENCE_OPTIONS}
-              //    value={selectedValueSet ? selectedValueSet.oid : ""}
-              //    renderValue={(value) => {
-              //      if (value === "") {
-              //        return placeHolder("Select Value Set / Direct Reference Code");
-              //      }
-              //      return selectedValueSet?.display_name;
-              //    }}
-
-              // onChange={handleValueSetChange}
             />
 
             <TextArea
