@@ -21,7 +21,7 @@ describe("Measure Definition Row Component", () => {
     const definition = getByText("I'm a measure definition");
     expect(definition).toBeInTheDocument();
 
-    const editButton = await getByTestId(
+    const editButton = getByTestId(
       "measure-definition-edit-term-I'm a measure definition"
     );
     expect(editButton).toBeInTheDocument();
