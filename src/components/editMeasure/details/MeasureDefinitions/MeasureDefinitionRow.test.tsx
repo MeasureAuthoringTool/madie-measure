@@ -5,7 +5,7 @@ import MeasureDefinitionRow from "./MeasureDefinitionRow";
 afterEach(cleanup);
 
 describe("Measure Definition Row Component", () => {
-  it("Measure Definition Row renders at all", async () => {
+  it("Measure Definition Row renders at all", () => {
     const { getByText, getByTestId } = render(
       <MeasureDefinitionRow
         measureDefinition={{
