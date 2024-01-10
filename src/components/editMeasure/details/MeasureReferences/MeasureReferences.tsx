@@ -369,7 +369,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
             <TextArea
               required
               disabled={!canEdit}
-              label="References"
+              label="Reference"
               placeholder="Enter"
               readOnly={!canEdit}
               id="measure-referenceText"
