@@ -83,8 +83,33 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
       setMeasureReferences(copiedDefinitions);
     }
   }, [setMeasureReferences, measure]);
+
   const handleSubmit = (values: Reference) => {
-    // make a copy of the metaData
+    //  we want to first sort by referenceType then by referenceText
+    const sortByTypeThenReferences = (references: Reference[]): Reference[] => {
+      const sorterFunction = (a: Reference, b: Reference) => {
+        const type1 = a.referenceType.toLowerCase();
+        const type2 = b.referenceType.toLowerCase();
+        const reference1 = a.referenceText.toLowerCase();
+        const reference2 = b.referenceText.toLowerCase();
+        if (type1 < type2) {
+          return -1;
+        }
+        if (type2 > type1) {
+          return 1;
+        }
+        if (type1 === type2) {
+          if (reference1 < reference2) {
+            return -1;
+          }
+          if (reference2 > reference1) {
+            return 1;
+          }
+        }
+        return 0;
+      };
+      return references.sort(sorterFunction);
+    };
     const copiedMetaData = { ...measure?.measureMetaData };
     if (
       copiedMetaData.hasOwnProperty("references") &&
@@ -92,7 +117,10 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
     ) {
       // if it does exist we push to it
       copiedMetaData.references.push(values);
-      copiedMetaData.references.sort();
+      copiedMetaData.references = sortByTypeThenReferences(
+        copiedMetaData.references
+      );
+      // copiedMetaData.references.sort();
     } else {
       // if none exist, we will init our the array
       copiedMetaData.references = [values];
