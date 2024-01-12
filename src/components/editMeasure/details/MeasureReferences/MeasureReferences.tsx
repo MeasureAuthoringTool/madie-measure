@@ -6,31 +6,37 @@ import {
   Button,
   MadieDialog,
   Pagination,
-  TextField,
+  Select,
   TextArea,
   Toast,
 } from "@madie/madie-design-system/dist/react";
-import { Typography } from "@mui/material";
+import { Typography, MenuItem } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { measureStore, checkUserCanEdit } from "@madie/madie-util";
 import { useFormik } from "formik";
-import MeasureDefinitionRow from "./MeasureDefinitionRow";
-import { MeasureDefininitionsValidator } from "./MeasureDefinitionsValidator";
+import MeasureMetaDataRow from "../MeasureMetaDataRow";
+import { MeasureReferencesValidator } from "./MeasureReferencesValidator";
+import { Reference } from "@madie/madie-models";
 
 import "../MeasureMetaDataTable.scss";
 
-interface MeasureDefinition {
-  id?: string;
-  definition: string;
-  term: string;
-}
+const REFERENCE_TYPES = [
+  "Citation",
+  "Documentation",
+  "Justification",
+  "Unknown",
+];
+const REFERENCE_OPTIONS = REFERENCE_TYPES.map((ref, i) => (
+  <MenuItem key={`${ref}-${i}`} data-testid={`${ref}-option`} value={ref}>
+    {ref}
+  </MenuItem>
+));
 
-// This component should likely be reused for QICore. At that time it would make sense to pull conditionally import validation logic and whatever else may be different.
-interface MeasureDefinitionsProps {
+interface MeasureReferencesProps {
   setErrorMessage: Function;
 }
 
-const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
+const MeasureReferences = (props: MeasureReferencesProps) => {
   const { setErrorMessage } = props;
   const { search } = useLocation();
   const history = useHistory();
@@ -43,8 +49,6 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
       subscription.unsubscribe();
     };
   }, []);
-  const [selectedDefinition, setSelectedDefinition] =
-    useState<MeasureDefinition>(null);
   // Toast utilities
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
@@ -65,60 +69,61 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
     measure?.measureSet?.acls,
     measure?.measureMetaData?.draft
   );
-  const sortDefinitions = (measureDefinitions: Array<MeasureDefinition>) => {
-    if (measureDefinitions) {
-      return measureDefinitions.sort((a, b) => a.term.localeCompare(b.term));
-    } else {
-      return [];
-    }
-  };
   const INITIAL_VALUES = {
-    id: selectedDefinition?.id,
-    term: selectedDefinition?.term,
-    definition: selectedDefinition?.definition,
-  } as MeasureDefinition;
-  const [measureDefinitions, setMeasureDefinitions] = useState<
-    MeasureDefinition[]
-  >(sortDefinitions(measure?.measureMetaData?.measureDefinitions));
-
+    referenceType: "",
+    referenceText: "",
+  } as Reference;
+  const [measureReferences, setMeasureReferences] = useState<Reference[]>(
+    measure?.measureMetaData?.references || []
+  );
   // we ideally will always make a new copy of the measure. Lets just listen for that update and then write our definitions to local state.
   useEffect(() => {
-    if (measure?.measureMetaData?.measureDefinitions) {
-      const copiedDefinitions = [
-        ...measure?.measureMetaData?.measureDefinitions,
-      ];
-      setMeasureDefinitions(copiedDefinitions);
+    if (measure?.measureMetaData?.references) {
+      const copiedDefinitions = [...measure?.measureMetaData?.references];
+      setMeasureReferences(copiedDefinitions);
     }
-  }, [setMeasureDefinitions, measure]);
-  const handleSubmit = (values: MeasureDefinition) => {
-    // make a copy of the metaData
+  }, [setMeasureReferences, measure]);
+
+  const handleSubmit = (values: Reference) => {
+    //  we want to first sort by referenceType then by referenceText
+    const sortByTypeThenReferences = (references: Reference[]): Reference[] => {
+      const sorterFunction = (a: Reference, b: Reference) => {
+        const type1 = a.referenceType.toLowerCase();
+        const type2 = b.referenceType.toLowerCase();
+        const reference1 = a.referenceText.toLowerCase();
+        const reference2 = b.referenceText.toLowerCase();
+        if (type1 < type2) {
+          return -1;
+        }
+        if (type2 > type1) {
+          return 1;
+        }
+        if (type1 === type2) {
+          if (reference1 < reference2) {
+            return -1;
+          }
+          if (reference2 > reference1) {
+            return 1;
+          }
+        }
+        return 0;
+      };
+      return references.sort(sorterFunction);
+    };
     const copiedMetaData = { ...measure?.measureMetaData };
-    // confirm it has the measureDefinitions key
     if (
-      copiedMetaData.hasOwnProperty("measureDefinitions") &&
-      Array.isArray(copiedMetaData.measureDefinitions)
+      copiedMetaData.hasOwnProperty("references") &&
+      Array.isArray(copiedMetaData.references)
     ) {
-      //when adding a new definition
-      if (!selectedDefinition) {
-        // if it does exist we push to it
-        copiedMetaData.measureDefinitions.push(values);
-        copiedMetaData.measureDefinitions = [
-          ...sortDefinitions(copiedMetaData.measureDefinitions),
-        ];
-      } else {
-        const newMeasureDefinitions: Array<MeasureDefinition> =
-          copiedMetaData.measureDefinitions.filter(
-            (measureDefinition) =>
-              measureDefinition.id !== selectedDefinition.id
-          );
-        newMeasureDefinitions.push(values);
-        copiedMetaData.measureDefinitions = [
-          ...sortDefinitions(newMeasureDefinitions),
-        ];
-      }
+      // if it does exist we push to it
+      copiedMetaData.references.push(values);
+      copiedMetaData.references = sortByTypeThenReferences(
+        copiedMetaData.references
+      );
+      // copiedMetaData.references.sort();
     } else {
       // if none exist, we will init our the array
-      copiedMetaData.measureDefinitions = [values];
+      copiedMetaData.references = [values];
     }
     const modifiedMeasure = {
       ...measure,
@@ -130,7 +135,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
         //@ts-ignore
         const { status, data } = res;
         if (status === 200) {
-          handleToast("success", `Measure Definition Saved Successfully`, true);
+          handleToast("success", `Measure Reference Saved Successfully`, true);
           updateMeasure(data);
           toggleOpen();
           formik.resetForm();
@@ -155,9 +160,8 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
 
   const formik = useFormik({
     initialValues: { ...INITIAL_VALUES },
-    enableReinitialize: true,
-    validationSchema: MeasureDefininitionsValidator,
-    onSubmit: async (values: MeasureDefinition) => await handleSubmit(values),
+    validationSchema: MeasureReferencesValidator,
+    onSubmit: async (values: Reference) => await handleSubmit(values),
   });
 
   function formikErrorHandler(name: string, isError: boolean) {
@@ -168,7 +172,6 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
   const [open, setOpen] = useState<boolean>(false);
   const toggleOpen = () => {
     setOpen(!open);
-    setSelectedDefinition(null);
   };
 
   // Pagination controls: Hook queries into the UI so hyper links work
@@ -183,33 +186,31 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
   const [currentPage, setCurrentPage] = useState<number>(
     (values.page && Number(values.page)) || 1
   );
-  const [visibleDefinitions, setVisibleDefinitions] = useState<
-    MeasureDefinition[]
-  >([]);
+  const [visibleReferences, setVisibleReferences] = useState<Reference[]>([]);
 
   const managePagination = useCallback(() => {
-    if (measureDefinitions.length < currentLimit) {
+    if (measureReferences.length < currentLimit) {
       setOffset(0);
-      setVisibleDefinitions([...measureDefinitions]);
-      setVisibleItems(measureDefinitions.length);
-      setTotalItems(measureDefinitions.length);
+      setVisibleReferences([...measureReferences]);
+      setVisibleItems(measureReferences.length);
+      setTotalItems(measureReferences.length);
       setTotalPages(1);
     } else {
       const start = (currentPage - 1) * currentLimit;
       const end = start + currentLimit;
-      const newVisibleDefinitions = [...measureDefinitions].slice(start, end);
+      const newVisibleReferences = [...measureReferences].slice(start, end);
       setOffset(start);
-      setVisibleDefinitions(newVisibleDefinitions);
-      setVisibleItems(newVisibleDefinitions.length);
-      setTotalItems(measureDefinitions.length);
-      setTotalPages(Math.ceil(measureDefinitions.length / currentLimit));
+      setVisibleReferences(newVisibleReferences);
+      setVisibleItems(newVisibleReferences.length);
+      setTotalItems(measureReferences.length);
+      setTotalPages(Math.ceil(measureReferences.length / currentLimit));
     }
   }, [
     currentLimit,
     currentPage,
-    measureDefinitions,
+    measureReferences,
     setOffset,
-    setVisibleDefinitions,
+    setVisibleReferences,
     setVisibleItems,
     setTotalItems,
     setTotalPages,
@@ -217,7 +218,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
 
   useEffect(() => {
     managePagination();
-  }, [measureDefinitions, currentPage, currentLimit]);
+  }, [measureReferences, currentPage, currentLimit]);
 
   const canGoNext = (() => {
     return currentPage < totalPages;
@@ -235,12 +236,12 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
   return (
     <div
       id="measure-details-form"
-      data-testid={`measure-definition-terms`}
+      data-testid={`measure-references`}
       style={{ minHeight: 539 }}
     >
       <div className="content">
         <div className="subTitle">
-          <h2>Definition Terms</h2>
+          <h2>References</h2>
           <div>
             <Typography
               style={{ fontSize: 14, fontWeight: 300, fontFamily: "Rubik" }}
@@ -253,50 +254,47 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
         <div id="measure-meta-data-table">
           <div className="top-row">
             <Button
-              id="create-definition"
+              id="create-reference"
               disabled={!canEdit}
               variant="outline-filled"
               className="page-header-action-button"
-              data-testid="create-definition-button"
+              data-testid="create-reference-button"
               onClick={toggleOpen}
             >
               <AddIcon className="page-header-action-icon" />
-              Add Term
+              Add Reference
             </Button>
           </div>
           <table className="meta-data-table">
             <thead>
               <tr>
                 <th scope="col" className="col-header">
-                  Term
+                  Type
                 </th>
                 <th scope="col" className="col-header">
-                  Definition
-                </th>
-                <th scope="col" className="col-header">
-                  Action
+                  References
                 </th>
               </tr>
             </thead>
-            <tbody data-testId="measure-definitions-table-body">
-              {visibleDefinitions?.length > 0 ? (
-                visibleDefinitions.map((measureDefinition, index) => (
-                  <MeasureDefinitionRow
-                    measureDefinition={measureDefinition}
-                    setOpen={setOpen}
-                    setSelectedDefinition={setSelectedDefinition}
-                    key={`${measureDefinition.term}-${index}`}
+            <tbody data-testId="measure-references-table-body">
+              {visibleReferences?.length > 0 ? (
+                visibleReferences.map((reference) => (
+                  <MeasureMetaDataRow
+                    name={reference.referenceType}
+                    description={reference.referenceText}
+                    key={reference.id}
                   />
                 ))
               ) : (
-                <p data-testId="empty-definitions">
-                  There are currently no definitions. Click the (Add Term)
+                <p data-testId="empty-references">
+                  There are currently no definitions. Click the (Add Reference)
                   button above to add one.
                 </p>
               )}
             </tbody>
           </table>
         </div>
+
         <div className="pagination-container">
           <Pagination
             totalItems={totalItems}
@@ -314,13 +312,14 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
           />
         </div>
       </div>
+
       <Toast
         toastKey="measure-information-toast"
         toastType={toastType}
         testId={
           toastType === "danger"
-            ? `measure-definitions-error`
-            : `measure-definitions-success`
+            ? `measure-references-error`
+            : `measure-references-success`
         }
         open={toastOpen}
         message={toastMessage}
@@ -332,7 +331,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
       />
       <MadieDialog
         form={true}
-        title={selectedDefinition ? "Edit Term" : "New Term"}
+        title="New References"
         dialogProps={{
           open,
           onClose: toggleOpen,
@@ -350,37 +349,41 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
         }}
         children={
           <div>
-            <TextField
-              required
-              disabled={!canEdit}
-              label="Term"
-              id="qdm-measure-term"
-              data-testid="qdm-measure-term"
+            <Select
+              id={`measure-referenceType`}
+              label="Type"
+              placeHolder={{ name: "Select", value: "" }}
               inputProps={{
-                "data-testid": "qdm-measure-term-input",
-                "aria-describedby": "qdm-measure-term-helper-text",
+                "data-testid": `measure-referenceType-input`,
               }}
-              helperText={formikErrorHandler("term", true)}
-              error={formik.touched.term && Boolean(formik.errors.term)}
-              {...formik.getFieldProps("term")}
+              data-testid={`measure-referenceType`}
+              disabled={!canEdit}
+              required
+              SelectDisplayProps={{
+                "aria-required": "true",
+              }}
+              {...formik.getFieldProps("referenceType")}
+              options={REFERENCE_OPTIONS}
             />
+
             <TextArea
               required
               disabled={!canEdit}
-              label="Definition"
+              label="Reference"
+              placeholder="Enter"
               readOnly={!canEdit}
-              id="qdm-measure-definition"
-              data-testid="qdm-measure-definition"
+              id="measure-referenceText"
+              data-testid="measure-referenceText"
               inputProps={{
-                "data-testid": "qdm-measure-definition-input",
-                "aria-describedby": "qdm-measure-definition-helper-text",
+                "data-testid": "measure-referenceText-input",
+                "aria-describedby": "measure-referenceText-helper-text",
               }}
-              placeholder=""
               error={
-                formik.touched.definition && Boolean(formik.errors.definition)
+                formik.touched.referenceText &&
+                Boolean(formik.errors.referenceText)
               }
-              helperText={formikErrorHandler("definition", true)}
-              {...formik.getFieldProps("definition")}
+              helperText={formikErrorHandler("referenceText", true)}
+              {...formik.getFieldProps("referenceText")}
             />
           </div>
         }
@@ -389,4 +392,4 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
   );
 };
 
-export default MeasureDefinitions;
+export default MeasureReferences;
