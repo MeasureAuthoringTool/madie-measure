@@ -1,13 +1,13 @@
 $border-color: #8c8c8c;
 
-#qdm-measure-definitions {
+#measure-meta-data-table {
   > .top-row {
     display: flex;
     flex-direction: row-reverse;
     margin-bottom: 32px;
   }
 
-  .definition-table {
+  .meta-data-table {
     min-width: 100%;
 
     > thead {
@@ -31,11 +31,11 @@ $border-color: #8c8c8c;
       padding: 1.2rem 1.4rem;
     }
 
-    > .col-header {
+    tr > .col-header {
       color: #2d3540;
       font-family: Rubik, sans-serif;
       font-size: 14.4px;
-      font-weight: 700;
+      font-weight: 500;
       text-align: left;
     }
   }
@@ -54,7 +54,7 @@ $border-color: #8c8c8c;
   border-top: solid 1px #8c8c8c;
 }
 
-#add-measure-definition-dialog {
+#add-measure-meta-data-dialog {
   .MuiButtonBase-root > svg {
     color: #d92f2f;
   }

@@ -19,6 +19,7 @@ import ModelAndMeasurementPeriod from "./modelAndMeasurementPeriod/ModelAndMeasu
 import "./MeasureDetails.scss";
 import EditMeasureDetailsSideNav from "./EditMeasureDetailsSideNav";
 import MeasureDefinitions from "./MeasureDefinitions/MeasureDefinitions";
+import MeasureReferences from "./MeasureReferences/MeasureReferences";
 const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
 export interface RouteHandlerState {
   canTravel: boolean;
@@ -42,6 +43,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   const guidanceLink = `${path}/measure-guidance`;
   const clinicalLink = `${path}/measure-clinical-recommendation`;
   const definitionsLink = `${path}/measure-definitions`;
+  const referencesLink = `${path}/measure-references`;
   // const riskAdjustmentLink = `${path}/measure-risk-adjustment`;
 
   const links = [
@@ -96,6 +98,12 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
           href: clinicalLink,
           dataTestId: "leftPanelMeasureClinicalRecommendation",
           id: "sideNavMeasureClinicalRecommendation",
+        },
+        {
+          title: "References",
+          href: referencesLink,
+          dataTestId: "leftPanelMeasureReferences",
+          id: "sideNavMeasureReferences",
         },
         // {
         //   title: "Risk Adjustment",
@@ -222,6 +230,9 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               header="Clinical Recommendation"
               setErrorMessage={setErrorMessage}
             />
+          </Route>
+          <Route path={referencesLink}>
+            <MeasureReferences setErrorMessage={setErrorMessage} />
           </Route>
           {featureFlags.qdmMeasureDefinitions && (
             <Route path={definitionsLink}>
