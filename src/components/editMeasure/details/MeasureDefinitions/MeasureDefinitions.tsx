@@ -14,12 +14,12 @@ import { Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { measureStore, checkUserCanEdit } from "@madie/madie-util";
 import { useFormik } from "formik";
-import MeasureDefinitionRow from "./MeasureDefinitionRow";
+import MeasureMetaDataRow from "../MeasureMetaDataRow";
 import { MeasureDefininitionsValidator } from "./MeasureDefinitionsValidator";
 
 import "../MeasureMetaDataTable.scss";
 
-interface MeasureDefinition {
+export interface MeasureDefinition {
   id?: string;
   definition: string;
   term: string;
@@ -65,13 +65,9 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
     measure?.measureSet?.acls,
     measure?.measureMetaData?.draft
   );
-  const sortDefinitions = (measureDefinitions: Array<MeasureDefinition>) => {
-    if (measureDefinitions) {
-      return measureDefinitions.sort((a, b) => a.term.localeCompare(b.term));
-    } else {
-      return [];
-    }
-  };
+
+  const termComparator = (a, b) => a.term.localeCompare(b.term);
+
   const INITIAL_VALUES = {
     id: selectedDefinition?.id,
     term: selectedDefinition?.term,
@@ -79,7 +75,11 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
   } as MeasureDefinition;
   const [measureDefinitions, setMeasureDefinitions] = useState<
     MeasureDefinition[]
-  >(sortDefinitions(measure?.measureMetaData?.measureDefinitions));
+  >(
+    measure?.measureMetaData?.measureDefinitions
+      ? measure?.measureMetaData?.measureDefinitions.sort(termComparator)
+      : []
+  );
 
   // we ideally will always make a new copy of the measure. Lets just listen for that update and then write our definitions to local state.
   useEffect(() => {
@@ -103,7 +103,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
         // if it does exist we push to it
         copiedMetaData.measureDefinitions.push(values);
         copiedMetaData.measureDefinitions = [
-          ...sortDefinitions(copiedMetaData.measureDefinitions),
+          ...copiedMetaData.measureDefinitions?.sort(termComparator),
         ];
       } else {
         const newMeasureDefinitions: Array<MeasureDefinition> =
@@ -113,7 +113,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
           );
         newMeasureDefinitions.push(values);
         copiedMetaData.measureDefinitions = [
-          ...sortDefinitions(newMeasureDefinitions),
+          ...newMeasureDefinitions?.sort(termComparator),
         ];
       }
     } else {
@@ -281,7 +281,9 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
             <tbody data-testId="measure-definitions-table-body">
               {visibleDefinitions?.length > 0 ? (
                 visibleDefinitions.map((measureDefinition, index) => (
-                  <MeasureDefinitionRow
+                  <MeasureMetaDataRow
+                    name={measureDefinition.term}
+                    description={measureDefinition.definition}
                     measureDefinition={measureDefinition}
                     setOpen={setOpen}
                     setSelectedDefinition={setSelectedDefinition}
