@@ -23,12 +23,8 @@ describe("Measure MetaData Row Component", () => {
       <MeasureDefinitionRow
         name="term"
         description="I'm a measure definition"
-        measureDefinition={{
-          term: "term",
-          definition: "I'm a measure definition",
-        }}
-        setOpen={jest.fn()}
-        setSelectedDefinition={jest.fn()}
+        id="test measure definition id"
+        handleEdit={jest.fn()}
       />
     );
     const term = getByText("term");
@@ -37,7 +33,7 @@ describe("Measure MetaData Row Component", () => {
     expect(definition).toBeInTheDocument();
 
     const editButton = getByTestId(
-      "measure-definition-edit-term-I'm a measure definition"
+      "measure-definition-edit-test measure definition id"
     );
     expect(editButton).toBeInTheDocument();
   });

@@ -7,12 +7,12 @@ import {
   ApiContextProvider,
   ServiceConfig,
 } from "../../../../api/ServiceContext";
-import MeasureDefinitions from "./MeasureDefinitions";
+import MeasureDefinitions, { MeasureDefinition } from "./MeasureDefinitions";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../api/useMeasureServiceApi";
 import { measureStore } from "@madie/madie-util";
-import { Measure, MeasureDefinition } from "@madie/madie-models";
+import { Measure } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 
 jest.mock("../../../../api/useMeasureServiceApi");
@@ -33,6 +33,7 @@ function definitionHelper(number: number): MeasureDefinition[] {
   const definitions: MeasureDefinition[] = [];
   for (let i = 0; i < number; i++) {
     definitions.push({
+      id: `id ${i}`,
       term: `term ${i}`,
       definition: `definition ${i}`,
     });
@@ -205,7 +206,7 @@ describe("EditMeasure Component", () => {
     await checkRows(9);
 
     const editButtonForDefinition8 = await findByTestId(
-      "measure-definition-edit-term 8-definition 8"
+      "measure-definition-edit-id 8"
     );
     expect(editButtonForDefinition8).toBeInTheDocument();
 

@@ -81,6 +81,15 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
       : []
   );
 
+  const handleEdit = (id) => {
+    setOpen(true);
+    setSelectedDefinition(
+      measure?.measureMetaData?.measureDefinitions.find((definition) => {
+        return id === definition.id;
+      })
+    );
+  };
+
   // we ideally will always make a new copy of the measure. Lets just listen for that update and then write our definitions to local state.
   useEffect(() => {
     if (measure?.measureMetaData?.measureDefinitions) {
@@ -284,9 +293,8 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
                   <MeasureMetaDataRow
                     name={measureDefinition.term}
                     description={measureDefinition.definition}
-                    measureDefinition={measureDefinition}
-                    setOpen={setOpen}
-                    setSelectedDefinition={setSelectedDefinition}
+                    id={measureDefinition.id}
+                    handleEdit={handleEdit}
                     key={`${measureDefinition.term}-${index}`}
                   />
                 ))

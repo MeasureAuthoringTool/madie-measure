@@ -8,39 +8,27 @@ import { Button } from "@madie/madie-design-system/dist/react";
 interface MeasureMetaDataRowProps {
   name: string;
   description: string;
-  measureDefinition?: MeasureDefinition;
-  setOpen?: Function;
-  setSelectedDefinition?: Function;
+  id?: string;
+  handleEdit?: Function;
 }
 
 const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
-  const {
-    name,
-    description,
-    measureDefinition,
-    setOpen,
-    setSelectedDefinition,
-  } = props;
-
-  const handleOpen = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    setOpen(true);
-    setSelectedDefinition(measureDefinition);
-  };
+  const { name, description, id, handleEdit } = props;
 
   return (
     <tr>
       <td>{name}</td>
       <td>{description}</td>
-      {measureDefinition && (
+      {id && (
         <td>
           <Button
             variant="outline-secondary"
             name="Edit"
             onClick={(e) => {
-              handleOpen(e);
+              handleEdit(id);
             }}
-            data-testid={`measure-definition-edit-${measureDefinition.term}-${measureDefinition.definition}`}
-            aria-label={`Measure term ${measureDefinition.term} definition ${measureDefinition.definition}`}
+            data-testid={`measure-definition-edit-${id}`}
+            aria-label={`Measure definition ${id}`}
             role="button"
             tab-index={0}
           >
