@@ -135,7 +135,6 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
       id: "sideNavQDMMeasureDefinitions",
     });
   }
-  console.log("featureflags,", featureFlags);
   if (featureFlags?.qdmMeasureReferences) {
     links[1].links.push({
       title: "References",
