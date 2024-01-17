@@ -99,12 +99,6 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
           dataTestId: "leftPanelMeasureClinicalRecommendation",
           id: "sideNavMeasureClinicalRecommendation",
         },
-        {
-          title: "References",
-          href: referencesLink,
-          dataTestId: "leftPanelMeasureReferences",
-          id: "sideNavMeasureReferences",
-        },
         // {
         //   title: "Risk Adjustment",
         //   href: riskAdjustmentLink,
@@ -139,6 +133,15 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
       href: definitionsLink,
       dataTestId: "leftPanelQDMMeasureDefinitions",
       id: "sideNavQDMMeasureDefinitions",
+    });
+  }
+  console.log("featureflags,", featureFlags);
+  if (featureFlags?.qdmMeasureReferences) {
+    links[1].links.push({
+      title: "References",
+      href: referencesLink,
+      dataTestId: "leftPanelMeasureReferences",
+      id: "sideNavMeasureReferences",
     });
   }
   const history = useHistory();
@@ -231,9 +234,11 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               setErrorMessage={setErrorMessage}
             />
           </Route>
-          <Route path={referencesLink}>
-            <MeasureReferences setErrorMessage={setErrorMessage} />
-          </Route>
+          {featureFlags.qdmMeasureReferences && (
+            <Route path={referencesLink}>
+              <MeasureReferences setErrorMessage={setErrorMessage} />
+            </Route>
+          )}
           {featureFlags.qdmMeasureDefinitions && (
             <Route path={definitionsLink}>
               <MeasureDefinitions setErrorMessage={setErrorMessage} />
