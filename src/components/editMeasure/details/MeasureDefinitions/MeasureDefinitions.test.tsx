@@ -7,12 +7,12 @@ import {
   ApiContextProvider,
   ServiceConfig,
 } from "../../../../api/ServiceContext";
-import MeasureDefinitions from "./MeasureDefinitions";
+import MeasureDefinitions, { MeasureDefinition } from "./MeasureDefinitions";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../api/useMeasureServiceApi";
 import { measureStore } from "@madie/madie-util";
-import { Measure, MeasureDefinition } from "@madie/madie-models";
+import { Measure } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 
 jest.mock("../../../../api/useMeasureServiceApi");
@@ -33,6 +33,7 @@ function definitionHelper(number: number): MeasureDefinition[] {
   const definitions: MeasureDefinition[] = [];
   for (let i = 0; i < number; i++) {
     definitions.push({
+      id: `id ${i}`,
       term: `term ${i}`,
       definition: `definition ${i}`,
     });
@@ -146,7 +147,7 @@ describe("EditMeasure Component", () => {
     expect(result).toBeInTheDocument();
   });
 
-  it("should render a loading page if the measure is not yet loaded", async () => {
+  it("should allow adding term and definition", async () => {
     measureStore.state.mockImplementationOnce(() => null);
     render(
       <ApiContextProvider value={serviceConfig}>
@@ -157,6 +158,87 @@ describe("EditMeasure Component", () => {
     );
     const result = getByTestId("empty-definitions");
     expect(result).toBeInTheDocument();
+
+    const createButton = await findByTestId("create-definition-button");
+    expect(createButton).toBeInTheDocument();
+    await checkDialogExists();
+    const termBoxNode = await getByTestId("qdm-measure-term-input");
+    userEvent.type(termBoxNode, "term");
+    Simulate.change(termBoxNode);
+    expect(termBoxNode.value).toBe("term");
+
+    const textAreaInput = getByTestId(
+      "qdm-measure-definition"
+    ) as HTMLTextAreaElement;
+    expectInputValue(textAreaInput, "");
+    act(() => {
+      fireEvent.change(textAreaInput, {
+        target: { value: "definition" },
+      });
+    });
+    fireEvent.blur(textAreaInput);
+    expectInputValue(textAreaInput, "definition");
+    const submitButton = getByTestId("save-button");
+    expect(submitButton).toHaveProperty("disabled", false);
+    fireEvent.click(submitButton);
+
+    expect(
+      await screen.findByTestId("measure-definitions-success")
+    ).toHaveTextContent("Measure Definition Saved Successfully");
+    const toastCloseButton = await screen.findByTestId("close-error-button");
+    expect(toastCloseButton).toBeInTheDocument();
+    fireEvent.click(toastCloseButton);
+    await waitFor(() => {
+      expect(toastCloseButton).not.toBeInTheDocument();
+    });
+  });
+
+  it("Should allow editing dialog with populated values on clicking Edit and changes are saved.", async () => {
+    measureStore.state.mockImplementation(() => measureWithNineItems);
+    measureStore.initialState.mockImplementation(() => measureWithNineItems);
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureDefinitions setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    await checkRows(9);
+
+    const editButtonForDefinition8 = await findByTestId(
+      "measure-definition-edit-id 8"
+    );
+    expect(editButtonForDefinition8).toBeInTheDocument();
+
+    userEvent.click(editButtonForDefinition8);
+    await waitFor(() => {
+      expect(getByTestId("dialog-form")).toBeInTheDocument();
+    });
+
+    const termInput = await findByTestId("qdm-measure-term-input");
+    expect(termInput.value).toBe("term 8");
+    const definitionInput = await findByTestId("qdm-measure-definition");
+    expect(definitionInput.value).toBe("definition 8");
+
+    fireEvent.change(termInput, {
+      target: { value: "term 8 changed" },
+    });
+
+    //const saveButton = findByTestId("save-button");
+    //expect(saveButton).toBeDisabled();
+    const submitButton = getByTestId("save-button");
+    expect(submitButton).toHaveProperty("disabled", false);
+    fireEvent.click(submitButton);
+
+    expect(
+      await screen.findByTestId("measure-definitions-success")
+    ).toHaveTextContent("Measure Definition Saved Successfully");
+    const toastCloseButton = await screen.findByTestId("close-error-button");
+    expect(toastCloseButton).toBeInTheDocument();
+    fireEvent.click(toastCloseButton);
+    await waitFor(() => {
+      expect(toastCloseButton).not.toBeInTheDocument();
+    });
   });
 
   it("Should open a dialog on click, fill out form, cancel closes the form.", async () => {

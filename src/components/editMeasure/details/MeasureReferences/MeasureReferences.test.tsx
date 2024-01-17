@@ -21,7 +21,7 @@ const useMeasureServiceApiMock =
 const measure = {
   id: "measure ID",
   measureName: "measureName",
-  createdBy: "testuser@example.com",
+  createdBy: "testuser@example.com", //#nosec
 } as Measure;
 
 let serviceApiMock = {

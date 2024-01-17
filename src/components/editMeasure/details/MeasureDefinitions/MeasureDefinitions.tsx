@@ -19,7 +19,8 @@ import { MeasureDefininitionsValidator } from "./MeasureDefinitionsValidator";
 
 import "../MeasureMetaDataTable.scss";
 
-interface MeasureDefinition {
+export interface MeasureDefinition {
+  id?: string;
   definition: string;
   term: string;
 }
@@ -42,6 +43,8 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
       subscription.unsubscribe();
     };
   }, []);
+  const [selectedDefinition, setSelectedDefinition] =
+    useState<MeasureDefinition>(null);
   // Toast utilities
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
@@ -62,13 +65,30 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
     measure?.measureSet?.acls,
     measure?.measureMetaData?.draft
   );
+
+  const termComparator = (a, b) => a.term.localeCompare(b.term);
+
   const INITIAL_VALUES = {
-    term: "",
-    definition: "",
+    id: selectedDefinition?.id,
+    term: selectedDefinition?.term,
+    definition: selectedDefinition?.definition,
   } as MeasureDefinition;
   const [measureDefinitions, setMeasureDefinitions] = useState<
     MeasureDefinition[]
-  >(measure?.measureMetaData?.measureDefinitions || []);
+  >(
+    measure?.measureMetaData?.measureDefinitions
+      ? measure?.measureMetaData?.measureDefinitions.sort(termComparator)
+      : []
+  );
+
+  const handleEdit = (id) => {
+    setOpen(true);
+    setSelectedDefinition(
+      measure?.measureMetaData?.measureDefinitions.find((definition) => {
+        return id === definition.id;
+      })
+    );
+  };
 
   // we ideally will always make a new copy of the measure. Lets just listen for that update and then write our definitions to local state.
   useEffect(() => {
@@ -87,8 +107,24 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
       copiedMetaData.hasOwnProperty("measureDefinitions") &&
       Array.isArray(copiedMetaData.measureDefinitions)
     ) {
-      // if it does exist we push to it
-      copiedMetaData.measureDefinitions.push(values);
+      //when adding a new definition
+      if (!selectedDefinition) {
+        // if it does exist we push to it
+        copiedMetaData.measureDefinitions.push(values);
+        copiedMetaData.measureDefinitions = [
+          ...copiedMetaData.measureDefinitions?.sort(termComparator),
+        ];
+      } else {
+        const newMeasureDefinitions: Array<MeasureDefinition> =
+          copiedMetaData.measureDefinitions.filter(
+            (measureDefinition) =>
+              measureDefinition.id !== selectedDefinition.id
+          );
+        newMeasureDefinitions.push(values);
+        copiedMetaData.measureDefinitions = [
+          ...newMeasureDefinitions?.sort(termComparator),
+        ];
+      }
     } else {
       // if none exist, we will init our the array
       copiedMetaData.measureDefinitions = [values];
@@ -128,6 +164,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
 
   const formik = useFormik({
     initialValues: { ...INITIAL_VALUES },
+    enableReinitialize: true,
     validationSchema: MeasureDefininitionsValidator,
     onSubmit: async (values: MeasureDefinition) => await handleSubmit(values),
   });
@@ -140,6 +177,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
   const [open, setOpen] = useState<boolean>(false);
   const toggleOpen = () => {
     setOpen(!open);
+    setSelectedDefinition(null);
   };
 
   // Pagination controls: Hook queries into the UI so hyper links work
@@ -244,6 +282,9 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
                 <th scope="col" className="col-header">
                   Definition
                 </th>
+                <th scope="col" className="col-header">
+                  Action
+                </th>
               </tr>
             </thead>
             <tbody data-testId="measure-definitions-table-body">
@@ -252,6 +293,8 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
                   <MeasureMetaDataRow
                     name={measureDefinition.term}
                     description={measureDefinition.definition}
+                    id={measureDefinition.id}
+                    handleEdit={handleEdit}
                     key={`${measureDefinition.term}-${index}`}
                   />
                 ))
@@ -299,7 +342,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
       />
       <MadieDialog
         form={true}
-        title="New Term"
+        title={selectedDefinition ? "Edit Term" : "New Term"}
         dialogProps={{
           open,
           onClose: toggleOpen,
