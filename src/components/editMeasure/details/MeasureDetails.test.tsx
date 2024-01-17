@@ -63,7 +63,10 @@ const serviceConfig: ServiceConfig = {
 };
 
 beforeEach(() => {
-  useFeatureFlags.mockReturnValue({ qdmMeasureDefinitions: true });
+  useFeatureFlags.mockReturnValue({
+    qdmMeasureDefinitions: true,
+    qdmMeasureReferences: true,
+  });
 });
 
 describe("MeasureDetails component", () => {
