@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Backdrop, FormHelperText } from "@mui/material";
+import { Backdrop, FormHelperText, MenuItem } from "@mui/material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
@@ -9,7 +9,6 @@ import {
   MadieDialog,
   MadieSpinner,
 } from "@madie/madie-design-system/dist/react";
-import { MenuItem } from "@mui/material";
 import "./CreateVersionDialog.scss";
 import * as _ from "lodash";
 
@@ -69,9 +68,6 @@ const CreatVersionDialog = ({
   // we need a way to deal with "000"
   //given a version number string, we can divide into three parts and increment and rejoin based on whatever.
   const [newVersionNumber, setNewVersionNumber] = useState<string>("");
-  const checkVersionMatch = (currentVersion, confirmedVersion) => {
-    return currentVersion === confirmedVersion;
-  };
 
   const formik = useFormik({
     initialValues: {
@@ -89,9 +85,6 @@ const CreatVersionDialog = ({
           }
         )
         .required("Confirmed Version is required"),
-      // currentVersion: Yup.string().required().test("currentVersion", async (confirmed) => {
-      //   return (checkVersionMatch(currentVersion, confirmed))
-      // })
     }),
     enableReinitialize: true,
     onSubmit: ({ type }) => {
