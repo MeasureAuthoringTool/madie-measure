@@ -31,7 +31,7 @@ describe("Create Version Dialog component", () => {
     expect(getByTestId("create-version-continue-button")).toBeDisabled();
   });
 
-  it("should render version dialog and enable continue button after a selection", () => {
+  it("should render version dialog and enable continue button after a selection: major", () => {
     render(
       <CreateVersionDialog
         currentVersion="0.0.000"
@@ -53,6 +53,56 @@ describe("Create Version Dialog component", () => {
     userEvent.type(confirmVersionNode, "1.0.000");
     Simulate.change(confirmVersionNode);
     expect(confirmVersionNode.value).toBe("1.0.000");
+    expect(getByTestId("create-version-continue-button")).not.toBeDisabled();
+  });
+
+  it("should render version dialog and enable continue button after a selection: minor", () => {
+    render(
+      <CreateVersionDialog
+        currentVersion="0.0.000"
+        open={true}
+        onClose={jest.fn()}
+        onSubmit={jest.fn()}
+        versionHelperText=""
+      />
+    );
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+    const typeInput = getByTestId("version-type-input") as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "minor" },
+    });
+    expect(typeInput.value).toBe("minor");
+    const confirmVersionNode = getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "0.1.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("0.1.000");
+    expect(getByTestId("create-version-continue-button")).not.toBeDisabled();
+  });
+
+  it("should render version dialog and enable continue button after a selection: patch", () => {
+    render(
+      <CreateVersionDialog
+        currentVersion="0.0.000"
+        open={true}
+        onClose={jest.fn()}
+        onSubmit={jest.fn()}
+        versionHelperText=""
+      />
+    );
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+    const typeInput = getByTestId("version-type-input") as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "patch" },
+    });
+    expect(typeInput.value).toBe("patch");
+    const confirmVersionNode = getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "0.0.001");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("0.0.001");
     expect(getByTestId("create-version-continue-button")).not.toBeDisabled();
   });
 
