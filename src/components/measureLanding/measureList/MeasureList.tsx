@@ -650,6 +650,7 @@ export default function MeasureList(props: {
               loading={loading}
             />
             <CreatVersionDialog
+              currentVersion={targetMeasure?.current?.version}
               open={createVersionDialog.open}
               onClose={handleDialogClose}
               onSubmit={checkCreateVersion}
