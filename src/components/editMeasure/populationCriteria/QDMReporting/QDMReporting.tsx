@@ -42,11 +42,19 @@ const improvementNotationOptions = [
       "Improvement is indicated as a decrease in the score or measurement (e.g. Lower score indicates better quality).",
     code: "decrease",
   },
+  {
+    label: "Other",
+    value: "Other",
+    subtitle:
+      "Custom Input",
+    code: "other",
+  },
 ];
 
 interface ReportingForm {
   rateAggregation: string;
   improvementNotation: string;
+  improvementNotationOther:string;
 }
 
 const QDMReporting = () => {
@@ -76,6 +84,7 @@ const QDMReporting = () => {
     initialValues: {
       rateAggregation: measure?.rateAggregation || "",
       improvementNotation: measure?.improvementNotation || "",
+      improvementNotationOther: measure?.improvementNotationOther || "",
     },
     enableReinitialize: true,
     onSubmit: async (values: ReportingForm) => await handleSubmit(values),
@@ -87,6 +96,8 @@ const QDMReporting = () => {
       canTravel: !formik.dirty,
       pendingRoute: "",
     });
+    console.log(measure)
+    console.log(formik.getFieldProps("improvementNotationOther"))
   }, [formik.dirty]);
 
   const onCancel = () => {
@@ -109,6 +120,7 @@ const QDMReporting = () => {
       ...measure,
       rateAggregation: values.rateAggregation,
       improvementNotation: values.improvementNotation,
+      improvementNotationOther: values?.improvementNotationOther,
     };
 
     measureServiceApi
@@ -184,6 +196,27 @@ const QDMReporting = () => {
               ))}
             />
           </div>
+          {formik.getFieldProps("improvementNotation").value =="Other" &&  
+          <div className="left">
+            <FieldLabel htmlFor="imr" id="improvement-notation-other-label">
+              Custom Improvement Notation
+            </FieldLabel>
+            <FieldSeparator>
+              <FieldInput
+                style={{ border: "solid 1px #8c8c8c" }}
+                {...formik.getFieldProps("improvementNotationOther")}
+                aria-labelledby="improvement-notation-other-label"
+                type="text"
+                disabled={!canEdit}
+                name="improvement-notation-other"
+                id="improvement-notation-other"
+                autoComplete="improvement-notation-other"
+                placeholder="Custom Improvement Notation"
+                data-testid="improvementNotationOtherText"
+                {...formik.getFieldProps("improvementNotationOther")}
+              />
+            </FieldSeparator>
+          </div>}
         </div>
         <Toast
           toastKey="reporting-toast"
