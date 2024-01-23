@@ -115,6 +115,9 @@ const QDMReporting = () => {
   };
 
   const handleSubmit = async (values) => {
+    if (formik.getFieldProps("improvementNotation").value != "Other") {
+      values.improvementNotationOther = "";
+    }
     const newMeasure: Measure = {
       ...measure,
       rateAggregation: values.rateAggregation,
@@ -205,13 +208,15 @@ const QDMReporting = () => {
 
             {formik.getFieldProps("improvementNotation").value == "Other" && (
               <div>
-                <FieldLabel htmlFor="imr" id="improvement-notation-other-label">
+                <FieldLabel
+                  htmlFor="improvement-notation-other-label"
+                  id="improvement-notation-other-label"
+                >
                   Improvement Notation (Other)
                 </FieldLabel>
                 <FieldSeparator>
                   <FieldInput
                     style={{ border: "solid 1px #8c8c8c" }}
-                    {...formik.getFieldProps("improvementNotationOther")}
                     aria-labelledby="improvement-notation-other-label"
                     type="text"
                     disabled={!canEdit}
