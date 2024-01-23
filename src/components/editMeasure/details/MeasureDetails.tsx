@@ -18,7 +18,8 @@ import StewardAndDevelopers from "./stewardAndDevelopers/StewardAndDevelopers";
 import ModelAndMeasurementPeriod from "./modelAndMeasurementPeriod/ModelAndMeasurementPeriod";
 import "./MeasureDetails.scss";
 import EditMeasureDetailsSideNav from "./EditMeasureDetailsSideNav";
-import QDMMeasureDefinitions from "./QDMMeasureDefinitions";
+import MeasureDefinitions from "./MeasureDefinitions/MeasureDefinitions";
+import MeasureReferences from "./MeasureReferences/MeasureReferences";
 const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
 export interface RouteHandlerState {
   canTravel: boolean;
@@ -42,6 +43,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   const guidanceLink = `${path}/measure-guidance`;
   const clinicalLink = `${path}/measure-clinical-recommendation`;
   const definitionsLink = `${path}/measure-definitions`;
+  const referencesLink = `${path}/measure-references`;
   // const riskAdjustmentLink = `${path}/measure-risk-adjustment`;
 
   const links = [
@@ -91,7 +93,6 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
           dataTestId: "leftPanelMeasureGuidance",
           id: "sideNavMeasureGuidance",
         },
-        //
         {
           title: "Clinical Recommendation",
           href: clinicalLink,
@@ -132,6 +133,14 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
       href: definitionsLink,
       dataTestId: "leftPanelQDMMeasureDefinitions",
       id: "sideNavQDMMeasureDefinitions",
+    });
+  }
+  if (featureFlags?.qdmMeasureReferences) {
+    links[1].links.push({
+      title: "References",
+      href: referencesLink,
+      dataTestId: "leftPanelMeasureReferences",
+      id: "sideNavMeasureReferences",
     });
   }
   const history = useHistory();
@@ -224,9 +233,14 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               setErrorMessage={setErrorMessage}
             />
           </Route>
+          {featureFlags.qdmMeasureReferences && (
+            <Route path={referencesLink}>
+              <MeasureReferences setErrorMessage={setErrorMessage} />
+            </Route>
+          )}
           {featureFlags.qdmMeasureDefinitions && (
             <Route path={definitionsLink}>
-              <QDMMeasureDefinitions />
+              <MeasureDefinitions setErrorMessage={setErrorMessage} />
             </Route>
           )}
           {/* <Route path={riskAdjustmentLink}>
