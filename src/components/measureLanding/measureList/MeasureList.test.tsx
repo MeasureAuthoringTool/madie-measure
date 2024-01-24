@@ -1097,6 +1097,53 @@ describe("Measure List component", () => {
     unmount();
   });
 
+  it("should display the error when measure type is not present", async () => {
+    const error = {
+      response: {
+        status: 409,
+      },
+    };
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return {
+        ...mockMeasureServiceApi,
+        getMeasureExport: jest.fn().mockRejectedValue(error),
+      };
+    });
+
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const actionButton = getByTestId(`measure-action-${measures[3].id}`);
+    fireEvent.click(actionButton);
+    expect(
+      screen.getByTestId(`export-measure-${measures[3].id}`)
+    ).toBeInTheDocument();
+    fireEvent.click(getByTestId(`export-measure-${measures[3].id}`));
+    await waitFor(() => {
+      expect(getByTestId("error-message")).toHaveTextContent(
+        "Unable to Export measure.CQL Contains ErrorsMissing Measure DevelopersMissing StewardMissing DescriptionMeasure Type is required"
+      );
+    });
+    unmount();
+  });
+
   it("should display the error when there are no associated population criteria while exporting the measure", async () => {
     const error = {
       response: {

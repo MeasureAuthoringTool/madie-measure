@@ -362,6 +362,7 @@ export default function MeasureList(props: {
             missing.push("Missing Description");
           }
           if (
+            targetedMeasure?.model === Model.QICORE &&
             targetedMeasure.groups &&
             targetedMeasure.groups.filter(
               (group) =>
@@ -370,6 +371,12 @@ export default function MeasureList(props: {
             ).length > 0
           ) {
             missing.push("At least one Population Criteria is missing Type");
+          }
+          if (
+            targetedMeasure?.model === Model.QDM_5_6 &&
+            _.isEmpty(targetedMeasure?.baseConfigurationTypes)
+          ) {
+            missing.push("Measure Type is required");
           }
           if (missing.length <= 0) {
             const message =
