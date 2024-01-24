@@ -203,6 +203,7 @@ const CreatVersionDialog = ({
               label="Confirm New Version #"
               placeholder="Confirm New Version Number"
               helperText={formikErrorHandler("confirmedVersion", true)}
+              tooltipText="Input the new version # located to the left to confirm."
               {...formik.getFieldProps("confirmedVersion")}
             />
           </div>
