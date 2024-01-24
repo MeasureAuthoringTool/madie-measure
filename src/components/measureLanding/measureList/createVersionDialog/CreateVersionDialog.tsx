@@ -192,9 +192,6 @@ const CreatVersionDialog = ({
               value={newVersionNumber}
             />
             <TextField
-              inputProps={{
-                "data-testid": "confirm-version-input",
-              }}
               error={
                 formik.touched.confirmedVersion &&
                 Boolean(formik.errors.confirmedVersion)
@@ -204,6 +201,10 @@ const CreatVersionDialog = ({
               placeholder="Confirm New Version Number"
               helperText={formikErrorHandler("confirmedVersion", true)}
               tooltipText="Input the new version # located to the left to confirm."
+              id="confirm-version"
+              inputProps={{
+                "data-testid": "confirm-version-input",
+              }}
               {...formik.getFieldProps("confirmedVersion")}
             />
           </div>
