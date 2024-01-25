@@ -32,7 +32,7 @@ const CreatVersionDialog = ({
   versionHelperText,
   loading,
 }) => {
-  function formikErrorHandler(name: string, isError: boolean) {
+  function formikErrorHandler(name: string) {
     if (formik.touched[name] && formik.errors[name]) {
       return `${formik.errors[name]}`;
     }
