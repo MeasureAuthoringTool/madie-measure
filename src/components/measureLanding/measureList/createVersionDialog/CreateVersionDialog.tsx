@@ -194,7 +194,7 @@ const CreatVersionDialog = ({
               required
               label="Confirm New Version #"
               placeholder="Confirm New Version Number"
-              helperText={formikErrorHandler("confirmedVersion", true)}
+              helperText={formikErrorHandler("confirmedVersion")}
               tooltipText="Input the new version # located to the left to confirm."
               id="confirm-version"
               inputProps={{
