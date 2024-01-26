@@ -16,7 +16,7 @@ import { oneItemResponse } from "../../__mocks__/mockMeasureResponses";
 import userEvent from "@testing-library/user-event";
 import { v4 as uuid } from "uuid";
 import ServiceContext, { ServiceConfig } from "../../../api/ServiceContext";
-import { act } from "react-dom/test-utils";
+import { act, Simulate } from "react-dom/test-utils";
 import { useFeatureFlags } from "@madie/madie-util";
 
 // CSSStyleDeclaration
@@ -540,7 +540,21 @@ describe("Measure List component", () => {
     );
     fireEvent.click(getByTestId(`measure-action-${measures[0].id}`));
     fireEvent.click(getByTestId(`create-version-measure-${measures[0].id}`));
-    fireEvent.click(getByLabelText("Major"));
+
+    const typeInput = screen.getByTestId(
+      "version-type-input"
+    ) as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = await getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
+
     await waitFor(() => {
       fireEvent.click(getByTestId("create-version-continue-button"));
       expect(getByTestId("error-toast")).toHaveTextContent(
@@ -588,7 +602,20 @@ describe("Measure List component", () => {
     fireEvent.click(
       screen.getByTestId(`create-version-measure-${measures[0].id}`)
     );
-    fireEvent.click(getByLabelText("Major"));
+    const typeInput = screen.getByTestId(
+      "version-type-input"
+    ) as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = await getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
+
     await waitFor(() => {
       fireEvent.click(getByTestId("create-version-continue-button"));
       expect(getByTestId("error-toast")).toHaveTextContent(
@@ -635,7 +662,19 @@ describe("Measure List component", () => {
     );
     fireEvent.click(getByTestId(`measure-action-${measures[0].id}`));
     fireEvent.click(getByTestId(`create-version-measure-${measures[0].id}`));
-    fireEvent.click(getByLabelText("Major"));
+    const typeInput = screen.getByTestId(
+      "version-type-input"
+    ) as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = await getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
     await waitFor(() => {
       fireEvent.click(getByTestId("create-version-continue-button"));
       expect(getByTestId("error-toast")).toHaveTextContent("server error");
@@ -679,7 +718,19 @@ describe("Measure List component", () => {
     );
     fireEvent.click(getByTestId(`measure-action-${measures[0].id}`));
     fireEvent.click(getByTestId(`create-version-measure-${measures[0].id}`));
-    fireEvent.click(getByLabelText("Major"));
+    const typeInput = screen.getByTestId(
+      "version-type-input"
+    ) as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = await getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
     await waitFor(() => {
       fireEvent.click(getByTestId("create-version-continue-button"));
       expect(getByTestId("success-toast")).toHaveTextContent(
@@ -737,7 +788,19 @@ describe("Measure List component", () => {
     );
     fireEvent.click(getByTestId(`measure-action-${measures[0].id}`));
     fireEvent.click(getByTestId(`create-version-measure-${measures[0].id}`));
-    fireEvent.click(getByLabelText("Major"));
+    const typeInput = screen.getByTestId(
+      "version-type-input"
+    ) as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = await getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
     await waitFor(() => {
       fireEvent.click(getByTestId("create-version-continue-button"));
       expect(
