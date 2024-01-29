@@ -262,8 +262,13 @@ export default function MeasureList(props: {
     if (shouldAllowAction(selected, featureFlags.qdmExport)) {
       additionalOptions.push(exportButton);
     }
-    // always on if feature
-    if (selected.measureMetaData.draft) {
+    // no longer an always on if feature
+    if (
+      selected.measureMetaData.draft &&
+      !(
+        selected.model.startsWith("QDM") && featureFlags.enableQdmRepeatTransfer
+      )
+    ) {
       options.push({
         label: "Version",
         toImplementFunction: checkCreateVersion,
