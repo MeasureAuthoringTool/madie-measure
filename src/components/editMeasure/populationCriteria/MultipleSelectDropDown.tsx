@@ -56,6 +56,16 @@ const MultipleSelectDropDown = ({
   onClose,
   ...rest
 }) => {
+  const requiredLabelReadable = (
+    <span style={{ color: "white", fontSize: "1px" }}>required</span>
+  );
+  const labelReadable = required ? (
+    <span>
+      {label} {requiredLabelReadable}
+    </span>
+  ) : (
+    label
+  );
   return (
     <FormControl error={error} fullWidth>
       <div
@@ -111,7 +121,7 @@ const MultipleSelectDropDown = ({
           inputProps["aria-label"] = "Types multiple types can be selected";
           return (
             <TextField
-              label={`${label} ${required ? "required" : ""}`}
+              label={labelReadable}
               placeholder="Select All That Apply"
               error={error}
               {...params}
