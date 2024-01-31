@@ -13,6 +13,7 @@ import {
   Select,
   MadieDiscardDialog,
   Toast,
+  TextArea,
 } from "@madie/madie-design-system/dist/react";
 import "./QDMReporting.scss";
 import { FieldInput } from "../../../../styles/editMeasure/populationCriteria/groups";
@@ -167,7 +168,7 @@ const QDMReporting = () => {
                 Rate Aggregation
               </FieldLabel>
               <FieldSeparator>
-                <FieldInput
+                <TextArea
                   style={{ border: "solid 1px #8c8c8c" }}
                   {...formik.getFieldProps("rateAggregation")}
                   aria-labelledby="rate-aggregation-label"
