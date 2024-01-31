@@ -19,7 +19,7 @@ const useMeasureServiceApiMock =
 const measure = {
   id: "measure ID",
   measureName: "measureName",
-  createdBy: "testuser@example.com",
+  createdBy: "testuser",
   model: "QDM v5.6",
   measureMetaData: {
     transmissionFormat: "",
