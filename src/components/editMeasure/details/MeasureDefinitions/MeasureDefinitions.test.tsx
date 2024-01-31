@@ -105,7 +105,7 @@ const expectInputValue = (
   const inputEl = element as HTMLTextAreaElement;
   expect(inputEl.value).toBe(value);
 };
-describe("EditMeasure Component", () => {
+describe("MeasureDefinitions Component", () => {
   afterEach(() => jest.clearAllMocks());
   const expectInputValue = (
     element: HTMLTextAreaElement,
