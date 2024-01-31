@@ -123,7 +123,7 @@ describe("Transmission Format page", () => {
     });
   });
 
-  it("Should handle dirtyCheck and cancel", async () => {
+  it("Should handle dirtyCheck and cancel: write, discard, cancel, discard, continue", async () => {
     measureStore.state.mockImplementation(() => measure);
     measureStore.initialState.mockImplementation(() => measure);
     render(
@@ -158,6 +158,20 @@ describe("Transmission Format page", () => {
     );
     expect(discardDialogCancelButton).toBeInTheDocument();
     fireEvent.click(discardDialogCancelButton);
+    await waitFor(() => {
+      expect(queryByText("You have unsaved changes.")).not.toBeVisible();
+    });
+
+    expect(cancelButton).toHaveProperty("disabled", false);
+    fireEvent.click(cancelButton);
+    expect(discardDialog).toBeInTheDocument();
+    expect(queryByText("You have unsaved changes.")).toBeVisible();
+
+    const discardDialogContinueButton = screen.getByTestId(
+      "discard-dialog-continue-button"
+    );
+    expect(discardDialogContinueButton).toBeInTheDocument();
+    fireEvent.click(discardDialogContinueButton);
     await waitFor(() => {
       expect(queryByText("You have unsaved changes.")).not.toBeVisible();
     });
