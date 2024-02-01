@@ -110,11 +110,11 @@ export default function EditMeasure() {
 
   // At this time it appears only possible to have a single error at a time because of the way state is updated.
   const [errorMessage, setErrorMessage] = useState<string>("");
-
+  const isQDM = measure?.model?.includes("QDM");
   const contentDiv = (
     <div data-testid="editMeasure">
       <div tw="relative" style={{ marginTop: "-60px" }}>
-        <EditMeasureNav isQDM={measure?.model?.includes("QDM")} />
+        <EditMeasureNav isQDM={isQDM} />
         <div
           style={{
             marginLeft: "2rem",
@@ -138,7 +138,7 @@ export default function EditMeasure() {
         <Switch>
           <Redirect exact from={url} to={`${url}/details`} />
           <Route path={`${url}/details`}>
-            <MeasureDetails setErrorMessage={setErrorMessage} />
+            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={isQDM} />
           </Route>
           <Route path={`${url}/cql-editor`}>
             <MeasureEditor />
