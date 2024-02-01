@@ -182,7 +182,7 @@ const BaseConfiguration = () => {
             <MultipleSelectDropDown
               formControl={formik.getFieldProps("baseConfigurationTypes")}
               id="base-configuration-types"
-              label="Type"
+              label="Measure Type"
               placeHolder={{ name: "", value: "" }}
               defaultValue={formik.values.baseConfigurationTypes}
               required={true}
