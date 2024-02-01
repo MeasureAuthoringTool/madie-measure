@@ -15,11 +15,11 @@ import {
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
-interface TransmissionReferenceProps {
+interface TransmissionFormatProps {
   setErrorMessage: Function;
 }
 
-const TransmissionFormat = (props: TransmissionReferenceProps) => {
+const TransmissionFormat = (props: TransmissionFormatProps) => {
   const { setErrorMessage } = props;
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
@@ -109,7 +109,7 @@ const TransmissionFormat = (props: TransmissionReferenceProps) => {
   return (
     <div
       id="measure-details-form"
-      data-testid={`measure-references`}
+      data-testid={`transmission-format`}
       style={{ minHeight: 539 }}
     >
       <div className="content">
