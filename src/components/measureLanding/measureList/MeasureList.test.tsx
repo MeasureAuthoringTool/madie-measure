@@ -6,6 +6,7 @@ import {
   waitFor,
   cleanup,
   findByTestId,
+  queryByTestId,
 } from "@testing-library/react";
 import { Measure, Model } from "@madie/madie-models";
 import MeasureList from "./MeasureList";
@@ -16,7 +17,7 @@ import { oneItemResponse } from "../../__mocks__/mockMeasureResponses";
 import userEvent from "@testing-library/user-event";
 import { v4 as uuid } from "uuid";
 import ServiceContext, { ServiceConfig } from "../../../api/ServiceContext";
-import { act } from "react-dom/test-utils";
+import { act, Simulate } from "react-dom/test-utils";
 import { useFeatureFlags } from "@madie/madie-util";
 
 // CSSStyleDeclaration
@@ -33,9 +34,10 @@ jest.mock("@madie/madie-util", () => ({
     getAccessToken: () => "test.jwt",
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
-  useFeatureFlags: () => ({
+  useFeatureFlags: jest.fn(() => ({
     qdmExport: true,
-  }),
+    enableQdmRepeatTransfer: false,
+  })),
 }));
 
 jest.mock("../../../api/useMeasureServiceApi");
@@ -540,7 +542,21 @@ describe("Measure List component", () => {
     );
     fireEvent.click(getByTestId(`measure-action-${measures[0].id}`));
     fireEvent.click(getByTestId(`create-version-measure-${measures[0].id}`));
-    fireEvent.click(getByLabelText("Major"));
+
+    const typeInput = screen.getByTestId(
+      "version-type-input"
+    ) as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = await getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
+
     await waitFor(() => {
       fireEvent.click(getByTestId("create-version-continue-button"));
       expect(getByTestId("error-toast")).toHaveTextContent(
@@ -588,7 +604,20 @@ describe("Measure List component", () => {
     fireEvent.click(
       screen.getByTestId(`create-version-measure-${measures[0].id}`)
     );
-    fireEvent.click(getByLabelText("Major"));
+    const typeInput = screen.getByTestId(
+      "version-type-input"
+    ) as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = await getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
+
     await waitFor(() => {
       fireEvent.click(getByTestId("create-version-continue-button"));
       expect(getByTestId("error-toast")).toHaveTextContent(
@@ -635,7 +664,19 @@ describe("Measure List component", () => {
     );
     fireEvent.click(getByTestId(`measure-action-${measures[0].id}`));
     fireEvent.click(getByTestId(`create-version-measure-${measures[0].id}`));
-    fireEvent.click(getByLabelText("Major"));
+    const typeInput = screen.getByTestId(
+      "version-type-input"
+    ) as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = await getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
     await waitFor(() => {
       fireEvent.click(getByTestId("create-version-continue-button"));
       expect(getByTestId("error-toast")).toHaveTextContent("server error");
@@ -679,7 +720,19 @@ describe("Measure List component", () => {
     );
     fireEvent.click(getByTestId(`measure-action-${measures[0].id}`));
     fireEvent.click(getByTestId(`create-version-measure-${measures[0].id}`));
-    fireEvent.click(getByLabelText("Major"));
+    const typeInput = screen.getByTestId(
+      "version-type-input"
+    ) as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = await getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
     await waitFor(() => {
       fireEvent.click(getByTestId("create-version-continue-button"));
       expect(getByTestId("success-toast")).toHaveTextContent(
@@ -737,7 +790,19 @@ describe("Measure List component", () => {
     );
     fireEvent.click(getByTestId(`measure-action-${measures[0].id}`));
     fireEvent.click(getByTestId(`create-version-measure-${measures[0].id}`));
-    fireEvent.click(getByLabelText("Major"));
+    const typeInput = screen.getByTestId(
+      "version-type-input"
+    ) as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = await getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
     await waitFor(() => {
       fireEvent.click(getByTestId("create-version-continue-button"));
       expect(
@@ -1097,6 +1162,53 @@ describe("Measure List component", () => {
     unmount();
   });
 
+  it("should display the error when measure type is not present", async () => {
+    const error = {
+      response: {
+        status: 409,
+      },
+    };
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return {
+        ...mockMeasureServiceApi,
+        getMeasureExport: jest.fn().mockRejectedValue(error),
+      };
+    });
+
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const actionButton = getByTestId(`measure-action-${measures[3].id}`);
+    fireEvent.click(actionButton);
+    expect(
+      screen.getByTestId(`export-measure-${measures[3].id}`)
+    ).toBeInTheDocument();
+    fireEvent.click(getByTestId(`export-measure-${measures[3].id}`));
+    await waitFor(() => {
+      expect(getByTestId("error-message")).toHaveTextContent(
+        "Unable to Export measure.CQL Contains ErrorsMissing Measure DevelopersMissing StewardMissing DescriptionMeasure Type is required"
+      );
+    });
+    unmount();
+  });
+
   it("should display the error when there are no associated population criteria while exporting the measure", async () => {
     const error = {
       response: {
@@ -1237,6 +1349,100 @@ describe("Measure List component", () => {
     await waitFor(() => {
       expect(getByText("Measure exported successfully")).toBeInTheDocument();
     });
+    unmount();
+  });
+
+  it("Should not be able to version QDM Measure when enableQdmRepeatTransfer is true", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      enableQdmRepeatTransfer: true,
+      qdmExport: true,
+    }));
+    const { getByTestId, queryByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const actionButton = getByTestId(`measure-action-${measures[0].id}`);
+    expect(actionButton).toBeInTheDocument();
+    expect(actionButton).toHaveTextContent("Select");
+    expect(window.location.href).toBe("http://localhost/");
+    fireEvent.click(actionButton);
+    expect(getByTestId(`view-measure-${measures[0].id}`)).toBeInTheDocument();
+    expect(getByTestId(`export-measure-${measures[0].id}`)).toBeInTheDocument();
+    expect(
+      queryByTestId(`create-version-measure-${measures[0].id}`)
+    ).not.toBeInTheDocument();
+    const actionButton2 = getByTestId(`measure-action-${measures[1].id}`);
+    expect(actionButton2).toBeInTheDocument();
+    expect(actionButton2).toHaveTextContent("Select");
+    expect(window.location.href).toBe("http://localhost/");
+    fireEvent.click(actionButton2);
+    expect(getByTestId(`view-measure-${measures[1].id}`)).toBeInTheDocument();
+    expect(getByTestId(`export-measure-${measures[1].id}`)).toBeInTheDocument();
+    expect(
+      getByTestId(`create-version-measure-${measures[1].id}`)
+    ).toBeInTheDocument();
+    unmount();
+  });
+
+  it("Should be able to version QDM Measure when enableQdmRepeatTransfer is false", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      enableQdmRepeatTransfer: false,
+      qdmExport: true,
+    }));
+    const { getByTestId, queryByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const actionButton = getByTestId(`measure-action-${measures[0].id}`);
+    expect(actionButton).toBeInTheDocument();
+    expect(actionButton).toHaveTextContent("Select");
+    expect(window.location.href).toBe("http://localhost/");
+    fireEvent.click(actionButton);
+    expect(getByTestId(`view-measure-${measures[0].id}`)).toBeInTheDocument();
+    expect(getByTestId(`export-measure-${measures[0].id}`)).toBeInTheDocument();
+    expect(
+      queryByTestId(`create-version-measure-${measures[0].id}`)
+    ).toBeInTheDocument();
+    const actionButton2 = getByTestId(`measure-action-${measures[1].id}`);
+    expect(actionButton2).toBeInTheDocument();
+    expect(actionButton2).toHaveTextContent("Select");
+    expect(window.location.href).toBe("http://localhost/");
+    fireEvent.click(actionButton2);
+    expect(getByTestId(`view-measure-${measures[1].id}`)).toBeInTheDocument();
+    expect(getByTestId(`export-measure-${measures[1].id}`)).toBeInTheDocument();
+    expect(
+      getByTestId(`create-version-measure-${measures[1].id}`)
+    ).toBeInTheDocument();
     unmount();
   });
 });
