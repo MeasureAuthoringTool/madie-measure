@@ -10,10 +10,11 @@ interface MeasureMetaDataRowProps {
   description: string;
   id?: string;
   handleEdit?: Function;
+  canEdit?: boolean;
 }
 
 const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
-  const { name, description, id, handleEdit } = props;
+  const { name, description, id, handleEdit, canEdit } = props;
 
   return (
     <tr>
@@ -27,6 +28,7 @@ const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
             onClick={(e) => {
               handleEdit(id);
             }}
+            disabled={!canEdit}
             data-testid={`measure-definition-edit-${id}`}
             aria-label={`Measure definition ${id}`}
             role="button"
