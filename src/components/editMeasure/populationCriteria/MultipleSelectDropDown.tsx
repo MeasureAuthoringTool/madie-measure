@@ -56,6 +56,14 @@ const MultipleSelectDropDown = ({
   onClose,
   ...rest
 }) => {
+  const requiredLabelReadable = <span className="sr-only">required</span>;
+  const labelReadable = required ? (
+    <span>
+      {label} {requiredLabelReadable}
+    </span>
+  ) : (
+    label
+  );
   return (
     <FormControl error={error} fullWidth>
       <div
@@ -108,10 +116,11 @@ const MultipleSelectDropDown = ({
           const { inputProps } = params;
           inputProps["aria-required"] = required;
           inputProps["aria-describedby"] = "measure-group-type-helper-text";
-          inputProps["aria-label"] = "Types multiple types can be selected";
+          inputProps["aria-label"] =
+            "Measure types multiple measure types can be selected";
           return (
             <TextField
-              label={`${label} ${required ? "required" : ""}`}
+              label={labelReadable}
               placeholder="Select All That Apply"
               error={error}
               {...params}
