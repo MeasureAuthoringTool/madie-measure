@@ -295,7 +295,6 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
                     description={measureDefinition.definition}
                     id={measureDefinition.id}
                     handleEdit={handleEdit}
-                    key={`${measureDefinition.term}-${index}`}
                     canEdit={canEdit}
                   />
                 ))
