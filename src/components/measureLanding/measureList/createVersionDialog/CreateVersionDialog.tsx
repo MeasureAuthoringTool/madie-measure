@@ -87,7 +87,7 @@ const CreatVersionDialog = ({
       return splitVersion.join(".");
     } else {
       const targetValue = splitVersion[selectedIndex];
-      splitVersion[selectedIndex] = Number(targetValue + 1);
+      splitVersion[selectedIndex] = Number(targetValue) + 1;
       return splitVersion.join(".");
     }
   };
