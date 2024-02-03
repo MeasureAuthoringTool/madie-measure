@@ -33,6 +33,7 @@ function referenceHelper(number: number): Reference[] {
   const references: Reference[] = [];
   for (let i = 0; i < number; i++) {
     references.push({
+      id: `id ${i}`,
       referenceType: `type ${i}`,
       referenceText: `text ${i}`,
     });
@@ -321,6 +322,61 @@ describe("EditMeasure Component", () => {
     expect(
       await screen.findByTestId("measure-references-error")
     ).toHaveTextContent('Error updating measure "measureName"');
+    const toastCloseButton = await screen.findByTestId("close-error-button");
+    expect(toastCloseButton).toBeInTheDocument();
+    fireEvent.click(toastCloseButton);
+    await waitFor(() => {
+      expect(toastCloseButton).not.toBeInTheDocument();
+    });
+  });
+
+  it("Should allow editing dialog with populated values on clicking Edit and changes are saved.", async () => {
+    measureStore.state.mockImplementation(() => measureWithNineItems);
+    measureStore.initialState.mockImplementation(() => measureWithNineItems);
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    await checkRows(9);
+
+    const editButton = await findByTestId("measure-definition-edit-id 1");
+    expect(editButton).toBeInTheDocument();
+    userEvent.click(screen.getByTestId("measure-definition-edit-id 1"));
+    await waitFor(() => {
+      expect(getByTestId("dialog-form")).toBeInTheDocument();
+    });
+
+    const typeInput = screen.getByTestId(
+      "measure-referenceType-input"
+    ) as HTMLInputElement;
+    expect(typeInput.value).toBe("type 1");
+    const textAreaInput = getByTestId(
+      "measure-referenceText"
+    ) as HTMLTextAreaElement;
+    expect(textAreaInput.value).toBe("text 1");
+
+    fireEvent.change(typeInput, {
+      target: { value: "Citation" },
+    });
+    expect(typeInput.value).toBe("Citation");
+
+    act(() => {
+      fireEvent.change(textAreaInput, {
+        target: { value: "text 10" },
+      });
+    });
+    fireEvent.blur(textAreaInput);
+    expectInputValue(textAreaInput, "text 10");
+    const submitButton = getByTestId("save-button");
+    expect(submitButton).toHaveProperty("disabled", false);
+    fireEvent.click(submitButton);
+
+    expect(
+      await screen.findByTestId("measure-references-success")
+    ).toHaveTextContent("Measure Reference Saved Successfully");
     const toastCloseButton = await screen.findByTestId("close-error-button");
     expect(toastCloseButton).toBeInTheDocument();
     fireEvent.click(toastCloseButton);
