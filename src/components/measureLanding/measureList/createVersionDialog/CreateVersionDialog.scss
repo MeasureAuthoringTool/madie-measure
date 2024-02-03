@@ -1,0 +1,12 @@
+#create-version-dialog {
+  display: flex;
+  flex-direction: column;
+  row-gap: 24px;
+
+  .column-gap {
+    display: flex;
+    flex-direction: row;
+    column-gap: 24px;
+    align-items: center;
+  }
+}

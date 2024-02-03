@@ -5,11 +5,14 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
+import { Simulate } from "react-dom/test-utils";
 import * as React from "react";
+import userEvent from "@testing-library/user-event";
 import clearAllMocks = jest.clearAllMocks;
 import CreateVersionDialog from "./CreateVersionDialog";
 
 describe("Create Version Dialog component", () => {
+  const { getByTestId } = screen;
   beforeEach(() => {
     clearAllMocks();
   });
@@ -17,45 +20,97 @@ describe("Create Version Dialog component", () => {
   it("should render version dialog and the continue button is disabled", () => {
     render(
       <CreateVersionDialog
+        currentVersion="0.0.000"
         open={true}
         onClose={jest.fn()}
         onSubmit={jest.fn()}
         versionHelperText=""
       />
     );
-    expect(screen.getByTestId("create-version-dialog")).toBeInTheDocument();
-    expect(screen.getByTestId("create-version-continue-button")).toBeDisabled();
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+    expect(getByTestId("create-version-continue-button")).toBeDisabled();
   });
 
-  it("should render version dialog and enable continue button after a selection", () => {
+  it("should render version dialog and enable continue button after a selection: major", () => {
     render(
       <CreateVersionDialog
+        currentVersion="0.0.000"
         open={true}
         onClose={jest.fn()}
         onSubmit={jest.fn()}
         versionHelperText=""
       />
     );
-    expect(screen.getByTestId("create-version-dialog")).toBeInTheDocument();
-    const majorRadio: HTMLInputElement = screen.getByLabelText("Major");
-    const minorRadio: HTMLInputElement = screen.getByLabelText("Minor");
-    const patchRadio: HTMLInputElement = screen.getByLabelText("Patch");
-    expect(majorRadio.checked).toEqual(false);
-    act(() => {
-      fireEvent.click(majorRadio);
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+    const typeInput = getByTestId("version-type-input") as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
     });
-    expect(majorRadio.checked).toEqual(true);
-    expect(minorRadio.checked).toEqual(false);
-    expect(patchRadio.checked).toEqual(false);
-    expect(
-      screen.getByTestId("create-version-continue-button")
-    ).not.toBeDisabled();
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
+    expect(getByTestId("create-version-continue-button")).not.toBeDisabled();
+  });
+
+  it("should render version dialog and enable continue button after a selection: minor", () => {
+    render(
+      <CreateVersionDialog
+        currentVersion="0.0.000"
+        open={true}
+        onClose={jest.fn()}
+        onSubmit={jest.fn()}
+        versionHelperText=""
+      />
+    );
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+    const typeInput = getByTestId("version-type-input") as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "minor" },
+    });
+    expect(typeInput.value).toBe("minor");
+    const confirmVersionNode = getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "0.1.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("0.1.000");
+    expect(getByTestId("create-version-continue-button")).not.toBeDisabled();
+  });
+
+  it("should render version dialog and enable continue button after a selection: patch", () => {
+    render(
+      <CreateVersionDialog
+        currentVersion="0.0.000"
+        open={true}
+        onClose={jest.fn()}
+        onSubmit={jest.fn()}
+        versionHelperText=""
+      />
+    );
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+    const typeInput = getByTestId("version-type-input") as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "patch" },
+    });
+    expect(typeInput.value).toBe("patch");
+    const confirmVersionNode = getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "0.0.001");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("0.0.001");
+    expect(getByTestId("create-version-continue-button")).not.toBeDisabled();
   });
 
   it("should navigate to measure list home page on cancel", async () => {
     const onCloseFn = jest.fn();
     render(
       <CreateVersionDialog
+        currentVersion="0.0.000"
         open={true}
         onClose={onCloseFn}
         onSubmit={jest.fn()}
@@ -63,33 +118,20 @@ describe("Create Version Dialog component", () => {
       />
     );
 
-    expect(screen.getByTestId("create-version-dialog")).toBeInTheDocument();
-    const majorRadio: HTMLInputElement = screen.getByLabelText("Major");
-    const minorRadio: HTMLInputElement = screen.getByLabelText("Minor");
-    const patchRadio: HTMLInputElement = screen.getByLabelText("Patch");
-    expect(majorRadio.checked).toEqual(false);
-    act(() => {
-      fireEvent.click(majorRadio);
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+    const typeInput = getByTestId("version-type-input") as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
     });
-    expect(majorRadio.checked).toEqual(true);
-    expect(minorRadio.checked).toEqual(false);
-    expect(patchRadio.checked).toEqual(false);
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
 
-    act(() => {
-      fireEvent.click(minorRadio);
-    });
-    expect(majorRadio.checked).toEqual(false);
-    expect(minorRadio.checked).toEqual(true);
-    expect(patchRadio.checked).toEqual(false);
-
-    act(() => {
-      fireEvent.click(patchRadio);
-    });
-    expect(majorRadio.checked).toEqual(false);
-    expect(minorRadio.checked).toEqual(false);
-    expect(patchRadio.checked).toEqual(true);
-
-    fireEvent.click(screen.getByTestId("create-version-cancel-button"));
+    fireEvent.click(getByTestId("create-version-cancel-button"));
     expect(onCloseFn).toHaveBeenCalled();
   });
 
@@ -97,21 +139,27 @@ describe("Create Version Dialog component", () => {
     const onSubmitFn = jest.fn();
     render(
       <CreateVersionDialog
+        currentVersion="0.0.000"
         open={true}
         onClose={jest.fn()}
         onSubmit={onSubmitFn}
         versionHelperText=""
       />
     );
-    expect(screen.getByTestId("create-version-dialog")).toBeInTheDocument();
-    const majorRadio: HTMLInputElement = screen.getByLabelText("Major");
-    expect(majorRadio.checked).toEqual(false);
-
-    act(() => {
-      fireEvent.click(majorRadio);
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+    const typeInput = getByTestId("version-type-input") as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
     });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
 
-    const continueButton = screen.getByTestId("create-version-continue-button");
+    const continueButton = getByTestId("create-version-continue-button");
     await waitFor(() => {
       expect(continueButton).toBeEnabled();
     });
@@ -129,6 +177,7 @@ describe("Create Version Dialog component", () => {
     const onSubmitFn = jest.fn();
     render(
       <CreateVersionDialog
+        currentVersion="0.0.000"
         open={true}
         onClose={jest.fn()}
         onSubmit={onSubmitFn}

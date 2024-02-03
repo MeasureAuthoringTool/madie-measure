@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import tw from "twin.macro";
 import { useFormik } from "formik";
 import { Measure } from "@madie/madie-models";
 import {
@@ -21,6 +22,7 @@ import {
 } from "../../../../styles/editMeasure/populationCriteria/supplementalData";
 import { MenuItem as MuiMenuItem } from "@mui/material";
 
+const Grid = tw.div`grid grid-cols-2 gap-4   overflow-hidden w-full`;
 const improvementNotationOptions = [
   {
     label: "-",
@@ -42,11 +44,18 @@ const improvementNotationOptions = [
       "Improvement is indicated as a decrease in the score or measurement (e.g. Lower score indicates better quality).",
     code: "decrease",
   },
+  {
+    label: "Other",
+    value: "Other",
+    subtitle: "Custom Input",
+    code: "other",
+  },
 ];
 
 interface ReportingForm {
   rateAggregation: string;
   improvementNotation: string;
+  improvementNotationOther: string;
 }
 
 const QDMReporting = () => {
@@ -76,6 +85,7 @@ const QDMReporting = () => {
     initialValues: {
       rateAggregation: measure?.rateAggregation || "",
       improvementNotation: measure?.improvementNotation || "",
+      improvementNotationOther: measure?.improvementNotationOther || "",
     },
     enableReinitialize: true,
     onSubmit: async (values: ReportingForm) => await handleSubmit(values),
@@ -105,10 +115,14 @@ const QDMReporting = () => {
   };
 
   const handleSubmit = async (values) => {
+    if (formik.getFieldProps("improvementNotation").value != "Other") {
+      values.improvementNotationOther = "";
+    }
     const newMeasure: Measure = {
       ...measure,
       rateAggregation: values.rateAggregation,
       improvementNotation: values.improvementNotation,
+      improvementNotationOther: values?.improvementNotationOther,
     };
 
     measureServiceApi
@@ -144,47 +158,81 @@ const QDMReporting = () => {
         data-testid="reporting-form"
       >
         <div id="reporting" data-testid="reporting">
-          <div className="left">
-            <FieldLabel htmlFor="rate-aggregation" id="rate-aggregation-label">
-              Rate Aggregation
-            </FieldLabel>
-            <FieldSeparator>
-              <FieldInput
-                style={{ border: "solid 1px #8c8c8c" }}
-                {...formik.getFieldProps("rateAggregation")}
-                aria-labelledby="rate-aggregation-label"
-                type="text"
+          <Grid>
+            <div>
+              <FieldLabel
+                htmlFor="rate-aggregation"
+                id="rate-aggregation-label"
+              >
+                Rate Aggregation
+              </FieldLabel>
+              <FieldSeparator>
+                <FieldInput
+                  style={{ border: "solid 1px #8c8c8c" }}
+                  {...formik.getFieldProps("rateAggregation")}
+                  aria-labelledby="rate-aggregation-label"
+                  type="text"
+                  disabled={!canEdit}
+                  name="rate-aggregation"
+                  id="rate-aggregation"
+                  autoComplete="rate-aggregation"
+                  placeholder="Rate Aggregation"
+                  data-testid="rateAggregationText"
+                  {...formik.getFieldProps("rateAggregation")}
+                />
+              </FieldSeparator>
+            </div>
+            <div />
+            <div>
+              <Select
+                name="Improvement Notation"
+                placeHolder={{ name: "Select Improvement Notation", value: "" }}
+                label="Improvement Notation"
+                id="improvement-notation-select"
+                inputProps={{
+                  "data-testid": "improvement-notation-input",
+                }}
                 disabled={!canEdit}
-                name="rate-aggregation"
-                id="rate-aggregation"
-                autoComplete="rate-aggregation"
-                placeholder="Rate Aggregation"
-                data-testid="rateAggregationText"
-                {...formik.getFieldProps("rateAggregation")}
+                data-testid="improvement-notation-select"
+                {...formik.getFieldProps("improvementNotation")}
+                size="small"
+                options={Object.values(improvementNotationOptions).map(
+                  (opt) => (
+                    <MuiMenuItem key={opt.label} value={opt.value}>
+                      {opt.label}
+                    </MuiMenuItem>
+                  )
+                )}
               />
-            </FieldSeparator>
-          </div>
-          <div className="right">
-            <Select
-              name="Improvement Notation"
-              placeHolder={{ name: "Select Improvement Notation", value: "" }}
-              label="Improvement Notation"
-              id="improvement-notation-select"
-              inputProps={{
-                "data-testid": "improvement-notation-input",
-              }}
-              disabled={!canEdit}
-              data-testid="improvement-notation-select"
-              {...formik.getFieldProps("improvementNotation")}
-              size="small"
-              options={Object.values(improvementNotationOptions).map((opt) => (
-                <MuiMenuItem key={opt.label} value={opt.value}>
-                  {opt.label}
-                </MuiMenuItem>
-              ))}
-            />
-          </div>
+            </div>
+
+            {formik.getFieldProps("improvementNotation").value == "Other" && (
+              <div>
+                <FieldLabel
+                  htmlFor="improvement-notation-other-label"
+                  id="improvement-notation-other-label"
+                >
+                  Improvement Notation (Other)
+                </FieldLabel>
+                <FieldSeparator>
+                  <FieldInput
+                    style={{ border: "solid 1px #8c8c8c" }}
+                    aria-labelledby="improvement-notation-other-label"
+                    type="text"
+                    disabled={!canEdit}
+                    name="improvement-notation-other"
+                    id="improvement-notation-other"
+                    autoComplete="improvement-notation-other"
+                    placeholder="Custom Improvement Notation"
+                    data-testid="improvementNotationOtherText"
+                    {...formik.getFieldProps("improvementNotationOther")}
+                  />
+                </FieldSeparator>
+              </div>
+            )}
+          </Grid>
         </div>
+
         <Toast
           toastKey="reporting-toast"
           aria-live="polite"

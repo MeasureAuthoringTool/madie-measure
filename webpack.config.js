@@ -47,7 +47,6 @@ module.exports = (webpackConfigEnv, argv) => {
   const externalsConfig = {
     externals: [
       "@madie/madie-patient",
-      "@madie/madie-components",
       "@madie/madie-editor",
       "@madie/madie-util",
     ],

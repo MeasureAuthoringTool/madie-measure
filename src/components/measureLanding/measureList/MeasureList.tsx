@@ -262,8 +262,13 @@ export default function MeasureList(props: {
     if (shouldAllowAction(selected, featureFlags.qdmExport)) {
       additionalOptions.push(exportButton);
     }
-    // always on if feature
-    if (selected.measureMetaData.draft) {
+    // no longer an always on if feature
+    if (
+      selected.measureMetaData.draft &&
+      !(
+        selected.model.startsWith("QDM") && featureFlags.enableQdmRepeatTransfer
+      )
+    ) {
       options.push({
         label: "Version",
         toImplementFunction: checkCreateVersion,
@@ -362,6 +367,7 @@ export default function MeasureList(props: {
             missing.push("Missing Description");
           }
           if (
+            targetedMeasure?.model === Model.QICORE &&
             targetedMeasure.groups &&
             targetedMeasure.groups.filter(
               (group) =>
@@ -370,6 +376,12 @@ export default function MeasureList(props: {
             ).length > 0
           ) {
             missing.push("At least one Population Criteria is missing Type");
+          }
+          if (
+            targetedMeasure?.model === Model.QDM_5_6 &&
+            _.isEmpty(targetedMeasure?.baseConfigurationTypes)
+          ) {
+            missing.push("Measure Type is required");
           }
           if (missing.length <= 0) {
             const message =
@@ -643,6 +655,7 @@ export default function MeasureList(props: {
               loading={loading}
             />
             <CreatVersionDialog
+              currentVersion={targetMeasure?.current?.version}
               open={createVersionDialog.open}
               onClose={handleDialogClose}
               onSubmit={checkCreateVersion}

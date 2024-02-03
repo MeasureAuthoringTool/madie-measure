@@ -309,6 +309,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
                     handleEdit={handleEdit}
                     id={reference.id}
                     key={`${reference.referenceType}-${index}`}
+                    canEdit={canEdit}
                   />
                 ))
               ) : (
