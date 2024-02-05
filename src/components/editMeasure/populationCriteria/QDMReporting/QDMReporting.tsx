@@ -221,7 +221,6 @@ const QDMReporting = () => {
                     aria-labelledby="improvement-notation-other-label"
                     type="text"
                     disabled={!canEdit}
-                    required={true}
                     name="improvement-notation-other"
                     id="improvement-notation-other"
                     autoComplete="improvement-notation-other"
