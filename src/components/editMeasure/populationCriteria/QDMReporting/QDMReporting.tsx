@@ -21,7 +21,7 @@ import {
   FieldSeparator,
 } from "../../../../styles/editMeasure/populationCriteria/supplementalData";
 import { MenuItem as MuiMenuItem } from "@mui/material";
-
+import { QDMReportingValidator } from "./QDMReportingValidator";
 const Grid = tw.div`grid grid-cols-2 gap-4   overflow-hidden w-full`;
 const improvementNotationOptions = [
   {
@@ -88,6 +88,7 @@ const QDMReporting = () => {
       improvementNotationOther: measure?.improvementNotationOther || "",
     },
     enableReinitialize: true,
+    validationSchema: QDMReportingValidator,
     onSubmit: async (values: ReportingForm) => await handleSubmit(values),
   });
   const { resetForm } = formik;
@@ -220,6 +221,7 @@ const QDMReporting = () => {
                     aria-labelledby="improvement-notation-other-label"
                     type="text"
                     disabled={!canEdit}
+                    required={true}
                     name="improvement-notation-other"
                     id="improvement-notation-other"
                     autoComplete="improvement-notation-other"
