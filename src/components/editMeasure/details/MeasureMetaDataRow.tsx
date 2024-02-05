@@ -2,7 +2,6 @@ import React from "react";
 // we will have two different renders so far
 // measureMetaData.measureDefinition = [{term, definition}];
 // measureMetaData.measureReferences = [{referenceText, ReferenceType}]
-import { MeasureDefinition } from "../../editMeasure/details/MeasureDefinitions/MeasureDefinitions";
 import { Button } from "@madie/madie-design-system/dist/react";
 
 interface MeasureMetaDataRowProps {
@@ -10,10 +9,11 @@ interface MeasureMetaDataRowProps {
   description: string;
   id?: string;
   handleEdit?: Function;
+  canEdit?: boolean;
 }
 
 const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
-  const { name, description, id, handleEdit } = props;
+  const { name, description, id, handleEdit, canEdit } = props;
 
   return (
     <tr>
@@ -24,9 +24,10 @@ const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
           <Button
             variant="outline-secondary"
             name="Edit"
-            onClick={(e) => {
+            onClick={() => {
               handleEdit(id);
             }}
+            disabled={!canEdit}
             data-testid={`measure-definition-edit-${id}`}
             aria-label={`Measure definition ${id}`}
             role="button"

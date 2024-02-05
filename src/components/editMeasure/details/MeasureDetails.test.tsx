@@ -75,7 +75,7 @@ describe("MeasureDetails component", () => {
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
           <Route path="/foo">
-            <MeasureDetails setErrorMessage={setErrorMessage} />
+            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={false} />
           </Route>
         </MemoryRouter>
       </ApiContextProvider>
@@ -90,7 +90,7 @@ describe("MeasureDetails component", () => {
           initialEntries={[{ pathname: "/foo/model&measurement-period" }]}
         >
           <Route path="/foo">
-            <MeasureDetails setErrorMessage={setErrorMessage} />
+            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={false} />
           </Route>
         </MemoryRouter>
       </ApiContextProvider>
@@ -105,7 +105,7 @@ describe("MeasureDetails component", () => {
           initialEntries={[{ pathname: "/foo/measure-description" }]}
         >
           <Route path="/foo">
-            <MeasureDetails setErrorMessage={setErrorMessage} />
+            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={false} />
           </Route>
         </MemoryRouter>
       </ApiContextProvider>
@@ -128,7 +128,7 @@ describe("MeasureDetails component", () => {
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={[{ pathname: "/foo/measure-copyright" }]}>
           <Route path="/foo">
-            <MeasureDetails setErrorMessage={setErrorMessage} />
+            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={false} />
           </Route>
         </MemoryRouter>
       </ApiContextProvider>
@@ -153,7 +153,7 @@ describe("MeasureDetails component", () => {
           initialEntries={[{ pathname: "/foo/measure-disclaimer" }]}
         >
           <Route path="/foo">
-            <MeasureDetails setErrorMessage={setErrorMessage} />
+            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={false} />
           </Route>
         </MemoryRouter>
       </ApiContextProvider>
@@ -176,7 +176,7 @@ describe("MeasureDetails component", () => {
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={[{ pathname: "/foo/measure-rationale" }]}>
           <Route path="/foo">
-            <MeasureDetails setErrorMessage={setErrorMessage} />
+            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={false} />
           </Route>
         </MemoryRouter>
       </ApiContextProvider>
@@ -199,7 +199,7 @@ describe("MeasureDetails component", () => {
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={[{ pathname: "/foo/measure-guidance" }]}>
           <Route path="/foo">
-            <MeasureDetails setErrorMessage={setErrorMessage} />
+            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={false} />
           </Route>
         </MemoryRouter>
       </ApiContextProvider>
@@ -224,7 +224,7 @@ describe("MeasureDetails component", () => {
           initialEntries={[{ pathname: "/foo/measure-definitions" }]}
         >
           <Route path="/foo">
-            <MeasureDetails setErrorMessage={setErrorMessage} />
+            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={true} />
           </Route>
         </MemoryRouter>
       </ApiContextProvider>
@@ -242,7 +242,7 @@ describe("MeasureDetails component", () => {
           initialEntries={[{ pathname: "/foo/measure-references" }]}
         >
           <Route path="/foo">
-            <MeasureDetails setErrorMessage={setErrorMessage} />
+            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={true} />
           </Route>
         </MemoryRouter>
       </ApiContextProvider>
@@ -259,7 +259,7 @@ describe("MeasureDetails component", () => {
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
           <Route path="/foo">
-            <MeasureDetails setErrorMessage={setErrorMessage} />
+            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={true} />
           </Route>
         </MemoryRouter>
       </ApiContextProvider>

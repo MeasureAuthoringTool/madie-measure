@@ -8,7 +8,7 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
-import { Button } from "@madie/madie-components";
+import { Button } from "@madie/madie-design-system/dist/react";
 import CloseIcon from "@mui/icons-material/Close";
 import { makeStyles } from "@mui/styles";
 
@@ -169,20 +169,19 @@ export default function MeasureGroupsWarningDialog(
       <Divider className={classes.dividerBottom} />
       <DialogActions classes={{ root: classes.actionsRoot }}>
         <Button
-          type="button"
-          buttonTitle={dialogText?.cancelButtonText}
-          variant="white"
+          variant="secondary"
           data-testid={`${dialogText?.dataTestId}-modal-cancel-btn`}
           onClick={onClose}
-        />
+        >
+          {dialogText?.cancelButtonText}
+        </Button>
         <Button
           style={{ background: "#424B5A", marginTop: 0 }}
-          type="submit"
-          buttonTitle={dialogText?.confirmButtonText}
-          group-form-update-btn
           data-testid={`${dialogText?.dataTestId}-modal-agree-btn`}
           onClick={onSubmit}
-        />
+        >
+          {dialogText?.confirmButtonText}
+        </Button>
       </DialogActions>
     </Dialog>
   );

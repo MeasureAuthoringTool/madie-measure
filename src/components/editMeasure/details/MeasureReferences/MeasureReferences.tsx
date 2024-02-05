@@ -283,6 +283,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
                     name={reference.referenceType}
                     description={reference.referenceText}
                     key={reference.id}
+                    canEdit={canEdit}
                   />
                 ))
               ) : (

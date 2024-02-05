@@ -20,6 +20,8 @@ import "./MeasureDetails.scss";
 import EditMeasureDetailsSideNav from "./EditMeasureDetailsSideNav";
 import MeasureDefinitions from "./MeasureDefinitions/MeasureDefinitions";
 import MeasureReferences from "./MeasureReferences/MeasureReferences";
+import TransmissionFormat from "./TransmissionFormat/TransmissionFormat";
+
 const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
 export interface RouteHandlerState {
   canTravel: boolean;
@@ -28,10 +30,10 @@ export interface RouteHandlerState {
 
 export interface MeasureDetailsProps {
   setErrorMessage: Function;
+  isQDM: boolean;
 }
-
 export default function MeasureDetails(props: MeasureDetailsProps) {
-  const { setErrorMessage } = props;
+  const { setErrorMessage, isQDM } = props;
   useDocumentTitle("MADiE Edit Measure Details");
   const { path } = useRouteMatch();
   const modelPeriodLink = `${path}/model&measurement-period`;
@@ -44,7 +46,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   const clinicalLink = `${path}/measure-clinical-recommendation`;
   const definitionsLink = `${path}/measure-definitions`;
   const referencesLink = `${path}/measure-references`;
-  // const riskAdjustmentLink = `${path}/measure-risk-adjustment`;
+  const transmissionFormat = `${path}/transmission-format`;
 
   const links = [
     // General Information
@@ -99,15 +101,8 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
           dataTestId: "leftPanelMeasureClinicalRecommendation",
           id: "sideNavMeasureClinicalRecommendation",
         },
-        // {
-        //   title: "Risk Adjustment",
-        //   href: riskAdjustmentLink,
-        //   dataTestId: "leftPanelMeasureRiskAdjustment",
-        //   id: "sideNavMeasureRiskAdjustment",
-        // },
       ],
     },
-    // legal
     {
       title: "Legal",
       links: [
@@ -127,20 +122,28 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
     },
   ];
   const featureFlags = useFeatureFlags();
-  if (featureFlags?.qdmMeasureDefinitions) {
-    links[1].links.splice(3, 0, {
-      title: "Definition (Terms)",
-      href: definitionsLink,
-      dataTestId: "leftPanelQDMMeasureDefinitions",
-      id: "sideNavQDMMeasureDefinitions",
-    });
-  }
-  if (featureFlags?.qdmMeasureReferences) {
+  if (isQDM) {
+    if (featureFlags?.qdmMeasureDefinitions) {
+      links[1].links.splice(3, 0, {
+        title: "Definition (Terms)",
+        href: definitionsLink,
+        dataTestId: "leftPanelQDMMeasureDefinitions",
+        id: "sideNavQDMMeasureDefinitions",
+      });
+    }
+    if (featureFlags?.qdmMeasureReferences) {
+      links[1].links.push({
+        title: "References",
+        href: referencesLink,
+        dataTestId: "leftPanelMeasureReferences",
+        id: "sideNavMeasureReferences",
+      });
+    }
     links[1].links.push({
-      title: "References",
-      href: referencesLink,
-      dataTestId: "leftPanelMeasureReferences",
-      id: "sideNavMeasureReferences",
+      title: "Transmission Format",
+      href: transmissionFormat,
+      dataTestId: "leftPanelMeasureTransmissionFormat",
+      id: "sideNavMeasureTransmissionFormat",
     });
   }
   const history = useHistory();
@@ -233,24 +236,23 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               setErrorMessage={setErrorMessage}
             />
           </Route>
-          {featureFlags.qdmMeasureReferences && (
-            <Route path={referencesLink}>
-              <MeasureReferences setErrorMessage={setErrorMessage} />
-            </Route>
+          {isQDM && (
+            <>
+              <Route path={transmissionFormat}>
+                <TransmissionFormat setErrorMessage={setErrorMessage} />
+              </Route>
+              {featureFlags.qdmMeasureReferences && (
+                <Route path={referencesLink}>
+                  <MeasureReferences setErrorMessage={setErrorMessage} />
+                </Route>
+              )}
+              {featureFlags.qdmMeasureDefinitions && (
+                <Route path={definitionsLink}>
+                  <MeasureDefinitions setErrorMessage={setErrorMessage} />
+                </Route>
+              )}
+            </>
           )}
-          {featureFlags.qdmMeasureDefinitions && (
-            <Route path={definitionsLink}>
-              <MeasureDefinitions setErrorMessage={setErrorMessage} />
-            </Route>
-          )}
-          {/* <Route path={riskAdjustmentLink}>
-            <MeasureMetadata
-              measureMetadataId="RiskAdjustment"
-              measureMetadataType="Risk Adjustment"
-              header="Risk Adjustment"
-              setErrorMessage={setErrorMessage}
-            />
-          </Route> */}
         </Switch>
       </Grid>
     </>
