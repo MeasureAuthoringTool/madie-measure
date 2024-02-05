@@ -169,10 +169,6 @@ const QDMReporting = () => {
               </FieldLabel>
               <FieldSeparator>
                 <TextArea
-                  style={{ border: "solid 1px #8c8c8c" }}
-                  {...formik.getFieldProps("rateAggregation")}
-                  aria-labelledby="rate-aggregation-label"
-                  type="text"
                   disabled={!canEdit}
                   name="rate-aggregation"
                   id="rate-aggregation"
