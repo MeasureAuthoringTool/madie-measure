@@ -213,14 +213,20 @@ const QDMReporting = () => {
                   htmlFor="improvement-notation-other-label"
                   id="improvement-notation-other-label"
                 >
-                  Improvement Notation (Other)
+                  <span aria-hidden="true" style={{ color: "red" }}>
+                    *{" "}
+                  </span>
+                  <span className="sr-only">required</span>Improvement Notation
+                  (Other)
                 </FieldLabel>
                 <FieldSeparator>
                   <FieldInput
                     style={{ border: "solid 1px #8c8c8c" }}
                     aria-labelledby="improvement-notation-other-label"
                     type="text"
+                    // helperText={formik.touched["improvementNotationOther"]&&formikErrorHandler("improvementNotationOther", true)}
                     disabled={!canEdit}
+                    required={true}
                     name="improvement-notation-other"
                     id="improvement-notation-other"
                     autoComplete="improvement-notation-other"
