@@ -161,23 +161,16 @@ const QDMReporting = () => {
         <div id="reporting" data-testid="reporting">
           <Grid>
             <div>
-              <FieldLabel
-                htmlFor="rate-aggregation"
-                id="rate-aggregation-label"
-              >
-                Rate Aggregation
-              </FieldLabel>
-              <FieldSeparator>
-                <TextArea
-                  disabled={!canEdit}
-                  name="rate-aggregation"
-                  id="rate-aggregation"
-                  autoComplete="rate-aggregation"
-                  placeholder="Rate Aggregation"
-                  data-testid="rateAggregationText"
-                  {...formik.getFieldProps("rateAggregation")}
-                />
-              </FieldSeparator>
+              <TextArea
+                disabled={!canEdit}
+                label="Rate Aggregation"
+                name="rate-aggregation"
+                id="rate-aggregation"
+                autoComplete="rate-aggregation"
+                placeholder="Rate Aggregation"
+                data-testid="rateAggregationText"
+                {...formik.getFieldProps("rateAggregation")}
+              />
             </div>
             <div />
             <div>
