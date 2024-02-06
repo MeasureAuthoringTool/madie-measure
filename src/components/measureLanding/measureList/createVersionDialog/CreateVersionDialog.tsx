@@ -67,29 +67,20 @@ const CreatVersionDialog = ({
     if (!currentVersion) {
       return null;
     }
-    const VERSION_MAP = {
-      major: 0,
-      minor: 1,
-      patch: 2,
-    };
-    const splitVersion = currentVersion.split(".");
-    const selectedIndex = VERSION_MAP[versionType];
-    if (selectedIndex === 2) {
-      // patch is a little funny
-      const currentPatch = splitVersion[selectedIndex];
-      let newPatch = Number(currentPatch) + 1;
-      let newPatchString = String(newPatch);
-      const digits = String(newPatchString).length; //now we know how many digits we have
-      for (let i = 0; i < 3 - digits; i++) {
-        newPatchString = "0" + newPatchString;
-      }
-      splitVersion[selectedIndex] = newPatchString;
-      return splitVersion.join(".");
-    } else {
-      const targetValue = splitVersion[selectedIndex];
-      splitVersion[selectedIndex] = Number(targetValue + 1);
-      return splitVersion.join(".");
+    const splitVersionString = currentVersion.split(".");
+    if (versionType === "major") {
+      splitVersionString[0] = String(parseInt(splitVersionString[0]) + 1);
+      splitVersionString[1] = "0";
+      splitVersionString[2] = "000";
+    } else if (versionType === "minor") {
+      splitVersionString[1] = String(parseInt(splitVersionString[1]) + 1);
+      splitVersionString[2] = "000";
+    } else if (versionType === "patch") {
+      splitVersionString[2] = String(
+        parseInt(splitVersionString[2]) + 1
+      ).padStart(3, "0");
     }
+    return splitVersionString.join(".");
   };
 
   useEffect(() => {
