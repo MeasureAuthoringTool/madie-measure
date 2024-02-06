@@ -13,6 +13,7 @@ import {
   Select,
   MadieDiscardDialog,
   Toast,
+  TextField,
 } from "@madie/madie-design-system/dist/react";
 import "./QDMReporting.scss";
 import { FieldInput } from "../../../../styles/editMeasure/populationCriteria/groups";
@@ -209,22 +210,17 @@ const QDMReporting = () => {
 
             {formik.getFieldProps("improvementNotation").value == "Other" && (
               <div>
-                <FieldLabel
-                  htmlFor="improvement-notation-other-label"
-                  id="improvement-notation-other-label"
-                >
-                  <span aria-hidden="true" style={{ color: "red" }}>
-                    *{" "}
-                  </span>
-                  <span className="sr-only">required</span>Improvement Notation
-                  (Other)
-                </FieldLabel>
                 <FieldSeparator>
-                  <FieldInput
-                    style={{ border: "solid 1px #8c8c8c" }}
-                    aria-labelledby="improvement-notation-other-label"
-                    type="text"
-                    // helperText={formik.touched["improvementNotationOther"]&&formikErrorHandler("improvementNotationOther", true)}
+                  <TextField
+                    label="Improvement Notation (Other)"
+                    helperText={
+                      formik.touched.improvementNotationOther &&
+                      formik.errors.improvementNotationOther
+                    }
+                    error={
+                      formik.touched.improvementNotationOther &&
+                      formik.errors.improvementNotationOther
+                    }
                     disabled={!canEdit}
                     required={true}
                     name="improvement-notation-other"
