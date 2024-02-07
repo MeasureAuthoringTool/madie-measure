@@ -14,6 +14,7 @@ import useMeasureServiceApi, {
 import { measureStore } from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
+import buildString from "../../../../utils/buildString";
 
 jest.mock("../../../../api/useMeasureServiceApi");
 const useMeasureServiceApiMock =
@@ -147,6 +148,41 @@ describe("MeasureDefinitions Component", () => {
     expect(result).toBeInTheDocument();
   });
 
+  it("should allow entry with no limit", async () => {
+    measureStore.state.mockImplementationOnce(() => null);
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureDefinitions setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    const result = getByTestId("empty-definitions");
+    expect(result).toBeInTheDocument();
+
+    const createButton = await findByTestId("create-definition-button");
+    expect(createButton).toBeInTheDocument();
+    await checkDialogExists();
+    const termBoxNode = await getByTestId("qdm-measure-term-input");
+    const manyChars = buildString(260);
+    userEvent.type(termBoxNode, manyChars);
+    Simulate.change(termBoxNode);
+
+    const textAreaInput = getByTestId(
+      "qdm-measure-definition"
+    ) as HTMLTextAreaElement;
+    expectInputValue(textAreaInput, "");
+    act(() => {
+      fireEvent.change(textAreaInput, {
+        target: { value: manyChars },
+      });
+    });
+    fireEvent.blur(textAreaInput);
+
+    const submitButton = getByTestId("save-button");
+    expect(submitButton).toHaveProperty("disabled", false);
+    fireEvent.click(submitButton);
+  });
   it("should allow adding term and definition", async () => {
     measureStore.state.mockImplementationOnce(() => null);
     render(
