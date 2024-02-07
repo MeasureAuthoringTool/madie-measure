@@ -775,7 +775,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                   <MultipleSelectDropDown
                     formControl={formik.getFieldProps("measureGroupTypes")}
                     id="measure-group-type"
-                    label="Type"
+                    label="Measure Type"
                     placeHolder={{ name: "Select Measure Group", value: "" }}
                     defaultValue={formik.values.measureGroupTypes}
                     required={true}
