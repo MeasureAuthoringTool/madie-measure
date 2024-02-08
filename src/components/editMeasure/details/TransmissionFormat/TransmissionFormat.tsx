@@ -84,12 +84,7 @@ const TransmissionFormat = (props: TransmissionFormatProps) => {
     initialValues: { ...INITIAL_VALUES },
     enableReinitialize: true,
     validationSchema: Yup.object().shape({
-      transmissionFormat: Yup.string()
-        .notRequired()
-        .max(
-          250,
-          "Measure Transmission Format cannot be more than 250 characters."
-        ),
+      transmissionFormat: Yup.string().notRequired(),
     }),
     onSubmit: async (values) => await handleSubmit(values),
   });
