@@ -13,6 +13,7 @@ import {
   Select,
   MadieDiscardDialog,
   Toast,
+  TextArea,
   TextField,
 } from "@madie/madie-design-system/dist/react";
 import "./QDMReporting.scss";
@@ -162,27 +163,16 @@ const QDMReporting = () => {
         <div id="reporting" data-testid="reporting">
           <Grid>
             <div>
-              <FieldLabel
-                htmlFor="rate-aggregation"
-                id="rate-aggregation-label"
-              >
-                Rate Aggregation
-              </FieldLabel>
-              <FieldSeparator>
-                <FieldInput
-                  style={{ border: "solid 1px #8c8c8c" }}
-                  {...formik.getFieldProps("rateAggregation")}
-                  aria-labelledby="rate-aggregation-label"
-                  type="text"
-                  disabled={!canEdit}
-                  name="rate-aggregation"
-                  id="rate-aggregation"
-                  autoComplete="rate-aggregation"
-                  placeholder="Rate Aggregation"
-                  data-testid="rateAggregationText"
-                  {...formik.getFieldProps("rateAggregation")}
-                />
-              </FieldSeparator>
+              <TextArea
+                disabled={!canEdit}
+                label="Rate Aggregation"
+                name="rate-aggregation"
+                id="rate-aggregation"
+                autoComplete="rate-aggregation"
+                placeholder="Rate Aggregation"
+                data-testid="rateAggregationText"
+                {...formik.getFieldProps("rateAggregation")}
+              />
             </div>
             <div />
             <div>
