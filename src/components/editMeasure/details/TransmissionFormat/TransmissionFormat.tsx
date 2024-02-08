@@ -84,7 +84,7 @@ const TransmissionFormat = (props: TransmissionFormatProps) => {
     initialValues: { ...INITIAL_VALUES },
     enableReinitialize: true,
     validationSchema: Yup.object().shape({
-      transmissionFormat: Yup.string().notRequired(),
+      transmissionFormat: Yup.string(),
     }),
     onSubmit: async (values) => await handleSubmit(values),
   });
