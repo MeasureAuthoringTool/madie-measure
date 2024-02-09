@@ -83,9 +83,6 @@ const TransmissionFormat = (props: TransmissionFormatProps) => {
   const formik = useFormik({
     initialValues: { ...INITIAL_VALUES },
     enableReinitialize: true,
-    validationSchema: Yup.object().shape({
-      transmissionFormat: Yup.string(),
-    }),
     onSubmit: async (values) => await handleSubmit(values),
   });
   function formikErrorHandler(name: string, isError: boolean) {
