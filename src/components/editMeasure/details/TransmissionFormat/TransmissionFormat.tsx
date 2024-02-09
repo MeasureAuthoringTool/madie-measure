@@ -83,14 +83,6 @@ const TransmissionFormat = (props: TransmissionFormatProps) => {
   const formik = useFormik({
     initialValues: { ...INITIAL_VALUES },
     enableReinitialize: true,
-    validationSchema: Yup.object().shape({
-      transmissionFormat: Yup.string()
-        .notRequired()
-        .max(
-          250,
-          "Measure Transmission Format cannot be more than 250 characters."
-        ),
-    }),
     onSubmit: async (values) => await handleSubmit(values),
   });
   function formikErrorHandler(name: string, isError: boolean) {
