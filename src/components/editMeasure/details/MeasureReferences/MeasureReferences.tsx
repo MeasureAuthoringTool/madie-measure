@@ -49,6 +49,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
       subscription.unsubscribe();
     };
   }, []);
+  const [selectedReference, setSelectedReference] = useState<Reference>(null);
   // Toast utilities
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
@@ -70,8 +71,9 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
     measure?.measureMetaData?.draft
   );
   const INITIAL_VALUES = {
-    referenceType: "",
-    referenceText: "",
+    id: selectedReference?.id,
+    referenceType: selectedReference?.referenceType,
+    referenceText: selectedReference?.referenceText,
   } as Reference;
   const [measureReferences, setMeasureReferences] = useState<Reference[]>(
     measure?.measureMetaData?.references || []
@@ -115,12 +117,20 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
       copiedMetaData.hasOwnProperty("references") &&
       Array.isArray(copiedMetaData.references)
     ) {
-      // if it does exist we push to it
-      copiedMetaData.references.push(values);
-      copiedMetaData.references = sortByTypeThenReferences(
-        copiedMetaData.references
-      );
-      // copiedMetaData.references.sort();
+      if (!selectedReference) {
+        // if it does exist we push to it
+        copiedMetaData.references.push(values);
+        copiedMetaData.references = sortByTypeThenReferences(
+          copiedMetaData.references
+        );
+      } else {
+        const newReferences: Array<Reference> =
+          copiedMetaData.references.filter(
+            (reference) => reference.id !== selectedReference.id
+          );
+        newReferences.push(values);
+        copiedMetaData.references = sortByTypeThenReferences(newReferences);
+      }
     } else {
       // if none exist, we will init our the array
       copiedMetaData.references = [values];
@@ -160,6 +170,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
 
   const formik = useFormik({
     initialValues: { ...INITIAL_VALUES },
+    enableReinitialize: true,
     validationSchema: MeasureReferencesValidator,
     onSubmit: async (values: Reference) => await handleSubmit(values),
   });
@@ -172,6 +183,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
   const [open, setOpen] = useState<boolean>(false);
   const toggleOpen = () => {
     setOpen(!open);
+    setSelectedReference(null);
   };
 
   // Pagination controls: Hook queries into the UI so hyper links work
@@ -233,6 +245,16 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
     setCurrentPage(1);
     history.push(`?page=${1}&limit=${e.target.value}`);
   };
+
+  const handleEdit = (id) => {
+    setOpen(true);
+    setSelectedReference(
+      measure?.measureMetaData?.references.find((reference) => {
+        return id === reference.id;
+      })
+    );
+  };
+
   return (
     <div
       id="measure-details-form"
@@ -274,15 +296,18 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
                 <th scope="col" className="col-header">
                   References
                 </th>
+                <th scope="col" className="col-header"></th>
               </tr>
             </thead>
             <tbody data-testId="measure-references-table-body">
               {visibleReferences?.length > 0 ? (
-                visibleReferences.map((reference) => (
+                visibleReferences.map((reference, index) => (
                   <MeasureMetaDataRow
                     name={reference.referenceType}
                     description={reference.referenceText}
-                    key={reference.id}
+                    handleEdit={handleEdit}
+                    id={reference.id}
+                    key={`${reference.referenceType}-${index}`}
                     canEdit={canEdit}
                   />
                 ))
@@ -332,7 +357,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
       />
       <MadieDialog
         form={true}
-        title="New References"
+        title={selectedReference ? "Edit Reference" : "New References"}
         dialogProps={{
           open,
           onClose: toggleOpen,

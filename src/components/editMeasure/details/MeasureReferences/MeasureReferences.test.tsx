@@ -14,7 +14,6 @@ import useMeasureServiceApi, {
 import { measureStore } from "@madie/madie-util";
 import { Measure, Reference } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
-import buildString from "../../../../utils/buildString";
 
 jest.mock("../../../../api/useMeasureServiceApi");
 const useMeasureServiceApiMock =
@@ -34,6 +33,7 @@ function referenceHelper(number: number): Reference[] {
   const references: Reference[] = [];
   for (let i = 0; i < number; i++) {
     references.push({
+      id: `id ${i}`,
       referenceType: `type ${i}`,
       referenceText: `text ${i}`,
     });
@@ -160,7 +160,7 @@ describe("Measure References Component", () => {
     expect(result).toBeInTheDocument();
   });
 
-  it("Should have no character limit on form", async () => {
+  it("Should allow editing dialog with populated values on clicking Edit and changes are saved.", async () => {
     measureStore.state.mockImplementation(() => measureWithNineItems);
     measureStore.initialState.mockImplementation(() => measureWithNineItems);
     render(
@@ -171,36 +171,48 @@ describe("Measure References Component", () => {
       </ApiContextProvider>
     );
     await checkRows(9);
-    expect(getByTestId("create-reference-button")).toBeEnabled();
 
-    const createButton = await findByTestId("create-reference-button");
-    expect(createButton).toBeInTheDocument();
-    await checkDialogExists();
+    const editButton = await findByTestId("measure-definition-edit-id 1");
+    expect(editButton).toBeInTheDocument();
+    userEvent.click(screen.getByTestId("measure-definition-edit-id 1"));
+    await waitFor(() => {
+      expect(getByTestId("dialog-form")).toBeInTheDocument();
+    });
 
     const typeInput = screen.getByTestId(
       "measure-referenceType-input"
     ) as HTMLInputElement;
-    expect(typeInput).toBeInTheDocument();
-    expect(typeInput.value).toBe("");
-    const manyChars = buildString(260);
-
-    fireEvent.change(typeInput, {
-      target: { value: manyChars },
-    });
-
+    expect(typeInput.value).toBe("type 1");
     const textAreaInput = getByTestId(
       "measure-referenceText"
     ) as HTMLTextAreaElement;
-    expectInputValue(textAreaInput, "");
+    expect(textAreaInput.value).toBe("text 1");
+
+    fireEvent.change(typeInput, {
+      target: { value: "Citation" },
+    });
+    expect(typeInput.value).toBe("Citation");
+
     act(() => {
       fireEvent.change(textAreaInput, {
-        target: { value: manyChars },
+        target: { value: "text 10" },
       });
     });
     fireEvent.blur(textAreaInput);
-
+    expectInputValue(textAreaInput, "text 10");
     const submitButton = getByTestId("save-button");
     expect(submitButton).toHaveProperty("disabled", false);
+    fireEvent.click(submitButton);
+
+    expect(
+      await screen.findByTestId("measure-references-success")
+    ).toHaveTextContent("Measure Reference Saved Successfully");
+    const toastCloseButton = await screen.findByTestId("close-error-button");
+    expect(toastCloseButton).toBeInTheDocument();
+    fireEvent.click(toastCloseButton);
+    await waitFor(() => {
+      expect(toastCloseButton).not.toBeInTheDocument();
+    });
   });
 
   it("Should open a dialog on click, fill out form, cancel closes the form.", async () => {
