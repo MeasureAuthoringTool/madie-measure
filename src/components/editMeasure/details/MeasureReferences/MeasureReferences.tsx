@@ -123,7 +123,6 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
         copiedMetaData.references = sortByTypeThenReferences(
           copiedMetaData.references
         );
-        // copiedMetaData.references.sort();
       } else {
         const newReferences: Array<Reference> =
           copiedMetaData.references.filter(
