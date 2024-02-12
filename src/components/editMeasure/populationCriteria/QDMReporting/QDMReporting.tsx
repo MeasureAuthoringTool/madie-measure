@@ -13,6 +13,8 @@ import {
   Select,
   MadieDiscardDialog,
   Toast,
+  TextArea,
+  TextField,
 } from "@madie/madie-design-system/dist/react";
 import "./QDMReporting.scss";
 import { FieldInput } from "../../../../styles/editMeasure/populationCriteria/groups";
@@ -21,7 +23,7 @@ import {
   FieldSeparator,
 } from "../../../../styles/editMeasure/populationCriteria/supplementalData";
 import { MenuItem as MuiMenuItem } from "@mui/material";
-
+import { QDMReportingValidator } from "./QDMReportingValidator";
 const Grid = tw.div`grid grid-cols-2 gap-4   overflow-hidden w-full`;
 const improvementNotationOptions = [
   {
@@ -88,6 +90,7 @@ const QDMReporting = () => {
       improvementNotationOther: measure?.improvementNotationOther || "",
     },
     enableReinitialize: true,
+    validationSchema: QDMReportingValidator,
     onSubmit: async (values: ReportingForm) => await handleSubmit(values),
   });
   const { resetForm } = formik;
@@ -160,27 +163,16 @@ const QDMReporting = () => {
         <div id="reporting" data-testid="reporting">
           <Grid>
             <div>
-              <FieldLabel
-                htmlFor="rate-aggregation"
-                id="rate-aggregation-label"
-              >
-                Rate Aggregation
-              </FieldLabel>
-              <FieldSeparator>
-                <FieldInput
-                  style={{ border: "solid 1px #8c8c8c" }}
-                  {...formik.getFieldProps("rateAggregation")}
-                  aria-labelledby="rate-aggregation-label"
-                  type="text"
-                  disabled={!canEdit}
-                  name="rate-aggregation"
-                  id="rate-aggregation"
-                  autoComplete="rate-aggregation"
-                  placeholder="Rate Aggregation"
-                  data-testid="rateAggregationText"
-                  {...formik.getFieldProps("rateAggregation")}
-                />
-              </FieldSeparator>
+              <TextArea
+                disabled={!canEdit}
+                label="Rate Aggregation"
+                name="rate-aggregation"
+                id="rate-aggregation"
+                autoComplete="rate-aggregation"
+                placeholder="Rate Aggregation"
+                data-testid="rateAggregationText"
+                {...formik.getFieldProps("rateAggregation")}
+              />
             </div>
             <div />
             <div>
@@ -208,18 +200,19 @@ const QDMReporting = () => {
 
             {formik.getFieldProps("improvementNotation").value == "Other" && (
               <div>
-                <FieldLabel
-                  htmlFor="improvement-notation-other-label"
-                  id="improvement-notation-other-label"
-                >
-                  Improvement Notation (Other)
-                </FieldLabel>
                 <FieldSeparator>
-                  <FieldInput
-                    style={{ border: "solid 1px #8c8c8c" }}
-                    aria-labelledby="improvement-notation-other-label"
-                    type="text"
+                  <TextField
+                    label="Improvement Notation (Other)"
+                    helperText={
+                      formik.touched.improvementNotationOther &&
+                      formik.errors.improvementNotationOther
+                    }
+                    error={
+                      formik.touched.improvementNotationOther &&
+                      formik.errors.improvementNotationOther
+                    }
                     disabled={!canEdit}
+                    required={true}
                     name="improvement-notation-other"
                     id="improvement-notation-other"
                     autoComplete="improvement-notation-other"

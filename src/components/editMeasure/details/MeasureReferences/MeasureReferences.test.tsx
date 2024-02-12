@@ -14,6 +14,7 @@ import useMeasureServiceApi, {
 import { measureStore } from "@madie/madie-util";
 import { Measure, Reference } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
+import buildString from "../../../../utils/buildString";
 
 jest.mock("../../../../api/useMeasureServiceApi");
 const useMeasureServiceApiMock =
@@ -158,6 +159,49 @@ describe("Measure References Component", () => {
     );
     const result = getByTestId("empty-references");
     expect(result).toBeInTheDocument();
+  });
+
+  it("Should have no character limit on form", async () => {
+    measureStore.state.mockImplementation(() => measureWithNineItems);
+    measureStore.initialState.mockImplementation(() => measureWithNineItems);
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    await checkRows(9);
+    expect(getByTestId("create-reference-button")).toBeEnabled();
+
+    const createButton = await findByTestId("create-reference-button");
+    expect(createButton).toBeInTheDocument();
+    await checkDialogExists();
+
+    const typeInput = screen.getByTestId(
+      "measure-referenceType-input"
+    ) as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    const manyChars = buildString(260);
+
+    fireEvent.change(typeInput, {
+      target: { value: manyChars },
+    });
+
+    const textAreaInput = getByTestId(
+      "measure-referenceText"
+    ) as HTMLTextAreaElement;
+    expectInputValue(textAreaInput, "");
+    act(() => {
+      fireEvent.change(textAreaInput, {
+        target: { value: manyChars },
+      });
+    });
+    fireEvent.blur(textAreaInput);
+
+    const submitButton = getByTestId("save-button");
+    expect(submitButton).toHaveProperty("disabled", false);
   });
 
   it("Should open a dialog on click, fill out form, cancel closes the form.", async () => {
