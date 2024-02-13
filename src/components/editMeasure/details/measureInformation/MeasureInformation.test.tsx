@@ -11,7 +11,7 @@ import MeasureInformation from "./MeasureInformation";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../api/useMeasureServiceApi";
-import { Measure } from "@madie/madie-models";
+import { Measure, Model } from "@madie/madie-models";
 import { AxiosError, AxiosResponse } from "axios";
 import { parseContent, synchingEditorCqlContent } from "@madie/madie-editor";
 import userEvent from "@testing-library/user-event";
@@ -338,6 +338,18 @@ describe("MeasureInformation component", () => {
         fireEvent.click(cmsIdBtn);
       });
     });
+
+    measure.model = Model.QDM_5_6;
+    measure.measureSet = {
+      id: "id1",
+      cmsId: 2,
+      measureSetId: "testMeasureId",
+      owner: "test.com",
+    };
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    const cmsId = getByTestId("cms-id-input") as HTMLInputElement;
+    expect(cmsId.value).toBe("2");
+    expect(cmsId).toHaveProperty("readOnly", true);
   });
 
   it("Should display measure Version ID when it is not null", async () => {

@@ -26,6 +26,7 @@ export default function CmsIdentifier({ label, cmsId, model, onClick }) {
           <MadieTooltip
             tooltipText="Once a CMS Identifier has been generated it may not be modified or removed for any draft or version of a measure."
             id={`${label}-tooltip`}
+            placement="top"
           />
         </div>
       </div>
