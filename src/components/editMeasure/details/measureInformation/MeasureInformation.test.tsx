@@ -15,7 +15,11 @@ import { Measure } from "@madie/madie-models";
 import { AxiosError, AxiosResponse } from "axios";
 import { parseContent, synchingEditorCqlContent } from "@madie/madie-editor";
 import userEvent from "@testing-library/user-event";
-import { checkUserCanEdit, measureStore } from "@madie/madie-util";
+import {
+  checkUserCanEdit,
+  measureStore,
+  useFeatureFlags,
+} from "@madie/madie-util";
 
 const mockHistoryPush = jest.fn();
 
@@ -50,6 +54,12 @@ const measure = {
       },
     ],
   },
+  measureSet: {
+    id: "id1",
+    cmsId: 23,
+    measureSetId: "testMeasureId",
+    owner: "test.com",
+  },
 } as unknown as Measure;
 
 jest.mock("@madie/madie-editor", () => ({
@@ -66,6 +76,9 @@ jest.mock("@madie/madie-util", () => ({
     getAccessToken: () => "test.jwt",
   })),
   useKeyPress: jest.fn(() => false),
+  useFeatureFlags: jest.fn().mockReturnValue({
+    generateCMSID: true,
+  }),
   measureStore: {
     updateMeasure: jest.fn(),
     state: jest.fn(),
@@ -116,6 +129,7 @@ describe("MeasureInformation component", () => {
   beforeEach(() => {
     serviceApiMock = {
       getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
+      createCmsId: jest.fn().mockResolvedValue(2),
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
   });
@@ -289,7 +303,7 @@ describe("MeasureInformation component", () => {
       expect(versionId.value).toBe(measure.id);
       expect(versionId).toHaveProperty("readOnly", true);
       const cmsId = getByTestId("cms-id-input") as HTMLInputElement;
-      expect(cmsId.value).toBe("");
+      expect(cmsId.value).toBe("23FHIR");
       expect(cmsId).toHaveProperty("readOnly", true);
       const cqlLibraryNameText = getByTestId(
         "cql-library-name-input"
@@ -302,6 +316,27 @@ describe("MeasureInformation component", () => {
         name: "Experimental",
       }) as HTMLInputElement;
       expect(experimentalInput.value).toBe("false");
+    });
+  });
+  it("generate cms id", async () => {
+    measure.measureSet = {
+      id: "id1",
+      measureSetId: "testMeasureId",
+      owner: "test.com",
+    };
+
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    const result: HTMLElement = getByTestId("measure-information-form");
+    expect(result).toBeInTheDocument();
+
+    await act(async () => {
+      const cmsIdBtn = getByTestId(
+        "generate-cms-id-button"
+      ) as HTMLInputElement;
+      expect(cmsIdBtn).toBeEnabled();
+      act(() => {
+        fireEvent.click(cmsIdBtn);
+      });
     });
   });
 
