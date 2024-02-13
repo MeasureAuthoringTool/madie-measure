@@ -418,7 +418,7 @@ describe("MeasureServiceApi Tests", () => {
     const resp = { status: 200, data: 2 };
     mockedAxios.put.mockResolvedValue(resp);
 
-    await measureServiceApi.createCmsId("measureSetId");
+    await measureServiceApi.createCmsId("testMeasureSetId");
     expect(mockedAxios.put).toBeCalledTimes(1);
     expect(resp.data).toEqual(2);
   });
@@ -431,10 +431,9 @@ describe("MeasureServiceApi Tests", () => {
     mockedAxios.put.mockRejectedValueOnce(resp);
 
     try {
-      await measureServiceApi.createCmsId("measureSetId");
+      await measureServiceApi.createCmsId("testMeasureSetId");
       expect(mockedAxios.put).toBeCalledTimes(1);
     } catch (error) {
-      console.log(error);
       expect(error.message).toBe("Failed to create cms id.");
     }
   });
