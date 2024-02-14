@@ -20,13 +20,12 @@ export default function CmsIdentifier({ label, cmsId, model, onClick }) {
       }}
     >
       <div style={{ display: "flex", flexDirection: "row" }}>
-        <InputLabel>{label}</InputLabel>
+        <InputLabel for="cmsId">{label}</InputLabel>
 
         <div>
           <MadieTooltip
             tooltipText="Once a CMS Identifier has been generated it may not be modified or removed for any draft or version of a measure."
-            id={`${label}-tooltip`}
-            placement="top"
+            id={`cms-id-tooltip`}
           />
         </div>
       </div>
@@ -40,12 +39,14 @@ export default function CmsIdentifier({ label, cmsId, model, onClick }) {
           inputProps={{ "data-testid": "cms-id-input" }}
           size="small"
           value={model.startsWith("QI-Core") ? `${cmsId}FHIR` : cmsId}
+          area-describedby="cms-id-tooltip"
         />
       ) : (
         <Button
           variant="secondary"
           onClick={onClick}
           data-testid="generate-cms-id-button"
+          area-describedby="cms-id-tooltip"
           style={{
             border: "none",
           }}
