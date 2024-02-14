@@ -439,6 +439,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             />
           ) : (
             <ReadOnlyTextField
+              label="CMS ID"
               tabIndex={0}
               placeholder="CMS ID"
               id="cmsId"
