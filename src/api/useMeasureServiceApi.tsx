@@ -402,6 +402,26 @@ export class MeasureServiceApi {
       }
     );
   }
+
+  async createCmsId(measureSetId: string): Promise<any> {
+    try {
+      const response = await axios.put(
+        `${this.baseUrl}/measures/${measureSetId}/create-cms-id`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      const message = this.buildErrorMessage(err, "Failed to create cms id.");
+      console.error(message, err);
+      throw new Error(message);
+    }
+  }
+
   // add abort signal.
   async getMeasureExport(measureId: string, signal): Promise<Blob> {
     const response = await axios.get(

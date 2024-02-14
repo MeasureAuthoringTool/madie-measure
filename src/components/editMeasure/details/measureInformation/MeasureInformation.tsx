@@ -17,6 +17,7 @@ import {
   measureStore,
   routeHandlerStore,
   checkUserCanEdit,
+  useFeatureFlags,
 } from "@madie/madie-util";
 import { Box } from "@mui/system";
 import {
@@ -25,6 +26,7 @@ import {
   validateContent,
 } from "@madie/madie-editor";
 import "./MeasureInformation.scss";
+import CmsIdentifier from "../cmsIdentifier/CmsIdentifier";
 
 interface measureInformationForm {
   versionId: string;
@@ -51,6 +53,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   const [endorsementIdRequired, setEndorsementIdRequired] = useState<boolean>();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
+  const featureFlags = useFeatureFlags();
 
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -89,7 +92,6 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       measure?.versionId === null || measure?.versionId === undefined
         ? measure?.id
         : measure?.versionId,
-    cmsId: measure?.cmsId,
     measureId: measure?.measureSetId,
     experimental: measure?.measureMetaData?.experimental || false,
     endorsements: measure?.measureMetaData?.endorsements || [],
@@ -295,6 +297,18 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     setFocusedField(field);
   };
 
+  const createCmsId = async (measureSetId: string) => {
+    const updatedMeasureSet = await measureServiceApi.createCmsId(measureSetId);
+    const newMeasure: Measure = {
+      ...measure,
+      measureSet: {
+        ...measure?.measureSet,
+        cmsId: updatedMeasureSet.cmsId,
+      },
+    };
+    updateMeasure(newMeasure);
+  };
+
   return (
     <form
       id="measure-details-form"
@@ -416,18 +430,27 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             error={formik.touched.ecqmTitle && Boolean(formik.errors.ecqmTitle)}
             {...formik.getFieldProps("ecqmTitle")}
           />
-          <ReadOnlyTextField
-            tabIndex={0}
-            placeholder="CMS ID"
-            label="CMS Id"
-            id="cmsId"
-            data-testid="cms-id-text-field"
-            inputProps={{ "data-testid": "cms-id-input" }}
-            helperText={formikErrorHandler("cmsId", true)}
-            size="small"
-            error={formik.touched.cmsId && Boolean(formik.errors.cmsId)}
-            {...formik.getFieldProps("cmsId")}
-          />
+          {featureFlags.generateCMSID ? (
+            <CmsIdentifier
+              label="CMS ID"
+              cmsId={measure?.measureSet?.cmsId}
+              model={measure?.model}
+              onClick={() => createCmsId(measure?.measureSet?.measureSetId)}
+            />
+          ) : (
+            <ReadOnlyTextField
+              label="CMS ID"
+              tabIndex={0}
+              placeholder="CMS ID"
+              id="cmsId"
+              data-testid="cms-id-text-field"
+              inputProps={{ "data-testid": "cms-id-input" }}
+              helperText={formikErrorHandler("cmsId", true)}
+              size="small"
+              error={formik.touched.cmsId && Boolean(formik.errors.cmsId)}
+              {...formik.getFieldProps("cmsId")}
+            />
+          )}
         </Box>
         <Box sx={formRowGapped}>
           <FormControlLabel

@@ -413,4 +413,28 @@ describe("MeasureServiceApi Tests", () => {
       expect(error.message).toBe("Unable to fetch endorsers");
     }
   });
+
+  it("test createCmsId success", async () => {
+    const resp = { status: 200, data: 2 };
+    mockedAxios.put.mockResolvedValue(resp);
+
+    await measureServiceApi.createCmsId("testMeasureSetId");
+    expect(mockedAxios.put).toBeCalledTimes(1);
+    expect(resp.data).toEqual(2);
+  });
+
+  it("test createCmsId failure", async () => {
+    const resp = {
+      status: 400,
+      message: "Failed to create cms id.",
+    };
+    mockedAxios.put.mockRejectedValueOnce(resp);
+
+    try {
+      await measureServiceApi.createCmsId("testMeasureSetId");
+      expect(mockedAxios.put).toBeCalledTimes(1);
+    } catch (error) {
+      expect(error.message).toBe("Failed to create cms id.");
+    }
+  });
 });

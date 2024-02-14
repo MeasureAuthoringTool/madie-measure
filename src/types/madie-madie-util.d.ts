@@ -14,6 +14,7 @@ declare module "@madie/madie-util" {
     qdmMeasureDefinitions: boolean;
     qdmMeasureReferences: boolean;
     enableQdmRepeatTransfer: boolean;
+    generateCMSID: boolean;
   }
 
   export interface ServiceConfig {
