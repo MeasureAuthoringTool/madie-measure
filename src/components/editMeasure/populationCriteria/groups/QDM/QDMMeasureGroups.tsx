@@ -973,6 +973,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                             Remove
                                           </DSLink>
                                         )}
+
                                         <Select
                                           disabled={!canEdit}
                                           placeHolder={{
@@ -1007,7 +1008,28 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                         />
                                       </div>
                                     </div>
-                                    <div tw="lg:col-span-2" />
+                                    <div tw="lg:col-span-2">
+                                      <TextArea
+                                        disabled={!canEdit}
+                                        data-testid={`stratification-${
+                                          i + 1
+                                        }-description`}
+                                        id={`Stratification-Description-${
+                                          i + 1
+                                        }`}
+                                        aria-describedby={`Stratification-description-${
+                                          i + 1
+                                        }-helper-text`}
+                                        label={`Stratification ${
+                                          i + 1
+                                        } Description`}
+                                        placeHolder="Description"
+                                        {...formik.getFieldProps(
+                                          `stratifications[${i}].description`
+                                        )}
+                                      />
+                                    </div>
+                                    <div tw="lg:col-span-1" />
                                   </div>
                                 </div>
                               )
