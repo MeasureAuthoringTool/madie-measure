@@ -123,7 +123,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   const featureFlags = useFeatureFlags();
   if (isQDM) {
     if (featureFlags?.qdmMeasureDefinitions) {
-      links[1].links.push({
+      links[1].links.splice(3, 0, {
         title: "Definition",
         href: definitionLink,
         dataTestId: "leftPanelQDMMeasureDefinition",
