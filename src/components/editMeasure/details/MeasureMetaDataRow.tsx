@@ -1,7 +1,4 @@
 import React from "react";
-// we will have two different renders so far
-// measureMetaData.measureDefinition = [{term, definition}];
-// measureMetaData.measureReferences = [{referenceText, ReferenceType}]
 import { Button } from "@madie/madie-design-system/dist/react";
 
 interface MeasureMetaDataRowProps {
