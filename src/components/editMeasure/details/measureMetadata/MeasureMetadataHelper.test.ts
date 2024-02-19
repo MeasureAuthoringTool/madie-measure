@@ -15,6 +15,7 @@ describe("MeasureMetadataHelper", () => {
   const CLINICAL = "Test Clinical";
   const RISKADJUSTMENT = "Test Risk Adjustment";
   const NEWVALUE = "Test New Value";
+  const definition = "this is measure definition";
 
   afterEach(cleanup);
 
@@ -26,6 +27,7 @@ describe("MeasureMetadataHelper", () => {
       rationale: RATIONALE,
       guidance: GUIDANCE,
       clinicalRecommendation: CLINICAL,
+      definition: definition,
       riskAdjustment: RISKADJUSTMENT,
     } as MeasureMetadata;
 
@@ -40,19 +42,10 @@ describe("MeasureMetadataHelper", () => {
     expect(actual).toBe(DECRIPTION);
   });
 
-  it("should return empty string instead of nul when description is null", () => {
-    measureMetaData = {
-      description: null,
-      copyright: COPYRIGHT,
-      disclaimer: DISCLAIMER,
-      rationale: RATIONALE,
-      guidance: GUIDANCE,
-      clinicalRecommendation: CLINICAL,
-    } as MeasureMetadata;
-
+  it("should return empty string instead of null when description is null", () => {
     measure = {
       id: MEASUREID,
-      measureMetaData: measureMetaData,
+      measureMetaData: { description: null },
     } as Measure;
 
     const actual = getInitialValues(measure, "description");
@@ -64,18 +57,10 @@ describe("MeasureMetadataHelper", () => {
     expect(actual).toBe(COPYRIGHT);
   });
 
-  it("should return empty string instead of nul when copyright is null", () => {
-    measureMetaData = {
-      description: DECRIPTION,
-      copyright: null,
-      disclaimer: DISCLAIMER,
-      rationale: RATIONALE,
-      guidance: GUIDANCE,
-    } as MeasureMetadata;
-
+  it("should return empty string instead of null when copyright is null", () => {
     measure = {
       id: MEASUREID,
-      measureMetaData: measureMetaData,
+      measureMetaData: { copyright: null },
     } as Measure;
 
     const actual = getInitialValues(measure, "copyright");
@@ -87,18 +72,10 @@ describe("MeasureMetadataHelper", () => {
     expect(actual).toBe(DISCLAIMER);
   });
 
-  it("should return empty string instead of nul when disclaimer is null", () => {
-    measureMetaData = {
-      description: DECRIPTION,
-      copyright: COPYRIGHT,
-      disclaimer: null,
-      rationale: RATIONALE,
-      guidance: GUIDANCE,
-    } as MeasureMetadata;
-
+  it("should return empty string instead of null when disclaimer is null", () => {
     measure = {
       id: MEASUREID,
-      measureMetaData: measureMetaData,
+      measureMetaData: { disclaimer: null },
     } as Measure;
 
     const actual = getInitialValues(measure, "disclaimer");
@@ -110,19 +87,10 @@ describe("MeasureMetadataHelper", () => {
     expect(actual).toBe(RATIONALE);
   });
 
-  it("should return empty string instead of nul when rationale is null", () => {
-    measureMetaData = {
-      description: DECRIPTION,
-      copyright: COPYRIGHT,
-      disclaimer: DISCLAIMER,
-      rationale: null,
-      guidance: GUIDANCE,
-      clinicalRecommendation: CLINICAL,
-    } as MeasureMetadata;
-
+  it("should return empty string instead of null when rationale is null", () => {
     measure = {
       id: MEASUREID,
-      measureMetaData: measureMetaData,
+      measureMetaData: { rationale: null },
     } as Measure;
 
     const actual = getInitialValues(measure, "rationale");
@@ -142,23 +110,26 @@ describe("MeasureMetadataHelper", () => {
     expect(actual).toBe(CLINICAL);
   });
 
-  it("should return empty string instead of nul when guidance is null", () => {
-    measureMetaData = {
-      description: DECRIPTION,
-      copyright: COPYRIGHT,
-      disclaimer: DISCLAIMER,
-      rationale: RATIONALE,
-      guidance: null,
-      clinicalRecommendation: CLINICAL,
-    } as MeasureMetadata;
-
+  it("should return empty string instead of null when guidance is null", () => {
     measure = {
       id: MEASUREID,
-      measureMetaData: measureMetaData,
+      measureMetaData: { guidance: null },
     } as Measure;
 
     const actual = getInitialValues(measure, "guidance");
     expect(actual).toBe("");
+  });
+
+  it("should retrieve definition value", () => {
+    expect(getInitialValues(measure, "definition")).toBe(definition);
+  });
+
+  it("should return empty string instead of null when definition is null", () => {
+    measure = {
+      id: MEASUREID,
+      measureMetaData: { definition: null },
+    } as Measure;
+    expect(getInitialValues(measure, "definition")).toBe("");
   });
 
   it("should empty string when invalid measure metadata type", () => {
@@ -196,6 +167,11 @@ describe("MeasureMetadataHelper", () => {
     expect(measure.measureMetaData.clinicalRecommendation).toBe(NEWVALUE);
   });
 
+  it("should reset definition value", () => {
+    setMeasureMetadata(measure, "definition", NEWVALUE);
+    expect(measure.measureMetaData.definition).toBe(NEWVALUE);
+  });
+
   it("should not reset any measure metadata", () => {
     setMeasureMetadata(measure, "test", NEWVALUE);
     expect(measure.measureMetaData.description).toBe(DECRIPTION);
@@ -204,16 +180,4 @@ describe("MeasureMetadataHelper", () => {
     expect(measure.measureMetaData.rationale).toBe(RATIONALE);
     expect(measure.measureMetaData.guidance).toBe(GUIDANCE);
   });
-
-  // it("should retrieve riskAdjustment value", () => {
-  //   const actual = getInitialValues(measure, "risk-adjustment");
-  //   expect(actual).toBe(RISKADJUSTMENT);
-
-  //   const riskAdjustment = getInitialValues(null, "risk-adjustment");
-  //   expect(riskAdjustment).toBe("");
-  // });
-  // it("should reset riskAdjustment value", () => {
-  //   setMeasureMetadata(measure, "risk-adjustment", NEWVALUE);
-  //   expect(measure.measureMetaData?.riskAdjustment).toBe(NEWVALUE);
-  // });
 });

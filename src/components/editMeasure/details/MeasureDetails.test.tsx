@@ -217,11 +217,11 @@ describe("MeasureDetails component", () => {
     expect(getByTestId("leftPanelMeasureGuidance")).toBeInTheDocument();
   });
 
-  it("should render the MeasureMetadata component for measure-definitions", () => {
+  it("should render the MeasureMetadata component for measure-definition", () => {
     const { getByTestId } = render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter
-          initialEntries={[{ pathname: "/foo/measure-definitions" }]}
+          initialEntries={[{ pathname: "/foo/measure-definition" }]}
         >
           <Route path="/foo">
             <MeasureDetails setErrorMessage={setErrorMessage} isQDM={true} />
@@ -231,8 +231,7 @@ describe("MeasureDetails component", () => {
     );
 
     expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
-    expect(getByTestId("leftPanelQDMMeasureDefinitions")).toBeInTheDocument();
-    expect(getByTestId("measure-definition-terms")).toBeInTheDocument();
+    expect(getByTestId("leftPanelQDMMeasureDefinition")).toBeInTheDocument();
   });
 
   it("should render the MeasureMetadata component for references", () => {
@@ -249,7 +248,7 @@ describe("MeasureDetails component", () => {
     );
 
     expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
-    expect(getByTestId("leftPanelQDMMeasureDefinitions")).toBeInTheDocument();
+    expect(getByTestId("leftPanelQDMMeasureDefinition")).toBeInTheDocument();
     expect(getByTestId("measure-references")).toBeInTheDocument();
   });
 

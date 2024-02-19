@@ -18,7 +18,6 @@ import StewardAndDevelopers from "./stewardAndDevelopers/StewardAndDevelopers";
 import ModelAndMeasurementPeriod from "./modelAndMeasurementPeriod/ModelAndMeasurementPeriod";
 import "./MeasureDetails.scss";
 import EditMeasureDetailsSideNav from "./EditMeasureDetailsSideNav";
-import MeasureDefinitions from "./MeasureDefinitions/MeasureDefinitions";
 import MeasureReferences from "./MeasureReferences/MeasureReferences";
 import TransmissionFormat from "./TransmissionFormat/TransmissionFormat";
 
@@ -44,7 +43,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   const rationaleLink = `${path}/measure-rationale`;
   const guidanceLink = `${path}/measure-guidance`;
   const clinicalLink = `${path}/measure-clinical-recommendation`;
-  const definitionsLink = `${path}/measure-definitions`;
+  const definitionLink = `${path}/measure-definition`;
   const referencesLink = `${path}/measure-references`;
   const transmissionFormat = `${path}/transmission-format`;
 
@@ -124,11 +123,11 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   const featureFlags = useFeatureFlags();
   if (isQDM) {
     if (featureFlags?.qdmMeasureDefinitions) {
-      links[1].links.splice(3, 0, {
-        title: "Definition (Terms)",
-        href: definitionsLink,
-        dataTestId: "leftPanelQDMMeasureDefinitions",
-        id: "sideNavQDMMeasureDefinitions",
+      links[1].links.push({
+        title: "Definition",
+        href: definitionLink,
+        dataTestId: "leftPanelQDMMeasureDefinition",
+        id: "sideNavQDMMeasureDefinition",
       });
     }
     if (featureFlags?.qdmMeasureReferences) {
@@ -247,8 +246,13 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                 </Route>
               )}
               {featureFlags.qdmMeasureDefinitions && (
-                <Route path={definitionsLink}>
-                  <MeasureDefinitions setErrorMessage={setErrorMessage} />
+                <Route path={definitionLink}>
+                  <MeasureMetadata
+                    measureMetadataId="Definition"
+                    measureMetadataType="Definition"
+                    header="Definition"
+                    setErrorMessage={setErrorMessage}
+                  />
                 </Route>
               )}
             </>
