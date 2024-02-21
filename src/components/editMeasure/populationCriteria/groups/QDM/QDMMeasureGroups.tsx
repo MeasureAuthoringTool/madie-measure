@@ -946,7 +946,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                 deleteToken && (
                                 <div key={i} tw="mt-6">
                                   <div tw="grid lg:grid-cols-4 gap-4">
-                                    <div tw="lg:col-span-1">
+                                    <div tw="lg:col-span-2">
                                       <div tw="relative">
                                         {formik.values.stratifications.length >
                                           2 && (
@@ -1009,27 +1009,22 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                       </div>
                                     </div>
                                     <div tw="lg:col-span-2">
-                                      <TextArea
-                                        disabled={!canEdit}
-                                        data-testid={`stratification-${
-                                          i + 1
-                                        }-description`}
-                                        id={`Stratification-Description-${
-                                          i + 1
-                                        }`}
-                                        aria-describedby={`Stratification-description-${
-                                          i + 1
-                                        }-helper-text`}
-                                        label={`Stratification ${
-                                          i + 1
-                                        } Description`}
-                                        placeHolder="Description"
-                                        {...formik.getFieldProps(
-                                          `stratifications[${i}].description`
-                                        )}
-                                      />
+                                      {i == 0 ? (
+                                        <TextArea
+                                          disabled={!canEdit}
+                                          data-testid="stratification-description"
+                                          id="stratification-description"
+                                          aria-describedby="stratification-description-helper-text"
+                                          label="Stratification Description"
+                                          placeHolder="Description"
+                                          {...formik.getFieldProps(
+                                            `stratifications[${i}].description`
+                                          )}
+                                        />
+                                      ) : (
+                                        ""
+                                      )}
                                     </div>
-                                    <div tw="lg:col-span-1" />
                                   </div>
                                 </div>
                               )
