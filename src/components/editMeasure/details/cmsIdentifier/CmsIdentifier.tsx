@@ -7,7 +7,13 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import GenerateCmsID from "../../../../icons/GenerateCmsID";
 
-export default function CmsIdentifier({ label, cmsId, model, onClick }) {
+export default function CmsIdentifier({
+  canEdit,
+  label,
+  cmsId,
+  model,
+  onClick,
+}) {
   return (
     <div
       style={{
@@ -50,6 +56,7 @@ export default function CmsIdentifier({ label, cmsId, model, onClick }) {
           </div>
 
           <Button
+            disabled={!canEdit}
             variant="secondary"
             onClick={onClick}
             data-testid="generate-cms-id-button"
