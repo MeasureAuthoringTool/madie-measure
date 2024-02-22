@@ -432,6 +432,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
           />
           {featureFlags.generateCMSID ? (
             <CmsIdentifier
+              canEdit={canEdit}
               label="CMS ID"
               cmsId={measure?.measureSet?.cmsId}
               model={measure?.model}
