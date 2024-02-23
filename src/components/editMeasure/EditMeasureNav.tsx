@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   NavLink,
   useLocation,
-  useRouteMatch,
-  useHistory,
+  useNavigate,
+  Navigate,
+  useMatch,
+  useParams,
 } from "react-router-dom";
 import tw, { styled } from "twin.macro";
 import { routeHandlerStore } from "@madie/madie-util";
@@ -23,94 +25,27 @@ const MenuItem = styled.li((props: PropTypes) => [
 ]);
 
 const EditMeasureNav = ({ isQDM }) => {
-  const { url } = useRouteMatch();
-  // TODO: try activeClassName of NavLink instead of manual path check
   const { pathname } = useLocation();
-  let history = useHistory();
-
-  if (
-    pathname !== `${url}/details` &&
-    pathname !== `${url}/details/model&measurement-period` &&
-    pathname !== `${url}/cql-editor` &&
-    pathname !== `${url}/supplemental-data` &&
-    pathname !== `${url}/risk-adjustment` &&
-    pathname !== `${url}/base-configuration` &&
-    pathname !== `${url}/reporting` &&
-    pathname !== `${url}/details/measure-steward` &&
-    pathname !== `${url}/details/measure-description` &&
-    pathname !== `${url}/details/measure-copyright` &&
-    pathname !== `${url}/details/measure-disclaimer` &&
-    pathname !== `${url}/details/measure-rationale` &&
-    pathname !== `${url}/details/measure-guidance` &&
-    pathname !== `${url}/details/measure-definition` &&
-    pathname !== `${url}/details/measure-references` &&
-    pathname !== `${url}/details/measure-clinical-recommendation` &&
-    pathname !== `${url}/details/transmission-format` &&
-    pathname !== `${url}/review-info` &&
-    !pathname.startsWith(`${url}/test-cases`) &&
-    !pathname.startsWith(`${url}/groups`)
-  ) {
-    history.push("/404");
-  }
-  const { updateRouteHandlerState } = routeHandlerStore;
-  const [routeHandlerState, setRouteHandlerState] = useState<RouteHandlerState>(
-    routeHandlerStore.state
-  );
-
-  useEffect(() => {
-    const subscription = routeHandlerStore.subscribe(setRouteHandlerState);
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-  useEffect(() => {
-    const unblock = history.block(({ pathname }, action) => {
-      if (!routeHandlerState.canTravel) {
-        updateRouteHandlerState({ canTravel: false, pendingRoute: pathname });
-        return false;
-      }
-      unblock();
-    });
-    return unblock;
-  }, [
-    history.block,
-    routeHandlerState.canTravel,
-    routeHandlerState.pendingRoute,
-  ]);
-  const [selected, setSelected] = useState<string>("");
-  useEffect(() => {
-    // groups
-    if (
-      pathname.startsWith(`${url}/groups`) ||
-      pathname.startsWith(`${url}/supplemental-data`) ||
-      pathname.startsWith(`${url}/risk-adjustment`) ||
-      pathname.startsWith(`${url}/base-configuration`)
-    ) {
-      setSelected(`${url}/groups`);
-    } else if (pathname.startsWith(`${url}/details`)) {
-      setSelected(`${url}/details`);
-    } else if (pathname === `${url}/cql-editor`) {
-      setSelected(`${url}/cql-editor`);
-    } else if (pathname.startsWith(`${url}/test-cases`)) {
-      setSelected(`${url}/test-cases`);
-    } else if (pathname.startsWith(`${url}/review-info`)) {
-      setSelected(`${url}/review-info`);
-    }
-  }, [pathname]);
+  let navigate = useNavigate();
+  const { id } = useParams<{
+    id: string;
+  }>();
   const handleChange = (e, v) => {
-    setSelected(v);
+    const newPath = `/measures/${id}/edit/${v}`;
+    navigate(newPath, { replace: true });
   };
   const qdmNavTo = () => {
-    isQDM ? `${url}/base-configuration` : `${url}/groups/1`;
+    isQDM ? `${pathname}/base-configuration` : `${pathname}/groups/1`;
   };
-
+  // we grab the matching pattern after edit, then we only get the part before the next slash.
+  const match = useMatch("/measures/:id/edit/*")?.params?.["*"].split("/")[0];
   return (
     <div>
       <div style={{ marginLeft: "32px" }} id="edit-measure-nav-a">
-        <Tabs value={selected} onChange={handleChange} type="A" size="large">
+        <Tabs value={match} onChange={handleChange} type="A" size="large">
           <Tab
-            value={`${url}/details`}
-            to={`${url}/details`}
+            value={`details`}
+            to="details"
             data-testid="measure-details-tab"
             type="A"
             size="large"
@@ -118,8 +53,8 @@ const EditMeasureNav = ({ isQDM }) => {
             component={NavLink}
           />
           <Tab
-            value={`${url}/cql-editor`}
-            to={`${url}/cql-editor`}
+            value="cql-editor"
+            to={`cql-editor`}
             data-testid="cql-editor-tab"
             type="A"
             size="large"
@@ -127,8 +62,8 @@ const EditMeasureNav = ({ isQDM }) => {
             component={NavLink}
           />
           <Tab
-            value={`${url}/groups`}
-            to={isQDM ? `${url}/base-configuration` : `${url}/groups/1`}
+            value={`groups`}
+            to={isQDM ? `base-configuration` : `groups/1`}
             data-testid="groups-tab"
             type="A"
             size="large"
@@ -136,8 +71,8 @@ const EditMeasureNav = ({ isQDM }) => {
             component={NavLink}
           />
           <Tab
-            value={`${url}/test-cases`}
-            to={`${url}/test-cases`}
+            value={`test-cases`}
+            to={`test-cases`}
             data-testid="patients-tab"
             type="A"
             size="large"

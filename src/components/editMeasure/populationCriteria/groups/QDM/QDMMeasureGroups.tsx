@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { useRouteMatch, useLocation, useHistory } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import tw from "twin.macro";
 import "styled-components/macro";
 import {
@@ -169,7 +169,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   );
   const measureServiceApi = useMeasureServiceApi();
   let location = useLocation();
-  const { path } = useRouteMatch();
+  const { pathname } = useLocation();
 
   const [alertMessage, setAlertMessage] = useState({
     ...INITIAL_ALERT_MESSAGE,
@@ -193,7 +193,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   };
 
   const groupsBaseUrl = "/measures/" + props.measureId + "/edit/groups";
-  const history = useHistory();
+  let navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>("populations");
   const measureGroupNumber =
     props.measureGroupNumber - 1 < 0 ? 0 : props.measureGroupNumber;
@@ -561,7 +561,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
             "Population details for this group saved successfully.",
             true
           );
-          history.push(groupsBaseUrl + "/" + updatedMeasure?.groups.length);
+          navigate(groupsBaseUrl + "/" + updatedMeasure?.groups.length);
         })
         .catch((error) => {
           setAlertMessage({
@@ -599,7 +599,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           props.setMeasureGroupNumber(
             measureGroupNumber === 0 ? 0 : measureGroupNumber - 1
           );
-        history.push(
+        navigate(
           groupsBaseUrl +
             "/" +
             (measureGroupNumber === 0 ? 1 : measureGroupNumber)
@@ -718,7 +718,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
               modalType={groupWarningDialogProps?.modalType}
             />
           )}
-          {path.includes("/groups") && (
+          {pathname.includes("/groups") && (
             <>
               <div tw="flex pb-2 pt-6">
                 <h2 tw="w-1/2 mb-0" data-testid="title" id="title">

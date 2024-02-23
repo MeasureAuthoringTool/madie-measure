@@ -8,10 +8,10 @@ import { createMemoryHistory } from "history";
 // mocking useHistory
 const mockPush = jest.fn();
 jest.mock("react-router-dom", () => ({
-  useHistory: () => {
-    const push = () => mockPush("/measures-mocked");
-    return { push };
-  },
+  // useHistory: () => {
+  //   const push = () => mockPush("/measures-mocked");
+  //   return { push };
+  // },
 }));
 
 describe("NotFound component", () => {

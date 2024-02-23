@@ -1,7 +1,7 @@
 import React, { lazy, useEffect, useMemo, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
-import { useHistory, useParams, useRouteMatch } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import SupplementalData from "./supplementalData/SupplementalData";
 import RiskAdjustment from "./riskAdjustment/RiskAdjustment";
 import PopulationCriteriaSideNav from "./populationCriteriaSideNav/PopulationCriteriaSideNav";
@@ -15,8 +15,8 @@ interface GroupInputParams {
 }
 
 export function PopulationCriteriaHome() {
-  const { path } = useRouteMatch();
-  const { groupNumber } = useParams<GroupInputParams>();
+  const { pathname } = useLocation();
+  const { groupNumber } = useParams();
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -25,7 +25,7 @@ export function PopulationCriteriaHome() {
     };
   }, []);
 
-  let history = useHistory();
+  let navigate = useNavigate();
   const canEdit: boolean = checkUserCanEdit(
     measure?.measureSet?.owner,
     measure?.measureSet?.acls,
@@ -45,11 +45,11 @@ export function PopulationCriteriaHome() {
   })();
 
   useEffect(() => {
-    if (path.includes("/groups")) {
+    if (pathname.includes("/groups")) {
       if (+groupNumber && +groupNumber > 0) {
         setMeasureGroupNumber(+groupNumber - 1);
       } else {
-        history.push("/404");
+        // navigate("/404");
       }
     } else {
       setMeasureGroupNumber(null);
@@ -118,10 +118,10 @@ export function PopulationCriteriaHome() {
         isQDM={isQDM}
       />
       {/* path can be independent of nav */}
-      {path.includes("/base-configuration") && <BaseConfiguration />}
+      {pathname.includes("/base-configuration") && <BaseConfiguration />}
 
       {/* we will load A measureGroups component*/}
-      {path.includes("/groups") && (
+      {pathname.includes("/groups") && (
         <MeasureGroupsComponent
           setIsFormDirty={setIsFormDirty}
           measureGroupNumber={measureGroupNumber}
@@ -131,11 +131,11 @@ export function PopulationCriteriaHome() {
       )}
       {/* what's a better way to say if QDM or QICore? 
           To do: Find a more elegant solution for future when we have more than two models to avoid if else if else. */}
-      {path.includes("reporting") && <QDMReporting />}
+      {pathname.includes("reporting") && <QDMReporting />}
 
-      {path.includes("/supplemental-data") && <SupplementalData />}
+      {pathname.includes("/supplemental-data") && <SupplementalData />}
 
-      {path.includes("/risk-adjustment") && <RiskAdjustment />}
+      {pathname.includes("/risk-adjustment") && <RiskAdjustment />}
     </div>
   );
 }

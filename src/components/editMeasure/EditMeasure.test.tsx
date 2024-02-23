@@ -80,10 +80,10 @@ const serviceConfig: ServiceConfig = {
 const mockPush = jest.fn();
 jest.mock("react-router-dom", () => ({
   ...(jest.requireActual("react-router-dom") as any),
-  useHistory: () => {
-    const push = (val) => mockPush(val);
-    return { push, block: () => null };
-  },
+  // useHistory: () => {
+  //   const push = (val) => mockPush(val);
+  //   return { push, block: () => null };
+  // },
 }));
 
 afterEach(cleanup);

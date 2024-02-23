@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
-import { useHistory, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
@@ -39,7 +39,7 @@ export default function PopulationCriteriaSideNav(
   const { pathname } = useLocation();
   const [showPopulationCriteriaTabs, setShowPopulationCriteriaTabs] =
     useState<boolean>(true);
-  const history = useHistory();
+  let navigate = useNavigate();
   const populationCriteriaTabsFeatureFlag = false;
   const groupsBaseUrl = "/measures/" + measureId + "/edit/groups";
   const QdmReportingBaseUrl = "/measures/" + measureId + "/edit/reporting";
@@ -50,17 +50,17 @@ export default function PopulationCriteriaSideNav(
   };
 
   const handleMeasureGroupNavigation = (val: number) => {
-    history.push(groupsBaseUrl + "/" + (val + 1));
+    navigate(groupsBaseUrl + "/" + (val + 1));
   };
 
   const initiateNavigateGroupClick = (e) => {
     e.preventDefault();
     const groupNumber = Number(e.target.id);
     if (groupNumber !== measureGroupNumber) {
-      history.push(groupsBaseUrl + "/" + (groupNumber + 1));
+      navigate(groupsBaseUrl + "/" + (groupNumber + 1));
     } else {
       handleMeasureGroupNavigation(groupNumber);
-      history.push(groupsBaseUrl + "/" + (groupNumber + 1));
+      navigate(groupsBaseUrl + "/" + (groupNumber + 1));
     }
   };
 
@@ -78,14 +78,14 @@ export default function PopulationCriteriaSideNav(
       newMeasureGroupLink,
     ];
     setSideNavLinks([...sideNavLinks]);
-    history.push(groupsBaseUrl + "/" + newMeasureGroupNumber);
+    navigate(groupsBaseUrl + "/" + newMeasureGroupNumber);
   };
 
   const handlePopulationCriteriaCollapse = (tabInfo) => {
     if (tabInfo.title === "Population Criteria") {
       setShowPopulationCriteriaTabs(!showPopulationCriteriaTabs);
     } else {
-      history.push(tabInfo.href);
+      navigate(tabInfo.href);
     }
   };
 
@@ -121,7 +121,7 @@ export default function PopulationCriteriaSideNav(
             orientation="vertical"
             value={pathname}
             onChange={(e, v) => {
-              history.push(v);
+              navigate(v);
             }}
           >
             <Tab
@@ -204,7 +204,7 @@ export default function PopulationCriteriaSideNav(
             orientation="vertical"
             value={pathname}
             onChange={(e, v) => {
-              history.push(v);
+              navigate(v);
             }}
           >
             <Tab
@@ -222,7 +222,7 @@ export default function PopulationCriteriaSideNav(
           orientation="vertical"
           value={pathname}
           onChange={(e, v) => {
-            history.push(v);
+            navigate(v);
           }}
         >
           {additionalLinks.map((l) => {

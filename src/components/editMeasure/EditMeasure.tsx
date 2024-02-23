@@ -1,11 +1,10 @@
 import React, { useEffect, useState, Suspense } from "react";
 import {
-  Redirect,
+  useBlocker,
   Route,
-  Switch,
+  Routes,
   useParams,
-  useRouteMatch,
-  useHistory,
+  useNavigate,
 } from "react-router-dom";
 import "twin.macro";
 import "styled-components/macro";
@@ -15,7 +14,7 @@ import MeasureEditor from "./editor/MeasureEditor";
 import { Measure } from "@madie/madie-models";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { MadiePatient } from "@madie/madie-patient";
-import { measureStore } from "@madie/madie-util";
+import { measureStore, routeHandlerStore } from "@madie/madie-util";
 import { Toast, MadieAlert } from "@madie/madie-design-system/dist/react";
 import DeleteDialog from "./DeleteDialog";
 import NotFound from "../notfound/NotFound";
@@ -25,14 +24,37 @@ import PopulationCriteriaWrapper from "./populationCriteria/PopulationCriteriaWr
 interface inputParams {
   id: string;
 }
+export interface RouteHandlerState {
+  canTravel: boolean;
+  pendingRoute: string;
+}
 export default function EditMeasure() {
-  const { url } = useRouteMatch();
-  const { id } = useParams<inputParams>();
+  const { id } = useParams();
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const [loading, setLoading] = useState<boolean>(true);
+  let navigate = useNavigate();
+  const [routeHandlerState, setRouteHandlerState] = useState<RouteHandlerState>(
+    routeHandlerStore.state
+  );
+  useEffect(() => {
+    const subscription = routeHandlerStore.subscribe(setRouteHandlerState);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+  const { updateRouteHandlerState } = routeHandlerStore;
 
-  const history = useHistory();
+  // make reusable component to throw anywhere we want to block navigation..
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) => !routeHandlerState.canTravel
+  );
+  useEffect(() => {
+    updateRouteHandlerState({
+      ...routeHandlerState,
+      pendingRoute: blocker?.location?.pathname,
+    });
+  }, [blocker?.location?.pathname]);
 
   useEffect(() => {
     // we don't want to fire this by accident during delete.
@@ -45,7 +67,7 @@ export default function EditMeasure() {
         })
         .catch((err) => {
           if (err.toString().includes("404")) {
-            history.push("/404");
+            navigate("/404");
           }
         });
     }
@@ -82,7 +104,7 @@ export default function EditMeasure() {
       if (result.status === 200) {
         handleToast("success", "Measure successfully deleted", true);
         setTimeout(() => {
-          history.push("/measures");
+          navigate("/measures");
         }, 3000);
       }
     } catch (e) {
@@ -107,7 +129,6 @@ export default function EditMeasure() {
     setToastMessage(message);
     setToastOpen(open);
   };
-
   // At this time it appears only possible to have a single error at a time because of the way state is updated.
   const [errorMessage, setErrorMessage] = useState<string>("");
   const isQDM = measure?.model?.includes("QDM");
@@ -135,35 +156,36 @@ export default function EditMeasure() {
             />
           )}
         </div>
-        <Switch>
-          <Redirect exact from={url} to={`${url}/details`} />
-          <Route path={`${url}/details`}>
-            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={isQDM} />
-          </Route>
-          <Route path={`${url}/cql-editor`}>
-            <MeasureEditor />
-          </Route>
-          <Route path={`${url}/test-cases`}>
-            <MadiePatient />
-          </Route>
+        <Routes>
+          {/* root nav links with wild card operators. We always want these displayed regardless of deeper navigation */}
           <Route
-            path={[
-              `${url}/groups/:groupNumber`,
-              `${url}/supplemental-data`,
-              `${url}/risk-adjustment`,
-              `${url}/base-configuration`,
-              `${url}/reporting`,
-            ]}
-          >
-            <PopulationCriteriaWrapper />
-          </Route>
-          <Route path={`${url}/review-info`}>
-            <ReviewInfo />
-          </Route>
-          <Route path="*">
-            <NotFound />
-          </Route>
-        </Switch>
+            path="/details/*"
+            element={
+              <MeasureDetails setErrorMessage={setErrorMessage} isQDM={isQDM} />
+            }
+          />
+          <Route path={`/cql-editor/*`} element={<MeasureEditor />} />
+          <Route path={`/test-cases/*`} element={<MadiePatient />} />
+          <Route
+            path={`/groups/:groupNumber`}
+            element={<PopulationCriteriaWrapper />}
+          />
+          <Route
+            path={`/supplemental-data`}
+            element={<PopulationCriteriaWrapper />}
+          />
+          <Route
+            path={`/risk-adjustment`}
+            element={<PopulationCriteriaWrapper />}
+          />
+          <Route
+            path={`/base-configuration`}
+            element={<PopulationCriteriaWrapper />}
+          />
+          <Route path={`/reporting`} element={<PopulationCriteriaWrapper />} />
+          <Route path={`/review-info`} element={<ReviewInfo />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </div>
       <DeleteDialog
         open={deleteOpen}
