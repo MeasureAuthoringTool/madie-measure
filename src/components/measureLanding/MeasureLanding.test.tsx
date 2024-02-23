@@ -3,8 +3,8 @@ import "@testing-library/jest-dom";
 
 import * as React from "react";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { MemoryRouter } from "react-router";
-import { MeasureRoutes } from "../measureRoutes/MeasureRoutes";
+import { createMemoryRouter, RouterProvider } from "react-router-dom";
+import { routesConfig } from "../measureRoutes/MeasureRoutes";
 import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import userEvent from "@testing-library/user-event";
@@ -13,7 +13,6 @@ import {
   oneItemResponse,
   multipleItemsResponse,
 } from "../__mocks__/mockMeasureResponses";
-import MeasureLanding from "./MeasureLanding";
 
 const serviceConfig: ServiceConfig = {
   terminologyService: { baseUrl: "example-service-url" },
@@ -32,6 +31,13 @@ jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: () => null,
 }));
 
+const mockedUsedNavigate = jest.fn();
+
+jest.mock("react-router-dom", () => ({
+  ...(jest.requireActual("react-router-dom") as any),
+  useNavigate: () => mockedUsedNavigate,
+}));
+
 const mockMeasureServiceApi = {
   fetchMeasures: jest.fn().mockResolvedValue(multipleItemsResponse),
   searchMeasuresByMeasureNameOrEcqmTitle: jest
@@ -45,111 +51,91 @@ jest.mock("../../api/useMeasureServiceApi", () =>
 
 describe("Measure Page", () => {
   afterEach(() => {
+    mockedUsedNavigate.mockReset();
     jest.clearAllMocks();
   });
+  const renderRouter = (initialEntries) => {
+    const router = createMemoryRouter(routesConfig, {
+      initialEntries: initialEntries,
+    });
+
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <RouterProvider router={router} />
+      </ApiContextProvider>
+    );
+  };
 
   test("shows my measures on page load", async () => {
-    await act(async () => {
-      render(
-        <ApiContextProvider value={serviceConfig}>
-          <MemoryRouter initialEntries={["/measures"]}>
-            <MeasureRoutes />
-          </MemoryRouter>
-        </ApiContextProvider>
-      );
-      const measure1 = await screen.findByText("TestMeasure1");
-      expect(measure1).toBeInTheDocument();
-      expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
-        true,
-        10,
-        0,
-        abortController.signal
-      );
-      const myMeasuresTab = screen.getByRole("tab", { name: "My Measures" });
-      expect(myMeasuresTab).toBeInTheDocument();
-      expect(myMeasuresTab).toHaveClass("Mui-selected");
-      const allMeasuresTab = screen.getByRole("tab", { name: "All Measures" });
-      expect(allMeasuresTab).toBeInTheDocument();
-      expect(allMeasuresTab).not.toHaveClass("Mui-selected");
-    });
+    renderRouter(["/measures"]);
+    const measure1 = await screen.findByText("TestMeasure1");
+    expect(measure1).toBeInTheDocument();
+    expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
+      true,
+      10,
+      0,
+      abortController.signal
+    );
+    const myMeasuresTab = screen.getByRole("tab", { name: "My Measures" });
+    expect(myMeasuresTab).toBeInTheDocument();
+    expect(myMeasuresTab).toHaveClass("Mui-selected");
+    const allMeasuresTab = screen.getByRole("tab", { name: "All Measures" });
+    expect(allMeasuresTab).toBeInTheDocument();
+    expect(allMeasuresTab).not.toHaveClass("Mui-selected");
   });
 
-  test("shows all measures measures on tab click", async () => {
-    await act(async () => {
-      const { findByTestId } = render(
-        <ApiContextProvider value={serviceConfig}>
-          <MemoryRouter
-            initialEntries={[
-              {
-                pathname: "/measures",
-                search: "",
-                hash: "",
-                state: undefined,
-                key: "1fewtg",
-              },
-            ]}
-          >
-            <MeasureRoutes />
-          </MemoryRouter>
-        </ApiContextProvider>
-      );
-      const measure1 = await screen.findByText("TestMeasure1");
-      expect(measure1).toBeInTheDocument();
+  test("all measure nav click triggers nav", async () => {
+    renderRouter(["/measures"]);
+    const measure1 = await screen.findByText("TestMeasure1");
+    expect(measure1).toBeInTheDocument();
+    expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
+      true,
+      10,
+      0,
+      abortController.signal
+    );
+
+    const myMeasuresTab = await screen.findByTestId("my-measures-tab");
+    userEvent.click(myMeasuresTab);
+    expect(myMeasuresTab).toHaveClass("Mui-selected");
+
+    const allMeasuresTab = await screen.findByTestId("all-measures-tab");
+    act(() => {
+      userEvent.click(allMeasuresTab);
+    });
+    expect(mockedUsedNavigate).toHaveBeenCalledWith("?tab=1&page=0&limit=10");
+  });
+  test("loading in with props for all measures page, triggers a fetch", async () => {
+    renderRouter(["/measures?tab=1&page=0&limit=10"]);
+    const allMeasuresTab = await screen.findByTestId("all-measures-tab");
+    await waitFor(() => {
+      expect(allMeasuresTab).toHaveClass("Mui-selected");
+    });
+    await waitFor(() =>
       expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
-        true,
+        false,
         10,
         0,
         abortController.signal
-      );
-      const myMeasuresTab = await findByTestId("my-measures-tab");
-      userEvent.click(myMeasuresTab);
-      expect(myMeasuresTab).toHaveClass("Mui-selected");
-
-      const allMeasuresTab = await findByTestId("all-measures-tab");
-      userEvent.click(allMeasuresTab);
-      expect(allMeasuresTab).toHaveClass("Mui-selected");
-      await waitFor(() =>
-        expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
-          false,
-          10,
-          0,
-          abortController.signal
-        )
-      );
-    });
+      )
+    );
   });
 
   test("Search measure should call search api with search criteria", async () => {
-    await act(async () => {
-      render(
-        <ApiContextProvider value={serviceConfig}>
-          <MemoryRouter initialEntries={["/measures"]}>
-            <MeasureLanding />
-          </MemoryRouter>
-        </ApiContextProvider>
-      );
-    });
-    const searchFieldInput = screen.getByTestId("searchMeasure-input");
-    expect(searchFieldInput).toBeInTheDocument();
-    userEvent.type(searchFieldInput, "test");
-    expect(searchFieldInput.value).toBe("test");
+    renderRouter(["/measures"]);
 
-    fireEvent.submit(searchFieldInput);
+    const measureInput = await screen.findByTestId("searchMeasure-input");
+    expect(measureInput).toBeInTheDocument();
+    userEvent.type(measureInput, "test");
+    expect(measureInput.value).toBe("test");
+    fireEvent.submit(measureInput);
     expect(
       mockMeasureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle
     ).toHaveBeenCalledWith(true, 10, 0, "test", abortController.signal);
   });
 
   test("Create event triggers the event listener", async () => {
-    await act(async () => {
-      render(
-        <ApiContextProvider value={serviceConfig}>
-          <MemoryRouter initialEntries={["/measures"]}>
-            <MeasureRoutes />
-          </MemoryRouter>
-        </ApiContextProvider>
-      );
-    });
+    renderRouter(["/measures"]);
     const event = new Event("create");
     window.dispatchEvent(event);
     expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
@@ -159,36 +145,30 @@ describe("Measure Page", () => {
       abortController.signal
     );
   });
+
   test("test pagination page button", async () => {
-    await act(async () => {
-      render(
-        <ApiContextProvider value={serviceConfig}>
-          <MemoryRouter initialEntries={["/measures"]}>
-            <MeasureRoutes />
-          </MemoryRouter>
-        </ApiContextProvider>
-      );
-    });
-    const pageButton = screen.getByRole("button", {
+    renderRouter(["/measures"]);
+    const pageButton = await screen.findByRole("button", {
       name: /page 1/i,
     });
-    userEvent.click(pageButton);
+    act(() => {
+      userEvent.click(pageButton);
+    });
+    expect(mockedUsedNavigate).toHaveBeenCalledWith("?tab=0&page=1&limit=10");
     const measure1 = await screen.findByText("TestMeasure1");
     expect(measure1).toBeInTheDocument();
   });
 
   test("test pagination page limit change", async () => {
-    await act(async () => {
-      render(
-        <ApiContextProvider value={serviceConfig}>
-          <MemoryRouter initialEntries={["/measures"]}>
-            <MeasureRoutes />
-          </MemoryRouter>
-        </ApiContextProvider>
-      );
-    });
+    renderRouter(["/measures"]);
+    expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
+      true,
+      10,
+      0,
+      abortController.signal
+    );
 
-    const pageLimit10Button = screen.getByRole("button", {
+    const pageLimit10Button = await screen.findByRole("button", {
       name: /10/i,
     });
     userEvent.click(pageLimit10Button);
@@ -204,42 +184,21 @@ describe("Measure Page", () => {
     (mockMeasureServiceApi.fetchMeasures as jest.Mock)
       .mockClear()
       .mockRejectedValueOnce(new Error("Unable to fetch measures"));
+    renderRouter(["/measures"]);
 
-    await act(async () => {
-      render(
-        <ApiContextProvider value={serviceConfig}>
-          <MemoryRouter initialEntries={["/measures"]}>
-            <MeasureLanding />
-          </MemoryRouter>
-        </ApiContextProvider>
-      );
-
-      const error = await screen.findByTestId("generic-error-text-header");
-      expect(error).toBeInTheDocument();
-      const errorText = await screen.findByText("Unable to fetch measures");
-      expect(errorText).toBeInTheDocument();
-    });
+    const error = await screen.findByTestId("generic-error-text-header");
+    expect(error).toBeInTheDocument();
+    const errorText = await screen.findByText("Unable to fetch measures");
+    expect(errorText).toBeInTheDocument();
   });
 
   it("Should not display errors when fetching measures is canceled", async () => {
     (mockMeasureServiceApi.fetchMeasures as jest.Mock)
       .mockClear()
       .mockRejectedValueOnce(new Error("canceled"));
-
-    await act(async () => {
-      render(
-        <ApiContextProvider value={serviceConfig}>
-          <MemoryRouter initialEntries={["/measures"]}>
-            <MeasureLanding />
-          </MemoryRouter>
-        </ApiContextProvider>
-      );
-
-      expect(
-        await screen.queryByTestId("generic-error-text-header")
-      ).toBeNull();
-      expect(await screen.queryByText("Unable to fetch measures")).toBeNull();
-    });
+    renderRouter(["/measures"]);
+    expect(await screen.queryByTestId("generic-error-text-header")).toBeNull();
+    expect(await screen.queryByText("Unable to fetch measures")).toBeNull();
   });
 
   test("Search measure should display errors when searching measures is rejected", async () => {
@@ -249,52 +208,35 @@ describe("Measure Page", () => {
     (mockMeasureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle as jest.Mock)
       .mockClear()
       .mockRejectedValueOnce(new Error("Unable to fetch measures"));
-    await act(async () => {
-      render(
-        <ApiContextProvider value={serviceConfig}>
-          <MemoryRouter initialEntries={["/measures"]}>
-            <MeasureLanding />
-          </MemoryRouter>
-        </ApiContextProvider>
-      );
-    });
-    const searchFieldInput = screen.getByTestId("searchMeasure-input");
-    expect(searchFieldInput).toBeInTheDocument();
-    userEvent.type(searchFieldInput, "test");
-    expect(searchFieldInput.value).toBe("test");
+    renderRouter(["/measures"]);
 
-    fireEvent.submit(searchFieldInput);
-
+    const measureInput = await screen.findByTestId("searchMeasure-input");
+    expect(measureInput).toBeInTheDocument();
+    userEvent.type(measureInput, "test");
+    expect(measureInput.value).toBe("test");
+    fireEvent.submit(measureInput);
     const error = await screen.findByTestId("generic-error-text-header");
     expect(error).toBeInTheDocument();
     const errorText = await screen.findByText("Unable to fetch measures");
     expect(errorText).toBeInTheDocument();
   });
-});
 
-test("Search measure should not display errors when searching measures is canceled", async () => {
-  (mockMeasureServiceApi.fetchMeasures as jest.Mock)
-    .mockClear()
-    .mockRejectedValueOnce(new Error("canceled"));
-  (mockMeasureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle as jest.Mock)
-    .mockClear()
-    .mockRejectedValueOnce(new Error("canceled"));
-  await act(async () => {
-    render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={["/measures"]}>
-          <MeasureLanding />
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
+  test("Search measure should not display errors when searching measures is canceled", async () => {
+    (mockMeasureServiceApi.fetchMeasures as jest.Mock)
+      .mockClear()
+      .mockRejectedValueOnce(new Error("canceled"));
+    (mockMeasureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle as jest.Mock)
+      .mockClear()
+      .mockRejectedValueOnce(new Error("canceled"));
+    renderRouter(["/measures"]);
+
+    const measureInput = await screen.findByTestId("searchMeasure-input");
+    expect(measureInput).toBeInTheDocument();
+    userEvent.type(measureInput, "test");
+    expect(measureInput.value).toBe("test");
+    fireEvent.submit(measureInput);
+
+    expect(await screen.queryByTestId("generic-error-text-header")).toBeNull();
+    expect(await screen.queryByText("Unable to fetch measures")).toBeNull();
   });
-  const searchFieldInput = screen.getByTestId("searchMeasure-input");
-  expect(searchFieldInput).toBeInTheDocument();
-  userEvent.type(searchFieldInput, "test");
-  expect(searchFieldInput.value).toBe("test");
-
-  fireEvent.submit(searchFieldInput);
-
-  expect(await screen.queryByTestId("generic-error-text-header")).toBeNull();
-  expect(await screen.queryByText("Unable to fetch measures")).toBeNull();
 });

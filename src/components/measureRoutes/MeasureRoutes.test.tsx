@@ -3,9 +3,9 @@ import "@testing-library/jest-dom";
 
 import * as React from "react";
 import { render, screen } from "@testing-library/react";
-import MeasureBrowserRoutes, { MeasureRoutes } from "./MeasureRoutes";
-import { MemoryRouter } from "react-router";
-import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
+import { routesConfig } from "./MeasureRoutes";
+import { createMemoryRouter, RouterProvider } from "react-router";
+import { ServiceConfig } from "../../api/ServiceContext";
 import { describe, expect, test } from "@jest/globals";
 import useMeasureServiceApi, {
   MeasureServiceApi,
@@ -13,6 +13,9 @@ import useMeasureServiceApi, {
 import { Measure } from "@madie/madie-models";
 
 jest.mock("../../api/useMeasureServiceApi");
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+}));
 
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
@@ -83,69 +86,53 @@ jest.mock("../editMeasure/EditMeasure", () => () => {
 
 const { findByTestId } = screen;
 // react no op error is caused by two awaits in one it call. ignorable.
+
+const renderRouter = (initialEntries) => {
+  const router = createMemoryRouter(routesConfig, {
+    initialEntries: initialEntries,
+  });
+  render(<RouterProvider router={router} />);
+};
+
 describe("Measure Router", () => {
   test("Render a default notFound page", async () => {
-    render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter
-          initialEntries={[
-            {
-              pathname: "",
-              search: "",
-              hash: "",
-              state: undefined,
-              key: "1fewtg",
-            },
-          ]}
-        >
-          <MeasureBrowserRoutes />
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
+    renderRouter([
+      {
+        pathname: "/test",
+        search: "",
+        hash: "",
+        state: undefined,
+        key: "1fewtg",
+      },
+    ]);
     const notFound = await findByTestId("notfound-component-mocked");
     expect(notFound).toBeInTheDocument();
   });
 
   test("Router routes to measureLanding", async () => {
-    render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter
-          initialEntries={[
-            {
-              pathname: "/measures",
-              search: "",
-              hash: "",
-              state: undefined,
-              key: "1fewtg",
-            },
-          ]}
-        >
-          <MeasureRoutes />
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
-    const measureLanding = await findByTestId("measure-landing");
+    renderRouter([
+      {
+        pathname: "/measures",
+        search: "",
+        hash: "",
+        state: undefined,
+        key: "1fewtg",
+      },
+    ]);
+    const measureLanding = screen.getByTestId("measure-landing");
     expect(measureLanding).toBeInTheDocument();
   });
 
   test("Router routes to EditMeasure", async () => {
-    render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter
-          initialEntries={[
-            {
-              pathname: "/measures/test/edit",
-              search: "",
-              hash: "",
-              state: undefined,
-              key: "1fewtg",
-            },
-          ]}
-        >
-          <MeasureRoutes />
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
+    renderRouter([
+      {
+        pathname: "/measures/test/edit",
+        search: "",
+        hash: "",
+        state: undefined,
+        key: "1fewtg",
+      },
+    ]);
     const EditMeasure = await findByTestId("editMeasure");
     expect(EditMeasure).toBeInTheDocument();
   });

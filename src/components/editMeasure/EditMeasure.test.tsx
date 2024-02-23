@@ -1,16 +1,21 @@
 import * as React from "react";
-import { render, fireEvent, cleanup, waitFor } from "@testing-library/react";
+import {
+  render,
+  fireEvent,
+  cleanup,
+  waitFor,
+  screen,
+} from "@testing-library/react";
 import { act } from "react-dom/test-utils";
-import { MemoryRouter } from "react-router";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
-import EditMeasure from "./EditMeasure";
+import { createMemoryRouter, RouterProvider } from "react-router-dom";
+import { routesConfig } from "../measureRoutes/MeasureRoutes";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../api/useMeasureServiceApi";
 import { Measure } from "@madie/madie-models";
 import MeasureEditor from "./editor/MeasureEditor";
 import { measureStore } from "@madie/madie-util";
-import { ExpressionTermContext } from "@madie/cql-antlr-parser/dist/generated";
 
 jest.mock("./details/MeasureDetails");
 jest.mock("./editor/MeasureEditor");
@@ -24,6 +29,13 @@ const MeasureEditorMock = MeasureEditor as jest.Mock<JSX.Element>;
 MeasureEditorMock.mockImplementation(() => {
   return <div>library testCql version '1.0.000'</div>;
 });
+
+const mockedNavigate = jest.fn();
+
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: () => mockedNavigate,
+}));
 
 const measure = {
   id: "measure ID",
@@ -76,42 +88,33 @@ const serviceConfig: ServiceConfig = {
   terminologyService: { baseUrl: "" },
 };
 
-// mocking useHistory
-const mockPush = jest.fn();
-jest.mock("react-router-dom", () => ({
-  ...(jest.requireActual("react-router-dom") as any),
-  // useHistory: () => {
-  //   const push = (val) => mockPush(val);
-  //   return { push, block: () => null };
-  // },
-}));
+const { getByTestId, findByTestId, queryByTestId, queryByText, findByText } =
+  screen;
 
+const renderRouter = () => {
+  const router = createMemoryRouter(routesConfig, {
+    initialEntries: [{ pathname: "/measures/fakeid/edit/details" }],
+  });
+
+  render(
+    <ApiContextProvider value={serviceConfig}>
+      <RouterProvider router={router} />
+    </ApiContextProvider>
+  );
+};
 afterEach(cleanup);
 
 describe("EditMeasure Component", () => {
   measureStore.state.mockImplementationOnce(() => null);
   it("should render a loading page if the measure is not yet loaded", async () => {
-    const { getByTestId, findByTestId } = render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={["/"]}>
-          <EditMeasure />
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
-
+    renderRouter();
     const result = getByTestId("loading");
     expect(result).toBeInTheDocument();
     await findByTestId("editMeasure"); // let the rendering finish
   });
 
   it("should render the EditMeasure contents after the measure is loaded", async () => {
-    const { findByTestId, queryByTestId } = render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={["/"]}>
-          <EditMeasure />
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
+    renderRouter();
 
     const result = await findByTestId("editMeasure");
     expect(result).toBeInTheDocument();
@@ -122,13 +125,7 @@ describe("EditMeasure Component", () => {
   });
 
   it("should display a delete dialog when the event is triggered, discards.", async () => {
-    const { findByTestId, queryByTestId, queryByText } = render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={["/"]}>
-          <EditMeasure />
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
+    renderRouter();
 
     const result = await findByTestId("editMeasure");
     expect(result).toBeInTheDocument();
@@ -149,13 +146,7 @@ describe("EditMeasure Component", () => {
   });
 
   it("should render edit measure menu with measure details page active by default", async () => {
-    const { findByText } = render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={["/"]}>
-          <EditMeasure />
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
+    renderRouter();
 
     //verify all menus present in the dom
     expect(await findByText("Details")).toBeInTheDocument();
@@ -169,13 +160,7 @@ describe("EditMeasure Component", () => {
   });
 
   it("should render respective menu contents on clicking menu items", async () => {
-    const { findByText } = render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={["/"]}>
-          <EditMeasure />
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
+    renderRouter();
 
     // CQL Editor Menu click action
     const editorLink = await findByText("CQL Editor");
@@ -183,11 +168,11 @@ describe("EditMeasure Component", () => {
       fireEvent.click(editorLink);
     });
     await waitFor(() => {
-      expect(editorLink).toHaveAttribute("aria-selected", "true");
+      expect(mockedNavigate).toHaveBeenCalledWith(
+        "/measures/fakeid/edit/cql-editor",
+        { replace: true }
+      );
     });
-    expect(document.body.textContent).toContain(
-      "library testCql version '1.0.000'"
-    );
 
     // Test Cases Menu click action
     const testCaseLink = await findByText("Test Cases");
@@ -195,19 +180,15 @@ describe("EditMeasure Component", () => {
       fireEvent.click(testCaseLink);
     });
     await waitFor(() => {
-      expect(testCaseLink).toHaveAttribute("aria-selected", "true");
+      expect(mockedNavigate).toHaveBeenCalledWith(
+        "/measures/fakeid/edit/test-cases",
+        { replace: true }
+      );
     });
-    expect(document.body.textContent).toContain("Patient Component");
   });
 
   it("delete succeeds", async () => {
-    const { findByTestId, queryByTestId, getByTestId } = render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={["/"]}>
-          <EditMeasure />
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
+    renderRouter();
 
     const result = await findByTestId("editMeasure");
     expect(result).toBeInTheDocument();
@@ -243,13 +224,7 @@ describe("EditMeasure Component", () => {
       status: 500,
       response: { data: { message: "update failed" } },
     });
-    const { findByTestId, queryByTestId, getByTestId } = render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={["/"]}>
-          <EditMeasure />
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
+    renderRouter();
 
     const result = await findByTestId("editMeasure");
     expect(result).toBeInTheDocument();
@@ -273,13 +248,7 @@ describe("EditMeasure Component", () => {
     serviceApiMock.updateMeasure = jest
       .fn()
       .mockRejectedValueOnce("I'm an error");
-    const { findByTestId, queryByTestId, getByTestId, queryByText } = render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={["/"]}>
-          <EditMeasure />
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
+    renderRouter();
 
     const result = await findByTestId("editMeasure");
     expect(result).toBeInTheDocument();
@@ -307,15 +276,9 @@ describe("EditMeasure Component", () => {
     useMeasureServiceApiMock.mockImplementation(() => {
       return serviceApiRejectedMock;
     });
-    render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={["/"]}>
-          <EditMeasure />
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
+    renderRouter();
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith("/404");
+      expect(mockedNavigate).toHaveBeenCalledWith("/404");
     });
   });
 });

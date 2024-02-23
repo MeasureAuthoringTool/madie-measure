@@ -1,8 +1,8 @@
 import "@testing-library/jest-dom";
 import * as React from "react";
-import { getByTestId, queryByTestId, render } from "@testing-library/react";
+import { screen, render } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
-import { Route } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import MeasureDetails from "./MeasureDetails";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
 import MeasureInformation from "./measureInformation/MeasureInformation";
@@ -69,14 +69,24 @@ beforeEach(() => {
   });
 });
 
+const { getByText, getByTestId } = screen;
+
 describe("MeasureDetails component", () => {
   it("should render the MeasureInformation component for default URL", () => {
-    const { getByText } = render(
+    render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
-          <Route path="/foo">
-            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={false} />
-          </Route>
+          <Routes>
+            <Route
+              path="/foo"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  isQDM={false}
+                />
+              }
+            />
+          </Routes>
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -84,14 +94,22 @@ describe("MeasureDetails component", () => {
   });
 
   it("should render the model and measurement component for the URL", () => {
-    const { getByTestId } = render(
+    render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter
           initialEntries={[{ pathname: "/foo/model&measurement-period" }]}
         >
-          <Route path="/foo">
-            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={false} />
-          </Route>
+          <Routes>
+            <Route
+              path="/foo/*"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  isQDM={false}
+                />
+              }
+            />
+          </Routes>
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -104,9 +122,17 @@ describe("MeasureDetails component", () => {
         <MemoryRouter
           initialEntries={[{ pathname: "/foo/measure-description" }]}
         >
-          <Route path="/foo">
-            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={false} />
-          </Route>
+          <Routes>
+            <Route
+              path="/foo/*"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  isQDM={false}
+                />
+              }
+            />
+          </Routes>
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -127,9 +153,17 @@ describe("MeasureDetails component", () => {
     const { getByText, getByTestId } = render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={[{ pathname: "/foo/measure-copyright" }]}>
-          <Route path="/foo">
-            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={false} />
-          </Route>
+          <Routes>
+            <Route
+              path="/foo/*"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  isQDM={false}
+                />
+              }
+            />
+          </Routes>
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -152,9 +186,17 @@ describe("MeasureDetails component", () => {
         <MemoryRouter
           initialEntries={[{ pathname: "/foo/measure-disclaimer" }]}
         >
-          <Route path="/foo">
-            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={false} />
-          </Route>
+          <Routes>
+            <Route
+              path="/foo/*"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  isQDM={false}
+                />
+              }
+            />
+          </Routes>
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -175,9 +217,17 @@ describe("MeasureDetails component", () => {
     const { getByText, getByTestId } = render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={[{ pathname: "/foo/measure-rationale" }]}>
-          <Route path="/foo">
-            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={false} />
-          </Route>
+          <Routes>
+            <Route
+              path="/foo/*"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  isQDM={false}
+                />
+              }
+            />
+          </Routes>
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -198,9 +248,17 @@ describe("MeasureDetails component", () => {
     const { getByText, getByTestId } = render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={[{ pathname: "/foo/measure-guidance" }]}>
-          <Route path="/foo">
-            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={false} />
-          </Route>
+          <Routes>
+            <Route
+              path="/foo/*"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  isQDM={false}
+                />
+              }
+            />
+          </Routes>
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -223,13 +281,20 @@ describe("MeasureDetails component", () => {
         <MemoryRouter
           initialEntries={[{ pathname: "/foo/measure-definition" }]}
         >
-          <Route path="/foo">
-            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={true} />
-          </Route>
+          <Routes>
+            <Route
+              path="/foo/*"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  isQDM={true}
+                />
+              }
+            />
+          </Routes>
         </MemoryRouter>
       </ApiContextProvider>
     );
-
     expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
     expect(getByTestId("leftPanelQDMMeasureDefinition")).toBeInTheDocument();
   });
@@ -240,9 +305,17 @@ describe("MeasureDetails component", () => {
         <MemoryRouter
           initialEntries={[{ pathname: "/foo/measure-references" }]}
         >
-          <Route path="/foo">
-            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={true} />
-          </Route>
+          <Routes>
+            <Route
+              path="/foo/*"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  isQDM={true}
+                />
+              }
+            />
+          </Routes>
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -257,9 +330,17 @@ describe("MeasureDetails component", () => {
     const { getByTestId, queryByTestId } = render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
-          <Route path="/foo">
-            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={true} />
-          </Route>
+          <Routes>
+            <Route
+              path="/foo/*"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  isQDM={true}
+                />
+              }
+            />
+          </Routes>
         </MemoryRouter>
       </ApiContextProvider>
     );

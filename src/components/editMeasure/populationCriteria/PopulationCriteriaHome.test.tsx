@@ -1,6 +1,6 @@
 import * as React from "react";
 import { act, render, screen } from "@testing-library/react";
-import { MemoryRouter, Route } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
 import PopulationCriteriaWrapper from "./PopulationCriteriaWrapper";
@@ -104,9 +104,12 @@ const renderPopulationCriteriaHomeComponent = async (
       ]}
     >
       <ApiContextProvider value={serviceConfig}>
-        <Route path={[`/measures/testMeasureId/edit/${routePath}`]}>
-          <PopulationCriteriaWrapper />
-        </Route>
+        <Routes>
+          <Route
+            path={`/measures/testMeasureId/edit/${routePath}`}
+            element={<PopulationCriteriaWrapper />}
+          />
+        </Routes>
       </ApiContextProvider>
     </MemoryRouter>
   );
