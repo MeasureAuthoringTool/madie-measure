@@ -34,7 +34,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   const rationaleLink = `measure-rationale`;
   const guidanceLink = `measure-guidance`;
   const clinicalLink = `measure-clinical-recommendation`;
-  const definitionsLink = `measure-definition`;
+  const definitionLink = `measure-definition`;
   const referencesLink = `measure-references`;
   const transmissionFormat = `transmission-format`;
   const detailsLink = "";
@@ -244,7 +244,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               )}
               {featureFlags.qdmMeasureDefinitions && (
                 <Route
-                  path={definitionsLink}
+                  path={definitionLink}
                   element={
                     <MeasureMetadata
                       measureMetadataId="Definition"
