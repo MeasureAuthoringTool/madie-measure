@@ -13,14 +13,6 @@ import NotFound from "../notfound/NotFound";
 
 export const routesConfig = [
   {
-    // path: "/",
-    // element: (
-    //   <>
-    //     <SiteHeader />
-    //     <Outlet />
-    //   </>
-    // ),
-    // errorElement: <NotFound />,
     children: [
       { path: "/", element: <MeasureLanding /> },
       { path: "/measures", element: <MeasureLanding /> },
@@ -32,20 +24,6 @@ export const routesConfig = [
     ],
   },
 ];
-
-// export const MeasureRoutes = createBrowserRouter(
-//   createRoutesFromElements(
-//     <Route path="/">
-//       <Route path="/measures" element={<MeasureLanding />} />
-//       <Route path="/measures/:id/edit">
-//         <Route path="/measures/:id/edit" index element={<EditMeasure />} />
-//         <Route path="/measures/:id/edit/*" index element={<EditMeasure />} />
-//       </Route>
-//       <Route path="/404" element={<NotFound />} />
-//       <Route path="*" element={<Navigate to="/404" />} />
-//     </Route>
-//   )
-// );
 
 const router = createBrowserRouter(routesConfig);
 

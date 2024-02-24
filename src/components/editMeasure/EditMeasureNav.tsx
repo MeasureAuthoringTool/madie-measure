@@ -38,6 +38,10 @@ const EditMeasureNav = ({ isQDM }) => {
     isQDM ? `${pathname}/base-configuration` : `${pathname}/groups/1`;
   };
   // we grab the matching pattern after edit, then we only get the part before the next slash.
+  const fullMatch = useMatch("/measures/:id/edit/*")?.params?.["*"];
+  if (fullMatch === "details" && id) {
+    navigate(`/measures/${id}/edit/details/`, { replace: true });
+  }
   const match = useMatch("/measures/:id/edit/*")?.params?.["*"].split("/")[0];
   return (
     <div>
