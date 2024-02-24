@@ -244,8 +244,16 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               )}
               {featureFlags.qdmMeasureDefinitions && (
                 <Route
-                    path={definitionsLink}
-                    element={<MeasureMetadata measureMetadataId="Definition" measureMetadataType="Definition" header="Definition" setErrorMessage={setErrorMessage}/>} />
+                  path={definitionsLink}
+                  element={
+                    <MeasureMetadata
+                      measureMetadataId="Definition"
+                      measureMetadataType="Definition"
+                      header="Definition"
+                      setErrorMessage={setErrorMessage}
+                    />
+                  }
+                />
               )}
             </>
           )}
