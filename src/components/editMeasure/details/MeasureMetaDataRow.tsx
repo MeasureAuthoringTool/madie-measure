@@ -2,12 +2,7 @@ import React, { useState } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import "twin.macro";
 import "styled-components/macro";
-import {
-  TextField,
-  Button,
-  Popover,
-  Toast,
-} from "@madie/madie-design-system/dist/react";
+import { Popover } from "@madie/madie-design-system/dist/react";
 
 interface MeasureMetaDataRowProps {
   name: string;
@@ -33,11 +28,9 @@ const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
   };
 
   const handleClose = () => {
-    console.log("here")
     setOptionsOpen(false);
     setSelectedReferenceId(null);
     setAnchorEl(null);
-   // setCanEdit(false);
   };
 
   return (
@@ -46,22 +39,6 @@ const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
         <td>{name}</td>
         <td>{description}</td>
         {id && (
-          // <td>
-          //   <Button
-          //     variant="outline-secondary"
-          //     name="Edit"
-          //     onClick={() => {
-          //       handleClick(id,'delete');
-          //     }}
-          //     disabled={!canEdit}
-          //     data-testid={`measure-definition-edit-${id}`}
-          //     aria-label={`Measure definition ${id}`}
-          //     role="button"
-          //     tab-index={0}
-          //   >
-          //     Delete
-          //   </Button>
-          // </td>
           <td style={{ width: 160 }}>
             <button
               className="action-button"
@@ -80,28 +57,30 @@ const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
           </td>
         )}
       </tr>
-      {console.log(optionsOpen, anchorEl)}
-      {/* {optionsOpen && ( */}
-        <Popover
-          optionsOpen={optionsOpen}
-          anchorEl={anchorEl}
-          handleClose={handleClose}
-          canEdit={canEdit}
-          editViewSelectOptionProps={{
-            label: "Edit",
-            toImplementFunction: () => handleClick(selectedReferenceId, "edit"),
-            dataTestId: `view-measure-${selectedReferenceId}`,
-          }}
-          otherSelectOptionProps={[
-            {
-              label: "Delete",
-              toImplementFunction: () =>
-                handleClick(selectedReferenceId, "delete"),
-              dataTestId: `draft-measure-${selectedReferenceId}`,
+      <Popover
+        optionsOpen={optionsOpen}
+        anchorEl={anchorEl}
+        handleClose={handleClose}
+        canEdit={canEdit}
+        editViewSelectOptionProps={{
+          label: "Edit",
+          toImplementFunction: () => {
+            handleClick(selectedReferenceId, "edit");
+            setOptionsOpen(false);
+          },
+          dataTestId: `edit-measure-${selectedReferenceId}`,
+        }}
+        otherSelectOptionProps={[
+          {
+            label: "Delete",
+            toImplementFunction: () => {
+              handleClick(selectedReferenceId, "delete");
+              setOptionsOpen(false);
             },
-          ]}
-        />
-      {/* )} */}
+            dataTestId: `delete-measure-${selectedReferenceId}`,
+          },
+        ]}
+      />
     </>
   );
 };
