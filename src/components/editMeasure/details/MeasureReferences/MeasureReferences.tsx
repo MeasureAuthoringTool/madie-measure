@@ -274,15 +274,17 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
       },
     };
 
+    console.log("here");
     measureServiceApi
       .updateMeasure(modifiedMeasure)
       .then((res) => {
         //@ts-ignore
         const { status, data } = res;
         if (status === 200) {
+          console.log("here");
           handleToast(
             "success",
-            `Measure Reference Deleted Successfully`,
+            `Measure reference deleted successfully`,
             true
           );
           updateMeasure(data);

@@ -226,7 +226,7 @@ describe("Measure References Component", () => {
     });
   });
 
-  it("should render delete dialogue on measure reference page when delete button is clicked", async () => {
+  it("should render delete dialogue on Test Case list page when delete button is clicked", async () => {
     measureStore.state.mockImplementation(() => measureWithNineItems);
     measureStore.initialState.mockImplementation(() => measureWithNineItems);
     render(
@@ -261,6 +261,46 @@ describe("Measure References Component", () => {
       const submitButton = screen.queryByText("Yes, Delete");
       expect(submitButton).not.toBeInTheDocument();
     });
+  });
+
+  it("should successfully delete measure reference page when delete button is clicked", async () => {
+    measureStore.state.mockImplementation(() => measureWithNineItems);
+    measureStore.initialState.mockImplementation(() => measureWithNineItems);
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    await checkRows(9);
+
+    await waitFor(() => {
+      const selectButton = screen.getByTestId(`select-action-id 1`);
+      expect(selectButton).toBeInTheDocument();
+      userEvent.click(selectButton);
+    });
+
+    const deleteButton = getByTestId(`delete-measure-reference-id 1`);
+    expect(deleteButton).toBeInTheDocument();
+    fireEvent.click(deleteButton);
+
+    expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("delete-dialog-continue-button")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("delete-dialog-cancel-button")
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("delete-dialog-continue-button"));
+    const toastMessage = await screen.findByTestId(
+      "measure-references-success"
+    );
+    expect(toastMessage).toHaveTextContent(
+      "Measure reference deleted successfully"
+    );
+    expect(screen.queryByTestId("delete-dialog-body")).toBeNull();
   });
 
   it("Should open a dialog on click, fill out form, cancel closes the form.", async () => {
