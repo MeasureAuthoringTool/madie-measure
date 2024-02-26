@@ -46,8 +46,8 @@ const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
                 handleOpen(id, e);
               }}
               tw="text-blue-600 hover:text-blue-900"
-              data-testid={`select-action-${name}`}
-              aria-label={`select-action-${name}`}
+              data-testid={`select-action-${id}`}
+              aria-label={`select-action-${id}`}
             >
               <div className="action">Select</div>
               <div className="chevron-container">
@@ -68,7 +68,7 @@ const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
             handleClick(selectedReferenceId, "edit");
             setOptionsOpen(false);
           },
-          dataTestId: `edit-measure-${selectedReferenceId}`,
+          dataTestId: `edit-measure-reference-${selectedReferenceId}`,
         }}
         otherSelectOptionProps={[
           {
@@ -77,7 +77,7 @@ const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
               handleClick(selectedReferenceId, "delete");
               setOptionsOpen(false);
             },
-            dataTestId: `delete-measure-${selectedReferenceId}`,
+            dataTestId: `delete-measure-reference-${selectedReferenceId}`,
           },
         ]}
       />

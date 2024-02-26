@@ -49,17 +49,17 @@ $border-color: #8c8c8c;
 .action-button {
   font-family: Rubik, sans-serif;
   font-weight: 400;
-  //color: #000;
+  color: #000;
   font-size: 14px;
   display: flex;
   flex-direction: row;
-  border: solid 1px #0073c8;
+  border: solid 1px #808080;
   border-radius: 4px;
   height: 39px;
 
   .action {
     padding: 7px 21px;
-    border-right: solid 1px #0073c8;
+    border-right: solid 1px #8c8c8c;
   }
   .chevron-container {
     display: flex;

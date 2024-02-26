@@ -172,9 +172,20 @@ describe("Measure References Component", () => {
     );
     await checkRows(9);
 
-    const editButton = await findByTestId("measure-definition-edit-id 1");
+    await waitFor(() => {
+      const selectButton = screen.getByTestId(`select-action-id 1`);
+      expect(selectButton).toBeInTheDocument();
+      userEvent.click(selectButton);
+    });
+
+    const editButton = screen.getByTestId(`edit-measure-reference-id 1`);
     expect(editButton).toBeInTheDocument();
-    userEvent.click(screen.getByTestId("measure-definition-edit-id 1"));
+
+    const deleteButton = getByTestId(`delete-measure-reference-id 1`);
+    expect(deleteButton).toBeInTheDocument();
+
+    userEvent.click(editButton);
+
     await waitFor(() => {
       expect(getByTestId("dialog-form")).toBeInTheDocument();
     });

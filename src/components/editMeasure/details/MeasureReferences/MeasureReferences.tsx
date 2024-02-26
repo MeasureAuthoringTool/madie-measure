@@ -250,7 +250,6 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
   };
 
   const handleClick = (id, operation) => {
-    console.log(id, operation);
     if (operation === "delete") {
       setDeleteDialogModalOpen(true);
     } else {
@@ -281,7 +280,11 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
         //@ts-ignore
         const { status, data } = res;
         if (status === 200) {
-          handleToast("success", `Measure Reference Delete Successfully`, true);
+          handleToast(
+            "success",
+            `Measure Reference Deleted Successfully`,
+            true
+          );
           updateMeasure(data);
           setDeleteDialogModalOpen(false);
           formik.resetForm();
@@ -345,7 +348,6 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
                     name={reference.referenceType}
                     description={reference.referenceText}
                     handleClick={handleClick}
-                    // handleDelete={handleDelete}
                     id={reference.id}
                     key={`${reference.referenceType}-${index}`}
                     canEdit={canEdit}
@@ -464,7 +466,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
           setDeleteDialogModalOpen(false);
         }}
         dialogTitle="Delete Measure Reference"
-        name={`${selectedReference?.referenceText},${selectedReference?.referenceType}`}
+        name={selectedReference?.referenceText}
       />
     </div>
   );
