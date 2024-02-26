@@ -9,6 +9,7 @@ import {
   Select,
   TextArea,
   Toast,
+  MadieDeleteDialog,
 } from "@madie/madie-design-system/dist/react";
 import { Typography, MenuItem } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -16,7 +17,7 @@ import { measureStore, checkUserCanEdit } from "@madie/madie-util";
 import { useFormik } from "formik";
 import MeasureMetaDataRow from "../MeasureMetaDataRow";
 import { MeasureReferencesValidator } from "./MeasureReferencesValidator";
-import { Reference } from "@madie/madie-models";
+import { Measure, Reference } from "@madie/madie-models";
 
 import "../MeasureMetaDataTable.scss";
 
@@ -181,6 +182,8 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
     }
   }
   const [open, setOpen] = useState<boolean>(false);
+  const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
+    useState<boolean>(false);
   const toggleOpen = () => {
     setOpen(!open);
     setSelectedReference(null);
@@ -246,13 +249,52 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
     history.push(`?page=${1}&limit=${e.target.value}`);
   };
 
-  const handleEdit = (id) => {
-    setOpen(true);
+  const handleClick = (id, operation) => {
+    if (operation === "delete") {
+      setDeleteDialogModalOpen(true);
+    } else {
+      setOpen(true);
+    }
     setSelectedReference(
       measure?.measureMetaData?.references.find((reference) => {
         return id === reference.id;
       })
     );
+  };
+
+  const deleteMeasureReference = (id) => {
+    const modifiedMetaData = measure?.measureMetaData?.references?.filter(
+      (reference) => reference?.id !== id
+    );
+    const modifiedMeasure: Measure = {
+      ...measure,
+      measureMetaData: {
+        ...measure.measureMetaData,
+        references: modifiedMetaData,
+      },
+    };
+
+    measureServiceApi
+      .updateMeasure(modifiedMeasure)
+      .then((res) => {
+        //@ts-ignore
+        const { status, data } = res;
+        if (status === 200) {
+          handleToast(
+            "success",
+            `Measure reference deleted successfully`,
+            true
+          );
+          updateMeasure(data);
+          setDeleteDialogModalOpen(false);
+          formik.resetForm();
+        }
+      })
+      .catch((reason) => {
+        const message = `Error updating measure "${measure.measureName}"`;
+        handleToast("danger", message, true);
+        setErrorMessage(message);
+      });
   };
 
   return (
@@ -305,7 +347,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
                   <MeasureMetaDataRow
                     name={reference.referenceType}
                     description={reference.referenceText}
-                    handleEdit={handleEdit}
+                    handleClick={handleClick}
                     id={reference.id}
                     key={`${reference.referenceType}-${index}`}
                     canEdit={canEdit}
@@ -413,6 +455,18 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
             />
           </div>
         }
+      />
+
+      <MadieDeleteDialog
+        open={deleteDialogModalOpen}
+        onContinue={() => {
+          deleteMeasureReference(selectedReference.id);
+        }}
+        onClose={() => {
+          setDeleteDialogModalOpen(false);
+        }}
+        dialogTitle="Delete Measure Reference"
+        name={selectedReference?.referenceText}
       />
     </div>
   );

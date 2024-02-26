@@ -1,6 +1,7 @@
 import * as React from "react";
-import { render, cleanup } from "@testing-library/react";
+import { render, cleanup, waitFor } from "@testing-library/react";
 import MeasureDefinitionRow from "./MeasureMetaDataRow";
+import userEvent from "@testing-library/user-event";
 
 afterEach(cleanup);
 
@@ -18,13 +19,14 @@ describe("Measure MetaData Row Component", () => {
     expect(description).toBeInTheDocument();
   });
 
-  it("Measure MetaData rows renders MeasureDefinition", () => {
+  it("Measure MetaData rows renders MeasureDefinition", async () => {
     const { getByText, getByTestId } = render(
       <MeasureDefinitionRow
         name="term"
         description="I'm a measure definition"
-        id="test measure definition id"
-        handleEdit={jest.fn()}
+        id="reference_id_1"
+        handleClick={jest.fn()}
+        canEdit={true}
       />
     );
     const term = getByText("term");
@@ -32,9 +34,13 @@ describe("Measure MetaData Row Component", () => {
     const definition = getByText("I'm a measure definition");
     expect(definition).toBeInTheDocument();
 
-    const editButton = getByTestId(
-      "measure-definition-edit-test measure definition id"
-    );
+    await waitFor(() => {
+      const selectButton = getByTestId(`select-action-reference_id_1`);
+      expect(selectButton).toBeInTheDocument();
+      userEvent.click(selectButton);
+    });
+
+    const editButton = getByTestId(`edit-measure-reference-reference_id_1`);
     expect(editButton).toBeInTheDocument();
   });
 });
