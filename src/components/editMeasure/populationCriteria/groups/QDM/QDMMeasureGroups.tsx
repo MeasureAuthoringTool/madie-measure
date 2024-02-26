@@ -1017,9 +1017,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                         id={`Stratification-Description-${
                                           i + 1
                                         }`}
-                                        aria-describedby={`Stratification-description-${
-                                          i + 1
-                                        }-helper-text`}
                                         label={`Stratification ${
                                           i + 1
                                         } Description`}
