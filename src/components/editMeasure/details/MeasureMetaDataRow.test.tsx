@@ -26,6 +26,7 @@ describe("Measure MetaData Row Component", () => {
         description="I'm a measure definition"
         id="reference_id_1"
         handleClick={jest.fn()}
+        canEdit={true}
       />
     );
     const term = getByText("term");

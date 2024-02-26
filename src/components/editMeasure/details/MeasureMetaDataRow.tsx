@@ -38,7 +38,7 @@ const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
       <tr>
         <td>{name}</td>
         <td>{description}</td>
-        {id && (
+        {id && canEdit && (
           <td style={{ width: 160 }}>
             <button
               className="action-button"
