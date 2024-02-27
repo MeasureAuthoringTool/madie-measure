@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { Measure, Model } from "@madie/madie-models";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Chip, IconButton } from "@mui/material";
 import {
   TextField,
@@ -93,8 +93,7 @@ export default function MeasureList(props: {
     }
   }, [props.measureList, measureServiceApi]);
 
-  const history = useHistory();
-
+  const navigate = useNavigate();
   // Popover utilities
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -156,9 +155,7 @@ export default function MeasureList(props: {
         props.setInitialLoad(false);
         props.setErrMsg("");
       });
-    history.push(
-      `?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`
-    );
+    navigate(`?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`);
   };
 
   const doSearch = () => {
@@ -187,9 +184,7 @@ export default function MeasureList(props: {
       doSearch();
     }
 
-    history.push(
-      `?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`
-    );
+    navigate(`?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`);
   };
   const setPageProps = (data) => {
     if (data) {
@@ -296,7 +291,7 @@ export default function MeasureList(props: {
   };
 
   const viewEditRedirect = () => {
-    history.push(`/measures/${selectedMeasure?.id}/edit/details`);
+    navigate(`/measures/${selectedMeasure?.id}/edit/details`);
     setOptionsOpen(false);
   };
 

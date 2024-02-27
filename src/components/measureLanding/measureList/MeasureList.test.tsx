@@ -5,8 +5,6 @@ import {
   screen,
   waitFor,
   cleanup,
-  findByTestId,
-  queryByTestId,
 } from "@testing-library/react";
 import { Measure, Model } from "@madie/madie-models";
 import MeasureList from "./MeasureList";
@@ -23,10 +21,8 @@ import { useFeatureFlags } from "@madie/madie-util";
 // CSSStyleDeclaration
 const mockPush = jest.fn();
 jest.mock("react-router-dom", () => ({
-  useHistory: () => {
-    const push = () => mockPush("/example");
-    return { push };
-  },
+  ...(jest.requireActual("react-router-dom") as any),
+  useNavigate: () => mockPush,
 }));
 
 jest.mock("@madie/madie-util", () => ({
@@ -247,7 +243,7 @@ describe("Measure List component", () => {
     expect(editButton).toBeInTheDocument();
     expect(window.location.href).toBe("http://localhost/");
     fireEvent.click(editButton);
-    expect(mockPush).toHaveBeenCalledWith("/example");
+    expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID2/edit/details");
     unmount();
   });
 
@@ -283,7 +279,7 @@ describe("Measure List component", () => {
     ).toBeInTheDocument();
     expect(window.location.href).toBe("http://localhost/");
     fireEvent.click(getByTestId(`view-measure-${measures[0].id}`));
-    expect(mockPush).toHaveBeenCalledWith("/example");
+    expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID1/edit/details");
     unmount();
   });
 
@@ -463,7 +459,7 @@ describe("Measure List component", () => {
       0,
       abortController.signal
     );
-    expect(mockPush).toHaveBeenCalledWith("/example");
+    expect(mockPush).toHaveBeenCalledWith("?tab=0&page=1&limit=10");
     unmount();
   });
 
