@@ -164,7 +164,7 @@ export default function EditMeasure() {
               <MeasureDetails setErrorMessage={setErrorMessage} isQDM={isQDM} />
             }
           />
-          <Route path={`/cql-editor/*`} element={<MeasureEditor />} />
+          <Route path={`/cql-editor`} element={<MeasureEditor />} />
           <Route path={`/test-cases/*`} element={<MadiePatient />} />
           <Route
             path={`/groups/:groupNumber`}
