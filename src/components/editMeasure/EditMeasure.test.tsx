@@ -169,8 +169,7 @@ describe("EditMeasure Component", () => {
     });
     await waitFor(() => {
       expect(mockedNavigate).toHaveBeenCalledWith(
-        "/measures/fakeid/edit/cql-editor",
-        { replace: true }
+        "/measures/fakeid/edit/cql-editor"
       );
     });
 
@@ -181,8 +180,7 @@ describe("EditMeasure Component", () => {
     });
     await waitFor(() => {
       expect(mockedNavigate).toHaveBeenCalledWith(
-        "/measures/fakeid/edit/test-cases",
-        { replace: true }
+        "/measures/fakeid/edit/test-cases"
       );
     });
   });

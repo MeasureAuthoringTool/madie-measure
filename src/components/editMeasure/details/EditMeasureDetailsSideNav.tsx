@@ -1,12 +1,7 @@
 import React from "react";
 import tw from "twin.macro";
 
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-  useMatch,
-} from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Tab, Tabs } from "@madie/madie-design-system/dist/react";
 import "./EditMeasureSideBarNav.scss";
 import "../../common/madie-link.scss";
@@ -31,7 +26,7 @@ export default function EditMeasureDetailsSideNav(
   let navigate = useNavigate();
   const handleChange = (e, v) => {
     const newPath = `/measures/${id}/edit/details/${v}`;
-    navigate(newPath, { replace: true });
+    navigate(newPath);
   };
   return (
     <OuterWrapper>

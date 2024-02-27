@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  Route,
-  Navigate,
-  RouterProvider,
-  createBrowserRouter,
-  createRoutesFromElements,
-} from "react-router-dom";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import EditMeasure from "../editMeasure/EditMeasure";
 import MeasureLanding from "../measureLanding/MeasureLanding";
 import TimeoutHandler from "./TimeoutHandler";
@@ -16,8 +10,6 @@ export const routesConfig = [
     children: [
       { path: "/", element: <MeasureLanding /> },
       { path: "/measures", element: <MeasureLanding /> },
-      { path: "/measures/*", element: <MeasureLanding /> },
-      { path: "/measures/:id/edit", element: <EditMeasure /> },
       { path: "/measures/:id/edit/*", element: <EditMeasure /> },
       { path: "/404", element: <NotFound /> },
       { path: "*", element: <NotFound /> },

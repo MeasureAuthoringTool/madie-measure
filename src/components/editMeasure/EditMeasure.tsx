@@ -46,9 +46,7 @@ export default function EditMeasure() {
   const { updateRouteHandlerState } = routeHandlerStore;
 
   // make reusable component to throw anywhere we want to block navigation..
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) => !routeHandlerState.canTravel
-  );
+  const blocker = useBlocker(() => !routeHandlerState.canTravel);
   useEffect(() => {
     updateRouteHandlerState({
       ...routeHandlerState,

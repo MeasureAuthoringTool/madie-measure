@@ -49,7 +49,7 @@ export function PopulationCriteriaHome() {
       if (+groupNumber && +groupNumber > 0) {
         setMeasureGroupNumber(+groupNumber - 1);
       } else {
-        // navigate("/404");
+        navigate("/404");
       }
     } else {
       setMeasureGroupNumber(null);
