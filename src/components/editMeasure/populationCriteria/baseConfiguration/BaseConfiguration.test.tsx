@@ -17,11 +17,9 @@ import userEvent from "@testing-library/user-event";
 const mockHistoryPush = jest.fn();
 
 jest.mock("react-router-dom", () => ({
-  useHistory: () => ({
-    push: mockHistoryPush,
-  }),
+  ...(jest.requireActual("react-router-dom") as any),
+  useNavigate: () => mockHistoryPush,
 }));
-
 jest.mock("../../../../api/useMeasureServiceApi");
 const measure = {
   id: "test measure",

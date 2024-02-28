@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useHistory, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import queryString from "query-string";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import {
@@ -40,7 +40,7 @@ interface MeasureReferencesProps {
 const MeasureReferences = (props: MeasureReferencesProps) => {
   const { setErrorMessage } = props;
   const { search } = useLocation();
-  const history = useHistory();
+  let navigate = useNavigate();
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
@@ -241,12 +241,12 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
   const canGoPrev = Number(values?.page) > 1;
   const handlePageChange = (e, v) => {
     setCurrentPage(v);
-    history.push(`?page=${v}&limit=${values?.limit || 10}`);
+    navigate(`?page=${v}&limit=${values?.limit || 10}`);
   };
   const handleLimitChange = (e) => {
     setCurrentLimit(e.target.value);
     setCurrentPage(1);
-    history.push(`?page=${1}&limit=${e.target.value}`);
+    navigate(`?page=${1}&limit=${e.target.value}`);
   };
 
   const handleClick = (id, operation) => {

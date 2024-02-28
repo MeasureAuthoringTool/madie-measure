@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useHistory, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import queryString from "query-string";
 import "twin.macro";
 import "styled-components/macro";
@@ -26,7 +26,7 @@ import StatusHandler from "../editMeasure/editor/StatusHandler";
 export default function MeasureLanding() {
   useDocumentTitle("MADiE Measures");
   const { search } = useLocation();
-  const history = useHistory();
+  let navigate = useNavigate();
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [measureList, setMeasureList] = useState<Measure[]>([]);
   // utilities for pagination
@@ -53,11 +53,11 @@ export default function MeasureLanding() {
   const canGoPrev = Number(values?.page) > 1;
   const handlePageChange = (e, v) => {
     setCurrentPage(v - 1);
-    history.push(`?tab=${activeTab}&page=${v}&limit=${values?.limit || 10}`);
+    navigate(`?tab=${activeTab}&page=${v}&limit=${values?.limit || 10}`);
   };
   const handleLimitChange = (e) => {
     setCurrentLimit(e.target.value);
-    history.push(`?tab=${activeTab}&page=${0}&limit=${e.target.value}`);
+    navigate(`?tab=${activeTab}&page=${0}&limit=${e.target.value}`);
   };
 
   const retrieveMeasures = useCallback(
@@ -134,7 +134,7 @@ export default function MeasureLanding() {
     abortController.current.abort();
     setMeasureList(null);
     const limit = values?.limit || 10;
-    history.push(`?tab=${nextTab}&page=0&limit=${limit}`);
+    navigate(`?tab=${nextTab}&page=0&limit=${limit}`);
   };
 
   // we need to tell our layout page that we've loaded to prevent strange tab order
