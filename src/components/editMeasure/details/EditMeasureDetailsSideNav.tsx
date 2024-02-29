@@ -1,6 +1,7 @@
 import React from "react";
 import tw from "twin.macro";
-import { useLocation, useHistory } from "react-router-dom";
+
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Tab, Tabs } from "@madie/madie-design-system/dist/react";
 import "./EditMeasureSideBarNav.scss";
 import "../../common/madie-link.scss";
@@ -18,10 +19,14 @@ export default function EditMeasureDetailsSideNav(
 ) {
   const { links } = props;
   const { pathname } = useLocation();
-  const history = useHistory();
-
+  const endRoute = /[^/]*$/.exec(pathname)[0];
+  const { id } = useParams<{
+    id: string;
+  }>();
+  let navigate = useNavigate();
   const handleChange = (e, v) => {
-    history.push(v);
+    const newPath = `/measures/${id}/edit/details/${v}`;
+    navigate(newPath);
   };
   return (
     <OuterWrapper>
@@ -33,7 +38,7 @@ export default function EditMeasureDetailsSideNav(
               <Tabs
                 type="C"
                 orientation="vertical"
-                value={pathname}
+                value={endRoute}
                 onChange={handleChange}
               >
                 {link.links.map((linkInfo) => {

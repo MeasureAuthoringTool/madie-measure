@@ -24,7 +24,7 @@ import {
   ApiContextProvider,
   ServiceConfig,
 } from "../../../../../api/ServiceContext";
-import { MemoryRouter, Route } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { ELM_JSON, MeasureCQL } from "../../../../common/MeasureCQL";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
@@ -161,9 +161,12 @@ describe("Measure Groups Page", () => {
         initialEntries={[{ pathname: "/measures/test-measure/edit/groups/1" }]}
       >
         <ApiContextProvider value={serviceConfig}>
-          <Route path="/measures/test-measure/edit/groups/:groupNumber">
-            <MeasureGroups {...props} />
-          </Route>
+          <Routes>
+            <Route
+              path="/measures/test-measure/edit/groups/:groupNumber"
+              element={<MeasureGroups {...props} />}
+            ></Route>
+          </Routes>
         </ApiContextProvider>
       </MemoryRouter>
     );
@@ -437,16 +440,18 @@ describe("Measure Groups Page", () => {
     measure.groups = updatedMeasure.groups;
     rerender(
       <MemoryRouter
-        initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
+        initialEntries={[{ pathname: "/measures/test-measure/edit/groups/" }]}
       >
         <ApiContextProvider value={serviceConfig}>
-          <Route path="/measures/test-measure/edit/groups">
-            <MeasureGroups {...props} />
-          </Route>
+          <Routes>
+            <Route
+              path="/measures/test-measure/edit/groups/:groupNumber"
+              element={<MeasureGroups {...props} />}
+            ></Route>
+          </Routes>
         </ApiContextProvider>
       </MemoryRouter>
     );
-
     await waitFor(() => {
       expect(screen.getByTestId("groupDescriptionInput")).toHaveValue("");
       userEvent.click(screen.getByTestId("reporting-tab"));
@@ -579,23 +584,27 @@ describe("Measure Groups Page", () => {
     expect(screen.getByTestId("title").textContent).toBe(
       "Population Criteria 1"
     );
-
-    // adding measure group 2
     rerender(
       <MemoryRouter
-        initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
+        initialEntries={[{ pathname: "/measures/test-measure/edit/groups/" }]}
       >
         <ApiContextProvider value={serviceConfig}>
-          <Route path="/measures/test-measure/edit/groups">
-            <MeasureGroups
-              setIsFormDirty={jest.fn}
-              measureGroupNumber={1}
-              setMeasureGroupNumber={jest.fn}
-            />
-          </Route>
+          <Routes>
+            <Route
+              path="/measures/test-measure/edit/groups/:groupNumber"
+              element={
+                <MeasureGroups
+                  setIsFormDirty={jest.fn}
+                  measureGroupNumber={1}
+                  setMeasureGroupNumber={jest.fn}
+                />
+              }
+            ></Route>
+          </Routes>
         </ApiContextProvider>
       </MemoryRouter>
     );
+
     await changePopulationBasis(populationBasis);
     // Change and verifies the scoring value to Cohort
     const scoringSelect2 = screen.getByTestId("scoring-select");

@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useState } from "react";
-import { useRouteMatch, useLocation, useHistory } from "react-router-dom";
+import { useMatch, useLocation, useNavigate } from "react-router-dom";
 import tw, { styled } from "twin.macro";
 import * as ucum from "@lhncbc/ucum-lhc";
 import "styled-components/macro";
@@ -197,7 +197,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   );
   const measureServiceApi = useMeasureServiceApi();
   let location = useLocation();
-  const { path } = useRouteMatch();
+  const { pathname } = location;
 
   const [alertMessage, setAlertMessage] = useState({
     ...INITIAL_ALERT_MESSAGE,
@@ -221,7 +221,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   };
 
   const groupsBaseUrl = "/measures/" + props.measureId + "/edit/groups";
-  const history = useHistory();
+  let navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>("populations");
   const measureGroupNumber =
     props.measureGroupNumber - 1 < 0 ? 0 : props.measureGroupNumber;
@@ -538,7 +538,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
             "Population details for this group saved successfully.",
             true
           );
-          history.push(groupsBaseUrl + "/" + updatedMeasure?.groups.length);
+          navigate(groupsBaseUrl + "/" + updatedMeasure?.groups.length);
         })
         .catch((error) => {
           setAlertMessage({
@@ -561,7 +561,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       .deleteMeasureGroup(measure?.groups[measureGroupNumber]?.id, measure.id)
       .then((response) => {
         updateMeasure(response);
-        history.push(
+        navigate(
           groupsBaseUrl +
             "/" +
             (measureGroupNumber === 0 ? 1 : measureGroupNumber)
@@ -717,7 +717,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
               modalType={groupWarningDialogProps?.modalType}
             />
           )}
-          {path.includes("/groups") && (
+          {pathname.includes("/groups") && (
             <>
               <div tw="flex pb-2 pt-6">
                 <h2 tw="w-1/2 mb-0" data-testid="title" id="title">

@@ -26,7 +26,7 @@ import {
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../../api/useMeasureServiceApi";
-import { MemoryRouter, Route } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { ELM_JSON, MeasureCQL } from "../../../../common/MeasureCQL";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
@@ -107,9 +107,12 @@ const renderMeasureGroupComponent = () => {
       initialEntries={[{ pathname: "/measures/test-measure/edit/groups/1" }]}
     >
       <ApiContextProvider value={serviceConfig}>
-        <Route path="/measures/test-measure/edit/groups/:groupNumber">
-          <MeasureGroups {...props} />
-        </Route>
+        <Routes>
+          <Route
+            path="/measures/test-measure/edit/groups/:groupNumber"
+            element={<MeasureGroups {...props} />}
+          />
+        </Routes>
       </ApiContextProvider>
     </MemoryRouter>
   );
@@ -1378,19 +1381,7 @@ describe("Delete Tests", () => {
       "test-measure"
     );
 
-    cohortMeasure.groups = updatedMeasure.groups;
-    rerender(
-      <MemoryRouter
-        initialEntries={[{ pathname: "/measures/test-measure/edit/groups" }]}
-      >
-        <ApiContextProvider value={serviceConfig}>
-          <Route path="/measures/test-measure/edit/groups">
-            <MeasureGroups {...props} />
-          </Route>
-        </ApiContextProvider>
-      </MemoryRouter>
-    );
-
+    renderMeasureGroupComponent();
     await waitFor(() => {
       expect(screen.getByTestId("groupDescriptionInput")).toHaveValue("");
     });

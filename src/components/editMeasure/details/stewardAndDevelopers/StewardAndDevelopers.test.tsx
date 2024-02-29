@@ -17,12 +17,9 @@ import { act } from "react-dom/test-utils";
 const mockHistoryPush = jest.fn();
 
 jest.mock("react-router-dom", () => ({
-  ...jest.requireActual("react-router-dom"),
-  useHistory: () => ({
-    push: mockHistoryPush,
-  }),
+  ...(jest.requireActual("react-router-dom") as any),
+  useNavigate: () => mockHistoryPush,
 }));
-
 jest.mock("../../../../api/useMeasureServiceApi");
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;

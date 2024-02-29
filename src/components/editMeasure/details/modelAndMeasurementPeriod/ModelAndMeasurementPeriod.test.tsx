@@ -19,12 +19,9 @@ const mockHistoryPush = jest.fn();
 const setErrorMessage = jest.fn();
 
 jest.mock("react-router-dom", () => ({
-  ...jest.requireActual("react-router-dom"),
-  useHistory: () => ({
-    push: mockHistoryPush,
-  }),
+  ...(jest.requireActual("react-router-dom") as any),
+  useNavigate: () => mockHistoryPush,
 }));
-
 jest.mock("../../../../api/useMeasureServiceApi");
 
 const testUser = "john doe";

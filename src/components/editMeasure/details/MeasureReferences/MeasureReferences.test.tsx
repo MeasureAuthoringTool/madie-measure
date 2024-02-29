@@ -1,6 +1,6 @@
 import * as React from "react";
 import { render, fireEvent, waitFor, screen } from "@testing-library/react";
-import { act, Simulate } from "react-dom/test-utils";
+import { act } from "react-dom/test-utils";
 import { within } from "@testing-library/dom";
 import { MemoryRouter } from "react-router";
 import {
@@ -86,14 +86,9 @@ const serviceConfig: ServiceConfig = {
   terminologyService: { baseUrl: "" },
 };
 
-// mocking useHistory
-const mockPush = jest.fn();
 jest.mock("react-router-dom", () => ({
-  ...(jest.requireActual("react-router-dom") as any),
-  useHistory: () => {
-    const push = (val) => mockPush(val);
-    return { push, block: () => null };
-  },
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: jest.fn(),
 }));
 
 const { getByTestId, findByTestId, getByLabelText } = screen;
