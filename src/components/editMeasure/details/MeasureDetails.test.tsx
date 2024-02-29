@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom";
 import * as React from "react";
-import { getByTestId, queryByTestId, render } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { Route } from "react-router-dom";
 import MeasureDetails from "./MeasureDetails";
@@ -271,5 +271,21 @@ describe("MeasureDetails component", () => {
     expect(leftPanelQDMMeasureDefinitions).toBeNull();
     const measureDefinitionTerms = queryByTestId("measure-definitions");
     expect(measureDefinitionTerms).toBeNull();
+  });
+
+  it("should render the MeasureMetadata component for measure set", () => {
+    useFeatureFlags.mockReturnValue({ qdmMeasureDefinitions: true });
+    const { getByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={[{ pathname: "/foo/measure-set" }]}>
+          <Route path="/foo">
+            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={true} />
+          </Route>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureSet")).toBeInTheDocument();
   });
 });

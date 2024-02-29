@@ -169,7 +169,7 @@ describe("EditMeasure Component", () => {
   });
 
   it("should render respective menu contents on clicking menu items", async () => {
-    const { findByText } = render(
+    const { findByText, getByTestId } = render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
           <EditMeasure />
@@ -198,6 +198,11 @@ describe("EditMeasure Component", () => {
       expect(testCaseLink).toHaveAttribute("aria-selected", "true");
     });
     expect(document.body.textContent).toContain("Patient Component");
+
+    //group population menuu click action
+    const populationLink = getByTestId("groups-tab");
+    fireEvent.click(populationLink);
+    expect(document.body.textContent).toContain("Population Criteria");
   });
 
   it("delete succeeds", async () => {

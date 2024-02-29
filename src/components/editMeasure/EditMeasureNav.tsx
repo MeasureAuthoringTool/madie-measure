@@ -48,7 +48,8 @@ const EditMeasureNav = ({ isQDM }) => {
     pathname !== `${url}/details/transmission-format` &&
     pathname !== `${url}/review-info` &&
     !pathname.startsWith(`${url}/test-cases`) &&
-    !pathname.startsWith(`${url}/groups`)
+    !pathname.startsWith(`${url}/groups`) &&
+    pathname !== `${url}/details/measure-set`
   ) {
     history.push("/404");
   }
