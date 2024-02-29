@@ -1,10 +1,6 @@
 import "@testing-library/jest-dom";
 import * as React from "react";
-<<<<<<< HEAD
-import { render } from "@testing-library/react";
-=======
 import { screen, render } from "@testing-library/react";
->>>>>>> 93c3bd299269f7ea09e92a8b3620dce74675cc93
 import { MemoryRouter } from "react-router";
 import { Route, Routes } from "react-router-dom";
 import MeasureDetails from "./MeasureDetails";
@@ -362,10 +358,18 @@ describe("MeasureDetails component", () => {
     useFeatureFlags.mockReturnValue({ qdmMeasureDefinitions: true });
     const { getByTestId } = render(
       <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={[{ pathname: "/foo/measure-set" }]}>
-          <Route path="/foo">
-            <MeasureDetails setErrorMessage={setErrorMessage} isQDM={true} />
-          </Route>
+        <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
+          <Routes>
+            <Route
+              path="/foo/*"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  isQDM={true}
+                />
+              }
+            />
+          </Routes>
         </MemoryRouter>
       </ApiContextProvider>
     );
