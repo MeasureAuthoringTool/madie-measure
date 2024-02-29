@@ -1,14 +1,12 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React from "react";
 import {
   NavLink,
   useLocation,
   useNavigate,
-  Navigate,
   useMatch,
   useParams,
 } from "react-router-dom";
 import tw, { styled } from "twin.macro";
-import { routeHandlerStore } from "@madie/madie-util";
 import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
 export interface RouteHandlerState {
   canTravel: boolean;

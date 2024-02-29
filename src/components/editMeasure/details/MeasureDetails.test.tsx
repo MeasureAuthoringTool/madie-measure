@@ -353,4 +353,28 @@ describe("MeasureDetails component", () => {
     const measureDefinitionTerms = queryByTestId("measure-definitions");
     expect(measureDefinitionTerms).toBeNull();
   });
+
+  it("should render the MeasureMetadata component for measure set", () => {
+    useFeatureFlags.mockReturnValue({ qdmMeasureDefinitions: true });
+    const { getByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
+          <Routes>
+            <Route
+              path="/foo/*"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  isQDM={true}
+                />
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureSet")).toBeInTheDocument();
+  });
 });
