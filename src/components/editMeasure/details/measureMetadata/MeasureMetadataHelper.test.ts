@@ -16,6 +16,7 @@ describe("MeasureMetadataHelper", () => {
   const RISKADJUSTMENT = "Test Risk Adjustment";
   const NEWVALUE = "Test New Value";
   const definition = "this is measure definition";
+  const MEASURESETTITLE = "Test Measure Set";
 
   afterEach(cleanup);
 
@@ -29,6 +30,7 @@ describe("MeasureMetadataHelper", () => {
       clinicalRecommendation: CLINICAL,
       definition: definition,
       riskAdjustment: RISKADJUSTMENT,
+      measureSetTitle: MEASURESETTITLE,
     } as MeasureMetadata;
 
     measure = {
@@ -45,7 +47,7 @@ describe("MeasureMetadataHelper", () => {
   it("should return empty string instead of null when description is null", () => {
     measure = {
       id: MEASUREID,
-      measureMetaData: { description: null },
+      measureMetaData: { description: null } as unknown as MeasureMetadata,
     } as Measure;
 
     const actual = getInitialValues(measure, "description");
@@ -60,7 +62,7 @@ describe("MeasureMetadataHelper", () => {
   it("should return empty string instead of null when copyright is null", () => {
     measure = {
       id: MEASUREID,
-      measureMetaData: { copyright: null },
+      measureMetaData: { copyright: null } as unknown as MeasureMetadata,
     } as Measure;
 
     const actual = getInitialValues(measure, "copyright");
@@ -75,7 +77,7 @@ describe("MeasureMetadataHelper", () => {
   it("should return empty string instead of null when disclaimer is null", () => {
     measure = {
       id: MEASUREID,
-      measureMetaData: { disclaimer: null },
+      measureMetaData: { disclaimer: null } as unknown as MeasureMetadata,
     } as Measure;
 
     const actual = getInitialValues(measure, "disclaimer");
@@ -90,10 +92,32 @@ describe("MeasureMetadataHelper", () => {
   it("should return empty string instead of null when rationale is null", () => {
     measure = {
       id: MEASUREID,
-      measureMetaData: { rationale: null },
+      measureMetaData: { rationale: null } as unknown as MeasureMetadata,
     } as Measure;
 
     const actual = getInitialValues(measure, "rationale");
+    expect(actual).toBe("");
+  });
+
+  it("should retrieve clinical recommendation statement value", () => {
+    const actual = getInitialValues(
+      measure,
+      "clinical-recommendation-statement"
+    );
+    expect(actual).toBe(CLINICAL);
+  });
+  it("should return empty string instead of null when clinical recommendation statement is null", () => {
+    measure = {
+      id: MEASUREID,
+      measureMetaData: {
+        clinicalRecommendation: null,
+      } as unknown as MeasureMetadata,
+    } as Measure;
+
+    const actual = getInitialValues(
+      measure,
+      "clinical-recommendation-statement"
+    );
     expect(actual).toBe("");
   });
 
@@ -101,19 +125,10 @@ describe("MeasureMetadataHelper", () => {
     const actual = getInitialValues(measure, "guidance-usage");
     expect(actual).toBe(GUIDANCE);
   });
-
-  it("should retrieve guidance value", () => {
-    const actual = getInitialValues(
-      measure,
-      "clinical-recommendation-statement"
-    );
-    expect(actual).toBe(CLINICAL);
-  });
-
   it("should return empty string instead of null when guidance is null", () => {
     measure = {
       id: MEASUREID,
-      measureMetaData: { guidance: null },
+      measureMetaData: { guidance: null } as unknown as MeasureMetadata,
     } as Measure;
 
     const actual = getInitialValues(measure, "guidance");
@@ -127,7 +142,7 @@ describe("MeasureMetadataHelper", () => {
   it("should return empty string instead of null when definition is null", () => {
     measure = {
       id: MEASUREID,
-      measureMetaData: { definition: null },
+      measureMetaData: { definition: null } as unknown as MeasureMetadata,
     } as Measure;
     expect(getInitialValues(measure, "definition")).toBe("");
   });
@@ -137,47 +152,68 @@ describe("MeasureMetadataHelper", () => {
     expect(actual).toBe("");
   });
 
+  it("should retrieve measure set value", () => {
+    const actual = getInitialValues(measure, "measure-set");
+    expect(actual).toBe(MEASURESETTITLE);
+  });
+
+  it("should return empty string instead of null when measure set is null", () => {
+    measure = {
+      id: MEASUREID,
+      measureMetaData: { measureSetTile: null } as unknown as MeasureMetadata,
+    } as Measure;
+
+    const actual = getInitialValues(measure, "measure-set");
+    expect(actual).toBe("");
+  });
+
   it("should reset description value", () => {
     setMeasureMetadata(measure, "description", NEWVALUE);
-    expect(measure.measureMetaData.description).toBe(NEWVALUE);
+    expect(measure.measureMetaData?.description).toBe(NEWVALUE);
   });
 
   it("should reset copyright value", () => {
     setMeasureMetadata(measure, "copyright", NEWVALUE);
-    expect(measure.measureMetaData.copyright).toBe(NEWVALUE);
+    expect(measure.measureMetaData?.copyright).toBe(NEWVALUE);
   });
 
   it("should reset disclaimer value", () => {
     setMeasureMetadata(measure, "disclaimer", NEWVALUE);
-    expect(measure.measureMetaData.disclaimer).toBe(NEWVALUE);
+    expect(measure.measureMetaData?.disclaimer).toBe(NEWVALUE);
   });
 
   it("should reset rationale value", () => {
     setMeasureMetadata(measure, "rationale", NEWVALUE);
-    expect(measure.measureMetaData.rationale).toBe(NEWVALUE);
+    expect(measure.measureMetaData?.rationale).toBe(NEWVALUE);
   });
 
   it("should reset guidance value", () => {
     setMeasureMetadata(measure, "guidance-usage", NEWVALUE);
-    expect(measure.measureMetaData.guidance).toBe(NEWVALUE);
+    expect(measure.measureMetaData?.guidance).toBe(NEWVALUE);
   });
 
   it("should reset clinicalRecommendation value", () => {
     setMeasureMetadata(measure, "clinical-recommendation-statement", NEWVALUE);
-    expect(measure.measureMetaData.clinicalRecommendation).toBe(NEWVALUE);
+    expect(measure.measureMetaData?.clinicalRecommendation).toBe(NEWVALUE);
   });
 
   it("should reset definition value", () => {
     setMeasureMetadata(measure, "definition", NEWVALUE);
-    expect(measure.measureMetaData.definition).toBe(NEWVALUE);
+    expect(measure.measureMetaData?.definition).toBe(NEWVALUE);
+  });
+
+  it("should reset measure set value", () => {
+    setMeasureMetadata(measure, "measure-set", NEWVALUE);
+    expect(measure.measureMetaData?.measureSetTitle).toBe(NEWVALUE);
   });
 
   it("should not reset any measure metadata", () => {
     setMeasureMetadata(measure, "test", NEWVALUE);
-    expect(measure.measureMetaData.description).toBe(DECRIPTION);
-    expect(measure.measureMetaData.copyright).toBe(COPYRIGHT);
-    expect(measure.measureMetaData.disclaimer).toBe(DISCLAIMER);
-    expect(measure.measureMetaData.rationale).toBe(RATIONALE);
-    expect(measure.measureMetaData.guidance).toBe(GUIDANCE);
+    expect(measure.measureMetaData?.description).toBe(DECRIPTION);
+    expect(measure.measureMetaData?.copyright).toBe(COPYRIGHT);
+    expect(measure.measureMetaData?.disclaimer).toBe(DISCLAIMER);
+    expect(measure.measureMetaData?.rationale).toBe(RATIONALE);
+    expect(measure.measureMetaData?.guidance).toBe(GUIDANCE);
+    expect(measure.measureMetaData?.measureSetTitle).toBe(MEASURESETTITLE);
   });
 });

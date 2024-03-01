@@ -183,6 +183,11 @@ describe("EditMeasure Component", () => {
         "/measures/fakeid/edit/test-cases"
       );
     });
+
+    //group population menuu click action
+    const populationLink = getByTestId("groups-tab");
+    fireEvent.click(populationLink);
+    expect(document.body.textContent).toContain("Population Criteria");
   });
 
   it("delete succeeds", async () => {

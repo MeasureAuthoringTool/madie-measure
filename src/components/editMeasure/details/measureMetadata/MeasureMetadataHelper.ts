@@ -28,6 +28,9 @@ export default function getInitialValues(measure: Measure, typeLower: string) {
     case "definition":
       const definition = measure?.measureMetaData?.definition;
       return !!definition ? definition : "";
+    case "measure-set":
+      const measureSetTitle = measure?.measureMetaData?.measureSetTitle;
+      return !!measureSetTitle ? measureSetTitle : "";
     default:
       return "";
   }
@@ -59,6 +62,9 @@ export const setMeasureMetadata = (
       break;
     case "definition":
       measure.measureMetaData.definition = newValue;
+      break;
+    case "measure-set":
+      measure.measureMetaData.measureSetTitle = newValue;
       break;
     default:
       break;

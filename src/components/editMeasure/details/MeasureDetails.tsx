@@ -37,6 +37,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   const referencesLink = `measure-references`;
   const transmissionFormat = `transmission-format`;
   const detailsLink = "";
+  const measureSetLink = `measure-set`;
 
   const links = [
     // General Information
@@ -135,6 +136,12 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
       dataTestId: "leftPanelMeasureTransmissionFormat",
       id: "sideNavMeasureTransmissionFormat",
     });
+    links[1].links.push({
+      title: "Measure Set",
+      href: measureSetLink,
+      dataTestId: "leftPanelMeasureSet",
+      id: "sideNavMeasureSet",
+    });
   }
   useEffect(() => {
     setErrorMessage("");
@@ -231,6 +238,17 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                 path={transmissionFormat}
                 element={
                   <TransmissionFormat setErrorMessage={setErrorMessage} />
+                }
+              />
+              <Route
+                path={measureSetLink}
+                element={
+                  <MeasureMetadata
+                    measureMetadataId="MeasureSet"
+                    measureMetadataType="Measure Set"
+                    header="Measure Set"
+                    setErrorMessage={setErrorMessage}
+                  />
                 }
               />
               {featureFlags.qdmMeasureReferences && (
