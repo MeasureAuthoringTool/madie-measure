@@ -58,6 +58,12 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
     measure?.measureSet?.acls,
     measure?.measureMetaData?.draft
   );
+    // console.log('measureowner', measure?.measureSet?.owner)
+    // console.log('acls', measure?.measureSet?.acls)
+    console.log('measureset', measure?.measureSet)
+    console.log('draft', measure?.measureMetaData?.draft)
+
+
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: { genericField: getInitialValues(measure, typeLower) },

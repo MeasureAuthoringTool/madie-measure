@@ -1,0 +1,135 @@
+{
+  "emailId": "fastermech@hotmail.com",
+  "harpId": "matdevuser1",
+  "measureMetaData": {
+    "steward": {
+       "name": null
+    },
+    "description": "test",
+    "copyright": null,
+    "disclaimer": null,
+    "draft": true,
+    "developers": [],
+    "rationale": null,
+    "guidance": null,
+    "clinicalRecommendation": null,
+    "references": [],
+    "endorsements": [],
+    "definition": null,
+    "experimental": false,
+    "transmissionFormat": null
+  },
+  "manageMeasureDetailModel": {
+    "id": "2c928083889a82ef01889be0513c0046",
+    "measureName": "QDMTransferTestMeasure",
+    "measureModel": "QDM",
+    "shortName": "eCQMTitle",
+    "versionNumber": "0.000",
+    "revisionNumber": "1",
+    "measureId": null,
+    "groupName": null,
+    "groupId": "d6cfec25-add6-4dc9-8b4f-f3740483c6fe",
+    "finalizedDate": null,
+    "measFromPeriod": null,
+    "measToPeriod": null,
+    "measScoring": "Cohort",
+    "stewardValue": "Academy of Nutrition and Dietetics",
+    "endorseByNQF": false,
+    "nqfId": null,
+    "description": "Desc",
+    "copyright": null,
+    "clinicalRecomms": null,
+    "definitions": null,
+    "guidance": null,
+    "transmissionFormat": null,
+    "rationale": null,
+    "improvNotations": null,
+    "stratification": null,
+    "referencesList": [],
+    "authorSelectedList": [
+      {
+        "id": "2.16.840.1.113883.3.6308",
+        "authorName": "Academy of Nutrition and Dietetics",
+        "orgId": "2.16.840.1.113883.3.6308"
+      }
+    ],
+    "stewardSelectedList": null,
+    "measureTypeSelectedList": [
+      {
+        "id": "4",
+        "description": "Outcome",
+        "abbrName": "OUTCOME"
+      }
+    ],
+    "qdsSelectedList": null,
+    "componentMeasuresSelectedList": null,
+    "toCompareAuthor": null,
+    "toCompareMeasure": null,
+    "toCompareComponentMeasures": null,
+    "draft": true,
+    "measureSetId": "d6cfec25-add6-4dc9-8b4f-f3740483c6fe",
+    "valueSetDate": null,
+    "supplementalData": "this is the supplemental data description",
+    "disclaimer": null,
+    "riskAdjustment": "this is the risk adjustment description",
+    "rateAggregation": null,
+    "initialPop": null,
+    "denominator": null,
+    "denominatorExclusions": null,
+    "numerator": null,
+    "numeratorExclusions": null,
+    "denominatorExceptions": null,
+    "measurePopulation": null,
+    "measureObservations": null,
+    "eMeasureId": 0,
+    "orgVersionNumber": "0.0.001",
+    "qltyMeasureSetUuid": "d6cfec25-add6-4dc9-8b4f-f3740483c6fe",
+    "stewardId": "122",
+    "scoringAbbr": "COHORT",
+    "periodModel": {
+      "uuid": "c9661433-b166-4e9c-815b-865df924abf0",
+      "startDate": "01/01/20xx",
+      "stopDate": "12/31/20xx",
+      "calenderYear": true
+    },
+    "endorsement": null,
+    "endorsementId": null,
+    "nqfModel": {
+      "root": "2.16.840.1.113883.3.560.1",
+      "extension": null
+    },
+    "measureOwnerId": "2c92808275b98a820175c258d6860597",
+    "measurePopulationExclusions": "",
+    "measureDetailResult": {
+      "usedSteward": {
+        "id": "122",
+        "orgName": "Academy of Nutrition and Dietetics",
+        "orgOid": "2.16.840.1.113883.3.6308"
+      },
+      "usedAuthorList": [
+        {
+          "id": "122",
+          "authorName": "Academy of Nutrition and Dietetics",
+          "orgId": "2.16.840.1.113883.3.6308"
+        }
+      ],
+      "allAuthorList": null,
+      "allStewardList": null
+    },
+    "qdmVersion": "5.6",
+    "fhirVersion": null,
+    "formattedVersion": "Draft v0.0.001",
+    "experimental": false,
+    "populationBasis": null,
+    "fhir": false,
+    "editable": false,
+    "calenderYear": true,
+    "deleted": false,
+    "patientBased": true,
+    "cqllibraryName": "QDMLibrary578899"
+  },
+  "fhirMeasureResourceJson": null,
+  "fhirLibraryResourcesJson": null,
+  "cql": "library QDMLibrary578899 version '0.0.001'\r\n\r\nusing QDM version '5.6'\r\n\r\nvalueset \"Ethnicity\": 'urn:oid:2.16.840.1.114222.4.11.837'\r\nvalueset \"ONC Administrative Sex\": 'urn:oid:2.16.840.1.113762.1.4.1'\r\nvalueset \"Payer\": 'urn:oid:2.16.840.1.114222.4.11.3591'\r\n\r\ncontext Patient\r\n\r\ndefine \"SDE Ethnicity\":\r\n  [\"Patient Characteristic Ethnicity\": \"Ethnicity\"]\r\n\r\ndefine \"SDE Payer\":\r\n  [\"Patient Characteristic Payer\": \"Payer\"]\r\n\r\ndefine \"SDE Sex\":\r\n  [\"Patient Characteristic Sex\": \"ONC Administrative Sex\"]\r\n\r\ndefine \"SDE Race\":\r\n  true",
+  "simpleXml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><measure> <cqlLookUp><library>QDMLibrary578899</library><version>0.0.001</version><usingModel>QDM</usingModel><usingModelVersion>5.6</usingModelVersion><cqlContext>Patient</cqlContext><valuesets><valueset datatype=\"Patient Characteristic Ethnicity\" id=\"718e3971-1249-47a1-b8b2-7bd4329fc386\" isValidatedWithVsac=\"VALID\" name=\"Ethnicity\" oid=\"2.16.840.1.114222.4.11.837\" originalName=\"Ethnicity\" program=\"\" release=\"\" suffix=\"\" suppDataElement=\"false\" taxonomy=\"CDC\" type=\"Extensional\" uuid=\"109f12da-4063-47c5-bfc4-34ec3165854c\" version=\"\"/><valueset datatype=\"Patient Characteristic Sex\" id=\"790d1710-cbe9-45dc-99bb-f16200f2f5b2\" isValidatedWithVsac=\"VALID\" name=\"ONC Administrative Sex\" oid=\"2.16.840.1.113762.1.4.1\" originalName=\"ONC Administrative Sex\" program=\"\" release=\"\" suffix=\"\" suppDataElement=\"false\" taxonomy=\"Administrative Sex\" type=\"Extensional\" uuid=\"3fdf74bf-a415-41e0-b49f-4f501b080b6c\" version=\"\"/><valueset datatype=\"Patient Characteristic Payer\" id=\"2adebb02-48c1-4ca2-879a-105cca0ce277\" isValidatedWithVsac=\"VALID\" name=\"Payer\" oid=\"2.16.840.1.114222.4.11.3591\" originalName=\"Payer\" program=\"\" release=\"\" suffix=\"\" suppDataElement=\"false\" taxonomy=\"Source of Payment Typology\" type=\"Extensional\" uuid=\"0c56ec89-148f-4db4-9677-8f46ac55f764\" version=\"\"/></valuesets><parameters/><definitions><definition context=\"Patient\" id=\"65011c8d-dba7-406f-b2d5-5dab6ed0ee3f\" name=\"SDE Ethnicity\" popDefinition=\"false\" supplDataElement=\"true\"><logic>[\"Patient Characteristic Ethnicity\": \"Ethnicity\"]</logic><comment/></definition><definition context=\"Patient\" id=\"e7401b6d-72c0-41a5-ab9f-7d19b5fd7d73\" name=\"SDE Payer\" popDefinition=\"false\" supplDataElement=\"true\"><logic>[\"Patient Characteristic Payer\": \"Payer\"]</logic><comment/></definition><definition context=\"Patient\" id=\"ea81f3e9-a2af-4090-8fa0-5cb7402c3fd8\" name=\"SDE Sex\" popDefinition=\"false\" supplDataElement=\"true\"><logic>[\"Patient Characteristic Sex\": \"ONC Administrative Sex\"]</logic><comment/></definition><definition context=\"Patient\" id=\"53d5ad46-1532-4c85-b5d7-efd01ed49f29\" name=\"SDE Race\" popDefinition=\"false\" supplDataElement=\"false\"><logic>true</logic><comment/></definition></definitions></cqlLookUp><supplementalDataElements><cqldefinition displayName=\"SDE Ethnicity\" uuid=\"65011c8d-dba7-406f-b2d5-5dab6ed0ee3f\"/><cqldefinition displayName=\"SDE Payer\" uuid=\"e7401b6d-72c0-41a5-ab9f-7d19b5fd7d73\"/><cqldefinition displayName=\"SDE Race\" uuid=\"53d5ad46-1532-4c85-b5d7-efd01ed49f29\"/><cqldefinition displayName=\"SDE Sex\" uuid=\"ea81f3e9-a2af-4090-8fa0-5cb7402c3fd8\"/></supplementalDataElements><riskAdjustmentVariables/><measureGrouping><group sequence=\"1\" ucum=\"g/g\"><clause displayName=\"Initial Population 1\" isInGrouping=\"true\" type=\"initialPopulation\" uuid=\"707D581D-D3B4-42DC-BAFC-951775EEBDD6\"><cqldefinition displayName=\"SDE Race\" uuid=\"53d5ad46-1532-4c85-b5d7-efd01ed49f29\"/></clause><clause displayName=\"stratum\" isInGrouping=\"false\" type=\"stratum\" uuid=\"d4d38528-eccf-4c46-a29a-6b49305f98e5\"/></group></measureGrouping><elementLookUp><qdm code=\"false\" datatype=\"Patient Characteristic Payer\" id=\"0c56ec89-148f-4db4-9677-8f46ac55f764\" isValidatedWithVsac=\"VALID\" name=\"Payer\" oid=\"2.16.840.1.114222.4.11.3591\" originalName=\"Payer\" program=\"\" release=\"\" suffix=\"\" suppDataElement=\"false\" taxonomy=\"Source of Payment Typology\" type=\"Extensional\" uuid=\"0c56ec89-148f-4db4-9677-8f46ac55f764\" version=\"\"/><qdm code=\"false\" datatype=\"Patient Characteristic Sex\" id=\"3fdf74bf-a415-41e0-b49f-4f501b080b6c\" isValidatedWithVsac=\"VALID\" name=\"ONC Administrative Sex\" oid=\"2.16.840.1.113762.1.4.1\" originalName=\"ONC Administrative Sex\" program=\"\" release=\"\" suffix=\"\" suppDataElement=\"false\" taxonomy=\"Administrative Sex\" type=\"Extensional\" uuid=\"3fdf74bf-a415-41e0-b49f-4f501b080b6c\" version=\"\"/><qdm code=\"false\" datatype=\"Patient Characteristic Ethnicity\" id=\"109f12da-4063-47c5-bfc4-34ec3165854c\" isValidatedWithVsac=\"VALID\" name=\"Ethnicity\" oid=\"2.16.840.1.114222.4.11.837\" originalName=\"Ethnicity\" program=\"\" release=\"\" suffix=\"\" suppDataElement=\"false\" taxonomy=\"CDC\" type=\"Extensional\" uuid=\"109f12da-4063-47c5-bfc4-34ec3165854c\" version=\"\"/></elementLookUp><allUsedCQLLibs/><measureDetails><uuid>2c928083-889a-82ef-0188-9be0513c0046</uuid><cqlUUID>1C8484E7-D082-415D-98FE-E46314B7D76E</cqlUUID><title>QDMTransferTestMeasure</title><measureModel>QDM</measureModel><shortTitle>eCQMTitle</shortTitle><guid>d6cfec25-add6-4dc9-8b4f-f3740483c6fe</guid><version>0.0.001</version><nqfid root=\"2.16.840.1.113883.3.560.1\"/><period calenderYear=\"true\" uuid=\"5fd47fb3-8529-4a64-8bea-6bf32ec37e0c\"><startDate>00000101</startDate><stopDate>00001231</stopDate></period><steward id=\"122\">Academy of Nutrition and Dietetics</steward><experimental>false</experimental><developers><developer id=\"2.16.840.1.113883.3.6308\">Academy of Nutrition and Dietetics</developer></developers><description>Desc</description><scoring id=\"COHORT\">Cohort</scoring><patientBasedIndicator>true</patientBasedIndicator><types><type id=\"OUTCOME\">Outcome</type></types><measurePopulationExclusionsDescription/><qualityMeasureSet uuid=\"d6cfec25-add6-4dc9-8b4f-f3740483c6fe\"/></measureDetails></measure>"
+}

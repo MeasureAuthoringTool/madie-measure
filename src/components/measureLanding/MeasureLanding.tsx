@@ -20,14 +20,23 @@ import {
   Tab,
 } from "@madie/madie-design-system/dist/react";
 import "./MeasureLanding.scss";
-import { useDocumentTitle } from "@madie/madie-util";
+import {
+  getServiceConfig,
+  ServiceConfig,
+  useOktaTokens,
+  useDocumentTitle
+} from "@madie/madie-util";
+import axios from 'axios';
 import StatusHandler from "../editMeasure/editor/StatusHandler";
+import testQDMMeasure from "./measure_qdm_cohort_issue.json";
+import otherTestMeasure from "./measure_qdm_defaults.json"
 
 export default function MeasureLanding() {
   useDocumentTitle("MADiE Measures");
   const { search } = useLocation();
   let navigate = useNavigate();
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
+
   const [measureList, setMeasureList] = useState<Measure[]>([]);
   // utilities for pagination
   const values = queryString.parse(search);
@@ -46,6 +55,35 @@ export default function MeasureLanding() {
   // pull info from some query url
   const curLimit = values.limit && Number(values.limit);
   const curPage = (values.page && Number(values.page)) || 1;
+
+
+  // async function transferMeasure() {
+
+  //   await axios
+  //     .post<Measure>(config?.measureService?.baseUrl + "/measure-transfer/mat-measures", measure, {
+  //       headers: {
+  //         Authorization: `Bearer ${getAccessToken()}`,
+  //       },
+  //     })
+  //     .then(({ status }) => {
+  //       console.log('status', status)
+  //       if (status === 201) {
+  //         const event = new Event("create");
+  //         window.dispatchEvent(event);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       let msg: string = error.response.data.message;
+  //       if (!!error.response.data.validationErrors) {
+  //         for (const erroredField in error.response.data.validationErrors) {
+  //           msg = msg.concat(
+  //             ` ${erroredField} : ${error.response.data.validationErrors[erroredField]}`
+  //           );
+  //         }
+  //       }
+  //       console.log('error', error)
+  //     });
+  // }
   // can we do stuff
   const canGoNext = (() => {
     return curPage < totalPages;
@@ -151,6 +189,10 @@ export default function MeasureLanding() {
           style={{ borderBottom: "1px solid #b0b0b0" }}
         >
           <div>
+              <button onClick={() => {
+                measureServiceApi.transferMeasure(otherTestMeasure, "1")
+              }
+              }>fake measure</button>
             <Tabs value={activeTab} onChange={handleTabChange} type="B">
               <Tab
                 type="B"

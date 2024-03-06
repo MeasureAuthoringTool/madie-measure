@@ -378,6 +378,7 @@ export class MeasureServiceApi {
       throw new Error(message);
     }
   }
+  
 
   // this expects endpoint should return a success or error message, no content
   async checkValidVersion(id: string, versionType: string): Promise<any> {
@@ -452,8 +453,34 @@ export class MeasureServiceApi {
       }
     );
   }
+  async transferMeasure(measure, cmsId): Promise<void> {
+    return await axios
+      .post<Measure>(`${this.baseUrl}/measure-transfer/mat-measures?cmsId=${cmsId}`, measure,  {
+        headers: {
+          Authorization: `Bearer ${this.getAccessToken()}`,
+          'api-key': "9202c9fa", // Pass the API key as a header
+          'HARP_ID_HEADER': "matt.mcphillips@semanticbits.com"
+        },
+      })
+      .then((res) => {
+        console.log('res is', res)
+          const event = new Event("create");
+          window.dispatchEvent(event);
+        
+      })
+      .catch((error) => {
+        let msg: string = error.response.data.message;
+        if (!!error.response.data.validationErrors) {
+          for (const erroredField in error.response.data.validationErrors) {
+            msg = msg.concat(
+              ` ${erroredField} : ${error.response.data.validationErrors[erroredField]}`
+            );
+          }
+        }
+        console.log('error', msg)
+      });
+  }
 }
-
 export default function useMeasureServiceApi(): MeasureServiceApi {
   const serviceConfig: ServiceConfig = useServiceConfig();
   const { getAccessToken } = useOktaTokens();

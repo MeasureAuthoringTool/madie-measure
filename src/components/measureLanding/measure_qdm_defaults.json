@@ -1,0 +1,184 @@
+{
+  "measureSetId": "a00bceb6-c121-45c7-bbb0-c3c0f141dca9",
+  "measureSet": {
+    "owner": "matt.mcphillips@semanticbits.com"
+  },
+  "state": true,
+  "measureName": "ObsTestTransfer",
+  "cqlLibraryName": "CMS1175",
+  "scoring": "Continuous Variable",
+  "model": "QDM v5.6",
+  "measurementPeriodStart": "2024-01-01T00:00:00.000Z",
+  "measurementPeriodEnd": "2024-12-31T23:59:59.999Z",
+  "populationBasis": null,
+  "patientBasis": false,
+  "versionId": "4028b2c58810a6ed01881105f1e90019",
+  "ecqmTitle": "ObsTestTransfer",
+  "supplementalDataDescription": null,
+  "riskAdjustmentDescription": null,
+  "active": true,
+  "cmsId": "01",
+  "measureMetaData": {
+     "steward": {
+        "name": null
+     },
+     "description": "test",
+     "copyright": null,
+     "disclaimer": null,
+     "draft": true,
+     "developers": [],
+     "rationale": null,
+     "guidance": null,
+     "clinicalRecommendation": null,
+     "references": [],
+     "endorsements": [],
+     "definition": null,
+     "experimental": false,
+     "transmissionFormat": null
+  },
+  "groups": [
+     {
+        "scoring": "Continuous Variable",
+        "populations": [
+           {
+              "id": "98A1B4B6-EEE8-4596-88D6-716624E12E7E",
+              "name": "initialPopulation",
+              "definition": "ipp2",
+              "description": null
+           },
+           {
+              "id": "91069412-1BFC-4CE2-A3B0-283D2F29D2E6",
+              "name": "measurePopulation",
+              "definition": "mp",
+              "description": null
+           },
+           {
+              "id": "dc1e072b-301d-4ceb-b5a3-b84e464cea38",
+              "name": "measurePopulationExclusion",
+              "definition": ""
+           }
+        ],
+        "measureObservations": [
+           {
+              "id": "02AEABE7-2000-4BDE-9C65-188EB5119F88",
+              "aggregateMethod": "Count",
+              "definition": "testfunc",
+              "description": null,
+              "criteriaReference": "91069412-1BFC-4CE2-A3B0-283D2F29D2E6"
+           }
+        ],
+        "stratifications": [
+           {
+              "cqlDefinition": "ipp2",
+              "association": "initialPopulation"
+           },
+           {
+              "cqlDefinition": "mp",
+              "association": "measurePopulation"
+           }
+        ],
+        "populationBasis": "false"
+     },
+     {
+        "scoring": "Continuous Variable",
+        "populations": [
+           {
+              "id": "BF4E7010-D498-41C9-9C4B-7BFC651F8941",
+              "name": "initialPopulation",
+              "definition": "ipp",
+              "description": null
+           },
+           {
+              "id": "5E1928F8-7B5D-4E96-B6F5-74C4301B54E0",
+              "name": "measurePopulation",
+              "definition": "mp",
+              "description": null
+           },
+           {
+              "id": "d4dda1de-c2d3-47df-b4c5-81707cef3cc8",
+              "name": "measurePopulationExclusion",
+              "definition": ""
+           }
+        ],
+        "measureObservations": [
+           {
+              "id": "685AADAF-D747-4332-BFFE-C1F737675057",
+              "aggregateMethod": "Count",
+              "definition": "testfunc",
+              "description": null,
+              "criteriaReference": "5E1928F8-7B5D-4E96-B6F5-74C4301B54E0"
+           }
+        ],
+        "populationBasis": "false"
+     },
+     {
+        "scoring": "Continuous Variable",
+        "populations": [
+           {
+              "id": "B8E8B60B-39B3-4B91-A074-ADDEC8C8B058",
+              "name": "initialPopulation",
+              "definition": "ipp",
+              "description": null
+           },
+           {
+              "id": "118F2DE7-6555-444F-BE8A-4A815E923073",
+              "name": "measurePopulation",
+              "definition": "mp2",
+              "description": null
+           },
+           {
+              "id": "71676f82-1be5-4eae-94c8-5c26ec2653f3",
+              "name": "measurePopulationExclusion",
+              "definition": ""
+           }
+        ],
+        "measureObservations": [
+           {
+              "id": "744CABCB-9881-40BE-81EE-DFF4C417CE49",
+              "aggregateMethod": "Count",
+              "definition": "testfunc",
+              "description": null,
+              "criteriaReference": "118F2DE7-6555-444F-BE8A-4A815E923073"
+           }
+        ],
+        "stratifications": [
+           {
+              "cqlDefinition": "ipp2",
+              "association": "initialPopulation"
+           }
+        ],
+        "populationBasis": "false"
+     }
+  ],
+   "cql": "library CVGlobalMalnutrition986 version '0.0.001'\n\nusing QDM version '5.6'\n\ninclude MATGlobalCommonFunctionsQDM version '7.2.000' called Global\n\nvalueset \"Emergency Department Visit\": 'urn:oid:2.16.840.1.113883.3.117.1.7.1.292'\nvalueset \"Encounter Inpatient\": 'urn:oid:2.16.840.1.113883.3.666.5.307'\nvalueset \"Ethnicity\": 'urn:oid:2.16.840.1.114222.4.11.837'\nvalueset \"Hospital Dietitian Referral\": 'urn:oid:2.16.840.1.113762.1.4.1095.91'\nvalueset \"Malnutrition Diagnosis\": 'urn:oid:2.16.840.1.113762.1.4.1095.55'\nvalueset \"Malnutrition Risk Screening\": 'urn:oid:2.16.840.1.113762.1.4.1095.92'\nvalueset \"Malnutrition Screening Finding of At Risk Result\": 'urn:oid:2.16.840.1.113762.1.4.1095.89'\nvalueset \"Malnutrition Screening Finding of Not At Risk Result\": 'urn:oid:2.16.840.1.113762.1.4.1095.34'\nvalueset \"Nutrition Assessment\": 'urn:oid:2.16.840.1.113762.1.4.1095.21'\nvalueset \"Nutrition Assessment Status Finding of Moderately Malnourished\": 'urn:oid:2.16.840.1.113762.1.4.1095.47'\nvalueset \"Nutrition Assessment Status Finding of Severely Malnourished\": 'urn:oid:2.16.840.1.113762.1.4.1095.43'\nvalueset \"Nutrition Assessment Status Finding of Well Nourished or Not Malnourished or Mildly Malnourished\": 'urn:oid:2.16.840.1.113762.1.4.1095.96'\nvalueset \"Nutrition Care Plan\": 'urn:oid:2.16.840.1.113762.1.4.1095.93'\nvalueset \"Observation Services\": 'urn:oid:2.16.840.1.113762.1.4.1111.143'\nvalueset \"ONC Administrative Sex\": 'urn:oid:2.16.840.1.113762.1.4.1'\nvalueset \"Payer Type\": 'urn:oid:2.16.840.1.114222.4.11.3591'\nvalueset \"Race\": 'urn:oid:2.16.840.1.114222.4.11.836'\n\nparameter \"Measurement Period\" Interval<DateTime>\n\ncontext Patient\n\ndefine \"SDE Payer\":\n  [\"Patient Characteristic Payer\": \"Payer Type\"]\n\ndefine \"SDE Ethnicity\":\n  [\"Patient Characteristic Ethnicity\": \"Ethnicity\"]\n\ndefine \"SDE Race\":\n  [\"Patient Characteristic Race\": \"Race\"]\n\ndefine \"SDE Sex\":\n  [\"Patient Characteristic Sex\": \"ONC Administrative Sex\"]\n\ndefine \"Measure Population\":\n  \"Initial Population\"\n\ndefine \"Initial Population\":\n  [\"Encounter, Performed\": \"Encounter Inpatient\"] EncounterInpatient\n    where AgeInYearsAt(date from start of EncounterInpatient.relevantPeriod) >= 18\n      and duration in hours of EncounterInpatient.relevantPeriod >= 24\n      and EncounterInpatient.relevantPeriod during day of \"Measurement Period\"\n\ndefine \"Encounter with Hospital Dietitian Referral\":\n  \"Initial Population\" QualifyingEncounter\n    with [\"Intervention, Order\": \"Hospital Dietitian Referral\"] HospitalDietitianReferral\n      such that HospitalDietitianReferral.authorDatetime during Global.\"HospitalizationWithObservation\" ( QualifyingEncounter )\n\ndefine \"Encounter with Malnutrition Risk Screening and Identified Result or with Hospital Dietitian Referral\":\n  \"Initial Population\" QualifyingEncounter\n    with [\"Assessment, Performed\": \"Malnutrition Risk Screening\"] MalnutritionRiskScreening\n      such that Coalesce(start of Global.\"NormalizeInterval\"(MalnutritionRiskScreening.relevantDatetime, MalnutritionRiskScreening.relevantPeriod), MalnutritionRiskScreening.authorDatetime) during Global.\"HospitalizationWithObservation\" ( QualifyingEncounter )\n        and ( ( MalnutritionRiskScreening.result in \"Malnutrition Screening Finding of At Risk Result\" )\n            or ( MalnutritionRiskScreening.result in \"Malnutrition Screening Finding of Not At Risk Result\" )\n        )\n        or exists ( \"Encounter with Hospital Dietitian Referral\" )\n\ndefine \"Encounter with Malnutrition Screening Not At Risk Result\":\n  \"Initial Population\" QualifyingEncounter\n    with [\"Assessment, Performed\": \"Malnutrition Risk Screening\"] MalnutritionRiskScreening\n      such that Coalesce(start of Global.\"NormalizeInterval\"(MalnutritionRiskScreening.relevantDatetime, MalnutritionRiskScreening.relevantPeriod), MalnutritionRiskScreening.authorDatetime) during Global.\"HospitalizationWithObservation\" ( QualifyingEncounter )\n        and MalnutritionRiskScreening.result in \"Malnutrition Screening Finding of Not At Risk Result\"\n\ndefine \"Encounter with Malnutrition Not at Risk Result and without Hospital Dietitian Referral\":\n  \"Initial Population\" QualifyingEncounter\n    with [\"Assessment, Performed\": \"Malnutrition Risk Screening\"] MalnutritionRiskScreening\n      such that exists ( \"Encounter with Malnutrition Screening Not At Risk Result\" )\n        and not exists ( \"Encounter with Hospital Dietitian Referral\" )\n\ndefine \"Encounter with Malnutrition Screening At Risk Result\":\n  \"Initial Population\" QualifyingEncounter\n    with [\"Assessment, Performed\": \"Malnutrition Risk Screening\"] MalnutritionRiskScreening\n      such that Coalesce(start of Global.\"NormalizeInterval\"(MalnutritionRiskScreening.relevantDatetime, MalnutritionRiskScreening.relevantPeriod), MalnutritionRiskScreening.authorDatetime) during Global.\"HospitalizationWithObservation\" ( QualifyingEncounter )\n        and MalnutritionRiskScreening.result in \"Malnutrition Screening Finding of At Risk Result\"\n        and not ( exists \"Encounter with Malnutrition Screening Not At Risk Result\" )\n\ndefine \"Encounter with Nutrition Assessment and Identified Status\":\n  \"Initial Population\" QualifyingEncounter\n    with [\"Assessment, Performed\": \"Nutrition Assessment\"] NutritionAssessment\n      such that Coalesce(start of Global.\"NormalizeInterval\"(NutritionAssessment.relevantDatetime, NutritionAssessment.relevantPeriod), NutritionAssessment.authorDatetime) during Global.\"HospitalizationWithObservation\" ( QualifyingEncounter )\n        and ( NutritionAssessment.result in \"Nutrition Assessment Status Finding of Well Nourished or Not Malnourished or Mildly Malnourished\"\n            or ( NutritionAssessment.result in \"Nutrition Assessment Status Finding of Moderately Malnourished\" )\n            or ( NutritionAssessment.result in \"Nutrition Assessment Status Finding of Severely Malnourished\" )\n        )\n        and ( exists \"Encounter with Malnutrition Screening At Risk Result\"\n            or exists ( \"Encounter with Hospital Dietitian Referral\" )\n        )\n\ndefine \"Encounter with Nutrition Assessment Status Not or Mildly Malnourished\":\n  \"Initial Population\" QualifyingEncounter\n    with [\"Assessment, Performed\": \"Nutrition Assessment\"] NutritionAssessment\n      such that Coalesce(start of Global.\"NormalizeInterval\"(NutritionAssessment.relevantDatetime, NutritionAssessment.relevantPeriod), NutritionAssessment.authorDatetime) during Global.\"HospitalizationWithObservation\" ( QualifyingEncounter )\n        and NutritionAssessment.result in \"Nutrition Assessment Status Finding of Well Nourished or Not Malnourished or Mildly Malnourished\"\n\ndefine \"Encounter with Nutrition Assessment Status Finding of Moderately Malnourished\":\n  \"Initial Population\" QualifyingEncounter\n    with [\"Assessment, Performed\": \"Nutrition Assessment\"] NutritionAssessment\n      such that Coalesce(start of Global.\"NormalizeInterval\"(NutritionAssessment.relevantDatetime, NutritionAssessment.relevantPeriod), NutritionAssessment.authorDatetime) during Global.\"HospitalizationWithObservation\" ( QualifyingEncounter )\n        and NutritionAssessment.result in \"Nutrition Assessment Status Finding of Moderately Malnourished\"\n\ndefine \"Encounter with Nutrition Assessment Status Finding of Severely Malnourished\":\n  \"Initial Population\" QualifyingEncounter\n    with [\"Assessment, Performed\": \"Nutrition Assessment\"] NutritionAssessment\n      such that Coalesce(start of Global.\"NormalizeInterval\"(NutritionAssessment.relevantDatetime, NutritionAssessment.relevantPeriod), NutritionAssessment.authorDatetime) during Global.\"HospitalizationWithObservation\" ( QualifyingEncounter )\n        and NutritionAssessment.result in \"Nutrition Assessment Status Finding of Severely Malnourished\"\n\ndefine \"Encounter with Malnutrition Diagnosis\":\n  \"Initial Population\" QualifyingEncounter\n    with [\"Diagnosis\": \"Malnutrition Diagnosis\"] MalnutritionDiagnosis\n      such that MalnutritionDiagnosis.prevalencePeriod starts during Global.\"HospitalizationWithObservation\" ( QualifyingEncounter )\n\ndefine \"Encounter with Nutrition Care Plan\":\n  \"Initial Population\" QualifyingEncounter\n    with [\"Intervention, Performed\": \"Nutrition Care Plan\"] NutritionCarePlan\n      such that Coalesce(start of Global.\"NormalizeInterval\"(NutritionCarePlan.relevantDatetime, NutritionCarePlan.relevantPeriod), NutritionCarePlan.authorDatetime) during Global.\"HospitalizationWithObservation\" ( QualifyingEncounter )\n\ndefine function \"Measure Observation 1\"(Encounter \"Encounter, Performed\" ):\n  if ( \"Encounter with Malnutrition Risk Screening and Identified Result or with Hospital Dietitian Referral\" contains Encounter\n      and ( \"Encounter with Malnutrition Screening Not At Risk Result\" contains Encounter\n          or ( \"Encounter with Malnutrition Screening At Risk Result\" contains Encounter )\n      )\n      or exists ( \"Encounter with Hospital Dietitian Referral\" )\n  ) then 1 \n    else 0\n\ndefine function \"Measure Observation 2\"(Encounter \"Encounter, Performed\" ):\n  if ( \"Encounter with Malnutrition Not at Risk Result and without Hospital Dietitian Referral\" ) contains Encounter then 0 \n    else if ( \"Encounter with Nutrition Assessment and Identified Status\" contains Encounter\n      and ( ( \"Encounter with Nutrition Assessment Status Not or Mildly Malnourished\" contains Encounter\n            or \"Encounter with Nutrition Assessment Status Finding of Moderately Malnourished\" contains Encounter\n            or \"Encounter with Nutrition Assessment Status Finding of Severely Malnourished\" contains Encounter\n        )\n          and ( ( \"Encounter with Malnutrition Risk Screening and Identified Result or with Hospital Dietitian Referral\" contains Encounter\n                and \"Encounter with Malnutrition Screening At Risk Result\" contains Encounter\n            )\n              or ( \"Encounter with Hospital Dietitian Referral\" ) contains Encounter\n          )\n      )\n  ) then 1 \n    else 0\n\ndefine function \"Measure Observation 3\"(Encounter \"Encounter, Performed\" ):\n  if ( \"Encounter with Malnutrition Not at Risk Result and without Hospital Dietitian Referral\" ) contains Encounter\n    or ( \"Encounter with Nutrition Assessment Status Not or Mildly Malnourished\" ) contains Encounter then 0 \n    else if ( \"Encounter with Malnutrition Diagnosis\" contains Encounter\n      and \"Encounter with Nutrition Assessment and Identified Status\" contains Encounter\n      and ( ( \"Encounter with Nutrition Assessment Status Finding of Moderately Malnourished\" contains Encounter\n            or \"Encounter with Nutrition Assessment Status Finding of Severely Malnourished\" contains Encounter\n        )\n      )\n  ) then 1 \n    else 0\n\ndefine function \"Measure Observation 4\"(Encounter \"Encounter, Performed\" ):\n  if ( \"Encounter with Malnutrition Not at Risk Result and without Hospital Dietitian Referral\" ) contains Encounter\n    or ( \"Encounter with Nutrition Assessment Status Not or Mildly Malnourished\" ) contains Encounter then 0 \n    else if ( \"Encounter with Nutrition Care Plan\" contains Encounter\n      and \"Encounter with Nutrition Assessment and Identified Status\" contains Encounter\n      and ( ( \"Encounter with Nutrition Assessment Status Finding of Moderately Malnourished\" contains Encounter\n            or \"Encounter with Nutrition Assessment Status Finding of Severely Malnourished\" contains Encounter\n        )\n      )\n  ) then 1 \n    else 0\n\ndefine function \"Total Malnutrition Composite Score Eligible Denominators\"(Encounter \"Encounter, Performed\" ):\n  if ( \"Encounter with Malnutrition Screening Not At Risk Result\" contains Encounter\n      and not ( \"Encounter with Hospital Dietitian Referral\" contains Encounter )\n  ) then 1 \n    else if ( ( \"Encounter with Malnutrition Screening At Risk Result\" contains Encounter\n        or ( \"Encounter with Hospital Dietitian Referral\" contains Encounter )\n    )\n",
+  "version": "0.0.4",
+  "createdBy": "matt.mcphillips@semanticbits.com",
+  "lastModifiedBy": "matt.mcphillips@semanticbits.com",
+  "supplementalData": [
+     {
+        "definition": "SDE Ethnicity"
+     },
+     {
+        "definition": "SDE Payer"
+     },
+     {
+        "definition": "SDE Race"
+     },
+     {
+        "definition": "SDE Sex"
+     }
+  ],
+  "rateAggregation": null,
+  "improvementNotation": null,
+  "baseConfigurationTypes": [
+     "Process",
+     "Structure",
+     "Cost/Resource Use",
+     "Efficiency",
+     "Outcome",
+     "Appropriate Use Process",
+     "Intermediate Clinical Outcome",
+     "Patient Engagement/Experience"
+  ]
+}
+
