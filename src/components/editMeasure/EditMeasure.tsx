@@ -52,6 +52,7 @@ export default function EditMeasure() {
       ...routeHandlerState,
       pendingRoute: blocker?.location?.pathname,
     });
+    if (blocker.location) blocker.reset();
   }, [blocker?.location?.pathname]);
 
   useEffect(() => {
