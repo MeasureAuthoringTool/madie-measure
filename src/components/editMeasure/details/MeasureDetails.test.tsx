@@ -62,13 +62,6 @@ const serviceConfig: ServiceConfig = {
   },
 };
 
-beforeEach(() => {
-  useFeatureFlags.mockReturnValue({
-    qdmMeasureDefinitions: true,
-    qdmMeasureReferences: true,
-  });
-});
-
 const { getByText, getByTestId } = screen;
 
 describe("MeasureDetails component", () => {
@@ -326,7 +319,6 @@ describe("MeasureDetails component", () => {
   });
 
   it("should not render the component for measure-definitions", () => {
-    useFeatureFlags.mockReturnValue({ qdmMeasureDefinitions: false });
     const { getByTestId, queryByTestId } = render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
@@ -355,7 +347,6 @@ describe("MeasureDetails component", () => {
   });
 
   it("should render the MeasureMetadata component for measure set", () => {
-    useFeatureFlags.mockReturnValue({ qdmMeasureDefinitions: true });
     const { getByTestId } = render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
