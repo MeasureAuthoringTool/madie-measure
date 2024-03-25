@@ -114,14 +114,14 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   ];
   const featureFlags = useFeatureFlags();
   if (isQDM) {
-    if (featureFlags?.qdmMeasureDefinitions) {
+    
       links[1].links.splice(3, 0, {
         title: "Definition",
         href: definitionLink,
         dataTestId: "leftPanelQDMMeasureDefinition",
         id: "sideNavQDMMeasureDefinition",
       });
-    }
+    
     if (featureFlags?.qdmMeasureReferences) {
       links[1].links.push({
         title: "References",
@@ -259,7 +259,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                   }
                 />
               )}
-              {featureFlags.qdmMeasureDefinitions && (
+              
                 <Route
                   path={definitionLink}
                   element={
@@ -271,7 +271,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                     />
                   }
                 />
-              )}
+              
             </>
           )}
           <Route path="*" element={<Navigate to="/404" />} />
