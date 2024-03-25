@@ -122,14 +122,12 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
         id: "sideNavQDMMeasureDefinition",
       });
     
-    if (featureFlags?.qdmMeasureReferences) {
       links[1].links.push({
         title: "References",
         href: referencesLink,
         dataTestId: "leftPanelMeasureReferences",
         id: "sideNavMeasureReferences",
       });
-    }
     links[1].links.push({
       title: "Transmission Format",
       href: transmissionFormat,
@@ -251,14 +249,12 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                   />
                 }
               />
-              {featureFlags.qdmMeasureReferences && (
                 <Route
                   path={referencesLink}
                   element={
                     <MeasureReferences setErrorMessage={setErrorMessage} />
                   }
                 />
-              )}
               
                 <Route
                   path={definitionLink}
