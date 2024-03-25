@@ -114,20 +114,19 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   ];
   const featureFlags = useFeatureFlags();
   if (isQDM) {
-    
-      links[1].links.splice(3, 0, {
-        title: "Definition",
-        href: definitionLink,
-        dataTestId: "leftPanelQDMMeasureDefinition",
-        id: "sideNavQDMMeasureDefinition",
-      });
-    
-      links[1].links.push({
-        title: "References",
-        href: referencesLink,
-        dataTestId: "leftPanelMeasureReferences",
-        id: "sideNavMeasureReferences",
-      });
+    links[1].links.splice(3, 0, {
+      title: "Definition",
+      href: definitionLink,
+      dataTestId: "leftPanelQDMMeasureDefinition",
+      id: "sideNavQDMMeasureDefinition",
+    });
+
+    links[1].links.push({
+      title: "References",
+      href: referencesLink,
+      dataTestId: "leftPanelMeasureReferences",
+      id: "sideNavMeasureReferences",
+    });
     links[1].links.push({
       title: "Transmission Format",
       href: transmissionFormat,
@@ -249,25 +248,24 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                   />
                 }
               />
-                <Route
-                  path={referencesLink}
-                  element={
-                    <MeasureReferences setErrorMessage={setErrorMessage} />
-                  }
-                />
-              
-                <Route
-                  path={definitionLink}
-                  element={
-                    <MeasureMetadata
-                      measureMetadataId="Definition"
-                      measureMetadataType="Definition"
-                      header="Definition"
-                      setErrorMessage={setErrorMessage}
-                    />
-                  }
-                />
-              
+              <Route
+                path={referencesLink}
+                element={
+                  <MeasureReferences setErrorMessage={setErrorMessage} />
+                }
+              />
+
+              <Route
+                path={definitionLink}
+                element={
+                  <MeasureMetadata
+                    measureMetadataId="Definition"
+                    measureMetadataType="Definition"
+                    header="Definition"
+                    setErrorMessage={setErrorMessage}
+                  />
+                }
+              />
             </>
           )}
           <Route path="*" element={<Navigate to="/404" />} />
