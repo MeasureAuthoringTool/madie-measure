@@ -10,10 +10,7 @@ import { useFeatureFlags, routeHandlerStore } from "@madie/madie-util";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 
-export default function CqlEditorTab(props: {
-  isQDM: boolean;
-  canEdit: boolean;
-}) {
+export default function CqlEditor(props: { isQDM: boolean; canEdit: boolean }) {
   const { isQDM, canEdit } = props;
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>(null);

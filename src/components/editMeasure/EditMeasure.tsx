@@ -10,7 +10,7 @@ import "twin.macro";
 import "styled-components/macro";
 import EditMeasureNav from "./EditMeasureNav";
 import MeasureDetails from "./details/MeasureDetails";
-import CqlEditorTab from "./editor/CqlEditorTab";
+import CqlEditor from "./editor/CqlEditor";
 import { Measure } from "@madie/madie-models";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { MadiePatient } from "@madie/madie-patient";
@@ -180,7 +180,7 @@ export default function EditMeasure() {
           />
           <Route
             path={`/cql-editor`}
-            element={<CqlEditorTab isQDM={isQDM} canEdit={canEdit} />}
+            element={<CqlEditor isQDM={isQDM} canEdit={canEdit} />}
           />
           <Route path={`/test-cases/*`} element={<MadiePatient />} />
           <Route
