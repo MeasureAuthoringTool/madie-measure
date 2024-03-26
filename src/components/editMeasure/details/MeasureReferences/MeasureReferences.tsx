@@ -355,7 +355,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
                 ))
               ) : (
                 <p data-testId="empty-references">
-                  There are currently no definitions. Click the (Add Reference)
+                  There are currently no references. Click the (Add Reference)
                   button above to add one.
                 </p>
               )}
