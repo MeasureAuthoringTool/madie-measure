@@ -21,6 +21,7 @@ import NotFound from "../notfound/NotFound";
 import ReviewInfo from "./reviewInfo/ReviewInfo";
 import "./EditMeasure.scss";
 import PopulationCriteriaWrapper from "./populationCriteria/PopulationCriteriaWrapper";
+import CqlEditorTab from "./editor/CqlEditorTab";
 interface inputParams {
   id: string;
 }
@@ -163,7 +164,10 @@ export default function EditMeasure() {
               <MeasureDetails setErrorMessage={setErrorMessage} isQDM={isQDM} />
             }
           />
-          <Route path={`/cql-editor`} element={<MeasureEditor />} />
+          <Route
+            path={`/cql-editor`}
+            element={<CqlEditorTab isQDM={isQDM} />}
+          />
           <Route path={`/test-cases/*`} element={<MadiePatient />} />
           <Route
             path={`/groups/:groupNumber`}

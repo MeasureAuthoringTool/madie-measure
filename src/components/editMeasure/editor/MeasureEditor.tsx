@@ -13,7 +13,6 @@ import {
   isUsingEmpty,
 } from "@madie/madie-editor";
 import {
-  Button,
   MadieSpinner,
   MadieDiscardDialog,
   Toast,
@@ -25,10 +24,8 @@ import * as _ from "lodash";
 import {
   measureStore,
   useDocumentTitle,
-  routeHandlerStore,
   checkUserCanEdit,
 } from "@madie/madie-util";
-import StatusHandler from "./StatusHandler";
 import { SuccessText } from "../../../styles/editMeasure/editor";
 
 export const mapErrorsToAceAnnotations = (
@@ -81,7 +78,31 @@ export interface CustomCqlCode extends Omit<CqlCode, "codeSystem"> {
   errorMessage?: string;
 }
 
-const MeasureEditor = () => {
+export interface MeasureEditorProps {
+  setError: Function;
+  setErrorMessage: Function;
+  setSuccess: Function;
+  setOutboundAnnotations: Function;
+  setIsCQLUnchanged: Function;
+  isCQLUnchanged: boolean;
+  setDiscardDialogOpen: Function;
+  discardDialogOpen: boolean;
+  setUpdatingMeasureCql: Function;
+  updatingMeasureCql: boolean;
+}
+
+const MeasureEditor = (props: MeasureEditorProps) => {
+  const {
+    setError,
+    setErrorMessage,
+    setSuccess,
+    setOutboundAnnotations,
+    setIsCQLUnchanged,
+    setDiscardDialogOpen,
+    discardDialogOpen,
+    updatingMeasureCql,
+    setUpdatingMeasureCql,
+  } = props;
   useDocumentTitle("MADiE Edit Measure CQL");
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
 
@@ -121,15 +142,9 @@ const MeasureEditor = () => {
       subscription.unsubscribe();
     };
   }, []);
-  const [discardDialogOpen, setDiscardDialogOpen]: [
-    boolean,
-    Dispatch<SetStateAction<boolean>>
-  ] = useState(false);
   const [editorVal, setEditorVal]: [string, Dispatch<SetStateAction<string>>] =
     useState("");
-  const { updateRouteHandlerState } = routeHandlerStore;
-  // We have a unique case where when we have a fresh measure the cql isn't an empty string. It's a null or undefined value.
-  const [isCQLUnchanged, setIsCQLUnchanged] = useState<boolean>(true);
+
   const checkIfCQLUnchanged = (val1, val2) => {
     // if  both measure cql are falsey values return true
     if (!val1 && !val2) {
@@ -137,22 +152,9 @@ const MeasureEditor = () => {
     }
     return val1 === val2;
   };
-  useEffect(() => {
-    updateRouteHandlerState({
-      canTravel: isCQLUnchanged,
-      pendingRoute: "",
-    });
-  }, [isCQLUnchanged, updateRouteHandlerState]);
 
   const measureServiceApi = useMeasureServiceApi();
-  // set success message
-  const [success, setSuccess] = useState({
-    status: undefined,
-    message: undefined,
-  });
-  const [error, setError] = useState(false);
   // const [elmTranslationError, setElmTranslationError] = useState(null); // should not be own error, modified to error message
-  const [outboundAnnotations, setOutboundAnnotations] = useState([]);
   // annotations control the gutter error icons.
   const [elmAnnotations, setElmAnnotations] = useState<EditorAnnotation[]>([]);
   // error markers control the error underlining in the editor.
@@ -164,7 +166,6 @@ const MeasureEditor = () => {
   );
 
   const [valuesetMsg, setValuesetMsg] = useState(null);
-  const [errorMessage, setErrorMessage] = useState<string>(null);
 
   // Toast utilities
   const [toastOpen, setToastOpen] = useState<boolean>(false);
@@ -218,8 +219,15 @@ const MeasureEditor = () => {
     return JSON.stringify(errors).includes("Please log in to UMLS");
   };
 
+  useEffect(() => {
+    if (updatingMeasureCql) {
+      updateMeasureCql();
+    }
+  }, [updatingMeasureCql]);
+
   const updateMeasureCql = async () => {
     setProcessing(true);
+    setUpdatingMeasureCql(false);
     try {
       //Get model name and version
       const using = measure?.model.split(" v");
@@ -336,106 +344,103 @@ const MeasureEditor = () => {
     setEditorVal(measure?.cql || "");
     setIsCQLUnchanged(true);
   };
+  //const [activeTab, setActiveTab] = useState<string>("valueSets");
 
   return (
-    <>
-      <div id="status-handler">
-        <StatusHandler
-          error={error}
-          errorMessage={errorMessage}
-          success={success}
-          outboundAnnotations={outboundAnnotations}
-          hasSubTitle={false}
+    <div className="left-panel">
+      {/* <div className="tab-container">
+        <RightPanelNavTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+      </div> */}
+      <div className="panel-content">
+        <div tw="flex flex-wrap  shadow-lg rounded-md border border-slate bg-white">
+          <div tw="flex-none sm:w-full">
+            {valuesetMsg && (
+              <SuccessText data-testid="valueset-success">
+                {valuesetMsg}
+              </SuccessText>
+            )}
+            {!processing && (
+              <MadieEditor
+                onChange={(val: string) => handleMadieEditorValue(val)}
+                value={editorVal}
+                inboundAnnotations={elmAnnotations}
+                inboundErrorMarkers={errorMarkers}
+                height="calc(100vh - 135px)"
+                readOnly={!canEdit}
+                setOutboundAnnotations={setOutboundAnnotations}
+              />
+            )}
+            {processing && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  height: "calc(100vh - 135px)",
+                }}
+              >
+                <MadieSpinner style={{ height: 50, width: 50 }} />
+              </div>
+            )}
+          </div>
+          {/* <div
+            tw="flex h-24 bg-white w-full sticky bottom-0 left-0 z-10"
+            data-testid="measure-editor-actions"
+          >
+            <div tw="w-1/2 flex flex-col px-10 py-2"></div>
+            {canEdit && (
+              <div
+                tw="w-1/2 flex justify-end items-center px-10 py-6"
+                style={{ alignItems: "end" }}
+              >
+                <Button
+                  variant="outline"
+                  tw="m-2"
+                  onClick={() => setDiscardDialogOpen(true)}
+                  data-testid="reset-cql-btn"
+                  disabled={isCQLUnchanged}
+                >
+                  Discard Changes
+                </Button>
+                <Button
+                  variant="cyan"
+                  tw="m-2"
+                  onClick={() => updateMeasureCql()}
+                  data-testid="save-cql-btn"
+                  disabled={isCQLUnchanged}
+                >
+                  Save
+                </Button>
+              </div>
+            )}
+          </div> */}
+        </div>
+        <Toast
+          toastKey="measure-errors-toast"
+          aria-live="polite"
+          toastType={toastType}
+          testId="measure-errors-toast"
+          open={toastOpen}
+          message={toastMessage}
+          onClose={() => {
+            setToastType("danger");
+            setToastMessage("");
+            setToastOpen(false);
+          }}
+          autoHideDuration={10000}
+          closeButtonProps={{
+            "data-testid": "close-error-button",
+          }}
+        />
+        <MadieDiscardDialog
+          open={discardDialogOpen}
+          onContinue={() => {
+            resetCql();
+            setDiscardDialogOpen(false);
+          }}
+          onClose={() => setDiscardDialogOpen(false)}
         />
       </div>
-      <div tw="flex flex-wrap mx-8 shadow-lg rounded-md border border-slate bg-white">
-        <div tw="flex-none sm:w-full">
-          {valuesetMsg && (
-            <SuccessText data-testid="valueset-success">
-              {valuesetMsg}
-            </SuccessText>
-          )}
-          {!processing && (
-            <MadieEditor
-              onChange={(val: string) => handleMadieEditorValue(val)}
-              value={editorVal}
-              inboundAnnotations={elmAnnotations}
-              inboundErrorMarkers={errorMarkers}
-              height="calc(100vh - 135px)"
-              readOnly={!canEdit}
-              setOutboundAnnotations={setOutboundAnnotations}
-            />
-          )}
-          {processing && (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                height: "calc(100vh - 135px)",
-              }}
-            >
-              <MadieSpinner style={{ height: 50, width: 50 }} />
-            </div>
-          )}
-        </div>
-        <div
-          tw="flex h-24 bg-white w-full sticky bottom-0 left-0 z-10"
-          data-testid="measure-editor-actions"
-        >
-          <div tw="w-1/2 flex flex-col px-10 py-2"></div>
-          {canEdit && (
-            <div
-              tw="w-1/2 flex justify-end items-center px-10 py-6"
-              style={{ alignItems: "end" }}
-            >
-              <Button
-                variant="outline"
-                tw="m-2"
-                onClick={() => setDiscardDialogOpen(true)}
-                data-testid="reset-cql-btn"
-                disabled={isCQLUnchanged}
-              >
-                Discard Changes
-              </Button>
-              <Button
-                variant="cyan"
-                tw="m-2"
-                onClick={() => updateMeasureCql()}
-                data-testid="save-cql-btn"
-                disabled={isCQLUnchanged}
-              >
-                Save
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
-      <Toast
-        toastKey="measure-errors-toast"
-        aria-live="polite"
-        toastType={toastType}
-        testId="measure-errors-toast"
-        open={toastOpen}
-        message={toastMessage}
-        onClose={() => {
-          setToastType("danger");
-          setToastMessage("");
-          setToastOpen(false);
-        }}
-        autoHideDuration={10000}
-        closeButtonProps={{
-          "data-testid": "close-error-button",
-        }}
-      />
-      <MadieDiscardDialog
-        open={discardDialogOpen}
-        onContinue={() => {
-          resetCql();
-          setDiscardDialogOpen(false);
-        }}
-        onClose={() => setDiscardDialogOpen(false)}
-      />
-    </>
+    </div>
   );
 };
 export default MeasureEditor;
