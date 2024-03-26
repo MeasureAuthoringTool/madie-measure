@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import * as React from "react";
 import {
   mapErrorsToAceAnnotations,
@@ -173,7 +179,7 @@ const renderEditor = (measure) => {
   measureStore.state.mockImplementationOnce(() => measure);
   return render(
     <ApiContextProvider value={serviceConfig}>
-      <CqlEditor isQDM={true} canEdit={true} />
+      <CqlEditor isQDM={false} canEdit={true} />
     </ApiContextProvider>
   );
 };
@@ -189,6 +195,50 @@ describe("MeasureEditor component", () => {
       const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
       expect(measure.cql).toEqual(editorContainer.value);
     });
+  });
+
+  it("right panel navigation works as expected for QDM measures", async () => {
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <CqlEditor isQDM={true} canEdit={true} />
+      </ApiContextProvider>
+    );
+
+    const valueSets = await screen.findByText("Value Sets");
+    const codes = await screen.findByText("Codes");
+    const definitions = await screen.findByText("Definitions");
+
+    expect(valueSets).toHaveAttribute("aria-selected", "true");
+    act(() => {
+      fireEvent.click(codes);
+    });
+    await waitFor(() => {
+      expect(codes).toHaveAttribute("aria-selected", "true");
+    });
+
+    act(() => {
+      fireEvent.click(definitions);
+    });
+    await waitFor(() => {
+      expect(definitions).toHaveAttribute("aria-selected", "true");
+    });
+    act(() => {
+      fireEvent.click(valueSets);
+    });
+    await waitFor(() => {
+      expect(valueSets).toHaveAttribute("aria-selected", "true");
+    });
+  });
+
+  it("right panel navigation shouldn't appear for QI Core measure", () => {
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <CqlEditor isQDM={false} canEdit={true} />
+      </ApiContextProvider>
+    );
+
+    const rightPanelNavBar = screen.queryByTestId("right-panel-navs");
+    expect(rightPanelNavBar).not.toBeInTheDocument();
   });
 
   it("set the editor to empty when no measure cql present", async () => {
@@ -792,7 +842,7 @@ describe("map elm errors to Ace Markers", () => {
 it("Save button and Cancel button should not show if user is not the owner of the measure", () => {
   render(
     <ApiContextProvider value={serviceConfig}>
-      <CqlEditor isQDM={true} canEdit={false} />
+      <CqlEditor isQDM={false} canEdit={false} />
     </ApiContextProvider>
   );
 
