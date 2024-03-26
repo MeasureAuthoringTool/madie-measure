@@ -89,6 +89,7 @@ export interface MeasureEditorProps {
   discardDialogOpen: boolean;
   setUpdatingMeasureCql: Function;
   updatingMeasureCql: boolean;
+  canEdit: boolean;
 }
 
 const MeasureEditor = (props: MeasureEditorProps) => {
@@ -100,8 +101,9 @@ const MeasureEditor = (props: MeasureEditorProps) => {
     setIsCQLUnchanged,
     setDiscardDialogOpen,
     discardDialogOpen,
-    updatingMeasureCql,
     setUpdatingMeasureCql,
+    updatingMeasureCql,
+    canEdit,
   } = props;
   useDocumentTitle("MADiE Edit Measure CQL");
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
@@ -159,12 +161,6 @@ const MeasureEditor = (props: MeasureEditorProps) => {
   const [elmAnnotations, setElmAnnotations] = useState<EditorAnnotation[]>([]);
   // error markers control the error underlining in the editor.
   const [errorMarkers, setErrorMarkers] = useState<EditorErrorMarker[]>([]);
-  const canEdit = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
-  );
-
   const [valuesetMsg, setValuesetMsg] = useState(null);
 
   // Toast utilities
@@ -344,15 +340,11 @@ const MeasureEditor = (props: MeasureEditorProps) => {
     setEditorVal(measure?.cql || "");
     setIsCQLUnchanged(true);
   };
-  //const [activeTab, setActiveTab] = useState<string>("valueSets");
 
   return (
     <div className="left-panel">
-      {/* <div className="tab-container">
-        <RightPanelNavTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-      </div> */}
       <div className="panel-content">
-        <div tw="flex flex-wrap  shadow-lg rounded-md border border-slate bg-white">
+        <div tw="flex flex-wrap shadow-lg rounded-md border border-slate bg-white">
           <div tw="flex-none sm:w-full">
             {valuesetMsg && (
               <SuccessText data-testid="valueset-success">
@@ -382,37 +374,6 @@ const MeasureEditor = (props: MeasureEditorProps) => {
               </div>
             )}
           </div>
-          {/* <div
-            tw="flex h-24 bg-white w-full sticky bottom-0 left-0 z-10"
-            data-testid="measure-editor-actions"
-          >
-            <div tw="w-1/2 flex flex-col px-10 py-2"></div>
-            {canEdit && (
-              <div
-                tw="w-1/2 flex justify-end items-center px-10 py-6"
-                style={{ alignItems: "end" }}
-              >
-                <Button
-                  variant="outline"
-                  tw="m-2"
-                  onClick={() => setDiscardDialogOpen(true)}
-                  data-testid="reset-cql-btn"
-                  disabled={isCQLUnchanged}
-                >
-                  Discard Changes
-                </Button>
-                <Button
-                  variant="cyan"
-                  tw="m-2"
-                  onClick={() => updateMeasureCql()}
-                  data-testid="save-cql-btn"
-                  disabled={isCQLUnchanged}
-                >
-                  Save
-                </Button>
-              </div>
-            )}
-          </div> */}
         </div>
         <Toast
           toastKey="measure-errors-toast"

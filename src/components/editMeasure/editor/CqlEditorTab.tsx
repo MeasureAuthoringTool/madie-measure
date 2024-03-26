@@ -10,8 +10,11 @@ import { useFeatureFlags, routeHandlerStore } from "@madie/madie-util";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 
-export default function CqlEditorTab(props: { isQDM: boolean }) {
-  const { isQDM } = props;
+export default function CqlEditorTab(props: {
+  isQDM: boolean;
+  canEdit: boolean;
+}) {
+  const { isQDM, canEdit } = props;
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>(null);
   const [outboundAnnotations, setOutboundAnnotations] = useState([]);
@@ -51,6 +54,7 @@ export default function CqlEditorTab(props: { isQDM: boolean }) {
         <div className="allotment-wrapper">
           <Allotment defaultSizes={[175, 125]} vertical={false}>
             <Allotment.Pane>
+              <div style={{ borderWidth: "24px", borderColor: "#ededed" }} />
               <MeasureEditor
                 setError={setError}
                 setErrorMessage={setErrorMessage}
@@ -62,6 +66,7 @@ export default function CqlEditorTab(props: { isQDM: boolean }) {
                 discardDialogOpen={discardDialogOpen}
                 setUpdatingMeasureCql={setUpdatingMeasureCql}
                 updatingMeasureCql={updatingMeasureCql}
+                canEdit={canEdit}
               />
             </Allotment.Pane>
             <Allotment.Pane>
@@ -82,16 +87,17 @@ export default function CqlEditorTab(props: { isQDM: boolean }) {
             discardDialogOpen={discardDialogOpen}
             setUpdatingMeasureCql={setUpdatingMeasureCql}
             updatingMeasureCql={updatingMeasureCql}
+            canEdit={canEdit}
           />
         </div>
       )}
 
-      <div
+      {/* <div
         tw="flex h-24 bg-white w-full sticky bottom-0 left-0 z-10"
         data-testid="measure-editor-actions"
       >
         <div tw="w-1/2 flex flex-col px-10 py-2"></div>
-        {
+        {canEdit && (
           <div
             tw="w-1/2 flex justify-end items-center px-10 py-6"
             style={{ alignItems: "end" }}
@@ -115,30 +121,34 @@ export default function CqlEditorTab(props: { isQDM: boolean }) {
               Save
             </Button>
           </div>
-        }
-      </div>
-
-      {/* <div className="bottom-row">
-        <div className="spacer" />
-        <Button
-          variant="outline"
-          tw="m-2"
-          // onClick={() => setDiscardDialogOpen(true)}
-          data-testid="reset-cql-btn"
-          // disabled={isCQLUnchanged}
-        >
-          Discard Changes
-        </Button>
-        <Button
-          variant="cyan"
-          tw="m-2"
-          // onClick={() => updateMeasureCql()}
-          data-testid="save-cql-btn"
-          // disabled={isCQLUnchanged}
-        >
-          Save
-        </Button>
+        )}
       </div> */}
+
+      <div className="bottom-row">
+        <div className="spacer" />
+        {canEdit && (
+          <>
+            <Button
+              variant="outline"
+              tw="m-2"
+              onClick={() => setDiscardDialogOpen(true)}
+              data-testid="reset-cql-btn"
+              disabled={isCQLUnchanged}
+            >
+              Discard Changes
+            </Button>
+            <Button
+              variant="cyan"
+              tw="m-2"
+              onClick={() => setUpdatingMeasureCql(true)}
+              data-testid="save-cql-btn"
+              disabled={isCQLUnchanged}
+            >
+              Save
+            </Button>
+          </>
+        )}
+      </div>
     </>
   );
 }
