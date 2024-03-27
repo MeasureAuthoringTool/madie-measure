@@ -89,38 +89,6 @@ export default function CqlEditor(props: { isQDM: boolean; canEdit: boolean }) {
         </div>
       )}
 
-      {/* <div
-        tw="flex h-24 bg-white w-full sticky bottom-0 left-0 z-10"
-        data-testid="measure-editor-actions"
-      >
-        <div tw="w-1/2 flex flex-col px-10 py-2"></div>
-        {canEdit && (
-          <div
-            tw="w-1/2 flex justify-end items-center px-10 py-6"
-            style={{ alignItems: "end" }}
-          >
-            <Button
-              variant="outline"
-              tw="m-2"
-              onClick={() => setDiscardDialogOpen(true)}
-              data-testid="reset-cql-btn"
-              disabled={isCQLUnchanged}
-            >
-              Discard Changes
-            </Button>
-            <Button
-              variant="cyan"
-              tw="m-2"
-              onClick={() => setUpdatingMeasureCql(true)}
-              data-testid="save-cql-btn"
-              disabled={isCQLUnchanged}
-            >
-              Save
-            </Button>
-          </div>
-        )}
-      </div> */}
-
       <div className="bottom-row">
         <div className="spacer" />
         {canEdit && (
