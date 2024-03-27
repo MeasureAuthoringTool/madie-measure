@@ -1,9 +1,16 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import * as React from "react";
-import MeasureEditor, {
+import {
   mapErrorsToAceAnnotations,
   mapErrorsToAceMarkers,
 } from "./MeasureEditor";
+import CqlEditor from "./CqlEditor";
 import { Measure, MeasureErrorType } from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
 import axios from "axios";
@@ -17,7 +24,7 @@ import {
   isUsingEmpty,
   validateContent,
 } from "@madie/madie-editor";
-import { checkUserCanEdit, measureStore } from "@madie/madie-util";
+import { measureStore } from "@madie/madie-util";
 
 const measure = {
   id: "abcd-pqrs-xyz",
@@ -44,8 +51,8 @@ jest.mock("@madie/madie-util", () => ({
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
   })),
-  checkUserCanEdit: jest.fn(() => {
-    return true;
+  useFeatureFlags: jest.fn().mockReturnValue({
+    qdmCodeSearch: true,
   }),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
@@ -64,6 +71,12 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
   },
+}));
+
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
 }));
 
 const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
@@ -166,7 +179,7 @@ const renderEditor = (measure) => {
   measureStore.state.mockImplementationOnce(() => measure);
   return render(
     <ApiContextProvider value={serviceConfig}>
-      <MeasureEditor />
+      <CqlEditor isQDM={false} canEdit={true} />
     </ApiContextProvider>
   );
 };
@@ -182,6 +195,50 @@ describe("MeasureEditor component", () => {
       const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
       expect(measure.cql).toEqual(editorContainer.value);
     });
+  });
+
+  it("right panel navigation works as expected for QDM measures", async () => {
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <CqlEditor isQDM={true} canEdit={true} />
+      </ApiContextProvider>
+    );
+
+    const valueSets = await screen.findByText("Value Sets");
+    const codes = await screen.findByText("Codes");
+    const definitions = await screen.findByText("Definitions");
+
+    expect(valueSets).toHaveAttribute("aria-selected", "true");
+    act(() => {
+      fireEvent.click(codes);
+    });
+    await waitFor(() => {
+      expect(codes).toHaveAttribute("aria-selected", "true");
+    });
+
+    act(() => {
+      fireEvent.click(definitions);
+    });
+    await waitFor(() => {
+      expect(definitions).toHaveAttribute("aria-selected", "true");
+    });
+    act(() => {
+      fireEvent.click(valueSets);
+    });
+    await waitFor(() => {
+      expect(valueSets).toHaveAttribute("aria-selected", "true");
+    });
+  });
+
+  it("right panel navigation shouldn't appear for QI Core measure", () => {
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <CqlEditor isQDM={false} canEdit={true} />
+      </ApiContextProvider>
+    );
+
+    const rightPanelNavBar = screen.queryByTestId("right-panel-navs");
+    expect(rightPanelNavBar).not.toBeInTheDocument();
   });
 
   it("set the editor to empty when no measure cql present", async () => {
@@ -783,8 +840,11 @@ describe("map elm errors to Ace Markers", () => {
 });
 
 it("Save button and Cancel button should not show if user is not the owner of the measure", () => {
-  (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
-  renderEditor(measure);
+  render(
+    <ApiContextProvider value={serviceConfig}>
+      <CqlEditor isQDM={false} canEdit={false} />
+    </ApiContextProvider>
+  );
 
   const cancelButton = screen.queryByTestId("reset-cql-btn");
   expect(cancelButton).not.toBeInTheDocument();
@@ -793,7 +853,6 @@ it("Save button and Cancel button should not show if user is not the owner of th
 });
 
 it("Save button and Cancel button should show if measure is shared with the user", () => {
-  (checkUserCanEdit as jest.Mock).mockImplementation(() => true);
   renderEditor(measure);
 
   const cancelButton = screen.queryByTestId("reset-cql-btn");

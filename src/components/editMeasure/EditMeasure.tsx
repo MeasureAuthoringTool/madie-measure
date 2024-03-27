@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Suspense } from "react";
+import React, { useEffect, useState } from "react";
 import {
   useBlocker,
   Route,
@@ -10,17 +10,22 @@ import "twin.macro";
 import "styled-components/macro";
 import EditMeasureNav from "./EditMeasureNav";
 import MeasureDetails from "./details/MeasureDetails";
-import MeasureEditor from "./editor/MeasureEditor";
+import CqlEditor from "./editor/CqlEditor";
 import { Measure } from "@madie/madie-models";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { MadiePatient } from "@madie/madie-patient";
-import { measureStore, routeHandlerStore } from "@madie/madie-util";
+import {
+  measureStore,
+  routeHandlerStore,
+  checkUserCanEdit,
+} from "@madie/madie-util";
 import { Toast, MadieAlert } from "@madie/madie-design-system/dist/react";
 import DeleteDialog from "./DeleteDialog";
 import NotFound from "../notfound/NotFound";
 import ReviewInfo from "./reviewInfo/ReviewInfo";
 import "./EditMeasure.scss";
 import PopulationCriteriaWrapper from "./populationCriteria/PopulationCriteriaWrapper";
+
 interface inputParams {
   id: string;
 }
@@ -136,6 +141,11 @@ export default function EditMeasure() {
   // At this time it appears only possible to have a single error at a time because of the way state is updated.
   const [errorMessage, setErrorMessage] = useState<string>("");
   const isQDM = measure?.model?.includes("QDM");
+  const canEdit = checkUserCanEdit(
+    measure?.measureSet?.owner,
+    measure?.measureSet?.acls,
+    measure?.measureMetaData?.draft
+  );
   const contentDiv = (
     <div data-testid="editMeasure">
       <div tw="relative" style={{ marginTop: "-60px" }}>
@@ -168,7 +178,10 @@ export default function EditMeasure() {
               <MeasureDetails setErrorMessage={setErrorMessage} isQDM={isQDM} />
             }
           />
-          <Route path={`/cql-editor`} element={<MeasureEditor />} />
+          <Route
+            path={`/cql-editor`}
+            element={<CqlEditor isQDM={isQDM} canEdit={canEdit} />}
+          />
           <Route path={`/test-cases/*`} element={<MadiePatient />} />
           <Route
             path={`/groups/:groupNumber`}

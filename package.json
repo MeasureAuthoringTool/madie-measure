@@ -97,6 +97,7 @@
     "@mui/material": "^5.2.6",
     "@mui/styles": "^5.5.1",
     "@tailwindcss/forms": "^0.3.4",
+    "allotment": "^1.20.0",
     "axios": "^1.6.0",
     "classnames": "^2.3.1",
     "file-saver": "^2.0.5",
