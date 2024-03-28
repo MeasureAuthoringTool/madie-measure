@@ -6,12 +6,12 @@ import {
   Button,
   MadieDiscardDialog,
   Toast,
-  TextField,
   ReadOnlyTextField,
 } from "@madie/madie-design-system/dist/react";
+import DateField from "./DateField";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
+
 import { Typography } from "@mui/material";
 import { useFormik } from "formik";
 import { MeasurementPeriodValidator } from "../../../../validations/MeasurementPeriodValidator";
@@ -150,7 +150,6 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
       date.getUTCMonth() + 1
     }/${date.getUTCDate()}/${date.getUTCFullYear()}`;
   };
-
   return (
     <form
       id="measure-details-form"
@@ -189,95 +188,37 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
 
         <Box sx={formRowGapped} data-testid="measurement-period-div">
           <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <DesktopDatePicker
-              disableOpenPicker={true}
+            <DateField
+              id="measurement-period-start"
               disabled={!canEdit}
               label="Measurement Period - Start Date"
-              inputFormat="MM/dd/yyyy"
-              aria-required="true"
-              value={
-                formik.values.measurementPeriodStart
-                  ? makeUTCDate(new Date(formik.values.measurementPeriodStart))
-                  : formik.values.measurementPeriodStart
-              }
-              onChange={(startDate) => {
+              handleDateChange={(startDate) => {
                 formik.setFieldValue("measurementPeriodStart", startDate);
               }}
-              renderInput={(params) => {
-                const { inputProps } = params;
-                inputProps["aria-required"] = true;
-                const { onChange, ...formikFieldProps } = formik.getFieldProps(
-                  "measurementPeriodStart"
-                );
-                return (
-                  <TextField
-                    id="measurement-period-start"
-                    {...formikFieldProps}
-                    {...params}
-                    required
-                    data-testid="measurement-period-start"
-                    error={
-                      formik.touched.measurementPeriodStart &&
-                      Boolean(formik.errors.measurementPeriodStart)
-                    }
-                    helperText={formikErrorHandler(
-                      "measurementPeriodStart",
-                      true
-                    )}
-                    InputProps={{
-                      "aria-describedby":
-                        "measurement-period-start-helper-text",
-                      required: true,
-                      "aria-required": "true",
-                    }}
-                  />
-                );
-              }}
+              error={
+                formik.touched.measurementPeriodStart &&
+                Boolean(formik.errors.measurementPeriodStart)
+              }
+              helperText={formikErrorHandler("measurementPeriodStart", true)}
+              value={formik.values.measurementPeriodStart}
+              {...formik.getFieldProps("measurementPeriodStart")}
             />
           </LocalizationProvider>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <DesktopDatePicker
-              disableOpenPicker={true}
+            <DateField
               disabled={!canEdit}
+              id="measurement-period-end"
               label="Measurement Period - End Date"
-              inputFormat="MM/dd/yyyy"
-              value={
-                formik.values.measurementPeriodEnd
-                  ? makeUTCDate(new Date(formik.values.measurementPeriodEnd))
-                  : formik.values.measurementPeriodEnd
-              }
-              onChange={(endDate) => {
+              handleDateChange={(endDate) => {
                 formik.setFieldValue("measurementPeriodEnd", endDate);
               }}
-              renderInput={(params) => {
-                const { inputProps } = params;
-                inputProps["aria-required"] = true;
-                const { onChange, ...formikFieldProps } = formik.getFieldProps(
-                  "measurementPeriodEnd"
-                );
-                return (
-                  <TextField
-                    id="measurement-period-end"
-                    {...formikFieldProps}
-                    {...params}
-                    required
-                    data-testid="measurement-period-end"
-                    error={
-                      formik.touched.measurementPeriodEnd &&
-                      Boolean(formik.errors.measurementPeriodEnd)
-                    }
-                    helperText={formikErrorHandler(
-                      "measurementPeriodEnd",
-                      true
-                    )}
-                    InputProps={{
-                      "aria-describedby": "measurement-period-end-helper-text",
-                      required: true,
-                      "aria-required": "true",
-                    }}
-                  />
-                );
-              }}
+              error={
+                formik.touched.measurementPeriodEnd &&
+                Boolean(formik.errors.measurementPeriodEnd)
+              }
+              helperText={formikErrorHandler("measurementPeriodEnd", true)}
+              value={formik.values.measurementPeriodEnd}
+              {...formik.getFieldProps("measurementPeriodEnd")}
             />
           </LocalizationProvider>
         </Box>
