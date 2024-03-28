@@ -13,6 +13,7 @@ declare module "@madie/madie-util" {
     qdmExport: boolean;
     enableQdmRepeatTransfer: boolean;
     generateCMSID: boolean;
+    qdmCodeSearch: boolean;
   }
 
   export interface ServiceConfig {

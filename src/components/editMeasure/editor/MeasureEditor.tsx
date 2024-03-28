@@ -11,6 +11,7 @@ import {
   ValidationResult,
   synchingEditorCqlContent,
   isUsingEmpty,
+  MadieTerminologyEditor,
 } from "@madie/madie-editor";
 import {
   Button,
@@ -27,9 +28,11 @@ import {
   useDocumentTitle,
   routeHandlerStore,
   checkUserCanEdit,
+  useFeatureFlags,
 } from "@madie/madie-util";
 import StatusHandler from "./StatusHandler";
 import { SuccessText } from "../../../styles/editMeasure/editor";
+import "./MeasureEditor.scss";
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
@@ -87,6 +90,9 @@ const MeasureEditor = () => {
 
   const { updateMeasure } = measureStore;
   const [processing, setProcessing] = useState<boolean>(true);
+  const featureFlags = useFeatureFlags();
+  const isQDM = measure?.model?.includes("QDM");
+
   useEffect(() => {
     const subscription = measureStore.subscribe((measure: Measure) => {
       setMeasure(measure);
@@ -355,17 +361,30 @@ const MeasureEditor = () => {
               {valuesetMsg}
             </SuccessText>
           )}
-          {!processing && (
-            <MadieEditor
-              onChange={(val: string) => handleMadieEditorValue(val)}
-              value={editorVal}
-              inboundAnnotations={elmAnnotations}
-              inboundErrorMarkers={errorMarkers}
-              height="calc(100vh - 135px)"
-              readOnly={!canEdit}
-              setOutboundAnnotations={setOutboundAnnotations}
-            />
-          )}
+          {!processing &&
+            (featureFlags?.qdmCodeSearch && isQDM ? (
+              <MadieTerminologyEditor
+                onChange={(val: string) => handleMadieEditorValue(val)}
+                value={editorVal}
+                inboundAnnotations={elmAnnotations}
+                inboundErrorMarkers={errorMarkers}
+                height="calc(100vh - 135px)"
+                readOnly={!canEdit}
+                setOutboundAnnotations={setOutboundAnnotations}
+              />
+            ) : (
+              <>
+                <MadieEditor
+                  onChange={(val: string) => handleMadieEditorValue(val)}
+                  value={editorVal}
+                  inboundAnnotations={elmAnnotations}
+                  inboundErrorMarkers={errorMarkers}
+                  height="calc(100vh - 135px)"
+                  readOnly={!canEdit}
+                  setOutboundAnnotations={setOutboundAnnotations}
+                />
+              </>
+            ))}
           {processing && (
             <div
               style={{
@@ -378,38 +397,34 @@ const MeasureEditor = () => {
             </div>
           )}
         </div>
-        <div
-          tw="flex h-24 bg-white w-full sticky bottom-0 left-0 z-10"
-          data-testid="measure-editor-actions"
-        >
-          <div tw="w-1/2 flex flex-col px-10 py-2"></div>
-          {canEdit && (
-            <div
-              tw="w-1/2 flex justify-end items-center px-10 py-6"
-              style={{ alignItems: "end" }}
-            >
-              <Button
-                variant="outline"
-                tw="m-2"
-                onClick={() => setDiscardDialogOpen(true)}
-                data-testid="reset-cql-btn"
-                disabled={isCQLUnchanged}
-              >
-                Discard Changes
-              </Button>
-              <Button
-                variant="cyan"
-                tw="m-2"
-                onClick={() => updateMeasureCql()}
-                data-testid="save-cql-btn"
-                disabled={isCQLUnchanged}
-              >
-                Save
-              </Button>
-            </div>
-          )}
-        </div>
       </div>
+
+      <div className="bottom-row">
+        <div className="spacer" />
+        {canEdit && (
+          <>
+            <Button
+              variant="outline"
+              tw="m-2"
+              onClick={() => setDiscardDialogOpen(true)}
+              data-testid="reset-cql-btn"
+              disabled={isCQLUnchanged}
+            >
+              Discard Changes
+            </Button>
+            <Button
+              variant="cyan"
+              tw="m-2"
+              onClick={() => updateMeasureCql()}
+              data-testid="save-cql-btn"
+              disabled={isCQLUnchanged}
+            >
+              Save
+            </Button>
+          </>
+        )}
+      </div>
+
       <Toast
         toastKey="measure-errors-toast"
         aria-live="polite"
