@@ -36,6 +36,22 @@ declare module "@madie/madie-editor" {
     stop?: LineInfo;
     message: string;
   }
+
+  export interface EditorPropsType {
+    value: string;
+    onChange: (value: string) => void;
+    parseDebounceTime?: number;
+    inboundAnnotations?: EditorAnnotation[];
+    inboundErrorMarkers?: EditorErrorMarker[];
+    height?: string;
+    validationsEnabled?: boolean;
+    setOutboundAnnotations?: Function;
+    readOnly?: boolean;
+
+    // conditional props used to pass up annotations outside of the editor
+    setOutboundAnnotations?: Function;
+  }
+
   export type ElmTranslationError = {
     startLine: number;
     startChar: number;
@@ -88,17 +104,9 @@ declare module "@madie/madie-editor" {
 
   export function isUsingEmpty(editorVal: string): boolean;
 
-  export const MadieEditor: FC<{
-    value: string;
-    onChange: (value: string) => void;
-    parseDebounceTime?: number;
-    inboundAnnotations?: EditorAnnotation[];
-    inboundErrorMarkers?: EditorErrorMarker[];
-    height?: string;
-    validationsEnabled?: boolean;
-    setOutboundAnnotations?: Function;
-    readOnly?: boolean;
-  }>;
+  export const MadieTerminologyEditor: FC<EditorPropsType>;
+  export const MadieEditor: FC<EditorPropsType>;
+
   export const bootstrap: LifeCycleFn<void>;
   export const mount: LifeCycleFn<void>;
   export const unmount: LifeCycleFn<void>;
