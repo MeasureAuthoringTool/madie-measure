@@ -48,13 +48,18 @@ export default function EditMeasure() {
   // make reusable component to throw anywhere we want to block navigation..
   const blocker = useBlocker(() => !routeHandlerState.canTravel);
   useEffect(() => {
-    updateRouteHandlerState({
-      ...routeHandlerState,
-      pendingRoute: blocker?.location?.pathname,
-    });
-    if (blocker.location) blocker.reset();
+    if (blocker.location)
+      updateRouteHandlerState({
+        canTravel: false,
+        pendingRoute: blocker?.location?.pathname,
+      });
   }, [blocker?.location?.pathname]);
 
+  useEffect(() => {
+    if (routeHandlerState.canTravel && blocker.reset) {
+      blocker.reset();
+    }
+  }, [routeHandlerState.canTravel]);
   useEffect(() => {
     // we don't want to fire this by accident during delete.
     if (loading) {
