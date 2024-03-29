@@ -57,7 +57,7 @@ const improvementNotationOptions = [
 interface ReportingForm {
   rateAggregation: string;
   improvementNotation: string;
-  improvementNotationOther: string;
+  improvementNotationDescription: string;
 }
 
 const QDMReporting = () => {
@@ -87,7 +87,7 @@ const QDMReporting = () => {
     initialValues: {
       rateAggregation: measure?.rateAggregation || "",
       improvementNotation: measure?.improvementNotation || "",
-      improvementNotationOther: measure?.improvementNotationOther || "",
+      improvementNotationDescription: measure?.improvementNotationDescription || "",
     },
     enableReinitialize: true,
     validationSchema: QDMReportingValidator,
@@ -118,14 +118,11 @@ const QDMReporting = () => {
   };
 
   const handleSubmit = async (values) => {
-    if (formik.getFieldProps("improvementNotation").value != "Other") {
-      values.improvementNotationOther = "";
-    }
     const newMeasure: Measure = {
       ...measure,
       rateAggregation: values.rateAggregation,
       improvementNotation: values.improvementNotation,
-      improvementNotationOther: values?.improvementNotationOther,
+      improvementNotationDescription: values?.improvementNotationDescription,
     };
 
     measureServiceApi
@@ -197,32 +194,29 @@ const QDMReporting = () => {
                 )}
               />
             </div>
-
-            {formik.getFieldProps("improvementNotation").value == "Other" && (
-              <div>
-                <FieldSeparator>
-                  <TextField
-                    label="Improvement Notation (Other)"
-                    helperText={
-                      formik.touched.improvementNotationOther &&
-                      formik.errors.improvementNotationOther
-                    }
-                    error={
-                      formik.touched.improvementNotationOther &&
-                      formik.errors.improvementNotationOther
-                    }
-                    disabled={!canEdit}
-                    required={true}
-                    name="improvement-notation-other"
-                    id="improvement-notation-other"
-                    autoComplete="improvement-notation-other"
-                    placeholder="Custom Improvement Notation"
-                    data-testid="improvementNotationOtherText"
-                    {...formik.getFieldProps("improvementNotationOther")}
-                  />
-                </FieldSeparator>
-              </div>
-            )}
+            <div>
+              <TextField
+                label="Improvement Notation Description"
+                helperText={
+                  formik.touched.improvementNotationDescription &&
+                  formik.errors.improvementNotationDescription
+                }
+                error={
+                  formik.touched.improvementNotationDescription &&
+                  formik.errors.improvementNotationDescription
+                }
+                disabled={!canEdit}
+                required={
+                  formik.getFieldProps("improvementNotation").value == "Other"
+                }
+                name="improvement-notation-description"
+                id="improvement-notation-description"
+                autoComplete="improvement-notation-description"
+                placeholder="Description"
+                data-testid="improvement-notation-description"
+                {...formik.getFieldProps("improvementNotationDescription")}
+              />
+            </div>
           </Grid>
         </div>
 

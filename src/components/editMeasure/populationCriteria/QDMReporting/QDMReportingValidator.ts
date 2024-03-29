@@ -1,10 +1,10 @@
 import * as Yup from "yup";
 
 export const QDMReportingValidator = Yup.object().shape({
-  improvementNotationOther: Yup.string().when("improvementNotation", {
+  improvementNotationDescription: Yup.string().when("improvementNotation", {
     is: "Other",
     then: Yup.string().required(
-      "Custom Field is required when Other is selected"
+      "Improvement Notation Description required when Other is selected"
     ),
   }),
 });

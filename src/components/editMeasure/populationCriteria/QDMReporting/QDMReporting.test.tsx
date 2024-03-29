@@ -217,7 +217,7 @@ describe("QDMReporting component", () => {
         ...measure,
         rateAggregation: "Test",
         improvementNotation: "Decreased score indicates improvement",
-        improvementNotationOther: "",
+        improvementNotationDescription: "",
       })
     );
 
@@ -268,7 +268,7 @@ describe("QDMReporting component", () => {
         ...measure,
         rateAggregation: "Test",
         improvementNotation: "Decreased score indicates improvement",
-        improvementNotationOther: "",
+        improvementNotationDescription: "",
       })
     );
 
