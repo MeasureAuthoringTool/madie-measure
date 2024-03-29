@@ -17,13 +17,9 @@ import {
   TextField,
 } from "@madie/madie-design-system/dist/react";
 import "./QDMReporting.scss";
-import { FieldInput } from "../../../../styles/editMeasure/populationCriteria/groups";
-import {
-  FieldLabel,
-  FieldSeparator,
-} from "../../../../styles/editMeasure/populationCriteria/supplementalData";
 import { MenuItem as MuiMenuItem } from "@mui/material";
 import { QDMReportingValidator } from "./QDMReportingValidator";
+import _ from "lodash";
 const Grid = tw.div`grid grid-cols-2 gap-4   overflow-hidden w-full`;
 const improvementNotationOptions = [
   {
@@ -87,7 +83,8 @@ const QDMReporting = () => {
     initialValues: {
       rateAggregation: measure?.rateAggregation || "",
       improvementNotation: measure?.improvementNotation || "",
-      improvementNotationDescription: measure?.improvementNotationDescription || "",
+      improvementNotationDescription:
+        measure?.improvementNotationDescription || "",
     },
     enableReinitialize: true,
     validationSchema: QDMReportingValidator,
@@ -143,6 +140,13 @@ const QDMReporting = () => {
       });
   };
 
+  const handleImprovementNotationChange = (evt) => {
+    if (_.isEmpty(evt.target.value)) {
+      formik.setFieldValue("improvementNotationDescription", "");
+    }
+    formik.setFieldValue("improvementNotation", evt.target.value);
+  };
+
   return (
     <MetaDataWrapper
       header="Reporting"
@@ -192,6 +196,7 @@ const QDMReporting = () => {
                     </MuiMenuItem>
                   )
                 )}
+                onChange={handleImprovementNotationChange}
               />
             </div>
             <div>
@@ -205,7 +210,10 @@ const QDMReporting = () => {
                   formik.touched.improvementNotationDescription &&
                   formik.errors.improvementNotationDescription
                 }
-                disabled={!canEdit}
+                disabled={
+                  !canEdit ||
+                  _.isEmpty(formik.getFieldProps("improvementNotation").value)
+                }
                 required={
                   formik.getFieldProps("improvementNotation").value == "Other"
                 }
