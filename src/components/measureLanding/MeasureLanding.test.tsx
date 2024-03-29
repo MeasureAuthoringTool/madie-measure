@@ -9,6 +9,7 @@ import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import userEvent from "@testing-library/user-event";
 import { act } from "react-dom/test-utils";
+import { within } from "@testing-library/dom";
 import {
   oneItemResponse,
   multipleItemsResponse,
@@ -167,10 +168,10 @@ describe("Measure Page", () => {
       0,
       abortController.signal
     );
-
-    const pageLimit10Button = await screen.findByRole("button", {
-      name: /10/i,
-    });
+    const paginationContainer = await screen.findByTestId(
+      "pagination-container"
+    );
+    const pageLimit10Button = within(paginationContainer).getByText("10");
     userEvent.click(pageLimit10Button);
     const pageLimit25 = screen.getByRole("option", {
       name: /25/i,

@@ -196,7 +196,7 @@ describe("Measure Groups Page", () => {
     expect(scoringSelectInput.value).toBe("");
     // options will be rendered only after clicking the select,
     const scoringSelect = screen.getByTestId("scoring-select");
-    userEvent.click(getByRole(scoringSelect, "button"));
+    userEvent.click(getByRole(scoringSelect, "combobox"));
     const optionsList = await screen.findAllByTestId(/group-scoring-option/i);
     expect(optionsList).toHaveLength(4);
   });
@@ -210,7 +210,7 @@ describe("Measure Groups Page", () => {
       for await (let value of Object.values(GroupScoring)) {
         // select a scoring
         const scoringSelect = screen.getByTestId("scoring-select");
-        userEvent.click(getByRole(scoringSelect, "button"));
+        userEvent.click(getByRole(scoringSelect, "combobox"));
         await waitFor(() => {
           userEvent.click(screen.getByText(value));
         });
@@ -305,7 +305,7 @@ describe("Measure Groups Page", () => {
 
     // select a scoring
     const scoringSelect = screen.getByTestId("scoring-select");
-    userEvent.click(getByRole(scoringSelect, "button"));
+    userEvent.click(getByRole(scoringSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText("Cohort"));
     });
@@ -331,7 +331,7 @@ describe("Measure Groups Page", () => {
     const measureGroupTypeSelect = screen.getByTestId(
       "measure-group-type-dropdown"
     );
-    userEvent.click(getByRole(measureGroupTypeSelect, "button"));
+    userEvent.click(getByRole(measureGroupTypeSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText("Patient Reported Outcome"));
     });
@@ -525,7 +525,7 @@ describe("Measure Groups Page", () => {
 
     // select a scoring
     const scoringSelect = screen.getByTestId("scoring-select");
-    userEvent.click(getByRole(scoringSelect, "button"));
+    userEvent.click(getByRole(scoringSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText("Cohort"));
     });
@@ -548,7 +548,7 @@ describe("Measure Groups Page", () => {
     const measureGroupTypeSelect = screen.getByTestId(
       "measure-group-type-dropdown"
     );
-    userEvent.click(getByRole(measureGroupTypeSelect, "button"));
+    userEvent.click(getByRole(measureGroupTypeSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText("Patient Reported Outcome"));
     });
@@ -608,7 +608,7 @@ describe("Measure Groups Page", () => {
     await changePopulationBasis(populationBasis);
     // Change and verifies the scoring value to Cohort
     const scoringSelect2 = screen.getByTestId("scoring-select");
-    userEvent.click(getByRole(scoringSelect2, "button"));
+    userEvent.click(getByRole(scoringSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText("Cohort"));
     });
@@ -689,7 +689,7 @@ describe("Measure Groups Page", () => {
     group.populations[0].definition = definitionToUpdate;
 
     const measureGroupTypeSelect = getByTestId("measure-group-type-dropdown");
-    userEvent.click(getByRole(measureGroupTypeSelect, "button"));
+    userEvent.click(getByRole(measureGroupTypeSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(getByText("Patient Reported Outcome"));
     });
@@ -943,7 +943,7 @@ describe("Measure Groups Page", () => {
     const initialPopulationSelect = screen.getByTestId(
       "population-select-initial-population"
     );
-    userEvent.click(getByRole(initialPopulationSelect, "button"));
+    userEvent.click(getByRole(initialPopulationSelect, "combobox"));
     userEvent.click(screen.getByText(definitionToUpdate));
     expect(initialPopulationInput.value).toBe(definitionToUpdate);
 
@@ -1003,7 +1003,7 @@ describe("Measure Groups Page", () => {
     await changePopulationBasis("Encounter");
     // select a scoring
     const scoringSelect = screen.getByTestId("scoring-select");
-    userEvent.click(getByRole(scoringSelect, "button"));
+    userEvent.click(getByRole(scoringSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText("Cohort"));
     });
@@ -1020,7 +1020,7 @@ describe("Measure Groups Page", () => {
     const measureGroupTypeSelect = screen.getByTestId(
       "measure-group-type-dropdown"
     );
-    userEvent.click(getByRole(measureGroupTypeSelect, "button"));
+    userEvent.click(getByRole(measureGroupTypeSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText("Patient Reported Outcome"));
     });
@@ -1120,7 +1120,7 @@ describe("Measure Groups Page", () => {
     await changePopulationBasis("Encounter");
     // select a scoring
     const scoringSelect = screen.getByTestId("scoring-select");
-    userEvent.click(getByRole(scoringSelect, "button"));
+    userEvent.click(getByRole(scoringSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText("Cohort"));
     });
@@ -1139,7 +1139,7 @@ describe("Measure Groups Page", () => {
     const measureGroupTypeSelect = screen.getByTestId(
       "measure-group-type-dropdown"
     );
-    userEvent.click(getByRole(measureGroupTypeSelect, "button"));
+    userEvent.click(getByRole(measureGroupTypeSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText("Patient Reported Outcome"));
     });
@@ -1153,7 +1153,7 @@ describe("Measure Groups Page", () => {
 
     // Select the scoring value to Proportion
     const scoringSelect = screen.getByTestId("scoring-select");
-    userEvent.click(getByRole(scoringSelect, "button"));
+    userEvent.click(getByRole(scoringSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText(GroupScoring.PROPORTION));
     });
@@ -1184,7 +1184,7 @@ describe("Measure Groups Page", () => {
     const measureGroupTypeSelect = screen.getByTestId(
       "measure-group-type-dropdown"
     );
-    userEvent.click(getByRole(measureGroupTypeSelect, "button"));
+    userEvent.click(getByRole(measureGroupTypeSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText("Patient Reported Outcome"));
     });
@@ -1197,7 +1197,7 @@ describe("Measure Groups Page", () => {
 
     // Select the scoring value to RATIO
     const scoringSelect = screen.getByTestId("scoring-select");
-    userEvent.click(getByRole(scoringSelect, "button"));
+    userEvent.click(getByRole(scoringSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText(GroupScoring.RATIO));
     });
@@ -1236,7 +1236,7 @@ describe("Measure Groups Page", () => {
     const measureGroupTypeSelect = screen.getByTestId(
       "measure-group-type-dropdown"
     );
-    userEvent.click(getByRole(measureGroupTypeSelect, "button"));
+    userEvent.click(getByRole(measureGroupTypeSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText("Patient Reported Outcome"));
     });
@@ -1250,7 +1250,7 @@ describe("Measure Groups Page", () => {
 
     // Select scoring to CONTINUOUS_VARIABLE
     const scoringSelect = screen.getByTestId("scoring-select");
-    userEvent.click(getByRole(scoringSelect, "button"));
+    userEvent.click(getByRole(scoringSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText(GroupScoring.CONTINUOUS_VARIABLE));
     });
@@ -1279,7 +1279,7 @@ describe("Measure Groups Page", () => {
     const observationSelect = screen.getByTestId(
       "select-measure-observation-cv-obs"
     );
-    userEvent.click(getByRole(observationSelect, "button"));
+    userEvent.click(getByRole(observationSelect, "combobox"));
     const observationOptions = await screen.findAllByRole("option");
     expect(observationOptions).toHaveLength(1);
     userEvent.click(screen.getByText("fun"));
@@ -1290,7 +1290,7 @@ describe("Measure Groups Page", () => {
     const aggregateSelect = screen.getByTestId(
       "select-measure-observation-aggregate-cv-obs"
     );
-    userEvent.click(getByRole(aggregateSelect, "button"));
+    userEvent.click(getByRole(aggregateSelect, "combobox"));
     const aggregateOptions = await screen.findAllByRole("option");
     expect(aggregateOptions).toHaveLength(6);
     userEvent.click(screen.getByText("Count"));
@@ -1301,7 +1301,7 @@ describe("Measure Groups Page", () => {
     const measureGroupTypeSelect = screen.getByTestId(
       "measure-group-type-dropdown"
     );
-    userEvent.click(getByRole(measureGroupTypeSelect, "button"));
+    userEvent.click(getByRole(measureGroupTypeSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText("Patient Reported Outcome"));
     });
@@ -1324,7 +1324,7 @@ describe("Measure Groups Page", () => {
 
     const measureGroupTypeSelect = getByTestId("measure-group-type-dropdown");
     await act(async () => {
-      userEvent.click(getByRole(measureGroupTypeSelect, "button"));
+      userEvent.click(getByRole(measureGroupTypeSelect, "combobox"));
       await waitFor(() => {
         userEvent.click(getByText("Patient Reported Outcome"));
       });
@@ -1347,7 +1347,7 @@ describe("Measure Groups Page", () => {
     await changePopulationBasis("Encounter");
     // select a scoring
     const scoringSelect = screen.getByTestId("scoring-select");
-    userEvent.click(getByRole(scoringSelect, "button"));
+    userEvent.click(getByRole(scoringSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText("Cohort"));
     });
@@ -1363,7 +1363,7 @@ describe("Measure Groups Page", () => {
     const measureGroupTypeSelect = screen.getByTestId(
       "measure-group-type-dropdown"
     );
-    userEvent.click(getByRole(measureGroupTypeSelect, "button"));
+    userEvent.click(getByRole(measureGroupTypeSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText("Patient Reported Outcome"));
     });
@@ -1386,7 +1386,7 @@ describe("Measure Groups Page", () => {
 
     // select Ratio scoring
     const scoringSelect = screen.getByTestId("scoring-select");
-    userEvent.click(getByRole(scoringSelect, "button"));
+    userEvent.click(getByRole(scoringSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText("Ratio"));
     });
@@ -1562,7 +1562,7 @@ describe("Measure Groups Page", () => {
     renderMeasureGroupComponent();
     // select Cohort scoring
     const scoringSelect = screen.getByTestId("scoring-select");
-    userEvent.click(getByRole(scoringSelect, "button"));
+    userEvent.click(getByRole(scoringSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText("Cohort"));
     });
@@ -1578,7 +1578,7 @@ describe("Measure Groups Page", () => {
     renderMeasureGroupComponent();
     // select Proportion scoring
     const scoringSelect = screen.getByTestId("scoring-select");
-    userEvent.click(getByRole(scoringSelect, "button"));
+    userEvent.click(getByRole(scoringSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText("Proportion"));
     });
@@ -1600,7 +1600,7 @@ describe("Measure Groups Page", () => {
     renderMeasureGroupComponent();
 
     const scoringSelect = screen.getByTestId("scoring-select");
-    userEvent.click(getByRole(scoringSelect, "button"));
+    userEvent.click(getByRole(scoringSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText(GroupScoring.CONTINUOUS_VARIABLE));
     });
@@ -1707,7 +1707,7 @@ describe("Measure Groups Page", () => {
 
     // Select scoring to CONTINUOUS_VARIABLE
     const scoringSelect = screen.getByTestId("scoring-select");
-    userEvent.click(getByRole(scoringSelect, "button"));
+    userEvent.click(getByRole(scoringSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText(GroupScoring.CONTINUOUS_VARIABLE));
     });
@@ -1734,7 +1734,7 @@ describe("Measure Groups Page", () => {
     const observationSelect = screen.getByTestId(
       "select-measure-observation-cv-obs"
     );
-    userEvent.click(getByRole(observationSelect, "button"));
+    userEvent.click(getByRole(observationSelect, "combobox"));
     const observationOptions = await screen.findAllByRole("option");
     expect(observationOptions).toHaveLength(1);
     userEvent.click(screen.getByText("fun"));
@@ -1745,7 +1745,7 @@ describe("Measure Groups Page", () => {
     const aggregateSelect = screen.getByTestId(
       "select-measure-observation-aggregate-cv-obs"
     );
-    userEvent.click(getByRole(aggregateSelect, "button"));
+    userEvent.click(getByRole(aggregateSelect, "combobox"));
     const aggregateOptions = await screen.findAllByRole("option");
     expect(aggregateOptions).toHaveLength(6);
     userEvent.click(screen.getByText("Count"));
@@ -1754,7 +1754,7 @@ describe("Measure Groups Page", () => {
     const measureGroupTypeSelect = screen.getByTestId(
       "measure-group-type-dropdown"
     );
-    userEvent.click(getByRole(measureGroupTypeSelect, "button"));
+    userEvent.click(getByRole(measureGroupTypeSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText("Patient Reported Outcome"));
     });
@@ -1799,7 +1799,7 @@ describe("Measure Groups Page", () => {
     await changePopulationBasis("Encounter");
     // Select scoring to Ratio
     const scoringSelect = screen.getByTestId("scoring-select");
-    userEvent.click(getByRole(scoringSelect, "button"));
+    userEvent.click(getByRole(scoringSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText(GroupScoring.RATIO));
     });
@@ -1849,14 +1849,14 @@ describe("Measure Groups Page", () => {
     const observationSelect = await screen.getByTestId(
       "select-measure-observation-numerator"
     );
-    userEvent.click(getByRole(observationSelect, "button"));
+    userEvent.click(getByRole(observationSelect, "combobox"));
     userEvent.click(screen.getByText("fun"));
 
     // Setting numerator aggregate value
     const aggregateSelect = screen.getByTestId(
       "select-measure-observation-aggregate-numerator"
     );
-    userEvent.click(getByRole(aggregateSelect, "button"));
+    userEvent.click(getByRole(aggregateSelect, "combobox"));
     userEvent.click(screen.getByText(AggregateFunctionType.MAXIMUM));
 
     await waitFor(() =>

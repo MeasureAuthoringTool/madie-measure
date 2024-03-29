@@ -202,7 +202,10 @@ export default function MeasureLanding() {
                 currentPage={currentPage}
                 setErrMsg={setErrMsg}
               />
-              <div className="pagination-container">
+              <div
+                className="pagination-container"
+                data-testid="pagination-container"
+              >
                 {totalItems > 0 && (
                   <Pagination
                     totalItems={totalItems}
