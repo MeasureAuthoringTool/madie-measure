@@ -63,6 +63,9 @@ const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 
 let serviceApiMock: MeasureServiceApi;
+const increasedNotation = "Increased score indicates improvement";
+const decreasedNotation = "Decreased score indicates improvement";
+const otherNotation = "Other";
 
 describe("QDMReporting component", () => {
   beforeEach(() => {
@@ -120,7 +123,7 @@ describe("QDMReporting component", () => {
     });
     expect(rateAggregation.value).toBe("Test");
 
-    await selectAnOptionForImprovementNotation();
+    await selectAnOptionForImprovementNotation(decreasedNotation);
 
     const cancelButton = getByRole("button", {
       name: "Discard Changes",
@@ -159,7 +162,7 @@ describe("QDMReporting component", () => {
     });
     expect(rateAggregation.value).toBe("Test");
 
-    await selectAnOptionForImprovementNotation();
+    await selectAnOptionForImprovementNotation(decreasedNotation);
 
     const cancelButton = getByRole("button", {
       name: "Discard Changes",
@@ -204,7 +207,7 @@ describe("QDMReporting component", () => {
     });
     expect(rateAggregation.value).toBe("Test");
 
-    await selectAnOptionForImprovementNotation();
+    await selectAnOptionForImprovementNotation(decreasedNotation);
 
     const saveButton = getByRole("button", {
       name: "Save",
@@ -217,7 +220,7 @@ describe("QDMReporting component", () => {
         ...measure,
         rateAggregation: "Test",
         improvementNotation: "Decreased score indicates improvement",
-        improvementNotationOther: "",
+        improvementNotationDescription: "",
       })
     );
 
@@ -255,7 +258,7 @@ describe("QDMReporting component", () => {
     });
     expect(rateAggregation.value).toBe("Test");
 
-    await selectAnOptionForImprovementNotation();
+    await selectAnOptionForImprovementNotation(decreasedNotation);
 
     const saveButton = getByRole("button", {
       name: "Save",
@@ -268,7 +271,7 @@ describe("QDMReporting component", () => {
         ...measure,
         rateAggregation: "Test",
         improvementNotation: "Decreased score indicates improvement",
-        improvementNotationOther: "",
+        improvementNotationDescription: "",
       })
     );
 
@@ -284,9 +287,48 @@ describe("QDMReporting component", () => {
       expect(toastCloseButton).not.toBeInTheDocument();
     });
   });
+
+  test("Improvement Notation description is mandatory for 'Other' Improvement Notation", async () => {
+    render(<QDMReporting />);
+    const description = screen.getByTestId(
+      "improvement-notation-description-input"
+    ) as HTMLInputElement;
+    // if no notation is selected
+    expect(description).toBeDisabled();
+    // select notation
+    await selectAnOptionForImprovementNotation(otherNotation);
+    expect(description).toBeEnabled();
+    expect(description.value).toBe("");
+    const saveButton = getByRole("button", {
+      name: "Save",
+    });
+    expect(saveButton).toBeInTheDocument();
+    // save btn should be disabled until description is entered
+    await waitFor(() => expect(saveButton).toBeDisabled());
+    userEvent.type(description, "Test description");
+    await waitFor(() => expect(saveButton).toBeEnabled());
+  });
+
+  test("Improvement Notation description is not mandatory for Increased Improvement Notation", async () => {
+    render(<QDMReporting />);
+    // for increased notation
+    await selectAnOptionForImprovementNotation(increasedNotation);
+    let description = screen.getByTestId(
+      "improvement-notation-description-input"
+    ) as HTMLInputElement;
+    expect(description.value).toBe("");
+    // save btn should not be disabled
+    await waitFor(() =>
+      expect(
+        getByRole("button", {
+          name: "Save",
+        })
+      ).toBeEnabled()
+    );
+  });
 });
 
-const selectAnOptionForImprovementNotation = async () => {
+const selectAnOptionForImprovementNotation = async (notationValue) => {
   // verifies default value and selects a new value from options
   const improvementNotation = screen.getByLabelText(
     "Improvement Notation"
@@ -298,10 +340,8 @@ const selectAnOptionForImprovementNotation = async () => {
   });
   userEvent.click(
     within(improvementNotationOptions).getByRole("option", {
-      name: "Decreased score indicates improvement",
+      name: notationValue,
     })
   );
-  expect(await improvementNotation).toHaveTextContent(
-    "Decreased score indicates improvement"
-  );
+  expect(await improvementNotation).toHaveTextContent(notationValue);
 };
