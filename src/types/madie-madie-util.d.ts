@@ -11,10 +11,9 @@ declare module "@madie/madie-util" {
 
   interface FeatureFlags {
     qdmExport: boolean;
-    qdmMeasureDefinitions: boolean;
-    qdmMeasureReferences: boolean;
     enableQdmRepeatTransfer: boolean;
     generateCMSID: boolean;
+    qdmCodeSearch: boolean;
   }
 
   export interface ServiceConfig {
