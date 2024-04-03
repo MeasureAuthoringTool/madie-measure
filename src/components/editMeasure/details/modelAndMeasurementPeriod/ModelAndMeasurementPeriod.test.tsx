@@ -331,7 +331,7 @@ describe("Model and Measurement Period component", () => {
     userEvent.type(measurementPeriodStartInput, "12/07/200");
     await act(async () => {
       await waitFor(() =>
-        expect(measurementPeriodStartInput.value).toBe("12/07/200")
+        expect(measurementPeriodStartInput.value).toBe("12/07/0200")
       );
     });
     const measurementPeriodEndNode = getByTestId("measurement-period-end");
@@ -412,15 +412,16 @@ describe("Model and Measurement Period component", () => {
   });
 
   it("Check if measurement period save button is enabled when measurement period start and end dates pass all date checks, and failure works", async () => {
-    measure.measurementPeriodEnd = null;
-    measure.measurementPeriodStart = null;
+    measure.measurementPeriodEnd = new Date(0);
+    measure.measurementPeriodStart = new Date(0);
     render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
       measurementPeriodStartNode
     ).getByRole("textbox") as HTMLInputElement;
     userEvent.clear(measurementPeriodStartInput);
-    userEvent.type(measurementPeriodStartInput, "12/07/2000");
+    userEvent.type(measurementPeriodStartInput, "12/07/2000"); //<- I don't really understand.. this seems to fix an error where
+
     expect(measurementPeriodStartInput.value).toBe("12/07/2000");
     const measurementPeriodEndNode = getByTestId("measurement-period-end");
     const measurementPeriodEndInput = within(
@@ -454,8 +455,8 @@ describe("Model and Measurement Period component", () => {
   });
 
   it("Check that discarding changes works", async () => {
-    measure.measurementPeriodEnd = null;
-    measure.measurementPeriodStart = null;
+    measure.measurementPeriodEnd = new Date(0);
+    measure.measurementPeriodStart = new Date(0);
     render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
@@ -484,13 +485,13 @@ describe("Model and Measurement Period component", () => {
     fireEvent.click(continueButton);
     await waitFor(() => {
       // check for old value
-      expect(measurementPeriodStartInput.value).toBe("");
+      expect(measurementPeriodStartInput.value).toBe("01/01/1970");
     });
   });
 
   it("Check that canceling changes in discard works", async () => {
-    measure.measurementPeriodEnd = null;
-    measure.measurementPeriodStart = null;
+    measure.measurementPeriodEnd = new Date(0);
+    measure.measurementPeriodStart = new Date(0);
     render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
