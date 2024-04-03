@@ -95,7 +95,7 @@ describe("Base Configuration component", () => {
     // options will be rendered only after clicking the select,
     const scoringSelect = getByTestId("scoring-select");
     const scoringSelectDropdown = within(scoringSelect).getByRole(
-      "combobox"
+      "button"
     ) as HTMLInputElement;
     userEvent.click(scoringSelectDropdown);
 
@@ -112,7 +112,7 @@ describe("Base Configuration component", () => {
 
     const scoringSelect = getByTestId("scoring-select");
     const scoringSelectDropdown = within(scoringSelect).getByRole(
-      "combobox"
+      "button"
     ) as HTMLInputElement;
     userEvent.click(scoringSelectDropdown);
 
@@ -148,7 +148,7 @@ describe("Base Configuration component", () => {
 
     const scoringSelect = getByTestId("scoring-select");
     const scoringSelectDropdown = within(scoringSelect).getByRole(
-      "combobox"
+      "button"
     ) as HTMLInputElement;
     userEvent.click(scoringSelectDropdown);
 
@@ -190,7 +190,7 @@ describe("Base Configuration component", () => {
 
     const scoringSelect = getByTestId("scoring-select");
     const scoringSelectDropdown = within(scoringSelect).getByRole(
-      "combobox"
+      "button"
     ) as HTMLInputElement;
     userEvent.click(scoringSelectDropdown);
 
@@ -256,7 +256,7 @@ describe("Base Configuration component", () => {
 
     const scoringSelect = getByTestId("scoring-select");
     const scoringSelectDropdown = within(scoringSelect).getByRole(
-      "combobox"
+      "button"
     ) as HTMLInputElement;
     userEvent.click(scoringSelectDropdown);
 
@@ -323,7 +323,7 @@ describe("Base Configuration component", () => {
 
     const scoringSelect = getByTestId("scoring-select");
     const scoringSelectDropdown = within(scoringSelect).getByRole(
-      "combobox"
+      "button"
     ) as HTMLInputElement;
     userEvent.click(scoringSelectDropdown);
 
@@ -412,7 +412,7 @@ describe("Base Configuration component", () => {
 
     const scoringSelect = getByTestId("scoring-select");
     const scoringSelectDropdown = within(scoringSelect).getByRole(
-      "combobox"
+      "button"
     ) as HTMLInputElement;
     userEvent.click(scoringSelectDropdown);
 
@@ -502,7 +502,7 @@ describe("Base Configuration component", () => {
 
     const scoringSelect = getByTestId("scoring-select");
     const scoringSelectDropdown = within(scoringSelect).getByRole(
-      "combobox"
+      "button"
     ) as HTMLInputElement;
     userEvent.click(scoringSelectDropdown);
 

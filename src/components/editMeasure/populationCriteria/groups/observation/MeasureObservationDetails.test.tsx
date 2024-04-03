@@ -184,7 +184,7 @@ describe("Measure Observation Details", () => {
     const observationSelect = screen.getByTestId(
       "select-measure-observation-obs1"
     );
-    userEvent.click(getByRole(observationSelect, "combobox"));
+    userEvent.click(getByRole(observationSelect, "button"));
     const observationOptions = await screen.findAllByRole("option");
     expect(observationOptions).toHaveLength(1);
     expect(observationOptions[0].textContent).toEqual("-");
@@ -228,7 +228,7 @@ describe("Measure Observation Details", () => {
       "select-measure-observation-obs1"
     );
     expect(observationSelect).toBeInTheDocument();
-    userEvent.click(getByRole(observationSelect, "combobox"));
+    userEvent.click(getByRole(observationSelect, "button"));
     const observationOptions = await screen.findAllByRole("option");
     expect(observationOptions).toHaveLength(3);
     expect(observationOptions[0].textContent).toEqual("-");
@@ -252,7 +252,7 @@ describe("Measure Observation Details", () => {
     );
 
     expect(aggregateFunctionSelect).toBeInTheDocument();
-    userEvent.click(getByRole(aggregateFunctionSelect, "combobox"));
+    userEvent.click(getByRole(aggregateFunctionSelect, "button"));
     const aggregateFunctionOptions = await screen.findAllByRole("option");
     expect(aggregateFunctionOptions).toHaveLength(7);
 
@@ -319,7 +319,7 @@ describe("Measure Observation Details", () => {
       "select-measure-observation-obs1"
     );
     expect(observationSelect).toBeInTheDocument();
-    userEvent.click(getByRole(observationSelect, "combobox"));
+    userEvent.click(getByRole(observationSelect, "button"));
     const observationOptions = await screen.findAllByRole("option");
     expect(observationOptions).toHaveLength(3);
     expect(observationOptions[0].textContent).toEqual("-");
@@ -414,7 +414,7 @@ describe("Measure Observation Details", () => {
       "select-measure-observation-obs1"
     );
     expect(observationSelect).toBeInTheDocument();
-    userEvent.click(getByRole(observationSelect, "combobox"));
+    userEvent.click(getByRole(observationSelect, "button"));
     const observationOptions = await screen.findAllByRole("option");
     expect(observationOptions).toHaveLength(3);
     expect(observationOptions[0].textContent).toEqual("-");
@@ -455,7 +455,7 @@ describe("Measure Observation Details", () => {
     const aggregateSelect = screen.getByTestId(
       "select-measure-observation-aggregate-obs1"
     );
-    userEvent.click(getByRole(aggregateSelect, "combobox"));
+    userEvent.click(getByRole(aggregateSelect, "button"));
     const aggregateOptions = await screen.findAllByRole("option");
     expect(aggregateOptions).toHaveLength(7);
     userEvent.click(screen.getByText("Count"));
@@ -501,7 +501,7 @@ describe("Measure Observation Details", () => {
     const aggregateSelect = screen.getByTestId(
       "select-measure-observation-aggregate-obs1"
     );
-    userEvent.click(getByRole(aggregateSelect, "combobox"));
+    userEvent.click(getByRole(aggregateSelect, "button"));
     userEvent.click(screen.getByText("Count"));
     expect(aggregateInput.value).toBe("");
   });
