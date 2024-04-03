@@ -80,6 +80,39 @@ describe("MeasureServiceApi Tests", () => {
     }
   });
 
+  it("test fetchMeasure success", async () => {
+    const measure: Measure = {
+      id: "1234AFDE",
+      measureName: "measure - A",
+    } as Measure;
+    const resp = { status: 200, data: measure };
+    mockedAxios.get.mockResolvedValue(resp);
+
+    const measuresList = await measureServiceApi.fetchMeasure("1234AFDE");
+    expect(mockedAxios.get).toBeCalledTimes(1);
+    expect(measuresList).toEqual(measure);
+  });
+
+  it("test fetchMeasure failure", async () => {
+    const errorMessage = "Unable to fetch measure 1234AFDE";
+    mockedAxios.get.mockImplementationOnce(() =>
+      Promise.reject(new Error(errorMessage))
+    );
+    await expect(measureServiceApi.fetchMeasure("1234AFDE")).rejects.toThrow(
+      errorMessage
+    );
+  });
+
+  it("fails to delete a Measure Group if groupId is falsy", async () => {
+    const errorMessage = "Failed to delete the measure group.";
+    mockedAxios.delete.mockImplementationOnce(() =>
+      Promise.reject(new Error(errorMessage))
+    );
+    await expect(measureServiceApi.deleteMeasureGroup("", "")).rejects.toThrow(
+      errorMessage
+    );
+  });
+
   it("handles fetch measure draft status rejection", async () => {
     const resp = { status: 500, data: "failure", error: { message: "error" } };
     mockedAxios.get.mockRejectedValueOnce(resp);
