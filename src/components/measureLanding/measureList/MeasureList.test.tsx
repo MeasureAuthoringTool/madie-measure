@@ -1084,7 +1084,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockRejectedValue(error),
-      };
+      } as unknown as MeasureServiceApi;
     });
 
     const { getByTestId, unmount } = render(
@@ -1130,7 +1130,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockRejectedValue(error),
-      };
+      } as unknown as MeasureServiceApi;
     });
 
     const { getByTestId, unmount, queryByTestId } = render(
@@ -1175,7 +1175,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockRejectedValue(error),
-      };
+      } as unknown as MeasureServiceApi;
     });
 
     measures[2].cqlErrors = true;
@@ -1224,7 +1224,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockRejectedValue(error),
-      };
+      } as unknown as MeasureServiceApi;
     });
 
     measures[2].errors = [
@@ -1274,7 +1274,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockRejectedValue(error),
-      };
+      } as unknown as MeasureServiceApi;
     });
 
     const { getByTestId, unmount } = render(
@@ -1321,7 +1321,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockRejectedValue(error),
-      };
+      } as unknown as MeasureServiceApi;
     });
 
     const { getByTestId, unmount } = render(
@@ -1366,7 +1366,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockRejectedValue(error),
-      };
+      } as unknown as MeasureServiceApi;
     });
 
     const { getByTestId, unmount } = render(
@@ -1410,7 +1410,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockRejectedValue(error),
-      };
+      } as unknown as MeasureServiceApi;
     });
 
     const org: Organization = {
@@ -1483,9 +1483,7 @@ describe("Measure List component", () => {
     );
 
     const actionButton = getByTestId(`measure-action-${measures[0].id}`);
-    act(() => {
-      fireEvent.click(actionButton);
-    });
+    userEvent.click(actionButton);
     window.URL.createObjectURL = jest
       .fn()
       .mockReturnValueOnce("http://fileurl");
@@ -1494,12 +1492,12 @@ describe("Measure List component", () => {
     act(() => {
       fireEvent.click(exportButton);
     });
-    await waitFor(() => {
-      const cancelButton = getByTestId("ds-btn");
-      expect(cancelButton).toBeInTheDocument();
-      fireEvent.click(cancelButton);
-      expect(cancelButton).not.toBeInTheDocument();
-    });
+
+    const cancelButton = getByTestId("ds-btn");
+    expect(cancelButton).toBeInTheDocument();
+    userEvent.click(cancelButton);
+    expect(cancelButton).not.toBeInTheDocument();
+
     unmount();
   });
 
@@ -1517,7 +1515,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockResolvedValue(success),
-      };
+      } as unknown as MeasureServiceApi;
     });
 
     const { getByTestId, getByText, unmount, queryByText } = render(
@@ -1549,14 +1547,14 @@ describe("Measure List component", () => {
       .mockReturnValueOnce("http://fileurl");
     const exportButton = getByTestId(`export-measure-${measures[0].id}`);
     expect(exportButton).toBeInTheDocument();
-    act(() => {
-      fireEvent.click(exportButton);
-    });
+
+    userEvent.click(exportButton);
+
     await waitFor(() => {
       expect(getByText("Measure exported successfully")).toBeInTheDocument();
       const continueButton = getByTestId("ds-btn");
       expect(continueButton).toBeInTheDocument();
-      fireEvent.click(continueButton);
+      userEvent.click(continueButton);
       expect(continueButton).not.toBeInTheDocument();
     });
     unmount();
