@@ -107,6 +107,7 @@ export default function MeasureList(props: {
   ] = useState(null);
   const [additionalSelectOptionProps, setAdditionalSelectOptionProps] =
     useState(null);
+  const [editViewButtonLabel, setEditViewButtonLabel] = useState<string>(null);
 
   const targetMeasure = useRef<Measure>();
 
@@ -234,16 +235,19 @@ export default function MeasureList(props: {
     }
     return true;
   };
-  const handleOpen = async (
+  const handlePopOverOpen = async (
     selected: Measure,
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
     setOptionsOpen(true);
     setSelectedMeasure(selected);
     setAnchorEl(event.currentTarget);
-    setCanEdit(
-      checkUserCanEdit(selected?.measureSet?.owner, selected?.measureSet?.acls)
+    const isSelectedMeasureEditable = checkUserCanEdit(
+      selected?.measureSet?.owner,
+      selected?.measureSet?.acls
     );
+    setCanEdit(isSelectedMeasureEditable);
+    setEditViewButtonLabel(isSelectedMeasureEditable ? "Edit" : "View");
 
     let options = [];
     // additional options are outside the edit flag
@@ -601,7 +605,7 @@ export default function MeasureList(props: {
                           variant="outline-secondary"
                           name="Select"
                           onClick={(e) => {
-                            handleOpen(measure, e);
+                            handlePopOverOpen(measure, e);
                           }}
                           data-testid={`measure-action-${measure.id}`}
                           aria-label={`Measure ${measure?.measureName} version ${measure?.version} draft status ${measure?.measureMetaData?.draft} Select`}
@@ -621,7 +625,7 @@ export default function MeasureList(props: {
                 handleClose={handleClose}
                 canEdit={canEdit}
                 editViewSelectOptionProps={{
-                  label: "View",
+                  label: editViewButtonLabel,
                   toImplementFunction: viewEditRedirect,
                   dataTestId: `view-measure-${selectedMeasure?.id}`,
                 }}

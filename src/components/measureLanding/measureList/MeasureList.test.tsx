@@ -1,10 +1,10 @@
 import * as React from "react";
 import {
+  cleanup,
   fireEvent,
   render,
   screen,
   waitFor,
-  cleanup,
 } from "@testing-library/react";
 import { Measure, Model } from "@madie/madie-models";
 import MeasureList from "./MeasureList";
@@ -15,7 +15,8 @@ import { oneItemResponse } from "../../__mocks__/mockMeasureResponses";
 import userEvent from "@testing-library/user-event";
 import { v4 as uuid } from "uuid";
 import ServiceContext, { ServiceConfig } from "../../../api/ServiceContext";
-import { act, Simulate } from "react-dom/test-utils";
+import { Simulate } from "react-dom/test-utils";
+// @ts-ignore
 import { useFeatureFlags } from "@madie/madie-util";
 
 // CSSStyleDeclaration
@@ -68,7 +69,7 @@ const testGroup = [
     measureGroupTypes: ["OUTCOME"],
   },
 ];
-const measures: Measure[] = [
+const measures = [
   {
     id: "IDIDID1",
     measureHumanReadableId: null,
@@ -82,7 +83,7 @@ const measures: Measure[] = [
     createdBy: MEASURE_CREATEDBY,
     lastModifiedAt: null,
     lastModifiedBy: null,
-    model: "QDM",
+    model: Model.QDM_5_6,
     active: true,
     measureMetaData: {
       draft: true,
@@ -100,7 +101,7 @@ const measures: Measure[] = [
     createdBy: null,
     lastModifiedAt: null,
     lastModifiedBy: null,
-    model: "FHIR",
+    model: Model.QICORE,
     active: false,
     measureMetaData: {
       draft: true,
@@ -120,7 +121,7 @@ const measures: Measure[] = [
     createdBy: null,
     lastModifiedAt: null,
     lastModifiedBy: null,
-    model: Model.QICORE.valueOf(),
+    model: Model.QICORE,
     active: false,
     measureMetaData: {
       draft: false,
@@ -146,7 +147,7 @@ const measures: Measure[] = [
       draft: false,
     },
   },
-];
+] as unknown as Measure[];
 const checkValidSuccess = {
   status: 200,
   response: {
@@ -234,15 +235,13 @@ describe("Measure List component", () => {
     const selectButton1 = await findByRole("button", {
       name: "Measure draft measure - B version 0.0.000 draft status true Select",
     });
-    act(() => {
-      fireEvent.click(selectButton1);
-    });
+    userEvent.click(selectButton1);
     const editButton = await findByRole("button", {
-      name: "View",
+      name: "Edit",
     });
     expect(editButton).toBeInTheDocument();
     expect(window.location.href).toBe("http://localhost/");
-    fireEvent.click(editButton);
+    userEvent.click(editButton);
     expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID2/edit/details");
     unmount();
   });
@@ -517,7 +516,7 @@ describe("Measure List component", () => {
       return useMeasureServiceMockRejected;
     });
 
-    const { getByTestId, getByLabelText, unmount } = render(
+    const { getByTestId, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -548,7 +547,9 @@ describe("Measure List component", () => {
       target: { value: "major" },
     });
     expect(typeInput.value).toBe("major");
-    const confirmVersionNode = await getByTestId("confirm-version-input");
+    const confirmVersionNode = getByTestId(
+      "confirm-version-input"
+    ) as HTMLInputElement;
     userEvent.type(confirmVersionNode, "1.0.000");
     Simulate.change(confirmVersionNode);
     expect(confirmVersionNode.value).toBe("1.0.000");
@@ -577,7 +578,7 @@ describe("Measure List component", () => {
       return useMeasureServiceMockRejected;
     });
 
-    const { getByTestId, getByLabelText, unmount } = render(
+    const { getByTestId, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -609,7 +610,9 @@ describe("Measure List component", () => {
       target: { value: "major" },
     });
     expect(typeInput.value).toBe("major");
-    const confirmVersionNode = await getByTestId("confirm-version-input");
+    const confirmVersionNode = getByTestId(
+      "confirm-version-input"
+    ) as HTMLInputElement;
     userEvent.type(confirmVersionNode, "1.0.000");
     Simulate.change(confirmVersionNode);
     expect(confirmVersionNode.value).toBe("1.0.000");
@@ -639,7 +642,7 @@ describe("Measure List component", () => {
       return useMeasureServiceMockRejected;
     });
 
-    const { getByTestId, getByLabelText, unmount } = render(
+    const { getByTestId, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -669,7 +672,9 @@ describe("Measure List component", () => {
       target: { value: "major" },
     });
     expect(typeInput.value).toBe("major");
-    const confirmVersionNode = await getByTestId("confirm-version-input");
+    const confirmVersionNode = getByTestId(
+      "confirm-version-input"
+    ) as HTMLInputElement;
     userEvent.type(confirmVersionNode, "1.0.000");
     Simulate.change(confirmVersionNode);
     expect(confirmVersionNode.value).toBe("1.0.000");
@@ -695,7 +700,7 @@ describe("Measure List component", () => {
     useMeasureServiceMock.mockImplementation(() => {
       return useMeasureServiceMockRejected;
     });
-    const { getByTestId, getByLabelText, queryByTestId, unmount } = render(
+    const { getByTestId, queryByTestId, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -725,7 +730,9 @@ describe("Measure List component", () => {
       target: { value: "major" },
     });
     expect(typeInput.value).toBe("major");
-    const confirmVersionNode = await getByTestId("confirm-version-input");
+    const confirmVersionNode = getByTestId(
+      "confirm-version-input"
+    ) as HTMLInputElement;
     userEvent.type(confirmVersionNode, "1.0.000");
     Simulate.change(confirmVersionNode);
     expect(confirmVersionNode.value).toBe("1.0.000");
@@ -765,7 +772,7 @@ describe("Measure List component", () => {
     useMeasureServiceMock.mockImplementation(() => {
       return useMeasureServiceMockRejected;
     });
-    const { getByTestId, getByLabelText, queryByTestId, unmount } = render(
+    const { getByTestId, queryByTestId, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -795,7 +802,9 @@ describe("Measure List component", () => {
       target: { value: "major" },
     });
     expect(typeInput.value).toBe("major");
-    const confirmVersionNode = await getByTestId("confirm-version-input");
+    const confirmVersionNode = getByTestId(
+      "confirm-version-input"
+    ) as HTMLInputElement;
     userEvent.type(confirmVersionNode, "1.0.000");
     Simulate.change(confirmVersionNode);
     expect(confirmVersionNode.value).toBe("1.0.000");
@@ -804,11 +813,9 @@ describe("Measure List component", () => {
       expect(
         screen.getByTestId("invalid-test-case-dialog")
       ).toBeInTheDocument();
-      act(() => {
-        fireEvent.click(
-          screen.getByTestId("invalid-test-dialog-continue-button")
-        );
-      });
+      fireEvent.click(
+        screen.getByTestId("invalid-test-dialog-continue-button")
+      );
     });
     await waitFor(() => {
       expect(getByTestId("success-toast")).toHaveTextContent(
@@ -826,7 +833,7 @@ describe("Measure List component", () => {
   });
 
   it("should display draft/version actions based on whether measure is draft or versioned", async () => {
-    const { findByRole, unmount } = render(
+    const { findByRole } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -1077,7 +1084,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockRejectedValue(error),
-      };
+      } as unknown as MeasureServiceApi;
     });
 
     const { getByTestId, unmount } = render(
@@ -1122,7 +1129,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockRejectedValue(error),
-      };
+      } as unknown as MeasureServiceApi;
     });
 
     const { getByTestId, unmount } = render(
@@ -1169,7 +1176,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockRejectedValue(error),
-      };
+      } as unknown as MeasureServiceApi;
     });
 
     const { getByTestId, unmount } = render(
@@ -1216,7 +1223,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockRejectedValue(error),
-      };
+      } as unknown as MeasureServiceApi;
     });
 
     const { getByTestId, unmount } = render(
@@ -1261,7 +1268,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockRejectedValue(error),
-      };
+      } as unknown as MeasureServiceApi;
     });
 
     const { getByTestId, unmount } = render(
@@ -1307,7 +1314,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockResolvedValue(success),
-      };
+      } as unknown as MeasureServiceApi;
     });
 
     const { getByTestId, getByText, unmount } = render(
@@ -1331,17 +1338,13 @@ describe("Measure List component", () => {
     );
 
     const actionButton = getByTestId(`measure-action-${measures[0].id}`);
-    act(() => {
-      fireEvent.click(actionButton);
-    });
+    fireEvent.click(actionButton);
     window.URL.createObjectURL = jest
       .fn()
       .mockReturnValueOnce("http://fileurl");
     const exportButton = getByTestId(`export-measure-${measures[0].id}`);
     expect(exportButton).toBeInTheDocument();
-    act(() => {
-      fireEvent.click(exportButton);
-    });
+    fireEvent.click(exportButton);
     await waitFor(() => {
       expect(getByText("Measure exported successfully")).toBeInTheDocument();
     });
