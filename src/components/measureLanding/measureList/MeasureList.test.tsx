@@ -1557,7 +1557,7 @@ describe("Measure List component", () => {
       const continueButton = getByTestId("ds-btn");
       expect(continueButton).toBeInTheDocument();
       fireEvent.click(continueButton);
-      expect(queryByText("Measure exported successfully")).toBeInTheDocument();
+      expect(continueButton).not.toBeInTheDocument();
     });
     unmount();
   });
