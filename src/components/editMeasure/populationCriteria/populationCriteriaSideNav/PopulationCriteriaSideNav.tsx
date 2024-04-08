@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import tw, { styled } from "twin.macro";
+import tw from "twin.macro";
 import "styled-components/macro";
 import { useLocation, useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
@@ -10,6 +10,7 @@ import "../../../common/madie-link.scss";
 import { DSLink, Tabs, Tab } from "@madie/madie-design-system/dist/react";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
+const InnerWrapper = tw.div`flex-grow flex flex-col`;
 const Nav = tw.nav`flex-1 space-y-1 bg-slate`;
 
 export interface PopulationCriteriaSideNavProp {
@@ -32,15 +33,12 @@ export default function PopulationCriteriaSideNav(
     setSideNavLinks,
     measureId,
     measureGroupNumber,
-    setMeasureGroupNumber,
-    isFormDirty = false,
     isQDM,
   } = props;
   const { pathname } = useLocation();
   const [showPopulationCriteriaTabs, setShowPopulationCriteriaTabs] =
     useState<boolean>(true);
   let navigate = useNavigate();
-  const populationCriteriaTabsFeatureFlag = false;
   const groupsBaseUrl = "/measures/" + measureId + "/edit/groups";
   const QdmReportingBaseUrl = "/measures/" + measureId + "/edit/reporting";
 
@@ -110,95 +108,113 @@ export default function PopulationCriteriaSideNav(
     },
   ];
 
-  // for tracking active secondary link
-
   return (
     <OuterWrapper>
-      <Nav aria-label="Sidebar">
-        {isQDM && (
-          <Tabs
-            type="C"
-            orientation="vertical"
-            value={pathname}
-            onChange={(e, v) => {
-              navigate(v);
-            }}
-          >
-            <Tab
+      <InnerWrapper className="edit-measure-side-nav">
+        <Nav aria-label="Sidebar">
+          {isQDM && (
+            <Tabs
               type="C"
-              label="Base Configuration"
-              value={baseConfigurationUrl}
-              data-testId="leftPanelMeasureBaseConfigurationTab"
-              id="sideNavMeasureBaseConfiguration"
-            />
-          </Tabs>
-        )}
-        {sideNavLinks &&
-          sideNavLinks?.map((tab) => (
-            <>
-              <button
-                onClick={() => {
-                  handlePopulationCriteriaCollapse(tab);
-                }}
-                data-testId={tab.dataTestId}
-                className={
-                  pathname === tab.href ? "tab-title active" : "tab-title "
-                }
-                id={tab.title}
-                tw="px-2"
-              >
-                {tab.title}
-                <span className="tab-dropdown">
-                  {tab.title === "Population Criteria" &&
-                    (showPopulationCriteriaTabs ? (
-                      <ExpandLessIcon />
-                    ) : (
-                      <ExpandMoreIcon />
-                    ))}
-                </span>
-              </button>
-              {tab.title === "Population Criteria" &&
-                showPopulationCriteriaTabs && (
-                  <>
-                    <Tabs
-                      type="C"
-                      size="standard"
-                      orientation="vertical"
-                      value={
-                        pathname.includes("/groups") ? measureGroupNumber : null
-                      }
-                    >
-                      {tab?.groups?.map((linkInfo, index) => {
-                        return (
-                          <Tab
-                            value={index}
-                            key={linkInfo.title}
-                            onClick={(e) => initiateNavigateGroupClick(e)}
-                            type="C"
-                            orientation="vertical"
-                            id={index}
-                            label={linkInfo.title}
-                            data-testid={linkInfo.dataTestId}
-                          />
-                        );
-                      })}
-                    </Tabs>
-                    {canEdit && (
-                      <DSLink
-                        className="madie-link"
-                        style={{ color: "#125496" }}
-                        onClick={(e) => initiateBlankMeasureGroupClick(e)}
-                        data-testid="add-measure-group-button"
+              orientation="vertical"
+              value={pathname}
+              onChange={(e, v) => {
+                navigate(v);
+              }}
+            >
+              <Tab
+                type="C"
+                label="Base Configuration"
+                value={baseConfigurationUrl}
+                data-testId="leftPanelMeasureBaseConfigurationTab"
+                id="sideNavMeasureBaseConfiguration"
+              />
+            </Tabs>
+          )}
+          {sideNavLinks &&
+            sideNavLinks?.map((tab) => (
+              <>
+                <button
+                  onClick={() => {
+                    handlePopulationCriteriaCollapse(tab);
+                  }}
+                  data-testId={tab.dataTestId}
+                  className={
+                    pathname === tab.href ? "tab-title active" : "tab-title "
+                  }
+                  id={tab.title}
+                >
+                  {tab.title}
+                  <span className="tab-dropdown">
+                    {tab.title === "Population Criteria" &&
+                      (showPopulationCriteriaTabs ? (
+                        <ExpandLessIcon />
+                      ) : (
+                        <ExpandMoreIcon />
+                      ))}
+                  </span>
+                </button>
+                {tab.title === "Population Criteria" &&
+                  showPopulationCriteriaTabs && (
+                    <>
+                      <Tabs
+                        type="C"
+                        size="standard"
+                        orientation="vertical"
+                        value={
+                          pathname.includes("/groups")
+                            ? measureGroupNumber
+                            : null
+                        }
                       >
-                        <AddIcon className="add-icon" fontSize="small" /> Add
-                        Population Criteria
-                      </DSLink>
-                    )}
-                  </>
-                )}
-            </>
-          ))}
-        {isQDM && (
+                        {tab?.groups?.map((linkInfo, index) => {
+                          return (
+                            <Tab
+                              value={index}
+                              key={linkInfo.title}
+                              onClick={(e) => initiateNavigateGroupClick(e)}
+                              type="C"
+                              orientation="vertical"
+                              id={index}
+                              label={linkInfo.title}
+                              data-testid={linkInfo.dataTestId}
+                            />
+                          );
+                        })}
+                      </Tabs>
+                      {canEdit && (
+                        <DSLink
+                          className="madie-link"
+                          style={{ color: "#125496" }}
+                          onClick={(e) => initiateBlankMeasureGroupClick(e)}
+                          data-testid="add-measure-group-button"
+                        >
+                          <AddIcon className="add-icon" fontSize="small" /> Add
+                          Population Criteria
+                        </DSLink>
+                      )}
+                    </>
+                  )}
+              </>
+            ))}
+          {isQDM && (
+            <Tabs
+              type="C"
+              orientation="vertical"
+              value={pathname}
+              onChange={(e, v) => {
+                navigate(v);
+              }}
+            >
+              <Tab
+                type="C"
+                label="Reporting"
+                value={QdmReportingBaseUrl}
+                dataTestId="leftPanelMeasureReportingTab"
+                id="sideNavMeasureReporting"
+              />
+            </Tabs>
+          )}
+
           <Tabs
             type="C"
             orientation="vertical"
@@ -207,29 +223,12 @@ export default function PopulationCriteriaSideNav(
               navigate(v);
             }}
           >
-            <Tab
-              type="C"
-              label="Reporting"
-              value={QdmReportingBaseUrl}
-              dataTestId="leftPanelMeasureReportingTab"
-              id="sideNavMeasureReporting"
-            />
+            {additionalLinks.map((l) => {
+              return <Tab {...l} type="B" />;
+            })}
           </Tabs>
-        )}
-
-        <Tabs
-          type="C"
-          orientation="vertical"
-          value={pathname}
-          onChange={(e, v) => {
-            navigate(v);
-          }}
-        >
-          {additionalLinks.map((l) => {
-            return <Tab {...l} type="B" />;
-          })}
-        </Tabs>
-      </Nav>
+        </Nav>
+      </InnerWrapper>
     </OuterWrapper>
   );
 }
