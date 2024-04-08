@@ -1489,9 +1489,7 @@ describe("Measure List component", () => {
       .mockReturnValueOnce("http://fileurl");
     const exportButton = getByTestId(`export-measure-${measures[0].id}`);
     expect(exportButton).toBeInTheDocument();
-    act(() => {
-      fireEvent.click(exportButton);
-    });
+    userEvent.click(exportButton);
 
     const cancelButton = getByTestId("ds-btn");
     expect(cancelButton).toBeInTheDocument();
