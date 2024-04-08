@@ -1,4 +1,4 @@
-#edit-measure-details-side-nav {
+.edit-measure-side-nav {
   .link-container,
   nav {
     display: flex;
@@ -29,7 +29,7 @@
       font-weight: 400;
       font-size: 16px;
       line-height: 24px;
-      padding: 5px 0px 5px 16px;
+      padding: 5px 0 5px 16px;
 
       &.active {
         font-weight: 500;
@@ -46,7 +46,6 @@
     margin-top: 15px;
     margin-bottom: 4px;
     font-family: "Rubik";
-    font-style: "normal";
     font-weight: 400;
     font-size: 16px;
     line-height: 24px;
