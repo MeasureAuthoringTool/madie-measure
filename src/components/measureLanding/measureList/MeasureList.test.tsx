@@ -6,7 +6,14 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import { Measure, Model } from "@madie/madie-models";
+import {
+  Measure,
+  MeasureErrorType,
+  Model,
+  Organization,
+  Group,
+  MeasureGroupTypes,
+} from "@madie/madie-models";
 import MeasureList from "./MeasureList";
 import useMeasureServiceApi, {
   MeasureServiceApi,
@@ -1118,7 +1125,53 @@ describe("Measure List component", () => {
     unmount();
   });
 
-  it("should display the error when there are return type mismatch or errors in cql while exporting the measure", async () => {
+  it("should cancel export with canceled message ", async () => {
+    const error = {
+      response: {
+        status: 409,
+      },
+      message: "canceled",
+    };
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return {
+        ...mockMeasureServiceApi,
+        getMeasureExport: jest.fn().mockRejectedValue(error),
+      } as unknown as MeasureServiceApi;
+    });
+
+    const { getByTestId, unmount, queryByTestId } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const actionButton = getByTestId(`measure-action-${measures[2].id}`);
+    fireEvent.click(actionButton);
+    expect(
+      screen.getByTestId(`export-measure-${measures[2].id}`)
+    ).toBeInTheDocument();
+    fireEvent.click(getByTestId(`export-measure-${measures[2].id}`));
+    await waitFor(() => {
+      expect(queryByTestId("error-message")).not.toBeInTheDocument();
+    });
+    unmount();
+  });
+
+  it("should display the error when cqlErrors is true while exporting the measure", async () => {
     const error = {
       response: {
         status: 409,
@@ -1131,6 +1184,8 @@ describe("Measure List component", () => {
         getMeasureExport: jest.fn().mockRejectedValue(error),
       } as unknown as MeasureServiceApi;
     });
+
+    measures[2].cqlErrors = true;
 
     const { getByTestId, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
@@ -1160,6 +1215,56 @@ describe("Measure List component", () => {
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
         "Unable to Export measure.CQL Contains ErrorsMissing Measure DevelopersMissing StewardMissing DescriptionAt least one Population Criteria is missing Type"
+      );
+    });
+    unmount();
+  });
+
+  it("should display the error when errors is not null while exporting the measure", async () => {
+    const error = {
+      response: {
+        status: 409,
+      },
+    };
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return {
+        ...mockMeasureServiceApi,
+        getMeasureExport: jest.fn().mockRejectedValue(error),
+      } as unknown as MeasureServiceApi;
+    });
+
+    measures[2].errors = [
+      MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES,
+    ];
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const actionButton = getByTestId(`measure-action-${measures[2].id}`);
+    fireEvent.click(actionButton);
+    expect(
+      screen.getByTestId(`export-measure-${measures[2].id}`)
+    ).toBeInTheDocument();
+    fireEvent.click(getByTestId(`export-measure-${measures[2].id}`));
+    await waitFor(() => {
+      expect(getByTestId("error-message")).toHaveTextContent(
+        "Unable to Export measure.CQL Contains ErrorsMISMATCH_CQL_POPULATION_RETURN_TYPESMissing Measure DevelopersMissing StewardMissing DescriptionAt least one Population Criteria is missing Type"
       );
     });
     unmount();
@@ -1300,6 +1405,107 @@ describe("Measure List component", () => {
     });
     unmount();
   });
+
+  it("should display general error when exporting the measure", async () => {
+    const error = {
+      response: {
+        status: 409,
+      },
+    };
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return {
+        ...mockMeasureServiceApi,
+        getMeasureExport: jest.fn().mockRejectedValue(error),
+      } as unknown as MeasureServiceApi;
+    });
+
+    const org: Organization = {
+      id: "testOrgId",
+      name: "test org name",
+    };
+    measures[2].cqlErrors = false;
+    measures[2].errors = [];
+    measures[2].measureMetaData = {
+      developers: [org],
+      steward: org,
+      description: "test description",
+    };
+    measures[2].groups = [
+      {
+        id: "testGroupId",
+        measureGroupTypes: [MeasureGroupTypes.OUTCOME],
+      } as Group,
+    ];
+
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    fireEvent.click(getByTestId(`measure-action-${measures[2].id}`));
+    expect(getByTestId(`export-measure-${measures[2].id}`)).toBeInTheDocument();
+    fireEvent.click(getByTestId(`export-measure-${measures[2].id}`));
+    await waitFor(() => {
+      expect(getByTestId("error-message")).toHaveTextContent(
+        "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists."
+      );
+    });
+    unmount();
+  });
+
+  it("should  not call the export when clicking cancel button", async () => {
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    const actionButton = getByTestId(`measure-action-${measures[0].id}`);
+    userEvent.click(actionButton);
+    window.URL.createObjectURL = jest
+      .fn()
+      .mockReturnValueOnce("http://fileurl");
+    const exportButton = getByTestId(`export-measure-${measures[0].id}`);
+    expect(exportButton).toBeInTheDocument();
+    userEvent.click(exportButton);
+
+    const cancelButton = getByTestId("ds-btn");
+    expect(cancelButton).toBeInTheDocument();
+    userEvent.click(cancelButton);
+    expect(cancelButton).not.toBeInTheDocument();
+
+    unmount();
+  });
+
   // this test has been passing based on side effects. changing the order that it works in breaks all other tests.
   it("should call the export api to generate the measure zip file", async () => {
     const success = {
@@ -1317,7 +1523,7 @@ describe("Measure List component", () => {
       } as unknown as MeasureServiceApi;
     });
 
-    const { getByTestId, getByText, unmount } = render(
+    const { getByTestId, getByText, unmount, queryByText } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -1344,9 +1550,15 @@ describe("Measure List component", () => {
       .mockReturnValueOnce("http://fileurl");
     const exportButton = getByTestId(`export-measure-${measures[0].id}`);
     expect(exportButton).toBeInTheDocument();
-    fireEvent.click(exportButton);
+
+    userEvent.click(exportButton);
+
     await waitFor(() => {
       expect(getByText("Measure exported successfully")).toBeInTheDocument();
+      const continueButton = getByTestId("ds-btn");
+      expect(continueButton).toBeInTheDocument();
+      userEvent.click(continueButton);
+      expect(continueButton).not.toBeInTheDocument();
     });
     unmount();
   });
