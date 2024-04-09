@@ -343,11 +343,13 @@ export default function MeasureList(props: {
           if (_.isEmpty(targetMeasure.current?.cql)) {
             missing.push("Missing CQL");
           }
-          if (
-            targetedMeasure?.cqlErrors ||
-            !_.isEmpty(targetedMeasure?.errors)
-          ) {
+          if (targetedMeasure?.cqlErrors) {
             missing.push("CQL Contains Errors");
+          }
+          if (!_.isEmpty(targetedMeasure?.errors)) {
+            targetedMeasure?.errors.forEach((error) => {
+              missing.push(error);
+            });
           }
           if (_.isEmpty(targetedMeasure?.groups)) {
             missing.push("Missing Population Criteria");
