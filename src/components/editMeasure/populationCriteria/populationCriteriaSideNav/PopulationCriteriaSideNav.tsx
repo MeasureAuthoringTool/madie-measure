@@ -139,7 +139,9 @@ export default function PopulationCriteriaSideNav(
                   }}
                   data-testId={tab.dataTestId}
                   className={
-                    pathname === tab.href ? "tab-title active" : "tab-title "
+                    pathname === tab.href
+                      ? "collapsable-button active"
+                      : "collapsable-button"
                   }
                   id={tab.title}
                 >
@@ -155,7 +157,7 @@ export default function PopulationCriteriaSideNav(
                 </button>
                 {tab.title === "Population Criteria" &&
                   showPopulationCriteriaTabs && (
-                    <>
+                    <div className="indented-tabs">
                       <Tabs
                         type="C"
                         size="standard"
@@ -182,38 +184,22 @@ export default function PopulationCriteriaSideNav(
                         })}
                       </Tabs>
                       {canEdit && (
-                        <DSLink
-                          className="madie-link"
-                          style={{ color: "#125496" }}
-                          onClick={(e) => initiateBlankMeasureGroupClick(e)}
-                          data-testid="add-measure-group-button"
-                        >
-                          <AddIcon className="add-icon" fontSize="small" /> Add
-                          Population Criteria
-                        </DSLink>
+                        <div className="link-wrapper">
+                          <DSLink
+                            className="madie-link"
+                            style={{ color: "#125496" }}
+                            onClick={(e) => initiateBlankMeasureGroupClick(e)}
+                            data-testid="add-measure-group-button"
+                          >
+                            <AddIcon className="add-icon" fontSize="small" />{" "}
+                            Add Population Criteria
+                          </DSLink>
+                        </div>
                       )}
-                    </>
+                    </div>
                   )}
               </>
             ))}
-          {isQDM && (
-            <Tabs
-              type="C"
-              orientation="vertical"
-              value={pathname}
-              onChange={(e, v) => {
-                navigate(v);
-              }}
-            >
-              <Tab
-                type="C"
-                label="Reporting"
-                value={QdmReportingBaseUrl}
-                dataTestId="leftPanelMeasureReportingTab"
-                id="sideNavMeasureReporting"
-              />
-            </Tabs>
-          )}
 
           <Tabs
             type="C"
@@ -223,6 +209,15 @@ export default function PopulationCriteriaSideNav(
               navigate(v);
             }}
           >
+            {isQDM && (
+              <Tab
+                type="C"
+                label="Reporting"
+                value={QdmReportingBaseUrl}
+                dataTestId="leftPanelMeasureReportingTab"
+                id="sideNavMeasureReporting"
+              />
+            )}
             {additionalLinks.map((l) => {
               return <Tab {...l} type="B" />;
             })}
