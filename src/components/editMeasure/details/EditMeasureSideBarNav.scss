@@ -40,11 +40,14 @@
     }
   }
 
-  .tab-title {
+  .collapsable-button {
+    padding: 14.5px 24.5px;
+    text-align: left;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
     color: #515151;
-    margin-left: 8px;
-    margin-top: 15px;
-    margin-bottom: 4px;
     font-family: "Rubik";
     font-weight: 400;
     font-size: 16px;
@@ -58,7 +61,12 @@
     }
   }
 
-  .tab-dropdown {
-    margin-left: 65px;
+  .indented-tabs {
+    .MuiButtonBase-root {
+      padding-left: 40px;
+    }
+    > .link-wrapper {
+      padding: 14.5px 28px;
+    }
   }
 }
