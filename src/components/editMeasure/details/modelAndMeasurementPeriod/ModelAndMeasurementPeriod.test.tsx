@@ -274,6 +274,7 @@ describe("Model and Measurement Period component", () => {
       measurementPeriodEndNode
     ).getByRole("textbox") as HTMLInputElement;
     userEvent.type(measurementPeriodEndInput, "12/07/2009");
+    userEvent.tab(); // blur
     await waitFor(() =>
       expect(measurementPeriodEndInput.value).toBe("12/07/2009")
     );
@@ -281,6 +282,12 @@ describe("Model and Measurement Period component", () => {
     const createBtn = getByTestId("model-and-measurement-save-button");
     expect(createBtn).toBeInTheDocument();
     expect(createBtn).not.toBeEnabled();
+
+    expect(
+      screen.getByText(
+        "Measurement period end date should be greater than measurement period start date."
+      )
+    ).toBeInTheDocument();
   });
 
   it("Check if measurement period save button is disabled when measurement period end date is less than start date", async () => {
@@ -306,6 +313,7 @@ describe("Model and Measurement Period component", () => {
       measurementPeriodEndNode
     ).getByRole("textbox") as HTMLInputElement;
     userEvent.type(measurementPeriodEndInput, "12/07/2008");
+    userEvent.tab(); // blur
     await waitFor(() =>
       expect(measurementPeriodEndInput.value).toBe("12/07/2008")
     );
@@ -313,6 +321,12 @@ describe("Model and Measurement Period component", () => {
     const createBtn = getByTestId("model-and-measurement-save-button");
     expect(createBtn).toBeInTheDocument();
     expect(createBtn).toBeDisabled();
+
+    expect(
+      screen.getByText(
+        "Measurement period end date should be greater than measurement period start date."
+      )
+    ).toBeInTheDocument();
   });
 
   it("Check if measurement period save button is disabled when measurement period end date or state date is not valid", async () => {

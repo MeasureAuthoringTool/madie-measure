@@ -9,9 +9,6 @@ import {
   ReadOnlyTextField,
   DateField,
 } from "@madie/madie-design-system/dist/react";
-//import DateField from "./DateField";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
 import { Typography } from "@mui/material";
 import { useFormik } from "formik";
@@ -22,6 +19,12 @@ import {
   checkUserCanEdit,
 } from "@madie/madie-util";
 import { Box } from "@mui/system";
+
+const formGridStyle = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr 1fr 1fr",
+  gap: 5,
+};
 
 interface modelAndMeasurementPeriod {
   model: string;
@@ -146,11 +149,6 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
     }
   }
 
-  const makeUTCDate = (date) => {
-    return `${
-      date.getUTCMonth() + 1
-    }/${date.getUTCDate()}/${date.getUTCFullYear()}`;
-  };
   return (
     <form
       id="measure-details-form"
@@ -186,42 +184,47 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
             onKeyDown={goBackToNav}
           />
         </Box>
-
-        <Box sx={formRowGapped} data-testid="measurement-period-div">
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <DateField
-              id="measurement-period-start"
-              disabled={!canEdit}
-              label="Measurement Period - Start Date"
-              handleDateChange={(startDate) => {
-                formik.setFieldValue("measurementPeriodStart", startDate);
-              }}
-              error={
-                formik.touched.measurementPeriodStart &&
-                Boolean(formik.errors.measurementPeriodStart)
-              }
-              helperText={formikErrorHandler("measurementPeriodStart", true)}
-              value={formik.values.measurementPeriodStart}
-              {...formik.getFieldProps("measurementPeriodStart")}
-            />
-          </LocalizationProvider>
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <DateField
-              disabled={!canEdit}
-              id="measurement-period-end"
-              label="Measurement Period - End Date"
-              handleDateChange={(endDate) => {
-                formik.setFieldValue("measurementPeriodEnd", endDate);
-              }}
-              error={
-                formik.touched.measurementPeriodEnd &&
-                Boolean(formik.errors.measurementPeriodEnd)
-              }
-              helperText={formikErrorHandler("measurementPeriodEnd", true)}
-              value={formik.values.measurementPeriodEnd}
-              {...formik.getFieldProps("measurementPeriodEnd")}
-            />
-          </LocalizationProvider>
+        <Box sx={formGridStyle} data-testid="measurement-period-div">
+          <DateField
+            id="measurement-period-start"
+            disabled={!canEdit}
+            required={true}
+            label="Measurement Period - Start Date"
+            handleDateChange={(startDate) =>
+              formik.setFieldValue("measurementPeriodStart", startDate)
+            }
+            error={
+              formik.touched.measurementPeriodStart &&
+              Boolean(formik.errors.measurementPeriodStart)
+            }
+            helperText={formikErrorHandler("measurementPeriodStart", true)}
+            value={formik.values.measurementPeriodStart}
+            textFieldSx={{ width: "100%" }}
+            {...formik.getFieldProps("measurementPeriodStart")}
+            onBlur={() =>
+              formik.setFieldTouched("measurementPeriodStart", true, false)
+            }
+          />
+          <DateField
+            id="measurement-period-end"
+            disabled={!canEdit}
+            required={true}
+            label="Measurement Period - End Date"
+            handleDateChange={(endDate) =>
+              formik.setFieldValue("measurementPeriodEnd", endDate, true)
+            }
+            error={
+              formik.touched.measurementPeriodEnd &&
+              Boolean(formik.errors.measurementPeriodEnd)
+            }
+            helperText={formikErrorHandler("measurementPeriodEnd", true)}
+            value={formik.values.measurementPeriodEnd}
+            textFieldSx={{ width: "100%" }}
+            {...formik.getFieldProps("measurementPeriodEnd")}
+            onBlur={() =>
+              formik.setFieldTouched("measurementPeriodEnd", true, false)
+            }
+          />
         </Box>
       </div>
       {canEdit && (
