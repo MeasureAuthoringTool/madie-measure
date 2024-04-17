@@ -304,7 +304,7 @@ export default function MeasureList(props: {
   // Ref required or value will be lost on all state changes.
   const abortController = useRef(null);
 
-  const downloadZipFile = (exportData, ecqmTitle, model, version) => {
+  const downloadZipFile = (exportData, ecqmTitle, model, version, warn=false) => {
     const url = window.URL.createObjectURL(exportData);
     const link = document.createElement("a");
     link.href = url;
@@ -317,7 +317,7 @@ export default function MeasureList(props: {
     setToastOpen(true);
     setToastType("success");
     setToastMessage("Measure exported successfully");
-    setDownloadState("success");
+    setDownloadState(warn ? "warning" : "success");
     document.body.removeChild(link);
   };
 
@@ -328,11 +328,12 @@ export default function MeasureList(props: {
       // we need to generate an abort controller for this call and bind it in the context of our ref
       abortController.current = new AbortController();
       const { ecqmTitle, model, version } = targetMeasure?.current ?? {};
-      const exportData = await measureServiceApi?.getMeasureExport(
+      const responseObj = await measureServiceApi?.getMeasureExport(
         targetMeasure.current?.id,
         abortController.current.signal
       );
-      downloadZipFile(exportData, ecqmTitle, model, version);
+      const warn = responseObj.status === 201 && !targetMeasure?.current?.measureMetaData?.draft;
+      downloadZipFile(responseObj.data, ecqmTitle, model, version, warn);
     } catch (err) {
       const errorStatus = err.response?.status;
       const targetedMeasure = targetMeasure.current;

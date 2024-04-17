@@ -423,7 +423,7 @@ export class MeasureServiceApi {
   }
 
   // add abort signal.
-  async getMeasureExport(measureId: string, signal): Promise<Blob> {
+  async getMeasureExport(measureId: string, signal): Promise<any> {
     const response = await axios.get(
       `${this.baseUrl}/measures/${measureId}/exports`,
       {
@@ -434,7 +434,13 @@ export class MeasureServiceApi {
         signal,
       }
     );
-    return response.data;
+
+    console.log("response: ", response);
+    return {
+      status: response.status,
+      data: response.data,
+    };
+    // return response.data;
   }
 
   async draftMeasure(

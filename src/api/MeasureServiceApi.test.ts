@@ -387,7 +387,7 @@ describe("MeasureServiceApi Tests", () => {
       new AbortController().signal
     );
     expect(mockedAxios.get).toBeCalledTimes(1);
-    expect(measureExportData).toEqual(zippedMeasureData);
+    expect(measureExportData).toEqual({status: 200, data: zippedMeasureData});
   });
 
   it("test getMeasureExport failure", async () => {
