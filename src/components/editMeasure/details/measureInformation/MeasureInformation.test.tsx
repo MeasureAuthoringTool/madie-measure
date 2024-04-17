@@ -368,18 +368,14 @@ describe("MeasureInformation component", () => {
     };
 
     render(<MeasureInformation setErrorMessage={setErrorMessage} />);
-    const result: HTMLElement = getByTestId("measure-information-form");
+    const result: HTMLElement = screen.getByTestId("measure-information-form");
     expect(result).toBeInTheDocument();
 
-    await act(async () => {
-      const cmsIdBtn = getByTestId(
-        "generate-cms-id-button"
-      ) as HTMLInputElement;
-      expect(cmsIdBtn).toBeEnabled();
-      act(() => {
-        fireEvent.click(cmsIdBtn);
-      });
-    });
+    const cmsIdBtn = screen.getByTestId(
+      "generate-cms-id-button"
+    ) as HTMLInputElement;
+    expect(cmsIdBtn).toBeEnabled();
+    userEvent.click(cmsIdBtn);
 
     measure.model = Model.QDM_5_6;
     measure.measureSet = {

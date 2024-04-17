@@ -23,6 +23,7 @@ import versionErrorHelper from "../../../utils/versionErrorHelper";
 import getModelFamily from "../../../utils/measureModelHelpers";
 import _ from "lodash";
 import ExportDialog from "./exportDialog/ExportDialog";
+import { AxiosResponse } from "axios";
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -338,14 +339,14 @@ export default function MeasureList(props: {
       // we need to generate an abort controller for this call and bind it in the context of our ref
       abortController.current = new AbortController();
       const { ecqmTitle, model, version } = targetMeasure?.current ?? {};
-      const responseObj = await measureServiceApi?.getMeasureExport(
+      const { status, data } = await measureServiceApi?.getMeasureExport(
         targetMeasure.current?.id,
         abortController.current.signal
       );
+
       const warn =
-        responseObj.status === 201 &&
-        !targetMeasure?.current?.measureMetaData?.draft;
-      downloadZipFile(responseObj.data, ecqmTitle, model, version, warn);
+        status === 201 && !targetMeasure?.current?.measureMetaData?.draft;
+      downloadZipFile(data, ecqmTitle, model, version, warn);
     } catch (err) {
       const errorStatus = err.response?.status;
       const targetedMeasure = targetMeasure.current;
