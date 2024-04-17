@@ -387,11 +387,8 @@ describe("MeasureInformation component", () => {
       measureSetId: "testMeasureId",
       owner: "test.com",
     };
-    const byTestId = screen.getByTestId(
-      "edit-measure-information-generic-error-text"
-    );
     expect(
-      await screen.findByText("Failed to create CMS ID!")
+      await screen.findByText("Failed to create CMS ID.")
     ).toBeInTheDocument();
   });
 

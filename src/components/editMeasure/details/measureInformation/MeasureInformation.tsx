@@ -311,7 +311,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       };
       updateMeasure(newMeasure);
     } catch (error) {
-      handleToast("danger", "Failed to create CMS ID!", true);
+      handleToast("danger", "Failed to create CMS ID.", true);
     }
   };
 
