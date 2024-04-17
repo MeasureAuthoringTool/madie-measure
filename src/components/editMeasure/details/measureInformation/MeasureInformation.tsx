@@ -299,7 +299,9 @@ export default function MeasureInformation(props: MeasureInformationProps) {
 
   const createCmsId = async (measureSetId: string) => {
     try {
-      const updatedMeasureSet = await measureServiceApi.createCmsId(measureSetId);
+      const updatedMeasureSet = await measureServiceApi.createCmsId(
+        measureSetId
+      );
       const newMeasure: Measure = {
         ...measure,
         measureSet: {

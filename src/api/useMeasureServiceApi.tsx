@@ -435,12 +435,10 @@ export class MeasureServiceApi {
       }
     );
 
-    console.log("response: ", response);
     return {
       status: response.status,
       data: response.data,
     };
-    // return response.data;
   }
 
   async draftMeasure(

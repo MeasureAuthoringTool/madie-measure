@@ -31,7 +31,12 @@ const ExportDialog = ({
   const messageMap = {
     downloading: <span>Please wait! this shouldn't take long.</span>,
     success: <span>Your download has been completed</span>,
-    warning: <span>Your download has been completed using the latest translator version instead of the version used at the time the measure was versioned.</span>,
+    warning: (
+      <span>
+        Your download has been completed using the latest translator version
+        instead of the version used at the time the measure was versioned.
+      </span>
+    ),
     failure: (
       <span>
         Your download could <b>not</b> be completed

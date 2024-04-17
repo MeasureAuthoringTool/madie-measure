@@ -308,7 +308,13 @@ export default function MeasureList(props: {
   // Ref required or value will be lost on all state changes.
   const abortController = useRef(null);
 
-  const downloadZipFile = (exportData, ecqmTitle, model, version, warn=false) => {
+  const downloadZipFile = (
+    exportData,
+    ecqmTitle,
+    model,
+    version,
+    warn = false
+  ) => {
     const url = window.URL.createObjectURL(exportData);
     const link = document.createElement("a");
     link.href = url;
@@ -336,7 +342,9 @@ export default function MeasureList(props: {
         targetMeasure.current?.id,
         abortController.current.signal
       );
-      const warn = responseObj.status === 201 && !targetMeasure?.current?.measureMetaData?.draft;
+      const warn =
+        responseObj.status === 201 &&
+        !targetMeasure?.current?.measureMetaData?.draft;
       downloadZipFile(responseObj.data, ecqmTitle, model, version, warn);
     } catch (err) {
       const errorStatus = err.response?.status;
