@@ -253,6 +253,36 @@ describe("Measure List component", () => {
     unmount();
   });
 
+  it("should display View button for versioned measures", async () => {
+    const { findByRole, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const actionButton = screen.getByTestId(`measure-action-${measures[2].id}`);
+    userEvent.click(actionButton);
+    const viewButton = await findByRole("button", {
+      name: "View",
+    });
+    expect(viewButton).toBeInTheDocument();
+    userEvent.click(viewButton);
+    expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID3/edit/details");
+  });
+
   it("should display the popover with options of export and view when feature flag is set to true", () => {
     const { getByTestId, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>

@@ -247,7 +247,11 @@ export default function MeasureList(props: {
       selected?.measureSet?.acls
     );
     setCanEdit(isSelectedMeasureEditable);
-    setEditViewButtonLabel(isSelectedMeasureEditable ? "Edit" : "View");
+    setEditViewButtonLabel(
+      isSelectedMeasureEditable && selected?.measureMetaData.draft
+        ? "Edit"
+        : "View"
+    );
 
     let options = [];
     // additional options are outside the edit flag
