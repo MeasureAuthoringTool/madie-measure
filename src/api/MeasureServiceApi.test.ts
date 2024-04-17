@@ -1,6 +1,6 @@
 import { MeasureServiceApi } from "./useMeasureServiceApi";
 import { libraryElm } from "./__mocks__/cqlLibraryElm";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 import {
@@ -34,10 +34,10 @@ describe("MeasureServiceApi Tests", () => {
         measureName: "measure - C",
       } as Measure,
     ];
-    const resp = { status: 200, data: measures };
+    const resp: any = { status: 200, data: measures };
     mockedAxios.get.mockResolvedValue(resp);
 
-    const measuresList = await measureServiceApi.fetchMeasures(true, 25, 0);
+    const measuresList = await measureServiceApi.fetchMeasures(true, 25, 0, {});
     expect(mockedAxios.get).toBeCalledTimes(1);
     expect(measuresList).toEqual(measures);
   });
@@ -60,7 +60,7 @@ describe("MeasureServiceApi Tests", () => {
   });
 
   it("test fetchMeasures cancels", async () => {
-    const resp = {
+    const resp: any = {
       status: 500,
       data: "failure",
       message: "canceled",
@@ -85,7 +85,7 @@ describe("MeasureServiceApi Tests", () => {
       id: "1234AFDE",
       measureName: "measure - A",
     } as Measure;
-    const resp = { status: 200, data: measure };
+    const resp: any = { status: 200, data: measure };
     mockedAxios.get.mockResolvedValue(resp);
 
     const measuresList = await measureServiceApi.fetchMeasure("1234AFDE");
@@ -130,7 +130,7 @@ describe("MeasureServiceApi Tests", () => {
   });
 
   it("fetches measure draft statuses", async () => {
-    const resp = {
+    const resp: any = {
       status: 200,
       data: {
         aaaaa: true,
@@ -185,7 +185,7 @@ describe("MeasureServiceApi Tests", () => {
   });
 
   it("build error message from server side error response", () => {
-    const errorResponse = {
+    const errorResponse: any = {
       response: {
         status: 400,
         data: {
@@ -223,7 +223,7 @@ describe("MeasureServiceApi Tests", () => {
         measureName: "measure - C",
       } as Measure,
     ];
-    const resp = { status: 200, data: measures };
+    const resp: any = { status: 200, data: measures };
     mockedAxios.get.mockResolvedValue(resp);
 
     const measuresList =
@@ -298,7 +298,7 @@ describe("MeasureServiceApi Tests", () => {
         oid: "testOid1",
       },
     ];
-    const resp = { status: 200, data: organizations };
+    const resp: any = { status: 200, data: organizations };
     mockedAxios.get.mockResolvedValueOnce(resp);
 
     const returnedOrgList = measureServiceApi.getAllOrganizations();
@@ -320,7 +320,7 @@ describe("MeasureServiceApi Tests", () => {
   });
 
   it("test getAllOrganizations error when returned list is empty", async () => {
-    const resp = { status: 200, data: [] };
+    const resp: any = { status: 200, data: [] };
     mockedAxios.get.mockResolvedValueOnce(resp);
 
     try {
@@ -332,7 +332,7 @@ describe("MeasureServiceApi Tests", () => {
   });
 
   it("test checkValidVersion success", async () => {
-    const resp = { status: 200 };
+    const resp: any = { status: 200 };
     mockedAxios.get.mockResolvedValue(resp);
 
     await measureServiceApi.checkValidVersion("testId", "MAJOR");
@@ -348,7 +348,7 @@ describe("MeasureServiceApi Tests", () => {
       revisionNumber: 1,
     } as unknown as Measure;
 
-    const resp = { status: 200, data: measure };
+    const resp: any = { status: 200, data: measure };
     mockedAxios.put.mockResolvedValue(resp);
 
     await measureServiceApi.createVersion("testId", "MAJOR");
@@ -362,7 +362,7 @@ describe("MeasureServiceApi Tests", () => {
       measureName: "Measure - A",
     } as unknown as Measure;
 
-    const resp = { status: 200, data: measure };
+    const resp: any = { status: 200, data: measure };
     mockedAxios.post.mockResolvedValue(resp);
 
     await measureServiceApi.draftMeasure(
@@ -379,7 +379,7 @@ describe("MeasureServiceApi Tests", () => {
       size: 635581,
       type: "application/octet-stream",
     };
-    const resp = { status: 200, data: zippedMeasureData };
+    const resp: any = { status: 200, data: zippedMeasureData };
     mockedAxios.get.mockResolvedValue(resp);
 
     const measureExportData = await measureServiceApi.getMeasureExport(
@@ -387,7 +387,7 @@ describe("MeasureServiceApi Tests", () => {
       new AbortController().signal
     );
     expect(mockedAxios.get).toBeCalledTimes(1);
-    expect(measureExportData).toEqual(zippedMeasureData);
+    expect(measureExportData).toEqual({ status: 200, data: zippedMeasureData });
   });
 
   it("test getMeasureExport failure", async () => {
@@ -414,7 +414,7 @@ describe("MeasureServiceApi Tests", () => {
         endorserOrganization: "test organization 1",
       },
     ];
-    const resp = { status: 200, data: endorsers };
+    const resp: any = { status: 200, data: endorsers };
     mockedAxios.get.mockResolvedValueOnce(resp);
 
     const returnedOrgList = measureServiceApi.getAllEndorsers();
@@ -436,7 +436,7 @@ describe("MeasureServiceApi Tests", () => {
   });
 
   it("test getAllEndorsers error when returned list is empty", async () => {
-    const resp = { status: 200, data: [] };
+    const resp: any = { status: 200, data: [] };
     mockedAxios.get.mockResolvedValueOnce(resp);
 
     try {
@@ -448,7 +448,7 @@ describe("MeasureServiceApi Tests", () => {
   });
 
   it("test createCmsId success", async () => {
-    const resp = { status: 200, data: 2 };
+    const resp: any = { status: 200, data: 2 };
     mockedAxios.put.mockResolvedValue(resp);
 
     await measureServiceApi.createCmsId("testMeasureSetId");

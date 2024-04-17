@@ -1,5 +1,5 @@
 import React from "react";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import useServiceConfig from "./useServiceConfig";
 import { ServiceConfig } from "./ServiceContext";
 import {
@@ -423,18 +423,14 @@ export class MeasureServiceApi {
   }
 
   // add abort signal.
-  async getMeasureExport(measureId: string, signal): Promise<Blob> {
-    const response = await axios.get(
-      `${this.baseUrl}/measures/${measureId}/exports`,
-      {
-        headers: {
-          Authorization: `Bearer ${this.getAccessToken()}`,
-        },
-        responseType: "blob",
-        signal,
-      }
-    );
-    return response.data;
+  async getMeasureExport(measureId: string, signal): Promise<AxiosResponse> {
+    return await axios.get(`${this.baseUrl}/measures/${measureId}/exports`, {
+      headers: {
+        Authorization: `Bearer ${this.getAccessToken()}`,
+      },
+      responseType: "blob",
+      signal,
+    });
   }
 
   async draftMeasure(

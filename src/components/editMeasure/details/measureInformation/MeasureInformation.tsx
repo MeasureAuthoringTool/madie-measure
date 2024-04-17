@@ -298,15 +298,21 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   };
 
   const createCmsId = async (measureSetId: string) => {
-    const updatedMeasureSet = await measureServiceApi.createCmsId(measureSetId);
-    const newMeasure: Measure = {
-      ...measure,
-      measureSet: {
-        ...measure?.measureSet,
-        cmsId: updatedMeasureSet.cmsId,
-      },
-    };
-    updateMeasure(newMeasure);
+    try {
+      const updatedMeasureSet = await measureServiceApi.createCmsId(
+        measureSetId
+      );
+      const newMeasure: Measure = {
+        ...measure,
+        measureSet: {
+          ...measure?.measureSet,
+          cmsId: updatedMeasureSet.cmsId,
+        },
+      };
+      updateMeasure(newMeasure);
+    } catch (error) {
+      handleToast("danger", "Failed to create CMS ID.", true);
+    }
   };
 
   return (

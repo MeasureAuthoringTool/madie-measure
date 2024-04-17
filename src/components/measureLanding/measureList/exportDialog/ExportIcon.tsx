@@ -13,7 +13,7 @@ const ExportIcon = (props: { downloadState: string }) => {
     />
   );
 
-  if (downloadState === "success") {
+  if (downloadState === "success" || downloadState === "warning") {
     content = (
       <CheckCircleOutlineIcon
         sx={{ height: "40px", width: "40px", color: "#4D7E23" }}

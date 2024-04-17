@@ -350,6 +350,44 @@ describe("MeasureInformation component", () => {
     expect(cmsId).toHaveProperty("readOnly", true);
   });
 
+  it("gracefully handles issue with generate cms id", async () => {
+    serviceApiMock = {
+      getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
+      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
+      createCmsId: jest.fn().mockRejectedValueOnce({
+        status: 403,
+        response: { data: { message: "Failed to generate CMS ID." } },
+      }),
+    } as unknown as MeasureServiceApi;
+    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+
+    measure.measureSet = {
+      id: "id1",
+      measureSetId: "testMeasureId",
+      owner: "test.com",
+    };
+
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    const result: HTMLElement = screen.getByTestId("measure-information-form");
+    expect(result).toBeInTheDocument();
+
+    const cmsIdBtn = screen.getByTestId(
+      "generate-cms-id-button"
+    ) as HTMLInputElement;
+    expect(cmsIdBtn).toBeEnabled();
+    userEvent.click(cmsIdBtn);
+
+    measure.model = Model.QDM_5_6;
+    measure.measureSet = {
+      id: "id1",
+      measureSetId: "testMeasureId",
+      owner: "test.com",
+    };
+    expect(
+      await screen.findByText("Failed to create CMS ID.")
+    ).toBeInTheDocument();
+  });
+
   it("Should display measure Version ID when it is not null", async () => {
     measure.versionId = "testVersionId";
     render(<MeasureInformation setErrorMessage={setErrorMessage} />);
