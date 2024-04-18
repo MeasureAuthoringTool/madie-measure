@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import { useFormik } from "formik";
+import { Typography } from "@mui/material";
+import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import getInitialValues, { setMeasureMetadata } from "./MeasureMetadataHelper";
 import {
   measureStore,
@@ -20,10 +21,11 @@ export interface MeasureMetadataProps {
   measureMetadataType?: String;
   header?: String;
   setErrorMessage: Function;
+  required?: boolean;
 }
 
 export default function MeasureMetadata(props: MeasureMetadataProps) {
-  const { setErrorMessage } = props;
+  const { setErrorMessage, required } = props;
   const { measureMetadataId, measureMetadataType, header } = props;
   const typeLower = _.kebabCase(measureMetadataType.toLowerCase());
 
@@ -119,9 +121,26 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
       <div className="content">
         <div className="subTitle">
           <h2>{header}</h2>
+          {required ? (
+            <Typography
+              style={{
+                fontSize: 14,
+                fontWeight: 300,
+                fontFamily: "Rubik",
+                float: "right",
+              }}
+            >
+              <span style={{ color: "#D92F2F", marginRight: 3 }}>*</span>
+              Indicates required field
+            </Typography>
+          ) : (
+            // spacing element to prevent discrepency.
+            <div style={{ height: 15, marginBottom: 6 }} />
+          )}
         </div>
-        <label htmlFor={`measure-${typeLower}`}>{measureMetadataType}</label>
         <TextArea
+          label={measureMetadataType}
+          required={required}
           readOnly={!canEdit}
           name={`measure-${typeLower}`}
           id={`measure-${typeLower}`}
