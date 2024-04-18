@@ -425,4 +425,22 @@ describe("MeasureRationale component", () => {
     const input = await screen.findByRole("textbox", { name: "Rationale" });
     await waitFor(() => expect(input).toBeInTheDocument());
   });
+
+  it("Should display 'required' when required prop is passed", async () => {
+    (checkUserCanEdit as jest.Mock).mockImplementationOnce(() => {
+      return false;
+    });
+    render(
+      <MeasureMetadataForm
+        required
+        measureMetadataType="Description"
+        setErrorMessage={setErrorMessage}
+      />
+    );
+
+    const input = await screen.findByRole("textbox", { name: "Description" });
+    await waitFor(() => expect(input).toBeInTheDocument());
+    const requiredText = await screen.findByText("Indicates required field");
+    expect(requiredText).toBeInTheDocument();
+  });
 });
