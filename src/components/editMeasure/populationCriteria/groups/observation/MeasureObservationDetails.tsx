@@ -17,6 +17,7 @@ const AGGREGATE_FUNCTIONS = Array.from(AGGREGATE_FUNCTION_KEYS.keys()).sort();
 
 export interface MeasureObservationProps {
   required: boolean;
+  ratio: boolean;
   name: string;
   elmJson: string;
   measureObservation: MeasureObservation;
@@ -29,6 +30,7 @@ export interface MeasureObservationProps {
 
 const MeasureObservationDetails = ({
   required = false,
+  ratio = false,
   name,
   label,
   elmJson,
@@ -148,7 +150,8 @@ const MeasureObservationDetails = ({
           ]}
         />
       </div>
-      {!required && canEdit && (
+      {/* required fields can be removed, but only for ratio measures */}
+      {ratio && canEdit && (
         <div className="add-population-button remove">
           <DSLink
             className="madie-link remove"
