@@ -28,7 +28,7 @@ const MeasureGroupObservation = ({
   let style = {};
   let measureObservation = null;
   let required = false;
-
+  let ratio = false;
   if (
     scoring === MeasureScoring.RATIO &&
     linkMeasureObservationDisplay &&
@@ -42,6 +42,8 @@ const MeasureGroupObservation = ({
     measureObservation = formik.values.measureObservations?.find(
       (mo) => mo.criteriaReference === population.id
     );
+    required = true;
+    ratio = true;
   } else if (
     scoring === MeasureScoring.CONTINUOUS_VARIABLE &&
     [PopulationType.MEASURE_POPULATION].includes(population?.name) &&
@@ -67,6 +69,7 @@ const MeasureGroupObservation = ({
       label={label}
       errors={error ? error : ""}
       required={required}
+      ratio={ratio}
       name={observationName}
       elmJson={elmJson}
       measureObservation={measureObservation}

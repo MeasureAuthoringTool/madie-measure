@@ -523,6 +523,7 @@ describe("Measure Observation Details", () => {
     render(
       <MeasureObservationDetails
         required={false}
+        ratio={true}
         name={"obs1"}
         elmJson={elmJson}
         measureObservation={measureObservation}
