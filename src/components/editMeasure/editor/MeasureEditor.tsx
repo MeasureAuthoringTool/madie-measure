@@ -33,6 +33,7 @@ import {
 import StatusHandler from "./StatusHandler";
 import { SuccessText } from "../../../styles/editMeasure/editor";
 import "./MeasureEditor.scss";
+import applyCode from "./codeApplier";
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
@@ -330,6 +331,11 @@ const MeasureEditor = () => {
     }
   };
 
+  const handleTerminologyEditorValue = (code: any) => {
+    const changedVal: string = applyCode(editorVal, code);
+    handleMadieEditorValue(changedVal);
+  };
+
   const handleMadieEditorValue = (val: string) => {
     setSuccess({ status: undefined, message: undefined });
     setError(false);
@@ -364,6 +370,7 @@ const MeasureEditor = () => {
           {!processing &&
             (featureFlags?.qdmCodeSearch && isQDM ? (
               <MadieTerminologyEditor
+                onTerminologyChange={handleTerminologyEditorValue}
                 onChange={(val: string) => handleMadieEditorValue(val)}
                 value={editorVal}
                 inboundAnnotations={elmAnnotations}
@@ -375,7 +382,7 @@ const MeasureEditor = () => {
             ) : (
               <>
                 <MadieEditor
-                  onChange={(val: string) => handleMadieEditorValue(val)}
+                  onChange={handleMadieEditorValue}
                   value={editorVal}
                   inboundAnnotations={elmAnnotations}
                   inboundErrorMarkers={errorMarkers}
