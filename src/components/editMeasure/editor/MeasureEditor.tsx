@@ -373,8 +373,7 @@ const MeasureEditor = () => {
                 setOutboundAnnotations={setOutboundAnnotations}
               />
             ) : (
-              <>
-                <MadieEditor
+              <MadieEditor
                   onChange={(val: string) => handleMadieEditorValue(val)}
                   value={editorVal}
                   inboundAnnotations={elmAnnotations}
@@ -383,7 +382,6 @@ const MeasureEditor = () => {
                   readOnly={!canEdit}
                   setOutboundAnnotations={setOutboundAnnotations}
                 />
-              </>
             ))}
           {processing && (
             <div
