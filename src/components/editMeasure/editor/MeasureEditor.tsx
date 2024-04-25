@@ -33,7 +33,7 @@ import {
 import StatusHandler from "./StatusHandler";
 import { SuccessText } from "../../../styles/editMeasure/editor";
 import "./MeasureEditor.scss";
-import applyCode from "./codeApplier";
+import applyCode, { CodeChangeResult } from "./codeApplier";
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
@@ -332,8 +332,13 @@ const MeasureEditor = () => {
   };
 
   const handleTerminologyEditorValue = (code: any) => {
-    const changedVal: string = applyCode(editorVal, code);
-    handleMadieEditorValue(changedVal);
+    const result: CodeChangeResult = applyCode(editorVal, code);
+    if (result.status) {
+      handleMadieEditorValue(result.cql);
+    }
+    setToastMessage(result.message);
+    setToastType("success");
+    setToastOpen(true);
   };
 
   const handleMadieEditorValue = (val: string) => {

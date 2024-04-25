@@ -1,7 +1,15 @@
 import { CqlAntlr, CqlResult } from "@madie/cql-antlr-parser/dist/src";
 
-const applyCode = (cql: string, code: any): string => {
+export type CodeChangeResult = {
+  cql: string;
+  status: boolean;
+  message: string;
+};
+const applyCode = (cql: string, code: any): CodeChangeResult => {
+  let codeChangeStatus: boolean = false;
+  let message: string = "The requested operation was unsuccessful";
   const cqlArr: string[] = cql.split("\n");
+
   //extract code, codesets from code object
   const parseResults: CqlResult = new CqlAntlr(cql).parse();
 
@@ -51,11 +59,17 @@ const applyCode = (cql: string, code: any): string => {
       0,
       `code "${code.display}": '${code.name}' from "${code.codeSystem}" display '${code.display}'`
     );
-    //display toast message?
+    message = `Code ${code.name} has been successfully added to the CQL.`;
+    codeChangeStatus = true;
+  } else {
+    message = "This code is already defined in the CQL.";
   }
-
   //return the array as a string
-  return cqlArr.join("\n");
+  return {
+    cql: cqlArr.join("\n"),
+    status: codeChangeStatus,
+    message: message,
+  } as unknown as CodeChangeResult;
 };
 
 const findCodeInsertPoint = (parseResults: CqlResult) => {
