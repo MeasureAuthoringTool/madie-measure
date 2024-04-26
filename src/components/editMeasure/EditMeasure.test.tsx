@@ -85,6 +85,9 @@ const serviceConfig: ServiceConfig = {
   elmTranslationService: {
     baseUrl: "",
   },
+  testCaseService: {
+    baseUrl: "base.url",
+  },
   terminologyService: { baseUrl: "" },
 };
 
@@ -152,7 +155,7 @@ describe("EditMeasure Component", () => {
     expect(await findByText("Details")).toBeInTheDocument();
     expect(await findByText("CQL Editor")).toBeInTheDocument();
     expect(await findByText("Population Criteria")).toBeInTheDocument();
-    expect(await findByText("Test Cases")).toBeInTheDocument();
+    expect(await findByText("Test Cases (0)")).toBeInTheDocument();
     const detailsLink = await findByText("Details");
     await waitFor(() => {
       expect(detailsLink).toHaveAttribute("aria-selected", "true");
@@ -174,7 +177,7 @@ describe("EditMeasure Component", () => {
     });
 
     // Test Cases Menu click action
-    const testCaseLink = await findByText("Test Cases");
+    const testCaseLink = await findByText("Test Cases (0)");
     act(() => {
       fireEvent.click(testCaseLink);
     });
