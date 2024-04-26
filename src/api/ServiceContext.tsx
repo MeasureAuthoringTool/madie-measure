@@ -7,6 +7,9 @@ export interface ServiceConfig {
   elmTranslationService: {
     baseUrl: string;
   };
+  testCaseService: {
+    baseUrl: string;
+  };
   terminologyService: {
     baseUrl: string;
   };
