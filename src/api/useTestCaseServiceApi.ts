@@ -27,7 +27,6 @@ export class TestCaseServiceApi {
       throw new Error(message);
     }
   }
-
 }
 const useTestCaseServiceApi = (): TestCaseServiceApi => {
   const serviceConfig: ServiceConfig = useServiceConfig();

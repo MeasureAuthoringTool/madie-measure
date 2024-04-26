@@ -170,24 +170,11 @@ describe("EditMeasure Component", () => {
     expect(editorLink).toHaveAttribute("aria-selected", "true");
   });
 
-
-    // Test Cases Menu click action
-    const testCaseLink = await findByText("Test Cases (0)");
-    act(() => {
-      fireEvent.click(testCaseLink);
-    });
-    await waitFor(() => {
-      expect(mockedNavigate).toHaveBeenCalledW(h(
-        "/measures/fakeid/edit/test-cases"
-      );
-    });
-
   it("should render details", async () => {
     renderRouter([{ pathname: "/measures/fakeid/edit/details/" }]);
     const detailsLink = await findByText("Details");
     expect(detailsLink).toHaveAttribute("aria-selected", "true");
   });
-
 
   it("should render popCriteria", async () => {
     renderRouter([{ pathname: "/measures/fakeid/edit/groups/1" }]);
@@ -196,7 +183,7 @@ describe("EditMeasure Component", () => {
   });
   it("should render test-cases", async () => {
     renderRouter([{ pathname: "/measures/fakeid/edit/test-cases/" }]);
-    const tcLink = await findByText("Test Cases");
+    const tcLink = await findByText("Test Cases (0)");
     expect(tcLink).toHaveAttribute("aria-selected", "true");
   });
 

@@ -43,13 +43,12 @@ const EditMeasureNav = ({ isQDM }) => {
   const match = useMatch("/measures/:id/edit/*")?.params?.["*"].split("/")[0];
 
   useEffect(() => {
-      if(id){
+    if (id) {
       testCaseService.current
         .getTestCasesByMeasureId(id)
-      .then((testCaseList)=>
-      setTestCaseLength(testCaseList.length))
-      .catch((error) => {})
-      }
+        .then((testCaseList) => setTestCaseLength(testCaseList.length))
+        .catch((error) => {});
+    }
   }, [id]);
 
   return (
