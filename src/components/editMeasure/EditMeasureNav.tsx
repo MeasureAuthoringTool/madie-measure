@@ -32,10 +32,6 @@ const EditMeasureNav = ({ isQDM }) => {
   const { id } = useParams<{
     id: string;
   }>();
-  const handleChange = (e, v) => {
-    const newPath = `/measures/${id}/edit/${v}`;
-    navigate(newPath);
-  };
   const qdmNavTo = () => {
     isQDM ? `${pathname}/base-configuration` : `${pathname}/groups/1`;
   };
@@ -59,7 +55,7 @@ const EditMeasureNav = ({ isQDM }) => {
   return (
     <div>
       <div style={{ marginLeft: "32px" }} id="edit-measure-nav-a">
-        <Tabs value={match} onChange={handleChange} type="A" size="large">
+        <Tabs value={match} type="A" size="large">
           <Tab
             value={`details`}
             to="details"
@@ -79,7 +75,7 @@ const EditMeasureNav = ({ isQDM }) => {
             component={NavLink}
           />
           <Tab
-            value={`groups`}
+            value={isQDM ? `base-configuration` : `groups`}
             to={isQDM ? `base-configuration` : `groups/1`}
             data-testid="groups-tab"
             type="A"
@@ -89,7 +85,7 @@ const EditMeasureNav = ({ isQDM }) => {
           />
           <Tab
             value={`test-cases`}
-            to={`test-cases`}
+            to={`test-cases/list-page`}
             data-testid="patients-tab"
             type="A"
             size="large"

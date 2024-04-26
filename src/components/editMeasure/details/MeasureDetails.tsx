@@ -167,6 +167,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
             path={descriptionLink}
             element={
               <MeasureMetadata
+                required
                 measureMetadataId="Description"
                 measureMetadataType="Description"
                 header="Description"

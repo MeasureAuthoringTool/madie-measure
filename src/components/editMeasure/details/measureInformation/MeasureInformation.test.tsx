@@ -130,6 +130,7 @@ describe("MeasureInformation component", () => {
       createCmsId: jest.fn().mockResolvedValue(2),
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    measureStore.state.mockImplementation(() => measure);
   });
   const { getByTestId, queryByText, findByTestId, getByRole, getByText } =
     screen;
@@ -316,6 +317,60 @@ describe("MeasureInformation component", () => {
       expect(experimentalInput.value).toBe("false");
     });
   });
+
+  it("should not allow underscore in cql library name for Qi-Core measure", async () => {
+    const testMeasure = {
+      ...measure,
+      cqlLibraryName: "TestCqlLibraryName",
+      versionId: "test measure",
+      measureId: undefined,
+      cql: "modified cql",
+    } as unknown as Measure;
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+
+    const result: HTMLElement = getByTestId("measure-information-form");
+    expect(result).toBeInTheDocument();
+
+    const cqlLibraryName = (await screen.findByRole("textbox", {
+      name: "Measure CQL Library Name",
+    })) as HTMLInputElement;
+
+    const modifiedLibName = "NewLibName_";
+    userEvent.clear(cqlLibraryName);
+    userEvent.type(cqlLibraryName, modifiedLibName);
+    expect(cqlLibraryName.value).not.toEqual(testMeasure.cqlLibraryName);
+    expect(cqlLibraryName.value).toEqual(modifiedLibName);
+
+    const saveButton = await screen.findByRole("button", { name: "Save" });
+    expect(saveButton).toBeInTheDocument();
+    await waitFor(() => expect(saveButton).not.toBeEnabled());
+  });
+
+  it("should allow underscore in cql library name for QDM measure", async () => {
+    const testMeasure = {
+      ...measure,
+      model: Model.QDM_5_6,
+    } as unknown as Measure;
+    measureStore.state.mockImplementation(() => testMeasure);
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+
+    const result: HTMLElement = getByTestId("measure-information-form");
+    expect(result).toBeInTheDocument();
+
+    const cqlLibraryName = (await screen.findByRole("textbox", {
+      name: "Measure CQL Library Name",
+    })) as HTMLInputElement;
+
+    const modifiedLibName = "NewLibName_";
+    userEvent.clear(cqlLibraryName);
+    userEvent.type(cqlLibraryName, modifiedLibName);
+    expect(cqlLibraryName.value).toEqual(modifiedLibName);
+
+    const saveButton = await screen.findByRole("button", { name: "Save" });
+    expect(saveButton).toBeInTheDocument();
+    await waitFor(() => expect(saveButton).toBeEnabled());
+  });
+
   it("generate cms id", async () => {
     measure.measureSet = {
       id: "id1",

@@ -27,6 +27,7 @@ import {
 } from "@madie/madie-editor";
 import "./MeasureInformation.scss";
 import CmsIdentifier from "../cmsIdentifier/CmsIdentifier";
+import { QdmMeasureSchemaValidator } from "../../../../validations/QDMMeasureSchemaValidator";
 
 interface measureInformationForm {
   versionId: string;
@@ -98,9 +99,14 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     endorsementId: measure?.measureMetaData?.endorsements?.[0]?.endorsementId,
   } as measureInformationForm;
 
+  const schema =
+    measure?.model === "QI-Core v4.1.1"
+      ? MeasureSchemaValidator
+      : QdmMeasureSchemaValidator;
+
   const formik = useFormik({
     initialValues: { ...INITIAL_VALUES },
-    validationSchema: MeasureSchemaValidator,
+    validationSchema: schema,
     enableReinitialize: true, // formik will auto set initial variables whenever measure delivers new results
     onSubmit: async (values: measureInformationForm) =>
       await handleSubmit(values),

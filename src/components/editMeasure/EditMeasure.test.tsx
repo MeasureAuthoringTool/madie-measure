@@ -94,9 +94,11 @@ const serviceConfig: ServiceConfig = {
 const { getByTestId, findByTestId, queryByTestId, queryByText, findByText } =
   screen;
 
-const renderRouter = () => {
+const renderRouter = (
+  initialEntries = [{ pathname: "/measures/fakeid/edit/details/" }]
+) => {
   const router = createMemoryRouter(routesConfig, {
-    initialEntries: [{ pathname: "/measures/fakeid/edit/details" }],
+    initialEntries,
   });
 
   render(
@@ -162,19 +164,12 @@ describe("EditMeasure Component", () => {
     });
   });
 
-  it("should render respective menu contents on clicking menu items", async () => {
-    renderRouter();
-
-    // CQL Editor Menu click action
+  it("should render editor", async () => {
+    renderRouter([{ pathname: "/measures/fakeid/edit/cql-editor/" }]);
     const editorLink = await findByText("CQL Editor");
-    act(() => {
-      fireEvent.click(editorLink);
-    });
-    await waitFor(() => {
-      expect(mockedNavigate).toHaveBeenCalledWith(
-        "/measures/fakeid/edit/cql-editor"
-      );
-    });
+    expect(editorLink).toHaveAttribute("aria-selected", "true");
+  });
+
 
     // Test Cases Menu click action
     const testCaseLink = await findByText("Test Cases (0)");
@@ -182,15 +177,27 @@ describe("EditMeasure Component", () => {
       fireEvent.click(testCaseLink);
     });
     await waitFor(() => {
-      expect(mockedNavigate).toHaveBeenCalledWith(
+      expect(mockedNavigate).toHaveBeenCalledW(h(
         "/measures/fakeid/edit/test-cases"
       );
     });
 
-    //group population menuu click action
-    const populationLink = getByTestId("groups-tab");
-    fireEvent.click(populationLink);
-    expect(document.body.textContent).toContain("Population Criteria");
+  it("should render details", async () => {
+    renderRouter([{ pathname: "/measures/fakeid/edit/details/" }]);
+    const detailsLink = await findByText("Details");
+    expect(detailsLink).toHaveAttribute("aria-selected", "true");
+  });
+
+
+  it("should render popCriteria", async () => {
+    renderRouter([{ pathname: "/measures/fakeid/edit/groups/1" }]);
+    const popCriteria = await findByText("Population Criteria");
+    expect(popCriteria).toHaveAttribute("aria-selected", "true");
+  });
+  it("should render test-cases", async () => {
+    renderRouter([{ pathname: "/measures/fakeid/edit/test-cases/" }]);
+    const tcLink = await findByText("Test Cases");
+    expect(tcLink).toHaveAttribute("aria-selected", "true");
   });
 
   it("delete succeeds", async () => {
