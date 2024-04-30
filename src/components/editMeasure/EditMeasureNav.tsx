@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   NavLink,
   useLocation,
@@ -12,19 +12,23 @@ export interface RouteHandlerState {
   canTravel: boolean;
   pendingRoute: string;
 }
+import useTestCaseServiceApi from "../../api/useTestCaseServiceApi";
 interface PropTypes {
   isActive?: boolean;
 }
 
 const MenuItemContainer = tw.ul`bg-transparent flex px-8`;
+
 const MenuItem = styled.li((props: PropTypes) => [
   tw`mr-1 text-white bg-[rgba(0, 32, 64, 0.5)] rounded-t-md hover:bg-[rgba(0,6,13, 0.5)]`,
   props.isActive && tw`bg-slate text-slate-90 font-medium hover:bg-slate`,
 ]);
 
 const EditMeasureNav = ({ isQDM }) => {
+  const [testCaseLength, setTestCaseLength] = useState<any>(0);
   const { pathname } = useLocation();
   let navigate = useNavigate();
+  const testCaseService = useRef(useTestCaseServiceApi());
   const { id } = useParams<{
     id: string;
   }>();
@@ -37,6 +41,18 @@ const EditMeasureNav = ({ isQDM }) => {
     navigate(`/measures/${id}/edit/details/`);
   }
   const match = useMatch("/measures/:id/edit/*")?.params?.["*"].split("/")[0];
+
+  useEffect(() => {
+    if (id) {
+      testCaseService.current
+        .getTestCasesByMeasureId(id)
+        .then((testCaseList) => {
+          setTestCaseLength(testCaseList.length);
+        })
+        .catch((error) => {});
+    }
+  }, [id]);
+
   return (
     <div>
       <div style={{ marginLeft: "32px" }} id="edit-measure-nav-a">
@@ -74,7 +90,7 @@ const EditMeasureNav = ({ isQDM }) => {
             data-testid="patients-tab"
             type="A"
             size="large"
-            label="Test Cases"
+            label={`Test Cases (${testCaseLength})`}
             component={NavLink}
           />
         </Tabs>

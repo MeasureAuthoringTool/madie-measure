@@ -13,13 +13,24 @@ import { routesConfig } from "../measureRoutes/MeasureRoutes";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../api/useMeasureServiceApi";
-import { Measure } from "@madie/madie-models";
+import {
+  GroupPopulation,
+  Measure,
+  MeasureScoring,
+  PopulationExpectedValue,
+  TestCase,
+} from "@madie/madie-models";
 import MeasureEditor from "./editor/MeasureEditor";
 import { measureStore } from "@madie/madie-util";
+import useTestCaseServiceApi, {
+  TestCaseServiceApi,
+} from "../../api/useTestCaseServiceApi";
 
 jest.mock("./details/MeasureDetails");
 jest.mock("./editor/MeasureEditor");
 jest.mock("../../api/useMeasureServiceApi");
+jest.mock("../../api/useTestCaseServiceApi");
+// jest.mock("axios");
 
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
@@ -29,6 +40,93 @@ const MeasureEditorMock = MeasureEditor as jest.Mock<JSX.Element>;
 MeasureEditorMock.mockImplementation(() => {
   return <div>library testCql version '1.0.000'</div>;
 });
+
+const testCases = [
+  {
+    id: "1",
+    description: "Test IPP",
+    title: "WhenAllGood",
+    series: "IPP-Pass",
+    validResource: true,
+    json: "{}",
+    groupPopulations: [
+      {
+        groupId: "1",
+        scoring: MeasureScoring.PROPORTION,
+        populationValues: [
+          {
+            name: "initialPopulation",
+            expected: true,
+          },
+          {
+            name: "denominator",
+            expected: false,
+          },
+          {
+            name: "numerator",
+            expected: true,
+          },
+        ] as PopulationExpectedValue[],
+      },
+    ] as GroupPopulation[],
+  },
+  {
+    id: "2",
+    description: "Test IPP Fail when something is wrong",
+    title: "WhenSomethingIsWrong",
+    series: "IPP-Fail",
+    validResource: true,
+    json: "{}",
+    groupPopulations: [
+      {
+        groupId: "1",
+        scoring: MeasureScoring.PROPORTION,
+        populationValues: [
+          {
+            name: "initialPopulation",
+            expected: false,
+          },
+          {
+            name: "denominator",
+            expected: false,
+          },
+          {
+            name: "numerator",
+            expected: true,
+          },
+        ] as PopulationExpectedValue[],
+      },
+    ] as GroupPopulation[],
+  },
+  {
+    id: "3",
+    description: "Invalid test case",
+    title: "WhenJsonIsInvalid",
+    series: "IPP-Fail",
+    validResource: false,
+    json: "{}",
+    groupPopulations: [
+      {
+        groupId: "1",
+        scoring: MeasureScoring.PROPORTION,
+        populationValues: [
+          {
+            name: "initialPopulation",
+            expected: false,
+          },
+          {
+            name: "denominator",
+            expected: false,
+          },
+          {
+            name: "numerator",
+            expected: true,
+          },
+        ] as PopulationExpectedValue[],
+      },
+    ] as GroupPopulation[],
+  },
+] as TestCase[];
 
 const mockedNavigate = jest.fn();
 
@@ -40,7 +138,11 @@ jest.mock("react-router-dom", () => ({
 const measure = {
   id: "measure ID",
   createdBy: "testuser@example.com",
+  testCases: testCases,
 } as Measure;
+
+const useTestCaseServiceMock =
+  useTestCaseServiceApi as jest.Mock<TestCaseServiceApi>;
 
 const serviceApiMock = {
   fetchMeasure: jest.fn().mockResolvedValue(measure),
@@ -51,6 +153,18 @@ const serviceApiMock = {
 
 useMeasureServiceApiMock.mockImplementation(() => {
   return serviceApiMock;
+});
+
+const useTestCaseServiceMockResolved = {
+  getTestCasesByMeasureId: jest.fn().mockResolvedValue(testCases),
+} as unknown as TestCaseServiceApi;
+
+const getTestCasesByMeasureIdMock = jest.fn().mockResolvedValue(testCases);
+useTestCaseServiceMock.mockImplementation(() => {
+  return {
+    ...useTestCaseServiceMockResolved,
+    getTestCasesByMeasureId: getTestCasesByMeasureIdMock,
+  } as unknown as TestCaseServiceApi;
 });
 
 jest.mock("@madie/madie-util", () => ({
@@ -116,7 +230,7 @@ describe("EditMeasure Component", () => {
   });
 
   it("should render the EditMeasure contents after the measure is loaded", async () => {
-    renderRouter();
+    await renderRouter();
 
     const result = await findByTestId("editMeasure");
     expect(result).toBeInTheDocument();
@@ -127,7 +241,7 @@ describe("EditMeasure Component", () => {
   });
 
   it("should display a delete dialog when the event is triggered, discards.", async () => {
-    renderRouter();
+    await renderRouter();
 
     const result = await findByTestId("editMeasure");
     expect(result).toBeInTheDocument();
@@ -149,12 +263,13 @@ describe("EditMeasure Component", () => {
 
   it("should render edit measure menu with measure details page active by default", async () => {
     renderRouter();
-
     //verify all menus present in the dom
     expect(await findByText("Details")).toBeInTheDocument();
     expect(await findByText("CQL Editor")).toBeInTheDocument();
     expect(await findByText("Population Criteria")).toBeInTheDocument();
-    expect(await findByText("Test Cases")).toBeInTheDocument();
+    expect(
+      await findByText(`Test Cases (${measure?.testCases?.length})`)
+    ).toBeInTheDocument();
     const detailsLink = await findByText("Details");
     await waitFor(() => {
       expect(detailsLink).toHaveAttribute("aria-selected", "true");
@@ -180,7 +295,7 @@ describe("EditMeasure Component", () => {
   });
   it("should render test-cases", async () => {
     renderRouter([{ pathname: "/measures/fakeid/edit/test-cases/" }]);
-    const tcLink = await findByText("Test Cases");
+    const tcLink = await findByText("Test Cases (0)");
     expect(tcLink).toHaveAttribute("aria-selected", "true");
   });
 
