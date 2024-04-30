@@ -46,7 +46,9 @@ const EditMeasureNav = ({ isQDM }) => {
     if (id) {
       testCaseService.current
         .getTestCasesByMeasureId(id)
-        .then((testCaseList) => setTestCaseLength(testCaseList.length))
+        .then((testCaseList) => {
+          setTestCaseLength(testCaseList.length);
+        })
         .catch((error) => {});
     }
   }, [id]);

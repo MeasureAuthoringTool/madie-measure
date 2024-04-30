@@ -1,11 +1,7 @@
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 import useServiceConfig from "./useServiceConfig";
 import { ServiceConfig } from "./ServiceContext";
-import {
-  HapiOperationOutcome,
-  TestCase,
-  TestCaseImportRequest,
-} from "@madie/madie-models";
+import { TestCase } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
 
 export class TestCaseServiceApi {
@@ -23,8 +19,11 @@ export class TestCaseServiceApi {
       );
       return response.data || [];
     } catch (err) {
-      const message = "Unable to retrieve test cases, please try later.";
-      throw new Error(message);
+      if (err?.message?.includes("401") || err?.status === 401) {
+        throw new Error("You Lack Permissions For Test Cases");
+      } else {
+        throw new Error("Unable to retrieve test cases, please try later.");
+      }
     }
   }
 }
@@ -32,7 +31,7 @@ const useTestCaseServiceApi = (): TestCaseServiceApi => {
   const serviceConfig: ServiceConfig = useServiceConfig();
   const { getAccessToken } = useOktaTokens();
   return new TestCaseServiceApi(
-    serviceConfig?.testCaseService.baseUrl,
+    serviceConfig?.measureService.baseUrl,
     getAccessToken
   );
 };
