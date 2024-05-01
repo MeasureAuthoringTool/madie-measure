@@ -7,6 +7,7 @@ import {
   useParams,
 } from "react-router-dom";
 import tw, { styled } from "twin.macro";
+import { useFeatureFlags } from "@madie/madie-util";
 import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
 export interface RouteHandlerState {
   canTravel: boolean;
@@ -27,6 +28,7 @@ const MenuItem = styled.li((props: PropTypes) => [
 const EditMeasureNav = ({ isQDM }) => {
   const [testCaseLength, setTestCaseLength] = useState<any>(0);
   const { pathname } = useLocation();
+  const featureFlags = useFeatureFlags();
   let navigate = useNavigate();
   const testCaseService = useRef(useTestCaseServiceApi());
   const { id } = useParams<{
@@ -90,7 +92,9 @@ const EditMeasureNav = ({ isQDM }) => {
             data-testid="patients-tab"
             type="A"
             size="large"
-            label={`Test Cases (${testCaseLength})`}
+            label={`Test Cases${
+              featureFlags?.testTabNumber ? ` (${testCaseLength})` : ""
+            }`}
             component={NavLink}
           />
         </Tabs>

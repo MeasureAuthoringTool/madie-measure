@@ -267,9 +267,10 @@ describe("EditMeasure Component", () => {
     expect(await findByText("Details")).toBeInTheDocument();
     expect(await findByText("CQL Editor")).toBeInTheDocument();
     expect(await findByText("Population Criteria")).toBeInTheDocument();
-    expect(
-      await findByText(`Test Cases (${measure?.testCases?.length})`)
-    ).toBeInTheDocument();
+    // expect(
+    //   await findByText(`Test Cases (${measure?.testCases?.length})`)
+    // ).toBeInTheDocument();
+    expect(await findByText("Test Cases")).toBeInTheDocument();
     const detailsLink = await findByText("Details");
     await waitFor(() => {
       expect(detailsLink).toHaveAttribute("aria-selected", "true");
@@ -295,7 +296,8 @@ describe("EditMeasure Component", () => {
   });
   it("should render test-cases", async () => {
     renderRouter([{ pathname: "/measures/fakeid/edit/test-cases/" }]);
-    const tcLink = await findByText("Test Cases (0)");
+    // const tcLink = await findByText("Test Cases (0)");
+    const tcLink = await findByText("Test Cases");
     expect(tcLink).toHaveAttribute("aria-selected", "true");
   });
 
