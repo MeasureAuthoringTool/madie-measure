@@ -12,7 +12,7 @@ export interface RouteHandlerState {
   canTravel: boolean;
   pendingRoute: string;
 }
-import useTestCaseServiceApi from "../../api/useTestCaseServiceApi";
+import { measureStore } from "@madie/madie-util";
 interface PropTypes {
   isActive?: boolean;
 }
@@ -28,7 +28,6 @@ const EditMeasureNav = ({ isQDM }) => {
   const [testCaseLength, setTestCaseLength] = useState<any>(0);
   const { pathname } = useLocation();
   let navigate = useNavigate();
-  const testCaseService = useRef(useTestCaseServiceApi());
   const { id } = useParams<{
     id: string;
   }>();
@@ -42,16 +41,18 @@ const EditMeasureNav = ({ isQDM }) => {
   }
   const match = useMatch("/measures/:id/edit/*")?.params?.["*"].split("/")[0];
 
+  const [measure, setMeasure] = useState<any>(measureStore.state);
+  useEffect(() => {
+    const subscription = measureStore.subscribe(setMeasure);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
   useEffect(() => {
     if (id) {
-      testCaseService.current
-        .getTestCasesByMeasureId(id)
-        .then((testCaseList) => {
-          setTestCaseLength(testCaseList.length);
-        })
-        .catch((error) => {});
+      setTestCaseLength(measure?.testCases?.length || 0);
     }
-  }, [id]);
+  }, [id, measure]);
 
   return (
     <div>

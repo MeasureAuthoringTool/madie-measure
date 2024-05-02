@@ -22,14 +22,9 @@ import {
 } from "@madie/madie-models";
 import MeasureEditor from "./editor/MeasureEditor";
 import { measureStore } from "@madie/madie-util";
-import useTestCaseServiceApi, {
-  TestCaseServiceApi,
-} from "../../api/useTestCaseServiceApi";
-
 jest.mock("./details/MeasureDetails");
 jest.mock("./editor/MeasureEditor");
 jest.mock("../../api/useMeasureServiceApi");
-jest.mock("../../api/useTestCaseServiceApi");
 // jest.mock("axios");
 
 const useMeasureServiceApiMock =
@@ -138,11 +133,9 @@ jest.mock("react-router-dom", () => ({
 const measure = {
   id: "measure ID",
   createdBy: "testuser@example.com",
+  model: "QI-Core v4.1.1",
   testCases: testCases,
 } as Measure;
-
-const useTestCaseServiceMock =
-  useTestCaseServiceApi as jest.Mock<TestCaseServiceApi>;
 
 const serviceApiMock = {
   fetchMeasure: jest.fn().mockResolvedValue(measure),
@@ -153,18 +146,6 @@ const serviceApiMock = {
 
 useMeasureServiceApiMock.mockImplementation(() => {
   return serviceApiMock;
-});
-
-const useTestCaseServiceMockResolved = {
-  getTestCasesByMeasureId: jest.fn().mockResolvedValue(testCases),
-} as unknown as TestCaseServiceApi;
-
-const getTestCasesByMeasureIdMock = jest.fn().mockResolvedValue(testCases);
-useTestCaseServiceMock.mockImplementation(() => {
-  return {
-    ...useTestCaseServiceMockResolved,
-    getTestCasesByMeasureId: getTestCasesByMeasureIdMock,
-  } as unknown as TestCaseServiceApi;
 });
 
 jest.mock("@madie/madie-util", () => ({
@@ -221,7 +202,9 @@ const renderRouter = (
 afterEach(cleanup);
 
 describe("EditMeasure Component", () => {
-  measureStore.state.mockImplementationOnce(() => null);
+  beforeEach(() => {
+    measureStore.state.mockImplementation(() => measure);
+  });
   it("should render a loading page if the measure is not yet loaded", async () => {
     renderRouter();
     const result = getByTestId("loading");
