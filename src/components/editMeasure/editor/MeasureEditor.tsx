@@ -307,8 +307,6 @@ const MeasureEditor = () => {
 
               setSuccess(successMessage);
             }
-            // Dispatch custom event
-            window.dispatchEvent(new CustomEvent("submitButtonClicked"));
           })
           .catch((reason) => {
             // inner failure
