@@ -4,11 +4,11 @@ it("Should parse CQL", () => {
   //read cql from file
 
   const cql = fs.readFileSync(
-    "src/components/editMeasure/editor/LoincTest.cql",
+    "src/components/editMeasure/editor/__mocks__/LoincTest.cql",
     "utf8"
   );
   const codeJson = fs.readFileSync(
-    "src/components/editMeasure/editor/LoincCode.json",
+    "src/components/editMeasure/editor/__mocks__/LoincCode.json",
     "utf8"
   );
 
@@ -25,11 +25,11 @@ it("Should not add a CodeSystem that already exists", () => {
   //read cql from file
 
   const cql = fs.readFileSync(
-    "src/components/editMeasure/editor/LoincTest.cql",
+    "src/components/editMeasure/editor/__mocks__/LoincTest.cql",
     "utf8"
   );
   const codeJson = fs.readFileSync(
-    "src/components/editMeasure/editor/LoincCode.json",
+    "src/components/editMeasure/editor/__mocks__/LoincCode.json",
     "utf8"
   );
 
@@ -56,11 +56,11 @@ it("Should not add a Code that already exists", () => {
   //read cql from file
 
   const cql = fs.readFileSync(
-    "src/components/editMeasure/editor/LoincTest.cql",
+    "src/components/editMeasure/editor/__mocks__/LoincTest.cql",
     "utf8"
   );
   const codeJson = fs.readFileSync(
-    "src/components/editMeasure/editor/LoincCode.json",
+    "src/components/editMeasure/editor/__mocks__/LoincCode.json",
     "utf8"
   );
 
@@ -79,11 +79,11 @@ it("Should not add a Code that already exists", () => {
 it("Should add CodeSystem and Code if necessary", () => {
   //read cql from file
   const cql = fs.readFileSync(
-    "src/components/editMeasure/editor/CptTest.cql",
+    "src/components/editMeasure/editor/__mocks__/CptTest.cql",
     "utf8"
   );
   const codeJson = fs.readFileSync(
-    "src/components/editMeasure/editor/SnomedctCode.json",
+    "src/components/editMeasure/editor/__mocks__/SnomedctCode.json",
     "utf8"
   );
 
