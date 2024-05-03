@@ -307,6 +307,8 @@ const MeasureEditor = () => {
 
               setSuccess(successMessage);
             }
+            // Dispatch custom event
+            window.dispatchEvent(new CustomEvent("submitButtonClicked"));
           })
           .catch((reason) => {
             // inner failure
@@ -383,6 +385,7 @@ const MeasureEditor = () => {
                 height="calc(100vh - 135px)"
                 readOnly={!canEdit}
                 setOutboundAnnotations={setOutboundAnnotations}
+                measureStoreCql={measure?.cql}
               />
             ) : (
               <>

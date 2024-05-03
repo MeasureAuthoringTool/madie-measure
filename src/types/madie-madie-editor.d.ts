@@ -48,6 +48,7 @@ declare module "@madie/madie-editor" {
     validationsEnabled?: boolean;
     setOutboundAnnotations?: Function;
     readOnly?: boolean;
+    measureStoreCql?: string;
 
     // conditional props used to pass up annotations outside of the editor
     setOutboundAnnotations?: Function;
