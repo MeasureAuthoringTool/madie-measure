@@ -374,8 +374,10 @@ export default function MeasureList(props: {
             missing.push("CQL Contains Errors");
           }
           if (!_.isEmpty(errors)) {
-            targetedMeasure?.errors.forEach((error) => {
-              missing.push(error);
+            errors.forEach((error) => {
+              if (error.startsWith("MISMATCH")) {
+                missing.push(error);
+              }
             });
           }
           if (_.isEmpty(groups)) {
