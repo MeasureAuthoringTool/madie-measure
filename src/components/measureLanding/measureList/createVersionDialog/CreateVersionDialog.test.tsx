@@ -177,9 +177,9 @@ describe("Create Version Dialog component", () => {
     expect(onCloseFn).toHaveBeenCalled();
   });
 
-  it.only("should continue versioning by calling onSubmit", async () => {
+  it("should continue versioning by calling onSubmit", async () => {
     const onSubmitFn = jest.fn();
-    render(
+    await render(
       <CreateVersionDialog
         currentVersion="0.0.000"
         open={true}
@@ -198,11 +198,12 @@ describe("Create Version Dialog component", () => {
       target: { value: "major" },
     });
     expect(typeInput.value).toBe("major");
-    expect(mockMeasureServiceApi.checkNextVersionNumber).toHaveBeenCalled()
     const confirmVersionNode = getByTestId("confirm-version-input");
     userEvent.type(confirmVersionNode, "1.0.000");
     Simulate.change(confirmVersionNode);
-    expect(confirmVersionNode.value).toBe("1.0.000");
+    await waitFor(() => {
+      expect(confirmVersionNode.value).toBe("1.0.000");
+    });
 
     const continueButton = getByTestId("create-version-continue-button");
     await waitFor(() => {

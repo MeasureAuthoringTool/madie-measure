@@ -56,8 +56,6 @@ const CreatVersionDialog = ({
           "confirmedVersion",
           "Confirmed Version number must match new version number.",
           (val) => {
-            console.log(val)
-            console.log(newVersionNumber)
             return val === newVersionNumber;
           }
         )
