@@ -357,34 +357,45 @@ export default function MeasureList(props: {
         setToastType("danger");
         setDownloadState("failure");
         if (errorStatus === 409) {
+          const {
+            cql,
+            cqlErrors,
+            errors,
+            groups,
+            measureMetaData,
+            model,
+            baseConfigurationTypes,
+          } = await measureServiceApi?.fetchMeasure(targetMeasure.current?.id);
           const missing = [];
-          if (_.isEmpty(targetMeasure.current?.cql)) {
+          if (_.isEmpty(cql)) {
             missing.push("Missing CQL");
           }
-          if (targetedMeasure?.cqlErrors) {
+          if (cqlErrors) {
             missing.push("CQL Contains Errors");
           }
-          if (!_.isEmpty(targetedMeasure?.errors)) {
-            targetedMeasure?.errors.forEach((error) => {
-              missing.push(error);
+          if (!_.isEmpty(errors)) {
+            errors.forEach((error) => {
+              if (error.startsWith("MISMATCH")) {
+                missing.push(error);
+              }
             });
           }
-          if (_.isEmpty(targetedMeasure?.groups)) {
+          if (_.isEmpty(groups)) {
             missing.push("Missing Population Criteria");
           }
-          if (_.isEmpty(targetedMeasure?.measureMetaData.developers)) {
+          if (_.isEmpty(measureMetaData.developers)) {
             missing.push("Missing Measure Developers");
           }
-          if (_.isEmpty(targetedMeasure?.measureMetaData.steward)) {
+          if (_.isEmpty(measureMetaData.steward)) {
             missing.push("Missing Steward");
           }
-          if (_.isEmpty(targetedMeasure?.measureMetaData.description)) {
+          if (_.isEmpty(measureMetaData.description)) {
             missing.push("Missing Description");
           }
           if (
-            targetedMeasure?.model === Model.QICORE &&
-            targetedMeasure.groups &&
-            targetedMeasure.groups.filter(
+            model === Model.QICORE &&
+            groups &&
+            groups.filter(
               (group) =>
                 group.measureGroupTypes === null ||
                 _.isEmpty(group.measureGroupTypes)
@@ -392,10 +403,7 @@ export default function MeasureList(props: {
           ) {
             missing.push("At least one Population Criteria is missing Type");
           }
-          if (
-            targetedMeasure?.model === Model.QDM_5_6 &&
-            _.isEmpty(targetedMeasure?.baseConfigurationTypes)
-          ) {
+          if (model === Model.QDM_5_6 && _.isEmpty(baseConfigurationTypes)) {
             missing.push("Measure Type is required");
           }
           if (missing.length <= 0) {

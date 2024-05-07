@@ -39,7 +39,8 @@ declare module "@madie/madie-editor" {
 
   export interface EditorPropsType {
     value: string;
-    onChange: (value: string) => void;
+    onChange?: (value: string) => void;
+    onTerminologyChange?: (code: string) => void;
     parseDebounceTime?: number;
     inboundAnnotations?: EditorAnnotation[];
     inboundErrorMarkers?: EditorErrorMarker[];

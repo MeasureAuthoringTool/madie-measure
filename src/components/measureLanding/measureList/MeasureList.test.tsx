@@ -1130,6 +1130,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockRejectedValue(error),
+        fetchMeasure: jest.fn().mockResolvedValue(measures[0]),
       } as unknown as MeasureServiceApi;
     });
 
@@ -1176,6 +1177,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockRejectedValue(error),
+        fetchMeasure: jest.fn().mockResolvedValue(measures[2]),
       } as unknown as MeasureServiceApi;
     });
 
@@ -1221,6 +1223,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockRejectedValue(error),
+        fetchMeasure: jest.fn().mockResolvedValue(measures[2]),
       } as unknown as MeasureServiceApi;
     });
 
@@ -1270,6 +1273,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockRejectedValue(error),
+        fetchMeasure: jest.fn().mockResolvedValue(measures[2]),
       } as unknown as MeasureServiceApi;
     });
 
@@ -1320,6 +1324,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockRejectedValue(error),
+        fetchMeasure: jest.fn().mockResolvedValue(measures[3]),
       } as unknown as MeasureServiceApi;
     });
 
@@ -1367,6 +1372,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockRejectedValue(error),
+        fetchMeasure: jest.fn().mockResolvedValue(measures[1]),
       } as unknown as MeasureServiceApi;
     });
 
@@ -1412,6 +1418,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockRejectedValue(error),
+        fetchMeasure: jest.fn().mockResolvedValue(measures[2]),
       } as unknown as MeasureServiceApi;
     });
 
@@ -1456,6 +1463,7 @@ describe("Measure List component", () => {
       return {
         ...mockMeasureServiceApi,
         getMeasureExport: jest.fn().mockRejectedValue(error),
+        fetchMeasure: jest.fn().mockResolvedValue(measures[2]),
       } as unknown as MeasureServiceApi;
     });
 
