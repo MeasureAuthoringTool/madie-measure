@@ -684,6 +684,7 @@ export default function MeasureList(props: {
               onSubmit={checkCreateVersion}
               versionHelperText={versionHelperText}
               loading={loading}
+              measureId={targetMeasure?.current?.id}
             />
             <DraftMeasureDialog
               open={draftMeasureDialog.open}
