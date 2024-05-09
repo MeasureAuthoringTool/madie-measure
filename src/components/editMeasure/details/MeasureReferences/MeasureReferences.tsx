@@ -91,8 +91,8 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
     //  we want to first sort by referenceType then by referenceText
     const sortByTypeThenReferences = (references: Reference[]): Reference[] => {
       const sorterFunction = (a: Reference, b: Reference) => {
-        const type1 = a.referenceType.toLowerCase();
-        const type2 = b.referenceType.toLowerCase();
+        const type1 = a.referenceType ? a.referenceType.toLowerCase() : "";
+        const type2 = b.referenceType ? b.referenceType.toLowerCase() : "";
         const reference1 = a.referenceText.toLowerCase();
         const reference2 = b.referenceText.toLowerCase();
         if (type1 < type2) {
