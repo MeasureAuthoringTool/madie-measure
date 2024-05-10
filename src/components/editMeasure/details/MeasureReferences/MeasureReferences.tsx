@@ -153,7 +153,12 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
         }
       })
       .catch((reason) => {
-        const message = `Error updating measure "${measure.measureName}"`;
+        let message = `Error updating measure "${measure.measureName}"`;
+        measureReferences.map((reference) => {
+          if (!reference.referenceType && message.slice(-1) != ".")
+            message += ": All References must have a type.";
+        });
+
         handleToast("danger", message, true);
         // to do: some sort of error handling
         // console.warn(`Error updating measure : ${reason}`);
