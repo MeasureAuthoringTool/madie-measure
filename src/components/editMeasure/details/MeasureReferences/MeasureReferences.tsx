@@ -88,6 +88,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
   }, [setMeasureReferences, measure]);
 
   const handleSubmit = (values: Reference) => {
+    setErrorMessage("");
     //  we want to first sort by referenceType then by referenceText
     const sortByTypeThenReferences = (references: Reference[]): Reference[] => {
       const sorterFunction = (a: Reference, b: Reference) => {
