@@ -146,6 +146,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
         //@ts-ignore
         const { status, data } = res;
         if (status === 200) {
+          setErrorMessage("");
           handleToast("success", `Measure Reference Saved Successfully`, true);
           updateMeasure(data);
           toggleOpen();
