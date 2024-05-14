@@ -88,7 +88,6 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
   }, [setMeasureReferences, measure]);
 
   const handleSubmit = (values: Reference) => {
-    setErrorMessage("");
     //  we want to first sort by referenceType then by referenceText
     const sortByTypeThenReferences = (references: Reference[]): Reference[] => {
       const sorterFunction = (a: Reference, b: Reference) => {
@@ -147,6 +146,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
         //@ts-ignore
         const { status, data } = res;
         if (status === 200) {
+          setErrorMessage("");
           handleToast("success", `Measure Reference Saved Successfully`, true);
           updateMeasure(data);
           toggleOpen();
