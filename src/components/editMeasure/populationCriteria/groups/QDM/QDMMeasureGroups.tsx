@@ -746,7 +746,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                 <div>
                   <FormFieldInner>
                     <FieldLabel htmlFor="measure-group-description">
-                      Description
+                      Population Criteria {measureGroupNumber + 1} Description
                     </FieldLabel>
                     <FieldSeparator>
                       <TextArea

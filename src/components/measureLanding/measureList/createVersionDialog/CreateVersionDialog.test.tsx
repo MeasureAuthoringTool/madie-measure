@@ -1,5 +1,6 @@
 import {
   act,
+  findByTestId,
   fireEvent,
   render,
   screen,
@@ -10,13 +11,44 @@ import * as React from "react";
 import userEvent from "@testing-library/user-event";
 import clearAllMocks = jest.clearAllMocks;
 import CreateVersionDialog from "./CreateVersionDialog";
+import useMeasureServiceApi, {
+  MeasureServiceApi,
+} from "../../../../api/useMeasureServiceApi";
+import { oneItemResponse } from "../../../__mocks__/mockMeasureResponses";
 
+jest.mock("../../../../api/useMeasureServiceApi");
+const useMeasureServiceMock =
+  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
+const mockMeasureServiceApi = {
+  searchMeasuresByMeasureNameOrEcqmTitle: jest
+    .fn()
+    .mockResolvedValue(oneItemResponse),
+  fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
+  createVersion: jest.fn().mockResolvedValue({}),
+  checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
+  checkValidVersion: jest.fn().mockResolvedValue({}),
+  fetchMeasureDraftStatuses: jest.fn().mockResolvedValue({
+    "1": true,
+    "2": true,
+    "3": true,
+  }),
+  getMeasureExport: jest
+    .fn()
+    .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
+} as unknown as MeasureServiceApi;
+
+jest.mock("../../../../api/useMeasureServiceApi", () =>
+  jest.fn(() => mockMeasureServiceApi)
+);
 describe("Create Version Dialog component", () => {
   const { getByTestId } = screen;
-  beforeEach(() => {
-    clearAllMocks();
-  });
 
+  beforeEach(() => {
+    jest.resetModules();
+    useMeasureServiceMock.mockReset().mockImplementation(() => {
+      return mockMeasureServiceApi;
+    });
+  });
   it("should render version dialog and the continue button is disabled", () => {
     render(
       <CreateVersionDialog
@@ -25,6 +57,8 @@ describe("Create Version Dialog component", () => {
         onClose={jest.fn()}
         onSubmit={jest.fn()}
         versionHelperText=""
+        loading={false}
+        measureId={"12a4"}
       />
     );
     expect(getByTestId("create-version-dialog")).toBeInTheDocument();
@@ -39,6 +73,8 @@ describe("Create Version Dialog component", () => {
         onClose={jest.fn()}
         onSubmit={jest.fn()}
         versionHelperText=""
+        loading={false}
+        measureId={"12a4"}
       />
     );
     expect(getByTestId("create-version-dialog")).toBeInTheDocument();
@@ -64,6 +100,8 @@ describe("Create Version Dialog component", () => {
         onClose={jest.fn()}
         onSubmit={jest.fn()}
         versionHelperText=""
+        loading={false}
+        measureId={"12a4"}
       />
     );
     expect(getByTestId("create-version-dialog")).toBeInTheDocument();
@@ -89,6 +127,8 @@ describe("Create Version Dialog component", () => {
         onClose={jest.fn()}
         onSubmit={jest.fn()}
         versionHelperText=""
+        loading={false}
+        measureId={"12a4"}
       />
     );
     expect(getByTestId("create-version-dialog")).toBeInTheDocument();
@@ -115,6 +155,8 @@ describe("Create Version Dialog component", () => {
         onClose={onCloseFn}
         onSubmit={jest.fn()}
         versionHelperText=""
+        loading={false}
+        measureId={"12a4"}
       />
     );
 
@@ -137,13 +179,15 @@ describe("Create Version Dialog component", () => {
 
   it("should continue versioning by calling onSubmit", async () => {
     const onSubmitFn = jest.fn();
-    render(
+    await render(
       <CreateVersionDialog
         currentVersion="0.0.000"
         open={true}
         onClose={jest.fn()}
         onSubmit={onSubmitFn}
         versionHelperText=""
+        loading={false}
+        measureId={"12a4"}
       />
     );
     expect(getByTestId("create-version-dialog")).toBeInTheDocument();
@@ -157,7 +201,9 @@ describe("Create Version Dialog component", () => {
     const confirmVersionNode = getByTestId("confirm-version-input");
     userEvent.type(confirmVersionNode, "1.0.000");
     Simulate.change(confirmVersionNode);
-    expect(confirmVersionNode.value).toBe("1.0.000");
+    await waitFor(() => {
+      expect(confirmVersionNode.value).toBe("1.0.000");
+    });
 
     const continueButton = getByTestId("create-version-continue-button");
     await waitFor(() => {
@@ -182,6 +228,8 @@ describe("Create Version Dialog component", () => {
         onClose={jest.fn()}
         onSubmit={onSubmitFn}
         versionHelperText="Something has gone wrong. Please insert sand in the disk drive to continue."
+        loading={false}
+        measureId={"12a4"}
       />
     );
     expect(screen.getByTestId("create-version-dialog")).toBeInTheDocument();

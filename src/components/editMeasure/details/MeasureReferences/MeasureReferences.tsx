@@ -91,8 +91,8 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
     //  we want to first sort by referenceType then by referenceText
     const sortByTypeThenReferences = (references: Reference[]): Reference[] => {
       const sorterFunction = (a: Reference, b: Reference) => {
-        const type1 = a.referenceType.toLowerCase();
-        const type2 = b.referenceType.toLowerCase();
+        const type1 = a.referenceType ? a.referenceType.toLowerCase() : "";
+        const type2 = b.referenceType ? b.referenceType.toLowerCase() : "";
         const reference1 = a.referenceText.toLowerCase();
         const reference2 = b.referenceText.toLowerCase();
         if (type1 < type2) {
@@ -146,6 +146,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
         //@ts-ignore
         const { status, data } = res;
         if (status === 200) {
+          setErrorMessage("");
           handleToast("success", `Measure Reference Saved Successfully`, true);
           updateMeasure(data);
           toggleOpen();
@@ -153,7 +154,12 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
         }
       })
       .catch((reason) => {
-        const message = `Error updating measure "${measure.measureName}"`;
+        let message = `Error updating measure "${measure.measureName}"`;
+        measureReferences.map((reference) => {
+          if (!reference.referenceType && message.slice(-1) != ".")
+            message += ": All References must have a type.";
+        });
+
         handleToast("danger", message, true);
         // to do: some sort of error handling
         // console.warn(`Error updating measure : ${reason}`);

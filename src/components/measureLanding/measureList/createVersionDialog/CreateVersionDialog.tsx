@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Backdrop, FormHelperText, MenuItem } from "@mui/material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -11,6 +11,9 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import "./CreateVersionDialog.scss";
 import * as _ from "lodash";
+import useMeasureServiceApi, {
+  MeasureServiceApi,
+} from "../../../../api/useMeasureServiceApi";
 
 interface VersionInfo {
   type: string;
@@ -31,7 +34,9 @@ const CreatVersionDialog = ({
   onSubmit,
   versionHelperText,
   loading,
+  measureId,
 }) => {
+  const measureServiceApi = useRef(useMeasureServiceApi()).current;
   function formikErrorHandler(name: string) {
     if (formik.touched[name] && formik.errors[name]) {
       return `${formik.errors[name]}`;
@@ -63,29 +68,19 @@ const CreatVersionDialog = ({
     },
   });
 
-  const getNewVersion = (versionType, currentVersion) => {
-    if (!currentVersion) {
+  const getNewVersion = async (versionType, measureId) => {
+    if (!measureId) {
       return null;
+    } else {
+      setNewVersionNumber(
+        await measureServiceApi.checkNextVersionNumber(measureId, versionType)
+      );
     }
-    const splitVersionString = currentVersion.split(".");
-    if (versionType === "major") {
-      splitVersionString[0] = String(parseInt(splitVersionString[0]) + 1);
-      splitVersionString[1] = "0";
-      splitVersionString[2] = "000";
-    } else if (versionType === "minor") {
-      splitVersionString[1] = String(parseInt(splitVersionString[1]) + 1);
-      splitVersionString[2] = "000";
-    } else if (versionType === "patch") {
-      splitVersionString[2] = String(
-        parseInt(splitVersionString[2]) + 1
-      ).padStart(3, "0");
-    }
-    return splitVersionString.join(".");
   };
 
   useEffect(() => {
-    setNewVersionNumber(getNewVersion(formik.values.type, currentVersion));
-  }, [currentVersion, formik.values.type, setNewVersionNumber]);
+    getNewVersion(formik.values.type, measureId);
+  }, [currentVersion, formik.values.type]);
 
   const error = !!versionHelperText;
   return (
@@ -173,8 +168,8 @@ const CreatVersionDialog = ({
               readOnly
               label="New Version #"
               placeholder="Enter"
-              id="current-version"
-              data-testid="current-version"
+              id="new-version"
+              data-testid="new-version"
               value={newVersionNumber}
             />
             <TextField

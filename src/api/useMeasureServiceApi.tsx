@@ -403,6 +403,24 @@ export class MeasureServiceApi {
     );
   }
 
+  async checkNextVersionNumber(id: string, versionType: string): Promise<any> {
+    try {
+      const response = await axios.get<any>(
+        `${this.baseUrl}/measures/${id}/next-version?versionType=${versionType}`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      const message = `Unable to calculate next version`;
+      console.error(message);
+      console.error(err);
+    }
+  }
+
   async createCmsId(measureSetId: string): Promise<any> {
     try {
       const response = await axios.put(
