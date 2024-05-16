@@ -366,10 +366,7 @@ const MeasureEditor = () => {
       //if result status is true, we modified the CQL
       //  let'/s store off the codesystem/code/version
       codeMap.set(termCode.name, termCode);
-      //   we can send it with the measure when it's saved... wait!
-      //   What if it's removed manually from the CQL?
-      //   Or.. what if we change the version and try to updated the Code (because it's not added if it already exists)
-      //   more "AND"s...
+      //   we can send it with the measure when it's saved
       handleMadieEditorValue(result.cql);
     }
     //if result status is false, we didn't modify.. so CQL didn't change,
