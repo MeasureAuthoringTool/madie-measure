@@ -461,6 +461,12 @@ export default function MeasureList(props: {
       setToastMessage("Requested measure cannot be versioned");
     } else if (errorData?.status === 403) {
       setToastMessage("User is unauthorized to create a version");
+    } else if (errorData?.status === 409) {
+      setToastMessage(
+        errorData?.data?.message
+          ? errorData.data.message
+          : "Requested operation could not be completed. Please contact the Help Desk."
+      );
     } else {
       setToastMessage(errorData?.message ? errorData.message : "Server error!");
     }
