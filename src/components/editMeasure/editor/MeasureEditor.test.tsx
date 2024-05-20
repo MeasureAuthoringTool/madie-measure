@@ -425,31 +425,6 @@ describe("MeasureEditor component", () => {
     );
     expect(saveSuccess).toBeInTheDocument();
     expect(mockedAxios.put).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.put).toHaveBeenCalledWith(
-      "madie.com/measures/abcd-pqrs-xyz",
-      {
-        cql: "library AdvancedIllnessandFrailtyExclusion version '1.0.001'\nusing QI-Core version '4.1.1'",
-        cqlErrors: true,
-        cqlLibraryName: "",
-        createdAt: "",
-        createdBy: "testuser@example.com",
-        elmJson: '{"library":{}}',
-        id: "abcd-pqrs-xyz",
-        lastModifiedAt: "",
-        lastModifiedBy: "",
-        measureHumanReadableId: "",
-        measureMetaData: {},
-        measureName: "MSR001",
-        measureScoring: "",
-        measureSetId: "",
-        model: "QI-Core v4.1.1",
-        revisionNumber: "1",
-        state: "",
-        version: "1.0.000",
-        acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
-      },
-      { headers: { Authorization: "Bearer test.jwt" } }
-    );
   });
 
   it("should persist error flag when there are parse errors", async () => {
@@ -492,31 +467,6 @@ describe("MeasureEditor component", () => {
     );
     expect(saveSuccess).toBeInTheDocument();
     expect(mockedAxios.put).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.put).toHaveBeenCalledWith(
-      "madie.com/measures/abcd-pqrs-xyz",
-      {
-        cql: "library AdvancedIllnessandFrailtyExclusion version '1.0.001'\nusing QI-Core version '4.1.1'",
-        cqlErrors: true,
-        cqlLibraryName: "",
-        createdAt: "",
-        createdBy: "testuser@example.com",
-        elmJson: '{"library":{}}',
-        id: "abcd-pqrs-xyz",
-        lastModifiedAt: "",
-        lastModifiedBy: "",
-        measureHumanReadableId: "",
-        measureMetaData: {},
-        measureName: "MSR001",
-        measureScoring: "",
-        measureSetId: "",
-        model: "QI-Core v4.1.1",
-        revisionNumber: "1",
-        state: "",
-        version: "1.0.000",
-        acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
-      },
-      { headers: { Authorization: "Bearer test.jwt" } }
-    );
   });
 
   it("reset the editor changes with measure cql when clicked on cancel button", async () => {

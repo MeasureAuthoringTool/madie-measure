@@ -1,11 +1,13 @@
 import { CqlAntlr, CqlResult } from "@madie/cql-antlr-parser/dist/src";
+import { Code } from "@madie/madie-models";
 
 export type CodeChangeResult = {
   cql: string;
   status: boolean;
   message: string;
 };
-const applyCode = (cql: string, code: any): CodeChangeResult => {
+
+const applyCode = (cql: string, code: Code): CodeChangeResult => {
   let codeChangeStatus: boolean = false;
   let message: string = "The requested operation was unsuccessful";
   const cqlArr: string[] = cql.split("\n");

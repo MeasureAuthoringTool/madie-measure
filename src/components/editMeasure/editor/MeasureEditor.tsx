@@ -19,7 +19,12 @@ import {
   MadieDiscardDialog,
   Toast,
 } from "@madie/madie-design-system/dist/react";
-import { Measure, MeasureErrorType } from "@madie/madie-models";
+import {
+  Measure,
+  MeasureErrorType,
+  Code,
+  CqlMetaData,
+} from "@madie/madie-models";
 import { CqlCode, CqlCodeSystem } from "@madie/cql-antlr-parser/dist/src";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 import * as _ from "lodash";
@@ -88,6 +93,9 @@ export interface CustomCqlCode extends Omit<CqlCode, "codeSystem"> {
 const MeasureEditor = () => {
   useDocumentTitle("MADiE Edit Measure CQL");
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
+  const [codeMap, setCodeMap] = useState<Map<string, Code>>(
+    new Map<string, Code>()
+  );
 
   const { updateMeasure } = measureStore;
   const [processing, setProcessing] = useState<boolean>(true);
@@ -230,6 +238,7 @@ const MeasureEditor = () => {
     try {
       //Get model name and version
       const using = measure?.model.split(" v");
+
       const inSyncCql = await synchingEditorCqlContent(
         editorVal,
         measure?.cql,
@@ -282,6 +291,24 @@ const MeasureEditor = () => {
             validationResult && JSON.stringify(validationResult?.translation),
           cqlErrors,
         };
+        // Get version information into the update call.
+        if (
+          newMeasure.measureMetaData?.cqlMetaData?.codeSystemMap === undefined
+        ) {
+          if (!newMeasure.measureMetaData?.cqlMetaData) {
+            newMeasure.measureMetaData.cqlMetaData =
+              {} as unknown as CqlMetaData;
+          }
+          newMeasure.measureMetaData.cqlMetaData.codeSystemMap = new Map<
+            string,
+            Code
+          >();
+        }
+        codeMap.forEach((entry) => {
+          newMeasure.measureMetaData.cqlMetaData.codeSystemMap[entry.name] =
+            entry;
+        });
+
         measureServiceApi
           .updateMeasure(newMeasure)
           .then((response: any) => {
@@ -331,11 +358,19 @@ const MeasureEditor = () => {
     }
   };
 
-  const handleTerminologyEditorValue = (code: any) => {
-    const result: CodeChangeResult = applyCode(editorVal, code);
+  const handleTerminologyEditorValue = (code: string) => {
+    const termCode: Code = code as unknown as Code;
+    const result: CodeChangeResult = applyCode(editorVal, termCode);
+
     if (result.status) {
+      //if result status is true, we modified the CQL
+      //  let'/s store off the codesystem/code/version
+      codeMap.set(termCode.name, termCode);
+      //   we can send it with the measure when it's saved
       handleMadieEditorValue(result.cql);
     }
+    //if result status is false, we didn't modify.. so CQL didn't change,
+    //  but confirmation messages can still be displayed
     setToastMessage(result.message);
     setToastType("success");
     setToastOpen(true);
