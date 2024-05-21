@@ -419,6 +419,7 @@ const MeasureEditor = () => {
                 readOnly={!canEdit}
                 setOutboundAnnotations={setOutboundAnnotations}
                 measureStoreCql={measure?.cql}
+                cqlMetaData={measure?.measureMetaData?.cqlMetaData}
               />
             ) : (
               <>
