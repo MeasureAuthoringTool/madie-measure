@@ -358,8 +358,8 @@ const MeasureEditor = () => {
     }
   };
 
-  const handleTerminologyEditorValue = (code: string) => {
-    const termCode: Code = code as unknown as Code;
+  const handleTerminologyEditorValue = (code) => {
+    const termCode: Code = code;
     const result: CodeChangeResult = applyCode(editorVal, termCode);
 
     if (result.status) {
