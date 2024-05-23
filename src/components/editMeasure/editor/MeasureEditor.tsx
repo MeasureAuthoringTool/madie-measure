@@ -420,6 +420,7 @@ const MeasureEditor = () => {
                 setOutboundAnnotations={setOutboundAnnotations}
                 measureStoreCql={measure?.cql}
                 cqlMetaData={measure?.measureMetaData?.cqlMetaData}
+                measureModel={measure?.model}
               />
             ) : (
               <>
