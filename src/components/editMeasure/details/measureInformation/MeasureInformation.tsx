@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect } from "react";
 import { Endorsement, Measure } from "@madie/madie-models";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import "styled-components/macro";
@@ -116,6 +116,9 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   const { updateRouteHandlerState } = routeHandlerStore;
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
 
+  useLayoutEffect(() => {
+    formik.validateForm();
+  }, [])
   useEffect(() => {
     updateRouteHandlerState({
       canTravel: !formik.dirty,
@@ -292,7 +295,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       return `${formik.errors[name]}`;
     }
   }
-
+  console.log('formik.errors', formik.errors["measureName"])
   // we create a state to track current focus. We only display helper text on focus and remove current focus on blur
   const [focusedField, setFocusedField] = useState("");
   const onBlur = (field) => {
@@ -355,16 +358,12 @@ export default function MeasureInformation(props: MeasureInformationProps) {
               "aria-required": "true",
             }}
             helperText={
-              (formik.touched["measureName"] ||
-                focusedField === "measureName") &&
-              formikErrorHandler("measureName", true)
+              formik.errors["measureName"]
             }
             data-testid="measure-name-text-field"
             size="small"
             onKeyDown={goBackToNav}
-            error={
-              formik.touched.measureName && Boolean(formik.errors.measureName)
-            }
+            error={Boolean(formik.errors.measureName)}
             {...formik.getFieldProps("measureName")}
             onBlur={() => {
               onBlur("measureName");
