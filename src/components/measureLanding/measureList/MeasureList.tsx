@@ -384,8 +384,12 @@ export default function MeasureList(props: {
           }
           if (!_.isEmpty(errors)) {
             errors.forEach((error) => {
-              if (error.startsWith("MISMATCH")) {
-                missing.push(error);
+              if (error.startsWith("MISMATCH_CQL_POPULATION_RETURN_TYPES")) {
+                missing.push("CQL Populations Return Types are invalid");
+              } else if (error.startsWith("MISMATCH_CQL_RISK_ADJUSTMENT")) {
+                missing.push("CQL Risk Adjustment are invalid");
+              } else if (error.startsWith("MISMATCH_CQL_SUPPLEMENTAL_DATA")) {
+                missing.push("CQL Supplemental Data Elements are invalid");
               }
             });
           }
