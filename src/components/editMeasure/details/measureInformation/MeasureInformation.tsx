@@ -360,11 +360,17 @@ export default function MeasureInformation(props: MeasureInformationProps) {
               "data-testid": "measure-name-input",
               "aria-required": "true",
             }}
-            helperText={formik.errors["measureName"]}
+            helperText={
+              (formik.touched["measureName"] ||
+                focusedField === "measureName") &&
+              formikErrorHandler("measureName", true)
+            }
             data-testid="measure-name-text-field"
             size="small"
             onKeyDown={goBackToNav}
-            error={Boolean(formik.errors.measureName)}
+            error={
+              formik.touched.measureName && Boolean(formik.errors.measureName)
+            }
             {...formik.getFieldProps("measureName")}
             onBlur={() => {
               onBlur("measureName");
@@ -382,16 +388,9 @@ export default function MeasureInformation(props: MeasureInformationProps) {
               "data-testid": "cql-library-name-input",
               "aria-required": "true",
             }}
-            helperText={
-              formik.touched["cqlLibraryName"] &&
-              focusedField === "cqlLibraryName" &&
-              formikErrorHandler("cqlLibraryName", true)
-            }
+            helperText={formik.errors["cqlLibraryName"]}
             size="small"
-            error={
-              formik.touched.cqlLibraryName &&
-              Boolean(formik.errors.cqlLibraryName)
-            }
+            error={Boolean(formik.errors.cqlLibraryName)}
             {...formik.getFieldProps("cqlLibraryName")}
             onBlur={() => {
               onBlur("cqlLibraryName");
