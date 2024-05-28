@@ -374,14 +374,6 @@ export default function MeasureList(props: {
           if (cqlErrors) {
             missing.push("CQL Contains Errors");
           }
-          if (
-            (model.startsWith("QI-Core") &&
-              !/^(^[A-Z][a-zA-Z0-9]*$)/.test(cqlLibraryName)) ||
-            (model.startsWith("QDM") &&
-              !/^(^[A-Z][a-zA-Z0-9_]*$)/.test(cqlLibraryName))
-          ) {
-            missing.push("Measure CQL Library Name is invalid");
-          }
           if (!_.isEmpty(errors)) {
             errors.forEach((error) => {
               if (error.startsWith("MISMATCH_CQL_POPULATION_RETURN_TYPES")) {
@@ -393,7 +385,15 @@ export default function MeasureList(props: {
               }
             });
           }
-
+          if (
+            (model.startsWith("QI-Core") &&
+              !/^(^[A-Z][a-zA-Z0-9]*$)/.test(cqlLibraryName)) ||
+            (model.startsWith("QDM") &&
+              !/^(^[A-Z][a-zA-Z0-9_]*$)/.test(cqlLibraryName)) ||
+            cqlLibraryName.length > 64
+          ) {
+            missing.push("Measure CQL Library Name is invalid");
+          }
           if (_.isEmpty(groups)) {
             missing.push("Missing Population Criteria");
           }
