@@ -1,8 +1,7 @@
-import getLibraryNameErrors from "./getLibraryNameErrors";
+import getLibraryNameErrors, { ERROR_MAP } from "./getLibraryNameErrors";
 import "@testing-library/jest-dom";
 import { describe, expect, test } from "@jest/globals";
 import { Model } from "@madie/madie-models";
-import { ERROR_MAP } from "./getLibraryNameErrors";
 
 describe("getLibraryNameErrors", () => {
   test("Sees no errors", () => {
