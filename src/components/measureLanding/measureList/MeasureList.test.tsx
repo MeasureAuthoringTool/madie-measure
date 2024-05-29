@@ -104,6 +104,7 @@ const measures = [
     version: "0.0.000",
     state: "DRAFT",
     measureName: "draft measure - B",
+    cqlLibraryName: "IDIDID2",
     cql: "Sample Cql",
     createdAt: null,
     createdBy: null,
@@ -122,6 +123,7 @@ const measures = [
     version: "1.3",
     state: "VERSIONED",
     measureName: "versioned measure - C",
+    cqlLibraryName: "IDIDID3",
     cql: "Sample Cql",
     cqlErrors: true,
     groups: [testGroup],
@@ -142,6 +144,7 @@ const measures = [
     version: "1.3",
     state: "DRAFT",
     measureName: "versioned measure - D",
+    cqlLibraryName: "IDIDID4",
     cql: "Sample Cql",
     cqlErrors: true,
     groups: [testGroup],
@@ -1159,7 +1162,7 @@ describe("Measure List component", () => {
     fireEvent.click(getByTestId(`export-measure-${measures[0].id}`));
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
-        "Unable to Export measure.Missing CQLMissing Population CriteriaMissing Measure DevelopersMissing StewardMissing Description"
+        "Unable to Export measure.Missing CQLMeasure CQL Library Name is invalidMissing Population CriteriaMissing Measure DevelopersMissing StewardMissing DescriptionMeasure Type is required"
       );
     });
     unmount();
@@ -1307,7 +1310,7 @@ describe("Measure List component", () => {
     fireEvent.click(getByTestId(`export-measure-${measures[2].id}`));
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
-        "Unable to Export measure.CQL Contains ErrorsMISMATCH_CQL_POPULATION_RETURN_TYPESMissing Measure DevelopersMissing StewardMissing DescriptionAt least one Population Criteria is missing Type"
+        "Unable to Export measure.CQL Contains ErrorsCQL Populations Return Types are invalidMissing Measure DevelopersMissing StewardMissing DescriptionAt least one Population Criteria is missing Type"
       );
     });
     unmount();

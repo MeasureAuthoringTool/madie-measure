@@ -33,8 +33,8 @@ const setErrorMessage = jest.fn();
 const testUser = "john doe";
 const measure = {
   id: "test measure",
-  measureName: "the measure for testing",
-  cqlLibraryName: "TestCqlLibraryName",
+  measureName: "TestM123",
+  cqlLibraryName: "TestLibray123",
   model: "QI-Core v4.1.1",
   ecqmTitle: "ecqmTitle",
   measurementPeriodStart: "01/01/2022",
@@ -173,6 +173,51 @@ describe("MeasureInformation component", () => {
         expect(
           screen.getByText("Endorser Number is Required")
         ).toBeInTheDocument();
+      });
+    });
+  });
+
+  test("Click Save button will save the change", async () => {
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
+      return true;
+    });
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+
+    const endorserAutoComplete = await screen.findByTestId("endorser");
+    const endorserId = getByTestId(
+      "endorsement-number-input"
+    ) as HTMLInputElement;
+
+    fireEvent.keyDown(endorserAutoComplete, { key: "ArrowDown" });
+    // selects 2nd option
+    const endorserOptions = await screen.findAllByRole("option");
+    fireEvent.click(endorserOptions[1]);
+
+    // verifies if the option is selected
+    const endorserComboBox = within(endorserAutoComplete).getByRole("combobox");
+    expect(endorserComboBox).toHaveValue("NQF");
+    //verifies endorserId was enabled
+    expect(endorserId).toBeEnabled();
+    //enter endorserId
+    fireEvent.change(endorserId, {
+      target: { value: "1" },
+    });
+    expect(endorserId).toHaveValue("1");
+
+    const discardButton = screen.getByRole("button", {
+      name: "Discard Changes",
+    }) as HTMLButtonElement;
+    expect(discardButton).toBeEnabled();
+
+    await act(async () => {
+      const input = await findByTestId("measure-name-input");
+      fireEvent.change(input, {
+        target: { value: "new value" },
+      });
+      const createBtn = getByTestId("measurement-information-save-button");
+      expect(createBtn).toBeEnabled();
+      act(() => {
+        fireEvent.click(createBtn);
       });
     });
   });
@@ -670,45 +715,7 @@ describe("MeasureInformation component", () => {
     expect(endorserComboBox).toHaveValue("");
     expect(endorserId).toHaveValue("");
   });
-  test("Click Save button will save the change", async () => {
-    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
-      return true;
-    });
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
 
-    const endorserAutoComplete = await screen.findByTestId("endorser");
-    const endorserId = getByTestId(
-      "endorsement-number-input"
-    ) as HTMLInputElement;
-
-    fireEvent.keyDown(endorserAutoComplete, { key: "ArrowDown" });
-    // selects 2nd option
-    const endorserOptions = await screen.findAllByRole("option");
-    fireEvent.click(endorserOptions[1]);
-
-    // verifies if the option is selected
-    const endorserComboBox = within(endorserAutoComplete).getByRole("combobox");
-    expect(endorserComboBox).toHaveValue("NQF");
-    //verifies endorserId was enabled
-    expect(endorserId).toBeEnabled();
-    //enter endorserId
-    fireEvent.change(endorserId, {
-      target: { value: "1" },
-    });
-    expect(endorserId).toHaveValue("1");
-
-    const discardButton = screen.getByRole("button", {
-      name: "Discard Changes",
-    }) as HTMLButtonElement;
-    expect(discardButton).toBeEnabled();
-    const saveButton = screen.getByRole("button", {
-      name: "Save",
-    }) as HTMLButtonElement;
-    expect(saveButton).toBeEnabled();
-    act(() => {
-      fireEvent.click(saveButton);
-    });
-  });
   it("Discard dialog opens and succeeds", async () => {
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {

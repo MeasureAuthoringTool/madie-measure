@@ -293,6 +293,12 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     }
   }
 
+  useEffect(() => {
+    if (measure?.id) {
+      formik.validateForm();
+    }
+  }, [measure]);
+
   // we create a state to track current focus. We only display helper text on focus and remove current focus on blur
   const [focusedField, setFocusedField] = useState("");
   const onBlur = (field) => {
@@ -382,16 +388,9 @@ export default function MeasureInformation(props: MeasureInformationProps) {
               "data-testid": "cql-library-name-input",
               "aria-required": "true",
             }}
-            helperText={
-              formik.touched["cqlLibraryName"] &&
-              focusedField === "cqlLibraryName" &&
-              formikErrorHandler("cqlLibraryName", true)
-            }
+            helperText={formik.errors["cqlLibraryName"]}
             size="small"
-            error={
-              formik.touched.cqlLibraryName &&
-              Boolean(formik.errors.cqlLibraryName)
-            }
+            error={Boolean(formik.errors.cqlLibraryName)}
             {...formik.getFieldProps("cqlLibraryName")}
             onBlur={() => {
               onBlur("cqlLibraryName");

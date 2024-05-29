@@ -363,6 +363,7 @@ export default function MeasureList(props: {
             errors,
             groups,
             measureMetaData,
+            cqlLibraryName,
             model,
             baseConfigurationTypes,
           } = await measureServiceApi?.fetchMeasure(targetMeasure.current?.id);
@@ -373,13 +374,26 @@ export default function MeasureList(props: {
           if (cqlErrors) {
             missing.push("CQL Contains Errors");
           }
+          if (
+            (model.startsWith("QI-Core") &&
+              !/^(^[A-Z][a-zA-Z0-9]*$)/.test(cqlLibraryName)) ||
+            (model.startsWith("QDM") &&
+              !/^(^[A-Z][a-zA-Z0-9_]*$)/.test(cqlLibraryName))
+          ) {
+            missing.push("Measure CQL Library Name is invalid");
+          }
           if (!_.isEmpty(errors)) {
             errors.forEach((error) => {
-              if (error.startsWith("MISMATCH")) {
-                missing.push(error);
+              if (error.startsWith("MISMATCH_CQL_POPULATION_RETURN_TYPES")) {
+                missing.push("CQL Populations Return Types are invalid");
+              } else if (error.startsWith("MISMATCH_CQL_RISK_ADJUSTMENT")) {
+                missing.push("CQL Risk Adjustment are invalid");
+              } else if (error.startsWith("MISMATCH_CQL_SUPPLEMENTAL_DATA")) {
+                missing.push("CQL Supplemental Data Elements are invalid");
               }
             });
           }
+
           if (_.isEmpty(groups)) {
             missing.push("Missing Population Criteria");
           }
