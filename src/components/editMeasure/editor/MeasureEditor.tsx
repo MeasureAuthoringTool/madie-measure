@@ -250,11 +250,11 @@ const MeasureEditor = () => {
       }));
 
       const updatedCodeSystemMap: Map<string, CodeSystem> = Object.fromEntries(
-        Object.entries(cqlMetaData).filter(([key, value]) =>
+        Object.entries(cqlMetaData)?.filter(([key, value]) =>
           parsedCodes.some(
             (parsedCode) =>
-              parsedCode.codeId === value.name &&
-              parsedCode.codeSystem === value.codeSystem
+              parsedCode.codeId === value?.name &&
+              parsedCode.codeSystem === value?.codeSystem
           )
         )
       ) as {} as Map<string, CodeSystem>;
