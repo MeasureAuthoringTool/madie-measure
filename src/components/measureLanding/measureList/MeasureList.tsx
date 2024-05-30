@@ -390,6 +390,7 @@ export default function MeasureList(props: {
               !/^(^[A-Z][a-zA-Z0-9]*$)/.test(cqlLibraryName)) ||
             (model.startsWith("QDM") &&
               !/^(^[A-Z][a-zA-Z0-9_]*$)/.test(cqlLibraryName)) ||
+            cqlLibraryName == null ||
             cqlLibraryName.length > 64
           ) {
             missing.push("Measure CQL Library Name is invalid");
