@@ -104,7 +104,8 @@ const measures = [
     version: "0.0.000",
     state: "DRAFT",
     measureName: "draft measure - B",
-    cqlLibraryName: "IDIDID2",
+    cqlLibraryName:
+      "IDIDID22IDIDID22IDIDID22IDIDID22IDIDID22IDIDID22IDIDID22IDIDID22a",
     cql: "Sample Cql",
     createdAt: null,
     createdBy: null,
@@ -1404,7 +1405,7 @@ describe("Measure List component", () => {
     fireEvent.click(getByTestId(`export-measure-${measures[1].id}`));
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
-        "Unable to Export measure.Missing Population CriteriaMissing Measure DevelopersMissing StewardMissing Description"
+        "Unable to Export measure.Measure CQL Library Name is invalidMissing Population CriteriaMissing Measure DevelopersMissing StewardMissing Description"
       );
     });
     unmount();
