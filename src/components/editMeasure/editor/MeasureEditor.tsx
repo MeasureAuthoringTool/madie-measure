@@ -258,7 +258,6 @@ const MeasureEditor = () => {
           )
         )
       ) as {} as Map<string, CodeSystem>;
-
       return { codeSystemMap: updatedCodeSystemMap };
     }
   };
