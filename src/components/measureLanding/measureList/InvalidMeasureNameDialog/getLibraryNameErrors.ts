@@ -22,7 +22,7 @@ export const ERROR_MAP = {
       return /^[A-Z][a-zA-Z0-9_]*$/.test(name);
     },
     message:
-      "Library name must start with an upper case letter, followed by alpha-numeric character(s) and must not contain spaces or other special characters except of underscore for QDM.",
+      "Library name must start with an upper case letter, followed by alpha-numeric character(s) and must not contain spaces or other special characters except for underscore in the case of QDM.",
   },
   qiCoreCheck: {
     test: (name: string, model: Model) => {
