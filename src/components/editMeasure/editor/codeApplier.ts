@@ -75,10 +75,10 @@ const applyCode = (cql: string, code: Code): CodeChangeResult => {
 };
 
 const findCodeInsertPoint = (parseResults: CqlResult) => {
-  const codes: number = parseResults.codes.length;
-  const codesystems: number = parseResults.codeSystems.length;
-  const includes: number = parseResults.includes.length;
-  const usings: number = parseResults.using.start.line;
+  const codes: number = parseResults?.codes.length;
+  const codesystems: number = parseResults?.codeSystems.length;
+  const includes: number = parseResults?.includes.length;
+  const usings: number = parseResults?.using?.start?.line;
 
   if (codes > 0) {
     return parseResults.codes[parseResults.codes.length - 1].stop.line;
@@ -86,19 +86,21 @@ const findCodeInsertPoint = (parseResults: CqlResult) => {
     return parseResults.codeSystems[parseResults.codeSystems.length - 1].stop
       .line;
   } else if (includes > 0) {
-    return parseResults.includes[parseResults.includes.length - 1].stop.line;
+    return (
+      parseResults.includes[parseResults.includes.length - 1].stop.line + 1
+    );
   } else if (usings > 0) {
-    return parseResults.using.start.line;
+    return parseResults.using.start.line + 1;
   } else {
-    return 1;
+    return 2;
   }
 };
 
 const findCodeSystemInsertPoint = (parseResults: CqlResult) => {
-  const codes: number = parseResults.codes.length;
-  const codesystems: number = parseResults.codeSystems.length;
-  const includes: number = parseResults.includes.length;
-  const usings: number = parseResults.using.start.line;
+  const codes: number = parseResults?.codes.length;
+  const codesystems: number = parseResults?.codeSystems.length;
+  const includes: number = parseResults?.includes.length;
+  const usings: number = parseResults?.using?.start?.line;
 
   if (codesystems > 0) {
     return parseResults.codeSystems[parseResults.codeSystems.length - 1].stop

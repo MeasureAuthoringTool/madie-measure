@@ -24,8 +24,13 @@ import {
   MeasureErrorType,
   Code,
   CqlMetaData,
+  CodeSystem,
 } from "@madie/madie-models";
-import { CqlCode, CqlCodeSystem } from "@madie/cql-antlr-parser/dist/src";
+import {
+  CqlAntlr,
+  CqlCode,
+  CqlCodeSystem,
+} from "@madie/cql-antlr-parser/dist/src";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 import * as _ from "lodash";
 import {
@@ -233,6 +238,30 @@ const MeasureEditor = () => {
     return JSON.stringify(errors).includes("Please log in to UMLS");
   };
 
+  const updateCodeSystemMap = (
+    newMeasure,
+    cqlMetaData: Map<string, CodeSystem>
+  ) => {
+    const definitions = new CqlAntlr(newMeasure.cql).parse();
+    if (definitions?.codes && cqlMetaData) {
+      const parsedCodes = definitions?.codes.map((code) => ({
+        codeId: code?.codeId.replace(/['"]/g, ""),
+        codeSystem: code?.codeSystem.replace(/['"]/g, ""),
+      }));
+
+      const updatedCodeSystemMap: Map<string, CodeSystem> = Object.fromEntries(
+        Object.entries(cqlMetaData)?.filter(([key, value]) =>
+          parsedCodes.some(
+            (parsedCode) =>
+              parsedCode.codeId === value?.name &&
+              parsedCode.codeSystem === value?.codeSystem
+          )
+        )
+      ) as {} as Map<string, CodeSystem>;
+      return { codeSystemMap: updatedCodeSystemMap };
+    }
+  };
+
   const updateMeasureCql = async () => {
     setProcessing(true);
     try {
@@ -308,6 +337,12 @@ const MeasureEditor = () => {
           newMeasure.measureMetaData.cqlMetaData.codeSystemMap[entry.name] =
             entry;
         });
+
+        //removing code entry from cqlMetaData when a code is removed from cql editor manually(not through UI)
+        newMeasure.measureMetaData.cqlMetaData = updateCodeSystemMap(
+          newMeasure,
+          measure?.measureMetaData?.cqlMetaData?.codeSystemMap
+        );
 
         measureServiceApi
           .updateMeasure(newMeasure)
