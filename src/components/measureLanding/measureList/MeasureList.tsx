@@ -23,6 +23,8 @@ import versionErrorHelper from "../../../utils/versionErrorHelper";
 import getModelFamily from "../../../utils/measureModelHelpers";
 import _ from "lodash";
 import ExportDialog from "./exportDialog/ExportDialog";
+import InvalidMeasureNameDialog from "./InvalidMeasureNameDialog/InvalidMeasureNameDialog";
+import getLibraryNameErrors from "./InvalidMeasureNameDialog/getLibraryNameErrors";
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -115,11 +117,19 @@ export default function MeasureList(props: {
     open: false,
     measureId: "",
   });
+  const [invalidLibraryDialogOpen, setInvalidLibraryDialogOpen] =
+    useState<boolean>(false);
+  const [invalidLibraryErrors, setInvalidLibraryErrors] = useState<string[]>(
+    []
+  );
+
   const [versionHelperText, setVersionHelperText] = useState("");
   const [draftMeasureDialog, setDraftMeasureDialog] = useState({
     open: false,
   });
   const handleDialogClose = () => {
+    setInvalidLibraryDialogOpen(false);
+    setInvalidTestCaseOpen(false);
     setCreateVersionDialog({
       open: false,
       measureId: "",
@@ -127,8 +137,8 @@ export default function MeasureList(props: {
     setDraftMeasureDialog({
       open: false,
     });
+    setInvalidLibraryErrors([]);
     setVersionHelperText("");
-    setInvalidTestCaseOpen(false);
   };
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
@@ -536,6 +546,35 @@ export default function MeasureList(props: {
         });
     }
   };
+  // intermediary validation step before we check if we can create version
+  const checkValidCqlLibraryName = async (versionType: string) => {
+    try {
+      const result = await measureServiceApi?.fetchMeasure(
+        targetMeasure.current?.id
+      );
+      if (result) {
+        const { cqlLibraryName, model } = result;
+        const errorResults = getLibraryNameErrors(
+          cqlLibraryName,
+          model as Model
+        );
+        if (errorResults.length > 0) {
+          setInvalidLibraryErrors(errorResults);
+          setInvalidLibraryDialogOpen(true);
+          setCreateVersionDialog((prevState) => ({
+            ...prevState,
+            open: false,
+          }));
+        } else {
+          checkCreateVersion(versionType);
+        }
+      }
+    } catch (e) {
+      setToastMessage(
+        "An error occurred, please try again. If the error persists, please contact the help desk."
+      );
+    }
+  };
 
   const draftMeasure = async (measureName: string) => {
     await measureServiceApi
@@ -685,21 +724,27 @@ export default function MeasureList(props: {
               onClose={onToastClose}
               autoHideDuration={6000}
             />
+            <CreatVersionDialog
+              currentVersion={targetMeasure?.current?.version}
+              open={createVersionDialog.open}
+              onClose={handleDialogClose}
+              onSubmit={checkValidCqlLibraryName}
+              versionHelperText={versionHelperText}
+              loading={loading}
+              measureId={targetMeasure?.current?.id}
+            />
+            <InvalidMeasureNameDialog
+              invalidLibraryDialogOpen={invalidLibraryDialogOpen}
+              onInvalidLibraryNameDialogClose={handleDialogClose}
+              measureName={targetMeasure?.current?.measureName}
+              invalidLibraryErrors={invalidLibraryErrors}
+            />
             <InvalidTestCaseDialog
               open={invalidTestCaseOpen}
               onContinue={createVersion}
               onClose={handleDialogClose}
               versionType={versionType}
               loading={loading}
-            />
-            <CreatVersionDialog
-              currentVersion={targetMeasure?.current?.version}
-              open={createVersionDialog.open}
-              onClose={handleDialogClose}
-              onSubmit={checkCreateVersion}
-              versionHelperText={versionHelperText}
-              loading={loading}
-              measureId={targetMeasure?.current?.id}
             />
             <DraftMeasureDialog
               open={draftMeasureDialog.open}

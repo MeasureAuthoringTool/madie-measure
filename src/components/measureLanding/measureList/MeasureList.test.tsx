@@ -5,7 +5,9 @@ import {
   render,
   screen,
   waitFor,
+  waitForElementToBeRemoved,
 } from "@testing-library/react";
+
 import {
   Measure,
   MeasureErrorType,
@@ -22,7 +24,7 @@ import { oneItemResponse } from "../../__mocks__/mockMeasureResponses";
 import userEvent from "@testing-library/user-event";
 import { v4 as uuid } from "uuid";
 import ServiceContext, { ServiceConfig } from "../../../api/ServiceContext";
-import { Simulate } from "react-dom/test-utils";
+import { Simulate, act } from "react-dom/test-utils";
 // @ts-ignore
 import { useFeatureFlags } from "@madie/madie-util";
 
@@ -83,6 +85,7 @@ const measures = [
     measureHumanReadableId: null,
     ecqmTitle: "ecqmTitleeee",
     measureSetId: "1",
+    cqlLibraryName: "QiCore1",
     version: "0.0.000",
     state: "NEW",
     measureName: "new measure - A",
@@ -160,6 +163,10 @@ const measures = [
     },
   },
 ] as unknown as Measure[];
+const badCqlLibraryName = {
+  ...measures[0],
+  cqlLibraryName: "Q1!@#_",
+};
 const checkValidSuccess = {
   status: 200,
   response: {
@@ -543,16 +550,93 @@ describe("Measure List component", () => {
     unmount();
   });
 
-  it("should display unauthorized error while creating a version of a measure", async () => {
+  it("Should display invalid Cql library name dialog and close on cancel.", async () => {
     const error = {
       response: {
         status: 403,
+        request: {
+          responseText: JSON.stringify({
+            message: "User is unauthorized to create a version",
+          }),
+        },
       },
     };
     const useMeasureServiceMockRejected = {
       createVersion: jest.fn().mockRejectedValue(error),
       checkValidVersion: jest.fn().mockRejectedValue(error),
       checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
+      fetchMeasure: jest.fn().mockResolvedValueOnce(badCqlLibraryName),
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockRejected;
+    });
+
+    const { getByTestId, unmount, queryByText, getByText } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    fireEvent.click(getByTestId(`measure-action-${measures[0].id}`));
+    fireEvent.click(getByTestId(`create-version-measure-${measures[0].id}`));
+
+    const typeInput = screen.getByTestId(
+      "version-type-input"
+    ) as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = getByTestId(
+      "confirm-version-input"
+    ) as HTMLInputElement;
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
+    expect(getByTestId("create-version-continue-button")).toBeEnabled();
+    await waitFor(() => {
+      fireEvent.click(getByTestId("create-version-continue-button"));
+      expect(getByTestId("invalid-cancel")).toBeInTheDocument();
+    });
+    fireEvent.click(getByTestId("invalid-cancel"));
+    await waitForElementToBeRemoved(() =>
+      queryByText("Measure CQL Library Name is invalid")
+    );
+    unmount();
+  });
+
+  it("should display unauthorized error while creating a version of a measure", async () => {
+    const error = {
+      response: {
+        status: 403,
+        request: {
+          responseText: JSON.stringify({
+            message: "User is unauthorized to create a version",
+          }),
+        },
+      },
+    };
+    const useMeasureServiceMockRejected = {
+      createVersion: jest.fn().mockRejectedValue(error),
+      checkValidVersion: jest.fn().mockRejectedValue(error),
+      checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
+      fetchMeasure: jest.fn().mockResolvedValueOnce(measures[0]),
     } as unknown as MeasureServiceApi;
 
     useMeasureServiceMock.mockImplementation(() => {
@@ -610,12 +694,18 @@ describe("Measure List component", () => {
     const error = {
       response: {
         status: 400,
+        request: {
+          responseText: JSON.stringify({
+            message: "Requested measure cannot be versioned",
+          }),
+        },
       },
     };
     const useMeasureServiceMockRejected = {
       createVersion: jest.fn().mockRejectedValue(error),
       checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
       checkValidVersion: jest.fn().mockRejectedValue(error),
+      fetchMeasure: jest.fn().mockResolvedValueOnce(measures[0]),
     } as unknown as MeasureServiceApi;
 
     useMeasureServiceMock.mockImplementation(() => {
@@ -675,12 +765,18 @@ describe("Measure List component", () => {
       response: {
         status: 500,
         message: "server error",
+        request: {
+          responseText: JSON.stringify({
+            message: "Requested measure cannot be versioned",
+          }),
+        },
       },
     };
     const useMeasureServiceMockRejected = {
       createVersion: jest.fn().mockRejectedValue(error),
       checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
       checkValidVersion: jest.fn().mockRejectedValue(error),
+      fetchMeasure: jest.fn().mockResolvedValueOnce(measures[0]),
     } as unknown as MeasureServiceApi;
 
     useMeasureServiceMock.mockImplementation(() => {
@@ -734,6 +830,9 @@ describe("Measure List component", () => {
     const success = {
       response: {
         data: {},
+        request: {
+          responseText: JSON.stringify({ message: "" }),
+        },
       },
     };
     const useMeasureServiceMockRejected = {
@@ -741,6 +840,7 @@ describe("Measure List component", () => {
       checkValidVersion: jest.fn().mockResolvedValue(checkValidSuccess),
       checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
       fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
+      fetchMeasure: jest.fn().mockResolvedValue(measures[0]),
     } as unknown as MeasureServiceApi;
 
     useMeasureServiceMock.mockImplementation(() => {
@@ -802,10 +902,16 @@ describe("Measure List component", () => {
   it("should handle invalid test cases dialog", async () => {
     const invalidTestCaseResponse = {
       response: {},
+      request: {
+        responseText: JSON.stringify({ message: "" }),
+      },
       status: 202,
     };
     const success = {
       response: {
+        request: {
+          responseText: JSON.stringify({ message: "" }),
+        },
         data: {},
       },
     };
@@ -814,8 +920,8 @@ describe("Measure List component", () => {
       createVersion: jest.fn().mockResolvedValue(success),
       checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
       fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
+      fetchMeasure: jest.fn().mockResolvedValue(measures[0]),
     } as unknown as MeasureServiceApi;
-
     useMeasureServiceMock.mockImplementation(() => {
       return useMeasureServiceMockRejected;
     });
@@ -1127,6 +1233,9 @@ describe("Measure List component", () => {
     const error = {
       response: {
         status: 409,
+        request: {
+          responseText: JSON.stringify({ message: "" }),
+        },
       },
     };
 
@@ -1163,7 +1272,7 @@ describe("Measure List component", () => {
     fireEvent.click(getByTestId(`export-measure-${measures[0].id}`));
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
-        "Unable to Export measure.Missing CQLMeasure CQL Library Name is invalidMissing Population CriteriaMissing Measure DevelopersMissing StewardMissing DescriptionMeasure Type is required"
+        "Unable to Export measure.Missing CQLMissing Population CriteriaMissing Measure DevelopersMissing StewardMissing DescriptionMeasure Type is required"
       );
     });
     unmount();
