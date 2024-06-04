@@ -438,7 +438,6 @@ const MeasureEditor = () => {
     })[0];
 
     const splittedCql: string[] = editorVal.split("\n");
-
     const updatedCql = removeCodeFromCql(
       splittedCql,
       isSameCodeSystemPresentInMultipleCodes,
