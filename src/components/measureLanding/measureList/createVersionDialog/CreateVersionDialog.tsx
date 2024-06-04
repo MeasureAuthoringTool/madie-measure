@@ -62,7 +62,7 @@ const CreatVersionDialog = ({
         .required("Confirmed Version is required"),
     }),
     enableReinitialize: true,
-    onSubmit: ({ type }) => {
+    onSubmit: async ({ type }) => {
       formik.resetForm();
       return onSubmit(type);
     },
