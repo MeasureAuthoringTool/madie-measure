@@ -1614,53 +1614,6 @@ describe("Measure List component", () => {
     unmount();
   });
 
-  it("Should not be able to version QDM Measure when enableQdmRepeatTransfer is true", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      enableQdmRepeatTransfer: true,
-      qdmExport: true,
-    }));
-    const { getByTestId, queryByTestId, unmount } = render(
-      <ServiceContext.Provider value={serviceConfig}>
-        <MeasureList
-          measureList={measures}
-          setMeasureList={setMeasureListMock}
-          setTotalPages={setTotalPagesMock}
-          setTotalItems={setTotalItemsMock}
-          setVisibleItems={setVisibleItemsMock}
-          setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
-          activeTab={0}
-          searchCriteria={""}
-          setSearchCriteria={setSearchCriteriaMock}
-          currentLimit={10}
-          currentPage={0}
-          setErrMsg={setErrMsgMock}
-        />
-      </ServiceContext.Provider>
-    );
-    const actionButton = getByTestId(`measure-action-${measures[0].id}`);
-    expect(actionButton).toBeInTheDocument();
-    expect(actionButton).toHaveTextContent("Select");
-    expect(window.location.href).toBe("http://localhost/");
-    fireEvent.click(actionButton);
-    expect(getByTestId(`view-measure-${measures[0].id}`)).toBeInTheDocument();
-    expect(getByTestId(`export-measure-${measures[0].id}`)).toBeInTheDocument();
-    expect(
-      queryByTestId(`create-version-measure-${measures[0].id}`)
-    ).not.toBeInTheDocument();
-    const actionButton2 = getByTestId(`measure-action-${measures[1].id}`);
-    expect(actionButton2).toBeInTheDocument();
-    expect(actionButton2).toHaveTextContent("Select");
-    expect(window.location.href).toBe("http://localhost/");
-    fireEvent.click(actionButton2);
-    expect(getByTestId(`view-measure-${measures[1].id}`)).toBeInTheDocument();
-    expect(getByTestId(`export-measure-${measures[1].id}`)).toBeInTheDocument();
-    expect(
-      getByTestId(`create-version-measure-${measures[1].id}`)
-    ).toBeInTheDocument();
-    unmount();
-  });
-
   it("Should be able to version QDM Measure when enableQdmRepeatTransfer is false", async () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       enableQdmRepeatTransfer: false,

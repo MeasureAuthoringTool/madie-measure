@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { Measure, Model } from "@madie/madie-models";
 import { useNavigate } from "react-router-dom";
 import { Chip, IconButton } from "@mui/material";
 import {
-  TextField,
   Button,
   Popover,
+  TextField,
   Toast,
 } from "@madie/madie-design-system/dist/react";
 
@@ -23,7 +23,6 @@ import versionErrorHelper from "../../../utils/versionErrorHelper";
 import getModelFamily from "../../../utils/measureModelHelpers";
 import _ from "lodash";
 import ExportDialog from "./exportDialog/ExportDialog";
-import { AxiosResponse } from "axios";
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -267,12 +266,7 @@ export default function MeasureList(props: {
       additionalOptions.push(exportButton);
     }
     // no longer an always on if feature
-    if (
-      selected.measureMetaData.draft &&
-      (selected.model.startsWith("QI") ||
-        (selected.model.startsWith("QDM") &&
-          !featureFlags.enableQdmRepeatTransfer))
-    ) {
+    if (selected.measureMetaData.draft) {
       options.push({
         label: "Version",
         toImplementFunction: checkCreateVersion,
