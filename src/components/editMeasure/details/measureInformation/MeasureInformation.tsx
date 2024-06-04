@@ -388,9 +388,16 @@ export default function MeasureInformation(props: MeasureInformationProps) {
               "data-testid": "cql-library-name-input",
               "aria-required": "true",
             }}
-            helperText={formik.errors["cqlLibraryName"]}
+            helperText={
+              (formik.touched["cqlLibraryName"] ||
+                focusedField === "cqlLibraryName") &&
+              formikErrorHandler("cqlLibraryName", true)
+            }
             size="small"
-            error={Boolean(formik.errors.cqlLibraryName)}
+            error={
+              formik.touched.cqlLibraryName &&
+              Boolean(formik.errors.cqlLibraryName)
+            }
             {...formik.getFieldProps("cqlLibraryName")}
             onBlur={() => {
               onBlur("cqlLibraryName");
