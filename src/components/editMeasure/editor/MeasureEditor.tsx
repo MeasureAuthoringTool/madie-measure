@@ -238,6 +238,36 @@ const MeasureEditor = () => {
     return JSON.stringify(errors).includes("Please log in to UMLS");
   };
 
+  useEffect(() => {
+    const handleDeleteCodeEvent = (event) => {
+      const { callback, data } = event?.detail;
+      const definitions = new CqlAntlr(data?.cql).parse();
+      const parsedSelectedCodeDetails = definitions?.codes?.filter(
+        (code) =>
+          code?.codeId.replace(/['"]/g, "") ===
+            data?.selectedCodeDetails?.name &&
+          code?.codeSystem.replace(/['"]/g, "") ===
+            data?.selectedCodeDetails?.codeSystem
+      )[0];
+      const splittedCql: string[] = data?.cql.split("\n");
+      const updatedCql = splittedCql
+        ?.filter(
+          (line, index) =>
+            index < parsedSelectedCodeDetails?.start?.line - 1 ||
+            index > parsedSelectedCodeDetails?.stop?.line - 1
+        )
+        ?.join("\n");
+      setEditorVal(updatedCql);
+      handleUpdateMeasureCql(updatedCql).then(() => {
+        callback();
+      });
+    };
+    window.addEventListener("deleteCode", handleDeleteCodeEvent);
+    return () => {
+      window.removeEventListener("deleteCode", handleDeleteCodeEvent);
+    };
+  }, [measure?.cql]);
+
   const updateCodeSystemMap = (
     newMeasure,
     cqlMetaData: Map<string, CodeSystem>
@@ -262,14 +292,13 @@ const MeasureEditor = () => {
     }
   };
 
-  const updateMeasureCql = async () => {
-    setProcessing(true);
+  const updateMeasureCql = async (editorValue: string) => {
     try {
       //Get model name and version
       const using = measure?.model.split(" v");
 
       const inSyncCql = await synchingEditorCqlContent(
-        editorVal,
+        editorValue,
         measure?.cql,
         measure?.cqlLibraryName,
         "",
@@ -311,7 +340,7 @@ const MeasureEditor = () => {
           _.filter(validationResult?.errors, { errorSeverity: "Error" })
         ) || !_.isEmpty(validationResult?.externalErrors);
 
-      if (editorVal !== measure.cql) {
+      if (editorValue !== measure.cql) {
         const cqlErrors = parseErrors || cqlElmErrors;
         const newMeasure: Measure = {
           ...measure,
@@ -390,6 +419,15 @@ const MeasureEditor = () => {
       setElmAnnotations([]);
     } finally {
       setProcessing(false);
+    }
+  };
+
+  const handleUpdateMeasureCql = async (cql?: string) => {
+    setProcessing(true);
+    if (cql) {
+      updateMeasureCql(cql);
+    } else {
+      updateMeasureCql(editorVal);
     }
   };
 
@@ -500,7 +538,7 @@ const MeasureEditor = () => {
             <Button
               variant="cyan"
               tw="m-2"
-              onClick={() => updateMeasureCql()}
+              onClick={() => handleUpdateMeasureCql()}
               data-testid="save-cql-btn"
               disabled={isCQLUnchanged}
             >
