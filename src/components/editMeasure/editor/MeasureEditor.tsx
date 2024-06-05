@@ -12,6 +12,7 @@ import {
   synchingEditorCqlContent,
   isUsingEmpty,
   MadieTerminologyEditor,
+  ValueSetForSearch,
 } from "@madie/madie-editor";
 import {
   Button,
@@ -44,6 +45,7 @@ import StatusHandler from "./StatusHandler";
 import { SuccessText } from "../../../styles/editMeasure/editor";
 import "./MeasureEditor.scss";
 import applyCode, { CodeChangeResult } from "./codeApplier";
+import applyValueset from "./valuesetApplier";
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
@@ -404,6 +406,7 @@ const MeasureEditor = () => {
   };
 
   const handleTerminologyEditorValue = (code) => {
+  const handleApplyCode = (code) => {
     const termCode: Code = code;
     const result: CodeChangeResult = applyCode(editorVal, termCode);
 
@@ -484,6 +487,24 @@ const MeasureEditor = () => {
         )
         ?.join("\n");
     }
+  // structure of statement: valueset "<name>": "urn:oid:<oid>"
+  // valueset "Ethnicity": 'urn:oid:2.16.840.1.114222.4.11.837'
+
+  const handleApplyValueSet = (vs: ValueSetForSearch) => {
+    const result: CodeChangeResult = applyValueset(editorVal, vs);
+
+    if (result.status) {
+      setToastType("success");
+      handleMadieEditorValue(result.cql);
+      //if result status is true, we modified the CQL
+      //  let'/s store off the codesystem/code/version
+      // codeMap.set(termCode.name, termCode);
+      //   we can send it with the measure when it's saved
+    } else {
+      setToastType("danger");
+    }
+    setToastMessage(result.message);
+    setToastOpen(true);
   };
 
   const handleMadieEditorValue = (val: string) => {
@@ -520,7 +541,8 @@ const MeasureEditor = () => {
           {!processing &&
             (featureFlags?.qdmCodeSearch && isQDM ? (
               <MadieTerminologyEditor
-                onTerminologyChange={handleTerminologyEditorValue}
+                handleApplyCode={handleApplyCode}
+                handleApplyValueSet={handleApplyValueSet}
                 onChange={(val: string) => handleMadieEditorValue(val)}
                 value={editorVal}
                 inboundAnnotations={elmAnnotations}
