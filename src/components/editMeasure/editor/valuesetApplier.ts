@@ -28,7 +28,6 @@ const createTransformedValuesets = (parseResults: CqlResult): any[] => {
   for (let i = 0; i < sortedValuesets.length; i++) {
     const vs = sortedValuesets[i];
     const lineDifference = vs.stop.line - vs.start.line;
-    // vs.start.line, vs.stop.line = lines[i];
     vs.start.line = lines[i];
     vs.stop.line = lines[i] + lineDifference;
     sortedValuesetsWithCorrectLineNumbers.push(vs);

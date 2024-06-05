@@ -489,17 +489,11 @@ const MeasureEditor = () => {
     }
   // structure of statement: valueset "<name>": "urn:oid:<oid>"
   // valueset "Ethnicity": 'urn:oid:2.16.840.1.114222.4.11.837'
-
   const handleApplyValueSet = (vs: ValueSetForSearch) => {
     const result: CodeChangeResult = applyValueset(editorVal, vs);
-
     if (result.status) {
       setToastType("success");
       handleMadieEditorValue(result.cql);
-      //if result status is true, we modified the CQL
-      //  let'/s store off the codesystem/code/version
-      // codeMap.set(termCode.name, termCode);
-      //   we can send it with the measure when it's saved
     } else {
       setToastType("danger");
     }
