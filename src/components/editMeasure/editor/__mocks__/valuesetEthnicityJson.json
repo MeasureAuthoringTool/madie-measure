@@ -1,0 +1,16 @@
+{
+  "title": "Ethnicity",
+  "name": "Ethnicity",
+  "author": "",
+  "composedOf": "",
+  "effectiveDate": "DateType[2020-03-05]",
+  "lastReviewDate": "DateType[2024-03-11]",
+  "lastUpdated": "Thu Dec 21 14:43:03 PST 2023",
+  "publisher": "",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.163",
+  "oid": "urn:oid:2.16.840.1.114222.4.11.837",
+  "steward": "",
+  "version": "",
+  "codeSystem": null,
+  "status": "ACTIVE"
+}

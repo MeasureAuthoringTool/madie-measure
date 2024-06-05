@@ -20,7 +20,78 @@
       "hits": null
     }
   ],
-  "valueSets": [],
+  "valueSets": [
+    {
+      "text": "valueset \"Antithrombotic Therapy for Ischemic Stroke\": 'urn:oid:2.16.840.1.113762.1.4.1110.62'",
+      "start": {
+        "line": 9,
+        "position": 0
+      },
+      "stop": {
+        "line": 9,
+        "position": 93
+      },
+      "name": "\"Antithrombotic Therapy for Ischemic Stroke\"",
+      "url": "'urn:oid:2.16.840.1.113762.1.4.1110.62'",
+      "hits": 0
+    },
+    {
+      "text": "valueset \"Ethnicity\": 'urn:oid:2.16.840.1.114222.4.11.837'",
+      "start": {
+        "line": 10,
+        "position": 0
+      },
+      "stop": {
+        "line": 10,
+        "position": 57
+      },
+      "name": "\"Ethnicity\"",
+      "url": "'urn:oid:2.16.840.1.114222.4.11.837'",
+      "hits": 0
+    },
+    {
+      "text": "valueset \"ONC Administrative Sex\": 'urn:oid:2.16.840.1.113762.1.4.1'",
+      "start": {
+        "line": 11,
+        "position": 0
+      },
+      "stop": {
+        "line": 11,
+        "position": 67
+      },
+      "name": "\"ONC Administrative Sex\"",
+      "url": "'urn:oid:2.16.840.1.113762.1.4.1'",
+      "hits": 0
+    },
+    {
+      "text": "valueset \"Payer\": 'urn:oid:2.16.840.1.114222.4.11.3591'",
+      "start": {
+        "line": 12,
+        "position": 0
+      },
+      "stop": {
+        "line": 12,
+        "position": 54
+      },
+      "name": "\"Payer\"",
+      "url": "'urn:oid:2.16.840.1.114222.4.11.3591'",
+      "hits": 0
+    },
+    {
+      "text": "valueset \"Race\": 'urn:oid:2.16.840.1.114222.4.11.836'",
+      "start": {
+        "line": 13,
+        "position": 0
+      },
+      "stop": {
+        "line": 13,
+        "position": 52
+      },
+      "name": "\"Race\"",
+      "url": "'urn:oid:2.16.840.1.114222.4.11.836'",
+      "hits": 0
+    }
+  ],
   "codes": [
     {
       "text": "code \"Birth date\": '21112-8' from \"LOINC\" display 'Birth date'",
