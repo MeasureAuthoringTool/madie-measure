@@ -52,6 +52,9 @@ declare module "@madie/madie-editor" {
     cqlMetaData?: CqlMetaData;
     measureModel?: string;
     handleCodeDelete?: (code: string) => void;
+    setEditorVal?: Function;
+    setIsCQLUnchanged?: Function;
+    isCQLUnchanged?: boolean;
 
     // conditional props used to pass up annotations outside of the editor
     setOutboundAnnotations?: Function;

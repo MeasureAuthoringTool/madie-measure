@@ -531,6 +531,9 @@ const MeasureEditor = () => {
                 cqlMetaData={measure?.measureMetaData?.cqlMetaData}
                 measureModel={measure?.model}
                 handleCodeDelete={handleCodeDelete}
+                setEditorVal={setEditorVal}
+                setIsCQLUnchanged={setIsCQLUnchanged}
+                isCQLUnchanged={isCQLUnchanged}
               />
             ) : (
               <>
