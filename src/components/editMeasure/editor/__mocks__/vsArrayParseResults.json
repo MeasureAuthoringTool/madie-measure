@@ -1,0 +1,150 @@
+{
+  "includes": [
+    {
+      "text": "include MATGlobalCommonFunctionsQDM version '1.0.000' called Global",
+      "start": { "line": 5, "position": 0 },
+      "stop": { "line": 5, "position": 66 },
+      "name": "MATGlobalCommonFunctionsQDM",
+      "version": "'1.0.000'",
+      "called": "Global",
+      "hits": 0
+    }
+  ],
+  "codeSystems": [
+    {
+      "text": "codesystem \"LOINC\": 'urn:oid:2.16.840.1.113883.6.1'",
+      "start": { "line": 7, "position": 0 },
+      "stop": { "line": 7, "position": 50 },
+      "oid": "'urn:oid:2.16.840.1.113883.6.1'",
+      "name": "\"LOINC\"",
+      "hits": null
+    }
+  ],
+  "valueSets": [
+    {
+      "text": "valueset \"Antithrombotic Therapy for Ischemic Stroke\": 'urn:oid:2.16.840.1.113762.1.4.1110.62'",
+      "start": {
+        "line": 9,
+        "position": 0
+      },
+      "stop": {
+        "line": 9,
+        "position": 93
+      },
+      "name": "\"Antithrombotic Therapy for Ischemic Stroke\"",
+      "url": "'urn:oid:2.16.840.1.113762.1.4.1110.62'",
+      "hits": 0
+    },
+    {
+      "text": "valueset \"ONC Administrative Sex\": 'urn:oid:2.16.840.1.113762.1.4.1'",
+      "start": {
+        "line": 11,
+        "position": 0
+      },
+      "stop": {
+        "line": 11,
+        "position": 67
+      },
+      "name": "\"ONC Administrative Sex\"",
+      "url": "'urn:oid:2.16.840.1.113762.1.4.1'",
+      "hits": 0
+    },
+    {
+      "text": "valueset \"Payer\": 'urn:oid:2.16.840.1.114222.4.11.3591'",
+      "start": {
+        "line": 12,
+        "position": 0
+      },
+      "stop": {
+        "line": 12,
+        "position": 54
+      },
+      "name": "\"Payer\"",
+      "url": "'urn:oid:2.16.840.1.114222.4.11.3591'",
+      "hits": 0
+    },
+    {
+      "text": "valueset \"Race\": 'urn:oid:2.16.840.1.114222.4.11.836'",
+      "start": {
+        "line": 13,
+        "position": 0
+      },
+      "stop": {
+        "line": 13,
+        "position": 52
+      },
+      "name": "\"Race\"",
+      "url": "'urn:oid:2.16.840.1.114222.4.11.836'",
+      "hits": 0
+    }
+  ],
+  "codes": [
+    {
+      "text": "code \"Birth date\": '21112-8' from \"LOINC\" display 'Birth date'",
+      "start": { "line": 11, "position": 0 },
+      "stop": { "line": 11, "position": 61 },
+      "name": "\"Birth date\"",
+      "codeId": "'21112-8'",
+      "codeSystem": "\"LOINC\""
+    }
+  ],
+  "parameters": [
+    {
+      "text": "parameter \"Measurement Period\" Interval<DateTime>",
+      "start": { "line": 13, "position": 0 },
+      "stop": { "line": 13, "position": 48 },
+      "name": "\"Measurement Period\"",
+      "type": "Interval<DateTime>"
+    }
+  ],
+  "identifiers": [],
+  "expressionDefinitions": [
+    {
+      "text": "define \"Denominator\":\n  \"Initial Population\"",
+      "start": { "line": 17, "position": 0 },
+      "stop": { "line": 18, "position": 21 },
+      "name": "\"Denominator\""
+    },
+    {
+      "text": "define \"Initial Population\":\n  \"Inpatient Encounters\"",
+      "start": { "line": 20, "position": 0 },
+      "stop": { "line": 21, "position": 23 },
+      "name": "\"Initial Population\"",
+      "hits": null
+    },
+    {
+      "text": "define \"Numerator\":\n  \"Initial Population\"",
+      "start": { "line": 23, "position": 0 },
+      "stop": { "line": 24, "position": 21 },
+      "name": "\"Numerator\""
+    },
+    {
+      "text": "define \"Inpatient Encounters\":\n  true",
+      "start": { "line": 27, "position": 0 },
+      "stop": { "line": 28, "position": 5 },
+      "name": "\"Inpatient Encounters\"",
+      "hits": null
+    }
+  ],
+  "errors": [],
+  "library": {
+    "text": "library MAT6197UCUMAnnotations version '0.0.000'",
+    "start": { "line": 1, "position": 0 },
+    "stop": { "line": 1, "position": 47 },
+    "name": "MAT6197UCUMAnnotations",
+    "version": "'0.0.000'"
+  },
+  "using": {
+    "text": "using QDM version '5.6'",
+    "start": { "line": 3, "position": 0 },
+    "stop": { "line": 3, "position": 22 },
+    "name": "QDM",
+    "version": "'5.6'"
+  },
+  "context": {
+    "text": "context Patient",
+    "start": { "line": 15, "position": 0 },
+    "stop": { "line": 15, "position": 14 },
+    "name": "Patient"
+  }
+}
