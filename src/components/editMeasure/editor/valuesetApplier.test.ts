@@ -2,43 +2,43 @@ import { CodeChangeResult } from "./codeApplier.ts";
 import applyValueset from "./valuesetApplier.ts";
 import * as fs from "fs";
 
-// it("Should add valuset to CQL that does not exist when no valusets present", () => {
-//   const cql = fs.readFileSync(
-//     "src/components/editMeasure/editor/__mocks__/LoincTest.cql",
-//     "utf8"
-//   );
-//   const valusetJson = fs.readFileSync(
-//     "src/components/editMeasure/editor/__mocks__/valusetJson.json",
-//     "utf8"
-//   );
+it("Should add valuset to CQL that does not exist when no valusets present", () => {
+  const cql = fs.readFileSync(
+    "src/components/editMeasure/editor/__mocks__/LoincTest.cql",
+    "utf8"
+  );
+  const valusetJson = fs.readFileSync(
+    "src/components/editMeasure/editor/__mocks__/valusetJson.json",
+    "utf8"
+  );
 
-//   const valuset = JSON.parse(valusetJson);
-//   const result: CodeChangeResult = applyValueset(cql, valuset);
-//   expect(result.cql).toContain("Emergency Department Evaluation");
-//   expect(result.status).toBeTruthy();
-//   expect(result.message).toEqual(
-//     `Value Set Emergency Department Evaluation has been successfully added to the CQL.`
-//   );
-// });
+  const valuset = JSON.parse(valusetJson);
+  const result: CodeChangeResult = applyValueset(cql, valuset);
+  expect(result.cql).toContain("Emergency Department Evaluation");
+  expect(result.status).toBeTruthy();
+  expect(result.message).toEqual(
+    `Value Set Emergency Department Evaluation has been successfully added to the CQL.`
+  );
+});
 
-// it("Should add valuset to CQL that does not exist when valususets are present", () => {
-//   const cql = fs.readFileSync(
-//     "src/components/editMeasure/editor/__mocks__/CptTest.cql",
-//     "utf8"
-//   );
-//   const valusetJson = fs.readFileSync(
-//     "src/components/editMeasure/editor/__mocks__/valusetJson.json",
-//     "utf8"
-//   );
+it("Should add valuset to CQL that does not exist when valususets are present", () => {
+  const cql = fs.readFileSync(
+    "src/components/editMeasure/editor/__mocks__/CptTest.cql",
+    "utf8"
+  );
+  const valusetJson = fs.readFileSync(
+    "src/components/editMeasure/editor/__mocks__/valusetJson.json",
+    "utf8"
+  );
 
-//   const valuset = JSON.parse(valusetJson);
-//   const result: CodeChangeResult = applyValueset(cql, valuset);
-//   expect(result.cql).toContain("Emergency Department Evaluation");
-//   expect(result.status).toBeTruthy();
-//   expect(result.message).toEqual(
-//     `Value Set Emergency Department Evaluation has been successfully added to the CQL.`
-//   );
-// });
+  const valuset = JSON.parse(valusetJson);
+  const result: CodeChangeResult = applyValueset(cql, valuset);
+  expect(result.cql).toContain("Emergency Department Evaluation");
+  expect(result.status).toBeTruthy();
+  expect(result.message).toEqual(
+    `Value Set Emergency Department Evaluation has been successfully added to the CQL.`
+  );
+});
 
 it("Should not add a valuset that already exists", () => {
   const cql = fs.readFileSync(
@@ -110,7 +110,7 @@ it("Should add valuset, priotiy location includes array", () => {
 
 it("Should add valuset, priotiy location valuset array", () => {
   const cql = fs.readFileSync(
-    "src/components/editMeasure/editor/__mocks__/vsArrayTest.cql",
+    "src/components/editMeasure/editor/__mocks__/vsArraytest.cql",
     "utf8"
   );
   const valusetJson = fs.readFileSync(
