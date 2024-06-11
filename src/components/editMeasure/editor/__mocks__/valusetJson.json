@@ -1,0 +1,17 @@
+{
+  "title": "Emergency Department Evaluation",
+  "name": "EmergencyDepartmentEvaluation",
+  "author": "Lantana EH Author",
+  "composedOf": "",
+  "effectiveDate": "DateType[2020-03-05]",
+  "lastReviewDate": "DateType[2024-03-11]",
+  "lastUpdated": "Thu Dec 21 14:43:03 PST 2023",
+  "publisher": "Lantana EH Steward",
+  "purpose": "(Clinical Focus: The purpose of this value set is to represent concepts of an assessment performed in the emergency department.),(Data Element Scope: This value set may use a model element related to Assessment.),(Inclusion Criteria: Includes concepts that represent an assessment that was performed in the emergency department.),(Exclusion Criteria: No exclusions.)",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.163",
+  "oid": "urn:oid:2.16.840.1.113762.1.4.1111.163",
+  "steward": "Lantana EH Steward",
+  "version": "20200305",
+  "codeSystem": null,
+  "status": "ACTIVE"
+}

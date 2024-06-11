@@ -4,14 +4,6 @@ using QDM version '5.6'
 
 include MATGlobalCommonFunctionsQDM version '1.0.000' called Global
 
-codesystem "CPT": 'urn:oid:2.16.840.1.113883.6.12'
-
-valueset "Antithrombotic Therapy for Ischemic Stroke": 'urn:oid:2.16.840.1.113762.1.4.1110.62'
-valueset "Ethnicity": 'urn:oid:2.16.840.1.114222.4.11.837'
-valueset "ONC Administrative Sex": 'urn:oid:2.16.840.1.113762.1.4.1'
-valueset "Payer": 'urn:oid:2.16.840.1.114222.4.11.3591'
-valueset "Race": 'urn:oid:2.16.840.1.114222.4.11.836'
-
 parameter "Measurement Period" Interval<DateTime>
 
 context Patient
