@@ -405,7 +405,6 @@ const MeasureEditor = () => {
     }
   };
 
-  const handleTerminologyEditorValue = (code) => {
   const handleApplyCode = (code) => {
     const termCode: Code = code;
     const result: CodeChangeResult = applyCode(editorVal, termCode);
@@ -487,6 +486,7 @@ const MeasureEditor = () => {
         )
         ?.join("\n");
     }
+  };
   // structure of statement: valueset "<name>": "urn:oid:<oid>"
   // valueset "Ethnicity": 'urn:oid:2.16.840.1.114222.4.11.837'
   const handleApplyValueSet = (vs: ValueSetForSearch) => {
