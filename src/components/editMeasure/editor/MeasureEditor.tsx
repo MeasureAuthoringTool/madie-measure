@@ -262,14 +262,13 @@ const MeasureEditor = () => {
     }
   };
 
-  const updateMeasureCql = async () => {
-    setProcessing(true);
+  const updateMeasureCql = async (editorValue: string) => {
     try {
       //Get model name and version
       const using = measure?.model.split(" v");
 
       const inSyncCql = await synchingEditorCqlContent(
-        editorVal,
+        editorValue,
         measure?.cql,
         measure?.cqlLibraryName,
         "",
@@ -311,7 +310,7 @@ const MeasureEditor = () => {
           _.filter(validationResult?.errors, { errorSeverity: "Error" })
         ) || !_.isEmpty(validationResult?.externalErrors);
 
-      if (editorVal !== measure.cql) {
+      if (editorValue !== measure.cql) {
         const cqlErrors = parseErrors || cqlElmErrors;
         const newMeasure: Measure = {
           ...measure,
@@ -394,6 +393,16 @@ const MeasureEditor = () => {
     }
   };
 
+  const handleUpdateMeasureCql = (cql?: string) => {
+    setProcessing(true);
+    if (cql) {
+      // this is the updated cql after removing the code (i.e., handleDeleteCode from saved codes)
+      updateMeasureCql(cql);
+    } else {
+      updateMeasureCql(editorVal);
+    }
+  };
+
   const handleTerminologyEditorValue = (code) => {
     const termCode: Code = code;
     const result: CodeChangeResult = applyCode(editorVal, termCode);
@@ -410,6 +419,71 @@ const MeasureEditor = () => {
     setToastMessage(result.message);
     setToastType("success");
     setToastOpen(true);
+  };
+
+  const handleCodeDelete = (selectedCode) => {
+    let isSameCodeSystemPresentInMultipleCodes = false;
+    const definitions = new CqlAntlr(editorVal).parse();
+    const parsedSelectedCodeDetails = definitions?.codes?.filter((code) => {
+      if (
+        code?.codeId.replace(/['"]/g, "") === selectedCode?.name &&
+        code?.codeSystem.replace(/['"]/g, "") === selectedCode?.codeSystem
+      ) {
+        return code;
+      }
+
+      if (code?.codeSystem.replace(/['"]/g, "") === selectedCode?.codeSystem) {
+        //check if the same codesystem of selected code (that is to be deleted) is used in multiple codes
+        isSameCodeSystemPresentInMultipleCodes = true;
+      }
+    })[0];
+
+    const splittedCql: string[] = editorVal.split("\n");
+    const updatedCql = removeCodeFromCql(
+      splittedCql,
+      isSameCodeSystemPresentInMultipleCodes,
+      parsedSelectedCodeDetails,
+      definitions?.codeSystems,
+      selectedCode?.codeSystem
+    );
+    setEditorVal(updatedCql);
+    handleUpdateMeasureCql(updatedCql);
+  };
+
+  const removeCodeFromCql = (
+    splittedCql: string[],
+    isSameCodeSystemPresentInMultipleCodes: boolean,
+    parsedSelectedCodeDetails,
+    codeSystems,
+    selectedCodeSytemName
+  ) => {
+    if (!isSameCodeSystemPresentInMultipleCodes) {
+      const relatedCodeSystem = codeSystems?.filter(
+        (codeSystem) =>
+          codeSystem?.name?.replace(/['"]/g, "") === selectedCodeSytemName
+      )[0];
+      if (relatedCodeSystem && Object.keys(relatedCodeSystem).length > 0) {
+        //removing code and codesystem(when this codesystem is not used in any other code apart from selected one) from cql
+        return splittedCql
+          ?.filter(
+            (line, index) =>
+              (index < parsedSelectedCodeDetails?.start?.line - 1 ||
+                index > parsedSelectedCodeDetails?.stop?.line - 1) &&
+              (index < relatedCodeSystem?.start?.line - 1 ||
+                index > relatedCodeSystem?.stop?.line - 1)
+          )
+          ?.join("\n");
+      }
+    } else {
+      //removing code from cql
+      return splittedCql
+        ?.filter(
+          (line, index) =>
+            index < parsedSelectedCodeDetails?.start?.line - 1 ||
+            index > parsedSelectedCodeDetails?.stop?.line - 1
+        )
+        ?.join("\n");
+    }
   };
 
   const handleMadieEditorValue = (val: string) => {
@@ -457,6 +531,10 @@ const MeasureEditor = () => {
                 measureStoreCql={measure?.cql}
                 cqlMetaData={measure?.measureMetaData?.cqlMetaData}
                 measureModel={measure?.model}
+                handleCodeDelete={handleCodeDelete}
+                setEditorVal={setEditorVal}
+                setIsCQLUnchanged={setIsCQLUnchanged}
+                isCQLUnchanged={isCQLUnchanged}
               />
             ) : (
               <>
@@ -501,7 +579,7 @@ const MeasureEditor = () => {
             <Button
               variant="cyan"
               tw="m-2"
-              onClick={() => updateMeasureCql()}
+              onClick={() => handleUpdateMeasureCql()}
               data-testid="save-cql-btn"
               disabled={isCQLUnchanged}
             >
