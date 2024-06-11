@@ -348,6 +348,7 @@ const MeasureEditor = () => {
           .then((response: any) => {
             const updatedMeasure = response.data;
             updateMeasure(updatedMeasure);
+            setCodeMap(new Map<string, Code>());
             setEditorVal(newMeasure?.cql);
             setIsCQLUnchanged(true);
             if (isUsingEmpty(editorVal)) {
