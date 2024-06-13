@@ -36,11 +36,29 @@ declare module "@madie/madie-editor" {
     stop?: LineInfo;
     message: string;
   }
+  export interface ValueSetForSearch {
+    codeSystem?: string;
+    name?: string;
+    author?: string;
+    composedOf?: string;
+    effectiveDate?: string;
+    lastReviewDate?: string;
+    lastUpdated?: string;
+    publisher?: string;
+    purpose?: string;
+    oid?: string;
+    status?: string;
+    steward?: string;
+    title?: string;
+    url?: string;
+    version?: string;
+  }
 
   export interface EditorPropsType {
     value: string;
     onChange?: (value: string) => void;
-    onTerminologyChange?: (code: string) => void;
+    handleApplyCode?: (code: string) => void;
+    handleApplyValueSet?: (vs: ValueSetForSearch) => void;
     parseDebounceTime?: number;
     inboundAnnotations?: EditorAnnotation[];
     inboundErrorMarkers?: EditorErrorMarker[];

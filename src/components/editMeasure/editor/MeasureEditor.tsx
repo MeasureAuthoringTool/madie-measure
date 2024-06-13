@@ -12,6 +12,7 @@ import {
   synchingEditorCqlContent,
   isUsingEmpty,
   MadieTerminologyEditor,
+  ValueSetForSearch,
 } from "@madie/madie-editor";
 import {
   Button,
@@ -44,6 +45,7 @@ import StatusHandler from "./StatusHandler";
 import { SuccessText } from "../../../styles/editMeasure/editor";
 import "./MeasureEditor.scss";
 import applyCode, { CodeChangeResult } from "./codeApplier";
+import applyValueset from "./valuesetApplier";
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
@@ -267,13 +269,12 @@ const MeasureEditor = () => {
     codeName?: string,
     codeSystemName?: string
   ) => {
-    setProcessing(true);
     try {
+      setProcessing(true);
       setSuccess({
         status: undefined,
         message: undefined,
       });
-
       //Get model name and version
       const using = measure?.model.split(" v");
 
@@ -412,7 +413,7 @@ const MeasureEditor = () => {
     }
   };
 
-  const handleTerminologyEditorValue = (code) => {
+  const handleApplyCode = (code) => {
     const termCode: Code = code;
     const result: CodeChangeResult = applyCode(editorVal, termCode);
 
@@ -501,6 +502,19 @@ const MeasureEditor = () => {
         ?.join("\n");
     }
   };
+  // structure of statement: valueset "<name>": "urn:oid:<oid>"
+  // valueset "Ethnicity": 'urn:oid:2.16.840.1.114222.4.11.837'
+  const handleApplyValueSet = (vs: ValueSetForSearch) => {
+    const result: CodeChangeResult = applyValueset(editorVal, vs);
+    if (result.status) {
+      setToastType("success");
+      handleMadieEditorValue(result.cql);
+    } else {
+      setToastType("danger");
+    }
+    setToastMessage(result.message);
+    setToastOpen(true);
+  };
 
   const handleMadieEditorValue = (val: string) => {
     setSuccess({ status: undefined, message: undefined });
@@ -536,7 +550,8 @@ const MeasureEditor = () => {
           {!processing &&
             (featureFlags?.qdmCodeSearch && isQDM ? (
               <MadieTerminologyEditor
-                onTerminologyChange={handleTerminologyEditorValue}
+                handleApplyCode={handleApplyCode}
+                handleApplyValueSet={handleApplyValueSet}
                 onChange={(val: string) => handleMadieEditorValue(val)}
                 value={editorVal}
                 inboundAnnotations={elmAnnotations}
