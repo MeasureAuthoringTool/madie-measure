@@ -262,8 +262,18 @@ const MeasureEditor = () => {
     }
   };
 
-  const updateMeasureCql = async (editorValue: string) => {
+  const updateMeasureCql = async (
+    editorValue: string,
+    codeName?: string,
+    codeSystemName?: string
+  ) => {
+    setProcessing(true);
     try {
+      setSuccess({
+        status: undefined,
+        message: undefined,
+      });
+
       //Get model name and version
       const using = measure?.model.split(" v");
 
@@ -351,7 +361,7 @@ const MeasureEditor = () => {
             setCodeMap(new Map<string, Code>());
             setEditorVal(newMeasure?.cql);
             setIsCQLUnchanged(true);
-            if (isUsingEmpty(editorVal)) {
+            if (isUsingEmpty(editorValue)) {
               setSuccess({
                 status: "success",
                 message:
@@ -359,7 +369,7 @@ const MeasureEditor = () => {
               });
             } else {
               const successMessage =
-                inSyncCql !== editorVal
+                inSyncCql !== editorValue
                   ? {
                       status: "success",
                       message:
@@ -368,6 +378,15 @@ const MeasureEditor = () => {
                   : { status: "success", message: "CQL saved successfully" };
 
               setSuccess(successMessage);
+            }
+            if (codeName) {
+              setToastMessage(
+                `code ${codeName} ${
+                  codeSystemName ? `and code system ${codeSystemName}` : ""
+                } has been successfully removed from the CQL`
+              );
+              setToastType("success");
+              setToastOpen(true);
             }
           })
           .catch((reason) => {
@@ -393,16 +412,6 @@ const MeasureEditor = () => {
     }
   };
 
-  const handleUpdateMeasureCql = (cql?: string) => {
-    setProcessing(true);
-    if (cql) {
-      // this is the updated cql after removing the code (i.e., handleDeleteCode from saved codes)
-      updateMeasureCql(cql);
-    } else {
-      updateMeasureCql(editorVal);
-    }
-  };
-
   const handleTerminologyEditorValue = (code) => {
     const termCode: Code = code;
     const result: CodeChangeResult = applyCode(editorVal, termCode);
@@ -422,13 +431,14 @@ const MeasureEditor = () => {
   };
 
   const handleCodeDelete = (selectedCode) => {
-    let isSameCodeSystemPresentInMultipleCodes = false;
+    let isSameCodeSystemPresentInMultipleCodes = null;
     const definitions = new CqlAntlr(editorVal).parse();
     const parsedSelectedCodeDetails = definitions?.codes?.filter((code) => {
       if (
         code?.codeId.replace(/['"]/g, "") === selectedCode?.name &&
         code?.codeSystem.replace(/['"]/g, "") === selectedCode?.codeSystem
       ) {
+        isSameCodeSystemPresentInMultipleCodes = false;
         return code;
       }
 
@@ -447,7 +457,13 @@ const MeasureEditor = () => {
       selectedCode?.codeSystem
     );
     setEditorVal(updatedCql);
-    handleUpdateMeasureCql(updatedCql);
+    const deletedCodeSystemName =
+      isSameCodeSystemPresentInMultipleCodes === false
+        ? selectedCode?.codeSystem
+        : "";
+
+    //this is the updated cql after removing the code (i.e., handleDeleteCode from saved codes)
+    updateMeasureCql(updatedCql, selectedCode?.name, deletedCodeSystemName);
   };
 
   const removeCodeFromCql = (
@@ -579,7 +595,7 @@ const MeasureEditor = () => {
             <Button
               variant="cyan"
               tw="m-2"
-              onClick={() => handleUpdateMeasureCql()}
+              onClick={() => updateMeasureCql(editorVal)}
               data-testid="save-cql-btn"
               disabled={isCQLUnchanged}
             >
