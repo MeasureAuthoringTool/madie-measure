@@ -1,4 +1,11 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import {
@@ -103,7 +110,6 @@ const MeasureEditor = () => {
   const [codeMap, setCodeMap] = useState<Map<string, Code>>(
     new Map<string, Code>()
   );
-
   const { updateMeasure } = measureStore;
   const [processing, setProcessing] = useState<boolean>(true);
   const featureFlags = useFeatureFlags();
@@ -504,18 +510,28 @@ const MeasureEditor = () => {
   };
   // structure of statement: valueset "<name>": "urn:oid:<oid>"
   // valueset "Ethnicity": 'urn:oid:2.16.840.1.114222.4.11.837'
-  const handleApplyValueSet = (vs: ValueSetForSearch) => {
-    const result: CodeChangeResult = applyValueset(editorVal, vs);
+  const handleApplyValueSet = (vs, cql) => {
+    const result: CodeChangeResult = applyValueset(cql, vs); // should have udpated editorVal but doesnt
     if (result.status) {
       setToastType("success");
       handleMadieEditorValue(result.cql);
+      setEditorVal(result.cql);
     } else {
       setToastType("danger");
     }
     setToastMessage(result.message);
     setToastOpen(true);
   };
-
+  // need this callback check to make sure that it's getting the updated cql reference. otherwise it's stale.
+  const handleUpdateVs = useCallback(
+    (vs) => {
+      setEditorVal((currentValue) => {
+        handleApplyValueSet(vs, currentValue);
+        return currentValue;
+      });
+    },
+    [handleApplyValueSet]
+  );
   const handleMadieEditorValue = (val: string) => {
     setSuccess({ status: undefined, message: undefined });
     setError(false);
@@ -551,7 +567,7 @@ const MeasureEditor = () => {
             (featureFlags?.qdmCodeSearch && isQDM ? (
               <MadieTerminologyEditor
                 handleApplyCode={handleApplyCode}
-                handleApplyValueSet={handleApplyValueSet}
+                handleApplyValueSet={handleUpdateVs}
                 onChange={(val: string) => handleMadieEditorValue(val)}
                 value={editorVal}
                 inboundAnnotations={elmAnnotations}
@@ -619,7 +635,6 @@ const MeasureEditor = () => {
           </>
         )}
       </div>
-
       <Toast
         toastKey="measure-errors-toast"
         aria-live="polite"
