@@ -48,7 +48,7 @@ const applyCode = (cql: string, code: Code): CodeChangeResult => {
       const oldCodeCodeSystem = oldCode.codeSystem.replace(/["']/g, "");
       codeExists =
         codeExists ||
-        (oldCodeName === code.display &&
+        (oldCodeName === code.display.replace(/["']/g, "") &&
           oldCodeCodeId === code.name &&
           oldCodeCodeSystem === code.codeSystem);
     });
