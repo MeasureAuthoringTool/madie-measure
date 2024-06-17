@@ -10,7 +10,6 @@ import {
 } from "@madie/madie-models";
 import { useOktaTokens, wafIntercept } from "@madie/madie-util";
 import _ from "lodash";
-import DOMPurify from "dompurify";
 
 axios.interceptors.response.use((response) => {
   return response;
