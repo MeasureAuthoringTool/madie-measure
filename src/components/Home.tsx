@@ -2,12 +2,17 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import MeasureRoutes from "./measureRoutes/MeasureRoutes";
 import { ApiContextProvider, ServiceConfig } from "../api/ServiceContext";
+import { wafIntercept } from "@madie/madie-util";
 
 export default function Home() {
   const [configError, setConfigError] = useState<boolean>(false);
   const [serviceConfig, setServiceConfig] = useState<ServiceConfig | null>(
     null
   );
+
+  axios.interceptors.response.use((response) => {
+    return response;
+  }, wafIntercept);
 
   // Use an effect hook to fetch the serviceConfig and set the state
   useEffect(() => {

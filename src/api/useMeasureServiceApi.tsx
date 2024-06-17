@@ -8,8 +8,13 @@ import {
   Organization,
   EndorsementOrganization,
 } from "@madie/madie-models";
-import { useOktaTokens } from "@madie/madie-util";
+import { useOktaTokens, wafIntercept } from "@madie/madie-util";
 import _ from "lodash";
+import DOMPurify from "dompurify";
+
+axios.interceptors.response.use((response) => {
+  return response;
+}, wafIntercept);
 
 export class MeasureServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
@@ -467,6 +472,10 @@ export class MeasureServiceApi {
     );
   }
 }
+
+axios.interceptors.response.use((response) => {
+  return response;
+}, wafIntercept);
 
 export default function useMeasureServiceApi(): MeasureServiceApi {
   const serviceConfig: ServiceConfig = useServiceConfig();

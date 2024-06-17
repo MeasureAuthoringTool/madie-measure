@@ -1,3 +1,4 @@
+import { wafIntercept } from "@madie/madie-util";
 import axios from "axios";
 
 export interface OktaConfig {
@@ -15,6 +16,9 @@ export interface ServiceConfig {
     baseUrl: string;
   };
 }
+axios.interceptors.response.use((response) => {
+  return response;
+}, wafIntercept);
 
 export async function getServiceConfig(): Promise<ServiceConfig> {
   const serviceConfig: ServiceConfig = (

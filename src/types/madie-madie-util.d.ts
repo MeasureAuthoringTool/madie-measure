@@ -63,6 +63,7 @@ declare module "@madie/madie-util" {
     getIdTokenObj: () => any;
   };
   export function useOnClickOutside(ref: any, handler: any): void;
+  export function wafIntercept(): void;
 
   export class TerminologyServiceApi {
     constructor(baseUrl: string, getAccessToken: () => string);
