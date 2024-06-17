@@ -1,4 +1,11 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import {
@@ -103,7 +110,6 @@ const MeasureEditor = () => {
   const [codeMap, setCodeMap] = useState<Map<string, Code>>(
     new Map<string, Code>()
   );
-
   const { updateMeasure } = measureStore;
   const [processing, setProcessing] = useState<boolean>(true);
   const featureFlags = useFeatureFlags();
@@ -264,8 +270,17 @@ const MeasureEditor = () => {
     }
   };
 
-  const updateMeasureCql = async (editorValue: string) => {
+  const updateMeasureCql = async (
+    editorValue: string,
+    codeName?: string,
+    codeSystemName?: string
+  ) => {
     try {
+      setProcessing(true);
+      setSuccess({
+        status: undefined,
+        message: undefined,
+      });
       //Get model name and version
       const using = measure?.model.split(" v");
 
@@ -353,7 +368,7 @@ const MeasureEditor = () => {
             setCodeMap(new Map<string, Code>());
             setEditorVal(newMeasure?.cql);
             setIsCQLUnchanged(true);
-            if (isUsingEmpty(editorVal)) {
+            if (isUsingEmpty(editorValue)) {
               setSuccess({
                 status: "success",
                 message:
@@ -361,7 +376,7 @@ const MeasureEditor = () => {
               });
             } else {
               const successMessage =
-                inSyncCql !== editorVal
+                inSyncCql !== editorValue
                   ? {
                       status: "success",
                       message:
@@ -370,6 +385,15 @@ const MeasureEditor = () => {
                   : { status: "success", message: "CQL saved successfully" };
 
               setSuccess(successMessage);
+            }
+            if (codeName) {
+              setToastMessage(
+                `code ${codeName} ${
+                  codeSystemName ? `and code system ${codeSystemName}` : ""
+                } has been successfully removed from the CQL`
+              );
+              setToastType("success");
+              setToastOpen(true);
             }
           })
           .catch((reason) => {
@@ -395,16 +419,6 @@ const MeasureEditor = () => {
     }
   };
 
-  const handleUpdateMeasureCql = (cql?: string) => {
-    setProcessing(true);
-    if (cql) {
-      // this is the updated cql after removing the code (i.e., handleDeleteCode from saved codes)
-      updateMeasureCql(cql);
-    } else {
-      updateMeasureCql(editorVal);
-    }
-  };
-
   const handleApplyCode = (code) => {
     const termCode: Code = code;
     const result: CodeChangeResult = applyCode(editorVal, termCode);
@@ -424,13 +438,14 @@ const MeasureEditor = () => {
   };
 
   const handleCodeDelete = (selectedCode) => {
-    let isSameCodeSystemPresentInMultipleCodes = false;
+    let isSameCodeSystemPresentInMultipleCodes = null;
     const definitions = new CqlAntlr(editorVal).parse();
     const parsedSelectedCodeDetails = definitions?.codes?.filter((code) => {
       if (
         code?.codeId.replace(/['"]/g, "") === selectedCode?.name &&
         code?.codeSystem.replace(/['"]/g, "") === selectedCode?.codeSystem
       ) {
+        isSameCodeSystemPresentInMultipleCodes = false;
         return code;
       }
 
@@ -449,7 +464,13 @@ const MeasureEditor = () => {
       selectedCode?.codeSystem
     );
     setEditorVal(updatedCql);
-    handleUpdateMeasureCql(updatedCql);
+    const deletedCodeSystemName =
+      isSameCodeSystemPresentInMultipleCodes === false
+        ? selectedCode?.codeSystem
+        : "";
+
+    //this is the updated cql after removing the code (i.e., handleDeleteCode from saved codes)
+    updateMeasureCql(updatedCql, selectedCode?.name, deletedCodeSystemName);
   };
 
   const removeCodeFromCql = (
@@ -489,18 +510,28 @@ const MeasureEditor = () => {
   };
   // structure of statement: valueset "<name>": "urn:oid:<oid>"
   // valueset "Ethnicity": 'urn:oid:2.16.840.1.114222.4.11.837'
-  const handleApplyValueSet = (vs: ValueSetForSearch) => {
-    const result: CodeChangeResult = applyValueset(editorVal, vs);
+  const handleApplyValueSet = (vs, cql) => {
+    const result: CodeChangeResult = applyValueset(cql, vs); // should have udpated editorVal but doesnt
     if (result.status) {
       setToastType("success");
       handleMadieEditorValue(result.cql);
+      setEditorVal(result.cql);
     } else {
       setToastType("danger");
     }
     setToastMessage(result.message);
     setToastOpen(true);
   };
-
+  // need this callback check to make sure that it's getting the updated cql reference. otherwise it's stale.
+  const handleUpdateVs = useCallback(
+    (vs) => {
+      setEditorVal((currentValue) => {
+        handleApplyValueSet(vs, currentValue);
+        return currentValue;
+      });
+    },
+    [handleApplyValueSet]
+  );
   const handleMadieEditorValue = (val: string) => {
     setSuccess({ status: undefined, message: undefined });
     setError(false);
@@ -536,7 +567,7 @@ const MeasureEditor = () => {
             (featureFlags?.qdmCodeSearch && isQDM ? (
               <MadieTerminologyEditor
                 handleApplyCode={handleApplyCode}
-                handleApplyValueSet={handleApplyValueSet}
+                handleApplyValueSet={handleUpdateVs}
                 onChange={(val: string) => handleMadieEditorValue(val)}
                 value={editorVal}
                 inboundAnnotations={elmAnnotations}
@@ -595,7 +626,7 @@ const MeasureEditor = () => {
             <Button
               variant="cyan"
               tw="m-2"
-              onClick={() => handleUpdateMeasureCql()}
+              onClick={() => updateMeasureCql(editorVal)}
               data-testid="save-cql-btn"
               disabled={isCQLUnchanged}
             >
@@ -604,7 +635,6 @@ const MeasureEditor = () => {
           </>
         )}
       </div>
-
       <Toast
         toastKey="measure-errors-toast"
         aria-live="polite"
