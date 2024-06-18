@@ -393,8 +393,7 @@ const MeasureEditor = () => {
               );
             }
             if (secondaryMessages.length > 0) {
-              primaryMessage =
-                "CQL updated successfully but the following issues were found";
+              primaryMessage += " but the following issues were found";
             }
             setSuccess({
               status: "success",
