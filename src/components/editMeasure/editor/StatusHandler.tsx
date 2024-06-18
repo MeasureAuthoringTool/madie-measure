@@ -5,7 +5,7 @@ import * as _ from "lodash";
 const generateMadieAlertWithContent = (
   type,
   header,
-  secondaryMessage,
+  secondaryMessages,
   outboundAnnotations
 ) => {
   const errorAnnotation = _.filter(outboundAnnotations, { type: "error" });
@@ -30,9 +30,13 @@ const generateMadieAlertWithContent = (
           >
             {header}
           </h3>
-          {secondaryMessage && (
+          {secondaryMessages?.length > 0 && (
             <p className="secondary" data-testid="library-warning">
-              {secondaryMessage}
+              <ul style={{ listStyle: "inside" }}>
+                {secondaryMessages.map((message) => (
+                  <li>{message}</li>
+                ))}
+              </ul>
             </p>
           )}
           {errors?.length > 0 && (
@@ -79,52 +83,20 @@ const StatusHandler = ({
     success alone
   */
   if (success?.status === "success") {
-    if (errorMessage) {
-      if (outboundAnnotations?.length > 0) {
-        // Succesfully saved with errorMessage and outBoundAnnotations
-        return generateMadieAlertWithContent(
-          success.status,
-          "Changes saved successfully but the following issues were found",
-          errorMessage,
-          outboundAnnotations
-        );
-      } else {
-        // Succesfully saved with errorMessage
-        return generateMadieAlertWithContent(
-          success.status,
-          "Changes saved successfully but the following issues were found",
-          errorMessage,
-          null
-        );
-      }
-    } else if (outboundAnnotations && outboundAnnotations.length > 0) {
-      // Succesfully saved with outboundAnnotations and a warning messages
-      if (
-        success.message ===
-          "CQL updated successfully but was missing a Using statement. Please add in a valid model and version." ||
-        success.message ===
-          "CQL updated successfully! Library Statement or Using Statement were incorrect. MADiE has overwritten them to ensure proper CQL."
-      ) {
-        return generateMadieAlertWithContent(
-          success.status,
-          "Changes saved successfully but the following issues were found",
-          success.message,
-          outboundAnnotations
-        );
-      } else {
-        return generateMadieAlertWithContent(
-          success.status,
-          "Changes saved successfully but the following issues were found",
-          null,
-          outboundAnnotations
-        );
-      }
-    } else {
-      // Successfully saved with no errorMessage or outBoundAnnotations
+    if (outboundAnnotations?.length > 0) {
+      // Successfully saved with errorMessage and outBoundAnnotations
       return generateMadieAlertWithContent(
         success.status,
-        success.message,
-        null,
+        success.primaryMessage,
+        success.secondaryMessages,
+        outboundAnnotations
+      );
+    } else {
+      // Successfully saved with errorMessage
+      return generateMadieAlertWithContent(
+        success.status,
+        success.primaryMessage,
+        success.secondaryMessages,
         null
       );
     }

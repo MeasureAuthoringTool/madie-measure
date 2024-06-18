@@ -176,7 +176,8 @@ const MeasureEditor = () => {
   // set success message
   const [success, setSuccess] = useState({
     status: undefined,
-    message: undefined,
+    primaryMessage: undefined,
+    secondaryMessages: undefined,
   });
   const [error, setError] = useState(false);
   // const [elmTranslationError, setElmTranslationError] = useState(null); // should not be own error, modified to error message
@@ -279,12 +280,13 @@ const MeasureEditor = () => {
       setProcessing(true);
       setSuccess({
         status: undefined,
-        message: undefined,
+        primaryMessage: undefined,
+        secondaryMessages: undefined,
       });
       //Get model name and version
       const using = measure?.model.split(" v");
 
-      const inSyncCql = await synchingEditorCqlContent(
+      const updatedCqlObj = await synchingEditorCqlContent(
         editorValue,
         measure?.cql,
         measure?.cqlLibraryName,
@@ -296,8 +298,8 @@ const MeasureEditor = () => {
       );
 
       const results = await Promise.allSettled([
-        updateElmAnnotations(inSyncCql),
-        hasParserErrors(inSyncCql),
+        updateElmAnnotations(updatedCqlObj.cql),
+        hasParserErrors(updatedCqlObj.cql),
       ]);
 
       if (results[0].status === "rejected") {
@@ -331,7 +333,7 @@ const MeasureEditor = () => {
         const cqlErrors = parseErrors || cqlElmErrors;
         const newMeasure: Measure = {
           ...measure,
-          cql: inSyncCql,
+          cql: updatedCqlObj.cql,
           elmJson:
             validationResult && JSON.stringify(validationResult?.translation),
           cqlErrors,
@@ -368,24 +370,37 @@ const MeasureEditor = () => {
             setCodeMap(new Map<string, Code>());
             setEditorVal(newMeasure?.cql);
             setIsCQLUnchanged(true);
-            if (isUsingEmpty(editorValue)) {
-              setSuccess({
-                status: "success",
-                message:
-                  "CQL updated successfully but was missing a Using statement. Please add in a valid model and version.",
-              });
-            } else {
-              const successMessage =
-                inSyncCql !== editorValue
-                  ? {
-                      status: "success",
-                      message:
-                        "CQL updated successfully! Library Statement or Using Statement were incorrect. MADiE has overwritten them to ensure proper CQL.",
-                    }
-                  : { status: "success", message: "CQL saved successfully" };
-
-              setSuccess(successMessage);
+            let primaryMessage = "CQL updated successfully";
+            const secondaryMessages = [];
+            if (isUsingEmpty(editorVal)) {
+              secondaryMessages.push(
+                "Missing a using statement. Please add in a valid model and version."
+              );
             }
+            if (updatedCqlObj.isLibraryStatementChanged) {
+              secondaryMessages.push(
+                "Library statement was incorrect. MADiE has overwritten it."
+              );
+            }
+            if (updatedCqlObj.isUsingStatementChanged) {
+              secondaryMessages.push(
+                "Using statement was incorrect. MADiE has overwritten it."
+              );
+            }
+            if (updatedCqlObj.isValueSetChanged) {
+              secondaryMessages.push(
+                "MADiE does not currently support use of value set version directly in measures at this time. Your value set versions have been removed. Please use the relevant manifest for value set expansion for testing."
+              );
+            }
+            if (secondaryMessages.length > 0) {
+              primaryMessage =
+                "CQL updated successfully but the following issues were found";
+            }
+            setSuccess({
+              status: "success",
+              primaryMessage,
+              secondaryMessages,
+            });
             if (codeName) {
               setToastMessage(
                 `code ${codeName} ${
@@ -533,7 +548,11 @@ const MeasureEditor = () => {
     [handleApplyValueSet]
   );
   const handleMadieEditorValue = (val: string) => {
-    setSuccess({ status: undefined, message: undefined });
+    setSuccess({
+      status: undefined,
+      primaryMessage: undefined,
+      secondaryMessages: undefined,
+    });
     setError(false);
     setEditorVal(val);
     setValuesetMsg(null);
