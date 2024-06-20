@@ -52,6 +52,7 @@ declare module "@madie/madie-editor" {
     title?: string;
     url?: string;
     version?: string;
+    suffix?: string;
   }
 
   export interface EditorPropsType {
