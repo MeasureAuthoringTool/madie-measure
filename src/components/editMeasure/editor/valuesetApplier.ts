@@ -75,6 +75,13 @@ const findInsertPointWhenNoValuesets = (parseResults: CqlResult): number => {
   }
 };
 
+const getValueSetTitleName = (vs) => {
+  if (vs.suffix) {
+    return `${vs.title} (${vs.suffix})`;
+  }
+  return vs.title;
+};
+
 const applyValueset = (
   cql: string,
   vs: ValueSetForSearch
@@ -90,15 +97,20 @@ const applyValueset = (
     parseResults.valueSets.forEach((valueSet) => {
       const oldVsName = valueSet.name.replace(/["']/g, "");
       const oldUrl = valueSet.url.replace(/["']/g, "");
-      vsExists = vsExists || (oldVsName === vs.title && oldUrl === vs.oid);
+      vsExists =
+        vsExists ||
+        (oldVsName === getValueSetTitleName(vs) && oldUrl === vs.oid);
     });
   }
   // no matching valueset in the cql, add it.
   if (!vsExists) {
-    const { title, oid } = vs;
-    const valueSetStatement = `valueset "${title}": '${oid}'`;
+    const valueSetStatement = `valueset "${getValueSetTitleName(vs)}": '${
+      vs.oid
+    }'`;
     valuesetChangeStatus = true;
-    message = `Value Set ${title} has been successfully added to the CQL.`;
+    message = `Value Set ${getValueSetTitleName(
+      vs
+    )} has been successfully added to the CQL.`;
     // no vs, no vs array
     if (!parseResults.valueSets.length) {
       const insertionIndex = findInsertPointWhenNoValuesets(parseResults);
