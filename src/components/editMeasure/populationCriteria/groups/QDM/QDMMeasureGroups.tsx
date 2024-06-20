@@ -227,6 +227,10 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   const [cqlFunctionDataTypes, setCqlFunctionDataTypes] =
     useState<CqlFunctionDataTypes>();
 
+  const [usedPopulationTypes, setUsedPopulationTypes] = useState<Set<string>>(
+    new Set()
+  );
+
   const goBackToNav = (e) => {
     if (e.shiftKey && e.keyCode == 9) {
       e.preventDefault();
@@ -609,15 +613,16 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   };
 
   // Provides dropdown options for stratification
+
   // contains a default value along with all available CQL Definitions
   const stratificationOptions = [
     <MuiMenuItem key="-" value={""}>
       -
     </MuiMenuItem>,
-    expressionDefinitions
-      .sort((a, b) => a.name.localeCompare(b.name))
+    ...Array.from(usedPopulationTypes)
+      .sort((a, b) => a.localeCompare(b))
       .map((opt, i) => {
-        const sanitizedString = opt.name.replace(/"/g, "");
+        const sanitizedString = opt.replace(/"/g, "");
         return (
           <MuiMenuItem key={`${sanitizedString}-${i}`} value={sanitizedString}>
             {sanitizedString}
@@ -625,7 +630,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
         );
       }),
   ];
-
   // sets alert message when CQL has any errors
   useEffect(() => {
     setAlertMessage(() => ({ ...INITIAL_ALERT_MESSAGE }));
@@ -633,6 +637,14 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       const definitions = new CqlAntlr(measure.cql).parse()
         .expressionDefinitions;
       setExpressionDefinitions(definitions);
+
+      const updatedUsedPopulations = new Set<string>(usedPopulationTypes);
+      measure.groups.map((group) => {
+        group.populations.map((population) =>
+          updatedUsedPopulations.add(population.definition)
+        );
+      });
+      setUsedPopulationTypes(updatedUsedPopulations);
     }
     if (measure && (measure.cqlErrors || !measure?.cql) && !measure?.scoring) {
       // bad cql and bad base config step
