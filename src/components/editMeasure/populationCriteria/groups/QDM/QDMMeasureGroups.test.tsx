@@ -1163,7 +1163,8 @@ describe("Cohort Population Criteria validations", () => {
     // }, 100);
   });
 
-  test("Should not be able to save if non-patient based but return types are different with Stratifications", async () => {
+  //this test is no longer possible due to stratification options filtering
+  test.skip("Should not be able to save if non-patient based but return types are different with Stratifications", async () => {
     cohortMeasure.patientBasis = false;
     cohortMeasure.scoring = "Cohort";
 

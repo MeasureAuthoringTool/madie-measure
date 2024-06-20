@@ -639,12 +639,16 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       setExpressionDefinitions(definitions);
 
       const updatedUsedPopulations = new Set<string>(usedPopulationTypes);
-      measure.groups.map((group) => {
-        group.populations.map((population) =>
-          updatedUsedPopulations.add(population.definition)
-        );
-      });
-      setUsedPopulationTypes(updatedUsedPopulations);
+      if (measure.groups) {
+        measure.groups.map((group) => {
+          if (group.populations) {
+            group.populations.map((population) =>
+              updatedUsedPopulations.add(population.definition)
+            );
+          }
+        });
+        setUsedPopulationTypes(updatedUsedPopulations);
+      }
     }
     if (measure && (measure.cqlErrors || !measure?.cql) && !measure?.scoring) {
       // bad cql and bad base config step
