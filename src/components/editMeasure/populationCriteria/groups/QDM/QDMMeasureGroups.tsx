@@ -638,7 +638,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
         .expressionDefinitions;
       setExpressionDefinitions(definitions);
 
-      const updatedUsedPopulations = new Set<string>(usedPopulationTypes);
+      const updatedUsedPopulations = new Set<string>();
       if (measure.groups) {
         measure.groups.map((group) => {
           if (group.populations) {
@@ -998,6 +998,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                           }}
                                           label={`Stratification ${i + 1}`}
                                           id={`Stratification-select-${i + 1}`}
+                                          data-testid= {`stratification-select-${i + 1}-input`}
                                           aria-describedby={`Stratification-select-${
                                             i + 1
                                           }-helper-text`}
