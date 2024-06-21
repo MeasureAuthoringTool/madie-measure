@@ -1,9 +1,7 @@
-import React from "react";
 import axios from "axios";
 import useServiceConfig from "./useServiceConfig";
 import { ServiceConfig } from "./ServiceContext";
 import { useOktaTokens } from "@madie/madie-util";
-import _ from "lodash";
 
 export class FhirElmTranslationServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
