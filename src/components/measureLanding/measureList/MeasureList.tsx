@@ -1,5 +1,12 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import "twin.macro";
+import React, {
+  HTMLProps,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import tw from "twin.macro";
 import "styled-components/macro";
 import { Measure, Model } from "@madie/madie-models";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +17,12 @@ import {
   TextField,
   Toast,
 } from "@madie/madie-design-system/dist/react";
+import {
+  useReactTable,
+  ColumnDef,
+  getCoreRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 
 import InvalidTestCaseDialog from "./InvalidTestCaseDialog.tsx/InvalidTestCaseDialog";
 import InputAdornment from "@material-ui/core/InputAdornment";
@@ -25,6 +38,8 @@ import _ from "lodash";
 import ExportDialog from "./exportDialog/ExportDialog";
 import InvalidMeasureNameDialog from "./InvalidMeasureNameDialog/InvalidMeasureNameDialog";
 import getLibraryNameErrors from "./InvalidMeasureNameDialog/getLibraryNameErrors";
+import { Checkbox } from "@mui/material";
+import TruncateText from "./TruncateText";
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -56,6 +71,8 @@ const searchInputStyle = {
 
 export default function MeasureList(props: {
   measureList: Measure[];
+  selectedIds: object;
+  changeSelectedIds;
   setMeasureList;
   setTotalPages;
   setTotalItems;
@@ -89,11 +106,161 @@ export default function MeasureList(props: {
     },
     [measureServiceApi]
   );
+  const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
+  const transFormData = (measureList) => {
+    const results = measureList.map((measure: Measure) => ({
+      id: measure.id,
+      measureName: (
+        <TruncateText
+          text={measure.measureName}
+          maxLength={120}
+          name="measureName"
+          dataTestId={`measure-name-${measure.id}`}
+        />
+      ),
+      version: (
+        <TruncateText
+          text={measure.version}
+          maxLength={60}
+          name="version"
+          dataTestId={`measure-version-${measure.id}`}
+        />
+      ),
+      model: (
+        <TruncateText
+          text={measure.model}
+          maxLength={120}
+          name="model"
+          dataTestId={`measure-model-${measure.id}`}
+        />
+      ),
+      actions: (
+        <Button
+          variant="outline-secondary"
+          name="Select"
+          onClick={(e) => {
+            handlePopOverOpen(measure, e);
+          }}
+          data-testid={`measure-action-${measure.id}`}
+          aria-label={`Measure ${measure?.measureName} version ${measure?.version} draft status ${measure?.measureMetaData?.draft} Select`}
+          role="button"
+          tab-index={0}
+        >
+          Select
+        </Button>
+      ),
+    }));
+
+    return results;
+  };
+
+  type TCRow = {
+    id: string;
+    select: any;
+    measureName: string;
+    version: string;
+    model: string;
+    actions: any;
+    changeSelectedIds;
+  };
+
+  const [data, setData] = useState<TCRow[]>([]);
   useEffect(() => {
     if (props.measureList && measureServiceApi) {
       buildLookup(props.measureList);
+      setData(transFormData(props.measureList));
     }
   }, [props.measureList, measureServiceApi]);
+
+  function IndeterminateCheckbox({
+    indeterminate,
+    className = "",
+    onChange,
+    //@ts-ignore
+    changeSelectedIds,
+    id,
+    ...rest
+  }: { indeterminate?: boolean } & HTMLProps<HTMLInputElement>) {
+    const ref = React.useRef<HTMLInputElement>(null!);
+
+    React.useEffect(() => {
+      if (typeof indeterminate === "boolean") {
+        ref.current.indeterminate = !rest.checked && indeterminate;
+      }
+    }, [ref, indeterminate]);
+
+    console.log(rest);
+    const handleChange = (e) => {
+      onChange(e);
+      console.log(id);
+      changeSelectedIds(id);
+    };
+
+    return (
+      <input
+        type="checkbox"
+        ref={ref}
+        className={className + " cursor-pointer"}
+        onChange={handleChange}
+        {...rest}
+      />
+    );
+  }
+
+  const columns = useMemo<ColumnDef<TCRow>[]>(
+    () => [
+      {
+        id: "select",
+        header: ({ table }) => (
+          <IndeterminateCheckbox
+            {...{
+              checked: table.getIsAllRowsSelected(),
+              indeterminate: table.getIsSomeRowsSelected(),
+              onChange: table.getToggleAllRowsSelectedHandler(),
+            }}
+          />
+        ),
+        cell: ({ row }) => {
+          console.log(row);
+          return (
+            <div className="px-1">
+              <IndeterminateCheckbox
+                {...{
+                  checked: row.getIsSelected(),
+                  disabled: !row.getCanSelect(),
+                  indeterminate: row.getIsSomeSelected(),
+                  onChange: row.getToggleSelectedHandler(),
+                  id: row.original.id,
+                  changeSelectedIds: changeSelectedIds,
+                }}
+              />
+            </div>
+          );
+        },
+      },
+      {
+        header: "Measure Name",
+        cell: (row) => row.renderValue(),
+        accessorKey: "measureName",
+      },
+      {
+        header: "Version",
+        cell: (row) => row.renderValue(),
+        accessorKey: "version",
+      },
+      {
+        header: "Model",
+        cell: (row) => row.renderValue(),
+        accessorKey: "model",
+      },
+      {
+        header: "Actions",
+        cell: (row) => row.renderValue(),
+        accessorKey: "actions",
+      },
+    ],
+    []
+  );
 
   const navigate = useNavigate();
   // Popover utilities
@@ -604,8 +771,55 @@ export default function MeasureList(props: {
       });
   };
 
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
   return (
-    <div data-testid="measure-list">
+    <table
+      tw="min-w-full"
+      data-testid="test-case-tbl"
+      className="ml-table"
+      style={{
+        borderTop: "solid 1px #8c8c8c",
+        borderSpacing: "0 2em !important",
+      }}
+    >
+      <thead tw="bg-slate">
+        {table.getHeaderGroups().map((headerGroup) => (
+          <tr key={headerGroup.id}>
+            {headerGroup.headers.map((header) => (
+              <TH key={header.id} scope="col">
+                {header.isPlaceholder
+                  ? null
+                  : flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+              </TH>
+            ))}
+          </tr>
+        ))}
+      </thead>
+      <tbody className="table-body" style={{ padding: 20 }}>
+        {table.getRowModel().rows.map((row) => (
+          <tr
+            key={row.id}
+            className="tcl-tr"
+            data-testid={`measure-row-${row.id}`}
+          >
+            {row.getVisibleCells().map((cell) => (
+              <td key={cell.id} data-testid={`measure-name-${cell.id}`}>
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+
+      {/* <div data-testid="measure-list">
       <div tw="flex flex-col">
         <div tw="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div tw="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
@@ -645,6 +859,17 @@ export default function MeasureList(props: {
                 <thead tw="bg-slate">
                   <tr>
                     <th scope="col" className="col-header">
+                      <Checkbox
+                        // {...formik.getFieldProps("selectAll")}
+                        checked={null}
+                        disabled={!canEdit}
+                        name="selectAll"
+                        id="selectAll"
+                        data-testid="selectAll"
+                        // label={""}
+                      />
+                    </th>
+                    <th scope="col" className="col-header">
                       Measure Name
                     </th>
                     <th scope="col" className="col-header">
@@ -666,6 +891,17 @@ export default function MeasureList(props: {
                       data-testid="row-item"
                       style={{ borderTop: "solid 1px #8c8c8c" }}
                     >
+                      <td>
+                        <Checkbox
+                          // {...formik.getFieldProps("selectAll")}
+                          checked={null}
+                          disabled={!canEdit}
+                          name={`select-measure-${measure.id}`}
+                          id={`select-measure-${measure.id}`}
+                          data-testid={`select-measure-${measure.id}`}
+                          // label={""}
+                        />
+                      </td>
                       <td tw="w-7/12">{measure.measureName}</td>
                       <td>
                         {measure?.version}
@@ -696,65 +932,65 @@ export default function MeasureList(props: {
                     </tr>
                   ))}
                 </tbody>
-              </table>
-              <Popover
-                optionsOpen={optionsOpen}
-                anchorEl={anchorEl}
-                handleClose={handleClose}
-                canEdit={canEdit}
-                editViewSelectOptionProps={{
-                  label: editViewButtonLabel,
-                  toImplementFunction: viewEditRedirect,
-                  dataTestId: `view-measure-${selectedMeasure?.id}`,
-                }}
-                otherSelectOptionProps={otherSelectOptionPropsForPopOver}
-                additionalSelectOptionProps={additionalSelectOptionProps}
-              />
-            </div>
-            <Toast
-              toastKey="measure-action-toast"
-              aria-live="polite"
-              toastType={toastType}
-              testId={toastType === "danger" ? "error-toast" : "success-toast"}
-              closeButtonProps={{
-                "data-testid": "close-toast-button",
-              }}
-              open={toastOpen}
-              message={toastMessage}
-              onClose={onToastClose}
-              autoHideDuration={6000}
-            />
-            <CreatVersionDialog
-              currentVersion={targetMeasure?.current?.version}
-              open={createVersionDialog.open}
-              onClose={handleDialogClose}
-              onSubmit={checkValidCqlLibraryName}
-              versionHelperText={versionHelperText}
-              loading={loading}
-              measureId={targetMeasure?.current?.id}
-            />
-            <InvalidMeasureNameDialog
-              invalidLibraryDialogOpen={invalidLibraryDialogOpen}
-              onInvalidLibraryNameDialogClose={handleDialogClose}
-              measureName={targetMeasure?.current?.measureName}
-              invalidLibraryErrors={invalidLibraryErrors}
-            />
-            <InvalidTestCaseDialog
-              open={invalidTestCaseOpen}
-              onContinue={createVersion}
-              onClose={handleDialogClose}
-              versionType={versionType}
-              loading={loading}
-            />
-            <DraftMeasureDialog
-              open={draftMeasureDialog.open}
-              onClose={handleDialogClose}
-              onSubmit={draftMeasure}
-              measure={targetMeasure.current}
-            />
-          </div>
-        </div>
-      </div>
+              </table> */}
+      <Popover
+        optionsOpen={optionsOpen}
+        anchorEl={anchorEl}
+        handleClose={handleClose}
+        canEdit={canEdit}
+        editViewSelectOptionProps={{
+          label: editViewButtonLabel,
+          toImplementFunction: viewEditRedirect,
+          dataTestId: `view-measure-${selectedMeasure?.id}`,
+        }}
+        otherSelectOptionProps={otherSelectOptionPropsForPopOver}
+        additionalSelectOptionProps={additionalSelectOptionProps}
+      />
+      {/* </div> */}
+      <Toast
+        toastKey="measure-action-toast"
+        aria-live="polite"
+        toastType={toastType}
+        testId={toastType === "danger" ? "error-toast" : "success-toast"}
+        closeButtonProps={{
+          "data-testid": "close-toast-button",
+        }}
+        open={toastOpen}
+        message={toastMessage}
+        onClose={onToastClose}
+        autoHideDuration={6000}
+      />
+      <CreatVersionDialog
+        currentVersion={targetMeasure?.current?.version}
+        open={createVersionDialog.open}
+        onClose={handleDialogClose}
+        onSubmit={checkValidCqlLibraryName}
+        versionHelperText={versionHelperText}
+        loading={loading}
+        measureId={targetMeasure?.current?.id}
+      />
+      <InvalidMeasureNameDialog
+        invalidLibraryDialogOpen={invalidLibraryDialogOpen}
+        onInvalidLibraryNameDialogClose={handleDialogClose}
+        measureName={targetMeasure?.current?.measureName}
+        invalidLibraryErrors={invalidLibraryErrors}
+      />
+      <InvalidTestCaseDialog
+        open={invalidTestCaseOpen}
+        onContinue={createVersion}
+        onClose={handleDialogClose}
+        versionType={versionType}
+        loading={loading}
+      />
+      <DraftMeasureDialog
+        open={draftMeasureDialog.open}
+        onClose={handleDialogClose}
+        onSubmit={draftMeasure}
+        measure={targetMeasure.current}
+      />
+      {/* // </div> */}
+      {/* // </div> */}
+      {/* // </div> */}
       <ExportDialog
         failureMessage={failureMessage}
         measureName={targetMeasure?.current?.measureName}
@@ -763,6 +999,7 @@ export default function MeasureList(props: {
         handleContinueDialog={handleContinueDialog}
         handleCancelDialog={handleCancelDialog}
       />
-    </div>
+      {/* // </div> */}
+    </table>
   );
 }
