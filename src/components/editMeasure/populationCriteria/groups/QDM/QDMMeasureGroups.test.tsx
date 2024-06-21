@@ -3,6 +3,7 @@ import {
   act,
   fireEvent,
   getByRole,
+  logRoles,
   render,
   screen,
   waitFor,
@@ -1163,42 +1164,6 @@ describe("Cohort Population Criteria validations", () => {
     // }, 100);
   });
 
-  //this test is no longer possible due to stratification options filtering
-  test.skip("Should not be able to save if non-patient based but return types are different with Stratifications", async () => {
-    cohortMeasure.patientBasis = false;
-    cohortMeasure.scoring = "Cohort";
-
-    renderMeasureGroupComponent();
-
-    const groupPopulationInput = screen.getByTestId(
-      "select-measure-group-population-input"
-    ) as HTMLInputElement;
-    expect(groupPopulationInput).toBeInTheDocument();
-
-    act(() => {
-      fireEvent.change(groupPopulationInput, {
-        target: {
-          value: "VTE Prophylaxis by Medication Administered or Device Applied",
-        },
-      });
-    });
-
-    userEvent.click(screen.getByTestId("stratifications-tab"));
-
-    const strat1Input = screen.getByTestId("stratification-1-input");
-    expect(strat1Input).toBeInTheDocument();
-    fireEvent.change(strat1Input, {
-      target: {
-        value: "boolIpp",
-      },
-    });
-
-    await waitFor(() => {
-      const submitBtn = screen.getByTestId("group-form-submit-btn");
-      expect(submitBtn).toBeDisabled();
-    });
-  });
-
   test("Should not be able to save with non-patient based stratification return type is not the same", async () => {
     cohortMeasure.patientBasis = false;
     cohortMeasure.scoring = "Cohort";
@@ -1722,5 +1687,83 @@ describe("GAK MAT-6526 These tests were skipped in a previous story, but are wor
         "Please complete the CQL Editor process and Base Configuration tab before continuing"
       );
     });
+  });
+});
+
+describe("Stratification / Measure Group Interaction", () => {
+  let cohortMeasure: Measure;
+  let group: Group;
+
+  beforeEach(() => {
+    cohortMeasure = {
+      id: "test-measure",
+      measureName: "Cthe measure for testing 'Population Criteria validations'",
+      cql: MeasureCQL,
+      elmJson: ELM_JSON,
+      createdBy: MEASURE_CREATEDBY,
+      scoring: MeasureScoring.COHORT,
+      groups: [{ groupDescription: "Cthe group for testing" }],
+      baseConfigurationTypes: ["Outcome", "Patient Reported Outcome"],
+      patientBasis: true,
+      model: Model.QDM_5_6,
+    } as Measure;
+    group = {
+      id: "",
+      scoring: GroupScoring.COHORT,
+      populations: [
+        {
+          id: "id-1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+          description: "",
+        },
+      ],
+      groupDescription: "Junk Description",
+      measureGroupTypes: [],
+      populationBasis: "boolean",
+      scoringUnit: "",
+    } as Group;
+
+    measureStore.state.mockImplementationOnce(() => cohortMeasure);
+
+    //mocking measureServiceApi before component is rendered
+  });
+  test("stratifications only have options of what's selected for population criteria", async () => {
+    cohortMeasure.patientBasis = false;
+    cohortMeasure.scoring = "Cohort";
+
+    renderMeasureGroupComponent();
+    userEvent.click(screen.getByTestId("stratifications-tab"));
+    const listButton = screen.getByRole("button", {
+      name: "Stratification 1 Select Definition",
+    });
+    expect(listButton).toBeInTheDocument();
+    userEvent.click(listButton);
+    const opts = await screen.findAllByRole("option");
+    expect(opts.length).toBe(1);
+    userEvent.click(screen.getByTestId("populations-tab"));
+    const groupPopulationInput = screen.getByTestId(
+      "select-measure-group-population-input"
+    ) as HTMLInputElement;
+    expect(groupPopulationInput).toBeInTheDocument();
+
+    act(() => {
+      fireEvent.change(groupPopulationInput, {
+        target: {
+          value: "VTE Prophylaxis by Medication Administered or Device Applied",
+        },
+      });
+    });
+
+    userEvent.click(screen.getByTestId("stratifications-tab"));
+    const listButton2 = screen.getByRole("button", {
+      name: "Stratification 1 Select Definition",
+    });
+    userEvent.click(listButton2);
+    const opts2 = await screen.findAllByRole("option");
+    expect(opts2.length).toBe(2);
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 });

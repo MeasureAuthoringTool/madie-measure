@@ -630,6 +630,19 @@ const MeasureGroups = (props: MeasureGroupProps) => {
         );
       }),
   ];
+
+  useEffect(() => {
+    const updatedUsedPopulations = new Set<string>();
+    if (formik.values.populations) {
+      formik.values.populations.map((population) => {
+        if (population.definition) {
+          updatedUsedPopulations.add(population.definition);
+        }
+      });
+      setUsedPopulationTypes(updatedUsedPopulations);
+    }
+  }, [formik.values.populations]);
+
   // sets alert message when CQL has any errors
   useEffect(() => {
     setAlertMessage(() => ({ ...INITIAL_ALERT_MESSAGE }));
@@ -637,18 +650,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       const definitions = new CqlAntlr(measure.cql).parse()
         .expressionDefinitions;
       setExpressionDefinitions(definitions);
-
-      const updatedUsedPopulations = new Set<string>();
-      if (measure.groups) {
-        measure.groups.map((group) => {
-          if (group.populations) {
-            group.populations.map((population) =>
-              updatedUsedPopulations.add(population.definition)
-            );
-          }
-        });
-        setUsedPopulationTypes(updatedUsedPopulations);
-      }
     }
     if (measure && (measure.cqlErrors || !measure?.cql) && !measure?.scoring) {
       // bad cql and bad base config step
@@ -989,7 +990,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                             Remove
                                           </DSLink>
                                         )}
-
                                         <Select
                                           disabled={!canEdit}
                                           placeHolder={{
@@ -998,7 +998,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                           }}
                                           label={`Stratification ${i + 1}`}
                                           id={`Stratification-select-${i + 1}`}
-                                          data-testid= {`stratification-select-${i + 1}-input`}
+                                          data-testid={`stratification-select-${
+                                            i + 1
+                                          }-input`}
                                           aria-describedby={`Stratification-select-${
                                             i + 1
                                           }-helper-text`}
