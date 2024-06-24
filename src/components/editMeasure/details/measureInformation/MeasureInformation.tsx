@@ -28,6 +28,8 @@ import {
 import "./MeasureInformation.scss";
 import CmsIdentifier from "../cmsIdentifier/CmsIdentifier";
 import { QdmMeasureSchemaValidator } from "../../../../validations/QDMMeasureSchemaValidator";
+import useQdmElmTranslationServiceApi from "../../../../api/useQdmElmTranslationServiceApi";
+import useFhirElmTranslationServiceApi from "../../../../api/useFhirElmTranslationServiceApi";
 
 interface measureInformationForm {
   versionId: string;
@@ -50,10 +52,53 @@ interface MeasureInformationProps {
 export default function MeasureInformation(props: MeasureInformationProps) {
   const { setErrorMessage } = props;
   const measureServiceApi = useMeasureServiceApi();
+  const qdmElmTranslationService = useQdmElmTranslationServiceApi();
+  const fhirElmTranslationService = useFhirElmTranslationServiceApi();
+
   const [endorsers, setEndorsers] = useState<string[]>();
   const [endorsementIdRequired, setEndorsementIdRequired] = useState<boolean>();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
+  const [translatorVersion, setTranslatorVersion] = useState("");
+
+  const getTranslatorVersion = async (model, draft) => {
+    if (model.includes("QDM")) {
+      qdmElmTranslationService.fetchTranslatorVersion(draft).then((data) => {
+        setTranslatorVersion(data);
+      });
+    } else {
+      fhirElmTranslationService.fetchTranslatorVersion(draft).then((data) => {
+        setTranslatorVersion(data);
+      });
+    }
+  };
+  useEffect(() => {
+    // if we have a measure loaded
+    if (measure?.model) {
+      const model = measure.model;
+      const draft = measure?.measureMetaData?.draft;
+      // if it's in draft we request
+      if (draft) {
+        getTranslatorVersion(model, draft);
+      } else {
+        const elmJson = JSON.parse(measure.elmJson);
+        const annotations = elmJson?.library?.annotation;
+        if (annotations?.length) {
+          const found = annotations.find((e) =>
+            e.hasOwnProperty("translatorVersion")
+          );
+          if (found) {
+            setTranslatorVersion(found.translatorVersion);
+          }
+        } else {
+          getTranslatorVersion(model, draft);
+        }
+      }
+    }
+  }, [measure?.model]);
+  const transLatorLable = measure?.measureMetaData?.draft
+    ? `Currently using CQL to ELM Translator Version`
+    : `Versioned with CQL to ELM Translator Version`;
   const featureFlags = useFeatureFlags();
 
   useEffect(() => {
@@ -525,6 +570,18 @@ export default function MeasureInformation(props: MeasureInformationProps) {
           />
           <div />
           <div />
+        </Box>
+        <Box sx={formRowGapped}>
+          <ReadOnlyTextField
+            value={translatorVersion}
+            label={transLatorLable}
+            tabIndex={0}
+            placeholder="Translator Version"
+            id="translator-label"
+            data-testid="translator-version-text-field"
+            inputProps={{ "data-testid": "translator-version-input" }}
+            size="small"
+          />
         </Box>
       </div>
       {canEdit && (
