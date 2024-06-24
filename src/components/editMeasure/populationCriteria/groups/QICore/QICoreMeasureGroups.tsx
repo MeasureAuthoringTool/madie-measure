@@ -182,6 +182,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   >([]);
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
+  const [stratAssociation, setStratAssociation] = useState<Array<any>>([]);
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
     return () => {
@@ -601,6 +602,18 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       }),
   ];
 
+  useEffect(() => {
+    if (formik.values.scoring) {
+      setStratAssociation(
+        associationSelect[formik.values.scoring].filter((name) =>
+          formik.values.populations
+            .filter((population) => population.definition)
+            .map((population) => population.name)
+            .includes(name)
+        )
+      );
+    }
+  }, [formik.values.populations]);
   // sets alert message when CQL has any errors
   useEffect(() => {
     setAlertMessage(() => ({ ...INITIAL_ALERT_MESSAGE }));
@@ -1149,11 +1162,10 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                           renderValue={(value) =>
                                             _.startCase(value)
                                           }
+                                          //aaaa
                                           options={
                                             !!formik.values.scoring &&
-                                            associationSelect[
-                                              formik.values.scoring
-                                            ].map((opt, i) => (
+                                            stratAssociation.map((opt, i) => (
                                               <MuiMenuItem
                                                 key={`${opt}-${i}`}
                                                 value={`${opt}`}
