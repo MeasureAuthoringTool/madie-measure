@@ -78,7 +78,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       const model = measure.model;
       const draft = measure?.measureMetaData?.draft;
       // if it's in draft we request
-      if (draft){
+      if (draft) {
         getTranslatorVersion(model, draft);
       } else {
         const elmJson = JSON.parse(measure.elmJson);
