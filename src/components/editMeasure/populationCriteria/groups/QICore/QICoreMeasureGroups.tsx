@@ -1163,17 +1163,20 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                             _.startCase(value)
                                           }
                                           //aaaa
-                                          options={
+                                          options={[
+                                            <MuiMenuItem key={"-"} value={""}>
+                                              -
+                                            </MuiMenuItem>,
                                             !!formik.values.scoring &&
-                                            stratAssociation.map((opt, i) => (
-                                              <MuiMenuItem
-                                                key={`${opt}-${i}`}
-                                                value={`${opt}`}
-                                              >
-                                                {_.startCase(opt)}
-                                              </MuiMenuItem>
-                                            ))
-                                          }
+                                              stratAssociation.map((opt, i) => (
+                                                <MuiMenuItem
+                                                  key={`${opt}-${i}`}
+                                                  value={`${opt}`}
+                                                >
+                                                  {_.startCase(opt)}
+                                                </MuiMenuItem>
+                                              )),
+                                          ]}
                                         />
                                       </div>
                                     </div>
