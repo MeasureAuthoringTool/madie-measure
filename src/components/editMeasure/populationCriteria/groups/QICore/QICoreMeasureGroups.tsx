@@ -1162,7 +1162,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                           renderValue={(value) =>
                                             _.startCase(value)
                                           }
-                                          //aaaa
                                           options={[
                                             <MuiMenuItem key={"-"} value={""}>
                                               -
