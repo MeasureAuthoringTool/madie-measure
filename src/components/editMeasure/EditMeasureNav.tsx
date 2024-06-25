@@ -25,7 +25,9 @@ const MenuItem = styled.li((props: PropTypes) => [
 ]);
 
 const EditMeasureNav = ({ isQDM }) => {
-  const [testCaseLength, setTestCaseLength] = useState<any>(0);
+  const [testCaseLength, setTestCaseLength] = useState<any>(null);
+  const testCaseLabel =
+    testCaseLength === null ? `Test Cases` : `Test Cases (${testCaseLength})`;
   const { pathname } = useLocation();
   let navigate = useNavigate();
   const { id } = useParams<{
@@ -50,10 +52,15 @@ const EditMeasureNav = ({ isQDM }) => {
   }, []);
   useEffect(() => {
     if (id) {
-      setTestCaseLength(measure?.testCases?.length || 0);
+      const testCases = measure?.testCases;
+      if (testCases === null) {
+        setTestCaseLength(0);
+        // when test cases are null, then we set to 0 since they are absent. Otherwise we display 0 before anything shows up
+      } else if (testCases?.length) {
+        setTestCaseLength(testCases?.length);
+      }
     }
-  }, [id, measure]);
-
+  }, [id, measure?.testCases]);
   return (
     <div>
       <div style={{ marginLeft: "32px" }} id="edit-measure-nav-a">
@@ -91,7 +98,7 @@ const EditMeasureNav = ({ isQDM }) => {
             data-testid="patients-tab"
             type="A"
             size="large"
-            label={`Test Cases (${testCaseLength})`}
+            label={testCaseLabel}
             component={NavLink}
           />
         </Tabs>
