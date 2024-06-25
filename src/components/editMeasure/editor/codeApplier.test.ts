@@ -2,7 +2,7 @@ import applyCode, { CodeChangeResult } from "./codeApplier";
 import * as fs from "fs";
 import { Code } from "@madie/madie-models";
 
-it("Apply new code to CQL", () => {
+it("Should apply new code to CQL", () => {
   //read cql from file
 
   const cql = fs.readFileSync(
@@ -23,7 +23,7 @@ it("Apply new code to CQL", () => {
   );
 });
 
-it("Add a code that already exists- duplicate code", () => {
+it("Should not add a code that already exists- duplicate code", () => {
   const cql = fs.readFileSync(
     "src/components/editMeasure/editor/__mocks__/LoincTest.cql",
     "utf8"
@@ -80,7 +80,7 @@ it("Should add CodeSystem and Code if necessary", () => {
   expect(result.cql).toContain("281302008");
 });
 
-it("Update existing code- add suffix and version", () => {
+it("Should update existing code- add suffix and version", () => {
   //read cql from file
   const cql = fs.readFileSync(
     "src/components/editMeasure/editor/__mocks__/CptTest.cql",
