@@ -447,7 +447,7 @@ const MeasureEditor = () => {
     //if result status is false, we didn't modify.. so CQL didn't change,
     //  but confirmation messages can still be displayed
     setToastMessage(result.message);
-    setToastType("success");
+    setToastType(result.status);
     setToastOpen(true);
   };
 

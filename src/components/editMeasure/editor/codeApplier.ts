@@ -3,114 +3,166 @@ import { Code } from "@madie/madie-models";
 
 export type CodeChangeResult = {
   cql: string;
-  status: boolean;
+  status: "success" | "info";
   message: string;
 };
 
+const findCodeSystem = (code, codeSystems) => {
+  if (!code || !codeSystems) {
+    return undefined;
+  }
+  return codeSystems.find((codeSystem) => {
+    const oldCodeSystemName = codeSystem.name.replace(/["']/g, "");
+    const oldCodeSystemOid = codeSystem.oid
+      .replace(/["']/g, "")
+      ?.replace(/urn:oid:/g, "");
+    const oldCodeSystemVersion = codeSystem.version
+      ?.replace(/["']/g, "")
+      ?.replace(/urn:hl7:version:/g, "");
+
+    if (code.isVersionIncluded) {
+      return (
+        oldCodeSystemName === `${code.codeSystem}:${code.svsVersion}` &&
+        oldCodeSystemOid === code.codeSystemOid &&
+        oldCodeSystemVersion === code.svsVersion
+      );
+    } else {
+      return (
+        oldCodeSystemName === code.codeSystem &&
+        oldCodeSystemOid === code.codeSystemOid
+      );
+    }
+  });
+};
+
+const findCode = (code, codes) => {
+  if (!code || !codes) {
+    return undefined;
+  }
+  return codes.find((oldCode) => {
+    const oldCodeCodeId = oldCode.codeId.replace(/["']/g, "");
+    // get code system by ignoring version
+    const oldCodeCodeSystem = oldCode.codeSystem
+      .replace(/["']/g, "")
+      .split(":")[0];
+    return oldCodeCodeId === code.name && oldCodeCodeSystem === code.codeSystem;
+  });
+};
+
+const createCodeDeclaration = (code: Code) => {
+  let newCode = `code "${code.display}`;
+  if (code.suffix) {
+    newCode += ` (${code.suffix})`;
+  }
+  if (code.isVersionIncluded) {
+    newCode += `": '${code.name}' from "${code.codeSystem}:${code.svsVersion}" display '${code.display}'`;
+  } else {
+    newCode += `": '${code.name}' from "${code.codeSystem}" display '${code.display}'`;
+  }
+  return newCode;
+};
+
+const createCodeSystemDeclaration = (code: Code) => {
+  if (code.isVersionIncluded) {
+    return `codesystem "${code.codeSystem}:${code.svsVersion}": 'urn:oid:${code.codeSystemOid}' version 'urn:hl7:version:${code.svsVersion}'`;
+  } else {
+    return `codesystem "${code.codeSystem}": 'urn:oid:${code.codeSystemOid}'`;
+  }
+};
+
 const applyCode = (cql: string, code: Code): CodeChangeResult => {
-  let codeChangeStatus: boolean = false;
-  let message: string = "The requested operation was unsuccessful";
   const cqlArr: string[] = cql.split("\n");
 
-  //extract code, codesets from code object
+  // Parse CQL to get code and code systems
   const parseResults: CqlResult = new CqlAntlr(cql).parse();
 
-  // Let's check if the code set is already in the CQL
-  let codeSystemExists: boolean = false;
-  if (parseResults.codeSystems.length > 0) {
-    parseResults.codeSystems.forEach((codesystem) => {
-      const oldCodeSystemName = codesystem.name.replace(/["']/g, "");
-      const oldCodeSystemOid = codesystem.oid.replace(/["']/g, "");
-      codeSystemExists =
-        codeSystemExists ||
-        (oldCodeSystemName === code.codeSystem &&
-          oldCodeSystemOid.split(":")[2] === code.codeSystemOid);
-    });
+  // Let's check if the code system is already in the CQL
+  const previousCodeSystem = findCodeSystem(code, parseResults.codeSystems);
+  // Add code system to CQL if it does not exist
+  if (!previousCodeSystem) {
+    let newCodeSystem = createCodeSystemDeclaration(code);
+    cqlArr.splice(findCodeSystemInsertPoint(parseResults), 0, newCodeSystem);
   }
 
-  if (!codeSystemExists) {
-    //Add codeSystem to CQL
-    const codeSystemAddition = `codesystem "${code.codeSystem}": 'urn:oid:${code.codeSystemOid}'`;
-    cqlArr.splice(
-      findCodeSystemInsertPoint(parseResults),
-      0,
-      codeSystemAddition
-    );
-  }
-
-  //check to see if the code already exists.. add it if it doesn't
-  let codeExists: boolean = false;
-  if (parseResults.codes.length > 0) {
-    //1.  Are there codes?  If so, add this one last
-    parseResults.codes.forEach((oldCode) => {
-      const oldCodeName = oldCode.name.replace(/["']/g, "");
-      const oldCodeCodeId = oldCode.codeId.replace(/["']/g, "");
-      const oldCodeCodeSystem = oldCode.codeSystem.replace(/["']/g, "");
-      codeExists =
-        codeExists ||
-        (oldCodeName === code.display.replace(/["']/g, "") &&
-          oldCodeCodeId === code.name &&
-          oldCodeCodeSystem === code.codeSystem);
-    });
-  }
-
-  if (!codeExists) {
-    //add code to CQL
-    cqlArr.splice(
-      findCodeInsertPoint(parseResults),
-      0,
-      `code "${code.display}": '${code.name}' from "${code.codeSystem}" display '${code.display}'`
-    );
+  let status = "success";
+  let message: string;
+  // find if the code exists
+  const previousCode = findCode(code, parseResults.codes);
+  // prepare new code
+  const newCode = createCodeDeclaration(code);
+  // check if new code is same as existing
+  if (previousCode?.text === newCode) {
+    message = `Code ${code.name} has already been defined in CQL.`;
+    status = "info";
+  } //if code exists, update it
+  else if (previousCode) {
+    if (previousCodeSystem) {
+      cqlArr[previousCode.stop.line - 1] = newCode;
+    } else {
+      cqlArr[previousCode.stop.line] = newCode;
+    }
+    message = `Code ${code.name} has been updated successfully.`;
+  } // Add new code
+  else {
+    if (previousCodeSystem) {
+      cqlArr.splice(findCodeInsertPoint(parseResults), 0, newCode);
+    } else {
+      cqlArr.splice(findCodeInsertPoint(parseResults) + 1, 0, newCode);
+    }
     message = `Code ${code.name} has been successfully added to the CQL.`;
-    codeChangeStatus = true;
-  } else {
-    message = "This code is already defined in the CQL.";
   }
   //return the array as a string
   return {
     cql: cqlArr.join("\n"),
-    status: codeChangeStatus,
+    status: status,
     message: message,
   } as unknown as CodeChangeResult;
 };
 
 const findCodeInsertPoint = (parseResults: CqlResult) => {
-  const codes: number = parseResults?.codes.length;
-  const codesystems: number = parseResults?.codeSystems.length;
-  const includes: number = parseResults?.includes.length;
-  const usings: number = parseResults?.using?.start?.line;
-
-  if (codes > 0) {
+  if (!parseResults || Object.keys(parseResults).length === 0) {
+    // 1 because code system would be added at 0 if editor is empty and code would be on line 1
+    return 1;
+  }
+  if (parseResults.codes.length > 0) {
     return parseResults.codes[parseResults.codes.length - 1].stop.line;
-  } else if (codesystems > 0) {
-    return parseResults.codeSystems[parseResults.codeSystems.length - 1].stop
-      .line;
-  } else if (includes > 0) {
+  } else if (parseResults.valueSets.length > 0) {
+    return (
+      parseResults.valueSets[parseResults.valueSets.length - 1].stop.line + 1
+    );
+  } else if (parseResults.codeSystems.length > 0) {
+    return (
+      parseResults.codeSystems[parseResults.codeSystems.length - 1].stop.line +
+      1
+    );
+  } else if (parseResults.includes.length > 0) {
     return (
       parseResults.includes[parseResults.includes.length - 1].stop.line + 1
     );
-  } else if (usings > 0) {
-    return parseResults.using.start.line + 1;
+  } else if (parseResults.using) {
+    return parseResults.using.stop.line + 1;
   } else {
+    // 2 because line 0 would be library, line 1 would be empty and 2 would be code system
     return 2;
   }
 };
 
 const findCodeSystemInsertPoint = (parseResults: CqlResult) => {
-  const codes: number = parseResults?.codes.length;
-  const codesystems: number = parseResults?.codeSystems.length;
-  const includes: number = parseResults?.includes.length;
-  const usings: number = parseResults?.using?.start?.line;
-
-  if (codesystems > 0) {
+  if (!parseResults || Object.keys(parseResults).length === 0) {
+    // code system would be added at 0 if editor is empty
+    return 0;
+  }
+  if (parseResults.codeSystems.length > 0) {
     return parseResults.codeSystems[parseResults.codeSystems.length - 1].stop
       .line;
-  } else if (includes > 0) {
-    return parseResults.includes[parseResults.includes.length - 1].stop.line;
-  } else if (usings > 0) {
-    return parseResults.using.start.line;
+  } else if (parseResults.includes.length > 0) {
+    return (
+      parseResults.includes[parseResults.includes.length - 1].stop.line + 1
+    );
+  } else if (parseResults.using) {
+    return parseResults.using.start.line + 1;
   } else {
-    return 1;
+    return 2;
   }
 };
 export default applyCode;
