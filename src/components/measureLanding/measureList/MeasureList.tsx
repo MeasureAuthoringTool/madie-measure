@@ -97,8 +97,10 @@ export default function MeasureList(props: {
         const results = await measureServiceApi.fetchMeasureDraftStatuses(
           measureSetList
         );
+        console.log(results);
         if (results) {
           setCanDraftLookup(results);
+          console.log(canDraftLookup);
         }
       } catch (e) {
         console.warn("Error fetching draft statuses: ", e);
@@ -119,12 +121,17 @@ export default function MeasureList(props: {
         />
       ),
       version: (
-        <TruncateText
-          text={measure.version}
-          maxLength={60}
-          name="version"
-          dataTestId={`measure-version-${measure.id}`}
-        />
+        <>
+          <TruncateText
+            text={measure.version}
+            maxLength={60}
+            name="version"
+            dataTestId={`measure-version-${measure.id}`}
+          />
+          {`${measure.measureMetaData?.draft}` === "true" && (
+            <Chip tw="ml-6" className="chip-draft" label="Draft" />
+          )}
+        </>
       ),
       model: (
         <TruncateText
@@ -161,7 +168,6 @@ export default function MeasureList(props: {
     version: string;
     model: string;
     actions: any;
-    changeSelectedIds;
   };
 
   const [data, setData] = useState<TCRow[]>([]);
@@ -176,11 +182,13 @@ export default function MeasureList(props: {
     indeterminate,
     className = "",
     onChange,
-    //@ts-ignore
     changeSelectedIds,
     id,
     ...rest
-  }: { indeterminate?: boolean } & HTMLProps<HTMLInputElement>) {
+  }: {
+    indeterminate?: boolean;
+    changeSelectedIds: (id: string) => void;
+  } & HTMLProps<HTMLInputElement>) {
     const ref = React.useRef<HTMLInputElement>(null!);
 
     React.useEffect(() => {
@@ -189,11 +197,10 @@ export default function MeasureList(props: {
       }
     }, [ref, indeterminate]);
 
-    console.log(rest);
     const handleChange = (e) => {
       onChange(e);
-      console.log(id);
       changeSelectedIds(id);
+      console.log(props.selectedIds);
     };
 
     return (
@@ -217,21 +224,21 @@ export default function MeasureList(props: {
               checked: table.getIsAllRowsSelected(),
               indeterminate: table.getIsSomeRowsSelected(),
               onChange: table.getToggleAllRowsSelectedHandler(),
+              changeSelectedIds: props.changeSelectedIds,
             }}
           />
         ),
         cell: ({ row }) => {
-          console.log(row);
           return (
             <div className="px-1">
               <IndeterminateCheckbox
                 {...{
-                  checked: row.getIsSelected(),
+                  checked: props.selectedIds[row.original.id],
                   disabled: !row.getCanSelect(),
                   indeterminate: row.getIsSomeSelected(),
                   onChange: row.getToggleSelectedHandler(),
                   id: row.original.id,
-                  changeSelectedIds: changeSelectedIds,
+                  changeSelectedIds: props.changeSelectedIds,
                 }}
               />
             </div>
@@ -259,7 +266,7 @@ export default function MeasureList(props: {
         accessorKey: "actions",
       },
     ],
-    []
+    [props.changeSelectedIds]
   );
 
   const navigate = useNavigate();
@@ -809,6 +816,10 @@ export default function MeasureList(props: {
             key={row.id}
             className="tcl-tr"
             data-testid={`measure-row-${row.id}`}
+            style={{
+              borderTop: "solid 1px #8c8c8c",
+              borderSpacing: "0 2em !important",
+            }}
           >
             {row.getVisibleCells().map((cell) => (
               <td key={cell.id} data-testid={`measure-name-${cell.id}`}>
@@ -818,121 +829,6 @@ export default function MeasureList(props: {
           </tr>
         ))}
       </tbody>
-
-      {/* <div data-testid="measure-list">
-      <div tw="flex flex-col">
-        <div tw="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-          <div tw="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-            <div>
-              <form onSubmit={handleSubmit}>
-                <table
-                  style={{ marginLeft: 20, marginTop: 20, marginBottom: 20 }}
-                >
-                  <thead>
-                    <tr>
-                      <TextField
-                        onChange={(newValue) => {
-                          props.setSearchCriteria(newValue.target.value);
-                        }}
-                        id="searchMeasure"
-                        name="searchMeasure"
-                        placeholder="Search Measure"
-                        type="search"
-                        fullWidth
-                        data-testid="measure-search-input"
-                        label="Filter Measures"
-                        variant="outlined"
-                        defaultValue={props.searchCriteria}
-                        value={props.searchCriteria}
-                        inputProps={{
-                          "data-testid": "searchMeasure-input",
-                          "aria-required": "false",
-                        }}
-                        InputProps={searchInputProps}
-                        sx={searchInputStyle}
-                      />
-                    </tr>
-                  </thead>
-                </table>
-              </form>
-              <table tw="min-w-full" style={{ borderTop: "solid 1px #8c8c8c" }}>
-                <thead tw="bg-slate">
-                  <tr>
-                    <th scope="col" className="col-header">
-                      <Checkbox
-                        // {...formik.getFieldProps("selectAll")}
-                        checked={null}
-                        disabled={!canEdit}
-                        name="selectAll"
-                        id="selectAll"
-                        data-testid="selectAll"
-                        // label={""}
-                      />
-                    </th>
-                    <th scope="col" className="col-header">
-                      Measure Name
-                    </th>
-                    <th scope="col" className="col-header">
-                      Version
-                    </th>
-                    <th scope="col" className="col-header">
-                      Model
-                    </th>
-                    <th scope="col" className="col-header">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody data-testid="table-body" className="table-body">
-                  {props.measureList?.map((measure, i) => (
-                    <tr
-                      key={`${measure.id}-${i}`}
-                      data-testid="row-item"
-                      style={{ borderTop: "solid 1px #8c8c8c" }}
-                    >
-                      <td>
-                        <Checkbox
-                          // {...formik.getFieldProps("selectAll")}
-                          checked={null}
-                          disabled={!canEdit}
-                          name={`select-measure-${measure.id}`}
-                          id={`select-measure-${measure.id}`}
-                          data-testid={`select-measure-${measure.id}`}
-                          // label={""}
-                        />
-                      </td>
-                      <td tw="w-7/12">{measure.measureName}</td>
-                      <td>
-                        {measure?.version}
-                        {`${measure.measureMetaData?.draft}` === "true" && (
-                          <Chip
-                            tw="ml-6"
-                            className="chip-draft"
-                            label="Draft"
-                          />
-                        )}
-                      </td>
-                      <td>{measure.model}</td>
-                      <td>
-                        <Button
-                          variant="outline-secondary"
-                          name="Select"
-                          onClick={(e) => {
-                            handlePopOverOpen(measure, e);
-                          }}
-                          data-testid={`measure-action-${measure.id}`}
-                          aria-label={`Measure ${measure?.measureName} version ${measure?.version} draft status ${measure?.measureMetaData?.draft} Select`}
-                          role="button"
-                          tab-index={0}
-                        >
-                          Select
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table> */}
       <Popover
         optionsOpen={optionsOpen}
         anchorEl={anchorEl}
@@ -946,7 +842,6 @@ export default function MeasureList(props: {
         otherSelectOptionProps={otherSelectOptionPropsForPopOver}
         additionalSelectOptionProps={additionalSelectOptionProps}
       />
-      {/* </div> */}
       <Toast
         toastKey="measure-action-toast"
         aria-live="polite"
@@ -988,9 +883,6 @@ export default function MeasureList(props: {
         onSubmit={draftMeasure}
         measure={targetMeasure.current}
       />
-      {/* // </div> */}
-      {/* // </div> */}
-      {/* // </div> */}
       <ExportDialog
         failureMessage={failureMessage}
         measureName={targetMeasure?.current?.measureName}
@@ -999,7 +891,6 @@ export default function MeasureList(props: {
         handleContinueDialog={handleContinueDialog}
         handleCancelDialog={handleCancelDialog}
       />
-      {/* // </div> */}
     </table>
   );
 }

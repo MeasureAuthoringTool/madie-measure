@@ -38,6 +38,7 @@ export default function MeasureLanding() {
     } else {
       selectedIdCopy[id] = true;
     }
+    setSelectedIds(selectedIdCopy);
   };
   // utilities for pagination
   const values = queryString.parse(search);
