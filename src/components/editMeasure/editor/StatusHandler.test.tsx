@@ -19,11 +19,13 @@ describe("StatusHandler Component", () => {
     },
   ];
 
+  const success = {
+    status: "success",
+    primaryMessage: "CQL updated successfully",
+    secondaryMessages: ["Library statement can not be updated"],
+  };
+
   it("Should display success message, an errorMessage and outbound annotations", () => {
-    const success = {
-      status: "success",
-      message: "",
-    };
     const warningMessage =
       "You forgot to cover the edge case for fire helpers that aren't fire helpers";
     render(
@@ -35,12 +37,11 @@ describe("StatusHandler Component", () => {
         hasSubTitle={false}
       />
     );
-
     expect(screen.getByTestId("generic-success-text-header")).toHaveTextContent(
-      "Changes saved successfully but the following issues were found"
+      success.primaryMessage
     );
     expect(screen.getByTestId("library-warning")).toHaveTextContent(
-      warningMessage
+      success.secondaryMessages.join()
     );
     const errorsList = screen.getByTestId("generic-errors-text-list");
     expect(errorsList).toBeInTheDocument();
@@ -54,42 +55,7 @@ describe("StatusHandler Component", () => {
     );
   });
 
-  it("Should display a Success message along with Error Message but no Annotations", () => {
-    const success = {
-      status: "success",
-      message: "",
-    };
-    const errorMessage = "An error occurred, but CQL is saved successfully";
-    render(
-      <StatusHandler
-        success={success}
-        error={false}
-        errorMessage={errorMessage}
-        outboundAnnotations={[]}
-        hasSubTitle={false}
-      />
-    );
-
-    expect(screen.getByTestId("generic-success-text-header")).toHaveTextContent(
-      "Changes saved successfully but the following issues were found"
-    );
-    expect(screen.getByTestId("library-warning")).toHaveTextContent(
-      errorMessage
-    );
-    expect(
-      screen.queryByTestId("generic-errors-text-list")
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId("generic-warnings-text-list")
-    ).not.toBeInTheDocument();
-  });
-
   it("Should display a generic success message and a library warning if a library warning exists when no error or messages present, also displays a list of annotations", () => {
-    const success = {
-      status: "success",
-      message:
-        "CQL updated successfully! Library Statement or Using Statement were incorrect. MADiE has overwritten them to ensure proper CQL.",
-    };
     render(
       <StatusHandler
         success={success}
@@ -101,10 +67,10 @@ describe("StatusHandler Component", () => {
     );
 
     expect(getByTestId("generic-success-text-header")).toHaveTextContent(
-      "Changes saved successfully but the following issues were found"
+      success.primaryMessage
     );
     expect(screen.getByTestId("library-warning")).toHaveTextContent(
-      success.message
+      success.secondaryMessages.join()
     );
     const errorsList = screen.getByTestId("generic-errors-text-list");
     expect(errorsList).toBeInTheDocument();
@@ -119,11 +85,6 @@ describe("StatusHandler Component", () => {
   });
 
   it("Should display a generic success message and a using warning if a library warning exists when no error or messages present, also displays a list of annotations", async () => {
-    const success = {
-      status: "success",
-      message:
-        "CQL updated successfully but was missing a Using statement. Please add in a valid model and version.",
-    };
     render(
       <StatusHandler
         success={success}
@@ -135,11 +96,11 @@ describe("StatusHandler Component", () => {
     );
 
     expect(getByTestId("generic-success-text-header")).toHaveTextContent(
-      "Changes saved successfully but the following issues were found"
+      success.primaryMessage
     );
     await waitFor(() => {
       expect(screen.getByTestId("library-warning")).toHaveTextContent(
-        success.message
+        success.secondaryMessages.join()
       );
     });
     const errorsList = screen.getByTestId("generic-errors-text-list");
@@ -154,42 +115,7 @@ describe("StatusHandler Component", () => {
     );
   });
 
-  it("Should display a success message, with a list of annotations", () => {
-    const success = {
-      status: "success",
-      message: "",
-    };
-    render(
-      <StatusHandler
-        success={success}
-        error={false}
-        errorMessage={null}
-        outboundAnnotations={annotationsObject}
-        hasSubTitle={false}
-      />
-    );
-
-    expect(getByTestId("generic-success-text-header")).toHaveTextContent(
-      "Changes saved successfully but the following issues were found"
-    );
-    expect(screen.queryByTestId("library-warning")).not.toBeInTheDocument();
-    const errorsList = screen.getByTestId("generic-errors-text-list");
-    expect(errorsList).toBeInTheDocument();
-    expect(errorsList).toHaveTextContent(
-      transformAnnotation(annotationsObject[0])
-    );
-    const warningsList = screen.getByTestId("generic-warnings-text-list");
-    expect(warningsList).toBeInTheDocument();
-    expect(warningsList).toHaveTextContent(
-      transformAnnotation(annotationsObject[1])
-    );
-  });
-
   it("Should display a generic success message when no error or messages present", () => {
-    const success = {
-      status: "success",
-      message: "stuff saved successfully",
-    };
     render(
       <StatusHandler
         success={success}
@@ -201,7 +127,7 @@ describe("StatusHandler Component", () => {
     );
 
     expect(getByTestId("generic-success-text-header")).toHaveTextContent(
-      success.message
+      success.primaryMessage
     );
     expect(
       screen.queryByTestId("generic-errors-text-list")

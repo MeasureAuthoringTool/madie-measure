@@ -12,18 +12,45 @@ const sortCQLValuesetsInPlace = (
   }
 };
 
+const extractValueSetNameAndSuffix = (valueSetName) => {
+  const match = valueSetName
+    .replace(/["']/g, "")
+    .match(/^([a-zA-Z\-\s]+?)(?:\s*\((\d+)\))?$/);
+  if (match) {
+    return {
+      baseValueSetName: match[1].trim(),
+      number: match[2] ? parseInt(match[2], 10) : -1, // Treat no number as -1
+    };
+  } else {
+    // No number found, treat as -1
+    return {
+      baseValueSetName: valueSetName.replace(/["']/g, "").trim(),
+      suffix: -1,
+    };
+  }
+};
+
 // create a helper array of valuesets, declared in the expected line order
-const createTransformedValuesets = (parseResults: CqlResult): any[] => {
-  const lines = parseResults.valueSets
-    .map((vs) => vs.start.line)
-    .sort((a, b) => a - b);
-  // sort the valuesets alphabetically
-  const sortedValuesets = parseResults.valueSets.sort((a, b) => {
-    const nameA = a.name.replace(/["']/g, "").toLowerCase();
-    const nameB = b.name.replace(/["']/g, "").toLowerCase();
-    return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
+const createTransformedValuesets = (valueSets) => {
+  const lines = valueSets.map((vs) => vs.start.line).sort((a, b) => a - b);
+  const sortedValuesets = valueSets.sort((a, b) => {
+    const valueSetNameA = a.name.replace(/["']/g, "").toLowerCase(); // Convert to lower case for case-insensitive sorting
+    const valueSetNameB = b.name.replace(/["']/g, "").toLowerCase(); // Convert to lower case for case-insensitive sorting
+
+    // Function to extract base name and numeric part
+    const { baseValueSetName: baseValueSetNameA, suffix: suffixA } =
+      extractValueSetNameAndSuffix(valueSetNameA);
+    const { baseValueSetName: baseValueSetNameB, suffix: suffixB } =
+      extractValueSetNameAndSuffix(valueSetNameB);
+
+    // Compare base names first
+    if (baseValueSetNameA < baseValueSetNameB) return -1;
+    if (baseValueSetNameA > baseValueSetNameB) return 1;
+
+    // If base names are the same, compare numeric parts
+    return suffixA - suffixB;
   });
-  //  update the lines
+
   const sortedValuesetsWithCorrectLineNumbers = [];
   for (let i = 0; i < sortedValuesets.length; i++) {
     const vs = sortedValuesets[i];
@@ -35,27 +62,40 @@ const createTransformedValuesets = (parseResults: CqlResult): any[] => {
   return sortedValuesetsWithCorrectLineNumbers;
 };
 
-const findInsertionIndexInSortedVsList = (vsArr: any[], newName): number => {
-  let left = 0;
-  let right = vsArr.length - 1;
-  const lowerCaseNewName = newName.toLowerCase();
-  while (left <= right) {
-    const middle = Math.floor((left + right) / 2);
-    const comparison = vsArr[middle].name
+function findInsertionIndexInSortedVsList(valueSets, newValueSet) {
+  // Find the insertion index based on the valueset name and suffix part
+  const { baseValueSetName: newValueSetBaseName, suffix: newValueSetSuffix } =
+    extractValueSetNameAndSuffix(newValueSet.toLowerCase());
+
+  let insertionIndex = 0;
+  for (let i = 0; i < valueSets.length; i++) {
+    const currentValueSetName = valueSets[i].name
       .replace(/["']/g, "")
-      .toLowerCase()
-      .localeCompare(lowerCaseNewName);
-    if (comparison < 0) {
-      left = middle + 1;
-    } else if (comparison > 0) {
-      right = middle - 1;
+      .toLowerCase(); // Convert to lower case for case-insensitive comparison
+    const {
+      baseValueSetName: currentValueSetBaseName,
+      suffix: currentValueSetSuffix,
+    } = extractValueSetNameAndSuffix(currentValueSetName);
+
+    // Compare base names first
+    if (newValueSetBaseName < currentValueSetBaseName) {
+      insertionIndex = i;
+      break;
+    } else if (newValueSetBaseName === currentValueSetBaseName) {
+      // If base names are the same, compare numeric parts
+      if (newValueSetSuffix < currentValueSetSuffix) {
+        insertionIndex = i;
+        break;
+      } else {
+        insertionIndex = i + 1;
+      }
     } else {
-      return middle;
+      insertionIndex = i + 1;
     }
   }
 
-  return left;
-};
+  return insertionIndex;
+}
 
 const findInsertPointWhenNoValuesets = (parseResults: CqlResult): number => {
   const codesystems: number = parseResults?.codeSystems.length;
@@ -75,6 +115,13 @@ const findInsertPointWhenNoValuesets = (parseResults: CqlResult): number => {
   }
 };
 
+const getValueSetTitleName = (vs) => {
+  if (vs.suffix) {
+    return `${vs.title} (${vs.suffix})`;
+  }
+  return vs.title;
+};
+
 const applyValueset = (
   cql: string,
   vs: ValueSetForSearch
@@ -90,32 +137,48 @@ const applyValueset = (
     parseResults.valueSets.forEach((valueSet) => {
       const oldVsName = valueSet.name.replace(/["']/g, "");
       const oldUrl = valueSet.url.replace(/["']/g, "");
-      vsExists = vsExists || (oldVsName === vs.title && oldUrl === vs.oid);
+      vsExists =
+        vsExists ||
+        (oldVsName === getValueSetTitleName(vs) && oldUrl === vs.oid);
     });
   }
   // no matching valueset in the cql, add it.
   if (!vsExists) {
-    const { title, oid } = vs;
-    const valueSetStatement = `valueset "${title}": '${oid}'`;
+    const valueSetStatement = `valueset "${getValueSetTitleName(vs)}": '${
+      vs.oid
+    }'`;
     valuesetChangeStatus = true;
-    message = `Value Set ${title} has been successfully added to the CQL.`;
+    message = `Value Set ${getValueSetTitleName(
+      vs
+    )} has been successfully added to the CQL.`;
     // no vs, no vs array
     if (!parseResults.valueSets.length) {
       const insertionIndex = findInsertPointWhenNoValuesets(parseResults);
       cqlArr.splice(insertionIndex, 0, valueSetStatement);
       // no vs, but vs array to sort and work on
     } else {
-      const sortedValueSets = createTransformedValuesets(parseResults);
+      const sortedValueSets = createTransformedValuesets(
+        parseResults?.valueSets
+      );
       sortCQLValuesetsInPlace(sortedValueSets, cqlArr);
       const insertionIndex = findInsertionIndexInSortedVsList(
         sortedValueSets,
-        vs.title
+        getValueSetTitleName(vs)
       );
-      cqlArr.splice(
-        sortedValueSets[insertionIndex].stop.line - 1,
-        0,
-        valueSetStatement
-      );
+
+      if (insertionIndex > sortedValueSets.length - 1) {
+        cqlArr.splice(
+          sortedValueSets[insertionIndex - 1].stop.line,
+          0,
+          valueSetStatement
+        );
+      } else {
+        cqlArr.splice(
+          sortedValueSets[insertionIndex].stop.line - 1,
+          0,
+          valueSetStatement
+        );
+      }
     }
   } else {
     message = "This valueset is already defined in the CQL.";
