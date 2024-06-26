@@ -119,7 +119,7 @@ const applyCode = (cql: string, code: Code): CodeChangeResult => {
   } as unknown as CodeChangeResult;
 };
 
-const findCodeInsertPoint = (parseResults: CqlResult) => {
+export const findCodeInsertPoint = (parseResults: CqlResult) => {
   if (!parseResults || Object.keys(parseResults).length === 0) {
     // 1 because code system would be added at 0 if editor is empty and code would be on line 1
     return 1;
@@ -141,13 +141,14 @@ const findCodeInsertPoint = (parseResults: CqlResult) => {
     );
   } else if (parseResults.using) {
     return parseResults.using.stop.line + 1;
-  } else {
-    // 2 because line 0 would be library, line 1 would be empty and 2 would be code system
+  } else if (parseResults.library) {
     return 2;
+  } else {
+    return 1;
   }
 };
 
-const findCodeSystemInsertPoint = (parseResults: CqlResult) => {
+export const findCodeSystemInsertPoint = (parseResults: CqlResult) => {
   if (!parseResults || Object.keys(parseResults).length === 0) {
     // code system would be added at 0 if editor is empty
     return 0;
@@ -161,8 +162,10 @@ const findCodeSystemInsertPoint = (parseResults: CqlResult) => {
     );
   } else if (parseResults.using) {
     return parseResults.using.start.line + 1;
+  } else if (parseResults.library) {
+    return 1;
   } else {
-    return 2;
+    return 0;
   }
 };
 export default applyCode;
