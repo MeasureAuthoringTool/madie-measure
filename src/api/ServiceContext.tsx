@@ -7,6 +7,12 @@ export interface ServiceConfig {
   elmTranslationService: {
     baseUrl: string;
   };
+  qdmElmTranslationService: {
+    baseUrl: string;
+  };
+  fhirElmTranslationService: {
+    baseUrl: string;
+  };
   terminologyService: {
     baseUrl: string;
   };

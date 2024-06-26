@@ -70,13 +70,6 @@ jest.mock("@madie/madie-util", () => ({
 }));
 
 const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
-
-const elmTranslationWithNoErrors: ElmTranslation = {
-  externalErrors: [],
-  errorExceptions: [],
-  library: null,
-};
-
 const translationErrors = [
   {
     startLine: 4,
@@ -211,7 +204,12 @@ describe("MeasureEditor component", () => {
     (synchingEditorCqlContent as jest.Mock)
       .mockClear()
       .mockImplementation(() => {
-        return "library testCql version '0.0.000'";
+        return {
+          cql: "library testCql version '0.0.000'",
+          isLibraryStatementChanged: true,
+          isUsingStatementChanged: false,
+          isValueSetChanged: false,
+        };
       });
 
     mockedAxios.put.mockImplementation((args) => {
@@ -234,7 +232,7 @@ describe("MeasureEditor component", () => {
     await waitFor(() => {
       const successText = getByTestId("generic-success-text-header");
       expect(successText.textContent).toEqual(
-        "Changes saved successfully but the following issues were found"
+        "CQL updated successfully but the following issues were found"
       );
       expect(mockedAxios.put).toHaveBeenCalledTimes(1);
     });
@@ -251,7 +249,12 @@ describe("MeasureEditor component", () => {
     (synchingEditorCqlContent as jest.Mock)
       .mockClear()
       .mockImplementation(() => {
-        return "library testCql version '0.0.000'";
+        return {
+          cql: "library testCql version '0.0.000'",
+          isLibraryStatementChanged: true,
+          isUsingStatementChanged: false,
+          isValueSetChanged: false,
+        };
       });
 
     mockedAxios.put.mockImplementation((args) => {
@@ -279,7 +282,7 @@ describe("MeasureEditor component", () => {
     await waitFor(() => {
       const successText = getByTestId("generic-success-text-header");
       expect(successText.textContent).toEqual(
-        "Changes saved successfully but the following issues were found"
+        "CQL updated successfully but the following issues were found"
       );
       expect(mockedAxios.put).toHaveBeenCalledTimes(1);
     });
@@ -315,7 +318,12 @@ describe("MeasureEditor component", () => {
     (synchingEditorCqlContent as jest.Mock)
       .mockClear()
       .mockImplementation(() => {
-        return "library testCql version '0.0.000'";
+        return {
+          cql: "library testCql version '0.0.000'",
+          isLibraryStatementChanged: true,
+          isUsingStatementChanged: false,
+          isValueSetChanged: false,
+        };
       });
 
     isUsingEmpty.mockClear().mockImplementation(() => true);
@@ -340,7 +348,7 @@ describe("MeasureEditor component", () => {
     await waitFor(() => {
       const successText = getByTestId("generic-success-text-header");
       expect(successText.textContent).toEqual(
-        "Changes saved successfully but the following issues were found"
+        "CQL updated successfully but the following issues were found"
       );
       expect(mockedAxios.put).toHaveBeenCalledTimes(1);
     });
@@ -359,7 +367,12 @@ describe("MeasureEditor component", () => {
     (synchingEditorCqlContent as jest.Mock)
       .mockClear()
       .mockImplementation(() => {
-        return "librarydwwd Test2dvh3wd version '0.0.000'";
+        return {
+          cql: "librarydwwd Test2dvh3wd version '0.0.000'",
+          isLibraryStatementChanged: true,
+          isUsingStatementChanged: false,
+          isValueSetChanged: false,
+        };
       });
 
     const { getByTestId } = renderEditor(measure);
@@ -377,7 +390,7 @@ describe("MeasureEditor component", () => {
     await waitFor(() => {
       const successMessage = getByTestId("generic-success-text-header");
       expect(successMessage.textContent).toEqual(
-        "Changes saved successfully but the following issues were found"
+        "CQL updated successfully but the following issues were found"
       );
       expect(mockedAxios.put).toHaveBeenCalledTimes(1);
     });
@@ -400,7 +413,12 @@ describe("MeasureEditor component", () => {
     (synchingEditorCqlContent as jest.Mock)
       .mockClear()
       .mockImplementation(() => {
-        return "library AdvancedIllnessandFrailtyExclusion version '1.0.001'\nusing QI-Core version '4.1.1'";
+        return {
+          cql: "library AdvancedIllnessandFrailtyExclusion version '1.0.001'\nusing QI-Core version '4.1.1'",
+          isLibraryStatementChanged: true,
+          isUsingStatementChanged: false,
+          isValueSetChanged: false,
+        };
       });
 
     isUsingEmpty.mockClear().mockImplementation(() => false);
@@ -421,7 +439,7 @@ describe("MeasureEditor component", () => {
     const saveButton = screen.getByRole("button", { name: "Save" });
     userEvent.click(saveButton);
     const saveSuccess = await screen.findByText(
-      "CQL updated successfully! Library Statement or Using Statement were incorrect. MADiE has overwritten them to ensure proper CQL."
+      "CQL updated successfully but the following issues were found"
     );
     expect(saveSuccess).toBeInTheDocument();
     expect(mockedAxios.put).toHaveBeenCalledTimes(1);
@@ -443,7 +461,12 @@ describe("MeasureEditor component", () => {
     (synchingEditorCqlContent as jest.Mock)
       .mockClear()
       .mockImplementation(() => {
-        return "library AdvancedIllnessandFrailtyExclusion version '1.0.001'\nusing QI-Core version '4.1.1'";
+        return {
+          cql: "library AdvancedIllnessandFrailtyExclusion version '1.0.001'\nusing QI-Core version '4.1.1'",
+          isLibraryStatementChanged: true,
+          isUsingStatementChanged: true,
+          isValueSetChanged: false,
+        };
       });
 
     isUsingEmpty.mockClear().mockImplementation(() => false);
@@ -463,7 +486,7 @@ describe("MeasureEditor component", () => {
     const saveButton = screen.getByRole("button", { name: "Save" });
     userEvent.click(saveButton);
     const saveSuccess = await screen.findByText(
-      "CQL updated successfully! Library Statement or Using Statement were incorrect. MADiE has overwritten them to ensure proper CQL."
+      "CQL updated successfully but the following issues were found"
     );
     expect(saveSuccess).toBeInTheDocument();
     expect(mockedAxios.put).toHaveBeenCalledTimes(1);

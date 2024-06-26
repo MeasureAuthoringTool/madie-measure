@@ -11,6 +11,12 @@ import MeasureInformation from "./MeasureInformation";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../api/useMeasureServiceApi";
+import useQdmElmTranslationServiceApi, {
+  QdmElmTranslationServiceApi,
+} from "../../../../api/useQdmElmTranslationServiceApi";
+import useFhirElmTranslationServiceApi, {
+  FhirElmTranslationServiceApi,
+} from "../../../../api/useFhirElmTranslationServiceApi";
 import { Measure, Model } from "@madie/madie-models";
 import { AxiosError, AxiosResponse } from "axios";
 import { parseContent, synchingEditorCqlContent } from "@madie/madie-editor";
@@ -29,8 +35,61 @@ jest.mock("react-router-dom", () => ({
 }));
 
 jest.mock("../../../../api/useMeasureServiceApi");
+jest.mock("../../../../api/useQdmElmTranslationServiceApi");
+jest.mock("../../../../api/useFhirElmTranslationServiceApi");
+const useQdmElmTranslationServiceApiMock =
+  useQdmElmTranslationServiceApi as jest.Mock<QdmElmTranslationServiceApi>;
+const useFhirElmTranslationServiceApiMock =
+  useFhirElmTranslationServiceApi as jest.Mock<FhirElmTranslationServiceApi>;
+
+const qdmElmTranslationServiceApiMock = {
+  fetchTranslatorVersion: jest.fn().mockResolvedValue("3.1.0"),
+} as unknown as QdmElmTranslationServiceApi;
+const fhirElmTranslationServiceApiMock = {
+  fetchTranslatorVersion: jest.fn().mockResolvedValue("3.2.0"),
+} as unknown as FhirElmTranslationServiceApi;
+
+useQdmElmTranslationServiceApiMock.mockImplementation(() => {
+  return qdmElmTranslationServiceApiMock;
+});
+useFhirElmTranslationServiceApiMock.mockImplementation(() => {
+  return fhirElmTranslationServiceApiMock;
+});
 const setErrorMessage = jest.fn();
 const testUser = "john doe";
+
+const testQDMElmJson = `{
+  "library": {
+      "annotation": [
+          {
+              "translatorVersion": "99.9.9"
+          }
+      ]
+  }
+}`;
+const testFhirElmJson = `{
+  "library": {
+      "annotation": [
+          {
+              "translatorVersion": "1.5.0"
+          }
+      ]
+  }
+}`;
+const measureMetaDataDraft = {
+  experimental: false,
+  endorsements: [
+    {
+      endorsementId: "NQF",
+      endorser: "1234",
+    },
+  ],
+  draft: true,
+};
+const measureMetaDataNotDraft = {
+  ...measureMetaDataDraft,
+  draft: false,
+};
 const measure = {
   id: "test measure",
   measureName: "TestM123",
@@ -42,7 +101,7 @@ const measure = {
   createdBy: "john doe",
   measureSetId: "testMeasureId",
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
-  elmJson: "{library: TestCqlLibraryName}",
+  elmJson: `{}`,
   measureMetaData: {
     experimental: false,
     endorsements: [
@@ -132,8 +191,14 @@ describe("MeasureInformation component", () => {
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
     measureStore.state.mockImplementation(() => measure);
   });
-  const { getByTestId, queryByText, findByTestId, getByRole, getByText } =
-    screen;
+  const {
+    getByTestId,
+    queryByText,
+    findByTestId,
+    findByText,
+    getByRole,
+    getByText,
+  } = screen;
 
   it("Toast error shows when endorsing organization is not null and endorsement Id is empty", async () => {
     measureStore.state.mockImplementationOnce(() => measure);
@@ -824,6 +889,101 @@ describe("MeasureInformation component", () => {
       expect(endorserComboBox).toHaveValue("");
       expect(endorserId).toBeDisabled();
       expect(endorserId).toHaveValue("");
+    });
+  });
+
+  it("QICore: When no elmJson is present, we're able to get the current version from the translator", async () => {
+    const testMeasure = {
+      ...measure,
+      model: Model.QICORE,
+    } as unknown as Measure;
+    measureStore.state.mockImplementationOnce(() => testMeasure);
+    checkUserCanEdit.mockImplementationOnce(() => true);
+    await act(async () => {
+      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+      const translatorVersion = await findByTestId("translator-version-input");
+      expect(translatorVersion).toBeInTheDocument();
+      expect(translatorVersion).toHaveValue("3.2.0");
+    });
+  });
+  it("QDM: When no elmJson is present, we're able to get the current version from the translator", async () => {
+    const testMeasure = {
+      ...measure,
+      model: Model.QDM_5_6,
+    } as unknown as Measure;
+    measureStore.state.mockImplementationOnce(() => testMeasure);
+    checkUserCanEdit.mockImplementationOnce(() => true);
+    await act(async () => {
+      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+      const translatorVersion = await findByTestId("translator-version-input");
+      expect(translatorVersion).toBeInTheDocument();
+      expect(translatorVersion).toHaveValue("3.1.0");
+    });
+  });
+
+  it("Fhir: When elmJson is present, we're able to get the current version from the translator", async () => {
+    const testMeasure = {
+      ...measure,
+      model: Model.QICORE,
+      elmJson: testFhirElmJson,
+    } as unknown as Measure;
+    measureStore.state.mockImplementationOnce(() => testMeasure);
+    checkUserCanEdit.mockImplementationOnce(() => true);
+    await act(async () => {
+      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+      const translatorVersion = await findByTestId("translator-version-input");
+      expect(translatorVersion).toBeInTheDocument();
+      expect(translatorVersion).toHaveValue("1.5.0");
+    });
+  });
+  it("QDM: When elmJson is present, we're able to get the current version from the translator", async () => {
+    const testMeasure = {
+      ...measure,
+      model: Model.QDM_5_6,
+      elmJson: testQDMElmJson,
+    } as unknown as Measure;
+    measureStore.state.mockImplementationOnce(() => testMeasure);
+    checkUserCanEdit.mockImplementationOnce(() => true);
+    await act(async () => {
+      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+      const translatorVersion = await findByTestId("translator-version-input");
+      expect(translatorVersion).toBeInTheDocument();
+      expect(translatorVersion).toHaveValue("99.9.9");
+    });
+  });
+
+  it("Translator Version: When set to draft we have specific verbage display", async () => {
+    const testMeasure = {
+      ...measure,
+      model: Model.QDM_5_6,
+      elmJson: testQDMElmJson,
+      measureMetaData: measureMetaDataDraft,
+    } as unknown as Measure;
+    measureStore.state.mockImplementationOnce(() => testMeasure);
+    checkUserCanEdit.mockImplementationOnce(() => true);
+    await act(async () => {
+      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+      const translatorVersionText = await findByText(
+        "Currently using CQL to ELM Translator Version"
+      );
+      expect(translatorVersionText).toBeInTheDocument();
+    });
+  });
+  it("Translator Version: When set to not draft, we have specific verbage display", async () => {
+    const testMeasure = {
+      ...measure,
+      model: Model.QDM_5_6,
+      elmJson: testQDMElmJson,
+      measureMetaData: measureMetaDataNotDraft,
+    } as unknown as Measure;
+    measureStore.state.mockImplementationOnce(() => testMeasure);
+    checkUserCanEdit.mockImplementationOnce(() => true);
+    await act(async () => {
+      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+      const translatorVersionText = await findByText(
+        "Versioned with CQL to ELM Translator Version"
+      );
+      expect(translatorVersionText).toBeInTheDocument();
     });
   });
 });
