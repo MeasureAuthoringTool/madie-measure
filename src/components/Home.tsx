@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { axiosInstance as axios } from "../utils/axios-insatnce";
 import MeasureRoutes from "./measureRoutes/MeasureRoutes";
 import { ApiContextProvider, ServiceConfig } from "../api/ServiceContext";
 import { wafIntercept } from "@madie/madie-util";

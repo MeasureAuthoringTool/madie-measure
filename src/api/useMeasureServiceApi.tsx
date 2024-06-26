@@ -1,5 +1,6 @@
 import React from "react";
-import axios, { AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
+import { axiosInstance as axios } from "../utils/axios-insatnce";
 import useServiceConfig from "./useServiceConfig";
 import { ServiceConfig } from "./ServiceContext";
 import {
