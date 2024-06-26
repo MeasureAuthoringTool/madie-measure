@@ -22,6 +22,8 @@ import {
   ColumnDef,
   getCoreRowModel,
   flexRender,
+  getSortedRowModel,
+  SortingState,
 } from "@tanstack/react-table";
 
 import InvalidTestCaseDialog from "./InvalidTestCaseDialog.tsx/InvalidTestCaseDialog";
@@ -40,6 +42,9 @@ import InvalidMeasureNameDialog from "./InvalidMeasureNameDialog/InvalidMeasureN
 import getLibraryNameErrors from "./InvalidMeasureNameDialog/getLibraryNameErrors";
 import { Checkbox } from "@mui/material";
 import TruncateText from "./TruncateText";
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -89,6 +94,41 @@ export default function MeasureList(props: {
   const measureServiceApi = useRef(useMeasureServiceApi()).current; //needs to be ref or triggers jest. throws warn
   // CanDraftLookup will be an object who's keys are measureSetIds, to check weather we can draft M
   const [canDraftLookup, setCanDraftLookup] = useState<object>({});
+  const [hoveredHeader, setHoveredHeader] = useState<string>("");
+
+  const navigate = useNavigate();
+  // Popover utilities
+  const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [selectedMeasure, setSelectedMeasure] = useState<Measure>(null);
+  const [canEdit, setCanEdit] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  // if user can edit and it is a version, then draft button
+  const [
+    otherSelectOptionPropsForPopOver,
+    setOtherSelectOptionPropsForPopOver,
+  ] = useState(null);
+  const [additionalSelectOptionProps, setAdditionalSelectOptionProps] =
+    useState(null);
+  const [editViewButtonLabel, setEditViewButtonLabel] = useState<string>(null);
+
+  const targetMeasure = useRef<Measure>();
+
+  const [createVersionDialog, setCreateVersionDialog] = useState({
+    open: false,
+    measureId: "",
+  });
+  const [invalidLibraryDialogOpen, setInvalidLibraryDialogOpen] =
+    useState<boolean>(false);
+  const [invalidLibraryErrors, setInvalidLibraryErrors] = useState<string[]>(
+    []
+  );
+
+  const [versionHelperText, setVersionHelperText] = useState("");
+  const [draftMeasureDialog, setDraftMeasureDialog] = useState({
+    open: false,
+  });
 
   const buildLookup = useCallback(
     async (measureList) => {
@@ -97,10 +137,8 @@ export default function MeasureList(props: {
         const results = await measureServiceApi.fetchMeasureDraftStatuses(
           measureSetList
         );
-        console.log(results);
         if (results) {
           setCanDraftLookup(results);
-          console.log(canDraftLookup);
         }
       } catch (e) {
         console.warn("Error fetching draft statuses: ", e);
@@ -109,66 +147,37 @@ export default function MeasureList(props: {
     [measureServiceApi]
   );
   const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
-  const transFormData = (measureList) => {
-    const results = measureList.map((measure: Measure) => ({
+  const transFormData = (measureList: Measure[]): TCRow[] => {
+    return measureList.map((measure: Measure) => ({
       id: measure.id,
-      measureName: (
-        <TruncateText
-          text={measure.measureName}
-          maxLength={120}
-          name="measureName"
-          dataTestId={`measure-name-${measure.id}`}
-        />
-      ),
-      version: (
-        <>
-          <TruncateText
-            text={measure.version}
-            maxLength={60}
-            name="version"
-            dataTestId={`measure-version-${measure.id}`}
-          />
-          {`${measure.measureMetaData?.draft}` === "true" && (
-            <Chip tw="ml-6" className="chip-draft" label="Draft" />
-          )}
-        </>
-      ),
-      model: (
-        <TruncateText
-          text={measure.model}
-          maxLength={120}
-          name="model"
-          dataTestId={`measure-model-${measure.id}`}
-        />
-      ),
-      actions: (
-        <Button
-          variant="outline-secondary"
-          name="Select"
-          onClick={(e) => {
-            handlePopOverOpen(measure, e);
-          }}
-          data-testid={`measure-action-${measure.id}`}
-          aria-label={`Measure ${measure?.measureName} version ${measure?.version} draft status ${measure?.measureMetaData?.draft} Select`}
-          role="button"
-          tab-index={0}
-        >
-          Select
-        </Button>
-      ),
+      measureName: measure.measureName,
+      version: measure.version,
+      model: measure.model,
+      actions: measure,
     }));
-
-    return results;
   };
 
   type TCRow = {
     id: string;
-    select: any;
+    // select: any;
     measureName: string;
     version: string;
     model: string;
     actions: any;
   };
+
+  function customSort(a: string, b: string) {
+    if (a === undefined || a === "") {
+      return 1;
+    } else if (b === undefined || b === "") {
+      return -1;
+    }
+    const aComp = a.trim().toLocaleLowerCase();
+    const bComp = b.trim().toLocaleLowerCase();
+    if (aComp < bComp) return -1;
+    if (aComp > bComp) return 1;
+    return 0;
+  }
 
   const [data, setData] = useState<TCRow[]>([]);
   useEffect(() => {
@@ -200,7 +209,6 @@ export default function MeasureList(props: {
     const handleChange = (e) => {
       onChange(e);
       changeSelectedIds(id);
-      console.log(props.selectedIds);
     };
 
     return (
@@ -213,10 +221,11 @@ export default function MeasureList(props: {
       />
     );
   }
-
-  const columns = useMemo<ColumnDef<TCRow>[]>(
-    () => [
-      {
+  const columns = useMemo<ColumnDef<TCRow>[]>(() => {
+    const columnDefs = [];
+    // if (featureFlags.MeasureListCheckboxes) {
+    if (true) {
+      columnDefs.push({
         id: "select",
         header: ({ table }) => (
           <IndeterminateCheckbox
@@ -244,63 +253,80 @@ export default function MeasureList(props: {
             </div>
           );
         },
-      },
+      });
+    }
+
+    return [
+      ...columnDefs,
       {
         header: "Measure Name",
-        cell: (row) => row.renderValue(),
+        cell: (info) => (
+          <TruncateText
+            text={info.row.original.measureName}
+            maxLength={120}
+            name="measureName"
+            dataTestId={`measure-name-${info.row.original.id}`}
+          />
+        ),
         accessorKey: "measureName",
+        sortingFn: (rowA, rowB) =>
+          customSort(rowA.original.measureName, rowB.original.measureName),
       },
       {
         header: "Version",
-        cell: (row) => row.renderValue(),
+        cell: (info) => (
+          <>
+            <TruncateText
+              text={info.row.original.version}
+              maxLength={60}
+              name="version"
+              dataTestId={`measure-version-${info.row.original.id}`}
+            />
+            {`${info.row.original.actions.measureMetaData?.draft}` ===
+              "true" && <Chip tw="ml-6" className="chip-draft" label="Draft" />}
+          </>
+        ),
         accessorKey: "version",
+        sortingFn: (rowA, rowB) =>
+          customSort(rowA.original.version, rowB.original.version),
       },
       {
         header: "Model",
-        cell: (row) => row.renderValue(),
+        cell: (info) => (
+          <TruncateText
+            text={info.row.original.model}
+            maxLength={120}
+            name="model"
+            dataTestId={`measure-model-${info.row.original.id}`}
+          />
+        ),
         accessorKey: "model",
+        sortingFn: (rowA, rowB) =>
+          customSort(rowA.original.model, rowB.original.model),
       },
       {
         header: "Actions",
-        cell: (row) => row.renderValue(),
+        cell: (info) => (
+          <Button
+            variant="outline-secondary"
+            name="Select"
+            onClick={(e) => {
+              handlePopOverOpen(info.row.original.actions, e);
+            }}
+            data-testid={`measure-action-${info.row.original.id}`}
+            aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
+            role="button"
+            tab-index={0}
+          >
+            Select
+          </Button>
+        ),
         accessorKey: "actions",
+        enableSorting: false,
       },
-    ],
-    [props.changeSelectedIds]
-  );
+    ];
+  }, [props.changeSelectedIds]);
 
-  const navigate = useNavigate();
-  // Popover utilities
-  const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedMeasure, setSelectedMeasure] = useState<Measure>(null);
-  const [canEdit, setCanEdit] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  // if user can edit and it is a version, then draft button
-  const [
-    otherSelectOptionPropsForPopOver,
-    setOtherSelectOptionPropsForPopOver,
-  ] = useState(null);
-  const [additionalSelectOptionProps, setAdditionalSelectOptionProps] =
-    useState(null);
-  const [editViewButtonLabel, setEditViewButtonLabel] = useState<string>(null);
-
-  const targetMeasure = useRef<Measure>();
-
-  const [createVersionDialog, setCreateVersionDialog] = useState({
-    open: false,
-    measureId: "",
-  });
-  const [invalidLibraryDialogOpen, setInvalidLibraryDialogOpen] =
-    useState<boolean>(false);
-  const [invalidLibraryErrors, setInvalidLibraryErrors] = useState<string[]>(
-    []
-  );
-
-  const [versionHelperText, setVersionHelperText] = useState("");
-  const [draftMeasureDialog, setDraftMeasureDialog] = useState({
-    open: false,
-  });
   const handleDialogClose = () => {
     setInvalidLibraryDialogOpen(false);
     setInvalidTestCaseOpen(false);
@@ -419,55 +445,57 @@ export default function MeasureList(props: {
     }
     return true;
   };
-  const handlePopOverOpen = async (
-    selected: Measure,
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    setOptionsOpen(true);
-    setSelectedMeasure(selected);
-    setAnchorEl(event.currentTarget);
-    const isSelectedMeasureEditable = checkUserCanEdit(
-      selected?.measureSet?.owner,
-      selected?.measureSet?.acls
-    );
-    setCanEdit(isSelectedMeasureEditable);
-    setEditViewButtonLabel(
-      isSelectedMeasureEditable && selected?.measureMetaData.draft
-        ? "Edit"
-        : "View"
-    );
+  console.log(canDraftLookup);
+  const handlePopOverOpen = useCallback(
+    async (selected: Measure, event: React.MouseEvent<HTMLButtonElement>) => {
+      setOptionsOpen(true);
+      console.log("handlePopover", canDraftLookup);
+      setSelectedMeasure(selected);
+      setAnchorEl(event.currentTarget);
+      const isSelectedMeasureEditable = checkUserCanEdit(
+        selected?.measureSet?.owner,
+        selected?.measureSet?.acls
+      );
+      setCanEdit(isSelectedMeasureEditable);
+      setEditViewButtonLabel(
+        isSelectedMeasureEditable && selected?.measureMetaData.draft
+          ? "Edit"
+          : "View"
+      );
 
-    let options = [];
-    // additional options are outside the edit flag
-    let additionalOptions = [];
-    // always on if feature
-    const exportButton = {
-      label: "Export",
-      toImplementFunction: exportMeasure,
-      dataTestId: `export-measure-${selected?.id}`,
-    };
-    if (shouldAllowAction(selected, featureFlags.qdmExport)) {
-      additionalOptions.push(exportButton);
-    }
-    // no longer an always on if feature
-    if (selected.measureMetaData.draft) {
-      options.push({
-        label: "Version",
-        toImplementFunction: checkCreateVersion,
-        dataTestId: `create-version-measure-${selected?.id}`,
-      });
-      // draft should only be available if no other measureSet is in draft, by call
-    }
-    if (canDraftLookup[selected?.measureSetId]) {
-      options.push({
-        label: "Draft",
-        toImplementFunction: () => setDraftMeasureDialog({ open: true }),
-        dataTestId: `draft-measure-${selected?.id}`,
-      });
-    }
-    setAdditionalSelectOptionProps(additionalOptions);
-    setOtherSelectOptionPropsForPopOver(options);
-  };
+      let options = [];
+      // additional options are outside the edit flag
+      let additionalOptions = [];
+      // always on if feature
+      const exportButton = {
+        label: "Export",
+        toImplementFunction: exportMeasure,
+        dataTestId: `export-measure-${selected?.id}`,
+      };
+      if (shouldAllowAction(selected, featureFlags.qdmExport)) {
+        additionalOptions.push(exportButton);
+      }
+      // no longer an always on if feature
+      if (selected.measureMetaData.draft) {
+        options.push({
+          label: "Version",
+          toImplementFunction: checkCreateVersion,
+          dataTestId: `create-version-measure-${selected?.id}`,
+        });
+        // draft should only be available if no other measureSet is in draft, by call
+      }
+      if (canDraftLookup[selected?.measureSetId]) {
+        options.push({
+          label: "Draft",
+          toImplementFunction: () => setDraftMeasureDialog({ open: true }),
+          dataTestId: `draft-measure-${selected?.id}`,
+        });
+      }
+      setAdditionalSelectOptionProps(additionalOptions);
+      setOtherSelectOptionPropsForPopOver(options);
+    },
+    [canDraftLookup]
+  );
 
   const handleClose = () => {
     setOtherSelectOptionPropsForPopOver(null);
@@ -781,116 +809,194 @@ export default function MeasureList(props: {
   const table = useReactTable({
     data,
     columns,
+    defaultColumn: {
+      size: 200, //starting column size
+      minSize: 50, //enforced during column resizing
+      maxSize: 500, //enforced during column resizing
+    },
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
+    state: {
+      sorting,
+    },
   });
 
   return (
-    <table
-      tw="min-w-full"
-      data-testid="test-case-tbl"
-      className="ml-table"
-      style={{
-        borderTop: "solid 1px #8c8c8c",
-        borderSpacing: "0 2em !important",
-      }}
-    >
-      <thead tw="bg-slate">
-        {table.getHeaderGroups().map((headerGroup) => (
-          <tr key={headerGroup.id}>
-            {headerGroup.headers.map((header) => (
-              <TH key={header.id} scope="col">
-                {header.isPlaceholder
-                  ? null
-                  : flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
+    <div>
+      <form onSubmit={handleSubmit}>
+        <table style={{ marginLeft: 20, marginTop: 20, marginBottom: 20 }}>
+          <thead>
+            <tr>
+              <TextField
+                onChange={(newValue) => {
+                  props.setSearchCriteria(newValue.target.value);
+                }}
+                id="searchMeasure"
+                name="searchMeasure"
+                placeholder="Search Measure"
+                type="search"
+                fullWidth
+                data-testid="measure-search-input"
+                label="Filter Measures"
+                variant="outlined"
+                defaultValue={props.searchCriteria}
+                value={props.searchCriteria}
+                inputProps={{
+                  "data-testid": "searchMeasure-input",
+                  "aria-required": "false",
+                }}
+                InputProps={searchInputProps}
+                sx={searchInputStyle}
+              />
+            </tr>
+          </thead>
+        </table>
+      </form>
+      <table
+        tw="min-w-full"
+        data-testid="measure-list-tbl"
+        className="ml-table"
+        style={{
+          borderTop: "solid 1px #8c8c8c",
+          borderSpacing: "0 2em !important",
+        }}
+      >
+        <thead tw="bg-slate">
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => {
+                const isHovered = hoveredHeader?.includes(header.id);
+                return (
+                  <TH
+                    key={header.id}
+                    scope="col"
+                    onClick={header.column.getToggleSortingHandler()}
+                    onMouseEnter={() => setHoveredHeader(header.id)}
+                    onMouseLeave={() => setHoveredHeader(null)}
+                    className="header-cell"
+                  >
+                    {header.isPlaceholder ? null : (
+                      <button
+                        className={
+                          header.column.getCanSort()
+                            ? "cursor-pointer select-none header-button"
+                            : "header-button"
+                        }
+                        title={
+                          header.column.getCanSort()
+                            ? header.column.getNextSortingOrder() === "asc"
+                              ? "Sort ascending"
+                              : header.column.getNextSortingOrder() === "desc"
+                              ? "Sort descending"
+                              : "Clear sort"
+                            : undefined
+                        }
+                      >
+                        <span className="arrowDisplay">
+                          {header.column.getCanSort() &&
+                            isHovered &&
+                            !header.column.getIsSorted() && <UnfoldMoreIcon />}
+
+                          {{
+                            asc: <KeyboardArrowUpIcon />,
+                            desc: <KeyboardArrowDownIcon />,
+                          }[header.column.getIsSorted() as string] ?? null}
+                        </span>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                      </button>
                     )}
-              </TH>
-            ))}
-          </tr>
-        ))}
-      </thead>
-      <tbody className="table-body" style={{ padding: 20 }}>
-        {table.getRowModel().rows.map((row) => (
-          <tr
-            key={row.id}
-            className="tcl-tr"
-            data-testid={`measure-row-${row.id}`}
-            style={{
-              borderTop: "solid 1px #8c8c8c",
-              borderSpacing: "0 2em !important",
-            }}
-          >
-            {row.getVisibleCells().map((cell) => (
-              <td key={cell.id} data-testid={`measure-name-${cell.id}`}>
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-      <Popover
-        optionsOpen={optionsOpen}
-        anchorEl={anchorEl}
-        handleClose={handleClose}
-        canEdit={canEdit}
-        editViewSelectOptionProps={{
-          label: editViewButtonLabel,
-          toImplementFunction: viewEditRedirect,
-          dataTestId: `view-measure-${selectedMeasure?.id}`,
-        }}
-        otherSelectOptionProps={otherSelectOptionPropsForPopOver}
-        additionalSelectOptionProps={additionalSelectOptionProps}
-      />
-      <Toast
-        toastKey="measure-action-toast"
-        aria-live="polite"
-        toastType={toastType}
-        testId={toastType === "danger" ? "error-toast" : "success-toast"}
-        closeButtonProps={{
-          "data-testid": "close-toast-button",
-        }}
-        open={toastOpen}
-        message={toastMessage}
-        onClose={onToastClose}
-        autoHideDuration={6000}
-      />
-      <CreatVersionDialog
-        currentVersion={targetMeasure?.current?.version}
-        open={createVersionDialog.open}
-        onClose={handleDialogClose}
-        onSubmit={checkValidCqlLibraryName}
-        versionHelperText={versionHelperText}
-        loading={loading}
-        measureId={targetMeasure?.current?.id}
-      />
-      <InvalidMeasureNameDialog
-        invalidLibraryDialogOpen={invalidLibraryDialogOpen}
-        onInvalidLibraryNameDialogClose={handleDialogClose}
-        measureName={targetMeasure?.current?.measureName}
-        invalidLibraryErrors={invalidLibraryErrors}
-      />
-      <InvalidTestCaseDialog
-        open={invalidTestCaseOpen}
-        onContinue={createVersion}
-        onClose={handleDialogClose}
-        versionType={versionType}
-        loading={loading}
-      />
-      <DraftMeasureDialog
-        open={draftMeasureDialog.open}
-        onClose={handleDialogClose}
-        onSubmit={draftMeasure}
-        measure={targetMeasure.current}
-      />
-      <ExportDialog
-        failureMessage={failureMessage}
-        measureName={targetMeasure?.current?.measureName}
-        downloadState={downloadState}
-        open={Boolean(downloadState)}
-        handleContinueDialog={handleContinueDialog}
-        handleCancelDialog={handleCancelDialog}
-      />
-    </table>
+                  </TH>
+                );
+              })}
+            </tr>
+          ))}
+        </thead>
+        <tbody className="table-body" style={{ padding: 20 }}>
+          {table.getRowModel().rows.map((row) => (
+            <tr
+              key={row.id}
+              className="ml-tr"
+              data-testid={`row-item`}
+              style={{
+                borderTop: "solid 1px #8c8c8c",
+                borderSpacing: "0 2em !important",
+              }}
+            >
+              {row.getVisibleCells().map((cell) => (
+                <td key={cell.id} data-testid={`measure-name-${cell.id}`}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+        <Popover
+          optionsOpen={optionsOpen}
+          anchorEl={anchorEl}
+          handleClose={handleClose}
+          canEdit={canEdit}
+          editViewSelectOptionProps={{
+            label: editViewButtonLabel,
+            toImplementFunction: viewEditRedirect,
+            dataTestId: `view-measure-${selectedMeasure?.id}`,
+          }}
+          otherSelectOptionProps={otherSelectOptionPropsForPopOver}
+          additionalSelectOptionProps={additionalSelectOptionProps}
+        />
+        <Toast
+          toastKey="measure-action-toast"
+          aria-live="polite"
+          toastType={toastType}
+          testId={toastType === "danger" ? "error-toast" : "success-toast"}
+          closeButtonProps={{
+            "data-testid": "close-toast-button",
+          }}
+          open={toastOpen}
+          message={toastMessage}
+          onClose={onToastClose}
+          autoHideDuration={6000}
+        />
+        <CreatVersionDialog
+          currentVersion={targetMeasure?.current?.version}
+          open={createVersionDialog.open}
+          onClose={handleDialogClose}
+          onSubmit={checkValidCqlLibraryName}
+          versionHelperText={versionHelperText}
+          loading={loading}
+          measureId={targetMeasure?.current?.id}
+        />
+        <InvalidMeasureNameDialog
+          invalidLibraryDialogOpen={invalidLibraryDialogOpen}
+          onInvalidLibraryNameDialogClose={handleDialogClose}
+          measureName={targetMeasure?.current?.measureName}
+          invalidLibraryErrors={invalidLibraryErrors}
+        />
+        <InvalidTestCaseDialog
+          open={invalidTestCaseOpen}
+          onContinue={createVersion}
+          onClose={handleDialogClose}
+          versionType={versionType}
+          loading={loading}
+        />
+        <DraftMeasureDialog
+          open={draftMeasureDialog.open}
+          onClose={handleDialogClose}
+          onSubmit={draftMeasure}
+          measure={targetMeasure.current}
+        />
+        <ExportDialog
+          failureMessage={failureMessage}
+          measureName={targetMeasure?.current?.measureName}
+          downloadState={downloadState}
+          open={Boolean(downloadState)}
+          handleContinueDialog={handleContinueDialog}
+          handleCancelDialog={handleCancelDialog}
+        />
+      </table>
+    </div>
   );
 }
