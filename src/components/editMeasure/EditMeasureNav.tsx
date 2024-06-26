@@ -60,7 +60,7 @@ const EditMeasureNav = ({ isQDM }) => {
         setTestCaseLength(testCases?.length);
       }
     }
-  }, [id, measure?.testCases]);
+  }, [id, measure?.testCases, measure?.testCases?.length]);
   return (
     <div>
       <div style={{ marginLeft: "32px" }} id="edit-measure-nav-a">
