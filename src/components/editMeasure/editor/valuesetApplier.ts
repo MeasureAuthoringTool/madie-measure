@@ -19,7 +19,7 @@ const extractValueSetNameAndSuffix = (valueSetName) => {
   if (match) {
     return {
       baseValueSetName: match[1].trim(),
-      number: match[2] ? parseInt(match[2], 10) : -1, // Treat no number as -1
+      suffix: match[2] ? parseInt(match[2], 10) : -1, // Treat no number as -1
     };
   } else {
     // No number found, treat as -1
