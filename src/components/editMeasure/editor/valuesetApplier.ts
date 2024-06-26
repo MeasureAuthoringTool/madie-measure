@@ -19,7 +19,7 @@ const extractValueSetNameAndSuffix = (valueSetName) => {
   if (match) {
     return {
       baseValueSetName: match[1].trim(),
-      number: match[2] ? parseInt(match[2], 10) : -1, // Treat no number as -1
+      suffix: match[2] ? parseInt(match[2], 10) : -1, // Treat no number as -1
     };
   } else {
     // No number found, treat as -1
@@ -116,18 +116,50 @@ const findInsertPointWhenNoValuesets = (parseResults: CqlResult): number => {
 };
 
 const getValueSetTitleName = (vs) => {
-  if (vs.suffix) {
+  if (vs?.suffix) {
     return `${vs.title} (${vs.suffix})`;
   }
   return vs.title;
 };
 
+//this function is to check if the values set is being added or updated
+const checkIfValueSetBeingEdited = (vs, previousVs) => {
+  if (
+    previousVs &&
+    previousVs.title === vs.title &&
+    previousVs.steward === vs.steward &&
+    previousVs.oid === vs.oid
+  ) {
+    return true;
+  }
+  return false;
+};
+
+// this to remove the previous line that was added when updating the valueset
+const updateCql = (cql, previousVs) => {
+  const valueSetStatement = `valueset "${getValueSetTitleName(previousVs)}": '${
+    previousVs.oid
+  }'`;
+  const normalize = (str) => str.replace(/\s+/g, " ").trim();
+  const normalizedText = normalize(valueSetStatement);
+  const updatedCqlArray = cql.split("\n").filter((statement) => {
+    const normalizedItem = normalize(statement);
+    return normalizedItem.localeCompare(normalizedText) !== 0;
+  });
+
+  return updatedCqlArray.join("\n");
+};
+
 const applyValueset = (
   cql: string,
-  vs: ValueSetForSearch
+  vs: ValueSetForSearch,
+  previousVs?: ValueSetForSearch
 ): CodeChangeResult => {
-  const cqlArr: string[] = cql.split("\n");
-  const parseResults: CqlResult = new CqlAntlr(cql).parse();
+  const updatedCql = checkIfValueSetBeingEdited(vs, previousVs)
+    ? updateCql(cql, previousVs)
+    : cql;
+  const cqlArr: string[] = updatedCql.split("\n");
+  const parseResults: CqlResult = new CqlAntlr(updatedCql).parse();
   let valuesetChangeStatus: boolean = false;
   let message: string = "The requested operation was unsuccessful";
   let vsExists: boolean = false;
