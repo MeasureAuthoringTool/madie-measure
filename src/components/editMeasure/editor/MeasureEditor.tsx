@@ -200,6 +200,9 @@ const MeasureEditor = () => {
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
 
+  const [refValueSetDetails, setRefValueSetDetails] = useState();
+  const prevSelectedValueSetDetails = useRef();
+
   // on load fetch elm translations results to display errors on editor not just on load..
   useEffect(() => {
     updateElmAnnotations(measure?.cql).catch((err) => {
@@ -368,6 +371,7 @@ const MeasureEditor = () => {
             const updatedMeasure = response.data;
             updateMeasure(updatedMeasure);
             setCodeMap(new Map<string, Code>());
+            prevSelectedValueSetDetails.current = null;
             setEditorVal(newMeasure?.cql);
             setIsCQLUnchanged(true);
             let primaryMessage = "CQL updated successfully";
@@ -524,8 +528,13 @@ const MeasureEditor = () => {
   };
   // structure of statement: valueset "<name>": "urn:oid:<oid>"
   // valueset "Ethnicity": 'urn:oid:2.16.840.1.114222.4.11.837'
-  const handleApplyValueSet = (vs, cql) => {
-    const result: CodeChangeResult = applyValueset(cql, vs); // should have udpated editorVal but doesnt
+  const handleUpdateVs = (vs) => {
+    setRefValueSetDetails(vs);
+    const result: CodeChangeResult = applyValueset(
+      editorVal,
+      vs,
+      prevSelectedValueSetDetails?.current
+    ); // should have udpated editorVal but doesnt
     if (result.status) {
       setToastType("success");
       handleMadieEditorValue(result.cql);
@@ -536,16 +545,11 @@ const MeasureEditor = () => {
     setToastMessage(result.message);
     setToastOpen(true);
   };
-  // need this callback check to make sure that it's getting the updated cql reference. otherwise it's stale.
-  const handleUpdateVs = useCallback(
-    (vs) => {
-      setEditorVal((currentValue) => {
-        handleApplyValueSet(vs, currentValue);
-        return currentValue;
-      });
-    },
-    [handleApplyValueSet]
-  );
+
+  useEffect(() => {
+    prevSelectedValueSetDetails.current = refValueSetDetails;
+  }, [refValueSetDetails]);
+
   const handleMadieEditorValue = (val: string) => {
     setSuccess({
       status: undefined,
