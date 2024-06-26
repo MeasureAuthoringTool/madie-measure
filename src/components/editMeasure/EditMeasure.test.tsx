@@ -278,7 +278,7 @@ describe("EditMeasure Component", () => {
   });
   it("should render test-cases", async () => {
     renderRouter([{ pathname: "/measures/fakeid/edit/test-cases/" }]);
-    const tcLink = await findByText("Test Cases (0)");
+    const tcLink = await findByText("Test Cases");
     expect(tcLink).toHaveAttribute("aria-selected", "true");
   });
 
