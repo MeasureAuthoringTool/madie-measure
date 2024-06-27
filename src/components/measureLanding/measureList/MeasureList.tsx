@@ -129,6 +129,7 @@ export default function MeasureList(props: {
   const [draftMeasureDialog, setDraftMeasureDialog] = useState({
     open: false,
   });
+  const featureFlags = useFeatureFlags();
 
   const buildLookup = useCallback(
     async (measureList) => {
@@ -223,8 +224,7 @@ export default function MeasureList(props: {
   }
   const columns = useMemo<ColumnDef<TCRow>[]>(() => {
     const columnDefs = [];
-    // if (featureFlags.MeasureListCheckboxes) {
-    if (true) {
+    if (featureFlags?.MeasureListCheckboxes) {
       columnDefs.push({
         id: "select",
         header: ({ table }) => (
@@ -311,7 +311,8 @@ export default function MeasureList(props: {
             variant="outline-secondary"
             name="Select"
             onClick={(e) => {
-              handlePopOverOpen(info.row.original.actions, e);
+              console.log("button", canDraftLookup);
+              handlePopOverOpen(info.row.original.actions, e, canDraftLookup);
             }}
             data-testid={`measure-action-${info.row.original.id}`}
             aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
@@ -435,7 +436,6 @@ export default function MeasureList(props: {
       targetMeasure.current = selectedMeasure;
     }
   }, [selectedMeasure]);
-  const featureFlags = useFeatureFlags();
   // put export and version behind a flag for qdm
   const shouldAllowAction = (measure: Measure, flag: boolean) => {
     // pass in current model and barring flag
@@ -447,7 +447,11 @@ export default function MeasureList(props: {
   };
   console.log(canDraftLookup);
   const handlePopOverOpen = useCallback(
-    async (selected: Measure, event: React.MouseEvent<HTMLButtonElement>) => {
+    async (
+      selected: Measure,
+      event: React.MouseEvent<HTMLButtonElement>,
+      canDraftLookup: object
+    ) => {
       setOptionsOpen(true);
       console.log("handlePopover", canDraftLookup);
       setSelectedMeasure(selected);
