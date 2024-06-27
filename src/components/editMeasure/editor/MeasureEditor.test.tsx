@@ -228,9 +228,7 @@ describe("MeasureEditor component", () => {
     fireEvent.click(getByTestId("save-cql-btn"));
     await waitFor(() => {
       const successText = getByTestId("generic-success-text-header");
-      expect(successText.textContent).toEqual(
-        "CQL updated successfully"
-      );
+      expect(successText.textContent).toEqual("CQL updated successfully");
     });
   });
 
