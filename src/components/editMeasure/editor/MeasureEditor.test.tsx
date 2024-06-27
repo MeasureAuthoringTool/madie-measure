@@ -193,6 +193,47 @@ describe("MeasureEditor component", () => {
     expect(editorContainer.value).toEqual("");
   });
 
+  it("save measure with empty cql successfully", async () => {
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        translation: { library: {} },
+      });
+    });
+
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => {
+        return {
+          cql: "",
+        };
+      });
+
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measure });
+      }
+    });
+
+    const { getByTestId } = renderEditor(measure);
+    const editorContainer = (await getByTestId(
+      "measure-editor"
+    )) as HTMLInputElement;
+    expect(measure.cql).toEqual(editorContainer.value);
+    fireEvent.change(getByTestId("measure-editor"), {
+      target: {
+        value: "",
+      },
+    });
+    fireEvent.click(getByTestId("save-cql-btn"));
+    await waitFor(() => {
+      const successText = getByTestId("generic-success-text-header");
+      expect(successText.textContent).toEqual(
+        "CQL updated successfully"
+      );
+    });
+  });
+
   it("save measure with updated cql in editor on save button click", async () => {
     (validateContent as jest.Mock).mockClear().mockImplementation(() => {
       return Promise.resolve({

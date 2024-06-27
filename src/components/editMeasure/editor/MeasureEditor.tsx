@@ -254,6 +254,9 @@ const MeasureEditor = () => {
     newMeasure,
     cqlMetaData: Map<string, CodeSystem>
   ) => {
+    if (!newMeasure.cql) {
+      return undefined;
+    }
     const definitions = new CqlAntlr(newMeasure.cql).parse();
     if (definitions?.codes && cqlMetaData) {
       const parsedCodes = definitions?.codes.map((code) => ({
@@ -261,7 +264,7 @@ const MeasureEditor = () => {
         codeSystem: code?.codeSystem.replace(/['"]/g, ""),
       }));
 
-      const updatedCodeSystemMap: Map<string, CodeSystem> = Object.fromEntries(
+      return Object.fromEntries(
         Object.entries(cqlMetaData)?.filter(([key, value]) =>
           parsedCodes.some(
             (parsedCode) =>
@@ -270,7 +273,6 @@ const MeasureEditor = () => {
           )
         )
       ) as {} as Map<string, CodeSystem>;
-      return { codeSystemMap: updatedCodeSystemMap };
     }
   };
 
@@ -360,10 +362,11 @@ const MeasureEditor = () => {
         });
 
         //removing code entry from cqlMetaData when a code is removed from cql editor manually(not through UI)
-        newMeasure.measureMetaData.cqlMetaData = updateCodeSystemMap(
-          newMeasure,
-          measure?.measureMetaData?.cqlMetaData?.codeSystemMap
-        );
+        newMeasure.measureMetaData.cqlMetaData.codeSystemMap =
+          updateCodeSystemMap(
+            newMeasure,
+            measure?.measureMetaData?.cqlMetaData?.codeSystemMap
+          );
 
         measureServiceApi
           .updateMeasure(newMeasure)
@@ -376,28 +379,30 @@ const MeasureEditor = () => {
             setIsCQLUnchanged(true);
             let primaryMessage = "CQL updated successfully";
             const secondaryMessages = [];
-            if (isUsingEmpty(editorVal)) {
-              secondaryMessages.push(
-                "Missing a using statement. Please add in a valid model and version."
-              );
-            }
-            if (updatedCqlObj.isLibraryStatementChanged) {
-              secondaryMessages.push(
-                "Library statement was incorrect. MADiE has overwritten it."
-              );
-            }
-            if (updatedCqlObj.isUsingStatementChanged) {
-              secondaryMessages.push(
-                "Using statement was incorrect. MADiE has overwritten it."
-              );
-            }
-            if (updatedCqlObj.isValueSetChanged) {
-              secondaryMessages.push(
-                "MADiE does not currently support use of value set version directly in measures at this time. Your value set versions have been removed. Please use the relevant manifest for value set expansion for testing."
-              );
-            }
-            if (secondaryMessages.length > 0) {
-              primaryMessage += " but the following issues were found";
+            if (newMeasure?.cql) {
+              if (isUsingEmpty(editorVal)) {
+                secondaryMessages.push(
+                  "Missing a using statement. Please add in a valid model and version."
+                );
+              }
+              if (updatedCqlObj.isLibraryStatementChanged) {
+                secondaryMessages.push(
+                  "Library statement was incorrect. MADiE has overwritten it."
+                );
+              }
+              if (updatedCqlObj.isUsingStatementChanged) {
+                secondaryMessages.push(
+                  "Using statement was incorrect. MADiE has overwritten it."
+                );
+              }
+              if (updatedCqlObj.isValueSetChanged) {
+                secondaryMessages.push(
+                  "MADiE does not currently support use of value set version directly in measures at this time. Your value set versions have been removed. Please use the relevant manifest for value set expansion for testing."
+                );
+              }
+              if (secondaryMessages.length > 0) {
+                primaryMessage += " but the following issues were found";
+              }
             }
             setSuccess({
               status: "success",
