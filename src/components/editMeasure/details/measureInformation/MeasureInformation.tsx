@@ -73,20 +73,26 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     }
   };
   useEffect(() => {
+    // if we have a measure loaded
     if (measure?.model) {
       const model = measure.model;
       const draft = measure?.measureMetaData?.draft;
-      const elmJson = JSON.parse(measure.elmJson);
-      const annotations = elmJson?.library?.annotation;
-      if (annotations?.length) {
-        const found = annotations.find((e) =>
-          e.hasOwnProperty("translatorVersion")
-        );
-        if (found) {
-          setTranslatorVersion(found.translatorVersion);
-        }
-      } else {
+      // if it's in draft we request
+      if (draft) {
         getTranslatorVersion(model, draft);
+      } else {
+        const elmJson = JSON.parse(measure.elmJson);
+        const annotations = elmJson?.library?.annotation;
+        if (annotations?.length) {
+          const found = annotations.find((e) =>
+            e.hasOwnProperty("translatorVersion")
+          );
+          if (found) {
+            setTranslatorVersion(found.translatorVersion);
+          }
+        } else {
+          getTranslatorVersion(model, draft);
+        }
       }
     }
   }, [measure?.model]);
