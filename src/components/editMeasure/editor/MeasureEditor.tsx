@@ -1,7 +1,6 @@
 import React, {
   Dispatch,
   SetStateAction,
-  useCallback,
   useEffect,
   useRef,
   useState,
@@ -19,7 +18,6 @@ import {
   synchingEditorCqlContent,
   isUsingEmpty,
   MadieTerminologyEditor,
-  ValueSetForSearch,
 } from "@madie/madie-editor";
 import {
   Button,
@@ -379,7 +377,7 @@ const MeasureEditor = () => {
             setIsCQLUnchanged(true);
             let primaryMessage = "CQL updated successfully";
             const secondaryMessages = [];
-            if (newMeasure?.cql) {
+            if (newMeasure.cql?.trim()) {
               if (isUsingEmpty(editorVal)) {
                 secondaryMessages.push(
                   "Missing a using statement. Please add in a valid model and version."
