@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Backdrop, FormHelperText, MenuItem } from "@mui/material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -11,9 +11,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import "./CreateVersionDialog.scss";
 import * as _ from "lodash";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../../api/useMeasureServiceApi";
+import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 
 interface VersionInfo {
   type: string;
