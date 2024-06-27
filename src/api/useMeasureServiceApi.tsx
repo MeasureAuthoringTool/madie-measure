@@ -1,6 +1,6 @@
 import React from "react";
 import { AxiosResponse } from "axios";
-import { axiosInstance as axios } from "../utils/axios-insatnce";
+import axios from "../api/axios-insatnce";
 import useServiceConfig from "./useServiceConfig";
 import { ServiceConfig } from "./ServiceContext";
 import {
@@ -9,12 +9,8 @@ import {
   Organization,
   EndorsementOrganization,
 } from "@madie/madie-models";
-import { useOktaTokens, wafIntercept } from "@madie/madie-util";
+import { useOktaTokens } from "@madie/madie-util";
 import _ from "lodash";
-
-axios.interceptors.response.use((response) => {
-  return response;
-}, wafIntercept);
 
 export class MeasureServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
@@ -472,10 +468,6 @@ export class MeasureServiceApi {
     );
   }
 }
-
-axios.interceptors.response.use((response) => {
-  return response;
-}, wafIntercept);
 
 export default function useMeasureServiceApi(): MeasureServiceApi {
   const serviceConfig: ServiceConfig = useServiceConfig();
