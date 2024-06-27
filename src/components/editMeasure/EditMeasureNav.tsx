@@ -56,7 +56,7 @@ const EditMeasureNav = ({ isQDM }) => {
       if (testCases === null) {
         setTestCaseLength(0);
         // when test cases are null, then we set to 0 since they are absent. Otherwise we display 0 before anything shows up
-      } else if (testCases?.length) {
+      } else if (testCases?.length >= 0) {
         setTestCaseLength(testCases?.length);
       }
     }
