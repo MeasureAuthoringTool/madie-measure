@@ -40,7 +40,6 @@ import _ from "lodash";
 import ExportDialog from "./exportDialog/ExportDialog";
 import InvalidMeasureNameDialog from "./InvalidMeasureNameDialog/InvalidMeasureNameDialog";
 import getLibraryNameErrors from "./InvalidMeasureNameDialog/getLibraryNameErrors";
-import { Checkbox } from "@mui/material";
 import TruncateText from "./TruncateText";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
@@ -94,6 +93,8 @@ export default function MeasureList(props: {
   const measureServiceApi = useRef(useMeasureServiceApi()).current; //needs to be ref or triggers jest. throws warn
   // CanDraftLookup will be an object who's keys are measureSetIds, to check weather we can draft M
   const [canDraftLookup, setCanDraftLookup] = useState<object>({});
+  const canDraftRef = useRef<object>();
+  canDraftRef.current = canDraftLookup;
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
 
   const navigate = useNavigate();
@@ -311,8 +312,7 @@ export default function MeasureList(props: {
             variant="outline-secondary"
             name="Select"
             onClick={(e) => {
-              console.log("button", canDraftLookup);
-              handlePopOverOpen(info.row.original.actions, e, canDraftLookup);
+              handlePopOverOpen(info.row.original.actions, e);
             }}
             data-testid={`measure-action-${info.row.original.id}`}
             aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
@@ -445,15 +445,9 @@ export default function MeasureList(props: {
     }
     return true;
   };
-  console.log(canDraftLookup);
   const handlePopOverOpen = useCallback(
-    async (
-      selected: Measure,
-      event: React.MouseEvent<HTMLButtonElement>,
-      canDraftLookup: object
-    ) => {
+    async (selected: Measure, event: React.MouseEvent<HTMLButtonElement>) => {
       setOptionsOpen(true);
-      console.log("handlePopover", canDraftLookup);
       setSelectedMeasure(selected);
       setAnchorEl(event.currentTarget);
       const isSelectedMeasureEditable = checkUserCanEdit(
@@ -488,7 +482,7 @@ export default function MeasureList(props: {
         });
         // draft should only be available if no other measureSet is in draft, by call
       }
-      if (canDraftLookup[selected?.measureSetId]) {
+      if (canDraftRef.current[selected?.measureSetId]) {
         options.push({
           label: "Draft",
           toImplementFunction: () => setDraftMeasureDialog({ open: true }),
