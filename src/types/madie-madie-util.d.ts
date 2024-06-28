@@ -14,6 +14,7 @@ declare module "@madie/madie-util" {
     enableQdmRepeatTransfer: boolean;
     generateCMSID: boolean;
     qdmCodeSearch: boolean;
+    MeasureListCheckboxes: boolean;
   }
 
   export interface ServiceConfig {
