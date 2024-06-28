@@ -1,7 +1,6 @@
 import React, {
   Dispatch,
   SetStateAction,
-  useCallback,
   useEffect,
   useRef,
   useState,
@@ -19,7 +18,6 @@ import {
   synchingEditorCqlContent,
   isUsingEmpty,
   MadieTerminologyEditor,
-  ValueSetForSearch,
 } from "@madie/madie-editor";
 import {
   Button,
@@ -200,6 +198,9 @@ const MeasureEditor = () => {
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
 
+  const [refValueSetDetails, setRefValueSetDetails] = useState();
+  const prevSelectedValueSetDetails = useRef();
+
   // on load fetch elm translations results to display errors on editor not just on load..
   useEffect(() => {
     updateElmAnnotations(measure?.cql).catch((err) => {
@@ -251,6 +252,9 @@ const MeasureEditor = () => {
     newMeasure,
     cqlMetaData: Map<string, CodeSystem>
   ) => {
+    if (!newMeasure.cql) {
+      return undefined;
+    }
     const definitions = new CqlAntlr(newMeasure.cql).parse();
     if (definitions?.codes && cqlMetaData) {
       const parsedCodes = definitions?.codes.map((code) => ({
@@ -258,7 +262,7 @@ const MeasureEditor = () => {
         codeSystem: code?.codeSystem.replace(/['"]/g, ""),
       }));
 
-      const updatedCodeSystemMap: Map<string, CodeSystem> = Object.fromEntries(
+      return Object.fromEntries(
         Object.entries(cqlMetaData)?.filter(([key, value]) =>
           parsedCodes.some(
             (parsedCode) =>
@@ -267,7 +271,6 @@ const MeasureEditor = () => {
           )
         )
       ) as {} as Map<string, CodeSystem>;
-      return { codeSystemMap: updatedCodeSystemMap };
     }
   };
 
@@ -357,10 +360,11 @@ const MeasureEditor = () => {
         });
 
         //removing code entry from cqlMetaData when a code is removed from cql editor manually(not through UI)
-        newMeasure.measureMetaData.cqlMetaData = updateCodeSystemMap(
-          newMeasure,
-          measure?.measureMetaData?.cqlMetaData?.codeSystemMap
-        );
+        newMeasure.measureMetaData.cqlMetaData.codeSystemMap =
+          updateCodeSystemMap(
+            newMeasure,
+            measure?.measureMetaData?.cqlMetaData?.codeSystemMap
+          );
 
         measureServiceApi
           .updateMeasure(newMeasure)
@@ -368,32 +372,35 @@ const MeasureEditor = () => {
             const updatedMeasure = response.data;
             updateMeasure(updatedMeasure);
             setCodeMap(new Map<string, Code>());
+            prevSelectedValueSetDetails.current = null;
             setEditorVal(newMeasure?.cql);
             setIsCQLUnchanged(true);
             let primaryMessage = "CQL updated successfully";
             const secondaryMessages = [];
-            if (isUsingEmpty(editorVal)) {
-              secondaryMessages.push(
-                "Missing a using statement. Please add in a valid model and version."
-              );
-            }
-            if (updatedCqlObj.isLibraryStatementChanged) {
-              secondaryMessages.push(
-                "Library statement was incorrect. MADiE has overwritten it."
-              );
-            }
-            if (updatedCqlObj.isUsingStatementChanged) {
-              secondaryMessages.push(
-                "Using statement was incorrect. MADiE has overwritten it."
-              );
-            }
-            if (updatedCqlObj.isValueSetChanged) {
-              secondaryMessages.push(
-                "MADiE does not currently support use of value set version directly in measures at this time. Your value set versions have been removed. Please use the relevant manifest for value set expansion for testing."
-              );
-            }
-            if (secondaryMessages.length > 0) {
-              primaryMessage += " but the following issues were found";
+            if (newMeasure.cql?.trim()) {
+              if (isUsingEmpty(editorVal)) {
+                secondaryMessages.push(
+                  "Missing a using statement. Please add in a valid model and version."
+                );
+              }
+              if (updatedCqlObj.isLibraryStatementChanged) {
+                secondaryMessages.push(
+                  "Library statement was incorrect. MADiE has overwritten it."
+                );
+              }
+              if (updatedCqlObj.isUsingStatementChanged) {
+                secondaryMessages.push(
+                  "Using statement was incorrect. MADiE has overwritten it."
+                );
+              }
+              if (updatedCqlObj.isValueSetChanged) {
+                secondaryMessages.push(
+                  "MADiE does not currently support use of value set version directly in measures at this time. Your value set versions have been removed. Please use the relevant manifest for value set expansion for testing."
+                );
+              }
+              if (secondaryMessages.length > 0) {
+                primaryMessage += " but the following issues were found";
+              }
             }
             setSuccess({
               status: "success",
@@ -447,7 +454,7 @@ const MeasureEditor = () => {
     //if result status is false, we didn't modify.. so CQL didn't change,
     //  but confirmation messages can still be displayed
     setToastMessage(result.message);
-    setToastType("success");
+    setToastType(result.status);
     setToastOpen(true);
   };
 
@@ -524,8 +531,13 @@ const MeasureEditor = () => {
   };
   // structure of statement: valueset "<name>": "urn:oid:<oid>"
   // valueset "Ethnicity": 'urn:oid:2.16.840.1.114222.4.11.837'
-  const handleApplyValueSet = (vs, cql) => {
-    const result: CodeChangeResult = applyValueset(cql, vs); // should have udpated editorVal but doesnt
+  const handleUpdateVs = (vs) => {
+    setRefValueSetDetails(vs);
+    const result: CodeChangeResult = applyValueset(
+      editorVal,
+      vs,
+      prevSelectedValueSetDetails?.current
+    ); // should have udpated editorVal but doesnt
     if (result.status) {
       setToastType("success");
       handleMadieEditorValue(result.cql);
@@ -536,16 +548,11 @@ const MeasureEditor = () => {
     setToastMessage(result.message);
     setToastOpen(true);
   };
-  // need this callback check to make sure that it's getting the updated cql reference. otherwise it's stale.
-  const handleUpdateVs = useCallback(
-    (vs) => {
-      setEditorVal((currentValue) => {
-        handleApplyValueSet(vs, currentValue);
-        return currentValue;
-      });
-    },
-    [handleApplyValueSet]
-  );
+
+  useEffect(() => {
+    prevSelectedValueSetDetails.current = refValueSetDetails;
+  }, [refValueSetDetails]);
+
   const handleMadieEditorValue = (val: string) => {
     setSuccess({
       status: undefined,
