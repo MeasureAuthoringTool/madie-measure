@@ -29,6 +29,17 @@ export default function MeasureLanding() {
   let navigate = useNavigate();
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [measureList, setMeasureList] = useState<Measure[]>([]);
+  const [selectedIds, setSelectedIds] = useState<object>({});
+  // {id: true}
+  const changeSelectedIds = (id) => {
+    const selectedIdCopy = Object.assign({}, selectedIds);
+    if (selectedIdCopy[id]) {
+      selectedIdCopy[id] = false;
+    } else {
+      selectedIdCopy[id] = true;
+    }
+    setSelectedIds(selectedIdCopy);
+  };
   // utilities for pagination
   const values = queryString.parse(search);
   const [initialLoad, setInitialLoad] = useState<boolean>(true);
@@ -189,6 +200,8 @@ export default function MeasureLanding() {
             <div className="table">
               <MeasureList
                 measureList={measureList}
+                selectedIds={selectedIds}
+                changeSelectedIds={changeSelectedIds}
                 setMeasureList={setMeasureList}
                 setTotalPages={setTotalPages}
                 setTotalItems={setTotalItems}
