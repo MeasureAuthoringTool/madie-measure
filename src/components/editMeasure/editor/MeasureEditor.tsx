@@ -342,10 +342,8 @@ const MeasureEditor = () => {
           cqlErrors,
         };
         // Get version information into the update call.
-        if (
-          newMeasure.measureMetaData?.cqlMetaData?.codeSystemMap === undefined
-        ) {
-          if (!newMeasure.measureMetaData?.cqlMetaData) {
+        if (!newMeasure.measureMetaData.cqlMetaData?.codeSystemMap) {
+          if (!newMeasure.measureMetaData.cqlMetaData) {
             newMeasure.measureMetaData.cqlMetaData =
               {} as unknown as CqlMetaData;
           }
@@ -440,62 +438,54 @@ const MeasureEditor = () => {
     }
   };
 
-  const handleApplyCode = (code) => {
-    const termCode: Code = code;
-    const result: CodeChangeResult = applyCode(editorVal, termCode);
-
+  const handleApplyCode = (code: Code) => {
+    const result: CodeChangeResult = applyCode(editorVal, code);
     if (result.status) {
-      //if result status is true, we modified the CQL
-      //  let'/s store off the codesystem/code/version
-      codeMap.set(termCode.name, termCode);
-      //   we can send it with the measure when it's saved
+      // if result status is true, we modified the CQL
+      // let's store off the codeSystem/code/version
+      const codeMap = new Map<string, Code>();
+      codeMap.set(code.name, code);
+      setCodeMap(codeMap);
+      // we can send it with the measure when it's saved
       handleMadieEditorValue(result.cql);
     }
-    //if result status is false, we didn't modify.. so CQL didn't change,
-    //  but confirmation messages can still be displayed
+    // if result status is false, we didn't modify. so CQL didn't change,
+    // but confirmation messages can still be displayed
     setToastMessage(result.message);
     setToastType(result.status);
     setToastOpen(true);
   };
 
   const handleCodeDelete = (selectedCode) => {
-    let isSameCodeSystemPresentInMultipleCodes = null;
-    const definitions = new CqlAntlr(editorVal).parse();
-    const parsedSelectedCodeDetails = definitions?.codes?.filter((code) => {
-      if (
-        code?.codeId.replace(/['"]/g, "") === selectedCode?.name &&
+    const cqlComponents = new CqlAntlr(editorVal).parse();
+    const matchingCodes = cqlComponents?.codes?.filter(
+      (code) =>
         code?.codeSystem.replace(/['"]/g, "") === selectedCode?.codeSystem
-      ) {
-        isSameCodeSystemPresentInMultipleCodes = false;
-        return code;
-      }
+    );
+    const isCodeSystemUsedByMultipleCodes = matchingCodes.length > 1;
 
-      if (code?.codeSystem.replace(/['"]/g, "") === selectedCode?.codeSystem) {
-        //check if the same codesystem of selected code (that is to be deleted) is used in multiple codes
-        isSameCodeSystemPresentInMultipleCodes = true;
-      }
-    })[0];
-
+    const codeToRemove = matchingCodes.find(
+      (code) => code?.codeId.replace(/['"]/g, "") === selectedCode?.name
+    );
     const splittedCql: string[] = editorVal.split("\n");
     const updatedCql = removeCodeFromCql(
       splittedCql,
-      isSameCodeSystemPresentInMultipleCodes,
-      parsedSelectedCodeDetails,
-      definitions?.codeSystems,
+      isCodeSystemUsedByMultipleCodes,
+      codeToRemove,
+      cqlComponents?.codeSystems,
       selectedCode?.codeSystem
     );
     setEditorVal(updatedCql);
-    const deletedCodeSystemName =
-      isSameCodeSystemPresentInMultipleCodes === false
-        ? selectedCode?.codeSystem
-        : "";
+    const deletedCodeSystemName = isCodeSystemUsedByMultipleCodes
+      ? ""
+      : selectedCode?.codeSystem;
 
     //this is the updated cql after removing the code (i.e., handleDeleteCode from saved codes)
     updateMeasureCql(updatedCql, selectedCode?.name, deletedCodeSystemName);
   };
 
   const removeCodeFromCql = (
-    splittedCql: string[],
+    cqlArray: string[],
     isSameCodeSystemPresentInMultipleCodes: boolean,
     parsedSelectedCodeDetails,
     codeSystems,
@@ -508,7 +498,7 @@ const MeasureEditor = () => {
       )[0];
       if (relatedCodeSystem && Object.keys(relatedCodeSystem).length > 0) {
         //removing code and codesystem(when this codesystem is not used in any other code apart from selected one) from cql
-        return splittedCql
+        return cqlArray
           ?.filter(
             (line, index) =>
               (index < parsedSelectedCodeDetails?.start?.line - 1 ||
@@ -520,7 +510,7 @@ const MeasureEditor = () => {
       }
     } else {
       //removing code from cql
-      return splittedCql
+      return cqlArray
         ?.filter(
           (line, index) =>
             index < parsedSelectedCodeDetails?.start?.line - 1 ||
