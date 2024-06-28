@@ -526,7 +526,6 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             dataTestId="endorser"
             label="Endorsing Organization"
             placeholder="-"
-            required={true}
             disabled={!canEdit}
             error={formik.touched.endorsements && formik.errors["endorsements"]}
             helperText={
