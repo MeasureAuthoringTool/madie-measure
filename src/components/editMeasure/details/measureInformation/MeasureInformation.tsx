@@ -271,7 +271,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     }
     if (endorsersValid) {
       const using = measure?.model.split(" v");
-      const inSyncCql = await synchingEditorCqlContent(
+      const updatedCqlOb = await synchingEditorCqlContent(
         "",
         measure?.cql,
         values.cqlLibraryName,
@@ -284,9 +284,11 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       // Generate updated ELM when Library name is modified
       //  and there are no CQL errors.
       if (INITIAL_VALUES.cqlLibraryName !== values.cqlLibraryName) {
-        if (inSyncCql && inSyncCql.trim().length > 0) {
-          const cqlErrors = parseContent(inSyncCql);
-          const { errors, translation } = await validateContent(inSyncCql);
+        if (updatedCqlOb && updatedCqlOb.cql?.trim()) {
+          const cqlErrors = parseContent(updatedCqlOb.cql);
+          const { errors, translation } = await validateContent(
+            updatedCqlOb.cql
+          );
           if (cqlErrors.length === 0 && errors.length === 0) {
             var updatedElm = JSON.stringify(translation);
           }
@@ -299,7 +301,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
         measureName: values.measureName,
         cqlLibraryName: values.cqlLibraryName,
         ecqmTitle: values.ecqmTitle,
-        cql: inSyncCql,
+        cql: updatedCqlOb?.cql,
         elmJson: updatedElm ? updatedElm : measure.elmJson,
         measureId: values.measureSetId,
         measureMetaData: {
