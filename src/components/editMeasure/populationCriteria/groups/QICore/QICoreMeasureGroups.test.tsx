@@ -57,7 +57,7 @@ const serviceConfig: ServiceConfig = {
 const getEmptyStrat = () => ({
   cqlDefinition: "",
   description: "",
-  association: PopulationType.INITIAL_POPULATION,
+  association: null,
   id: "",
 });
 
@@ -1520,7 +1520,7 @@ describe("Measure Groups Page", () => {
     expect(group.stratifications[0]).toEqual({
       ...getEmptyStrat(),
       id: "uuid-3",
-      association: PopulationType.INITIAL_POPULATION,
+      association: null,
     });
   });
 
