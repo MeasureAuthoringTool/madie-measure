@@ -311,13 +311,13 @@ export default function MeasureList(props: {
           <Button
             variant="outline-secondary"
             name="Select"
-            onClick={(e) => {
+            onClick={(e) =>
               handlePopOverOpen(
                 info.row.original.actions,
                 e,
                 featureFlags?.qdmExport
-              );
-            }}
+              )
+            }
             data-testid={`measure-action-${info.row.original.id}`}
             aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
             role="button"
