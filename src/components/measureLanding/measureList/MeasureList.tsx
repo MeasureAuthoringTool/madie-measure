@@ -312,7 +312,11 @@ export default function MeasureList(props: {
             variant="outline-secondary"
             name="Select"
             onClick={(e) => {
-              handlePopOverOpen(info.row.original.actions, e);
+              handlePopOverOpen(
+                info.row.original.actions,
+                e,
+                featureFlags?.qdmExport
+              );
             }}
             data-testid={`measure-action-${info.row.original.id}`}
             aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
@@ -446,7 +450,11 @@ export default function MeasureList(props: {
     return true;
   };
   const handlePopOverOpen = useCallback(
-    async (selected: Measure, event: React.MouseEvent<HTMLButtonElement>) => {
+    async (
+      selected: Measure,
+      event: React.MouseEvent<HTMLButtonElement>,
+      qdmExportFlag: boolean
+    ) => {
       setOptionsOpen(true);
       setSelectedMeasure(selected);
       setAnchorEl(event.currentTarget);
@@ -470,7 +478,7 @@ export default function MeasureList(props: {
         toImplementFunction: exportMeasure,
         dataTestId: `export-measure-${selected?.id}`,
       };
-      if (shouldAllowAction(selected, featureFlags.qdmExport)) {
+      if (shouldAllowAction(selected, qdmExportFlag)) {
         additionalOptions.push(exportButton);
       }
       // no longer an always on if feature
