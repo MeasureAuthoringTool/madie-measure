@@ -142,11 +142,10 @@ const cqlToElmExternalErrors: ElmTranslationExternalError[] = [
   },
 ];
 
-// const setMeasure = jest.fn();
 jest.mock("../../../api/axios-insatnce");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
-const serviceConfig: ServiceConfig = {
+const serviceConfig = {
   measureService: {
     baseUrl: "madie.com",
   },
@@ -156,7 +155,7 @@ const serviceConfig: ServiceConfig = {
   terminologyService: {
     baseUrl: "terminology-service.com",
   },
-};
+} as ServiceConfig;
 
 const renderEditor = (measure) => {
   measureStore.state.mockImplementationOnce(() => measure);

@@ -458,9 +458,11 @@ const MeasureEditor = () => {
 
   const handleCodeDelete = (selectedCode) => {
     const cqlComponents = new CqlAntlr(editorVal).parse();
+    const codeSystem = selectedCode?.versionIncluded
+      ? `${selectedCode.codeSystem}:${selectedCode.svsVersion}`
+      : selectedCode?.codeSystem;
     const matchingCodes = cqlComponents?.codes?.filter(
-      (code) =>
-        code?.codeSystem.replace(/['"]/g, "") === selectedCode?.codeSystem
+      (code) => code?.codeSystem.replace(/['"]/g, "") === codeSystem
     );
     const isCodeSystemUsedByMultipleCodes = matchingCodes.length > 1;
 
@@ -473,7 +475,7 @@ const MeasureEditor = () => {
       isCodeSystemUsedByMultipleCodes,
       codeToRemove,
       cqlComponents?.codeSystems,
-      selectedCode?.codeSystem
+      codeSystem
     );
     setEditorVal(updatedCql);
     const deletedCodeSystemName = isCodeSystemUsedByMultipleCodes
