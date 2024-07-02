@@ -311,13 +311,7 @@ export default function MeasureList(props: {
           <Button
             variant="outline-secondary"
             name="Select"
-            onClick={(e) =>
-              handlePopOverOpen(
-                info.row.original.actions,
-                e,
-                featureFlags?.qdmExport
-              )
-            }
+            onClick={(e) => handlePopOverOpen(info.row.original.actions, e)}
             data-testid={`measure-action-${info.row.original.id}`}
             aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
             role="button"
@@ -330,7 +324,7 @@ export default function MeasureList(props: {
         enableSorting: false,
       },
     ];
-  }, [props.changeSelectedIds]);
+  }, [props.changeSelectedIds, featureFlags?.qdmExport]);
 
   const handleDialogClose = () => {
     setInvalidLibraryDialogOpen(false);
@@ -450,11 +444,7 @@ export default function MeasureList(props: {
     return true;
   };
   const handlePopOverOpen = useCallback(
-    async (
-      selected: Measure,
-      event: React.MouseEvent<HTMLButtonElement>,
-      qdmExportFlag: boolean
-    ) => {
+    async (selected: Measure, event: React.MouseEvent<HTMLButtonElement>) => {
       setOptionsOpen(true);
       setSelectedMeasure(selected);
       setAnchorEl(event.currentTarget);
@@ -478,7 +468,7 @@ export default function MeasureList(props: {
         toImplementFunction: exportMeasure,
         dataTestId: `export-measure-${selected?.id}`,
       };
-      if (shouldAllowAction(selected, qdmExportFlag)) {
+      if (shouldAllowAction(selected, featureFlags?.qdmExport)) {
         additionalOptions.push(exportButton);
       }
       // no longer an always on if feature
@@ -500,7 +490,7 @@ export default function MeasureList(props: {
       setAdditionalSelectOptionProps(additionalOptions);
       setOtherSelectOptionPropsForPopOver(options);
     },
-    [canDraftLookup]
+    [canDraftLookup, featureFlags?.qdmExport]
   );
 
   const handleClose = () => {
