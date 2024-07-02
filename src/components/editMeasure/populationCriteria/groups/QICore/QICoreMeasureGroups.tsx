@@ -112,12 +112,12 @@ const improvementNotationOptions = [
   },
 ];
 
-// default value for any association is Initial population
+// default value for any association is no longer Initial population
 // TODO: figure out why it is being called on every rerender
 const getEmptyStrat = () => ({
   cqlDefinition: "",
   description: "",
-  association: PopulationType.INITIAL_POPULATION,
+  association: null,
   id: uuidv4(),
 });
 
@@ -182,6 +182,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   >([]);
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
+  const [stratAssociation, setStratAssociation] = useState<Array<any>>([]);
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
     return () => {
@@ -601,6 +602,18 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       }),
   ];
 
+  useEffect(() => {
+    if (formik.values.scoring) {
+      setStratAssociation(
+        associationSelect[formik.values.scoring].filter((name) =>
+          formik.values.populations
+            .filter((population) => population.definition)
+            .map((population) => population.name)
+            .includes(name)
+        )
+      );
+    }
+  }, [formik.values.populations]);
   // sets alert message when CQL has any errors
   useEffect(() => {
     setAlertMessage(() => ({ ...INITIAL_ALERT_MESSAGE }));
@@ -1130,7 +1143,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                           disabled={!canEdit}
                                           placeHolder={{
                                             name: "Select Association",
-                                            value: "",
+                                            value: null,
                                           }}
                                           label={`Association ${i + 1}`}
                                           id={`association-select-${i + 1}`}
@@ -1147,20 +1160,24 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                           )}
                                           size="small"
                                           renderValue={(value) =>
-                                            _.startCase(value)
+                                            _.startCase(value).length > 0
+                                              ? _.startCase(value)
+                                              : "-"
                                           }
                                           options={
-                                            !!formik.values.scoring &&
-                                            associationSelect[
-                                              formik.values.scoring
-                                            ].map((opt, i) => (
-                                              <MuiMenuItem
-                                                key={`${opt}-${i}`}
-                                                value={`${opt}`}
-                                              >
-                                                {_.startCase(opt)}
-                                              </MuiMenuItem>
-                                            ))
+                                            !!formik.values.scoring && [
+                                              <MuiMenuItem key="-" value={null}>
+                                                -
+                                              </MuiMenuItem>,
+                                              stratAssociation.map((opt, i) => (
+                                                <MuiMenuItem
+                                                  key={`${opt}-${i}`}
+                                                  value={`${opt}`}
+                                                >
+                                                  {_.startCase(opt)}
+                                                </MuiMenuItem>
+                                              )),
+                                            ]
                                           }
                                         />
                                       </div>

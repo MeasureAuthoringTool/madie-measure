@@ -21,11 +21,7 @@ import { Measure, Model } from "@madie/madie-models";
 import { AxiosError, AxiosResponse } from "axios";
 import { parseContent, synchingEditorCqlContent } from "@madie/madie-editor";
 import userEvent from "@testing-library/user-event";
-import {
-  checkUserCanEdit,
-  measureStore,
-  useFeatureFlags,
-} from "@madie/madie-util";
+import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 
 const mockHistoryPush = jest.fn();
 
@@ -120,7 +116,9 @@ const measure = {
 } as unknown as Measure;
 
 jest.mock("@madie/madie-editor", () => ({
-  synchingEditorCqlContent: jest.fn().mockResolvedValue("modified cql"),
+  synchingEditorCqlContent: jest
+    .fn()
+    .mockResolvedValue({ cql: "modified cql" }),
   parseContent: jest.fn(() => []),
   validateContent: jest.fn().mockResolvedValue({
     errors: [],

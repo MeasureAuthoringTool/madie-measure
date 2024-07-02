@@ -27,7 +27,7 @@ import {
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { ELM_JSON, MeasureCQL } from "../../../../common/MeasureCQL";
 import userEvent from "@testing-library/user-event";
-import axios from "axios";
+import axios from "../../../../../api/axios-insatnce";
 import * as uuid from "uuid";
 import { getPopulationsForScoring } from "../../PopulationHelper";
 import * as _ from "lodash";
@@ -57,11 +57,11 @@ const serviceConfig: ServiceConfig = {
 const getEmptyStrat = () => ({
   cqlDefinition: "",
   description: "",
-  association: PopulationType.INITIAL_POPULATION,
+  association: null,
   id: "",
 });
 
-jest.mock("axios");
+jest.mock("../../../../../api/axios-insatnce");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
@@ -1520,7 +1520,7 @@ describe("Measure Groups Page", () => {
     expect(group.stratifications[0]).toEqual({
       ...getEmptyStrat(),
       id: "uuid-3",
-      association: PopulationType.INITIAL_POPULATION,
+      association: null,
     });
   });
 
