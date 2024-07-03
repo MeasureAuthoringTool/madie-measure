@@ -4,7 +4,7 @@ import MeasureEditor, {
   mapErrorsToAceAnnotations,
   mapErrorsToAceMarkers,
 } from "./MeasureEditor";
-import { Measure, MeasureErrorType } from "@madie/madie-models";
+import { Measure, MeasureErrorType, Model } from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
 import axios from "../../../api/axios-insatnce";
 import { ElmTranslationError } from "./measureEditorUtils";
@@ -647,8 +647,6 @@ describe("MeasureEditor component", () => {
   });
 
   it("should display toast for CQL Return Types error on measure", async () => {
-    measureStore.state.mockImplementationOnce(() => measure);
-
     renderEditor(measure);
     await waitFor(() => {
       expect(measureStore.subscribe as jest.Mock).toHaveBeenCalled();
@@ -795,6 +793,75 @@ describe("map elm errors to Ace Markers", () => {
     });
   });
 
+  it("Save button and Cancel button should not show if user is not the owner of the measure", () => {
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
+    renderEditor(measure);
+
+    const cancelButton = screen.queryByTestId("reset-cql-btn");
+    expect(cancelButton).not.toBeInTheDocument();
+    const saveButton = screen.queryByTestId("save-cql-btn");
+    expect(saveButton).not.toBeInTheDocument();
+  });
+
+  it("Save button and Cancel button should show if measure is shared with the user", () => {
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => true);
+    renderEditor(measure);
+
+    const cancelButton = screen.queryByTestId("reset-cql-btn");
+    expect(cancelButton).toBeInTheDocument();
+    const saveButton = screen.queryByTestId("save-cql-btn");
+    expect(saveButton).toBeInTheDocument();
+  });
+
+  it("should display errors if not logged into umls", async () => {
+    const elmTransaltionErrorsUMLS: ElmTranslationError[] = [
+      {
+        startLine: 24,
+        startChar: 7,
+        endLine: 24,
+        endChar: 15,
+        errorSeverity: "Warning",
+        errorType: "ELM",
+        message: "Please log in to UMLS",
+        targetIncludeLibraryId: "TestLibrary_QICore",
+        targetIncludeLibraryVersionId: "5.0.000",
+        type: "VSAC",
+      },
+    ];
+
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: elmTransaltionErrorsUMLS,
+        translation: null,
+        externalErrors: [],
+      });
+    });
+
+    const measureWithCqlCodes = {
+      ...measure,
+      cql:
+        "library DuplicateMeasureTest version '0.0.000'\n" +
+        "\n" +
+        "using FHIR version '4.0.1'\n" +
+        "\n" +
+        "codesystem \"ActPriority:HL7V3.0_2021-03\": 'https://terminology.hl7.org/CodeSystem/v3-ActPriority' version 'HL7V3.0_2021-03'\n" +
+        "code \"preop\": 'P' from \"ActPriority:HL7V3.0_2021-03\" display 'preop'",
+    };
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measureWithCqlCodes });
+      }
+    });
+
+    renderEditor(measureWithCqlCodes);
+    const issues = await screen.findByText("1 issues found with CQL");
+    expect(issues).toBeInTheDocument();
+    const loggedIn = await screen.findByText("Please log in to UMLS!");
+    expect(loggedIn).toBeInTheDocument();
+  });
+});
+
+describe("EditorWithTerminology", () => {
   it("should remove cql code successfully", async () => {
     (synchingEditorCqlContent as jest.Mock)
       .mockClear()
@@ -813,10 +880,9 @@ describe("map elm errors to Ace Markers", () => {
         externalErrors: [],
       });
     });
-
     const measureWithCqlCodes = {
       ...measure,
-      model: "QDM v5.6",
+      model: Model.QDM_5_6,
       cql:
         "library RemoveCodeTest version '0.0.000'\n" +
         "\n" +
@@ -824,7 +890,7 @@ describe("map elm errors to Ace Markers", () => {
         "\n" +
         "codesystem \"RXNORM:2022-05\": 'urn:oid:2.16.840.1.113883.6.88' version 'urn:hl7:version:2022-05'\n" +
         "code \"1 ML digoxin 0.1 MG/ML Injection\": '204504' from \"RXNORM:2022-05\" display '1 ML digoxin 0.1 MG/ML Injection'",
-    };
+    } as Measure;
     const cqlWithNoCodes =
       "library RemoveCodeTest version '0.0.000'using QDM version '5.6'";
     mockedAxios.put.mockImplementation((args) => {
@@ -832,7 +898,6 @@ describe("map elm errors to Ace Markers", () => {
         return Promise.resolve({ data: measureWithCqlCodes });
       }
     });
-
     renderEditor(measureWithCqlCodes);
     const removeCodeBtn = await screen.findByText("Remove code");
     expect(removeCodeBtn).toBeInTheDocument();
@@ -845,71 +910,4 @@ describe("map elm errors to Ace Markers", () => {
       "code 204504 and code system RXNORM has been successfully removed from the CQL"
     );
   });
-});
-
-it("Save button and Cancel button should not show if user is not the owner of the measure", () => {
-  (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
-  renderEditor(measure);
-
-  const cancelButton = screen.queryByTestId("reset-cql-btn");
-  expect(cancelButton).not.toBeInTheDocument();
-  const saveButton = screen.queryByTestId("save-cql-btn");
-  expect(saveButton).not.toBeInTheDocument();
-});
-
-it("Save button and Cancel button should show if measure is shared with the user", () => {
-  (checkUserCanEdit as jest.Mock).mockImplementation(() => true);
-  renderEditor(measure);
-
-  const cancelButton = screen.queryByTestId("reset-cql-btn");
-  expect(cancelButton).toBeInTheDocument();
-  const saveButton = screen.queryByTestId("save-cql-btn");
-  expect(saveButton).toBeInTheDocument();
-});
-
-it("should display errors if not logged into umls", async () => {
-  const elmTransaltionErrorsUMLS: ElmTranslationError[] = [
-    {
-      startLine: 24,
-      startChar: 7,
-      endLine: 24,
-      endChar: 15,
-      errorSeverity: "Warning",
-      errorType: "ELM",
-      message: "Please log in to UMLS",
-      targetIncludeLibraryId: "TestLibrary_QICore",
-      targetIncludeLibraryVersionId: "5.0.000",
-      type: "VSAC",
-    },
-  ];
-
-  (validateContent as jest.Mock).mockClear().mockImplementation(() => {
-    return Promise.resolve({
-      errors: elmTransaltionErrorsUMLS,
-      translation: null,
-      externalErrors: [],
-    });
-  });
-
-  const measureWithCqlCodes = {
-    ...measure,
-    cql:
-      "library DuplicateMeasureTest version '0.0.000'\n" +
-      "\n" +
-      "using FHIR version '4.0.1'\n" +
-      "\n" +
-      "codesystem \"ActPriority:HL7V3.0_2021-03\": 'https://terminology.hl7.org/CodeSystem/v3-ActPriority' version 'HL7V3.0_2021-03'\n" +
-      "code \"preop\": 'P' from \"ActPriority:HL7V3.0_2021-03\" display 'preop'",
-  };
-  mockedAxios.put.mockImplementation((args) => {
-    if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-      return Promise.resolve({ data: measureWithCqlCodes });
-    }
-  });
-
-  renderEditor(measureWithCqlCodes);
-  const issues = await screen.findByText("1 issues found with CQL");
-  expect(issues).toBeInTheDocument();
-  const loggedIn = await screen.findByText("Please log in to UMLS!");
-  expect(loggedIn).toBeInTheDocument();
 });
