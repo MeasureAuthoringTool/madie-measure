@@ -794,6 +794,57 @@ describe("map elm errors to Ace Markers", () => {
       type: "text",
     });
   });
+
+  it("should remove cql code successfully", async () => {
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => {
+        return {
+          cql: "library RemoveCodeTest version '0.0.000'\nusing QDM version '5.6'",
+          isLibraryStatementChanged: false,
+          isUsingStatementChanged: false,
+          isValueSetChanged: false,
+        };
+      });
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        translation: null,
+        externalErrors: [],
+      });
+    });
+
+    const measureWithCqlCodes = {
+      ...measure,
+      model: "QDM v5.6",
+      cql:
+        "library RemoveCodeTest version '0.0.000'\n" +
+        "\n" +
+        "using QDM version '5.6'\n" +
+        "\n" +
+        "codesystem \"RXNORM:2022-05\": 'urn:oid:2.16.840.1.113883.6.88' version 'urn:hl7:version:2022-05'\n" +
+        "code \"1 ML digoxin 0.1 MG/ML Injection\": '204504' from \"RXNORM:2022-05\" display '1 ML digoxin 0.1 MG/ML Injection'",
+    };
+    const cqlWithNoCodes =
+      "library RemoveCodeTest version '0.0.000'using QDM version '5.6'";
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measureWithCqlCodes });
+      }
+    });
+
+    renderEditor(measureWithCqlCodes);
+    const removeCodeBtn = await screen.findByText("Remove code");
+    expect(removeCodeBtn).toBeInTheDocument();
+    userEvent.click(removeCodeBtn);
+    await waitFor(() => {
+      const editor = screen.getByTestId("measure-editor");
+      expect(editor).toHaveValue(cqlWithNoCodes);
+    });
+    expect(screen.getByTestId("measure-errors-toast")).toHaveTextContent(
+      "code 204504 and code system RXNORM has been successfully removed from the CQL"
+    );
+  });
 });
 
 it("Save button and Cancel button should not show if user is not the owner of the measure", () => {
