@@ -9,7 +9,7 @@ const mockCode = {
   codeSystem: "RXNORM",
   codeSystemOid: "2.16.840.1.113883.6.96",
   suffix: "12",
-  isVersionIncluded: true,
+  versionIncluded: true,
   status: "NA",
 } as unknown as Code;
 

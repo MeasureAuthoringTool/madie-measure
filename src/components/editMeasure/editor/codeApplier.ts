@@ -20,7 +20,7 @@ const findCodeSystem = (code, codeSystems) => {
       ?.replace(/["']/g, "")
       ?.replace(/urn:hl7:version:/g, "");
 
-    if (code.isVersionIncluded) {
+    if (code.versionIncluded) {
       return (
         oldCodeSystemName === `${code.codeSystem}:${code.svsVersion}` &&
         oldCodeSystemOid === code.codeSystemOid &&
@@ -54,7 +54,7 @@ const createCodeDeclaration = (code: Code) => {
   if (code.suffix) {
     newCode += ` (${code.suffix})`;
   }
-  if (code.isVersionIncluded) {
+  if (code.versionIncluded) {
     newCode += `": '${code.name}' from "${code.codeSystem}:${code.svsVersion}" display '${code.display}'`;
   } else {
     newCode += `": '${code.name}' from "${code.codeSystem}" display '${code.display}'`;
@@ -63,7 +63,7 @@ const createCodeDeclaration = (code: Code) => {
 };
 
 const createCodeSystemDeclaration = (code: Code) => {
-  if (code.isVersionIncluded) {
+  if (code.versionIncluded) {
     return `codesystem "${code.codeSystem}:${code.svsVersion}": 'urn:oid:${code.codeSystemOid}' version 'urn:hl7:version:${code.svsVersion}'`;
   } else {
     return `codesystem "${code.codeSystem}": 'urn:oid:${code.codeSystemOid}'`;
