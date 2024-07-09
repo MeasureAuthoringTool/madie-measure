@@ -39,6 +39,7 @@ jest.mock("react-router-dom", () => ({
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
+    getUserName: () => "test user",
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useFeatureFlags: jest.fn(() => ({
@@ -177,7 +178,8 @@ const checkValidSuccess = {
   },
 };
 const serviceConfig: ServiceConfig = {
-  elmTranslationService: { baseUrl: "" },
+  fhirElmTranslationService: { baseUrl: "" },
+  qdmElmTranslationService: { baseUrl: "" },
   measureService: { baseUrl: "" },
   terminologyService: { baseUrl: "" },
 };
