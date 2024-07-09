@@ -15,6 +15,7 @@ declare module "@madie/madie-util" {
     generateCMSID: boolean;
     qdmCodeSearch: boolean;
     MeasureListCheckboxes: boolean;
+    associateMeasures: boolean;
   }
 
   export interface ServiceConfig {

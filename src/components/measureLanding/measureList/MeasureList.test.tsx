@@ -46,6 +46,7 @@ jest.mock("@madie/madie-util", () => ({
     qdmExport: true,
     enableQdmRepeatTransfer: false,
     MeasureListCheckboxes: true,
+    associateMeasures: true,
   })),
 }));
 
