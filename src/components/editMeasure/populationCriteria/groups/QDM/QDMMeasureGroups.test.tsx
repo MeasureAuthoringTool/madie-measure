@@ -29,7 +29,7 @@ import useMeasureServiceApi, {
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { ELM_JSON, MeasureCQL } from "../../../../common/MeasureCQL";
 import userEvent from "@testing-library/user-event";
-import axios from "../../../../../api/axios-insatnce";
+import axios from "../../../../../api/axios-instance";
 import * as uuid from "uuid";
 import { measureStore, checkUserCanEdit } from "@madie/madie-util";
 import { InitialPopulationAssociationType } from "../groupPopulations/GroupPopulation";

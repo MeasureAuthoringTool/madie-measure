@@ -483,7 +483,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             error={formik.touched.ecqmTitle && Boolean(formik.errors.ecqmTitle)}
             {...formik.getFieldProps("ecqmTitle")}
           />
-          {featureFlags.generateCMSID ? (
+          {true ? (
             <CmsIdentifier
               canEdit={canEdit}
               label="CMS ID"

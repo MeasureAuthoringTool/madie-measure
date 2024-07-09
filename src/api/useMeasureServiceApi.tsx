@@ -1,6 +1,6 @@
 import React from "react";
 import { AxiosResponse } from "axios";
-import axios from "../api/axios-insatnce";
+import axios from "./axios-instance";
 import useServiceConfig from "./useServiceConfig";
 import { ServiceConfig } from "./ServiceContext";
 import {

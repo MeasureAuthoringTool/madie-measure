@@ -64,6 +64,7 @@ export default function CmsIdentifier({
             id="cms-id"
             style={{
               border: "none",
+              width:"fit-content"
             }}
           >
             <div style={{ display: "flex", alignItems: "center" }}>
