@@ -171,7 +171,8 @@ const applyValueset = (
       const oldUrl = valueSet.url.replace(/["']/g, "");
       vsExists =
         vsExists ||
-        (oldVsName === getValueSetTitleName(vs) && oldUrl === vs.oid);
+        (oldVsName === getValueSetTitleName(vs) && oldUrl === vs.oid) ||
+        vs?.oid === previousVs?.oid;
     });
   }
   // no matching valueset in the cql, add it.

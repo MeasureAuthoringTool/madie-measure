@@ -131,3 +131,22 @@ it("Should add valuset, priotiy location valuset array", () => {
   );
   expect(result.status).toBeTruthy();
 });
+
+it("Should not add valuset to CQL when value set was already added", () => {
+  const cql = fs.readFileSync(
+    "src/components/editMeasure/editor/__mocks__/CptTest.cql",
+    "utf8"
+  );
+  const valusetJson = fs.readFileSync(
+    "src/components/editMeasure/editor/__mocks__/valusetJson.json",
+    "utf8"
+  );
+
+  const valuset = JSON.parse(valusetJson);
+  const result: CodeChangeResult = applyValueset(cql, valuset, valuset);
+  expect(result.cql).not.toContain("Emergency Department Evaluation");
+  expect(result.status).not.toBeTruthy();
+  expect(result.message).toEqual(
+    `This valueset is already defined in the CQL.`
+  );
+});
