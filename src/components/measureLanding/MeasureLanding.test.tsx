@@ -15,12 +15,11 @@ import {
 } from "../__mocks__/mockMeasureResponses";
 
 const serviceConfig: ServiceConfig = {
+  fhirElmTranslationService: { baseUrl: "fhir/services" },
+  qdmElmTranslationService: { baseUrl: "qdm/services" },
   terminologyService: { baseUrl: "example-service-url" },
   measureService: {
     baseUrl: "example-service-url",
-  },
-  elmTranslationService: {
-    baseUrl: "test-elm-service",
   },
 };
 
@@ -28,7 +27,11 @@ const abortController = new AbortController();
 
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
-  useFeatureFlags: () => null,
+  useFeatureFlags: () => {
+    return {
+      MeasureListCheckboxes: false,
+    };
+  },
 }));
 
 const mockedUsedNavigate = jest.fn();
@@ -124,7 +127,9 @@ describe("Measure Page", () => {
   test("Search measure should call search api with search criteria", async () => {
     renderRouter(["/measures"]);
 
-    const measureInput = await screen.findByTestId("searchMeasure-input");
+    const measureInput = (await screen.findByTestId(
+      "searchMeasure-input"
+    )) as HTMLInputElement;
     expect(measureInput).toBeInTheDocument();
     userEvent.type(measureInput, "test");
     expect(measureInput.value).toBe("test");
@@ -210,7 +215,9 @@ describe("Measure Page", () => {
       .mockRejectedValueOnce(new Error("Unable to fetch measures"));
     renderRouter(["/measures"]);
 
-    const measureInput = await screen.findByTestId("searchMeasure-input");
+    const measureInput = (await screen.findByTestId(
+      "searchMeasure-input"
+    )) as HTMLInputElement;
     expect(measureInput).toBeInTheDocument();
     userEvent.type(measureInput, "test");
     expect(measureInput.value).toBe("test");
@@ -230,7 +237,9 @@ describe("Measure Page", () => {
       .mockRejectedValueOnce(new Error("canceled"));
     renderRouter(["/measures"]);
 
-    const measureInput = await screen.findByTestId("searchMeasure-input");
+    const measureInput = (await screen.findByTestId(
+      "searchMeasure-input"
+    )) as HTMLInputElement;
     expect(measureInput).toBeInTheDocument();
     userEvent.type(measureInput, "test");
     expect(measureInput.value).toBe("test");
