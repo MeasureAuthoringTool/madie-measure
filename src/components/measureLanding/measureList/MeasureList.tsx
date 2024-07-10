@@ -44,6 +44,7 @@ import TruncateText from "./TruncateText";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import AssociateCmsIdAction from "./associateCmsIdAction/AccociateCmsIdAction";
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -130,6 +131,11 @@ export default function MeasureList(props: {
   const [draftMeasureDialog, setDraftMeasureDialog] = useState({
     open: false,
   });
+
+  const selectedMeasures = props.measureList?.filter(
+    (measure) => props.selectedIds[measure.id]
+  );
+
   const featureFlags = useFeatureFlags();
 
   const buildLookup = useCallback(
@@ -820,35 +826,39 @@ export default function MeasureList(props: {
 
   return (
     <div>
-      <form onSubmit={handleSubmit}>
-        <table style={{ marginLeft: 20, marginTop: 20, marginBottom: 20 }}>
-          <thead>
-            <tr>
-              <TextField
-                onChange={(newValue) => {
-                  props.setSearchCriteria(newValue.target.value);
-                }}
-                id="searchMeasure"
-                name="searchMeasure"
-                placeholder="Search Measure"
-                type="search"
-                fullWidth
-                data-testid="measure-search-input"
-                label="Filter Measures"
-                variant="outlined"
-                defaultValue={props.searchCriteria}
-                value={props.searchCriteria}
-                inputProps={{
-                  "data-testid": "searchMeasure-input",
-                  "aria-required": "false",
-                }}
-                InputProps={searchInputProps}
-                sx={searchInputStyle}
-              />
-            </tr>
-          </thead>
-        </table>
-      </form>
+      <div tw="grid grid-cols-3 gap-4 m-4">
+        <div tw="col-span-2">
+          <form onSubmit={handleSubmit} tw="w-1/4">
+            <TextField
+              onChange={(newValue) => {
+                props.setSearchCriteria(newValue.target.value);
+              }}
+              id="searchMeasure"
+              name="searchMeasure"
+              placeholder="Search Measure"
+              type="search"
+              fullWidth
+              data-testid="measure-search-input"
+              label="Filter Measures"
+              variant="outlined"
+              defaultValue={props.searchCriteria}
+              value={props.searchCriteria}
+              inputProps={{
+                "data-testid": "searchMeasure-input",
+                "aria-required": "false",
+              }}
+              InputProps={searchInputProps}
+              sx={searchInputStyle}
+            />
+          </form>
+        </div>
+        {featureFlags.MeasureListCheckboxes && featureFlags.associateMeasures && (
+          <div tw="justify-self-end p-3">
+            <AssociateCmsIdAction measures={selectedMeasures} />
+          </div>
+        )}
+      </div>
+
       <table
         tw="min-w-full"
         data-testid="measure-list-tbl"
