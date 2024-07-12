@@ -7,6 +7,7 @@ import IconLink from "../../../../icons/IconLink";
 
 interface PropTypes {
   measures: Measure[];
+  onClick: () => void;
 }
 
 export const MUST_BE_OWNER = "Must own both selected measures";
@@ -29,7 +30,7 @@ export default function AssociateCmsIdAction(props: PropTypes) {
   const validateAssociateCmsIdActionState = () => {
     // set button state to disabled by default
     setDisableAssociateCmsIdBtn(true);
-    if (measures.length === 2) {
+    if (measures?.length === 2) {
       const [measure1, measure2] = measures;
       if (
         measure1.measureSet.owner !== userName ||
@@ -62,12 +63,6 @@ export default function AssociateCmsIdAction(props: PropTypes) {
     }
   };
 
-  const associateCmsId = () => {
-    // TODO: implement this with MAT-7301
-    // eslint-disable-next-line no-console
-    console.log("linking cms id...");
-  };
-
   useEffect(() => {
     validateAssociateCmsIdActionState();
   }, [measures, validateAssociateCmsIdActionState]);
@@ -81,7 +76,7 @@ export default function AssociateCmsIdAction(props: PropTypes) {
     >
       <span>
         <IconButton
-          onClick={associateCmsId}
+          onClick={props.onClick}
           disabled={disableAssociateCmsIdBtn}
           data-testid="associate_cms_id_btn"
         >

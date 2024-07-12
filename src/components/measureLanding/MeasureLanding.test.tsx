@@ -13,6 +13,7 @@ import {
   oneItemResponse,
   multipleItemsResponse,
 } from "../__mocks__/mockMeasureResponses";
+import { within } from "@testing-library/dom";
 
 const serviceConfig: ServiceConfig = {
   fhirElmTranslationService: { baseUrl: "fhir/services" },
@@ -24,12 +25,17 @@ const serviceConfig: ServiceConfig = {
 };
 
 const abortController = new AbortController();
+const mockUser = "TestUser1";
 
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
+  useOktaTokens: () => ({
+    getUserName: () => mockUser,
+  }),
   useFeatureFlags: () => {
     return {
-      MeasureListCheckboxes: false,
+      MeasureListCheckboxes: true,
+      associateMeasures: true,
     };
   },
 }));
@@ -247,5 +253,34 @@ describe("Measure Page", () => {
 
     expect(await screen.queryByTestId("generic-error-text-header")).toBeNull();
     expect(await screen.queryByText("Unable to fetch measures")).toBeNull();
+  });
+
+  test("render associate cms id dialog", async () => {
+    renderRouter(["/measures"]);
+    await waitFor(() => {
+      expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument();
+    });
+    const measure1Checkbox = await within(
+      await screen.findByTestId("measure-name-0_select")
+    ).findByRole("checkbox");
+    userEvent.click(measure1Checkbox);
+    const measure2Checkbox = await within(
+      await screen.findByTestId("measure-name-1_select")
+    ).findByRole("checkbox");
+    userEvent.click(measure2Checkbox);
+    const associateCmsIdBtn = await screen.findByTestId("associate_cms_id_btn");
+    expect(associateCmsIdBtn).toBeEnabled();
+    userEvent.click(associateCmsIdBtn);
+    const dialogTable = await screen.findByTestId(
+      "associate-cms-id-dialog-tbl"
+    );
+    expect(dialogTable).toBeInTheDocument();
+    const measure1Name = await within(dialogTable).getByText("TestMeasure1");
+    expect(measure1Name).toBeInTheDocument();
+    const measure2Name = await within(dialogTable).getByText("TestMeasure2");
+    expect(measure2Name).toBeInTheDocument();
+    expect(
+      screen.getByText("Copy QDM Metadata to QI-Core measure")
+    ).toBeInTheDocument();
   });
 });

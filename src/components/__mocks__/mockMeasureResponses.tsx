@@ -58,10 +58,11 @@ const multipleMeasures = [
     id: "measureId1",
     measureName: "TestMeasure1",
     createdBy: TESTUSER1,
-    model: Model.QICORE,
+    model: Model.QDM_5_6,
     revisionNumber: "1",
     version: "1.000",
     measureMetaData: { draft: true },
+    measureSet: { cmsId: "124", owner: TESTUSER1 },
   },
   {
     id: "measureId2",
@@ -70,6 +71,7 @@ const multipleMeasures = [
     model: Model.QICORE,
     version: "1.0.000",
     measureMetaData: { draft: true },
+    measureSet: { owner: TESTUSER1 },
   },
   {
     id: "measureId3",

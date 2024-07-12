@@ -10,6 +10,7 @@ import AssociateCmsIdAction, {
   SELECT_TWO_MEASURES,
 } from "./AccociateCmsIdAction";
 import { Measure, MeasureSet, Model } from "@madie/madie-models";
+import userEvent from "@testing-library/user-event";
 
 const mockUser = "test user";
 jest.mock("@madie/madie-util", () => ({
@@ -37,9 +38,11 @@ const qiCoreMeasure = {
   measureMetaData: { draft: true },
 } as Measure;
 
+const associateCmsId = jest.fn();
+
 describe("AssociateCmsIdAction", () => {
   it("Should disable action btn if no measure selected", () => {
-    render(<AssociateCmsIdAction measures={[]} />);
+    render(<AssociateCmsIdAction measures={[]} onClick={associateCmsId} />);
     expect(screen.getByTestId("associate_cms_id_btn")).toBeDisabled();
     expect(screen.getByTestId("associate_cms_id_tooltip")).toHaveAttribute(
       "aria-label",
@@ -48,7 +51,9 @@ describe("AssociateCmsIdAction", () => {
   });
 
   it("Should disable action btn if user does not select two measures ", () => {
-    render(<AssociateCmsIdAction measures={[qdmMeasure]} />);
+    render(
+      <AssociateCmsIdAction measures={[qdmMeasure]} onClick={associateCmsId} />
+    );
     expect(screen.getByTestId("associate_cms_id_btn")).toBeDisabled();
     expect(screen.getByTestId("associate_cms_id_tooltip")).toHaveAttribute(
       "aria-label",
@@ -67,6 +72,7 @@ describe("AssociateCmsIdAction", () => {
             measureSet: { ...mockMeasureSet, owner: "not me" },
           },
         ]}
+        onClick={associateCmsId}
       />
     );
     expect(screen.getByTestId("associate_cms_id_btn")).toBeDisabled();
@@ -78,7 +84,12 @@ describe("AssociateCmsIdAction", () => {
 
   it("Should disable action btn if user selects two measures with same model", () => {
     const measure2 = { ...qiCoreMeasure, model: Model.QDM_5_6 };
-    render(<AssociateCmsIdAction measures={[qdmMeasure, measure2]} />);
+    render(
+      <AssociateCmsIdAction
+        measures={[qdmMeasure, measure2]}
+        onClick={associateCmsId}
+      />
+    );
     expect(screen.getByTestId("associate_cms_id_btn")).toBeDisabled();
     expect(screen.getByTestId("associate_cms_id_tooltip")).toHaveAttribute(
       "aria-label",
@@ -89,7 +100,12 @@ describe("AssociateCmsIdAction", () => {
   it("Should disable action btn if QICore measure selected is not a draft", async () => {
     const measure2 = { ...qiCoreMeasure, measureMetaData: { draft: false } };
     // second measure in the selected measures is QICore
-    render(<AssociateCmsIdAction measures={[qdmMeasure, measure2]} />);
+    render(
+      <AssociateCmsIdAction
+        measures={[qdmMeasure, measure2]}
+        onClick={associateCmsId}
+      />
+    );
     expect(screen.getByTestId("associate_cms_id_btn")).toBeDisabled();
     expect(screen.getByTestId("associate_cms_id_tooltip")).toHaveAttribute(
       "aria-label",
@@ -102,7 +118,12 @@ describe("AssociateCmsIdAction", () => {
       ...qdmMeasure,
       measureSet: { ...mockMeasureSet, cmsId: null },
     };
-    render(<AssociateCmsIdAction measures={[measure1, qiCoreMeasure]} />);
+    render(
+      <AssociateCmsIdAction
+        measures={[measure1, qiCoreMeasure]}
+        onClick={associateCmsId}
+      />
+    );
     expect(screen.getByTestId("associate_cms_id_btn")).toBeDisabled();
     expect(screen.getByTestId("associate_cms_id_tooltip")).toHaveAttribute(
       "aria-label",
@@ -115,7 +136,12 @@ describe("AssociateCmsIdAction", () => {
       ...qiCoreMeasure,
       measureSet: { ...mockMeasureSet, cmsId: 125 },
     };
-    render(<AssociateCmsIdAction measures={[qdmMeasure, measure2]} />);
+    render(
+      <AssociateCmsIdAction
+        measures={[qdmMeasure, measure2]}
+        onClick={associateCmsId}
+      />
+    );
     expect(screen.getByTestId("associate_cms_id_btn")).toBeDisabled();
     expect(screen.getByTestId("associate_cms_id_tooltip")).toHaveAttribute(
       "aria-label",
@@ -124,11 +150,18 @@ describe("AssociateCmsIdAction", () => {
   });
 
   it("Should enable action btn if two measures have different models, QDM measure has CMS id, QICore measure has no CMS ID and both owned by user", () => {
-    render(<AssociateCmsIdAction measures={[qdmMeasure, qiCoreMeasure]} />);
+    render(
+      <AssociateCmsIdAction
+        measures={[qdmMeasure, qiCoreMeasure]}
+        onClick={associateCmsId}
+      />
+    );
     expect(screen.getByTestId("associate_cms_id_btn")).toBeEnabled();
     expect(screen.getByTestId("associate_cms_id_tooltip")).toHaveAttribute(
       "aria-label",
       ASSOCIATE_CMS_ID
     );
+    userEvent.click(screen.getByTestId("associate_cms_id_btn"));
+    expect(associateCmsId).toHaveBeenCalled();
   });
 });
