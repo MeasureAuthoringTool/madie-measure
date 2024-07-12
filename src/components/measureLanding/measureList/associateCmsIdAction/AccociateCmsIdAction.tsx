@@ -29,7 +29,7 @@ export default function AssociateCmsIdAction(props: PropTypes) {
   const validateAssociateCmsIdActionState = () => {
     // set button state to disabled by default
     setDisableAssociateCmsIdBtn(true);
-    if (measures.length === 2) {
+    if (measures?.length === 2) {
       const [measure1, measure2] = measures;
       if (
         measure1.measureSet.owner !== userName ||
