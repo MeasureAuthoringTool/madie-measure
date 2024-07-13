@@ -45,6 +45,7 @@ import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import AssociateCmsIdAction from "./associateCmsIdAction/AccociateCmsIdAction";
+import AssociateCmsIdDialog from "./associateCmsIdDialog/AssociateCmsIdDialog";
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -131,6 +132,9 @@ export default function MeasureList(props: {
   const [draftMeasureDialog, setDraftMeasureDialog] = useState({
     open: false,
   });
+
+  const [openAssociateCmsIdDialog, setOpenAssociateCmsIdDialog] =
+    useState(false);
 
   const selectedMeasures = props.measureList?.filter(
     (measure) => props.selectedIds[measure.id]
@@ -808,6 +812,10 @@ export default function MeasureList(props: {
       });
   };
 
+  const associateCmsId = () => {
+    setOpenAssociateCmsIdDialog(true);
+  };
+
   const table = useReactTable({
     data,
     columns,
@@ -854,7 +862,10 @@ export default function MeasureList(props: {
         </div>
         {featureFlags.MeasureListCheckboxes && featureFlags.associateMeasures && (
           <div tw="justify-self-end p-3">
-            <AssociateCmsIdAction measures={selectedMeasures} />
+            <AssociateCmsIdAction
+              measures={selectedMeasures}
+              onClick={associateCmsId}
+            />
           </div>
         )}
       </div>
@@ -1001,6 +1012,11 @@ export default function MeasureList(props: {
           open={Boolean(downloadState)}
           handleContinueDialog={handleContinueDialog}
           handleCancelDialog={handleCancelDialog}
+        />
+        <AssociateCmsIdDialog
+          measures={selectedMeasures}
+          onClose={() => setOpenAssociateCmsIdDialog(false)}
+          open={openAssociateCmsIdDialog}
         />
       </table>
     </div>
