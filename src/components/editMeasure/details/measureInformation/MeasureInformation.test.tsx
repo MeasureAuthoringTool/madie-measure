@@ -539,6 +539,11 @@ describe("MeasureInformation component", () => {
     ) as HTMLInputElement;
     expect(cmsIdBtn).toBeEnabled();
     userEvent.click(cmsIdBtn);
+    const cmsPopupBtn = screen.getByTestId(
+      "cms-identifier-dialog-continue-button"
+    );
+    expect(cmsPopupBtn).toBeEnabled();
+    userEvent.click(cmsPopupBtn);
 
     measure.model = Model.QDM_5_6;
     measure.measureSet = {
