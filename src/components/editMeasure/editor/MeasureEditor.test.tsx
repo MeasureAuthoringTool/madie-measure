@@ -4,9 +4,9 @@ import MeasureEditor, {
   mapErrorsToAceAnnotations,
   mapErrorsToAceMarkers,
 } from "./MeasureEditor";
-import { Measure, MeasureErrorType } from "@madie/madie-models";
+import { Measure, MeasureErrorType, Model } from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
-import axios from "axios";
+import axios from "../../../api/axios-insatnce";
 import { ElmTranslationError } from "./measureEditorUtils";
 import userEvent from "@testing-library/user-event";
 // @ts-ignore
@@ -142,11 +142,10 @@ const cqlToElmExternalErrors: ElmTranslationExternalError[] = [
   },
 ];
 
-// const setMeasure = jest.fn();
-jest.mock("axios");
+jest.mock("../../../api/axios-insatnce");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
-const serviceConfig: ServiceConfig = {
+const serviceConfig = {
   measureService: {
     baseUrl: "madie.com",
   },
@@ -156,7 +155,7 @@ const serviceConfig: ServiceConfig = {
   terminologyService: {
     baseUrl: "terminology-service.com",
   },
-};
+} as ServiceConfig;
 
 const renderEditor = (measure) => {
   measureStore.state.mockImplementationOnce(() => measure);
@@ -191,6 +190,45 @@ describe("MeasureEditor component", () => {
       "measure-editor"
     )) as HTMLInputElement;
     expect(editorContainer.value).toEqual("");
+  });
+
+  it("save measure with empty cql successfully", async () => {
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        translation: { library: {} },
+      });
+    });
+
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => {
+        return {
+          cql: "",
+        };
+      });
+
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measure });
+      }
+    });
+
+    const { getByTestId } = renderEditor(measure);
+    const editorContainer = (await getByTestId(
+      "measure-editor"
+    )) as HTMLInputElement;
+    expect(measure.cql).toEqual(editorContainer.value);
+    fireEvent.change(getByTestId("measure-editor"), {
+      target: {
+        value: "",
+      },
+    });
+    fireEvent.click(getByTestId("save-cql-btn"));
+    await waitFor(() => {
+      const successText = getByTestId("generic-success-text-header");
+      expect(successText.textContent).toEqual("CQL updated successfully");
+    });
   });
 
   it("save measure with updated cql in editor on save button click", async () => {
@@ -609,8 +647,6 @@ describe("MeasureEditor component", () => {
   });
 
   it("should display toast for CQL Return Types error on measure", async () => {
-    measureStore.state.mockImplementationOnce(() => measure);
-
     renderEditor(measure);
     await waitFor(() => {
       expect(measureStore.subscribe as jest.Mock).toHaveBeenCalled();
@@ -756,71 +792,122 @@ describe("map elm errors to Ace Markers", () => {
       type: "text",
     });
   });
-});
 
-it("Save button and Cancel button should not show if user is not the owner of the measure", () => {
-  (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
-  renderEditor(measure);
+  it("Save button and Cancel button should not show if user is not the owner of the measure", () => {
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
+    renderEditor(measure);
 
-  const cancelButton = screen.queryByTestId("reset-cql-btn");
-  expect(cancelButton).not.toBeInTheDocument();
-  const saveButton = screen.queryByTestId("save-cql-btn");
-  expect(saveButton).not.toBeInTheDocument();
-});
+    const cancelButton = screen.queryByTestId("reset-cql-btn");
+    expect(cancelButton).not.toBeInTheDocument();
+    const saveButton = screen.queryByTestId("save-cql-btn");
+    expect(saveButton).not.toBeInTheDocument();
+  });
 
-it("Save button and Cancel button should show if measure is shared with the user", () => {
-  (checkUserCanEdit as jest.Mock).mockImplementation(() => true);
-  renderEditor(measure);
+  it("Save button and Cancel button should show if measure is shared with the user", () => {
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => true);
+    renderEditor(measure);
 
-  const cancelButton = screen.queryByTestId("reset-cql-btn");
-  expect(cancelButton).toBeInTheDocument();
-  const saveButton = screen.queryByTestId("save-cql-btn");
-  expect(saveButton).toBeInTheDocument();
-});
+    const cancelButton = screen.queryByTestId("reset-cql-btn");
+    expect(cancelButton).toBeInTheDocument();
+    const saveButton = screen.queryByTestId("save-cql-btn");
+    expect(saveButton).toBeInTheDocument();
+  });
 
-it("should display errors if not logged into umls", async () => {
-  const elmTransaltionErrorsUMLS: ElmTranslationError[] = [
-    {
-      startLine: 24,
-      startChar: 7,
-      endLine: 24,
-      endChar: 15,
-      errorSeverity: "Warning",
-      errorType: "ELM",
-      message: "Please log in to UMLS",
-      targetIncludeLibraryId: "TestLibrary_QICore",
-      targetIncludeLibraryVersionId: "5.0.000",
-      type: "VSAC",
-    },
-  ];
+  it("should display errors if not logged into umls", async () => {
+    const elmTransaltionErrorsUMLS: ElmTranslationError[] = [
+      {
+        startLine: 24,
+        startChar: 7,
+        endLine: 24,
+        endChar: 15,
+        errorSeverity: "Warning",
+        errorType: "ELM",
+        message: "Please log in to UMLS",
+        targetIncludeLibraryId: "TestLibrary_QICore",
+        targetIncludeLibraryVersionId: "5.0.000",
+        type: "VSAC",
+      },
+    ];
 
-  (validateContent as jest.Mock).mockClear().mockImplementation(() => {
-    return Promise.resolve({
-      errors: elmTransaltionErrorsUMLS,
-      translation: null,
-      externalErrors: [],
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: elmTransaltionErrorsUMLS,
+        translation: null,
+        externalErrors: [],
+      });
     });
-  });
 
-  const measureWithCqlCodes = {
-    ...measure,
-    cql:
-      "library DuplicateMeasureTest version '0.0.000'\n" +
-      "\n" +
-      "using FHIR version '4.0.1'\n" +
-      "\n" +
-      "codesystem \"ActPriority:HL7V3.0_2021-03\": 'https://terminology.hl7.org/CodeSystem/v3-ActPriority' version 'HL7V3.0_2021-03'\n" +
-      "code \"preop\": 'P' from \"ActPriority:HL7V3.0_2021-03\" display 'preop'",
-  };
-  mockedAxios.put.mockImplementation((args) => {
-    if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-      return Promise.resolve({ data: measureWithCqlCodes });
-    }
-  });
+    const measureWithCqlCodes = {
+      ...measure,
+      cql:
+        "library DuplicateMeasureTest version '0.0.000'\n" +
+        "\n" +
+        "using FHIR version '4.0.1'\n" +
+        "\n" +
+        "codesystem \"ActPriority:HL7V3.0_2021-03\": 'https://terminology.hl7.org/CodeSystem/v3-ActPriority' version 'HL7V3.0_2021-03'\n" +
+        "code \"preop\": 'P' from \"ActPriority:HL7V3.0_2021-03\" display 'preop'",
+    };
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measureWithCqlCodes });
+      }
+    });
 
-  renderEditor(measureWithCqlCodes);
-  const issues = await screen.findByText("1 issues found with CQL");
-  expect(issues).toBeInTheDocument();
-  const loggedIn = await screen.findByText("Please log in to UMLS!");
-  expect(loggedIn).toBeInTheDocument();
+    renderEditor(measureWithCqlCodes);
+    const issues = await screen.findByText("1 issues found with CQL");
+    expect(issues).toBeInTheDocument();
+    const loggedIn = await screen.findByText("Please log in to UMLS!");
+    expect(loggedIn).toBeInTheDocument();
+  });
+});
+
+describe("EditorWithTerminology", () => {
+  it("should remove cql code successfully", async () => {
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => {
+        return {
+          cql: "library RemoveCodeTest version '0.0.000'\nusing QDM version '5.6'",
+          isLibraryStatementChanged: false,
+          isUsingStatementChanged: false,
+          isValueSetChanged: false,
+        };
+      });
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        translation: null,
+        externalErrors: [],
+      });
+    });
+    const measureWithCqlCodes = {
+      ...measure,
+      model: Model.QDM_5_6,
+      cql:
+        "library RemoveCodeTest version '0.0.000'\n" +
+        "\n" +
+        "using QDM version '5.6'\n" +
+        "\n" +
+        "codesystem \"RXNORM:2022-05\": 'urn:oid:2.16.840.1.113883.6.88' version 'urn:hl7:version:2022-05'\n" +
+        "code \"1 ML digoxin 0.1 MG/ML Injection\": '204504' from \"RXNORM:2022-05\" display '1 ML digoxin 0.1 MG/ML Injection'",
+    } as Measure;
+    const cqlWithNoCodes =
+      "library RemoveCodeTest version '0.0.000'using QDM version '5.6'";
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measureWithCqlCodes });
+      }
+    });
+    renderEditor(measureWithCqlCodes);
+    const removeCodeBtn = await screen.findByText("Remove code");
+    expect(removeCodeBtn).toBeInTheDocument();
+    userEvent.click(removeCodeBtn);
+    await waitFor(() => {
+      const editor = screen.getByTestId("measure-editor");
+      expect(editor).toHaveValue(cqlWithNoCodes);
+    });
+    expect(screen.getByTestId("measure-errors-toast")).toHaveTextContent(
+      "code 204504 and code system RXNORM has been successfully removed from the CQL"
+    );
+  });
 });

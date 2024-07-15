@@ -23,3 +23,30 @@ export function MadieEditor({ onChange, value, inboundAnnotations }) {
     </>
   );
 }
+
+export function MadieTerminologyEditor({ onChange, value, handleCodeDelete }) {
+  const code = {
+    codeSystem: "RXNORM",
+    codeSystemOid: "2.16.840.1.113883.6.88",
+    display: "1 ML digoxin 0.1 MG/ML Injection",
+    fhirVersion: "05022022",
+    name: "204504",
+    status: "ACTIVE",
+    svsVersion: "2022-05",
+    versionIncluded: true,
+  };
+  return (
+    <>
+      <input
+        data-testid="measure-editor"
+        value={value}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+          onChange(e.target.value);
+        }}
+      />
+      <button data-testid="delete-code" onClick={() => handleCodeDelete(code)}>
+        Remove code
+      </button>
+    </>
+  );
+}

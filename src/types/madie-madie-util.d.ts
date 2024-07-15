@@ -14,6 +14,8 @@ declare module "@madie/madie-util" {
     enableQdmRepeatTransfer: boolean;
     generateCMSID: boolean;
     qdmCodeSearch: boolean;
+    MeasureListCheckboxes: boolean;
+    associateMeasures: boolean;
   }
 
   export interface ServiceConfig {
@@ -63,6 +65,7 @@ declare module "@madie/madie-util" {
     getIdTokenObj: () => any;
   };
   export function useOnClickOutside(ref: any, handler: any): void;
+  export function wafIntercept(): void;
 
   export class TerminologyServiceApi {
     constructor(baseUrl: string, getAccessToken: () => string);
@@ -81,6 +84,8 @@ declare module "@madie/madie-util" {
     acls: Array<Acl>,
     draft?: boolean
   ): boolean;
+
+  export function wafIntercept(): void;
 
   export const bootstrap: LifeCycleFn<void>;
   export const mount: LifeCycleFn<void>;

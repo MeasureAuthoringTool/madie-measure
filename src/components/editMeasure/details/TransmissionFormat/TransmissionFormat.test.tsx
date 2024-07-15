@@ -57,11 +57,10 @@ jest.mock("@madie/madie-util", () => ({
 }));
 
 const serviceConfig: ServiceConfig = {
+  fhirElmTranslationService: { baseUrl: "fhir/services" },
+  qdmElmTranslationService: { baseUrl: "qdm/services" },
   measureService: {
     baseUrl: "base.url",
-  },
-  elmTranslationService: {
-    baseUrl: "",
   },
   terminologyService: { baseUrl: "" },
 };

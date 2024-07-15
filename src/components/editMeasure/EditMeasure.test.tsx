@@ -204,6 +204,7 @@ afterEach(cleanup);
 describe("EditMeasure Component", () => {
   beforeEach(() => {
     measureStore.state.mockImplementation(() => measure);
+    measure.testCases = testCases;
   });
   it("should render a loading page if the measure is not yet loaded", async () => {
     renderRouter();
@@ -259,6 +260,20 @@ describe("EditMeasure Component", () => {
     });
   });
 
+  it("should render edit measure menu with zero test cases", async () => {
+    measure.testCases = [];
+    renderRouter();
+    //verify all menus present in the dom
+    expect(await findByText("Details")).toBeInTheDocument();
+    expect(await findByText("CQL Editor")).toBeInTheDocument();
+    expect(await findByText("Population Criteria")).toBeInTheDocument();
+    expect(await findByText(`Test Cases (0)`)).toBeInTheDocument();
+    const detailsLink = await findByText("Details");
+    await waitFor(() => {
+      expect(detailsLink).toHaveAttribute("aria-selected", "true");
+    });
+  });
+
   it("should render editor", async () => {
     renderRouter([{ pathname: "/measures/fakeid/edit/cql-editor/" }]);
     const editorLink = await findByText("CQL Editor");
@@ -278,7 +293,7 @@ describe("EditMeasure Component", () => {
   });
   it("should render test-cases", async () => {
     renderRouter([{ pathname: "/measures/fakeid/edit/test-cases/" }]);
-    const tcLink = await findByText("Test Cases (0)");
+    const tcLink = await findByText("Test Cases");
     expect(tcLink).toHaveAttribute("aria-selected", "true");
   });
 
