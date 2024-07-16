@@ -161,7 +161,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   // tell our routehandler no go
   const { updateRouteHandlerState } = routeHandlerStore;
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
-  const [cmsIdDialogOpen, setcmsIdDialogOpen] = useState(false);
+  const [cmsIdDialogOpen, setCmsIdDialogOpen] = useState(false);
 
   useEffect(() => {
     updateRouteHandlerState({
