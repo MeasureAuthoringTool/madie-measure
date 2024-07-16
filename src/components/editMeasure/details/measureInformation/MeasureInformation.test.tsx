@@ -556,6 +556,39 @@ describe("MeasureInformation component", () => {
     ).toBeInTheDocument();
   });
 
+  it("cms id popup closes on cancel click", async () => {
+    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    measure.measureSet = {
+      id: "id1",
+      measureSetId: "testMeasureId",
+      owner: "test.com",
+    };
+
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    const result: HTMLElement = screen.getByTestId("measure-information-form");
+    expect(result).toBeInTheDocument();
+    const cmsIdBtn = screen.getByTestId(
+      "generate-cms-id-button"
+    ) as HTMLInputElement;
+    expect(cmsIdBtn).toBeEnabled();
+    userEvent.click(cmsIdBtn);
+    const cmsPopupBtn = screen.getByTestId(
+      "cms-identifier-dialog-continue-button"
+    );
+    expect(cmsPopupBtn).toBeInTheDocument();
+    const cmsCancelBtn = screen.getByTestId(
+      "cms-identifier-dialog-cancel-button"
+    );
+    expect(cmsCancelBtn).toBeInTheDocument();
+    userEvent.click(cmsCancelBtn);
+    const cmsPopupText = screen.queryByText(
+      "Are you sure you wish to generate a CMS ID?"
+    );
+    await waitFor(() => {
+      expect(cmsPopupText).not.toBeInTheDocument();
+    });
+  });
+
   it("Should display measure Version ID when it is not null", async () => {
     measure.versionId = "testVersionId";
     render(<MeasureInformation setErrorMessage={setErrorMessage} />);
