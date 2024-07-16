@@ -84,8 +84,8 @@ const EditMeasureNav = ({ isQDM }) => {
             component={NavLink}
           />
           <Tab
-            value={isQDM ? `base-configuration` : `groups`}
-            to={isQDM ? `base-configuration` : `groups/1`}
+            value={isQDM ? `base-configuration` : `popc`}
+            to={isQDM ? `base-configuration` : `popc/groups/1`}
             data-testid="groups-tab"
             type="A"
             size="large"

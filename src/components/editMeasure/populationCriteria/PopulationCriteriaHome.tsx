@@ -35,7 +35,7 @@ export function PopulationCriteriaHome() {
   const [sideNavLinks, setSideNavLinks] = useState<Array<any>>();
   const [isFormDirty, setIsFormDirty] = useState<boolean>(false);
 
-  const groupsBaseUrl = "/measures/" + measure?.id + "/edit/groups";
+  const groupsBaseUrl = "/measures/" + measure?.id + "/edit/popc/groups";
 
   // this works for a specific QDM version
   // If we specify weather the string contains QDM, we can have a more flexible check. All QDM versions will trigger that render, then we can handle differently

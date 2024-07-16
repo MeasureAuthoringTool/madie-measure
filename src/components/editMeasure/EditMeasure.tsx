@@ -171,19 +171,19 @@ export default function EditMeasure() {
           <Route path={`/cql-editor`} element={<MeasureEditor />} />
           <Route path={`/test-cases/*`} element={<MadiePatient />} />
           <Route
-            path={`/groups/:groupNumber`}
+            path={`/popc/groups/:groupNumber`}
             element={<PopulationCriteriaWrapper />}
           />
           <Route
-            path={`/supplemental-data`}
+            path={`/popc/supplemental-data`}
             element={<PopulationCriteriaWrapper />}
           />
           <Route
-            path={`/risk-adjustment`}
+            path={`/popc/risk-adjustment`}
             element={<PopulationCriteriaWrapper />}
           />
           <Route
-            path={`/base-configuration`}
+            path={`/popc/base-configuration`}
             element={<PopulationCriteriaWrapper />}
           />
           <Route path={`/reporting`} element={<PopulationCriteriaWrapper />} />

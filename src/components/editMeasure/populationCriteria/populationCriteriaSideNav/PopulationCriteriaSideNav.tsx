@@ -39,7 +39,7 @@ export default function PopulationCriteriaSideNav(
   const [showPopulationCriteriaTabs, setShowPopulationCriteriaTabs] =
     useState<boolean>(true);
   let navigate = useNavigate();
-  const groupsBaseUrl = "/measures/" + measureId + "/edit/groups";
+  const groupsBaseUrl = "/measures/" + measureId + "/edit/popc/groups";
   const QdmReportingBaseUrl = "/measures/" + measureId + "/edit/reporting";
 
   const initiateBlankMeasureGroupClick = (e) => {
@@ -88,11 +88,11 @@ export default function PopulationCriteriaSideNav(
   };
 
   const baseConfigurationUrl =
-    "/measures/" + measureId + "/edit/base-configuration";
+    "/measures/" + measureId + "/edit/popc/base-configuration";
   const supplementalDataBaseUrl =
-    "/measures/" + measureId + "/edit/supplemental-data";
+    "/measures/" + measureId + "/edit/popc/supplemental-data";
   const riskAdjustmentBaseUrl =
-    "/measures/" + measureId + "/edit/risk-adjustment";
+    "/measures/" + measureId + "/edit/popc/risk-adjustment";
   const additionalLinks = [
     {
       label: "Supplemental Data",
