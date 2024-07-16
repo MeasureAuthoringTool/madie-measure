@@ -1,5 +1,5 @@
 import * as React from "react";
-import { MeasureCQL } from "../../../common/MeasureCQL";
+import { MeasureCQL } from "../../../../common/MeasureCQL";
 import {
   render,
   screen,
@@ -12,10 +12,10 @@ import { Measure } from "@madie/madie-models";
 import {
   ServiceConfig,
   ApiContextProvider,
-} from "../../../../api/ServiceContext";
+} from "../../../../../api/ServiceContext";
 import useMeasureServiceApi, {
   MeasureServiceApi,
-} from "../../../../api/useMeasureServiceApi";
+} from "../../../../../api/useMeasureServiceApi";
 import { checkUserCanEdit } from "@madie/madie-util";
 import SupplementalData from "./SupplementalData";
 
@@ -23,8 +23,11 @@ const serviceConfig: ServiceConfig = {
   measureService: {
     baseUrl: "example-service-url",
   },
-  elmTranslationService: {
-    baseUrl: "test-elm-service",
+  qdmElmTranslationService: {
+    baseUrl: "test-qdm-elm-service",
+  },
+  fhirElmTranslationService: {
+    baseUrl: "test-fhir-elm-service",
   },
   terminologyService: {
     baseUrl: "terminology-service.com",
@@ -77,7 +80,7 @@ jest.mock("@madie/madie-util", () => ({
   },
 }));
 
-jest.mock("../../../../api/useMeasureServiceApi");
+jest.mock("../../../../../api/useMeasureServiceApi");
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 let measureServiceApi: MeasureServiceApi;
@@ -116,15 +119,17 @@ describe("SupplementalData Component", () => {
       screen.getByRole("button", { name: "Initial Population" })
     ).toBeInTheDocument();
 
-    const comboBoxInput = screen.getByRole("combobox");
-    expect(comboBoxInput).toBeDisabled();
+    const comboBoxInputs = screen.getAllByRole("combobox");
+    for (const comboBoxInput of comboBoxInputs) {
+      expect(comboBoxInput).toBeDisabled();
+    }
 
     const description = screen.getByTestId("supplementalDataDescription");
     expect(description).toHaveTextContent("test description");
     expect(description).toBeDisabled();
   });
 
-  it("Should successfully update supplemental Elements values and save to DB", async () => {
+  it("Should successfully update supplemental Elements values with default IncludeInReportTypes and save to DB", async () => {
     checkUserCanEdit.mockReturnValue(true);
     // Mocking service call to update measure
     const newSupplementalData = [
@@ -135,6 +140,12 @@ describe("SupplementalData Component", () => {
       {
         definition: "SDE Ethnicity",
         description: "",
+        includeInReportType: [
+          "Individual",
+          "Subject List",
+          "Summary",
+          "Data Collection",
+        ],
       },
     ];
     const newSupplementalDataDescription = "Updated test description";
@@ -163,6 +174,18 @@ describe("SupplementalData Component", () => {
     const supplementalDataButton = within(
       suppolementalElementsSelect
     ).getByTitle("Open");
+    const includeInReportTypeContainer = screen.getByTestId(
+      "Initial Population-supplemental-data-dropdown"
+    );
+    expect(
+      within(includeInReportTypeContainer).queryByText("Individual")
+    ).not.toBeInTheDocument();
+    expect(
+      within(includeInReportTypeContainer).queryByText("Subject List")
+    ).not.toBeInTheDocument();
+    expect(
+      within(includeInReportTypeContainer).queryByText("+2")
+    ).not.toBeInTheDocument();
 
     userEvent.click(supplementalDataButton);
     await waitFor(() => {
@@ -255,7 +278,7 @@ describe("SupplementalData Component", () => {
   });
 
   it("Should not discard changes on click of cancel button on discard model", async () => {
-    RenderSupplementalElements();
+    const { container } = RenderSupplementalElements();
 
     // Verifies if SD already loads values from store and able to add new
     const supplementalDataSelect = screen.getByTestId(
@@ -308,6 +331,18 @@ describe("SupplementalData Component", () => {
     //Verifies if the form values are not discarded
     expect(description).toHaveTextContent("Updated test description");
     expect(screen.getByText("+1")).toBeInTheDocument(); // We are limiting the selected options displayed
+    const includeInReportTypeContainer = screen.getByTestId(
+      "SDE Ethnicity-supplemental-data-dropdown"
+    );
+    expect(
+      within(includeInReportTypeContainer).getByText("Individual")
+    ).toBeInTheDocument();
+    expect(
+      within(includeInReportTypeContainer).getByText("Subject List")
+    ).toBeInTheDocument();
+    expect(
+      within(includeInReportTypeContainer).getByText("+2")
+    ).toBeInTheDocument();
   });
 
   it("should reset after discarding changes", async () => {

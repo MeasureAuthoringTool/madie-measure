@@ -52,6 +52,7 @@ const MultipleSelectDropDown = ({
   options,
   multipleSelect = true,
   limitTags = 1,
+  textFieldInputProps = undefined,
   // formControl, // is not referenced, already passed as prop
   onClose,
   ...rest
@@ -115,9 +116,13 @@ const MultipleSelectDropDown = ({
         renderInput={(params) => {
           const { inputProps } = params;
           inputProps["aria-required"] = required;
-          inputProps["aria-describedby"] = "measure-group-type-helper-text";
+          inputProps["aria-describedby"] =
+            textFieldInputProps?.["aria-describedby"] ??
+            "measure-group-type-helper-text";
           inputProps["aria-label"] =
+            textFieldInputProps?.["aria-label"] ??
             "Measure types multiple measure types can be selected";
+
           return (
             <TextField
               label={labelReadable}
@@ -150,6 +155,10 @@ MultipleSelectDropDown.propTypes = {
   options: PropTypes.arrayOf(PropTypes.string),
   multipleSelect: PropTypes.bool,
   limitTags: PropTypes.number,
+  textFieldInputProps: PropTypes.shape({
+    "aria-describedby": PropTypes.string,
+    "aria-label": PropTypes.string,
+  }),
 };
 
 export default MultipleSelectDropDown;

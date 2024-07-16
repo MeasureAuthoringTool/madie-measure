@@ -2,7 +2,6 @@ import React, { lazy, useEffect, useMemo, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import SupplementalData from "./supplementalData/SupplementalData";
 import RiskAdjustment from "./riskAdjustment/RiskAdjustment";
 import PopulationCriteriaSideNav from "./populationCriteriaSideNav/PopulationCriteriaSideNav";
 import { checkUserCanEdit, measureStore } from "@madie/madie-util";
@@ -36,6 +35,21 @@ export function PopulationCriteriaHome() {
   const [isFormDirty, setIsFormDirty] = useState<boolean>(false);
 
   const groupsBaseUrl = "/measures/" + measure?.id + "/edit/groups";
+
+  const SupplementalDataComponent = useMemo(
+    () =>
+      lazy(() => {
+        if (measure?.model.includes("QDM")) {
+          return import("./supplementalData/qdm/SupplementalData");
+        }
+        if (measure?.model.includes("QI-Core")) {
+          return import("./supplementalData/qiCore/SupplementalData");
+        } else {
+          return import("./supplementalData/EmptySupplementalData");
+        }
+      }),
+    [measure?.model]
+  );
 
   // this works for a specific QDM version
   // If we specify weather the string contains QDM, we can have a more flexible check. All QDM versions will trigger that render, then we can handle differently
@@ -133,7 +147,7 @@ export function PopulationCriteriaHome() {
           To do: Find a more elegant solution for future when we have more than two models to avoid if else if else. */}
       {pathname.includes("reporting") && <QDMReporting />}
 
-      {pathname.includes("/supplemental-data") && <SupplementalData />}
+      {pathname.includes("/supplemental-data") && <SupplementalDataComponent />}
 
       {pathname.includes("/risk-adjustment") && <RiskAdjustment />}
     </div>
