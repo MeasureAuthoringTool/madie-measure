@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import ErrorIcon from "@mui/icons-material/Error";
 import { MadieDialog } from "@madie/madie-design-system/dist/react";
 
-const CMSIdentifierPopup = ({ open, onClose, onContinue }) => (
+const GenerateCmsIdConfirmationDialog = ({ open, onClose, onContinue }) => (
   <MadieDialog
     title="Generate CMS ID"
     dialogProps={{
@@ -27,7 +27,6 @@ const CMSIdentifierPopup = ({ open, onClose, onContinue }) => (
   >
     <div id="discard-changes-dialog-body">
       <section className="dialog-warning-body">
-        {/* <p>This will add .</p> */}
         <p className="strong">Are you sure you wish to generate a CMS ID?</p>
       </section>
       <section className="dialog-warning-action"></section>
@@ -35,10 +34,10 @@ const CMSIdentifierPopup = ({ open, onClose, onContinue }) => (
   </MadieDialog>
 );
 
-CMSIdentifierPopup.propTypes = {
+GenerateCmsIdConfirmationDialog.propTypes = {
   open: PropTypes.bool,
   onClose: PropTypes.func,
   onContinue: PropTypes.func,
 };
 
-export default CMSIdentifierPopup;
+export default GenerateCmsIdConfirmationDialog;
