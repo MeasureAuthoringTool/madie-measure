@@ -5,7 +5,7 @@ import { MadieDialog } from "@madie/madie-design-system/dist/react";
 
 const CMSIdentifierPopup = ({ open, onClose, onContinue }) => (
   <MadieDialog
-    title="Add a CMS ID?"
+    title="Generate CMS ID"
     dialogProps={{
       open: open,
       onClose,
@@ -14,28 +14,23 @@ const CMSIdentifierPopup = ({ open, onClose, onContinue }) => (
     cancelButtonProps={{
       variant: "secondary",
       onClick: onClose,
-      cancelText: "No",
+      cancelText: "Cancel",
       "data-testid": "cms-identifier-dialog-cancel-button",
     }}
     continueButtonProps={{
       variant: "primary",
       type: "submit",
       "data-testid": "cms-identifier-dialog-continue-button",
-      continueText: "Yes, Add CMS Identifier",
+      continueText: "Yes, Generate",
       onClick: onContinue,
     }}
   >
     <div id="discard-changes-dialog-body">
       <section className="dialog-warning-body">
         {/* <p>This will add .</p> */}
-        <p className="strong">
-          Are you sure you want to add a CMS ID to this measure?
-        </p>
+        <p className="strong">Are you sure you wish to generate a CMS ID?</p>
       </section>
-      <section className="dialog-warning-action">
-        <ErrorIcon />
-        <p>This Action cannot be undone.</p>
-      </section>
+      <section className="dialog-warning-action"></section>
     </div>
   </MadieDialog>
 );
