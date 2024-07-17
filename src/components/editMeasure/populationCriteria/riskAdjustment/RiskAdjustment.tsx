@@ -126,19 +126,7 @@ const RiskAdjustment = () => {
       handleSubmit={formik.handleSubmit}
       onCancel={onCancel}
     >
-      <div tw="flex flex-col" data-testid="risk-adjustment">
-        <InputLabel htlmfor="riskAdjustmentDescription">Description</InputLabel>
-        <TextArea
-          {...formik.getFieldProps("riskAdjustmentDescription")}
-          name="riskAdjustmentDescription"
-          id="riskAdjustmentDescription"
-          disabled={!canEdit}
-          placeholder="Description"
-          data-testid="riskAdjustmentDescription"
-          className="risk-description"
-        />
-      </div>
-      <div tw="flex mt-6 w-1/4">
+      <div tw="flex mt-6 w-1/4 pb-7">
         <MultipleSelectDropDown
           formControl={formik.getFieldProps("riskAdjustments")}
           value={formik.values.riskAdjustments?.map((ra) => ra?.definition)}
@@ -183,6 +171,18 @@ const RiskAdjustment = () => {
               formik.setFieldValue("riskAdjustments", []);
             }
           }}
+        />
+      </div>
+      <div tw="flex flex-col" data-testid="risk-adjustment">
+        <InputLabel htlmfor="riskAdjustmentDescription">Description</InputLabel>
+        <TextArea
+          {...formik.getFieldProps("riskAdjustmentDescription")}
+          name="riskAdjustmentDescription"
+          id="riskAdjustmentDescription"
+          disabled={!canEdit}
+          placeholder="Description"
+          data-testid="riskAdjustmentDescription"
+          className="risk-description"
         />
       </div>
       <Toast
