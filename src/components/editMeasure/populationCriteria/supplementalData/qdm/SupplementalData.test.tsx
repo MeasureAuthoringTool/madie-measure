@@ -1,5 +1,4 @@
 import * as React from "react";
-import { MeasureCQL } from "../../../../common/MeasureCQL";
 import {
   render,
   screen,
@@ -18,6 +17,7 @@ import useMeasureServiceApi, {
 } from "../../../../../api/useMeasureServiceApi";
 import { checkUserCanEdit } from "@madie/madie-util";
 import SupplementalData from "./SupplementalData";
+import { QdmMeasureCQL } from "../../../../common/QdmMeasureCQL";
 
 const serviceConfig: ServiceConfig = {
   measureService: {
@@ -37,14 +37,14 @@ const serviceConfig: ServiceConfig = {
 const mockTestMeasure = {
   id: "test measure",
   createdBy: "matt",
-  model: "QI-Core v4.1.1",
+  model: "QDM v5.6",
   measureName: "the measure for testing",
   cqlLibraryName: "TestCqlLibraryName",
   ecqmTitle: "ecqmTitle",
   measurementPeriodStart: "01/01/2022",
   measurementPeriodEnd: "12/02/2022",
   measureSetId: "testMeasureId",
-  cql: MeasureCQL,
+  cql: QdmMeasureCQL,
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
   supplementalData: [
     {

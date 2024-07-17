@@ -242,7 +242,7 @@ const SupplementalData = () => {
                 <MultipleSelectDropDown
                   value={supplementalData.includeInReportType ?? []}
                   id={`${supplementalData.definition}-supplemental-data`}
-                  label={`${supplementalData.definition} - Included in Report Type`}
+                  label={`${supplementalData.definition} - Include in Report Type`}
                   placeHolder={[{ code: "", display: "" }]}
                   disabled={!canEdit}
                   error={false}
@@ -251,7 +251,7 @@ const SupplementalData = () => {
                   tw="mb-5"
                   limitTags={2}
                   textFieldInputProps={{
-                    "aria-label": `${supplementalData.definition} - Included in Report Type`,
+                    "aria-label": `${supplementalData.definition} - Include in Report Type`,
                   }}
                   options={measureReportTypeOptions}
                   onClose={() => {}}

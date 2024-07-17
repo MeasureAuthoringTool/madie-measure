@@ -1,17 +1,23 @@
 import * as React from "react";
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
 import PopulationCriteriaWrapper from "./PopulationCriteriaWrapper";
 import { measureStore } from "@madie/madie-util";
+import { QdmMeasureCQL } from "../../common/QdmMeasureCQL";
+import { Measure } from "@madie/madie-models";
+import { MeasureCQL } from "../../common/MeasureCQL";
 
 const serviceConfig: ServiceConfig = {
   measureService: {
     baseUrl: "example-service-url",
   },
-  elmTranslationService: {
-    baseUrl: "test-elm-service",
+  qdmElmTranslationService: {
+    baseUrl: "test-qdm-elm-service",
+  },
+  fhirElmTranslationService: {
+    baseUrl: "test-fhir-elm-service",
   },
   terminologyService: {
     baseUrl: "terminology-service.com",
@@ -39,6 +45,7 @@ const qdmMeasure = {
       scoringUnit: "",
     },
   ],
+  cql: QdmMeasureCQL,
 };
 
 const QiCoreMeasure = {
@@ -64,7 +71,7 @@ const QiCoreMeasure = {
       scoringUnit: "",
     },
   ],
-};
+} as Measure;
 
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
@@ -117,6 +124,11 @@ const renderPopulationCriteriaHomeComponent = async (
 
 describe("PopulationCriteriaHome", () => {
   const { findByTestId } = screen;
+
+  beforeEach(() => {
+    QiCoreMeasure.cql = MeasureCQL;
+  });
+
   it.skip("should render Measure Groups component with group from measure along with side nav", async () => {
     // needs to be fixed
     renderPopulationCriteriaHomeComponent("groups/:groupNumber", "groups/1");
@@ -297,5 +309,74 @@ describe("PopulationCriteriaHome", () => {
     renderPopulationCriteriaHomeComponent("groups/:groupNumber", "groups/1");
     const QDMPage = await findByTestId("qdm-groups");
     expect(QDMPage).toBeInTheDocument();
+  });
+
+  it("should render the QDM Supplemental Data page for QDM measures", async () => {
+    const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
+    mockedMeasureState.state = { ...qdmMeasure };
+    await renderPopulationCriteriaHomeComponent(
+      "supplemental-data",
+      "supplemental-data"
+    );
+    expect(
+      await screen.findByRole("textbox", { name: "Description" })
+    ).toBeInTheDocument();
+    const allComboBoxes = screen.getAllByRole("combobox");
+    expect(allComboBoxes.length).toEqual(1);
+
+    userEvent.click(screen.getByRole("button", { name: "Open" }));
+    await waitFor(() => {
+      userEvent.click(screen.getByText("SDE Ethnicity"));
+    });
+    expect(
+      screen.getByRole("button", { name: "SDE Ethnicity" })
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByText("SDE Ethnicity - Include in Report Type")
+    ).not.toBeInTheDocument();
+  });
+
+  it("should render the QI-Core Supplemental Data page for QI-Core measures", async () => {
+    const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
+    mockedMeasureState.state = { ...QiCoreMeasure };
+    await renderPopulationCriteriaHomeComponent(
+      "supplemental-data",
+      "supplemental-data"
+    );
+    expect(
+      await screen.findByRole("textbox", { name: "Description" })
+    ).toBeInTheDocument();
+    const allComboBoxes = screen.getAllByRole("combobox");
+    expect(allComboBoxes.length).toEqual(1);
+
+    userEvent.click(screen.getByRole("button", { name: "Open" }));
+    await waitFor(() => {
+      userEvent.click(screen.getByText("SDE Ethnicity"));
+    });
+    expect(
+      screen.getByRole("button", { name: "SDE Ethnicity" })
+    ).toBeInTheDocument();
+
+    expect(
+      await screen.findByText("SDE Ethnicity - Include in Report Type")
+    ).toBeInTheDocument();
+
+    const allComboBoxes2 = screen.getAllByRole("combobox");
+    expect(allComboBoxes2.length).toEqual(2);
+  });
+
+  it("should render the Empty Supplemental Data page for no measure", async () => {
+    const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
+    mockedMeasureState.state = undefined;
+    await renderPopulationCriteriaHomeComponent(
+      "supplemental-data",
+      "supplemental-data"
+    );
+    expect(
+      screen.queryByRole("textbox", { name: "Description" })
+    ).not.toBeInTheDocument();
+    const allComboBoxes = screen.queryAllByRole("combobox");
+    expect(allComboBoxes.length).toEqual(0);
   });
 });

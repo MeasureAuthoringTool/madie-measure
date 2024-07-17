@@ -39,10 +39,10 @@ export function PopulationCriteriaHome() {
   const SupplementalDataComponent = useMemo(
     () =>
       lazy(() => {
-        if (measure?.model.includes("QDM")) {
+        if (measure?.model?.includes("QDM")) {
           return import("./supplementalData/qdm/SupplementalData");
         }
-        if (measure?.model.includes("QI-Core")) {
+        if (measure?.model?.includes("QI-Core")) {
           return import("./supplementalData/qiCore/SupplementalData");
         } else {
           return import("./supplementalData/EmptySupplementalData");
