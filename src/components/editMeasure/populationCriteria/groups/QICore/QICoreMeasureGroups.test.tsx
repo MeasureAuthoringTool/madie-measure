@@ -30,10 +30,7 @@ import axios from "../../../../../api/axios-insatnce";
 import { getPopulationsForScoring } from "../../PopulationHelper";
 import * as _ from "lodash";
 // @ts-ignore
-import {
-  measureStore,
-  checkUserCanEdit,
-} from "@madie/madie-util";
+import { measureStore, checkUserCanEdit } from "@madie/madie-util";
 import { InitialPopulationAssociationType } from "../groupPopulations/GroupPopulation";
 // fix error about window.scrollto
 global.scrollTo = jest.fn();

@@ -38,7 +38,7 @@ import {
   routeHandlerStore,
   useDocumentTitle,
   checkUserCanEdit,
-  useFeatureFlags
+  useFeatureFlags,
 } from "@madie/madie-util";
 import MeasureGroupsWarningDialog from "../MeasureGroupWarningDialog";
 import {
