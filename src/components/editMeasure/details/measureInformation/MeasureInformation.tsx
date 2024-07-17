@@ -30,6 +30,7 @@ import CmsIdentifier from "../cmsIdentifier/CmsIdentifier";
 import { QdmMeasureSchemaValidator } from "../../../../validations/QDMMeasureSchemaValidator";
 import useQdmElmTranslationServiceApi from "../../../../api/useQdmElmTranslationServiceApi";
 import useFhirElmTranslationServiceApi from "../../../../api/useFhirElmTranslationServiceApi";
+import GenerateCmsIdConfirmationDialog from "../cmsIdentifier/GenerateCmsIdConfirmationDialog";
 
 interface measureInformationForm {
   versionId: string;
@@ -160,6 +161,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   // tell our routehandler no go
   const { updateRouteHandlerState } = routeHandlerStore;
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
+  const [cmsIdDialogOpen, setCmsIdDialogOpen] = useState(false);
 
   useEffect(() => {
     updateRouteHandlerState({
@@ -489,7 +491,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
               label="CMS ID"
               cmsId={measure?.measureSet?.cmsId}
               model={measure?.model}
-              onClick={() => createCmsId(measure?.measureSet?.measureSetId)}
+              onClick={() => setCmsIdDialogOpen(true)}
             />
           ) : (
             <ReadOnlyTextField
@@ -631,6 +633,15 @@ export default function MeasureInformation(props: MeasureInformationProps) {
           setDiscardDialogOpen(false);
         }}
         onClose={() => setDiscardDialogOpen(false)}
+      />
+
+      <GenerateCmsIdConfirmationDialog
+        open={cmsIdDialogOpen}
+        onContinue={async () => {
+          await createCmsId(measure?.measureSet?.measureSetId);
+          setCmsIdDialogOpen(false);
+        }}
+        onClose={() => setCmsIdDialogOpen(false)}
       />
     </form>
   );
