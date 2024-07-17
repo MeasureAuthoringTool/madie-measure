@@ -38,6 +38,7 @@ import {
   routeHandlerStore,
   useDocumentTitle,
   checkUserCanEdit,
+  useFeatureFlags
 } from "@madie/madie-util";
 import MeasureGroupsWarningDialog from "../MeasureGroupWarningDialog";
 import {
@@ -52,7 +53,6 @@ import MeasureGroupAlerts from "../MeasureGroupAlerts";
 import AddRemovePopulation from "../groupPopulations/AddRemovePopulation";
 import GroupsDescription from "../GroupsDescription";
 import MultipleSelectDropDown from "../../MultipleSelectDropDown";
-// import Add
 import camelCaseConverter from "../../../../../utils/camelCaseConverter";
 
 import "../../../../common/madie-link.scss";
@@ -176,6 +176,7 @@ const INITIAL_ALERT_MESSAGE = {
 
 const MeasureGroups = (props: MeasureGroupProps) => {
   useDocumentTitle("MADiE Edit Measure Population Criteria");
+  const featureFlags = useFeatureFlags();
   const defaultPopulationBasis = "boolean";
   const [expressionDefinitions, setExpressionDefinitions] = useState<
     Array<ExpressionDefinition>
@@ -772,7 +773,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                         onKeyDown={goBackToNav}
                         {...formik.getFieldProps("groupDescription")}
                       />
-                      {!canEdit && formik.values.groupDescription}
                     </FieldSeparator>
                   </FormFieldInner>
                 </div>
@@ -1139,47 +1139,84 @@ const MeasureGroups = (props: MeasureGroupProps) => {
 
                                       {/*Association Select*/}
                                       <div tw="pt-4">
-                                        <Select
-                                          disabled={!canEdit}
-                                          placeHolder={{
-                                            name: "Select Association",
-                                            value: null,
-                                          }}
-                                          label={`Association ${i + 1}`}
-                                          id={`association-select-${i + 1}`}
-                                          aria-describedby={`association-select-${
-                                            i + 1
-                                          }-helper-text`}
-                                          inputProps={{
-                                            "data-testid": `association-${
+                                        {featureFlags?.qiCoreStu4Updates ? (
+                                          <MultipleSelectDropDown
+                                            id={`association-select-${i + 1}`}
+                                            label={`Association ${i + 1}`}
+                                            placeHolder={{
+                                              name: "Select Association",
+                                              value: null,
+                                            }}
+                                            required={false}
+                                            disabled={!canEdit}
+                                            options={Object.values(
+                                              stratAssociation
+                                            )}
+                                            multipleSelect={true}
+                                            onChange={(
+                                              _event: any,
+                                              selectedVal: string | null
+                                            ) => {
+                                              formik.setFieldValue(
+                                                `stratifications[${i}].association`,
+                                                selectedVal
+                                              );
+                                            }}
+                                            onClose={() =>
+                                              formik.setFieldTouched(
+                                                `stratifications[${i}].association`,
+                                                true
+                                              )
+                                            }
+                                          />
+                                        ) : (
+                                          <Select
+                                            disabled={!canEdit}
+                                            placeHolder={{
+                                              name: "Select Association",
+                                              value: null,
+                                            }}
+                                            label={`Association ${i + 1}`}
+                                            id={`association-select-${i + 1}`}
+                                            aria-describedby={`association-select-${
                                               i + 1
-                                            }-input`,
-                                          }}
-                                          {...formik.getFieldProps(
-                                            `stratifications[${i}].association`
-                                          )}
-                                          size="small"
-                                          renderValue={(value) =>
-                                            _.startCase(value).length > 0
-                                              ? _.startCase(value)
-                                              : "-"
-                                          }
-                                          options={
-                                            !!formik.values.scoring && [
-                                              <MuiMenuItem key="-" value={null}>
-                                                -
-                                              </MuiMenuItem>,
-                                              stratAssociation.map((opt, i) => (
+                                            }-helper-text`}
+                                            inputProps={{
+                                              "data-testid": `association-${
+                                                i + 1
+                                              }-input`,
+                                            }}
+                                            {...formik.getFieldProps(
+                                              `stratifications[${i}].association`
+                                            )}
+                                            size="small"
+                                            renderValue={(value) =>
+                                              _.startCase(value).length > 0
+                                                ? _.startCase(value)
+                                                : "-"
+                                            }
+                                            options={
+                                              !!formik.values.scoring && [
                                                 <MuiMenuItem
-                                                  key={`${opt}-${i}`}
-                                                  value={`${opt}`}
+                                                  key="-"
+                                                  value={null}
                                                 >
-                                                  {_.startCase(opt)}
-                                                </MuiMenuItem>
-                                              )),
-                                            ]
-                                          }
-                                        />
+                                                  -
+                                                </MuiMenuItem>,
+                                                stratAssociation.map(
+                                                  (opt, i) => (
+                                                    <MuiMenuItem
+                                                      key={`${opt}-${i}`}
+                                                      value={`${opt}`}
+                                                    >
+                                                      {_.startCase(opt)}
+                                                    </MuiMenuItem>
+                                                  )
+                                                ),
+                                              ]
+                                            }
+                                          />
+                                        )}
                                       </div>
                                     </div>
                                     <div tw="lg:col-span-2">

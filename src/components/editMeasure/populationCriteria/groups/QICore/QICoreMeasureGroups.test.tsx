@@ -8,7 +8,6 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
-
 import { isEqual } from "lodash";
 import MeasureGroups, { MeasureGroupProps } from "./QICoreMeasureGroups";
 import {
@@ -28,10 +27,13 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { ELM_JSON, MeasureCQL } from "../../../../common/MeasureCQL";
 import userEvent from "@testing-library/user-event";
 import axios from "../../../../../api/axios-insatnce";
-import * as uuid from "uuid";
 import { getPopulationsForScoring } from "../../PopulationHelper";
 import * as _ from "lodash";
-import { measureStore, checkUserCanEdit } from "@madie/madie-util";
+// @ts-ignore
+import {
+  measureStore,
+  checkUserCanEdit,
+} from "@madie/madie-util";
 import { InitialPopulationAssociationType } from "../groupPopulations/GroupPopulation";
 // fix error about window.scrollto
 global.scrollTo = jest.fn();
@@ -46,8 +48,11 @@ const serviceConfig: ServiceConfig = {
   measureService: {
     baseUrl: "example-service-url",
   },
-  elmTranslationService: {
-    baseUrl: "test-elm-service",
+  qdmElmTranslationService: {
+    baseUrl: "qdm-test-elm-service",
+  },
+  fhirElmTranslationService: {
+    baseUrl: "fhir-test-elm-service",
   },
   terminologyService: {
     baseUrl: "terminology-service.com",
@@ -89,6 +94,9 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
   },
+  useFeatureFlags: jest.fn().mockReturnValue({
+    qiCoreStu4Updates: false,
+  }),
 }));
 
 const populationBasisValues: string[] = [
