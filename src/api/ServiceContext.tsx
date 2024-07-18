@@ -4,9 +4,6 @@ export interface ServiceConfig {
   measureService: {
     baseUrl: string;
   };
-  elmTranslationService: {
-    baseUrl: string;
-  };
   qdmElmTranslationService: {
     baseUrl: string;
   };

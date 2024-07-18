@@ -12,12 +12,11 @@ import { mockPaginationResponses } from "../__mocks__/mockMeasureResponses";
 import { describe, expect, test } from "@jest/globals";
 
 const serviceConfig: ServiceConfig = {
+  fhirElmTranslationService: { baseUrl: "fhir/services" },
+  qdmElmTranslationService: { baseUrl: "qdm/services" },
   terminologyService: { baseUrl: "example-service-url" },
   measureService: {
     baseUrl: "example-service-url",
-  },
-  elmTranslationService: {
-    baseUrl: "test-elm-service",
   },
 };
 
@@ -26,7 +25,11 @@ jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),
-  useFeatureFlags: () => null, // Values of flags do not matter for these tests
+  useFeatureFlags: () => {
+    return {
+      MeasureListCheckboxes: false,
+    };
+  }, // Values of flags do not matter for these tests
 }));
 
 const mockMeasureServiceApi = {
