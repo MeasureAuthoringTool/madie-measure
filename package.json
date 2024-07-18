@@ -88,7 +88,7 @@
     "@lhncbc/ucum-lhc": "^4.1.5",
     "@madie/cql-antlr-parser": "^1.0.0",
     "@madie/madie-auth": "^0.0.1",
-    "@madie/madie-design-system": "^1.2.18",
+    "@madie/madie-design-system": "^1.2.20",
     "@madie/madie-editor": "^0.0.1",
     "@madie/madie-models": "^1.4.10",
     "@madie/madie-root": "^0.0.3",
