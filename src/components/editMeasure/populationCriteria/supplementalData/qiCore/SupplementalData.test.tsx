@@ -93,7 +93,7 @@ const RenderSupplementalElements = () => {
   );
 };
 
-describe("SupplementalData Component", () => {
+describe("SupplementalData Component QI-Core", () => {
   it("Should render Supplemental Data component with the values saved in DB", async () => {
     RenderSupplementalElements();
     const suppolementalElementsSelect = screen.getByTestId(
@@ -136,6 +136,7 @@ describe("SupplementalData Component", () => {
       {
         definition: "Initial Population",
         description: "",
+        includeInReportType: ["Individual"],
       },
       {
         definition: "SDE Ethnicity",
@@ -161,7 +162,7 @@ describe("SupplementalData Component", () => {
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => measureServiceApi);
 
-    RenderSupplementalElements();
+    const { container } = RenderSupplementalElements();
 
     // Verifies if SE already loads values from store and able to add new
     const suppolementalElementsSelect = screen.getByTestId(
@@ -174,18 +175,38 @@ describe("SupplementalData Component", () => {
     const supplementalDataButton = within(
       suppolementalElementsSelect
     ).getByTitle("Open");
-    const includeInReportTypeContainer = screen.getByTestId(
-      "Initial Population-supplemental-data-dropdown"
+    const ipIncludeInReportTypeContainer = screen.getByTestId(
+      "Initial Population-include-in-report-type-formcontrol"
     );
     expect(
-      within(includeInReportTypeContainer).queryByText("Individual")
+      within(ipIncludeInReportTypeContainer).queryByText("Individual")
     ).not.toBeInTheDocument();
     expect(
-      within(includeInReportTypeContainer).queryByText("Subject List")
+      within(ipIncludeInReportTypeContainer).queryByText("Subject List")
     ).not.toBeInTheDocument();
     expect(
-      within(includeInReportTypeContainer).queryByText("+2")
+      within(ipIncludeInReportTypeContainer).queryByText("+2")
     ).not.toBeInTheDocument();
+
+    // open Include in Report Type for IP
+    const ipIncludeInReportTypeButton = within(
+      ipIncludeInReportTypeContainer
+    ).getByTitle("Open");
+    expect(ipIncludeInReportTypeButton).toBeInTheDocument();
+    userEvent.click(ipIncludeInReportTypeButton);
+    expect(
+      await within(ipIncludeInReportTypeContainer).findByTitle("Close")
+    ).toBeInTheDocument();
+    // add an option for Initial Population
+    expect(
+      await within(ipIncludeInReportTypeContainer).findByText("Individual")
+    ).toBeInTheDocument();
+    await waitFor(() => {
+      userEvent.click(screen.getByText("Individual"));
+    });
+    expect(
+      screen.getByRole("button", { name: "Individual" })
+    ).toBeInTheDocument();
 
     userEvent.click(supplementalDataButton);
     await waitFor(() => {
@@ -194,6 +215,34 @@ describe("SupplementalData Component", () => {
     expect(
       screen.getByRole("button", { name: "SDE Ethnicity" })
     ).toBeInTheDocument();
+
+    const sdeEthnicityIncludeInReportTypeContainer = screen.getByTestId(
+      "SDE Ethnicity-include-in-report-type-formcontrol"
+    );
+    // check that it defaults to all values added for Include in Report Type
+    expect(
+      within(sdeEthnicityIncludeInReportTypeContainer).queryByText("Individual")
+    ).toBeInTheDocument();
+    expect(
+      within(sdeEthnicityIncludeInReportTypeContainer).queryByText(
+        "Subject List"
+      )
+    ).toBeInTheDocument();
+    expect(
+      within(sdeEthnicityIncludeInReportTypeContainer).queryByText("+2")
+    ).toBeInTheDocument();
+
+    const sdeEthnicityDropdown = within(
+      sdeEthnicityIncludeInReportTypeContainer
+    ).getByTitle("Open");
+
+    userEvent.click(sdeEthnicityDropdown);
+    await waitFor(() => {
+      expect(screen.getAllByText("Data Collection").length).toEqual(2);
+    });
+
+    userEvent.click(screen.getByRole("button", { name: "Subject List" }));
+    userEvent.click(sdeEthnicityDropdown);
 
     // Verifies if SD description already loads values from store and able to update
     const description = screen.getByTestId("supplementalDataDescription");
@@ -332,7 +381,7 @@ describe("SupplementalData Component", () => {
     expect(description).toHaveTextContent("Updated test description");
     expect(screen.getByText("+1")).toBeInTheDocument(); // We are limiting the selected options displayed
     const includeInReportTypeContainer = screen.getByTestId(
-      "SDE Ethnicity-supplemental-data-dropdown"
+      "SDE Ethnicity-include-in-report-type-dropdown"
     );
     expect(
       within(includeInReportTypeContainer).getByText("Individual")

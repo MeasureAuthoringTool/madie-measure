@@ -5,6 +5,7 @@ import { InputLabel, TextField } from "@madie/madie-design-system/dist/react/";
 import FormHelperText from "@mui/material/FormHelperText";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import * as _ from "lodash";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -55,6 +56,7 @@ const MultipleSelectDropDown = ({
   textFieldInputProps = undefined,
   // formControl, // is not referenced, already passed as prop
   onClose,
+  key = undefined,
   ...rest
 }) => {
   const requiredLabelReadable = <span className="sr-only">required</span>;
@@ -66,7 +68,12 @@ const MultipleSelectDropDown = ({
     label
   );
   return (
-    <FormControl error={error} fullWidth>
+    <FormControl
+      error={error}
+      fullWidth
+      key={key}
+      data-testid={`${id}-formcontrol`}
+    >
       <div
         style={{
           width: 1,
@@ -92,9 +99,10 @@ const MultipleSelectDropDown = ({
         disableCloseOnSelect
         getOptionLabel={(option) => option}
         renderOption={(props: any, option, { selected }) => {
+          const inputKey = `${props.key}_${props.id}`;
           const uniqueProps = {
             ...props,
-            key: `${props.key}_${props.id}`,
+            key: inputKey === "_" ? option : inputKey,
           };
           return (
             <li

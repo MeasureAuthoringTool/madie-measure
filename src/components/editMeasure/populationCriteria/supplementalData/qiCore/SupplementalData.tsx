@@ -240,8 +240,9 @@ const SupplementalData = () => {
                 formik.values.supplementalData?.indexOf(supplementalData);
               return (
                 <MultipleSelectDropDown
+                  key={supplementalData.definition}
                   value={supplementalData.includeInReportType ?? []}
-                  id={`${supplementalData.definition}-supplemental-data`}
+                  id={`${supplementalData.definition}-include-in-report-type`}
                   label={`${supplementalData.definition} - Include in Report Type`}
                   placeHolder={[{ code: "", display: "" }]}
                   disabled={!canEdit}

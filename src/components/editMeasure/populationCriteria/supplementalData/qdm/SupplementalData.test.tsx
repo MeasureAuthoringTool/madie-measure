@@ -93,7 +93,7 @@ const RenderSupplementalElements = () => {
   );
 };
 
-describe("SupplementalData Component", () => {
+describe("SupplementalData Component QDM", () => {
   it("Should render Supplemental Data component with the values saved in DB", async () => {
     RenderSupplementalElements();
     const suppolementalElementsSelect = screen.getByTestId(
