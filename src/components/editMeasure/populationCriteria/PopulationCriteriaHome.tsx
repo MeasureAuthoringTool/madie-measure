@@ -104,7 +104,6 @@ export function PopulationCriteriaHome() {
       style={{
         borderColor: "#8c8c8c",
         borderRadius: "4px",
-        overflow: "hidden",
       }}
     >
       <PopulationCriteriaSideNav
