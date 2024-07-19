@@ -126,7 +126,7 @@ const RiskAdjustment = () => {
       handleSubmit={formik.handleSubmit}
       onCancel={onCancel}
     >
-      <div tw="flex mt-6 w-1/4 pb-7">
+      <div tw="flex mt-6 w-1/4 pb-7" style={{ marginTop: "-5px" }}>
         <MultipleSelectDropDown
           formControl={formik.getFieldProps("riskAdjustments")}
           value={formik.values.riskAdjustments?.map((ra) => ra?.definition)}

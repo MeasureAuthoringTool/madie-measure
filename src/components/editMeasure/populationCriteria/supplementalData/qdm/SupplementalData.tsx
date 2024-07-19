@@ -127,7 +127,7 @@ const SupplementalData = () => {
       handleSubmit={formik.handleSubmit}
       onCancel={onCancel}
     >
-      <div tw="flex mt-6 w-1/4 pb-7">
+      <div tw="flex mt-6 w-2/4 pb-7" style={{ marginTop: "-5px" }}>
         <MultipleSelectDropDown
           formControl={formik.getFieldProps("supplementalData")}
           value={formik.values.supplementalData?.map((sd) => sd?.definition)}
