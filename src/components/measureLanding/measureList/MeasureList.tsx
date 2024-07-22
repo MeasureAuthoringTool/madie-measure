@@ -816,6 +816,33 @@ export default function MeasureList(props: {
     setOpenAssociateCmsIdDialog(true);
   };
 
+  const handleCmsIdAssociationContinueDialog = (
+    qiCoreMeasureId,
+    qdmMeasureId
+  ) => {
+    measureServiceApi
+      .associateCmdId(qiCoreMeasureId, qdmMeasureId)
+      .then((measureSet) => {
+        setToastOpen(true);
+        setToastType("success");
+        setToastMessage(
+          `Measures successfully associated with CMS ID ${measureSet?.cmsId}.`
+        );
+        setOpenAssociateCmsIdDialog(false);
+      })
+      .catch((err) => {
+        const errorOb = err?.response?.data;
+        setToastOpen(true);
+        if (errorOb?.message) {
+          setToastMessage(errorOb.message);
+        } else {
+          setToastMessage(
+            "An error occurred, please try again. If the error persists, please contact the help desk."
+          );
+        }
+      });
+  };
+
   const table = useReactTable({
     data,
     columns,
@@ -1017,6 +1044,9 @@ export default function MeasureList(props: {
           measures={selectedMeasures}
           onClose={() => setOpenAssociateCmsIdDialog(false)}
           open={openAssociateCmsIdDialog}
+          handleCmsIdAssociationContinueDialog={
+            handleCmsIdAssociationContinueDialog
+          }
         />
       </table>
     </div>

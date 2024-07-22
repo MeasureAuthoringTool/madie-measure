@@ -8,6 +8,7 @@ import {
   Group,
   Organization,
   EndorsementOrganization,
+  MeasureSet,
 } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
 import _ from "lodash";
@@ -150,6 +151,26 @@ export class MeasureServiceApi {
       console.error(message, err);
       throw new Error(message);
     }
+  }
+
+  async associateCmdId(
+    qiCoreMeasureId: string,
+    qdmMeasureId: string
+  ): Promise<MeasureSet> {
+    const response = await axios.put<any>(
+      `${this.baseUrl}/measures/cms-id-association`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${this.getAccessToken()}`,
+        },
+        params: {
+          qiCoreMeasureId,
+          qdmMeasureId,
+        },
+      }
+    );
+    return response.data;
   }
 
   async updateGroup(group: Group, measureId: string): Promise<Group> {
