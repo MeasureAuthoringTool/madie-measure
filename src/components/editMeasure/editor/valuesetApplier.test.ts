@@ -57,7 +57,7 @@ it("Should not add a valuset that already exists", () => {
     "valueset \"Ethnicity\": 'urn:oid:2.16.840.1.114222.4.11.837'"
   );
   expect(result.message).toBe("This valueset is already defined in the CQL.");
-  expect(result.status).not.toBeTruthy();
+  expect(result.status).toBe("info");
 });
 
 it("Should add valuset, priotiy location usings array", () => {
@@ -145,7 +145,7 @@ it("Should not add valuset to CQL when value set was already added", () => {
   const valuset = JSON.parse(valusetJson);
   const result: CodeChangeResult = applyValueset(cql, valuset, valuset);
   expect(result.cql).not.toContain("Emergency Department Evaluation");
-  expect(result.status).not.toBeTruthy();
+  expect(result.status).toBe("info");
   expect(result.message).toEqual(
     `This valueset is already defined in the CQL.`
   );
