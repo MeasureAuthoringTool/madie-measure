@@ -6,6 +6,7 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 import {
   EndorsementOrganization,
   Measure,
+  MeasureSet,
   Model,
   Organization,
 } from "@madie/madie-models";
@@ -469,5 +470,39 @@ describe("MeasureServiceApi Tests", () => {
     } catch (error) {
       expect(error.message).toBe("Failed to create cms id.");
     }
+  });
+
+  it("test associate cms id failure", async () => {
+    const resp = {
+      status: 400,
+      message: "CMS ID could not be associated. Please try again.",
+    };
+    mockedAxios.put.mockRejectedValueOnce(resp);
+
+    try {
+      await measureServiceApi.associateCmdId("qiCoreMeasureId", "qdmMeasureId");
+      expect(mockedAxios.put).toBeCalledTimes(1);
+    } catch (error) {
+      expect(error.message).toBe(
+        "CMS ID could not be associated. Please try again."
+      );
+    }
+  });
+
+  it("successfully associate cms id", async () => {
+    const measureSet = {
+      id: "1",
+      cmsId: 6,
+      measureSetId: "testMesureSetId",
+      owner: "owner",
+      acls: null,
+    } as unknown as MeasureSet;
+
+    const resp: any = { status: 200, data: measureSet };
+    mockedAxios.put.mockResolvedValue(resp);
+
+    await measureServiceApi.associateCmdId("qiCoreMeasureId", "qdmMeasureId");
+    expect(mockedAxios.put).toBeCalledTimes(1);
+    expect(resp.data).toEqual(measureSet);
   });
 });
