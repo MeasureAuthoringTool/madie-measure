@@ -5,6 +5,7 @@ import "twin.macro";
 import "styled-components/macro";
 import { CheckBox } from "@mui/icons-material";
 import { FormControlLabel } from "@mui/material";
+import WarningIcon from "@mui/icons-material/Warning";
 import AssociateCmsIdConfirmationDialog from "../associateCmsIdConfirmationDialog/AssociateCmsIdConfirmationDialog";
 
 interface PropTypes {
@@ -49,6 +50,14 @@ export default function AssociateCmsIdDialog(props: PropTypes) {
           onClick: () => setAssociateCmsIdConfirmationDialogOpen(true),
         }}
       >
+        <div style={{ display: "flex", flexDirection: "row" }}>
+          <WarningIcon style={{ color: "#ff9800" }} />
+          <p style={{ marginLeft: "5px" }}>
+            Associate CMS ID will copy the CMS from your QDM measure to your
+            QI-Core measure. To copy QDM metadate to the QI-Core measure as well
+            please select the checkbox below.
+          </p>
+        </div>
         <table tw="w-full" data-testid="associate-cms-id-dialog-tbl">
           <thead>
             <tr>
