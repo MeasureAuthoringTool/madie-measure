@@ -20,7 +20,7 @@ const AssociateCmsIdConfirmationDialog = ({ open, onClose, onContinue }) => (
       type: "submit",
       "data-testid":
         "associate-cms-identifier-confirming-dialog-continue-button",
-      continueText: "Associate Measures",
+      continueText: "Associate",
       onClick: onContinue,
     }}
   >

@@ -38,10 +38,12 @@ export default function AssociateCmsIdDialog(props: PropTypes) {
           maxWidth: "md",
         }}
         cancelButtonProps={{
-          cancelText: "Discard Changes",
+          variant: "outline",
+          cancelText: "Cancel",
           "data-testid": "cancel-button",
         }}
         continueButtonProps={{
+          variant: "primary",
           continueText: "Associate",
           "data-testid": "associate-cms-id-button",
           onClick: () => setAssociateCmsIdConfirmationDialog(true),

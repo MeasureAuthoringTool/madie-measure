@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { IconButton } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import { Measure, Model } from "@madie/madie-models";
@@ -27,7 +27,7 @@ export default function AssociateCmsIdAction(props: PropTypes) {
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
 
-  const validateAssociateCmsIdActionState = () => {
+  const validateAssociateCmsIdActionState = useCallback(() => {
     // set button state to disabled by default
     setDisableAssociateCmsIdBtn(true);
     if (measures?.length === 2) {
@@ -61,7 +61,7 @@ export default function AssociateCmsIdAction(props: PropTypes) {
     } else {
       setTooltipMessage(SELECT_TWO_MEASURES);
     }
-  };
+  }, [measures, userName]);
 
   useEffect(() => {
     validateAssociateCmsIdActionState();
