@@ -9,17 +9,18 @@ const AssociateCmsIdConfirmationDialog = ({ open, onClose, onContinue }) => (
     dialogProps={{
       open: open,
       onClose,
-      "data-testid": "associate-cms-identifier-confirming-dialog",
+      "data-testid": "associate-cms-identifier-confirmation-dialog",
     }}
     cancelButtonProps={{
       onClick: onClose,
       cancelText: "Cancel",
-      "data-testid": "associate-cms-identifier-confirming-dialog-cancel-button",
+      "data-testid":
+        "associate-cms-identifier-confirmation-dialog-cancel-button",
     }}
     continueButtonProps={{
       type: "submit",
       "data-testid":
-        "associate-cms-identifier-confirming-dialog-continue-button",
+        "associate-cms-identifier-confirmation-dialog-continue-button",
       continueText: "Associate",
       onClick: onContinue,
     }}

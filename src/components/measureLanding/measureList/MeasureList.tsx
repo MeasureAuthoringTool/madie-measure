@@ -816,10 +816,7 @@ export default function MeasureList(props: {
     setOpenAssociateCmsIdDialog(true);
   };
 
-  const handleCmsIdAssociationContinueDialog = (
-    qiCoreMeasureId,
-    qdmMeasureId
-  ) => {
+  const handleCmsIdAssociation = (qiCoreMeasureId, qdmMeasureId) => {
     measureServiceApi
       .associateCmdId(qiCoreMeasureId, qdmMeasureId)
       .then((measureSet) => {
@@ -1045,9 +1042,7 @@ export default function MeasureList(props: {
           measures={selectedMeasures}
           onClose={() => setOpenAssociateCmsIdDialog(false)}
           open={openAssociateCmsIdDialog}
-          handleCmsIdAssociationContinueDialog={
-            handleCmsIdAssociationContinueDialog
-          }
+          handleCmsIdAssociationContinueDialog={handleCmsIdAssociation}
         />
       </table>
     </div>

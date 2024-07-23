@@ -107,7 +107,7 @@ export default function AssociateCmsIdDialog(props: PropTypes) {
 
       <AssociateCmsIdConfirmationDialog
         open={associateCmsIdConfirmationDialogOpen}
-        onContinue={async () => {
+        onContinue={() => {
           handleCmsIdAssociationContinueDialog(
             qiCoreMeasure?.id,
             qdmMeasure?.id

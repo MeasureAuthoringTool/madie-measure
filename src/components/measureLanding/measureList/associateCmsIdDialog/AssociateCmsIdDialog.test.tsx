@@ -162,13 +162,13 @@ describe("Associate Cms Id Dialog component", () => {
     expect(associatePopupText1).toBeInTheDocument();
 
     const associateCmsIdentifierConfirmingDialogCancelBtn = screen.getByTestId(
-      "associate-cms-identifier-confirming-dialog-cancel-button"
+      "associate-cms-identifier-confirmation-dialog-cancel-button"
     );
     expect(associateCmsIdentifierConfirmingDialogCancelBtn).toBeInTheDocument();
 
     const associateCmsIdentifierConfirmingDialogContinueBtn =
       screen.getByTestId(
-        "associate-cms-identifier-confirming-dialog-continue-button"
+        "associate-cms-identifier-confirmation-dialog-continue-button"
       );
     expect(
       associateCmsIdentifierConfirmingDialogContinueBtn
