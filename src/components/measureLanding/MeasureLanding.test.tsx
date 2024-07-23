@@ -261,26 +261,50 @@ describe("Measure Page", () => {
       expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument();
     });
     const measure1Checkbox = await within(
-      await screen.findByTestId("measure-name-0_select")
+      screen.getByTestId("measure-name-0_select")
     ).findByRole("checkbox");
     userEvent.click(measure1Checkbox);
     const measure2Checkbox = await within(
-      await screen.findByTestId("measure-name-1_select")
+      screen.getByTestId("measure-name-1_select")
     ).findByRole("checkbox");
     userEvent.click(measure2Checkbox);
-    const associateCmsIdBtn = await screen.findByTestId("associate_cms_id_btn");
-    expect(associateCmsIdBtn).toBeEnabled();
-    userEvent.click(associateCmsIdBtn);
+
+    const associateCmsIdIcon = screen.getByTestId("associate_cms_id_btn");
+    expect(associateCmsIdIcon).toBeEnabled();
+    userEvent.click(associateCmsIdIcon);
+
     const dialogTable = await screen.findByTestId(
       "associate-cms-id-dialog-tbl"
     );
-    expect(dialogTable).toBeInTheDocument();
-    const measure1Name = await within(dialogTable).getByText("TestMeasure1");
+    const measure1Name = within(dialogTable).getByText("TestMeasure1");
     expect(measure1Name).toBeInTheDocument();
-    const measure2Name = await within(dialogTable).getByText("TestMeasure2");
+    const measure2Name = within(dialogTable).getByText("TestMeasure2");
     expect(measure2Name).toBeInTheDocument();
     expect(
       screen.getByText("Copy QDM Metadata to QI-Core measure")
     ).toBeInTheDocument();
+
+    const associateCmsIdBtn = screen.getByRole("button", { name: "Associate" });
+    expect(associateCmsIdBtn).toBeEnabled();
+    userEvent.click(associateCmsIdBtn);
+
+    const confirmationDialog = await screen.findByTestId(
+      "associate-cms-id-confirmation-dialog"
+    );
+    expect(confirmationDialog).toBeInTheDocument();
+    const associatedCancelBtn = screen.getByRole("button", {
+      name: "Cancel",
+    });
+    const associatedConfirmationBtn = screen.getByRole("button", {
+      name: "Yes, Associate",
+    });
+    expect(associatedConfirmationBtn).toBeEnabled();
+    expect(associatedCancelBtn).toBeEnabled();
+
+    userEvent.click(associatedConfirmationBtn);
+    await waitFor(() => {
+      expect(confirmationDialog).not.toBeInTheDocument();
+      expect(dialogTable).not.toBeInTheDocument();
+    });
   });
 });
