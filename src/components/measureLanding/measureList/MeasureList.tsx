@@ -888,15 +888,14 @@ export default function MeasureList(props: {
             />
           </form>
         </div>
-        {featureFlags.MeasureListCheckboxes &&
-          featureFlags.associateMeasures && (
-            <div tw="justify-self-end p-3">
-              <AssociateCmsIdAction
-                measures={selectedMeasures}
-                onClick={associateCmsId}
-              />
-            </div>
-          )}
+        {featureFlags.MeasureListCheckboxes && featureFlags.associateMeasures && (
+          <div tw="justify-self-end p-3">
+            <AssociateCmsIdAction
+              measures={selectedMeasures}
+              onClick={associateCmsId}
+            />
+          </div>
+        )}
       </div>
 
       <table
