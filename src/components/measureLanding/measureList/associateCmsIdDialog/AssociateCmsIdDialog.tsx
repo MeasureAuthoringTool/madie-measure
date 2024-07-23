@@ -18,8 +18,8 @@ export default function AssociateCmsIdDialog(props: PropTypes) {
   const { open, onClose, measures, handleCmsIdAssociationContinueDialog } =
     props;
   const [
-    associateCmsIdConfirmationDialog,
-    setAssociateCmsIdConfirmationDialog,
+    associateCmsIdConfirmationDialogOpen,
+    setAssociateCmsIdConfirmationDialogOpen,
   ] = useState(false);
   const qdmMeasure = measures?.find(
     (measure) => measure.model === Model.QDM_5_6
@@ -46,7 +46,7 @@ export default function AssociateCmsIdDialog(props: PropTypes) {
           variant: "primary",
           continueText: "Associate",
           "data-testid": "associate-cms-id-button",
-          onClick: () => setAssociateCmsIdConfirmationDialog(true),
+          onClick: () => setAssociateCmsIdConfirmationDialogOpen(true),
         }}
       >
         <table tw="w-full" data-testid="associate-cms-id-dialog-tbl">
@@ -97,15 +97,15 @@ export default function AssociateCmsIdDialog(props: PropTypes) {
       </MadieDialog>
 
       <AssociateCmsIdConfirmationDialog
-        open={associateCmsIdConfirmationDialog}
+        open={associateCmsIdConfirmationDialogOpen}
         onContinue={async () => {
           handleCmsIdAssociationContinueDialog(
             qiCoreMeasure?.id,
             qdmMeasure?.id
           ),
-            setAssociateCmsIdConfirmationDialog(false);
+            setAssociateCmsIdConfirmationDialogOpen(false);
         }}
-        onClose={() => setAssociateCmsIdConfirmationDialog(false)}
+        onClose={() => setAssociateCmsIdConfirmationDialogOpen(false)}
       />
     </>
   );

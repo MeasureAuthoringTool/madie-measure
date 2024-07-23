@@ -26,7 +26,10 @@ const AssociateCmsIdConfirmationDialog = ({ open, onClose, onContinue }) => (
   >
     <div id="discard-changes-dialog-body">
       <section className="dialog-warning-body">
-        <p>You are about to associate measures.</p>
+        <p>
+          Are you sure you wish to associate this CMS ID? Any meta data that
+          gets copied over will overwrite existing data in that field."
+        </p>
       </section>
       <section className="dialog-warning-action">
         <ErrorIcon />
