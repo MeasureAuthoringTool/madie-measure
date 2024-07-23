@@ -79,6 +79,7 @@ export default function MeasureList(props: {
   measureList: Measure[];
   selectedIds: object;
   changeSelectedIds;
+  setSelectedIds: Function;
   setMeasureList;
   setTotalPages;
   setTotalItems;
@@ -821,6 +822,7 @@ export default function MeasureList(props: {
       .associateCmdId(qiCoreMeasureId, qdmMeasureId)
       .then((measureSet) => {
         doUpdateList();
+        props.setSelectedIds({});
         setToastOpen(true);
         setToastType("success");
         setToastMessage(
