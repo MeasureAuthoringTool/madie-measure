@@ -3,7 +3,7 @@ import { Code } from "@madie/madie-models";
 
 export type CodeChangeResult = {
   cql: string;
-  status: "success" | "info";
+  status: "success" | "info" | "danger";
   message: string;
 };
 
