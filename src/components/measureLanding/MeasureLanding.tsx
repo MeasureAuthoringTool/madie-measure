@@ -201,6 +201,7 @@ export default function MeasureLanding() {
               <MeasureList
                 measureList={measureList}
                 selectedIds={selectedIds}
+                setSelectedIds={setSelectedIds}
                 changeSelectedIds={changeSelectedIds}
                 setMeasureList={setMeasureList}
                 setTotalPages={setTotalPages}
