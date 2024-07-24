@@ -2,7 +2,6 @@ import React, { lazy, useEffect, useMemo, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import RiskAdjustment from "./riskAdjustment/RiskAdjustment";
 import PopulationCriteriaSideNav from "./populationCriteriaSideNav/PopulationCriteriaSideNav";
 import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
@@ -46,6 +45,21 @@ export function PopulationCriteriaHome() {
           return import("./supplementalData/qiCore/SupplementalData");
         } else {
           return import("./supplementalData/EmptySupplementalData");
+        }
+      }),
+    [measure?.model]
+  );
+
+  const RiskAdjustmentComponent = useMemo(
+    () =>
+      lazy(() => {
+        if (measure?.model?.includes("QDM")) {
+          return import("./riskAdjustment/qdm/RiskAdjustment");
+        }
+        if (measure?.model?.includes("QI-Core")) {
+          return import("./riskAdjustment/qiCore/RiskAdjustment");
+        } else {
+          return import("./riskAdjustment/EmptyRiskAdjustment");
         }
       }),
     [measure?.model]
@@ -148,7 +162,7 @@ export function PopulationCriteriaHome() {
 
       {pathname.includes("/supplemental-data") && <SupplementalDataComponent />}
 
-      {pathname.includes("/risk-adjustment") && <RiskAdjustment />}
+      {pathname.includes("/risk-adjustment") && <RiskAdjustmentComponent />}
     </div>
   );
 }

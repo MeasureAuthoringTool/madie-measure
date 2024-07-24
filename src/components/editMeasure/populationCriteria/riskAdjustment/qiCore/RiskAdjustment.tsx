@@ -1,28 +1,27 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
-import {
-  MadieDiscardDialog,
-  Toast,
-  InputLabel,
-  TextArea,
-} from "@madie/madie-design-system/dist/react";
+import { useFormik } from "formik";
 import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
 import {
+  checkUserCanEdit,
   measureStore,
   routeHandlerStore,
-  checkUserCanEdit,
 } from "@madie/madie-util";
-import { useFormik } from "formik";
-import "../../../details/MeasureDetails.scss";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
+import MetaDataWrapper from "../../../details/MetaDataWrapper";
+import MultipleSelectDropDown from "../../MultipleSelectDropDown";
+import {
+  InputLabel,
+  MadieDiscardDialog,
+  Toast,
+  TextArea,
+} from "@madie/madie-design-system/dist/react";
 import {
   Measure,
   MeasureReportType,
-  SupplementalData as SupplementalDataModel,
+  RiskAdjustment as RiskAdjustmentModel,
 } from "@madie/madie-models";
-import MetaDataWrapper from "../../../details/MetaDataWrapper";
-import MultipleSelectDropDown from "../../MultipleSelectDropDown";
 import * as Yup from "yup";
 import * as _ from "lodash";
 
@@ -32,7 +31,7 @@ for (let t in MeasureReportType) {
 }
 
 const schema = Yup.object().shape({
-  supplementalData: Yup.array().of(
+  riskAdjustment: Yup.array().of(
     Yup.object().shape({
       definition: Yup.string(),
       includeInReportType: Yup.array()
@@ -41,10 +40,10 @@ const schema = Yup.object().shape({
         .nullable(),
     })
   ),
-  supplementalDataDescription: Yup.string().optional(),
+  riskAdjustmentDescription: Yup.string().optional(),
 });
 
-const SupplementalData = () => {
+const RiskAdjustment = () => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   const [definitions, setDefinitions] = useState([]);
   const { updateMeasure } = measureStore;
@@ -77,8 +76,8 @@ const SupplementalData = () => {
 
   const formik = useFormik({
     initialValues: {
-      supplementalData: measure?.supplementalData || [],
-      supplementalDataDescription: measure?.supplementalDataDescription || "",
+      riskAdjustments: measure?.riskAdjustments || [],
+      riskAdjustmentDescription: measure?.riskAdjustmentDescription || "",
     },
     validationSchema: schema,
     enableReinitialize: true,
@@ -90,8 +89,8 @@ const SupplementalData = () => {
   const handleSubmit = (values) => {
     const modifiedMeasure = {
       ...measure,
-      supplementalData: values.supplementalData,
-      supplementalDataDescription: values.supplementalDataDescription,
+      riskAdjustments: values.riskAdjustments,
+      riskAdjustmentDescription: values.riskAdjustmentDescription,
     };
 
     measureServiceApi
@@ -102,7 +101,7 @@ const SupplementalData = () => {
           updateMeasure(data);
           handleToast(
             "success",
-            `Measure Supplemental Data have been Saved Successfully`,
+            `Measure Risk Adjustments have been Saved Successfully`,
             true
           );
         }
@@ -143,50 +142,41 @@ const SupplementalData = () => {
     setDiscardDialogOpen(true);
   };
 
-  const sortedSupplementalData = _.cloneDeep(
-    formik.values.supplementalData
-  ).sort(
+  const sortedRiskAdjustments = _.cloneDeep(formik.values.riskAdjustments).sort(
     (a, b) =>
       definitions?.indexOf(a.definition) - definitions?.indexOf(b.definition)
   );
 
   return (
     <MetaDataWrapper
-      header="Supplemental Data"
+      header="Risk Adjustment"
       canEdit={canEdit}
       dirty={formik.dirty}
       isValid={formik.isValid}
       handleSubmit={formik.handleSubmit}
       onCancel={onCancel}
     >
-      <div
-        tw="flex flex-col"
-        data-testid="supplementalDataDescriptionContainer"
-      >
-        <InputLabel
-          htmlFor="supplementalDataDescription"
-          style={{ placeContent: "flex-end" }}
-        >
-          Description
-        </InputLabel>
+      <div tw="flex flex-col" data-testid="risk-adjustment">
+        <InputLabel htmlFor="riskAdjustmentDescription">Description</InputLabel>
         <TextArea
-          {...formik.getFieldProps("supplementalDataDescription")}
-          name="supplementalDataDescription"
-          id="supplementalDataDescription"
+          {...formik.getFieldProps("riskAdjustmentDescription")}
+          name="riskAdjustmentDescription"
+          id="riskAdjustmentDescription"
           disabled={!canEdit}
           placeholder="Description"
-          data-testid="supplementalDataDescription"
-          className="supplemental-data-description"
+          data-testid="riskAdjustmentDescription"
+          className="risk-description"
         />
       </div>
       <div tw="flex mt-6 gap-x-3 w-full">
         <div tw="w-full">
           <MultipleSelectDropDown
-            formControl={formik.getFieldProps("supplementalData")}
-            value={formik.values.supplementalData?.map((sd) => sd?.definition)}
-            id="supplemental-data"
+            formControl={formik.getFieldProps("riskAdjustments")}
+            value={formik.values.riskAdjustments?.map((ra) => ra?.definition)}
+            id="risk-adjustment"
             label="Definition"
             placeHolder={{ name: "", value: "" }}
+            required={false}
             disabled={!canEdit}
             error={false}
             helperText=""
@@ -196,19 +186,15 @@ const SupplementalData = () => {
             onClose={() => {}}
             onChange={(e, v, r) => {
               if (r === "removeOption") {
-                const copiedValues = _.cloneDeep(
-                  formik.values.supplementalData
-                );
+                const copiedValues = formik.values.riskAdjustments.slice();
                 // find out what v is not present in copiedValues
                 const filteredValues = copiedValues.filter((val) => {
                   return v.includes(val.definition);
                 });
-                formik.setFieldValue("supplementalData", filteredValues);
+                formik.setFieldValue("riskAdjustments", filteredValues);
               }
               if (r === "selectOption") {
-                const copiedValues = _.cloneDeep(
-                  formik.values.supplementalData
-                );
+                const copiedValues = formik.values.riskAdjustments.slice();
                 // we don't seem to have a good way of knowing exactly what was selected, but we can compare
                 const selectedOption = v.filter((v) => {
                   for (let i = 0; i < copiedValues.length; i++) {
@@ -223,10 +209,10 @@ const SupplementalData = () => {
                   description: "",
                   includeInReportType: [...measureReportTypeOptions],
                 });
-                formik.setFieldValue("supplementalData", copiedValues);
+                formik.setFieldValue("riskAdjustments", copiedValues);
               }
               if (r === "clear") {
-                formik.setFieldValue("supplementalData", []);
+                formik.setFieldValue("riskAdjustments", []);
               }
             }}
           />
@@ -236,56 +222,53 @@ const SupplementalData = () => {
           tw="w-full flex flex-col"
           data-testid="includeInReportType-container"
         >
-          {sortedSupplementalData?.map(
-            (supplementalData: SupplementalDataModel) => {
-              const idx =
-                formik.values.supplementalData?.indexOf(supplementalData);
-              return (
-                <MultipleSelectDropDown
-                  key={supplementalData.definition}
-                  value={supplementalData.includeInReportType ?? []}
-                  id={`${supplementalData.definition}-include-in-report-type`}
-                  label={`${supplementalData.definition} - Include in Report Type`}
-                  placeHolder={[{ code: "", display: "" }]}
-                  disabled={!canEdit}
-                  error={false}
-                  helperText=""
-                  multipleSelect={true}
-                  tw="mb-5"
-                  limitTags={2}
-                  textFieldInputProps={{
-                    "aria-label": `${supplementalData.definition} - Include in Report Type`,
-                  }}
-                  options={measureReportTypeOptions}
-                  onClose={() => {}}
-                  defaultValue={[]}
-                  onChange={(e, v, r) => {
-                    const copied = _.cloneDeep(formik.values.supplementalData);
-                    const current = copied.find(
-                      (sd) => sd.definition === supplementalData.definition
-                    );
+          {sortedRiskAdjustments?.map((riskAdjustment: RiskAdjustmentModel) => {
+            const idx = formik.values.riskAdjustments?.indexOf(riskAdjustment);
+            return (
+              <MultipleSelectDropDown
+                key={riskAdjustment.definition}
+                value={riskAdjustment.includeInReportType ?? []}
+                id={`${riskAdjustment.definition}-include-in-report-type`}
+                label={`${riskAdjustment.definition} - Include in Report Type`}
+                placeHolder={[{ code: "", display: "" }]}
+                disabled={!canEdit}
+                error={false}
+                helperText=""
+                multipleSelect={true}
+                tw="mb-5"
+                limitTags={2}
+                textFieldInputProps={{
+                  "aria-label": `${riskAdjustment.definition} - Include in Report Type`,
+                }}
+                options={measureReportTypeOptions}
+                onClose={() => {}}
+                defaultValue={[]}
+                onChange={(e, v, r) => {
+                  const copied = _.cloneDeep(formik.values.riskAdjustments);
+                  const current = copied.find(
+                    (sd) => sd.definition === riskAdjustment.definition
+                  );
 
-                    if (r === "clear") {
-                      current.includeInReportType = [];
-                    } else {
-                      current.includeInReportType = v;
-                    }
-                    formik.setFieldValue("supplementalData", copied);
-                  }}
-                />
-              );
-            }
-          )}
+                  if (r === "clear") {
+                    current.includeInReportType = [];
+                  } else {
+                    current.includeInReportType = v;
+                  }
+                  formik.setFieldValue("riskAdjustments", copied);
+                }}
+              />
+            );
+          })}
         </div>
       </div>
 
       <Toast
-        toastKey="supplemental-data-toast"
+        toastKey="risk-adjustment-toast"
         toastType={toastType}
         testId={
           toastType === "danger"
-            ? `supplemental-data-error`
-            : `supplemental-data-success`
+            ? `risk-adjustment-error`
+            : `risk-adjustment-success`
         }
         open={toastOpen}
         message={toastMessage}
@@ -307,4 +290,4 @@ const SupplementalData = () => {
   );
 };
 
-export default SupplementalData;
+export default RiskAdjustment;

@@ -127,7 +127,24 @@ const SupplementalData = () => {
       handleSubmit={formik.handleSubmit}
       onCancel={onCancel}
     >
-      <div tw="flex mt-6 w-2/4 pb-7" style={{ marginTop: "-5px" }}>
+      <div tw="flex flex-col">
+        <InputLabel
+          htmlFor="supplementalDataDescription"
+          style={{ placeContent: "flex-end" }}
+        >
+          Description
+        </InputLabel>
+        <TextArea
+          {...formik.getFieldProps("supplementalDataDescription")}
+          name="supplementalDataDescription"
+          id="supplementalDataDescription"
+          disabled={!canEdit}
+          placeholder="Description"
+          data-testid="supplementalDataDescription"
+          className="supplemental-data-description"
+        />
+      </div>
+      <div tw="flex mt-6 w-2/4">
         <MultipleSelectDropDown
           formControl={formik.getFieldProps("supplementalData")}
           value={formik.values.supplementalData?.map((sd) => sd?.definition)}
@@ -171,23 +188,6 @@ const SupplementalData = () => {
               formik.setFieldValue("supplementalData", []);
             }
           }}
-        />
-      </div>
-      <div tw="flex flex-col">
-        <InputLabel
-          htmlFor="supplementalDataDescription"
-          style={{ placeContent: "flex-end" }}
-        >
-          Description
-        </InputLabel>
-        <TextArea
-          {...formik.getFieldProps("supplementalDataDescription")}
-          name="supplementalDataDescription"
-          id="supplementalDataDescription"
-          disabled={!canEdit}
-          placeholder="Description"
-          data-testid="supplementalDataDescription"
-          className="supplemental-data-description"
         />
       </div>
       <Toast

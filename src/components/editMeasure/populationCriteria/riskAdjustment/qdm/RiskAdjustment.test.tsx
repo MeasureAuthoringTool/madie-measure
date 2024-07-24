@@ -1,5 +1,5 @@
 import * as React from "react";
-import { MeasureCQL } from "../../../common/MeasureCQL";
+import { MeasureCQL } from "../../../../common/MeasureCQL";
 import {
   act,
   render,
@@ -14,10 +14,10 @@ import { Measure } from "@madie/madie-models";
 import {
   ServiceConfig,
   ApiContextProvider,
-} from "../../../../api/ServiceContext";
+} from "../../../../../api/ServiceContext";
 import useMeasureServiceApi, {
   MeasureServiceApi,
-} from "../../../../api/useMeasureServiceApi";
+} from "../../../../../api/useMeasureServiceApi";
 import { checkUserCanEdit } from "@madie/madie-util";
 
 const serviceConfig: ServiceConfig = {
@@ -78,7 +78,7 @@ jest.mock("@madie/madie-util", () => ({
   },
 }));
 
-jest.mock("../../../../api/useMeasureServiceApi");
+jest.mock("../../../../../api/useMeasureServiceApi");
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 let measureServiceApi: MeasureServiceApi;
