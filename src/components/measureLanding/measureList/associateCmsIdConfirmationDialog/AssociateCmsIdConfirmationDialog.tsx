@@ -29,7 +29,7 @@ const AssociateCmsIdConfirmationDialog = ({ open, onClose, onContinue }) => (
       <section className="dialog-warning-body">
         <p>
           Are you sure you wish to associate this CMS ID? Any meta data that
-          gets copied over will overwrite existing data in that field."
+          gets copied over will overwrite existing data in that field.
         </p>
       </section>
       <section className="dialog-warning-action">
