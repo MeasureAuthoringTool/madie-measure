@@ -2,15 +2,15 @@ import React, { useEffect, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { useFormik } from "formik";
-import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
+import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
 import {
   checkUserCanEdit,
   measureStore,
   routeHandlerStore,
 } from "@madie/madie-util";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
-import MetaDataWrapper from "../../details/MetaDataWrapper";
-import MultipleSelectDropDown from "../MultipleSelectDropDown";
+import MetaDataWrapper from "../../../details/MetaDataWrapper";
+import MultipleSelectDropDown from "../../MultipleSelectDropDown";
 import {
   InputLabel,
   MadieDiscardDialog,
@@ -126,7 +126,19 @@ const RiskAdjustment = () => {
       handleSubmit={formik.handleSubmit}
       onCancel={onCancel}
     >
-      <div tw="flex mt-6 w-1/4 pb-7" style={{ marginTop: "-5px" }}>
+      <div tw="flex flex-col" data-testid="risk-adjustment">
+        <InputLabel htlmFor="riskAdjustmentDescription">Description</InputLabel>
+        <TextArea
+          {...formik.getFieldProps("riskAdjustmentDescription")}
+          name="riskAdjustmentDescription"
+          id="riskAdjustmentDescription"
+          disabled={!canEdit}
+          placeholder="Description"
+          data-testid="riskAdjustmentDescription"
+          className="risk-description"
+        />
+      </div>
+      <div tw="flex mt-6 w-1/4">
         <MultipleSelectDropDown
           formControl={formik.getFieldProps("riskAdjustments")}
           value={formik.values.riskAdjustments?.map((ra) => ra?.definition)}
@@ -171,18 +183,6 @@ const RiskAdjustment = () => {
               formik.setFieldValue("riskAdjustments", []);
             }
           }}
-        />
-      </div>
-      <div tw="flex flex-col" data-testid="risk-adjustment">
-        <InputLabel htlmfor="riskAdjustmentDescription">Description</InputLabel>
-        <TextArea
-          {...formik.getFieldProps("riskAdjustmentDescription")}
-          name="riskAdjustmentDescription"
-          id="riskAdjustmentDescription"
-          disabled={!canEdit}
-          placeholder="Description"
-          data-testid="riskAdjustmentDescription"
-          className="risk-description"
         />
       </div>
       <Toast
