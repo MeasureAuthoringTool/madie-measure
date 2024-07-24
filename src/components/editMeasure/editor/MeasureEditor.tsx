@@ -530,13 +530,13 @@ const MeasureEditor = () => {
       vs,
       prevSelectedValueSetDetails?.current
     ); // should have udpated editorVal but doesnt
-    if (result.status) {
-      setToastType("success");
+
+    if (result.status !== "danger") {
       handleMadieEditorValue(result.cql);
       setEditorVal(result.cql);
-    } else {
-      setToastType("danger");
     }
+
+    setToastType(result.status);
     setToastMessage(result.message);
     setToastOpen(true);
   };

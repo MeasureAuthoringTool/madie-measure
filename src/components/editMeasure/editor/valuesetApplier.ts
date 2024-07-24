@@ -160,7 +160,7 @@ const applyValueset = (
     : cql;
   const cqlArr: string[] = updatedCql.split("\n");
   const parseResults: CqlResult = new CqlAntlr(updatedCql).parse();
-  let valuesetChangeStatus: boolean = false;
+  let valuesetChangeStatus: "success" | "info" | "danger" = "danger";
   let message: string = "The requested operation was unsuccessful";
   let vsExists: boolean = false;
 
@@ -180,7 +180,7 @@ const applyValueset = (
     const valueSetStatement = `valueset "${getValueSetTitleName(vs)}": '${
       vs.oid
     }'`;
-    valuesetChangeStatus = true;
+    valuesetChangeStatus = "success";
     message = `Value Set ${getValueSetTitleName(
       vs
     )} has been successfully added to the CQL.`;
@@ -215,6 +215,7 @@ const applyValueset = (
     }
   } else {
     message = "This valueset is already defined in the CQL.";
+    valuesetChangeStatus = "info";
   }
   return {
     cql: cqlArr.join("\n"),
