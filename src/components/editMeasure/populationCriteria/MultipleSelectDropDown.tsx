@@ -1,11 +1,9 @@
 import React from "react";
 import { FormControl, Autocomplete, Checkbox } from "@mui/material";
 import PropTypes from "prop-types";
-import { InputLabel, TextField } from "@madie/madie-design-system/dist/react/";
-import FormHelperText from "@mui/material/FormHelperText";
+import { TextField } from "@madie/madie-design-system/dist/react/";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import * as _ from "lodash";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -54,6 +52,7 @@ const MultipleSelectDropDown = ({
   multipleSelect = true,
   limitTags = 1,
   textFieldInputProps = undefined,
+  tooltipText = "",
   // formControl, // is not referenced, already passed as prop
   onClose,
   key = undefined,
@@ -136,6 +135,7 @@ const MultipleSelectDropDown = ({
               label={labelReadable}
               placeholder="Select All That Apply"
               error={error}
+              tooltipText={tooltipText}
               {...params}
               required={required}
               helperText={helperText}
