@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useState } from "react";
-import { useMatch, useLocation, useNavigate } from "react-router-dom";
-import tw, { styled } from "twin.macro";
+import { useLocation, useNavigate } from "react-router-dom";
+import "twin.macro";
 import * as ucum from "@lhncbc/ucum-lhc";
 import "styled-components/macro";
 import {
@@ -10,7 +10,6 @@ import {
   PopulationType,
   MeasureErrorType,
   MeasureGroupTypes,
-  MeasureScoring,
 } from "@madie/madie-models";
 import { MenuItem as MuiMenuItem, Typography, Divider } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
@@ -71,6 +70,13 @@ interface ColSpanPopulationsType {
   isSecondInitialPopulation?: boolean;
   children?: any;
 }
+
+const STU4_STRATUM_ASSOCIATION_HELPER_TEXT =
+  "This is an optional element. Provision of this association allows a user to target specific populations to stratify within this population criteria." +
+  " The default association is to all populations within the population criteria and does not require user to make any selections." +
+  " If you desire to stratify all populations within a population criteria, do not provide an association." +
+  " If you wish to stratify a subset of populations within this population criteria, provide only the populations that should be stratified." +
+  " Refer to the Quality Measure Implementation Guide for more details.";
 
 const ColSpanPopulations = (props: ColSpanPopulationsType) => {
   return (
@@ -1167,6 +1173,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                                 `stratifications[${i}].association`,
                                                 true
                                               )
+                                            }
+                                            tooltipText={
+                                              STU4_STRATUM_ASSOCIATION_HELPER_TEXT
                                             }
                                           />
                                         ) : (
