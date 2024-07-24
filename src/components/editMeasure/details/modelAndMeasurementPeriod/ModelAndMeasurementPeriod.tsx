@@ -194,7 +194,7 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
             handleDateChange={(startDate) =>
               formik.setFieldValue(
                 "measurementPeriodStart",
-                startDate.format(DATE_FORMAT)
+                startDate?.format(DATE_FORMAT)
               )
             }
             error={
@@ -217,7 +217,7 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
             handleDateChange={(endDate) =>
               formik.setFieldValue(
                 "measurementPeriodEnd",
-                endDate.format(DATE_FORMAT),
+                endDate?.format(DATE_FORMAT),
                 true
               )
             }
