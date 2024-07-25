@@ -817,16 +817,22 @@ export default function MeasureList(props: {
     setOpenAssociateCmsIdDialog(true);
   };
 
-  const handleCmsIdAssociation = (qiCoreMeasureId, qdmMeasureId) => {
+  const handleCmsIdAssociation = (
+    qiCoreMeasureId: string,
+    qdmMeasureId: string,
+    copyMetaData: boolean
+  ) => {
     measureServiceApi
-      .associateCmdId(qiCoreMeasureId, qdmMeasureId)
+      .associateCmdId(qiCoreMeasureId, qdmMeasureId, copyMetaData)
       .then((measureSet) => {
         doUpdateList();
         props.setSelectedIds({});
         setToastOpen(true);
         setToastType("success");
         setToastMessage(
-          `Measures successfully associated with CMS ID ${measureSet?.cmsId}.`
+          `Measures successfully associated with CMS ID ${measureSet?.cmsId}${
+            copyMetaData ? " and meta data is copied over" : ""
+          }.`
         );
         setOpenAssociateCmsIdDialog(false);
       })

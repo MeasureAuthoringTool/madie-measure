@@ -155,7 +155,8 @@ export class MeasureServiceApi {
 
   async associateCmdId(
     qiCoreMeasureId: string,
-    qdmMeasureId: string
+    qdmMeasureId: string,
+    copyMetaData: boolean
   ): Promise<MeasureSet> {
     const response = await axios.put<any>(
       `${this.baseUrl}/measures/cms-id-association`,
@@ -167,6 +168,7 @@ export class MeasureServiceApi {
         params: {
           qiCoreMeasureId,
           qdmMeasureId,
+          copyMetaData,
         },
       }
     );
