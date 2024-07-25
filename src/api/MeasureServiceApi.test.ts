@@ -501,7 +501,11 @@ describe("MeasureServiceApi Tests", () => {
     const resp: any = { status: 200, data: measureSet };
     mockedAxios.put.mockResolvedValue(resp);
 
-    await measureServiceApi.associateCmdId("qiCoreMeasureId", "qdmMeasureId");
+    await measureServiceApi.associateCmdId(
+      "qiCoreMeasureId",
+      "qdmMeasureId",
+      true
+    );
     expect(mockedAxios.put).toBeCalledTimes(1);
     expect(resp.data).toEqual(measureSet);
   });
