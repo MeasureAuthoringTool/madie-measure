@@ -13,7 +13,6 @@ import useMeasureServiceApi, {
 } from "../../../../api/useMeasureServiceApi";
 import { Measure } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
-import { AxiosError, AxiosResponse } from "axios";
 
 const mockHistoryPush = jest.fn();
 const setErrorMessage = jest.fn();
@@ -48,7 +47,6 @@ jest.mock("@madie/madie-util", () => ({
     state: jest.fn().mockImplementation(() => measure),
     initialState: jest.fn().mockImplementation(() => null),
     subscribe: (set) => {
-      // set(measure)
       return { unsubscribe: () => null };
     },
   },
@@ -65,14 +63,6 @@ jest.mock("@madie/madie-util", () => ({
 
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
-
-const axiosError: AxiosError = {
-  response: {
-    status: 500,
-    data: { status: 500, error: "bad test", message: "oh no what happened" },
-  } as AxiosResponse,
-  toJSON: jest.fn(),
-} as unknown as AxiosError;
 
 let serviceApiMock: MeasureServiceApi;
 

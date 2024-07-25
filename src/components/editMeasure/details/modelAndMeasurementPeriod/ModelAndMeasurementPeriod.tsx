@@ -35,6 +35,7 @@ interface modelAndMeasurementPeriod {
 interface ModelAndMeasurementPeriodProps {
   setErrorMessage: Function;
 }
+const DATE_FORMAT = "YYYY-MM-DDTHH:mm:ss";
 
 const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
   const { setErrorMessage } = props;
@@ -191,7 +192,10 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
             required={true}
             label="Measurement Period - Start Date"
             handleDateChange={(startDate) =>
-              formik.setFieldValue("measurementPeriodStart", startDate)
+              formik.setFieldValue(
+                "measurementPeriodStart",
+                startDate?.format(DATE_FORMAT)
+              )
             }
             error={
               formik.touched.measurementPeriodStart &&
@@ -211,7 +215,11 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
             required={true}
             label="Measurement Period - End Date"
             handleDateChange={(endDate) =>
-              formik.setFieldValue("measurementPeriodEnd", endDate, true)
+              formik.setFieldValue(
+                "measurementPeriodEnd",
+                endDate?.format(DATE_FORMAT),
+                true
+              )
             }
             error={
               formik.touched.measurementPeriodEnd &&
