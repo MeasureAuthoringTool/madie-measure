@@ -3,7 +3,12 @@ import PropTypes from "prop-types";
 import ErrorIcon from "@mui/icons-material/Error";
 import { MadieDialog } from "@madie/madie-design-system/dist/react";
 
-const AssociateCmsIdConfirmationDialog = ({ open, onClose, onContinue }) => (
+const AssociateCmsIdConfirmationDialog = ({
+  open,
+  onClose,
+  onContinue,
+  copyMetaData,
+}) => (
   <MadieDialog
     title="Are you sure?"
     dialogProps={{
@@ -28,8 +33,9 @@ const AssociateCmsIdConfirmationDialog = ({ open, onClose, onContinue }) => (
     <div id="discard-changes-dialog-body">
       <section className="dialog-warning-body">
         <p>
-          Are you sure you wish to associate this CMS ID? Any meta data that
-          gets copied over will overwrite existing data in that field.
+          Are you sure you wish to associate this CMS ID?
+          {copyMetaData &&
+            " Any meta data that gets copied over will overwrite existing data in that field."}
         </p>
       </section>
       <section className="dialog-warning-action">

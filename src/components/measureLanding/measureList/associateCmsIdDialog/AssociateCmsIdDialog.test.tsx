@@ -153,6 +153,12 @@ describe("Associate Cms Id Dialog component", () => {
     expect(associateCancelBtn).toBeInTheDocument();
     expect(associateCancelBtn).toBeEnabled();
 
+    const copyQdmMetaDataChkBox = screen.getByRole("checkbox", {
+      name: "Copy QDM Metadata to QI-Core measure",
+    }) as HTMLInputElement;
+    expect(copyQdmMetaDataChkBox.checked).toBe(false);
+    userEvent.click(copyQdmMetaDataChkBox);
+
     const associatePopupText = screen.queryByText("Associate CMS ID");
     expect(associatePopupText).toBeInTheDocument();
 
@@ -160,6 +166,12 @@ describe("Associate Cms Id Dialog component", () => {
 
     const associatePopupText1 = screen.queryByText("Are you sure?");
     expect(associatePopupText1).toBeInTheDocument();
+
+    expect(
+      screen.queryByText(
+        "Are you sure you wish to associate this CMS ID? Any meta data that gets copied over will overwrite existing data in that field."
+      )
+    ).toBeInTheDocument();
 
     const associateCmsIdentifierConfirmingDialogCancelBtn = screen.getByTestId(
       "associate-cms-identifier-confirmation-dialog-cancel-button"

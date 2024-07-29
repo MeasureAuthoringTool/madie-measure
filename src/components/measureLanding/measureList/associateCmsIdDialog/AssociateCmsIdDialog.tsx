@@ -3,8 +3,7 @@ import { Measure, Model } from "@madie/madie-models";
 import { MadieDialog } from "@madie/madie-design-system/dist/react";
 import "twin.macro";
 import "styled-components/macro";
-import { CheckBox } from "@mui/icons-material";
-import { FormControlLabel } from "@mui/material";
+import { FormControlLabel, Checkbox } from "@mui/material";
 import WarningIcon from "@mui/icons-material/Warning";
 import AssociateCmsIdConfirmationDialog from "../associateCmsIdConfirmationDialog/AssociateCmsIdConfirmationDialog";
 
@@ -22,6 +21,7 @@ export default function AssociateCmsIdDialog(props: PropTypes) {
     associateCmsIdConfirmationDialogOpen,
     setAssociateCmsIdConfirmationDialogOpen,
   ] = useState(false);
+  const [copyMetaData, setCopyMetaData] = useState(false);
   const qdmMeasure = measures?.find(
     (measure) => measure.model === Model.QDM_5_6
   );
@@ -84,12 +84,12 @@ export default function AssociateCmsIdDialog(props: PropTypes) {
               <td colSpan={4} tw="pt-2 pb-2">
                 <FormControlLabel
                   control={
-                    <CheckBox
-                      sx={{
-                        color: "#0073C8",
-                      }}
+                    <Checkbox
                       name="cmsId"
                       data-testid="copy-cms-id-checkbox"
+                      onChange={(event: any) =>
+                        setCopyMetaData(event.target.checked)
+                      }
                     />
                   }
                   label="Copy QDM Metadata to QI-Core measure"
@@ -110,11 +110,13 @@ export default function AssociateCmsIdDialog(props: PropTypes) {
         onContinue={() => {
           handleCmsIdAssociationContinueDialog(
             qiCoreMeasure?.id,
-            qdmMeasure?.id
+            qdmMeasure?.id,
+            copyMetaData
           ),
             setAssociateCmsIdConfirmationDialogOpen(false);
         }}
         onClose={() => setAssociateCmsIdConfirmationDialogOpen(false)}
+        copyMetaData={copyMetaData}
       />
     </>
   );
