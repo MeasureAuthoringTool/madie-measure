@@ -689,6 +689,7 @@ describe("MeasureInformation component", () => {
   });
 
   it("Should be editable if measure is shared with the user", () => {
+    measure.model = Model.QICORE;
     render(<MeasureInformation setErrorMessage={setErrorMessage} />);
     const result: HTMLElement = getByTestId("measure-information-form");
     expect(result).toBeInTheDocument();
@@ -722,6 +723,7 @@ describe("MeasureInformation component", () => {
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
       return false;
     });
+    measure.model = Model.QDM_5_6;
     await act(async () => {
       render(<MeasureInformation setErrorMessage={setErrorMessage} />);
       const result: HTMLElement = getByTestId("measure-information-form");
@@ -739,11 +741,6 @@ describe("MeasureInformation component", () => {
 
       const ecqmTitleText = getByTestId("ecqm-input") as HTMLInputElement;
       expect(ecqmTitleText).toBeDisabled();
-
-      const experimentalInput = screen.getByRole("checkbox", {
-        name: "Experimental",
-      }) as HTMLInputElement;
-      expect(experimentalInput).toBeDisabled();
 
       const endorserAutoComplete = getByTestId("endorser") as HTMLInputElement;
       const endorserComboBox =
