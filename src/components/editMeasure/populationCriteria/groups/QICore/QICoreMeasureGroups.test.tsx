@@ -60,6 +60,7 @@ const getEmptyStrat = () => ({
   cqlDefinition: "",
   description: "",
   association: null,
+  associations: [],
   id: "",
 });
 
