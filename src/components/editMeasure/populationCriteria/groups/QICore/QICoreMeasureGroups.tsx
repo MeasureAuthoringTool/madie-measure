@@ -124,15 +124,9 @@ const getEmptyStrat = () => ({
   cqlDefinition: "",
   description: "",
   association: null,
+  associations: [],
   id: uuidv4(),
 });
-
-export const deleteStrat = {
-  cqlDefinition: "delete",
-  description: deleteToken,
-  association: PopulationType.INITIAL_POPULATION,
-  id: "",
-};
 
 // provides dropdown options for stratification association
 const associationSelect = {
@@ -1153,6 +1147,11 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                               name: "Select Association",
                                               value: null,
                                             }}
+                                            defaultValue={
+                                              formik.getFieldProps(
+                                                `stratifications[${i}].associations`
+                                              ).value
+                                            }
                                             required={false}
                                             disabled={!canEdit}
                                             options={Object.values(
@@ -1164,13 +1163,13 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                               selectedVal: string | null
                                             ) => {
                                               formik.setFieldValue(
-                                                `stratifications[${i}].association`,
+                                                `stratifications[${i}].associations`,
                                                 selectedVal
                                               );
                                             }}
                                             onClose={() =>
                                               formik.setFieldTouched(
-                                                `stratifications[${i}].association`,
+                                                `stratifications[${i}].associations`,
                                                 true
                                               )
                                             }
