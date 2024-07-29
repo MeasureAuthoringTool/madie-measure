@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Endorsement, Measure } from "@madie/madie-models";
+import { Endorsement, Measure, Model } from "@madie/madie-models";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import "styled-components/macro";
 import {
@@ -508,21 +508,24 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             />
           )}
         </Box>
-        <Box sx={formRowGapped}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                {...formik.getFieldProps("experimental")}
-                checked={formik.values.experimental}
-                disabled={!canEdit}
-                name="experimental"
-                id="experimental"
-                data-testid="experimental"
-              />
-            }
-            label="Experimental"
-          />
-        </Box>
+
+        {measure?.model !== Model.QDM_5_6 && (
+          <Box sx={formRowGapped}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  {...formik.getFieldProps("experimental")}
+                  checked={formik.values.experimental}
+                  disabled={!canEdit}
+                  name="experimental"
+                  id="experimental"
+                  data-testid="experimental"
+                />
+              }
+              label="Experimental"
+            />
+          </Box>
+        )}
 
         <Box sx={formRowGapped}>
           <AutoComplete
