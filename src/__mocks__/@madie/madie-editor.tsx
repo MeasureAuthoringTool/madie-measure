@@ -24,7 +24,12 @@ export function MadieEditor({ onChange, value, inboundAnnotations }) {
   );
 }
 
-export function MadieTerminologyEditor({ onChange, value, handleCodeDelete }) {
+export function MadieTerminologyEditor({
+  onChange,
+  value,
+  inboundAnnotations,
+  handleCodeDelete,
+}) {
   const code = {
     codeSystem: "RXNORM",
     codeSystemOid: "2.16.840.1.113883.6.88",
@@ -44,6 +49,11 @@ export function MadieTerminologyEditor({ onChange, value, handleCodeDelete }) {
           onChange(e.target.value);
         }}
       />
+      {inboundAnnotations && inboundAnnotations.length > 0 ? (
+        <span>{inboundAnnotations.length} issues found with CQL</span>
+      ) : (
+        <span>CQL is valid</span>
+      )}
       <button data-testid="delete-code" onClick={() => handleCodeDelete(code)}>
         Remove code
       </button>
