@@ -17,7 +17,6 @@ import {
   measureStore,
   routeHandlerStore,
   checkUserCanEdit,
-  useFeatureFlags,
 } from "@madie/madie-util";
 import { Box } from "@mui/system";
 import {
@@ -100,7 +99,6 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   const transLatorLable = measure?.measureMetaData?.draft
     ? `Currently using CQL to ELM Translator Version`
     : `Versioned with CQL to ELM Translator Version`;
-  const featureFlags = useFeatureFlags();
 
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);

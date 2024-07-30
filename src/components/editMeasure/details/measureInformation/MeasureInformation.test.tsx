@@ -131,7 +131,6 @@ jest.mock("@madie/madie-util", () => ({
     getAccessToken: () => "test.jwt",
   })),
   useKeyPress: jest.fn(() => false),
-  useFeatureFlags: jest.fn().mockReturnValue({}),
   measureStore: {
     updateMeasure: jest.fn(),
     state: jest.fn(),
