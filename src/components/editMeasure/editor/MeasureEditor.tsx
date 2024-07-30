@@ -581,7 +581,7 @@ const MeasureEditor = () => {
             </SuccessText>
           )}
           {!processing &&
-            (featureFlags?.qdmCodeSearch && isQDM ? (
+            (featureFlags?.CQLBuilderTabs ? (
               <MadieTerminologyEditor
                 handleApplyCode={handleApplyCode}
                 handleApplyValueSet={handleUpdateVs}
