@@ -43,7 +43,6 @@ jest.mock("@madie/madie-util", () => ({
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useFeatureFlags: jest.fn(() => ({
-    qdmExport: true,
     enableQdmRepeatTransfer: false,
     MeasureListCheckboxes: true,
     associateMeasures: true,
@@ -1814,7 +1813,6 @@ describe("Measure List component", () => {
   it("Should be able to version QDM Measure when enableQdmRepeatTransfer is false", async () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       enableQdmRepeatTransfer: false,
-      qdmExport: true,
     }));
     const { getByTestId, findByTestId, queryByTestId, unmount } = await render(
       <ServiceContext.Provider value={serviceConfig}>
