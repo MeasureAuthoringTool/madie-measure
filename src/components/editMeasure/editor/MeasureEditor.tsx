@@ -112,6 +112,11 @@ const MeasureEditor = () => {
   const [processing, setProcessing] = useState<boolean>(true);
   const featureFlags = useFeatureFlags();
   const isQDM = measure?.model?.includes("QDM");
+  const showCqlBuilderTabs =
+    featureFlags?.QDMValueSetSearch ||
+    featureFlags?.qdmCodeSearch ||
+    featureFlags?.CQLBuilderDefinitions ||
+    featureFlags?.CQLBuilderIncludes;
 
   useEffect(() => {
     const subscription = measureStore.subscribe((measure: Measure) => {
@@ -581,7 +586,7 @@ const MeasureEditor = () => {
             </SuccessText>
           )}
           {!processing &&
-            (featureFlags?.CQLBuilderTabs ? (
+            (showCqlBuilderTabs ? (
               <MadieTerminologyEditor
                 handleApplyCode={handleApplyCode}
                 handleApplyValueSet={handleUpdateVs}
