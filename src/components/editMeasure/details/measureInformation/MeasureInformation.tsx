@@ -17,7 +17,6 @@ import {
   measureStore,
   routeHandlerStore,
   checkUserCanEdit,
-  useFeatureFlags,
 } from "@madie/madie-util";
 import { Box } from "@mui/system";
 import {
@@ -100,7 +99,6 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   const transLatorLable = measure?.measureMetaData?.draft
     ? `Currently using CQL to ELM Translator Version`
     : `Versioned with CQL to ELM Translator Version`;
-  const featureFlags = useFeatureFlags();
 
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -487,28 +485,14 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             error={formik.touched.ecqmTitle && Boolean(formik.errors.ecqmTitle)}
             {...formik.getFieldProps("ecqmTitle")}
           />
-          {featureFlags.generateCMSID ? (
-            <CmsIdentifier
-              canEdit={canEdit}
-              label="CMS ID"
-              cmsId={measure?.measureSet?.cmsId}
-              model={measure?.model}
-              onClick={() => setCmsIdDialogOpen(true)}
-            />
-          ) : (
-            <ReadOnlyTextField
-              label="CMS ID"
-              tabIndex={0}
-              placeholder="CMS ID"
-              id="cmsId"
-              data-testid="cms-id-text-field"
-              inputProps={{ "data-testid": "cms-id-input" }}
-              helperText={formikErrorHandler("cmsId", true)}
-              size="small"
-              error={formik.touched.cmsId && Boolean(formik.errors.cmsId)}
-              {...formik.getFieldProps("cmsId")}
-            />
-          )}
+
+          <CmsIdentifier
+            canEdit={canEdit}
+            label="CMS ID"
+            cmsId={measure?.measureSet?.cmsId}
+            model={measure?.model}
+            onClick={() => setCmsIdDialogOpen(true)}
+          />
         </Box>
 
         {measure?.model !== Model.QDM_5_6 && (

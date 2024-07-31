@@ -335,7 +335,7 @@ export default function MeasureList(props: {
         enableSorting: false,
       },
     ];
-  }, [props.changeSelectedIds, featureFlags?.qdmExport]);
+  }, [props.changeSelectedIds]);
 
   const handleDialogClose = () => {
     setInvalidLibraryDialogOpen(false);
@@ -445,15 +445,6 @@ export default function MeasureList(props: {
       targetMeasure.current = selectedMeasure;
     }
   }, [selectedMeasure]);
-  // put export and version behind a flag for qdm
-  const shouldAllowAction = (measure: Measure, flag: boolean) => {
-    // pass in current model and barring flag
-    // we only want to block in case model === qdm & it's flag is false
-    if (measure.model === Model.QDM_5_6 && !flag) {
-      return false;
-    }
-    return true;
-  };
   const handlePopOverOpen = useCallback(
     async (selected: Measure, event: React.MouseEvent<HTMLButtonElement>) => {
       setOptionsOpen(true);
@@ -479,9 +470,7 @@ export default function MeasureList(props: {
         toImplementFunction: exportMeasure,
         dataTestId: `export-measure-${selected?.id}`,
       };
-      if (shouldAllowAction(selected, featureFlags?.qdmExport)) {
-        additionalOptions.push(exportButton);
-      }
+      additionalOptions.push(exportButton);
       // no longer an always on if feature
       if (selected.measureMetaData.draft) {
         options.push({
@@ -501,7 +490,7 @@ export default function MeasureList(props: {
       setAdditionalSelectOptionProps(additionalOptions);
       setOtherSelectOptionPropsForPopOver(options);
     },
-    [canDraftLookup, featureFlags?.qdmExport]
+    [canDraftLookup]
   );
 
   const handleClose = () => {

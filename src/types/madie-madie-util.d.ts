@@ -10,13 +10,15 @@ declare module "@madie/madie-util" {
   }
 
   interface FeatureFlags {
-    qdmExport: boolean;
     enableQdmRepeatTransfer: boolean;
-    generateCMSID: boolean;
     qdmCodeSearch: boolean;
     MeasureListCheckboxes: boolean;
     associateMeasures: boolean;
     qiCoreStu4Updates: boolean;
+    QDMValueSetSearch: boolean;
+    qdmCodeSearch: boolean;
+    CQLBuilderDefinitions: boolean;
+    CQLBuilderIncludes: boolean;
   }
 
   export interface ServiceConfig {
