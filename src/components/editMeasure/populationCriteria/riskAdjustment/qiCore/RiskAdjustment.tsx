@@ -157,7 +157,6 @@ const RiskAdjustment = () => {
       onCancel={onCancel}
     >
       <div tw="flex flex-col" data-testid="risk-adjustment">
-        <InputLabel htmlFor="riskAdjustmentDescription">Description</InputLabel>
         <TextArea
           {...formik.getFieldProps("riskAdjustmentDescription")}
           name="riskAdjustmentDescription"
@@ -166,6 +165,7 @@ const RiskAdjustment = () => {
           placeholder="Description"
           data-testid="riskAdjustmentDescription"
           className="risk-description"
+          label="Description"
         />
       </div>
       <div tw="flex mt-6 gap-x-3 w-full">
