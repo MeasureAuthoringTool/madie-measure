@@ -163,12 +163,6 @@ const SupplementalData = () => {
         tw="flex flex-col"
         data-testid="supplementalDataDescriptionContainer"
       >
-        <InputLabel
-          htmlFor="supplementalDataDescription"
-          style={{ placeContent: "flex-end" }}
-        >
-          Description
-        </InputLabel>
         <TextArea
           {...formik.getFieldProps("supplementalDataDescription")}
           name="supplementalDataDescription"
@@ -177,6 +171,7 @@ const SupplementalData = () => {
           placeholder="Description"
           data-testid="supplementalDataDescription"
           className="supplemental-data-description"
+          label="Description"
         />
       </div>
       <div tw="flex mt-6 gap-x-3 w-full">
