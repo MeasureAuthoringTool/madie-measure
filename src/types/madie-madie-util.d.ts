@@ -15,7 +15,10 @@ declare module "@madie/madie-util" {
     MeasureListCheckboxes: boolean;
     associateMeasures: boolean;
     qiCoreStu4Updates: boolean;
-    CQLBuilderTabs: boolean;
+    QDMValueSetSearch: boolean;
+    qdmCodeSearch: boolean;
+    CQLBuilderDefinitions: boolean;
+    CQLBuilderIncludes: boolean;
   }
 
   export interface ServiceConfig {

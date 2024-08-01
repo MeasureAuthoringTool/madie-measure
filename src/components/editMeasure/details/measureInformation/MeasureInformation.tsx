@@ -138,7 +138,9 @@ export default function MeasureInformation(props: MeasureInformationProps) {
         ? measure?.id
         : measure?.versionId,
     measureId: measure?.measureSetId,
-    experimental: measure?.measureMetaData?.experimental || false,
+    experimental:
+      measure?.measureMetaData?.experimental ||
+      (measure?.model === Model.QDM_5_6 ? null : false),
     endorsements: measure?.measureMetaData?.endorsements || [],
     endorsementId: measure?.measureMetaData?.endorsements?.[0]?.endorsementId,
   } as measureInformationForm;
