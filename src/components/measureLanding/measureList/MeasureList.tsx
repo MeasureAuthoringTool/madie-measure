@@ -335,7 +335,7 @@ export default function MeasureList(props: {
         enableSorting: false,
       },
     ];
-  }, [props.changeSelectedIds]);
+  }, [featureFlags?.MeasureListCheckboxes, props.changeSelectedIds]);
 
   const handleDialogClose = () => {
     setInvalidLibraryDialogOpen(false);
