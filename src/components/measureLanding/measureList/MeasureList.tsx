@@ -910,7 +910,7 @@ export default function MeasureList(props: {
                   <TH
                     key={header.id}
                     scope="col"
-                    onClick={header.column.getToggleSortingHandler()}
+                    // onClick={header.column.getToggleSortingHandler()}
                     onMouseEnter={() => setHoveredHeader(header.id)}
                     onMouseLeave={() => setHoveredHeader(null)}
                     className="header-cell"
@@ -932,16 +932,17 @@ export default function MeasureList(props: {
                             : undefined
                         }
                       >
-                        <span className="arrowDisplay">
-                          {header.column.getCanSort() &&
-                            isHovered &&
-                            !header.column.getIsSorted() && <UnfoldMoreIcon />}
+                        {/*TODO Sorting functionality is disabled as per MAT-7532, Will be enabled in future */}
+                        {/*<span className="arrowDisplay">*/}
+                        {/*  {header.column.getCanSort() &&*/}
+                        {/*    isHovered &&*/}
+                        {/*    !header.column.getIsSorted() && <UnfoldMoreIcon />}*/}
 
-                          {{
-                            asc: <KeyboardArrowUpIcon />,
-                            desc: <KeyboardArrowDownIcon />,
-                          }[header.column.getIsSorted() as string] ?? null}
-                        </span>
+                        {/*  {{*/}
+                        {/*    asc: <KeyboardArrowUpIcon />,*/}
+                        {/*    desc: <KeyboardArrowDownIcon />,*/}
+                        {/*  }[header.column.getIsSorted() as string] ?? null}*/}
+                        {/*</span>*/}
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext()
