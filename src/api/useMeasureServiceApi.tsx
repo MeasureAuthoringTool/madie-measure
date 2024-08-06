@@ -377,14 +377,16 @@ export class MeasureServiceApi {
     signal
   ): Promise<any> {
     try {
+      const encodedCriteria = encodeURI(searchCriteria);
       const response = await axios.get<any>(
-        `${this.baseUrl}/measures/search/${encodeURI(searchCriteria)}`,
+        `${this.baseUrl}/measures/search`, // Changed to endpoint without path variable
         {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
           },
           params: {
-            currentUser: filterByCurrentUser,
+            query: encodedCriteria, // putting encoded chars here doesn't trigger spring preflight failure
+            filterByCurrentUser,
             limit,
             page,
           },

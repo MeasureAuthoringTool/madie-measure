@@ -758,11 +758,11 @@ const MeasureGroups = (props: MeasureGroupProps) => {
               <div>
                 <div>
                   <FormFieldInner>
-                    <FieldLabel htmlFor="measure-group-description">
-                      Population Criteria {measureGroupNumber + 1} Description
-                    </FieldLabel>
                     <FieldSeparator>
                       <TextArea
+                        label={`Population Criteria ${
+                          measureGroupNumber + 1
+                        } Description`}
                         value={formik.values.groupDescription}
                         name="group-description"
                         id="group-description"
