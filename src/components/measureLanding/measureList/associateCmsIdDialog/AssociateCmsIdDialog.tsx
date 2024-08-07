@@ -54,7 +54,7 @@ export default function AssociateCmsIdDialog(props: PropTypes) {
           <WarningIcon style={{ color: "#ff9800" }} />
           <p style={{ marginLeft: "5px" }}>
             Associate CMS ID will copy the CMS ID from your QDM measure to your
-            QI-Core measure. To copy QDM metadate to the QI-Core measure as well
+            QI-Core measure. To copy QDM metadata to the QI-Core measure as well
             please select the checkbox below.
           </p>
         </div>
