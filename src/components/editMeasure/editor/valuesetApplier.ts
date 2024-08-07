@@ -13,9 +13,11 @@ const sortCQLValuesetsInPlace = (
 };
 
 const extractValueSetNameAndSuffix = (valueSetName) => {
+  console.log("extractValueSetNameAndSuffix")
   const match = valueSetName
     .replace(/["']/g, "")
-    .match(/^([a-zA-Z\-\s]+?)(?:\s*\((\d+)\))?$/);
+    .match(/^(.*)\((\d+)\)\s*$/);
+    
   if (match) {
     return {
       baseValueSetName: match[1].trim(),
@@ -32,6 +34,7 @@ const extractValueSetNameAndSuffix = (valueSetName) => {
 
 // create a helper array of valuesets, declared in the expected line order
 const createTransformedValuesets = (valueSets) => {
+  console.log("createTransformedValuesets")
   const lines = valueSets.map((vs) => vs.start.line).sort((a, b) => a - b);
   const sortedValuesets = valueSets.sort((a, b) => {
     const valueSetNameA = a.name.replace(/["']/g, "").toLowerCase(); // Convert to lower case for case-insensitive sorting
@@ -63,11 +66,14 @@ const createTransformedValuesets = (valueSets) => {
 };
 
 function findInsertionIndexInSortedVsList(valueSets, newValueSet) {
+  console.log("findInsertionIndexInSortedVsList")
   // Find the insertion index based on the valueset name and suffix part
   const { baseValueSetName: newValueSetBaseName, suffix: newValueSetSuffix } =
     extractValueSetNameAndSuffix(newValueSet.toLowerCase());
 
   let insertionIndex = 0;
+  // console.log(valueSets)
+  // console.log(newValueSet)
   for (let i = 0; i < valueSets.length; i++) {
     const currentValueSetName = valueSets[i].name
       .replace(/["']/g, "")
@@ -76,7 +82,11 @@ function findInsertionIndexInSortedVsList(valueSets, newValueSet) {
       baseValueSetName: currentValueSetBaseName,
       suffix: currentValueSetSuffix,
     } = extractValueSetNameAndSuffix(currentValueSetName);
-
+    console.log(currentValueSetBaseName)
+    console.log(currentValueSetSuffix)
+    console.log(newValueSetBaseName)
+    console.log(newValueSetSuffix)
+    console.log("=========")
     // Compare base names first
     if (newValueSetBaseName < currentValueSetBaseName) {
       insertionIndex = i;
@@ -98,6 +108,7 @@ function findInsertionIndexInSortedVsList(valueSets, newValueSet) {
 }
 
 const findInsertPointWhenNoValuesets = (parseResults: CqlResult): number => {
+  console.log("findInsertPointWhenNoValuesets")
   const codesystems: number = parseResults?.codeSystems.length;
   const includes: number = parseResults?.includes.length;
   const usings: number = parseResults?.using?.start?.line;
@@ -116,6 +127,7 @@ const findInsertPointWhenNoValuesets = (parseResults: CqlResult): number => {
 };
 
 const getValueSetTitleName = (vs) => {
+  console.log("getValueSetTitleName")
   if (vs?.suffix) {
     return `${vs.title} (${vs.suffix})`;
   }
@@ -124,6 +136,7 @@ const getValueSetTitleName = (vs) => {
 
 //this function is to check if the values set is being added or updated
 const checkIfValueSetBeingEdited = (vs, previousVs) => {
+  console.log("checkIfValueSetBeingEdited")
   if (
     previousVs &&
     previousVs.title === vs.title &&
@@ -137,6 +150,7 @@ const checkIfValueSetBeingEdited = (vs, previousVs) => {
 
 // this to remove the previous line that was added when updating the valueset
 const updateCql = (cql, previousVs) => {
+  console.log("updateCql")
   const valueSetStatement = `valueset "${getValueSetTitleName(previousVs)}": '${
     previousVs.oid
   }'`;
@@ -155,6 +169,7 @@ const applyValueset = (
   vs: ValueSetForSearch,
   previousVs?: ValueSetForSearch
 ): CodeChangeResult => {
+  console.log("applyValueset")
   const updatedCql = checkIfValueSetBeingEdited(vs, previousVs)
     ? updateCql(cql, previousVs)
     : cql;
@@ -162,21 +177,32 @@ const applyValueset = (
   const parseResults: CqlResult = new CqlAntlr(updatedCql).parse();
   let valuesetChangeStatus: "success" | "info" | "danger" = "danger";
   let message: string = "The requested operation was unsuccessful";
-  let vsExists: boolean = false;
+  let vsExactExists: boolean = false;
+  let  vsSameTitleExist: boolean = false;
+
 
   // are there valuesets at all?
+  let oldVsName2 = ""
   if (parseResults?.valueSets?.length > 0) {
     parseResults.valueSets.forEach((valueSet) => {
       const oldVsName = valueSet.name.replace(/["']/g, "");
+      oldVsName2=oldVsName
+      console.log(oldVsName)
       const oldUrl = valueSet.url.replace(/["']/g, "");
-      vsExists =
-        vsExists ||
+      vsExactExists =
+        vsExactExists ||
         (oldVsName === getValueSetTitleName(vs) && oldUrl === vs.oid) ||
         vs?.oid === previousVs?.oid;
-    });
-  }
+      vsSameTitleExist =
+        vsSameTitleExist ||
+        (oldVsName.substring(0,oldVsName.length-(vs.suffix.length+3)).replace(/\s/g, '').toLowerCase() === vs.name.toLowerCase() 
+                   && oldUrl === vs.oid) ||
+        vs?.oid === previousVs?.oid;
+    })
+    }
+
   // no matching valueset in the cql, add it.
-  if (!vsExists) {
+  if (!vsExactExists && !vsSameTitleExist) {
     const valueSetStatement = `valueset "${getValueSetTitleName(vs)}": '${
       vs.oid
     }'`;
@@ -213,7 +239,48 @@ const applyValueset = (
         );
       }
     }
-  } else {
+  } 
+  
+  else if(vsSameTitleExist){
+    const valueSetStatement = `valueset "${getValueSetTitleName(vs)}": '${
+      vs.oid
+    }'`;
+    valuesetChangeStatus = "success";
+    message = `Value Set ${getValueSetTitleName(
+      vs
+    )} has been successfully updated in the CQL.`;
+
+    if (!parseResults.valueSets.length) {
+      const insertionIndex = findInsertPointWhenNoValuesets(parseResults);
+      cqlArr.splice(insertionIndex, 0, valueSetStatement);
+      // no vs, but vs array to sort and work on
+    } else {
+      const sortedValueSets = createTransformedValuesets(
+        parseResults?.valueSets
+      );
+      sortCQLValuesetsInPlace(sortedValueSets, cqlArr);
+      const insertionIndex = findInsertionIndexInSortedVsList(
+        sortedValueSets,
+        getValueSetTitleName(vs)
+      );
+
+      if (insertionIndex > sortedValueSets.length - 1) {
+        cqlArr.splice(
+          sortedValueSets[insertionIndex - 1].stop.line,
+          0,
+          valueSetStatement
+        );
+      } else {
+        cqlArr.splice(
+          sortedValueSets[insertionIndex].stop.line - 1,
+          0,
+          valueSetStatement
+        );
+      }
+    }
+
+  }
+  else {
     message = "This valueset is already defined in the CQL.";
     valuesetChangeStatus = "info";
   }
