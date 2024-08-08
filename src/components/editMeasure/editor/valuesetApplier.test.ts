@@ -134,7 +134,7 @@ it("Should add valuset, priotiy location valuset array", () => {
 
 it("Should not add valuset to CQL when value set was already added", () => {
   const cql = fs.readFileSync(
-    "src/components/editMeasure/editor/__mocks__/CptTest.cql",
+    "src/components/editMeasure/editor/__mocks__/CptTestWithEDE.cql",
     "utf8"
   );
   const valusetJson = fs.readFileSync(
@@ -143,10 +143,50 @@ it("Should not add valuset to CQL when value set was already added", () => {
   );
 
   const valuset = JSON.parse(valusetJson);
-  const result: CodeChangeResult = applyValueset(cql, valuset, valuset);
-  expect(result.cql).not.toContain("Emergency Department Evaluation");
+  const result: CodeChangeResult = applyValueset(cql, valuset);
+  expect(result.cql).toContain("Emergency Department Evaluation");
   expect(result.status).toBe("info");
   expect(result.message).toEqual(
     `This valueset is already defined in the CQL.`
+  );
+});
+
+it("Should remove valuset suffix to already present CQL", () => {
+  const cql = fs.readFileSync(
+    "src/components/editMeasure/editor/__mocks__/CptTestWithSuffix.cql",
+    "utf8"
+  );
+  const valusetJson = fs.readFileSync(
+    "src/components/editMeasure/editor/__mocks__/valusetJson.json",
+    "utf8"
+  );
+
+  const valuset = JSON.parse(valusetJson);
+  const result: CodeChangeResult = applyValueset(cql, valuset);
+  expect(result.cql).not.toContain("Emergency Department Evaluation (1)");
+  expect(result.cql).toContain("Emergency Department Evaluation");
+  expect(result.status).toBe("success");
+  expect(result.message).toEqual(
+    `Value Set Emergency Department Evaluation has been successfully updated in the CQL.`
+  );
+});
+
+it("Should add valuset suffix to already present CQL", () => {
+  const cql = fs.readFileSync(
+    "src/components/editMeasure/editor/__mocks__/CptTestWithEDE.cql",
+    "utf8"
+  );
+  const valusetJson = fs.readFileSync(
+    "src/components/editMeasure/editor/__mocks__/valusetJsonWithSuffix.json",
+    "utf8"
+  );
+
+  const valuset = JSON.parse(valusetJson);
+  const result: CodeChangeResult = applyValueset(cql, valuset);
+  expect(result.cql).toContain("Emergency Department Evaluation (1)");
+  expect(result.cql).not.toContain('Emergency Department Evaluation":');
+  expect(result.status).toBe("success");
+  expect(result.message).toEqual(
+    `Value Set Emergency Department Evaluation (1) has been successfully updated in the CQL.`
   );
 });

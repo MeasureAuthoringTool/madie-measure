@@ -95,6 +95,30 @@ function findInsertionIndexInSortedVsList(valueSets, newValueSet) {
   return insertionIndex;
 }
 
+function findReplacementIndexInSortedVsList(valueSets, newValueSet) {
+  // Find the replacement index based on the valueset name and suffix part
+  const { baseValueSetName: newValueSetBaseName, suffix: newValueSetSuffix } =
+    extractValueSetNameAndSuffix(newValueSet.toLowerCase());
+
+  let replacementIndex = 0;
+  for (let i = 0; i < valueSets.length; i++) {
+    const currentValueSetName = valueSets[i].name
+      .replace(/["']/g, "")
+      .toLowerCase(); // Convert to lower case for case-insensitive comparison
+    const { baseValueSetName: currentValueSetBaseName } =
+      extractValueSetNameAndSuffix(currentValueSetName);
+    // Only compairing names as suffix can be added and removed
+    if (newValueSetBaseName < currentValueSetBaseName) {
+      replacementIndex = i;
+      break;
+    } else {
+      replacementIndex = i + 1;
+    }
+  }
+
+  return replacementIndex;
+}
+
 const findInsertPointWhenNoValuesets = (parseResults: CqlResult): number => {
   const codesystems: number = parseResults?.codeSystems.length;
   const includes: number = parseResults?.includes.length;
@@ -120,44 +144,13 @@ const getValueSetTitleName = (vs) => {
   return vs.title;
 };
 
-//this function is to check if the values set is being added or updated
-const checkIfValueSetBeingEdited = (vs, previousVs) => {
-  if (
-    previousVs &&
-    previousVs.title === vs.title &&
-    previousVs.steward === vs.steward &&
-    previousVs.oid === vs.oid
-  ) {
-    return true;
-  }
-  return false;
-};
-
-// this to remove the previous line that was added when updating the valueset
-const updateCql = (cql, previousVs) => {
-  const valueSetStatement = `valueset "${getValueSetTitleName(previousVs)}": '${
-    previousVs.oid
-  }'`;
-  const normalize = (str) => str.replace(/\s+/g, " ").trim();
-  const normalizedText = normalize(valueSetStatement);
-  const updatedCqlArray = cql.split("\n").filter((statement) => {
-    const normalizedItem = normalize(statement);
-    return normalizedItem.localeCompare(normalizedText) !== 0;
-  });
-
-  return updatedCqlArray.join("\n");
-};
-
 const applyValueset = (
   cql: string,
   vs: ValueSetForSearch,
   previousVs?: ValueSetForSearch
 ): CodeChangeResult => {
-  const updatedCql = checkIfValueSetBeingEdited(vs, previousVs)
-    ? updateCql(cql, previousVs)
-    : cql;
-  const cqlArr: string[] = updatedCql.split("\n");
-  const parseResults: CqlResult = new CqlAntlr(updatedCql).parse();
+  const cqlArr: string[] = cql.split("\n");
+  const parseResults: CqlResult = new CqlAntlr(cql).parse();
   let valuesetChangeStatus: "success" | "info" | "danger" = "danger";
   let message: string = "The requested operation was unsuccessful";
   let vsExactExists: boolean = false;
@@ -170,8 +163,7 @@ const applyValueset = (
       const oldUrl = valueSet.url.replace(/["']/g, "");
       vsExactExists =
         vsExactExists ||
-        (oldVsName === getValueSetTitleName(vs) && oldUrl === vs.oid) ||
-        vs?.oid === previousVs?.oid;
+        (oldVsName === getValueSetTitleName(vs) && oldUrl === vs.oid);
       vsSameTitleExist =
         vsSameTitleExist ||
         (oldVsName &&
@@ -230,20 +222,18 @@ const applyValueset = (
       vs
     )} has been successfully updated in the CQL.`;
 
-      const sortedValueSets = createTransformedValuesets(
-        parseResults?.valueSets
-      );
-      sortCQLValuesetsInPlace(sortedValueSets, cqlArr);
-      const insertionIndex = findInsertionIndexInSortedVsList(
-        sortedValueSets,
-        getValueSetTitleName(vs)
-      );
-        cqlArr.splice(
-          sortedValueSets[insertionIndex - 1].stop.line-1,
-          1,
-          valueSetStatement
-        );
-    
+    const sortedValueSets = createTransformedValuesets(parseResults?.valueSets);
+    sortCQLValuesetsInPlace(sortedValueSets, cqlArr);
+    const replacementIndex = findReplacementIndexInSortedVsList(
+      sortedValueSets,
+      getValueSetTitleName(vs)
+    );
+
+    cqlArr.splice(
+      sortedValueSets[replacementIndex - 1].stop.line - 1,
+      1,
+      valueSetStatement
+    );
   } else {
     message = "This valueset is already defined in the CQL.";
     valuesetChangeStatus = "info";
