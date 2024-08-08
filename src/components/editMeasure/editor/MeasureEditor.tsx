@@ -595,7 +595,7 @@ const MeasureEditor = () => {
                 height="calc(100vh - 135px)"
                 readOnly={!canEdit}
                 setOutboundAnnotations={setOutboundAnnotations}
-                measureStoreCql={measure?.cql}
+                measureStoreCql={isCQLUnchanged ? editorVal : measure?.cql}
                 cqlMetaData={measure?.measureMetaData?.cqlMetaData}
                 measureModel={measure?.model}
                 handleCodeDelete={handleCodeDelete}
