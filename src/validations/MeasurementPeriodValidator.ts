@@ -4,8 +4,8 @@ import { isWithinInterval } from "date-fns";
 export const MeasurementPeriodValidator = Yup.object().shape({
   measurementPeriodStart: Yup.date()
     .required("Measurement period start date is required")
-    .typeError("Invalid date format. (mm/dd/yyyy)")
     .nullable()
+    .typeError("Invalid date format. (mm/dd/yyyy)")
     .test(
       "measurementPeriodStart",
       "Start date should be between the years 1900 and 2099.",
@@ -32,7 +32,7 @@ export const MeasurementPeriodValidator = Yup.object().shape({
     )
     .when("measurementPeriodStart", (measurementPeriodStart, schema) => {
       if (measurementPeriodStart !== null) {
-        if (!isNaN(measurementPeriodStart.getTime())) {
+        if (!isNaN(measurementPeriodStart?.getTime())) {
           const dayAfter = new Date(
             measurementPeriodStart.getTime() + 86400000
           );
