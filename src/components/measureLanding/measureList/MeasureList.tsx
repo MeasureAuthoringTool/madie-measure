@@ -229,10 +229,7 @@ export default function MeasureList(props: {
             {...{
               checked: table.getIsAllRowsSelected(),
               indeterminate: table.getIsSomePageRowsSelected(),
-              onChange: (e) => {
-                //TODO  Change to pass the handler directly instead of this mess
-                table.getToggleAllPageRowsSelectedHandler()(e);
-              },
+              onChange: table.getToggleAllPageRowsSelectedHandler(),
             }}
           />
         ),
