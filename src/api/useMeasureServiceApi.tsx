@@ -386,7 +386,7 @@ export class MeasureServiceApi {
           },
           params: {
             query: encodedCriteria, // putting encoded chars here doesn't trigger spring preflight failure
-            filterByCurrentUser,
+            currentUser: filterByCurrentUser,
             limit,
             page,
           },
