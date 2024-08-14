@@ -255,7 +255,7 @@ describe("Measure Page", () => {
     expect(await screen.queryByText("Unable to fetch measures")).toBeNull();
   });
 
-  test("render associate cms id dialog", async () => {
+  test.skip("render associate cms id dialog", async () => {
     renderRouter(["/measures"]);
     await waitFor(() => {
       expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument();

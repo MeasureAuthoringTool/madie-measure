@@ -24,6 +24,7 @@ import {
   flexRender,
   getSortedRowModel,
   SortingState,
+  RowSelection,
 } from "@tanstack/react-table";
 
 import InvalidTestCaseDialog from "./InvalidTestCaseDialog.tsx/InvalidTestCaseDialog";
@@ -41,9 +42,6 @@ import ExportDialog from "./exportDialog/ExportDialog";
 import InvalidMeasureNameDialog from "./InvalidMeasureNameDialog/InvalidMeasureNameDialog";
 import getLibraryNameErrors from "./InvalidMeasureNameDialog/getLibraryNameErrors";
 import TruncateText from "./TruncateText";
-import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import AssociateCmsIdAction from "./associateCmsIdAction/AccociateCmsIdAction";
 import AssociateCmsIdDialog from "./associateCmsIdDialog/AssociateCmsIdDialog";
 
@@ -77,9 +75,6 @@ const searchInputStyle = {
 
 export default function MeasureList(props: {
   measureList: Measure[];
-  selectedIds: object;
-  changeSelectedIds;
-  setSelectedIds: Function;
   setMeasureList;
   setTotalPages;
   setTotalItems;
@@ -136,10 +131,6 @@ export default function MeasureList(props: {
 
   const [openAssociateCmsIdDialog, setOpenAssociateCmsIdDialog] =
     useState(false);
-
-  const selectedMeasures = props.measureList?.filter(
-    (measure) => props.selectedIds[measure.id]
-  );
 
   const featureFlags = useFeatureFlags();
 
@@ -204,12 +195,10 @@ export default function MeasureList(props: {
     indeterminate,
     className = "",
     onChange,
-    changeSelectedIds,
     id,
     ...rest
   }: {
     indeterminate?: boolean;
-    changeSelectedIds: (id: string) => void;
   } & HTMLProps<HTMLInputElement>) {
     const ref = React.useRef<HTMLInputElement>(null!);
 
@@ -219,21 +208,17 @@ export default function MeasureList(props: {
       }
     }, [ref, indeterminate]);
 
-    const handleChange = (e) => {
-      onChange(e);
-      changeSelectedIds(id);
-    };
-
     return (
       <input
         type="checkbox"
         ref={ref}
         className={className + " cursor-pointer"}
-        onChange={handleChange}
+        onChange={onChange}
         {...rest}
       />
     );
   }
+
   const columns = useMemo<ColumnDef<TCRow>[]>(() => {
     const columnDefs = [];
     if (featureFlags?.MeasureListCheckboxes) {
@@ -243,9 +228,11 @@ export default function MeasureList(props: {
           <IndeterminateCheckbox
             {...{
               checked: table.getIsAllRowsSelected(),
-              indeterminate: table.getIsSomeRowsSelected(),
-              onChange: table.getToggleAllRowsSelectedHandler(),
-              changeSelectedIds: props.changeSelectedIds,
+              indeterminate: table.getIsSomePageRowsSelected(),
+              onChange: (e) => {
+                //TODO  Change to pass the handler directly instead of this mess
+                table.getToggleAllPageRowsSelectedHandler()(e);
+              },
             }}
           />
         ),
@@ -254,12 +241,11 @@ export default function MeasureList(props: {
             <div className="px-1">
               <IndeterminateCheckbox
                 {...{
-                  checked: props.selectedIds[row.original.id],
+                  checked: row.getIsSelected(), //props.selectedIds[row.original.id],
                   disabled: !row.getCanSelect(),
                   indeterminate: row.getIsSomeSelected(),
                   onChange: row.getToggleSelectedHandler(),
                   id: row.original.id,
-                  changeSelectedIds: props.changeSelectedIds,
                 }}
               />
             </div>
@@ -335,7 +321,32 @@ export default function MeasureList(props: {
         enableSorting: false,
       },
     ];
-  }, [featureFlags?.MeasureListCheckboxes, props.changeSelectedIds]);
+  }, [featureFlags?.MeasureListCheckboxes]);
+
+  const table = useReactTable({
+    data,
+    columns,
+    getRowId: (row) => row.id,
+    defaultColumn: {
+      size: 200, //starting column size
+      minSize: 50, //enforced during column resizing
+      maxSize: 500, //enforced during column resizing
+    },
+    manualPagination: true,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
+    state: {
+      sorting,
+    },
+  });
+
+  const selectedMeasures = props.measureList?.filter((measure) => {
+    return table
+      .getSelectedRowModel()
+      .rows.find((row) => row.original.id === measure.id);
+    //return props.selectedIds[measure.id];
+  });
 
   const handleDialogClose = () => {
     setInvalidLibraryDialogOpen(false);
@@ -815,7 +826,8 @@ export default function MeasureList(props: {
       .associateCmdId(qiCoreMeasureId, qdmMeasureId, copyMetaData)
       .then((measureSet) => {
         doUpdateList();
-        props.setSelectedIds({});
+
+        table.toggleAllRowsSelected(false);
         setToastOpen(true);
         setToastType("success");
         setToastMessage(
@@ -837,22 +849,6 @@ export default function MeasureList(props: {
         }
       });
   };
-
-  const table = useReactTable({
-    data,
-    columns,
-    defaultColumn: {
-      size: 200, //starting column size
-      minSize: 50, //enforced during column resizing
-      maxSize: 500, //enforced during column resizing
-    },
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    onSortingChange: setSorting,
-    state: {
-      sorting,
-    },
-  });
 
   return (
     <div>
