@@ -260,12 +260,13 @@ describe("Measure Page", () => {
     await waitFor(() => {
       expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument();
     });
+    screen.debug();
     const measure1Checkbox = await within(
-      await screen.findByTestId("measure-name-0_select")
+      await screen.findByTestId("measure-name-measureId1_select")
     ).findByRole("checkbox");
     userEvent.click(measure1Checkbox);
     const measure2Checkbox = await within(
-      await screen.findByTestId("measure-name-1_select")
+      await screen.findByTestId("measure-name-measureId2_select")
     ).findByRole("checkbox");
     userEvent.click(measure2Checkbox);
     const associateCmsIdBtn = await screen.findByTestId("associate_cms_id_btn");
