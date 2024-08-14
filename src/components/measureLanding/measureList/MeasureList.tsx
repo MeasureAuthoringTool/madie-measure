@@ -337,12 +337,14 @@ export default function MeasureList(props: {
       sorting,
     },
   });
+  useEffect(() => {
+    table.toggleAllRowsSelected(false);
+  }, [props.currentLimit, props.currentPage]);
 
   const selectedMeasures = props.measureList?.filter((measure) => {
     return table
       .getSelectedRowModel()
       .rows.find((row) => row.original.id === measure.id);
-    //return props.selectedIds[measure.id];
   });
 
   const handleDialogClose = () => {
@@ -419,6 +421,7 @@ export default function MeasureList(props: {
     if (data) {
       const { content, totalPages, totalElements, numberOfElements, pageable } =
         data;
+      table.toggleAllRowsSelected(false);
       props.setTotalPages(totalPages);
       props.setTotalItems(totalElements);
       props.setVisibleItems(numberOfElements);
