@@ -158,23 +158,21 @@ const applyValueset = (
 
   // are there valuesets at all?
   if (parseResults?.valueSets?.length > 0) {
-    parseResults.valueSets.forEach((valueSet) => {
+    parseResults.valueSets.some((valueSet) => {
       const oldVsName = valueSet.name.replace(/["']/g, "");
       const oldUrl = valueSet.url.replace(/["']/g, "");
       vsExactExists =
-        vsExactExists ||
-        (oldVsName === getValueSetTitleName(vs) && oldUrl === vs.oid);
+        oldVsName === getValueSetTitleName(vs) && oldUrl === vs.oid;
       vsSameTitleExist =
-        vsSameTitleExist ||
         (oldVsName &&
           extractValueSetNameAndSuffix(oldVsName)
             .baseValueSetName.toLowerCase()
             .replace(/\s/g, "") === vs.name.toLowerCase() &&
           oldUrl === vs.oid) ||
         vs?.oid === previousVs?.oid;
+      return vsExactExists || vsSameTitleExist;
     });
   }
-
   // no matching valueset in the cql, add it.
   if (!vsExactExists && !vsSameTitleExist) {
     const valueSetStatement = `valueset "${getValueSetTitleName(vs)}": '${
