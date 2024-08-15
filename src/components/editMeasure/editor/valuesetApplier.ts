@@ -152,7 +152,7 @@ const applyValueset = (
   const cqlArr: string[] = cql.split("\n");
   const parseResults: CqlResult = new CqlAntlr(cql).parse();
   let valuesetChangeStatus: "success" | "info" | "danger" = "danger";
-  let message: string = "The requested operation was unsuccessful";
+  let message: string;
   let vsExactExists: boolean = false;
   let vsSameTitleExist: boolean = false;
 
