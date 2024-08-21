@@ -113,8 +113,8 @@ const MeasureEditor = () => {
   const featureFlags = useFeatureFlags();
   const isQDM = measure?.model?.includes("QDM");
   const showCqlBuilderTabs =
-    featureFlags?.QDMValueSetSearch ||
-    featureFlags?.qdmCodeSearch ||
+    (featureFlags?.QDMValueSetSearch && isQDM) ||
+    (featureFlags?.qdmCodeSearch && isQDM) ||
     featureFlags?.CQLBuilderDefinitions ||
     featureFlags?.CQLBuilderIncludes;
 
