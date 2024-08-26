@@ -29,6 +29,7 @@ export function MadieTerminologyEditor({
   value,
   inboundAnnotations,
   handleCodeDelete,
+  handleApplyLibrary,
 }) {
   const code = {
     codeSystem: "RXNORM",
@@ -40,6 +41,13 @@ export function MadieTerminologyEditor({
     svsVersion: "2022-05",
     versionIncluded: true,
   };
+
+  const library = {
+    name: "TestHelpers",
+    alias: "Helpers",
+    version: "1.0.000",
+  };
+
   return (
     <>
       <input
@@ -56,6 +64,13 @@ export function MadieTerminologyEditor({
       )}
       <button data-testid="delete-code" onClick={() => handleCodeDelete(code)}>
         Remove code
+      </button>
+
+      <button
+        data-testid="apply-library"
+        onClick={() => handleApplyLibrary(library)}
+      >
+        Apply Library
       </button>
     </>
   );

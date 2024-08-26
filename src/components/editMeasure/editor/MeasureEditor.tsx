@@ -669,10 +669,10 @@ const MeasureEditor = () => {
         )}
       </div>
       <Toast
-        toastKey="measure-errors-toast"
+        toastKey="measure-editor-toast"
         aria-live="polite"
         toastType={toastType}
-        testId="measure-errors-toast"
+        testId="measure-editor-toast"
         open={toastOpen}
         message={toastMessage}
         onClose={() => {

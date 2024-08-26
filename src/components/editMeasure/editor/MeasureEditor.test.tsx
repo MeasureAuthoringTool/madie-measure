@@ -909,8 +909,50 @@ describe("EditorWithTerminology", () => {
       const editor = screen.getByTestId("measure-editor");
       expect(editor).toHaveValue(cqlWithNoCodes);
     });
-    expect(screen.getByTestId("measure-errors-toast")).toHaveTextContent(
+    expect(screen.getByTestId("measure-editor-toast")).toHaveTextContent(
       "code 204504 and code system RXNORM has been successfully removed from the CQL"
+    );
+  });
+
+  it("should apply library successfully", async () => {
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => {
+        return {
+          cql: "library ApplyLibraryTest version '0.0.000'\nusing QDM version '5.6'",
+          isLibraryStatementChanged: false,
+          isUsingStatementChanged: false,
+          isValueSetChanged: false,
+        };
+      });
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        translation: null,
+        externalErrors: [],
+      });
+    });
+    const measureWithCql = {
+      ...measure,
+      model: Model.QDM_5_6,
+      cql:
+        "library ApplyLibraryTest version '0.0.000'\n" +
+        "using QDM version '5.6'\n",
+    } as Measure;
+    const updatedCql =
+      "library ApplyLibraryTest version '0.0.000'" +
+      "using QDM version '5.6'" +
+      "include TestHelpers version '1.0.000' called Helpers";
+    renderEditor(measureWithCql);
+    // click on apply library
+    const applyLibraryBtn = screen.getByTestId("apply-library");
+    userEvent.click(applyLibraryBtn);
+    await waitFor(() => {
+      const editor = screen.getByTestId("measure-editor");
+      expect(editor).toHaveValue(updatedCql);
+    });
+    expect(screen.getByTestId("measure-editor-toast")).toHaveTextContent(
+      "Library TestHelpers has been successfully added to the CQL."
     );
   });
 });

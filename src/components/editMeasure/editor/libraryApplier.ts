@@ -26,9 +26,6 @@ export const applyLibrary = (
   cql: string,
   library: IncludeLibrary
 ): CqlApplyActionResult => {
-  if (!library) {
-    return;
-  }
   if (cql) {
     const cqlArr: string[] = cql.split("\n");
     // Parse CQL to get included libraries
