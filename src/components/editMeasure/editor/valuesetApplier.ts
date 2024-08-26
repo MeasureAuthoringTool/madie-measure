@@ -1,6 +1,6 @@
 import { CqlAntlr, CqlResult } from "@madie/cql-antlr-parser/dist/src";
 import { ValueSetForSearch } from "@madie/madie-editor";
-import {CqlApplyActionResult} from "./CqlApplyActionResult";
+import { CqlApplyActionResult } from "./CqlApplyActionResult";
 
 // given correct vs line order and the cqlArr, splice in the declarations
 const sortCQLValuesetsInPlace = (
