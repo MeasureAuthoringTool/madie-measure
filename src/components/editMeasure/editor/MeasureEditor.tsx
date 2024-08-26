@@ -18,6 +18,7 @@ import {
   synchingEditorCqlContent,
   isUsingEmpty,
   MadieTerminologyEditor,
+  IncludeLibrary,
 } from "@madie/madie-editor";
 import {
   Button,
@@ -49,8 +50,9 @@ import {
 import StatusHandler from "./StatusHandler";
 import { SuccessText } from "../../../styles/editMeasure/editor";
 import "./MeasureEditor.scss";
-import applyCode, { CodeChangeResult } from "./codeApplier";
+import applyCode from "./codeApplier";
 import applyValueset from "./valuesetApplier";
+import { applyLibrary } from "./libraryApplier";
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
@@ -443,8 +445,18 @@ const MeasureEditor = () => {
     }
   };
 
+  const handleApplyLibrary = (library: IncludeLibrary) => {
+    const result = applyLibrary(editorVal, library);
+    if (editorVal !== result.cql) {
+      handleMadieEditorValue(result.cql);
+    }
+    setToastMessage(result.message);
+    setToastType(result.status);
+    setToastOpen(true);
+  };
+
   const handleApplyCode = (code: Code) => {
-    const result: CodeChangeResult = applyCode(editorVal, code);
+    const result = applyCode(editorVal, code);
     if (result.status) {
       // if result status is true, we modified the CQL
       // let's store off the codeSystem/code/version
@@ -530,11 +542,11 @@ const MeasureEditor = () => {
   // valueset "Ethnicity": 'urn:oid:2.16.840.1.114222.4.11.837'
   const handleUpdateVs = (vs) => {
     setRefValueSetDetails(vs);
-    const result: CodeChangeResult = applyValueset(
+    const result = applyValueset(
       editorVal,
       vs,
       prevSelectedValueSetDetails?.current
-    ); // should have udpated editorVal but doesnt
+    ); // should have updated editorVal but doesn't
     if (result.status !== "danger") {
       handleMadieEditorValue(result.cql);
       setEditorVal(result.cql);
@@ -588,6 +600,7 @@ const MeasureEditor = () => {
               <MadieTerminologyEditor
                 handleApplyCode={handleApplyCode}
                 handleApplyValueSet={handleUpdateVs}
+                handleApplyLibrary={handleApplyLibrary}
                 onChange={(val: string) => handleMadieEditorValue(val)}
                 value={editorVal}
                 inboundAnnotations={elmAnnotations}
@@ -656,10 +669,10 @@ const MeasureEditor = () => {
         )}
       </div>
       <Toast
-        toastKey="measure-errors-toast"
+        toastKey="measure-editor-toast"
         aria-live="polite"
         toastType={toastType}
-        testId="measure-errors-toast"
+        testId="measure-editor-toast"
         open={toastOpen}
         message={toastMessage}
         onClose={() => {

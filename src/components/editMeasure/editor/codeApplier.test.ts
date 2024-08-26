@@ -1,6 +1,7 @@
-import applyCode, { CodeChangeResult } from "./codeApplier";
+import applyCode from "./codeApplier";
 import * as fs from "fs";
 import { Code } from "@madie/madie-models";
+import { CqlApplyActionResult } from "./CqlApplyActionResult";
 
 const mockCode = {
   name: "1178689",
@@ -26,7 +27,7 @@ describe("applyCode test cases", () => {
     );
 
     const code = JSON.parse(codeJson);
-    const result: CodeChangeResult = applyCode(cql, code);
+    const result: CqlApplyActionResult = applyCode(cql, code);
     expect(result.cql).toContain("24353-5");
     expect(result.status).toEqual("success");
     expect(result.message).toEqual(
@@ -49,7 +50,7 @@ describe("applyCode test cases", () => {
     );
     expect(cql).not.toContain("24353-5");
     const code = JSON.parse(codeJson);
-    let result: CodeChangeResult = applyCode(cql, code);
+    let result: CqlApplyActionResult = applyCode(cql, code);
 
     result = applyCode(result.cql, code);
 
@@ -85,7 +86,7 @@ describe("applyCode test cases", () => {
     expect(cql).not.toContain("281302008");
 
     const code = JSON.parse(codeJson);
-    let result: CodeChangeResult = applyCode(cql, code);
+    let result: CqlApplyActionResult = applyCode(cql, code);
 
     expect(result.cql).toContain(
       `codesystem "SNOMEDCT": 'urn:oid:2.16.840.1.113883.6.96'`
