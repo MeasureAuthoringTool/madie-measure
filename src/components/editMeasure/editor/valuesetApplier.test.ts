@@ -1,6 +1,6 @@
-import { CodeChangeResult } from "./codeApplier.ts";
 import applyValueset from "./valuesetApplier.ts";
 import * as fs from "fs";
+import { CqlApplyActionResult } from "./CqlApplyActionResult";
 
 it("Should add valuset to CQL that does not exist when no valusets present", () => {
   const cql = fs.readFileSync(
@@ -13,7 +13,7 @@ it("Should add valuset to CQL that does not exist when no valusets present", () 
   );
 
   const valuset = JSON.parse(valusetJson);
-  const result: CodeChangeResult = applyValueset(cql, valuset);
+  const result: CqlApplyActionResult = applyValueset(cql, valuset);
   expect(result.cql).toContain("Emergency Department Evaluation");
   expect(result.status).toBeTruthy();
   expect(result.message).toEqual(
@@ -32,7 +32,7 @@ it("Should add valuset to CQL that does not exist when valususets are present", 
   );
 
   const valuset = JSON.parse(valusetJson);
-  const result: CodeChangeResult = applyValueset(cql, valuset);
+  const result: CqlApplyActionResult = applyValueset(cql, valuset);
   expect(result.cql).toContain("Emergency Department Evaluation");
   expect(result.status).toBeTruthy();
   expect(result.message).toEqual(
@@ -51,7 +51,7 @@ it("Should not add a valuset that already exists", () => {
   );
 
   const valuset = JSON.parse(valusetJson);
-  let result: CodeChangeResult = applyValueset(cql, valuset);
+  let result: CqlApplyActionResult = applyValueset(cql, valuset);
   result = applyValueset(result.cql, valuset);
   expect(cql).toContain(
     "valueset \"Ethnicity\": 'urn:oid:2.16.840.1.114222.4.11.837'"
@@ -74,7 +74,7 @@ it("Should add valuset, priotiy location usings array", () => {
     "valueset \"Ethnicity\": 'urn:oid:2.16.840.1.114222.4.11.837'"
   );
   const valuset = JSON.parse(valusetJson);
-  let result: CodeChangeResult = applyValueset(cql, valuset);
+  let result: CqlApplyActionResult = applyValueset(cql, valuset);
   expect(result.cql).toContain(
     "valueset \"Ethnicity\": 'urn:oid:2.16.840.1.114222.4.11.837'"
   );
@@ -95,7 +95,7 @@ it("Should add valuset, priotiy location includes array", () => {
   );
 
   const valuset = JSON.parse(valusetJson);
-  let result: CodeChangeResult = applyValueset(cql, valuset);
+  let result: CqlApplyActionResult = applyValueset(cql, valuset);
   expect(cql).not.toContain(
     "valueset \"Ethnicity\": 'urn:oid:2.16.840.1.114222.4.11.837'"
   );
@@ -122,7 +122,7 @@ it("Should add valuset, priotiy location valuset array", () => {
   expect(cql).not.toContain(
     "valueset \"Ethnicity\": 'urn:oid:2.16.840.1.114222.4.11.837'"
   );
-  let result: CodeChangeResult = applyValueset(cql, valuset);
+  let result: CqlApplyActionResult = applyValueset(cql, valuset);
   expect(result.cql).toContain(
     "valueset \"Ethnicity\": 'urn:oid:2.16.840.1.114222.4.11.837'"
   );
@@ -143,7 +143,7 @@ it("Should not add valuset to CQL when value set was already added", () => {
   );
 
   const valuset = JSON.parse(valusetJson);
-  const result: CodeChangeResult = applyValueset(cql, valuset);
+  const result: CqlApplyActionResult = applyValueset(cql, valuset);
   expect(result.cql).toContain("Emergency Department Evaluation");
   expect(result.status).toBe("info");
   expect(result.message).toEqual(
@@ -162,7 +162,7 @@ it("Should remove valuset suffix to already present CQL", () => {
   );
 
   const valuset = JSON.parse(valusetJson);
-  const result: CodeChangeResult = applyValueset(cql, valuset);
+  const result: CqlApplyActionResult = applyValueset(cql, valuset);
   expect(result.cql).not.toContain("Emergency Department Evaluation (1)");
   expect(result.cql).toContain("Emergency Department Evaluation");
   expect(result.status).toBe("success");
@@ -182,7 +182,7 @@ it("Should add valuset suffix to already present CQL", () => {
   );
 
   const valuset = JSON.parse(valusetJson);
-  const result: CodeChangeResult = applyValueset(cql, valuset);
+  const result: CqlApplyActionResult = applyValueset(cql, valuset);
   expect(result.cql).toContain("Emergency Department Evaluation (1)");
   expect(result.cql).not.toContain('Emergency Department Evaluation":');
   expect(result.status).toBe("success");

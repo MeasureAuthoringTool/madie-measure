@@ -1,6 +1,6 @@
 import { CqlAntlr, CqlResult } from "@madie/cql-antlr-parser/dist/src";
-import { CodeChangeResult } from "./codeApplier";
 import { ValueSetForSearch } from "@madie/madie-editor";
+import {CqlApplyActionResult} from "./CqlApplyActionResult";
 
 // given correct vs line order and the cqlArr, splice in the declarations
 const sortCQLValuesetsInPlace = (
@@ -148,7 +148,7 @@ const applyValueset = (
   cql: string,
   vs: ValueSetForSearch,
   previousVs?: ValueSetForSearch
-): CodeChangeResult => {
+): CqlApplyActionResult => {
   const cqlArr: string[] = cql.split("\n");
   const parseResults: CqlResult = new CqlAntlr(cql).parse();
   let valuesetChangeStatus: "success" | "info" | "danger" = "danger";
@@ -240,6 +240,6 @@ const applyValueset = (
     cql: cqlArr.join("\n"),
     status: valuesetChangeStatus,
     message: message,
-  } as unknown as CodeChangeResult;
+  } as unknown as CqlApplyActionResult;
 };
 export default applyValueset;
