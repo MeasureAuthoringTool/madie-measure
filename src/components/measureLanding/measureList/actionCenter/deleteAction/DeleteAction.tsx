@@ -17,12 +17,9 @@ export const NOTHING_SELECTED = "Select measure to delete";
 export const DEL_MEASURE = "Delete measure";
 
 export default function DeleteAction(props: PropTypes) {
-  const { measures } = props;
+  const { measures, canEdit } = props;
   const [disableDeleteBtn, setDisableDeleteBtn] = useState(true);
   const [tooltipMessage, setTooltipMessage] = useState(NOTHING_SELECTED);
-
-  const { getUserName } = useOktaTokens();
-  const userName = getUserName();
 
   const validateDeleteActionState = useCallback(() => {
     // set button state to disabled by default
@@ -30,13 +27,13 @@ export default function DeleteAction(props: PropTypes) {
     setTooltipMessage(NOTHING_SELECTED);
     if (
       measures.length === 1 &&
-      props.canEdit &&
+      canEdit &&
       measures[0].measureMetaData.draft
     ) {
       setDisableDeleteBtn(false);
       setTooltipMessage(DEL_MEASURE);
     }
-  }, [measures, userName]);
+  }, [measures, canEdit]);
 
   useEffect(() => {
     validateDeleteActionState();

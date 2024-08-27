@@ -17,12 +17,9 @@ export const NOTHING_SELECTED = "Select measure to version";
 export const VERSION_MEASURE = "Version measure";
 
 export default function VersionAction(props: PropTypes) {
-  const { measures } = props;
+  const { measures, canEdit } = props;
   const [disableVersionBtn, setDisableVersionBtn] = useState(true);
   const [tooltipMessage, setTooltipMessage] = useState(NOTHING_SELECTED);
-
-  const { getUserName } = useOktaTokens();
-  const userName = getUserName();
 
   const validateVersionActionState = useCallback(() => {
     // set button state to disabled by default
@@ -31,13 +28,13 @@ export default function VersionAction(props: PropTypes) {
     if (
       measures.length === 1 &&
       measures[0].measureMetaData.draft &&
-      props.canEdit
+      canEdit
       /* check if there is not already a Version for that measure set*/
     ) {
       setDisableVersionBtn(false);
       setTooltipMessage(VERSION_MEASURE);
     }
-  }, [measures, userName]);
+  }, [measures, canEdit]);
 
   useEffect(() => {
     validateVersionActionState();

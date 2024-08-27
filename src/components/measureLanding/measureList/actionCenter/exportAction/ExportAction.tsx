@@ -19,9 +19,6 @@ export default function ExportAction(props: PropTypes) {
   const [disableExportBtn, setDisableExportBtn] = useState(true);
   const [tooltipMessage, setTooltipMessage] = useState(NOTHING_SELECTED);
 
-  const { getUserName } = useOktaTokens();
-  const userName = getUserName();
-
   const validateExportActionState = useCallback(() => {
     // set button state to disabled by default
     setDisableExportBtn(true);
@@ -30,7 +27,7 @@ export default function ExportAction(props: PropTypes) {
       setDisableExportBtn(false);
       setTooltipMessage(EXPORT_MEASURE);
     }
-  }, [measures, userName]);
+  }, [measures]);
 
   useEffect(() => {
     validateExportActionState();
