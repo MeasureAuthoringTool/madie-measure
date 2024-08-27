@@ -1,11 +1,6 @@
 import { CqlAntlr, CqlResult } from "@madie/cql-antlr-parser/dist/src";
 import { Code } from "@madie/madie-models";
-
-export type CodeChangeResult = {
-  cql: string;
-  status: "success" | "info" | "danger";
-  message: string;
-};
+import { CqlApplyActionResult } from "./CqlApplyActionResult";
 
 const findCodeSystem = (code, codeSystems) => {
   if (!code || !codeSystems) {
@@ -70,7 +65,7 @@ const createCodeSystemDeclaration = (code: Code) => {
   }
 };
 
-const applyCode = (cql: string, code: Code): CodeChangeResult => {
+const applyCode = (cql: string, code: Code): CqlApplyActionResult => {
   const cqlArr: string[] = cql.split("\n");
 
   // Parse CQL to get code and code systems
@@ -116,7 +111,7 @@ const applyCode = (cql: string, code: Code): CodeChangeResult => {
     cql: cqlArr.join("\n"),
     status: status,
     message: message,
-  } as unknown as CodeChangeResult;
+  } as unknown as CqlApplyActionResult;
 };
 
 export const findCodeInsertPoint = (parseResults: CqlResult) => {

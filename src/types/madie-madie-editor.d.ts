@@ -55,11 +55,18 @@ declare module "@madie/madie-editor" {
     suffix?: string;
   }
 
+  export interface IncludeLibrary {
+    name: string;
+    version: string;
+    alias: string;
+  }
+
   export interface EditorPropsType {
     value: string;
     onChange?: (value: string) => void;
     handleApplyCode?: (code: Code) => void;
     handleApplyValueSet?: (vs: ValueSetForSearch) => void;
+    handleApplyLibrary?: (lib: IncludeLibrary) => void;
     parseDebounceTime?: number;
     inboundAnnotations?: EditorAnnotation[];
     inboundErrorMarkers?: EditorErrorMarker[];
