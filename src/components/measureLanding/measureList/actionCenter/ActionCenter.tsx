@@ -20,7 +20,7 @@ export default function ActionCenter(props: PropTypes) {
   const featureFlags = useFeatureFlags();
   const { getUserName } = useOktaTokens();
   const [canEdit, setCanEdit] = useState<boolean>(false);
-  
+
   const isSelectedMeasureEditable = (measures) => {
     return !(measures.some = (measure) => {
       return !checkUserCanEdit(
@@ -28,21 +28,30 @@ export default function ActionCenter(props: PropTypes) {
         measure?.measureSet?.acls
       );
     });
-    
   };
 
   useEffect(() => {
     setCanEdit(!isSelectedMeasureEditable(props.measures));
   }, [props.measures]);
 
-
-
   return (
     <div>
-      <DeleteAction measures={props.measures} onClick={() => {}} canEdit={canEdit} />
+      <DeleteAction
+        measures={props.measures}
+        onClick={() => {}}
+        canEdit={canEdit}
+      />
       <ExportAction measures={props.measures} onClick={() => {}} />
-      <DraftAction measures={props.measures} onClick={() => {}} canEdit={canEdit} />
-      <VersionAction measures={props.measures} onClick={() => {}} canEdit={canEdit} />
+      <DraftAction
+        measures={props.measures}
+        onClick={() => {}}
+        canEdit={canEdit}
+      />
+      <VersionAction
+        measures={props.measures}
+        onClick={() => {}}
+        canEdit={canEdit}
+      />
       {featureFlags.MeasureListCheckboxes && featureFlags.associateMeasures && (
         <AssociateCmsIdAction
           measures={props.measures}

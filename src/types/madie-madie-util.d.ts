@@ -19,6 +19,7 @@ declare module "@madie/madie-util" {
     qdmCodeSearch: boolean;
     CQLBuilderDefinitions: boolean;
     CQLBuilderIncludes: boolean;
+    MeasureListButtons: boolean;
   }
 
   export interface ServiceConfig {

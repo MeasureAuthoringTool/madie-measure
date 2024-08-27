@@ -21,10 +21,9 @@ export default function DraftAction(props: PropTypes) {
   const { measures, canEdit } = props;
   const [disableDraftBtn, setDisableDraftBtn] = useState(true);
   const [tooltipMessage, setTooltipMessage] = useState(NOTHING_SELECTED);
-  const measureServiceApi = useRef(useMeasureServiceApi()).current; 
+  const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [canDraftLookup, setCanDraftLookup] = useState<object>({});
   const [canDraft, setCanDraft] = useState<boolean>(false);
-
 
   const validateDraftActionState = useCallback(() => {
     // set button state to disabled by default
@@ -33,37 +32,40 @@ export default function DraftAction(props: PropTypes) {
     if (
       measures.length === 1 &&
       !measures[0].measureMetaData.draft &&
-      canEdit
-      && canDraft
+      canEdit &&
+      canDraft
     ) {
       setDisableDraftBtn(false);
       setTooltipMessage(DRAFT_MEASURE);
     }
   }, [measures, canEdit, canDraft]);
 
-  
-
   useEffect(() => {
     validateDraftActionState();
   }, [measures, validateDraftActionState]);
 
-  const draftLookup = useCallback(async (measureList: Measure[]) => {
-    const measureSetList = measureList.map((m) => m.measureSetId);
-    try {
-      const results = await measureServiceApi.fetchMeasureDraftStatuses(measureSetList);
-      if (results) {
-        setCanDraft(results[measureList[0].measureSetId] ?? false);
+  const draftLookup = useCallback(
+    async (measureList: Measure[]) => {
+      const measureSetList = measureList.map((m) => m.measureSetId);
+      if (measureList.length > 0) {
+        try {
+          const results = await measureServiceApi.fetchMeasureDraftStatuses(
+            measureSetList
+          );
+          if (results) {
+            setCanDraft(results[measureList[0].measureSetId] ?? false);
+          }
+        } catch (error) {
+          console.error("Error fetching draft statuses: ", error);
+        }
       }
-    } catch (error) {
-      console.error("Error fetching draft statuses: ", error);
-    }
-  }, [measureServiceApi]);
+    },
+    [measureServiceApi]
+  );
 
   useEffect(() => {
     draftLookup(measures);
   }, [measures, draftLookup]);
-
-  
 
   return (
     <Tooltip
