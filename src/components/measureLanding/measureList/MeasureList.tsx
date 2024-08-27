@@ -42,8 +42,9 @@ import ExportDialog from "./exportDialog/ExportDialog";
 import InvalidMeasureNameDialog from "./InvalidMeasureNameDialog/InvalidMeasureNameDialog";
 import getLibraryNameErrors from "./InvalidMeasureNameDialog/getLibraryNameErrors";
 import TruncateText from "./TruncateText";
-import AssociateCmsIdAction from "./associateCmsIdAction/AccociateCmsIdAction";
+// import AssociateCmsIdAction from "./associateCmsIdAction/AccociateCmsIdAction";
 import AssociateCmsIdDialog from "./associateCmsIdDialog/AssociateCmsIdDialog";
+import ActionCenter from "./actionCenter/ActionCenter";
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -461,6 +462,7 @@ export default function MeasureList(props: {
       setOptionsOpen(true);
       setSelectedMeasure(selected);
       setAnchorEl(event.currentTarget);
+
       const isSelectedMeasureEditable = checkUserCanEdit(
         selected?.measureSet?.owner,
         selected?.measureSet?.acls
@@ -880,9 +882,13 @@ export default function MeasureList(props: {
         </div>
         {featureFlags.MeasureListCheckboxes && featureFlags.associateMeasures && (
           <div tw="justify-self-end p-3">
-            <AssociateCmsIdAction
+            {/* <AssociateCmsIdAction
               measures={selectedMeasures}
               onClick={associateCmsId}
+            /> */}
+            <ActionCenter
+              measures={selectedMeasures}
+              associateCmsId={associateCmsId}
             />
           </div>
         )}

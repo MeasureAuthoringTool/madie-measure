@@ -3,7 +3,7 @@ import { IconButton } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import { Measure, Model } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
-import IconLink from "../../../../icons/IconLink";
+import IconLink from "../../../../../icons/IconLink";
 
 interface PropTypes {
   measures: Measure[];
@@ -81,7 +81,7 @@ export default function AssociateCmsIdAction(props: PropTypes) {
           data-testid="associate_cms_id_btn"
         >
           <IconLink
-            fillColor={disableAssociateCmsIdBtn ? "#8C8C8C" : "#0073C8"}
+            fillColor={disableAssociateCmsIdBtn ? "#9e9e9e" : "#2196f3"}
           />
         </IconButton>
       </span>
