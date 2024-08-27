@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { IconButton } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import { Measure, Model } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
 import EditCalendarOutlinedIcon from "@mui/icons-material/EditCalendarOutlined";
+import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
 
 import { grey, blue } from "@mui/material/colors";
 
@@ -17,12 +18,13 @@ export const NOTHING_SELECTED = "Select measure to draft";
 export const DRAFT_MEASURE = "Draft measure";
 
 export default function DraftAction(props: PropTypes) {
-  const { measures } = props;
+  const { measures, canEdit } = props;
   const [disableDraftBtn, setDisableDraftBtn] = useState(true);
   const [tooltipMessage, setTooltipMessage] = useState(NOTHING_SELECTED);
+  const measureServiceApi = useRef(useMeasureServiceApi()).current; 
+  const [canDraftLookup, setCanDraftLookup] = useState<object>({});
+  const [canDraft, setCanDraft] = useState<boolean>(false);
 
-  const { getUserName } = useOktaTokens();
-  const userName = getUserName();
 
   const validateDraftActionState = useCallback(() => {
     // set button state to disabled by default
@@ -31,17 +33,37 @@ export default function DraftAction(props: PropTypes) {
     if (
       measures.length === 1 &&
       !measures[0].measureMetaData.draft &&
-      props.canEdit
-      /* && check if there is not already a draft for that measure set*/
+      canEdit
+      && canDraft
     ) {
       setDisableDraftBtn(false);
       setTooltipMessage(DRAFT_MEASURE);
     }
-  }, [measures, userName]);
+  }, [measures, canEdit, canDraft]);
+
+  
 
   useEffect(() => {
     validateDraftActionState();
   }, [measures, validateDraftActionState]);
+
+  const draftLookup = useCallback(async (measureList: Measure[]) => {
+    const measureSetList = measureList.map((m) => m.measureSetId);
+    try {
+      const results = await measureServiceApi.fetchMeasureDraftStatuses(measureSetList);
+      if (results) {
+        setCanDraft(results[measureList[0].measureSetId] ?? false);
+      }
+    } catch (error) {
+      console.error("Error fetching draft statuses: ", error);
+    }
+  }, [measureServiceApi]);
+
+  useEffect(() => {
+    draftLookup(measures);
+  }, [measures, draftLookup]);
+
+  
 
   return (
     <Tooltip
