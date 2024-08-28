@@ -37,7 +37,7 @@ export default function DeleteAction(props: PropTypes) {
 
   return (
     <Tooltip
-      data-testid="associate_cms_id_tooltip"
+      data-testid="delete_action_tooltip"
       title={tooltipMessage}
       onMouseOver={validateDeleteActionState}
       arrow
@@ -46,7 +46,7 @@ export default function DeleteAction(props: PropTypes) {
         <IconButton
           onClick={props.onClick}
           disabled={disableDeleteBtn}
-          data-testid="associate_cms_id_btn"
+          data-testid="delete_action_btn"
         >
           <DeleteOutlinedIcon
             sx={disableDeleteBtn ? { color: grey[500] } : { color: red[500] }}

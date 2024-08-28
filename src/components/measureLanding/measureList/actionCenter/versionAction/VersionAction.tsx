@@ -27,7 +27,7 @@ export default function VersionAction(props: PropTypes) {
     setTooltipMessage(NOTHING_SELECTED);
     if (
       measures.length === 1 &&
-      measures[0].measureMetaData.draft &&
+      measures[0].measureMetaData?.draft &&
       canEdit
       /* check if there is not already a Version for that measure set*/
     ) {
@@ -42,7 +42,7 @@ export default function VersionAction(props: PropTypes) {
 
   return (
     <Tooltip
-      data-testid="Version_measure_tooltip"
+      data-testid="version_measure_tooltip"
       title={tooltipMessage}
       onMouseOver={validateVersionActionState}
       arrow
@@ -51,7 +51,7 @@ export default function VersionAction(props: PropTypes) {
         <IconButton
           onClick={props.onClick}
           disabled={disableVersionBtn}
-          data-testid="Version_measure_btn"
+          data-testid="version_measure_btn"
         >
           <AccountTreeOutlinedIcon
             sx={disableVersionBtn ? { color: grey[500] } : { color: blue[500] }}
