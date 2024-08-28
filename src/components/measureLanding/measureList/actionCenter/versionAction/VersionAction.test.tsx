@@ -43,8 +43,8 @@ const qiCoreMeasureVersioned = {
 describe("VersionAction", () => {
   it("Should disable action btn if no measure selected", () => {
     render(<VersionAction measures={[]} onClick={() => {}} canEdit={true} />);
-    expect(screen.getByTestId("version_measure_btn")).toBeDisabled();
-    expect(screen.getByTestId("version_measure_tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("version-measure-btn")).toBeDisabled();
+    expect(screen.getByTestId("version-measure-tooltip")).toHaveAttribute(
       "aria-label",
       NOTHING_SELECTED
     );
@@ -58,8 +58,8 @@ describe("VersionAction", () => {
         canEdit={true}
       />
     );
-    expect(screen.getByTestId("version_measure_btn")).not.toBeDisabled();
-    expect(screen.getByTestId("version_measure_tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("version-measure-btn")).not.toBeDisabled();
+    expect(screen.getByTestId("version-measure-tooltip")).toHaveAttribute(
       "aria-label",
       VERSION_MEASURE
     );
@@ -72,8 +72,8 @@ describe("VersionAction", () => {
         canEdit={true}
       />
     );
-    expect(screen.getByTestId("version_measure_btn")).toBeDisabled();
-    expect(screen.getByTestId("version_measure_tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("version-measure-btn")).toBeDisabled();
+    expect(screen.getByTestId("version-measure-tooltip")).toHaveAttribute(
       "aria-label",
       NOTHING_SELECTED
     );
@@ -86,8 +86,8 @@ describe("VersionAction", () => {
         canEdit={false}
       />
     );
-    expect(screen.getByTestId("version_measure_btn")).toBeDisabled();
-    expect(screen.getByTestId("version_measure_tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("version-measure-btn")).toBeDisabled();
+    expect(screen.getByTestId("version-measure-tooltip")).toHaveAttribute(
       "aria-label",
       NOTHING_SELECTED
     );
@@ -102,8 +102,8 @@ describe("VersionAction", () => {
         canEdit={true}
       />
     );
-    expect(screen.getByTestId("version_measure_btn")).toBeDisabled();
-    expect(screen.getByTestId("version_measure_tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("version-measure-btn")).toBeDisabled();
+    expect(screen.getByTestId("version-measure-tooltip")).toHaveAttribute(
       "aria-label",
       NOTHING_SELECTED
     );

@@ -46,6 +46,7 @@ jest.mock("@madie/madie-util", () => ({
     enableQdmRepeatTransfer: false,
     MeasureListCheckboxes: true,
     associateMeasures: true,
+    MeasureListButtons: false,
   })),
 }));
 
@@ -1927,6 +1928,37 @@ describe("Measure List component", () => {
     });
     unmount();
   });
+  it("Should display action center when the feature flag is enabled", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      MeasureListButtons: true,
+    }));
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          selectedIds={selectedIds}
+          changeSelectedIds={changeSelectedIds}
+          setSelectedIds={setSelectedIds}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const actionCenter = getByTestId("action-center");
+    expect(actionCenter).toBeInTheDocument();
+    unmount();
+  });
+
   it("Should not display checkboxes when the feature flag is disabled", async () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       MeasureListCheckboxes: false,

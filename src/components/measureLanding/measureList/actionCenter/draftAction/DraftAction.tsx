@@ -69,7 +69,7 @@ export default function DraftAction(props: PropTypes) {
 
   return (
     <Tooltip
-      data-testid="draft_measure_tooltip"
+      data-testid="draft-measure-tooltip"
       title={tooltipMessage}
       onMouseOver={validateDraftActionState}
       arrow
@@ -78,7 +78,7 @@ export default function DraftAction(props: PropTypes) {
         <IconButton
           onClick={props.onClick}
           disabled={disableDraftBtn}
-          data-testid="draft_measure_btn"
+          data-testid="draft-measure-btn"
         >
           <EditCalendarOutlinedIcon
             sx={disableDraftBtn ? { color: grey[500] } : { color: blue[500] }}

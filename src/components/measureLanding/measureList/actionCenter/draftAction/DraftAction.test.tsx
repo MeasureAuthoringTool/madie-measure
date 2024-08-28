@@ -50,8 +50,8 @@ describe("DraftAction", () => {
 
   it("Should disable action btn if no measure selected", () => {
     render(<DraftAction measures={[]} onClick={() => {}} canEdit={true} />);
-    expect(screen.getByTestId("draft_measure_btn")).toBeDisabled();
-    expect(screen.getByTestId("draft_measure_tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("draft-measure-btn")).toBeDisabled();
+    expect(screen.getByTestId("draft-measure-tooltip")).toHaveAttribute(
       "aria-label",
       NOTHING_SELECTED
     );
@@ -73,8 +73,8 @@ describe("DraftAction", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId("draft_measure_btn")).not.toBeDisabled();
-      expect(screen.getByTestId("draft_measure_tooltip")).toHaveAttribute(
+      expect(screen.getByTestId("draft-measure-btn")).not.toBeDisabled();
+      expect(screen.getByTestId("draft-measure-tooltip")).toHaveAttribute(
         "aria-label",
         DRAFT_MEASURE
       );
@@ -89,8 +89,8 @@ describe("DraftAction", () => {
         canEdit={true}
       />
     );
-    expect(screen.getByTestId("draft_measure_btn")).toBeDisabled();
-    expect(screen.getByTestId("draft_measure_tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("draft-measure-btn")).toBeDisabled();
+    expect(screen.getByTestId("draft-measure-tooltip")).toHaveAttribute(
       "aria-label",
       NOTHING_SELECTED
     );
@@ -100,8 +100,8 @@ describe("DraftAction", () => {
     render(
       <DraftAction measures={[qdmMeasure]} onClick={() => {}} canEdit={false} />
     );
-    expect(screen.getByTestId("draft_measure_btn")).toBeDisabled();
-    expect(screen.getByTestId("draft_measure_tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("draft-measure-btn")).toBeDisabled();
+    expect(screen.getByTestId("draft-measure-tooltip")).toHaveAttribute(
       "aria-label",
       NOTHING_SELECTED
     );
@@ -116,8 +116,8 @@ describe("DraftAction", () => {
         canEdit={true}
       />
     );
-    expect(screen.getByTestId("draft_measure_btn")).toBeDisabled();
-    expect(screen.getByTestId("draft_measure_tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("draft-measure-btn")).toBeDisabled();
+    expect(screen.getByTestId("draft-measure-tooltip")).toHaveAttribute(
       "aria-label",
       NOTHING_SELECTED
     );

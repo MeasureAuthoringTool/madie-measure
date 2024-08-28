@@ -33,8 +33,8 @@ const qiCoreMeasure = {
 describe("DeleteAction", () => {
   it("Should disable action btn if no measure selected", () => {
     render(<DeleteAction measures={[]} onClick={() => {}} canEdit={true} />);
-    expect(screen.getByTestId("delete_action_btn")).toBeDisabled();
-    expect(screen.getByTestId("delete_action_tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("delete-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("delete-action-tooltip")).toHaveAttribute(
       "aria-label",
       NOTHING_SELECTED
     );
@@ -48,8 +48,8 @@ describe("DeleteAction", () => {
         canEdit={true}
       />
     );
-    expect(screen.getByTestId("delete_action_btn")).not.toBeDisabled();
-    expect(screen.getByTestId("delete_action_tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("delete-action-btn")).not.toBeDisabled();
+    expect(screen.getByTestId("delete-action-tooltip")).toHaveAttribute(
       "aria-label",
       DEL_MEASURE
     );
@@ -62,8 +62,8 @@ describe("DeleteAction", () => {
         canEdit={false}
       />
     );
-    expect(screen.getByTestId("delete_action_btn")).toBeDisabled();
-    expect(screen.getByTestId("delete_action_tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("delete-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("delete-action-tooltip")).toHaveAttribute(
       "aria-label",
       NOTHING_SELECTED
     );
@@ -78,8 +78,8 @@ describe("DeleteAction", () => {
         canEdit={true}
       />
     );
-    expect(screen.getByTestId("delete_action_btn")).toBeDisabled();
-    expect(screen.getByTestId("delete_action_tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("delete-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("delete-action-tooltip")).toHaveAttribute(
       "aria-label",
       NOTHING_SELECTED
     );

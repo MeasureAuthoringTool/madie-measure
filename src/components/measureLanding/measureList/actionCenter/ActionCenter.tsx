@@ -35,7 +35,7 @@ export default function ActionCenter(props: PropTypes) {
   }, [props.measures]);
 
   return (
-    <div>
+    <div data-testid="action-center">
       <DeleteAction
         measures={props.measures}
         onClick={() => {}}
