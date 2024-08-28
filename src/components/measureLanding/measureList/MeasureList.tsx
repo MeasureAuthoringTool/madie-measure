@@ -880,14 +880,17 @@ export default function MeasureList(props: {
             />
           </form>
         </div>
-        {featureFlags.MeasureListCheckboxes && featureFlags.associateMeasures && (
+        {((featureFlags.MeasureListButtons && featureFlags.associateMeasures) ||
+          featureFlags.MeasureListButtons) && (
           <div tw="justify-self-end p-3">
-            {!featureFlags.MeasureListButtons && (
-              <AssociateCmsIdAction
-                measures={selectedMeasures}
-                onClick={associateCmsId}
-              />
-            )}
+            {featureFlags.MeasureListCheckboxes &&
+              featureFlags.associateMeasures &&
+              !featureFlags.MeasureListButtons && (
+                <AssociateCmsIdAction
+                  measures={selectedMeasures}
+                  onClick={associateCmsId}
+                />
+              )}
             {featureFlags.MeasureListButtons && (
               <ActionCenter
                 measures={selectedMeasures}
