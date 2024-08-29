@@ -5,6 +5,7 @@ import { Measure, Model } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
 import EditCalendarOutlinedIcon from "@mui/icons-material/EditCalendarOutlined";
 import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
+import { Toast } from "@madie/madie-design-system/dist/react";
 
 import { grey, blue } from "@mui/material/colors";
 
@@ -16,14 +17,21 @@ interface PropTypes {
 
 export const NOTHING_SELECTED = "Select measure to draft";
 export const DRAFT_MEASURE = "Draft measure";
+export const LOOKUP_ERROR = "There was an error checking draftability. ";
 
 export default function DraftAction(props: PropTypes) {
   const { measures, canEdit } = props;
   const [disableDraftBtn, setDisableDraftBtn] = useState(true);
   const [tooltipMessage, setTooltipMessage] = useState(NOTHING_SELECTED);
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
-  const [canDraftLookup, setCanDraftLookup] = useState<object>({});
   const [canDraft, setCanDraft] = useState<boolean>(false);
+  const [toastOpen, setToastOpen] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string>("");
+
+  const onToastClose = () => {
+    setToastMessage("");
+    setToastOpen(false);
+  };
 
   const validateDraftActionState = useCallback(() => {
     // set button state to disabled by default
@@ -37,6 +45,8 @@ export default function DraftAction(props: PropTypes) {
     ) {
       setDisableDraftBtn(false);
       setTooltipMessage(DRAFT_MEASURE);
+    } else if (toastMessage) {
+      setTooltipMessage(LOOKUP_ERROR);
     }
   }, [measures, canEdit, canDraft]);
 
@@ -57,6 +67,9 @@ export default function DraftAction(props: PropTypes) {
           }
         } catch (error) {
           console.error("Error fetching draft statuses: ", error);
+          setToastMessage("Error fetching draft statuses: " + error);
+          setToastOpen(true);
+          setDisableDraftBtn(true);
         }
       }
     },
@@ -82,6 +95,15 @@ export default function DraftAction(props: PropTypes) {
         >
           <EditCalendarOutlinedIcon
             sx={disableDraftBtn ? { color: grey[500] } : { color: blue[500] }}
+          />
+          <Toast
+            toastKey="draft-button-error-toast"
+            toastType="danger"
+            testId="draft-button-error-toast-text"
+            open={toastOpen}
+            message={toastMessage}
+            onClose={onToastClose}
+            autoHideDuration={6000}
           />
         </IconButton>
       </span>

@@ -35,7 +35,7 @@ export default function ExportAction(props: PropTypes) {
 
   return (
     <Tooltip
-      data-testid="export_measure_tooltip"
+      data-testid="export-measure-tooltip"
       title={tooltipMessage}
       onMouseOver={validateExportActionState}
       arrow
@@ -44,7 +44,7 @@ export default function ExportAction(props: PropTypes) {
         <IconButton
           onClick={props.onClick}
           disabled={disableExportBtn}
-          data-testid="export_measure_btn"
+          data-testid="export-measure-btn"
         >
           <FileUploadOutlinedIcon
             sx={disableExportBtn ? { color: grey[500] } : { color: blue[500] }}

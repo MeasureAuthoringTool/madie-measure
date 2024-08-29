@@ -889,12 +889,13 @@ export default function MeasureList(props: {
                 onClick={associateCmsId}
               />
             )}
-          {featureFlags.MeasureListButtons && (
-            <ActionCenter
-              measures={selectedMeasures}
-              associateCmsId={associateCmsId}
-            />
-          )}
+          {featureFlags.MeasureListButtons &&
+            featureFlags.MeasureListCheckboxes && (
+              <ActionCenter
+                measures={selectedMeasures}
+                associateCmsId={associateCmsId}
+              />
+            )}
         </div>
       </div>
 

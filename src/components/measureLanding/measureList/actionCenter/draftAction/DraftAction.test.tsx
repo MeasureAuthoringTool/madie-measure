@@ -122,4 +122,30 @@ describe("DraftAction", () => {
       NOTHING_SELECTED
     );
   });
+
+  it("Should show an error toast if API call fails", async () => {
+    mockedUseMeasureServiceApi.mockReturnValue({
+      fetchMeasureDraftStatuses: jest
+        .fn()
+        .mockRejectedValue(new Error("Network Error")),
+    });
+
+    render(
+      <DraftAction
+        measures={[qiCoreMeasure]}
+        onClick={() => {}}
+        canEdit={true}
+      />
+    );
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("draft-button-error-toast-text")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("draft-button-error-toast-text")
+      ).toHaveTextContent(
+        "Error fetching draft statuses: Error: Network Error"
+      );
+    });
+  });
 });

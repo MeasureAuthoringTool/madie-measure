@@ -1931,6 +1931,7 @@ describe("Measure List component", () => {
   it("Should display action center when the feature flag is enabled", async () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       MeasureListButtons: true,
+      MeasureListCheckboxes: true,
     }));
     const { getByTestId, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
