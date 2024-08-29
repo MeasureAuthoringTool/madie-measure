@@ -10,7 +10,7 @@ const sortCQLValuesetsInPlace = (
   for (const tvs of sortedValueSets) {
     cqlArr.splice(tvs.start.line - 1, 1, tvs.text);
   }
-};
+}; //
 
 const extractValueSetNameAndSuffix = (valueSetName) => {
   const match = valueSetName.replace(/["']/g, "").match(/^(.*)\((\d+)\)\s*$/);
