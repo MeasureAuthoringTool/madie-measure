@@ -60,4 +60,14 @@ describe("ExportAction", () => {
       EXPORT_MEASURE
     );
   });
+
+  it("should call onClick when btn is clicked", () => {
+    const handleClick = jest.fn();
+    render(<ExportAction measures={[qiCoreMeasure]} onClick={handleClick} />);
+
+    const exportButton = screen.getByTestId("export-measure-btn");
+    userEvent.click(exportButton);
+
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
 });
