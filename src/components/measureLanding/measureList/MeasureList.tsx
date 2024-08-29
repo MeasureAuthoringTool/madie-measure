@@ -892,6 +892,8 @@ export default function MeasureList(props: {
           {featureFlags.MeasureListButtons &&
             featureFlags.MeasureListCheckboxes && (
               <ActionCenter
+                setSelectedMeasure={setSelectedMeasure}
+                exportMeasure={exportMeasure}
                 measures={selectedMeasures}
                 associateCmsId={associateCmsId}
               />
