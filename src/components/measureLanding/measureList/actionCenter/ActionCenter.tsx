@@ -16,7 +16,7 @@ interface PropTypes {
   measures: Measure[];
   associateCmsId: any;
   exportMeasure: () => void;
-  setSelectedMeasure: (Measure) => void;
+  updateTargetMeasure: (Measure) => void;
 }
 export default function ActionCenter(props: PropTypes) {
   const featureFlags = useFeatureFlags();
@@ -25,10 +25,10 @@ export default function ActionCenter(props: PropTypes) {
 
   const exportMeasure = useCallback(async () => {
     if (props.measures.length === 1) {
-      await props.setSelectedMeasure(props.measures[0]);
+      await props.updateTargetMeasure(props.measures[0]);
       props.exportMeasure();
     }
-  }, [props.measures, props.exportMeasure, props.setSelectedMeasure]);
+  }, [props.measures, props.exportMeasure, props.updateTargetMeasure]);
 
   const isSelectedMeasureEditable = (measures) => {
     return !(measures.some = (measure) => {
