@@ -26,7 +26,7 @@ export default function ActionCenter(props: PropTypes) {
   const exportMeasure = useCallback(async () => {
     if (props.measures.length === 1) {
       await props.setSelectedMeasure(props.measures[0]);
-      await props.exportMeasure();
+      props.exportMeasure();
     }
   }, [props.measures, props.exportMeasure, props.setSelectedMeasure]);
 
