@@ -23,9 +23,9 @@ export default function ActionCenter(props: PropTypes) {
   const { getUserName } = useOktaTokens();
   const [canEdit, setCanEdit] = useState<boolean>(false);
 
-  const exportMeasure = useCallback(async () => {
+  const exportMeasure = useCallback(() => {
     if (props.measures.length === 1) {
-      await props.updateTargetMeasure(props.measures[0]);
+      props.updateTargetMeasure(props.measures[0]);
       props.exportMeasure();
     }
   }, [props.measures, props.exportMeasure, props.updateTargetMeasure]);
