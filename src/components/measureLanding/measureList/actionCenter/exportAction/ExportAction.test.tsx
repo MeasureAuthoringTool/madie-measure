@@ -33,8 +33,8 @@ const qiCoreMeasure = {
 describe("ExportAction", () => {
   it("Should disable action btn if no measure selected", () => {
     render(<ExportAction measures={[]} onClick={() => {}} />);
-    expect(screen.getByTestId("export-measure-btn")).toBeDisabled();
-    expect(screen.getByTestId("export-measure-tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("export-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("export-action-tooltip")).toHaveAttribute(
       "aria-label",
       NOTHING_SELECTED
     );
@@ -42,8 +42,8 @@ describe("ExportAction", () => {
 
   it("Should enable action btn if user select one measure ", () => {
     render(<ExportAction measures={[qiCoreMeasure]} onClick={() => {}} />);
-    expect(screen.getByTestId("export-measure-btn")).not.toBeDisabled();
-    expect(screen.getByTestId("export-measure-tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("export-action-btn")).not.toBeDisabled();
+    expect(screen.getByTestId("export-action-tooltip")).toHaveAttribute(
       "aria-label",
       EXPORT_MEASURE
     );
@@ -54,8 +54,8 @@ describe("ExportAction", () => {
     render(
       <ExportAction measures={[qdmMeasure, measure2]} onClick={() => {}} />
     );
-    expect(screen.getByTestId("export-measure-btn")).not.toBeDisabled();
-    expect(screen.getByTestId("export-measure-tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("export-action-btn")).not.toBeDisabled();
+    expect(screen.getByTestId("export-action-tooltip")).toHaveAttribute(
       "aria-label",
       EXPORT_MEASURE
     );
@@ -65,7 +65,7 @@ describe("ExportAction", () => {
     const handleClick = jest.fn();
     render(<ExportAction measures={[qiCoreMeasure]} onClick={handleClick} />);
 
-    const exportButton = screen.getByTestId("export-measure-btn");
+    const exportButton = screen.getByTestId("export-action-btn");
     userEvent.click(exportButton);
 
     expect(handleClick).toHaveBeenCalledTimes(1);
