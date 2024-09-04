@@ -42,7 +42,7 @@ export default function VersionAction(props: PropTypes) {
 
   return (
     <Tooltip
-      data-testid="version-measure-tooltip"
+      data-testid="version-action-tooltip"
       title={tooltipMessage}
       onMouseOver={validateVersionActionState}
       arrow
@@ -51,7 +51,7 @@ export default function VersionAction(props: PropTypes) {
         <IconButton
           onClick={props.onClick}
           disabled={disableVersionBtn}
-          data-testid="version-measure-btn"
+          data-testid="version-action-btn"
         >
           <AccountTreeOutlinedIcon
             sx={disableVersionBtn ? { color: grey[500] } : { color: blue[500] }}

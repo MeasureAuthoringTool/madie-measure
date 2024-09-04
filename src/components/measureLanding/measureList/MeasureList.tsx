@@ -452,9 +452,13 @@ export default function MeasureList(props: {
     ),
   };
 
+  const updateTargetMeasure = (newValue) => {
+    targetMeasure.current = newValue;
+  };
+
   useEffect(() => {
     if (selectedMeasure) {
-      targetMeasure.current = selectedMeasure;
+      updateTargetMeasure(selectedMeasure);
     }
   }, [selectedMeasure]);
   const handlePopOverOpen = useCallback(
@@ -892,6 +896,8 @@ export default function MeasureList(props: {
           {featureFlags.MeasureListButtons &&
             featureFlags.MeasureListCheckboxes && (
               <ActionCenter
+                updateTargetMeasure={updateTargetMeasure}
+                exportMeasure={exportMeasure}
                 measures={selectedMeasures}
                 associateCmsId={associateCmsId}
               />

@@ -15,11 +15,20 @@ import {
 interface PropTypes {
   measures: Measure[];
   associateCmsId: any;
+  exportMeasure: () => void;
+  updateTargetMeasure: (Measure) => void;
 }
 export default function ActionCenter(props: PropTypes) {
   const featureFlags = useFeatureFlags();
   const { getUserName } = useOktaTokens();
   const [canEdit, setCanEdit] = useState<boolean>(false);
+
+  const exportMeasure = useCallback(() => {
+    if (props.measures.length === 1) {
+      props.updateTargetMeasure(props.measures[0]);
+      props.exportMeasure();
+    }
+  }, [props.measures, props.exportMeasure, props.updateTargetMeasure]);
 
   const isSelectedMeasureEditable = (measures) => {
     return !(measures.some = (measure) => {
@@ -41,7 +50,7 @@ export default function ActionCenter(props: PropTypes) {
         onClick={() => {}}
         canEdit={canEdit}
       />
-      <ExportAction measures={props.measures} onClick={() => {}} />
+      <ExportAction measures={props.measures} onClick={exportMeasure} />
       <DraftAction
         measures={props.measures}
         onClick={() => {}}
