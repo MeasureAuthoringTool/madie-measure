@@ -17,11 +17,22 @@ interface PropTypes {
   associateCmsId: any;
   exportMeasure: () => void;
   updateTargetMeasure: (Measure) => void;
+  setCreateVersionDialog: any;
 }
 export default function ActionCenter(props: PropTypes) {
   const featureFlags = useFeatureFlags();
   const { getUserName } = useOktaTokens();
   const [canEdit, setCanEdit] = useState<boolean>(false);
+
+  const versionMeasure = useCallback(() => {
+    if (props.measures.length === 1) {
+      props.updateTargetMeasure(props.measures[0]);
+      props.setCreateVersionDialog({
+        open: true,
+        measureId: props.measures[0].id,
+      });
+    }
+  }, [props.measures, props.setCreateVersionDialog, props.updateTargetMeasure]);
 
   const exportMeasure = useCallback(() => {
     if (props.measures.length === 1) {
@@ -58,7 +69,7 @@ export default function ActionCenter(props: PropTypes) {
       />
       <VersionAction
         measures={props.measures}
-        onClick={() => {}}
+        onClick={versionMeasure}
         canEdit={canEdit}
       />
       {featureFlags.MeasureListCheckboxes && featureFlags.associateMeasures && (

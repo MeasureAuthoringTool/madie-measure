@@ -17,7 +17,7 @@ export const NOTHING_SELECTED = "Select measure to version";
 export const VERSION_MEASURE = "Version measure";
 
 export default function VersionAction(props: PropTypes) {
-  const { measures, canEdit } = props;
+  const { measures, canEdit, onClick } = props;
   const [disableVersionBtn, setDisableVersionBtn] = useState(true);
   const [tooltipMessage, setTooltipMessage] = useState(NOTHING_SELECTED);
 
