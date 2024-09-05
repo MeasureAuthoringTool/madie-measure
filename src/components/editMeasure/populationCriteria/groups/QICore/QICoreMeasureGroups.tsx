@@ -1129,15 +1129,55 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                               i + 1
                                             }-input`,
                                           }}
+                                          // Modify the logic to do MORE
                                           {...formik.getFieldProps(
                                             `stratifications[${i}].cqlDefinition`
                                           )}
+                                          onChange={(e) => {
+                                            if (e.target.value === "") {
+                                              // we're sending it an empty string so we need to blank the associations as well
+                                              formik.setValues({
+                                                ...formik.values,
+                                                stratifications:
+                                                  formik.values.stratifications.map(
+                                                    (strat, index) =>
+                                                      index === i
+                                                        ? {
+                                                            ...strat,
+                                                            cqlDefinition:
+                                                              e.target.value,
+                                                            associations: [],
+                                                          }
+                                                        : strat
+                                                  ),
+                                              });
+                                            } else {
+                                              formik.setValues({
+                                                ...formik.values,
+                                                stratifications:
+                                                  formik.values.stratifications.map(
+                                                    (strat, index) =>
+                                                      index === i
+                                                        ? {
+                                                            ...strat,
+                                                            cqlDefinition:
+                                                              e.target.value,
+                                                            associations:
+                                                              Object.values(
+                                                                stratAssociation
+                                                              ),
+                                                          }
+                                                        : strat
+                                                  ),
+                                              });
+                                            }
+                                          }}
                                           size="small"
                                           options={stratificationOptions}
                                         />
                                       </div>
-
                                       {/*Association Select*/}
+                                      {/* Given STU update requirements we're going to default all items */}
                                       <div tw="pt-4">
                                         {featureFlags?.qiCoreStu4Updates ? (
                                           <MultipleSelectDropDown
@@ -1147,17 +1187,42 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                               name: "Select Association",
                                               value: null,
                                             }}
-                                            defaultValue={
-                                              formik.getFieldProps(
-                                                `stratifications[${i}].associations`
-                                              ).value
-                                            }
-                                            required={false}
-                                            disabled={!canEdit}
-                                            options={Object.values(
-                                              stratAssociation
+                                            {...formik.getFieldProps(
+                                              `stratifications[${i}].associations`
                                             )}
+                                            disabled={!canEdit}
+                                            options={
+                                              ["Select All"].concat(
+                                                Object.values(stratAssociation)
+                                              ) // add Select All as an option and then modify render logic tot toggle all on click.
+                                            }
                                             multipleSelect={true}
+                                            handleToggleSelectAll={() => {
+                                              // Are all possible options selected? -> Select None
+                                              if (
+                                                _.isEqual(
+                                                  Object.values(
+                                                    stratAssociation
+                                                  ),
+                                                  formik.getFieldProps(
+                                                    `stratifications[${i}].associations`
+                                                  ).value
+                                                )
+                                              ) {
+                                                formik.setFieldValue(
+                                                  `stratifications[${i}].associations`,
+                                                  []
+                                                );
+                                              } else {
+                                                // not all selected -> Select ALL
+                                                formik.setFieldValue(
+                                                  `stratifications[${i}].associations`,
+                                                  Object.values(
+                                                    stratAssociation
+                                                  )
+                                                );
+                                              }
+                                            }}
                                             onChange={(
                                               _event: any,
                                               selectedVal: string | null
@@ -1175,6 +1240,19 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                             }
                                             tooltipText={
                                               STU4_STRATUM_ASSOCIATION_HELPER_TEXT
+                                            }
+                                            required={true}
+                                            error={Boolean(
+                                              formik?.errors?.stratifications?.[
+                                                i
+                                                // @ts-ignore Tech Debt : Figure out how to get red of ts-ignore here
+                                              ]?.associations
+                                            )}
+                                            helperText={
+                                              formik?.errors?.stratifications?.[
+                                                i
+                                                // @ts-ignore Tech Debt : Figure out how to get red of ts-ignore here
+                                              ]?.associations
                                             }
                                           />
                                         ) : (
