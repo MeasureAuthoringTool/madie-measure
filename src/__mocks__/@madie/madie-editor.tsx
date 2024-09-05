@@ -51,10 +51,10 @@ export function MadieTerminologyEditor({
 
   return (
     <>
-      <input
+      <textarea
         data-testid="measure-editor"
         value={value}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+        onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
           onChange(e.target.value);
         }}
       />
