@@ -152,8 +152,11 @@ const serviceConfig = {
   measureService: {
     baseUrl: "madie.com",
   },
-  elmTranslationService: {
-    baseUrl: "elm-translator.com",
+  qdmElmTranslationService: {
+    baseUrl: "qdm-translator.com",
+  },
+  fhirElmTranslationService: {
+    baseUrl: "fhir-translator.com",
   },
   terminologyService: {
     baseUrl: "terminology-service.com",
@@ -953,6 +956,59 @@ describe("EditorWithTerminology", () => {
     });
     expect(screen.getByTestId("measure-editor-toast")).toHaveTextContent(
       "Library TestHelpers has been successfully added to the CQL."
+    );
+  });
+
+  it("should remove included library successfully", async () => {
+    const cqlWithIncludes =
+      "library ApplyLibraryTest version '0.0.000'\nusing QDM version '5.6'\ninclude TestHelpers version '1.0.000' called Helpers";
+    const cqlWithNoIncludes =
+      "library ApplyLibraryTest version '0.0.000'" + "using QDM version '5.6'";
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => {
+        return {
+          cql: "library ApplyLibraryTest version '0.0.000'\nusing QDM version '5.6'",
+          isLibraryStatementChanged: false,
+          isUsingStatementChanged: false,
+          isValueSetChanged: false,
+        };
+      });
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        translation: null,
+        externalErrors: [],
+      });
+    });
+
+    const measureWithIncludes = {
+      ...measure,
+      model: Model.QDM_5_6,
+      cql: cqlWithIncludes,
+    } as Measure;
+
+    const measureWithNoIncludes = {
+      ...measure,
+      model: Model.QDM_5_6,
+      cql: cqlWithNoIncludes,
+    } as Measure;
+
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measureWithNoIncludes });
+      }
+    });
+    renderEditor(measureWithIncludes);
+    // click on delete included library button
+    const deleteIncludeBtn = screen.getByTestId("delete-included-library");
+    userEvent.click(deleteIncludeBtn);
+    await waitFor(() => {
+      const editor = screen.getByTestId("measure-editor");
+      expect(editor).toHaveValue(cqlWithNoIncludes);
+    });
+    expect(screen.getByTestId("measure-editor-toast")).toHaveTextContent(
+      "Library TestHelpers has been successfully removed from the CQL."
     );
   });
 });

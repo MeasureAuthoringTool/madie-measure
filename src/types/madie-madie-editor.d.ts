@@ -67,6 +67,7 @@ declare module "@madie/madie-editor" {
     handleApplyCode?: (code: Code) => void;
     handleApplyValueSet?: (vs: ValueSetForSearch) => void;
     handleApplyLibrary?: (lib: IncludeLibrary) => void;
+    handleDeleteLibrary?: (lib: IncludeLibrary) => void;
     parseDebounceTime?: number;
     inboundAnnotations?: EditorAnnotation[];
     inboundErrorMarkers?: EditorErrorMarker[];
