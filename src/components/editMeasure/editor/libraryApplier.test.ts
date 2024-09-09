@@ -1,4 +1,4 @@
-import { applyLibrary } from "./libraryApplier";
+import { applyLibrary, deleteIncludedLibrary } from "./libraryApplier";
 import IncludedLibrary from "@madie/madie-models/dist/IncludedLibrary";
 import { IncludeLibrary } from "@madie/madie-editor";
 
@@ -119,5 +119,33 @@ describe("Library Apply Utility tests", () => {
     );
     // cql unchanged
     expect(result.cql).toEqual(cql);
+  });
+
+  it("should remove included library", () => {
+    const include = "include CancerLinQ version '1.5.000' called CancerLinQQ\n";
+    const cqlWithNoInclude =
+      "library CaseWhenThen version '0.3.000'\nusing QDM version '5.6'\n";
+    const cqlWithInclude = cqlWithNoInclude + include;
+    const library = {
+      name: "CancerLinQ",
+      alias: "CancerLinQQ",
+      version: "1.5.000",
+    } as IncludeLibrary;
+    const result = deleteIncludedLibrary(cqlWithInclude, library);
+    expect(result).toEqual(cqlWithNoInclude);
+  });
+
+  it("should not remove included library if one does not exist", () => {
+    const cql =
+      "library CaseWhenThen version '0.3.000'\nusing QDM version '5.6'\n" +
+      "include CancerLinQ version '1.5.000' called CancerLinQQ\n";
+    const library = {
+      name: "UnknownLibrary",
+      alias: "Unknown",
+      version: "1.5.000",
+    } as IncludeLibrary;
+    const result = deleteIncludedLibrary(cql, library);
+    // cql unchanged
+    expect(result).toEqual(cql);
   });
 });

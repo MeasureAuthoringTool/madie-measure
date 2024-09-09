@@ -65,3 +65,21 @@ export const applyLibrary = (
     };
   }
 };
+
+export const deleteIncludedLibrary = (
+  cql: string,
+  library: IncludeLibrary
+): string => {
+  const cqlArr: string[] = cql.split("\n");
+  const parsedResults: CqlResult = new CqlAntlr(cql).parse();
+  const existingLibrary = parsedResults?.includes.find(
+    (l) =>
+      l.name === library.name &&
+      l.version.replace(/["']/g, "") === library.version
+  );
+  if (existingLibrary) {
+    cqlArr.splice(existingLibrary.start.line - 1, 1);
+    return cqlArr.join("\n");
+  }
+  return cql;
+};
