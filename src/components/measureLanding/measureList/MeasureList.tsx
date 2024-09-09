@@ -901,6 +901,7 @@ export default function MeasureList(props: {
                 measures={selectedMeasures}
                 associateCmsId={associateCmsId}
                 setCreateVersionDialog={setCreateVersionDialog}
+                setDraftMeasureDialog={setDraftMeasureDialog}
               />
             )}
         </div>
