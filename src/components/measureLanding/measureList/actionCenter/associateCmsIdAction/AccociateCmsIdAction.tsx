@@ -69,7 +69,7 @@ export default function AssociateCmsIdAction(props: PropTypes) {
 
   return (
     <Tooltip
-      data-testid="associate_cms_id_tooltip"
+      data-testid="associate-cms-id-tooltip"
       title={tooltipMessage}
       onMouseOver={validateAssociateCmsIdActionState}
       arrow
@@ -78,7 +78,7 @@ export default function AssociateCmsIdAction(props: PropTypes) {
         <IconButton
           onClick={props.onClick}
           disabled={disableAssociateCmsIdBtn}
-          data-testid="associate_cms_id_btn"
+          data-testid="associate-cms-id-action-btn"
         >
           <IconLink
             fillColor={disableAssociateCmsIdBtn ? "#9e9e9e" : "#2196f3"}

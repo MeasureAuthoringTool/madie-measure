@@ -30,7 +30,7 @@ export default function ActionCenter(props: PropTypes) {
       props.updateTargetMeasure(props.measures[0]);
       props.setCreateVersionDialog({
         open: true,
-        measureId: props.measures[0].id,
+        measureId: props.measures[0].measureSetId,
       });
     }
   }, [props.measures, props.setCreateVersionDialog, props.updateTargetMeasure]);
@@ -52,8 +52,8 @@ export default function ActionCenter(props: PropTypes) {
   }, [props.measures, props.exportMeasure, props.updateTargetMeasure]);
 
   const isSelectedMeasureEditable = (measures) => {
-    return !(measures.some = (measure) => {
-      return !checkUserCanEdit(
+    return measures.every((measure) => {
+      return checkUserCanEdit(
         measure?.measureSet?.owner,
         measure?.measureSet?.acls
       );
@@ -61,7 +61,7 @@ export default function ActionCenter(props: PropTypes) {
   };
 
   useEffect(() => {
-    setCanEdit(!isSelectedMeasureEditable(props.measures));
+    setCanEdit(isSelectedMeasureEditable(props.measures));
   }, [props.measures]);
 
   return (

@@ -56,8 +56,8 @@ export default function DraftAction(props: PropTypes) {
 
   const draftLookup = useCallback(
     async (measureList: Measure[]) => {
-      const measureSetList = measureList.map((m) => m.measureSetId);
-      if (measureList.length > 0) {
+      const measureSetList = measureList?.map((m) => m.measureSetId);
+      if (measureList?.length > 0) {
         try {
           const results = await measureServiceApi.fetchMeasureDraftStatuses(
             measureSetList
