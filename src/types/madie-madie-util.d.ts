@@ -20,6 +20,7 @@ declare module "@madie/madie-util" {
     CQLBuilderDefinitions: boolean;
     CQLBuilderIncludes: boolean;
     MeasureListButtons: boolean;
+    qiCore6: boolean;
   }
 
   export interface ServiceConfig {
