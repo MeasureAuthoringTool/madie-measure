@@ -54,6 +54,7 @@ import "./MeasureEditor.scss";
 import applyCode from "./codeApplier";
 import applyValueset from "./valuesetApplier";
 import { applyLibrary, deleteIncludedLibrary } from "./libraryApplier";
+import { applyDefinition } from "./DefinitionApplier";
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
@@ -91,27 +92,6 @@ export const mapErrorsToAceMarkers = (
     }));
   }
   return markers;
-};
-
-export const applyDefinition = (
-  defValues: Definition,
-  editorVal: string
-): string => {
-  const formattedExpressionValue = defValues.expressionValue
-    .toString()
-    .split("\n")
-    .map((line) => `  ${line}`)
-    .join("\n");
-  const formattedComment = `/*\n${defValues.comment.toString()}\n*/`;
-  const formattedDefinitionStructure = `define "${defValues.definitionName}":\n${formattedExpressionValue}`;
-  return (
-    editorVal +
-    "\n" +
-    (defValues.comment
-      ? `${formattedComment}\n${formattedDefinitionStructure}`
-      : formattedDefinitionStructure) +
-    "\n"
-  );
 };
 
 // customCqlCode contains validation result from VSAC
