@@ -53,7 +53,7 @@ import { SuccessText } from "../../../styles/editMeasure/editor";
 import "./MeasureEditor.scss";
 import applyCode from "./codeApplier";
 import applyValueset from "./valuesetApplier";
-import { applyLibrary } from "./libraryApplier";
+import { applyLibrary, deleteIncludedLibrary } from "./libraryApplier";
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
@@ -115,7 +115,7 @@ export const applyDefinition = (
 };
 
 // customCqlCode contains validation result from VSAC
-// This object can be cached in future, to avoid calling VSAC everytime.
+// This object can be cached in the future, to avoid calling VSAC everytime.
 export interface CustomCqlCodeSystem extends CqlCodeSystem {
   valid?: boolean;
   errorMessage?: string;
@@ -303,10 +303,12 @@ const MeasureEditor = () => {
     }
   };
 
+  // TODO: this method is becoming complex. need refactorig
   const updateMeasureCql = async (
     editorValue: string,
     codeName?: string,
-    codeSystemName?: string
+    codeSystemName?: string,
+    libraryName?: string
   ) => {
     try {
       setProcessing(true);
@@ -443,6 +445,13 @@ const MeasureEditor = () => {
               setToastType("success");
               setToastOpen(true);
             }
+            if (libraryName) {
+              setToastMessage(
+                `Library ${libraryName} has been successfully removed from the CQL.`
+              );
+              setToastType("success");
+              setToastOpen(true);
+            }
           })
           .catch((reason) => {
             // inner failure
@@ -475,6 +484,13 @@ const MeasureEditor = () => {
     setToastMessage(result.message);
     setToastType(result.status);
     setToastOpen(true);
+  };
+
+  const handleDeleteLibrary = (library: IncludeLibrary) => {
+    if (editorVal) {
+      const updatedCql = deleteIncludedLibrary(editorVal, library);
+      updateMeasureCql(updatedCql, undefined, undefined, library.name);
+    }
   };
 
   const handleApplyCode = (code: Code) => {
@@ -633,6 +649,7 @@ const MeasureEditor = () => {
                 handleApplyValueSet={handleUpdateVs}
                 handleApplyLibrary={handleApplyLibrary}
                 handleApplyDefinition={handleApplyDefinition}
+                handleDeleteLibrary={handleDeleteLibrary}
                 onChange={(val: string) => handleMadieEditorValue(val)}
                 value={editorVal}
                 inboundAnnotations={elmAnnotations}
