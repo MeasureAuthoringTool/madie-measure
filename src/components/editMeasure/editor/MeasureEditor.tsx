@@ -19,6 +19,7 @@ import {
   isUsingEmpty,
   MadieTerminologyEditor,
   IncludeLibrary,
+  Definition,
 } from "@madie/madie-editor";
 import {
   Button,
@@ -53,6 +54,7 @@ import "./MeasureEditor.scss";
 import applyCode from "./codeApplier";
 import applyValueset from "./valuesetApplier";
 import { applyLibrary, deleteIncludedLibrary } from "./libraryApplier";
+import { applyDefinition } from "./DefinitionApplier";
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
@@ -593,6 +595,15 @@ const MeasureEditor = () => {
     setIsCQLUnchanged(true);
   };
 
+  const handleApplyDefinition = (defValues: Definition) => {
+    handleMadieEditorValue(applyDefinition(defValues, editorVal));
+    setToastType("success");
+    setToastMessage(
+      `Definition ${defValues.definitionName} has been successfully added to the CQL`
+    );
+    setToastOpen(true);
+  };
+
   return (
     <>
       <div id="status-handler">
@@ -617,6 +628,7 @@ const MeasureEditor = () => {
                 handleApplyCode={handleApplyCode}
                 handleApplyValueSet={handleUpdateVs}
                 handleApplyLibrary={handleApplyLibrary}
+                handleApplyDefinition={handleApplyDefinition}
                 handleDeleteLibrary={handleDeleteLibrary}
                 onChange={(val: string) => handleMadieEditorValue(val)}
                 value={editorVal}
