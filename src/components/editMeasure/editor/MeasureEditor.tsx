@@ -19,6 +19,7 @@ import {
   isUsingEmpty,
   MadieTerminologyEditor,
   IncludeLibrary,
+  Definition,
 } from "@madie/madie-editor";
 import {
   Button,
@@ -90,6 +91,27 @@ export const mapErrorsToAceMarkers = (
     }));
   }
   return markers;
+};
+
+export const applyDefinition = (
+  defValues: Definition,
+  editorVal: string
+): string => {
+  const formattedExpressionValue = defValues.expressionValue
+    .toString()
+    .split("\n")
+    .map((line) => `  ${line}`)
+    .join("\n");
+  const formattedComment = `/*\n${defValues.comment.toString()}\n*/`;
+  const formattedDefinitionStructure = `define "${defValues.definitionName}":\n${formattedExpressionValue}`;
+  return (
+    editorVal +
+    "\n" +
+    (defValues.comment
+      ? `${formattedComment}\n${formattedDefinitionStructure}`
+      : formattedDefinitionStructure) +
+    "\n"
+  );
 };
 
 // customCqlCode contains validation result from VSAC
@@ -577,6 +599,15 @@ const MeasureEditor = () => {
     setIsCQLUnchanged(true);
   };
 
+  const handleApplyDefinition = (defValues: Definition) => {
+    handleMadieEditorValue(applyDefinition(defValues, editorVal));
+    setToastType("success");
+    setToastMessage(
+      `Definition ${defValues.definitionName} has been successfully added to the CQL`
+    );
+    setToastOpen(true);
+  };
+
   return (
     <>
       <div id="status-handler">
@@ -601,6 +632,7 @@ const MeasureEditor = () => {
                 handleApplyCode={handleApplyCode}
                 handleApplyValueSet={handleUpdateVs}
                 handleApplyLibrary={handleApplyLibrary}
+                handleApplyDefinition={handleApplyDefinition}
                 onChange={(val: string) => handleMadieEditorValue(val)}
                 value={editorVal}
                 inboundAnnotations={elmAnnotations}

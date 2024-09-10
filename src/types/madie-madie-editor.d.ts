@@ -60,6 +60,11 @@ declare module "@madie/madie-editor" {
     version: string;
     alias: string;
   }
+  export interface Definition {
+    definitionName?: string;
+    comment?: string;
+    expressionValue?: string;
+  }
 
   export interface EditorPropsType {
     value: string;
@@ -67,6 +72,7 @@ declare module "@madie/madie-editor" {
     handleApplyCode?: (code: Code) => void;
     handleApplyValueSet?: (vs: ValueSetForSearch) => void;
     handleApplyLibrary?: (lib: IncludeLibrary) => void;
+    handleApplyDefinition?: (def: Definition) => void;
     parseDebounceTime?: number;
     inboundAnnotations?: EditorAnnotation[];
     inboundErrorMarkers?: EditorErrorMarker[];
