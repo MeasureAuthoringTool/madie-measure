@@ -49,7 +49,7 @@ describe("ExportAction", () => {
     );
   });
 
-  it("Should enable btn if user selects two measures", () => {
+  it("Should disable btn if user selects two measures", () => {
     const measure2 = { ...qiCoreMeasure, model: Model.QDM_5_6 };
     render(
       <ExportAction measures={[qdmMeasure, measure2]} onClick={() => {}} />
@@ -57,7 +57,7 @@ describe("ExportAction", () => {
     expect(screen.getByTestId("export-action-btn")).not.toBeDisabled();
     expect(screen.getByTestId("export-action-tooltip")).toHaveAttribute(
       "aria-label",
-      EXPORT_MEASURE
+      NOTHING_SELECTED
     );
   });
 
