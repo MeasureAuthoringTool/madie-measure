@@ -1062,7 +1062,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                     )}
                   />
                 )}
-
                 {activeTab === "stratification" && (
                   <FieldArray
                     name="stratifications"
@@ -1147,6 +1146,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                                             cqlDefinition:
                                                               e.target.value,
                                                             associations: [],
+                                                            association: null,
+                                                            description: "",
                                                           }
                                                         : strat
                                                   ),
