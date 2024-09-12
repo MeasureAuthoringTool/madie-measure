@@ -67,6 +67,7 @@ declare module "@madie/madie-editor" {
     handleApplyCode?: (code: Code) => void;
     handleApplyValueSet?: (vs: ValueSetForSearch) => void;
     handleApplyLibrary?: (lib: IncludeLibrary) => void;
+    handleApplyDefinition?: (def: Definition) => void;
     parseDebounceTime?: number;
     inboundAnnotations?: EditorAnnotation[];
     inboundErrorMarkers?: EditorErrorMarker[];
@@ -78,6 +79,7 @@ declare module "@madie/madie-editor" {
     cqlMetaData?: CqlMetaData;
     measureModel?: string;
     handleCodeDelete?: (code: string) => void;
+    handleDefinitionDelete?: (definition: string) => void;
     setEditorVal?: Function;
     setIsCQLUnchanged?: Function;
     isCQLUnchanged?: boolean;
