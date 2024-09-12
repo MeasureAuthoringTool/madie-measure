@@ -635,6 +635,7 @@ const MeasureEditor = () => {
                 setEditorVal={setEditorVal}
                 setIsCQLUnchanged={setIsCQLUnchanged}
                 isCQLUnchanged={isCQLUnchanged}
+                resetCql={resetCql}
               />
             ) : (
               <>
