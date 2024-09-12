@@ -31,12 +31,15 @@ export default function ActionCenter(props: PropTypes) {
   }, [props.measures, props.exportMeasure, props.updateTargetMeasure]);
 
   const isSelectedMeasureEditable = (measures) => {
-    return !(measures.some = (measure) => {
-      return !checkUserCanEdit(
-        measure?.measureSet?.owner,
-        measure?.measureSet?.acls
-      );
-    });
+    return (
+      measures &&
+      !(measures.some = (measure) => {
+        return !checkUserCanEdit(
+          measure?.measureSet?.owner,
+          measure?.measureSet?.acls
+        );
+      })
+    );
   };
 
   useEffect(() => {

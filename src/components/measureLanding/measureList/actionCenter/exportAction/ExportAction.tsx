@@ -23,7 +23,7 @@ export default function ExportAction(props: PropTypes) {
     // set button state to disabled by default
     setDisableExportBtn(true);
     setTooltipMessage(NOTHING_SELECTED);
-    if (measures.length) {
+    if (measures?.length) {
       setDisableExportBtn(false);
       setTooltipMessage(EXPORT_MEASURE);
     }

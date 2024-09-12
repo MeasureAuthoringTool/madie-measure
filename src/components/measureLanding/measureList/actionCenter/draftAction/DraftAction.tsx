@@ -8,6 +8,7 @@ import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
 import { Toast } from "@madie/madie-design-system/dist/react";
 
 import { grey, blue } from "@mui/material/colors";
+import _ from "lodash";
 
 interface PropTypes {
   measures: Measure[];
@@ -38,7 +39,7 @@ export default function DraftAction(props: PropTypes) {
     setDisableDraftBtn(true);
     setTooltipMessage(NOTHING_SELECTED);
     if (
-      measures.length === 1 &&
+      measures?.length === 1 &&
       !measures[0].measureMetaData.draft &&
       canEdit &&
       canDraft
@@ -56,8 +57,8 @@ export default function DraftAction(props: PropTypes) {
 
   const draftLookup = useCallback(
     async (measureList: Measure[]) => {
-      const measureSetList = measureList.map((m) => m.measureSetId);
-      if (measureList.length > 0) {
+      const measureSetList = measureList?.map((m) => m.measureSetId);
+      if (!_.isEmpty(measureList)) {
         try {
           const results = await measureServiceApi.fetchMeasureDraftStatuses(
             measureSetList
