@@ -34,7 +34,11 @@ const measureServiceApi = useMeasureServiceApi();
     
     setDisableDeleteBtn(true);
     setTooltipMessage(NOTHING_SELECTED);
-    if (measures.length === 1 && canEdit && measures[0].measureMetaData.draft) {
+    if (
+      measures?.length === 1 &&
+      canEdit &&
+      measures[0]?.measureMetaData?.draft
+    ) {
       setDisableDeleteBtn(false);
       setTooltipMessage(DEL_MEASURE);
     }

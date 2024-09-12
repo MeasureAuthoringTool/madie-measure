@@ -54,7 +54,7 @@ describe("ExportAction", () => {
     render(
       <ExportAction measures={[qdmMeasure, measure2]} onClick={() => {}} />
     );
-    expect(screen.getByTestId("export-action-btn")).not.toBeDisabled();
+    expect(screen.getByTestId("export-action-btn")).toBeDisabled();
     expect(screen.getByTestId("export-action-tooltip")).toHaveAttribute(
       "aria-label",
       NOTHING_SELECTED

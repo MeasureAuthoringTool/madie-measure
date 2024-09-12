@@ -1,11 +1,17 @@
 import React from "react";
-import { DialogContent, Typography } from "@mui/material";
+import { DialogContent, MenuItem, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { makeStyles } from "@mui/styles";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { MadieDialog, TextField } from "@madie/madie-design-system/dist/react";
+import {
+  MadieDialog,
+  Select,
+  TextField,
+} from "@madie/madie-design-system/dist/react";
 import { MeasureNameSchema } from "../../../../validations/MeasureSchemaValidator";
+import { Model } from "@madie/madie-models";
+import { useFeatureFlags } from "@madie/madie-util";
 
 const useStyles = makeStyles({
   requiredIndicator: {
@@ -25,10 +31,14 @@ const useStyles = makeStyles({
 });
 
 const DraftMeasureDialog = ({ open, onClose, onSubmit, measure }) => {
+  let modelOptions = Object.keys(Model);
   const classes = useStyles();
+  const featureFlags = useFeatureFlags();
+
   const formik = useFormik({
     initialValues: {
       measureName: measure?.measureName,
+      model: measure?.model,
     },
     validationSchema: Yup.object().shape({ measureName: MeasureNameSchema }),
     enableReinitialize: true,
@@ -37,6 +47,22 @@ const DraftMeasureDialog = ({ open, onClose, onSubmit, measure }) => {
       return onSubmit(measureName);
     },
   });
+
+  const row = {
+    display: "flex",
+    flexDirection: "row",
+  };
+  const spaced = {
+    marginTop: "23px",
+  };
+  const formRow = Object.assign({}, row, spaced);
+  const gap = {
+    columnGap: "24px",
+    "& > * ": {
+      flex: 1,
+    },
+  };
+  const formRowGapped = Object.assign({}, formRow, gap);
 
   return (
     <MadieDialog
@@ -67,7 +93,7 @@ const DraftMeasureDialog = ({ open, onClose, onSubmit, measure }) => {
             Required field
           </Typography>
         </div>
-        <Box>
+        <Box sx={formRow}>
           <TextField
             {...formik.getFieldProps("measureName")}
             placeholder="Measure Name"
@@ -89,6 +115,45 @@ const DraftMeasureDialog = ({ open, onClose, onSubmit, measure }) => {
             }
           />
         </Box>
+        <>
+          {featureFlags?.qiCore6 && !measure?.model.includes("QDM") ? (
+            <Box sx={formRowGapped}>
+              <Select
+                placeHolder={{ name: "Model", value: "" }}
+                required
+                label="Update Model Version"
+                id="model-select"
+                inputProps={{
+                  "data-testid": "measure-model-input",
+                  id: "model-select",
+                  "aria-describedby": "model-select-helper-text",
+                  required: true,
+                }}
+                SelectDisplayProps={{
+                  "aria-required": "true",
+                }}
+                data-testid="measure-model-select"
+                {...formik.getFieldProps("model")}
+                error={formik.touched.model && Boolean(formik.errors.model)}
+                helperText={formik.touched.model && formik.errors.model}
+                size="small"
+                options={modelOptions.map((modelKey) => {
+                  if (!modelKey.startsWith("QDM")) {
+                    return (
+                      <MenuItem
+                        key={modelKey}
+                        value={Model[modelKey]}
+                        data-testid={`measure-model-option-${Model[modelKey]}`}
+                      >
+                        {Model[modelKey]}
+                      </MenuItem>
+                    );
+                  }
+                })}
+              />
+            </Box>
+          ) : null}
+        </>
       </DialogContent>
     </MadieDialog>
   );

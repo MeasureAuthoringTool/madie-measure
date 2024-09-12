@@ -26,8 +26,8 @@ export default function VersionAction(props: PropTypes) {
     setDisableVersionBtn(true);
     setTooltipMessage(NOTHING_SELECTED);
     if (
-      measures.length === 1 &&
-      measures[0].measureMetaData?.draft &&
+      measures?.length === 1 &&
+      measures[0]?.measureMetaData?.draft &&
       canEdit
       /* check if there is not already a Version for that measure set*/
     ) {

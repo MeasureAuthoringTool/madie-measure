@@ -26,17 +26,17 @@ export default function ActionCenter(props: PropTypes) {
   const [canEdit, setCanEdit] = useState<boolean>(false);
 
   const versionMeasure = useCallback(() => {
-    if (props.measures.length === 1) {
+    if (props.measures?.length === 1) {
       props.updateTargetMeasure(props.measures[0]);
       props.setCreateVersionDialog({
         open: true,
-        measureId: props.measures[0].measureSetId,
+        measureId: props.measures[0]?.measureSetId,
       });
     }
   }, [props.measures, props.setCreateVersionDialog, props.updateTargetMeasure]);
 
   const draftMeasure = useCallback(() => {
-    if (props.measures.length === 1) {
+    if (props.measures?.length === 1) {
       props.updateTargetMeasure(props.measures[0]);
       props.setDraftMeasureDialog({
         open: true,
@@ -45,19 +45,22 @@ export default function ActionCenter(props: PropTypes) {
   }, [props.measures, props.setDraftMeasureDialog, props.updateTargetMeasure]);
 
   const exportMeasure = useCallback(() => {
-    if (props.measures.length === 1) {
+    if (props.measures?.length === 1) {
       props.updateTargetMeasure(props.measures[0]);
       props.exportMeasure();
     }
   }, [props.measures, props.exportMeasure, props.updateTargetMeasure]);
 
   const isSelectedMeasureEditable = (measures) => {
-    return measures.every((measure) => {
-      return checkUserCanEdit(
-        measure?.measureSet?.owner,
-        measure?.measureSet?.acls
-      );
-    });
+    return (
+      measures &&
+      measures.every((measure) => {
+        return checkUserCanEdit(
+          measure?.measureSet?.owner,
+          measure?.measureSet?.acls
+        );
+      })
+    );
   };
 
   useEffect(() => {
