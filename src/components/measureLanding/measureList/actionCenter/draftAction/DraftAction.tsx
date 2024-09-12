@@ -40,7 +40,7 @@ export default function DraftAction(props: PropTypes) {
     setTooltipMessage(NOTHING_SELECTED);
     if (
       measures?.length === 1 &&
-      !measures[0].measureMetaData.draft &&
+      !measures[0]?.measureMetaData?.draft &&
       canEdit &&
       canDraft
     ) {

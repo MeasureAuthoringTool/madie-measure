@@ -28,7 +28,7 @@ export default function DeleteAction(props: PropTypes) {
     if (
       measures?.length === 1 &&
       canEdit &&
-      measures[0].measureMetaData.draft
+      measures[0]?.measureMetaData?.draft
     ) {
       setDisableDeleteBtn(false);
       setTooltipMessage(DEL_MEASURE);
