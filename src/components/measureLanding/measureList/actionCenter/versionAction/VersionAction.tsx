@@ -17,7 +17,7 @@ export const NOTHING_SELECTED = "Select measure to version";
 export const VERSION_MEASURE = "Version measure";
 
 export default function VersionAction(props: PropTypes) {
-  const { measures, canEdit } = props;
+  const { measures, canEdit, onClick } = props;
   const [disableVersionBtn, setDisableVersionBtn] = useState(true);
   const [tooltipMessage, setTooltipMessage] = useState(NOTHING_SELECTED);
 
@@ -26,8 +26,8 @@ export default function VersionAction(props: PropTypes) {
     setDisableVersionBtn(true);
     setTooltipMessage(NOTHING_SELECTED);
     if (
-      measures.length === 1 &&
-      measures[0].measureMetaData?.draft &&
+      measures?.length === 1 &&
+      measures[0]?.measureMetaData?.draft &&
       canEdit
       /* check if there is not already a Version for that measure set*/
     ) {

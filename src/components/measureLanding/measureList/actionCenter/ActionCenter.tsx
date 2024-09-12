@@ -17,30 +17,54 @@ interface PropTypes {
   associateCmsId: any;
   exportMeasure: () => void;
   updateTargetMeasure: (Measure) => void;
+  setCreateVersionDialog: any;
+  setDraftMeasureDialog: any;
 }
 export default function ActionCenter(props: PropTypes) {
   const featureFlags = useFeatureFlags();
   const { getUserName } = useOktaTokens();
   const [canEdit, setCanEdit] = useState<boolean>(false);
 
+  const versionMeasure = useCallback(() => {
+    if (props.measures?.length === 1) {
+      props.updateTargetMeasure(props.measures[0]);
+      props.setCreateVersionDialog({
+        open: true,
+        measureId: props.measures[0]?.measureSetId,
+      });
+    }
+  }, [props.measures, props.setCreateVersionDialog, props.updateTargetMeasure]);
+
+  const draftMeasure = useCallback(() => {
+    if (props.measures?.length === 1) {
+      props.updateTargetMeasure(props.measures[0]);
+      props.setDraftMeasureDialog({
+        open: true,
+      });
+    }
+  }, [props.measures, props.setDraftMeasureDialog, props.updateTargetMeasure]);
+
   const exportMeasure = useCallback(() => {
-    if (props.measures.length === 1) {
+    if (props.measures?.length === 1) {
       props.updateTargetMeasure(props.measures[0]);
       props.exportMeasure();
     }
   }, [props.measures, props.exportMeasure, props.updateTargetMeasure]);
 
   const isSelectedMeasureEditable = (measures) => {
-    return !(measures.some = (measure) => {
-      return !checkUserCanEdit(
-        measure?.measureSet?.owner,
-        measure?.measureSet?.acls
-      );
-    });
+    return (
+      measures &&
+      measures.every((measure) => {
+        return checkUserCanEdit(
+          measure?.measureSet?.owner,
+          measure?.measureSet?.acls
+        );
+      })
+    );
   };
 
   useEffect(() => {
-    setCanEdit(!isSelectedMeasureEditable(props.measures));
+    setCanEdit(isSelectedMeasureEditable(props.measures));
   }, [props.measures]);
 
   return (
@@ -53,12 +77,12 @@ export default function ActionCenter(props: PropTypes) {
       <ExportAction measures={props.measures} onClick={exportMeasure} />
       <DraftAction
         measures={props.measures}
-        onClick={() => {}}
+        onClick={draftMeasure}
         canEdit={canEdit}
       />
       <VersionAction
         measures={props.measures}
-        onClick={() => {}}
+        onClick={versionMeasure}
         canEdit={canEdit}
       />
       {featureFlags.MeasureListCheckboxes && featureFlags.associateMeasures && (
