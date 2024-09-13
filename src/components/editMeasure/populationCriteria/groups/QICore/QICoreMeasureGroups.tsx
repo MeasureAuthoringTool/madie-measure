@@ -1180,130 +1180,77 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                       {/*Association Select*/}
                                       {/* Given STU update requirements we're going to default all items */}
                                       <div tw="pt-4">
-                                        {featureFlags?.qiCoreStu4Updates ? (
-                                          <MultipleSelectDropDown
-                                            id={`association-select-${i + 1}`}
-                                            label={`Association ${i + 1}`}
-                                            placeHolder={{
-                                              name: "Select Association",
-                                              value: null,
-                                            }}
-                                            {...formik.getFieldProps(
-                                              `stratifications[${i}].associations`
-                                            )}
-                                            disabled={!canEdit}
-                                            options={
-                                              ["Select All"].concat(
-                                                Object.values(stratAssociation)
-                                              ) // add Select All as an option and then modify render logic tot toggle all on click.
-                                            }
-                                            multipleSelect={true}
-                                            handleToggleSelectAll={() => {
-                                              // Are all possible options selected? -> Select None
-                                              if (
-                                                _.isEqual(
-                                                  Object.values(
-                                                    stratAssociation
-                                                  ),
-                                                  formik.getFieldProps(
-                                                    `stratifications[${i}].associations`
-                                                  ).value
-                                                )
-                                              ) {
-                                                formik.setFieldValue(
-                                                  `stratifications[${i}].associations`,
-                                                  []
-                                                );
-                                              } else {
-                                                // not all selected -> Select ALL
-                                                formik.setFieldValue(
-                                                  `stratifications[${i}].associations`,
-                                                  Object.values(
-                                                    stratAssociation
-                                                  )
-                                                );
-                                              }
-                                            }}
-                                            onChange={(
-                                              _event: any,
-                                              selectedVal: string | null
-                                            ) => {
+                                        <MultipleSelectDropDown
+                                          id={`association-select-${i + 1}`}
+                                          label={`Association ${i + 1}`}
+                                          placeHolder={{
+                                            name: "Select Association",
+                                            value: null,
+                                          }}
+                                          {...formik.getFieldProps(
+                                            `stratifications[${i}].associations`
+                                          )}
+                                          disabled={!canEdit}
+                                          options={
+                                            ["Select All"].concat(
+                                              Object.values(stratAssociation)
+                                            ) // add Select All as an option and then modify render logic tot toggle all on click.
+                                          }
+                                          multipleSelect={true}
+                                          handleToggleSelectAll={() => {
+                                            // Are all possible options selected? -> Select None
+                                            if (
+                                              _.isEqual(
+                                                Object.values(stratAssociation),
+                                                formik.getFieldProps(
+                                                  `stratifications[${i}].associations`
+                                                ).value
+                                              )
+                                            ) {
                                               formik.setFieldValue(
                                                 `stratifications[${i}].associations`,
-                                                selectedVal
+                                                []
                                               );
-                                            }}
-                                            onClose={() =>
-                                              formik.setFieldTouched(
+                                            } else {
+                                              // not all selected -> Select ALL
+                                              formik.setFieldValue(
                                                 `stratifications[${i}].associations`,
-                                                true
-                                              )
+                                                Object.values(stratAssociation)
+                                              );
                                             }
-                                            tooltipText={
-                                              STU4_STRATUM_ASSOCIATION_HELPER_TEXT
-                                            }
-                                            required={true}
-                                            error={Boolean(
-                                              formik?.errors?.stratifications?.[
-                                                i
-                                                // @ts-ignore Tech Debt : Figure out how to get red of ts-ignore here
-                                              ]?.associations
-                                            )}
-                                            helperText={
-                                              formik?.errors?.stratifications?.[
-                                                i
-                                                // @ts-ignore Tech Debt : Figure out how to get red of ts-ignore here
-                                              ]?.associations
-                                            }
-                                          />
-                                        ) : (
-                                          <Select
-                                            disabled={!canEdit}
-                                            placeHolder={{
-                                              name: "Select Association",
-                                              value: null,
-                                            }}
-                                            label={`Association ${i + 1}`}
-                                            id={`association-select-${i + 1}`}
-                                            aria-describedby={`association-select-${
-                                              i + 1
-                                            }-helper-text`}
-                                            inputProps={{
-                                              "data-testid": `association-${
-                                                i + 1
-                                              }-input`,
-                                            }}
-                                            {...formik.getFieldProps(
-                                              `stratifications[${i}].association`
-                                            )}
-                                            size="small"
-                                            renderValue={(value) =>
-                                              _.startCase(value).length > 0
-                                                ? _.startCase(value)
-                                                : "-"
-                                            }
-                                            options={
-                                              !!formik.values.scoring && [
-                                                <MuiMenuItem
-                                                  key="-"
-                                                  value={null}
-                                                >
-                                                  -
-                                                </MuiMenuItem>,
-                                                stratAssociation.map(
-                                                  (opt, i) => (
-                                                    <MuiMenuItem
-                                                      key={`${opt}-${i}`}
-                                                      value={`${opt}`}
-                                                    >
-                                                      {_.startCase(opt)}
-                                                    </MuiMenuItem>
-                                                  )
-                                                ),
-                                              ]
-                                            }
-                                          />
-                                        )}
+                                          }}
+                                          onChange={(
+                                            _event: any,
+                                            selectedVal: string | null
+                                          ) => {
+                                            formik.setFieldValue(
+                                              `stratifications[${i}].associations`,
+                                              selectedVal
+                                            );
+                                          }}
+                                          onClose={() =>
+                                            formik.setFieldTouched(
+                                              `stratifications[${i}].associations`,
+                                              true
+                                            )
+                                          }
+                                          tooltipText={
+                                            STU4_STRATUM_ASSOCIATION_HELPER_TEXT
+                                          }
+                                          required={true}
+                                          error={Boolean(
+                                            formik?.errors?.stratifications?.[
+                                              i
+                                              // @ts-ignore Tech Debt : Figure out how to get red of ts-ignore here
+                                            ]?.associations
+                                          )}
+                                          helperText={
+                                            formik?.errors?.stratifications?.[
+                                              i
+                                              // @ts-ignore Tech Debt : Figure out how to get red of ts-ignore here
+                                            ]?.associations
+                                          }
+                                        />
                                       </div>
                                     </div>
                                     <div tw="lg:col-span-2">
