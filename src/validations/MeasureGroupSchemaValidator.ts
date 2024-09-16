@@ -93,7 +93,6 @@ const returnTypeFunctionCheckOptions = (populationBasis, functionDataTypes) => {
     };
   }
 };
-
 export const measureGroupSchemaValidator = (
   definitionDataTypes: CqlDefineDataTypes,
   functionDataTypes: CqlFunctionDataTypes
@@ -208,6 +207,19 @@ export const measureGroupSchemaValidator = (
             cqlDefinition: Yup.string().test(
               returnTypeCheckOptions(populationBasis, definitionDataTypes)
             ),
+            // we need to make sure Associations have at least 1 value when Definition exists
+            associations: Yup.array().test({
+              name: "associationCheck",
+              message:
+                "Associations are required when CQL Definition is provided.",
+              test: function (associations) {
+                const { cqlDefinition } = this.parent;
+                if (cqlDefinition && cqlDefinition.trim() !== "") {
+                  return associations && associations.length > 0;
+                }
+                return true;
+              },
+            }),
           })
         )
         .nullable();

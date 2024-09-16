@@ -53,9 +53,10 @@ const MultipleSelectDropDown = ({
   limitTags = 1,
   textFieldInputProps = undefined,
   tooltipText = "",
-  // formControl, // is not referenced, already passed as prop
   onClose,
   key = undefined,
+  handleToggleSelectAll = undefined,
+  value,
   ...rest
 }) => {
   const requiredLabelReadable = <span className="sr-only">required</span>;
@@ -66,6 +67,7 @@ const MultipleSelectDropDown = ({
   ) : (
     label
   );
+  // we're putting Select All in as an option to please the 508 since other ways to add it will modify html bad
   return (
     <FormControl
       error={error}
@@ -82,6 +84,7 @@ const MultipleSelectDropDown = ({
         }}
       />
       <Autocomplete
+        value={value}
         aria-required
         size="small"
         limitTags={limitTags}
@@ -103,6 +106,12 @@ const MultipleSelectDropDown = ({
             ...props,
             key: inputKey === "_" ? option : inputKey,
           };
+          if (option === "Select All") {
+            // we're assuming Select All is provided as an option that is OUTSIDE of formik for a coherent source of truth. It cannot be added to the form
+            const allSelected = value?.length === options?.length - 1;
+            selected = allSelected;
+            uniqueProps.onClick = handleToggleSelectAll;
+          }
           return (
             <li
               {...uniqueProps}
@@ -134,11 +143,11 @@ const MultipleSelectDropDown = ({
             <TextField
               label={labelReadable}
               placeholder="Select All That Apply"
-              error={error}
               tooltipText={tooltipText}
               {...params}
               required={required}
               helperText={helperText}
+              error={error}
             />
           );
         }}
@@ -159,6 +168,7 @@ MultipleSelectDropDown.propTypes = {
   required: PropTypes.bool,
   disabled: PropTypes.bool,
   error: PropTypes.bool,
+  handleToggleSelectAll: PropTypes.func,
   helperText: PropTypes.string,
   options: PropTypes.arrayOf(PropTypes.string),
   multipleSelect: PropTypes.bool,
