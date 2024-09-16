@@ -96,6 +96,18 @@ export class MeasureServiceApi {
     });
   }
 
+  async deleteMeasure(measure: Measure): Promise<Response> {
+    return await axios.put(
+      `${this.baseUrl}/measures/${measure.id}/delete`,
+      measure,
+      {
+        headers: {
+          Authorization: `Bearer ${this.getAccessToken()}`,
+        },
+      }
+    );
+  }
+
   async createGroup(group: Group, measureId: string): Promise<Group> {
     try {
       const response = await axios.post<Group>(

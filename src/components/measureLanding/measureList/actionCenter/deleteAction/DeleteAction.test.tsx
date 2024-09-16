@@ -2,6 +2,7 @@ import * as React from "react";
 import { render, screen } from "@testing-library/react";
 import DeleteAction, { DEL_MEASURE, NOTHING_SELECTED } from "./DeleteAction";
 import { Measure, MeasureSet, Model } from "@madie/madie-models";
+import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
 import userEvent from "@testing-library/user-event";
 
 const mockUser = "test user";
