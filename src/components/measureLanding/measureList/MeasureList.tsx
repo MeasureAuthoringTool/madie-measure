@@ -373,12 +373,6 @@ export default function MeasureList(props: {
     setToastOpen(false);
   };
 
-  const handleToast = (type, message, open) => {
-    setToastType(type);
-    setToastMessage(message);
-    setToastOpen(open);
-  };
-
   const handleClearClick = async (event) => {
     abortController.current = new AbortController();
     props.setSearchCriteria("");
@@ -834,7 +828,9 @@ export default function MeasureList(props: {
         targetMeasure?.current
       );
       if (result.status === 200) {
-        handleToast("success", "Measure successfully deleted", true);
+        setToastType("success");
+        setToastMessage("Measure successfully deleted");
+        setToastOpen(true);
         doUpdateList();
         setDeleteMeasureDialog(false);
       }
@@ -842,10 +838,14 @@ export default function MeasureList(props: {
       if (e?.response?.data) {
         const { error, status, message } = e.response.data;
         const errorMessage = `${status}: ${error} ${message}`;
-        handleToast("danger", errorMessage, true);
+        setToastType("danger");
+        setToastMessage(errorMessage);
+        setToastOpen(true);
         setDeleteMeasureDialog(false);
       } else {
-        handleToast("danger", e.toString(), true);
+        setToastType("danger");
+        setToastMessage(e.toString());
+        setToastOpen(true);
         setDeleteMeasureDialog(false);
       }
     }
