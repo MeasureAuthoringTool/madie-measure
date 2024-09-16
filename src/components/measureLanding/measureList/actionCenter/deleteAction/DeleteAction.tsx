@@ -19,6 +19,7 @@ export const DEL_MEASURE = "Delete measure";
 
 export default function DeleteAction(props: PropTypes) {
   const { measures, canEdit } = props;
+  const { getUserName } = useOktaTokens();
   const [disableDeleteBtn, setDisableDeleteBtn] = useState(true);
   const [tooltipMessage, setTooltipMessage] = useState(NOTHING_SELECTED);
   const validateDeleteActionState = useCallback(() => {
