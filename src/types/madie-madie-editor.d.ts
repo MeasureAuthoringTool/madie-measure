@@ -71,23 +71,28 @@ declare module "@madie/madie-editor" {
     onChange?: (value: string) => void;
     handleApplyCode?: (code: Code) => void;
     handleApplyValueSet?: (vs: ValueSetForSearch) => void;
-    handleApplyLibrary?: (lib: IncludeLibrary) => void;
+
     handleApplyDefinition?: (def: Definition) => void;
-    handleDeleteLibrary?: (lib: IncludeLibrary) => void;
+    handleApplyLibrary?: (lib: SelectedLibrary) => void;
+    handleDeleteLibrary?: (lib: SelectedLibrary) => void;
+    // handleApplyLibrary?: (lib: IncludeLibrary) => void;
+    // handleDeleteLibrary?: (lib: IncludeLibrary) => void;
+
     parseDebounceTime?: number;
-    inboundAnnotations?: EditorAnnotation[];
-    inboundErrorMarkers?: EditorErrorMarker[];
+    inboundAnnotations?: Ace.Annotation[];
+    inboundErrorMarkers?: Ace.MarkerLike[];
     height?: string;
-    validationsEnabled?: boolean;
-    setOutboundAnnotations?: Function;
     readOnly?: boolean;
+    validationsEnabled?: boolean;
     measureStoreCql?: string;
     cqlMetaData?: CqlMetaData;
     measureModel?: string;
     handleCodeDelete?: (code: string) => void;
+    handleDefinitionDelete?: (definition: string) => void;
     setEditorVal?: Function;
     setIsCQLUnchanged?: Function;
     isCQLUnchanged?: boolean;
+    resetCql?: () => void;
 
     // conditional props used to pass up annotations outside of the editor
     setOutboundAnnotations?: Function;
