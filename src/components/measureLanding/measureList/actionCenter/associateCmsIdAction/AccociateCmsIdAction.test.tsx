@@ -43,8 +43,8 @@ const associateCmsId = jest.fn();
 describe("AssociateCmsIdAction", () => {
   it("Should disable action btn if no measure selected", () => {
     render(<AssociateCmsIdAction measures={[]} onClick={associateCmsId} />);
-    expect(screen.getByTestId("associate_cms_id_btn")).toBeDisabled();
-    expect(screen.getByTestId("associate_cms_id_tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("associate-cms-id-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("associate-cms-id-tooltip")).toHaveAttribute(
       "aria-label",
       SELECT_TWO_MEASURES
     );
@@ -54,8 +54,8 @@ describe("AssociateCmsIdAction", () => {
     render(
       <AssociateCmsIdAction measures={[qdmMeasure]} onClick={associateCmsId} />
     );
-    expect(screen.getByTestId("associate_cms_id_btn")).toBeDisabled();
-    expect(screen.getByTestId("associate_cms_id_tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("associate-cms-id-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("associate-cms-id-tooltip")).toHaveAttribute(
       "aria-label",
       SELECT_TWO_MEASURES
     );
@@ -75,8 +75,8 @@ describe("AssociateCmsIdAction", () => {
         onClick={associateCmsId}
       />
     );
-    expect(screen.getByTestId("associate_cms_id_btn")).toBeDisabled();
-    expect(screen.getByTestId("associate_cms_id_tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("associate-cms-id-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("associate-cms-id-tooltip")).toHaveAttribute(
       "aria-label",
       MUST_BE_OWNER
     );
@@ -90,8 +90,8 @@ describe("AssociateCmsIdAction", () => {
         onClick={associateCmsId}
       />
     );
-    expect(screen.getByTestId("associate_cms_id_btn")).toBeDisabled();
-    expect(screen.getByTestId("associate_cms_id_tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("associate-cms-id-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("associate-cms-id-tooltip")).toHaveAttribute(
       "aria-label",
       MUST_BE_DIFFERENT_MODELS
     );
@@ -106,8 +106,8 @@ describe("AssociateCmsIdAction", () => {
         onClick={associateCmsId}
       />
     );
-    expect(screen.getByTestId("associate_cms_id_btn")).toBeDisabled();
-    expect(screen.getByTestId("associate_cms_id_tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("associate-cms-id-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("associate-cms-id-tooltip")).toHaveAttribute(
       "aria-label",
       MUST_BE_DRAFT
     );
@@ -124,8 +124,8 @@ describe("AssociateCmsIdAction", () => {
         onClick={associateCmsId}
       />
     );
-    expect(screen.getByTestId("associate_cms_id_btn")).toBeDisabled();
-    expect(screen.getByTestId("associate_cms_id_tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("associate-cms-id-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("associate-cms-id-tooltip")).toHaveAttribute(
       "aria-label",
       MUST_HAVE_CMS_ID
     );
@@ -142,8 +142,8 @@ describe("AssociateCmsIdAction", () => {
         onClick={associateCmsId}
       />
     );
-    expect(screen.getByTestId("associate_cms_id_btn")).toBeDisabled();
-    expect(screen.getByTestId("associate_cms_id_tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("associate-cms-id-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("associate-cms-id-tooltip")).toHaveAttribute(
       "aria-label",
       MUST_NOT_HAVE_CMS_ID
     );
@@ -156,12 +156,12 @@ describe("AssociateCmsIdAction", () => {
         onClick={associateCmsId}
       />
     );
-    expect(screen.getByTestId("associate_cms_id_btn")).toBeEnabled();
-    expect(screen.getByTestId("associate_cms_id_tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("associate-cms-id-action-btn")).toBeEnabled();
+    expect(screen.getByTestId("associate-cms-id-tooltip")).toHaveAttribute(
       "aria-label",
       ASSOCIATE_CMS_ID
     );
-    userEvent.click(screen.getByTestId("associate_cms_id_btn"));
+    userEvent.click(screen.getByTestId("associate-cms-id-action-btn"));
     expect(associateCmsId).toHaveBeenCalled();
   });
 });

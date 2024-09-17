@@ -269,7 +269,9 @@ describe("Measure Page", () => {
       await screen.findByTestId("measure-name-measureId2_select")
     ).findByRole("checkbox");
     userEvent.click(measure2Checkbox);
-    const associateCmsIdBtn = await screen.findByTestId("associate_cms_id_btn");
+    const associateCmsIdBtn = await screen.findByTestId(
+      "associate-cms-id-action-btn"
+    );
     expect(associateCmsIdBtn).toBeEnabled();
     userEvent.click(associateCmsIdBtn);
     const dialogTable = await screen.findByTestId(

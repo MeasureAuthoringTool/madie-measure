@@ -60,15 +60,24 @@ declare module "@madie/madie-editor" {
     version: string;
     alias: string;
   }
+  export interface Definition {
+    definitionName?: string;
+    comment?: string;
+    expressionValue?: string;
+  }
 
   export interface EditorPropsType {
     value: string;
     onChange?: (value: string) => void;
     handleApplyCode?: (code: Code) => void;
     handleApplyValueSet?: (vs: ValueSetForSearch) => void;
+
     handleApplyDefinition?: (def: Definition) => void;
     handleApplyLibrary?: (lib: SelectedLibrary) => void;
     handleDeleteLibrary?: (lib: SelectedLibrary) => void;
+    // handleApplyLibrary?: (lib: IncludeLibrary) => void;
+    // handleDeleteLibrary?: (lib: IncludeLibrary) => void;
+
     parseDebounceTime?: number;
     inboundAnnotations?: Ace.Annotation[];
     inboundErrorMarkers?: Ace.MarkerLike[];

@@ -3,7 +3,13 @@ import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import clearAllMocks = jest.clearAllMocks;
 import DraftMeasureDialog from "./DraftMeasureDialog";
-import { Measure } from "@madie/madie-models";
+import { Measure, Model } from "@madie/madie-models";
+
+jest.mock("@madie/madie-util", () => ({
+  useFeatureFlags: jest.fn().mockReturnValue({
+    qiCore6: true,
+  }),
+}));
 
 describe("DraftMeasureDialog component", () => {
   let measure: Measure, onCloseFn, onSubmitFn;
@@ -12,6 +18,7 @@ describe("DraftMeasureDialog component", () => {
     measure = {
       id: "1",
       measureName: "Test",
+      model: "QI-Core v4.1.1",
     } as unknown as Measure;
     onCloseFn = jest.fn();
     onSubmitFn = jest.fn();
@@ -81,6 +88,40 @@ describe("DraftMeasureDialog component", () => {
         "Measure Name must not contain '_' (underscores)."
       );
     });
+  });
+
+  it("should display a model version option for QI-Core measures", async () => {
+    renderComponent();
+    const measureName = (await screen.findByRole("textbox", {
+      name: "Measure Name",
+    })) as HTMLInputElement;
+    expect(measureName.value).toEqual(measure.measureName);
+    expect(await screen.findByText("Create Draft")).toBeInTheDocument();
+    expect(await screen.findByText("Update Model Version")).toBeInTheDocument();
+    expect(await screen.findByText("QI-Core v4.1.1")).toBeInTheDocument();
+
+    expect(screen.getByTestId("create-draft-continue-button")).toBeEnabled();
+  });
+
+  it("should not display a model version option for QDM measures", async () => {
+    const qdmMeasure = Object.assign({}, measure);
+    qdmMeasure.model = Model.QDM_5_6;
+    render(
+      <DraftMeasureDialog
+        open={true}
+        onClose={onCloseFn}
+        onSubmit={onSubmitFn}
+        measure={qdmMeasure}
+      />
+    );
+    expect(await screen.findByText("Create Draft")).toBeInTheDocument();
+    const measureName = (await screen.findByRole("textbox", {
+      name: "Measure Name",
+    })) as HTMLInputElement;
+    expect(measureName.value).toEqual(measure.measureName);
+    expect(screen.queryByText("Update Model Version")).not.toBeInTheDocument();
+
+    expect(screen.getByTestId("create-draft-continue-button")).toBeEnabled();
   });
 
   it("should call model close handler on clicking cancel button", async () => {

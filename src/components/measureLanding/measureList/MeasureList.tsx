@@ -42,8 +42,9 @@ import ExportDialog from "./exportDialog/ExportDialog";
 import InvalidMeasureNameDialog from "./InvalidMeasureNameDialog/InvalidMeasureNameDialog";
 import getLibraryNameErrors from "./InvalidMeasureNameDialog/getLibraryNameErrors";
 import TruncateText from "./TruncateText";
-import AssociateCmsIdAction from "./associateCmsIdAction/AccociateCmsIdAction";
+import AssociateCmsIdAction from "./actionCenter/associateCmsIdAction/AccociateCmsIdAction";
 import AssociateCmsIdDialog from "./associateCmsIdDialog/AssociateCmsIdDialog";
+import ActionCenter from "./actionCenter/ActionCenter";
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -451,9 +452,13 @@ export default function MeasureList(props: {
     ),
   };
 
+  const updateTargetMeasure = (newValue) => {
+    targetMeasure.current = newValue;
+  };
+
   useEffect(() => {
     if (selectedMeasure) {
-      targetMeasure.current = selectedMeasure;
+      updateTargetMeasure(selectedMeasure);
     }
   }, [selectedMeasure]);
   const handlePopOverOpen = useCallback(
@@ -461,6 +466,7 @@ export default function MeasureList(props: {
       setOptionsOpen(true);
       setSelectedMeasure(selected);
       setAnchorEl(event.currentTarget);
+
       const isSelectedMeasureEditable = checkUserCanEdit(
         selected?.measureSet?.owner,
         selected?.measureSet?.acls
@@ -878,14 +884,27 @@ export default function MeasureList(props: {
             />
           </form>
         </div>
-        {featureFlags.MeasureListCheckboxes && featureFlags.associateMeasures && (
-          <div tw="justify-self-end p-3">
-            <AssociateCmsIdAction
-              measures={selectedMeasures}
-              onClick={associateCmsId}
-            />
-          </div>
-        )}
+        <div tw="justify-self-end p-3">
+          {featureFlags.MeasureListCheckboxes &&
+            featureFlags.associateMeasures &&
+            !featureFlags.MeasureListButtons && (
+              <AssociateCmsIdAction
+                measures={selectedMeasures}
+                onClick={associateCmsId}
+              />
+            )}
+          {featureFlags.MeasureListButtons &&
+            featureFlags.MeasureListCheckboxes && (
+              <ActionCenter
+                updateTargetMeasure={updateTargetMeasure}
+                exportMeasure={exportMeasure}
+                measures={selectedMeasures}
+                associateCmsId={associateCmsId}
+                setCreateVersionDialog={setCreateVersionDialog}
+                setDraftMeasureDialog={setDraftMeasureDialog}
+              />
+            )}
+        </div>
       </div>
 
       <table

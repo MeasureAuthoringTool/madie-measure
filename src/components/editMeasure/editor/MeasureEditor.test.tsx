@@ -152,8 +152,11 @@ const serviceConfig = {
   measureService: {
     baseUrl: "madie.com",
   },
-  elmTranslationService: {
-    baseUrl: "elm-translator.com",
+  qdmElmTranslationService: {
+    baseUrl: "qdm-translator.com",
+  },
+  fhirElmTranslationService: {
+    baseUrl: "fhir-translator.com",
   },
   terminologyService: {
     baseUrl: "terminology-service.com",
@@ -895,7 +898,7 @@ describe("EditorWithTerminology", () => {
         "code \"1 ML digoxin 0.1 MG/ML Injection\": '204504' from \"RXNORM:2022-05\" display '1 ML digoxin 0.1 MG/ML Injection'",
     } as Measure;
     const cqlWithNoCodes =
-      "library RemoveCodeTest version '0.0.000'using QDM version '5.6'";
+      "library RemoveCodeTest version '0.0.000'\nusing QDM version '5.6'";
     mockedAxios.put.mockImplementation((args) => {
       if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
         return Promise.resolve({ data: measureWithCqlCodes });
@@ -940,9 +943,9 @@ describe("EditorWithTerminology", () => {
         "using QDM version '5.6'\n",
     } as Measure;
     const updatedCql =
-      "library ApplyLibraryTest version '0.0.000'" +
-      "using QDM version '5.6'" +
-      "include TestHelpers version '1.0.000' called Helpers";
+      "library ApplyLibraryTest version '0.0.000'\n" +
+      "using QDM version '5.6'\n" +
+      "include TestHelpers version '1.0.000' called Helpers\n";
     renderEditor(measureWithCql);
     // click on apply library
     const applyLibraryBtn = screen.getByTestId("apply-library");
@@ -953,6 +956,57 @@ describe("EditorWithTerminology", () => {
     });
     expect(screen.getByTestId("measure-editor-toast")).toHaveTextContent(
       "Library TestHelpers has been successfully added to the CQL."
+    );
+  });
+
+  it("should remove included library successfully", async () => {
+    const cqlWithIncludes =
+      "library ApplyLibraryTest version '0.0.000'\nusing QDM version '5.6'\ninclude TestHelpers version '1.0.000' called Helpers";
+    const cqlWithNoIncludes =
+      "library ApplyLibraryTest version '0.0.000'\nusing QDM version '5.6'";
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => {
+        return {
+          cql: "library ApplyLibraryTest version '0.0.000'\nusing QDM version '5.6'",
+          isLibraryStatementChanged: false,
+          isUsingStatementChanged: false,
+          isValueSetChanged: false,
+        };
+      });
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        translation: null,
+        externalErrors: [],
+      });
+    });
+
+    const measureWithIncludes = {
+      ...measure,
+      model: Model.QDM_5_6,
+      cql: cqlWithIncludes,
+    } as Measure;
+
+    const measureWithNoIncludes = {
+      ...measure,
+      model: Model.QDM_5_6,
+      cql: cqlWithNoIncludes,
+    } as Measure;
+
+    mockedAxios.put.mockImplementation((args) =>
+      Promise.resolve({ data: measureWithNoIncludes })
+    );
+    renderEditor(measureWithIncludes);
+    // click on delete included library button
+    const deleteIncludeBtn = screen.getByTestId("delete-included-library");
+    userEvent.click(deleteIncludeBtn);
+    await waitFor(() => {
+      const editor = screen.getByTestId("measure-editor");
+      expect(editor).toHaveValue(cqlWithNoIncludes);
+    });
+    expect(screen.getByTestId("measure-editor-toast")).toHaveTextContent(
+      "Library TestHelpers has been successfully removed from the CQL."
     );
   });
 });
