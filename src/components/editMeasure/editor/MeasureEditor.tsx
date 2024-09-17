@@ -34,6 +34,7 @@ import {
   CqlMetaData,
   CodeSystem,
 } from "@madie/madie-models";
+
 import {
   CqlAntlr,
   CqlCode,
@@ -491,6 +492,24 @@ const MeasureEditor = () => {
     setToastOpen(true);
   };
 
+  const handleDefinitionDelete = (selectedDefinition) => {
+    //use Antrl parser to find the lines to delete for this definition
+    const cqlComponents = new CqlAntlr(editorVal).parse();
+    cqlComponents.expressionDefinitions.forEach((definition) => {
+      const definitionName = definition.name.replace(/['"]+/g, "");
+      if (definitionName === selectedDefinition) {
+        const cqlLineArr: string[] = measure?.cql.split("\n");
+        cqlLineArr.splice(
+          definition.start.line - 1,
+          definition.stop.line - definition.start.line + 1
+        );
+        const cql = cqlLineArr.join("\n");
+        setEditorVal(cql);
+        setIsCQLUnchanged(checkIfCQLUnchanged(cql, measure?.cql));
+      }
+    });
+  };
+
   const handleCodeDelete = (selectedCode) => {
     const cqlComponents = new CqlAntlr(editorVal).parse();
     const codeSystem = selectedCode?.versionIncluded
@@ -641,9 +660,11 @@ const MeasureEditor = () => {
                 cqlMetaData={measure?.measureMetaData?.cqlMetaData}
                 measureModel={measure?.model}
                 handleCodeDelete={handleCodeDelete}
+                handleDefinitionDelete={handleDefinitionDelete}
                 setEditorVal={setEditorVal}
                 setIsCQLUnchanged={setIsCQLUnchanged}
                 isCQLUnchanged={isCQLUnchanged}
+                resetCql={resetCql}
               />
             ) : (
               <>
