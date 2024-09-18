@@ -284,13 +284,42 @@ const MeasureEditor = () => {
     }
   };
 
-  // TODO: this method is becoming complex. need refactorig
-  const updateMeasureCql = async (
+  const updateMeasureCqlUpdateCode = async (
     editorValue: string,
-    codeName?: string,
-    codeSystemName?: string,
-    libraryName?: string
+    codeName: string,
+    codeSystemName: string
   ) => {
+    const setCodeName = () => {
+      if (codeName) {
+        setToastMessage(
+          `code ${codeName} ${
+            codeSystemName ? `and code system ${codeSystemName}` : ""
+          } has been successfully removed from the CQL`
+        );
+        setToastType("success");
+        setToastOpen(true);
+      }
+    };
+    updateMeasureCql(editorValue, setCodeName);
+  };
+
+  const updateMeasureCqlUpdateLibrary = async (
+    editorValue: string,
+    libraryName: string
+  ) => {
+    const setLibraryName = () => {
+      if (libraryName) {
+        setToastMessage(
+          `Library ${libraryName} has been successfully removed from the CQL.`
+        );
+        setToastType("success");
+        setToastOpen(true);
+      }
+    };
+    updateMeasureCql(editorValue, setLibraryName);
+  };
+
+  const updateMeasureCql = async (editorValue: string, callback: Function) => {
     try {
       setProcessing(true);
       setSuccess({
@@ -417,22 +446,7 @@ const MeasureEditor = () => {
               primaryMessage,
               secondaryMessages,
             });
-            if (codeName) {
-              setToastMessage(
-                `code ${codeName} ${
-                  codeSystemName ? `and code system ${codeSystemName}` : ""
-                } has been successfully removed from the CQL`
-              );
-              setToastType("success");
-              setToastOpen(true);
-            }
-            if (libraryName) {
-              setToastMessage(
-                `Library ${libraryName} has been successfully removed from the CQL.`
-              );
-              setToastType("success");
-              setToastOpen(true);
-            }
+            if (callback) callback();
           })
           .catch((reason) => {
             // inner failure
@@ -470,7 +484,7 @@ const MeasureEditor = () => {
   const handleDeleteLibrary = (library: IncludeLibrary) => {
     if (editorVal) {
       const updatedCql = deleteIncludedLibrary(editorVal, library);
-      updateMeasureCql(updatedCql, undefined, undefined, library.name);
+      updateMeasureCqlUpdateLibrary(updatedCql, library.name);
     }
   };
 
@@ -506,6 +520,14 @@ const MeasureEditor = () => {
         const cql = cqlLineArr.join("\n");
         setEditorVal(cql);
         setIsCQLUnchanged(checkIfCQLUnchanged(cql, measure?.cql));
+        const setDefinitionConfirmation = () => {
+          setToastMessage(
+            `Definition ${selectedDefinition} has been successfully removed from the CQL.`
+          );
+          setToastType("success");
+          setToastOpen(true);
+        };
+        updateMeasureCql(cql, setDefinitionConfirmation);
       }
     });
   };
@@ -537,7 +559,11 @@ const MeasureEditor = () => {
       : selectedCode?.codeSystem;
 
     //this is the updated cql after removing the code (i.e., handleDeleteCode from saved codes)
-    updateMeasureCql(updatedCql, selectedCode?.name, deletedCodeSystemName);
+    updateMeasureCqlUpdateCode(
+      updatedCql,
+      selectedCode?.name,
+      deletedCodeSystemName
+    );
   };
 
   const removeCodeFromCql = (
@@ -709,7 +735,7 @@ const MeasureEditor = () => {
             <Button
               variant="cyan"
               tw="m-2"
-              onClick={() => updateMeasureCql(editorVal)}
+              onClick={() => updateMeasureCql(editorVal, undefined)}
               data-testid="save-cql-btn"
               disabled={isCQLUnchanged}
             >
