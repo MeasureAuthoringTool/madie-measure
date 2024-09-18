@@ -204,9 +204,31 @@ export const measureGroupSchemaValidator = (
       return Yup.array()
         .of(
           Yup.object().shape({
-            cqlDefinition: Yup.string().test(
-              returnTypeCheckOptions(populationBasis, definitionDataTypes)
-            ),
+            cqlDefinition: Yup.string()
+              .test(
+                returnTypeCheckOptions(populationBasis, definitionDataTypes)
+              )
+              .test({
+                name: "cqlDefinitionCheck",
+                message:
+                  "CQL Definition is required when Association or Description is provided.",
+                test: function () {
+                  const {
+                    cqlDefinition,
+                    description,
+                    associations,
+                    association,
+                  } = this.parent;
+                  if (
+                    (description && description.trim() !== "") ||
+                    (associations && !_.isEmpty(associations)) ||
+                    (association && association.trim() !== "")
+                  ) {
+                    return cqlDefinition && cqlDefinition.length > 0;
+                  }
+                  return true;
+                },
+              }),
             // we need to make sure Associations have at least 1 value when Definition exists
             associations: Yup.array().test({
               name: "associationCheck",

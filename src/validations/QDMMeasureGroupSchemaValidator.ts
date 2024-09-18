@@ -268,9 +268,20 @@ export const qdmMeasureGroupSchemaValidator = (
           .of(
             Yup.object().shape({
               //temp
-              cqlDefinition: Yup.string().test(
-                patientBasedReturnTypeCheckOptions(definitionDataTypes)
-              ),
+              cqlDefinition: Yup.string()
+                .test(patientBasedReturnTypeCheckOptions(definitionDataTypes))
+                .test({
+                  name: "cqlDefinitionCheck",
+                  message:
+                    "CQL Definition is required when Description is provided.",
+                  test: function () {
+                    const { cqlDefinition, description } = this.parent;
+                    if (description && description.trim() !== "") {
+                      return cqlDefinition && cqlDefinition.length > 0;
+                    }
+                    return true;
+                  },
+                }),
             })
           )
           .nullable();
@@ -278,9 +289,20 @@ export const qdmMeasureGroupSchemaValidator = (
         return Yup.array()
           .of(
             Yup.object().shape({
-              cqlDefinition: Yup.string().test(
-                episodeBasedReturnTypeCheckOptions(definitionDataTypes)
-              ),
+              cqlDefinition: Yup.string()
+                .test(episodeBasedReturnTypeCheckOptions(definitionDataTypes))
+                .test({
+                  name: "cqlDefinitionCheck",
+                  message:
+                    "CQL Definition is required when Description is provided.",
+                  test: function () {
+                    const { cqlDefinition, description } = this.parent;
+                    if (description && description.trim() !== "") {
+                      return cqlDefinition && cqlDefinition.length > 0;
+                    }
+                    return true;
+                  },
+                }),
             })
           )
           .nullable();
