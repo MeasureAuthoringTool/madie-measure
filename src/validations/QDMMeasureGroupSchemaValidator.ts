@@ -126,6 +126,20 @@ const returnTypeFunctionCheckOptions = (populationBasis, functionDataTypes) => {
   }
 };
 
+const validateStratificarionAssociations = () => {
+  return {
+    name: "cqlDefinitionCheck",
+    message: "CQL Definition is required.",
+    test: function () {
+      const { cqlDefinition, description } = this.parent;
+      if (description && description.trim() !== "") {
+        return cqlDefinition && cqlDefinition.length > 0;
+      }
+      return true;
+    },
+  };
+};
+
 export const qdmMeasureGroupSchemaValidator = (
   definitionDataTypes: CqlDefineDataTypes,
   functionDataTypes: CqlFunctionDataTypes
@@ -270,18 +284,7 @@ export const qdmMeasureGroupSchemaValidator = (
               //temp
               cqlDefinition: Yup.string()
                 .test(patientBasedReturnTypeCheckOptions(definitionDataTypes))
-                .test({
-                  name: "cqlDefinitionCheck",
-                  message:
-                    "CQL Definition is required when Description is provided.",
-                  test: function () {
-                    const { cqlDefinition, description } = this.parent;
-                    if (description && description.trim() !== "") {
-                      return cqlDefinition && cqlDefinition.length > 0;
-                    }
-                    return true;
-                  },
-                }),
+                .test(validateStratificarionAssociations()),
             })
           )
           .nullable();
@@ -291,18 +294,7 @@ export const qdmMeasureGroupSchemaValidator = (
             Yup.object().shape({
               cqlDefinition: Yup.string()
                 .test(episodeBasedReturnTypeCheckOptions(definitionDataTypes))
-                .test({
-                  name: "cqlDefinitionCheck",
-                  message:
-                    "CQL Definition is required when Description is provided.",
-                  test: function () {
-                    const { cqlDefinition, description } = this.parent;
-                    if (description && description.trim() !== "") {
-                      return cqlDefinition && cqlDefinition.length > 0;
-                    }
-                    return true;
-                  },
-                }),
+                .test(validateStratificarionAssociations()),
             })
           )
           .nullable();
