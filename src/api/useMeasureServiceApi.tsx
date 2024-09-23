@@ -97,15 +97,11 @@ export class MeasureServiceApi {
   }
 
   async deleteMeasure(measure: Measure): Promise<Response> {
-    return await axios.put(
-      `${this.baseUrl}/measures/${measure.id}/delete`,
-      measure,
-      {
-        headers: {
-          Authorization: `Bearer ${this.getAccessToken()}`,
-        },
-      }
-    );
+    return await axios.delete(`${this.baseUrl}/measures/${measure.id}/delete`, {
+      headers: {
+        Authorization: `Bearer ${this.getAccessToken()}`,
+      },
+    });
   }
 
   async createGroup(group: Group, measureId: string): Promise<Group> {
