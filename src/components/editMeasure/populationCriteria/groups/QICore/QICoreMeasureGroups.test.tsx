@@ -1436,6 +1436,26 @@ describe("Measure Groups Page", () => {
     );
   });
 
+  test("Stratifications cannot be save when cql definition is not provided", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "Description Text";
+    group.improvementNotation = "Increased score indicates improvement";
+    group.stratifications = [
+      {
+        cqlDefinition: "",
+        description: "description",
+        association: undefined,
+        id: "id-1",
+      },
+      { ...getEmptyStrat(), id: "id-2" },
+    ];
+    measure.groups = [group];
+    renderMeasureGroupComponent();
+    userEvent.click(screen.getByTestId("stratifications-tab"));
+    const helperText = await screen.findByText("CQL Definition is required.");
+    expect(helperText).toBeInTheDocument();
+  });
+
   test("Stratifications Should Not Have Remove Button if there are only two", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "Description Text";
