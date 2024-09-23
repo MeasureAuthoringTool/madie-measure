@@ -834,16 +834,14 @@ export default function MeasureList(props: {
       if (e?.response?.data) {
         const { error, status, message } = e.response.data;
         const errorMessage = `${status}: ${error} ${message}`;
-        setToastType("danger");
         setToastMessage(errorMessage);
-        setToastOpen(true);
-        setDeleteMeasureDialog(false);
       } else {
-        setToastType("danger");
+        setToastMessage(e.toString());
+      }
+      setToastType("danger");
         setToastMessage(e.toString());
         setToastOpen(true);
         setDeleteMeasureDialog(false);
-      }
     }
   };
 
