@@ -1,4 +1,10 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import clearAllMocks = jest.clearAllMocks;
@@ -99,6 +105,35 @@ describe("DraftMeasureDialog component", () => {
     expect(await screen.findByText("Create Draft")).toBeInTheDocument();
     expect(await screen.findByText("Update Model Version")).toBeInTheDocument();
     expect(await screen.findByText("QI-Core v4.1.1")).toBeInTheDocument();
+
+    expect(screen.getByTestId("create-draft-continue-button")).toBeEnabled();
+  });
+
+  it("should have multiple model version options for QI-Core measures", async () => {
+    renderComponent();
+    const measureName = (await screen.findByRole("textbox", {
+      name: "Measure Name",
+    })) as HTMLInputElement;
+    expect(measureName.value).toEqual(measure.measureName);
+    expect(await screen.findByText("Create Draft")).toBeInTheDocument();
+    expect(await screen.findByText("Update Model Version")).toBeInTheDocument();
+
+    const modelInput = screen.getByTestId(
+      "measure-model-input"
+    ) as HTMLInputElement;
+    expect(modelInput.value).toBe("QI-Core v4.1.1");
+
+    const modelSelect = screen.getByTestId("measure-model-select");
+    const modelSelectDropdown = within(modelSelect).getByRole(
+      "button"
+    ) as HTMLInputElement;
+    userEvent.click(modelSelectDropdown);
+
+    fireEvent.change(modelInput, {
+      target: { value: "QI-Core v6.0.0" },
+    });
+
+    expect(modelInput.value).toBe("QI-Core v6.0.0");
 
     expect(screen.getByTestId("create-draft-continue-button")).toBeEnabled();
   });
