@@ -210,8 +210,7 @@ export const measureGroupSchemaValidator = (
               )
               .test({
                 name: "cqlDefinitionCheck",
-                message:
-                  "CQL Definition is required when Association or Description is provided.",
+                message: "CQL Definition is required.",
                 test: function () {
                   const {
                     cqlDefinition,
