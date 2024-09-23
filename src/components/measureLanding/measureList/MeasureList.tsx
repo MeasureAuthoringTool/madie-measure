@@ -839,9 +839,9 @@ export default function MeasureList(props: {
         setToastMessage(e.toString());
       }
       setToastType("danger");
-        setToastMessage(e.toString());
-        setToastOpen(true);
-        setDeleteMeasureDialog(false);
+      setToastMessage(e.toString());
+      setToastOpen(true);
+      setDeleteMeasureDialog(false);
     }
   };
 
