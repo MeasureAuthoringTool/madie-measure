@@ -821,7 +821,7 @@ export default function MeasureList(props: {
   const deleteMeasure = async () => {
     try {
       const result = await measureServiceApi.deleteMeasure(
-        targetMeasure?.current
+        targetMeasure?.current.id
       );
       if (result.status === 200) {
         setToastType("success");

@@ -96,8 +96,8 @@ export class MeasureServiceApi {
     });
   }
 
-  async deleteMeasure(measure: Measure): Promise<Response> {
-    return await axios.delete(`${this.baseUrl}/measures/${measure.id}/delete`, {
+  async deleteMeasure(id: string): Promise<Response> {
+    return await axios.delete(`${this.baseUrl}/measures/${id}/delete`, {
       headers: {
         Authorization: `Bearer ${this.getAccessToken()}`,
       },
