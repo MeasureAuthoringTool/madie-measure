@@ -292,7 +292,7 @@ const MeasureEditor = () => {
     const setCodeName = () => {
       if (codeName) {
         setToastMessage(
-          `code ${codeName} ${
+          `Code ${codeName} ${
             codeSystemName ? `and code system ${codeSystemName}` : ""
           } has been successfully removed from the CQL`
         );
