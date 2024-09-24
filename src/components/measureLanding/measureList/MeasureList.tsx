@@ -791,13 +791,9 @@ export default function MeasureList(props: {
     }
   };
 
-  const draftMeasure = async (measureName: string) => {
+  const draftMeasure = async (measureName: string, model: Model) => {
     await measureServiceApi
-      .draftMeasure(
-        targetMeasure.current?.id,
-        targetMeasure.current.model,
-        measureName
-      )
+      .draftMeasure(targetMeasure.current?.id, model, measureName)
       .then(async () => {
         setOptionsOpen(false);
         handleDialogClose();

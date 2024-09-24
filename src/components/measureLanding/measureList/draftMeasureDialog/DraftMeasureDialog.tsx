@@ -42,9 +42,9 @@ const DraftMeasureDialog = ({ open, onClose, onSubmit, measure }) => {
     },
     validationSchema: Yup.object().shape({ measureName: MeasureNameSchema }),
     enableReinitialize: true,
-    onSubmit: async ({ measureName }) => {
+    onSubmit: async ({ measureName, model }) => {
       formik.resetForm();
-      return onSubmit(measureName);
+      return onSubmit(measureName, model);
     },
   });
 
