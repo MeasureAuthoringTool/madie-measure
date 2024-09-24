@@ -127,6 +127,8 @@ const MeasureObservationDetails = ({
             "data-testid": `measure-observation-aggregate-${name}-input`,
           }}
           value={measureObservation?.aggregateMethod || ""}
+          error={!!errors?.aggregateMethod}
+          helperText={errors?.aggregateMethod}
           onChange={(e) => {
             if (onChange) {
               onChange({
