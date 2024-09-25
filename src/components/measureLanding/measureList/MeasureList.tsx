@@ -304,20 +304,42 @@ export default function MeasureList(props: {
           customSort(rowA.original.model, rowB.original.model),
       },
       {
+        //AAAA
         header: "Actions",
-        cell: (info) => (
-          <Button
-            variant="outline-secondary"
-            name="Select"
-            onClick={(e) => handlePopOverOpen(info.row.original.actions, e)}
-            data-testid={`measure-action-${info.row.original.id}`}
-            aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
-            role="button"
-            tab-index={0}
-          >
-            Select
-          </Button>
-        ),
+        cell: (info) =>
+          !featureFlags?.MeasureListButtons ? (
+            <Button
+              variant="outline-secondary"
+              name="Select"
+              onClick={(e) => handlePopOverOpen(info.row.original.actions, e)}
+              data-testid={`measure-action-${info.row.original.id}`}
+              aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
+              role="button"
+              tab-index={0}
+            >
+              Select
+            </Button>
+          ) : (
+            featureFlags?.MeasureListButtons &&
+            featureFlags?.MeasureListCheckboxes && (
+              <Button
+                variant="outline-seconday"
+                data-testid={`measure-action-${info.row.original.id}`}
+                aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
+                onClick={() =>
+                  navigate(`/measures/${info.row.original.id}/edit/details`)
+                }
+                role="button"
+              >
+                {checkUserCanEdit(
+                  info.row.original.actions?.measureSet?.owner,
+                  info.row.original.actions?.measureSet?.acls
+                ) && info.row.original.actions.measureMetaData?.draft
+                  ? "Edit"
+                  : "View"}
+              </Button>
+            )
+          ),
         accessorKey: "actions",
         enableSorting: false,
       },
