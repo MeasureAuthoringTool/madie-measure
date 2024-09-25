@@ -625,7 +625,7 @@ const MeasureEditor = () => {
 
   const handleDefinitionEdit = (selectedDefinition, defValues: Definition) => {
     handleMadieEditorValue(
-      editDefinition(selectedDefinition, defValues, editorVal, measure?.cql)
+      editDefinition(selectedDefinition, defValues, editorVal)
     );
     setToastType("success");
     setToastMessage(
