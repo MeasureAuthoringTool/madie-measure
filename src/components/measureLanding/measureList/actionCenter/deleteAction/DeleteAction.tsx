@@ -3,9 +3,10 @@ import { IconButton } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import { Measure, Model } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
-// import DeleteOutlinedIcon from "../../../../../icons/IconDelete";
+import { Toast } from "@madie/madie-design-system/dist/react";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import { grey, red } from "@mui/material/colors";
+import DeleteDialog from "../../../../editMeasure/DeleteDialog";
 
 interface PropTypes {
   measures: Measure[];
@@ -18,11 +19,12 @@ export const DEL_MEASURE = "Delete measure";
 
 export default function DeleteAction(props: PropTypes) {
   const { measures, canEdit } = props;
+  const { getUserName } = useOktaTokens();
   const [disableDeleteBtn, setDisableDeleteBtn] = useState(true);
   const [tooltipMessage, setTooltipMessage] = useState(NOTHING_SELECTED);
-
   const validateDeleteActionState = useCallback(() => {
     // set button state to disabled by default
+
     setDisableDeleteBtn(true);
     setTooltipMessage(NOTHING_SELECTED);
     if (
@@ -48,7 +50,7 @@ export default function DeleteAction(props: PropTypes) {
     >
       <span>
         <IconButton
-          onClick={props.onClick}
+          onClick={() => props.onClick()}
           disabled={disableDeleteBtn}
           data-testid="delete-action-btn"
         >

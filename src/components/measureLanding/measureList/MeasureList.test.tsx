@@ -59,6 +59,7 @@ const mockMeasureServiceApi = {
     .mockResolvedValue(oneItemResponse),
   fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
   createVersion: jest.fn().mockResolvedValue({}),
+  deleteMeasure: jest.fn().mockResolvedValue({}),
   checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
   checkValidVersion: jest.fn().mockResolvedValue({}),
   fetchMeasureDraftStatuses: jest.fn().mockResolvedValue({

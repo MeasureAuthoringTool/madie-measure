@@ -45,6 +45,7 @@ import TruncateText from "./TruncateText";
 import AssociateCmsIdAction from "./actionCenter/associateCmsIdAction/AccociateCmsIdAction";
 import AssociateCmsIdDialog from "./associateCmsIdDialog/AssociateCmsIdDialog";
 import ActionCenter from "./actionCenter/ActionCenter";
+import DeleteDialog from "../../editMeasure/DeleteDialog";
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -126,6 +127,8 @@ export default function MeasureList(props: {
   );
 
   const [versionHelperText, setVersionHelperText] = useState("");
+  const [deleteMeasureDialog, setDeleteMeasureDialog] =
+    useState<boolean>(false);
   const [draftMeasureDialog, setDraftMeasureDialog] = useState({
     open: false,
   });
@@ -815,6 +818,31 @@ export default function MeasureList(props: {
       });
   };
 
+  const deleteMeasure = async () => {
+    try {
+      const result = await measureServiceApi.deleteMeasure(
+        targetMeasure?.current.id
+      );
+      if (result.status === 200) {
+        setToastType("success");
+        setToastMessage("Measure successfully deleted");
+        setToastOpen(true);
+        doUpdateList();
+        setDeleteMeasureDialog(false);
+      }
+    } catch (e) {
+      if (e?.response?.data) {
+        const { message } = e.response.data;
+        setToastMessage(message);
+      } else {
+        setToastMessage(e.toString());
+      }
+      setToastType("danger");
+      setToastOpen(true);
+      setDeleteMeasureDialog(false);
+    }
+  };
+
   const associateCmsId = () => {
     setOpenAssociateCmsIdDialog(true);
   };
@@ -898,6 +926,8 @@ export default function MeasureList(props: {
                 associateCmsId={associateCmsId}
                 setCreateVersionDialog={setCreateVersionDialog}
                 setDraftMeasureDialog={setDraftMeasureDialog}
+                setDeleteMeasureDialog={setDeleteMeasureDialog}
+                deleteMeasure={deleteMeasure}
               />
             )}
         </div>
@@ -1046,6 +1076,12 @@ export default function MeasureList(props: {
           open={Boolean(downloadState)}
           handleContinueDialog={handleContinueDialog}
           handleCancelDialog={handleCancelDialog}
+        />
+        <DeleteDialog
+          open={deleteMeasureDialog}
+          onClose={() => setDeleteMeasureDialog(false)}
+          measureName={targetMeasure?.current?.measureName}
+          deleteMeasure={deleteMeasure}
         />
         <AssociateCmsIdDialog
           measures={selectedMeasures}

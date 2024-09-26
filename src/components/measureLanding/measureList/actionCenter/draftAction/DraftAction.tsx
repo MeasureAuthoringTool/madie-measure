@@ -38,6 +38,7 @@ export default function DraftAction(props: PropTypes) {
     // set button state to disabled by default
     setDisableDraftBtn(true);
     setTooltipMessage(NOTHING_SELECTED);
+
     if (
       measures?.length === 1 &&
       !measures[0]?.measureMetaData.draft &&
