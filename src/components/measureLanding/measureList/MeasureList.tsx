@@ -323,7 +323,8 @@ export default function MeasureList(props: {
             featureFlags?.MeasureListButtons &&
             featureFlags?.MeasureListCheckboxes && (
               <Button
-                variant="outline-seconday"
+                variant="outline-filled"
+                className=""
                 data-testid={`measure-action-${info.row.original.id}`}
                 aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
                 onClick={() =>
