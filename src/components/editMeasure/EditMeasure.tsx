@@ -101,6 +101,23 @@ export default function EditMeasure() {
       subscription.unsubscribe();
     };
   }, []);
+  // whenever measureID changes we need to update all pagination items except for limit which should be retained as a user preference
+  useEffect(() => {
+    return () => {
+      const testCasePageOptions = JSON.parse(
+        window.localStorage.getItem("testCasesPageOptions")
+      );
+      localStorage.setItem(
+        "testCasesPageOptions",
+        JSON.stringify({
+          page: 0,
+          limit: testCasePageOptions?.limit ? testCasePageOptions?.limit : 10,
+          filter: "",
+          search: "",
+        })
+      );
+    };
+  }, [id]);
   const deleteMeasure = async () => {
     const deletedMeasure: Measure = { ...measure, active: false };
     try {
