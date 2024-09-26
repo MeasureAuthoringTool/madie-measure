@@ -136,7 +136,7 @@ describe("SupplementalData Component QDM", () => {
         description: "",
       },
       {
-        definition: "SDE Ethnicity",
+        definition: '"SDE Ethnicity"',
         description: "",
       },
     ];
@@ -169,10 +169,10 @@ describe("SupplementalData Component QDM", () => {
 
     userEvent.click(supplementalDataButton);
     await waitFor(() => {
-      userEvent.click(screen.getByText("SDE Ethnicity"));
+      userEvent.click(screen.getByText('"SDE Ethnicity"'));
     });
     expect(
-      screen.getByRole("button", { name: "SDE Ethnicity" })
+      screen.getByRole("button", { name: '"SDE Ethnicity"' })
     ).toBeInTheDocument();
 
     // Verifies if SD description already loads values from store and able to update
@@ -274,11 +274,11 @@ describe("SupplementalData Component QDM", () => {
 
     userEvent.click(supplementalDataButton);
     await waitFor(() => {
-      userEvent.click(screen.getByText("SDE Ethnicity"));
+      userEvent.click(screen.getByText('"SDE Ethnicity"'));
     });
     userEvent.click(supplementalDataButton); // To collapse the dropdown
     expect(
-      screen.getByRole("button", { name: "SDE Ethnicity" })
+      screen.getByRole("button", { name: '"SDE Ethnicity"' })
     ).toBeInTheDocument();
 
     // Verifies if SD description already loads values from store and able to update
@@ -330,11 +330,11 @@ describe("SupplementalData Component QDM", () => {
 
     userEvent.click(supplementalDataButton);
     await waitFor(() => {
-      userEvent.click(screen.getByText("SDE Ethnicity"));
+      userEvent.click(screen.getByText('"SDE Ethnicity"'));
     });
     userEvent.click(supplementalDataButton); // To collapse the dropdown
     expect(
-      screen.getByRole("button", { name: "SDE Ethnicity" })
+      screen.getByRole("button", { name: '"SDE Ethnicity"' })
     ).toBeInTheDocument();
 
     // Verifies if SD description already loads values from store and able to update
