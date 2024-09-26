@@ -854,14 +854,12 @@ export default function MeasureList(props: {
       }
     } catch (e) {
       if (e?.response?.data) {
-        const { error, status, message } = e.response.data;
-        const errorMessage = `${status}: ${error} ${message}`;
-        setToastMessage(errorMessage);
+        const { message } = e.response.data;
+        setToastMessage(message);
       } else {
         setToastMessage(e.toString());
       }
       setToastType("danger");
-      setToastMessage(e.toString());
       setToastOpen(true);
       setDeleteMeasureDialog(false);
     }
