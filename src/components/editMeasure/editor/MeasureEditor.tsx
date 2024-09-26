@@ -650,14 +650,17 @@ const MeasureEditor = () => {
   };
 
   const handleDefinitionEdit = (selectedDefinition, defValues: Definition) => {
-    handleMadieEditorValue(
-      editDefinition(selectedDefinition, defValues, editorVal)
-    );
-    setToastType("success");
-    setToastMessage(
-      `Definition ${defValues.definitionName} has been successfully edited in the CQL`
-    );
-    setToastOpen(true);
+    const updatedCql = editDefinition(selectedDefinition, defValues, editorVal);
+    handleMadieEditorValue(updatedCql);
+
+    const setDefinitionConfirmation = () => {
+      setToastMessage(
+        `Definition ${defValues.definitionName} has been successfully edited in the CQL`
+      );
+      setToastType("success");
+      setToastOpen(true);
+    };
+    updateMeasureCql(updatedCql, setDefinitionConfirmation);
   };
 
   return (
