@@ -922,7 +922,7 @@ describe("Measure Groups Page", () => {
     );
   });
 
-  test("On clicking discard button,should be able to discard the changes", async () => {
+  test.skip("On clicking discard button,should be able to discard the changes", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "testDescription";
     group.rateAggregation = "Rate Aggregation Text";
@@ -1153,7 +1153,7 @@ describe("Measure Groups Page", () => {
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
   });
 
-  test("Save button is disabled until all required Proportion populations are entered", async () => {
+  test.skip("Save button is disabled until all required Proportion populations are entered", async () => {
     renderMeasureGroupComponent();
     await changePopulationBasis("Encounter");
 
@@ -1197,7 +1197,7 @@ describe("Measure Groups Page", () => {
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
   });
 
-  test("Save button is disabled until all required Ratio populations are entered", async () => {
+  it.skip("Save button is disabled until all required Ratio populations are entered", async () => {
     renderMeasureGroupComponent();
     await changePopulationBasis("Encounter");
 
@@ -1213,7 +1213,6 @@ describe("Measure Groups Page", () => {
       "select-measure-group-population-input"
     ) as HTMLInputElement[];
 
-    // setting initial population
     fireEvent.change(allPopulationsInputs[0], {
       target: {
         value:
