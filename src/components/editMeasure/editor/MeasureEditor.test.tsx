@@ -913,7 +913,7 @@ describe("EditorWithTerminology", () => {
       expect(editor).toHaveValue(cqlWithNoCodes);
     });
     expect(screen.getByTestId("measure-editor-toast")).toHaveTextContent(
-      "code 204504 and code system RXNORM has been successfully removed from the CQL"
+      "Code 204504 and code system RXNORM has been successfully removed from the CQL"
     );
   });
 
