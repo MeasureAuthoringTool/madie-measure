@@ -136,7 +136,7 @@ describe("QiCore RiskAdjustment Component", () => {
         includeInReportType: ["Individual"],
       },
       {
-        definition: '"SDE Ethnicity"',
+        definition: 'SDE."SDE Ethnicity"',
         description: "",
         includeInReportType: [
           "Individual",
@@ -204,10 +204,10 @@ describe("QiCore RiskAdjustment Component", () => {
 
     userEvent.click(riskAdjustmentButton);
     await waitFor(() => {
-      userEvent.click(screen.getByText('"SDE Ethnicity"'));
+      userEvent.click(screen.getByText('SDE."SDE Ethnicity"'));
     });
     expect(
-      screen.getByRole("button", { name: '"SDE Ethnicity"' })
+      screen.getByRole("button", { name: 'SDE."SDE Ethnicity"' })
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
@@ -255,7 +255,7 @@ describe("QiCore RiskAdjustment Component", () => {
         description: "",
       },
       {
-        definition: '"SDE Ethnicity"',
+        definition: 'SDE."SDE Ethnicity"',
         description: "",
         includeInReportType: [
           "Individual",
@@ -291,10 +291,10 @@ describe("QiCore RiskAdjustment Component", () => {
 
     userEvent.click(riskAdjustmentButton);
     await waitFor(() => {
-      userEvent.click(screen.getByText('"SDE Ethnicity"'));
+      userEvent.click(screen.getByText('SDE."SDE Ethnicity"'));
     });
     expect(
-      screen.getByRole("button", { name: '"SDE Ethnicity"' })
+      screen.getByRole("button", { name: 'SDE."SDE Ethnicity"' })
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
@@ -391,11 +391,11 @@ describe("QiCore RiskAdjustment Component", () => {
 
     userEvent.click(riskAdjustmentButton);
     await waitFor(() => {
-      userEvent.click(screen.getByText('"SDE Ethnicity"'));
+      userEvent.click(screen.getByText('SDE."SDE Ethnicity"'));
     });
     userEvent.click(riskAdjustmentButton); // To collapse the dropdown
     expect(
-      screen.getByRole("button", { name: '"SDE Ethnicity"' })
+      screen.getByRole("button", { name: 'SDE."SDE Ethnicity"' })
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
@@ -444,11 +444,11 @@ describe("QiCore RiskAdjustment Component", () => {
 
     userEvent.click(riskAdjustmentButton);
     await waitFor(() => {
-      userEvent.click(screen.getByText('"SDE Ethnicity"'));
+      userEvent.click(screen.getByText('SDE."SDE Ethnicity"'));
     });
     userEvent.click(riskAdjustmentButton); // To collapse the dropdown
     expect(
-      screen.getByRole("button", { name: '"SDE Ethnicity"' })
+      screen.getByRole("button", { name: 'SDE."SDE Ethnicity"' })
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
@@ -504,17 +504,17 @@ describe("QiCore RiskAdjustment Component", () => {
 
     userEvent.click(riskAdjustmentButton);
     await waitFor(() => {
-      userEvent.click(screen.getByText('"SDE Ethnicity"'));
+      userEvent.click(screen.getByText('SDE."SDE Ethnicity"'));
     });
     expect(
-      screen.getByRole("button", { name: '"SDE Ethnicity"' })
+      screen.getByRole("button", { name: 'SDE."SDE Ethnicity"' })
     ).toBeInTheDocument();
 
     act(async () => {
       const deleteButton = await screen.findByTestId("CancelIcon");
       userEvent.click(deleteButton);
       expect(
-        screen.queryByRole("button", { name: '"SDE Ethnicity"' })
+        screen.queryByRole("button", { name: 'SDE."SDE Ethnicity"' })
       ).not.toBeInTheDocument();
     });
   });
