@@ -324,7 +324,6 @@ export default function MeasureList(props: {
             featureFlags?.MeasureListCheckboxes && (
               <Button
                 variant="outline-filled"
-                className=""
                 data-testid={`measure-action-${info.row.original.id}`}
                 aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
                 onClick={() =>
@@ -855,12 +854,14 @@ export default function MeasureList(props: {
       }
     } catch (e) {
       if (e?.response?.data) {
-        const { message } = e.response.data;
-        setToastMessage(message);
+        const { error, status, message } = e.response.data;
+        const errorMessage = `${status}: ${error} ${message}`;
+        setToastMessage(errorMessage);
       } else {
         setToastMessage(e.toString());
       }
       setToastType("danger");
+      setToastMessage(e.toString());
       setToastOpen(true);
       setDeleteMeasureDialog(false);
     }
