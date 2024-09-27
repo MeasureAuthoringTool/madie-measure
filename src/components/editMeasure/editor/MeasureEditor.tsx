@@ -55,7 +55,7 @@ import "./MeasureEditor.scss";
 import applyCode from "./codeApplier";
 import applyValueset from "./valuesetApplier";
 import { applyLibrary, deleteIncludedLibrary } from "./libraryApplier";
-import { applyDefinition } from "./DefinitionApplier";
+import { applyDefinition, editDefinition } from "./DefinitionApplier";
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
@@ -649,6 +649,20 @@ const MeasureEditor = () => {
     setToastOpen(true);
   };
 
+  const handleDefinitionEdit = (selectedDefinition, defValues: Definition) => {
+    const updatedCql = editDefinition(selectedDefinition, defValues, editorVal);
+    handleMadieEditorValue(updatedCql);
+
+    const setDefinitionConfirmation = () => {
+      setToastMessage(
+        `Definition ${defValues.definitionName} has been successfully edited in the CQL`
+      );
+      setToastType("success");
+      setToastOpen(true);
+    };
+    updateMeasureCql(updatedCql, setDefinitionConfirmation);
+  };
+
   return (
     <>
       <div id="status-handler">
@@ -674,6 +688,7 @@ const MeasureEditor = () => {
                 handleApplyValueSet={handleUpdateVs}
                 handleApplyLibrary={handleApplyLibrary}
                 handleApplyDefinition={handleApplyDefinition}
+                handleDefinitionEdit={handleDefinitionEdit}
                 handleDeleteLibrary={handleDeleteLibrary}
                 onChange={(val: string) => handleMadieEditorValue(val)}
                 value={editorVal}
