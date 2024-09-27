@@ -45,6 +45,7 @@ import TruncateText from "./TruncateText";
 import AssociateCmsIdAction from "./actionCenter/associateCmsIdAction/AccociateCmsIdAction";
 import AssociateCmsIdDialog from "./associateCmsIdDialog/AssociateCmsIdDialog";
 import ActionCenter from "./actionCenter/ActionCenter";
+import DeleteDialog from "../../editMeasure/DeleteDialog";
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -126,6 +127,8 @@ export default function MeasureList(props: {
   );
 
   const [versionHelperText, setVersionHelperText] = useState("");
+  const [deleteMeasureDialog, setDeleteMeasureDialog] =
+    useState<boolean>(false);
   const [draftMeasureDialog, setDraftMeasureDialog] = useState({
     open: false,
   });
@@ -301,20 +304,42 @@ export default function MeasureList(props: {
           customSort(rowA.original.model, rowB.original.model),
       },
       {
+        //AAAA
         header: "Actions",
-        cell: (info) => (
-          <Button
-            variant="outline-secondary"
-            name="Select"
-            onClick={(e) => handlePopOverOpen(info.row.original.actions, e)}
-            data-testid={`measure-action-${info.row.original.id}`}
-            aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
-            role="button"
-            tab-index={0}
-          >
-            Select
-          </Button>
-        ),
+        cell: (info) =>
+          !featureFlags?.MeasureListButtons ? (
+            <Button
+              variant="outline-secondary"
+              name="Select"
+              onClick={(e) => handlePopOverOpen(info.row.original.actions, e)}
+              data-testid={`measure-action-${info.row.original.id}`}
+              aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
+              role="button"
+              tab-index={0}
+            >
+              Select
+            </Button>
+          ) : (
+            featureFlags?.MeasureListButtons &&
+            featureFlags?.MeasureListCheckboxes && (
+              <Button
+                variant="outline-filled"
+                data-testid={`measure-action-${info.row.original.id}`}
+                aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
+                onClick={() =>
+                  navigate(`/measures/${info.row.original.id}/edit/details`)
+                }
+                role="button"
+              >
+                {checkUserCanEdit(
+                  info.row.original.actions?.measureSet?.owner,
+                  info.row.original.actions?.measureSet?.acls
+                ) && info.row.original.actions.measureMetaData?.draft
+                  ? "Edit"
+                  : "View"}
+              </Button>
+            )
+          ),
         accessorKey: "actions",
         enableSorting: false,
       },
@@ -815,6 +840,31 @@ export default function MeasureList(props: {
       });
   };
 
+  const deleteMeasure = async () => {
+    try {
+      const result = await measureServiceApi.deleteMeasure(
+        targetMeasure?.current.id
+      );
+      if (result.status === 200) {
+        setToastType("success");
+        setToastMessage("Measure successfully deleted");
+        setToastOpen(true);
+        doUpdateList();
+        setDeleteMeasureDialog(false);
+      }
+    } catch (e) {
+      if (e?.response?.data) {
+        const { message } = e.response.data;
+        setToastMessage(message);
+      } else {
+        setToastMessage(e.toString());
+      }
+      setToastType("danger");
+      setToastOpen(true);
+      setDeleteMeasureDialog(false);
+    }
+  };
+
   const associateCmsId = () => {
     setOpenAssociateCmsIdDialog(true);
   };
@@ -898,6 +948,8 @@ export default function MeasureList(props: {
                 associateCmsId={associateCmsId}
                 setCreateVersionDialog={setCreateVersionDialog}
                 setDraftMeasureDialog={setDraftMeasureDialog}
+                setDeleteMeasureDialog={setDeleteMeasureDialog}
+                deleteMeasure={deleteMeasure}
               />
             )}
         </div>
@@ -1046,6 +1098,12 @@ export default function MeasureList(props: {
           open={Boolean(downloadState)}
           handleContinueDialog={handleContinueDialog}
           handleCancelDialog={handleCancelDialog}
+        />
+        <DeleteDialog
+          open={deleteMeasureDialog}
+          onClose={() => setDeleteMeasureDialog(false)}
+          measureName={targetMeasure?.current?.measureName}
+          deleteMeasure={deleteMeasure}
         />
         <AssociateCmsIdDialog
           measures={selectedMeasures}

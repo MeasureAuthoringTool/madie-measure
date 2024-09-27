@@ -19,6 +19,8 @@ interface PropTypes {
   updateTargetMeasure: (Measure) => void;
   setCreateVersionDialog: any;
   setDraftMeasureDialog: any;
+  setDeleteMeasureDialog: any;
+  deleteMeasure: () => void;
 }
 export default function ActionCenter(props: PropTypes) {
   const featureFlags = useFeatureFlags();
@@ -51,6 +53,13 @@ export default function ActionCenter(props: PropTypes) {
     }
   }, [props.measures, props.exportMeasure, props.updateTargetMeasure]);
 
+  const deleteMeasure = useCallback(() => {
+    if (props.measures?.length === 1) {
+      props.updateTargetMeasure(props.measures[0]);
+      props.setDeleteMeasureDialog(true);
+    }
+  }, [props.measures, props.updateTargetMeasure, props.setDeleteMeasureDialog]);
+
   const isSelectedMeasureEditable = (measures) => {
     return (
       measures &&
@@ -71,7 +80,7 @@ export default function ActionCenter(props: PropTypes) {
     <div data-testid="action-center">
       <DeleteAction
         measures={props.measures}
-        onClick={() => {}}
+        onClick={deleteMeasure}
         canEdit={canEdit}
       />
       <ExportAction measures={props.measures} onClick={exportMeasure} />

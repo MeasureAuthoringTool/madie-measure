@@ -27,7 +27,7 @@ import { v4 as uuid } from "uuid";
 import ServiceContext, { ServiceConfig } from "../../../api/ServiceContext";
 import { Simulate } from "react-dom/test-utils";
 // @ts-ignore
-import { useFeatureFlags } from "@madie/madie-util";
+import { useFeatureFlags, checkUserCanEdit } from "@madie/madie-util";
 
 // CSSStyleDeclaration
 const mockPush = jest.fn();
@@ -59,6 +59,7 @@ const mockMeasureServiceApi = {
     .mockResolvedValue(oneItemResponse),
   fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
   createVersion: jest.fn().mockResolvedValue({}),
+  deleteMeasure: jest.fn().mockResolvedValue({}),
   checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
   checkValidVersion: jest.fn().mockResolvedValue({}),
   fetchMeasureDraftStatuses: jest.fn().mockResolvedValue({
@@ -1998,5 +1999,112 @@ describe("Measure List component", () => {
       expect(checkboxes).not.toBeInTheDocument();
     });
     unmount();
+  });
+  describe("Action Center Tests", () => {
+    beforeEach(() => {
+      jest.resetModules();
+      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+        MeasureListButtons: true,
+        MeasureListCheckboxes: true,
+      }));
+    });
+
+    it("should display View button for versioned measures", async () => {
+      render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={measures}
+            selectedIds={selectedIds}
+            changeSelectedIds={changeSelectedIds}
+            setSelectedIds={setSelectedIds}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setInitialLoad={setInitialLoadMock}
+            activeTab={0}
+            searchCriteria={""}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            setErrMsg={setErrMsgMock}
+          />
+        </ServiceContext.Provider>
+      );
+      const actionButton = screen.getByTestId(
+        `measure-action-${measures[2].id}`
+      );
+
+      expect(within(actionButton).getByText("View")).toBeInTheDocument();
+
+      userEvent.click(actionButton);
+      expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID3/edit/details");
+    });
+
+    it("should display Edit button for draft and editable measures", async () => {
+      render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={measures}
+            selectedIds={selectedIds}
+            changeSelectedIds={changeSelectedIds}
+            setSelectedIds={setSelectedIds}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setInitialLoad={setInitialLoadMock}
+            activeTab={0}
+            searchCriteria={""}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            setErrMsg={setErrMsgMock}
+          />
+        </ServiceContext.Provider>
+      );
+      const actionButtonEdit = screen.getByTestId(
+        `measure-action-${measures[0].id}`
+      );
+      expect(within(actionButtonEdit).getByText("Edit")).toBeInTheDocument();
+      userEvent.click(actionButtonEdit);
+      expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID1/edit/details");
+    });
+    it("should display View button for non-editable measures", async () => {
+      checkUserCanEdit.mockImplementationOnce(() => false);
+      render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={measures}
+            selectedIds={selectedIds}
+            changeSelectedIds={changeSelectedIds}
+            setSelectedIds={setSelectedIds}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setInitialLoad={setInitialLoadMock}
+            activeTab={0}
+            searchCriteria={""}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            setErrMsg={setErrMsgMock}
+          />
+        </ServiceContext.Provider>
+      );
+      const actionButton = screen.getByTestId(
+        `measure-action-${measures[3].id}`
+      );
+
+      expect(within(actionButton).getByText("View")).toBeInTheDocument();
+
+      userEvent.click(actionButton);
+      expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID4/edit/details");
+      jest.resetAllMocks();
+    });
   });
 });

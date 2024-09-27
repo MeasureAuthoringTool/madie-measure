@@ -13,6 +13,7 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn(),
   useFeatureFlags: jest.fn(),
   useOktaTokens: jest.fn(),
+  fetchMeasureDraftStatuses: jest.fn(),
 }));
 
 jest.mock("../../../../api/useMeasureServiceApi");
@@ -26,6 +27,7 @@ const mockFeatureFlags = {
 };
 const mockGetUserName = jest.fn(() => "test user");
 const mockCheckUserCanEdit = jest.fn();
+const fetchMeasureDraftStatuses = jest.fn();
 
 const mockMeasureSet = {
   cmsId: "124",
@@ -38,6 +40,13 @@ const qdmMeasure = {
   measureSet: mockMeasureSet,
   measureSetId: "1-2-3-4",
   measureMetaData: { draft: true },
+} as Measure;
+
+const qdmMeasureVersion = {
+  model: Model.QDM_5_6,
+  measureSet: mockMeasureSet,
+  measureSetId: "1-2-3-4",
+  measureMetaData: { draft: false },
 } as Measure;
 
 const qiCoreMeasure = {
@@ -103,6 +112,66 @@ describe("ActionCenter", () => {
       open: true,
       measureId: qdmMeasure.measureSetId,
     });
+  });
+
+  it("should call updateTargetMeasure and setDraftMeasureDialog when draft action is triggered", async () => {
+    const updateTargetMeasure = jest.fn();
+    const setDraftMeasureDialog = jest.fn();
+    const fetchMeasureDraftStatuses = jest.fn().mockResolvedValue({
+      "1-2-3-4": true,
+    });
+
+    (useMeasureServiceApi as jest.Mock).mockReturnValue({
+      fetchMeasureDraftStatuses,
+    });
+
+    render(
+      <ActionCenter
+        measures={[qdmMeasureVersion]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={updateTargetMeasure}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={setDraftMeasureDialog}
+        setDeleteMeasureDialog={jest.fn()}
+        deleteMeasure={jest.fn()}
+      />
+    );
+
+    const draftButton = await screen.findByTestId("draft-action-btn");
+    expect(draftButton).toBeEnabled();
+    fireEvent.click(draftButton);
+
+    expect(updateTargetMeasure).toHaveBeenCalledWith(qdmMeasureVersion);
+    expect(setDraftMeasureDialog).toHaveBeenCalledWith({
+      open: true,
+    });
+  });
+
+  it("should call updateTargetMeasure and setDeleteMeasureDialog when delete action is triggered", async () => {
+    const updateTargetMeasure = jest.fn();
+    const setDeleteMeasureDialog = jest.fn();
+    const deleteMeasure = jest.fn();
+
+    render(
+      <ActionCenter
+        measures={[qdmMeasure]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={updateTargetMeasure}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={setDeleteMeasureDialog}
+        deleteMeasure={deleteMeasure}
+      />
+    );
+
+    const draftButton = await screen.findByTestId("delete-action-btn");
+    expect(draftButton).toBeEnabled();
+    fireEvent.click(draftButton);
+
+    expect(updateTargetMeasure).toHaveBeenCalledWith(qdmMeasure);
+    expect(setDeleteMeasureDialog).toHaveBeenCalledWith(true);
   });
 
   it("should call exportMeasure when export action is triggered", () => {
