@@ -1,4 +1,8 @@
-import { applyLibrary, deleteIncludedLibrary, editLibrary } from "./libraryApplier";
+import {
+  applyLibrary,
+  deleteIncludedLibrary,
+  editLibrary,
+} from "./libraryApplier";
 import IncludedLibrary from "@madie/madie-models/dist/IncludedLibrary";
 import { IncludeLibrary } from "@madie/madie-editor";
 
@@ -155,23 +159,25 @@ describe("Library Apply Utility tests", () => {
       "using QDM version '5.6'\n" +
       "include CancerLinQ version '1.5.000' called CancerLinQQ\n" +
       "codesystem \"RXNORM\": 'urn:oid:2.16.840.1.113883.6.88'";
-    
+
     const editedLibrary = {
-      name:'CancerLinQ',
-      version:'1.5.000',
-      alias: 'EditedCancerLinQQ'
-    }
+      name: "CancerLinQ",
+      version: "1.5.000",
+      alias: "EditedCancerLinQQ",
+    };
 
     const selectedLibrary = {
-      name:'CancerLinQ',
-      version:'1.5.000',
-      alias: 'CancerLinQQ'
-    }
+      name: "CancerLinQ",
+      version: "1.5.000",
+      alias: "CancerLinQQ",
+    };
 
-    const result= editLibrary(selectedLibrary, editedLibrary,cql) 
-    expect(result).toEqual("library CaseWhenThen version '0.3.000'\n" +
-      "using QDM version '5.6'\n" +
-      "include CancerLinQ version '1.5.000' called EditedCancerLinQQ\n" +
-      "codesystem \"RXNORM\": 'urn:oid:2.16.840.1.113883.6.88'");
-  })
+    const result = editLibrary(selectedLibrary, editedLibrary, cql);
+    expect(result).toEqual(
+      "library CaseWhenThen version '0.3.000'\n" +
+        "using QDM version '5.6'\n" +
+        "include CancerLinQ version '1.5.000' called EditedCancerLinQQ\n" +
+        "codesystem \"RXNORM\": 'urn:oid:2.16.840.1.113883.6.88'"
+    );
+  });
 });
