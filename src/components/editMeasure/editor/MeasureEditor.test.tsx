@@ -1009,4 +1009,30 @@ describe("EditorWithTerminology", () => {
       "Library TestHelpers has been successfully removed from the CQL."
     );
   });
+
+  it("should edit included library successfully", async () => {
+    const cqlWithIncludes =
+      "library ApplyLibraryTest version '0.0.000'\nusing QDM version '5.6'\ninclude TestHelpers version '1.0.000' called Helpers";
+
+    const cqlWithEdittedIncludes =
+      "library ApplyLibraryTest version '0.0.000'\nusing QDM version '5.6'\ninclude TestHelpers version '1.0.000' called EditedHelpers";
+
+    const measureWithIncludes = {
+      ...measure,
+      model: Model.QDM_5_6,
+      cql: cqlWithIncludes,
+    } as Measure;
+    renderEditor(measureWithIncludes);
+
+    const editIncludeBtn = screen.getByTestId("edit-included-library");
+    userEvent.click(editIncludeBtn);
+
+    await waitFor(() => {
+      const editor = screen.getByTestId("measure-editor");
+      expect(editor).toHaveValue(cqlWithEdittedIncludes);
+    });
+    expect(screen.getByTestId("measure-editor-toast")).toHaveTextContent(
+      "Library TestHelpers has been successfully edited in the CQL"
+    );
+  });
 });

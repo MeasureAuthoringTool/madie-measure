@@ -54,7 +54,11 @@ import { SuccessText } from "../../../styles/editMeasure/editor";
 import "./MeasureEditor.scss";
 import applyCode from "./codeApplier";
 import applyValueset from "./valuesetApplier";
-import { applyLibrary, deleteIncludedLibrary } from "./libraryApplier";
+import {
+  applyLibrary,
+  deleteIncludedLibrary,
+  editLibrary,
+} from "./libraryApplier";
 import { applyDefinition, editDefinition } from "./DefinitionApplier";
 
 export const mapErrorsToAceAnnotations = (
@@ -481,6 +485,23 @@ const MeasureEditor = () => {
     setToastOpen(true);
   };
 
+  const handleEditLibrary = (
+    selectedLibrary: IncludeLibrary,
+    editedLibrary: IncludeLibrary
+  ) => {
+    const updatedCql = editLibrary(selectedLibrary, editedLibrary, editorVal);
+    handleMadieEditorValue(updatedCql);
+
+    const setDefinitionConfirmation = () => {
+      setToastMessage(
+        `Library ${editedLibrary.name} has been successfully edited in the CQL`
+      );
+      setToastType("success");
+      setToastOpen(true);
+    };
+    updateMeasureCql(updatedCql, setDefinitionConfirmation);
+  };
+
   const handleDeleteLibrary = (library: IncludeLibrary) => {
     if (editorVal) {
       const updatedCql = deleteIncludedLibrary(editorVal, library);
@@ -690,6 +711,7 @@ const MeasureEditor = () => {
                 handleApplyDefinition={handleApplyDefinition}
                 handleDefinitionEdit={handleDefinitionEdit}
                 handleDeleteLibrary={handleDeleteLibrary}
+                handleEditLibrary={handleEditLibrary}
                 onChange={(val: string) => handleMadieEditorValue(val)}
                 value={editorVal}
                 inboundAnnotations={elmAnnotations}

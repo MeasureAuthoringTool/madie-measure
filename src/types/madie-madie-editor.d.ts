@@ -74,10 +74,11 @@ declare module "@madie/madie-editor" {
     handleApplyDefinition?: (def: Definition) => void;
     handleDefinitionEdit?: (lib: SelectedLibrary, def: Definition) => void;
     handleApplyLibrary?: (lib: SelectedLibrary) => void;
+    handleEditLibrary?: (
+      lib: SelectedLibrary,
+      editedLib: IncludeLibrary
+    ) => void;
     handleDeleteLibrary?: (lib: SelectedLibrary) => void;
-    // handleApplyLibrary?: (lib: IncludeLibrary) => void;
-    // handleDeleteLibrary?: (lib: IncludeLibrary) => void;
-
     parseDebounceTime?: number;
     inboundAnnotations?: Ace.Annotation[];
     inboundErrorMarkers?: Ace.MarkerLike[];

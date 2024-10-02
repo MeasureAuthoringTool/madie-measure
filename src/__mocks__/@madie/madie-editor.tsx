@@ -30,6 +30,7 @@ export function MadieTerminologyEditor({
   inboundAnnotations,
   handleCodeDelete,
   handleApplyLibrary,
+  handleEditLibrary,
   handleDeleteLibrary,
 }) {
   const code = {
@@ -47,6 +48,12 @@ export function MadieTerminologyEditor({
     name: "TestHelpers",
     alias: "Helpers",
     version: "1.0.000",
+  };
+
+  const editedLibrary = {
+    name: "TestHelpers",
+    version: "1.0.000",
+    alias: "EditedHelpers",
   };
 
   return (
@@ -72,6 +79,13 @@ export function MadieTerminologyEditor({
         onClick={() => handleApplyLibrary(library)}
       >
         Apply Library
+      </button>
+
+      <button
+        data-testid="edit-included-library"
+        onClick={() => handleEditLibrary(library, editedLibrary)}
+      >
+        Edit Library
       </button>
 
       <button

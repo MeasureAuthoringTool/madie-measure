@@ -83,3 +83,9 @@ export const deleteIncludedLibrary = (
   }
   return cql;
 };
+
+export const editLibrary = (selectedLibrary, editedLibrary, cql) => {
+  const oldLibrary = getIncludeStatementForLibrary(selectedLibrary);
+  const newLibrary = getIncludeStatementForLibrary(editedLibrary);
+  return cql.replace(oldLibrary, newLibrary);
+};
