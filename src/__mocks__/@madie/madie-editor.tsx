@@ -30,6 +30,7 @@ export function MadieTerminologyEditor({
   inboundAnnotations,
   handleCodeDelete,
   handleApplyLibrary,
+  handleEditLibrary,
   handleDeleteLibrary,
 }) {
   const code = {
@@ -72,6 +73,13 @@ export function MadieTerminologyEditor({
         onClick={() => handleApplyLibrary(library)}
       >
         Apply Library
+      </button>
+
+      <button
+        data-testid="edit-library"
+        onClick={() => handleEditLibrary(library)}
+      >
+        Edit Library
       </button>
 
       <button
