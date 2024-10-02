@@ -51,15 +51,9 @@ export function MadieTerminologyEditor({
   };
 
   const editedLibrary = {
-    name: "CancerLinQ",
-    version: "1.5.000",
-    alias: "EditedCancerLinQQ",
-  };
-
-  const selectedLibrary = {
-    name: "CancerLinQ",
-    version: "1.5.000",
-    alias: "CancerLinQQ",
+    name: "TestHelpers",
+    version: "1.0.000",
+    alias: "EditedHelpers",
   };
 
   return (
@@ -88,8 +82,8 @@ export function MadieTerminologyEditor({
       </button>
 
       <button
-        data-testid="edit-library"
-        onClick={() => handleEditLibrary(selectedLibrary, editedLibrary)}
+        data-testid="edit-included-library"
+        onClick={() => handleEditLibrary(library, editedLibrary)}
       >
         Edit Library
       </button>
