@@ -1016,14 +1016,11 @@ describe("EditorWithTerminology", () => {
 
     const cqlWithEdittedIncludes =
       "library ApplyLibraryTest version '0.0.000'\nusing QDM version '5.6'\ninclude TestHelpers version '1.0.000' called EditedHelpers";
-    const elm =
-      '{"library":{"statements":{"def":[{ "resultTypeName": "{urn:hl7-org:elm-types:r1}Boolean", "name": "Initial Population"}]}}}';
 
     const measureWithIncludes = {
       ...measure,
       model: Model.QDM_5_6,
       cql: cqlWithIncludes,
-      elmJson: elm,
     } as Measure;
     renderEditor(measureWithIncludes);
 
