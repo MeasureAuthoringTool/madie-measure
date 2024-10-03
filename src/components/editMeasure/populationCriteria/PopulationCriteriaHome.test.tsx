@@ -336,7 +336,7 @@ describe("PopulationCriteriaHome", () => {
     ).toBeInTheDocument();
 
     expect(
-      screen.queryByText("SDE Ethnicity - Include in Report Type")
+      screen.queryByText('"SDE Ethnicity" - Include in Report Type')
     ).not.toBeInTheDocument();
   });
 
@@ -355,14 +355,14 @@ describe("PopulationCriteriaHome", () => {
 
     userEvent.click(screen.getByRole("button", { name: "Open" }));
     await waitFor(() => {
-      userEvent.click(screen.getByText('SDE."SDE Ethnicity"'));
+      userEvent.click(screen.getByText('"SDE Ethnicity"'));
     });
     expect(
-      screen.getByRole("button", { name: 'SDE."SDE Ethnicity"' })
+      screen.getByRole("button", { name: '"SDE Ethnicity"' })
     ).toBeInTheDocument();
 
     expect(
-      await screen.findByText('SDE."SDE Ethnicity" - Include in Report Type')
+      await screen.findByText('"SDE Ethnicity" - Include in Report Type')
     ).toBeInTheDocument();
 
     const allComboBoxes2 = screen.getAllByRole("combobox");
@@ -403,7 +403,7 @@ describe("PopulationCriteriaHome", () => {
     ).toBeInTheDocument();
 
     expect(
-      screen.queryByText('SDE."SDE Ethnicity" - Include in Report Type')
+      screen.queryByText("SDE Ethnicity - Include in Report Type")
     ).not.toBeInTheDocument();
   });
 
@@ -422,14 +422,14 @@ describe("PopulationCriteriaHome", () => {
 
     userEvent.click(screen.getByRole("button", { name: "Open" }));
     await waitFor(() => {
-      userEvent.click(screen.getByText('SDE."SDE Ethnicity"'));
+      userEvent.click(screen.getByText('"SDE Ethnicity"'));
     });
     expect(
-      screen.getByRole("button", { name: 'SDE."SDE Ethnicity"' })
+      screen.getByRole("button", { name: '"SDE Ethnicity"' })
     ).toBeInTheDocument();
 
     expect(
-      await screen.findByText('SDE."SDE Ethnicity" - Include in Report Type')
+      await screen.findByText('"SDE Ethnicity" - Include in Report Type')
     ).toBeInTheDocument();
 
     const allComboBoxes2 = screen.getAllByRole("combobox");
