@@ -139,7 +139,7 @@ describe("SupplementalData Component QI-Core", () => {
         includeInReportType: ["Individual"],
       },
       {
-        definition: 'SDE."SDE Ethnicity"',
+        definition: '"SDE Ethnicity"',
         description: "",
         includeInReportType: [
           "Individual",
@@ -215,11 +215,11 @@ describe("SupplementalData Component QI-Core", () => {
       userEvent.click(el);
     });
     expect(
-      screen.getByRole("button", { name: 'SDE."SDE Ethnicity"', exact: false })
+      screen.getByRole("button", { name: '"SDE Ethnicity"', exact: false })
     ).toBeInTheDocument();
 
     const sdeEthnicityIncludeInReportTypeContainer = await screen.getByTestId(
-      'SDE."SDE Ethnicity"-include-in-report-type-dropdown',
+      '"SDE Ethnicity"-include-in-report-type-dropdown',
       { exact: true }
     );
     // check that it defaults to all values added for Include in Report Type
@@ -346,13 +346,11 @@ describe("SupplementalData Component QI-Core", () => {
 
     userEvent.click(supplementalDataButton);
     await waitFor(() => {
-      userEvent.click(
-        screen.getByText('SDE."SDE Ethnicity"', { exact: false })
-      );
+      userEvent.click(screen.getByText('"SDE Ethnicity"', { exact: false }));
     });
     userEvent.click(supplementalDataButton); // To collapse the dropdown
     expect(
-      screen.getByRole("button", { name: 'SDE."SDE Ethnicity"', exact: false })
+      screen.getByRole("button", { name: '"SDE Ethnicity"', exact: false })
     ).toBeInTheDocument();
 
     // Verifies if SD description already loads values from store and able to update
@@ -417,11 +415,11 @@ describe("SupplementalData Component QI-Core", () => {
 
     userEvent.click(supplementalDataButton);
     await waitFor(() => {
-      userEvent.click(screen.getByText('SDE."SDE Ethnicity"'));
+      userEvent.click(screen.getByText('"SDE Ethnicity"'));
     });
     userEvent.click(supplementalDataButton); // To collapse the dropdown
     expect(
-      screen.getByRole("button", { name: 'SDE."SDE Ethnicity"' })
+      screen.getByRole("button", { name: '"SDE Ethnicity"' })
     ).toBeInTheDocument();
 
     // Verifies if SD description already loads values from store and able to update
