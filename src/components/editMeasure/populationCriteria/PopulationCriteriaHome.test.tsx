@@ -329,14 +329,14 @@ describe("PopulationCriteriaHome", () => {
     });
 
     await waitFor(() => {
-      userEvent.click(screen.getByText('"SDE Ethnicity"', { exact: false }));
+      userEvent.click(screen.getByText("SDE Ethnicity", { exact: false }));
     });
     expect(
-      screen.getByRole("button", { name: '"SDE Ethnicity"' })
+      screen.getByRole("button", { name: "SDE Ethnicity" })
     ).toBeInTheDocument();
 
     expect(
-      screen.queryByText('"SDE Ethnicity" - Include in Report Type')
+      screen.queryByText("SDE Ethnicity - Include in Report Type")
     ).not.toBeInTheDocument();
   });
 
@@ -355,14 +355,14 @@ describe("PopulationCriteriaHome", () => {
 
     userEvent.click(screen.getByRole("button", { name: "Open" }));
     await waitFor(() => {
-      userEvent.click(screen.getByText('"SDE Ethnicity"'));
+      userEvent.click(screen.getByText("SDE Ethnicity"));
     });
     expect(
-      screen.getByRole("button", { name: '"SDE Ethnicity"' })
+      screen.getByRole("button", { name: "SDE Ethnicity" })
     ).toBeInTheDocument();
 
     expect(
-      await screen.findByText('"SDE Ethnicity" - Include in Report Type')
+      await screen.findByText("SDE Ethnicity - Include in Report Type")
     ).toBeInTheDocument();
 
     const allComboBoxes2 = screen.getAllByRole("combobox");
@@ -396,10 +396,10 @@ describe("PopulationCriteriaHome", () => {
 
     userEvent.click(screen.getByRole("button", { name: "Open" }));
     await waitFor(() => {
-      userEvent.click(screen.getByText('"SDE Ethnicity"'));
+      userEvent.click(screen.getByText("SDE Ethnicity"));
     });
     expect(
-      screen.getByRole("button", { name: '"SDE Ethnicity"' })
+      screen.getByRole("button", { name: "SDE Ethnicity" })
     ).toBeInTheDocument();
 
     expect(
@@ -422,14 +422,14 @@ describe("PopulationCriteriaHome", () => {
 
     userEvent.click(screen.getByRole("button", { name: "Open" }));
     await waitFor(() => {
-      userEvent.click(screen.getByText('"SDE Ethnicity"'));
+      userEvent.click(screen.getByText("SDE Ethnicity"));
     });
     expect(
-      screen.getByRole("button", { name: '"SDE Ethnicity"' })
+      screen.getByRole("button", { name: "SDE Ethnicity" })
     ).toBeInTheDocument();
 
     expect(
-      await screen.findByText('"SDE Ethnicity" - Include in Report Type')
+      await screen.findByText("SDE Ethnicity - Include in Report Type")
     ).toBeInTheDocument();
 
     const allComboBoxes2 = screen.getAllByRole("combobox");
