@@ -305,7 +305,7 @@ export default function MeasureList(props: {
       },
       {
         //AAAA
-        header: "Actions",
+        header: "",
         cell: (info) =>
           !featureFlags?.MeasureListButtons ? (
             <Button
