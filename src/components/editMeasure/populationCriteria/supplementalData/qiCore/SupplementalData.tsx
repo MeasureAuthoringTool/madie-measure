@@ -69,8 +69,7 @@ const SupplementalData = () => {
       const definitions = new CqlAntlr(measure?.cql).parse()
         .expressionDefinitions;
       const mappedDefinitions = definitions.map(({ name }) => {
-        return name;
-        //return JSON.parse(name);
+        return JSON.parse(name);
       });
       setDefinitions(mappedDefinitions);
     }
