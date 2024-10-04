@@ -24,8 +24,11 @@ const serviceConfig: ServiceConfig = {
   measureService: {
     baseUrl: "example-service-url",
   },
-  elmTranslationService: {
-    baseUrl: "test-elm-service",
+  qdmElmTranslationService: {
+    baseUrl: "qdm-elm-service",
+  },
+  fhirElmTranslationService: {
+    baseUrl: "fhir-elm-service",
   },
   terminologyService: {
     baseUrl: "terminology-service.com",
@@ -130,7 +133,7 @@ describe("QdmRiskAdjustment Component", () => {
         description: "",
       },
       {
-        definition: '"SDE Ethnicity"',
+        definition: "SDE Ethnicity",
         description: "",
       },
     ];
@@ -160,10 +163,10 @@ describe("QdmRiskAdjustment Component", () => {
 
     userEvent.click(riskAdjustmentButton);
     await waitFor(() => {
-      userEvent.click(screen.getByText('"SDE Ethnicity"'));
+      userEvent.click(screen.getByText("SDE Ethnicity"));
     });
     expect(
-      screen.getByRole("button", { name: '"SDE Ethnicity"' })
+      screen.getByRole("button", { name: "SDE Ethnicity" })
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
@@ -228,7 +231,7 @@ describe("QdmRiskAdjustment Component", () => {
         description: "",
       },
       {
-        definition: '"SDE Ethnicity"',
+        definition: "SDE Ethnicity",
         description: "",
       },
     ];
@@ -258,10 +261,10 @@ describe("QdmRiskAdjustment Component", () => {
 
     userEvent.click(riskAdjustmentButton);
     await waitFor(() => {
-      userEvent.click(screen.getByText('"SDE Ethnicity"'));
+      userEvent.click(screen.getByText("SDE Ethnicity"));
     });
     expect(
-      screen.getByRole("button", { name: '"SDE Ethnicity"' })
+      screen.getByRole("button", { name: "SDE Ethnicity" })
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
@@ -358,11 +361,11 @@ describe("QdmRiskAdjustment Component", () => {
 
     userEvent.click(riskAdjustmentButton);
     await waitFor(() => {
-      userEvent.click(screen.getByText('"SDE Ethnicity"'));
+      userEvent.click(screen.getByText("SDE Ethnicity"));
     });
     userEvent.click(riskAdjustmentButton); // To collapse the dropdown
     expect(
-      screen.getByRole("button", { name: '"SDE Ethnicity"' })
+      screen.getByRole("button", { name: "SDE Ethnicity" })
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
@@ -411,11 +414,11 @@ describe("QdmRiskAdjustment Component", () => {
 
     userEvent.click(riskAdjustmentButton);
     await waitFor(() => {
-      userEvent.click(screen.getByText('"SDE Ethnicity"'));
+      userEvent.click(screen.getByText("SDE Ethnicity"));
     });
     userEvent.click(riskAdjustmentButton); // To collapse the dropdown
     expect(
-      screen.getByRole("button", { name: '"SDE Ethnicity"' })
+      screen.getByRole("button", { name: "SDE Ethnicity" })
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
@@ -471,17 +474,17 @@ describe("QdmRiskAdjustment Component", () => {
 
     userEvent.click(riskAdjustmentButton);
     await waitFor(() => {
-      userEvent.click(screen.getByText('"SDE Ethnicity"'));
+      userEvent.click(screen.getByText("SDE Ethnicity"));
     });
     expect(
-      screen.getByRole("button", { name: '"SDE Ethnicity"' })
+      screen.getByRole("button", { name: "SDE Ethnicity" })
     ).toBeInTheDocument();
 
     act(async () => {
       const deleteButton = await screen.findByTestId("CancelIcon");
       userEvent.click(deleteButton);
       expect(
-        screen.queryByRole("button", { name: '"SDE Ethnicity"' })
+        screen.queryByRole("button", { name: "SDE Ethnicity" })
       ).not.toBeInTheDocument();
     });
   });
