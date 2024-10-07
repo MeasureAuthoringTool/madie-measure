@@ -1,6 +1,7 @@
 import React, {
   Dispatch,
   SetStateAction,
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -684,6 +685,12 @@ const MeasureEditor = () => {
     updateMeasureCql(updatedCql, setDefinitionConfirmation);
   };
 
+  const getCqlDefinitionReturnTypes = useCallback(() => {
+    return measureServiceApi.getReturnTypesForAllCqlDefinitions(
+      measure?.elmJson
+    );
+  }, [measure?.elmJson, measureServiceApi]);
+
   return (
     <>
       <div id="status-handler">
@@ -728,6 +735,7 @@ const MeasureEditor = () => {
                 setIsCQLUnchanged={setIsCQLUnchanged}
                 isCQLUnchanged={isCQLUnchanged}
                 resetCql={resetCql}
+                getCqlDefinitionReturnTypes={getCqlDefinitionReturnTypes}
               />
             ) : (
               <>

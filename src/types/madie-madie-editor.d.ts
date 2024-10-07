@@ -94,6 +94,7 @@ declare module "@madie/madie-editor" {
     setIsCQLUnchanged?: Function;
     isCQLUnchanged?: boolean;
     resetCql?: () => void;
+    getCqlDefinitionReturnTypes?: () => void;
 
     // conditional props used to pass up annotations outside of the editor
     setOutboundAnnotations?: Function;
