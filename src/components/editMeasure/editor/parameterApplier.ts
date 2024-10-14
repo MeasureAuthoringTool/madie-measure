@@ -61,7 +61,6 @@ but if not we'll keep going one higher until a line number is present, otherwise
     6 parameter
 */
 export const findParameterInsertPoint = (parseResults: CqlResult) => {
-  console.log("parseResults", parseResults);
   if (!parseResults || Object.keys(parseResults).length === 0) {
     // put at front if empty
     return 0;

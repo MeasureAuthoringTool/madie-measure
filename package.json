@@ -86,7 +86,7 @@
     "@emotion/styled": "^11.6.0",
     "@heroicons/react": "^1.0.5",
     "@lhncbc/ucum-lhc": "^4.1.5",
-    "@madie/cql-antlr-parser": "^1.0.4",
+    "@madie/cql-antlr-parser": "^1.0.3",
     "@madie/madie-auth": "^0.0.1",
     "@madie/madie-design-system": "^1.2.23",
     "@madie/madie-editor": "^0.0.1",
