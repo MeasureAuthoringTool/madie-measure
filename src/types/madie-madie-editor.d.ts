@@ -66,10 +66,16 @@ declare module "@madie/madie-editor" {
     expressionValue?: string;
   }
 
+  export interface Parameter {
+    parameterName?: string;
+    expression?: string;
+  }
+
   export interface EditorPropsType {
     value: string;
     onChange?: (value: string) => void;
     handleApplyCode?: (code: Code) => void;
+    handleApplyParameter?: (parameter: Parameter) => void;
     handleApplyValueSet?: (vs: ValueSetForSearch) => void;
     handleApplyDefinition?: (def: Definition) => void;
     handleDefinitionEdit?: (lib: SelectedLibrary, def: Definition) => void;

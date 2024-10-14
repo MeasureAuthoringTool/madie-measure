@@ -109,7 +109,7 @@ describe("Measure Group Population Select Component", () => {
     const populationSelect = screen.getByTestId(
       "population-select-population-test"
     );
-    userEvent.click(screen.getByRole("button", populationSelect));
+    userEvent.click(screen.getByRole("combobox", populationSelect));
     const optionList = await screen.findAllByTestId(
       "select-option-measure-group-population"
     );
@@ -163,7 +163,7 @@ describe("Measure Group Population Select Component", () => {
     const populationSelect = screen.getByTestId(
       "population-select-population-test"
     );
-    userEvent.click(screen.getByRole("button", populationSelect));
+    userEvent.click(screen.getByRole("combobox", populationSelect));
     userEvent.click(screen.getByText(updatedValue));
 
     expect(mockOnChangeHandler).toHaveReturnedWith(updatedValue);

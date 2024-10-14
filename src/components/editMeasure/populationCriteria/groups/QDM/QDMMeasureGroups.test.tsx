@@ -450,7 +450,7 @@ describe("Measure Groups Page", () => {
       const initialPopulationSelect = screen.getByTestId(
         "population-select-initial-population"
       );
-      userEvent.click(getByRole(initialPopulationSelect, "button"));
+      userEvent.click(getByRole(initialPopulationSelect, "combobox"));
       userEvent.click(screen.getByText(definitionToUpdate));
       expect(initialPopulationInput.value).toBe(definitionToUpdate);
 

@@ -21,6 +21,7 @@ import {
   MadieTerminologyEditor,
   IncludeLibrary,
   Definition,
+  Parameter,
 } from "@madie/madie-editor";
 import {
   Button,
@@ -54,6 +55,7 @@ import StatusHandler from "./StatusHandler";
 import { SuccessText } from "../../../styles/editMeasure/editor";
 import "./MeasureEditor.scss";
 import applyCode from "./codeApplier";
+import applyParameter from "./parameterApplier";
 import applyValueset from "./valuesetApplier";
 import {
   applyLibrary,
@@ -528,6 +530,17 @@ const MeasureEditor = () => {
     setToastOpen(true);
   };
 
+  const handleApplyParameter = (parameter: Parameter) => {
+    const result = applyParameter(editorVal, parameter);
+    if (result.status) {
+      handleMadieEditorValue(result.cql);
+    }
+    setToastMessage(result.message);
+    setToastType(result.status);
+    setToastOpen(true);
+    return result.status;
+  };
+
   const handleDefinitionDelete = (selectedDefinition) => {
     //use Antrl parser to find the lines to delete for this definition
     const cqlComponents = new CqlAntlr(editorVal).parse();
@@ -716,6 +729,7 @@ const MeasureEditor = () => {
                 handleApplyValueSet={handleUpdateVs}
                 handleApplyLibrary={handleApplyLibrary}
                 handleApplyDefinition={handleApplyDefinition}
+                handleApplyParameter={handleApplyParameter}
                 handleDefinitionEdit={handleDefinitionEdit}
                 handleDeleteLibrary={handleDeleteLibrary}
                 handleEditLibrary={handleEditLibrary}

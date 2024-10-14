@@ -159,9 +159,7 @@ describe("Measure Page", () => {
 
   test("test pagination page button", async () => {
     renderRouter(["/measures"]);
-    const pageButton = await screen.findByRole("button", {
-      name: /page 1/i,
-    });
+    const pageButton = await screen.findByLabelText("page 1");
     act(() => {
       userEvent.click(pageButton);
     });
@@ -179,10 +177,9 @@ describe("Measure Page", () => {
       abortController.signal
     );
 
-    const pageLimit10Button = await screen.findByRole("button", {
-      name: /10/i,
-    });
-    userEvent.click(pageLimit10Button);
+    const combobox = await screen.findByText("10");
+
+    userEvent.click(combobox);
     const pageLimit25 = screen.getByRole("option", {
       name: /25/i,
     });
