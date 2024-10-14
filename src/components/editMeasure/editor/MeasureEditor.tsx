@@ -21,6 +21,7 @@ import {
   MadieTerminologyEditor,
   IncludeLibrary,
   Definition,
+  Parameter,
 } from "@madie/madie-editor";
 import {
   Button,
@@ -54,6 +55,7 @@ import StatusHandler from "./StatusHandler";
 import { SuccessText } from "../../../styles/editMeasure/editor";
 import "./MeasureEditor.scss";
 import applyCode from "./codeApplier";
+import applyParameter from "./parameterApplier";
 import applyValueset from "./valuesetApplier";
 import {
   applyLibrary,
@@ -528,6 +530,22 @@ const MeasureEditor = () => {
     setToastOpen(true);
   };
 
+  const handleApplyParameter = (parameter: Parameter) => {
+    const result = applyParameter(editorVal, parameter);
+    if (result.status) {
+      // if result status is true, we modified the CQL
+      // let's store off the codeSystem/code/version
+      // we can send it with the measure when it's saved
+      handleMadieEditorValue(result.cql);
+    }
+    // if result status is false, we didn't modify. so CQL didn't change,
+    // but confirmation messages can still be displayed
+    setToastMessage(result.message);
+    setToastType(result.status);
+    setToastOpen(true);
+    return result.status;
+  };
+
   const handleDefinitionDelete = (selectedDefinition) => {
     //use Antrl parser to find the lines to delete for this definition
     const cqlComponents = new CqlAntlr(editorVal).parse();
@@ -716,6 +734,7 @@ const MeasureEditor = () => {
                 handleApplyValueSet={handleUpdateVs}
                 handleApplyLibrary={handleApplyLibrary}
                 handleApplyDefinition={handleApplyDefinition}
+                handleApplyParameter={handleApplyParameter}
                 handleDefinitionEdit={handleDefinitionEdit}
                 handleDeleteLibrary={handleDeleteLibrary}
                 handleEditLibrary={handleEditLibrary}
