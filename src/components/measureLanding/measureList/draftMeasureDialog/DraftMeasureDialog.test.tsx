@@ -125,7 +125,7 @@ describe("DraftMeasureDialog component", () => {
 
     const modelSelect = screen.getByTestId("measure-model-select");
     const modelSelectDropdown = within(modelSelect).getByRole(
-      "button"
+      "combobox"
     ) as HTMLInputElement;
     userEvent.click(modelSelectDropdown);
 
