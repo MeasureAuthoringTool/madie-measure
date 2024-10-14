@@ -533,13 +533,8 @@ const MeasureEditor = () => {
   const handleApplyParameter = (parameter: Parameter) => {
     const result = applyParameter(editorVal, parameter);
     if (result.status) {
-      // if result status is true, we modified the CQL
-      // let's store off the codeSystem/code/version
-      // we can send it with the measure when it's saved
       handleMadieEditorValue(result.cql);
     }
-    // if result status is false, we didn't modify. so CQL didn't change,
-    // but confirmation messages can still be displayed
     setToastMessage(result.message);
     setToastType(result.status);
     setToastOpen(true);
