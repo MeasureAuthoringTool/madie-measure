@@ -24,7 +24,6 @@ const applyParameter = (
 
   // Parse CQL to get code and code systems
   const parseResults: CqlResult = new CqlAntlr(cql).parse();
-  console.log("parseResults", parseResults);
   // Let's check if the code system is already in the CQL
   const existingParameter = findExistingParameter(
     parameter,
