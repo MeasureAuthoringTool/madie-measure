@@ -1,0 +1,4 @@
+{
+  "parameterName": "Measurement Period",
+  "expression": "Interval<DateTime>"
+}

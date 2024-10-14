@@ -37,9 +37,9 @@ const applyParameter = (
     let newParameter = createParameterDeclaration(parameter);
     cqlArr.splice(findParameterInsertPoint(parseResults), 0, newParameter);
     status = "success";
-    message = `Code ${parameter.parameterName} has been successfully added to the CQL.`;
+    message = `Parameter ${parameter.parameterName} has been successfully added to the CQL.`;
   } else {
-    message = `Code ${parameter.parameterName} has already been defined in CQL.`;
+    message = `Parameter ${parameter.parameterName} has already been defined in CQL.`;
     status = "info";
   }
   return {
@@ -61,29 +61,36 @@ but if not we'll keep going one higher until a line number is present, otherwise
     6 parameter
 */
 export const findParameterInsertPoint = (parseResults: CqlResult) => {
+  console.log("parseResults", parseResults);
   if (!parseResults || Object.keys(parseResults).length === 0) {
     // put at front if empty
     return 0;
   }
   // at end of parameters if it exists as priority 1
-  else if (parseResults.parameters.length) {
+  if (parseResults.parameters.length) {
     return parseResults.parameters[parseResults.parameters.length - 1].stop
       .line;
-  } else if (parseResults.codes) {
+  }
+  if (parseResults.codes.length) {
     return parseResults.codes[parseResults.codes.length - 1].stop.line;
-  } else if (parseResults.valueSets) {
+  }
+  if (parseResults.valueSets.length) {
     return parseResults.valueSets[parseResults.valueSets.length - 1].stop.line;
-  } else if (parseResults.codeSystems) {
+  }
+  if (parseResults.codeSystems.length) {
     return parseResults.codeSystems[parseResults.codeSystems.length - 1].stop
       .line;
-  } else if (parseResults.includes) {
+  }
+  if (parseResults.includes.length) {
     return parseResults.includes[parseResults.includes.length - 1].stop.line;
-  } else if (parseResults.using) {
-    return parseResults.using.start.line + 1;
-  } else if (parseResults.library) {
-    return 1;
+  }
+  if (parseResults.using) {
+    return parseResults.using.stop.line + 1;
+  }
+  if (parseResults.library) {
+    return 2;
   } else {
-    return 0;
+    return 1;
   }
 };
 export default applyParameter;
