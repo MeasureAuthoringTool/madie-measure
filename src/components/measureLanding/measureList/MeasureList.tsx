@@ -304,8 +304,7 @@ export default function MeasureList(props: {
           customSort(rowA.original.model, rowB.original.model),
       },
       {
-        //AAAA
-        header: "Actions",
+        header: "",
         cell: (info) =>
           !featureFlags?.MeasureListButtons ? (
             <Button
