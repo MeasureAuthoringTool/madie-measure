@@ -586,13 +586,11 @@ export default function MeasureList(props: {
         targetMeasure.current?.id,
         abortController.current.signal
       );
-
       const warn =
         status === 201 && !targetMeasure?.current?.measureMetaData?.draft;
       downloadZipFile(data, ecqmTitle, model, version, warn);
     } catch (err) {
       const errorStatus = err.response?.status;
-      const targetedMeasure = targetMeasure.current;
       if (err.message === "canceled") {
         setToastOpen(false);
         setDownloadState(null);
@@ -670,6 +668,20 @@ export default function MeasureList(props: {
             setFailureMessage(message);
           } else if (missing.length > 0) {
             setFailureMessage(missing);
+          }
+          // we send a custom error here. but it's type blob. we decode it here.
+        } else if (errorStatus === 400) {
+          try {
+            const blobFailureError = await err.response.data.text();
+            let parsed;
+            try {
+              parsed = JSON.parse(blobFailureError);
+            } catch (jsonError) {
+              parsed = { message: blobFailureError };
+            }
+            setFailureMessage(parsed.message || "Unknown error occurred.");
+          } catch (blobError) {
+            setFailureMessage("An error occurred while decoding the response.");
           }
         } else {
           const message =
