@@ -8,7 +8,7 @@ import {
   waitForElementToBeRemoved,
 } from "@testing-library/react";
 import { within } from "@testing-library/dom";
-
+import axios from "axios";
 import {
   Measure,
   MeasureErrorType,
@@ -1365,6 +1365,57 @@ describe("Measure List component", () => {
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
         "Unable to Export measure.Missing CQLMissing Population CriteriaMissing Measure DevelopersMissing StewardMissing DescriptionMeasure Type is required"
+      );
+    });
+    unmount();
+  });
+  it("should display a 400 as expected", async () => {
+    const error = {
+      response: {
+        status: 400,
+        request: {
+          responseText: JSON.stringify({ message: "" }),
+        },
+      },
+    };
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return {
+        ...mockMeasureServiceApi,
+        getMeasureExport: jest.fn().mockRejectedValue(error),
+        fetchMeasure: jest.fn().mockResolvedValue(measures[0]),
+      } as unknown as MeasureServiceApi;
+    });
+
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          selectedIds={selectedIds}
+          changeSelectedIds={changeSelectedIds}
+          setSelectedIds={setSelectedIds}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const actionButton = getByTestId(`measure-action-${measures[0].id}`);
+    fireEvent.click(actionButton);
+    expect(getByTestId(`export-measure-${measures[0].id}`)).toBeInTheDocument();
+    fireEvent.click(getByTestId(`export-measure-${measures[0].id}`));
+    await waitFor(() => {
+      expect(getByTestId("error-message")).toHaveTextContent(
+        "An error occurred while decoding the response."
       );
     });
     unmount();
