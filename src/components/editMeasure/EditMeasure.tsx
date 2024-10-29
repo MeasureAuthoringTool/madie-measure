@@ -15,13 +15,17 @@ import { Measure, Model } from "@madie/madie-models";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { MadiePatient } from "@madie/madie-patient";
 import { measureStore, routeHandlerStore } from "@madie/madie-util";
-import { Toast, MadieAlert } from "@madie/madie-design-system/dist/react";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
 import InvalidTestCaseDialog from "../common/invalidTestCaseDialog/InvalidTestCaseDialog";
 
 import versionErrorHelper from "../../utils/versionErrorHelper";
 
 import getLibraryNameErrors from "../measureLanding/measureList/InvalidMeasureNameDialog/getLibraryNameErrors";
+import {
+  Toast,
+  MadieAlert,
+  MadieDiscardDialog,
+} from "@madie/madie-design-system/dist/react";
 import DeleteDialog from "./DeleteDialog";
 import NotFound from "../notfound/NotFound";
 import ReviewInfo from "./reviewInfo/ReviewInfo";
@@ -46,35 +50,47 @@ export default function EditMeasure() {
   const { updateMeasure } = measureStore;
   const [loading, setLoading] = useState<boolean>(true);
   let navigate = useNavigate();
+
+  // Required by every single spa application that has internal routing
+  // This will block user from navigating inside madie-measure when the current form is dirty
+  const { updateRouteHandlerState } = routeHandlerStore;
   const [routeHandlerState, setRouteHandlerState] = useState<RouteHandlerState>(
     routeHandlerStore.state
   );
 
   const [measureId, setMeasureId] = useState<string>(id);
 
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   useEffect(() => {
     const subscription = routeHandlerStore.subscribe(setRouteHandlerState);
     return () => {
       subscription.unsubscribe();
     };
   }, []);
-  const { updateRouteHandlerState } = routeHandlerStore;
-
-  // make reusable component to throw anywhere we want to block navigation..
-  const blocker = useBlocker(() => !routeHandlerState.canTravel);
-  useEffect(() => {
-    if (blocker.location)
-      updateRouteHandlerState({
-        canTravel: false,
-        pendingRoute: blocker?.location?.pathname,
-      });
-  }, [blocker?.location?.pathname]);
-
-  useEffect(() => {
-    if (routeHandlerState.canTravel && blocker.reset) {
-      blocker.reset();
+  const blocker = useBlocker(({ currentLocation, nextLocation }) => {
+    if (
+      !routeHandlerState?.canTravel &&
+      currentLocation.pathname !== nextLocation.pathname
+    ) {
+      setDialogOpen(true);
+      return true;
     }
-  }, [routeHandlerState.canTravel]);
+    setDialogOpen(false);
+    return false;
+  });
+  const onContinue = () => {
+    setDialogOpen(false);
+    updateRouteHandlerState({
+      canTravel: true,
+      pendingRoute: "",
+    });
+    blocker.proceed();
+  };
+  const onClose = () => {
+    setDialogOpen(false);
+    blocker.reset();
+  };
+
   useEffect(() => {
     //we don't want to fire this by accident during delete.
     if (loading) loadMeasure();
@@ -490,6 +506,11 @@ export default function EditMeasure() {
         open={Boolean(downloadState)}
         handleContinueDialog={handleContinueDialog}
         handleCancelDialog={handleCancelDialog}
+      />
+      <MadieDiscardDialog
+        open={dialogOpen}
+        onContinue={onContinue}
+        onClose={onClose}
       />
       <Toast
         toastKey="measure-information-toast"
