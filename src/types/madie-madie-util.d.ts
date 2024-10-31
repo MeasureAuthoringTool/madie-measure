@@ -11,7 +11,6 @@ declare module "@madie/madie-util" {
 
   interface FeatureFlags {
     enableQdmRepeatTransfer: boolean;
-    MeasureListCheckboxes: boolean;
     associateMeasures: boolean;
     qiCoreStu4Updates: boolean;
     CQLBuilderDefinitions: boolean;

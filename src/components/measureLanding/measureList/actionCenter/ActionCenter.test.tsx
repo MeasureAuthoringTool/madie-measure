@@ -22,7 +22,6 @@ const mockedUseMeasureServiceApi = useMeasureServiceApi as jest.MockedFunction<
 >;
 
 const mockFeatureFlags = {
-  MeasureListCheckboxes: true,
   associateMeasures: true,
 };
 const mockGetUserName = jest.fn(() => "test user");

@@ -94,7 +94,7 @@ export default function ActionCenter(props: PropTypes) {
         onClick={versionMeasure}
         canEdit={canEdit}
       />
-      {featureFlags.MeasureListCheckboxes && featureFlags.associateMeasures && (
+      {featureFlags.associateMeasures && (
         <AssociateCmsIdAction
           measures={props.measures}
           onClick={props.associateCmsId}

@@ -34,7 +34,6 @@ jest.mock("@madie/madie-util", () => ({
   }),
   useFeatureFlags: () => {
     return {
-      MeasureListCheckboxes: true,
       associateMeasures: true,
     };
   },

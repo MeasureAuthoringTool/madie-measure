@@ -44,7 +44,6 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useFeatureFlags: jest.fn(() => ({
     enableQdmRepeatTransfer: false,
-    MeasureListCheckboxes: true,
     associateMeasures: true,
     MeasureListButtons: false,
   })),
@@ -1942,9 +1941,7 @@ describe("Measure List component", () => {
   });
 
   it("Should display checkboxes when the feature flag is enabled", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      MeasureListCheckboxes: true,
-    }));
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({}));
     const { getByTestId, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
@@ -1983,7 +1980,6 @@ describe("Measure List component", () => {
   it("Should display action center when the feature flag is enabled", async () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       MeasureListButtons: true,
-      MeasureListCheckboxes: true,
     }));
     const { getByTestId, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
@@ -2012,51 +2008,11 @@ describe("Measure List component", () => {
     unmount();
   });
 
-  it("Should not display checkboxes when the feature flag is disabled", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      MeasureListCheckboxes: false,
-    }));
-    const { getByTestId, unmount } = render(
-      <ServiceContext.Provider value={serviceConfig}>
-        <MeasureList
-          measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
-          setMeasureList={setMeasureListMock}
-          setTotalPages={setTotalPagesMock}
-          setTotalItems={setTotalItemsMock}
-          setVisibleItems={setVisibleItemsMock}
-          setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
-          activeTab={0}
-          searchCriteria={""}
-          setSearchCriteria={setSearchCriteriaMock}
-          currentLimit={10}
-          currentPage={0}
-          setErrMsg={setErrMsgMock}
-        />
-      </ServiceContext.Provider>
-    );
-
-    const tableBody = getByTestId("measure-list-tbl");
-    expect(tableBody).toBeInTheDocument();
-    const visibleRows = await within(tableBody).findAllByRole("row");
-    await waitFor(() => {
-      expect(visibleRows).toHaveLength(5);
-    });
-    const checkboxes = within(tableBody).queryByRole("checkbox");
-    await waitFor(() => {
-      expect(checkboxes).not.toBeInTheDocument();
-    });
-    unmount();
-  });
   describe("Action Center Tests", () => {
     beforeEach(() => {
       jest.resetModules();
       (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
         MeasureListButtons: true,
-        MeasureListCheckboxes: true,
       }));
     });
 
