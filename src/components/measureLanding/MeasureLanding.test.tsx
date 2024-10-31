@@ -34,7 +34,7 @@ jest.mock("@madie/madie-util", () => ({
   }),
   useFeatureFlags: () => {
     return {
-      associateMeasures: true,
+      MeasureListButtons: false,
     };
   },
 }));

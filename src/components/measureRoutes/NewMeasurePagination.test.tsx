@@ -19,14 +19,16 @@ const serviceConfig: ServiceConfig = {
     baseUrl: "example-service-url",
   },
 };
-
+const mockUser = "TestUser1";
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
+    getUserName: () => mockUser,
   }),
   useFeatureFlags: () => {
     return {
+      MeasureListButtons: false,
       MeasureListCheckboxes: false,
     };
   }, // Values of flags do not matter for these tests

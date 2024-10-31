@@ -939,13 +939,12 @@ export default function MeasureList(props: {
           </form>
         </div>
         <div tw="justify-self-end p-3">
-          {featureFlags.associateMeasures &&
-            !featureFlags.MeasureListButtons && (
-              <AssociateCmsIdAction
-                measures={selectedMeasures}
-                onClick={associateCmsId}
-              />
-            )}
+          {!featureFlags.MeasureListButtons && (
+            <AssociateCmsIdAction
+              measures={selectedMeasures}
+              onClick={associateCmsId}
+            />
+          )}
           {featureFlags.MeasureListButtons && (
             <ActionCenter
               updateTargetMeasure={updateTargetMeasure}

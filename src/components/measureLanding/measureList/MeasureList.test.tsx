@@ -44,7 +44,6 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useFeatureFlags: jest.fn(() => ({
     enableQdmRepeatTransfer: false,
-    associateMeasures: true,
     MeasureListButtons: false,
   })),
 }));

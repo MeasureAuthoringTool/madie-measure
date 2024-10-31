@@ -21,9 +21,7 @@ const mockedUseMeasureServiceApi = useMeasureServiceApi as jest.MockedFunction<
   typeof useMeasureServiceApi
 >;
 
-const mockFeatureFlags = {
-  associateMeasures: true,
-};
+const mockFeatureFlags = {};
 const mockGetUserName = jest.fn(() => "test user");
 const mockCheckUserCanEdit = jest.fn();
 const fetchMeasureDraftStatuses = jest.fn();

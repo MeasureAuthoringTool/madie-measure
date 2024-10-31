@@ -94,12 +94,10 @@ export default function ActionCenter(props: PropTypes) {
         onClick={versionMeasure}
         canEdit={canEdit}
       />
-      {featureFlags.associateMeasures && (
-        <AssociateCmsIdAction
-          measures={props.measures}
-          onClick={props.associateCmsId}
-        />
-      )}
+      <AssociateCmsIdAction
+        measures={props.measures}
+        onClick={props.associateCmsId}
+      />
     </div>
   );
 }
