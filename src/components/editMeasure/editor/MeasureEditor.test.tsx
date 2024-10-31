@@ -49,7 +49,6 @@ jest.mock("@madie/madie-util", () => ({
   }),
   useFeatureFlags: jest.fn().mockReturnValue({
     QDMValueSetSearch: true,
-    qdmCodeSearch: true,
     CQLBuilderDefinitions: true,
     CQLBuilderIncludes: true,
   }),
