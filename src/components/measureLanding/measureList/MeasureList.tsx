@@ -225,35 +225,33 @@ export default function MeasureList(props: {
 
   const columns = useMemo<ColumnDef<TCRow>[]>(() => {
     const columnDefs = [];
-    if (featureFlags?.MeasureListCheckboxes) {
-      columnDefs.push({
-        id: "select",
-        header: ({ table }) => (
-          <IndeterminateCheckbox
-            {...{
-              checked: table.getIsAllRowsSelected(),
-              indeterminate: table.getIsSomePageRowsSelected(),
-              onChange: table.getToggleAllPageRowsSelectedHandler(),
-            }}
-          />
-        ),
-        cell: ({ row }) => {
-          return (
-            <div className="px-1">
-              <IndeterminateCheckbox
-                {...{
-                  checked: row.getIsSelected(), //props.selectedIds[row.original.id],
-                  disabled: !row.getCanSelect(),
-                  indeterminate: row.getIsSomeSelected(),
-                  onChange: row.getToggleSelectedHandler(),
-                  id: row.original.id,
-                }}
-              />
-            </div>
-          );
-        },
-      });
-    }
+    columnDefs.push({
+      id: "select",
+      header: ({ table }) => (
+        <IndeterminateCheckbox
+          {...{
+            checked: table.getIsAllRowsSelected(),
+            indeterminate: table.getIsSomePageRowsSelected(),
+            onChange: table.getToggleAllPageRowsSelectedHandler(),
+          }}
+        />
+      ),
+      cell: ({ row }) => {
+        return (
+          <div className="px-1">
+            <IndeterminateCheckbox
+              {...{
+                checked: row.getIsSelected(), //props.selectedIds[row.original.id],
+                disabled: !row.getCanSelect(),
+                indeterminate: row.getIsSomeSelected(),
+                onChange: row.getToggleSelectedHandler(),
+                id: row.original.id,
+              }}
+            />
+          </div>
+        );
+      },
+    });
 
     return [
       ...columnDefs,
@@ -319,8 +317,7 @@ export default function MeasureList(props: {
               Select
             </Button>
           ) : (
-            featureFlags?.MeasureListButtons &&
-            featureFlags?.MeasureListCheckboxes && (
+            featureFlags?.MeasureListButtons && (
               <Button
                 variant="outline-filled"
                 data-testid={`measure-action-${info.row.original.id}`}
@@ -343,7 +340,7 @@ export default function MeasureList(props: {
         enableSorting: false,
       },
     ];
-  }, [featureFlags?.MeasureListCheckboxes]);
+  }, [featureFlags?.MeasureListButtons]);
 
   const table = useReactTable({
     data,
@@ -586,13 +583,11 @@ export default function MeasureList(props: {
         targetMeasure.current?.id,
         abortController.current.signal
       );
-
       const warn =
         status === 201 && !targetMeasure?.current?.measureMetaData?.draft;
       downloadZipFile(data, ecqmTitle, model, version, warn);
     } catch (err) {
       const errorStatus = err.response?.status;
-      const targetedMeasure = targetMeasure.current;
       if (err.message === "canceled") {
         setToastOpen(false);
         setDownloadState(null);
@@ -670,6 +665,20 @@ export default function MeasureList(props: {
             setFailureMessage(message);
           } else if (missing.length > 0) {
             setFailureMessage(missing);
+          }
+          // we send a custom error here. but it's type blob. we decode it here.
+        } else if (errorStatus === 400) {
+          try {
+            const blobFailureError = await err.response.data.text();
+            let parsed;
+            try {
+              parsed = JSON.parse(blobFailureError);
+            } catch (jsonError) {
+              parsed = { message: blobFailureError };
+            }
+            setFailureMessage(parsed.message || "Unknown error occurred.");
+          } catch (blobError) {
+            setFailureMessage("An error occurred while decoding the response.");
           }
         } else {
           const message =
@@ -930,27 +939,24 @@ export default function MeasureList(props: {
           </form>
         </div>
         <div tw="justify-self-end p-3">
-          {featureFlags.MeasureListCheckboxes &&
-            featureFlags.associateMeasures &&
-            !featureFlags.MeasureListButtons && (
-              <AssociateCmsIdAction
-                measures={selectedMeasures}
-                onClick={associateCmsId}
-              />
-            )}
-          {featureFlags.MeasureListButtons &&
-            featureFlags.MeasureListCheckboxes && (
-              <ActionCenter
-                updateTargetMeasure={updateTargetMeasure}
-                exportMeasure={exportMeasure}
-                measures={selectedMeasures}
-                associateCmsId={associateCmsId}
-                setCreateVersionDialog={setCreateVersionDialog}
-                setDraftMeasureDialog={setDraftMeasureDialog}
-                setDeleteMeasureDialog={setDeleteMeasureDialog}
-                deleteMeasure={deleteMeasure}
-              />
-            )}
+          {!featureFlags.MeasureListButtons && (
+            <AssociateCmsIdAction
+              measures={selectedMeasures}
+              onClick={associateCmsId}
+            />
+          )}
+          {featureFlags.MeasureListButtons && (
+            <ActionCenter
+              updateTargetMeasure={updateTargetMeasure}
+              exportMeasure={exportMeasure}
+              measures={selectedMeasures}
+              associateCmsId={associateCmsId}
+              setCreateVersionDialog={setCreateVersionDialog}
+              setDraftMeasureDialog={setDraftMeasureDialog}
+              setDeleteMeasureDialog={setDeleteMeasureDialog}
+              deleteMeasure={deleteMeasure}
+            />
+          )}
         </div>
       </div>
 

@@ -1,9 +1,15 @@
 #edit-measure-nav-a {
   .MuiTabs-flexContainer {
-    a:hover,
     a:focus {
       text-decoration: none !important;
+      background: #fafafa;
+      outline: #fafafa;
+      color: #000000 !important;
+    }
+    a:hover {
+      text-decoration: none !important;
       color: #fff !important;
+      background: #001f3d;
     }
   }
 }
