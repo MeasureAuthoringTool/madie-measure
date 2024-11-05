@@ -604,7 +604,7 @@ export default function MeasureList(props: {
             cqlLibraryName,
             model,
             baseConfigurationTypes,
-          } = await measureServiceApi?.fetchMeasure(targetedMeasure?.id);
+          } = await measureServiceApi?.fetchMeasure(targetMeasure.current?.id);
           const missing = [];
           if (_.isEmpty(cql)) {
             missing.push("Missing CQL");
