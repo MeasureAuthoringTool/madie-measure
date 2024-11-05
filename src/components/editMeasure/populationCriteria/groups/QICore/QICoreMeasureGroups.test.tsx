@@ -92,9 +92,7 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
   },
-  useFeatureFlags: jest.fn().mockReturnValue({
-    qiCoreStu4Updates: false,
-  }),
+  useFeatureFlags: jest.fn().mockReturnValue({}),
 }));
 
 const populationBasisValues: string[] = [

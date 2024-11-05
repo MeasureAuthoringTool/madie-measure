@@ -225,35 +225,33 @@ export default function MeasureList(props: {
 
   const columns = useMemo<ColumnDef<TCRow>[]>(() => {
     const columnDefs = [];
-    if (featureFlags?.MeasureListCheckboxes) {
-      columnDefs.push({
-        id: "select",
-        header: ({ table }) => (
-          <IndeterminateCheckbox
-            {...{
-              checked: table.getIsAllRowsSelected(),
-              indeterminate: table.getIsSomePageRowsSelected(),
-              onChange: table.getToggleAllPageRowsSelectedHandler(),
-            }}
-          />
-        ),
-        cell: ({ row }) => {
-          return (
-            <div className="px-1">
-              <IndeterminateCheckbox
-                {...{
-                  checked: row.getIsSelected(), //props.selectedIds[row.original.id],
-                  disabled: !row.getCanSelect(),
-                  indeterminate: row.getIsSomeSelected(),
-                  onChange: row.getToggleSelectedHandler(),
-                  id: row.original.id,
-                }}
-              />
-            </div>
-          );
-        },
-      });
-    }
+    columnDefs.push({
+      id: "select",
+      header: ({ table }) => (
+        <IndeterminateCheckbox
+          {...{
+            checked: table.getIsAllRowsSelected(),
+            indeterminate: table.getIsSomePageRowsSelected(),
+            onChange: table.getToggleAllPageRowsSelectedHandler(),
+          }}
+        />
+      ),
+      cell: ({ row }) => {
+        return (
+          <div className="px-1">
+            <IndeterminateCheckbox
+              {...{
+                checked: row.getIsSelected(), //props.selectedIds[row.original.id],
+                disabled: !row.getCanSelect(),
+                indeterminate: row.getIsSomeSelected(),
+                onChange: row.getToggleSelectedHandler(),
+                id: row.original.id,
+              }}
+            />
+          </div>
+        );
+      },
+    });
 
     return [
       ...columnDefs,
@@ -319,8 +317,7 @@ export default function MeasureList(props: {
               Select
             </Button>
           ) : (
-            featureFlags?.MeasureListButtons &&
-            featureFlags?.MeasureListCheckboxes && (
+            featureFlags?.MeasureListButtons && (
               <Button
                 variant="outline-filled"
                 data-testid={`measure-action-${info.row.original.id}`}
@@ -343,7 +340,7 @@ export default function MeasureList(props: {
         enableSorting: false,
       },
     ];
-  }, [featureFlags?.MeasureListCheckboxes]);
+  }, [featureFlags?.MeasureListButtons]);
 
   const table = useReactTable({
     data,
@@ -942,27 +939,24 @@ export default function MeasureList(props: {
           </form>
         </div>
         <div tw="justify-self-end p-3">
-          {featureFlags.MeasureListCheckboxes &&
-            featureFlags.associateMeasures &&
-            !featureFlags.MeasureListButtons && (
-              <AssociateCmsIdAction
-                measures={selectedMeasures}
-                onClick={associateCmsId}
-              />
-            )}
-          {featureFlags.MeasureListButtons &&
-            featureFlags.MeasureListCheckboxes && (
-              <ActionCenter
-                updateTargetMeasure={updateTargetMeasure}
-                exportMeasure={exportMeasure}
-                measures={selectedMeasures}
-                associateCmsId={associateCmsId}
-                setCreateVersionDialog={setCreateVersionDialog}
-                setDraftMeasureDialog={setDraftMeasureDialog}
-                setDeleteMeasureDialog={setDeleteMeasureDialog}
-                deleteMeasure={deleteMeasure}
-              />
-            )}
+          {!featureFlags.MeasureListButtons && (
+            <AssociateCmsIdAction
+              measures={selectedMeasures}
+              onClick={associateCmsId}
+            />
+          )}
+          {featureFlags.MeasureListButtons && (
+            <ActionCenter
+              updateTargetMeasure={updateTargetMeasure}
+              exportMeasure={exportMeasure}
+              measures={selectedMeasures}
+              associateCmsId={associateCmsId}
+              setCreateVersionDialog={setCreateVersionDialog}
+              setDraftMeasureDialog={setDraftMeasureDialog}
+              setDeleteMeasureDialog={setDeleteMeasureDialog}
+              deleteMeasure={deleteMeasure}
+            />
+          )}
         </div>
       </div>
 
