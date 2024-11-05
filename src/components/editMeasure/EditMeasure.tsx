@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Suspense } from "react";
+import React, { useEffect, useState, Suspense, useRef } from "react";
 import {
   useBlocker,
   Route,
@@ -21,6 +21,8 @@ import NotFound from "../notfound/NotFound";
 import ReviewInfo from "./reviewInfo/ReviewInfo";
 import "./EditMeasure.scss";
 import PopulationCriteriaWrapper from "./populationCriteria/PopulationCriteriaWrapper";
+import ExportDialog from "../measureLanding/measureList/exportDialog/ExportDialog";
+import { exportMeasure } from "../../utils/exportUtil";
 interface inputParams {
   id: string;
 }
@@ -86,6 +88,10 @@ export default function EditMeasure() {
   const [toastType, setToastType] = useState<string>("danger");
   const [measure, setMeasure] = useState<any>(measureStore.state);
 
+  const [downloadState, setDownloadState] = useState(null);
+  const [failureMessage, setFailureMessage] = useState(null);
+  const abortController = useRef(null);
+
   useEffect(() => {
     const deleteListener = () => {
       setDeleteOpen(true);
@@ -95,12 +101,48 @@ export default function EditMeasure() {
       window.removeEventListener("delete-measure", deleteListener, false);
     };
   }, []);
+
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
     return () => {
       subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    const exportListener = async () => {
+      try {
+        const measure = await measureServiceApi.fetchMeasure(id);
+        await exportMeasure(
+          setFailureMessage,
+          setDownloadState,
+          abortController,
+          measure,
+          measureServiceApi,
+          setToastOpen,
+          setToastType,
+          setToastMessage
+        );
+      } catch (error) {
+        console.error("Error fetching measure:", error);
+        setFailureMessage("Failed to fetch measure");
+      }
+    };
+    window.addEventListener("export-measure", exportListener, false);
+    return () => {
+      window.removeEventListener("export-measure", exportListener, false);
+    };
+  }, [
+    id,
+    setFailureMessage,
+    setDownloadState,
+    abortController,
+    measureServiceApi,
+    setToastOpen,
+    setToastType,
+    setToastMessage,
+  ]);
+
   // whenever measureID changes we need to update all pagination items except for limit which should be retained as a user preference
   useEffect(() => {
     return () => {
@@ -149,6 +191,14 @@ export default function EditMeasure() {
     setToastType(type);
     setToastMessage(message);
     setToastOpen(open);
+  };
+  const handleContinueDialog = () => {
+    setDownloadState(null);
+    setFailureMessage(null);
+  };
+  const handleCancelDialog = () => {
+    abortController.current && abortController.current.abort();
+    handleContinueDialog();
   };
   // At this time it appears only possible to have a single error at a time because of the way state is updated.
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -213,6 +263,14 @@ export default function EditMeasure() {
         onClose={() => setDeleteOpen(false)}
         measureName={measure?.measureName}
         deleteMeasure={deleteMeasure}
+      />
+      <ExportDialog
+        failureMessage={failureMessage}
+        measureName={measure?.measureName}
+        downloadState={downloadState}
+        open={Boolean(downloadState)}
+        handleContinueDialog={handleContinueDialog}
+        handleCancelDialog={handleCancelDialog}
       />
       <Toast
         toastKey="measure-information-toast"
