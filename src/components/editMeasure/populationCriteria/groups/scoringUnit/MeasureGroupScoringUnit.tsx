@@ -58,7 +58,7 @@ const MeasureGroupScoringUnit = ({
               code: event.target.value,
               guidance: undefined,
               name: "",
-              system: "https://clinicaltables.nlm.nih.gov/",
+              system: "http://unitsofmeasure.org/",
             },
           };
 
