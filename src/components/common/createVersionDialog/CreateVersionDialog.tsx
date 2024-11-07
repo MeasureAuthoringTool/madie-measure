@@ -11,7 +11,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import "./CreateVersionDialog.scss";
 import * as _ from "lodash";
-import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
+import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 
 interface VersionInfo {
   type: string;
@@ -25,7 +25,7 @@ const VERSION_OPTIONS = OPTIONS.map((ref, i) => (
   </MenuItem>
 ));
 
-const CreatVersionDialog = ({
+const CreateVersionDialog = ({
   currentVersion,
   open,
   onClose,
@@ -199,4 +199,4 @@ const CreatVersionDialog = ({
   );
 };
 
-export default CreatVersionDialog;
+export default CreateVersionDialog;

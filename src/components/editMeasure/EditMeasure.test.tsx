@@ -22,10 +22,11 @@ import {
 } from "@madie/madie-models";
 import MeasureEditor from "./editor/MeasureEditor";
 import { measureStore } from "@madie/madie-util";
+import { oneItemResponse } from "../__mocks__/mockMeasureResponses";
+
 jest.mock("./details/MeasureDetails");
 jest.mock("./editor/MeasureEditor");
 jest.mock("../../api/useMeasureServiceApi");
-// jest.mock("axios");
 
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
@@ -138,10 +139,27 @@ const measure = {
 } as Measure;
 
 const serviceApiMock = {
+  searchMeasuresByMeasureNameOrEcqmTitle: jest
+    .fn()
+    .mockResolvedValue(oneItemResponse),
+  fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
   fetchMeasure: jest.fn().mockResolvedValue(measure),
   getAllPopulationBasisOptions: jest.fn().mockResolvedValue([]),
   getReturnTypesForAllCqlDefinitions: jest.fn().mockResolvedValue({}),
   updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
+  createVersion: jest.fn().mockResolvedValue({}),
+  deleteMeasure: jest.fn().mockResolvedValue({}),
+  checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
+  checkValidVersion: jest.fn().mockResolvedValue({}),
+  fetchMeasureDraftStatuses: jest.fn().mockResolvedValue({
+    "1": true,
+    "2": true,
+    "3": true,
+  }),
+  getMeasureExport: jest
+    .fn()
+    .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
+  getReturnTypesForAllCqlFunctions: jest.fn().mockResolvedValue({}),
 } as unknown as MeasureServiceApi;
 
 useMeasureServiceApiMock.mockImplementation(() => {
@@ -177,7 +195,10 @@ const serviceConfig: ServiceConfig = {
   measureService: {
     baseUrl: "base.url",
   },
-  elmTranslationService: {
+  qdmElmTranslationService: {
+    baseUrl: "",
+  },
+  fhirElmTranslationService: {
     baseUrl: "",
   },
   terminologyService: { baseUrl: "" },
@@ -287,13 +308,15 @@ describe("EditMeasure Component", () => {
   });
 
   it("should render popCriteria", async () => {
-    renderRouter([{ pathname: "/measures/fakeid/edit/groups/1" }]);
-    const popCriteria = await findByText("Population Criteria");
+    waitFor(() =>
+      renderRouter([{ pathname: "/measures/fakeid/edit/groups/1" }])
+    );
+    const popCriteria = await screen.findByTestId("groups-tab");
     expect(popCriteria).toHaveAttribute("aria-selected", "true");
   });
   it("should render test-cases", async () => {
     renderRouter([{ pathname: "/measures/fakeid/edit/test-cases/" }]);
-    const tcLink = await findByText("Test Cases");
+    const tcLink = await screen.findByTestId("patients-tab");
     expect(tcLink).toHaveAttribute("aria-selected", "true");
   });
 

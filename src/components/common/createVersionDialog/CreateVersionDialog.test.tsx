@@ -13,10 +13,10 @@ import clearAllMocks = jest.clearAllMocks;
 import CreateVersionDialog from "./CreateVersionDialog";
 import useMeasureServiceApi, {
   MeasureServiceApi,
-} from "../../../../api/useMeasureServiceApi";
-import { oneItemResponse } from "../../../__mocks__/mockMeasureResponses";
+} from "../../../api/useMeasureServiceApi";
+import { oneItemResponse } from "../../__mocks__/mockMeasureResponses";
 
-jest.mock("../../../../api/useMeasureServiceApi");
+jest.mock("../../../api/useMeasureServiceApi");
 const useMeasureServiceMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 const mockMeasureServiceApi = {
@@ -37,7 +37,7 @@ const mockMeasureServiceApi = {
     .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
 } as unknown as MeasureServiceApi;
 
-jest.mock("../../../../api/useMeasureServiceApi", () =>
+jest.mock("../../../api/useMeasureServiceApi", () =>
   jest.fn(() => mockMeasureServiceApi)
 );
 describe("Create Version Dialog component", () => {
