@@ -9,7 +9,7 @@ import {
   Select,
   TextField,
 } from "@madie/madie-design-system/dist/react";
-import { MeasureNameSchema } from "../../../../validations/MeasureSchemaValidator";
+import { MeasureNameSchema } from "../../../validations/MeasureSchemaValidator";
 import { Model } from "@madie/madie-models";
 import { useFeatureFlags } from "@madie/madie-util";
 

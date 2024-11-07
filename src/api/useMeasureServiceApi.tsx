@@ -425,7 +425,7 @@ export class MeasureServiceApi {
     );
   }
 
-  async createVersion(id: string, versionType: string): Promise<Measure> {
+  async createVersion(id: string, versionType: string): Promise<any> {
     return await axios.put(
       `${this.baseUrl}/measures/${id}/version?versionType=${versionType}`,
       {},
@@ -499,7 +499,7 @@ export class MeasureServiceApi {
     measureId: string,
     model: string,
     measureName: string
-  ): Promise<Measure> {
+  ): Promise<any> {
     return await axios.post(
       `${this.baseUrl}/measures/${measureId}/draft`,
       { measureName: measureName, model: model },
