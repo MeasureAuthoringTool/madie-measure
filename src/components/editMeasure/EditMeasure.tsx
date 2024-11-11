@@ -67,17 +67,44 @@ export default function EditMeasure() {
       subscription.unsubscribe();
     };
   }, []);
+
+  function shouldIgnorePath(path) {
+    const ignorePatterns = [
+      /^\/measures\/[^/]+\/edit\/test-cases\/list-page\/sde$/,
+      /^\/measures\/[^/]+\/edit\/test-cases\/list-page\/expansion$/,
+      /^\/measures\/[^/]+\/edit\/test-cases\/list-page\/test-case-data$/,
+    ];
+    return ignorePatterns.some((pattern) => pattern.test(path));
+  }
+
+  // // make reusable component to throw anywhere we want to block navigation..
   const blocker = useBlocker(({ currentLocation, nextLocation }) => {
-    if (
-      !routeHandlerState?.canTravel &&
-      currentLocation.pathname !== nextLocation.pathname
-    ) {
-      setDialogOpen(true);
-      return true;
+    // we want to avoid blocking at lower levels in patient.
+    if (!shouldIgnorePath(nextLocation.pathname)) {
+      if (
+        !routeHandlerState?.canTravel &&
+        currentLocation.pathname !== nextLocation.pathname
+      ) {
+        setDialogOpen(true);
+        return true;
+      }
+      setDialogOpen(false);
+      return false;
     }
-    setDialogOpen(false);
-    return false;
   });
+  useEffect(() => {
+    if (blocker.location)
+      updateRouteHandlerState({
+        canTravel: false,
+        pendingRoute: blocker?.location?.pathname,
+      });
+  }, [blocker?.location?.pathname]);
+
+  useEffect(() => {
+    if (routeHandlerState.canTravel && blocker.reset) {
+      blocker.reset();
+    }
+  }, [routeHandlerState.canTravel]);
   const onContinue = () => {
     setDialogOpen(false);
     updateRouteHandlerState({
@@ -528,6 +555,11 @@ export default function EditMeasure() {
         message={toastMessage}
         onClose={onToastClose}
         autoHideDuration={6000}
+      />
+      <MadieDiscardDialog
+        open={dialogOpen}
+        onContinue={onContinue}
+        onClose={onClose}
       />
     </div>
   );
