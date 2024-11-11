@@ -55,7 +55,7 @@ import StatusHandler from "./StatusHandler";
 import { SuccessText } from "../../../styles/editMeasure/editor";
 import "./MeasureEditor.scss";
 import applyCode from "./codeApplier";
-import applyParameter from "./parameterApplier";
+import applyParameter, { editParameter } from "./parameterApplier";
 import applyValueset from "./valuesetApplier";
 import {
   applyLibrary,
@@ -540,6 +540,22 @@ const MeasureEditor = () => {
     return result.status;
   };
 
+  const handleParameterEdit = (
+    parameter: Parameter,
+    parameterToApply: Parameter
+  ) => {
+    const updatedCql = editParameter(editorVal, parameter, parameterToApply);
+    handleMadieEditorValue(updatedCql);
+    const setParameterConfirmation = () => {
+      setToastMessage(
+        `Parameter ${parameter.parameterName} has been successfully updated to the CQL`
+      );
+      setToastType("success");
+      setToastOpen(true);
+    };
+    updateMeasureCql(updatedCql, setParameterConfirmation);
+  };
+
   const handleDefinitionDelete = (selectedDefinition) => {
     //use Antrl parser to find the lines to delete for this definition
     const cqlComponents = new CqlAntlr(editorVal).parse();
@@ -729,6 +745,7 @@ const MeasureEditor = () => {
                 handleApplyLibrary={handleApplyLibrary}
                 handleApplyDefinition={handleApplyDefinition}
                 handleApplyParameter={handleApplyParameter}
+                handleParameterEdit={handleParameterEdit}
                 handleDefinitionEdit={handleDefinitionEdit}
                 handleDeleteLibrary={handleDeleteLibrary}
                 handleEditLibrary={handleEditLibrary}
