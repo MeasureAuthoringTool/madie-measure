@@ -55,7 +55,10 @@ import StatusHandler from "./StatusHandler";
 import { SuccessText } from "../../../styles/editMeasure/editor";
 import "./MeasureEditor.scss";
 import applyCode from "./codeApplier";
-import applyParameter, { deleteParameter } from "./parameterApplier";
+import applyParameter, {
+  editParameter,
+  deleteParameter,
+} from "./parameterApplier";
 import applyValueset from "./valuesetApplier";
 import {
   applyLibrary,
@@ -540,12 +543,28 @@ const MeasureEditor = () => {
     return result.status;
   };
 
+  const handleParameterEdit = (
+    parameter: Parameter,
+    parameterToApply: Parameter
+  ) => {
+    const updatedCql = editParameter(editorVal, parameter, parameterToApply);
+    handleMadieEditorValue(updatedCql);
+    const setParameterConfirmation = () => {
+      setToastMessage(
+        `Parameter ${parameter.parameterName} has been successfully updated to the CQL`
+      );
+      setToastType("success");
+      setToastOpen(true);
+    };
+    updateMeasureCql(updatedCql, setParameterConfirmation);
+  };
+
   const handleParameterDelete = (parameter: Parameter) => {
     const updatedCql = deleteParameter(editorVal, parameter);
     handleMadieEditorValue(updatedCql);
     const setParameterConfirmation = () => {
       setToastMessage(
-        `Parameter ${parameter.parameterName} has been successfully deleted from the CQL`
+        `Parameter ${parameter.parameterName} has been successfully updated to the CQL`
       );
       setToastType("success");
       setToastOpen(true);
@@ -742,6 +761,7 @@ const MeasureEditor = () => {
                 handleApplyLibrary={handleApplyLibrary}
                 handleApplyDefinition={handleApplyDefinition}
                 handleApplyParameter={handleApplyParameter}
+                handleParameterEdit={handleParameterEdit}
                 handleParameterDelete={handleParameterDelete}
                 handleDefinitionEdit={handleDefinitionEdit}
                 handleDeleteLibrary={handleDeleteLibrary}

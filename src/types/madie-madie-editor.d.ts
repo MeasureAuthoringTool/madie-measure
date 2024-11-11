@@ -76,6 +76,10 @@ declare module "@madie/madie-editor" {
     onChange?: (value: string) => void;
     handleApplyCode?: (code: Code) => void;
     handleApplyParameter?: (parameter: Parameter) => void;
+    handleParameterEdit?: (
+      parameter: Parameter,
+      parameterToApply: Parameter
+    ) => void;
     handleParameterDelete?: (parameter: Parameter) => void;
     handleApplyValueSet?: (vs: ValueSetForSearch) => void;
     handleApplyDefinition?: (def: Definition) => void;

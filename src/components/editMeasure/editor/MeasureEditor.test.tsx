@@ -1033,4 +1033,44 @@ describe("EditorWithTerminology", () => {
       "Library TestHelpers has been successfully edited in the CQL"
     );
   });
+
+  it("test edit parameter", async () => {
+    const measureWithCqlParameter = {
+      ...measure,
+      model: Model.QDM_5_6,
+      cql: 'parameter "Measurement Period" Interval<System.DateTime>',
+    } as Measure;
+
+    renderEditor(measureWithCqlParameter);
+
+    const editParameterBtn = await screen.findByTestId("edit-parameter");
+    expect(editParameterBtn).toBeInTheDocument();
+    userEvent.click(editParameterBtn);
+    await waitFor(() => {
+      const editor = screen.getByTestId("measure-editor");
+      expect(editor).toHaveValue(
+        'parameter "Test Measurement Period" Interval<System.DateTime>'
+      );
+    });
+  });
+
+  it("test delete parameter", async () => {
+    const measureWithCqlParameter = {
+      ...measure,
+      model: Model.QDM_5_6,
+      cql: 'parameter "Measurement Period" Interval<System.DateTime>',
+    } as Measure;
+
+    renderEditor(measureWithCqlParameter);
+
+    const deleteParameterBtn = await screen.findByTestId("delete-parameter");
+    expect(deleteParameterBtn).toBeInTheDocument();
+    userEvent.click(deleteParameterBtn);
+    await waitFor(() => {
+      const editor = screen.getByTestId("measure-editor");
+      expect(editor).not.toHaveValue(
+        'parameter "Measurement Period" Interval<System.DateTime>'
+      );
+    });
+  });
 });
