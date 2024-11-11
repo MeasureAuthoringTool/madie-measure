@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Suspense } from "react";
+import React, { useEffect, useState, Suspense, useRef } from "react";
 import {
   useBlocker,
   Route,
@@ -11,19 +11,31 @@ import "styled-components/macro";
 import EditMeasureNav from "./EditMeasureNav";
 import MeasureDetails from "./details/MeasureDetails";
 import MeasureEditor from "./editor/MeasureEditor";
-import { Measure } from "@madie/madie-models";
+import { Measure, Model } from "@madie/madie-models";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import { MadiePatient } from "@madie/madie-patient";
 import { measureStore, routeHandlerStore } from "@madie/madie-util";
 import { Toast, MadieAlert } from "@madie/madie-design-system/dist/react";
+import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
+import InvalidTestCaseDialog from "../common/invalidTestCaseDialog/InvalidTestCaseDialog";
+
+import versionErrorHelper from "../../utils/versionErrorHelper";
+
+import getLibraryNameErrors from "../measureLanding/measureList/InvalidMeasureNameDialog/getLibraryNameErrors";
 import DeleteDialog from "./DeleteDialog";
 import NotFound from "../notfound/NotFound";
 import ReviewInfo from "./reviewInfo/ReviewInfo";
 import "./EditMeasure.scss";
 import PopulationCriteriaWrapper from "./populationCriteria/PopulationCriteriaWrapper";
+
+import DraftMeasureDialog from "../common/draftMeasureDialog/DraftMeasureDialog";
+
+import ExportDialog from "../measureLanding/measureList/exportDialog/ExportDialog";
+import { exportMeasure } from "../../utils/exportUtil";
 interface inputParams {
   id: string;
 }
+
 export interface RouteHandlerState {
   canTravel: boolean;
   pendingRoute: string;
@@ -37,6 +49,9 @@ export default function EditMeasure() {
   const [routeHandlerState, setRouteHandlerState] = useState<RouteHandlerState>(
     routeHandlerStore.state
   );
+
+  const [measureId, setMeasureId] = useState<string>(id);
+
   useEffect(() => {
     const subscription = routeHandlerStore.subscribe(setRouteHandlerState);
     return () => {
@@ -61,30 +76,54 @@ export default function EditMeasure() {
     }
   }, [routeHandlerState.canTravel]);
   useEffect(() => {
-    // we don't want to fire this by accident during delete.
-    if (loading) {
-      measureServiceApi
-        .fetchMeasure(id)
-        .then((value: Measure) => {
-          updateMeasure(value);
-          setLoading(false);
-        })
-        .catch((err) => {
-          if (err.toString().includes("404")) {
-            navigate("/404");
-          }
-        });
-    }
-  }, [measureServiceApi, id, history, loading, updateMeasure]);
-
+    //we don't want to fire this by accident during delete.
+    if (loading) loadMeasure();
+  }, [measureServiceApi, measureId, history, loading, updateMeasure]);
+  useEffect(() => {
+    loadMeasure();
+  }, [measureId]);
+  const loadMeasure = () => {
+    measureServiceApi
+      .fetchMeasure(measureId)
+      .then((value: Measure) => {
+        updateMeasure(value);
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (err.toString().includes("404")) {
+          navigate("/404");
+        }
+      });
+  };
   const loadingDiv = <div data-testid="loading">Loading...</div>;
 
   // Delete utilities
   const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
+
+  const [invalidLibraryDialogOpen, setInvalidLibraryDialogOpen] =
+    useState<boolean>(false);
+  const [invalidLibraryErrors, setInvalidLibraryErrors] = useState<string[]>(
+    []
+  );
+  const [createVersionDialog, setCreateVersionDialog] = useState({
+    open: false,
+    measureId: "",
+  });
+  const [draftMeasureDialog, setDraftMeasureDialog] = useState({
+    open: false,
+  });
+  const [versionHelperText, setVersionHelperText] = useState("");
+  const [invalidTestCaseOpen, setInvalidTestCaseOpen] =
+    useState<boolean>(false);
+  const [versionType, setVersionType] = useState<string>(null);
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
   const [measure, setMeasure] = useState<any>(measureStore.state);
+
+  const [downloadState, setDownloadState] = useState(null);
+  const [failureMessage, setFailureMessage] = useState(null);
+  const abortController = useRef(null);
 
   useEffect(() => {
     const deleteListener = () => {
@@ -95,12 +134,73 @@ export default function EditMeasure() {
       window.removeEventListener("delete-measure", deleteListener, false);
     };
   }, []);
+
+  useEffect(() => {
+    const versionListener = () => {
+      setCreateVersionDialog({
+        open: true,
+        measureId: measure?.id,
+      });
+    };
+    window.addEventListener("version-measure", versionListener, false);
+    return () => {
+      window.removeEventListener("version-measure", versionListener, false);
+    };
+  }, [measure]);
+
+  useEffect(() => {
+    const draftListener = () => {
+      setDraftMeasureDialog({
+        open: true,
+      });
+    };
+    window.addEventListener("draft-measure", draftListener, false);
+    return () => {
+      window.removeEventListener("draft-measure", draftListener, false);
+    };
+  }, []);
+
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
     return () => {
       subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    const exportListener = async () => {
+      try {
+        const measure = await measureServiceApi.fetchMeasure(id);
+        await exportMeasure(
+          setFailureMessage,
+          setDownloadState,
+          abortController,
+          measure,
+          measureServiceApi,
+          setToastOpen,
+          setToastType,
+          setToastMessage
+        );
+      } catch (error) {
+        console.error("Error fetching measure:", error);
+        setFailureMessage("Failed to fetch measure");
+      }
+    };
+    window.addEventListener("export-measure", exportListener, false);
+    return () => {
+      window.removeEventListener("export-measure", exportListener, false);
+    };
+  }, [
+    id,
+    setFailureMessage,
+    setDownloadState,
+    abortController,
+    measureServiceApi,
+    setToastOpen,
+    setToastType,
+    setToastMessage,
+  ]);
+
   // whenever measureID changes we need to update all pagination items except for limit which should be retained as a user preference
   useEffect(() => {
     return () => {
@@ -117,7 +217,145 @@ export default function EditMeasure() {
         })
       );
     };
-  }, [id]);
+  }, [measureId]);
+  const handleCreateError = (error) => {
+    const errorData = error?.response;
+    setToastOpen(true);
+    setLoading(false);
+    if (errorData?.status === 400) {
+      setToastMessage("Requested measure cannot be versioned");
+    } else if (errorData?.status === 403) {
+      setToastMessage("User is unauthorized to create a version");
+    } else if (errorData?.status === 409) {
+      setToastMessage(
+        errorData?.data?.message
+          ? errorData.data.message
+          : "Requested operation could not be completed. Please contact the Help Desk."
+      );
+    } else {
+      setToastMessage(errorData?.message ? errorData.message : "Server error!");
+    }
+    const message = JSON.parse(errorData?.request?.responseText)?.message;
+    if (message) {
+      setVersionHelperText(versionErrorHelper(message));
+    }
+  };
+  const handleDialogClose = () => {
+    setInvalidLibraryDialogOpen(false);
+    setInvalidTestCaseOpen(false);
+    setCreateVersionDialog({
+      open: false,
+      measureId: "",
+    });
+    setDraftMeasureDialog({
+      open: false,
+    });
+    setInvalidLibraryErrors([]);
+    setVersionHelperText("");
+  };
+  const createVersion = (versionType: string) => {
+    setLoading(true);
+    return measureServiceApi
+      .createVersion(measure.id, versionType)
+      .then((r) => {
+        handleDialogClose();
+        setToastOpen(true);
+        setToastType("success");
+        setLoading(false);
+        setToastMessage("New version of measure is Successfully created");
+        setTimeout(() => {
+          navigate(`/measures/${r.data.id}/edit/details`);
+        }, 3000);
+      })
+      .catch((error) => {
+        handleCreateError(error);
+      });
+  };
+  // given a version and target, check if possible
+  const checkCreateVersion = async (versionType: string) => {
+    setLoading(true);
+    if (
+      versionType !== "major" &&
+      versionType !== "minor" &&
+      versionType !== "patch"
+    ) {
+      setCreateVersionDialog({
+        open: true,
+        measureId: measure.id,
+      });
+      setLoading(false);
+    } else {
+      await measureServiceApi
+        .checkValidVersion(measure.id, versionType)
+        .then(async (successResponse) => {
+          setLoading(false);
+          // if we get a 202, we have invalid test cases, but no other issues so we can create it
+          if (successResponse?.status === 202) {
+            setVersionType(versionType);
+            setInvalidTestCaseOpen(true);
+          }
+          // we assume standard 200 success case, we create the version
+          else {
+            createVersion(versionType);
+          }
+        })
+        .catch((error) => {
+          handleCreateError(error);
+        });
+    }
+  };
+  // intermediary validation step before we check if we can create version
+  const checkValidCqlLibraryName = async (versionType: string) => {
+    try {
+      const result = await measureServiceApi?.fetchMeasure(measure.id);
+      if (result) {
+        const { cqlLibraryName, model } = result;
+        const errorResults = getLibraryNameErrors(
+          cqlLibraryName,
+          model as Model
+        );
+        if (errorResults.length > 0) {
+          setInvalidLibraryErrors(errorResults);
+          setInvalidLibraryDialogOpen(true);
+          setCreateVersionDialog((prevState) => ({
+            ...prevState,
+            open: false,
+          }));
+        } else {
+          checkCreateVersion(versionType);
+        }
+      }
+    } catch (e) {
+      setToastMessage(
+        "An error occurred, please try again. If the error persists, please contact the help desk."
+      );
+    }
+  };
+  const draftMeasure = async (measureName: string, model: Model) => {
+    await measureServiceApi
+      .draftMeasure(measure.id, model, measureName)
+      .then(async (response) => {
+        handleDialogClose();
+        setToastOpen(true);
+        setToastType("success");
+        setToastMessage("New draft created successfully.");
+        setMeasureId(response.data.id);
+        setTimeout(() => {
+          navigate(`/measures/${response.data.id}/edit/details`);
+        }, 3000);
+      })
+      .catch((error) => {
+        const errorOb = error?.response?.data;
+        setToastOpen(true);
+        if (errorOb?.message) {
+          setToastMessage(errorOb.message);
+        } else {
+          setToastMessage(
+            "An error occurred, please try again. If the error persists, please contact the help desk."
+          );
+        }
+      });
+  };
   const deleteMeasure = async () => {
     const deletedMeasure: Measure = { ...measure, active: false };
     try {
@@ -149,6 +387,14 @@ export default function EditMeasure() {
     setToastType(type);
     setToastMessage(message);
     setToastOpen(open);
+  };
+  const handleContinueDialog = () => {
+    setDownloadState(null);
+    setFailureMessage(null);
+  };
+  const handleCancelDialog = () => {
+    abortController.current && abortController.current.abort();
+    handleContinueDialog();
   };
   // At this time it appears only possible to have a single error at a time because of the way state is updated.
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -213,6 +459,37 @@ export default function EditMeasure() {
         onClose={() => setDeleteOpen(false)}
         measureName={measure?.measureName}
         deleteMeasure={deleteMeasure}
+      />
+
+      <InvalidTestCaseDialog
+        open={invalidTestCaseOpen}
+        onContinue={createVersion}
+        onClose={handleDialogClose}
+        versionType={versionType}
+        loading={loading}
+      />
+      <DraftMeasureDialog
+        open={draftMeasureDialog.open}
+        onClose={handleDialogClose}
+        onSubmit={draftMeasure}
+        measure={measure}
+      />
+      <CreateVersionDialog
+        currentVersion={measure?.version}
+        open={createVersionDialog.open}
+        onClose={handleDialogClose}
+        onSubmit={checkValidCqlLibraryName}
+        versionHelperText={versionHelperText}
+        loading={loading}
+        measureId={measure?.id}
+      />
+      <ExportDialog
+        failureMessage={failureMessage}
+        measureName={measure?.measureName}
+        downloadState={downloadState}
+        open={Boolean(downloadState)}
+        handleContinueDialog={handleContinueDialog}
+        handleCancelDialog={handleCancelDialog}
       />
       <Toast
         toastKey="measure-information-toast"

@@ -27,14 +27,14 @@ import {
   RowSelection,
 } from "@tanstack/react-table";
 
-import InvalidTestCaseDialog from "./InvalidTestCaseDialog.tsx/InvalidTestCaseDialog";
+import InvalidTestCaseDialog from "../../common/invalidTestCaseDialog/InvalidTestCaseDialog";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
-import CreatVersionDialog from "./createVersionDialog/CreateVersionDialog";
-import DraftMeasureDialog from "./draftMeasureDialog/DraftMeasureDialog";
+import CreatVersionDialog from "../../common/createVersionDialog/CreateVersionDialog";
+import DraftMeasureDialog from "../../common/draftMeasureDialog/DraftMeasureDialog";
 import versionErrorHelper from "../../../utils/versionErrorHelper";
 import getModelFamily from "../../../utils/measureModelHelpers";
 import _ from "lodash";
