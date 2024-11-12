@@ -116,7 +116,7 @@ export function MadieTerminologyEditor({
         data-testid="delete-parameter"
         onClick={() => handleParameterDelete(parameter)}
       >
-        Edit Parameter
+        Delete Parameter
       </button>
     </>
   );

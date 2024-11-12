@@ -125,18 +125,18 @@ export const deleteParameter = (cql: string, parameter: Parameter) => {
     parameter,
     parseResults.parameters
   );
-  if (existingParameter) {
-    parseResults?.parameters?.forEach((parameter) => {
-      if (parameter.name === existingParameter?.name) {
-        cqlArr.splice(
-          parameter.start.line - 1,
-          parameter.stop.line - parameter.start.line + 1,
-          ""
-        );
-      }
-      return cqlArr.join("\n");
-    });
-  }
+
+  parseResults?.parameters?.forEach((parameter) => {
+    if (parameter.name === existingParameter?.name) {
+      cqlArr.splice(
+        parameter.start.line - 1,
+        parameter.stop.line - parameter.start.line + 1,
+        ""
+      );
+    }
+    return cqlArr.join("\n");
+  });
+
   return cqlArr.join("\n");
 };
 export default applyParameter;
