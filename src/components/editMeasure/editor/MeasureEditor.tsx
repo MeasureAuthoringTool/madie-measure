@@ -564,7 +564,7 @@ const MeasureEditor = () => {
     handleMadieEditorValue(updatedCql);
     const setParameterConfirmation = () => {
       setToastMessage(
-        `Parameter ${parameter.parameterName} has been successfully updated to the CQL`
+        `Parameter ${parameter.parameterName} has been successfully removed from the CQL.`
       );
       setToastType("success");
       setToastOpen(true);
