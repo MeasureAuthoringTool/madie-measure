@@ -753,7 +753,7 @@ const MeasureEditor = () => {
                 value={editorVal}
                 inboundAnnotations={elmAnnotations}
                 inboundErrorMarkers={errorMarkers}
-                height="calc(100vh - 135px)"
+                height="calc(100% - 48px)"
                 readOnly={!canEdit}
                 setOutboundAnnotations={setOutboundAnnotations}
                 measureStoreCql={measure?.cql}
@@ -769,12 +769,13 @@ const MeasureEditor = () => {
               />
             ) : (
               <>
+                {/* handle this edge case by flipping line (!showCqlBuilderTabs ? (*/}
                 <MadieEditor
                   onChange={handleMadieEditorValue}
                   value={editorVal}
                   inboundAnnotations={elmAnnotations}
                   inboundErrorMarkers={errorMarkers}
-                  height="calc(100vh - 135px)"
+                  height="100%"
                   readOnly={!canEdit}
                   setOutboundAnnotations={setOutboundAnnotations}
                 />
@@ -785,7 +786,7 @@ const MeasureEditor = () => {
               style={{
                 display: "flex",
                 justifyContent: "center",
-                height: "calc(100vh - 135px)",
+                height: "calc(100vh)",
               }}
             >
               <MadieSpinner style={{ height: 50, width: 50 }} />
