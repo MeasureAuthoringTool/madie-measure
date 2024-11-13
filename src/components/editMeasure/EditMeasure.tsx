@@ -92,19 +92,7 @@ export default function EditMeasure() {
       return false;
     }
   });
-  useEffect(() => {
-    if (blocker.location)
-      updateRouteHandlerState({
-        canTravel: false,
-        pendingRoute: blocker?.location?.pathname,
-      });
-  }, [blocker?.location?.pathname]);
 
-  useEffect(() => {
-    if (routeHandlerState.canTravel && blocker.reset) {
-      blocker.reset();
-    }
-  }, [routeHandlerState.canTravel]);
   const onContinue = () => {
     setDialogOpen(false);
     updateRouteHandlerState({
@@ -533,11 +521,6 @@ export default function EditMeasure() {
         open={Boolean(downloadState)}
         handleContinueDialog={handleContinueDialog}
         handleCancelDialog={handleCancelDialog}
-      />
-      <MadieDiscardDialog
-        open={dialogOpen}
-        onContinue={onContinue}
-        onClose={onClose}
       />
       <Toast
         toastKey="measure-information-toast"
