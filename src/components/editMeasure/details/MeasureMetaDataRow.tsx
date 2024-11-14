@@ -3,6 +3,8 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import "twin.macro";
 import "styled-components/macro";
 import { Popover } from "@madie/madie-design-system/dist/react";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import EditNoteIcon from '@mui/icons-material/EditNote';
 
 interface MeasureMetaDataRowProps {
   name: string;
@@ -40,7 +42,9 @@ const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
         <td>{description}</td>
         {id && canEdit && (
           <td style={{ width: 160 }}>
-            <button
+            <DeleteOutlinedIcon/>
+            <EditNoteIcon/>
+            {/* <button
               className="action-button"
               onClick={(e) => {
                 handleOpen(id, e);
@@ -53,7 +57,7 @@ const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
               <div className="chevron-container">
                 <ExpandMoreIcon />
               </div>
-            </button>
+            </button> */}
           </td>
         )}
       </tr>
