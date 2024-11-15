@@ -26,7 +26,7 @@ import {
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { ELM_JSON, MeasureCQL } from "../../../../common/MeasureCQL";
 import userEvent from "@testing-library/user-event";
-import axios from "../../../../../api/axios-insatnce";
+import axios from "../../../../../api/axios-instance";
 import { getPopulationsForScoring } from "../../PopulationHelper";
 import * as _ from "lodash";
 // @ts-ignore
@@ -64,7 +64,7 @@ const getEmptyStrat = () => ({
   id: "",
 });
 
-jest.mock("../../../../../api/axios-insatnce");
+jest.mock("../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec

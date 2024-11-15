@@ -13,7 +13,6 @@ import MeasureDetails from "./details/MeasureDetails";
 import MeasureEditor from "./editor/MeasureEditor";
 import { Measure, Model } from "@madie/madie-models";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
-import { MadiePatient } from "@madie/madie-patient";
 import { measureStore, routeHandlerStore } from "@madie/madie-util";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
 import InvalidTestCaseDialog from "../common/invalidTestCaseDialog/InvalidTestCaseDialog";
@@ -36,10 +35,7 @@ import DraftMeasureDialog from "../common/draftMeasureDialog/DraftMeasureDialog"
 
 import ExportDialog from "../measureLanding/measureList/exportDialog/ExportDialog";
 import { exportMeasure } from "../../utils/exportUtil";
-interface inputParams {
-  id: string;
-}
-
+import TestCases from "./testCases/TestCases";
 export interface RouteHandlerState {
   canTravel: boolean;
   pendingRoute: string;
@@ -50,6 +46,7 @@ export default function EditMeasure() {
   const { updateMeasure } = measureStore;
   const [loading, setLoading] = useState<boolean>(true);
   let navigate = useNavigate();
+  const [measureId, setMeasureId] = useState<string>(id);
 
   // Required by every single spa application that has internal routing
   // This will block user from navigating inside madie-measure when the current form is dirty
@@ -57,9 +54,6 @@ export default function EditMeasure() {
   const [routeHandlerState, setRouteHandlerState] = useState<RouteHandlerState>(
     routeHandlerStore.state
   );
-
-  const [measureId, setMeasureId] = useState<string>(id);
-
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   useEffect(() => {
     const subscription = routeHandlerStore.subscribe(setRouteHandlerState);
@@ -67,32 +61,17 @@ export default function EditMeasure() {
       subscription.unsubscribe();
     };
   }, []);
-
-  function shouldIgnorePath(path) {
-    const ignorePatterns = [
-      /^\/measures\/[^/]+\/edit\/test-cases\/list-page\/sde$/,
-      /^\/measures\/[^/]+\/edit\/test-cases\/list-page\/expansion$/,
-      /^\/measures\/[^/]+\/edit\/test-cases\/list-page\/test-case-data$/,
-    ];
-    return ignorePatterns.some((pattern) => pattern.test(path));
-  }
-
-  // // make reusable component to throw anywhere we want to block navigation..
   const blocker = useBlocker(({ currentLocation, nextLocation }) => {
-    // we want to avoid blocking at lower levels in patient.
-    if (!shouldIgnorePath(nextLocation.pathname)) {
-      if (
-        !routeHandlerState?.canTravel &&
-        currentLocation.pathname !== nextLocation.pathname
-      ) {
-        setDialogOpen(true);
-        return true;
-      }
-      setDialogOpen(false);
-      return false;
+    if (
+      !routeHandlerState?.canTravel &&
+      currentLocation.pathname !== nextLocation.pathname
+    ) {
+      setDialogOpen(true);
+      return true;
     }
+    setDialogOpen(false);
+    return false;
   });
-
   const onContinue = () => {
     setDialogOpen(false);
     updateRouteHandlerState({
@@ -130,12 +109,6 @@ export default function EditMeasure() {
 
   // Delete utilities
   const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
-
-  const [invalidLibraryDialogOpen, setInvalidLibraryDialogOpen] =
-    useState<boolean>(false);
-  const [invalidLibraryErrors, setInvalidLibraryErrors] = useState<string[]>(
-    []
-  );
   const [createVersionDialog, setCreateVersionDialog] = useState({
     open: false,
     measureId: "",
@@ -272,7 +245,6 @@ export default function EditMeasure() {
     }
   };
   const handleDialogClose = () => {
-    setInvalidLibraryDialogOpen(false);
     setInvalidTestCaseOpen(false);
     setCreateVersionDialog({
       open: false,
@@ -281,7 +253,6 @@ export default function EditMeasure() {
     setDraftMeasureDialog({
       open: false,
     });
-    setInvalidLibraryErrors([]);
     setVersionHelperText("");
   };
   const createVersion = (versionType: string) => {
@@ -346,8 +317,6 @@ export default function EditMeasure() {
           model as Model
         );
         if (errorResults.length > 0) {
-          setInvalidLibraryErrors(errorResults);
-          setInvalidLibraryDialogOpen(true);
           setCreateVersionDialog((prevState) => ({
             ...prevState,
             open: false,
@@ -463,7 +432,14 @@ export default function EditMeasure() {
             }
           />
           <Route path={`/cql-editor`} element={<MeasureEditor />} />
-          <Route path={`/test-cases/*`} element={<MadiePatient />} />
+          <Route
+            path={`/test-cases/*`}
+            element={
+              <Suspense fallback={<div>loading</div>}>
+                <TestCases />
+              </Suspense>
+            }
+          />
           <Route
             path={`/groups/:groupNumber`}
             element={<PopulationCriteriaWrapper />}

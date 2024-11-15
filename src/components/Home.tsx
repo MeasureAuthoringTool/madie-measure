@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "../api/axios-insatnce";
+import axios from "../api/axios-instance";
 import MeasureRoutes from "./measureRoutes/MeasureRoutes";
 import { ApiContextProvider, ServiceConfig } from "../api/ServiceContext";
 

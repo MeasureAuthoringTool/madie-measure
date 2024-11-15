@@ -6,7 +6,7 @@ import MeasureEditor, {
 } from "./MeasureEditor";
 import { Measure, MeasureErrorType, Model } from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
-import axios from "../../../api/axios-insatnce";
+import axios from "../../../api/axios-instance";
 import { ElmTranslationError } from "./measureEditorUtils";
 import userEvent from "@testing-library/user-event";
 // @ts-ignore
@@ -143,7 +143,7 @@ const cqlToElmExternalErrors: ElmTranslationExternalError[] = [
   },
 ];
 
-jest.mock("../../../api/axios-insatnce");
+jest.mock("../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const serviceConfig = {

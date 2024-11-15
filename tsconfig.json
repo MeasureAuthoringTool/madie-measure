@@ -2,6 +2,7 @@
   "esModuleInterop": true,
   "extends": "ts-config-single-spa",
   "compilerOptions": {
+    "target": "es2015",
     "declaration": true,
     "declarationDir": "dist",
     "declarationMap": true,
