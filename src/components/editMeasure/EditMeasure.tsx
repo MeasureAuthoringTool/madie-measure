@@ -75,13 +75,7 @@ export default function EditMeasure() {
       blocker.reset();
     }
   }, [routeHandlerState.canTravel]);
-  useEffect(() => {
-    //we don't want to fire this by accident during delete.
-    if (loading) loadMeasure();
-  }, [measureServiceApi, measureId, history, loading, updateMeasure]);
-  useEffect(() => {
-    loadMeasure();
-  }, [measureId]);
+
   const loadMeasure = () => {
     measureServiceApi
       .fetchMeasure(measureId)
@@ -95,6 +89,11 @@ export default function EditMeasure() {
         }
       });
   };
+
+  useEffect(() => {
+    loadMeasure();
+  }, [measureId]);
+
   const loadingDiv = <div data-testid="loading">Loading...</div>;
 
   // Delete utilities
@@ -134,7 +133,6 @@ export default function EditMeasure() {
       window.removeEventListener("delete-measure", deleteListener, false);
     };
   }, []);
-
   useEffect(() => {
     const versionListener = () => {
       setCreateVersionDialog({
@@ -142,11 +140,13 @@ export default function EditMeasure() {
         measureId: measure?.id,
       });
     };
-    window.addEventListener("version-measure", versionListener, false);
+    window.addEventListener("version-measure", versionListener, {
+      passive: true,
+    });
     return () => {
-      window.removeEventListener("version-measure", versionListener, false);
+      window.removeEventListener("version-measure", versionListener);
     };
-  }, [measure]);
+  }, []); // only mount and unmount on initial render
 
   useEffect(() => {
     const draftListener = () => {
@@ -263,9 +263,7 @@ export default function EditMeasure() {
         setToastType("success");
         setLoading(false);
         setToastMessage("New version of measure is Successfully created");
-        setTimeout(() => {
-          navigate(`/measures/${r.data.id}/edit/details`);
-        }, 3000);
+        loadMeasure();
       })
       .catch((error) => {
         handleCreateError(error);
@@ -301,11 +299,13 @@ export default function EditMeasure() {
         })
         .catch((error) => {
           handleCreateError(error);
+          setLoading(false);
         });
     }
   };
   // intermediary validation step before we check if we can create version
   const checkValidCqlLibraryName = async (versionType: string) => {
+    setLoading(true);
     try {
       const result = await measureServiceApi?.fetchMeasure(measure.id);
       if (result) {
@@ -329,6 +329,7 @@ export default function EditMeasure() {
       setToastMessage(
         "An error occurred, please try again. If the error persists, please contact the help desk."
       );
+      setLoading(false);
     }
   };
   const draftMeasure = async (measureName: string, model: Model) => {
