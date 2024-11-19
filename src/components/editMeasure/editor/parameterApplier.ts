@@ -92,4 +92,51 @@ export const findParameterInsertPoint = (parseResults: CqlResult) => {
     return 1;
   }
 };
+
+export const editParameter = (
+  cql: string,
+  parameter: Parameter,
+  parameterToApply: Parameter
+): string => {
+  const parseResults: CqlResult = new CqlAntlr(cql).parse();
+  let cqlLineArr: string[] = cql?.split("\n");
+  const existingParameter = findExistingParameter(
+    parameter,
+    parseResults.parameters
+  );
+
+  parseResults?.parameters?.forEach((parameter) => {
+    if (parameter.name === existingParameter?.name) {
+      cqlLineArr.splice(
+        parameter.start.line - 1,
+        parameter.stop.line - parameter.start.line + 1,
+        `parameter "${parameterToApply.parameterName}" ${parameterToApply.expression}`
+      );
+      return cqlLineArr.join("\n");
+    }
+  });
+  return cqlLineArr.join("\n");
+};
+
+export const deleteParameter = (cql: string, parameter: Parameter) => {
+  const cqlArr: string[] = cql.split("\n");
+  const parseResults: CqlResult = new CqlAntlr(cql).parse();
+  const existingParameter = findExistingParameter(
+    parameter,
+    parseResults.parameters
+  );
+
+  parseResults?.parameters?.forEach((parameter) => {
+    if (parameter.name === existingParameter?.name) {
+      cqlArr.splice(
+        parameter.start.line - 1,
+        parameter.stop.line - parameter.start.line + 1,
+        ""
+      );
+    }
+    return cqlArr.join("\n");
+  });
+
+  return cqlArr.join("\n");
+};
 export default applyParameter;

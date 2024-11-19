@@ -55,7 +55,10 @@ import StatusHandler from "./StatusHandler";
 import { SuccessText } from "../../../styles/editMeasure/editor";
 import "./MeasureEditor.scss";
 import applyCode from "./codeApplier";
-import applyParameter from "./parameterApplier";
+import applyParameter, {
+  editParameter,
+  deleteParameter,
+} from "./parameterApplier";
 import applyValueset from "./valuesetApplier";
 import {
   applyLibrary,
@@ -540,6 +543,35 @@ const MeasureEditor = () => {
     return result.status;
   };
 
+  const handleParameterEdit = (
+    parameter: Parameter,
+    parameterToApply: Parameter
+  ) => {
+    const updatedCql = editParameter(editorVal, parameter, parameterToApply);
+    handleMadieEditorValue(updatedCql);
+    const setParameterConfirmation = () => {
+      setToastMessage(
+        `Parameter ${parameter.parameterName} has been successfully updated.`
+      );
+      setToastType("success");
+      setToastOpen(true);
+    };
+    updateMeasureCql(updatedCql, setParameterConfirmation);
+  };
+
+  const handleParameterDelete = (parameter: Parameter) => {
+    const updatedCql = deleteParameter(editorVal, parameter);
+    handleMadieEditorValue(updatedCql);
+    const setParameterConfirmation = () => {
+      setToastMessage(
+        `Parameter ${parameter.parameterName} has been successfully removed from the CQL.`
+      );
+      setToastType("success");
+      setToastOpen(true);
+    };
+    updateMeasureCql(updatedCql, setParameterConfirmation);
+  };
+
   const handleDefinitionDelete = (selectedDefinition) => {
     //use Antrl parser to find the lines to delete for this definition
     const cqlComponents = new CqlAntlr(editorVal).parse();
@@ -729,6 +761,8 @@ const MeasureEditor = () => {
                 handleApplyLibrary={handleApplyLibrary}
                 handleApplyDefinition={handleApplyDefinition}
                 handleApplyParameter={handleApplyParameter}
+                handleParameterEdit={handleParameterEdit}
+                handleParameterDelete={handleParameterDelete}
                 handleDefinitionEdit={handleDefinitionEdit}
                 handleDeleteLibrary={handleDeleteLibrary}
                 handleEditLibrary={handleEditLibrary}
@@ -736,7 +770,7 @@ const MeasureEditor = () => {
                 value={editorVal}
                 inboundAnnotations={elmAnnotations}
                 inboundErrorMarkers={errorMarkers}
-                height="calc(100vh - 135px)"
+                height="calc(100% - 48px)"
                 readOnly={!canEdit}
                 setOutboundAnnotations={setOutboundAnnotations}
                 measureStoreCql={measure?.cql}
@@ -752,12 +786,13 @@ const MeasureEditor = () => {
               />
             ) : (
               <>
+                {/* handle this edge case by flipping line (!showCqlBuilderTabs ? (*/}
                 <MadieEditor
                   onChange={handleMadieEditorValue}
                   value={editorVal}
                   inboundAnnotations={elmAnnotations}
                   inboundErrorMarkers={errorMarkers}
-                  height="calc(100vh - 135px)"
+                  height="100%"
                   readOnly={!canEdit}
                   setOutboundAnnotations={setOutboundAnnotations}
                 />
@@ -768,7 +803,7 @@ const MeasureEditor = () => {
               style={{
                 display: "flex",
                 justifyContent: "center",
-                height: "calc(100vh - 135px)",
+                height: "calc(100vh)",
               }}
             >
               <MadieSpinner style={{ height: 50, width: 50 }} />
