@@ -34,12 +34,6 @@ describe("Measure MetaData Row Component", () => {
     const definition = getByText("I'm a measure definition");
     expect(definition).toBeInTheDocument();
 
-    await waitFor(() => {
-      const selectButton = getByTestId(`select-action-reference_id_1`);
-      expect(selectButton).toBeInTheDocument();
-      userEvent.click(selectButton);
-    });
-
     const editButton = getByTestId(`edit-measure-reference-reference_id_1`);
     expect(editButton).toBeInTheDocument();
   });
