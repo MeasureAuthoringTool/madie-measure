@@ -167,12 +167,6 @@ describe("Measure References Component", () => {
     );
     await checkRows(9);
 
-    await waitFor(() => {
-      const selectButton = screen.getByTestId(`select-action-id 1`);
-      expect(selectButton).toBeInTheDocument();
-      userEvent.click(selectButton);
-    });
-
     const editButton = screen.getByTestId(`edit-measure-reference-id 1`);
     expect(editButton).toBeInTheDocument();
 
@@ -233,12 +227,6 @@ describe("Measure References Component", () => {
     );
     await checkRows(9);
 
-    await waitFor(() => {
-      const selectButton = screen.getByTestId(`select-action-id 1`);
-      expect(selectButton).toBeInTheDocument();
-      userEvent.click(selectButton);
-    });
-
     const deleteButton = getByTestId(`delete-measure-reference-id 1`);
     expect(deleteButton).toBeInTheDocument();
     fireEvent.click(deleteButton);
@@ -269,12 +257,6 @@ describe("Measure References Component", () => {
       </ApiContextProvider>
     );
     await checkRows(9);
-
-    await waitFor(() => {
-      const selectButton = screen.getByTestId(`select-action-id 1`);
-      expect(selectButton).toBeInTheDocument();
-      userEvent.click(selectButton);
-    });
 
     const deleteButton = getByTestId(`delete-measure-reference-id 1`);
     expect(deleteButton).toBeInTheDocument();
