@@ -80,6 +80,7 @@ declare module "@madie/madie-editor" {
       parameter: Parameter,
       parameterToApply: Parameter
     ) => void;
+    handleParameterDelete?: (parameter: Parameter) => void;
     handleApplyValueSet?: (vs: ValueSetForSearch) => void;
     handleApplyDefinition?: (def: Definition) => void;
     handleDefinitionEdit?: (lib: SelectedLibrary, def: Definition) => void;

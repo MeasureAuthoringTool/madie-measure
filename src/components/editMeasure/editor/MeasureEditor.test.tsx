@@ -1053,4 +1053,24 @@ describe("EditorWithTerminology", () => {
       );
     });
   });
+
+  it("test delete parameter", async () => {
+    const measureWithCqlParameter = {
+      ...measure,
+      model: Model.QDM_5_6,
+      cql: 'parameter "Measurement Period" Interval<System.DateTime>',
+    } as Measure;
+
+    renderEditor(measureWithCqlParameter);
+
+    const deleteParameterBtn = await screen.findByTestId("delete-parameter");
+    expect(deleteParameterBtn).toBeInTheDocument();
+    userEvent.click(deleteParameterBtn);
+    await waitFor(() => {
+      const editor = screen.getByTestId("measure-editor");
+      expect(editor).not.toHaveValue(
+        'parameter "Measurement Period" Interval<System.DateTime>'
+      );
+    });
+  });
 });

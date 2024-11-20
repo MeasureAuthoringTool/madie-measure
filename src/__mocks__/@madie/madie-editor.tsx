@@ -33,6 +33,7 @@ export function MadieTerminologyEditor({
   handleEditLibrary,
   handleDeleteLibrary,
   handleParameterEdit,
+  handleParameterDelete,
 }) {
   const code = {
     codeSystem: "RXNORM",
@@ -110,6 +111,12 @@ export function MadieTerminologyEditor({
         onClick={() => handleParameterEdit(parameter, parameterToApply)}
       >
         Edit Parameter
+      </button>
+      <button
+        data-testid="delete-parameter"
+        onClick={() => handleParameterDelete(parameter)}
+      >
+        Delete Parameter
       </button>
     </>
   );
