@@ -6,7 +6,6 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
-import { act } from "react-dom/test-utils";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import {
   ApiContextProvider,
@@ -2131,39 +2130,29 @@ describe("TestCaseList component", () => {
       expect(toolTip).not.toHaveClass("hidden");
     });
     //blur
-    act(() => {
-      fireEvent.blur(focusTrap);
-    });
+    fireEvent.blur(focusTrap);
     await waitFor(() => {
       expect(toolTip).toHaveClass("hidden");
     });
     //enter
-    act(() => {
-      fireEvent.mouseEnter(focusTrap);
-    });
+    fireEvent.mouseEnter(focusTrap);
     await waitFor(() => {
       expect(toolTip).not.toHaveClass("hidden");
     });
     //leave
-    act(() => {
-      fireEvent.mouseLeave(focusTrap);
-    });
+    fireEvent.mouseLeave(focusTrap);
     await waitFor(() => {
       expect(toolTip).toHaveClass("hidden");
     });
-    act(() => {
-      fireEvent.mouseEnter(focusTrap);
-    });
+    fireEvent.mouseEnter(focusTrap);
     await waitFor(() => {
       expect(toolTip).not.toHaveClass("hidden");
     });
-    act(() => {
-      fireEvent.keyDown(focusTrap, {
-        key: "Escape",
-        code: "Escape",
-        keyCode: 27,
-        charCode: 27,
-      });
+    fireEvent.keyDown(focusTrap, {
+      key: "Escape",
+      code: "Escape",
+      keyCode: 27,
+      charCode: 27,
     });
     await waitFor(() => {
       expect(toolTip).toHaveClass("hidden");
@@ -2227,13 +2216,11 @@ describe("TestCaseList component", () => {
         screen.getByText("QRDA exported successfully")
       ).toBeInTheDocument();
     });
-    act(() => {
-      fireEvent.keyDown(screen.getByText("QRDA exported successfully"), {
-        key: "Escape",
-        code: "Escape",
-        keyCode: 27,
-        charCode: 27,
-      });
+    fireEvent.keyDown(screen.getByText("QRDA exported successfully"), {
+      key: "Escape",
+      code: "Escape",
+      keyCode: 27,
+      charCode: 27,
     });
 
     expect(
@@ -2336,13 +2323,11 @@ describe("TestCaseList component", () => {
     //popover opens
     const popoverButton = screen.getByTestId("export-excel-1");
     expect(popoverButton).toBeVisible();
-    act(() => {
-      fireEvent.keyDown(popoverButton, {
-        key: "Escape",
-        code: "Escape",
-        keyCode: 27,
-        charCode: 27,
-      });
+    fireEvent.keyDown(popoverButton, {
+      key: "Escape",
+      code: "Escape",
+      keyCode: 27,
+      charCode: 27,
     });
 
     expect(screen.queryByTestId("export-excel-1")).not.toBeVisible();
@@ -2403,13 +2388,11 @@ describe("TestCaseList component", () => {
         screen.getByText("Excel exported successfully")
       ).toBeInTheDocument();
     });
-    act(() => {
-      fireEvent.keyDown(screen.getByText("Excel exported successfully"), {
-        key: "Escape",
-        code: "Escape",
-        keyCode: 27,
-        charCode: 27,
-      });
+    fireEvent.keyDown(screen.getByText("Excel exported successfully"), {
+      key: "Escape",
+      code: "Escape",
+      keyCode: 27,
+      charCode: 27,
     });
 
     expect(
@@ -2475,13 +2458,11 @@ describe("TestCaseList component", () => {
     await waitFor(() => {
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
     });
-    act(() => {
-      fireEvent.keyDown(screen.getByText(errorMessage), {
-        key: "Escape",
-        code: "Escape",
-        keyCode: 27,
-        charCode: 27,
-      });
+    fireEvent.keyDown(screen.getByText(errorMessage), {
+      key: "Escape",
+      code: "Escape",
+      keyCode: 27,
+      charCode: 27,
     });
 
     expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
@@ -2546,13 +2527,11 @@ describe("TestCaseList component", () => {
     await waitFor(() => {
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
     });
-    act(() => {
-      fireEvent.keyDown(screen.getByText(errorMessage), {
-        key: "Escape",
-        code: "Escape",
-        keyCode: 27,
-        charCode: 27,
-      });
+    fireEvent.keyDown(screen.getByText(errorMessage), {
+      key: "Escape",
+      code: "Escape",
+      keyCode: 27,
+      charCode: 27,
     });
 
     expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();

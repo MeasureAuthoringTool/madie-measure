@@ -18,6 +18,7 @@ import {
 import { getExampleValueSet } from "../../../util/CalculationTestHelpers";
 import { Bundle } from "fhir/r4";
 import { act } from "react-dom/test-utils";
+import NotFound from "../../notfound/NotFound";
 
 // mock the editor cause we don't care for this test and it gets rid of errors
 jest.mock("../../editor/Editor", () => () => <div>editor contents</div>);
@@ -132,9 +133,16 @@ describe("TestCaseRoutes", () => {
       });
     });
     render(
-      <MemoryRouter initialEntries={["/measures/m1234/edit/test-cases"]}>
+      <MemoryRouter
+        initialEntries={["/measures/m1234/edit/test-cases/list-page"]}
+      >
         <ApiContextProvider value={serviceConfig}>
-          <TestCaseRoutes />
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
         </ApiContextProvider>
       </MemoryRouter>
     );
@@ -166,9 +174,16 @@ describe("TestCaseRoutes", () => {
       });
     });
     render(
-      <MemoryRouter initialEntries={["/measures/m1234/edit/test-cases"]}>
+      <MemoryRouter
+        initialEntries={["/measures/m1234/edit/test-cases/list-page"]}
+      >
         <ApiContextProvider value={serviceConfig}>
-          <TestCaseRoutes />
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
         </ApiContextProvider>
       </MemoryRouter>
     );
@@ -215,9 +230,17 @@ describe("TestCaseRoutes", () => {
     });
 
     render(
-      <MemoryRouter initialEntries={["/measures/m1234/edit/test-cases"]}>
+      <MemoryRouter
+        initialEntries={["/measures/m1234/edit/test-cases/list-page"]}
+      >
         <ApiContextProvider value={serviceConfig}>
-          <TestCaseRoutes />
+          {" "}
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
         </ApiContextProvider>
       </MemoryRouter>
     );
@@ -291,9 +314,17 @@ describe("TestCaseRoutes", () => {
     });
 
     render(
-      <MemoryRouter initialEntries={["/measures/m1234/edit/test-cases"]}>
+      <MemoryRouter
+        initialEntries={["/measures/m1234/edit/test-cases/list-page"]}
+      >
         <ApiContextProvider value={serviceConfig}>
-          <TestCaseRoutes />
+          {" "}
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
         </ApiContextProvider>
       </MemoryRouter>
     );
@@ -361,9 +392,17 @@ describe("TestCaseRoutes", () => {
     });
 
     render(
-      <MemoryRouter initialEntries={["/measures/m1234/edit/test-cases"]}>
+      <MemoryRouter
+        initialEntries={["/measures/m1234/edit/test-cases/list-page"]}
+      >
         <ApiContextProvider value={serviceConfig}>
-          <TestCaseRoutes />
+          {" "}
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
         </ApiContextProvider>
       </MemoryRouter>
     );
@@ -445,9 +484,17 @@ describe("TestCaseRoutes", () => {
     });
 
     render(
-      <MemoryRouter initialEntries={["/measures/m1234/edit/test-cases"]}>
+      <MemoryRouter
+        initialEntries={["/measures/m1234/edit/test-cases/list-page"]}
+      >
         <ApiContextProvider value={serviceConfig}>
-          <TestCaseRoutes />
+          {" "}
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
         </ApiContextProvider>
       </MemoryRouter>
     );
@@ -540,9 +587,17 @@ describe("TestCaseRoutes", () => {
     });
 
     render(
-      <MemoryRouter initialEntries={["/measures/m1234/edit/test-cases"]}>
+      <MemoryRouter
+        initialEntries={["/measures/m1234/edit/test-cases/list-page"]}
+      >
         <ApiContextProvider value={serviceConfig}>
-          <TestCaseRoutes />
+          {" "}
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
         </ApiContextProvider>
       </MemoryRouter>
     );
@@ -628,9 +683,16 @@ describe("TestCaseRoutes", () => {
 
     mockedAxios.put.mockRejectedValue(new Error("VALUE SET ERRORS"));
     render(
-      <MemoryRouter initialEntries={["/measures/m1234/edit/test-cases"]}>
+      <MemoryRouter
+        initialEntries={["/measures/m1234/edit/test-cases/list-page"]}
+      >
         <ApiContextProvider value={serviceConfig}>
-          <TestCaseRoutes />
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
         </ApiContextProvider>
       </MemoryRouter>
     );
@@ -662,9 +724,16 @@ describe("TestCaseRoutes", () => {
       });
     });
     render(
-      <MemoryRouter initialEntries={["/measures/m1234/edit/test-cases"]}>
+      <MemoryRouter
+        initialEntries={["/measures/m1234/edit/test-cases/list-page"]}
+      >
         <ApiContextProvider value={serviceConfig}>
-          <TestCaseRoutes />
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
         </ApiContextProvider>
       </MemoryRouter>
     );
@@ -695,9 +764,17 @@ describe("TestCaseRoutes", () => {
       });
     });
     render(
-      <MemoryRouter initialEntries={["/measures/m1234/edit/test-cases"]}>
+      <MemoryRouter
+        initialEntries={["/measures/m1234/edit/test-cases/list-page"]}
+      >
         <ApiContextProvider value={serviceConfig}>
-          <TestCaseRoutes />
+          {" "}
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
         </ApiContextProvider>
       </MemoryRouter>
     );
@@ -711,9 +788,15 @@ describe("TestCaseRoutes", () => {
 
   it("should render 404 page", async () => {
     const { getByTestId } = render(
-      <MemoryRouter initialEntries={["/measures/m1234/edit/test-case"]}>
+      <MemoryRouter initialEntries={["/measures/m1234/edit/invalid-url"]}>
         <ApiContextProvider value={serviceConfig}>
-          <TestCaseRoutes />
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </ApiContextProvider>
       </MemoryRouter>
     );
@@ -750,7 +833,9 @@ describe("TestCaseRoutes", () => {
     });
 
     const { getByTestId } = render(
-      <MemoryRouter initialEntries={["/measures/m1234/edit/test-cases"]}>
+      <MemoryRouter
+        initialEntries={["/measures/m1234/edit/test-cases/list-page"]}
+      >
         <ApiContextProvider value={serviceConfig}>
           <Routes>
             <Route

@@ -236,7 +236,7 @@ describe("EditMeasure Component", () => {
   });
 
   it("should render the EditMeasure contents after the measure is loaded", async () => {
-    await renderRouter();
+    renderRouter();
 
     const result = await findByTestId("editMeasure");
     expect(result).toBeInTheDocument();
@@ -247,7 +247,7 @@ describe("EditMeasure Component", () => {
   });
 
   it("should display a delete dialog when the event is triggered, discards.", async () => {
-    await renderRouter();
+    renderRouter();
 
     const result = await findByTestId("editMeasure");
     expect(result).toBeInTheDocument();

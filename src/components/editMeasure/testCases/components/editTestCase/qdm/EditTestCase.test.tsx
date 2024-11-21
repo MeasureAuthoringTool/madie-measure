@@ -311,7 +311,7 @@ const setCqmMeasure = jest.fn;
 const setExecutionContextReady = jest.fn;
 const getAccessToken = jest.fn();
 let cqmConversionService = new CqmConversionService("url", getAccessToken);
-const cqmMeasure = cqmConversionService.convertToCqmMeasure(mockMeasure);
+const cqmMeasure = cqmConversionService.convertToCqmMeasure(mockMeasure, null);
 
 const renderEditTestCaseComponent = () => {
   return render(
