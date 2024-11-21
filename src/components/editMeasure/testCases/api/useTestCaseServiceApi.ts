@@ -14,7 +14,6 @@ import { useOktaTokens } from "@madie/madie-util";
 import { ScanValidationDto } from "./models/ScanValidationDto";
 import { addValues } from "../util/DefaultValueProcessor";
 import { MadieError } from "../util/Utils";
-import { TestCaseExecutionResultDto } from "@madie/madie-models/dist/TestCaseExcelExportDto";
 
 export interface QrdaTestCaseDTO {
   testCaseId: string;

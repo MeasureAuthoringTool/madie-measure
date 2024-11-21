@@ -1,7 +1,7 @@
 import axios from "../../../../api/axios-instance";
 import { ExcelExportService } from "./useExcelExportService";
 
-jest.mock("./axios-instance");
+jest.mock("../../../../api/axios-instance");
 
 describe("useExcelExport Tests", () => {
   let excelExportService: ExcelExportService;

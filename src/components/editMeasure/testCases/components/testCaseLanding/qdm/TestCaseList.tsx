@@ -95,8 +95,8 @@ const TestCaseList = (props: TestCaseListProps) => {
   const { search } = useLocation();
   const values = queryString.parse(search);
   const { setErrors, setImportErrors, setWarnings } = props;
-  const { id, criteriaId } = useParams<{
-    id: string;
+  const { measureId, criteriaId } = useParams<{
+    measureId: string;
     criteriaId: string;
   }>();
   const {
@@ -110,7 +110,7 @@ const TestCaseList = (props: TestCaseListProps) => {
     sorting,
     setSorting,
   } = UseTestCases({
-    id,
+    measureId,
     setErrors,
   });
   // UseTestCases handles all the pagination and navigation independent of where we're at
@@ -207,7 +207,7 @@ const TestCaseList = (props: TestCaseListProps) => {
     }
     if (!criteriaId && measure?.groups) {
       setSelectedPopCriteria(measure.groups[0]);
-      const newPath = `/measures/${id}/edit/test-cases/list-page/${measure.groups[0]?.id}`;
+      const newPath = `/measures/${measureId}/edit/test-cases/list-page/${measure.groups[0]?.id}`;
       // we want to replace the current path to allow the back button to work as intended.
       navigate(newPath, { replace: true });
     }
@@ -224,10 +224,10 @@ const TestCaseList = (props: TestCaseListProps) => {
   }, [measure]);
 
   useEffect(() => {
-    if (!_.isNil(id) && testCaseService) {
+    if (!_.isNil(measureId) && testCaseService) {
       retrieveTestCases();
     }
-  }, [id, testCaseService]);
+  }, [measureId, testCaseService]);
 
   useEffect(() => {
     const createTestCaseListener = () => {
@@ -357,7 +357,7 @@ const TestCaseList = (props: TestCaseListProps) => {
 
   const deleteTestCase = (testCaseId) => {
     testCaseService.current
-      .deleteTestCaseByTestCaseId(id, testCaseId)
+      .deleteTestCaseByTestCaseId(measureId, testCaseId)
       .then(() => {
         retrieveTestCases();
       })
@@ -376,7 +376,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   const handleCloneTestCase = async (testCase: TestCase) => {
     try {
       const clonedTestCase = cloneTestCase(testCase);
-      await testCaseService.current.createTestCase(clonedTestCase, id);
+      await testCaseService.current.createTestCase(clonedTestCase, measureId);
       setToastOpen(true);
       setToastType("success");
       setToastMessage("Test case cloned successfully");
@@ -466,7 +466,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   const deleteAllTestCases = () => {
     const currentTestCaseIds = _.map(measure.testCases, "id");
     testCaseService.current
-      .deleteTestCases(id, currentTestCaseIds)
+      .deleteTestCases(measureId, currentTestCaseIds)
       .then(() => {
         retrieveTestCases();
         setOpenDeleteAllTestCasesDialog(false);
@@ -504,7 +504,7 @@ const TestCaseList = (props: TestCaseListProps) => {
         return testCase;
       });
       const res = await testCaseService.current.importTestCasesQDM(
-        id,
+        measureId,
         testCases
       );
       const testCaseImportOutcome: TestCaseImportOutcome[] = res.data;
@@ -528,7 +528,7 @@ const TestCaseList = (props: TestCaseListProps) => {
       setToastMessage(IMPORT_ERROR);
     } finally {
       setLoadingState({ loading: false, message: "" });
-      const newPath = `/measures/${id}/edit/test-cases/list-page/${
+      const newPath = `/measures/${measureId}/edit/test-cases/list-page/${
         measure.groups[0].id
       }?filter=${values.filter ? values.filter : ""}&search=${
         values.search ? values.search : ""
@@ -663,7 +663,7 @@ const TestCaseList = (props: TestCaseListProps) => {
         });
         groupNumber++;
       });
-      const exportData = await testCaseService.current.exportQRDA(id, {
+      const exportData = await testCaseService.current.exportQRDA(measureId, {
         measure: localMeasure,
         groupDTOs: groupExportDTOs,
       });
@@ -686,7 +686,7 @@ const TestCaseList = (props: TestCaseListProps) => {
 
   const onTestCaseShiftDates = (testCase: TestCase, shifted: number) => {
     testCaseService.current
-      .shiftQdmTestCaseDates(testCase, id, shifted)
+      .shiftQdmTestCaseDates(testCase, measureId, shifted)
       .then(() => {
         setToastOpen(true);
         setToastType("success");

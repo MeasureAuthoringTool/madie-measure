@@ -16,7 +16,7 @@ import { waitFor } from "@testing-library/react";
 import { addValues } from "../util/DefaultValueProcessor";
 import { measureCql } from "../components/editTestCase/groupCoverage/_mocks_/QdmCovergaeMeasureCql";
 
-jest.mock("./axios-instance");
+jest.mock("../../../../api/axios-instance");
 
 const mockMeasure = {
   id: "1",

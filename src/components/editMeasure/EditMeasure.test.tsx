@@ -21,6 +21,7 @@ import {
   TestCase,
 } from "@madie/madie-models";
 import MeasureEditor from "./editor/MeasureEditor";
+// @ts-ignore
 import { measureStore } from "@madie/madie-util";
 import { oneItemResponse } from "../__mocks__/mockMeasureResponses";
 
@@ -191,7 +192,7 @@ jest.mock("@madie/madie-util", () => ({
   },
 }));
 
-const serviceConfig: ServiceConfig = {
+const serviceConfig = {
   measureService: {
     baseUrl: "base.url",
   },
@@ -202,7 +203,7 @@ const serviceConfig: ServiceConfig = {
     baseUrl: "",
   },
   terminologyService: { baseUrl: "" },
-};
+} as ServiceConfig;
 
 const { getByTestId, findByTestId, queryByTestId, queryByText, findByText } =
   screen;

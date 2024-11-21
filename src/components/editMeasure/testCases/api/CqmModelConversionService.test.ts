@@ -14,10 +14,10 @@ import useMeasureServiceApi, {
 } from "../api/useMeasureServiceApi";
 import * as fs from "fs";
 
-jest.mock("../api/axios-instance");
+jest.mock("../../../../api/axios-instance");
 const axiosMock = axios as jest.Mocked<typeof axios>;
 const codeJson = fs.readFileSync(
-  "src/api/__mocks__/CqmMeasureForConversion.json",
+  "src/components/editMeasure/testCases/api/__mocks__/CqmMeasureForConversion.json",
   "utf8"
 );
 
@@ -161,7 +161,10 @@ describe("CqmConversionService", () => {
 
     measure.groups = [group];
 
-    const cqmMeasure = await cqmConversionService.convertToCqmMeasure(measure);
+    const cqmMeasure = await cqmConversionService.convertToCqmMeasure(
+      measure,
+      null
+    );
     expect(cqmMeasure.title).toEqual(measure.measureName);
     expect(cqmMeasure.main_cql_library).toEqual(measure.cqlLibraryName);
     expect(cqmMeasure.measure_scoring).toEqual(measure.scoring?.toUpperCase());
@@ -223,16 +226,18 @@ describe("CqmConversionService", () => {
   });
 
   it("converts to cqm measure when MADiE measure is null/undefined", async () => {
-    expect(await cqmConversionService.convertToCqmMeasure(null)).toBeNull();
     expect(
-      await cqmConversionService.convertToCqmMeasure(undefined)
+      await cqmConversionService.convertToCqmMeasure(null, null)
+    ).toBeNull();
+    expect(
+      await cqmConversionService.convertToCqmMeasure(undefined, null)
     ).toBeNull();
   });
 
   it("converts to cqm measure when MADiE measure has no cql", async () => {
     const madieMeasure = { ...measure, cql: undefined };
     expect(
-      await cqmConversionService.convertToCqmMeasure(madieMeasure)
+      await cqmConversionService.convertToCqmMeasure(madieMeasure, null)
     ).toBeNull();
   });
 

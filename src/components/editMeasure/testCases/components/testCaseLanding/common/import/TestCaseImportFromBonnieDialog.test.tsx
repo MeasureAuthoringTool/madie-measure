@@ -12,7 +12,7 @@ import {
 // @ts-ignore
 import bonnieJson from "../../../../__mocks__/bonniePatient.json";
 
-jest.mock("../../../../api/axios-instance");
+jest.mock("../../../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 let mockProcessedTestCases;

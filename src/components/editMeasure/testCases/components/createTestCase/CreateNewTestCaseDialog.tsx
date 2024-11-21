@@ -84,7 +84,7 @@ const CreateNewTestCaseDialog = ({
   });
   const { toastOpen, toastType, toastMessage } = toast;
   const testCaseService = useRef(useTestCaseServiceApi());
-  const { id } = useParams<keyof navigationParams>() as navigationParams;
+  const { measureId } = useParams<keyof navigationParams>() as navigationParams;
   const [seriesState, setSeriesState] = useState<any>({
     loaded: false,
     series: [],
@@ -115,7 +115,7 @@ const CreateNewTestCaseDialog = ({
   useEffect(() => {
     if (!seriesState.loaded) {
       testCaseService.current
-        .getTestCaseSeriesForMeasure(id)
+        .getTestCaseSeriesForMeasure(measureId)
         .then((existingSeries) =>
           setSeriesState({ loaded: true, series: existingSeries })
         )
@@ -128,7 +128,7 @@ const CreateNewTestCaseDialog = ({
           });
         });
     }
-  }, [id, testCaseService, seriesState.loaded]);
+  }, [measureId, testCaseService, seriesState.loaded]);
 
   const handleSubmit = async (testCase: TestCase) => {
     setToast({
@@ -160,11 +160,11 @@ const CreateNewTestCaseDialog = ({
     try {
       const savedTestCase = await testCaseService.current.createTestCase(
         testCase,
-        id
+        measureId
       );
       handleTestCaseResponse(savedTestCase);
       // go to page 1
-      const newPath = `/measures/${id}/edit/test-cases/list-page/${
+      const newPath = `/measures/${measureId}/edit/test-cases/list-page/${
         measure.groups[0].id
       }?filter=${values.filter ? values.filter : ""}&search=${
         values.search ? values.search : ""

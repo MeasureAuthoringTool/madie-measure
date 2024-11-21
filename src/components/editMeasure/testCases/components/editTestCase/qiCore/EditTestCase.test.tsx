@@ -52,7 +52,7 @@ import { ResourceIdentifier } from "../../../api/models/ResourceIdentifier";
 //temporary solution (after jest updated to version 27) for error: thrown: "Exceeded timeout of 5000 ms for a test.
 jest.setTimeout(60000);
 
-jest.mock("../../../api/axios-instance");
+jest.mock("../../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 // mock editor to reduce errors and warnings

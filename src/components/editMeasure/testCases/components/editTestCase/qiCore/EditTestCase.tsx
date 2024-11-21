@@ -206,7 +206,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
   useDocumentTitle("MADiE Edit Measure Edit Test Case");
   const navigate = useNavigate();
   const featureFlags = useFeatureFlags();
-  const { id, measureId } = useParams<
+  const { measureId, id } = useParams<
     keyof navigationParams
   >() as navigationParams;
   // Avoid infinite dependency render. May require additional error handling for timeouts.

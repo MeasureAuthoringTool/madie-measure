@@ -47,14 +47,14 @@ import { qdmCallStack } from "../groupCoverage/_mocks_/QdmCallStack";
 // @ts-ignore
 import testCaseJson from "../../../mockdata/qdm/testCasePatient.json";
 
-const serviceConfig: ServiceConfig = {
+const serviceConfig = {
   excelExportService: { baseUrl: "base.url" },
   fhirElmTranslationService: { baseUrl: "base.url" },
   qdmElmTranslationService: { baseUrl: "base.url" },
   testCaseService: { baseUrl: "base.url" },
   measureService: { baseUrl: "base.url" },
   terminologyService: { baseUrl: "http.com" },
-};
+} as ServiceConfig;
 
 const measureOwner = "testUser";
 
@@ -137,7 +137,7 @@ const testTitle = async (title: string, clear = false) => {
   });
 };
 
-jest.mock("../../../api/axios-instance");
+jest.mock("../../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const mockNavigate = jest.fn();

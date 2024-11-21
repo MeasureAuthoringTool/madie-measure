@@ -2,7 +2,7 @@ import axios from "../../../../../api/axios-instance";
 import { ServiceConfig } from "../../../../../api/ServiceContext";
 import { QdmCqlParsingService } from "./useQdmCqlParsingService";
 
-jest.mock("../axios-instance");
+jest.mock("../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const mockGetAccessToken = jest.fn().mockImplementation(() => {
@@ -32,7 +32,7 @@ const mockConfig: ServiceConfig = {
     baseUrl: "excelExportService.com",
   },
 };
-jest.mock("../useServiceConfig", () => {
+jest.mock("../../../../../api/useServiceConfig", () => {
   return {
     useServiceConfig: jest.fn(() => Promise.resolve(mockConfig)),
   };

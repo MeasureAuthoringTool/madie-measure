@@ -8,7 +8,7 @@ import { ScanValidationDto } from "../../../../api/models/ScanValidationDto";
 import bonnieQdmJson from "../../../../__mocks__/bonnieQDM56Patients.json";
 import TestCaseImportFromBonnieDialogQDM from "./TestCaseImportFromBonnieDialogQDM";
 
-jest.mock("../../../../api/axios-instance");
+jest.mock("../../../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 jest.mock("@madie/madie-util", () => ({

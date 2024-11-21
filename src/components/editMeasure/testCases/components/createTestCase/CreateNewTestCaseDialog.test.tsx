@@ -5,11 +5,11 @@ import { act, Simulate } from "react-dom/test-utils";
 import userEvent from "@testing-library/user-event";
 import CreateNewTestCaseDialog from "./CreateNewTestCaseDialog";
 import { Measure } from "@madie/madie-models";
-import axios from "../../api/axios-instance";
+import axios from "../../../../../api/axios-instance";
 import { specialChars } from "../../util/checkSpecialCharacters";
 import { MemoryRouter } from "react-router-dom";
 
-jest.mock("../../api/axios-instance");
+jest.mock("../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const MEASURE_CREATEDBY = "testuser";
@@ -236,16 +236,14 @@ describe("Create New Test Case Dialog", () => {
         </MemoryRouter>
       );
 
-      const titleInput = await getByTestId("create-test-case-title-input");
+      const titleInput = getByTestId("create-test-case-title-input");
       userEvent.type(titleInput, formikInfo.title);
       expect(titleInput.value).toBe(formikInfo.title);
       fireEvent.change(titleInput, {
         target: { value: "invalid title ~!@#$" },
       });
 
-      const descriptionInput = await getByTestId(
-        "create-test-case-description"
-      );
+      const descriptionInput = getByTestId("create-test-case-description");
       userEvent.type(descriptionInput, formikInfo.description);
       expect(descriptionInput.value).toBe(formikInfo.description);
       Simulate.change(descriptionInput);

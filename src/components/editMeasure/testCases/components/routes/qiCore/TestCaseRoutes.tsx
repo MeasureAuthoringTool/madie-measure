@@ -11,7 +11,6 @@ import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 import * as _ from "lodash";
 import StatusHandler from "../../statusHandler/StatusHandler";
 import TestCaseLandingWrapper from "../../testCaseLanding/common/TestCaseLandingWrapper";
-import RedirectToList from "../RedirectToList";
 import {
   Measure,
   MeasureErrorType,

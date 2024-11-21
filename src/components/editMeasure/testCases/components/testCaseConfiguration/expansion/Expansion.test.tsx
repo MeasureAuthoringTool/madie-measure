@@ -72,7 +72,7 @@ const measureServiceApiMock = {
 } as unknown as MeasureServiceApi;
 useMeasureServiceApiMock.mockImplementation(() => measureServiceApiMock);
 
-jest.mock("../../../api/axios-instance");
+jest.mock("../../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 jest.mock("@madie/madie-util", () => ({

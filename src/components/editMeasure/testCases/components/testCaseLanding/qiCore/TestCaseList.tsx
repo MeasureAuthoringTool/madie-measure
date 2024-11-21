@@ -77,8 +77,8 @@ export const getCoverageValueFromHtml = (
 
 const TestCaseList = (props: TestCaseListProps) => {
   const { setErrors, setWarnings } = props;
-  const { id, criteriaId } = useParams<{
-    id: string;
+  const { measureId, criteriaId } = useParams<{
+    measureId: string;
     criteriaId: string;
   }>();
   const {
@@ -92,7 +92,7 @@ const TestCaseList = (props: TestCaseListProps) => {
     sorting,
     setSorting,
   } = UseTestCases({
-    id: id,
+    measureId,
     setErrors,
   });
 
@@ -198,7 +198,7 @@ const TestCaseList = (props: TestCaseListProps) => {
     }
     if (!criteriaId && !_.isEmpty(measure?.groups)) {
       setSelectedPopCriteria(measure.groups[0]);
-      const newPath = `/measures/${id}/edit/test-cases/list-page/${measure.groups[0].id}`;
+      const newPath = `/measures/${measureId}/edit/test-cases/list-page/${measure.groups[0].id}`;
       // we want to replace the current path to allow the back button to work as intended.
       navigate(newPath, { replace: true });
     }
@@ -276,7 +276,7 @@ const TestCaseList = (props: TestCaseListProps) => {
 
   const deleteTestCase = (testCaseId) => {
     testCaseService.current
-      .deleteTestCaseByTestCaseId(id, testCaseId)
+      .deleteTestCaseByTestCaseId(measureId, testCaseId)
       .then(() => {
         retrieveTestCases();
       })
@@ -291,7 +291,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   const deleteAllTestCases = () => {
     const currentTestCaseIds = _.map(measure.testCases, "id");
     testCaseService.current
-      .deleteTestCases(id, currentTestCaseIds)
+      .deleteTestCases(measureId, currentTestCaseIds)
       .then(() => {
         retrieveTestCases();
         setOpenDeleteAllTestCasesDialog(false);
@@ -455,7 +455,7 @@ const TestCaseList = (props: TestCaseListProps) => {
     }));
 
     try {
-      await testCaseService.current.createTestCases(id, testCases);
+      await testCaseService.current.createTestCases(measureId, testCases);
       retrieveTestCases();
     } catch (error) {
       setErrors((prevState) => [...prevState, IMPORT_ERROR]);
@@ -474,7 +474,7 @@ const TestCaseList = (props: TestCaseListProps) => {
     }));
     try {
       const response = await testCaseService.current.importTestCases(
-        id,
+        measureId,
         testCaseImportRequest
       );
       const testCaseImportOutcome: TestCaseImportOutcome[] = response.data;
@@ -496,7 +496,7 @@ const TestCaseList = (props: TestCaseListProps) => {
       setErrors((prevState) => [...prevState, IMPORT_ERROR]);
     } finally {
       setLoadingState({ loading: false, message: "" });
-      const newPath = `/measures/${id}/edit/test-cases/list-page/${
+      const newPath = `/measures/${measureId}/edit/test-cases/list-page/${
         measure.groups[0].id
       }?filter=${values.filter ? values.filter : ""}&search=${
         values.search ? values.search : ""
@@ -508,7 +508,7 @@ const TestCaseList = (props: TestCaseListProps) => {
 
   const onTestCaseShiftDates = (testCase: TestCase, shifted: number) => {
     testCaseService.current
-      .shiftQiCoreTestCaseDates(id, testCase.id, shifted)
+      .shiftQiCoreTestCaseDates(measureId, testCase.id, shifted)
       .then(() => {
         setToastOpen(true);
         setToastType("success");
@@ -530,7 +530,7 @@ const TestCaseList = (props: TestCaseListProps) => {
     clonedTestCase.title =
       clonedTestCase.title + "-" + new ObjectID().toString();
     try {
-      await testCaseService.current.createTestCase(clonedTestCase, id);
+      await testCaseService.current.createTestCase(clonedTestCase, measureId);
       setToastOpen(true);
       setToastType("success");
       setToastMessage("Test case cloned successfully");

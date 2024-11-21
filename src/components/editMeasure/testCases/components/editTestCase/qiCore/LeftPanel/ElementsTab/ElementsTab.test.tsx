@@ -135,7 +135,6 @@ const serviceConfig: ServiceConfig = {
     baseUrl: "something.com",
   },
 };
-const MEASURE_CREATEDBY = "testuser";
 let mockApplyDefaults = false;
 jest.mock("@madie/madie-util", () => {
   return {
@@ -173,7 +172,7 @@ jest.mock("@madie/madie-util", () => {
   };
 });
 
-jest.mock("../../../../../api/axios-instance");
+jest.mock("../../../../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe("ElementsTab", () => {

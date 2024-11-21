@@ -44,7 +44,6 @@ import useMeasureServiceApi, {
 import userEvent from "@testing-library/user-event";
 import { buildMeasureBundle } from "../../../util/CalculationTestHelpers";
 import { QdmExecutionContextProvider } from "../../routes/qdm/QdmExecutionContext";
-// @ts-ignore
 import {
   checkUserCanEdit,
   useFeatureFlags,
@@ -177,7 +176,6 @@ jest.mock(
           </button>
           <button
             onClick={() => mockOnImportTestCases(onImport)}
-            // onClick={() => onImport(importingTestCases)}
             data-testid="test-case-import-import-btn"
             type="button"
           >

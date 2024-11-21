@@ -1,4 +1,3 @@
-import React from "react";
 import axios from "../../../../api/axios-instance";
 import useServiceConfig from "../../../../api/useServiceConfig";
 import { ServiceConfig } from "../../../../api/ServiceContext";

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { render, screen, within } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import TestCaseRoutes from "./TestCaseRoutes";
 import axios from "../../../../../../api/axios-instance";
 import {
@@ -12,7 +12,7 @@ import useCqmConversionService, {
   CqmConversionService,
 } from "../../../api/CqmModelConversionService";
 
-jest.mock("../../../api/axios-instance");
+jest.mock("../../../../../../api/axios-instance");
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
   unobserve: jest.fn(),
@@ -136,9 +136,16 @@ describe("TestCaseRoutes", () => {
       });
     });
     render(
-      <MemoryRouter initialEntries={["/measures/m1234/edit/test-cases"]}>
+      <MemoryRouter
+        initialEntries={["/measures/m1234/edit/test-cases/list-page"]}
+      >
         <ApiContextProvider value={serviceConfig}>
-          <TestCaseRoutes />
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
         </ApiContextProvider>
       </MemoryRouter>
     );
@@ -179,7 +186,12 @@ describe("TestCaseRoutes", () => {
         initialEntries={["/measures/m1234/edit/test-cases/list-page/sde"]}
       >
         <ApiContextProvider value={serviceConfig}>
-          <TestCaseRoutes />
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
         </ApiContextProvider>
       </MemoryRouter>
     );
@@ -207,7 +219,12 @@ describe("TestCaseRoutes", () => {
         initialEntries={["/measures/m1234/edit/test-cases/list-page/expansion"]}
       >
         <ApiContextProvider value={serviceConfig}>
-          <TestCaseRoutes />
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
         </ApiContextProvider>
       </MemoryRouter>
     );
@@ -235,7 +252,12 @@ describe("TestCaseRoutes", () => {
         ]}
       >
         <ApiContextProvider value={serviceConfig}>
-          <TestCaseRoutes />
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
         </ApiContextProvider>
       </MemoryRouter>
     );
@@ -261,7 +283,12 @@ describe("TestCaseRoutes", () => {
     render(
       <MemoryRouter initialEntries={["/measures/m1234/edit/test-cases/m1234"]}>
         <ApiContextProvider value={serviceConfig}>
-          <TestCaseRoutes />
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
         </ApiContextProvider>
       </MemoryRouter>
     );
@@ -284,7 +311,12 @@ describe("TestCaseRoutes", () => {
     render(
       <MemoryRouter initialEntries={["/measures/m1234/edit/test-cases/m1234"]}>
         <ApiContextProvider value={serviceConfig}>
-          <TestCaseRoutes />
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
         </ApiContextProvider>
       </MemoryRouter>
     );

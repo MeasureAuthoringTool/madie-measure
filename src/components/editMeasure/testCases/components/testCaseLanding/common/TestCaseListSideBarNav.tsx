@@ -20,8 +20,8 @@ const TestCaseListSideBarNav = ({
   qdm,
 }: TestCaseListSideBarNavProps) => {
   let navigate = useNavigate();
-  const { id, criteriaId } = useParams<{
-    id: string;
+  const { measureId, criteriaId } = useParams<{
+    measureId: string;
     criteriaId: string;
   }>();
 
@@ -32,7 +32,7 @@ const TestCaseListSideBarNav = ({
   const [showPopulationCriteriaTabs, setShowPopulationCriteriaTabs] =
     useState<boolean>(true);
   const handleChange = (e, v) => {
-    const newPath = `/measures/${id}/edit/test-cases/list-page/${v}`;
+    const newPath = `/measures/${measureId}/edit/test-cases/list-page/${v}`;
     navigate(newPath);
   };
   const endRoute = /[^/]*$/.exec(pathname)[0];

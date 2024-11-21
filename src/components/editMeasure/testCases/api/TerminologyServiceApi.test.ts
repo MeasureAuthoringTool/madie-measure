@@ -7,10 +7,8 @@ import { cqm_measure_basic_valueset } from "../mockdata/qdm/CMS108/cqm_measure_b
 import { Measure as CqmMeasure, ValueSet } from "cqm-models";
 import * as _ from "lodash";
 import { ManifestExpansion } from "@madie/madie-models";
-import { Simulate } from "react-dom/test-utils";
-import error = Simulate.error;
 
-jest.mock("./axios-instance");
+jest.mock("../../../../api/axios-instance");
 
 jest.mock("@madie/madie-util", () => ({
   getOidFromString: (oid) => oid.split("urn:oid:")[1],

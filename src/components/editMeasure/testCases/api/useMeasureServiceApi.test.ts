@@ -1,7 +1,7 @@
-import { AxiosResponse } from "axios";
 import axios from "../../../../api/axios-instance";
 import { MeasureServiceApi } from "./useMeasureServiceApi";
-jest.mock("./axios-instance");
+import { Measure } from "@madie/madie-models";
+jest.mock("../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const measure = {

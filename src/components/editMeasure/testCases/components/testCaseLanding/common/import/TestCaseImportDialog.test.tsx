@@ -13,7 +13,7 @@ import {
 } from "@madie/madie-models";
 import * as _ from "lodash";
 
-jest.mock("../../../../api/axios-instance");
+jest.mock("../../../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 jest.mock("@madie/madie-util", () => ({

@@ -31,6 +31,7 @@ export const sortFilteredTestCases = (
   const testCaseCopy = testCases.slice();
   if (sorts) {
     const { id, desc } = sorts;
+    console.log("sorts", sorts);
     // sort the testCaseList in either descending or ascending order based on the sorts object
     testCaseCopy.sort((a, b) => {
       const aValue = a[id as keyof typeof a] as string;
@@ -44,7 +45,7 @@ export const sortFilteredTestCases = (
   return testCaseCopy;
 };
 
-function UseFetchTestCases({ id, setErrors }) {
+function UseFetchTestCases({ measureId, setErrors }) {
   const { search } = useLocation();
   const values = queryString.parse(search);
   const testCaseService = useRef(useTestCaseServiceApi());
@@ -233,7 +234,7 @@ function UseFetchTestCases({ id, setErrors }) {
       message: "Loading Test Cases...",
     }));
     testCaseService.current
-      .getTestCasesByMeasureId(id)
+      .getTestCasesByMeasureId(measureId)
       .then((testCaseList: TestCase[]) => {
         testCaseList.forEach((testCase: any) => {
           testCase.executionStatus = testCase.validResource ? "NA" : "Invalid";
@@ -251,7 +252,7 @@ function UseFetchTestCases({ id, setErrors }) {
       .finally(() => {
         setLoadingState({ loading: false, message: "" });
       });
-  }, [id, testCaseService, setErrors]);
+  }, [measureId, testCaseService, setErrors]);
 
   useEffect(() => {
     retrieveTestCases();
