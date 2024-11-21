@@ -4,12 +4,13 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
 import PopulationCriteriaWrapper from "./PopulationCriteriaWrapper";
+// @ts-ignore
 import { measureStore } from "@madie/madie-util";
 import { QdmMeasureCQL } from "../../common/QdmMeasureCQL";
 import { Measure } from "@madie/madie-models";
 import { MeasureCQL } from "../../common/MeasureCQL";
 
-const serviceConfig: ServiceConfig = {
+const serviceConfig = {
   measureService: {
     baseUrl: "example-service-url",
   },
@@ -22,7 +23,7 @@ const serviceConfig: ServiceConfig = {
   terminologyService: {
     baseUrl: "terminology-service.com",
   },
-};
+} as ServiceConfig;
 
 const qdmMeasure = {
   id: "testMeasureId",
@@ -104,7 +105,7 @@ const renderPopulationCriteriaHomeComponent = async (
   routePath: string,
   browserUrlPath: string
 ) => {
-  await render(
+  render(
     <MemoryRouter
       initialEntries={[
         { pathname: `/measures/testMeasureId/edit/${browserUrlPath}` },
@@ -131,7 +132,10 @@ describe("PopulationCriteriaHome", () => {
 
   it.skip("should render Measure Groups component with group from measure along with side nav", async () => {
     // needs to be fixed
-    renderPopulationCriteriaHomeComponent("groups/:groupNumber", "groups/1");
+    await renderPopulationCriteriaHomeComponent(
+      "groups/:groupNumber",
+      "groups/1"
+    );
 
     const baseConfigTab = await findByTestId(
       "leftPanelMeasureBaseConfigurationTab"
@@ -166,7 +170,7 @@ describe("PopulationCriteriaHome", () => {
   });
 
   it("should render Supplemental Data component", async () => {
-    renderPopulationCriteriaHomeComponent(
+    await renderPopulationCriteriaHomeComponent(
       "supplemental-data",
       "supplemental-data"
     );
@@ -189,7 +193,10 @@ describe("PopulationCriteriaHome", () => {
   });
 
   it("should render Risk Adjustment component", async () => {
-    renderPopulationCriteriaHomeComponent("risk-adjustment", "risk-adjustment");
+    await renderPopulationCriteriaHomeComponent(
+      "risk-adjustment",
+      "risk-adjustment"
+    );
     // verifies if the side nav is created
     expect(
       await screen.findByRole("button", {
@@ -211,7 +218,10 @@ describe("PopulationCriteriaHome", () => {
 
   it.skip("should render a new form for population criteria, onclick of Add Population Criteria link", async () => {
     // todo, fix
-    renderPopulationCriteriaHomeComponent("groups/:groupNumber", "groups/1");
+    await renderPopulationCriteriaHomeComponent(
+      "groups/:groupNumber",
+      "groups/1"
+    );
     const criteria1 = await findByTestId(
       "leftPanelMeasureInformation-MeasureGroup1"
     );
@@ -241,10 +251,11 @@ describe("PopulationCriteriaHome", () => {
   });
 
   it("Should render a QI-Core specific page for QI-Core measures", async () => {
-    renderPopulationCriteriaHomeComponent("groups/:groupNumber", "groups/1");
-    const criteria1 = await findByTestId(
-      "leftPanelMeasureInformation-MeasureGroup1"
+    await renderPopulationCriteriaHomeComponent(
+      "groups/:groupNumber",
+      "groups/1"
     );
+    await findByTestId("leftPanelMeasureInformation-MeasureGroup1");
     const QICorePage = await findByTestId("qi-core-groups");
     expect(QICorePage).toBeInTheDocument();
   });
@@ -276,7 +287,7 @@ describe("PopulationCriteriaHome", () => {
   it("should render Reporting component only for QDM measures", async () => {
     const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
     mockedMeasureState.state = { ...qdmMeasure };
-    renderPopulationCriteriaHomeComponent("reporting", "reporting");
+    await renderPopulationCriteriaHomeComponent("reporting", "reporting");
     // verifies if the side nav is created and reporting tab is available
     const reportingTab = screen.getByRole("tab", {
       name: /Reporting/i,
@@ -290,7 +301,7 @@ describe("PopulationCriteriaHome", () => {
   it("should render base configuration component only for QDM measures", async () => {
     const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
     mockedMeasureState.state = { ...qdmMeasure };
-    renderPopulationCriteriaHomeComponent(
+    await renderPopulationCriteriaHomeComponent(
       "base-configuration",
       "base-configuration"
     );
@@ -306,7 +317,10 @@ describe("PopulationCriteriaHome", () => {
   it("Should render a QDM specific page for QDM measures", async () => {
     const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
     mockedMeasureState.state = { ...qdmMeasure };
-    renderPopulationCriteriaHomeComponent("groups/:groupNumber", "groups/1");
+    await renderPopulationCriteriaHomeComponent(
+      "groups/:groupNumber",
+      "groups/1"
+    );
     const QDMPage = await findByTestId("qdm-groups");
     expect(QDMPage).toBeInTheDocument();
   });
