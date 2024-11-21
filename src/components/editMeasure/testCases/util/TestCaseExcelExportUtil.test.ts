@@ -236,7 +236,10 @@ jest.mock("../api/CqmModelConversionService");
 const cqmConversionService =
   CqmConversionService as jest.Mocked<CqmConversionService>;
 
-const codeJson = fs.readFileSync("src/api/__mocks__/CqmMeasure.json", "utf8");
+const codeJson = fs.readFileSync(
+  "src/components/editMeasure/testCases/api/__mocks__/CqmMeasure.json",
+  "utf8"
+);
 
 const cqmMeasure = JSON.parse(codeJson) as unknown as CqmMeasure;
 
@@ -247,7 +250,7 @@ cqmConversionService.convertToCqmMeasure = jest
   .fn()
   .mockResolvedValueOnce(cqmMeasure);
 
-jest.mock("../api/axios-instance");
+jest.mock("../../../../api/axios-instance");
 const axiosMock = axios as jest.Mocked<typeof axios>;
 
 describe("TestCaseExcelExportUtil", () => {

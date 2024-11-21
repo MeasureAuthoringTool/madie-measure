@@ -8,6 +8,7 @@
     "declarationMap": true,
     "jsx": "react-jsx",
     "sourceMap": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true
   },
   "files": ["src/madie-madie-measure.tsx"],

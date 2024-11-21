@@ -3,7 +3,6 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Group } from "@madie/madie-models";
 import tw from "twin.macro";
 import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
-import { useFeatureFlags } from "@madie/madie-util";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import "./TestCaseListSideBarNav.scss";

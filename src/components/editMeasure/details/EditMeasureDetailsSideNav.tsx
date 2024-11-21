@@ -18,12 +18,12 @@ export default function EditMeasureDetailsSideNav(
   const { links } = props;
   const { pathname } = useLocation();
   const endRoute = /[^/]*$/.exec(pathname)[0];
-  const { id } = useParams<{
-    id: string;
+  const { measureId } = useParams<{
+    measureId: string;
   }>();
   let navigate = useNavigate();
   const handleChange = (e, v) => {
-    const newPath = `/measures/${id}/edit/details/${v}`;
+    const newPath = `/measures/${measureId}/edit/details/${v}`;
     navigate(newPath);
   };
   return (

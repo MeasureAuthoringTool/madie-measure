@@ -41,12 +41,12 @@ export interface RouteHandlerState {
   pendingRoute: string;
 }
 export default function EditMeasure() {
-  const { id } = useParams();
+  const { measureId } = useParams();
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const [loading, setLoading] = useState<boolean>(true);
   let navigate = useNavigate();
-  const [measureId, setMeasureId] = useState<string>(id);
+  const [currentMeasureId, setCurrentMeasureId] = useState<string>(measureId);
 
   // Required by every single spa application that has internal routing
   // This will block user from navigating inside madie-measure when the current form is dirty
@@ -88,13 +88,13 @@ export default function EditMeasure() {
   useEffect(() => {
     //we don't want to fire this by accident during delete.
     if (loading) loadMeasure();
-  }, [measureServiceApi, measureId, history, loading, updateMeasure]);
+  }, [measureServiceApi, currentMeasureId, history, loading, updateMeasure]);
   useEffect(() => {
     loadMeasure();
-  }, [measureId]);
+  }, [currentMeasureId]);
   const loadMeasure = () => {
     measureServiceApi
-      .fetchMeasure(measureId)
+      .fetchMeasure(currentMeasureId)
       .then((value: Measure) => {
         updateMeasure(value);
         setLoading(false);
@@ -108,7 +108,7 @@ export default function EditMeasure() {
 
   useEffect(() => {
     loadMeasure();
-  }, [measureId]);
+  }, [currentMeasureId]);
 
   const loadingDiv = <div data-testid="loading">Loading...</div>;
 
@@ -180,7 +180,7 @@ export default function EditMeasure() {
   useEffect(() => {
     const exportListener = async () => {
       try {
-        const measure = await measureServiceApi.fetchMeasure(id);
+        const measure = await measureServiceApi.fetchMeasure(measureId);
         await exportMeasure(
           setFailureMessage,
           setDownloadState,
@@ -201,7 +201,7 @@ export default function EditMeasure() {
       window.removeEventListener("export-measure", exportListener, false);
     };
   }, [
-    id,
+    measureId,
     setFailureMessage,
     setDownloadState,
     abortController,
@@ -227,7 +227,7 @@ export default function EditMeasure() {
         })
       );
     };
-  }, [measureId]);
+  }, [currentMeasureId]);
   const handleCreateError = (error) => {
     const errorData = error?.response;
     setToastOpen(true);
@@ -346,7 +346,7 @@ export default function EditMeasure() {
         setToastOpen(true);
         setToastType("success");
         setToastMessage("New draft created successfully.");
-        setMeasureId(response.data.id);
+        setCurrentMeasureId(response.data.id);
         setTimeout(() => {
           navigate(`/measures/${response.data.id}/edit/details`);
         }, 3000);

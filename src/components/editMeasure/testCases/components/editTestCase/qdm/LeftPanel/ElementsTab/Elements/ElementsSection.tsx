@@ -2,15 +2,12 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { uniq } from "lodash";
 import { DataElement } from "cqm-models";
 import { ObjectID } from "bson";
-import * as _ from "lodash";
 import ElementSection from "../../../../../common/ElementSection";
 import DynamicElementTabs from "./DynamicElementTabs";
 import useCqmConversionService from "../../../../../../api/CqmModelConversionService";
 import { measureStore } from "@madie/madie-util";
 import DataElementsList from "./dataElementsList/DataElementsList";
-import DataElementsCard, {
-  applyAttribute,
-} from "./DataElementsCard/DataElementsCard";
+import DataElementsCard from "./DataElementsCard/DataElementsCard";
 import "./ElementsSection.scss";
 import {
   PatientActionType,

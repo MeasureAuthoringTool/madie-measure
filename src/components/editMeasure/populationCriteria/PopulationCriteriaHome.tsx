@@ -8,10 +8,6 @@ import { Measure } from "@madie/madie-models";
 import BaseConfiguration from "./baseConfiguration/BaseConfiguration";
 import QDMReporting from "./QDMReporting/QDMReporting";
 
-interface GroupInputParams {
-  groupNumber: string;
-}
-
 export function PopulationCriteriaHome() {
   const { pathname } = useLocation();
   const { groupNumber } = useParams();
@@ -156,7 +152,7 @@ export function PopulationCriteriaHome() {
           measureId={measure?.id}
         />
       )}
-      {/* what's a better way to say if QDM or QICore? 
+      {/* what's a better way to say if QDM or QICore?
           To do: Find a more elegant solution for future when we have more than two models to avoid if else if else. */}
       {pathname.includes("reporting") && <QDMReporting />}
 

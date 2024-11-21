@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   NavLink,
   useLocation,
@@ -8,10 +8,6 @@ import {
 } from "react-router-dom";
 import tw, { styled } from "twin.macro";
 import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
-export interface RouteHandlerState {
-  canTravel: boolean;
-  pendingRoute: string;
-}
 import { measureStore } from "@madie/madie-util";
 interface PropTypes {
   isActive?: boolean;
@@ -30,16 +26,16 @@ const EditMeasureNav = ({ isQDM }) => {
     testCaseLength === null ? `Test Cases` : `Test Cases (${testCaseLength})`;
   const { pathname } = useLocation();
   let navigate = useNavigate();
-  const { id } = useParams<{
-    id: string;
+  const { measureId } = useParams<{
+    measureId: string;
   }>();
   const qdmNavTo = () => {
     isQDM ? `${pathname}/base-configuration` : `${pathname}/groups/1`;
   };
   // we grab the matching pattern after edit, then we only get the part before the next slash.
   const fullMatch = useMatch("/measures/:id/edit/*")?.params?.["*"];
-  if (fullMatch === "details" && id) {
-    navigate(`/measures/${id}/edit/details/`);
+  if (fullMatch === "details" && measureId) {
+    navigate(`/measures/${measureId}/edit/details/`);
   }
   const match = useMatch("/measures/:id/edit/*")?.params?.["*"].split("/")[0];
 
@@ -51,7 +47,7 @@ const EditMeasureNav = ({ isQDM }) => {
     };
   }, []);
   useEffect(() => {
-    if (id) {
+    if (measureId) {
       const testCases = measure?.testCases;
       if (testCases === null) {
         setTestCaseLength(0);
@@ -60,7 +56,7 @@ const EditMeasureNav = ({ isQDM }) => {
         setTestCaseLength(testCases?.length);
       }
     }
-  }, [id, measure?.testCases, measure?.testCases?.length]);
+  }, [measureId, measure?.testCases, measure?.testCases?.length]);
   return (
     <div>
       <div style={{ marginLeft: "32px" }} id="edit-measure-nav-a">

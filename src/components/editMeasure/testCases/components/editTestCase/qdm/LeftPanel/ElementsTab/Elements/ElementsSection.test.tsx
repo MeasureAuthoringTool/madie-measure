@@ -75,9 +75,10 @@ const measure = mockMeasure;
 const setMeasure = jest.fn();
 const setCqmMeasure = jest.fn;
 const getAccessToken = jest.fn();
+let selectedDataElement: DataElement = null;
 const setSelectedDataElement = jest.fn();
 let cqmConversionService = new CqmConversionService("url", getAccessToken);
-const cqmMeasure = cqmConversionService.convertToCqmMeasure(mockMeasure);
+const cqmMeasure = cqmConversionService.convertToCqmMeasure(mockMeasure, null);
 jest.mock("../../../../../../api/CqmModelConversionService");
 const CQMConversionMock =
   useCqmConversionService as jest.Mock<CqmConversionService>;
@@ -313,6 +314,7 @@ const renderElementsSectionComponent = (render, selectedDataElement) => {
               measureState: [measure, setMeasure],
               cqmMeasureState: [cqmMeasure, setCqmMeasure],
               executionContextReady: true,
+              setExecutionContextReady: jest.fn(),
               executing: false,
               setExecuting: jest.fn(),
               contextFailure: false,
