@@ -31,7 +31,6 @@ export const sortFilteredTestCases = (
   const testCaseCopy = testCases.slice();
   if (sorts) {
     const { id, desc } = sorts;
-    console.log("sorts", sorts);
     // sort the testCaseList in either descending or ascending order based on the sorts object
     testCaseCopy.sort((a, b) => {
       const aValue = a[id as keyof typeof a] as string;
