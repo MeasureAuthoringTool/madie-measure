@@ -107,7 +107,7 @@
     "@testing-library/react-hooks": "^8.0.1",
     "ace-builds": "^1.36.5",
     "allotment": "^1.20.2",
-    "axios": "^1.7.4",
+    "axios": "^1.7.7",
     "babel-plugin-dynamic-import-node": "^2.3.3",
     "blueimp-md5": "^2.19.0",
     "classnames": "^2.3.1",
@@ -162,6 +162,7 @@
     "glob-parent": "^5.1.2",
     "dset": "3.1.2",
     "loader-utils@<2.0.3": "2.0.4",
-    "yaml": "2.2.2"
+    "yaml": "2.2.2",
+    "axios": "^1.7.7"
   }
 }
