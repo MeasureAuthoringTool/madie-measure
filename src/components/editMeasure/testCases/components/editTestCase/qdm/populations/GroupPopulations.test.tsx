@@ -5,11 +5,28 @@ import {
   GroupPopulation,
   PopulationType,
   MeasureScoring,
+  Measure,
 } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 
 const errors = jest.fn();
-
+const measure = {
+  id: "abcd-pqrs-xyz",
+  version: "1.0.000",
+  measureName: "MSR001",
+  cql: "library testCql version '1.0.001'",
+  createdBy: "testuser@example.com",
+  model: "QDM v5.6",
+} as unknown as Measure;
+jest.mock("@madie/madie-util", () => ({
+  measureStore: {
+    state: jest.fn().mockImplementation(() => measure),
+    initialState: jest.fn().mockImplementation(() => measure),
+    subscribe: jest.fn().mockImplementation((set) => {
+      return { unsubscribe: () => null };
+    }),
+  },
+}));
 jest.mock("formik", () => ({
   useField: jest.fn(),
   useFormikContext: jest
