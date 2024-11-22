@@ -45,11 +45,7 @@ module.exports = (webpackConfigEnv, argv) => {
   // This must be updated for any single-spa applications or utilities,
   // or any other package to be loaded externally
   const externalsConfig = {
-    externals: [
-      "@madie/madie-patient",
-      "@madie/madie-editor",
-      "@madie/madie-util",
-    ],
+    externals: ["@madie/madie-editor", "@madie/madie-util"],
   };
   // We need to override the css loading rule from the parent configuration
   // so that we can add postcss-loader to the chain
@@ -144,6 +140,24 @@ module.exports = (webpackConfigEnv, argv) => {
     plugins: [new NodePolyfillPlugin()],
   };
 
+  //handlebar madness
+  const handlebarsConfig = {
+    module: {
+      rules: [
+        {
+          include: [/node_modules\/ * \/fqm_execution\/templates/],
+          test: /\.(js|handlebars|hbs)$/,
+          loader: "handlebars-loader",
+        },
+      ],
+    },
+    resolve: {
+      alias: {
+        handlebars: "handlebars/dist/handlebars.min.js",
+      },
+    },
+  };
+
   return mergeWithRules({
     module: {
       rules: {
@@ -152,6 +166,16 @@ module.exports = (webpackConfigEnv, argv) => {
       },
     },
     plugins: "append",
-  })(defaultConfig, polyfillConfig, newCssRule, externalsConfig);
-  // })(defaultConfig, newCssRule);
+  })(
+    externalsConfig,
+    defaultConfig,
+    polyfillConfig,
+    handlebarsConfig,
+    newCssRule,
+    {
+      optimization: {
+        minimize: false,
+      },
+    }
+  );
 };
