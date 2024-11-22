@@ -5,6 +5,7 @@ import {
   Routes,
   useParams,
   useNavigate,
+  useLocation,
 } from "react-router-dom";
 import "twin.macro";
 import "styled-components/macro";
@@ -36,6 +37,8 @@ interface inputParams {
   id: string;
 }
 
+const OBJECT_ID_REGEX = /\/[a-f0-9]{24}/g;
+
 export interface RouteHandlerState {
   canTravel: boolean;
   pendingRoute: string;
@@ -46,6 +49,7 @@ export default function EditMeasure() {
   const { updateMeasure } = measureStore;
   const [loading, setLoading] = useState<boolean>(true);
   let navigate = useNavigate();
+  const location = useLocation();
   const [routeHandlerState, setRouteHandlerState] = useState<RouteHandlerState>(
     routeHandlerStore.state
   );
@@ -336,13 +340,20 @@ export default function EditMeasure() {
     await measureServiceApi
       .draftMeasure(measure.id, model, measureName)
       .then(async (response) => {
+        // remove the old ids from url and split urls into parts
+        // e.g. /measures/673f9da22d51c65a00afb8a2/edit/test-cases/list-page/673f9da22d51c65a00afb89f
+        const routeParts = location.pathname
+          .replace(OBJECT_ID_REGEX, "")
+          .split("/edit");
+        // results into ["/measures", "/test-cases/list-page"]
+        const subRoute = routeParts.length > 1 ? routeParts[1] : "";
         handleDialogClose();
         setToastOpen(true);
         setToastType("success");
         setToastMessage("New draft created successfully.");
         setMeasureId(response.data.id);
         setTimeout(() => {
-          navigate(`/measures/${response.data.id}/edit/details`);
+          navigate(`/measures/${response.data.id}/edit${subRoute}`);
         }, 3000);
       })
       .catch((error) => {
