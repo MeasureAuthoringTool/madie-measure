@@ -29,7 +29,7 @@ import useMeasureServiceApi, {
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { ELM_JSON, MeasureCQL } from "../../../../common/MeasureCQL";
 import userEvent from "@testing-library/user-event";
-import axios from "../../../../../api/axios-insatnce";
+import axios from "../../../../../api/axios-instance";
 import * as uuid from "uuid";
 import { measureStore, checkUserCanEdit } from "@madie/madie-util";
 import { InitialPopulationAssociationType } from "../groupPopulations/GroupPopulation";
@@ -61,7 +61,7 @@ const getEmptyStrat = () => ({
   id: "",
 });
 
-jest.mock("../../../../../api/axios-insatnce");
+jest.mock("../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 let serviceApiMock: MeasureServiceApi;
 const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec

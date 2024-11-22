@@ -2,11 +2,13 @@
   "esModuleInterop": true,
   "extends": "ts-config-single-spa",
   "compilerOptions": {
+    "target": "es2015",
     "declaration": true,
     "declarationDir": "dist",
     "declarationMap": true,
     "jsx": "react-jsx",
     "sourceMap": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true
   },
   "files": ["src/madie-madie-measure.tsx"],

@@ -1,7 +1,7 @@
 import { MeasureServiceApi } from "./useMeasureServiceApi";
 import { libraryElm } from "./__mocks__/cqlLibraryElm";
-import axios from "../api/axios-insatnce";
-jest.mock("../api/axios-insatnce");
+import axios from "./axios-instance";
+jest.mock("./axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 import {
   EndorsementOrganization,

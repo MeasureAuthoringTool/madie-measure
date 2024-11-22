@@ -55,6 +55,7 @@ module.exports = {
         400: "#3adb73",
         500: "#1dd65e",
         DEFAULT: "#1dd65e",
+        550: "#54A12A",
         600: "#15b85e",
         700: "#0e9a5b",
         800: "#097c53",
@@ -101,6 +102,7 @@ module.exports = {
       },
       gray: {
         50: "#f2f5fb",
+        75: "#F7F7F7",
         100: "#e5ecf7",
         200: "#cfd8e8",
         300: "#b6bed2",
@@ -113,6 +115,7 @@ module.exports = {
         900: "#1c2556",
         950: "#20253a",
         975: "#080B1A",
+        980: "#515151",
       },
       slate: {
         DEFAULT: "#EDEDED",

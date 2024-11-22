@@ -4,13 +4,22 @@ export interface ServiceConfig {
   measureService: {
     baseUrl: string;
   };
+  testCaseService: {
+    baseUrl: string;
+  };
+  terminologyService: {
+    baseUrl: string;
+  };
   qdmElmTranslationService: {
     baseUrl: string;
   };
   fhirElmTranslationService: {
     baseUrl: string;
   };
-  terminologyService: {
+  fhirService: {
+    baseUrl: string;
+  };
+  excelExportService: {
     baseUrl: string;
   };
 }

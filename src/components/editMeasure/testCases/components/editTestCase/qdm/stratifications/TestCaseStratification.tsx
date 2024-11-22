@@ -1,0 +1,99 @@
+import React from "react";
+import "styled-components/macro";
+import { DisplayStratificationValue } from "@madie/madie-models";
+import ExpectActualInput from "../populations/ExpectActualInput";
+
+export interface TestCaseStratificationProps {
+  strataCode: string;
+  stratification: DisplayStratificationValue;
+  stratResult?: any;
+  populationBasis: string;
+  showExpected?: boolean;
+  disableExpected?: boolean;
+  onStratificationChange: (stratification: DisplayStratificationValue) => void;
+  QDM?: boolean;
+  index?: number;
+  isTestCaseExecuted?: boolean;
+  setIsTestCaseExecuted?: (isTestCaseExecuted: boolean) => void;
+}
+
+const TestCaseStratification = ({
+  strataCode,
+  stratification,
+  stratResult,
+  populationBasis,
+  disableExpected = false,
+  onStratificationChange,
+  setIsTestCaseExecuted,
+  index,
+  QDM = false,
+  isTestCaseExecuted = false,
+}: TestCaseStratificationProps) => {
+  return (
+    <React.Fragment key={`fragment-key-${strataCode}`}>
+      <tr
+        tw="border-b"
+        key={strataCode}
+        data-testid={`test-row-population-id-${stratification.name}`}
+        role="row"
+      >
+        <td>&nbsp;</td>
+        <td role="cell">{QDM ? "Stratification" : strataCode}</td>
+        <td role="cell">
+          <ExpectActualInput
+            id={`${stratification.name}-expected-cb`}
+            expectedValue={stratification.expected}
+            onChange={(expectedValue) => {
+              setIsTestCaseExecuted(false);
+              onStratificationChange({
+                ...stratification,
+                expected: expectedValue,
+              });
+            }}
+            populationBasis={populationBasis}
+            disabled={disableExpected}
+            data-testid={
+              QDM
+                ? `test-population-${stratification.name}-expected-${index}`
+                : `test-population-${stratification.name}-expected`
+            }
+            displayType="expected"
+          />
+        </td>
+        <td role="cell">
+          {isTestCaseExecuted ? (
+            <ExpectActualInput
+              id={`${stratResult.name}-actual-cb`}
+              expectedValue={stratResult.actual}
+              onChange={() => {}}
+              populationBasis={populationBasis}
+              disabled={true}
+              data-testid={
+                QDM
+                  ? `test-stratification-${stratResult.name}-actual-${index}`
+                  : `test-stratification-${stratResult.name}-actual`
+              }
+              displayType="actual"
+            />
+          ) : (
+            <pre
+              data-testid={
+                QDM
+                  ? `test-stratification-${stratResult.name}-actual-${index}`
+                  : `test-stratification-${stratResult.name}-actual`
+              }
+            >
+              {" "}
+              -
+            </pre>
+          )}
+        </td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+      </tr>
+    </React.Fragment>
+  );
+};
+
+export default TestCaseStratification;

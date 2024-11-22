@@ -10,7 +10,7 @@ export const routesConfig = [
     children: [
       { path: "/", element: <MeasureLanding /> },
       { path: "/measures", element: <MeasureLanding /> },
-      { path: "/measures/:id/edit/*", element: <EditMeasure /> },
+      { path: "/measures/:measureId/edit/*", element: <EditMeasure /> },
       { path: "/404", element: <NotFound /> },
       { path: "*", element: <NotFound /> },
     ],

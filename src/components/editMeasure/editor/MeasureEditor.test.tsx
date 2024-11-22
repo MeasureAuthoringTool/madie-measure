@@ -6,10 +6,9 @@ import MeasureEditor, {
 } from "./MeasureEditor";
 import { Measure, MeasureErrorType, Model } from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
-import axios from "../../../api/axios-insatnce";
+import axios from "../../../api/axios-instance";
 import { ElmTranslationError } from "./measureEditorUtils";
 import userEvent from "@testing-library/user-event";
-// @ts-ignore
 import {
   ElmTranslationExternalError,
   parseContent,
@@ -18,6 +17,7 @@ import {
   validateContent,
 } from "@madie/madie-editor";
 import { checkUserCanEdit, measureStore } from "@madie/madie-util";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 const measure = {
   id: "abcd-pqrs-xyz",
@@ -143,7 +143,7 @@ const cqlToElmExternalErrors: ElmTranslationExternalError[] = [
   },
 ];
 
-jest.mock("../../../api/axios-insatnce");
+jest.mock("../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const serviceConfig = {
@@ -159,13 +159,17 @@ const serviceConfig = {
   terminologyService: {
     baseUrl: "terminology-service.com",
   },
-} as ServiceConfig;
+} as unknown as ServiceConfig;
 
 const renderEditor = (measure) => {
   measureStore.state.mockImplementationOnce(() => measure);
   return render(
     <ApiContextProvider value={serviceConfig}>
-      <MeasureEditor />
+      <MemoryRouter initialEntries={[{ pathname: "/cql-editor" }]}>
+        <Routes>
+          <Route path="/cql-editor" element={<MeasureEditor />} />
+        </Routes>
+      </MemoryRouter>
     </ApiContextProvider>
   );
 };
@@ -190,9 +194,7 @@ describe("MeasureEditor component", () => {
       createdBy: MEASURE_CREATEDBY,
     } as Measure;
     const { getByTestId } = renderEditor(measureWithNoCql);
-    const editorContainer = (await getByTestId(
-      "measure-editor"
-    )) as HTMLInputElement;
+    const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
     expect(editorContainer.value).toEqual("");
   });
 
@@ -219,9 +221,7 @@ describe("MeasureEditor component", () => {
     });
 
     const { getByTestId } = renderEditor(measure);
-    const editorContainer = (await getByTestId(
-      "measure-editor"
-    )) as HTMLInputElement;
+    const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
     expect(measure.cql).toEqual(editorContainer.value);
     fireEvent.change(getByTestId("measure-editor"), {
       target: {
@@ -261,9 +261,7 @@ describe("MeasureEditor component", () => {
     });
 
     const { getByTestId } = renderEditor(measure);
-    const editorContainer = (await getByTestId(
-      "measure-editor"
-    )) as HTMLInputElement;
+    const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
     expect(measure.cql).toEqual(editorContainer.value);
     fireEvent.change(getByTestId("measure-editor"), {
       target: {
@@ -311,9 +309,7 @@ describe("MeasureEditor component", () => {
     });
 
     const { getByTestId } = renderEditor(measure);
-    const editorContainer = (await getByTestId(
-      "measure-editor"
-    )) as HTMLInputElement;
+    const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
     expect(measure.cql).toEqual(editorContainer.value);
     fireEvent.change(getByTestId("measure-editor"), {
       target: {
@@ -377,9 +373,7 @@ describe("MeasureEditor component", () => {
     });
 
     const { getByTestId } = renderEditor(measure);
-    const editorContainer = (await getByTestId(
-      "measure-editor"
-    )) as HTMLInputElement;
+    const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
     expect(measure.cql).toEqual(editorContainer.value);
     fireEvent.change(getByTestId("measure-editor"), {
       target: {
@@ -418,9 +412,7 @@ describe("MeasureEditor component", () => {
       });
 
     const { getByTestId } = renderEditor(measure);
-    const editorContainer = (await getByTestId(
-      "measure-editor"
-    )) as HTMLInputElement;
+    const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
     expect(measure.cql).toEqual(editorContainer.value);
     fireEvent.change(getByTestId("measure-editor"), {
       target: {
@@ -468,9 +460,9 @@ describe("MeasureEditor component", () => {
     renderEditor(measure);
     const issues = await screen.findByText("2 issues found with CQL");
     expect(issues).toBeInTheDocument();
-    const editorContainer = (await screen.getByTestId(
+    const editorContainer = screen.getByTestId(
       "measure-editor"
-    )) as HTMLInputElement;
+    ) as HTMLInputElement;
     expect(measure.cql).toEqual(editorContainer.value);
     fireEvent.change(screen.getByTestId("measure-editor"), {
       target: {
@@ -514,9 +506,7 @@ describe("MeasureEditor component", () => {
     isUsingEmpty.mockClear().mockImplementation(() => false);
 
     const { getByTestId } = renderEditor(measure);
-    const editorContainer = (await getByTestId(
-      "measure-editor"
-    )) as HTMLInputElement;
+    const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
     expect(measure.cql).toEqual(editorContainer.value);
     fireEvent.change(getByTestId("measure-editor"), {
       target: {
@@ -536,9 +526,7 @@ describe("MeasureEditor component", () => {
 
   it("reset the editor changes with measure cql when clicked on cancel button", async () => {
     const { getByTestId } = renderEditor(measure);
-    const editorContainer = (await getByTestId(
-      "measure-editor"
-    )) as HTMLInputElement;
+    const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
     expect(measure.cql).toEqual(editorContainer.value);
     // set new value to editor
     fireEvent.change(getByTestId("measure-editor"), {
@@ -548,11 +536,9 @@ describe("MeasureEditor component", () => {
     });
     // click on cancel button
     fireEvent.click(getByTestId("reset-cql-btn"));
-    const discardDialog = await screen.getByTestId("discard-dialog");
+    const discardDialog = screen.getByTestId("discard-dialog");
     expect(discardDialog).toBeInTheDocument();
-    const continueButton = await screen.getByTestId(
-      "discard-dialog-continue-button"
-    );
+    const continueButton = screen.getByTestId("discard-dialog-continue-button");
     expect(continueButton).toBeInTheDocument();
     fireEvent.click(continueButton);
     await waitFor(() => {
@@ -563,9 +549,7 @@ describe("MeasureEditor component", () => {
 
   it("it closes the dialog without changing the cql", async () => {
     const { getByTestId, queryByText } = renderEditor(measure);
-    const editorContainer = (await getByTestId(
-      "measure-editor"
-    )) as HTMLInputElement;
+    const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
     expect(measure.cql).toEqual(editorContainer.value);
     // set new value to editor
     fireEvent.change(getByTestId("measure-editor"), {
@@ -575,11 +559,9 @@ describe("MeasureEditor component", () => {
     });
     // click on cancel button
     fireEvent.click(getByTestId("reset-cql-btn"));
-    const discardDialog = await screen.getByTestId("discard-dialog");
+    const discardDialog = screen.getByTestId("discard-dialog");
     expect(discardDialog).toBeInTheDocument();
-    const cancelButton = await screen.getByTestId(
-      "discard-dialog-cancel-button"
-    );
+    const cancelButton = screen.getByTestId("discard-dialog-cancel-button");
     expect(queryByText("You have unsaved changes.")).toBeVisible();
     expect(cancelButton).toBeInTheDocument();
     fireEvent.click(cancelButton);
@@ -596,9 +578,7 @@ describe("MeasureEditor component", () => {
       }
     });
     const { getByTestId } = renderEditor(measure);
-    const editorContainer = (await getByTestId(
-      "measure-editor"
-    )) as HTMLInputElement;
+    const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
     expect(measure.cql).toEqual(editorContainer.value);
     // set new value to editor
     fireEvent.change(getByTestId("measure-editor"), {

@@ -21,6 +21,7 @@ import {
   TestCase,
 } from "@madie/madie-models";
 import MeasureEditor from "./editor/MeasureEditor";
+// @ts-ignore
 import { measureStore } from "@madie/madie-util";
 import { oneItemResponse } from "../__mocks__/mockMeasureResponses";
 
@@ -191,7 +192,7 @@ jest.mock("@madie/madie-util", () => ({
   },
 }));
 
-const serviceConfig: ServiceConfig = {
+const serviceConfig = {
   measureService: {
     baseUrl: "base.url",
   },
@@ -202,7 +203,7 @@ const serviceConfig: ServiceConfig = {
     baseUrl: "",
   },
   terminologyService: { baseUrl: "" },
-};
+} as ServiceConfig;
 
 const { getByTestId, findByTestId, queryByTestId, queryByText, findByText } =
   screen;
@@ -235,7 +236,7 @@ describe("EditMeasure Component", () => {
   });
 
   it("should render the EditMeasure contents after the measure is loaded", async () => {
-    await renderRouter();
+    renderRouter();
 
     const result = await findByTestId("editMeasure");
     expect(result).toBeInTheDocument();
@@ -246,7 +247,7 @@ describe("EditMeasure Component", () => {
   });
 
   it("should display a delete dialog when the event is triggered, discards.", async () => {
-    await renderRouter();
+    renderRouter();
 
     const result = await findByTestId("editMeasure");
     expect(result).toBeInTheDocument();
