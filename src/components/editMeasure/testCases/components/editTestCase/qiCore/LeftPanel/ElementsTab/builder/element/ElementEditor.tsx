@@ -29,7 +29,7 @@ const ElementEditor = ({
   }
   const currentPath = elementDefinition?.path;
 
-  const allChildren = fhirDefinitionsService.current.getAllChildren(
+  const allChildren = fhirDefinitionsService?.current?.getAllChildren(
     selectedResource,
     currentPath
   );

@@ -25,7 +25,8 @@ describe("Transform Arrays works as expected", () => {
     { id: "ClaimResponse.item.detail.subDetail.adjudication" },
   ];
   test("Splits by heirarchy", () => {
-    expect(transformArrays(testData, 3)).length.toBe(2);
+    const result = transformArrays(testData, 3);
+    expect(result).toHaveLength(2);
   });
   test("Doesn't split when uneccessary", () => {
     const test2 = [
@@ -43,6 +44,7 @@ describe("Transform Arrays works as expected", () => {
       { id: "ClaimResponse.item.detail.subDetail.noteNumber" },
       { id: "ClaimResponse.item.detail.subDetail.adjudication" },
     ];
-    expect(transformArrays(test2, 3)).length.toBe(1);
+    const result = transformArrays(test2, 3);
+    expect(result).toHaveLength(1);
   });
 });
