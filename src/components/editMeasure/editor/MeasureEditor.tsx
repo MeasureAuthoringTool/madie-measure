@@ -783,7 +783,6 @@ const MeasureEditor = () => {
                 isCQLUnchanged={isCQLUnchanged}
                 resetCql={resetCql}
                 getCqlDefinitionReturnTypes={getCqlDefinitionReturnTypes}
-                // checkContext={true}
               />
             ) : (
               <>
