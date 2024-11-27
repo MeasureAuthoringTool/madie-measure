@@ -91,12 +91,11 @@ export default function EditMeasure() {
   };
 
   useEffect(() => {
-    //we don't want to fire this by accident during delete.
-    if (loading) loadMeasure();
-  }, [measureServiceApi, currentMeasureId, history, loading, updateMeasure]);
-  useEffect(() => {
-    loadMeasure();
+    if (currentMeasureId) {
+      loadMeasure();
+    }
   }, [currentMeasureId]);
+
   const loadMeasure = () => {
     measureServiceApi
       .fetchMeasure(currentMeasureId)
