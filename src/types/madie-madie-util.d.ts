@@ -20,6 +20,7 @@ declare module "@madie/madie-util" {
     qdmHideJson: boolean;
     TestCaseListSearch: boolean;
     TestCaseID: boolean;
+    TestCaseListButtons: boolean;
   }
 
   export interface ServiceConfig {

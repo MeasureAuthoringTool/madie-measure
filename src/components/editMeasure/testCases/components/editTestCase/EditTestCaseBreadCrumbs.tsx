@@ -12,7 +12,10 @@ const EditTestCaseBreadCrumbs = (props: EditTestCaseBreadCrumbsProps) => {
 
   let testCaseString = "";
   if (testCase) {
-    testCaseString = testCase?.series
+    testCaseString = testCase?.caseNumber
+      ? `Case #${testCase.caseNumber}: `
+      : "";
+    testCaseString += testCase?.series
       ? `${testCase.series} - ${testCase.title}`
       : `${testCase.title}`;
   }
