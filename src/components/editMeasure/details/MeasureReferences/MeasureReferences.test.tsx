@@ -11,6 +11,7 @@ import MeasureReferences from "./MeasureReferences";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../api/useMeasureServiceApi";
+// @ts-ignore
 import { measureStore } from "@madie/madie-util";
 import { Measure, Reference } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
@@ -76,7 +77,7 @@ jest.mock("@madie/madie-util", () => ({
   },
 }));
 
-const serviceConfig: ServiceConfig = {
+const serviceConfig = {
   measureService: {
     baseUrl: "base.url",
   },
@@ -84,7 +85,7 @@ const serviceConfig: ServiceConfig = {
     baseUrl: "",
   },
   terminologyService: { baseUrl: "" },
-};
+} as unknown as ServiceConfig;
 
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
@@ -167,12 +168,6 @@ describe("Measure References Component", () => {
     );
     await checkRows(9);
 
-    await waitFor(() => {
-      const selectButton = screen.getByTestId(`select-action-id 1`);
-      expect(selectButton).toBeInTheDocument();
-      userEvent.click(selectButton);
-    });
-
     const editButton = screen.getByTestId(`edit-measure-reference-id 1`);
     expect(editButton).toBeInTheDocument();
 
@@ -233,12 +228,6 @@ describe("Measure References Component", () => {
     );
     await checkRows(9);
 
-    await waitFor(() => {
-      const selectButton = screen.getByTestId(`select-action-id 1`);
-      expect(selectButton).toBeInTheDocument();
-      userEvent.click(selectButton);
-    });
-
     const deleteButton = getByTestId(`delete-measure-reference-id 1`);
     expect(deleteButton).toBeInTheDocument();
     fireEvent.click(deleteButton);
@@ -269,12 +258,6 @@ describe("Measure References Component", () => {
       </ApiContextProvider>
     );
     await checkRows(9);
-
-    await waitFor(() => {
-      const selectButton = screen.getByTestId(`select-action-id 1`);
-      expect(selectButton).toBeInTheDocument();
-      userEvent.click(selectButton);
-    });
 
     const deleteButton = getByTestId(`delete-measure-reference-id 1`);
     expect(deleteButton).toBeInTheDocument();

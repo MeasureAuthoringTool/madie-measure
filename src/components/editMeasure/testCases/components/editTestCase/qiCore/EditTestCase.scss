@@ -1,0 +1,212 @@
+#edit-test-case-qi-core {
+  > .allotment-wrapper {
+    margin: 0 32px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    height: calc(100vh - 380px);
+    margin-bottom: 112px;
+    .split-view {
+      position: relative;
+      height: inherit;
+      .left-panel {
+        margin-top: 48px;
+        height: inherit;
+        > .panel-content {
+          padding-left: 32px;
+          padding-right: 20px;
+          height: inherit;
+        }
+      }
+      .validation-panel {
+        margin-left: 12px;
+        height: 100%;
+        .validation-content {
+          overflow-y: scroll;
+          margin-top: 17px;
+        }
+      }
+      .nav-panel,
+      .right-panel {
+        margin-left: 12px;
+        float: left;
+        height: inherit;
+        > .panel-content {
+          padding-left: 16px;
+          padding-right: 16px;
+          height: calc(100% - 48px);
+
+          > #details-panel {
+            margin-right: 16px;
+          }
+        }
+        > .tab-container {
+          > .MuiButtonBase-root {
+            margin-right: 8px;
+            > .back-icon {
+              color: #0073c8;
+            }
+          }
+        }
+        > #test-case-cql-editor {
+          height: 100%;
+          overflow: scroll;
+          margin-right: 16px;
+          > div {
+            height: inherit;
+          }
+        }
+      }
+
+      .left-panel,
+      .nav-panel,
+      .right-panel {
+        height: 100%;
+        width: 100%;
+        background: #fff;
+        margin-right: 500px;
+        > .tab-container {
+          background-color: #ededed;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          > .MuiTabs-root {
+            background-color: #ededed;
+            margin-left: 16px;
+          }
+        }
+        > .panel-content {
+          padding-top: 32px;
+          overflow: scroll;
+        }
+      }
+      .sash {
+        width: 16px;
+        background-color: #ddd;
+        &:before {
+          position: absolute;
+          content: "";
+          top: 50%;
+          width: 4px;
+          height: 34px;
+          border: solid 1.5px #717171;
+          border-color: transparent #717171 transparent #717171;
+        }
+        // after is a pretend pseudo element to cover the overlap up into the nav bars.
+        // We want the top to scroll, so so, they must be divided by the allotment
+        // solution is to hide the overlap. genius.
+        &:after {
+          position: absolute;
+          content: "";
+          top: 0;
+          height: 48px;
+          width: 100%;
+          background-color: #fff;
+          // going to need to uncomment this background-color: #ededed;
+        }
+      }
+    }
+  }
+}
+
+#create-test-case-right-panel,
+#test-case-population-lower-tab {
+  margin-right: 0;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 7px;
+    border-radius: 25px;
+  }
+
+  &::-webkit-scrollbar-track {
+    width: 7px;
+    background: rgba(176, 176, 176, 0.5);
+    border-radius: 25px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(81, 81, 81, 0.5);
+    opacity: 0.5;
+    border-radius: 25px;
+    width: 7px;
+  }
+}
+
+#create-test-case-right-panel {
+  max-height: 100%;
+}
+
+#test-case-population-lower-tab {
+  max-height: 445px;
+  max-width: 550px;
+  margin-right: 50px;
+}
+
+.population-table {
+  width: 100%;
+  empty-cells: show;
+  table-layout: auto;
+  font-family: Rubik, sans-serif;
+  font-weight: 400;
+
+  caption {
+    font-size: 15px;
+    line-height: 20px;
+    text-align: left;
+    border-bottom: solid 1px #8c8c8c;
+    padding: 16px 23px;
+
+    .caption {
+      font-weight: 500;
+    }
+
+    .pass {
+      color: #4d7e23;
+    }
+
+    .fail {
+      color: #ae1c1c;
+    }
+
+    .sub-caption {
+      font-weight: 400;
+    }
+  }
+
+  tbody > tr > td:first-of-type,
+  thead > tr > th:first-of-type {
+    border-bottom: solid 1px transparent;
+  }
+
+  tbody {
+    padding: 24px;
+    margin: 24px;
+    td:nth-of-type(2),
+    td:nth-of-type(3),
+    td:nth-of-type(4),
+    tr:last-of-type > td:first-of-type {
+      border-bottom: solid 1px #8c8c8c;
+    }
+  }
+
+  tr {
+    border: solid 1px transparent;
+    height: 40px;
+    > th,
+    > td {
+      text-align: left;
+      color: #515151;
+      line-height: 24px;
+      font-size: 14px;
+      text-transform: capitalize;
+      max-width: 40px;
+    }
+
+    > th {
+      font-weight: 500;
+    }
+
+    &:last-of-type {
+      border-bottom: solid 1px #8c8c8c;
+    }
+  }
+}

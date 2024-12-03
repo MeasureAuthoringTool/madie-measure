@@ -1,4 +1,7 @@
-import applyParameter, { editParameter } from "./parameterApplier";
+import applyParameter, {
+  editParameter,
+  deleteParameter,
+} from "./parameterApplier";
 import * as fs from "fs";
 import { CqlApplyActionResult } from "./CqlApplyActionResult";
 import { Parameter } from "../../../../../madie-editor/src/api/useTerminologyServiceApi";
@@ -115,7 +118,7 @@ describe("applyCode test cases", () => {
     expect(cqlArray[3]).toEqual('parameter "testName" testExpression');
   });
 
-  it("Should edit Parameter if not present", () => {
+  it("Should edit Parameter", () => {
     //read cql from file
     const cql = fs.readFileSync(
       "src/components/editMeasure/editor/__mocks__/LoincTest.cql",
@@ -134,5 +137,22 @@ describe("applyCode test cases", () => {
 
     const result = editParameter(cql, parameter, parameterToApply);
     expect(result).toContain("Test Measurement Period");
+  });
+
+  it("Should delete Parameter", () => {
+    //read cql from file
+    const cql = fs.readFileSync(
+      "src/components/editMeasure/editor/__mocks__/LoincTest.cql",
+      "utf8"
+    );
+    const parameterJSON = fs.readFileSync(
+      "src/components/editMeasure/editor/__mocks__/testParameter.json",
+      "utf8"
+    );
+
+    const parameter = JSON.parse(parameterJSON);
+
+    const result = deleteParameter(cql, parameter);
+    expect(result).not.toContain("Measurement Period");
   });
 });

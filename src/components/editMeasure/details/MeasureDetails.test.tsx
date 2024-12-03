@@ -7,7 +7,6 @@ import MeasureDetails from "./MeasureDetails";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
 import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureMetadata from "./measureMetadata/MeasureMetadata";
-import { useFeatureFlags } from "@madie/madie-util";
 
 jest.mock("./measureInformation/MeasureInformation");
 jest.mock("./measureMetadata/MeasureMetadata");
@@ -50,7 +49,7 @@ MeasureMetadataMock.mockImplementation(() => {
   return <div>Mock Measure Metadata</div>;
 });
 
-const serviceConfig: ServiceConfig = {
+const serviceConfig = {
   measureService: {
     baseUrl: "base.url",
   },
@@ -60,7 +59,7 @@ const serviceConfig: ServiceConfig = {
   terminologyService: {
     baseUrl: "base.url",
   },
-};
+} as unknown as ServiceConfig;
 
 const { getByText, getByTestId } = screen;
 

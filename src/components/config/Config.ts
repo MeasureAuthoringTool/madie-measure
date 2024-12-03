@@ -1,4 +1,4 @@
-import axios from "../../api/axios-insatnce";
+import axios from "../../api/axios-instance";
 
 export interface OktaConfig {
   baseUrl: string;

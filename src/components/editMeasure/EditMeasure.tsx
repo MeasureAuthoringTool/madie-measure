@@ -5,6 +5,7 @@ import {
   Routes,
   useParams,
   useNavigate,
+  useLocation,
 } from "react-router-dom";
 import "twin.macro";
 import "styled-components/macro";
@@ -13,15 +14,18 @@ import MeasureDetails from "./details/MeasureDetails";
 import MeasureEditor from "./editor/MeasureEditor";
 import { Measure, Model } from "@madie/madie-models";
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
-import { MadiePatient } from "@madie/madie-patient";
 import { measureStore, routeHandlerStore } from "@madie/madie-util";
-import { Toast, MadieAlert } from "@madie/madie-design-system/dist/react";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
 import InvalidTestCaseDialog from "../common/invalidTestCaseDialog/InvalidTestCaseDialog";
 
 import versionErrorHelper from "../../utils/versionErrorHelper";
 
 import getLibraryNameErrors from "../measureLanding/measureList/InvalidMeasureNameDialog/getLibraryNameErrors";
+import {
+  Toast,
+  MadieAlert,
+  MadieDiscardDialog,
+} from "@madie/madie-design-system/dist/react";
 import DeleteDialog from "./DeleteDialog";
 import NotFound from "../notfound/NotFound";
 import ReviewInfo from "./reviewInfo/ReviewInfo";
@@ -32,59 +36,69 @@ import DraftMeasureDialog from "../common/draftMeasureDialog/DraftMeasureDialog"
 
 import ExportDialog from "../measureLanding/measureList/exportDialog/ExportDialog";
 import { exportMeasure } from "../../utils/exportUtil";
-interface inputParams {
-  id: string;
-}
+import TestCases from "./testCases/TestCases";
+
+const OBJECT_ID_REGEX = /\/[a-f0-9]{24}/g;
 
 export interface RouteHandlerState {
   canTravel: boolean;
   pendingRoute: string;
 }
 export default function EditMeasure() {
-  const { id } = useParams();
+  const { measureId } = useParams();
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const [loading, setLoading] = useState<boolean>(true);
   let navigate = useNavigate();
+  const location = useLocation();
+  const [currentMeasureId, setCurrentMeasureId] = useState<string>(measureId);
+
+  // Required by every single spa application that has internal routing
+  // This will block user from navigating inside madie-measure when the current form is dirty
+  const { updateRouteHandlerState } = routeHandlerStore;
   const [routeHandlerState, setRouteHandlerState] = useState<RouteHandlerState>(
     routeHandlerStore.state
   );
-
-  const [measureId, setMeasureId] = useState<string>(id);
-
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   useEffect(() => {
     const subscription = routeHandlerStore.subscribe(setRouteHandlerState);
     return () => {
       subscription.unsubscribe();
     };
   }, []);
-  const { updateRouteHandlerState } = routeHandlerStore;
-
-  // make reusable component to throw anywhere we want to block navigation..
-  const blocker = useBlocker(() => !routeHandlerState.canTravel);
-  useEffect(() => {
-    if (blocker.location)
-      updateRouteHandlerState({
-        canTravel: false,
-        pendingRoute: blocker?.location?.pathname,
-      });
-  }, [blocker?.location?.pathname]);
-
-  useEffect(() => {
-    if (routeHandlerState.canTravel && blocker.reset) {
-      blocker.reset();
+  const blocker = useBlocker(({ currentLocation, nextLocation }) => {
+    if (
+      !routeHandlerState?.canTravel &&
+      currentLocation.pathname !== nextLocation.pathname
+    ) {
+      setDialogOpen(true);
+      return true;
     }
-  }, [routeHandlerState.canTravel]);
+    setDialogOpen(false);
+    return false;
+  });
+  const onContinue = () => {
+    setDialogOpen(false);
+    updateRouteHandlerState({
+      canTravel: true,
+      pendingRoute: "",
+    });
+    blocker.proceed();
+  };
+  const onClose = () => {
+    setDialogOpen(false);
+    blocker.reset();
+  };
+
   useEffect(() => {
-    //we don't want to fire this by accident during delete.
-    if (loading) loadMeasure();
-  }, [measureServiceApi, measureId, history, loading, updateMeasure]);
-  useEffect(() => {
-    loadMeasure();
-  }, [measureId]);
+    if (currentMeasureId) {
+      loadMeasure();
+    }
+  }, [currentMeasureId]);
+
   const loadMeasure = () => {
     measureServiceApi
-      .fetchMeasure(measureId)
+      .fetchMeasure(currentMeasureId)
       .then((value: Measure) => {
         updateMeasure(value);
         setLoading(false);
@@ -95,16 +109,15 @@ export default function EditMeasure() {
         }
       });
   };
+
+  useEffect(() => {
+    loadMeasure();
+  }, [currentMeasureId]);
+
   const loadingDiv = <div data-testid="loading">Loading...</div>;
 
   // Delete utilities
   const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
-
-  const [invalidLibraryDialogOpen, setInvalidLibraryDialogOpen] =
-    useState<boolean>(false);
-  const [invalidLibraryErrors, setInvalidLibraryErrors] = useState<string[]>(
-    []
-  );
   const [createVersionDialog, setCreateVersionDialog] = useState({
     open: false,
     measureId: "",
@@ -134,7 +147,6 @@ export default function EditMeasure() {
       window.removeEventListener("delete-measure", deleteListener, false);
     };
   }, []);
-
   useEffect(() => {
     const versionListener = () => {
       setCreateVersionDialog({
@@ -142,11 +154,13 @@ export default function EditMeasure() {
         measureId: measure?.id,
       });
     };
-    window.addEventListener("version-measure", versionListener, false);
+    window.addEventListener("version-measure", versionListener, {
+      passive: true,
+    });
     return () => {
-      window.removeEventListener("version-measure", versionListener, false);
+      window.removeEventListener("version-measure", versionListener);
     };
-  }, [measure]);
+  }, []); // only mount and unmount on initial render
 
   useEffect(() => {
     const draftListener = () => {
@@ -170,7 +184,7 @@ export default function EditMeasure() {
   useEffect(() => {
     const exportListener = async () => {
       try {
-        const measure = await measureServiceApi.fetchMeasure(id);
+        const measure = await measureServiceApi.fetchMeasure(measureId);
         await exportMeasure(
           setFailureMessage,
           setDownloadState,
@@ -191,7 +205,7 @@ export default function EditMeasure() {
       window.removeEventListener("export-measure", exportListener, false);
     };
   }, [
-    id,
+    measureId,
     setFailureMessage,
     setDownloadState,
     abortController,
@@ -217,7 +231,7 @@ export default function EditMeasure() {
         })
       );
     };
-  }, [measureId]);
+  }, [currentMeasureId]);
   const handleCreateError = (error) => {
     const errorData = error?.response;
     setToastOpen(true);
@@ -241,7 +255,6 @@ export default function EditMeasure() {
     }
   };
   const handleDialogClose = () => {
-    setInvalidLibraryDialogOpen(false);
     setInvalidTestCaseOpen(false);
     setCreateVersionDialog({
       open: false,
@@ -250,7 +263,6 @@ export default function EditMeasure() {
     setDraftMeasureDialog({
       open: false,
     });
-    setInvalidLibraryErrors([]);
     setVersionHelperText("");
   };
   const createVersion = (versionType: string) => {
@@ -263,9 +275,7 @@ export default function EditMeasure() {
         setToastType("success");
         setLoading(false);
         setToastMessage("New version of measure is Successfully created");
-        setTimeout(() => {
-          navigate(`/measures/${r.data.id}/edit/details`);
-        }, 3000);
+        loadMeasure();
       })
       .catch((error) => {
         handleCreateError(error);
@@ -301,11 +311,13 @@ export default function EditMeasure() {
         })
         .catch((error) => {
           handleCreateError(error);
+          setLoading(false);
         });
     }
   };
   // intermediary validation step before we check if we can create version
   const checkValidCqlLibraryName = async (versionType: string) => {
+    setLoading(true);
     try {
       const result = await measureServiceApi?.fetchMeasure(measure.id);
       if (result) {
@@ -315,8 +327,6 @@ export default function EditMeasure() {
           model as Model
         );
         if (errorResults.length > 0) {
-          setInvalidLibraryErrors(errorResults);
-          setInvalidLibraryDialogOpen(true);
           setCreateVersionDialog((prevState) => ({
             ...prevState,
             open: false,
@@ -329,19 +339,27 @@ export default function EditMeasure() {
       setToastMessage(
         "An error occurred, please try again. If the error persists, please contact the help desk."
       );
+      setLoading(false);
     }
   };
   const draftMeasure = async (measureName: string, model: Model) => {
     await measureServiceApi
       .draftMeasure(measure.id, model, measureName)
       .then(async (response) => {
+        // remove the old ids from url and split urls into parts
+        // e.g. /measures/673f9da22d51c65a00afb8a2/edit/test-cases/list-page/673f9da22d51c65a00afb89f
+        const routeParts = location.pathname
+          .replace(OBJECT_ID_REGEX, "")
+          .split("/edit");
+        // results into ["/measures", "/test-cases/list-page"]
+        const subRoute = routeParts.length > 1 ? routeParts[1] : "";
         handleDialogClose();
         setToastOpen(true);
         setToastType("success");
         setToastMessage("New draft created successfully.");
-        setMeasureId(response.data.id);
+        setCurrentMeasureId(response.data.id);
         setTimeout(() => {
-          navigate(`/measures/${response.data.id}/edit/details`);
+          navigate(`/measures/${response.data.id}/edit${subRoute}`);
         }, 3000);
       })
       .catch((error) => {
@@ -432,7 +450,14 @@ export default function EditMeasure() {
             }
           />
           <Route path={`/cql-editor`} element={<MeasureEditor />} />
-          <Route path={`/test-cases/*`} element={<MadiePatient />} />
+          <Route
+            path={`/test-cases/*`}
+            element={
+              <Suspense fallback={<div>loading</div>}>
+                <TestCases />
+              </Suspense>
+            }
+          />
           <Route
             path={`/groups/:groupNumber`}
             element={<PopulationCriteriaWrapper />}
@@ -507,6 +532,11 @@ export default function EditMeasure() {
         message={toastMessage}
         onClose={onToastClose}
         autoHideDuration={6000}
+      />
+      <MadieDiscardDialog
+        open={dialogOpen}
+        onContinue={onContinue}
+        onClose={onClose}
       />
     </div>
   );

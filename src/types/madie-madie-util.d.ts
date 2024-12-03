@@ -15,6 +15,12 @@ declare module "@madie/madie-util" {
     CQLBuilderIncludes: boolean;
     MeasureListButtons: boolean;
     qiCore6: boolean;
+    qiCoreBonnieTestCases: boolean;
+    qiCoreElementsTab: boolean;
+    qdmHideJson: boolean;
+    TestCaseListSearch: boolean;
+    TestCaseID: boolean;
+    TestCaseListButtons: boolean;
   }
 
   export interface ServiceConfig {
@@ -39,6 +45,7 @@ declare module "@madie/madie-util" {
       setMeasureState: React.Dispatch<React.SetStateAction<Measure>>
     ) => import("rxjs").Subscription;
     updateMeasure: (measure: Measure | null) => void;
+    updateTestCases: (testCases: TestCase[] | null) => void;
     initialState: null;
     state: Measure;
   };
@@ -85,6 +92,11 @@ declare module "@madie/madie-util" {
   ): boolean;
 
   export function wafIntercept(): void;
+
+  export function getOidFromString(
+    oidString: string,
+    dataModel: string
+  ): string;
 
   export const bootstrap: LifeCycleFn<void>;
   export const mount: LifeCycleFn<void>;
