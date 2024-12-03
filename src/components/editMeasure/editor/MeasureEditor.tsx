@@ -438,7 +438,7 @@ const MeasureEditor = () => {
               }
               if (updatedCqlObj.isUsingStatementChanged) {
                 secondaryMessages.push(
-                  "Using statement was incorrect. MADiE has overwritten it."
+                  "Incorrect using statement(s) detected. MADiE has corrected it."
                 );
               }
               if (updatedCqlObj.isValueSetChanged) {
