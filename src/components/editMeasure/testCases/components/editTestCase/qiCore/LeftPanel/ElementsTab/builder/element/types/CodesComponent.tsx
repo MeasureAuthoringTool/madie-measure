@@ -6,17 +6,23 @@ import { MenuItem } from "@mui/material";
 import { Select } from "@madie/madie-design-system/dist/react";
 import * as _ from "lodash";
 
+function getValueSetId(url) {
+  const lastPart = url.split("/").pop();
+  return lastPart.split("|")[0];
+}
+
 const CodesComponent = ({
   canEdit,
   structureDefinition,
+  label,
+  value,
+  onChange,
 }: TypeComponentProps) => {
   const [codes, setCodes] = useState([]);
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
 
   useEffect(() => {
     if (structureDefinition) {
-      // eslint-disable-next-line no-console
-      console.log("valueSet: ", structureDefinition.binding);
       const valueSetVal = structureDefinition.binding?.valueSet;
       if (_.isEmpty(valueSetVal)) {
         console.warn(
@@ -24,14 +30,11 @@ const CodesComponent = ({
           structureDefinition
         );
       } else {
-        const valueSetId = valueSetVal.substring(
-          valueSetVal.lastIndexOf("/") + 1,
-          valueSetVal.indexOf("|")
-        );
+        const valueSetId = getValueSetId(valueSetVal);
         fhirDefinitionsService.current
           .getFhirValueSetExpansion(valueSetId)
           .then((expansion) => {
-            setCodes(expansion.expansion.contains);
+            setCodes(expansion?.expansion?.contains);
           })
           .catch((error) => {
             console.error(
@@ -46,16 +49,16 @@ const CodesComponent = ({
   return (
     <Box>
       <Select
-        label="Code"
-        id={"code-selector"}
+        label={label}
+        id={`code-selector-${label}`}
         inputProps={{
-          "data-testid": "code-selector-input",
+          "data-testid": `code-selector-input-${label}`,
         }}
-        data-testid={"code-selector"}
+        data-testid={`code-selector-${label}`}
         SelectDisplayProps={{
           "aria-required": "true",
         }}
-        diabled={canEdit}
+        disabled={!canEdit}
         options={
           codes
             ? codes.map((concept) => (
@@ -64,19 +67,13 @@ const CodesComponent = ({
                   value={concept.code}
                   data-testid={`code-option-${concept.code}`}
                 >
-                  {concept.code} - {concept.display}
+                  {concept.display}
                 </MenuItem>
               ))
             : []
         }
-        // value={selectedCodeConcept ? selectedCodeConcept.code : ""}
-        // renderValue={(value) => {
-        //   if (value === "") {
-        //     return placeHolder("Select Code");
-        //   }
-        //   return `${selectedCodeConcept?.code} - ${selectedCodeConcept?.display_name}`;
-        // }}
-        // onChange={handleCodeChange}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
       />
     </Box>
   );
