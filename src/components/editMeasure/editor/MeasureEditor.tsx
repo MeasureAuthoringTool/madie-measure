@@ -349,7 +349,6 @@ const MeasureEditor = () => {
         using[1],
         "measureEditor"
       );
-
       const results = await Promise.allSettled([
         updateElmAnnotations(updatedCqlObj.cql),
         hasParserErrors(updatedCqlObj.cql),
@@ -434,6 +433,11 @@ const MeasureEditor = () => {
               if (updatedCqlObj.isLibraryStatementChanged) {
                 secondaryMessages.push(
                   "Library statement was incorrect. MADiE has overwritten it."
+                );
+              }
+              if (updatedCqlObj.isFhirHelpersAliasChanged) {
+                secondaryMessages.push(
+                  "FHIRHelpers was incorrectly aliased. MADiE has overwritten the alias with 'FHIRHelpers'."
                 );
               }
               if (updatedCqlObj.isUsingStatementChanged) {
