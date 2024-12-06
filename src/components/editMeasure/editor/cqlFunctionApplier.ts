@@ -108,7 +108,6 @@ const applyCQLFunction = (
   cqlFunction: CQLFunction
 ): CqlApplyActionResult => {
   const cqlArr: string[] = cql.split("\n");
-  console.log("cql is", cql);
   // Parse CQL to get code and code systems
   const parseResults: CqlResult = new CqlAntlr(cql).parse();
   // quick filter out the non function or fluent function definitions.
