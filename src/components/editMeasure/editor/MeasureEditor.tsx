@@ -549,16 +549,6 @@ const MeasureEditor = () => {
   };
 
   const handleApplyFunction = (cqlFunction) => {
-    // cqlFunction = {
-    //   fluentFunction: false,
-    //   functionName: "Function name here",
-    //   comment: "I'm a comment about nothing at all",
-    //   functionsArguments: [
-    //     { name: "arg1", dataType: "Integer" },
-    //     { name: "arg2", dataType: "Integer" },
-    //   ],
-    //   expression: "true"
-    // };
     const result = applyCQLFunction(editorVal, cqlFunction);
     if (result.status) {
       handleMadieEditorValue(result.cql);
