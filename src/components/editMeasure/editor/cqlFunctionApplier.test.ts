@@ -6,8 +6,8 @@ describe("Definition Apply Function tests", () => {
     functionName: "Function name here",
     comment: "I'm a comment about nothing at all",
     functionsArguments: [
-      { name: "arg1", dataType: "Integer" },
-      { name: "arg2", dataType: "Integer" },
+      { argumentName: "arg1", dataType: "Integer" },
+      { argumentName: "arg2", dataType: "Integer" },
     ],
     expressionValue: "true",
   };
