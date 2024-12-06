@@ -8,8 +8,9 @@ const findInsertionPoint = (parseResults: CqlResult) => {
     return parseResults.includes[parseResults.includes.length - 1].stop.line;
   }
   // if no includes present, add this library after using statement
-  if (parseResults.using) {
-    return parseResults.using.start.line;
+  if (parseResults.usings?.length) {
+    const lastUsing = parseResults.usings[parseResults.usings.length - 1];
+    return lastUsing.start.line;
   }
   // if no includes & using present, add this library after library statement
   if (parseResults.library) {

@@ -134,8 +134,9 @@ export const findCodeInsertPoint = (parseResults: CqlResult) => {
     return (
       parseResults.includes[parseResults.includes.length - 1].stop.line + 1
     );
-  } else if (parseResults.using) {
-    return parseResults.using.stop.line + 1;
+  } else if (parseResults.usings?.length) {
+    const lastUsing = parseResults.usings[parseResults.usings.length - 1];
+    return lastUsing.stop.line + 1;
   } else if (parseResults.library) {
     return 2;
   } else {
@@ -155,8 +156,8 @@ export const findCodeSystemInsertPoint = (parseResults: CqlResult) => {
     return (
       parseResults.includes[parseResults.includes.length - 1].stop.line + 1
     );
-  } else if (parseResults.using) {
-    return parseResults.using.start.line + 1;
+  } else if (parseResults.usings?.length) {
+    return parseResults.usings[0].start.line + 1;
   } else if (parseResults.library) {
     return 1;
   } else {

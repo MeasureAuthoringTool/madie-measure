@@ -1,0 +1,207 @@
+import { CqlAntlr, CqlResult } from "@madie/cql-antlr-parser/dist/src";
+import { CqlApplyActionResult } from "./CqlApplyActionResult";
+import { CQLFunction } from "@madie/madie-editor";
+
+function findMatchingArguments(objects, matchCriteria) {
+  const firstParensRegex = /\(([^)]+)\)/; // Matches the first set of parentheses and captures their content
+  const argumentRegex = /(\w+)\s+"([^"]+)"/g; // Extracts arguments (name and data type)
+
+  const result = [];
+  // iterate through all objects text properties
+  objects.forEach((obj) => {
+    if (!obj.text) return;
+    const parensMatch = obj.text.match(firstParensRegex);
+    if (!parensMatch) return; // no parens
+    const parensContent = parensMatch[1]; //get only first parens
+    const args = []; //parse out the args from the string to compare
+    let match;
+    while ((match = argumentRegex.exec(parensContent)) !== null) {
+      args.push({ name: match[1], dataType: match[2] });
+    }
+
+    // now we need to make sure that there are no misses on all args.
+    const { functionsArguments } = matchCriteria;
+    // if they don't have the same number of arguments we know we can skip a deeper check
+    if (functionsArguments.length !== args.length) {
+      return null;
+    }
+    // iterate through all cql matches, if args shallowEqual functionsArguments we push the object.
+    let missed = false;
+    args.forEach((arg, index) => {
+      const target = functionsArguments[index];
+      if (target.name !== arg.name || target.dataType !== arg.dataType) {
+        missed = true;
+        return;
+      }
+    });
+    if (!missed) {
+      result.push(obj);
+    }
+  });
+  if (result.length) {
+    return result[0];
+  }
+  return null;
+}
+
+const findExistingCQLFunction = (cqlFunction, expressionDefinitions) => {
+  if (!cqlFunction || !expressionDefinitions) {
+    return undefined;
+  }
+
+  //   Do a primary check on function name before we regex it.
+  const matchingCqlFunctionNames = [];
+  expressionDefinitions.forEach((expression) => {
+    // get the name of the expression (first encounter of characters in double quotes)
+    const match = expression?.text.match(/"([^"]+)"/);
+    const expressionName = match ? match[1] : null;
+    if (expressionName && expressionName === cqlFunction.functionName) {
+      matchingCqlFunctionNames.push(expressionName);
+    }
+  });
+  //   if we have a matching functionName, we want to compare the args # and dataTypes in order;
+  const result = findMatchingArguments(expressionDefinitions, cqlFunction);
+  return result;
+};
+
+// /* <comment> */
+// define fluent function <functionName>(<argumentName1> <argumentType1>, <argumentName2> <argumentType2>, <argumentNameN> <argumentTypeN>):
+//     expression
+
+// /* <comment> */
+// define function <functionName>(<argumentName1> <argumentType1>, <argumentName2> <argumentType2>, <argumentNameN> <argumentTypeN>):
+//     expression
+
+const createCQLFunctionDeclaration = (cqlFunction: CQLFunction) => {
+  let functionDeclarationString = "define ";
+  // fluent?
+  if (cqlFunction?.fluentFunction) {
+    functionDeclarationString += "fluent ";
+  }
+  functionDeclarationString += `function "${cqlFunction.functionName}"`;
+  // prepend comment
+  if (cqlFunction?.comment) {
+    functionDeclarationString =
+      `/* ${cqlFunction?.comment} */` + "\n" + functionDeclarationString;
+  }
+  // begin args
+  functionDeclarationString += "(";
+  const args = cqlFunction?.functionsArguments;
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    functionDeclarationString += `${arg.name} "${arg.dataType}"`;
+    // do we add a comma?
+    if (i < args.length - 1) {
+      functionDeclarationString += ", ";
+    }
+  }
+  // end args
+  functionDeclarationString += "):";
+  // new line before expression?
+  functionDeclarationString += "\n";
+  // prepend newline for format
+  return "\n" + functionDeclarationString + "  " + cqlFunction?.expression;
+};
+
+const applyCQLFunction = (
+  cql: string,
+  cqlFunction: CQLFunction
+): CqlApplyActionResult => {
+  const cqlArr: string[] = cql.split("\n");
+  console.log("cql is", cql);
+  // Parse CQL to get code and code systems
+  const parseResults: CqlResult = new CqlAntlr(cql).parse();
+  // quick filter out the non function or fluent function definitions.
+  // the parser will assume whatever comes after define is the name. in this case it's fluent or function
+  const functionDefinitions = parseResults?.expressionDefinitions.filter(
+    (exp) => {
+      return (
+        exp?.name.toLowerCase() === "fluent" ||
+        exp?.name.toLowerCase() === "function"
+      );
+    }
+  );
+
+  const existingFunction = findExistingCQLFunction(
+    cqlFunction,
+    functionDefinitions
+  );
+  // Add code system to CQL if it does not exist
+  let status = "";
+  let message: string;
+  message = "test";
+  //  it's not defined
+  // let existingFunction = false;
+  if (!existingFunction) {
+    let newFunctionDeclaration = createCQLFunctionDeclaration(cqlFunction);
+    cqlArr.splice(
+      findCQLFunctionInsertPoint(parseResults),
+      0,
+      newFunctionDeclaration
+    );
+    status = "success";
+    message = `Function ${cqlFunction.functionName} has been successfully added to the CQL.`;
+  } else {
+    message = `Function ${cqlFunction.functionName} has already been defined in CQL.`;
+    status = "info";
+  }
+  return {
+    cql: cqlArr.join("\n"),
+    status: status,
+    message: message,
+  } as unknown as CqlApplyActionResult;
+};
+
+/*
+Insertion is going to attempt from paramters up towards the top of the page, ideally hitting parameters,
+but if not we'll keep going one higher until a line number is present, otherwise we hit zero
+    0 Library
+    1 using
+    2  include
+    3 codeSystem
+    4 valueSet
+    5 code
+    6 parameter
+    7 expressionDefinitions
+*/
+export const findCQLFunctionInsertPoint = (parseResults: CqlResult) => {
+  if (!parseResults || Object.keys(parseResults).length === 0) {
+    // put at front if empty
+    return 0;
+  }
+  // at end of expressionDefinitions if it exists as priority 1
+  if (parseResults.expressionDefinitions.length) {
+    return parseResults.expressionDefinitions[
+      parseResults.expressionDefinitions.length - 1
+    ].stop.line;
+  }
+  if (parseResults.parameters.length) {
+    return parseResults.parameters[
+      parseResults.expressionDefinitions.length - 1
+    ].stop.line;
+  }
+  if (parseResults.codes.length) {
+    return parseResults.codes[parseResults.codes.length - 1].stop.line;
+  }
+  if (parseResults.valueSets.length) {
+    return parseResults.valueSets[parseResults.valueSets.length - 1].stop.line;
+  }
+  if (parseResults.codeSystems.length) {
+    return parseResults.codeSystems[parseResults.codeSystems.length - 1].stop
+      .line;
+  }
+  if (parseResults.includes.length) {
+    return parseResults.includes[parseResults.includes.length - 1].stop.line;
+  }
+  if (parseResults.usings[0]) {
+    const lastUsing = parseResults.usings[parseResults.usings.length - 1];
+    return lastUsing.stop.line + 1;
+  }
+  if (parseResults.library) {
+    return 2;
+  } else {
+    return 1;
+  }
+};
+
+export default applyCQLFunction;

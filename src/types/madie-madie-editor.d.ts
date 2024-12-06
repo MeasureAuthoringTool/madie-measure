@@ -71,6 +71,19 @@ declare module "@madie/madie-editor" {
     expression?: string;
   }
 
+  export interface CQLFunctionArgument {
+    name?: string;
+    dataType?: string;
+  }
+
+  export interface CQLFunction {
+    functionName?: string;
+    expression?: string;
+    comment?: string;
+    fluentFunction?: boolean;
+    functionsArguments?: CQLFunctionArgument[];
+  }
+
   export interface EditorPropsType {
     value: string;
     onChange?: (value: string) => void;
@@ -80,6 +93,7 @@ declare module "@madie/madie-editor" {
       parameter: Parameter,
       parameterToApply: Parameter
     ) => void;
+    handleApplyFunction?: (cqlFunction) => void;
     handleParameterDelete?: (parameter: Parameter) => void;
     handleApplyValueSet?: (vs: ValueSetForSearch) => void;
     handleApplyDefinition?: (def: Definition) => void;

@@ -83,8 +83,9 @@ export const findParameterInsertPoint = (parseResults: CqlResult) => {
   if (parseResults.includes.length) {
     return parseResults.includes[parseResults.includes.length - 1].stop.line;
   }
-  if (parseResults.using) {
-    return parseResults.using.stop.line + 1;
+  if (parseResults.usings?.length) {
+    const lastUsing = parseResults.usings[parseResults.usings.length - 1];
+    return lastUsing.stop.line + 1;
   }
   if (parseResults.library) {
     return 2;
