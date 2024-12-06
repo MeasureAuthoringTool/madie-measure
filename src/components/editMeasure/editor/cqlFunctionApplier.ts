@@ -149,8 +149,6 @@ const applyCQLFunction = (
 };
 
 /*
-Insertion is going to attempt from paramters up towards the top of the page, ideally hitting parameters,
-but if not we'll keep going one higher until a line number is present, otherwise we hit zero
     0 Library
     1 using
     2  include
