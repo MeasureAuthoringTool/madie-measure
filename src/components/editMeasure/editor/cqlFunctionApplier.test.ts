@@ -33,6 +33,17 @@ describe("Definition Apply Function tests", () => {
     const updatedCql = updatedCqlObject.cql;
     expect(updatedCql).toContain(`define function \"Function name here\"`);
   });
+  it("format the function when fluent are not provided", () => {
+    const updatedCqlObject = applyCQLFunction(mockCql, {
+      ...testFunction,
+      comment: "",
+      fluentFunction: true,
+    });
+    const updatedCql = updatedCqlObject.cql;
+    expect(updatedCql).toContain(
+      `define fluent function \"Function name here\"`
+    );
+  });
 
   it("format the definition when the comments are not provided", () => {
     const updatedCqlObject = applyCQLFunction(mockCql, {
@@ -62,6 +73,31 @@ describe("Definition Apply Function tests", () => {
     );
   });
 
+  it("will check arg length and skip if not same length", () => {
+    const mockCql = getMock("cqlFunctionApplierDuplicateEntry");
+    const result = applyCQLFunction(mockCql, {
+      ...testFunction,
+      functionsArguments: [{ argumentName: "arg1", dataType: "Integer" }],
+    });
+    expect(result.message).toBe(
+      "Function Function name here has been successfully added to the CQL."
+    );
+  });
+
+  it("will add fn if dataTypes differ", () => {
+    const mockCql = getMock("cqlFunctionApplierDuplicateEntry");
+    const result = applyCQLFunction(mockCql, {
+      ...testFunction,
+      functionsArguments: [
+        { argumentName: "arg1", dataType: "Other" },
+        { argumentName: "arg2", dataType: "Integer" },
+      ],
+    });
+    expect(result.message).toBe(
+      "Function Function name here has been successfully added to the CQL."
+    );
+  });
+
   it("canInsert when no parameters", () => {
     const mockCql = getMock("cqlFunctionAppliernoCodes");
     const { cql } = applyCQLFunction(mockCql, testFunction);
@@ -80,6 +116,14 @@ describe("Definition Apply Function tests", () => {
 
   it("canInsert when no valuesets", () => {
     const mockCql = getMock("cqlFunctionAppliernoValuesets");
+    const { cql } = applyCQLFunction(mockCql, testFunction);
+    expect(cql).toContain(
+      `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
+    );
+  });
+
+  it("canInsert when no params", () => {
+    const mockCql = getMock("cqlFunctionAppliernoParams");
     const { cql } = applyCQLFunction(mockCql, testFunction);
     expect(cql).toContain(
       `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
