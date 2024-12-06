@@ -126,8 +126,7 @@ const applyCQLFunction = (
   );
 
   let status = "";
-  let message: string;
-  message = "test";
+  let message: string = "";
   //  it's not defined
   if (!existingFunction) {
     let newFunctionDeclaration = createCQLFunctionDeclaration(cqlFunction);
@@ -173,9 +172,8 @@ export const findCQLFunctionInsertPoint = (parseResults: CqlResult) => {
     ].stop.line;
   }
   if (parseResults.parameters.length) {
-    return parseResults.parameters[
-      parseResults.expressionDefinitions.length - 1
-    ].stop.line;
+    return parseResults.parameters[parseResults.parameters.length - 1].stop
+      .line;
   }
   if (parseResults.codes.length) {
     return parseResults.codes[parseResults.codes.length - 1].stop.line;

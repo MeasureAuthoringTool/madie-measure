@@ -1,4 +1,12 @@
 import applyCQLFunction from "./cqlFunctionApplier";
+import * as fs from "fs";
+
+const getMock = (name) => {
+  return fs.readFileSync(
+    `src/components/editMeasure/editor/__mocks__/${name}.cql`,
+    "utf8"
+  );
+};
 
 describe("Definition Apply Function tests", () => {
   const testFunction = {
@@ -34,6 +42,77 @@ describe("Definition Apply Function tests", () => {
     const updatedCql = updatedCqlObject.cql;
     expect(updatedCql).toContain("/* numerator comment */");
     expect(updatedCql).toContain(
+      `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
+    );
+  });
+
+  it("canInsert when no ExpressionDefinitions", () => {
+    const mockCql = getMock("cqlFunctionAppliernoDefines");
+    const { cql } = applyCQLFunction(mockCql, testFunction);
+    expect(cql).toContain(
+      `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
+    );
+  });
+
+  it("will not insert when function is found", () => {
+    const mockCql = getMock("cqlFunctionApplierDuplicateEntry");
+    const result = applyCQLFunction(mockCql, testFunction);
+    expect(result.message).toBe(
+      "Function Function name here has already been defined in CQL."
+    );
+  });
+
+  it("canInsert when no parameters", () => {
+    const mockCql = getMock("cqlFunctionAppliernoCodes");
+    const { cql } = applyCQLFunction(mockCql, testFunction);
+    expect(cql).toContain(
+      `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
+    );
+  });
+
+  it("canInsert when no codes", () => {
+    const mockCql = getMock("cqlFunctionAppliernoCodeSystems");
+    const { cql } = applyCQLFunction(mockCql, testFunction);
+    expect(cql).toContain(
+      `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
+    );
+  });
+
+  it("canInsert when no valuesets", () => {
+    const mockCql = getMock("cqlFunctionAppliernoValuesets");
+    const { cql } = applyCQLFunction(mockCql, testFunction);
+    expect(cql).toContain(
+      `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
+    );
+  });
+
+  it("canInsert when no codeSystems", () => {
+    const mockCql = getMock("cqlFunctionAppliernoCodeSystems");
+    const { cql } = applyCQLFunction(mockCql, testFunction);
+    expect(cql).toContain(
+      `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
+    );
+  });
+
+  it("canInsert when no includes", () => {
+    const mockCql = getMock("cqlFunctionAppliernoIncludes");
+    const { cql } = applyCQLFunction(mockCql, testFunction);
+    expect(cql).toContain(
+      `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
+    );
+  });
+
+  it("canInsert when no usings", () => {
+    const mockCql = getMock("cqlFunctionAppliernoUsings");
+    const { cql } = applyCQLFunction(mockCql, testFunction);
+    expect(cql).toContain(
+      `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
+    );
+  });
+  it("canInsert when no library", () => {
+    const mockCql = getMock("cqlFunctionAppliernoLibrary");
+    const { cql } = applyCQLFunction(mockCql, testFunction);
+    expect(cql).toContain(
       `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
     );
   });
