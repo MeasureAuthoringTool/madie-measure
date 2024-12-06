@@ -9,7 +9,7 @@ describe("Definition Apply Function tests", () => {
       { name: "arg1", dataType: "Integer" },
       { name: "arg2", dataType: "Integer" },
     ],
-    expression: "true",
+    expressionValue: "true",
   };
   const mockCql = `library TestNow version '0.0.000'
     using QDM version '5.6'

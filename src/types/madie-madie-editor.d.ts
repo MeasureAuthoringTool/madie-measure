@@ -72,7 +72,7 @@ declare module "@madie/madie-editor" {
   }
 
   export interface CQLFunctionArgument {
-    name?: string;
+    argumentName?: string;
     dataType?: string;
   }
 
@@ -81,6 +81,7 @@ declare module "@madie/madie-editor" {
     expression?: string;
     comment?: string;
     fluentFunction?: boolean;
+    expressionValue?: string;
     functionsArguments?: CQLFunctionArgument[];
   }
 

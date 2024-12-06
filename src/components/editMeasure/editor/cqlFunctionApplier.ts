@@ -3,20 +3,25 @@ import { CqlApplyActionResult } from "./CqlApplyActionResult";
 import { CQLFunction } from "@madie/madie-editor";
 
 function findMatchingArguments(objects, matchCriteria) {
-  const firstParensRegex = /\(([^)]+)\)/; // Matches the first set of parentheses and captures their content
-  const argumentRegex = /(\w+)\s+"([^"]+)"/g; // Extracts arguments (name and data type)
+  // Matches the first set of parentheses and captures their content
+  const firstParensRegex = /\(([^)]+)\)/;
+  // Extracts arguments (name and data type)
+  const argumentRegex = /(\w+)\s+"([^"]+)"/g;
 
   const result = [];
   // iterate through all objects text properties
   objects.forEach((obj) => {
     if (!obj.text) return;
     const parensMatch = obj.text.match(firstParensRegex);
-    if (!parensMatch) return; // no parens
-    const parensContent = parensMatch[1]; //get only first parens
-    const args = []; //parse out the args from the string to compare
+    // no parens
+    if (!parensMatch) return;
+    //get only first parens
+    const parensContent = parensMatch[1];
+    //parse out the args from the string to compare
+    const args = [];
     let match;
     while ((match = argumentRegex.exec(parensContent)) !== null) {
-      args.push({ name: match[1], dataType: match[2] });
+      args.push({ argumentName: match[1], dataType: match[2] });
     }
 
     // now we need to make sure that there are no misses on all args.
@@ -29,7 +34,10 @@ function findMatchingArguments(objects, matchCriteria) {
     let missed = false;
     args.forEach((arg, index) => {
       const target = functionsArguments[index];
-      if (target.name !== arg.name || target.dataType !== arg.dataType) {
+      if (
+        target.argumentName !== arg.argumentName ||
+        target.dataType !== arg.dataType
+      ) {
         missed = true;
         return;
       }
@@ -64,14 +72,6 @@ const findExistingCQLFunction = (cqlFunction, expressionDefinitions) => {
   return result;
 };
 
-// /* <comment> */
-// define fluent function <functionName>(<argumentName1> <argumentType1>, <argumentName2> <argumentType2>, <argumentNameN> <argumentTypeN>):
-//     expression
-
-// /* <comment> */
-// define function <functionName>(<argumentName1> <argumentType1>, <argumentName2> <argumentType2>, <argumentNameN> <argumentTypeN>):
-//     expression
-
 const createCQLFunctionDeclaration = (cqlFunction: CQLFunction) => {
   let functionDeclarationString = "define ";
   // fluent?
@@ -89,7 +89,7 @@ const createCQLFunctionDeclaration = (cqlFunction: CQLFunction) => {
   const args = cqlFunction?.functionsArguments;
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    functionDeclarationString += `${arg.name} "${arg.dataType}"`;
+    functionDeclarationString += `${arg.argumentName} "${arg.dataType}"`;
     // do we add a comma?
     if (i < args.length - 1) {
       functionDeclarationString += ", ";
@@ -100,7 +100,7 @@ const createCQLFunctionDeclaration = (cqlFunction: CQLFunction) => {
   // new line before expression?
   functionDeclarationString += "\n";
   // prepend newline for format
-  return "\n" + functionDeclarationString + "  " + cqlFunction?.expression;
+  return "\n" + functionDeclarationString + "  " + cqlFunction?.expressionValue;
 };
 
 const applyCQLFunction = (
@@ -108,7 +108,6 @@ const applyCQLFunction = (
   cqlFunction: CQLFunction
 ): CqlApplyActionResult => {
   const cqlArr: string[] = cql.split("\n");
-  // Parse CQL to get code and code systems
   const parseResults: CqlResult = new CqlAntlr(cql).parse();
   // quick filter out the non function or fluent function definitions.
   // the parser will assume whatever comes after define is the name. in this case it's fluent or function
@@ -125,12 +124,11 @@ const applyCQLFunction = (
     cqlFunction,
     functionDefinitions
   );
-  // Add code system to CQL if it does not exist
+
   let status = "";
   let message: string;
   message = "test";
   //  it's not defined
-  // let existingFunction = false;
   if (!existingFunction) {
     let newFunctionDeclaration = createCQLFunctionDeclaration(cqlFunction);
     cqlArr.splice(
