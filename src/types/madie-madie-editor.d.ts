@@ -155,7 +155,10 @@ declare module "@madie/madie-editor" {
     isFhirHelpersAliasChanged?: boolean;
   }
   export const parseContent: (content: string) => CqlError[];
-  export const validateContent: (content: string) => Promise<ValidationResult>;
+  export const validateContent: (
+    content: string,
+    checkContext: boolean
+  ) => Promise<ValidationResult>;
   export const synchingEditorCqlContent: (
     editorVal: string,
     existingCql: string,
