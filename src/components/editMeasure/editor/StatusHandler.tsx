@@ -18,6 +18,9 @@ const generateMadieAlertWithContent = (
   const warnings = warningAnnotation?.map((el) => {
     return <li>{transformAnnotation(el)}</li>;
   });
+  if (type === "success" && errorAnnotation && errorAnnotation.length > 0) {
+    type = "warning";
+  }
   return (
     <MadieAlert
       type={type}
