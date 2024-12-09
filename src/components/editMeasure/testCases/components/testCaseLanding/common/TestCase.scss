@@ -1,16 +1,22 @@
 @use "sass:color";
 
 #testCaseListTable {
+  overflow: scroll;
+
   .tcl-tr {
     border-bottom: solid 1px #8c8c8c;
 
     > td {
       padding: 10px;
-      max-width: 10vw;
+      max-width: 10vw; // this max width is not enough for the action column
       white-space: normal;
       vertical-align: top;
       border-bottom: inherit;
       overflow-wrap: break-word;
+    }
+    // last table cell in .tcl-tr row
+    td:last-child {
+      max-width: fit-content;
     }
   }
 
