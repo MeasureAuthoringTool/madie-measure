@@ -23,7 +23,7 @@ const EditTestCaseBreadCrumbs = (props: EditTestCaseBreadCrumbsProps) => {
     <div id="edit-test-case-bread-crumbs">
       <NavLink
         data-testid="qdm-test-cases"
-        to={`/measures/${measureId}/edit/test-cases`}
+        to={`/measures/${measureId}/edit/test-cases/list-page`}
         className={({ isActive }) => (isActive ? "madie-link" : "madie-link")}
       >
         Test Cases
