@@ -464,11 +464,12 @@ describe("Measure Groups Page", () => {
     });
   });
 
-  test("Navigating between the tabs in measure groups page", async () => {
+  test.only("Navigating between the tabs in measure groups page", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "Description Text";
     group.rateAggregation = "Rate Aggregation Text";
     group.improvementNotation = "Increased score indicates improvement";
+    group.improvementNotationDescription = "Large";
     measure.groups = [group];
     await waitFor(() => renderMeasureGroupComponent());
 
@@ -492,6 +493,10 @@ describe("Measure Groups Page", () => {
     expect(improvementNotationInput.value).toBe(
       "Increased score indicates improvement"
     );
+    const improvementNotationDescriptionInput = screen.getByTestId(
+      "improvement-notation-description"
+    ) as HTMLInputElement;
+    expect(improvementNotationDescriptionInput.value).toBe("Large");
     expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
   });
 
