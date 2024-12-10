@@ -66,6 +66,7 @@ import {
   editLibrary,
 } from "./libraryApplier";
 import { applyDefinition, editDefinition } from "./DefinitionApplier";
+import applyCQLFunction from "./cqlFunctionApplier";
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
@@ -547,6 +548,17 @@ const MeasureEditor = () => {
     return result.status;
   };
 
+  const handleApplyFunction = (cqlFunction) => {
+    const result = applyCQLFunction(editorVal, cqlFunction);
+    if (result.status) {
+      handleMadieEditorValue(result.cql);
+    }
+    setToastMessage(result.message);
+    setToastType(result.status);
+    setToastOpen(true);
+    return result.status;
+  };
+
   const handleParameterEdit = (
     parameter: Parameter,
     parameterToApply: Parameter
@@ -764,6 +776,7 @@ const MeasureEditor = () => {
                 handleApplyValueSet={handleUpdateVs}
                 handleApplyLibrary={handleApplyLibrary}
                 handleApplyDefinition={handleApplyDefinition}
+                handleApplyFunction={handleApplyFunction}
                 handleApplyParameter={handleApplyParameter}
                 handleParameterEdit={handleParameterEdit}
                 handleParameterDelete={handleParameterDelete}

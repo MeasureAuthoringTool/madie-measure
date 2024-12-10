@@ -45,6 +45,11 @@ const SupplementalData = () => {
       const definitions = new CqlAntlr(measure?.cql).parse()
         .expressionDefinitions;
       const mappedDefinitions = definitions.map(({ name }) => {
+        // avoid trying to parse when no quotes
+        const isQuoted = /^(['"]).*\1$/.test(name);
+        if (!isQuoted) {
+          return name;
+        }
         return JSON.parse(name);
       });
       setDefinitions(mappedDefinitions);
