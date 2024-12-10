@@ -12,6 +12,9 @@ const mockConfig = {
   fhirService: {
     baseUrl: "fhirService.com",
   },
+  terminologyService: {
+    baseUrl: "terminology-service.com",
+  },
 } as unknown as ServiceConfig;
 
 const structureDefinition = {
@@ -56,7 +59,7 @@ describe("Codes Component", () => {
   });
   beforeEach(() => {
     mockedAxios.get.mockImplementation((url) => {
-      if (url.endsWith("/$expand")) {
+      if (url.endsWith("/expand")) {
         return Promise.resolve({ data: mockExpansionResponse });
       }
     });
@@ -75,8 +78,8 @@ describe("Codes Component", () => {
       </ApiContextProvider>
     );
     expect(axios.get).toHaveBeenCalledWith(
-      "https://tx.fhir.org/r4/ValueSet/administrative-gender/$expand",
-      { headers: { Accept: "application/fhir+json" } }
+      "terminology-service.com/internal-terminology/ValueSet/administrative-gender/expand",
+      { headers: { Authorization: "Bearer test.jwt" } }
     );
 
     const codeSelect = screen.getByRole("combobox", { name: "Gender" });
@@ -92,9 +95,7 @@ describe("Codes Component", () => {
 
   it("Should ignore generating the options when expansion call fails", async () => {
     mockedAxios.get.mockImplementation((url) => {
-      if (
-        url === "https://tx.fhir.org/r4/ValueSet/administrative-gender/$expand"
-      ) {
+      if (url.endsWith("expand")) {
         return Promise.reject({ data: "unknown error" });
       }
     });
@@ -111,8 +112,8 @@ describe("Codes Component", () => {
       </ApiContextProvider>
     );
     expect(axios.get).toHaveBeenCalledWith(
-      "https://tx.fhir.org/r4/ValueSet/administrative-gender/$expand",
-      { headers: { Accept: "application/fhir+json" } }
+      "terminology-service.com/internal-terminology/ValueSet/administrative-gender/expand",
+      { headers: { Authorization: "Bearer test.jwt" } }
     );
 
     const codeSelect = screen.getByRole("combobox", { name: "Gender" });
@@ -140,8 +141,8 @@ describe("Codes Component", () => {
       </ApiContextProvider>
     );
     expect(axios.get).toHaveBeenCalledWith(
-      "https://tx.fhir.org/r4/ValueSet/administrative-gender/$expand",
-      { headers: { Accept: "application/fhir+json" } }
+      "terminology-service.com/internal-terminology/ValueSet/administrative-gender/expand",
+      { headers: { Authorization: "Bearer test.jwt" } }
     );
 
     const codeSelect = screen.getByRole("combobox", { name: "Gender" });
