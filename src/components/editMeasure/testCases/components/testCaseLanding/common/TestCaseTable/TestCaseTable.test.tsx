@@ -83,6 +83,7 @@ jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: jest.fn().mockImplementation(() => ({
     applyDefaults: mockApplyDefaults,
     TestCaseID: false,
+    TestCaseListButtons: false,
   })),
 }));
 
@@ -190,6 +191,42 @@ describe("TestCase component", () => {
 
     const buttons = await screen.findAllByRole("button");
     expect(buttons).toHaveLength(11);
+  });
+
+  it("should render test case table with checkboxes when flag is set", async () => {
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      TestCaseID: true,
+      TestCaseListButtons: true,
+    }));
+
+    renderWithTestCase(
+      testCases,
+      true,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      defaultMeasure
+    );
+
+    const rows = await screen.findByTestId(`test-case-row-0`);
+    const columns = rows.querySelectorAll("td");
+    const checkbox = screen
+      .getByTestId("test-case-title-0_select")
+      .querySelector('input[type="checkbox"]');
+    expect(checkbox).toBeInTheDocument();
+    expect(checkbox).not.toHaveAttribute("checked");
+    expect(columns[1]).toHaveTextContent("1");
+    expect(columns[2]).toHaveTextContent("Pass");
+    expect(columns[3]).toHaveTextContent(testCase.series);
+    expect(columns[4]).toHaveTextContent(testCase.title);
+    expect(columns[5]).toHaveTextContent(testCase.description);
+    expect(columns[6]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
+
+    const buttons = await screen.findAllByRole("button");
+    expect(buttons).toHaveLength(12);
   });
 
   it("should render test case population table with sorting when button clicked", async () => {

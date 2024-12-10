@@ -39,7 +39,7 @@ const TypeEditor = ({
         return (
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
             <StringComponent
-              canEdit={true}
+              canEdit={canEdit}
               value={value}
               onChange={onChange}
               structureDefinition={null}
@@ -51,7 +51,7 @@ const TypeEditor = ({
         return (
           <PeriodComponent
             label={label}
-            canEdit={false}
+            canEdit={canEdit}
             structureDefinition={null}
             fieldRequired={false}
           />
@@ -60,7 +60,7 @@ const TypeEditor = ({
       case "http://hl7.org/fhirpath/System.DateTime":
         return (
           <DateTimeComponent
-            canEdit={true}
+            canEdit={canEdit}
             structureDefinition={structureDefinition}
             fieldRequired={required}
             label={``}
@@ -75,7 +75,7 @@ const TypeEditor = ({
             disabled={false}
             id="instant"
             label="Date Time"
-            canEdit={true}
+            canEdit={canEdit}
             required={required}
             dateTimeValue={value}
             handleDateTimeChange={onChange}
@@ -95,7 +95,7 @@ const TypeEditor = ({
       case "uri":
         return (
           <UriComponent
-            canEdit={true}
+            canEdit={canEdit}
             structureDefinition={structureDefinition}
             fieldRequired={required}
             label={label}
@@ -106,7 +106,7 @@ const TypeEditor = ({
       case "date":
         return (
           <DateComponent
-            canEdit={true}
+            canEdit={canEdit}
             structureDefinition={structureDefinition}
             fieldRequired={required}
             label={``}
@@ -117,7 +117,7 @@ const TypeEditor = ({
       case "positiveInt":
         return (
           <IntegerComponent
-            canEdit={true}
+            canEdit={canEdit}
             structureDefinition={structureDefinition}
             fieldRequired={required}
             label={_.capitalize(
@@ -133,7 +133,7 @@ const TypeEditor = ({
       case "unsignedInt":
         return (
           <IntegerComponent
-            canEdit={true}
+            canEdit={canEdit}
             structureDefinition={structureDefinition}
             fieldRequired={required}
             label={_.capitalize(
@@ -149,9 +149,14 @@ const TypeEditor = ({
       case "code":
         return (
           <CodesComponent
-            canEdit={true}
-            structureDefinition={structureDefinition}
+            canEdit={canEdit}
             fieldRequired={required}
+            label={_.capitalize(
+              label?.id?.substring(label?.id?.lastIndexOf(".") + 1)
+            )}
+            onChange={onChange}
+            value={value}
+            structureDefinition={structureDefinition}
           />
         );
       default:

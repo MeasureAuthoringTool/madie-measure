@@ -37,7 +37,7 @@ describe("StatusHandler Component", () => {
         hasSubTitle={false}
       />
     );
-    expect(screen.getByTestId("generic-success-text-header")).toHaveTextContent(
+    expect(screen.getByTestId("generic-warning-text-header")).toHaveTextContent(
       success.primaryMessage
     );
     expect(screen.getByTestId("library-warning")).toHaveTextContent(
@@ -66,7 +66,7 @@ describe("StatusHandler Component", () => {
       />
     );
 
-    expect(getByTestId("generic-success-text-header")).toHaveTextContent(
+    expect(getByTestId("generic-warning-text-header")).toHaveTextContent(
       success.primaryMessage
     );
     expect(screen.getByTestId("library-warning")).toHaveTextContent(
@@ -95,7 +95,7 @@ describe("StatusHandler Component", () => {
       />
     );
 
-    expect(getByTestId("generic-success-text-header")).toHaveTextContent(
+    expect(getByTestId("generic-warning-text-header")).toHaveTextContent(
       success.primaryMessage
     );
     await waitFor(() => {

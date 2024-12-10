@@ -239,7 +239,7 @@ const MeasureEditor = () => {
     // setElmTranslationError(null); ? set Error false?
     setError(false);
     if (cql && cql.trim().length > 0) {
-      const result = await validateContent(cql);
+      const result = await validateContent(cql, true);
       const { errors, externalErrors } = result;
       // right now we are only displaying the external errors related to included libraries
       // and only the first error returned by elm translator
@@ -349,7 +349,6 @@ const MeasureEditor = () => {
         using[1],
         "measureEditor"
       );
-
       const results = await Promise.allSettled([
         updateElmAnnotations(updatedCqlObj.cql),
         hasParserErrors(updatedCqlObj.cql),
@@ -436,9 +435,14 @@ const MeasureEditor = () => {
                   "Library statement was incorrect. MADiE has overwritten it."
                 );
               }
+              if (updatedCqlObj.isFhirHelpersAliasChanged) {
+                secondaryMessages.push(
+                  "FHIRHelpers was incorrectly aliased. MADiE has overwritten the alias with 'FHIRHelpers'."
+                );
+              }
               if (updatedCqlObj.isUsingStatementChanged) {
                 secondaryMessages.push(
-                  "Using statement was incorrect. MADiE has overwritten it."
+                  "Incorrect using statement(s) detected. MADiE has corrected it."
                 );
               }
               if (updatedCqlObj.isValueSetChanged) {
