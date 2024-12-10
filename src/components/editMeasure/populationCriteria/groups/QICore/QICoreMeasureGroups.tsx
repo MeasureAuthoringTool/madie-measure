@@ -338,6 +338,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       measureObservations: null,
       rateAggregation: group?.rateAggregation || "",
       improvementNotation: group?.improvementNotation || "",
+      improvementNotationDescription:
+        group?.improvementNotationDescription || "",
       groupDescription: group?.groupDescription,
       stratifications: group?.stratifications || [
         getEmptyStrat(),
@@ -461,6 +463,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           measureGroupTypes: [],
           rateAggregation: "",
           improvementNotation: "",
+          improvementNotationDescription: "",
           populationBasis: defaultPopulationBasis,
           scoringUnit: "",
         },
@@ -1335,7 +1338,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                         />
                       </FieldSeparator>
                     </div>
-                    <div tw="pt-6 pb-6 col-start-1 col-end-2">
+                    <div tw="pt-6 pb-6 grid grid-cols-2 gap-4 col-start-1 col-end-4">
                       <Select
                         placeHolder={{
                           name: "Select Improvement Notation",
@@ -1356,6 +1359,19 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                               {opt.label}
                             </MuiMenuItem>
                           )
+                        )}
+                      />
+                      <TextArea
+                        label="Improvement Notation Description"
+                        data-testid="improvement-notation-description"
+                        id="improvement-notation-description"
+                        disabled={!canEdit}
+                        placeHolder={{
+                          name: "Addition Information for Improvement Notation",
+                          value: "",
+                        }}
+                        {...formik.getFieldProps(
+                          "improvementNotationDescription"
                         )}
                       />
                     </div>
