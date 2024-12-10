@@ -44,6 +44,11 @@ const RiskAdjustment = () => {
       const definitions = new CqlAntlr(measure?.cql).parse()
         .expressionDefinitions;
       const mappedDefinitions = definitions.map(({ name }) => {
+        // avoid trying to parse when no quotes for function
+        const isQuoted = /^(['"]).*\1$/.test(name);
+        if (!isQuoted) {
+          return name;
+        }
         return JSON.parse(name);
       });
       setDefinitions(mappedDefinitions);
