@@ -911,7 +911,7 @@ export default function MeasureList(props: {
   };
 
   return (
-    <div style={{ overflow: "scroll" }}>
+    <div style={{ overflow: "auto" }}>
       <div tw="grid grid-cols-3 gap-4 m-4">
         <div tw="col-span-2">
           <form onSubmit={handleSubmit} tw="w-1/4">
