@@ -72,7 +72,7 @@ export default function AssociateCmsIdDialog(props: PropTypes) {
               <td tw="pt-2 pb-2">{qdmMeasure?.measureName}</td>
               <td>{qdmMeasure?.version}</td>
               <td>{qdmMeasure?.model}</td>
-              <td>{qdmMeasure?.measureSet.cmsId}</td>
+              <td>{qdmMeasure?.measureSet?.cmsId}</td>
             </tr>
             <tr>
               <td tw="pt-2 pb-2">{qiCoreMeasure?.measureName}</td>
