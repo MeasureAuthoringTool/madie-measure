@@ -847,6 +847,7 @@ const MeasureEditor = () => {
               tw="m-2"
               onClick={() => updateMeasureCql(editorVal, undefined)}
               data-testid="save-cql-btn"
+              id="save-cql-btn"
               disabled={isCQLUnchanged}
             >
               Save
