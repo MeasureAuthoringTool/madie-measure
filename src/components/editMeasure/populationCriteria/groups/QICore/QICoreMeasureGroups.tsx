@@ -1366,10 +1366,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                         data-testid="improvement-notation-description"
                         id="improvement-notation-description"
                         disabled={!canEdit}
-                        placeHolder={{
-                          name: "Addition Information for Improvement Notation",
-                          value: "",
-                        }}
+                        placeHolder="Addition Information for Improvement Notation"
                         {...formik.getFieldProps(
                           "improvementNotationDescription"
                         )}
