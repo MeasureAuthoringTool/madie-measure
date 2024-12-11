@@ -296,137 +296,140 @@ const TestCaseTable = (props: TestCaseTableProps) => {
   });
 
   return (
-    <table
-      tw="min-w-full"
-      data-testid="test-case-tbl"
-      className="tcl-table"
-      id="testCaseListTable"
-      style={{
-        borderTop: "solid 1px #8c8c8c",
-        borderSpacing: "0 2em !important",
-      }}
-    >
-      <thead tw="bg-slate">
-        {table.getHeaderGroups().map((headerGroup) => (
-          <tr key={headerGroup.id}>
-            {headerGroup.headers.map((header) => {
-              const isHovered = hoveredHeader?.includes(header.id);
-              return (
-                <TH
-                  key={header.id}
-                  scope="col"
-                  onClick={header.column.getToggleSortingHandler()}
-                  onMouseEnter={() => setHoveredHeader(header.id)}
-                  onMouseLeave={() => setHoveredHeader(null)}
-                  className="header-cell"
-                >
-                  {header.isPlaceholder ? null : (
-                    <button
-                      className={
-                        header.column.getCanSort()
-                          ? "cursor-pointer select-none header-button"
-                          : "header-button"
-                      }
-                      title={
-                        header.column.getCanSort()
-                          ? header.column.getNextSortingOrder() === "asc"
-                            ? "Sort ascending"
-                            : header.column.getNextSortingOrder() === "desc"
-                            ? "Sort descending"
-                            : "Clear sort"
-                          : undefined
-                      }
-                    >
-                      <span className="arrowDisplay">
-                        {header.column.getCanSort() &&
-                          isHovered &&
-                          !header.column.getIsSorted() && <UnfoldMoreIcon />}
-
-                        {{
-                          asc: <KeyboardArrowUpIcon />,
-                          desc: <KeyboardArrowDownIcon />,
-                        }[header.column.getIsSorted() as string] ?? null}
-                      </span>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                    </button>
-                  )}
-                </TH>
-              );
-            })}
-          </tr>
-        ))}
-      </thead>
-      <tbody className="table-body" style={{ padding: 20 }}>
-        {table.getRowModel().rows.map((row) => (
-          <tr
-            key={row.id}
-            className="tcl-tr"
-            data-testid={`test-case-row-${row.id}`}
-          >
-            {row.getVisibleCells().map((cell) => (
-              <td key={cell.id} data-testid={`test-case-title-${cell.id}`}>
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-      <TestCaseTablePopover
-        canEdit={canEdit}
-        viewOrEdit={viewOrEdit}
-        model={measure?.model}
-        groups={measure?.groups}
-        selectedTestCase={selectedTestCase}
-        anchorEl={anchorEl}
-        optionsOpen={optionsOpen}
-        setOptionsOpen={setOptionsOpen}
-        exportTestCase={exportTestCase}
-        onCloneTestCase={onCloneTestCase}
-        setDeleteDialogModalOpen={setDeleteDialogModalOpen}
-        handleClose={handleClose}
-        shiftDatesDialogOpen={shiftDatesDialogOpen}
-        setShiftDatesDialogOpen={setShiftDatesDialogOpen}
-        onTestCaseShiftDates={onTestCaseShiftDates}
-        handleQiCloneTestCase={handleQiCloneTestCase}
-      />
-
-      {/* This sees to have gotten disconnected at some point in the past. */}
-      <Toast
-        toastKey="test-case-action-toast"
-        aria-live="polite"
-        toastType={toastType}
-        testId={toastType === "danger" ? "error-toast" : "success-toast"}
-        closeButtonProps={{
-          "data-testid": "close-toast-button",
+    <div style={{ overflow: "hidden" }}>
+      <table
+        tw="min-w-full"
+        data-testid="test-case-tbl"
+        className="tcl-table"
+        id="testCaseListTable"
+        style={{
+          borderTop: "solid 1px #8c8c8c",
+          borderSpacing: "0 2em !important",
         }}
-        open={toastOpen}
-        message={toastMessage}
-        onClose={onToastClose}
-        autoHideDuration={6000}
-      />
+      >
+        <thead tw="bg-slate">
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => {
+                const isHovered = hoveredHeader?.includes(header.id);
+                return (
+                  <TH
+                    key={header.id}
+                    scope="col"
+                    onClick={header.column.getToggleSortingHandler()}
+                    onMouseEnter={() => setHoveredHeader(header.id)}
+                    onMouseLeave={() => setHoveredHeader(null)}
+                    className="header-cell"
+                  >
+                    {header.isPlaceholder ? null : (
+                      <button
+                        className={
+                          header.column.getCanSort()
+                            ? "cursor-pointer select-none header-button"
+                            : "header-button"
+                        }
+                        title={
+                          header.column.getCanSort()
+                            ? header.column.getNextSortingOrder() === "asc"
+                              ? "Sort ascending"
+                              : header.column.getNextSortingOrder() === "desc"
+                              ? "Sort descending"
+                              : "Clear sort"
+                            : undefined
+                        }
+                      >
+                        <span className="arrowDisplay">
+                          {header.column.getCanSort() &&
+                            isHovered &&
+                            !header.column.getIsSorted() && <UnfoldMoreIcon />}
 
-      <MadieDeleteDialog
-        open={deleteDialogModalOpen}
-        onContinue={() => {
-          deleteTestCase(selectedTestCase.id);
-        }}
-        onClose={() => {
-          setDeleteDialogModalOpen(false);
-        }}
-        dialogTitle={`Delete Test Case`}
-        name={selectedTestCase?.title}
-      />
-      <ShiftDatesDialog
-        open={shiftDatesDialogOpen}
-        onClose={handleClose}
-        canEdit={canEdit}
-        testCase={selectedTestCase}
-        onTestCaseShiftDates={onTestCaseShiftDates}
-      />
-    </table>
+                          {{
+                            asc: <KeyboardArrowUpIcon />,
+                            desc: <KeyboardArrowDownIcon />,
+                          }[header.column.getIsSorted() as string] ?? null}
+                        </span>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                      </button>
+                    )}
+                  </TH>
+                );
+              })}
+            </tr>
+          ))}
+        </thead>
+        {/* <tbody className="table-body"> */}
+        <tbody className="table-body" style={{ padding: 20 }}>
+          {table.getRowModel().rows.map((row) => (
+            <tr
+              key={row.id}
+              className="tcl-tr"
+              data-testid={`test-case-row-${row.id}`}
+            >
+              {row.getVisibleCells().map((cell) => (
+                <td key={cell.id} data-testid={`test-case-title-${cell.id}`}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+        <TestCaseTablePopover
+          canEdit={canEdit}
+          viewOrEdit={viewOrEdit}
+          model={measure?.model}
+          groups={measure?.groups}
+          selectedTestCase={selectedTestCase}
+          anchorEl={anchorEl}
+          optionsOpen={optionsOpen}
+          setOptionsOpen={setOptionsOpen}
+          exportTestCase={exportTestCase}
+          onCloneTestCase={onCloneTestCase}
+          setDeleteDialogModalOpen={setDeleteDialogModalOpen}
+          handleClose={handleClose}
+          shiftDatesDialogOpen={shiftDatesDialogOpen}
+          setShiftDatesDialogOpen={setShiftDatesDialogOpen}
+          onTestCaseShiftDates={onTestCaseShiftDates}
+          handleQiCloneTestCase={handleQiCloneTestCase}
+        />
+
+        {/* This sees to have gotten disconnected at some point in the past. */}
+        <Toast
+          toastKey="test-case-action-toast"
+          aria-live="polite"
+          toastType={toastType}
+          testId={toastType === "danger" ? "error-toast" : "success-toast"}
+          closeButtonProps={{
+            "data-testid": "close-toast-button",
+          }}
+          open={toastOpen}
+          message={toastMessage}
+          onClose={onToastClose}
+          autoHideDuration={6000}
+        />
+
+        <MadieDeleteDialog
+          open={deleteDialogModalOpen}
+          onContinue={() => {
+            deleteTestCase(selectedTestCase.id);
+          }}
+          onClose={() => {
+            setDeleteDialogModalOpen(false);
+          }}
+          dialogTitle={`Delete Test Case`}
+          name={selectedTestCase?.title}
+        />
+        <ShiftDatesDialog
+          open={shiftDatesDialogOpen}
+          onClose={handleClose}
+          canEdit={canEdit}
+          testCase={selectedTestCase}
+          onTestCaseShiftDates={onTestCaseShiftDates}
+        />
+      </table>
+    </div>
   );
 };
 
