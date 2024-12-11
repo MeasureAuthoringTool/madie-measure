@@ -98,6 +98,11 @@ export class FhirDefinitionsServiceApi {
   stripResourcePath(resourcePath, elementPath) {
     return elementPath.substring(`${resourcePath}.`.length);
   }
+
+  getAllChildren(resource, path) {
+    const elements = [...resource?.definition?.snapshot?.element];
+    return elements?.filter((e) => e.path !== path && e.path.includes(path));
+  }
 }
 
 export default function useFhirDefinitionsServiceApi(): FhirDefinitionsServiceApi {
