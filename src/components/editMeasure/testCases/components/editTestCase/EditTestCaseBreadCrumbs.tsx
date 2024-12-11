@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { TestCase } from "@madie/madie-models";
-import Button from "@mui/material/Button";
-import { Menu, MenuItem } from "@mui/material";
+import { Select, MenuItem } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { measureStore } from "@madie/madie-util";
 import "./EditTestCaseBreadCrumbs.scss";
@@ -15,7 +14,6 @@ export interface EditTestCaseBreadCrumbsProps {
 const EditTestCaseBreadCrumbs = (props: EditTestCaseBreadCrumbsProps) => {
   const { testCase, measureId } = props;
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
   const [testCases, setTestCases] = React.useState(null);
   const [selectedIndex, setSelectedIndex] = React.useState(0);
   const [measure, setMeasure] = useState<any>(measureStore.state);
@@ -66,17 +64,7 @@ const EditTestCaseBreadCrumbs = (props: EditTestCaseBreadCrumbsProps) => {
     }
   }, [measure, testCaseString]);
 
-  const handleIconButtonOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
   const handleMenuItemClick = (index: number) => {
-    setAnchorEl(null);
-
     const newPath = `/measures/${measure.id}/edit/test-cases/${testCases[index].id}`;
     navigate(newPath);
   };
@@ -90,22 +78,46 @@ const EditTestCaseBreadCrumbs = (props: EditTestCaseBreadCrumbsProps) => {
       >
         Test Cases
       </NavLink>
-      <div className="spacer">/</div>
-      {testCaseString}
 
-      <Button
+      <div className="spacer">/</div>
+
+      <Select
         aria-label="Navigate test cases button"
         data-testid="navigate-test-cases-btn"
-        onClick={handleIconButtonOpen}
-      >
-        <ExpandMoreIcon style={{ height: 32, width: 32, color: "#333" }} />
-      </Button>
-
-      <Menu
-        id="test-cases-menu"
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
+        sx={{
+          height: "32px",
+          borderColor: "transparent",
+          "& .Mui-focused": {
+            borderColor: "transparent",
+          },
+          "& .Mui-icon": {
+            fontSize: "3px",
+          },
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: "transparent",
+            "& legend": {
+              width: 0,
+            },
+          },
+          "& .MuiInputBase-input": {
+            fontFamily: "Rubik",
+            fontSize: 16,
+            fontWeight: 400,
+            color: "#515151",
+            borderColor: "transparent",
+            borderRadius: "3px",
+            padding: "9px 14px",
+            "&::placeholder": {
+              opacity: 0.6,
+            },
+          },
+          "& .MuiSelect-icon": {
+            color: "#515151",
+            fontSize: "large",
+          },
+        }}
+        IconComponent={ExpandMoreIcon}
+        value={testCaseString}
       >
         {testCases?.map((testCase, index) => {
           const testCaseString = generateTestCaseString(testCase);
@@ -122,7 +134,7 @@ const EditTestCaseBreadCrumbs = (props: EditTestCaseBreadCrumbsProps) => {
             </MenuItem>
           );
         })}
-      </Menu>
+      </Select>
     </div>
   );
 };
