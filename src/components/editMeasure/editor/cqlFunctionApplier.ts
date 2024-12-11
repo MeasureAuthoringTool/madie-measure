@@ -4,12 +4,12 @@ import { CQLFunction } from "@madie/madie-editor";
 
 function findMatchingArguments(objects, matchCriteria) {
   // first parse out and compare function names.
-  const appliedFuntionName = matchCriteria.functionName;
+  const appliedFuntionName = matchCriteria.functionName.toLowerCase();
   const functionName = /"(.*?)"/;
   // further filter down objects array with only members whos name matches applied function name
   objects = objects.filter((obj) => {
     const matchResult = obj.text.match(functionName);
-    const res = matchResult ? matchResult[1] : null;
+    const res = matchResult ? matchResult[1].toLowerCase() : null;
     return res === appliedFuntionName;
   });
 
