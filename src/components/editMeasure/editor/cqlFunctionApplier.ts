@@ -3,6 +3,16 @@ import { CqlApplyActionResult } from "./CqlApplyActionResult";
 import { CQLFunction } from "@madie/madie-editor";
 
 function findMatchingArguments(objects, matchCriteria) {
+  // first parse out and compare function names.
+  const appliedFuntionName = matchCriteria.functionName;
+  const functionName = /"(.*?)"/;
+  // further filter down objects array with only members whos name matches applied function name
+  objects = objects.filter((obj) => {
+    const matchResult = obj.text.match(functionName);
+    const res = matchResult ? matchResult[1] : null;
+    return res === appliedFuntionName;
+  });
+
   // Matches the first set of parentheses and captures their content
   const firstParensRegex = /\(([^)]+)\)/;
   // Extracts arguments (name and data type)
@@ -10,11 +20,16 @@ function findMatchingArguments(objects, matchCriteria) {
 
   const result = [];
   // iterate through all objects text properties
+  const { functionsArguments } = matchCriteria;
   objects.forEach((obj) => {
     if (!obj.text) return;
     const parensMatch = obj.text.match(firstParensRegex);
     // no parens
-    if (!parensMatch) return;
+    if (!parensMatch && functionsArguments.length == 0) {
+      result.push(obj);
+      return;
+    }
+    if (!parensMatch) return; // this erroneously skips no args without edge
     //get only first parens
     const parensContent = parensMatch[1];
     //parse out the args from the string to compare
@@ -23,13 +38,12 @@ function findMatchingArguments(objects, matchCriteria) {
     while ((match = argumentRegex.exec(parensContent)) !== null) {
       args.push({ argumentName: match[1], dataType: match[2] });
     }
-
     // now we need to make sure that there are no misses on all args.
-    const { functionsArguments } = matchCriteria;
     // if they don't have the same number of arguments we know we can skip a deeper check
     if (functionsArguments.length !== args.length) {
       return null;
     }
+
     // iterate through all cql matches, if args shallowEqual functionsArguments we push the object.
     let missed = false;
     args.forEach((arg, index) => {
@@ -42,6 +56,7 @@ function findMatchingArguments(objects, matchCriteria) {
         return;
       }
     });
+
     if (!missed) {
       result.push(obj);
     }
