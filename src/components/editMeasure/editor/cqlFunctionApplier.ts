@@ -13,7 +13,7 @@ function findMatchingArguments(objects, matchCriteria) {
     return res === appliedFuntionName;
   });
 
-  // Matches the first set of parentheses and captures their content
+  // string values inside of arguments parens
   const firstParensRegex = /\(([^)]+)\)/;
   // Extracts arguments (name and data type)
   const argumentRegex = /(\w+)\s+"([^"]+)"/g;
@@ -24,12 +24,11 @@ function findMatchingArguments(objects, matchCriteria) {
   objects.forEach((obj) => {
     if (!obj.text) return;
     const parensMatch = obj.text.match(firstParensRegex);
-    // no parens
+    // if nothing in the parens of our comparison obj and nothing in the supplied fn to apply, we know it's the same by earlier name match
     if (!parensMatch && functionsArguments.length == 0) {
       result.push(obj);
       return;
     }
-    if (!parensMatch) return; // this erroneously skips no args without edge
     //get only first parens
     const parensContent = parensMatch[1];
     //parse out the args from the string to compare
