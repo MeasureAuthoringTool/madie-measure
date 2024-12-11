@@ -33,7 +33,6 @@ const ResourceEditor = ({
   );
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   const { state, dispatch } = useQiCoreResource();
-
   useEffect(() => {
     if (selectedResource) {
       // TODO: look at the data that exists on the resource and combine fields from that
@@ -143,6 +142,7 @@ const ResourceEditor = ({
         </Tabs>
         <ElementEditor
           elementDefinition={displayedElements?.[activeTab]}
+          selectedResource={selectedResource}
           resource={editingResource}
           resourcePath={resourceBasePath}
           onChange={(path, value) => {
