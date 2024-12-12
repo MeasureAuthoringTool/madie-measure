@@ -79,7 +79,6 @@ const Builder = ({ testCase, canEdit }: BuilderProps) => {
                   profile: [resourceIdentifier.profile],
                 };
               }
-              newEntry;
               dispatch({
                 type: ResourceActionType.ADD_BUNDLE_ENTRY,
                 payload: newEntry,
