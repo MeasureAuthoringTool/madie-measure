@@ -188,22 +188,20 @@ const TestCaseTable = (props: TestCaseTableProps) => {
       });
     }
 
-    if (featureFlags?.TestCaseID) {
-      columnDefs.push({
-        header: "Case #",
-        cell: (info) => (
-          <TruncateText
-            text={info.row.original.caseNumber}
-            maxLength={60}
-            name="caseNumber"
-            dataTestId={`test-case-caseNumber-${info.row.original.id}`}
-          />
-        ),
-        accessorKey: "caseNumber",
-        sortingFn: "alphanumeric",
-        sortDescFirst: false,
-      });
-    }
+    columnDefs.push({
+      header: "Case #",
+      cell: (info) => (
+        <TruncateText
+          text={info.row.original.caseNumber}
+          maxLength={60}
+          name="caseNumber"
+          dataTestId={`test-case-caseNumber-${info.row.original.id}`}
+        />
+      ),
+      accessorKey: "caseNumber",
+      sortingFn: "alphanumeric",
+      sortDescFirst: false,
+    });
 
     return [
       ...columnDefs,
@@ -276,7 +274,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
         enableSorting: false,
       },
     ];
-  }, [featureFlags?.TestCaseID]);
+  }, []);
 
   const table = useReactTable({
     data,

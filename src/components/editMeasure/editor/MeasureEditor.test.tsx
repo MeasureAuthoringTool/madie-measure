@@ -47,10 +47,7 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn(() => {
     return true;
   }),
-  useFeatureFlags: jest.fn().mockReturnValue({
-    CQLBuilderDefinitions: true,
-    CQLBuilderIncludes: true,
-  }),
+
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => measure),
