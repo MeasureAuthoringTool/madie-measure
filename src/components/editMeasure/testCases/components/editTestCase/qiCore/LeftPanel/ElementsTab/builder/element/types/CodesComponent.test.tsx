@@ -17,6 +17,7 @@ const mockConfig = {
   },
 } as unknown as ServiceConfig;
 
+const valueSetUrl = "http://hl7.org/fhir/ValueSet/administrative-gender";
 const structureDefinition = {
   id: "Patient.gender",
   path: "Patient.gender",
@@ -29,7 +30,7 @@ const structureDefinition = {
   ],
   binding: {
     strength: "required",
-    valueSet: "http://hl7.org/fhir/ValueSet/administrative-gender",
+    valueSet: valueSetUrl,
   },
 };
 
@@ -59,7 +60,7 @@ describe("Codes Component", () => {
   });
   beforeEach(() => {
     mockedAxios.get.mockImplementation((url) => {
-      if (url.endsWith("/expand")) {
+      if (url.endsWith("/expand?url=" + valueSetUrl)) {
         return Promise.resolve({ data: mockExpansionResponse });
       }
     });
@@ -78,7 +79,8 @@ describe("Codes Component", () => {
       </ApiContextProvider>
     );
     expect(axios.get).toHaveBeenCalledWith(
-      "terminology-service.com/internal-terminology/ValueSet/administrative-gender/expand",
+      "terminology-service.com/internal-terminology/ValueSet/expand?url=" +
+        valueSetUrl,
       { headers: { Authorization: "Bearer test.jwt" } }
     );
 
@@ -87,9 +89,8 @@ describe("Codes Component", () => {
 
     userEvent.click(codeSelect);
 
-    await waitFor(() => {
-      const options = screen.getAllByRole("option");
-      expect(options).toHaveLength(4);
+    await waitFor(async () => {
+      expect(await screen.getAllByRole("option")).toHaveLength(4);
     });
   });
 
@@ -112,7 +113,8 @@ describe("Codes Component", () => {
       </ApiContextProvider>
     );
     expect(axios.get).toHaveBeenCalledWith(
-      "terminology-service.com/internal-terminology/ValueSet/administrative-gender/expand",
+      "terminology-service.com/internal-terminology/ValueSet/expand?url=" +
+        valueSetUrl,
       { headers: { Authorization: "Bearer test.jwt" } }
     );
 
@@ -141,7 +143,8 @@ describe("Codes Component", () => {
       </ApiContextProvider>
     );
     expect(axios.get).toHaveBeenCalledWith(
-      "terminology-service.com/internal-terminology/ValueSet/administrative-gender/expand",
+      "terminology-service.com/internal-terminology/ValueSet/expand?url=" +
+        valueSetUrl,
       { headers: { Authorization: "Bearer test.jwt" } }
     );
 

@@ -16,3 +16,9 @@
     flex-grow: 1;
   }
 }
+
+#save-cql-btn {
+  &:focus {
+    margin-left: 32px;
+  }
+}
