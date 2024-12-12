@@ -199,4 +199,6 @@ define "Moderate Emetic Risk Intravenous Antineoplastic Therapy":
     union ( ["Medication, Administered": "Cyclophosphamide Injectable"] Cyclophosphamide
         where Cyclophosphamide.dosage < 1500 'mg/m2'
     )
+define function "fun"("notPascalCase" Integer ):
+  true
 `;

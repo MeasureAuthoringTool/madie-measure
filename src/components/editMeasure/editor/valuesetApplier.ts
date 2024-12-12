@@ -122,7 +122,7 @@ function findReplacementIndexInSortedVsList(valueSets, newValueSet) {
 const findInsertPointWhenNoValuesets = (parseResults: CqlResult): number => {
   const codesystems: number = parseResults?.codeSystems.length;
   const includes: number = parseResults?.includes.length;
-  const usings: number = parseResults?.using?.start?.line;
+  const usings: number = parseResults?.usings[0]?.start?.line;
   if (codesystems > 0) {
     return parseResults.codeSystems[parseResults.codeSystems.length - 1].stop
       .line;
@@ -131,7 +131,8 @@ const findInsertPointWhenNoValuesets = (parseResults: CqlResult): number => {
       parseResults.includes[parseResults.includes.length - 1].stop.line + 1
     );
   } else if (usings > 0) {
-    return parseResults.using.start.line + 1;
+    const lastUsing = parseResults.usings[parseResults.usings.length - 1];
+    return lastUsing.start.line + 1;
   } else {
     return 2;
   }

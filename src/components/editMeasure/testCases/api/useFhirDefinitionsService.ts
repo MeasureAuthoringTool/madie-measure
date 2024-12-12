@@ -75,26 +75,6 @@ export class FhirDefinitionsServiceApi {
     return null;
   }
 
-  async getFhirValueSetExpansion(valueSetId: string): Promise<any> {
-    try {
-      const response = await axios.get<any>(
-        `https://tx.fhir.org/r4/ValueSet/${valueSetId}/$expand`,
-        {
-          headers: {
-            Accept: "application/fhir+json",
-          },
-        }
-      );
-      return response.data;
-    } catch (error) {
-      console.error(
-        `An error occurred while loading definition for resourceName [${valueSetId}]: `,
-        error
-      );
-    }
-    return null;
-  }
-
   getBasePath(resource: any): string {
     // const elements = [...resource?.definition?.snapshot?.element];
     // return elements?.[0].path;
@@ -117,6 +97,11 @@ export class FhirDefinitionsServiceApi {
 
   stripResourcePath(resourcePath, elementPath) {
     return elementPath.substring(`${resourcePath}.`.length);
+  }
+
+  getAllChildren(resource, path) {
+    const elements = [...resource?.definition?.snapshot?.element];
+    return elements?.filter((e) => e.path !== path && e.path.includes(path));
   }
 }
 
