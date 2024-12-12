@@ -250,35 +250,35 @@ describe("Measure Page", () => {
     expect(await screen.queryByText("Unable to fetch measures")).toBeNull();
   });
 
-  // test("render associate cms id dialog", async () => {
-  //   renderRouter(["/measures"]);
-  //   await waitFor(() => {
-  //     expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument();
-  //   });
-  //   screen.debug();
-  //   const measure1Checkbox = await within(
-  //     await screen.findByTestId("measure-name-measureId1_select")
-  //   ).findByRole("checkbox");
-  //   userEvent.click(measure1Checkbox);
-  //   const measure2Checkbox = await within(
-  //     await screen.findByTestId("measure-name-measureId2_select")
-  //   ).findByRole("checkbox");
-  //   userEvent.click(measure2Checkbox);
-  //   const associateCmsIdBtn = await screen.findByTestId(
-  //     "associate-cms-id-action-btn"
-  //   );
-  //   expect(associateCmsIdBtn).toBeEnabled();
-  //   userEvent.click(associateCmsIdBtn);
-  //   const dialogTable = await screen.findByTestId(
-  //     "associate-cms-id-dialog-tbl"
-  //   );
-  //   expect(dialogTable).toBeInTheDocument();
-  //   const measure1Name = await within(dialogTable).getByText("TestMeasure1");
-  //   expect(measure1Name).toBeInTheDocument();
-  //   const measure2Name = await within(dialogTable).getByText("TestMeasure2");
-  //   expect(measure2Name).toBeInTheDocument();
-  //   expect(
-  //     screen.getByText("Copy QDM Metadata to QI-Core measure")
-  //   ).toBeInTheDocument();
-  // });
+  test("render associate cms id dialog", async () => {
+    renderRouter(["/measures"]);
+    await waitFor(() => {
+      expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument();
+    });
+    screen.debug();
+    const measure1Checkbox = await within(
+      await screen.findByTestId("measure-name-measureId1_select")
+    ).findByRole("checkbox");
+    userEvent.click(measure1Checkbox);
+    const measure2Checkbox = await within(
+      await screen.findByTestId("measure-name-measureId2_select")
+    ).findByRole("checkbox");
+    userEvent.click(measure2Checkbox);
+    const associateCmsIdBtn = await screen.findByTestId(
+      "associate-cms-id-action-btn"
+    );
+    expect(associateCmsIdBtn).toBeEnabled();
+    userEvent.click(associateCmsIdBtn);
+    const dialogTable = await screen.findByTestId(
+      "associate-cms-id-dialog-tbl"
+    );
+    expect(dialogTable).toBeInTheDocument();
+    const measure1Name = await within(dialogTable).getByText("TestMeasure1");
+    expect(measure1Name).toBeInTheDocument();
+    const measure2Name = await within(dialogTable).getByText("TestMeasure2");
+    expect(measure2Name).toBeInTheDocument();
+    expect(
+      screen.getByText("Copy QDM Metadata to QI-Core measure")
+    ).toBeInTheDocument();
+  });
 });
