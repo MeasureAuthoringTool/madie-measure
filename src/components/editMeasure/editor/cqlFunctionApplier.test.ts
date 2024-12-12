@@ -160,4 +160,32 @@ describe("Definition Apply Function tests", () => {
       `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
     );
   });
+
+  it("Can insert a function with no args that's not defined", () => {
+    const mockCql = getMock("cqlFunctionApplierFunctionNoArgs");
+    const testFunction = {
+      fluentFunction: true,
+      functionName: "anyName",
+      comment: "",
+      functionsArguments: [],
+      expressionValue: "true",
+    };
+    const { cql } = applyCQLFunction(mockCql, testFunction);
+    expect(cql).toContain(`define fluent function \"anyName\"():`);
+  });
+
+  it("Will fail to insert a function with no args that is defined", () => {
+    const mockCql = getMock("cqlFunctionApplierFunctionNoArgs");
+    const testFunction = {
+      fluentFunction: true,
+      functionName: "test",
+      comment: "",
+      functionsArguments: [],
+      expressionValue: "true",
+    };
+    const result = applyCQLFunction(mockCql, testFunction);
+    expect(result.message).toBe(
+      "Function test has already been defined in CQL."
+    );
+  });
 });
