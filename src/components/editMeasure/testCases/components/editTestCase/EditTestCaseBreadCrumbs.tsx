@@ -72,7 +72,6 @@ const EditTestCaseBreadCrumbs = (props: EditTestCaseBreadCrumbsProps) => {
   return (
     <div id="edit-test-case-bread-crumbs">
       <NavLink
-        data-testid="qdm-test-cases"
         to={`/measures/${measureId}/edit/test-cases/list-page`}
         className="madie-link"
       >
@@ -82,8 +81,6 @@ const EditTestCaseBreadCrumbs = (props: EditTestCaseBreadCrumbsProps) => {
       <div className="spacer">/</div>
 
       <Select
-        aria-label="Navigate test cases button"
-        data-testid="navigate-test-cases-btn"
         sx={{
           height: "32px",
           borderColor: "transparent",
