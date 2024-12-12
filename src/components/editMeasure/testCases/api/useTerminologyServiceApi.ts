@@ -263,10 +263,10 @@ export class TerminologyServiceApi {
     });
   }
 
-  async getInternalValueSetExpansion(valueSetId: string): Promise<ValueSet> {
+  async getInternalValueSetExpansion(valueSetUrl: string): Promise<ValueSet> {
     try {
       const response = await axios.get<ValueSet>(
-        `${this.baseUrl}/internal-terminology/ValueSet/${valueSetId}/expand`,
+        `${this.baseUrl}/internal-terminology/ValueSet/expand?url=${valueSetUrl}`,
         {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
@@ -276,7 +276,7 @@ export class TerminologyServiceApi {
       return response.data;
     } catch (error) {
       console.error(
-        `An error occurred while fetching the ValueSet expansion for [${valueSetId}]: `,
+        `An error occurred while fetching the ValueSet expansion for [${valueSetUrl}]: `,
         error
       );
     }
