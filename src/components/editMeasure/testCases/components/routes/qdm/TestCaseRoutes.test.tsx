@@ -155,13 +155,13 @@ describe("TestCaseRoutes", () => {
     )) as HTMLTableElement;
     const tBody = testCaseListTable.tBodies.item(0);
     expect(tBody.rows.length).toBe(1);
-    expect(tBody.rows.item(0).cells[0]).toHaveTextContent("Invalid");
-    expect(tBody.rows.item(0).cells[1]).toHaveTextContent("IPP_Pass");
-    expect(tBody.rows.item(0).cells[2]).toHaveTextContent("TC12");
-    expect(tBody.rows.item(0).cells[3]).toHaveTextContent("Desc1");
-    expect(tBody.rows.item(0).cells[4]).toHaveTextContent("09/10/2024");
+    expect(tBody.rows.item(0).cells[1]).toHaveTextContent("Invalid");
+    expect(tBody.rows.item(0).cells[2]).toHaveTextContent("IPP_Pass");
+    expect(tBody.rows.item(0).cells[3]).toHaveTextContent("TC12");
+    expect(tBody.rows.item(0).cells[4]).toHaveTextContent("Desc1");
+    expect(tBody.rows.item(0).cells[5]).toHaveTextContent("09/10/2024");
     expect(
-      within(tBody.rows.item(0).cells[5]).getByRole("button", {
+      within(tBody.rows.item(0).cells[6]).getByRole("button", {
         name: "select-action-TC12",
       })
     ).toBeInTheDocument();

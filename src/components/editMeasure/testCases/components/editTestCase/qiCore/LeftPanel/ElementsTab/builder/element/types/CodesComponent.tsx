@@ -1,14 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { TypeComponentProps } from "./TypeComponentProps";
-import useFhirDefinitionsServiceApi from "../../../../../../../../api/useFhirDefinitionsService";
+import useTerminologyServiceApi from "../../../../../../../../api/useTerminologyServiceApi";
 import Box from "@mui/system/Box";
 import { MenuItem } from "@mui/material";
 import { Select } from "@madie/madie-design-system/dist/react";
 import * as _ from "lodash";
 
-function getValueSetId(url) {
-  const lastPart = url.split("/").pop();
-  return lastPart.split("|")[0];
+function getValueSetUrl(url: string) {
+  return url.split("|").shift();
 }
 
 const CodesComponent = ({
@@ -19,7 +18,7 @@ const CodesComponent = ({
   onChange,
 }: TypeComponentProps) => {
   const [codes, setCodes] = useState([]);
-  const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
+  const terminologyServiceApi = useRef(useTerminologyServiceApi());
 
   useEffect(() => {
     if (structureDefinition) {
@@ -30,15 +29,15 @@ const CodesComponent = ({
           structureDefinition
         );
       } else {
-        const valueSetId = getValueSetId(valueSetVal);
-        fhirDefinitionsService.current
-          .getFhirValueSetExpansion(valueSetId)
+        const valueSetUrl = getValueSetUrl(valueSetVal);
+        terminologyServiceApi.current
+          .getInternalValueSetExpansion(valueSetUrl)
           .then((expansion) => {
             setCodes(expansion?.expansion?.contains);
           })
           .catch((error) => {
             console.error(
-              `An error occurred while fetching valueSet expansion for valueSet [${valueSetId}]`,
+              `An error occurred while fetching valueSet expansion for valueSet [${valueSetUrl}]`,
               error
             );
           });

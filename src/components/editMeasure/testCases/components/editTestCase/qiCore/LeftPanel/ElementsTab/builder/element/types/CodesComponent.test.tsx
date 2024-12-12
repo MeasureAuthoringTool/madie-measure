@@ -12,8 +12,12 @@ const mockConfig = {
   fhirService: {
     baseUrl: "fhirService.com",
   },
+  terminologyService: {
+    baseUrl: "terminology-service.com",
+  },
 } as unknown as ServiceConfig;
 
+const valueSetUrl = "http://hl7.org/fhir/ValueSet/administrative-gender";
 const structureDefinition = {
   id: "Patient.gender",
   path: "Patient.gender",
@@ -26,7 +30,7 @@ const structureDefinition = {
   ],
   binding: {
     strength: "required",
-    valueSet: "http://hl7.org/fhir/ValueSet/administrative-gender",
+    valueSet: valueSetUrl,
   },
 };
 
@@ -56,9 +60,7 @@ describe("Codes Component", () => {
   });
   beforeEach(() => {
     mockedAxios.get.mockImplementation((url) => {
-      if (
-        url === "https://tx.fhir.org/r4/ValueSet/administrative-gender/$expand"
-      ) {
+      if (url.endsWith("/expand?url=" + valueSetUrl)) {
         return Promise.resolve({ data: mockExpansionResponse });
       }
     });
@@ -77,8 +79,9 @@ describe("Codes Component", () => {
       </ApiContextProvider>
     );
     expect(axios.get).toHaveBeenCalledWith(
-      "https://tx.fhir.org/r4/ValueSet/administrative-gender/$expand",
-      { headers: { Accept: "application/fhir+json" } }
+      "terminology-service.com/internal-terminology/ValueSet/expand?url=" +
+        valueSetUrl,
+      { headers: { Authorization: "Bearer test.jwt" } }
     );
 
     const codeSelect = screen.getByRole("combobox", { name: "Gender" });
@@ -86,17 +89,14 @@ describe("Codes Component", () => {
 
     userEvent.click(codeSelect);
 
-    await waitFor(() => {
-      const options = screen.getAllByRole("option");
-      expect(options).toHaveLength(4);
+    await waitFor(async () => {
+      expect(await screen.getAllByRole("option")).toHaveLength(4);
     });
   });
 
   it("Should ignore generating the options when expansion call fails", async () => {
     mockedAxios.get.mockImplementation((url) => {
-      if (
-        url === "https://tx.fhir.org/r4/ValueSet/administrative-gender/$expand"
-      ) {
+      if (url.endsWith("expand")) {
         return Promise.reject({ data: "unknown error" });
       }
     });
@@ -113,8 +113,9 @@ describe("Codes Component", () => {
       </ApiContextProvider>
     );
     expect(axios.get).toHaveBeenCalledWith(
-      "https://tx.fhir.org/r4/ValueSet/administrative-gender/$expand",
-      { headers: { Accept: "application/fhir+json" } }
+      "terminology-service.com/internal-terminology/ValueSet/expand?url=" +
+        valueSetUrl,
+      { headers: { Authorization: "Bearer test.jwt" } }
     );
 
     const codeSelect = screen.getByRole("combobox", { name: "Gender" });
@@ -142,8 +143,9 @@ describe("Codes Component", () => {
       </ApiContextProvider>
     );
     expect(axios.get).toHaveBeenCalledWith(
-      "https://tx.fhir.org/r4/ValueSet/administrative-gender/$expand",
-      { headers: { Accept: "application/fhir+json" } }
+      "terminology-service.com/internal-terminology/ValueSet/expand?url=" +
+        valueSetUrl,
+      { headers: { Authorization: "Bearer test.jwt" } }
     );
 
     const codeSelect = screen.getByRole("combobox", { name: "Gender" });

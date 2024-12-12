@@ -28,10 +28,12 @@ jest.mock("@madie/madie-util", () => ({
   }),
   useFeatureFlags: () => {
     return {
-      MeasureListButtons: false,
       MeasureListCheckboxes: false,
     };
   }, // Values of flags do not matter for these tests
+  checkUserCanEdit: jest.fn(() => {
+    return true;
+  }),
 }));
 
 const mockMeasureServiceApi = {
