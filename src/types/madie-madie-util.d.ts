@@ -21,6 +21,7 @@ declare module "@madie/madie-util" {
     TestCaseListSearch: boolean;
     TestCaseID: boolean;
     TestCaseListButtons: boolean;
+    stu6TestCaseValidation: boolean;
   }
 
   export interface ServiceConfig {
