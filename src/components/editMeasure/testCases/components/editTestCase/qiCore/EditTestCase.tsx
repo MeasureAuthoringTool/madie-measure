@@ -851,7 +851,11 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 Validations for QI-Core STU6 are Disabled. No validations will
                 be displayed. Validation of your Test Case JSON can be performed
                 using an alternative tool, such as the{" "}
-                <a href={"https://validator.fhir.org/"}>
+                <a
+                  href={"https://validator.fhir.org/"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   HL7 FHIR Validator
                 </a>{" "}
                 with the US-Core and QI-Core IGs selected.
