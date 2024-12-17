@@ -18,7 +18,7 @@ export const downloadZipFile = (
   link.href = url;
   link.setAttribute(
     "download",
-    `${ecqmTitle}-v${version}-${getModelFamily(model)}.zip`
+    `${_.trim(ecqmTitle)}-v${version}-${getModelFamily(model)}.zip`
   );
   document.body.appendChild(link);
   link.click();
