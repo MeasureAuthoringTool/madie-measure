@@ -659,8 +659,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
   }
 
   function isHapiOutcomeIssueCodeInformational(outcome: HapiOperationOutcome) {
+    if (_.isNil(outcome?.outcomeResponse?.issue)) return true; // no issues, valid.
     return (
-      outcome?.outcomeResponse?.issue.filter(
+      outcome?.outcomeResponse?.issue?.filter(
         (issue) => /^information/.exec(issue.severity) === null
       ).length <= 0
     );
@@ -836,7 +837,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
   }, [measure?.groups]);
   return (
     <>
-      {isQICore6 && (
+      {isQICore6 && !featureFlags?.stu6TestCaseValidation && (
         <div id="status-handler">
           <MadieAlert
             type="warning"
@@ -847,10 +848,17 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 data-testid={"terminology-validation-warning"}
               >
                 <strong>Warning: </strong>
-                Terminology validations for QI-Core STU6 are set to lenient. Any
-                validations on codes, codesystem, or valuesets will be displayed
-                as warning messages. Please ensure your terminology is accurate
-                to prevent errors when strict validations are turned on.
+                Validations for QI-Core STU6 are Disabled. No validations will
+                be displayed. Validation of your Test Case JSON can be performed
+                using an alternative tool, such as the{" "}
+                <a
+                  href={"https://validator.fhir.org/"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  HL7 FHIR Validator
+                </a>{" "}
+                with the US-Core and QI-Core IGs selected.
               </div>
             }
             canClose={false}

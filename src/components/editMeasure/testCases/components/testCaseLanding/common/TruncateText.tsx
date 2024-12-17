@@ -42,7 +42,7 @@ const TruncateText = ({ text, maxLength = 60, name, dataTestId }) => {
       </div>
     );
   } else {
-    return text;
+    return text ? text : "";
   }
 };
 

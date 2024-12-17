@@ -6,9 +6,8 @@ import { MenuItem } from "@mui/material";
 import { Select } from "@madie/madie-design-system/dist/react";
 import * as _ from "lodash";
 
-function getValueSetId(url) {
-  const lastPart = url.split("/").pop();
-  return lastPart.split("|")[0];
+function getValueSetUrl(url: string) {
+  return url.split("|").shift();
 }
 
 const CodesComponent = ({
@@ -30,15 +29,15 @@ const CodesComponent = ({
           structureDefinition
         );
       } else {
-        const valueSetId = getValueSetId(valueSetVal);
+        const valueSetUrl = getValueSetUrl(valueSetVal);
         terminologyServiceApi.current
-          .getInternalValueSetExpansion(valueSetId)
+          .getInternalValueSetExpansion(valueSetUrl)
           .then((expansion) => {
             setCodes(expansion?.expansion?.contains);
           })
           .catch((error) => {
             console.error(
-              `An error occurred while fetching valueSet expansion for valueSet [${valueSetId}]`,
+              `An error occurred while fetching valueSet expansion for valueSet [${valueSetUrl}]`,
               error
             );
           });

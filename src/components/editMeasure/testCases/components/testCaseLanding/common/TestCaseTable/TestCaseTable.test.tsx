@@ -82,7 +82,6 @@ let mockApplyDefaults = false;
 jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: jest.fn().mockImplementation(() => ({
     applyDefaults: mockApplyDefaults,
-    TestCaseID: false,
     TestCaseListButtons: false,
   })),
 }));
@@ -133,16 +132,16 @@ describe("TestCase component", () => {
 
     const rows = await screen.findByTestId(`test-case-row-0`);
     const columns = rows.querySelectorAll("td");
-    expect(columns[0]).toHaveTextContent("Pass");
-    expect(columns[1]).toHaveTextContent(testCase.series);
-    expect(columns[2]).toHaveTextContent(testCase.title);
-    expect(columns[3]).toHaveTextContent(testCase.description);
-    expect(columns[4]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
+    expect(columns[1]).toHaveTextContent("Pass");
+    expect(columns[2]).toHaveTextContent(testCase.series);
+    expect(columns[3]).toHaveTextContent(testCase.title);
+    expect(columns[4]).toHaveTextContent(testCase.description);
+    expect(columns[5]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(10);
-    expect(buttons[6]).toHaveTextContent("Select");
-    fireEvent.click(buttons[6]);
+    expect(buttons).toHaveLength(11);
+    expect(buttons[7]).toHaveTextContent("Select");
+    fireEvent.click(buttons[7]);
     expect(screen.getByText("edit")).toBeInTheDocument();
     expect(screen.getByText("export transaction bundle")).toBeInTheDocument();
     expect(screen.getByText("export collection bundle")).toBeInTheDocument();
@@ -167,9 +166,6 @@ describe("TestCase component", () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TestCaseID: true,
-    }));
 
     renderWithTestCase(
       testCases,
@@ -198,7 +194,6 @@ describe("TestCase component", () => {
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TestCaseID: true,
       TestCaseListButtons: true,
     }));
 
@@ -233,9 +228,6 @@ describe("TestCase component", () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TestCaseID: false,
-    }));
     const sortingFn = jest.fn();
     renderWithTestCase(
       testCases,
@@ -249,42 +241,39 @@ describe("TestCase component", () => {
 
     const rows = await screen.findByTestId(`test-case-row-0`);
     const columns = rows.querySelectorAll("td");
-    expect(columns[0]).toHaveTextContent("Pass");
-    expect(columns[1]).toHaveTextContent(testCase.series);
-    expect(columns[2]).toHaveTextContent(testCase.title);
-    expect(columns[3]).toHaveTextContent(testCase.description);
-    expect(columns[4]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
+    expect(columns[2]).toHaveTextContent("Pass");
+    expect(columns[3]).toHaveTextContent(testCase.series);
+    expect(columns[4]).toHaveTextContent(testCase.title);
+    expect(columns[5]).toHaveTextContent(testCase.description);
+    expect(columns[6]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
 
     const row2 = await screen.findByTestId(`test-case-row-1`);
     const column2 = row2.querySelectorAll("td");
-    expect(column2[0]).toHaveTextContent("Fail");
-    expect(column2[1]).toHaveTextContent(testCaseFail.series);
-    expect(column2[2]).toHaveTextContent(testCaseFail.title);
-    expect(column2[3]).toHaveTextContent(testCaseFail.description);
-    expect(column2[4]).toHaveTextContent(
+    expect(column2[2]).toHaveTextContent("Fail");
+    expect(column2[3]).toHaveTextContent(testCaseFail.series);
+    expect(column2[4]).toHaveTextContent(testCaseFail.title);
+    expect(column2[5]).toHaveTextContent(testCaseFail.description);
+    expect(column2[6]).toHaveTextContent(
       convertDate(testCaseFail.lastModifiedAt)
     );
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(10);
-    expect(buttons[4]).toHaveTextContent("Last Saved");
+    expect(buttons).toHaveLength(12);
+    expect(buttons[6]).toHaveTextContent("Last Saved");
     const lastSavedButton = screen.getByRole("button", { name: /last saved/i });
     expect(lastSavedButton).toHaveAttribute("title", "Sort descending");
 
-    expect(columns[4]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
+    expect(columns[6]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
     fireEvent.click(lastSavedButton);
     await waitFor(() => {
       expect(sortingFn).toHaveBeenCalled();
     });
   });
 
-  it("should render test case view for now owners and no delete option", async () => {
+  it("should render test case view for non owners and no delete option", async () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TestCaseID: false,
-    }));
 
     renderWithTestCase(
       testCases,
@@ -296,15 +285,15 @@ describe("TestCase component", () => {
     );
     const rows = await screen.findByTestId(`test-case-row-0`);
     const columns = rows.querySelectorAll("td");
-    expect(columns[0]).toHaveTextContent("Pass");
-    expect(columns[1]).toHaveTextContent(testCase.series);
-    expect(columns[2]).toHaveTextContent(testCase.title);
-    expect(columns[3]).toHaveTextContent(testCase.description);
+    expect(columns[2]).toHaveTextContent("Pass");
+    expect(columns[3]).toHaveTextContent(testCase.series);
+    expect(columns[4]).toHaveTextContent(testCase.title);
+    expect(columns[5]).toHaveTextContent(testCase.description);
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(10);
-    expect(buttons[6]).toHaveTextContent("Select");
-    fireEvent.click(buttons[6]);
+    expect(buttons).toHaveLength(12);
+    expect(buttons[8]).toHaveTextContent("Select");
+    fireEvent.click(buttons[8]);
     expect(screen.getByText("view")).toBeInTheDocument();
   });
 
@@ -312,9 +301,6 @@ describe("TestCase component", () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TestCaseID: false,
-    }));
 
     renderWithTestCase(
       testCases,
@@ -326,9 +312,9 @@ describe("TestCase component", () => {
     );
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(10);
-    expect(buttons[6]).toHaveTextContent("Select");
-    fireEvent.click(buttons[6]);
+    expect(buttons).toHaveLength(12);
+    expect(buttons[8]).toHaveTextContent("Select");
+    fireEvent.click(buttons[8]);
 
     expect(screen.getByText("edit")).toBeInTheDocument();
 
@@ -344,9 +330,6 @@ describe("TestCase component", () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TestCaseID: false,
-    }));
 
     renderWithTestCase(
       testCases,
@@ -359,15 +342,15 @@ describe("TestCase component", () => {
 
     const rows = await screen.findByTestId(`test-case-row-0`);
     const columns = rows.querySelectorAll("td");
-    expect(columns[0]).toHaveTextContent("Pass");
-    expect(columns[1]).toHaveTextContent(testCase.series);
-    expect(columns[2]).toHaveTextContent(testCase.title);
-    expect(columns[3]).toHaveTextContent(testCase.description);
+    expect(columns[2]).toHaveTextContent("Pass");
+    expect(columns[3]).toHaveTextContent(testCase.series);
+    expect(columns[4]).toHaveTextContent(testCase.title);
+    expect(columns[5]).toHaveTextContent(testCase.description);
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(10);
-    expect(buttons[6]).toHaveTextContent("Select");
-    fireEvent.click(buttons[6]);
+    expect(buttons).toHaveLength(12);
+    expect(buttons[8]).toHaveTextContent("Select");
+    fireEvent.click(buttons[8]);
     expect(screen.getByText("edit")).toBeInTheDocument();
     expect(screen.getByText("export transaction bundle")).toBeInTheDocument();
 
@@ -380,9 +363,6 @@ describe("TestCase component", () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TestCaseID: false,
-    }));
 
     renderWithTestCase(
       testCases,
@@ -394,9 +374,9 @@ describe("TestCase component", () => {
     );
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(10);
-    expect(buttons[6]).toHaveTextContent("Select");
-    fireEvent.click(buttons[6]);
+    expect(buttons).toHaveLength(12);
+    expect(buttons[8]).toHaveTextContent("Select");
+    fireEvent.click(buttons[8]);
     expect(screen.getByText("edit")).toBeInTheDocument();
     expect(screen.getByText("export transaction bundle")).toBeInTheDocument();
     expect(screen.getByText("export collection bundle")).toBeInTheDocument();
@@ -426,9 +406,6 @@ describe("TestCase component", () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TestCaseID: false,
-    }));
 
     renderWithTestCase(
       testCases,
@@ -440,9 +417,9 @@ describe("TestCase component", () => {
     );
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(10);
-    expect(buttons[6]).toHaveTextContent("Select");
-    fireEvent.click(buttons[6]);
+    expect(buttons).toHaveLength(12);
+    expect(buttons[8]).toHaveTextContent("Select");
+    fireEvent.click(buttons[8]);
     expect(screen.getByText("view")).toBeInTheDocument();
     const shiftDatesBtn = screen.queryByText("Shift Test Case dates");
     expect(shiftDatesBtn).not.toBeInTheDocument();
@@ -452,9 +429,6 @@ describe("TestCase component", () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TestCaseID: false,
-    }));
 
     renderWithTestCase(
       testCases,
@@ -466,9 +440,9 @@ describe("TestCase component", () => {
     );
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(10);
-    expect(buttons[6]).toHaveTextContent("Select");
-    fireEvent.click(buttons[6]);
+    expect(buttons).toHaveLength(12);
+    expect(buttons[8]).toHaveTextContent("Select");
+    fireEvent.click(buttons[8]);
     expect(screen.getByText("edit")).toBeInTheDocument();
     const exportBtn = screen.getByText("export collection bundle");
     expect(exportBtn).toBeInTheDocument();
@@ -482,9 +456,6 @@ describe("TestCase component", () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TestCaseID: false,
-    }));
 
     defaultMeasure.model = Model.QDM_5_6;
     renderWithTestCase(
@@ -497,9 +468,9 @@ describe("TestCase component", () => {
     );
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(10);
-    expect(buttons[6]).toHaveTextContent("Select");
-    fireEvent.click(buttons[6]);
+    expect(buttons).toHaveLength(12);
+    expect(buttons[8]).toHaveTextContent("Select");
+    fireEvent.click(buttons[8]);
 
     const exportBtn = screen.getByTestId("export-test-case-ID");
     expect(exportBtn).toBeInTheDocument();
@@ -513,9 +484,6 @@ describe("TestCase component", () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TestCaseID: false,
-    }));
 
     renderWithTestCase(
       testCases,
@@ -527,14 +495,14 @@ describe("TestCase component", () => {
     );
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(10);
-    expect(buttons[6]).toHaveTextContent("Select");
-    fireEvent.click(buttons[6]);
+    expect(buttons).toHaveLength(12);
+    expect(buttons[8]).toHaveTextContent("Select");
+    fireEvent.click(buttons[8]);
 
-    const cloneBtn = screen.getByTestId("clone-test-case-btn-ID");
-    expect(cloneBtn).toBeInTheDocument();
+    const cloneBtn = screen.getAllByTestId("clone-test-case-btn-ID");
+    expect(cloneBtn.length).toBe(1);
 
-    userEvent.click(cloneBtn);
+    userEvent.click(cloneBtn[0]);
 
     expect(onCloneTestCase).toHaveBeenCalled();
   });

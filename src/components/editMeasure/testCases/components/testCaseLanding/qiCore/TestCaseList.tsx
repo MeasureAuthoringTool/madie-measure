@@ -625,7 +625,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                           </span>
                         </div>
                       )}
-                      {featureFlags.TestCaseListSearch && <ActionCenter />}
+                      {<ActionCenter />}
                       <TestCaseTable
                         sorting={sorting}
                         setSorting={setSorting}
