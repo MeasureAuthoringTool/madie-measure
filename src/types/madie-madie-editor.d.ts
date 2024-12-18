@@ -95,6 +95,7 @@ declare module "@madie/madie-editor" {
       parameterToApply: Parameter
     ) => void;
     handleApplyFunction?: (cqlFunction) => void;
+    handleFunctionDelete?: (cqlFunction: CQLFunction) => void;
     handleParameterDelete?: (parameter: Parameter) => void;
     handleApplyValueSet?: (vs: ValueSetForSearch) => void;
     handleApplyDefinition?: (def: Definition) => void;

@@ -34,6 +34,7 @@ export function MadieTerminologyEditor({
   handleDeleteLibrary,
   handleParameterEdit,
   handleParameterDelete,
+  handleFunctionDelete,
 }) {
   const code = {
     codeSystem: "RXNORM",
@@ -65,6 +66,13 @@ export function MadieTerminologyEditor({
   const parameterToApply = {
     parameterName: "Test Measurement Period",
     expression: "Interval<System.DateTime>",
+  };
+
+  const functionToDelete = {
+    functionName: "MeasureObservation",
+    fluentFunction: false,
+    expressionValue: "define function MeasureObservation(e Encounter):\n  2",
+    expression: "define function MeasureObservation(e Encounter):\n  2",
   };
 
   return (
@@ -117,6 +125,12 @@ export function MadieTerminologyEditor({
         onClick={() => handleParameterDelete(parameter)}
       >
         Delete Parameter
+      </button>
+      <button
+        data-testid="delete-function"
+        onClick={() => handleFunctionDelete(functionToDelete)}
+      >
+        Delete Function
       </button>
     </>
   );
