@@ -100,7 +100,7 @@ export const measureGroupSchemaValidator = (
   return Yup.object().shape({
     scoring: Yup.string()
       .oneOf(Object.values(GroupScoring))
-      .required("Group Scoring is required.ee"),
+      .required("Group Scoring is required."),
     improvementNotation: Yup.string().required(
       "Improvement Notation is required."
     ),
