@@ -1,4 +1,4 @@
-import applyCQLFunction from "./cqlFunctionApplier";
+import applyCQLFunction, { deleteCQLFunction } from "./cqlFunctionApplier";
 import * as fs from "fs";
 
 const getMock = (name) => {
@@ -187,5 +187,20 @@ describe("Definition Apply Function tests", () => {
     expect(result.message).toBe(
       "Function test has already been defined in CQL."
     );
+  });
+
+  it("Will not delete a function when function not found", () => {
+    const mockCql = getMock("cqlFunctionApplierFunctionNoArgs");
+
+    const testFunction = {
+      fluentFunction: true,
+      functionName: "test",
+      expression: `define function "test"():\n  undefined`,
+      comment: "test comment",
+      functionsArguments: [],
+      expressionValue: "true",
+    };
+    const result = deleteCQLFunction(mockCql, testFunction);
+    expect(result.message).toBe("Function test has not been defined in CQL.");
   });
 });

@@ -211,4 +211,45 @@ export const findCQLFunctionInsertPoint = (parseResults: CqlResult) => {
   }
 };
 
+export const deleteCQLFunction = (
+  cql: string,
+  cqlFunction: CQLFunction
+): CqlApplyActionResult => {
+  const cqlArr: string[] = cql.split("\n");
+  const parseResults: CqlResult = new CqlAntlr(cql).parse();
+
+  const functionDefinitions = parseResults?.expressionDefinitions.filter(
+    (exp) => {
+      return (
+        exp?.name.toLowerCase() === "fluent" ||
+        exp?.name.toLowerCase() === "function"
+      );
+    }
+  );
+
+  const existingFunction = functionDefinitions?.find((funct) => {
+    return funct.text === cqlFunction.expression;
+  });
+
+  let status = "";
+  let message: string = "";
+  if (existingFunction) {
+    cqlArr.splice(
+      existingFunction.start.line - 1,
+      existingFunction.stop.line - existingFunction.start.line + 1,
+      ""
+    );
+    status = "success";
+    message = `Function ${cqlFunction.functionName} has been successfully removed from the CQL.`;
+  } else {
+    message = `Function ${cqlFunction.functionName} has not been defined in CQL.`;
+    status = "info";
+  }
+  return {
+    cql: cqlArr.join("\n"),
+    status: status,
+    message: message,
+  } as unknown as CqlApplyActionResult;
+};
+
 export default applyCQLFunction;
