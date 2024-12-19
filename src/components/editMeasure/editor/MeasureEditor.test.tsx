@@ -1050,4 +1050,32 @@ describe("EditorWithTerminology", () => {
       );
     });
   });
+
+  it("test delete function", async () => {
+    const measureWithCqlFunction = {
+      ...measure,
+      model: Model.QDM_5_6,
+      cql: `library TestLib version '0.0.000'
+using QICore version '4.1.1'
+include FHIRHelpers version '4.1.000' called FHIRHelpers
+
+context Patient
+
+define function MeasureObservation(e Encounter):
+  2`,
+    } as Measure;
+
+    renderEditor(measureWithCqlFunction);
+
+    const deleteFunctionBtn = await screen.findByTestId("delete-function");
+    expect(deleteFunctionBtn).toBeInTheDocument();
+    userEvent.click(deleteFunctionBtn);
+    await waitFor(() => {
+      const editor = screen.getByTestId("measure-editor");
+      expect(editor).not.toHaveValue(
+        `define function MeasureObservation(e Encounter):
+  2`
+      );
+    });
+  });
 });
