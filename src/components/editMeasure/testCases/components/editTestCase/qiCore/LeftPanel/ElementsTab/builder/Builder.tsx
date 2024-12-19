@@ -13,6 +13,10 @@ import {
 } from "../../../../../../util/QiCorePatientProvider";
 import useFhirDefinitionsServiceApi from "../../../../../../api/useFhirDefinitionsService";
 import { ResourceIdentifier } from "../../../../../../api/models/ResourceIdentifier";
+import useFhirElmTranslationServiceApi, {
+  SourceDataCriteria,
+} from "../../../../../../../../../api/useFhirElmTranslationServiceApi";
+import useExecutionContext from "../../../../../routes/qiCore/useExecutionContext";
 
 interface BuilderProps {
   testCase: TestCase;
@@ -20,23 +24,37 @@ interface BuilderProps {
 }
 
 const Builder = ({ testCase, canEdit }: BuilderProps) => {
-  const [resources, setResources] = useState<ResourceIdentifier[]>([]);
+  const [resources, setResources] = useState<ResourceIdentifier[]>(null);
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
+  const fhirElmTranslationService = useRef(useFhirElmTranslationServiceApi());
   const [activeResource, setActiveResource] = useState(null);
   const [activeDefinition, setActiveDefinition] = useState(null);
   const { state, dispatch } = useQiCoreResource();
+  const { measureState } = useExecutionContext();
+  const [measure] = measureState;
 
   useEffect(() => {
-    fhirDefinitionsService.current
-      .getResources()
-      .then((resources) => {
+    const resourcesPromise = fhirDefinitionsService.current.getResources();
+    const relevantElementsPromise =
+      fhirElmTranslationService.current.fetchRelevantDataElements(measure);
+    Promise.all([resourcesPromise, relevantElementsPromise]).then(
+      ([resources, sdcs]) => {
+        const relevantTypes = sdcs?.map(
+          (relevantElement) => relevantElement.type
+        );
         if (!_.isEmpty(resources)) {
-          setResources(_.uniq(resources.sort()));
+          const uniqueResources = _.uniq(resources.sort());
+          const filteredResources = _.isEmpty(relevantTypes)
+            ? uniqueResources
+            : uniqueResources.filter(
+                (r) =>
+                  relevantTypes.includes(r.type) ||
+                  "PATIENT" === r.type.toUpperCase()
+              );
+          setResources(filteredResources);
         }
-      })
-      .catch((err) =>
-        console.error("An error occurred while fetching resources", err)
-      );
+      }
+    );
   }, []);
 
   const handleResourceSelected = async (bundleEntry: any) => {
