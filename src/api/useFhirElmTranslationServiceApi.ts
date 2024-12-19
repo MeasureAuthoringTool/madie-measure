@@ -53,10 +53,12 @@ export class FhirElmTranslationServiceApi {
       );
       return response.data;
     } catch (error) {
-      throw new Error(
-        error.message ||
-          "An Error occurred while fetching relevant data elements"
+      // For now, allow UI to finish loading, without relevant elements filter
+      console.error(
+        "An error occurred while fetching relevant data elements",
+        error.message
       );
+      return [];
     }
   }
 }
