@@ -6,8 +6,14 @@ import {
   ApiContextProvider,
   ServiceConfig,
 } from "../../../../../../../../api/ServiceContext";
-import { Measure, TestCase } from "@madie/madie-models";
+import {
+  Measure,
+  MeasureScoring,
+  PopulationType,
+  TestCase,
+} from "@madie/madie-models";
 import axios from "../../../../../../../../api/axios-instance";
+import { ExecutionContextProvider } from "../../../../routes/qiCore/ExecutionContext";
 
 const patientBundle = {
   resourceType: "Bundle",
@@ -115,6 +121,34 @@ const patientBundle = {
   ],
 };
 const setEditorVal = jest.fn();
+const MEASURE_CREATEDBY = "testuser";
+const defaultMeasure = {
+  id: "m1234",
+  measureScoring: MeasureScoring.COHORT,
+  createdBy: MEASURE_CREATEDBY,
+  groups: [
+    {
+      groupId: "Group1_ID",
+      scoring: "Cohort",
+      populations: [
+        {
+          id: "id-1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Pop1",
+        },
+      ],
+      stratifications: [
+        {
+          id: "strat-id-1",
+          description: "strat1 description",
+          cqlDefinition: "cql definition",
+          associations: [PopulationType.INITIAL_POPULATION],
+        },
+      ],
+    },
+  ],
+  acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
+} as unknown as Measure;
 
 const serviceConfig: ServiceConfig = {
   qdmElmTranslationService: { baseUrl: "qdm-cql-to-elm.com" },
@@ -218,22 +252,54 @@ describe("ElementsTab", () => {
       }
       return Promise.resolve({ data: null });
     });
+
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.endsWith("relevant-elements")) {
+        return Promise.resolve({
+          data: [
+            {
+              oid: "ts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1110.42",
+              title: "Statin Allergen",
+              description: "AdverseEvent: Statin Allergen",
+              type: "AdverseEvent",
+              drc: false,
+              codeId: null,
+              name: "Statin Allergen",
+            },
+          ],
+        });
+      }
+    });
   });
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  const renderElementTab = () => {
+  const setMeasure = jest.fn();
+
+  const renderElementTab = (measure: Measure = defaultMeasure) => {
     render(
       <ApiContextProvider value={serviceConfig}>
-        <QiCoreResourceProvider>
-          <ElementsTab
-            canEdit={true}
-            setEditorVal={setEditorVal}
-            editorVal={JSON.stringify(patientBundle)}
-            testCase={{ json: JSON.stringify(patientBundle) } as TestCase}
-          />
-        </QiCoreResourceProvider>
+        <ExecutionContextProvider
+          value={{
+            measureState: [measure, setMeasure],
+            bundleState: null,
+            valueSetsState: null,
+            executionContextReady: true,
+            executing: false,
+            setExecuting: jest.fn(),
+            contextFailure: false,
+          }}
+        >
+          <QiCoreResourceProvider>
+            <ElementsTab
+              canEdit={true}
+              setEditorVal={setEditorVal}
+              editorVal={JSON.stringify(patientBundle)}
+              testCase={{ json: JSON.stringify(patientBundle) } as TestCase}
+            />
+          </QiCoreResourceProvider>
+        </ExecutionContextProvider>
       </ApiContextProvider>
     );
   };
