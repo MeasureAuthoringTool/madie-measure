@@ -16,7 +16,7 @@ import {
   CalculationOutput,
   DetailedPopulationGroupResult,
 } from "fqm-execution/build/types/Calculator";
-import { ObjectID } from "bson";
+import { ObjectId } from "bson";
 import {
   checkUserCanEdit,
   measureStore,
@@ -531,7 +531,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   const handleQiCloneTestCase = async (testCase: TestCase) => {
     const clonedTestCase = testCase;
     clonedTestCase.title =
-      clonedTestCase.title + "-" + new ObjectID().toString();
+      clonedTestCase.title + "-" + new ObjectId().toString();
     try {
       await testCaseService.current.createTestCase(clonedTestCase, measureId);
       setToastOpen(true);

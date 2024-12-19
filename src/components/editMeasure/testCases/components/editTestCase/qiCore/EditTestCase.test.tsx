@@ -264,6 +264,18 @@ const resourceIdentifiers: ResourceIdentifier[] = [
   },
 ];
 
+const relevantElements = [
+  {
+    oid: "ts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1110.42",
+    title: "Statin Allergen",
+    description: "AdverseEvent: Statin Allergen",
+    type: "AdverseEvent",
+    drc: false,
+    codeId: null,
+    name: "Statin Allergen",
+  },
+];
+
 const testTitle = async (title: string, clear = false) => {
   const tcTitle = await screen.findByTestId("test-case-title");
   expect(tcTitle).toBeInTheDocument();
@@ -326,6 +338,23 @@ describe("EditTestCase component", () => {
         });
       }
       return Promise.resolve({ data: null });
+    });
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.endsWith("relevant-elements")) {
+        return Promise.resolve({
+          data: [
+            {
+              oid: "ts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1110.42",
+              title: "Statin Allergen",
+              description: "AdverseEvent: Statin Allergen",
+              type: "AdverseEvent",
+              drc: false,
+              codeId: null,
+              name: "Statin Allergen",
+            },
+          ],
+        });
+      }
     });
   });
   afterEach(() => {
@@ -526,9 +555,97 @@ describe("EditTestCase component", () => {
       );
 
       expect(screen.getByTestId("elements-content")).toBeInTheDocument();
-      const firstResource = await screen.findByText("QICore AdverseEvent");
+      expect(
+        await screen.findByText("QICore AdverseEvent")
+      ).toBeInTheDocument();
+      expect(screen.getByText("Resources")).toBeInTheDocument();
 
-      expect(firstResource).toBeInTheDocument();
+      userEvent.click(screen.getByTestId("json-tab"));
+      expect(screen.getByTestId("test-case-json-editor")).toBeInTheDocument();
+    });
+
+    it("Should only display relevant elements", async () => {
+      const measure = {
+        ...defaultMeasure,
+        model: Model.QICORE_6_0_0,
+      } as unknown as Measure;
+      mockedAxios.put.mockImplementation((args) => {
+        if (args && args.endsWith("relevant-elements")) {
+          return Promise.resolve({
+            data: [
+              {
+                oid: "ts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1110.42",
+                title: "Statin Allergen",
+                description: "AdverseEvent: Statin Allergen",
+                type: "AdverseEvent",
+                drc: false,
+                codeId: null,
+                name: "Statin Allergen",
+              },
+              {
+                oid: "ts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1001",
+                title: "Antibiotic Medications",
+                description: "MedicationStatement: Antibiotic Medications",
+                type: "MedicationStatement",
+                drc: false,
+                codeId: null,
+                name: "Antibiotic Medications",
+              },
+            ],
+          });
+        }
+      });
+
+      renderWithRouter(
+        ["/measures/m1234/edit/test-cases"],
+        "/measures/:measureId/edit/test-cases",
+        measure
+      );
+
+      expect(screen.getByTestId("elements-content")).toBeInTheDocument();
+      // only relevant elements should be displayed
+      expect(
+        await screen.findByText("QICore AdverseEvent")
+      ).toBeInTheDocument();
+      expect(screen.queryByText("QICore Procedure")).not.toBeInTheDocument();
+      expect(
+        await screen.findByText("QICore MedicationStatement")
+      ).toBeInTheDocument();
+      expect(screen.getByText("Resources")).toBeInTheDocument();
+
+      userEvent.click(screen.getByTestId("json-tab"));
+      expect(screen.getByTestId("test-case-json-editor")).toBeInTheDocument();
+    });
+
+    it("Should display all elements if fetch of relevant elements fails", async () => {
+      const measure = {
+        ...defaultMeasure,
+        model: Model.QICORE_6_0_0,
+      } as unknown as Measure;
+      const axiosError: AxiosError = {
+        response: {
+          status: 404,
+          data: {},
+        } as AxiosResponse,
+        toJSON: jest.fn(),
+      } as unknown as AxiosError;
+      mockedAxios.put.mockClear().mockRejectedValue(axiosError);
+
+      renderWithRouter(
+        ["/measures/m1234/edit/test-cases"],
+        "/measures/:measureId/edit/test-cases",
+        measure
+      );
+
+      expect(screen.getByTestId("elements-content")).toBeInTheDocument();
+      // only relevant elements should be displayed
+      expect(
+        await screen.findByText("QICore AdverseEvent")
+      ).toBeInTheDocument();
+      expect(screen.queryByText("QICore Procedure")).toBeInTheDocument();
+      expect(
+        await screen.findByText("QICore MedicationStatement")
+      ).toBeInTheDocument();
       expect(screen.getByText("Resources")).toBeInTheDocument();
 
       userEvent.click(screen.getByTestId("json-tab"));

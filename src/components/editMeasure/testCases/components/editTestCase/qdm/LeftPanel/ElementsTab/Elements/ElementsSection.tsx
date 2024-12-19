@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { uniq } from "lodash";
 import { DataElement } from "cqm-models";
-import { ObjectID } from "bson";
+import { ObjectId } from "bson";
 import ElementSection from "../../../../../common/ElementSection";
 import DynamicElementTabs from "./DynamicElementTabs";
 import useCqmConversionService from "../../../../../../api/CqmModelConversionService";
@@ -126,7 +126,7 @@ const ElementsSection = (props: {
   const handleAddDataElement = (sourceCriteria) => {
     delete sourceCriteria._id;
 
-    const data = { ...sourceCriteria, id: new ObjectID().toString() };
+    const data = { ...sourceCriteria, id: new ObjectId().toString() };
     const modelClass = getDataElementClass(sourceCriteria);
     const newDataElement = new modelClass(data);
     setSelectedDataElement(newDataElement);
@@ -151,7 +151,7 @@ const ElementsSection = (props: {
   const cloneDataElement = (existingDataElement: DataElement) => {
     const clonedDataElement: DataElement = {
       ...existingDataElement,
-      id: new ObjectID().toString(),
+      id: new ObjectId().toString(),
     };
     const modelClass = getDataElementClass(clonedDataElement);
     const newDataElement: DataElement = new modelClass(clonedDataElement);
