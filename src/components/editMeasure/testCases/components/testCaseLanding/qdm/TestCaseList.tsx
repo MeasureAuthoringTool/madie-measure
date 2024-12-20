@@ -162,6 +162,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [importDialogState, setImportDialogState] = useState<any>({
     open: false,
   });
+  const [selectedTestCases, setSelectedTestCases] = useState<any>();
   const [exportExecuting, setExportExecuting] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
   const featureFlags = useFeatureFlags();
@@ -785,7 +786,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                           </span>
                         </div>
                       )}
-                      <ActionCenter />
+                      <ActionCenter selectedTestCases={selectedTestCases} canEdit={canEdit}/>
                       <TestCaseTable
                         sorting={sorting}
                         setSorting={setSorting}
@@ -796,6 +797,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                         onCloneTestCase={handleCloneTestCase}
                         measure={measure}
                         onTestCaseShiftDates={onTestCaseShiftDates}
+                        setSelectedTestCases={setSelectedTestCases}
                       />
                       <Pagination
                         totalItems={totalItems}

@@ -1,24 +1,44 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
-import { IconButton, MenuItem } from "@mui/material";
+import { IconButton, MenuItem, Tooltip } from "@mui/material";
 import { Select, TextField } from "@madie/madie-design-system/dist/react";
 import SearchIcon from "@mui/icons-material/Search";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import { useFormik } from "formik";
 import queryString from "query-string";
 import { useNavigate, useLocation } from "react-router-dom";
+import {useFeatureFlags} from "@madie/madie-util";
+import { grey, red } from "@mui/material/colors";
 
 interface ActionCenterProps {
   onSubmit?: any;
+  selectedTestCases:any;
+  canEdit:boolean;
 }
 
 const filterByOptions = ["Case #", "Status", "Group", "Title", "Description"];
 
 export default function ActionCenter(props: ActionCenterProps) {
+
+  const {
+    selectedTestCases,
+    canEdit
+  } = props;
+  const [disableDeleteBtn, setDisableDeleteBtn] = useState<boolean>(true);
+
+  useEffect(() => {
+    console.log(canEdit)
+    console.log(selectedTestCases?.length)
+    deleteButtonCheck()
+    
+  }, [selectedTestCases, canEdit]);
+
   const { search } = useLocation();
   let navigate = useNavigate();
+  const featureFlags = useFeatureFlags();
   const values = queryString.parse(search);
   // init against url
   const formik = useFormik({
@@ -57,6 +77,12 @@ export default function ActionCenter(props: ActionCenterProps) {
     );
     navigate(window.location.pathname);
   };
+
+  const deleteButtonCheck =()=>{
+    if(canEdit && selectedTestCases?.length==1){
+      setDisableDeleteBtn(false)}
+    else{setDisableDeleteBtn(true)}
+  }
   return (
     <form onSubmit={formik.handleSubmit}>
       <div tw="flex py-4">
@@ -143,6 +169,27 @@ export default function ActionCenter(props: ActionCenterProps) {
           </div>
         </div>
       </div>
+      {featureFlags.TestCaseListActionCenter &&
+      <div>
+
+        <Tooltip
+              data-testid="delete-tooltip"
+              title={disableDeleteBtn?"Select test case to delete":"Delete test case"}
+              placement="top"
+              arrow
+            >
+              <DeleteOutlinedIcon
+                onClick={() => {
+                  // handleClick(id, "delete");
+                }}
+                data-testid={`delete-action-center`}
+                style={{ cursor: "pointer", marginRight: "8px" }}
+                sx={disableDeleteBtn ? { color: grey[500] } : { color: red[500] }}
+              />
+              </Tooltip>
+        
+      </div>
+        }
     </form>
   );
 }
