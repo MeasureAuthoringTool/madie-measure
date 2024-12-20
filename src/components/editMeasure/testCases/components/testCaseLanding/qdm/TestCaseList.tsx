@@ -786,7 +786,11 @@ const TestCaseList = (props: TestCaseListProps) => {
                           </span>
                         </div>
                       )}
-                      <ActionCenter selectedTestCases={selectedTestCases} canEdit={canEdit}/>
+                      <ActionCenter
+                        selectedTestCases={selectedTestCases}
+                        canEdit={canEdit}
+                        isQDM={true}
+                      />
                       <TestCaseTable
                         sorting={sorting}
                         setSorting={setSorting}

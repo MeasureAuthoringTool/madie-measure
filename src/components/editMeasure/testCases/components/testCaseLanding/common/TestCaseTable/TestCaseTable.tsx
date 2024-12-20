@@ -1,11 +1,20 @@
 import React, { useState, useEffect, useMemo } from "react";
 import tw from "twin.macro";
-import { useReactTable, ColumnDef, getCoreRowModel, getSortedRowModel, flexRender } from "@tanstack/react-table";
+import {
+  useReactTable,
+  ColumnDef,
+  getCoreRowModel,
+  getSortedRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 import "styled-components/macro";
 import { TestCase } from "@madie/madie-models";
 import { TestCaseStatus, TestCaseActionButton } from "./TestCaseTableHelpers";
 import TruncateText from "../TruncateText";
-import { MadieDeleteDialog, Toast } from "@madie/madie-design-system/dist/react";
+import {
+  MadieDeleteDialog,
+  Toast,
+} from "@madie/madie-design-system/dist/react";
 import "../TestCase.scss";
 import TestCaseTablePopover from "./TestCaseTablePopover";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
@@ -82,7 +91,10 @@ const TestCaseTable = (props: TestCaseTableProps) => {
   const [shiftDatesDialogOpen, setShiftDatesDialogOpen] = useState(false);
   const featureFlags = useFeatureFlags();
 
-  const handleOpen = (selected: TestCase, event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleOpen = (
+    selected: TestCase,
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
     setSelectedTestCase(selected);
     setAnchorEl(event.currentTarget);
     setOptionsOpen(true);
@@ -172,7 +184,9 @@ const TestCaseTable = (props: TestCaseTableProps) => {
       ...columnDefs,
       {
         header: "Status",
-        cell: (info) => <TestCaseStatus executionStatus={info.row.original.status} />,
+        cell: (info) => (
+          <TestCaseStatus executionStatus={info.row.original.status} />
+        ),
         accessorKey: "executionStatus",
       },
       {
@@ -225,7 +239,12 @@ const TestCaseTable = (props: TestCaseTableProps) => {
       },
       {
         header: "Action",
-        cell: (info) => <TestCaseActionButton testCase={info.row.original.action} handleOpen={handleOpen} />,
+        cell: (info) => (
+          <TestCaseActionButton
+            testCase={info.row.original.action}
+            handleOpen={handleOpen}
+          />
+        ),
         accessorKey: "action",
         enableSorting: false,
       },
@@ -249,14 +268,14 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     manualSorting: true,
   });
   useEffect(() => {
-    const selectedRowIds = table.getSelectedRowModel().rows.map((row) => row.original?.id);
+    const selectedRowIds = table
+      .getSelectedRowModel()
+      .rows.map((row) => row.original?.id);
     const selectedTestCases = testCases.filter((testCase) =>
       selectedRowIds.includes(testCase.id)
     );
     setSelectedTestCases(selectedTestCases);
   }, [testCases, table.getSelectedRowModel().rows]);
-  
-  
 
   return (
     <div style={{ overflow: "hidden" }}>

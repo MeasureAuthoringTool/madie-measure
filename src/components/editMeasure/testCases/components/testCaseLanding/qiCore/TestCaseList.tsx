@@ -141,7 +141,7 @@ const TestCaseList = (props: TestCaseListProps) => {
       passPercentage: undefined,
       passFailRatio: "",
     });
-    const [selectedTestCases, setSelectedTestCases] = useState<any>();
+  const [selectedTestCases, setSelectedTestCases] = useState<any>();
   const { measureState, bundleState, valueSetsState, executing, setExecuting } =
     useExecutionContext();
   const [measure] = measureState;
@@ -626,7 +626,11 @@ const TestCaseList = (props: TestCaseListProps) => {
                           </span>
                         </div>
                       )}
-                      <ActionCenter selectedTestCases={selectedTestCases} canEdit={canEdit}/>
+                      <ActionCenter
+                        selectedTestCases={selectedTestCases}
+                        canEdit={canEdit}
+                        isQDM={false}
+                      />
                       <TestCaseTable
                         sorting={sorting}
                         setSorting={setSorting}
