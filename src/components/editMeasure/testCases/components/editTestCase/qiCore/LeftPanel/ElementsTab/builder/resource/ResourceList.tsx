@@ -3,6 +3,7 @@ import { Box, TextField } from "@mui/material";
 import ResourceListTile from "./ResourceListTile";
 import * as _ from "lodash";
 import { ResourceIdentifier } from "../../../../../../../api/models/ResourceIdentifier";
+import { MadieSpinner } from "@madie/madie-design-system/dist/react";
 
 export interface ResourceListProps {
   resourceIdentifiers: ResourceIdentifier[];
@@ -37,7 +38,7 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
           gap: "10px",
         }}
       >
-        {resourceIdentifiers &&
+        {resourceIdentifiers ? (
           resourceIdentifiers
             ?.filter(
               (resource) =>
@@ -51,7 +52,10 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
                 resourceIdentifier={resourceIdentifier}
                 onClick={onClick}
               />
-            ))}
+            ))
+        ) : (
+          <MadieSpinner style={{ height: 50, width: 50 }} />
+        )}
       </Box>
     </>
   );
