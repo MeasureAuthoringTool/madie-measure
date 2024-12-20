@@ -256,7 +256,7 @@ describe("DemographicsSection", () => {
       </FormikProvider>
     );
 
-    expect(screen.getByText("Gender")).toBeInTheDocument();
+    expect(screen.getByText("Sex")).toBeInTheDocument();
     const genderInput = screen.getByTestId(
       "demographics-gender-input"
     ) as HTMLInputElement;
