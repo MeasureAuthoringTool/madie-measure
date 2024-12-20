@@ -38,17 +38,13 @@ export const clauseNotCoveredStyleFail = {
   "background-color": "#edd8d0",
 };
 
+// blue with dashed underline
+export const clauseHighlightedStyle = {
+  backgroundColor: "rgb(218, 234, 245)",
+  color: "rgb(0, 78, 130)",
+};
+
 export const clauseNotApplicableStyle = {
   "background-color": "white",
   color: "black",
-};
-
-// blue with dashed underline
-export const clauseHighlightedStyle = {
-  color: "#036CB4",
-  "background-color": "#daeaf5",
-  "text-decoration": "underline",
-  "text-decoration-style": "dashed",
-  "text-decoration-color": "#036CB4",
-  "text-underline-offset": "3px",
 };
