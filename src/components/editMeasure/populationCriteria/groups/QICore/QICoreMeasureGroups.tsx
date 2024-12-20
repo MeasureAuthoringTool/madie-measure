@@ -947,7 +947,13 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                       )}
                       <Tab
                         type="B"
-                        label="Reporting"
+                        label={`Reporting 
+                          ${
+                            !!formik.errors.improvementNotation &&
+                            activeTab !== "reporting"
+                              ? "🚫"
+                              : ""
+                          }`}
                         data-testid="reporting-tab"
                         onClick={() => setActiveTab("reporting")}
                         value="reporting"
@@ -1344,14 +1350,20 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                           name: "Select Improvement Notation",
                           value: "",
                         }}
+                        required
                         label="Improvement Notation"
                         id="improvement-notation-select"
                         inputProps={{
                           "data-testid": "improvement-notation-input",
                         }}
                         disabled={!canEdit}
+                        helperText={formik.errors.improvementNotation}
                         data-testid="improvement-notation-select"
                         {...formik.getFieldProps("improvementNotation")}
+                        error={
+                          formik.touched.improvementNotation &&
+                          Boolean(formik.errors.improvementNotation)
+                        }
                         size="small"
                         options={Object.values(improvementNotationOptions).map(
                           (opt) => (
