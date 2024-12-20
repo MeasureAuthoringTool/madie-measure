@@ -270,6 +270,8 @@ describe("TypeEditor Component", () => {
         structureDefinition={null}
       />
     );
-    expect(screen.getByText(`Unsupported Type [test]`)).toBeInTheDocument();
+    expect(
+      screen.queryByText(`Unsupported Type [test]`)
+    ).not.toBeInTheDocument();
   });
 });
