@@ -17,6 +17,10 @@ const codingDef = {
 };
 const codingTopLevelElements = [
   {
+    id: "Coding.code",
+    path: "Coding.code",
+  },
+  {
     id: "Coding.id",
     path: "Coding.id",
   },
@@ -33,10 +37,6 @@ const codingTopLevelElements = [
     path: "Coding.version",
   },
   {
-    id: "Coding.code",
-    path: "Coding.code",
-  },
-  {
     id: "Coding.display",
     path: "Coding.display",
   },
@@ -45,14 +45,14 @@ const codingTopLevelElements = [
     path: "Coding.userSelected",
   },
 ];
-
 jest.mock("../../../../../../../api/useFhirDefinitionsService");
 const useFhirDefinitionsServiceApiMock =
   useFhirDefinitionsServiceApi as jest.Mock<FhirDefinitionsServiceApi>;
 const fhirDefinitionsServiceApiMock = {
-  isComponentDataType: jest.fn().mockResolvedValue(true),
+  isComponentDataType: jest.fn().mockReturnValue(true),
   getResourceTree: jest.fn().mockResolvedValue(codingDef),
-  getTopLevelElements: jest.fn().mockResolvedValue(codingTopLevelElements),
+  getTopLevelElements: jest.fn().mockReturnValue(codingTopLevelElements),
+  getAllChildren: jest.fn().mockResolvedValue(codingTopLevelElements),
 } as unknown as FhirDefinitionsServiceApi;
 useFhirDefinitionsServiceApiMock.mockImplementation(
   () => fhirDefinitionsServiceApiMock
@@ -236,6 +236,31 @@ describe("TypeEditor Component", () => {
 
   test("Should display unsupported", () => {
     const handleChange = jest.fn();
+    render(
+      <TypeEditor
+        type={`test`}
+        required={false}
+        value={`test`}
+        onChange={handleChange}
+        structureDefinition={null}
+      />
+    );
+    expect(screen.getByText(`Unsupported Type [test]`)).toBeInTheDocument();
+    jest.resetAllMocks();
+  });
+
+  test("Should handle missing isComponentDataType", async () => {
+    const fhirDefinitionsServiceApiMock = {
+      isComponentDataType: jest.fn().mockReturnValue(false),
+      getResourceTree: jest.fn().mockResolvedValue(codingDef),
+      getTopLevelElements: jest.fn().mockReturnValue(codingTopLevelElements),
+      getAllChildren: jest.fn().mockReturnValue(codingTopLevelElements),
+    } as unknown as FhirDefinitionsServiceApi;
+    useFhirDefinitionsServiceApiMock.mockImplementation(
+      () => fhirDefinitionsServiceApiMock
+    );
+    const handleChange = jest.fn();
+
     render(
       <TypeEditor
         type={`test`}
