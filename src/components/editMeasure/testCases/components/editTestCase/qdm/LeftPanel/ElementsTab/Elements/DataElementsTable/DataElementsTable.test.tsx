@@ -2,7 +2,7 @@ import * as React from "react";
 import { Measure } from "@madie/madie-models";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, within, waitFor } from "@testing-library/react";
 import DataElementsTable from "./DataElementsTable";
 import DataTypeCell from "./DataTypeCell";
 import TimingRow from "./TimingRow";
@@ -392,8 +392,17 @@ describe("Data Elements Table", () => {
     renderDataElementsTable([dataEl[0], dataEl[1]], mockOnDelete, mockOnView);
     expect(queryAllByText("Emergency Department Visit").length).toEqual(2);
     // click action button
-    userEvent.click(screen.getByTestId(`view-element-btn-${dataEl[0].id}`));
-    expect(getByTestId("popover-content")).toBeInTheDocument();
+    const button = screen.getByRole("button", {
+      name: `action-center-${dataEl[0].id}`,
+    });
+    expect(button).toBeInTheDocument();
+    userEvent.click(button);
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId(`action-center-${dataEl[0].id}`)
+      ).toBeInTheDocument();
+    });
     // click delete action
     userEvent.click(screen.getByTestId(`delete-element-${dataEl[0].id}`));
     expect(mockOnDelete).toHaveBeenCalledWith(dataEl[0].id);
