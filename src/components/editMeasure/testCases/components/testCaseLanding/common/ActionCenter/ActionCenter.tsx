@@ -105,7 +105,9 @@ export default function ActionCenter(props: ActionCenterProps) {
     if (isQDM) {
       if (
         selectedTestCases?.length > 0 &&
-        selectedTestCases?.some((testCase) => testCase?.executionStatus !== "NA")
+        selectedTestCases?.some(
+          (testCase) => testCase?.executionStatus !== "NA"
+        )
       ) {
         setDisableExportBtn(false);
       } else {
@@ -278,7 +280,9 @@ export default function ActionCenter(props: ActionCenterProps) {
                 }}
                 data-testid={`export-action-center`}
                 style={{ cursor: "pointer", marginRight: "8px" }}
-                sx={disableExportBtn ? { color: grey[500] } : { color: blue[700] }}
+                sx={
+                  disableExportBtn ? { color: grey[500] } : { color: blue[700] }
+                }
               />
             </Tooltip>
           </div>
