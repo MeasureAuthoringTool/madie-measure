@@ -31,28 +31,28 @@ export default function ActionCenter(props: ActionCenterProps) {
   const [disableExportBtn, setDisableExportBtn] = useState<boolean>(true);
 
   useEffect(() => {
-    console.log(selectedTestCases);
     deleteButtonCheck();
     cloneButtonCheck();
     exportButtonCheck();
-  }, [selectedTestCases, canEdit]);
+  }, [selectedTestCases, canEdit, isQDM]);
 
   const { search } = useLocation();
   let navigate = useNavigate();
   const featureFlags = useFeatureFlags();
   const values = queryString.parse(search);
-  // init against url
+
+  // init against URL
   const formik = useFormik({
     initialValues: {
       filterBy: values.filter ? values.filter : "",
       searchValue: values.search ? values.search : "",
     },
     enableReinitialize: true,
-    // on submit will never fire without a button of type submit in top level of the form.
     onSubmit: async (formValues) => {
       props.onSubmit(formValues);
     },
   });
+
   const createEncodedQuery = (values) => {
     const filterEncoded = encodeURIComponent(values.filterBy);
     const searchEncoded = encodeURIComponent(values.searchValue);
@@ -60,9 +60,11 @@ export default function ActionCenter(props: ActionCenterProps) {
       values.limit || 10
     }`;
   };
+
   const handleNavigate = () => {
     navigate(createEncodedQuery(formik.values));
   };
+
   const handleClearClick = () => {
     const testCasePageOptions = JSON.parse(
       window.localStorage.getItem("testCasesPageOptions")
@@ -86,6 +88,7 @@ export default function ActionCenter(props: ActionCenterProps) {
       setDisableDeleteBtn(true);
     }
   };
+
   const cloneButtonCheck = () => {
     if (
       canEdit &&
@@ -99,25 +102,28 @@ export default function ActionCenter(props: ActionCenterProps) {
   };
 
   const exportButtonCheck = () => {
-   if(isQDM){
-      if(selectedTestCases?.length>0 && selectedTestCases?.some(testCase => testCase?.executionStatus !== "NA")){
-        setDisableExportBtn(false)
-      }else{
-        setDisableExportBtn(true)
+    if (isQDM) {
+      if (
+        selectedTestCases?.length > 0 &&
+        selectedTestCases?.some((testCase) => testCase?.executionStatus !== "NA")
+      ) {
+        setDisableExportBtn(false);
+      } else {
+        setDisableExportBtn(true);
       }
-   }else{
-      if(selectedTestCases?.length>0){
-        setDisableExportBtn(false)
-      }else{
-        setDisableExportBtn(true)
+    } else {
+      if (selectedTestCases?.length > 0) {
+        setDisableExportBtn(false);
+      } else {
+        setDisableExportBtn(true);
       }
-   }
+    }
   };
 
   return (
     <form onSubmit={formik.handleSubmit}>
-      <div tw="flex py-4">
-        <div tw="flex w-1/2">
+      <div tw="flex py-4 justify-between items-center">
+        <div tw="flex w-1/2 pr-4">
           <div tw="w-1/2 pr-2">
             <Select
               label="Filter By"
@@ -144,7 +150,6 @@ export default function ActionCenter(props: ActionCenterProps) {
                     </MenuItem>
                   );
                 })
-                // blank filter option
                 .concat(
                   <MenuItem key="-" value="" data-testid={`filter-by--`}>
                     -
@@ -199,83 +204,86 @@ export default function ActionCenter(props: ActionCenterProps) {
             />
           </div>
         </div>
-      </div>
-      {featureFlags.TestCaseListActionCenter && (
-        <div>
-          {canEdit && (
-            <div>
-              <Tooltip
-                data-testid="delete-tooltip"
-                title={
-                  disableDeleteBtn
-                    ? "Select test case to delete"
-                    : "Delete test case"
-                }
-                placement="top"
-                arrow
-              >
-                <DeleteOutlinedIcon
-                  onClick={() => {
-                    // handleClick(id, "delete");
-                  }}
-                  data-testid={`delete-action-center`}
-                  style={{ cursor: "pointer", marginRight: "8px" }}
-                  sx={
-                    disableDeleteBtn
-                      ? { color: grey[500] }
-                      : { color: red[500] }
-                  }
-                />
-              </Tooltip>
 
-              <Tooltip
-                data-testid="clone-tooltip"
-                title={
-                  disableCloneBtn
-                    ? "Select a valid test case to clone"
-                    : "Clone test case"
-                }
-                placement="top"
-                arrow
-              >
-                <LibraryAddIcon
-                  onClick={() => {
-                    // handleClick(id, "delete");
-                  }}
-                  data-testid={`clone-action-center`}
-                  style={{ cursor: "pointer", marginRight: "8px" }}
-                  sx={
-                    disableCloneBtn
-                      ? { color: grey[500] }
-                      : { color: blue[700] }
+        {/* Action Buttons (Delete, Clone, Export) */}
+        {featureFlags.TestCaseListActionCenter && (
+          <div tw="flex items-center">
+            {canEdit && (
+              <div tw="flex items-center">
+                <Tooltip
+                  data-testid="delete-tooltip"
+                  title={
+                    disableDeleteBtn
+                      ? "Select test case to delete"
+                      : "Delete test case"
                   }
-                />
-              </Tooltip>
-            </div>
-          )}
-          <Tooltip
-            data-testid="export-tooltip"
-            title={
-              disableExportBtn
-                ? isQDM 
-                  ? "Test cases must be executed prior to exporting."
-                  : "Select test cases to export"
-                : "Export test cases"
-            }
-            placement="top"
-            arrow
-          >
-            <FileUploadOutlinedIcon
-              onClick={() => {
-                // handleClick(id, "delete");
-              }}
-              data-testid={`export-action-center`}
-              style={{ cursor: "pointer", marginRight: "8px" }}
-              sx={disableExportBtn ? { color: grey[500] } : { color: blue[700] }}
-            />
-          </Tooltip>
-        </div>
-      )}
+                  placement="top"
+                  arrow
+                >
+                  <DeleteOutlinedIcon
+                    onClick={() => {
+                      // handleClick(id, "delete");
+                    }}
+                    data-testid={`delete-action-center`}
+                    style={{ cursor: "pointer", marginRight: "8px" }}
+                    sx={
+                      disableDeleteBtn
+                        ? { color: grey[500] }
+                        : { color: red[500] }
+                    }
+                  />
+                </Tooltip>
+
+                <Tooltip
+                  data-testid="clone-tooltip"
+                  title={
+                    disableCloneBtn
+                      ? "Select a valid test case to clone"
+                      : "Clone test case"
+                  }
+                  placement="top"
+                  arrow
+                >
+                  <LibraryAddIcon
+                    onClick={() => {
+                      // handleClick(id, "delete");
+                    }}
+                    data-testid={`clone-action-center`}
+                    style={{ cursor: "pointer", marginRight: "8px" }}
+                    sx={
+                      disableCloneBtn
+                        ? { color: grey[500] }
+                        : { color: blue[700] }
+                    }
+                  />
+                </Tooltip>
+              </div>
+            )}
+
+            <Tooltip
+              data-testid="export-tooltip"
+              title={
+                disableExportBtn
+                  ? isQDM
+                    ? "Test cases must be executed prior to exporting."
+                    : "Select test cases to export"
+                  : "Export test cases"
+              }
+              placement="top"
+              arrow
+            >
+              <FileUploadOutlinedIcon
+                onClick={() => {
+                  // handleClick(id, "delete");
+                }}
+                data-testid={`export-action-center`}
+                style={{ cursor: "pointer", marginRight: "8px" }}
+                sx={disableExportBtn ? { color: grey[500] } : { color: blue[700] }}
+              />
+            </Tooltip>
+          </div>
+        )}
+      </div>
     </form>
   );
 }
