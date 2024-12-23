@@ -76,20 +76,22 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     setSelectedTestCases,
   } = props;
   const viewOrEdit = canEdit ? "edit" : "view";
-  const [deleteDialogModalOpen, setDeleteDialogModalOpen] = useState(false);
-  const [toastOpen, setToastOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-  const [toastType, setToastType] = useState("danger");
-  const [hoveredHeader, setHoveredHeader] = useState("");
+  const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
+    useState<boolean>(false);
+  const [toastOpen, setToastOpen] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string>("");
+  const [toastType, setToastType] = useState<string>("danger");
+  const [hoveredHeader, setHoveredHeader] = useState<string>("");
   const onToastClose = () => {
     setToastMessage("");
     setToastOpen(false);
   };
 
-  const [optionsOpen, setOptionsOpen] = useState(false);
+  const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedTestCase, setSelectedTestCase] = useState<TestCase>(null);
-  const [shiftDatesDialogOpen, setShiftDatesDialogOpen] = useState(false);
+  const [shiftDatesDialogOpen, setShiftDatesDialogOpen] =
+    useState<boolean>(false);
   const featureFlags = useFeatureFlags();
 
   const handleOpen = (
