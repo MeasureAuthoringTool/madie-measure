@@ -16,6 +16,7 @@ import {
   Popover,
   TextField,
   Toast,
+  TruncateText,
 } from "@madie/madie-design-system/dist/react";
 import {
   useReactTable,
@@ -24,7 +25,6 @@ import {
   flexRender,
   getSortedRowModel,
   SortingState,
-  RowSelection,
 } from "@tanstack/react-table";
 
 import InvalidTestCaseDialog from "../../common/invalidTestCaseDialog/InvalidTestCaseDialog";
@@ -41,7 +41,6 @@ import _ from "lodash";
 import ExportDialog from "./exportDialog/ExportDialog";
 import InvalidMeasureNameDialog from "./InvalidMeasureNameDialog/InvalidMeasureNameDialog";
 import getLibraryNameErrors from "./InvalidMeasureNameDialog/getLibraryNameErrors";
-import TruncateText from "./TruncateText";
 import AssociateCmsIdDialog from "./associateCmsIdDialog/AssociateCmsIdDialog";
 import ActionCenter from "./actionCenter/ActionCenter";
 import DeleteDialog from "../../editMeasure/DeleteDialog";
@@ -258,7 +257,6 @@ export default function MeasureList(props: {
           <TruncateText
             text={info.row.original.measureName}
             maxLength={120}
-            name="measureName"
             dataTestId={`measure-name-${info.row.original.id}`}
           />
         ),
@@ -273,7 +271,6 @@ export default function MeasureList(props: {
             <TruncateText
               text={info.row.original.version}
               maxLength={60}
-              name="version"
               dataTestId={`measure-version-${info.row.original.id}`}
             />
             {`${info.row.original.actions.measureMetaData?.draft}` ===
@@ -290,7 +287,6 @@ export default function MeasureList(props: {
           <TruncateText
             text={info.row.original.model}
             maxLength={120}
-            name="model"
             dataTestId={`measure-model-${info.row.original.id}`}
           />
         ),
