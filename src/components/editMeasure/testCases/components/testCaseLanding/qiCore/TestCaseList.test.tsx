@@ -982,7 +982,7 @@ describe("TestCaseList component", () => {
     );
 
     const seriesButton = await screen.findByTestId(
-        `test-case-series-${testCases[0].id}-toggle-button`
+      `test-case-series-${testCases[0].id}-toggle-button`
     );
     expect(seriesButton).toBeInTheDocument();
     expect(seriesButton).toHaveTextContent("Show more");
@@ -990,14 +990,14 @@ describe("TestCaseList component", () => {
     expect(seriesButton).toHaveTextContent("Show less");
 
     const titleButton = screen.getByTestId(
-        `test-case-title-${testCases[0].id}-toggle-button`
+      `test-case-title-${testCases[0].id}-toggle-button`
     );
     expect(titleButton).toBeInTheDocument();
     expect(titleButton).toHaveTextContent("Show more");
     userEvent.click(titleButton);
     expect(titleButton).toHaveTextContent("Show less");
     await waitFor(() =>
-        expect(screen.getByText(testCases[0].title)).toBeInTheDocument()
+      expect(screen.getByText(testCases[0].title)).toBeInTheDocument()
     );
   });
 

@@ -179,7 +179,6 @@ describe("TestCase component", () => {
 
     const rows = await screen.findByTestId(`test-case-row-0`);
     const columns = rows.querySelectorAll("td");
-    console.log("columns", columns);
     expect(columns[0]).toHaveTextContent("1");
     expect(columns[1]).toHaveTextContent("Pass");
     expect(columns[2]).toHaveTextContent(testCase.series);
