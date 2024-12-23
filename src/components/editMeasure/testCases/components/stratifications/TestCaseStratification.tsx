@@ -32,7 +32,7 @@ const TestCaseStratification = ({
     ? groupsStratificationAssociationMap[stratification?.id]
     : [];
   const associatedPopulationValues = stratification?.populationValues?.filter(
-    (pop) => associations.includes(pop.name)
+    (pop) => associations?.includes(pop.name)
   );
   return (
     <React.Fragment key={`fragment-key-${strataCode}`}>
