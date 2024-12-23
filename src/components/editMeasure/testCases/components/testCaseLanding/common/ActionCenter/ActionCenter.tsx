@@ -222,18 +222,22 @@ export default function ActionCenter(props: ActionCenterProps) {
                   placement="top"
                   arrow
                 >
-                  <DeleteOutlinedIcon
-                    onClick={() => {
-                      // handleClick(id, "delete");
-                    }}
-                    data-testid={`delete-action-center`}
-                    style={{ cursor: "pointer", marginRight: "8px" }}
-                    sx={
-                      disableDeleteBtn
-                        ? { color: grey[500] }
-                        : { color: red[500] }
-                    }
-                  />
+                  <span>
+                    <IconButton
+                      onClick={() => {}}
+                      disabled={disableDeleteBtn}
+                      data-testid="delete-action-btn"
+                    >
+                      <DeleteOutlinedIcon
+                        data-testid={`delete-action-icon`}
+                        sx={
+                          disableDeleteBtn
+                            ? { color: grey[500] }
+                            : { color: red[500] }
+                        }
+                      />
+                    </IconButton>
+                  </span>
                 </Tooltip>
 
                 <Tooltip
@@ -246,18 +250,22 @@ export default function ActionCenter(props: ActionCenterProps) {
                   placement="top"
                   arrow
                 >
-                  <LibraryAddIcon
-                    onClick={() => {
-                      // handleClick(id, "delete");
-                    }}
-                    data-testid={`clone-action-center`}
-                    style={{ cursor: "pointer", marginRight: "8px" }}
-                    sx={
-                      disableCloneBtn
-                        ? { color: grey[500] }
-                        : { color: blue[700] }
-                    }
-                  />
+                  <span>
+                    <IconButton
+                      onClick={() => {}}
+                      disabled={disableCloneBtn}
+                      data-testid="clone-action-btn"
+                    >
+                      <LibraryAddIcon
+                        data-testid={`clone-action-icon`}
+                        sx={
+                          disableCloneBtn
+                            ? { color: grey[500] }
+                            : { color: blue[700] }
+                        }
+                      />
+                    </IconButton>
+                  </span>
                 </Tooltip>
               </div>
             )}
@@ -274,16 +282,22 @@ export default function ActionCenter(props: ActionCenterProps) {
               placement="top"
               arrow
             >
-              <FileUploadOutlinedIcon
-                onClick={() => {
-                  // handleClick(id, "delete");
-                }}
-                data-testid={`export-action-center`}
-                style={{ cursor: "pointer", marginRight: "8px" }}
-                sx={
-                  disableExportBtn ? { color: grey[500] } : { color: blue[700] }
-                }
-              />
+              <span>
+                <IconButton
+                  onClick={() => {}}
+                  disabled={disableExportBtn}
+                  data-testid="export-action-btn"
+                >
+                  <FileUploadOutlinedIcon
+                    data-testid={`export-action-icon`}
+                    sx={
+                      disableExportBtn
+                        ? { color: grey[500] }
+                        : { color: blue[700] }
+                    }
+                  />
+                </IconButton>
+              </span>
             </Tooltip>
           </div>
         )}
