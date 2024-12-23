@@ -175,6 +175,30 @@ const measures = [
       cmsId: "cmsId4",
     },
   },
+  {
+    id: "IDIDID5",
+    measureHumanReadableId: null,
+    measureSetId: "5",
+    version: "1.3",
+    state: "DRAFT",
+    measureName: "draft measure - E",
+    cqlLibraryName: "IDIDID4",
+    cql: "Sample Cql",
+    cqlErrors: true,
+    groups: [testGroup],
+    createdAt: null,
+    createdBy: null,
+    lastModifiedAt: null,
+    lastModifiedBy: null,
+    model: Model.QICORE,
+    active: false,
+    measureMetaData: {
+      draft: true,
+    },
+    measureSet: {
+      cmsId: "cmsId5",
+    },
+  },
 ] as unknown as Measure[];
 const selectedIds = {};
 const badCqlLibraryName = {
@@ -187,12 +211,12 @@ const checkValidSuccess = {
     data: {},
   },
 };
-const serviceConfig: ServiceConfig = {
+const serviceConfig = {
   fhirElmTranslationService: { baseUrl: "" },
   qdmElmTranslationService: { baseUrl: "" },
   measureService: { baseUrl: "" },
   terminologyService: { baseUrl: "" },
-};
+} as unknown as ServiceConfig;
 const abortController = new AbortController();
 
 const changeSelectedIds = jest.fn();
@@ -536,7 +560,7 @@ describe("Measure List component", () => {
     expect(window.location.href).toBe("http://localhost/");
 
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     fireEvent.click(checkBoxes[1]);
 
     const createVersionButton = getByTestId("version-action-btn");
@@ -591,7 +615,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     fireEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -670,7 +694,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     fireEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -747,7 +771,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     fireEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -825,7 +849,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     fireEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -897,7 +921,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     fireEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -985,7 +1009,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     fireEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -1351,7 +1375,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     fireEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1405,7 +1429,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     fireEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1458,7 +1482,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     fireEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1510,7 +1534,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     fireEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1565,7 +1589,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     fireEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1617,7 +1641,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     fireEvent.click(checkBoxes[3]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1669,7 +1693,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     fireEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1678,6 +1702,58 @@ describe("Measure List component", () => {
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
         "Unable to Export measure.Measure CQL Library Name is invalidMissing Population CriteriaMissing Measure DevelopersMissing StewardMissing Description"
+      );
+    });
+    unmount();
+  });
+
+  it("should display the error when at least one Population Criteria is missing Improvement Notation", async () => {
+    const error = {
+      response: {
+        status: 409,
+      },
+    };
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return {
+        ...mockMeasureServiceApi,
+        getMeasureExport: jest.fn().mockRejectedValue(error),
+        fetchMeasure: jest.fn().mockResolvedValue(measures[4]),
+      } as unknown as MeasureServiceApi;
+    });
+
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          selectedIds={selectedIds}
+          changeSelectedIds={changeSelectedIds}
+          setSelectedIds={setSelectedIds}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    expect(checkBoxes.length).toBe(6);
+    fireEvent.click(checkBoxes[5]);
+    const exportButton = screen.getByTestId("export-action-btn");
+    expect(exportButton).toBeInTheDocument();
+    fireEvent.click(exportButton);
+
+    await waitFor(() => {
+      expect(getByTestId("error-message")).toHaveTextContent(
+        "Unable to Export measure.CQL Contains ErrorsMissing Measure DevelopersMissing StewardMissing DescriptionAt least one Population Criteria is missing TypeAt least one Population Criteria is missing Improvement Notation"
       );
     });
     unmount();
@@ -1721,7 +1797,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     fireEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1791,7 +1867,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     fireEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1833,7 +1909,7 @@ describe("Measure List component", () => {
       .fn()
       .mockReturnValueOnce("http://fileurl");
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     fireEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1888,7 +1964,7 @@ describe("Measure List component", () => {
     );
 
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     fireEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1930,7 +2006,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     fireEvent.click(checkBoxes[1]);
 
     const createVersionButton = getByTestId("version-action-btn");
@@ -1968,11 +2044,11 @@ describe("Measure List component", () => {
     expect(tableBody).toBeInTheDocument();
     const visibleRows = await within(tableBody).findAllByRole("row");
     await waitFor(() => {
-      expect(visibleRows).toHaveLength(5);
+      expect(visibleRows).toHaveLength(6);
     });
     const checkboxes = await within(tableBody).findAllByRole("checkbox");
     await waitFor(() => {
-      expect(checkboxes).toHaveLength(5);
+      expect(checkboxes).toHaveLength(6);
     });
     unmount();
   });
@@ -2028,7 +2104,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     fireEvent.click(checkBoxes[1]);
     const deleteButton = screen.getByTestId("delete-action-btn");
     expect(deleteButton).toBeInTheDocument();

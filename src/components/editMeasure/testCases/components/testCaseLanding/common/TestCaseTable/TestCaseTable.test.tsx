@@ -9,6 +9,7 @@ import {
   TestCase,
   Model,
 } from "@madie/madie-models";
+// @ts-ignore
 import { useFeatureFlags } from "@madie/madie-util";
 import userEvent from "@testing-library/user-event";
 
