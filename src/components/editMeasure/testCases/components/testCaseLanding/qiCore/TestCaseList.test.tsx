@@ -661,12 +661,12 @@ describe("TestCaseList component", () => {
 
       const tableHeaders = table.querySelectorAll("thead th");
 
-      expect(tableHeaders[1]).toHaveTextContent("Status");
-      expect(tableHeaders[2]).toHaveTextContent("Group");
-      expect(tableHeaders[3]).toHaveTextContent("Title");
-      expect(tableHeaders[4]).toHaveTextContent("Description");
-      expect(tableHeaders[5]).toHaveTextContent("Last Saved");
-      expect(tableHeaders[6]).toHaveTextContent("Action");
+      expect(tableHeaders[2]).toHaveTextContent("Status");
+      expect(tableHeaders[3]).toHaveTextContent("Group");
+      expect(tableHeaders[4]).toHaveTextContent("Title");
+      expect(tableHeaders[5]).toHaveTextContent("Description");
+      expect(tableHeaders[6]).toHaveTextContent("Last Saved");
+      expect(tableHeaders[7]).toHaveTextContent("Action");
 
       const tableRows = table.querySelectorAll("tbody tr");
 
@@ -970,10 +970,10 @@ describe("TestCaseList component", () => {
     const table = await screen.findByTestId("test-case-tbl");
     const tableHeaders = table.querySelectorAll("thead th");
 
-    expect(tableHeaders[1]).toHaveTextContent("Status");
-    expect(tableHeaders[2]).toHaveTextContent("Group");
-    expect(tableHeaders[3]).toHaveTextContent("Title");
-    expect(tableHeaders[4]).toHaveTextContent("Description");
+    expect(tableHeaders[2]).toHaveTextContent("Status");
+    expect(tableHeaders[3]).toHaveTextContent("Group");
+    expect(tableHeaders[4]).toHaveTextContent("Title");
+    expect(tableHeaders[5]).toHaveTextContent("Description");
 
     const tableRows = table.querySelectorAll("tbody tr");
     expect(tableRows[0]).toHaveTextContent(testCases[0].title.substring(0, 59));

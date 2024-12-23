@@ -38,7 +38,7 @@ interface TestCaseTableProps {
   setSelectedTestCases: any;
 }
 
-const convertDate = (date: string) => {
+export const convertDate = (date: string) => {
   if (!date) {
     return "";
   }

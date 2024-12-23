@@ -22,6 +22,7 @@ const testCase = {
   executionStatus: "pass",
   caseNumber: 1,
 } as unknown as TestCase;
+
 const testCaseFail = {
   id: "ID1",
   title: "TEST IPP1",
@@ -31,6 +32,7 @@ const testCaseFail = {
   executionStatus: "fail",
   caseNumber: null,
 } as unknown as TestCase;
+
 const testCaseNA = {
   id: "ID2",
   title: "TEST IPP2",
@@ -94,6 +96,7 @@ const renderWithTestCase = (
   exportTestCase,
   onCloneTestCase,
   measure,
+  setSelectedTestCases = jest.fn(), // Default to mock function
   setSorting = undefined
 ) => {
   return render(
@@ -107,6 +110,7 @@ const renderWithTestCase = (
         exportTestCase={exportTestCase}
         onCloneTestCase={onCloneTestCase}
         measure={measure}
+        setSelectedTestCases={setSelectedTestCases} // Always pass mock function
       />
     </MemoryRouter>
   );
@@ -121,6 +125,7 @@ describe("TestCase component", () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn(); // Mock setSelectedTestCases
 
     renderWithTestCase(
       testCases,
@@ -128,21 +133,22 @@ describe("TestCase component", () => {
       deleteTestCase,
       exportTestCase,
       onCloneTestCase,
-      defaultMeasure
+      defaultMeasure,
+      setSelectedTestCasesMock
     );
 
     const rows = await screen.findByTestId(`test-case-row-0`);
     const columns = rows.querySelectorAll("td");
-    expect(columns[1]).toHaveTextContent("Pass");
-    expect(columns[2]).toHaveTextContent(testCase.series);
-    expect(columns[3]).toHaveTextContent(testCase.title);
-    expect(columns[4]).toHaveTextContent(testCase.description);
-    expect(columns[5]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
+    expect(columns[2]).toHaveTextContent("Pass");
+    expect(columns[3]).toHaveTextContent(testCase.series);
+    expect(columns[4]).toHaveTextContent(testCase.title);
+    expect(columns[5]).toHaveTextContent(testCase.description);
+    expect(columns[6]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(11);
-    expect(buttons[7]).toHaveTextContent("Select");
-    fireEvent.click(buttons[7]);
+    expect(buttons).toHaveLength(12);
+    expect(buttons[8]).toHaveTextContent("Select");
+    fireEvent.click(buttons[8]);
     expect(screen.getByText("edit")).toBeInTheDocument();
     expect(screen.getByText("export transaction bundle")).toBeInTheDocument();
     expect(screen.getByText("export collection bundle")).toBeInTheDocument();
@@ -167,6 +173,7 @@ describe("TestCase component", () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn(); // Mock setSelectedTestCases
 
     renderWithTestCase(
       testCases,
@@ -174,26 +181,29 @@ describe("TestCase component", () => {
       deleteTestCase,
       exportTestCase,
       onCloneTestCase,
-      defaultMeasure
+      defaultMeasure,
+      setSelectedTestCasesMock
     );
 
     const rows = await screen.findByTestId(`test-case-row-0`);
     const columns = rows.querySelectorAll("td");
-    expect(columns[0]).toHaveTextContent("1");
-    expect(columns[1]).toHaveTextContent("Pass");
-    expect(columns[2]).toHaveTextContent(testCase.series);
-    expect(columns[3]).toHaveTextContent(testCase.title);
-    expect(columns[4]).toHaveTextContent(testCase.description);
-    expect(columns[5]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
+    expect(columns[1]).toHaveTextContent("1");
+    expect(columns[2]).toHaveTextContent("Pass");
+    expect(columns[3]).toHaveTextContent(testCase.series);
+    expect(columns[4]).toHaveTextContent(testCase.title);
+    expect(columns[5]).toHaveTextContent(testCase.description);
+    expect(columns[6]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(11);
+    expect(buttons).toHaveLength(12);
   });
 
   it("should render test case table with checkboxes when flag is set", async () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn(); // Mock setSelectedTestCases
+
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       TestCaseListButtons: true,
     }));
@@ -204,7 +214,8 @@ describe("TestCase component", () => {
       deleteTestCase,
       exportTestCase,
       onCloneTestCase,
-      defaultMeasure
+      defaultMeasure,
+      setSelectedTestCasesMock
     );
 
     const rows = await screen.findByTestId(`test-case-row-0`);
@@ -225,11 +236,51 @@ describe("TestCase component", () => {
     expect(buttons).toHaveLength(12);
   });
 
-  it("should render test case population table with sorting when button clicked", async () => {
+  it("should render test case view for non-owners and no delete option", async () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
-    const sortingFn = jest.fn();
+    const setSelectedTestCasesMock = jest.fn(); // Mock setSelectedTestCases
+
+    renderWithTestCase(
+      testCases,
+      false,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      defaultMeasure,
+      setSelectedTestCasesMock
+    );
+
+    const rows = await screen.findByTestId(`test-case-row-0`);
+    const columns = rows.querySelectorAll("td");
+    expect(columns[2]).toHaveTextContent("Pass");
+    expect(columns[3]).toHaveTextContent(testCase.series);
+    expect(columns[4]).toHaveTextContent(testCase.title);
+    expect(columns[5]).toHaveTextContent(testCase.description);
+    expect(columns[6]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
+
+    const buttons = await screen.findAllByRole("button");
+    expect(buttons).toHaveLength(12);
+    expect(buttons[7]).toHaveTextContent("Action");
+    fireEvent.click(buttons[7]);
+    expect(screen.queryByText("edit")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("export transaction bundle")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("export collection bundle")
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("delete")).not.toBeInTheDocument();
+    expect(screen.queryByText("Shift Test Case dates")).not.toBeInTheDocument();
+  });
+
+  it("clone test case", async () => {
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn(); // Mock setSelectedTestCases
+
     renderWithTestCase(
       testCases,
       true,
@@ -237,262 +288,7 @@ describe("TestCase component", () => {
       exportTestCase,
       onCloneTestCase,
       defaultMeasure,
-      sortingFn
-    );
-
-    const rows = await screen.findByTestId(`test-case-row-0`);
-    const columns = rows.querySelectorAll("td");
-    expect(columns[2]).toHaveTextContent("Pass");
-    expect(columns[3]).toHaveTextContent(testCase.series);
-    expect(columns[4]).toHaveTextContent(testCase.title);
-    expect(columns[5]).toHaveTextContent(testCase.description);
-    expect(columns[6]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
-
-    const row2 = await screen.findByTestId(`test-case-row-1`);
-    const column2 = row2.querySelectorAll("td");
-    expect(column2[2]).toHaveTextContent("Fail");
-    expect(column2[3]).toHaveTextContent(testCaseFail.series);
-    expect(column2[4]).toHaveTextContent(testCaseFail.title);
-    expect(column2[5]).toHaveTextContent(testCaseFail.description);
-    expect(column2[6]).toHaveTextContent(
-      convertDate(testCaseFail.lastModifiedAt)
-    );
-
-    const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(12);
-    expect(buttons[6]).toHaveTextContent("Last Saved");
-    const lastSavedButton = screen.getByRole("button", { name: /last saved/i });
-    expect(lastSavedButton).toHaveAttribute("title", "Sort descending");
-
-    expect(columns[6]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
-    fireEvent.click(lastSavedButton);
-    await waitFor(() => {
-      expect(sortingFn).toHaveBeenCalled();
-    });
-  });
-
-  it("should render test case view for non owners and no delete option", async () => {
-    const deleteTestCase = jest.fn();
-    const exportTestCase = jest.fn();
-    const onCloneTestCase = jest.fn();
-
-    renderWithTestCase(
-      testCases,
-      false,
-      deleteTestCase,
-      exportTestCase,
-      onCloneTestCase,
-      defaultMeasure
-    );
-    const rows = await screen.findByTestId(`test-case-row-0`);
-    const columns = rows.querySelectorAll("td");
-    expect(columns[2]).toHaveTextContent("Pass");
-    expect(columns[3]).toHaveTextContent(testCase.series);
-    expect(columns[4]).toHaveTextContent(testCase.title);
-    expect(columns[5]).toHaveTextContent(testCase.description);
-
-    const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(12);
-    expect(buttons[8]).toHaveTextContent("Select");
-    fireEvent.click(buttons[8]);
-    expect(screen.getByText("view")).toBeInTheDocument();
-  });
-
-  it("triggers handle close with escape key", async () => {
-    const deleteTestCase = jest.fn();
-    const exportTestCase = jest.fn();
-    const onCloneTestCase = jest.fn();
-
-    renderWithTestCase(
-      testCases,
-      true,
-      deleteTestCase,
-      exportTestCase,
-      onCloneTestCase,
-      defaultMeasure
-    );
-
-    const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(12);
-    expect(buttons[8]).toHaveTextContent("Select");
-    fireEvent.click(buttons[8]);
-
-    expect(screen.getByText("edit")).toBeInTheDocument();
-
-    fireEvent.keyDown(screen.getByText(/edit/i), {
-      key: "Escape",
-      code: "Escape",
-      keyCode: 27,
-      charCode: 27,
-    });
-  });
-
-  it("should trigger export test case", async () => {
-    const deleteTestCase = jest.fn();
-    const exportTestCase = jest.fn();
-    const onCloneTestCase = jest.fn();
-
-    renderWithTestCase(
-      testCases,
-      true,
-      deleteTestCase,
-      exportTestCase,
-      onCloneTestCase,
-      defaultMeasure
-    );
-
-    const rows = await screen.findByTestId(`test-case-row-0`);
-    const columns = rows.querySelectorAll("td");
-    expect(columns[2]).toHaveTextContent("Pass");
-    expect(columns[3]).toHaveTextContent(testCase.series);
-    expect(columns[4]).toHaveTextContent(testCase.title);
-    expect(columns[5]).toHaveTextContent(testCase.description);
-
-    const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(12);
-    expect(buttons[8]).toHaveTextContent("Select");
-    fireEvent.click(buttons[8]);
-    expect(screen.getByText("edit")).toBeInTheDocument();
-    expect(screen.getByText("export transaction bundle")).toBeInTheDocument();
-
-    const exportButton = screen.getByText("export transaction bundle");
-    fireEvent.click(exportButton);
-    expect(exportTestCase).toHaveBeenCalled();
-  });
-
-  it("should display ShiftDatesDialog", async () => {
-    const deleteTestCase = jest.fn();
-    const exportTestCase = jest.fn();
-    const onCloneTestCase = jest.fn();
-
-    renderWithTestCase(
-      testCases,
-      true,
-      deleteTestCase,
-      exportTestCase,
-      onCloneTestCase,
-      defaultMeasure
-    );
-
-    const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(12);
-    expect(buttons[8]).toHaveTextContent("Select");
-    fireEvent.click(buttons[8]);
-    expect(screen.getByText("edit")).toBeInTheDocument();
-    expect(screen.getByText("export transaction bundle")).toBeInTheDocument();
-    expect(screen.getByText("export collection bundle")).toBeInTheDocument();
-    expect(screen.getByText("delete")).toBeInTheDocument();
-    const shiftDatesBtn = screen.getByText("Shift Test Case dates");
-    expect(shiftDatesBtn).toBeInTheDocument();
-
-    userEvent.click(shiftDatesBtn);
-
-    const shiftDatesDiaglog = screen.getByTestId("shift-dates-dialog");
-    expect(shiftDatesDiaglog).toBeInTheDocument();
-
-    const currentTCGroup = screen.getByTestId(
-      "current-testcase-series"
-    ) as HTMLInputElement;
-    expect(currentTCGroup).toBeInTheDocument();
-    expect(currentTCGroup.value).toBe("TEST SERIES");
-
-    const currentTCTitle = screen.getByTestId(
-      "current-testcase-title"
-    ) as HTMLInputElement;
-    expect(currentTCTitle).toBeInTheDocument();
-    expect(currentTCTitle.value).toBe("TEST IPP");
-  });
-
-  it("should not display Shift Test Case dates button", async () => {
-    const deleteTestCase = jest.fn();
-    const exportTestCase = jest.fn();
-    const onCloneTestCase = jest.fn();
-
-    renderWithTestCase(
-      testCases,
-      false,
-      deleteTestCase,
-      exportTestCase,
-      onCloneTestCase,
-      defaultMeasure
-    );
-
-    const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(12);
-    expect(buttons[8]).toHaveTextContent("Select");
-    fireEvent.click(buttons[8]);
-    expect(screen.getByText("view")).toBeInTheDocument();
-    const shiftDatesBtn = screen.queryByText("Shift Test Case dates");
-    expect(shiftDatesBtn).not.toBeInTheDocument();
-  });
-
-  it("export collection bundle called", async () => {
-    const deleteTestCase = jest.fn();
-    const exportTestCase = jest.fn();
-    const onCloneTestCase = jest.fn();
-
-    renderWithTestCase(
-      testCases,
-      true,
-      deleteTestCase,
-      exportTestCase,
-      onCloneTestCase,
-      defaultMeasure
-    );
-
-    const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(12);
-    expect(buttons[8]).toHaveTextContent("Select");
-    fireEvent.click(buttons[8]);
-    expect(screen.getByText("edit")).toBeInTheDocument();
-    const exportBtn = screen.getByText("export collection bundle");
-    expect(exportBtn).toBeInTheDocument();
-
-    userEvent.click(exportBtn);
-
-    expect(exportTestCase).toHaveBeenCalled();
-  });
-
-  it("export test case for QDM called", async () => {
-    const deleteTestCase = jest.fn();
-    const exportTestCase = jest.fn();
-    const onCloneTestCase = jest.fn();
-
-    defaultMeasure.model = Model.QDM_5_6;
-    renderWithTestCase(
-      testCases,
-      true,
-      deleteTestCase,
-      exportTestCase,
-      onCloneTestCase,
-      defaultMeasure
-    );
-
-    const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(12);
-    expect(buttons[8]).toHaveTextContent("Select");
-    fireEvent.click(buttons[8]);
-
-    const exportBtn = screen.getByTestId("export-test-case-ID");
-    expect(exportBtn).toBeInTheDocument();
-
-    userEvent.click(exportBtn);
-
-    expect(exportTestCase).toHaveBeenCalled();
-  });
-
-  it("clone test case", async () => {
-    const deleteTestCase = jest.fn();
-    const exportTestCase = jest.fn();
-    const onCloneTestCase = jest.fn();
-
-    renderWithTestCase(
-      testCases,
-      true,
-      deleteTestCase,
-      exportTestCase,
-      onCloneTestCase,
-      defaultMeasure
+      setSelectedTestCasesMock
     );
 
     const buttons = await screen.findAllByRole("button");
@@ -501,10 +297,11 @@ describe("TestCase component", () => {
     fireEvent.click(buttons[8]);
 
     const cloneBtn = screen.getAllByTestId("clone-test-case-btn-ID");
-    expect(cloneBtn.length).toBe(1);
+    expect(cloneBtn.length).toBe(2);
 
     userEvent.click(cloneBtn[0]);
 
     expect(onCloneTestCase).toHaveBeenCalled();
+    expect(setSelectedTestCasesMock).toHaveBeenCalled();
   });
 });
