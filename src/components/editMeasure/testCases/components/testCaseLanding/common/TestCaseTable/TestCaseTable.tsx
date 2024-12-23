@@ -146,27 +146,28 @@ const TestCaseTable = (props: TestCaseTableProps) => {
 
   const columns = useMemo<ColumnDef<TCRow>[]>(() => {
     const columnDefs = [];
-
-    columnDefs.push({
-      id: "select",
-      header: ({ table }) => (
-        <IndeterminateCheckbox
-          checked={table.getIsAllRowsSelected()}
-          indeterminate={table.getIsSomePageRowsSelected()}
-          onChange={table.getToggleAllPageRowsSelectedHandler()}
-        />
-      ),
-      cell: ({ row }) => (
-        <div className="px-1">
+    if (featureFlags.TestCaseListActionCenter) {
+      columnDefs.push({
+        id: "select",
+        header: ({ table }) => (
           <IndeterminateCheckbox
-            checked={row.getIsSelected()}
-            disabled={!row.getCanSelect()}
-            indeterminate={row.getIsSomeSelected()}
-            onChange={row.getToggleSelectedHandler()}
+            checked={table.getIsAllRowsSelected()}
+            indeterminate={table.getIsSomePageRowsSelected()}
+            onChange={table.getToggleAllPageRowsSelectedHandler()}
           />
-        </div>
-      ),
-    });
+        ),
+        cell: ({ row }) => (
+          <div className="px-1">
+            <IndeterminateCheckbox
+              checked={row.getIsSelected()}
+              disabled={!row.getCanSelect()}
+              indeterminate={row.getIsSomeSelected()}
+              onChange={row.getToggleSelectedHandler()}
+            />
+          </div>
+        ),
+      });
+    }
 
     columnDefs.push({
       header: "Case #",
