@@ -637,6 +637,16 @@ export default function MeasureList(props: {
           if (model === Model.QDM_5_6 && _.isEmpty(baseConfigurationTypes)) {
             missing.push("Measure Type is required");
           }
+          if (
+            (model === Model.QICORE || model === Model.QICORE_6_0_0) &&
+            measureMetaData.draft
+          ) {
+            if (groups?.some((group) => _.isEmpty(group.improvementNotation))) {
+              missing.push(
+                "At least one Population Criteria is missing Improvement Notation"
+              );
+            }
+          }
           if (missing.length <= 0) {
             const message =
               "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists.";

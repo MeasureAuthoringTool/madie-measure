@@ -299,7 +299,7 @@ const DemographicsSection = ({ canEdit }) => {
                   labelId="demographics-gender-select-label"
                   id="demographics-gender-select-id"
                   defaultValue="Female"
-                  label="Gender"
+                  label="Sex"
                   disabled={!canEdit}
                   inputProps={{
                     "data-testid": `demographics-gender-input`,
