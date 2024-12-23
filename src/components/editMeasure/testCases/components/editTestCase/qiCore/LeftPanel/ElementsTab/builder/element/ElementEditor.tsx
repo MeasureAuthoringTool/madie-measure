@@ -33,7 +33,10 @@ const ElementEditor = ({
     selectedResource,
     currentPath
   );
+  console.log("resoursee,", resource);
+  console.log("selectedResource,", selectedResource);
 
+  console.log("allChildren");
   // We will hit all direct children normally with the typeEditor however not every second child;
   const currentDepth = elementDefinition?.path.split(".").length;
   return (
