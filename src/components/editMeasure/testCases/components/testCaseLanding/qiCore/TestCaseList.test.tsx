@@ -49,6 +49,7 @@ import { ScanValidationDto } from "../../../api/models/ScanValidationDto";
 import JSZip from "jszip";
 import TestCaseLandingWrapper from "../common/TestCaseLandingWrapper";
 import TestCaseLanding from "../qiCore/TestCaseLanding";
+// @ts-ignore
 import dotMadieFile from "./testDataImport/dotMadie.json";
 
 const createZipFile = async (
@@ -78,7 +79,7 @@ const createZipFile = async (
   }
 };
 
-const serviceConfig: ServiceConfig = {
+const serviceConfig = {
   elmTranslationService: { baseUrl: "base.url" },
   excelExportService: {
     baseUrl: "excelexport.com",
@@ -92,7 +93,7 @@ const serviceConfig: ServiceConfig = {
   terminologyService: {
     baseUrl: "http.com",
   },
-};
+} as unknown as ServiceConfig;
 
 const MEASURE_CREATEDBY = "testuser";
 // Mock data for Measure retrieved from MeasureService
@@ -981,32 +982,20 @@ describe("TestCaseList component", () => {
     );
 
     const seriesButton = await screen.findByTestId(
-      `test-case-series-${testCases[0].id}-button`
+      `test-case-series-${testCases[0].id}-toggle-button`
     );
     expect(seriesButton).toBeInTheDocument();
-    fireEvent.mouseOver(seriesButton);
-    expect(
-      await screen.findByRole("button", {
-        name: testCases[0].series,
-        hidden: true,
-      })
-    ).toBeVisible();
+    expect(seriesButton).toHaveTextContent("Show more");
+    userEvent.click(seriesButton);
+    expect(seriesButton).toHaveTextContent("Show less");
 
     const titleButton = screen.getByTestId(
-      `test-case-title-${testCases[0].id}-button`
+      `test-case-title-${testCases[0].id}-toggle-button`
     );
     expect(titleButton).toBeInTheDocument();
-    fireEvent.mouseOver(titleButton);
-    expect(
-      await screen.findByRole(
-        "button",
-        {
-          name: testCases[0].title,
-          hidden: true,
-        },
-        { timeout: 3000 }
-      )
-    ).toBeVisible();
+    expect(titleButton).toHaveTextContent("Show more");
+    userEvent.click(titleButton);
+    expect(titleButton).toHaveTextContent("Show less");
     await waitFor(() =>
       expect(screen.getByText(testCases[0].title)).toBeInTheDocument()
     );

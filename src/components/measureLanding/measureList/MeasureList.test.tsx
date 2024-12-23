@@ -211,12 +211,12 @@ const checkValidSuccess = {
     data: {},
   },
 };
-const serviceConfig: ServiceConfig = {
+const serviceConfig = {
   fhirElmTranslationService: { baseUrl: "" },
   qdmElmTranslationService: { baseUrl: "" },
   measureService: { baseUrl: "" },
   terminologyService: { baseUrl: "" },
-};
+} as unknown as ServiceConfig;
 const abortController = new AbortController();
 
 const changeSelectedIds = jest.fn();
