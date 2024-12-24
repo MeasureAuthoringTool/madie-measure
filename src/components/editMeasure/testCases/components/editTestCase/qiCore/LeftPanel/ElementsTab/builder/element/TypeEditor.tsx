@@ -7,6 +7,7 @@ import PeriodComponent from "./types/PeriodComponent";
 import DateTimeComponent from "./types/DateTimeComponent";
 import BooleanComponent from "./types/BooleanComponent";
 import UriComponent from "./types/UriComponent";
+import UrlComponent from "./types/UrlComponent";
 import DateComponent from "./types/DateComponent";
 import IntegerComponent, { IntegerType } from "./types/IntegerComponent";
 import CodesComponent from "./types/CodesComponent";
@@ -96,6 +97,17 @@ const TypeEditor = ({
       case "uri":
         return (
           <UriComponent
+            canEdit={canEdit}
+            structureDefinition={structureDefinition}
+            fieldRequired={required}
+            label={label}
+            onChange={onChange}
+            value={value}
+          />
+        );
+      case "url":
+        return (
+          <UrlComponent
             canEdit={canEdit}
             structureDefinition={structureDefinition}
             fieldRequired={required}
