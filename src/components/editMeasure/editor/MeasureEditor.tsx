@@ -6,12 +6,10 @@ import React, {
   useRef,
   useState,
 } from "react";
-import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import {
   EditorAnnotation,
   EditorErrorMarker,
-  MadieEditor,
   parseContent,
   validateContent,
   ElmTranslationError,
@@ -49,7 +47,6 @@ import {
   useDocumentTitle,
   routeHandlerStore,
   checkUserCanEdit,
-  useFeatureFlags,
 } from "@madie/madie-util";
 import StatusHandler from "./StatusHandler";
 import { SuccessText } from "../../../styles/editMeasure/editor";
@@ -66,7 +63,7 @@ import {
   editLibrary,
 } from "./libraryApplier";
 import { applyDefinition, editDefinition } from "./DefinitionApplier";
-import applyCQLFunction from "./cqlFunctionApplier";
+import applyCQLFunction, { deleteCQLFunction } from "./cqlFunctionApplier";
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
@@ -126,12 +123,6 @@ const MeasureEditor = () => {
   );
   const { updateMeasure } = measureStore;
   const [processing, setProcessing] = useState<boolean>(true);
-  const featureFlags = useFeatureFlags();
-  const isQDM = measure?.model?.includes("QDM");
-  const showCqlBuilderTabs =
-    isQDM ||
-    featureFlags?.CQLBuilderDefinitions ||
-    featureFlags?.CQLBuilderIncludes;
 
   useEffect(() => {
     const subscription = measureStore.subscribe((measure: Measure) => {
@@ -559,6 +550,19 @@ const MeasureEditor = () => {
     return result.status;
   };
 
+  const handleFunctionDelete = (cqlFunction) => {
+    const result = deleteCQLFunction(editorVal, cqlFunction);
+    if (result.status) {
+      handleMadieEditorValue(result.cql);
+    }
+    const setFunctionConfirmation = () => {
+      setToastMessage(result.message);
+      setToastType(result.status);
+      setToastOpen(true);
+    };
+    updateMeasureCql(result.cql, setFunctionConfirmation);
+  };
+
   const handleParameterEdit = (
     parameter: Parameter,
     parameterToApply: Parameter
@@ -769,52 +773,39 @@ const MeasureEditor = () => {
               {valuesetMsg}
             </SuccessText>
           )}
-          {!processing &&
-            (showCqlBuilderTabs ? (
-              <MadieTerminologyEditor
-                handleApplyCode={handleApplyCode}
-                handleApplyValueSet={handleUpdateVs}
-                handleApplyLibrary={handleApplyLibrary}
-                handleApplyDefinition={handleApplyDefinition}
-                handleApplyFunction={handleApplyFunction}
-                handleApplyParameter={handleApplyParameter}
-                handleParameterEdit={handleParameterEdit}
-                handleParameterDelete={handleParameterDelete}
-                handleDefinitionEdit={handleDefinitionEdit}
-                handleDeleteLibrary={handleDeleteLibrary}
-                handleEditLibrary={handleEditLibrary}
-                onChange={(val: string) => handleMadieEditorValue(val)}
-                value={editorVal}
-                inboundAnnotations={elmAnnotations}
-                inboundErrorMarkers={errorMarkers}
-                height="calc(100% - 48px)"
-                readOnly={!canEdit}
-                setOutboundAnnotations={setOutboundAnnotations}
-                measureStoreCql={measure?.cql}
-                cqlMetaData={measure?.measureMetaData?.cqlMetaData}
-                measureModel={measure?.model}
-                handleCodeDelete={handleCodeDelete}
-                handleDefinitionDelete={handleDefinitionDelete}
-                setEditorVal={setEditorVal}
-                setIsCQLUnchanged={setIsCQLUnchanged}
-                isCQLUnchanged={isCQLUnchanged}
-                resetCql={resetCql}
-                getCqlDefinitionReturnTypes={getCqlDefinitionReturnTypes}
-              />
-            ) : (
-              <>
-                {/* handle this edge case by flipping line (!showCqlBuilderTabs ? (*/}
-                <MadieEditor
-                  onChange={handleMadieEditorValue}
-                  value={editorVal}
-                  inboundAnnotations={elmAnnotations}
-                  inboundErrorMarkers={errorMarkers}
-                  height="100%"
-                  readOnly={!canEdit}
-                  setOutboundAnnotations={setOutboundAnnotations}
-                />
-              </>
-            ))}
+          {!processing && (
+            <MadieTerminologyEditor
+              handleApplyCode={handleApplyCode}
+              handleApplyValueSet={handleUpdateVs}
+              handleApplyLibrary={handleApplyLibrary}
+              handleApplyDefinition={handleApplyDefinition}
+              handleApplyFunction={handleApplyFunction}
+              handleFunctionDelete={handleFunctionDelete}
+              handleApplyParameter={handleApplyParameter}
+              handleParameterEdit={handleParameterEdit}
+              handleParameterDelete={handleParameterDelete}
+              handleDefinitionEdit={handleDefinitionEdit}
+              handleDeleteLibrary={handleDeleteLibrary}
+              handleEditLibrary={handleEditLibrary}
+              onChange={(val: string) => handleMadieEditorValue(val)}
+              value={editorVal}
+              inboundAnnotations={elmAnnotations}
+              inboundErrorMarkers={errorMarkers}
+              height="calc(100% - 48px)"
+              readOnly={!canEdit}
+              setOutboundAnnotations={setOutboundAnnotations}
+              measureStoreCql={measure?.cql}
+              cqlMetaData={measure?.measureMetaData?.cqlMetaData}
+              measureModel={measure?.model}
+              handleCodeDelete={handleCodeDelete}
+              handleDefinitionDelete={handleDefinitionDelete}
+              setEditorVal={setEditorVal}
+              setIsCQLUnchanged={setIsCQLUnchanged}
+              isCQLUnchanged={isCQLUnchanged}
+              resetCql={resetCql}
+              getCqlDefinitionReturnTypes={getCqlDefinitionReturnTypes}
+            />
+          )}
           {processing && (
             <div
               style={{
@@ -847,6 +838,7 @@ const MeasureEditor = () => {
               tw="m-2"
               onClick={() => updateMeasureCql(editorVal, undefined)}
               data-testid="save-cql-btn"
+              id="save-cql-btn"
               disabled={isCQLUnchanged}
             >
               Save

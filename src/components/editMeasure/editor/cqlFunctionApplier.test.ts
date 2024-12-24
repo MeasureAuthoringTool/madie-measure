@@ -1,4 +1,4 @@
-import applyCQLFunction from "./cqlFunctionApplier";
+import applyCQLFunction, { deleteCQLFunction } from "./cqlFunctionApplier";
 import * as fs from "fs";
 
 const getMock = (name) => {
@@ -158,6 +158,72 @@ describe("Definition Apply Function tests", () => {
     const { cql } = applyCQLFunction(mockCql, testFunction);
     expect(cql).toContain(
       `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
+    );
+  });
+
+  it("Can insert a function with no args that's not defined", () => {
+    const mockCql = getMock("cqlFunctionApplierFunctionNoArgs");
+    const testFunction = {
+      fluentFunction: true,
+      functionName: "anyName",
+      comment: "",
+      functionsArguments: [],
+      expressionValue: "true",
+    };
+    const { cql } = applyCQLFunction(mockCql, testFunction);
+    expect(cql).toContain(`define fluent function \"anyName\"():`);
+  });
+
+  it("Will fail to insert a function with no args that is defined", () => {
+    const mockCql = getMock("cqlFunctionApplierFunctionNoArgs");
+    const testFunction = {
+      fluentFunction: true,
+      functionName: "test",
+      comment: "",
+      functionsArguments: [],
+      expressionValue: "true",
+    };
+    const result = applyCQLFunction(mockCql, testFunction);
+    expect(result.message).toBe(
+      "Function test has already been defined in CQL."
+    );
+  });
+
+  it("Will not delete a function when function not found", () => {
+    const mockCql = getMock("cqlFunctionApplierFunctionNoArgs");
+
+    const testFunction = {
+      fluentFunction: true,
+      functionName: "test",
+      expression: `define function "test"():\n  undefined`,
+      comment: "test comment",
+      functionsArguments: [],
+      expressionValue: "true",
+    };
+    const result = deleteCQLFunction(mockCql, testFunction);
+    expect(result.message).toBe("Function test has not been defined in CQL.");
+  });
+
+  it("Will delete a function successfully", () => {
+    const mockCql = `library TestLib version '0.0.000'
+using QICore version '4.1.1'
+include FHIRHelpers version '4.1.000' called FHIRHelpers
+
+context Patient
+
+define function MeasureObservation(e Encounter):
+  2`;
+
+    const functionToDelete = {
+      functionName: "MeasureObservation",
+      fluentFunction: false,
+      expressionValue: "define function MeasureObservation(e Encounter):\n  2",
+      expression: "define function MeasureObservation(e Encounter):\n  2",
+    };
+
+    const result = deleteCQLFunction(mockCql, functionToDelete);
+    expect(result.message).toBe(
+      "Function MeasureObservation has been successfully removed from the CQL."
     );
   });
 });

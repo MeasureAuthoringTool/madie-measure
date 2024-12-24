@@ -17,6 +17,10 @@ const codingDef = {
 };
 const codingTopLevelElements = [
   {
+    id: "Coding.code",
+    path: "Coding.code",
+  },
+  {
     id: "Coding.id",
     path: "Coding.id",
   },
@@ -33,10 +37,6 @@ const codingTopLevelElements = [
     path: "Coding.version",
   },
   {
-    id: "Coding.code",
-    path: "Coding.code",
-  },
-  {
     id: "Coding.display",
     path: "Coding.display",
   },
@@ -45,14 +45,14 @@ const codingTopLevelElements = [
     path: "Coding.userSelected",
   },
 ];
-
 jest.mock("../../../../../../../api/useFhirDefinitionsService");
 const useFhirDefinitionsServiceApiMock =
   useFhirDefinitionsServiceApi as jest.Mock<FhirDefinitionsServiceApi>;
 const fhirDefinitionsServiceApiMock = {
-  isComponentDataType: jest.fn().mockResolvedValue(true),
+  isComponentDataType: jest.fn().mockReturnValue(true),
   getResourceTree: jest.fn().mockResolvedValue(codingDef),
-  getTopLevelElements: jest.fn().mockResolvedValue(codingTopLevelElements),
+  getTopLevelElements: jest.fn().mockReturnValue(codingTopLevelElements),
+  getAllChildren: jest.fn().mockResolvedValue(codingTopLevelElements),
 } as unknown as FhirDefinitionsServiceApi;
 useFhirDefinitionsServiceApiMock.mockImplementation(
   () => fhirDefinitionsServiceApiMock
@@ -158,6 +158,20 @@ describe("TypeEditor Component", () => {
     expect(screen.getByTestId("uri-input-field-URI")).toBeInTheDocument();
   });
 
+  test("Should render URL component", () => {
+    const handleChange = jest.fn();
+    render(
+      <TypeEditor
+        type={`url`}
+        required={true}
+        value={`http://hl7.org/fhir/us/core/StructureDefinition/uscdi-requirement`}
+        onChange={handleChange}
+        structureDefinition={null}
+      />
+    );
+    expect(screen.getByTestId("url-input-field-URL")).toBeInTheDocument();
+  });
+
   test("Should render Instant component by instant", () => {
     const handleChange = jest.fn();
     render(
@@ -171,6 +185,7 @@ describe("TypeEditor Component", () => {
     );
     expect(screen.getByTestId("instant-input")).toBeInTheDocument();
   });
+
   test("Should render Instant component by hl7 code", () => {
     const handleChange = jest.fn();
     render(
@@ -246,5 +261,32 @@ describe("TypeEditor Component", () => {
       />
     );
     expect(screen.getByText(`Unsupported Type [test]`)).toBeInTheDocument();
+    jest.resetAllMocks();
+  });
+
+  test("Should handle missing isComponentDataType", async () => {
+    const fhirDefinitionsServiceApiMock = {
+      isComponentDataType: jest.fn().mockReturnValue(false),
+      getResourceTree: jest.fn().mockResolvedValue(codingDef),
+      getTopLevelElements: jest.fn().mockReturnValue(codingTopLevelElements),
+      getAllChildren: jest.fn().mockReturnValue(codingTopLevelElements),
+    } as unknown as FhirDefinitionsServiceApi;
+    useFhirDefinitionsServiceApiMock.mockImplementation(
+      () => fhirDefinitionsServiceApiMock
+    );
+    const handleChange = jest.fn();
+
+    render(
+      <TypeEditor
+        type={`test`}
+        required={false}
+        value={`test`}
+        onChange={handleChange}
+        structureDefinition={null}
+      />
+    );
+    expect(
+      screen.queryByText(`Unsupported Type [test]`)
+    ).not.toBeInTheDocument();
   });
 });

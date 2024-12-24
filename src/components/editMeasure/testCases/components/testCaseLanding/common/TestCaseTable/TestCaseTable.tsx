@@ -8,14 +8,12 @@ import {
   getCoreRowModel,
   flexRender,
   getSortedRowModel,
-  SortingState,
 } from "@tanstack/react-table";
-import * as _ from "lodash";
 import { TestCaseStatus, TestCaseActionButton } from "./TestCaseTableHelpers";
-import TruncateText from "../TruncateText";
 import {
   MadieDeleteDialog,
   Toast,
+  TruncateText,
 } from "@madie/madie-design-system/dist/react";
 import "../TestCase.scss";
 import TestCaseTablePopover from "./TestCaseTablePopover";
@@ -24,6 +22,7 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import ShiftDatesDialog from "../shiftDates/ShiftDatesDialog";
 import { useFeatureFlags } from "@madie/madie-util";
+import _ from "lodash";
 
 interface TestCaseTableProps {
   testCases: TestCase[];
@@ -188,22 +187,19 @@ const TestCaseTable = (props: TestCaseTableProps) => {
       });
     }
 
-    if (featureFlags?.TestCaseID) {
-      columnDefs.push({
-        header: "Case #",
-        cell: (info) => (
-          <TruncateText
-            text={info.row.original.caseNumber}
-            maxLength={60}
-            name="caseNumber"
-            dataTestId={`test-case-caseNumber-${info.row.original.id}`}
-          />
-        ),
-        accessorKey: "caseNumber",
-        sortingFn: "alphanumeric",
-        sortDescFirst: false,
-      });
-    }
+    columnDefs.push({
+      header: "Case #",
+      cell: (info) => (
+        <TruncateText
+          text={_.toString(info.row.original.caseNumber)}
+          maxLength={60}
+          dataTestId={`test-case-caseNumber-${info.row.original.id}`}
+        />
+      ),
+      accessorKey: "caseNumber",
+      sortingFn: "alphanumeric",
+      sortDescFirst: false,
+    });
 
     return [
       ...columnDefs,
@@ -220,7 +216,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           <TruncateText
             text={info.row.original.group}
             maxLength={120}
-            name="series"
             dataTestId={`test-case-series-${info.row.original.id}`}
           />
         ),
@@ -232,7 +227,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           <TruncateText
             text={info.row.original.title}
             maxLength={60}
-            name="title"
             dataTestId={`test-case-title-${info.row.original.id}`}
           />
         ),
@@ -244,7 +238,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           <TruncateText
             text={info.row.original.description}
             maxLength={120}
-            name="description"
             dataTestId={`test-case-description-${info.row.original.id}`}
           />
         ),
@@ -256,7 +249,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           <TruncateText
             text={convertDate(info.row.original.lastSaved)}
             maxLength={23}
-            name="lastSaved"
             dataTestId={`test-case-lastSaved-${
               info.row.original.lastSaved ? info.row.original.lastSaved : ""
             }`}
@@ -276,7 +268,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
         enableSorting: false,
       },
     ];
-  }, [featureFlags?.TestCaseID]);
+  }, []);
 
   const table = useReactTable({
     data,

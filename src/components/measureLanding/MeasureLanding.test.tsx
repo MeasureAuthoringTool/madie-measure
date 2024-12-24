@@ -32,11 +32,10 @@ jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getUserName: () => mockUser,
   }),
-  useFeatureFlags: () => {
-    return {
-      MeasureListButtons: false,
-    };
-  },
+  checkUserCanEdit: jest.fn(() => {
+    return true;
+  }),
+  useFeatureFlags: jest.fn(),
 }));
 
 const mockedUsedNavigate = jest.fn();

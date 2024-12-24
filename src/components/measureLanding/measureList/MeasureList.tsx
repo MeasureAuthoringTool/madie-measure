@@ -16,6 +16,7 @@ import {
   Popover,
   TextField,
   Toast,
+  TruncateText,
 } from "@madie/madie-design-system/dist/react";
 import {
   useReactTable,
@@ -24,7 +25,6 @@ import {
   flexRender,
   getSortedRowModel,
   SortingState,
-  RowSelection,
 } from "@tanstack/react-table";
 
 import InvalidTestCaseDialog from "../../common/invalidTestCaseDialog/InvalidTestCaseDialog";
@@ -32,7 +32,7 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
-import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
+import { checkUserCanEdit } from "@madie/madie-util";
 import CreatVersionDialog from "../../common/createVersionDialog/CreateVersionDialog";
 import DraftMeasureDialog from "../../common/draftMeasureDialog/DraftMeasureDialog";
 import versionErrorHelper from "../../../utils/versionErrorHelper";
@@ -41,8 +41,6 @@ import _ from "lodash";
 import ExportDialog from "./exportDialog/ExportDialog";
 import InvalidMeasureNameDialog from "./InvalidMeasureNameDialog/InvalidMeasureNameDialog";
 import getLibraryNameErrors from "./InvalidMeasureNameDialog/getLibraryNameErrors";
-import TruncateText from "./TruncateText";
-import AssociateCmsIdAction from "./actionCenter/associateCmsIdAction/AccociateCmsIdAction";
 import AssociateCmsIdDialog from "./associateCmsIdDialog/AssociateCmsIdDialog";
 import ActionCenter from "./actionCenter/ActionCenter";
 import DeleteDialog from "../../editMeasure/DeleteDialog";
@@ -135,8 +133,6 @@ export default function MeasureList(props: {
 
   const [openAssociateCmsIdDialog, setOpenAssociateCmsIdDialog] =
     useState(false);
-
-  const featureFlags = useFeatureFlags();
 
   const buildLookup = useCallback(
     async (measureList) => {
@@ -261,7 +257,6 @@ export default function MeasureList(props: {
           <TruncateText
             text={info.row.original.measureName}
             maxLength={120}
-            name="measureName"
             dataTestId={`measure-name-${info.row.original.id}`}
           />
         ),
@@ -276,7 +271,6 @@ export default function MeasureList(props: {
             <TruncateText
               text={info.row.original.version}
               maxLength={60}
-              name="version"
               dataTestId={`measure-version-${info.row.original.id}`}
             />
             {`${info.row.original.actions.measureMetaData?.draft}` ===
@@ -293,7 +287,6 @@ export default function MeasureList(props: {
           <TruncateText
             text={info.row.original.model}
             maxLength={120}
-            name="model"
             dataTestId={`measure-model-${info.row.original.id}`}
           />
         ),
@@ -303,44 +296,29 @@ export default function MeasureList(props: {
       },
       {
         header: "",
-        cell: (info) =>
-          !featureFlags?.MeasureListButtons ? (
-            <Button
-              variant="outline-secondary"
-              name="Select"
-              onClick={(e) => handlePopOverOpen(info.row.original.actions, e)}
-              data-testid={`measure-action-${info.row.original.id}`}
-              aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
-              role="button"
-              tab-index={0}
-            >
-              Select
-            </Button>
-          ) : (
-            featureFlags?.MeasureListButtons && (
-              <Button
-                variant="outline-filled"
-                data-testid={`measure-action-${info.row.original.id}`}
-                aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
-                onClick={() =>
-                  navigate(`/measures/${info.row.original.id}/edit/details`)
-                }
-                role="button"
-              >
-                {checkUserCanEdit(
-                  info.row.original.actions?.measureSet?.owner,
-                  info.row.original.actions?.measureSet?.acls
-                ) && info.row.original.actions.measureMetaData?.draft
-                  ? "Edit"
-                  : "View"}
-              </Button>
-            )
-          ),
+        cell: (info) => (
+          <Button
+            variant="outline-filled"
+            data-testid={`measure-action-${info.row.original.id}`}
+            aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
+            onClick={() =>
+              navigate(`/measures/${info.row.original.id}/edit/details`)
+            }
+            role="button"
+          >
+            {checkUserCanEdit(
+              info.row.original.actions?.measureSet?.owner,
+              info.row.original.actions?.measureSet?.acls
+            ) && info.row.original.actions.measureMetaData?.draft
+              ? "Edit"
+              : "View"}
+          </Button>
+        ),
         accessorKey: "actions",
         enableSorting: false,
       },
     ];
-  }, [featureFlags?.MeasureListButtons]);
+  }, []);
 
   const table = useReactTable({
     data,
@@ -561,7 +539,7 @@ export default function MeasureList(props: {
     link.href = url;
     link.setAttribute(
       "download",
-      `${ecqmTitle}-v${version}-${getModelFamily(model)}.zip`
+      `${_.trim(ecqmTitle)}-v${version}-${getModelFamily(model)}.zip`
     );
     document.body.appendChild(link);
     link.click();
@@ -658,6 +636,16 @@ export default function MeasureList(props: {
           }
           if (model === Model.QDM_5_6 && _.isEmpty(baseConfigurationTypes)) {
             missing.push("Measure Type is required");
+          }
+          if (
+            (model === Model.QICORE || model === Model.QICORE_6_0_0) &&
+            measureMetaData.draft
+          ) {
+            if (groups?.some((group) => _.isEmpty(group.improvementNotation))) {
+              missing.push(
+                "At least one Population Criteria is missing Improvement Notation"
+              );
+            }
           }
           if (missing.length <= 0) {
             const message =
@@ -939,24 +927,16 @@ export default function MeasureList(props: {
           </form>
         </div>
         <div tw="justify-self-end p-3">
-          {!featureFlags.MeasureListButtons && (
-            <AssociateCmsIdAction
-              measures={selectedMeasures}
-              onClick={associateCmsId}
-            />
-          )}
-          {featureFlags.MeasureListButtons && (
-            <ActionCenter
-              updateTargetMeasure={updateTargetMeasure}
-              exportMeasure={exportMeasure}
-              measures={selectedMeasures}
-              associateCmsId={associateCmsId}
-              setCreateVersionDialog={setCreateVersionDialog}
-              setDraftMeasureDialog={setDraftMeasureDialog}
-              setDeleteMeasureDialog={setDeleteMeasureDialog}
-              deleteMeasure={deleteMeasure}
-            />
-          )}
+          <ActionCenter
+            updateTargetMeasure={updateTargetMeasure}
+            exportMeasure={exportMeasure}
+            measures={selectedMeasures}
+            associateCmsId={associateCmsId}
+            setCreateVersionDialog={setCreateVersionDialog}
+            setDraftMeasureDialog={setDraftMeasureDialog}
+            setDeleteMeasureDialog={setDeleteMeasureDialog}
+            deleteMeasure={deleteMeasure}
+          />
         </div>
       </div>
 
