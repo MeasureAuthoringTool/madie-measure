@@ -158,6 +158,20 @@ describe("TypeEditor Component", () => {
     expect(screen.getByTestId("uri-input-field-URI")).toBeInTheDocument();
   });
 
+  test("Should render URL component", () => {
+    const handleChange = jest.fn();
+    render(
+      <TypeEditor
+        type={`url`}
+        required={true}
+        value={`http://hl7.org/fhir/us/core/StructureDefinition/uscdi-requirement`}
+        onChange={handleChange}
+        structureDefinition={null}
+      />
+    );
+    expect(screen.getByTestId("url-input-field-URL")).toBeInTheDocument();
+  });
+
   test("Should render Instant component by instant", () => {
     const handleChange = jest.fn();
     render(
@@ -171,6 +185,7 @@ describe("TypeEditor Component", () => {
     );
     expect(screen.getByTestId("instant-input")).toBeInTheDocument();
   });
+
   test("Should render Instant component by hl7 code", () => {
     const handleChange = jest.fn();
     render(
