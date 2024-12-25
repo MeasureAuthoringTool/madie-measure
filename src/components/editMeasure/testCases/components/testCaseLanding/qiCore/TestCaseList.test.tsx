@@ -683,6 +683,38 @@ describe("TestCaseList component", () => {
       ).toBeInTheDocument();
     });
   }, 15000);
+  it("should render list of test cases with checkboxes if flag is true", async () => {
+    (useFeatureFlags as jest.Mock).mockReturnValue({
+      TestCaseListActionCenter: true,
+    });
+    renderTestCaseListComponent();
+    await waitFor(() => {
+      const table = screen.getByTestId("test-case-tbl");
+
+      const tableHeaders = table.querySelectorAll("thead th");
+
+      expect(tableHeaders[2]).toHaveTextContent("Status");
+      expect(tableHeaders[3]).toHaveTextContent("Group");
+      expect(tableHeaders[4]).toHaveTextContent("Title");
+      expect(tableHeaders[5]).toHaveTextContent("Description");
+      expect(tableHeaders[6]).toHaveTextContent("Last Saved");
+      expect(tableHeaders[7]).toHaveTextContent("Action");
+
+      const tableRows = table.querySelectorAll("tbody tr");
+
+      expect(tableRows[0]).toHaveTextContent(testCases[2].title);
+      expect(tableRows[0]).toHaveTextContent(testCases[2].series);
+      expect(
+        screen.getByTestId(`select-action-${testCases[0].id}`)
+      ).toBeInTheDocument();
+
+      expect(tableRows[1]).toHaveTextContent(testCases[1].title);
+      expect(tableRows[1]).toHaveTextContent(testCases[1].series);
+      expect(
+        screen.getByTestId(`select-action-${testCases[1].id}`)
+      ).toBeInTheDocument();
+    });
+  }, 15000);
 
   it("should not display error message when fetch test cases fails", async () => {
     const error = {
