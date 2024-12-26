@@ -9,7 +9,7 @@ describe("UuidComponent", () => {
     const uuid = "550e8400-e29b-41d4-a716-446655440000";
     render(
       <UuidComponent
-        value={uuid}
+        value={null}
         label="uuid"
         canEdit={true}
         fieldRequired={false}
@@ -18,8 +18,6 @@ describe("UuidComponent", () => {
       />
     );
 
-    const stringField = screen.getByTestId("field-input-uuid");
-    expect(stringField).toBeInTheDocument();
     const uuidInput = screen.getByTestId(
       "field-input-uuid"
     ) as HTMLInputElement;
@@ -28,7 +26,7 @@ describe("UuidComponent", () => {
     expect(uuidInput.value).toBe(uuid);
     expect(
       screen.getByTestId("field-input-helper-text-uuid")
-    ).toHaveTextContent("");
+    ).toBeEmptyDOMElement();
 
     // invalidate uuid format
     userEvent.clear(uuidInput);

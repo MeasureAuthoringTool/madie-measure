@@ -14,7 +14,7 @@ const UuidComponent = ({
   structureDefinition,
 }: TypeComponentProps) => {
   const [isValid, setValid] = useState<boolean>(true);
-  const handleChange = (uuid) => {
+  const handleChange = (uuid: string) => {
     setValid(true);
     if (uuidValidate(uuid)) {
       onChange(uuid);
