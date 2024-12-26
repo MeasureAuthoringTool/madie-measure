@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import UuidComponent from "./UuidComponent";
 import userEvent from "@testing-library/user-event";
 
@@ -29,7 +29,7 @@ describe("UuidComponent", () => {
     expect(
       screen.getByTestId("field-input-helper-text-uuid")
     ).toHaveTextContent("");
-    
+
     // invalidate uuid format
     userEvent.clear(uuidInput);
     userEvent.type(uuidInput, "Incorrect uuid");
