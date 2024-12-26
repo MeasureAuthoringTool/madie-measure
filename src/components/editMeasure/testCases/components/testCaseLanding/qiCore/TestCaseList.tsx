@@ -141,6 +141,7 @@ const TestCaseList = (props: TestCaseListProps) => {
       passPercentage: undefined,
       passFailRatio: "",
     });
+  const [selectedTestCases, setSelectedTestCases] = useState<any>();
   const { measureState, bundleState, valueSetsState, executing, setExecuting } =
     useExecutionContext();
   const [measure] = measureState;
@@ -625,7 +626,11 @@ const TestCaseList = (props: TestCaseListProps) => {
                           </span>
                         </div>
                       )}
-                      {<ActionCenter />}
+                      <ActionCenter
+                        selectedTestCases={selectedTestCases}
+                        canEdit={canEdit}
+                        isQDM={false}
+                      />
                       <TestCaseTable
                         sorting={sorting}
                         setSorting={setSorting}
@@ -637,6 +642,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                         measure={measure}
                         onTestCaseShiftDates={onTestCaseShiftDates}
                         handleQiCloneTestCase={handleQiCloneTestCase}
+                        setSelectedTestCases={setSelectedTestCases}
                       />
                       {currentSlice?.length > 0 && (
                         <Pagination
