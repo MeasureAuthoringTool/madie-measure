@@ -23,13 +23,19 @@ describe("UuidComponent", () => {
     const uuidInput = screen.getByTestId(
       "field-input-uuid"
     ) as HTMLInputElement;
+    // valid uuid
+    userEvent.type(uuidInput, uuid);
     expect(uuidInput.value).toBe(uuid);
-    // validate incorrect uuid format
+    expect(
+      screen.getByTestId("field-input-helper-text-uuid")
+    ).toHaveTextContent("");
+    
+    // invalidate uuid format
+    userEvent.clear(uuidInput);
     userEvent.type(uuidInput, "Incorrect uuid");
-    await waitFor(() => {
-      expect(
-        screen.getByTestId("field-input-helper-text-uuid")
-      ).toHaveTextContent("Please enter a valid uuid");
-    });
+    expect(uuidInput).toHaveValue("Incorrect uuid");
+    expect(
+      screen.getByTestId("field-input-helper-text-uuid")
+    ).toHaveTextContent("Please enter a valid uuid");
   });
 });
