@@ -106,6 +106,7 @@ const TypeEditor = ({
           />
         );
       case "url":
+      case "canonical":
         return (
           <UrlComponent
             canEdit={canEdit}
