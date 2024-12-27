@@ -12,7 +12,7 @@ interface MadieSpeedDialProps {
   dataTestId?: any;
 }
 
-const MeasureActionCenter = (props: MadieSpeedDialProps) => {
+const MadieSpeedDial = (props: MadieSpeedDialProps) => {
   const { actions, dataTestId } = props;
   const [open, setOpen] = useState(false);
 
@@ -64,7 +64,7 @@ const MeasureActionCenter = (props: MadieSpeedDialProps) => {
             key={action.name}
             icon={action.icon}
             tooltipTitle={action.name}
-            data-testid={action.dataTestId}
+            data-testid={action?.dataTestId}
             onClick={() => {
               setOpen(false);
               action.onClick();
@@ -83,4 +83,4 @@ const MeasureActionCenter = (props: MadieSpeedDialProps) => {
   );
 };
 
-export default MeasureActionCenter;
+export default MadieSpeedDial;
