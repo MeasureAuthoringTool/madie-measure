@@ -172,7 +172,7 @@ describe("TypeEditor Component", () => {
     expect(screen.getByTestId("url-input-field-URL")).toBeInTheDocument();
   });
 
-  test("Should render canonical uri type attribute", () => {
+  test("Should render canonical url type attribute", () => {
     const handleChange = jest.fn();
     const canonicalUri = "https://example.com/blog";
     render(
@@ -183,12 +183,12 @@ describe("TypeEditor Component", () => {
         onChange={handleChange}
         structureDefinition={null}
         canEdit={true}
-        label="instantiatesUri"
+        label="instantiatesCanonical"
       />
     );
-    expect(screen.getByTestId("url-input-field-instantiatesUri")).toHaveValue(
-      canonicalUri
-    );
+    expect(
+      screen.getByTestId("url-input-field-instantiatesCanonical")
+    ).toHaveValue(canonicalUri);
   });
 
   test("Should render Instant component by instant", () => {
