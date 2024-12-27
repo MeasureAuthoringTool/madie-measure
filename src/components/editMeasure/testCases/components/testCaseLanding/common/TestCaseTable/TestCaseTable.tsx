@@ -1,21 +1,19 @@
-import React, { useState, useEffect, useMemo, HTMLProps } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import tw from "twin.macro";
-import "styled-components/macro";
-import { Measure, TestCase } from "@madie/madie-models";
 import {
   useReactTable,
   ColumnDef,
   getCoreRowModel,
-  flexRender,
   getSortedRowModel,
-  SortingState,
+  flexRender,
 } from "@tanstack/react-table";
-import * as _ from "lodash";
+import "styled-components/macro";
+import { TestCase } from "@madie/madie-models";
 import { TestCaseStatus, TestCaseActionButton } from "./TestCaseTableHelpers";
-import TruncateText from "../TruncateText";
 import {
   MadieDeleteDialog,
   Toast,
+  TruncateText,
 } from "@madie/madie-design-system/dist/react";
 import "../TestCase.scss";
 import TestCaseTablePopover from "./TestCaseTablePopover";
@@ -24,6 +22,7 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import ShiftDatesDialog from "../shiftDates/ShiftDatesDialog";
 import { useFeatureFlags } from "@madie/madie-util";
+import _ from "lodash";
 
 interface TestCaseTableProps {
   testCases: TestCase[];
@@ -31,11 +30,12 @@ interface TestCaseTableProps {
   deleteTestCase: Function;
   exportTestCase: Function;
   onCloneTestCase?: (testCase: TestCase) => void;
-  measure: Measure;
+  measure: any;
   onTestCaseShiftDates?: (testCase: TestCase, shifted: number) => void;
   handleQiCloneTestCase?: (testCase: TestCase) => void;
   sorting: any;
   setSorting: any;
+  setSelectedTestCases: any;
 }
 
 export const convertDate = (date: string) => {
@@ -47,6 +47,18 @@ export const convertDate = (date: string) => {
   const month = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
   const day = String(dateObj.getUTCDate()).padStart(2, "0");
   return `${month}/${day}/${year}`;
+};
+
+const IndeterminateCheckbox = ({ indeterminate, checked, ...rest }: any) => {
+  const ref = React.useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.indeterminate = indeterminate;
+    }
+  }, [indeterminate]);
+
+  return <input type="checkbox" ref={ref} checked={checked} {...rest} />;
 };
 
 const TestCaseTable = (props: TestCaseTableProps) => {
@@ -61,6 +73,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     handleQiCloneTestCase,
     sorting,
     setSorting,
+    setSelectedTestCases,
   } = props;
   const viewOrEdit = canEdit ? "edit" : "view";
   const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
@@ -70,11 +83,10 @@ const TestCaseTable = (props: TestCaseTableProps) => {
   const [toastType, setToastType] = useState<string>("danger");
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
   const onToastClose = () => {
-    setToastType("danger");
     setToastMessage("");
     setToastOpen(false);
   };
-  // Popover utilities
+
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedTestCase, setSelectedTestCase] = useState<TestCase>(null);
@@ -90,13 +102,16 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     setAnchorEl(event.currentTarget);
     setOptionsOpen(true);
   };
+
   const handleClose = () => {
     setOptionsOpen(false);
     setSelectedTestCase(null);
     setAnchorEl(null);
     setShiftDatesDialogOpen(false);
   };
+
   const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
+
   const transFormData = (testCases: TestCase[]): TCRow[] => {
     return testCases.map((tc: TestCase) => ({
       id: tc.id,
@@ -110,34 +125,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     }));
   };
 
-  function IndeterminateCheckbox({
-    indeterminate,
-    className = "",
-    onChange,
-    id,
-    ...rest
-  }: {
-    indeterminate?: boolean;
-  } & HTMLProps<HTMLInputElement>) {
-    const ref = React.useRef<HTMLInputElement>(null!);
-
-    React.useEffect(() => {
-      if (typeof indeterminate === "boolean") {
-        ref.current.indeterminate = !rest.checked && indeterminate;
-      }
-    }, [ref, indeterminate]);
-
-    return (
-      <input
-        type="checkbox"
-        ref={ref}
-        className={className + " cursor-pointer"}
-        onChange={onChange}
-        {...rest}
-      />
-    );
-  }
-
   type TCRow = {
     status: any;
     group: string;
@@ -150,41 +137,35 @@ const TestCaseTable = (props: TestCaseTableProps) => {
   };
 
   const [data, setData] = useState<TCRow[]>([]);
+
   useEffect(() => {
     if (testCases) {
       setData(transFormData(testCases));
     }
   }, [testCases]);
+
   const columns = useMemo<ColumnDef<TCRow>[]>(() => {
     const columnDefs = [];
-
-    if (featureFlags?.TestCaseListButtons) {
+    if (featureFlags.TestCaseListActionCenter) {
       columnDefs.push({
         id: "select",
         header: ({ table }) => (
           <IndeterminateCheckbox
-            {...{
-              checked: table.getIsAllRowsSelected(),
-              indeterminate: table.getIsSomePageRowsSelected(),
-              onChange: table.getToggleAllPageRowsSelectedHandler(),
-            }}
+            checked={table.getIsAllRowsSelected()}
+            indeterminate={table.getIsSomePageRowsSelected()}
+            onChange={table.getToggleAllPageRowsSelectedHandler()}
           />
         ),
-        cell: ({ row }) => {
-          return (
-            <div className="px-1">
-              <IndeterminateCheckbox
-                {...{
-                  checked: row.getIsSelected(), //props.selectedIds[row.original.id],
-                  disabled: !row.getCanSelect(),
-                  indeterminate: row.getIsSomeSelected(),
-                  onChange: row.getToggleSelectedHandler(),
-                  id: row.original.id,
-                }}
-              />
-            </div>
-          );
-        },
+        cell: ({ row }) => (
+          <div className="px-1">
+            <IndeterminateCheckbox
+              checked={row.getIsSelected()}
+              disabled={!row.getCanSelect()}
+              indeterminate={row.getIsSomeSelected()}
+              onChange={row.getToggleSelectedHandler()}
+            />
+          </div>
+        ),
       });
     }
 
@@ -192,9 +173,8 @@ const TestCaseTable = (props: TestCaseTableProps) => {
       header: "Case #",
       cell: (info) => (
         <TruncateText
-          text={info.row.original.caseNumber}
+          text={_.toString(info.row.original.caseNumber)}
           maxLength={60}
-          name="caseNumber"
           dataTestId={`test-case-caseNumber-${info.row.original.id}`}
         />
       ),
@@ -218,7 +198,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           <TruncateText
             text={info.row.original.group}
             maxLength={120}
-            name="series"
             dataTestId={`test-case-series-${info.row.original.id}`}
           />
         ),
@@ -230,7 +209,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           <TruncateText
             text={info.row.original.title}
             maxLength={60}
-            name="title"
             dataTestId={`test-case-title-${info.row.original.id}`}
           />
         ),
@@ -242,7 +220,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           <TruncateText
             text={info.row.original.description}
             maxLength={120}
-            name="description"
             dataTestId={`test-case-description-${info.row.original.id}`}
           />
         ),
@@ -254,7 +231,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           <TruncateText
             text={convertDate(info.row.original.lastSaved)}
             maxLength={23}
-            name="lastSaved"
             dataTestId={`test-case-lastSaved-${
               info.row.original.lastSaved ? info.row.original.lastSaved : ""
             }`}
@@ -274,15 +250,15 @@ const TestCaseTable = (props: TestCaseTableProps) => {
         enableSorting: false,
       },
     ];
-  }, []);
+  }, [testCases]);
 
   const table = useReactTable({
     data,
     columns,
     defaultColumn: {
-      size: 200, //starting column size
-      minSize: 50, //enforced during column resizing
-      maxSize: 500, //enforced during column resizing
+      size: 200,
+      minSize: 50,
+      maxSize: 500,
     },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -292,6 +268,15 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     },
     manualSorting: true,
   });
+  useEffect(() => {
+    const selectedRowIds = table
+      .getSelectedRowModel()
+      .rows.map((row) => row.original?.id);
+    const selectedTestCases = testCases.filter((testCase) =>
+      selectedRowIds.includes(testCase.id)
+    );
+    setSelectedTestCases(selectedTestCases);
+  }, [testCases, table.getSelectedRowModel().rows]);
 
   return (
     <div style={{ overflow: "hidden" }}>
@@ -358,7 +343,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
             </tr>
           ))}
         </thead>
-        {/* <tbody className="table-body"> */}
         <tbody className="table-body" style={{ padding: 20 }}>
           {table.getRowModel().rows.map((row) => (
             <tr
@@ -392,8 +376,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           onTestCaseShiftDates={onTestCaseShiftDates}
           handleQiCloneTestCase={handleQiCloneTestCase}
         />
-
-        {/* This sees to have gotten disconnected at some point in the past. */}
         <Toast
           toastKey="test-case-action-toast"
           aria-live="polite"
@@ -407,7 +389,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           onClose={onToastClose}
           autoHideDuration={6000}
         />
-
         <MadieDeleteDialog
           open={deleteDialogModalOpen}
           onContinue={() => {

@@ -49,6 +49,7 @@ import { ScanValidationDto } from "../../../api/models/ScanValidationDto";
 import JSZip from "jszip";
 import TestCaseLandingWrapper from "../common/TestCaseLandingWrapper";
 import TestCaseLanding from "../qiCore/TestCaseLanding";
+// @ts-ignore
 import dotMadieFile from "./testDataImport/dotMadie.json";
 
 const createZipFile = async (
@@ -78,7 +79,7 @@ const createZipFile = async (
   }
 };
 
-const serviceConfig: ServiceConfig = {
+const serviceConfig = {
   elmTranslationService: { baseUrl: "base.url" },
   excelExportService: {
     baseUrl: "excelexport.com",
@@ -92,7 +93,7 @@ const serviceConfig: ServiceConfig = {
   terminologyService: {
     baseUrl: "http.com",
   },
-};
+} as unknown as ServiceConfig;
 
 const MEASURE_CREATEDBY = "testuser";
 // Mock data for Measure retrieved from MeasureService
@@ -682,6 +683,38 @@ describe("TestCaseList component", () => {
       ).toBeInTheDocument();
     });
   }, 15000);
+  it("should render list of test cases with checkboxes if flag is true", async () => {
+    (useFeatureFlags as jest.Mock).mockReturnValue({
+      TestCaseListActionCenter: true,
+    });
+    renderTestCaseListComponent();
+    await waitFor(() => {
+      const table = screen.getByTestId("test-case-tbl");
+
+      const tableHeaders = table.querySelectorAll("thead th");
+
+      expect(tableHeaders[2]).toHaveTextContent("Status");
+      expect(tableHeaders[3]).toHaveTextContent("Group");
+      expect(tableHeaders[4]).toHaveTextContent("Title");
+      expect(tableHeaders[5]).toHaveTextContent("Description");
+      expect(tableHeaders[6]).toHaveTextContent("Last Saved");
+      expect(tableHeaders[7]).toHaveTextContent("Action");
+
+      const tableRows = table.querySelectorAll("tbody tr");
+
+      expect(tableRows[0]).toHaveTextContent(testCases[2].title);
+      expect(tableRows[0]).toHaveTextContent(testCases[2].series);
+      expect(
+        screen.getByTestId(`select-action-${testCases[0].id}`)
+      ).toBeInTheDocument();
+
+      expect(tableRows[1]).toHaveTextContent(testCases[1].title);
+      expect(tableRows[1]).toHaveTextContent(testCases[1].series);
+      expect(
+        screen.getByTestId(`select-action-${testCases[1].id}`)
+      ).toBeInTheDocument();
+    });
+  }, 15000);
 
   it("should not display error message when fetch test cases fails", async () => {
     const error = {
@@ -981,32 +1014,20 @@ describe("TestCaseList component", () => {
     );
 
     const seriesButton = await screen.findByTestId(
-      `test-case-series-${testCases[0].id}-button`
+      `test-case-series-${testCases[0].id}-toggle-button`
     );
     expect(seriesButton).toBeInTheDocument();
-    fireEvent.mouseOver(seriesButton);
-    expect(
-      await screen.findByRole("button", {
-        name: testCases[0].series,
-        hidden: true,
-      })
-    ).toBeVisible();
+    expect(seriesButton).toHaveTextContent("Show more");
+    userEvent.click(seriesButton);
+    expect(seriesButton).toHaveTextContent("Show less");
 
     const titleButton = screen.getByTestId(
-      `test-case-title-${testCases[0].id}-button`
+      `test-case-title-${testCases[0].id}-toggle-button`
     );
     expect(titleButton).toBeInTheDocument();
-    fireEvent.mouseOver(titleButton);
-    expect(
-      await screen.findByRole(
-        "button",
-        {
-          name: testCases[0].title,
-          hidden: true,
-        },
-        { timeout: 3000 }
-      )
-    ).toBeVisible();
+    expect(titleButton).toHaveTextContent("Show more");
+    userEvent.click(titleButton);
+    expect(titleButton).toHaveTextContent("Show less");
     await waitFor(() =>
       expect(screen.getByText(testCases[0].title)).toBeInTheDocument()
     );

@@ -2689,7 +2689,7 @@ describe("TestCaseList component", () => {
     expect(tableHeaders[2]).toHaveTextContent("Group");
     expect(tableHeaders[3]).toHaveTextContent("Title");
     expect(tableHeaders[4]).toHaveTextContent("Description");
-
+    //AAAAAAA
     const tableRows = table.querySelectorAll("tbody tr");
     expect(tableRows[0]).toHaveTextContent(testCases[0].title.substring(0, 59));
     expect(tableRows[0]).toHaveTextContent(
@@ -2697,32 +2697,81 @@ describe("TestCaseList component", () => {
     );
 
     const seriesButton = await screen.findByTestId(
-      `test-case-series-${testCases[0].id}-button`
+      `test-case-series-${testCases[0].id}-toggle-button`
     );
     expect(seriesButton).toBeInTheDocument();
-    fireEvent.mouseOver(seriesButton);
-    expect(
-      await screen.findByRole("button", {
-        name: testCases[0].series,
-        hidden: true,
-      })
-    ).toBeVisible();
+    expect(seriesButton).toHaveTextContent("Show more");
+    userEvent.click(seriesButton);
+    expect(seriesButton).toHaveTextContent("Show less");
 
     const titleButton = screen.getByTestId(
-      `test-case-title-${testCases[0].id}-button`
+      `test-case-title-${testCases[0].id}-toggle-button`
     );
     expect(titleButton).toBeInTheDocument();
-    fireEvent.mouseOver(titleButton);
-    expect(
-      await screen.findByRole(
-        "button",
-        {
-          name: testCases[0].title,
-          hidden: true,
-        },
-        { timeout: 3000 }
-      )
-    ).toBeVisible();
+    expect(titleButton).toHaveTextContent("Show more");
+    userEvent.click(titleButton);
+    expect(titleButton).toHaveTextContent("Show less");
+    await waitFor(() =>
+      expect(screen.getByText(testCases[0].title)).toBeInTheDocument()
+    );
+  });
+  it("should render list of test cases and truncate title and series with checkboxes if flag is true", async () => {
+    (useFeatureFlags as jest.Mock).mockReturnValue({
+      TestCaseListActionCenter: true,
+    });
+    const testCases = [
+      {
+        id: "9010",
+        description: "Test IPP",
+        title:
+          "1bcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxy",
+        series:
+          "2bcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxy",
+        lastModifiedAt: "2024-09-10T10:57:14.382Z",
+      },
+    ];
+
+    const useTestCaseServiceMockResolved = {
+      getTestCasesByMeasureId: jest.fn().mockResolvedValue(testCases),
+      getTestCaseSeriesForMeasure: jest
+        .fn()
+        .mockResolvedValue(["Series 1", "Series 2"]),
+    } as unknown as TestCaseServiceApi;
+
+    useTestCaseServiceMock.mockImplementation(() => {
+      return useTestCaseServiceMockResolved;
+    });
+
+    renderTestCaseListComponent();
+
+    const table = await screen.findByTestId("test-case-tbl");
+    const tableHeaders = table.querySelectorAll("thead th");
+
+    expect(tableHeaders[2]).toHaveTextContent("Status");
+    expect(tableHeaders[3]).toHaveTextContent("Group");
+    expect(tableHeaders[4]).toHaveTextContent("Title");
+    expect(tableHeaders[5]).toHaveTextContent("Description");
+    const tableRows = table.querySelectorAll("tbody tr");
+    expect(tableRows[0]).toHaveTextContent(testCases[0].title.substring(0, 59));
+    expect(tableRows[0]).toHaveTextContent(
+      testCases[0].series.substring(0, 59)
+    );
+
+    const seriesButton = await screen.findByTestId(
+      `test-case-series-${testCases[0].id}-toggle-button`
+    );
+    expect(seriesButton).toBeInTheDocument();
+    expect(seriesButton).toHaveTextContent("Show more");
+    userEvent.click(seriesButton);
+    expect(seriesButton).toHaveTextContent("Show less");
+
+    const titleButton = screen.getByTestId(
+      `test-case-title-${testCases[0].id}-toggle-button`
+    );
+    expect(titleButton).toBeInTheDocument();
+    expect(titleButton).toHaveTextContent("Show more");
+    userEvent.click(titleButton);
+    expect(titleButton).toHaveTextContent("Show less");
     await waitFor(() =>
       expect(screen.getByText(testCases[0].title)).toBeInTheDocument()
     );
