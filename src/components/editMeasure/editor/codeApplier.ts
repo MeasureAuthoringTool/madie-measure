@@ -90,7 +90,6 @@ const applyCode = (
 
   // Parse CQL to get code and code systems
   const parseResults: CqlResult = new CqlAntlr(cql).parse();
-  debugger
   // Let's check if the code system is already in the CQL
   const previousCodeSystem = findCodeSystem(
     code,
