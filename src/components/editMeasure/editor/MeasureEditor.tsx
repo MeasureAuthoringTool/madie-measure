@@ -511,7 +511,7 @@ const MeasureEditor = () => {
   };
 
   const handleApplyCode = (code: Code) => {
-    const result = applyCode(editorVal, code);
+    const result = applyCode(editorVal, code, measure.model);
     if (result.status) {
       // if result status is true, we modified the CQL
       // let's store off the codeSystem/code/version
