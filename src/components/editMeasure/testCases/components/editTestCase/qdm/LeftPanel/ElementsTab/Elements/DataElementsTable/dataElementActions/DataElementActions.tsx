@@ -1,8 +1,10 @@
 import React from "react";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import "../DataElementsTable.scss";
 import { Button } from "@madie/madie-design-system/dist/react";
-import DataElementsTablePopover from "./DataElementsTablePopover";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import MadieSpeedDial from "./MadieSpeedDial";
+import CloneIcon from "../../../../../../../../../../common/CloneIcon";
+import EditIcon from "../../../../../../../../../../common/EditIcon";
 
 type DataElementActionsProps = {
   elementId: string;
@@ -15,86 +17,49 @@ type DataElementActionsProps = {
 
 export default function DataElementActions(props: DataElementActionsProps) {
   const { elementId, canView, onDelete, onView, canEdit, onClone } = props;
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-
-  const handleViewButtonClick = (event: React.MouseEvent<HTMLElement>) => {
-    if (canEdit) {
-      event.preventDefault();
-      setAnchorEl(event.currentTarget);
-    } else {
-      onView();
-    }
-  };
-
-  const handlePopOverClose = () => {
-    setAnchorEl(null);
-  };
-
-  const deleteDataElement = () => {
-    handlePopOverClose();
-    onDelete(elementId);
-  };
-
-  const additionalActions = canEdit
-    ? [
-        {
-          label: "Clone",
-          toImplementFunction: () => {
-            handlePopOverClose();
-            onClone();
-          },
-          dataTestId: `clone-element-${elementId}`,
-        },
-        {
-          label: "Delete",
-          toImplementFunction: deleteDataElement,
-          dataTestId: `delete-element-${elementId}`,
-        },
-      ]
-    : [];
 
   return (
     <div>
       {canEdit ? (
-        <Button
-          id={`view-element-btn-${elementId}`}
-          data-testid={`view-element-btn-${elementId}`}
-          className="view-with-dropdown-button"
-          aria-controls={open ? `view-element-menu-${elementId}` : undefined}
-          aria-haspopup="true"
-          aria-expanded={open ? "true" : undefined}
-          onClick={handleViewButtonClick}
-        >
-          <div>View</div>
-          <ExpandMoreIcon />
-        </Button>
+        <MadieSpeedDial
+          dataTestId={`action-center-${elementId}`}
+          actions={[
+            {
+              icon: <EditIcon color="#0073C8" />,
+              name: "Edit element",
+              onClick: onView,
+              dataTestId: `edit-element-${elementId}`,
+            },
+            {
+              icon: <DeleteOutlinedIcon sx={{ color: "#D92F2F" }} />,
+              name: "Delete element",
+              onClick: () => {
+                onDelete(elementId);
+              },
+              dataTestId: `delete-element-${elementId}`,
+            },
+            {
+              icon: <CloneIcon color="#0073C8" />,
+              name: "Clone element",
+              onClick: () => {
+                onClone(elementId);
+              },
+              dataTestId: `clone-element-${elementId}`,
+            },
+          ]}
+        />
       ) : (
+        // Case where user can only View.
         <Button
           id={`view-element-btn-${elementId}`}
           data-testid={`view-element-btn-${elementId}`}
-          onClick={handleViewButtonClick}
+          onClick={onView}
           loading={!canView} //disabled state
           variant="primary"
         >
           View
         </Button>
       )}
-      <DataElementsTablePopover
-        id={`view-element-menu-${elementId}`}
-        anchorEl={anchorEl}
-        optionsOpen={open}
-        handleClose={handlePopOverClose}
-        canEdit={true}
-        editSelectOptionProps={{
-          label: "Edit",
-          toImplementFunction: () => {
-            return onView();
-          },
-          dataTestId: `edit-element-${elementId}`,
-        }}
-        additionalSelectOptionProps={additionalActions}
-      />
     </div>
   );
 }
