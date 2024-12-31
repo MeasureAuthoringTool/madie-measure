@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import DataElementActions from "./DataElementActions";
 import userEvent from "@testing-library/user-event";
 
@@ -42,11 +42,17 @@ describe("DatElementActions", () => {
       />
     );
 
-    const viewButton = screen.getByRole("button", { name: "View" });
+    const viewButton = screen.getByRole("button", {
+      name: `action-center-exampleId`,
+    });
     expect(viewButton).toBeInTheDocument();
     userEvent.click(viewButton);
-    const popOver = await screen.findByTestId("popover-content");
-    const editButton = within(popOver).getByRole("button", { name: "Edit" });
+
+    await waitFor(() => {
+      expect(screen.getByTestId(`action-center-exampleId`)).toBeInTheDocument();
+    });
+
+    const editButton = screen.getByTestId("edit-element-exampleId");
     userEvent.click(editButton);
     expect(mockOnView).toHaveBeenCalledTimes(1);
   });
@@ -63,13 +69,18 @@ describe("DatElementActions", () => {
       />
     );
 
-    const viewButton = screen.getByRole("button", { name: "View" });
+    const viewButton = screen.getByRole("button", {
+      name: `action-center-exampleId`,
+    });
     expect(viewButton).toBeInTheDocument();
     userEvent.click(viewButton);
-    const popOver = await screen.findByTestId("popover-content");
-    const cloneButton = within(popOver).getByRole("button", {
-      name: "Clone",
+
+    await waitFor(() => {
+      expect(screen.getByTestId(`action-center-exampleId`)).toBeInTheDocument();
     });
+
+    const cloneButton = screen.getByTestId("clone-element-exampleId");
+
     userEvent.click(cloneButton);
     expect(mockOnClone).toHaveBeenCalledTimes(1);
   });
@@ -86,13 +97,18 @@ describe("DatElementActions", () => {
       />
     );
 
-    const viewButton = screen.getByRole("button", { name: "View" });
+    const viewButton = screen.getByRole("button", {
+      name: `action-center-exampleId`,
+    });
     expect(viewButton).toBeInTheDocument();
     userEvent.click(viewButton);
-    const popOver = await screen.findByTestId("popover-content");
-    const deleteButton = within(popOver).getByRole("button", {
-      name: "Delete",
+
+    await waitFor(() => {
+      expect(screen.getByTestId(`action-center-exampleId`)).toBeInTheDocument();
     });
+
+    const deleteButton = screen.getByTestId("delete-element-exampleId");
+
     userEvent.click(deleteButton);
     expect(mockOnDelete).toHaveBeenCalledTimes(1);
   });
