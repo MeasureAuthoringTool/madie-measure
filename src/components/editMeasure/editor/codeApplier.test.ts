@@ -244,5 +244,22 @@ describe("applyCode test cases", () => {
         "Code 24353-5 has been updated successfully."
       );
     });
+
+    it("Should update code for QICore measure CQL if version is included", () => {
+      const cql =
+        "library MAT6197UCUMAnnotations version '0.0.000'\n" +
+        "using QICore version '4.1.1'\n" +
+        "codesystem \"LOINC\": 'http://loinc.org'\n" +
+        "code \"Glucose tolerance 2 hours gestational panel - Urine and Serum or Plasma\": '24353-5' from \"LOINC\" display 'Glucose tolerance 2 hours gestational panel - Urine and Serum or Plasma'";
+
+      let result: CqlApplyActionResult = applyCode(
+        cql,
+        { ...code, versionIncluded: true },
+        Model.QICORE_6_0_0
+      );
+      expect(result.message).toEqual(
+        "Code 24353-5 has been updated successfully."
+      );
+    });
   });
 });
