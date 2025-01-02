@@ -118,9 +118,6 @@ const EditTestCase = () => {
       series: currentTestCase?.series || "",
       json: currentTestCase?.json || "",
       groupPopulations: currentTestCase?.groupPopulations || [],
-      birthDate: qdmPatient?.birthDatetime
-        ? dayjs(qdmPatient?.birthDatetime)
-        : null,
     },
     enableReinitialize: true,
     validationSchema: QDMPatientSchemaValidator,
@@ -174,10 +171,6 @@ const EditTestCase = () => {
       const patient: QDMPatient = JSON.parse(formik.values.json);
       if (patient) {
         setQdmPatient(patient);
-        formik.setFieldValue(
-          "birthDate",
-          patient?.birthDatetime ? dayjs(patient?.birthDatetime) : null
-        );
       }
     }
 
