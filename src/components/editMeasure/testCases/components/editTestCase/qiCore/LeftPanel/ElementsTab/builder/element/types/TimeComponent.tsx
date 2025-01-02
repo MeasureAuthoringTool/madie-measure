@@ -28,12 +28,10 @@ const TimeComponent = ({
       views={["hours", "minutes", "seconds"]}
       data-testid={`time-field-${label}`}
       handleTimeChange={(time) => {
-        if (time) {
-          const formatted = time.format(TIME_FORMAT);
+        const formatted = time.format(TIME_FORMAT);
 
-          setTime(time);
-          onChange(formatted);
-        }
+        setTime(time);
+        onChange(formatted);
       }}
       value={time}
     />
