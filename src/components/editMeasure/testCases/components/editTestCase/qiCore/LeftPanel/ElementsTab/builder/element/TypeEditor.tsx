@@ -12,6 +12,7 @@ import DateComponent from "./types/DateComponent";
 import IntegerComponent, { IntegerType } from "./types/IntegerComponent";
 import CodesComponent from "./types/CodesComponent";
 import { Instant } from "@madie/madie-design-system/dist/react";
+import TimeComponent from "./types/TimeComponent";
 
 const TypeEditor = ({
   type,
@@ -66,6 +67,18 @@ const TypeEditor = ({
             structureDefinition={structureDefinition}
             fieldRequired={required}
             label={``}
+            onChange={onChange}
+            value={value}
+          />
+        );
+      case "time":
+      case "http://hl7.org/fhir/R4/datatypes.html#time":
+        return (
+          <TimeComponent
+            canEdit={canEdit}
+            structureDefinition={null}
+            fieldRequired={false}
+            label={label}
             onChange={onChange}
             value={value}
           />

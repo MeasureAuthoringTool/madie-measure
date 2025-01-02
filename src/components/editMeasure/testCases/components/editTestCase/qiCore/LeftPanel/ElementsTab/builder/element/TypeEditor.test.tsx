@@ -236,6 +236,23 @@ describe("TypeEditor Component", () => {
     expect(inputField.value).toBe("09/26/2024");
   });
 
+  test("Should render Time component", () => {
+    const handleChange = jest.fn();
+    render(
+      <TypeEditor
+        type={`http://hl7.org/fhir/R4/datatypes.html#time`}
+        required={false}
+        value={`01:23:45`}
+        onChange={handleChange}
+        structureDefinition={null}
+      />
+    );
+
+    const inputTime = screen.getByPlaceholderText("hh:mm:ss aa");
+    expect(inputTime).toBeInTheDocument();
+    expect(inputTime.value).toBe("01:23:45 AM");
+  });
+
   test("Should render PositiveInt component", () => {
     const handleChange = jest.fn();
     render(
