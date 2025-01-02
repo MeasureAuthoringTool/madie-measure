@@ -2,11 +2,7 @@ import React, { useEffect, useState } from "react";
 import ElementSection from "../../../../../common/ElementSection";
 import { Select } from "@madie/madie-design-system/dist/react";
 import FormControl from "@mui/material/FormControl";
-import {
-  DataElement,
-  QDMPatient,
-  PatientCharacteristicExpired,
-} from "cqm-models";
+import { DataElement, QDMPatient } from "cqm-models";
 import DateTimeInput from "../../../../../common/dateTimeInput/DateTimeInput";
 import dayjs from "dayjs";
 import "./DemographicsSection.scss";
@@ -45,8 +41,6 @@ const DemographicsSection = ({ canEdit }) => {
   const { state, dispatch } = useQdmPatient();
   const { patient } = state;
   // this will be local
-  const [birthDateDataElement, setBirthDateDataElement] =
-    useState<DataElement>();
   const [raceDataElement, setRaceDataElement] = useState<DataElement>();
   const [genderDataElement, setGenderDataElement] = useState<DataElement>();
   const [ethnicityDataElement, setEthnicityDataElement] =
