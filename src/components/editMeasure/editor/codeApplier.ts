@@ -1,8 +1,8 @@
 import { CqlAntlr, CqlResult } from "@madie/cql-antlr-parser/dist/src";
-import { Code } from "@madie/madie-models";
+import { Code, Model } from "@madie/madie-models";
 import { CqlApplyActionResult } from "./CqlApplyActionResult";
 
-const findCodeSystem = (code, codeSystems) => {
+const findCodeSystem = (code, codeSystems, measureModel) => {
   if (!code || !codeSystems) {
     return undefined;
   }
@@ -14,17 +14,21 @@ const findCodeSystem = (code, codeSystems) => {
     const oldCodeSystemVersion = codeSystem.version
       ?.replace(/["']/g, "")
       ?.replace(/urn:hl7:version:/g, "");
-
+    let updatedOid = code.codeSystemUrl;
+    let updatedVersion = code.fhirVersion;
+    if (measureModel === Model.QDM_5_6) {
+      updatedOid = code.codeSystemOid;
+      updatedVersion = code.svsVersion;
+    }
     if (code.versionIncluded) {
       return (
         oldCodeSystemName === `${code.codeSystem}:${code.svsVersion}` &&
-        oldCodeSystemOid === code.codeSystemOid &&
-        oldCodeSystemVersion === code.svsVersion
+        oldCodeSystemOid === updatedOid &&
+        oldCodeSystemVersion === updatedVersion
       );
     } else {
       return (
-        oldCodeSystemName === code.codeSystem &&
-        oldCodeSystemOid === code.codeSystemOid
+        oldCodeSystemName === code.codeSystem && oldCodeSystemOid === updatedOid
       );
     }
   });
@@ -57,25 +61,44 @@ const createCodeDeclaration = (code: Code) => {
   return newCode;
 };
 
-const createCodeSystemDeclaration = (code: Code) => {
-  if (code.versionIncluded) {
-    return `codesystem "${code.codeSystem}:${code.svsVersion}": 'urn:oid:${code.codeSystemOid}' version 'urn:hl7:version:${code.svsVersion}'`;
+const createCodeSystemDeclaration = (code: Code, measureModel: Model) => {
+  let oid: string;
+  let codeSystemVersion: string;
+  let versionSuffix: string;
+  if (measureModel === Model.QDM_5_6) {
+    versionSuffix = code.svsVersion;
+    oid = `urn:oid:${code.codeSystemOid}`;
+    codeSystemVersion = `urn:hl7:version:${code.svsVersion}`;
   } else {
-    return `codesystem "${code.codeSystem}": 'urn:oid:${code.codeSystemOid}'`;
+    versionSuffix = code.svsVersion; // TODO: confirm this
+    oid = code.codeSystemUrl;
+    codeSystemVersion = code.fhirVersion;
+  }
+  if (code.versionIncluded) {
+    return `codesystem "${code.codeSystem}:${versionSuffix}": '${oid}' version '${codeSystemVersion}'`;
+  } else {
+    return `codesystem "${code.codeSystem}": '${oid}'`;
   }
 };
 
-const applyCode = (cql: string, code: Code): CqlApplyActionResult => {
+const applyCode = (
+  cql: string,
+  code: Code,
+  measureModel?: Model
+): CqlApplyActionResult => {
   const cqlArr: string[] = cql.split("\n");
 
   // Parse CQL to get code and code systems
   const parseResults: CqlResult = new CqlAntlr(cql).parse();
-
   // Let's check if the code system is already in the CQL
-  const previousCodeSystem = findCodeSystem(code, parseResults.codeSystems);
+  const previousCodeSystem = findCodeSystem(
+    code,
+    parseResults.codeSystems,
+    measureModel
+  );
   // Add code system to CQL if it does not exist
   if (!previousCodeSystem) {
-    let newCodeSystem = createCodeSystemDeclaration(code);
+    let newCodeSystem = createCodeSystemDeclaration(code, measureModel);
     cqlArr.splice(findCodeSystemInsertPoint(parseResults), 0, newCodeSystem);
   }
 
