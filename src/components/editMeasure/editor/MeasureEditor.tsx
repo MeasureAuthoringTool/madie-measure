@@ -272,8 +272,8 @@ const MeasureEditor = () => {
     const definitions = new CqlAntlr(newMeasure.cql).parse();
     if (definitions?.codes && cqlMetaData) {
       const parsedCodes = definitions?.codes.map((code) => ({
-        codeId: code?.codeId.replace(/['"]/g, ""),
-        codeSystem: code?.codeSystem.replace(/['"]/g, ""),
+        codeId: code?.codeId?.replace(/['"]/g, ""),
+        codeSystem: code?.codeSystem?.replace(/['"]/g, ""),
       }));
 
       return Object.fromEntries(
