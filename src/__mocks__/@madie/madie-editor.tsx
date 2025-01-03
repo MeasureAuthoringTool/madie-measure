@@ -35,6 +35,7 @@ export function MadieTerminologyEditor({
   handleParameterEdit,
   handleParameterDelete,
   handleFunctionDelete,
+  handleFunctionEdit,
 }) {
   const code = {
     codeSystem: "RXNORM",
@@ -70,6 +71,13 @@ export function MadieTerminologyEditor({
 
   const functionToDelete = {
     functionName: "MeasureObservation",
+    fluentFunction: false,
+    expressionValue: "define function MeasureObservation(e Encounter):\n  2",
+    expression: "define function MeasureObservation(e Encounter):\n  2",
+  };
+
+  const functionToEdit = {
+    functionName: "MeasureObservation1",
     fluentFunction: false,
     expressionValue: "define function MeasureObservation(e Encounter):\n  2",
     expression: "define function MeasureObservation(e Encounter):\n  2",
@@ -131,6 +139,17 @@ export function MadieTerminologyEditor({
         onClick={() => handleFunctionDelete(functionToDelete)}
       >
         Delete Function
+      </button>
+      <button
+        data-testid="edit-function"
+        onClick={() =>
+          handleFunctionEdit(
+            functionToEdit,
+            "define function MeasureObservation1(encounter Encounter):\n  2"
+          )
+        }
+      >
+        Edit Function
       </button>
     </>
   );

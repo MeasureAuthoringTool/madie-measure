@@ -252,4 +252,46 @@ export const deleteCQLFunction = (
   } as unknown as CqlApplyActionResult;
 };
 
+export const editCQLFunction = (
+  cql: string,
+  oldFunction: CQLFunction,
+  newFunction: string
+): CqlApplyActionResult => {
+  const cqlArr: string[] = cql.split("\n");
+  const parseResults: CqlResult = new CqlAntlr(cql).parse();
+
+  const functionDefinitions = parseResults?.expressionDefinitions.filter(
+    (exp) => {
+      return (
+        exp?.name.toLowerCase() === "fluent" ||
+        exp?.name.toLowerCase() === "function"
+      );
+    }
+  );
+
+  const existingFunction = functionDefinitions?.find((funct) => {
+    return funct.text === oldFunction.expression;
+  });
+
+  let status = "";
+  let message: string = "";
+  if (existingFunction) {
+    cqlArr.splice(
+      existingFunction.start.line - 1,
+      existingFunction.stop.line - existingFunction.start.line + 1,
+      newFunction
+    );
+    status = "success";
+    message = `Function ${oldFunction.functionName} has been successfully updated in the CQL.`;
+  } else {
+    message = `Function ${oldFunction.functionName} has not been defined in CQL.`;
+    status = "info";
+  }
+  return {
+    cql: cqlArr.join("\n"),
+    status: status,
+    message: message,
+  } as unknown as CqlApplyActionResult;
+};
+
 export default applyCQLFunction;
