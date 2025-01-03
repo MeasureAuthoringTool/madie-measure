@@ -693,6 +693,7 @@ const MeasureEditor = () => {
     setRefValueSetDetails(vs);
     const result = applyValueset(
       editorVal,
+      measure.model,
       vs,
       prevSelectedValueSetDetails?.current
     ); // should have updated editorVal but doesn't
