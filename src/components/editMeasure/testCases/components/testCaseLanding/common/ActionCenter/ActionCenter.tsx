@@ -14,18 +14,20 @@ import queryString from "query-string";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useFeatureFlags } from "@madie/madie-util";
 import { blue, grey, red } from "@mui/material/colors";
+import { TestCase } from "@madie/madie-models";
 
 interface ActionCenterProps {
   onSubmit?: any;
   selectedTestCases: any;
   canEdit: boolean;
   isQDM: boolean;
+  onCloneTestCase?: (testCase: TestCase) => void;
 }
 
 const filterByOptions = ["Case #", "Status", "Group", "Title", "Description"];
 
 export default function ActionCenter(props: ActionCenterProps) {
-  const { selectedTestCases, canEdit, isQDM } = props;
+  const { selectedTestCases, canEdit, isQDM, onCloneTestCase } = props;
   const [disableDeleteBtn, setDisableDeleteBtn] = useState<boolean>(true);
   const [disableCloneBtn, setDisableCloneBtn] = useState<boolean>(true);
   const [disableExportBtn, setDisableExportBtn] = useState<boolean>(true);
@@ -252,7 +254,9 @@ export default function ActionCenter(props: ActionCenterProps) {
                 >
                   <span>
                     <IconButton
-                      onClick={() => {}}
+                      onClick={(e) => {
+                        onCloneTestCase(selectedTestCases?.[0]);
+                      }}
                       disabled={disableCloneBtn}
                       data-testid="clone-action-btn"
                     >
