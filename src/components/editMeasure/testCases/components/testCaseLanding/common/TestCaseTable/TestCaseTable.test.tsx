@@ -100,7 +100,7 @@ const renderWithTestCase = (
   setSorting = undefined,
   selectedTestCases,
   deleteDialogModalOpen = false,
-  setDeleteDialogModalOpen= jest.fn()
+  setDeleteDialogModalOpen = jest.fn()
 ) => {
   return render(
     <MemoryRouter>
@@ -117,7 +117,6 @@ const renderWithTestCase = (
         selectedTestCases={selectedTestCases}
         deleteDialogModalOpen={deleteDialogModalOpen}
         setDeleteDialogModalOpen={setDeleteDialogModalOpen}
-
       />
     </MemoryRouter>
   );
@@ -324,9 +323,9 @@ describe("TestCase component", () => {
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
     const setSelectedTestCasesMock = jest.fn();
-  
+
     let deleteDialogModalOpen = false;
-  
+
     const { rerender } = renderWithTestCase(
       testCases,
       true,
@@ -342,19 +341,19 @@ describe("TestCase component", () => {
         deleteDialogModalOpen = value;
       }
     );
-  
+
     const selectButton = await screen.findByTestId("select-action-ID");
     expect(selectButton).toBeInTheDocument();
-    
+
     fireEvent.click(selectButton);
-  
+
     const deleteButton = await screen.findByText("delete");
     expect(deleteButton).toBeInTheDocument();
-    
+
     fireEvent.click(deleteButton);
-    
+
     expect(deleteDialogModalOpen).toBe(true);
-    
+
     rerender(
       <MemoryRouter>
         <TestCaseTable
@@ -375,18 +374,17 @@ describe("TestCase component", () => {
         />
       </MemoryRouter>
     );
-  
+
     const deleteDialog = screen.getByText("Delete Test Case");
     expect(deleteDialog).toBeInTheDocument();
-  
+
     const cancelButton = screen.getByText("Cancel");
     const confirmButton = screen.getByText("Yes, Delete");
-  
+
     expect(cancelButton).toBeInTheDocument();
     expect(confirmButton).toBeInTheDocument();
-  
+
     fireEvent.click(confirmButton);
     expect(deleteTestCase).toHaveBeenCalled();
   });
-  
 });

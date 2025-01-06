@@ -148,7 +148,7 @@ describe("TestCaseRoutes", () => {
     );
 
     const testCaseTitle = await screen.findByText("TC1");
-    screen.debug()
+    screen.debug();
     expect(testCaseTitle).toBeInTheDocument();
     const testCaseSeries = await screen.findByText("IPP_Pass");
     expect(testCaseSeries).toBeInTheDocument();

@@ -28,7 +28,13 @@ interface ActionCenterProps {
 const filterByOptions = ["Case #", "Status", "Group", "Title", "Description"];
 
 export default function ActionCenter(props: ActionCenterProps) {
-  const { selectedTestCases, canEdit, isQDM, onCloneTestCase, setDeleteDialogModalOpen } = props;
+  const {
+    selectedTestCases,
+    canEdit,
+    isQDM,
+    onCloneTestCase,
+    setDeleteDialogModalOpen,
+  } = props;
   const [disableDeleteBtn, setDisableDeleteBtn] = useState<boolean>(true);
   const [disableCloneBtn, setDisableCloneBtn] = useState<boolean>(true);
   const [disableExportBtn, setDisableExportBtn] = useState<boolean>(true);
