@@ -149,7 +149,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
 
   const columns = useMemo<ColumnDef<TCRow>[]>(() => {
     const columnDefs = [];
-    if (featureFlags.TestCaseListActionCenter) {
+    if (featureFlags?.TestCaseListActionCenter) {
       columnDefs.push({
         id: "select",
         header: ({ table }) => (
@@ -395,7 +395,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
         <MadieDeleteDialog
           open={props.deleteDialogModalOpen}
           onContinue={() => {
-            if (featureFlags.TestCaseListActionCenter) {
+            if (featureFlags?.TestCaseListActionCenter) {
               deleteTestCase(selectedTestCases[0].id);
               props.setDeleteDialogModalOpen(false);
             } else {

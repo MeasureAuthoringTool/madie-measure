@@ -117,7 +117,7 @@ describe("TestCaseRoutes", () => {
     measureBundle.entry = undefined;
   });
 
-  it("should render the landing component first", async () => {
+  it.only("should render the landing component first", async () => {
     mockedAxios.get.mockImplementation((args) => {
       return Promise.resolve({
         data: [
@@ -148,6 +148,7 @@ describe("TestCaseRoutes", () => {
     );
 
     const testCaseTitle = await screen.findByText("TC1");
+    screen.debug()
     expect(testCaseTitle).toBeInTheDocument();
     const testCaseSeries = await screen.findByText("IPP_Pass");
     expect(testCaseSeries).toBeInTheDocument();

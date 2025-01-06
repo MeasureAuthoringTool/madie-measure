@@ -211,7 +211,7 @@ export default function ActionCenter(props: ActionCenterProps) {
         </div>
 
         {/* Action Buttons (Delete, Clone, Export) */}
-        {featureFlags.TestCaseListActionCenter && (
+        {featureFlags?.TestCaseListActionCenter && (
           <div tw="flex items-center">
             {canEdit && (
               <div tw="flex items-center">
