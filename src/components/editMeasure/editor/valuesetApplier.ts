@@ -1,6 +1,7 @@
 import { CqlAntlr, CqlResult } from "@madie/cql-antlr-parser/dist/src";
 import { ValueSetForSearch } from "@madie/madie-editor";
 import { CqlApplyActionResult } from "./CqlApplyActionResult";
+import { Model } from "@madie/madie-models";
 
 // given correct vs line order and the cqlArr, splice in the declarations
 const sortCQLValuesetsInPlace = (
@@ -147,6 +148,7 @@ const getValueSetTitleName = (vs) => {
 
 const applyValueset = (
   cql: string,
+  measureModel: Model,
   vs: ValueSetForSearch,
   previousVs?: ValueSetForSearch
 ): CqlApplyActionResult => {
@@ -157,13 +159,14 @@ const applyValueset = (
   let vsExactExists: boolean = false;
   let vsSameTitleExist: boolean = false;
 
-  // are there valuesets at all?
+  // are there value sets at all?
   if (parseResults?.valueSets?.length > 0) {
     parseResults.valueSets.some((valueSet) => {
       const oldVsName = valueSet.name.replace(/["']/g, "");
       const oldUrl = valueSet.url.replace(/["']/g, "");
       vsExactExists =
-        oldVsName === getValueSetTitleName(vs) && oldUrl === vs.oid;
+        oldVsName === getValueSetTitleName(vs) &&
+        (oldUrl === vs.oid || oldUrl === vs.url);
       vsSameTitleExist =
         (oldVsName &&
           extractValueSetNameAndSuffix(oldVsName)
@@ -177,7 +180,7 @@ const applyValueset = (
   // no matching valueset in the cql, add it.
   if (!vsExactExists && !vsSameTitleExist) {
     const valueSetStatement = `valueset "${getValueSetTitleName(vs)}": '${
-      vs.oid
+      measureModel === Model.QDM_5_6 ? vs.oid : vs.url
     }'`;
     valuesetChangeStatus = "success";
     message = `Value Set ${getValueSetTitleName(
@@ -214,7 +217,7 @@ const applyValueset = (
     }
   } else if (vsSameTitleExist && !vsExactExists) {
     const valueSetStatement = `valueset "${getValueSetTitleName(vs)}": '${
-      vs.oid
+      measureModel === Model.QDM_5_6 ? vs.oid : vs.url
     }'`;
     valuesetChangeStatus = "success";
     message = `Value Set ${getValueSetTitleName(

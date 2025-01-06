@@ -155,5 +155,139 @@ describe("ActionCenter Component", () => {
       const exportTooltip = await screen.findByTestId("export-tooltip");
       expect(exportTooltip).toHaveAttribute("aria-label", "Export test cases");
     });
+
+    it("should clone test case when clone button is clicked", () => {
+      const selectedTestCase = [{ id: "1", validResource: true }];
+      const onCloneTestCase = jest.fn();
+      render(
+        <MemoryRouter>
+          <ActionCenter
+            selectedTestCases={selectedTestCase}
+            canEdit={true}
+            isQDM={true}
+            onCloneTestCase={onCloneTestCase}
+          />
+        </MemoryRouter>
+      );
+
+      const cloneBtn = screen.getByTestId("clone-action-btn");
+      expect(cloneBtn).toBeEnabled();
+      userEvent.click(cloneBtn);
+      expect(onCloneTestCase).toBeCalled();
+    });
+
+    it("should export transaction bundle for QI-Core", () => {
+      const selectedTestCase = [{ id: "1", validResource: true }];
+      const setExportOptionsOpen = jest.fn();
+      const exportTestCases = jest.fn();
+      render(
+        <MemoryRouter>
+          <ActionCenter
+            selectedTestCases={selectedTestCase}
+            canEdit={true}
+            isQDM={false}
+            exportTestCases={exportTestCases}
+            exportOptionsOpen={true}
+            setExportOptionsOpen={setExportOptionsOpen}
+          />
+        </MemoryRouter>
+      );
+
+      const exportActionBtn = screen.getByTestId("export-action-icon");
+      expect(exportActionBtn).toBeInTheDocument();
+      userEvent.click(exportActionBtn);
+
+      const exportTransactBundle = screen.getByTestId(
+        "export-transaction-bundle"
+      );
+      expect(exportTransactBundle).toBeInTheDocument();
+      userEvent.click(exportTransactBundle);
+      expect(exportTestCases).toBeCalled();
+    });
+
+    it("should export collection bundle for QI-Core", () => {
+      const selectedTestCase = [{ id: "1", validResource: true }];
+      const setExportOptionsOpen = jest.fn();
+      const exportTestCases = jest.fn();
+      render(
+        <MemoryRouter>
+          <ActionCenter
+            selectedTestCases={selectedTestCase}
+            canEdit={true}
+            isQDM={false}
+            exportTestCases={exportTestCases}
+            exportOptionsOpen={true}
+            setExportOptionsOpen={setExportOptionsOpen}
+          />
+        </MemoryRouter>
+      );
+
+      const exportActionBtn = screen.getByTestId("export-action-icon");
+      expect(exportActionBtn).toBeInTheDocument();
+      userEvent.click(exportActionBtn);
+
+      const exportCollectBundle = screen.getByTestId(
+        "export-collection-bundle"
+      );
+      expect(exportCollectBundle).toBeInTheDocument();
+      userEvent.click(exportCollectBundle);
+      expect(exportTestCases).toBeCalled();
+    });
+
+    it("should export QRDA for QDM", () => {
+      const selectedTestCase = [{ id: "1" }];
+      const setExportOptionsOpen = jest.fn();
+      const onExportQRDA = jest.fn();
+      render(
+        <MemoryRouter>
+          <ActionCenter
+            selectedTestCases={selectedTestCase}
+            canEdit={true}
+            isQDM={true}
+            onExportQRDA={onExportQRDA}
+            measureId="1"
+            exportOptionsOpen={true}
+            setExportOptionsOpen={setExportOptionsOpen}
+          />
+        </MemoryRouter>
+      );
+
+      const exportActionBtn = screen.getByTestId("export-action-icon");
+      expect(exportActionBtn).toBeInTheDocument();
+      userEvent.click(exportActionBtn);
+
+      const exportQrda = screen.getByTestId("export-qrda-1");
+      expect(exportQrda).toBeInTheDocument();
+      userEvent.click(exportQrda);
+      expect(onExportQRDA).toBeCalled();
+    });
+
+    it("should export Excel for QDM", () => {
+      const selectedTestCase = [{ id: "1" }];
+      const setExportOptionsOpen = jest.fn();
+      const onExportExcel = jest.fn();
+      render(
+        <MemoryRouter>
+          <ActionCenter
+            selectedTestCases={selectedTestCase}
+            canEdit={true}
+            isQDM={true}
+            onExportExcel={onExportExcel}
+            measureId="1"
+            exportOptionsOpen={true}
+            setExportOptionsOpen={setExportOptionsOpen}
+          />
+        </MemoryRouter>
+      );
+
+      const exportActionBtn = screen.getByTestId("export-action-icon");
+      expect(exportActionBtn).toBeInTheDocument();
+      userEvent.click(exportActionBtn);
+
+      const exportExcel = screen.getByTestId("export-excel-1");
+      expect(exportExcel).toBeInTheDocument();
+      userEvent.click(exportExcel);
+      expect(onExportExcel).toBeCalled();
+    });
   });
 });

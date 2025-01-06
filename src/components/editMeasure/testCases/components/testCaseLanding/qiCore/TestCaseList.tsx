@@ -158,6 +158,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   const abortController = useRef(null);
   const [createOpen, setCreateOpen] = useState<boolean>(false);
   const featureFlags = useFeatureFlags();
+  const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
 
   useEffect(() => {
     if (testCases?.length != measure?.testCases?.length) {
@@ -347,13 +348,20 @@ const TestCaseList = (props: TestCaseListProps) => {
   };
 
   const exportTestCases = async (bundleType: string) => {
+    setExportOptionsOpen(false);
     try {
       abortController.current = new AbortController();
       const { ecqmTitle, model, version } = measure ?? {};
       const testCaseIds: string[] = [];
-      measure?.testCases?.forEach((testCase) => {
-        testCaseIds.push(testCase.id);
-      });
+      if (selectedTestCases) {
+        selectedTestCases.forEach((testCase) => {
+          testCaseIds.push(testCase.id);
+        });
+      } else {
+        measure?.testCases?.forEach((testCase) => {
+          testCaseIds.push(testCase.id);
+        });
+      }
       const exportData = await testCaseService?.current.exportTestCases(
         measure?.id,
         bundleType,
@@ -630,6 +638,10 @@ const TestCaseList = (props: TestCaseListProps) => {
                         selectedTestCases={selectedTestCases}
                         canEdit={canEdit}
                         isQDM={false}
+                        onCloneTestCase={handleQiCloneTestCase}
+                        exportTestCases={exportTestCases}
+                        exportOptionsOpen={exportOptionsOpen}
+                        setExportOptionsOpen={setExportOptionsOpen}
                       />
                       <TestCaseTable
                         sorting={sorting}
