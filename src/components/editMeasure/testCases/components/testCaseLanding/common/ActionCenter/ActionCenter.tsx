@@ -2,7 +2,11 @@ import React, { useEffect, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { IconButton, MenuItem, Tooltip } from "@mui/material";
-import { Select, TextField } from "@madie/madie-design-system/dist/react";
+import {
+  Select,
+  TextField,
+  Popover,
+} from "@madie/madie-design-system/dist/react";
 import SearchIcon from "@mui/icons-material/Search";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -20,12 +24,28 @@ interface ActionCenterProps {
   selectedTestCases: any;
   canEdit: boolean;
   isQDM: boolean;
+  exportTestCases?: Function;
+  onExportQRDA?: Function;
+  onExportExcel?: Function;
+  measureId?: string;
+  exportOptionsOpen?: boolean;
+  setExportOptionsOpen?: Function;
 }
 
 const filterByOptions = ["Case #", "Status", "Group", "Title", "Description"];
 
 export default function ActionCenter(props: ActionCenterProps) {
-  const { selectedTestCases, canEdit, isQDM } = props;
+  const {
+    selectedTestCases,
+    canEdit,
+    isQDM,
+    exportTestCases,
+    onExportQRDA,
+    onExportExcel,
+    measureId,
+    exportOptionsOpen,
+    setExportOptionsOpen,
+  } = props;
   const [disableDeleteBtn, setDisableDeleteBtn] = useState<boolean>(true);
   const [disableCloneBtn, setDisableCloneBtn] = useState<boolean>(true);
   const [disableExportBtn, setDisableExportBtn] = useState<boolean>(true);
@@ -120,6 +140,12 @@ export default function ActionCenter(props: ActionCenterProps) {
         setDisableExportBtn(true);
       }
     }
+  };
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const handleClose = () => {
+    setExportOptionsOpen(false);
+    setAnchorEl(null);
   };
 
   return (
@@ -284,18 +310,66 @@ export default function ActionCenter(props: ActionCenterProps) {
             >
               <span>
                 <IconButton
-                  onClick={() => {}}
                   disabled={disableExportBtn}
                   data-testid="export-action-btn"
                 >
                   <FileUploadOutlinedIcon
                     data-testid={`export-action-icon`}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      setAnchorEl(event.currentTarget);
+                      setExportOptionsOpen(true);
+                    }}
                     sx={
                       disableExportBtn
                         ? { color: grey[500] }
                         : { color: blue[700] }
                     }
                   />
+                  {!isQDM && (
+                    <Popover
+                      optionsOpen={exportOptionsOpen}
+                      anchorEl={anchorEl}
+                      handleClose={handleClose}
+                      canEdit={canEdit}
+                      additionalSelectOptionProps={[
+                        {
+                          label: "Transaction Bundle",
+                          dataTestId: `export-transaction-bundle`,
+                          toImplementFunction: () => {
+                            exportTestCases("TRANSACTION");
+                          },
+                        },
+                        {
+                          label: "Collection Bundle",
+                          dataTestId: `export-collection-bundle`,
+                          toImplementFunction: () => {
+                            exportTestCases("COLLECTION");
+                          },
+                        },
+                      ]}
+                    />
+                  )}
+                  {isQDM && (
+                    <Popover
+                      optionsOpen={exportOptionsOpen}
+                      anchorEl={anchorEl}
+                      handleClose={handleClose}
+                      canEdit={canEdit}
+                      additionalSelectOptionProps={[
+                        {
+                          label: "QRDA",
+                          toImplementFunction: onExportQRDA,
+                          dataTestId: `export-qrda-${measureId}`,
+                        },
+                        {
+                          label: "Excel",
+                          toImplementFunction: onExportExcel,
+                          dataTestId: `export-excel-${measureId}`,
+                        },
+                      ]}
+                    />
+                  )}
                 </IconButton>
               </span>
             </Tooltip>
