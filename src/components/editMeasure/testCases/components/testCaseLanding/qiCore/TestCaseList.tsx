@@ -157,6 +157,8 @@ const TestCaseList = (props: TestCaseListProps) => {
     useState<boolean>(false);
   const abortController = useRef(null);
   const [createOpen, setCreateOpen] = useState<boolean>(false);
+  const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
+    useState<boolean>(false);
   const featureFlags = useFeatureFlags();
 
   useEffect(() => {
@@ -630,6 +632,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                         selectedTestCases={selectedTestCases}
                         canEdit={canEdit}
                         isQDM={false}
+                        setDeleteDialogModalOpen={setDeleteDialogModalOpen}
                       />
                       <TestCaseTable
                         sorting={sorting}
@@ -643,6 +646,9 @@ const TestCaseList = (props: TestCaseListProps) => {
                         onTestCaseShiftDates={onTestCaseShiftDates}
                         handleQiCloneTestCase={handleQiCloneTestCase}
                         setSelectedTestCases={setSelectedTestCases}
+                        selectedTestCases={selectedTestCases}
+                        deleteDialogModalOpen={deleteDialogModalOpen}
+                        setDeleteDialogModalOpen={setDeleteDialogModalOpen}
                       />
                       {currentSlice?.length > 0 && (
                         <Pagination

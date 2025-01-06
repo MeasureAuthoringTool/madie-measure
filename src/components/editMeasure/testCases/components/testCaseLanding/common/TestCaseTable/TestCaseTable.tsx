@@ -36,6 +36,9 @@ interface TestCaseTableProps {
   sorting: any;
   setSorting: any;
   setSelectedTestCases: any;
+  selectedTestCases: any;
+  deleteDialogModalOpen: any;
+  setDeleteDialogModalOpen: any;
 }
 
 export const convertDate = (date: string) => {
@@ -74,10 +77,11 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     sorting,
     setSorting,
     setSelectedTestCases,
+    selectedTestCases,
   } = props;
   const viewOrEdit = canEdit ? "edit" : "view";
-  const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
-    useState<boolean>(false);
+  // const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
+  //   useState<boolean>(false);
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
@@ -93,7 +97,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
   const [shiftDatesDialogOpen, setShiftDatesDialogOpen] =
     useState<boolean>(false);
   const featureFlags = useFeatureFlags();
-
   const handleOpen = (
     selected: TestCase,
     event: React.MouseEvent<HTMLButtonElement>
@@ -250,7 +253,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
         enableSorting: false,
       },
     ];
-  }, [testCases]);
+  }, [testCases, featureFlags]);
 
   const table = useReactTable({
     data,
@@ -369,7 +372,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           setOptionsOpen={setOptionsOpen}
           exportTestCase={exportTestCase}
           onCloneTestCase={onCloneTestCase}
-          setDeleteDialogModalOpen={setDeleteDialogModalOpen}
+          setDeleteDialogModalOpen={props.setDeleteDialogModalOpen}
           handleClose={handleClose}
           shiftDatesDialogOpen={shiftDatesDialogOpen}
           setShiftDatesDialogOpen={setShiftDatesDialogOpen}
@@ -390,12 +393,17 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           autoHideDuration={6000}
         />
         <MadieDeleteDialog
-          open={deleteDialogModalOpen}
+          open={props.deleteDialogModalOpen}
           onContinue={() => {
-            deleteTestCase(selectedTestCase.id);
+            if (featureFlags.TestCaseListActionCenter) {
+              deleteTestCase(selectedTestCases[0].id);
+              props.setDeleteDialogModalOpen(false);
+            } else {
+              deleteTestCase(selectedTestCase.id);
+            }
           }}
           onClose={() => {
-            setDeleteDialogModalOpen(false);
+            props.setDeleteDialogModalOpen(false);
           }}
           dialogTitle={`Delete Test Case`}
           name={selectedTestCase?.title}

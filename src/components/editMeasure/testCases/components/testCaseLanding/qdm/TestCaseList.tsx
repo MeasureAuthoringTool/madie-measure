@@ -165,6 +165,8 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [selectedTestCases, setSelectedTestCases] = useState<any>();
   const [exportExecuting, setExportExecuting] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
+  const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
+    useState<boolean>(false);
   const featureFlags = useFeatureFlags();
   const qdmCqlParsingService = useRef(useQdmCqlParsingService());
 
@@ -790,6 +792,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                         selectedTestCases={selectedTestCases}
                         canEdit={canEdit}
                         isQDM={true}
+                        setDeleteDialogModalOpen={setDeleteDialogModalOpen}
                       />
                       <TestCaseTable
                         sorting={sorting}
@@ -802,6 +805,9 @@ const TestCaseList = (props: TestCaseListProps) => {
                         measure={measure}
                         onTestCaseShiftDates={onTestCaseShiftDates}
                         setSelectedTestCases={setSelectedTestCases}
+                        deleteDialogModalOpen={deleteDialogModalOpen}
+                        selectedTestCases={selectedTestCases}
+                        setDeleteDialogModalOpen={setDeleteDialogModalOpen}
                       />
                       <Pagination
                         totalItems={totalItems}

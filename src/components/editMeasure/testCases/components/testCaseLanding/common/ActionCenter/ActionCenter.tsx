@@ -20,12 +20,13 @@ interface ActionCenterProps {
   selectedTestCases: any;
   canEdit: boolean;
   isQDM: boolean;
+  setDeleteDialogModalOpen: Function;
 }
 
 const filterByOptions = ["Case #", "Status", "Group", "Title", "Description"];
 
 export default function ActionCenter(props: ActionCenterProps) {
-  const { selectedTestCases, canEdit, isQDM } = props;
+  const { selectedTestCases, canEdit, isQDM, setDeleteDialogModalOpen } = props;
   const [disableDeleteBtn, setDisableDeleteBtn] = useState<boolean>(true);
   const [disableCloneBtn, setDisableCloneBtn] = useState<boolean>(true);
   const [disableExportBtn, setDisableExportBtn] = useState<boolean>(true);
@@ -224,7 +225,9 @@ export default function ActionCenter(props: ActionCenterProps) {
                 >
                   <span>
                     <IconButton
-                      onClick={() => {}}
+                      onClick={() => {
+                        setDeleteDialogModalOpen(true);
+                      }}
                       disabled={disableDeleteBtn}
                       data-testid="delete-action-btn"
                     >
