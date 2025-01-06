@@ -26,7 +26,7 @@ const bulkCreate = (count: number) => {
 
   const measureInput = {
     measureName: "",
-    model: "",
+    model: Model.QDM_5_6,
     cqlLibraryName: "",
   } as Measure;
 

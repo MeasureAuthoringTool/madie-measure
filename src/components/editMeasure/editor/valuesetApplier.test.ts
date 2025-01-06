@@ -1,6 +1,7 @@
-import applyValueset from "./valuesetApplier.ts";
+import applyValueset from "./valuesetApplier";
 import * as fs from "fs";
 import { CqlApplyActionResult } from "./CqlApplyActionResult";
+import { Model } from "@madie/madie-models";
 
 it("Should add valuset to CQL that does not exist when no valusets present", () => {
   const cql = fs.readFileSync(
@@ -13,7 +14,11 @@ it("Should add valuset to CQL that does not exist when no valusets present", () 
   );
 
   const valuset = JSON.parse(valusetJson);
-  const result: CqlApplyActionResult = applyValueset(cql, valuset);
+  const result: CqlApplyActionResult = applyValueset(
+    cql,
+    Model.QDM_5_6,
+    valuset
+  );
   expect(result.cql).toContain("Emergency Department Evaluation");
   expect(result.status).toBeTruthy();
   expect(result.message).toEqual(
@@ -32,7 +37,11 @@ it("Should add valuset to CQL that does not exist when valususets are present", 
   );
 
   const valuset = JSON.parse(valusetJson);
-  const result: CqlApplyActionResult = applyValueset(cql, valuset);
+  const result: CqlApplyActionResult = applyValueset(
+    cql,
+    Model.QDM_5_6,
+    valuset
+  );
   expect(result.cql).toContain("Emergency Department Evaluation");
   expect(result.status).toBeTruthy();
   expect(result.message).toEqual(
@@ -51,8 +60,8 @@ it("Should not add a valuset that already exists", () => {
   );
 
   const valuset = JSON.parse(valusetJson);
-  let result: CqlApplyActionResult = applyValueset(cql, valuset);
-  result = applyValueset(result.cql, valuset);
+  let result: CqlApplyActionResult = applyValueset(cql, Model.QDM_5_6, valuset);
+  result = applyValueset(result.cql, Model.QDM_5_6, valuset);
   expect(cql).toContain(
     "valueset \"Ethnicity\": 'urn:oid:2.16.840.1.114222.4.11.837'"
   );
@@ -74,7 +83,7 @@ it("Should add valuset, priotiy location usings array", () => {
     "valueset \"Ethnicity\": 'urn:oid:2.16.840.1.114222.4.11.837'"
   );
   const valuset = JSON.parse(valusetJson);
-  let result: CqlApplyActionResult = applyValueset(cql, valuset);
+  let result: CqlApplyActionResult = applyValueset(cql, Model.QDM_5_6, valuset);
   expect(result.cql).toContain(
     "valueset \"Ethnicity\": 'urn:oid:2.16.840.1.114222.4.11.837'"
   );
@@ -95,7 +104,7 @@ it("Should add valuset, priotiy location includes array", () => {
   );
 
   const valuset = JSON.parse(valusetJson);
-  let result: CqlApplyActionResult = applyValueset(cql, valuset);
+  let result: CqlApplyActionResult = applyValueset(cql, Model.QDM_5_6, valuset);
   expect(cql).not.toContain(
     "valueset \"Ethnicity\": 'urn:oid:2.16.840.1.114222.4.11.837'"
   );
@@ -122,7 +131,7 @@ it("Should add valuset, priotiy location valuset array", () => {
   expect(cql).not.toContain(
     "valueset \"Ethnicity\": 'urn:oid:2.16.840.1.114222.4.11.837'"
   );
-  let result: CqlApplyActionResult = applyValueset(cql, valuset);
+  let result: CqlApplyActionResult = applyValueset(cql, Model.QDM_5_6, valuset);
   expect(result.cql).toContain(
     "valueset \"Ethnicity\": 'urn:oid:2.16.840.1.114222.4.11.837'"
   );
@@ -143,7 +152,11 @@ it("Should not add valuset to CQL when value set was already added", () => {
   );
 
   const valuset = JSON.parse(valusetJson);
-  const result: CqlApplyActionResult = applyValueset(cql, valuset);
+  const result: CqlApplyActionResult = applyValueset(
+    cql,
+    Model.QDM_5_6,
+    valuset
+  );
   expect(result.cql).toContain("Emergency Department Evaluation");
   expect(result.status).toBe("info");
   expect(result.message).toEqual(
@@ -162,7 +175,11 @@ it("Should remove valuset suffix to already present CQL", () => {
   );
 
   const valuset = JSON.parse(valusetJson);
-  const result: CqlApplyActionResult = applyValueset(cql, valuset);
+  const result: CqlApplyActionResult = applyValueset(
+    cql,
+    Model.QDM_5_6,
+    valuset
+  );
   expect(result.cql).not.toContain("Emergency Department Evaluation (1)");
   expect(result.cql).toContain("Emergency Department Evaluation");
   expect(result.status).toBe("success");
@@ -182,11 +199,64 @@ it("Should add valuset suffix to already present CQL", () => {
   );
 
   const valuset = JSON.parse(valusetJson);
-  const result: CqlApplyActionResult = applyValueset(cql, valuset);
+  const result: CqlApplyActionResult = applyValueset(
+    cql,
+    Model.QDM_5_6,
+    valuset
+  );
   expect(result.cql).toContain("Emergency Department Evaluation (1)");
   expect(result.cql).not.toContain('Emergency Department Evaluation":');
   expect(result.status).toBe("success");
   expect(result.message).toEqual(
     `Value Set Emergency Department Evaluation (1) has been successfully updated in the CQL.`
+  );
+});
+
+it("should add a new value set", () => {
+  const cql =
+    "library SimpleEncounterMeasure version '4.0.000'\n" +
+    "using QICore version '4.1.1'";
+  const valueSet = {
+    title: "Sex",
+    name: "Sex",
+    url: "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1240.3",
+    oid: "urn:oid:2.16.840.1.113762.1.4.1240.3",
+  };
+  const result: CqlApplyActionResult = applyValueset(
+    cql,
+    Model.QICORE_6_0_0,
+    valueSet
+  );
+  expect(result.cql).toContain(valueSet.name);
+  expect(result.cql).toContain(valueSet.url);
+  expect(result.status).toBe("success");
+  expect(result.message).toEqual(
+    `Value Set Sex has been successfully added to the CQL.`
+  );
+});
+
+it("should update an existing value set if exists", () => {
+  const cql =
+    "library SimpleEncounterMeasure version '4.0.000'\n" +
+    "using QICore version '4.1.1'\n" +
+    "valueset \"Sex\": 'http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1240.3'";
+  const valueSet = {
+    title: "Sex",
+    name: "Sex",
+    url: "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1240.3",
+    oid: "urn:oid:2.16.840.1.113762.1.4.1240.3",
+    suffix: "1",
+  };
+  const result: CqlApplyActionResult = applyValueset(
+    cql,
+    Model.QICORE_6_0_0,
+    valueSet,
+    { ...valueSet, name: "Sex" }
+  );
+  expect(result.cql).toContain("Sex");
+  expect(result.cql).toContain(valueSet.url);
+  expect(result.status).toBe("success");
+  expect(result.message).toEqual(
+    `Value Set Sex (1) has been successfully updated in the CQL.`
   );
 });

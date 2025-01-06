@@ -793,6 +793,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                         canEdit={canEdit}
                         isQDM={true}
                         setDeleteDialogModalOpen={setDeleteDialogModalOpen}
+                        onCloneTestCase={handleCloneTestCase}
                       />
                       <TestCaseTable
                         sorting={sorting}

@@ -1,6 +1,6 @@
 import applyCode from "./codeApplier";
 import * as fs from "fs";
-import { Code } from "@madie/madie-models";
+import { Code, Model } from "@madie/madie-models";
 import { CqlApplyActionResult } from "./CqlApplyActionResult";
 
 const mockCode = {
@@ -86,7 +86,7 @@ describe("applyCode test cases", () => {
     expect(cql).not.toContain("281302008");
 
     const code = JSON.parse(codeJson);
-    let result: CqlApplyActionResult = applyCode(cql, code);
+    let result: CqlApplyActionResult = applyCode(cql, code, Model.QDM_5_6);
 
     expect(result.cql).toContain(
       `codesystem "SNOMEDCT": 'urn:oid:2.16.840.1.113883.6.96'`
@@ -109,7 +109,7 @@ describe("applyCode test cases", () => {
       `codesystem "SNOMEDCT": 'urn:oid:2.16.840.1.113883.6.96'`
     );
     expect(cql).not.toContain("281302008");
-    let result = applyCode(cql, mockCode);
+    let result = applyCode(cql, mockCode, Model.QDM_5_6);
     expect(result.cql).toContain(
       `codesystem "${mockCode.codeSystem}:${mockCode.svsVersion}": 'urn:oid:${mockCode.codeSystemOid}' version 'urn:hl7:version:${mockCode.svsVersion}'`
     );
@@ -123,7 +123,7 @@ describe("applyCode test cases", () => {
   });
 
   it("Should insert code if editor is blank", () => {
-    let result = applyCode("", mockCode);
+    let result = applyCode("", mockCode, Model.QDM_5_6);
     expect(result.message).toContain(
       `Code ${mockCode.name} has been successfully added to the CQL.`
     );
@@ -139,7 +139,7 @@ describe("applyCode test cases", () => {
 
   it("Should insert code if CQL has only library statement", () => {
     const libraryStatement = "library ABC version '0.0.000'";
-    let result = applyCode(libraryStatement, mockCode);
+    let result = applyCode(libraryStatement, mockCode, Model.QDM_5_6);
     const cqlArray = result.cql.split("\n");
     expect(cqlArray[0]).toEqual(libraryStatement);
     expect(cqlArray[1]).toEqual(
@@ -154,7 +154,7 @@ describe("applyCode test cases", () => {
     const usingStatement = "using QDM version '5.6'";
     const libraryStatement = "library ABC version '0.0.000'";
     const cql = `${libraryStatement}\n${usingStatement}`;
-    let result = applyCode(cql, mockCode);
+    let result = applyCode(cql, mockCode, Model.QDM_5_6);
     const cqlArray = result.cql.split("\n");
     expect(cqlArray[0]).toEqual(libraryStatement);
     expect(cqlArray[1]).toEqual(usingStatement);
@@ -172,7 +172,7 @@ describe("applyCode test cases", () => {
     const codeSystemStatement =
       "codesystem \"CPT\": 'urn:oid:2.16.840.1.113883.6.12'";
     const cql = `${libraryStatement}\n${usingStatement}\n${codeSystemStatement}`;
-    let result = applyCode(cql, mockCode);
+    let result = applyCode(cql, mockCode, Model.QDM_5_6);
     const cqlArray = result.cql.split("\n");
     expect(cqlArray[0]).toEqual(libraryStatement);
     expect(cqlArray[1]).toEqual(usingStatement);
@@ -183,5 +183,83 @@ describe("applyCode test cases", () => {
     expect(cqlArray[4]).toEqual(
       `code "${mockCode.display} (${mockCode.suffix})": '${mockCode.name}' from "${mockCode.codeSystem}:${mockCode.svsVersion}" display '${mockCode.display}'`
     );
+  });
+
+  describe("Apply code to QICore CQL", () => {
+    const code = {
+      name: "24353-5",
+      display:
+        "Glucose tolerance 2 hours gestational panel - Urine and Serum or Plasma",
+      version: "2.76",
+      codeSystem: "LOINC",
+      codeSystemOid: "2.16.840.1.113883.6.1",
+      status: "NA",
+      svsVersion: "2.78",
+      fhirVersion: "2.78",
+      codeSystemUrl: "http://loinc.org",
+      versionIncluded: false,
+    };
+    it("Should apply new code to QICore measure CQL", () => {
+      const cql =
+        "library MAT6197UCUMAnnotations version '0.0.000'\n" +
+        "using QICore version '4.1.1'";
+
+      let result: CqlApplyActionResult = applyCode(
+        cql,
+        code,
+        Model.QICORE_6_0_0
+      );
+      expect(result.cql).toContain("24353-5");
+      expect(result.status).toEqual("success");
+      expect(result.message).toEqual(
+        "Code 24353-5 has been successfully added to the CQL."
+      );
+
+      // include code system version
+      result = applyCode(
+        cql,
+        { ...code, versionIncluded: true },
+        Model.QICORE_6_0_0
+      );
+      expect(result.cql).toContain("LOINC:2.78");
+      expect(result.status).toEqual("success");
+      expect(result.message).toEqual(
+        "Code 24353-5 has been successfully added to the CQL."
+      );
+    });
+
+    it("Should update code for QICore measure CQL", () => {
+      const cql =
+        "library MAT6197UCUMAnnotations version '0.0.000'\n" +
+        "using QICore version '4.1.1'\n" +
+        "codesystem \"LOINC\": 'http://loinc.org'\n" +
+        "code \"Glucose tolerance 2 hours gestational panel - Urine and Serum or Plasma\": '24353-5' from \"LOINC:2.78\" display 'Glucose tolerance 2 hours gestational panel - Urine and Serum or Plasma'";
+
+      let result: CqlApplyActionResult = applyCode(
+        cql,
+        code,
+        Model.QICORE_6_0_0
+      );
+      expect(result.message).toEqual(
+        "Code 24353-5 has been updated successfully."
+      );
+    });
+
+    it("Should update code for QICore measure CQL if version is included", () => {
+      const cql =
+        "library MAT6197UCUMAnnotations version '0.0.000'\n" +
+        "using QICore version '4.1.1'\n" +
+        "codesystem \"LOINC\": 'http://loinc.org'\n" +
+        "code \"Glucose tolerance 2 hours gestational panel - Urine and Serum or Plasma\": '24353-5' from \"LOINC\" display 'Glucose tolerance 2 hours gestational panel - Urine and Serum or Plasma'";
+
+      let result: CqlApplyActionResult = applyCode(
+        cql,
+        { ...code, versionIncluded: true },
+        Model.QICORE_6_0_0
+      );
+      expect(result.message).toEqual(
+        "Code 24353-5 has been updated successfully."
+      );
+    });
   });
 });
