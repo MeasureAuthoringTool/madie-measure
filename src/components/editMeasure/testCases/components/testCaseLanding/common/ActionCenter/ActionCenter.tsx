@@ -51,7 +51,7 @@ export default function ActionCenter(props: ActionCenterProps) {
     exportOptionsOpen,
     setExportOptionsOpen,
   } = props;
-  
+
   const [disableDeleteBtn, setDisableDeleteBtn] = useState<boolean>(true);
   const [disableCloneBtn, setDisableCloneBtn] = useState<boolean>(true);
   const [disableExportBtn, setDisableExportBtn] = useState<boolean>(true);

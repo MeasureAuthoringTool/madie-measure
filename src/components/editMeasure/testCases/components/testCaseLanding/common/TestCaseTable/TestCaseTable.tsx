@@ -79,7 +79,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     setSelectedTestCases,
     selectedTestCases,
     deleteDialogModalOpen,
-    setDeleteDialogModalOpen
+    setDeleteDialogModalOpen,
   } = props;
   const viewOrEdit = canEdit ? "edit" : "view";
   // const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
@@ -255,7 +255,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
         enableSorting: false,
       },
     ];
-  }, [testCases, featureFlags]);
+  }, [testCases, featureFlags?.TestCaseListActionCenter]);
 
   const table = useReactTable({
     data,

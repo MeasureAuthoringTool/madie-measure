@@ -92,6 +92,7 @@ jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: jest.fn().mockImplementation(() => ({
     applyDefaults: false,
     qiCoreBonnieTestCases: false,
+    TestCaseListActionCenter: false,
   })),
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
@@ -117,7 +118,7 @@ describe("TestCaseRoutes", () => {
     measureBundle.entry = undefined;
   });
 
-  it.only("should render the landing component first", async () => {
+  it("should render the landing component first", async () => {
     mockedAxios.get.mockImplementation((args) => {
       return Promise.resolve({
         data: [
