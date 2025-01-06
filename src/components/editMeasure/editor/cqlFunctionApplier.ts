@@ -259,11 +259,6 @@ export const editCQLFunction = (
 ): CqlApplyActionResult => {
   const cqlArr: string[] = cql.split("\n");
   const parseResults: CqlResult = new CqlAntlr(cql).parse();
-
-  console.log(oldFunction, "old function");
-
-  console.log(newFunction, "new function");
-
   const functionDefinitions = parseResults?.expressionDefinitions.filter(
     (exp) => {
       return (
