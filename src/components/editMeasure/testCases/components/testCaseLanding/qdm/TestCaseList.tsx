@@ -169,6 +169,7 @@ const TestCaseList = (props: TestCaseListProps) => {
     useState<boolean>(false);
   const featureFlags = useFeatureFlags();
   const qdmCqlParsingService = useRef(useQdmCqlParsingService());
+  const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
 
   // const [callstackMap, setCallstackMap] = useState<CqlDefinitionCallstack>();
   // callStackMap is used for generating Excel Export
@@ -549,6 +550,7 @@ const TestCaseList = (props: TestCaseListProps) => {
     if (measure?.cql) {
       setExportExecuting(true);
       setOptionsOpen(false);
+      setExportOptionsOpen(false);
       qdmCqlParsingService.current
         .getDefinitionCallstacks(measure.cql)
         .then((callstack: CqlDefinitionCallstack) => {
@@ -614,6 +616,7 @@ const TestCaseList = (props: TestCaseListProps) => {
     }
     setExportExecuting(true);
     setOptionsOpen(false);
+    setExportOptionsOpen(false);
     const localMeasure = _.cloneDeep(measure);
     const executionResults: CqmExecutionResultsByPatient = calculationOutput;
     const groupExportDTOs: QrdaGroupExportDTO[] = [];
@@ -794,6 +797,11 @@ const TestCaseList = (props: TestCaseListProps) => {
                         isQDM={true}
                         setDeleteDialogModalOpen={setDeleteDialogModalOpen}
                         onCloneTestCase={handleCloneTestCase}
+                        onExportExcel={exportExcel}
+                        onExportQRDA={exportQRDA}
+                        measureId={measureId}
+                        exportOptionsOpen={exportOptionsOpen}
+                        setExportOptionsOpen={setExportOptionsOpen}
                       />
                       <TestCaseTable
                         sorting={sorting}
