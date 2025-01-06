@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import ActionCenter from "./ActionCenter";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
@@ -154,6 +154,26 @@ describe("ActionCenter Component", () => {
 
       const exportTooltip = await screen.findByTestId("export-tooltip");
       expect(exportTooltip).toHaveAttribute("aria-label", "Export test cases");
+    });
+
+    it("should clone test case when clone button is clicked", () => {
+      const selectedTestCase = [{ id: "1", validResource: true }];
+      const onCloneTestCase = jest.fn();
+      render(
+        <MemoryRouter>
+          <ActionCenter
+            selectedTestCases={selectedTestCase}
+            canEdit={true}
+            isQDM={true}
+            onCloneTestCase={onCloneTestCase}
+          />
+        </MemoryRouter>
+      );
+
+      const cloneBtn = screen.getByTestId("clone-action-btn");
+      expect(cloneBtn).toBeEnabled();
+      userEvent.click(cloneBtn);
+      expect(onCloneTestCase).toBeCalled();
     });
 
     it("should export transaction bundle for QI-Core", () => {

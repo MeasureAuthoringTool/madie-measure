@@ -793,6 +793,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                         selectedTestCases={selectedTestCases}
                         canEdit={canEdit}
                         isQDM={true}
+                        onCloneTestCase={handleCloneTestCase}
                         onExportExcel={exportExcel}
                         onExportQRDA={exportQRDA}
                         measureId={measureId}

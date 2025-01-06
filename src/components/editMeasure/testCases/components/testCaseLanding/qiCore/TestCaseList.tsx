@@ -638,6 +638,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                         selectedTestCases={selectedTestCases}
                         canEdit={canEdit}
                         isQDM={false}
+                        onCloneTestCase={handleQiCloneTestCase}
                         exportTestCases={exportTestCases}
                         exportOptionsOpen={exportOptionsOpen}
                         setExportOptionsOpen={setExportOptionsOpen}
