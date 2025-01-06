@@ -78,6 +78,8 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     setSorting,
     setSelectedTestCases,
     selectedTestCases,
+    deleteDialogModalOpen,
+    setDeleteDialogModalOpen
   } = props;
   const viewOrEdit = canEdit ? "edit" : "view";
   // const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
@@ -372,7 +374,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           setOptionsOpen={setOptionsOpen}
           exportTestCase={exportTestCase}
           onCloneTestCase={onCloneTestCase}
-          setDeleteDialogModalOpen={props.setDeleteDialogModalOpen}
+          setDeleteDialogModalOpen={setDeleteDialogModalOpen}
           handleClose={handleClose}
           shiftDatesDialogOpen={shiftDatesDialogOpen}
           setShiftDatesDialogOpen={setShiftDatesDialogOpen}
@@ -393,17 +395,17 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           autoHideDuration={6000}
         />
         <MadieDeleteDialog
-          open={props.deleteDialogModalOpen}
+          open={deleteDialogModalOpen}
           onContinue={() => {
             if (featureFlags?.TestCaseListActionCenter) {
               deleteTestCase(selectedTestCases[0].id);
-              props.setDeleteDialogModalOpen(false);
+              setDeleteDialogModalOpen(false);
             } else {
               deleteTestCase(selectedTestCase.id);
             }
           }}
           onClose={() => {
-            props.setDeleteDialogModalOpen(false);
+            setDeleteDialogModalOpen(false);
           }}
           dialogTitle={`Delete Test Case`}
           name={selectedTestCase?.title}
