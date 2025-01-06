@@ -63,7 +63,10 @@ import {
   editLibrary,
 } from "./libraryApplier";
 import { applyDefinition, editDefinition } from "./DefinitionApplier";
-import applyCQLFunction, { deleteCQLFunction } from "./cqlFunctionApplier";
+import applyCQLFunction, {
+  deleteCQLFunction,
+  editCQLFunction,
+} from "./cqlFunctionApplier";
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
@@ -563,6 +566,19 @@ const MeasureEditor = () => {
     updateMeasureCql(result.cql, setFunctionConfirmation);
   };
 
+  const handleFunctionEdit = (oldFunction, newFunction) => {
+    const result = editCQLFunction(editorVal, oldFunction, newFunction);
+    if (result.status) {
+      handleMadieEditorValue(result.cql);
+    }
+    const setFunctionConfirmation = () => {
+      setToastMessage(result.message);
+      setToastType(result.status);
+      setToastOpen(true);
+    };
+    updateMeasureCql(result.cql, setFunctionConfirmation);
+  };
+
   const handleParameterEdit = (
     parameter: Parameter,
     parameterToApply: Parameter
@@ -693,6 +709,7 @@ const MeasureEditor = () => {
     setRefValueSetDetails(vs);
     const result = applyValueset(
       editorVal,
+      measure.model,
       vs,
       prevSelectedValueSetDetails?.current
     ); // should have updated editorVal but doesn't
@@ -781,6 +798,7 @@ const MeasureEditor = () => {
               handleApplyDefinition={handleApplyDefinition}
               handleApplyFunction={handleApplyFunction}
               handleFunctionDelete={handleFunctionDelete}
+              handleFunctionEdit={handleFunctionEdit}
               handleApplyParameter={handleApplyParameter}
               handleParameterEdit={handleParameterEdit}
               handleParameterDelete={handleParameterDelete}

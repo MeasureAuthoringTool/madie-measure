@@ -1078,4 +1078,32 @@ define function MeasureObservation(e Encounter):
       );
     });
   });
+
+  it("test edit function", async () => {
+    const measureWithCqlFunction = {
+      ...measure,
+      model: Model.QDM_5_6,
+      cql: `library TestLib version '0.0.000'
+using QICore version '4.1.1'
+include FHIRHelpers version '4.1.000' called FHIRHelpers
+
+context Patient
+
+define function MeasureObservation(e Encounter):
+  2`,
+    } as Measure;
+
+    renderEditor(measureWithCqlFunction);
+
+    const editFunctionBtn = await screen.findByTestId("edit-function");
+    expect(editFunctionBtn).toBeInTheDocument();
+    userEvent.click(editFunctionBtn);
+    await waitFor(() => {
+      const editor = screen.getByTestId("measure-editor");
+      expect(editor).not.toHaveValue(
+        `define function MeasureObservation(e Encounter):
+  2`
+      );
+    });
+  });
 });

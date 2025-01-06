@@ -1,4 +1,7 @@
-import applyCQLFunction, { deleteCQLFunction } from "./cqlFunctionApplier";
+import applyCQLFunction, {
+  deleteCQLFunction,
+  editCQLFunction,
+} from "./cqlFunctionApplier";
 import * as fs from "fs";
 
 const getMock = (name) => {
@@ -224,6 +227,54 @@ define function MeasureObservation(e Encounter):
     const result = deleteCQLFunction(mockCql, functionToDelete);
     expect(result.message).toBe(
       "Function MeasureObservation has been successfully removed from the CQL."
+    );
+  });
+
+  it("Will not edit a function when function not found", () => {
+    const mockCql = getMock("cqlFunctionApplierFunctionNoArgs");
+
+    const testFunction = {
+      fluentFunction: true,
+      functionName: "test",
+      expression: `define function "test"():\n  undefined`,
+      comment: "test comment",
+      functionsArguments: [],
+      expressionValue: "true",
+    };
+    const result = editCQLFunction(
+      mockCql,
+      testFunction,
+      `define function MeasureObservation1(encounter Encounter):
+  2`
+    );
+    expect(result.message).toBe("Function test has not been defined in CQL.");
+  });
+
+  it("Will edit a function successfully", () => {
+    const mockCql = `library TestLib version '0.0.000'
+using QICore version '4.1.1'
+include FHIRHelpers version '4.1.000' called FHIRHelpers
+
+context Patient
+
+define function MeasureObservation(e Encounter):
+  2`;
+
+    const functionToDelete = {
+      functionName: "MeasureObservation",
+      fluentFunction: false,
+      expressionValue: "define function MeasureObservation(e Encounter):\n  2",
+      expression: "define function MeasureObservation(e Encounter):\n  2",
+    };
+
+    const result = editCQLFunction(
+      mockCql,
+      functionToDelete,
+      `define function MeasureObservation1(encounter Encounter):
+  2`
+    );
+    expect(result.message).toBe(
+      "Function MeasureObservation has been successfully updated in the CQL."
     );
   });
 });
