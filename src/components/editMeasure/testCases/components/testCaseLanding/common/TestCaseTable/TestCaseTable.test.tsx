@@ -10,7 +10,7 @@ import {
   Model,
 } from "@madie/madie-models";
 // @ts-ignore
-import { useFeatureFlags } from "@madie/madie-util";
+import { useFeatureFlags, checkUserCanEdit } from "@madie/madie-util";
 import userEvent from "@testing-library/user-event";
 
 const testCase = {
@@ -55,31 +55,79 @@ const testCaseInvalid = {
 
 const testCases = [testCase, testCaseFail, testCaseNA, testCaseInvalid];
 
-const defaultMeasure = {
-  id: "m1234",
-  measureScoring: MeasureScoring.COHORT,
-  createdBy: "testuser",
-  groups: [
-    {
-      groupId: "Group1_ID",
-      scoring: "Cohort",
-      populations: [
-        {
-          id: "id-1",
-          name: PopulationType.INITIAL_POPULATION,
-          definition: "Pop1",
-        },
-      ],
-      stratifications: [
-        {
-          id: "strat-id-1",
-        },
-      ],
+const measures = [
+  {
+    id: "m1234",
+    measureScoring: MeasureScoring.COHORT,
+    createdBy: "testuser",
+    groups: [
+      {
+        groupId: "Group1_ID",
+        scoring: "Cohort",
+        populations: [
+          {
+            id: "id-1",
+            name: PopulationType.INITIAL_POPULATION,
+            definition: "Pop1",
+          },
+        ],
+        stratifications: [
+          {
+            id: "strat-id-1",
+          },
+        ],
+      },
+    ],
+    model: "QI-Core v4.1.1",
+    acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
+  },
+  {
+    id: "IDIDID1",
+    measureHumanReadableId: null,
+    ecqmTitle: "ecqmTitleeee",
+    measureSetId: "1",
+    cqlLibraryName: "QiCore1",
+    version: "0.0.000",
+    state: "NEW",
+    measureName: "new measure - A",
+    cql: null,
+    createdAt: null,
+    createdBy: "testuser",
+    lastModifiedAt: null,
+    lastModifiedBy: null,
+    model: Model.QDM_5_6,
+    active: true,
+    measureMetaData: {
+      draft: false,
     },
-  ],
-  model: "QI-Core v4.1.1",
-  acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
-} as unknown as Measure;
+    measureSet: {
+      cmsId: "cmsId1",
+    },
+  },
+  {
+    id: "IDIDID2",
+    measureHumanReadableId: null,
+    ecqmTitle: "ecqmTitleeee",
+    measureSetId: "2",
+    cqlLibraryName: "QiCore2",
+    version: "0.0.000",
+    state: "NEW",
+    measureName: "new measure - B",
+    cql: null,
+    createdAt: null,
+    createdBy: "testuser",
+    lastModifiedAt: null,
+    lastModifiedBy: null,
+    model: Model.QDM_5_6,
+    active: true,
+    measureMetaData: {
+      draft: true,
+    },
+    measureSet: {
+      cmsId: "cmsId2",
+    },
+  },
+] as unknown as Measure[];
 
 let mockApplyDefaults = false;
 jest.mock("@madie/madie-util", () => ({
@@ -87,6 +135,13 @@ jest.mock("@madie/madie-util", () => ({
     applyDefaults: mockApplyDefaults,
     TestCaseListButtons: false,
   })),
+  checkUserCanEdit: jest.fn().mockImplementation(() => true),
+}));
+
+const mockPush = jest.fn();
+jest.mock("react-router-dom", () => ({
+  ...(jest.requireActual("react-router-dom") as any),
+  useNavigate: () => mockPush,
 }));
 
 const renderWithTestCase = (
@@ -137,7 +192,7 @@ describe("TestCase component", () => {
       deleteTestCase,
       exportTestCase,
       onCloneTestCase,
-      defaultMeasure,
+      measures[0],
       setSelectedTestCasesMock
     );
 
@@ -189,7 +244,7 @@ describe("TestCase component", () => {
       deleteTestCase,
       exportTestCase,
       onCloneTestCase,
-      defaultMeasure,
+      measures[0],
       setSelectedTestCasesMock
     );
 
@@ -221,7 +276,7 @@ describe("TestCase component", () => {
       deleteTestCase,
       exportTestCase,
       onCloneTestCase,
-      defaultMeasure,
+      measures[0],
       setSelectedTestCasesMock
     );
 
@@ -255,7 +310,7 @@ describe("TestCase component", () => {
       deleteTestCase,
       exportTestCase,
       onCloneTestCase,
-      defaultMeasure,
+      measures[0],
       setSelectedTestCasesMock
     );
 
@@ -269,7 +324,6 @@ describe("TestCase component", () => {
 
     const buttons = await screen.findAllByRole("button");
     expect(buttons).toHaveLength(11);
-    expect(buttons[6]).toHaveTextContent("Action");
     fireEvent.click(buttons[6]);
     expect(screen.queryByText("edit")).not.toBeInTheDocument();
     expect(
@@ -294,7 +348,7 @@ describe("TestCase component", () => {
       deleteTestCase,
       exportTestCase,
       onCloneTestCase,
-      defaultMeasure,
+      measures[0],
       setSelectedTestCasesMock
     );
 
@@ -310,5 +364,120 @@ describe("TestCase component", () => {
 
     expect(onCloneTestCase).toHaveBeenCalled();
     expect(setSelectedTestCasesMock).toHaveBeenCalled();
+  });
+
+  it("should display View button if the measure is not a draft and the TestCaseListActionCenter feature flag is true", async () => {
+    (useFeatureFlags as jest.Mock).mockImplementation(() => ({
+      TestCaseListActionCenter: true,
+    }));
+
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn(); // Mock setSelectedTestCases
+
+    renderWithTestCase(
+      testCases,
+      true,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      measures[1],
+      setSelectedTestCasesMock
+    );
+
+    await waitFor(() => {
+      const actionButton = screen.getByTestId(
+        `view-edit-test-case-button-${testCases[0].id}`
+      );
+
+      expect(actionButton).toBeInTheDocument();
+      expect(actionButton).toHaveTextContent("View");
+      expect(mockPush).toHaveBeenCalledTimes(0);
+
+      userEvent.click(actionButton);
+
+      expect(mockPush).toHaveBeenCalled();
+      expect(mockPush).toHaveBeenCalledTimes(1);
+      expect(mockPush).toHaveBeenCalledWith("../../ID");
+    });
+  });
+
+  it("should display View button if the user does not have edit access to the measure and the TestCaseListActionCenter feature flag is true", async () => {
+    checkUserCanEdit.mockImplementation(() => false);
+
+    (useFeatureFlags as jest.Mock).mockImplementation(() => ({
+      TestCaseListActionCenter: true,
+    }));
+
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn(); // Mock setSelectedTestCases
+
+    renderWithTestCase(
+      testCases,
+      true,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      measures[2],
+      setSelectedTestCasesMock
+    );
+
+    await waitFor(() => {
+      const actionButton = screen.getByTestId(
+        `view-edit-test-case-button-${testCases[0].id}`
+      );
+
+      expect(actionButton).toBeInTheDocument();
+      expect(actionButton).toHaveTextContent("View");
+      expect(mockPush).toHaveBeenCalledTimes(0);
+
+      userEvent.click(actionButton);
+
+      expect(mockPush).toHaveBeenCalled();
+      expect(mockPush).toHaveBeenCalledTimes(1);
+      expect(mockPush).toHaveBeenCalledWith("../../ID");
+    });
+  });
+
+  it("should display Edit button if the user has edit access to the measure and it's a draft and the TestCaseListActionCenter feature flag is true", async () => {
+    checkUserCanEdit.mockImplementation(() => true);
+
+    (useFeatureFlags as jest.Mock).mockImplementation(() => ({
+      TestCaseListActionCenter: true,
+    }));
+
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn(); // Mock setSelectedTestCases
+
+    renderWithTestCase(
+      testCases,
+      true,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      measures[2],
+      setSelectedTestCasesMock
+    );
+
+    await waitFor(() => {
+      const actionButton = screen.getByTestId(
+        `view-edit-test-case-button-${testCases[0].id}`
+      );
+
+      expect(actionButton).toBeInTheDocument();
+      expect(actionButton).toHaveTextContent("Edit");
+      expect(mockPush).toHaveBeenCalledTimes(0);
+
+      userEvent.click(actionButton);
+
+      expect(mockPush).toHaveBeenCalled();
+      expect(mockPush).toHaveBeenCalledTimes(1);
+      expect(mockPush).toHaveBeenCalledWith("../../ID");
+    });
   });
 });
