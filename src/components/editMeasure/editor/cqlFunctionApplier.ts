@@ -103,7 +103,7 @@ const createCQLFunctionDeclaration = (cqlFunction: CQLFunction) => {
   const args = cqlFunction?.functionsArguments;
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    functionDeclarationString += `${arg.argumentName} "${arg.dataType}"`;
+    functionDeclarationString += `"${arg.argumentName}" "${arg.dataType}"`;
     // do we add a comma?
     if (i < args.length - 1) {
       functionDeclarationString += ", ";
@@ -259,7 +259,6 @@ export const editCQLFunction = (
 ): CqlApplyActionResult => {
   const cqlArr: string[] = cql.split("\n");
   const parseResults: CqlResult = new CqlAntlr(cql).parse();
-
   const functionDefinitions = parseResults?.expressionDefinitions.filter(
     (exp) => {
       return (
