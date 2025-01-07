@@ -19,7 +19,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useFeatureFlags } from "@madie/madie-util";
 import { blue, grey, red } from "@mui/material/colors";
 import { TestCase } from "@madie/madie-models";
-import FileCopyOutlinedIcon from "@mui/icons-material/FileCopyOutlined";
+import { Icon } from "@iconify-icon/react";
 
 interface ActionCenterProps {
   onSubmit?: any;
@@ -330,9 +330,11 @@ export default function ActionCenter(props: ActionCenterProps) {
                     disabled={disableCopyBtn}
                     data-testid="copy-action-btn"
                   >
-                    <FileCopyOutlinedIcon
+                    <Icon
+                      icon="fluent:share-screen-start-24-regular"
                       data-testid={`copy-action-icon`}
-                      sx={
+                      rotate={45}
+                      style={
                         disableCopyBtn
                           ? { color: grey[500] }
                           : { color: blue[700] }
