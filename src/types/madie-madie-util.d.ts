@@ -18,6 +18,7 @@ declare module "@madie/madie-util" {
     TestCaseListButtons: boolean;
     stu6TestCaseValidation: boolean;
     TestCaseListActionCenter: boolean;
+    CopyTestCases: boolean;
   }
 
   export interface ServiceConfig {

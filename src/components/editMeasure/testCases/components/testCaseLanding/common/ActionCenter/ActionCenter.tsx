@@ -15,6 +15,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useFeatureFlags } from "@madie/madie-util";
 import { blue, grey, red } from "@mui/material/colors";
 import { TestCase } from "@madie/madie-models";
+import FileCopyOutlinedIcon from "@mui/icons-material/FileCopyOutlined";
 
 interface ActionCenterProps {
   onSubmit?: any;
@@ -31,11 +32,13 @@ export default function ActionCenter(props: ActionCenterProps) {
   const [disableDeleteBtn, setDisableDeleteBtn] = useState<boolean>(true);
   const [disableCloneBtn, setDisableCloneBtn] = useState<boolean>(true);
   const [disableExportBtn, setDisableExportBtn] = useState<boolean>(true);
+  const [disableCopyBtn, setDisableCopyBtn] = useState<boolean>(true);
 
   useEffect(() => {
     deleteButtonCheck();
     cloneButtonCheck();
     exportButtonCheck();
+    copyButtonCheck();
   }, [selectedTestCases, canEdit, isQDM]);
 
   const { search } = useLocation();
@@ -121,6 +124,14 @@ export default function ActionCenter(props: ActionCenterProps) {
       } else {
         setDisableExportBtn(true);
       }
+    }
+  };
+
+  const copyButtonCheck = () => {
+    if (selectedTestCases?.length > 0) {
+      setDisableCopyBtn(false);
+    } else {
+      setDisableCopyBtn(true);
     }
   };
 
@@ -272,6 +283,36 @@ export default function ActionCenter(props: ActionCenterProps) {
                   </span>
                 </Tooltip>
               </div>
+            )}
+
+            {featureFlags.CopyTestCases && (
+              <Tooltip
+                data-testid="copy-tooltip"
+                title={
+                  disableCopyBtn
+                    ? "Select test cases to copy to another measure"
+                    : "Copy to another measure"
+                }
+                placement="top"
+                arrow
+              >
+                <span>
+                  <IconButton
+                    onClick={() => {}}
+                    disabled={disableCopyBtn}
+                    data-testid="copy-action-btn"
+                  >
+                    <FileCopyOutlinedIcon
+                      data-testid={`copy-action-icon`}
+                      sx={
+                        disableCopyBtn
+                          ? { color: grey[500] }
+                          : { color: blue[700] }
+                      }
+                    />
+                  </IconButton>
+                </span>
+              </Tooltip>
             )}
 
             <Tooltip

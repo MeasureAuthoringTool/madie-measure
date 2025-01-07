@@ -1,5 +1,5 @@
 import * as React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import ActionCenter from "./ActionCenter";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
@@ -24,6 +24,7 @@ describe("ActionCenter Component", () => {
     (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
     (useFeatureFlags as jest.Mock).mockReturnValue({
       TestCaseListActionCenter: true,
+      CopyTestCases: true,
     });
   });
 
@@ -152,6 +153,12 @@ describe("ActionCenter Component", () => {
       const cloneTooltip = await screen.findByTestId("clone-tooltip");
       expect(cloneTooltip).toHaveAttribute("aria-label", "Clone test case");
 
+      const copyTooltip = await screen.findByTestId("copy-tooltip");
+      expect(copyTooltip).toHaveAttribute(
+        "aria-label",
+        "Copy to another measure"
+      );
+
       const exportTooltip = await screen.findByTestId("export-tooltip");
       expect(exportTooltip).toHaveAttribute("aria-label", "Export test cases");
     });
@@ -174,6 +181,26 @@ describe("ActionCenter Component", () => {
       expect(cloneBtn).toBeEnabled();
       userEvent.click(cloneBtn);
       expect(onCloneTestCase).toBeCalled();
+    });
+
+    it("should not show copy test cases tooltips when feature flag is not on", async () => {
+      (useFeatureFlags as jest.Mock).mockReturnValue({
+        TestCaseListActionCenter: true,
+        CopyTestCases: false,
+      });
+      const selectedTestCase = [{ id: "1", validResource: true }];
+      render(
+        <MemoryRouter>
+          <ActionCenter
+            selectedTestCases={selectedTestCase}
+            canEdit={true}
+            isQDM={false}
+          />
+        </MemoryRouter>
+      );
+
+      const copyTooltip = await screen.queryByTestId("copy-tooltip");
+      expect(copyTooltip).not.toBeInTheDocument();
     });
   });
 });
