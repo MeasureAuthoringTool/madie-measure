@@ -25,11 +25,6 @@ const TypeEditor = ({
   label,
 }) => {
   const formik = useFormikContext();
-  console.log("formik is", formik);
-  console.log("label is", label);
-
-  const fieldValue = _.get(formik.values, label); // Use lodash to safely get the value
-
   const [childTypeDefs, setChildTypeDefs] = useState([]);
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   useEffect(() => {
@@ -41,13 +36,23 @@ const TypeEditor = ({
       });
     }
   }, [type]);
+
+  // helper neeeded for nested structures. cannot access with a string alone.
+  const getNestedProperty = (obj, path) => {
+    return path
+      .split(".")
+      .reduce((current, key) => current && current[key], obj);
+  };
+
+  const formikErrorHandler = (name: string) => {
+    const touched = getNestedProperty(formik.touched, name);
+    const errors = getNestedProperty(formik.errors, name);
+    if (touched && errors) {
+      return errors;
+    }
+  };
+
   if (fhirDefinitionsService.current.isComponentDataType(type)) {
-    console.log(
-      "formik.getFieldProps",
-      "id",
-      label,
-      formik.getFieldProps(label)
-    );
     switch (type) {
       case "string":
       case "http://hl7.org/fhirpath/System.String":
@@ -56,13 +61,11 @@ const TypeEditor = ({
             <StringComponent
               label={label}
               canEdit={canEdit}
-              value={value}
-              onChange={onChange}
+              helperText={formikErrorHandler(label)}
+              error={getNestedProperty(formik.errors, label)}
               structureDefinition={null}
-              // {...formik.getFieldProps(`"${label}"`)}
-              {...formik.getFieldProps(label)}
-              // {...formik.getFieldMeta(label)}
               fieldRequired={required}
+              {...formik.getFieldProps(label)}
             />
           </Box>
         );

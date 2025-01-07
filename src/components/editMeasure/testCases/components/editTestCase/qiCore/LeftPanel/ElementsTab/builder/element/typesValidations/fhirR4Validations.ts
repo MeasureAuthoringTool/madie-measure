@@ -29,9 +29,7 @@ export const getStringValidator = (required) => {
     stringRegex,
     "Invalid String format"
   );
-  // if (required) {
   return baseValidator.required("This field is required");
-  // }
 };
 
 /*
@@ -47,6 +45,11 @@ export const validationLookup = {
   id: getIdValidator,
 };
 
-export const getValidation = (type) => {
-  return validationLookup[type];
+export const getValidation = (type, required) => {
+  // return Yup.string().required();
+  if (validationLookup[type]) {
+    const validation = validationLookup[type];
+    return validation(required);
+  }
+  return Yup.mixed();
 };

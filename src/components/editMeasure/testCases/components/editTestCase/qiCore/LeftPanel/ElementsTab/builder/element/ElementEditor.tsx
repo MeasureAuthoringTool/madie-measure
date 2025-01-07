@@ -35,12 +35,9 @@ const ElementEditor = ({
   // const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   const fhirDefinitionsServiceApi = useFhirDefinitionsServiceApi();
   const fhirDefinitionsService = useRef(fhirDefinitionsServiceApi);
-  console.log("elementDefinition", elementDefinition);
   const [loading, setLoading] = useState(true);
   const [initialValues, setInitialValues] = useState({});
   const [validationSchema, setValidationSchema] = useState({});
-  console.log("initialvalues are", initialValues);
-  console.log("validationSchema", validationSchema);
 
   const buildNode = async (
     child,
@@ -52,21 +49,28 @@ const ElementEditor = ({
     const type = child?.type?.[0]?.code;
     if (!fhirDefinitionsService.current.isComponentDataType(type)) {
       // Fetch the resource tree asynchronously
-      const def = await fhirDefinitionsService.current.getResourceTree(type);
-      const elements = fhirDefinitionsService.current.getTopLevelElements(def);
-
-      // Recursively call buildNode for each element
-      for (const element of elements) {
-        nodeList = await buildNode(
-          element,
-          resourcePath,
-          fhirDefinitionsService,
-          resource,
-          nodeList
-        );
+      // nesting these ifs to avoid a crash in deeply nested Claimresponse.item. Might cause issue elsewhere.
+      if (type) {
+        const def = await fhirDefinitionsService.current.getResourceTree(type);
+        if (def) {
+          const elements =
+            fhirDefinitionsService.current.getTopLevelElements(def);
+          if (elements) {
+            for (const element of elements) {
+              element.id = resourcePath + "." + element.id;
+              element.path = resourcePath + "." + element.path;
+              nodeList = await buildNode(
+                element,
+                resourcePath,
+                fhirDefinitionsService,
+                resource,
+                nodeList
+              );
+            }
+          }
+          return nodeList; // Return the aggregated node list
+        }
       }
-
-      return nodeList; // Return the aggregated node list
     } else {
       // It's a single node. Add it to the node list
       const required = +child.min > 0;
@@ -82,9 +86,9 @@ const ElementEditor = ({
         value,
         type,
         required,
+        validation: getValidation(type, required),
       };
-
-      return nodeList.concat(builtNode); // Add the single node to the list
+      return nodeList.concat(builtNode);
     }
   };
 
@@ -112,32 +116,59 @@ const ElementEditor = ({
       // associate id with form
       results[builtNode.id] = builtNode;
     }
-    console.log("results are", results);
     buildSchemaAndInitialValues(results);
+  };
+
+  const recursiveAddYupObject = (validationSchema) => {
+    // Iterate over each key in the object
+    for (const key in validationSchema) {
+      const value = validationSchema[key];
+      if (!Yup.isSchema(value) && typeof value === "object") {
+        // we need to convert this key to a yup object, but we also need to check deeper.
+        if (
+          validationSchema[key] &&
+          typeof validationSchema[key] === "object" &&
+          !Array.isArray(validationSchema[key])
+        ) {
+          recursiveAddYupObject(validationSchema[key]);
+        }
+        validationSchema[key] = Yup.object(value);
+      }
+    }
+    return validationSchema;
   };
 
   // given form info, we're going to make an object of schemas and save it to state for formik.
   const buildSchemaAndInitialValues = (formInfo) => {
     const initialValuesObject = {};
     const validationSchemaObject = {};
+    const setNestedValue = (obj, path, value) => {
+      const keys = path.split(".");
+      let currentObj = obj;
+      // start nested structure
+      keys.forEach((key, index) => {
+        if (index === keys.length - 1) {
+          currentObj[key] = value;
+        } else {
+          currentObj[key] = currentObj[key] || {};
+          currentObj = currentObj[key];
+        }
+      });
+    };
     for (const key in formInfo) {
-      initialValuesObject[key] = formInfo[key].value; // attach value against id
-      // may return undefined if we're missing the validation
-      const validation = getValidation(formInfo[key].type);
-      if (validation) {
-        validationSchemaObject[formInfo[key].id] = validation(
-          formInfo[key].required
-        );
-        console.log("validation", validation);
-      }
+      const { value, type, validation } = formInfo[key];
+      setNestedValue(initialValuesObject, key, value);
+      setNestedValue(validationSchemaObject, key, validation);
     }
-    console.log("schemaObject", validationSchemaObject);
     setInitialValues(initialValuesObject);
-    // formik.setValues(initialValues); // Update formik values dynamically
-    setValidationSchema(Yup.object().shape(validationSchemaObject));
-    // formik.setValidationSchema(validationSchema); //
+    setValidationSchema(
+      Yup.object().shape(recursiveAddYupObject(validationSchemaObject))
+    );
+    console.log("validationschema", validationSchemaObject);
+    // need a loading toggle or formikProvider dies violently.
     setLoading(false);
   };
+
   const triggerFormBuilder = async () => {
     const currentPath = elementDefinition?.path;
     const allChildren = fhirDefinitionsService?.current?.getAllChildren(
@@ -154,7 +185,6 @@ const ElementEditor = ({
   };
   useEffect(() => {
     if (elementDefinition) {
-      console.log("firing");
       triggerFormBuilder();
     }
   }, [elementDefinition?.id]);

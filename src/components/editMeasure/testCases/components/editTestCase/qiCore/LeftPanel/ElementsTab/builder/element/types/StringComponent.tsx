@@ -12,30 +12,44 @@ import { TextField } from "@madie/madie-design-system/dist/react";
 const StringComponent = ({
   canEdit,
   fieldRequired,
-  value,
-  onChange,
+  helperText,
+  // value,
+  // onChange,
   label = "VALUE",
   structureDefinition,
   ...props
 }: TypeComponentProps) => {
+  console.log("helperText is", helperText);
+  // console.log("props are", props);
+  // console.log('onChange', onChange)
   return (
     <TextField
       required={fieldRequired}
       disabled={!canEdit}
       id={`string-field-${label}`}
       label={`> ${label}`}
+      helperText={helperText}
       labelColor="#1976d2"
-      inputProps={{
-        "data-testid": `string-field-input-${label}`,
-        "aria-describedby": `string-field-input-helper-text-${label}`,
-        required: fieldRequired,
-        "aria-required": fieldRequired,
-      }}
+      // inputProps={{
+      //   "data-testid": `string-field-input-${label}`,
+      //   "aria-describedby": `string-field-input-helper-text-${label}`,
+      //   required: fieldRequired,
+      //   "aria-required": fieldRequired,
+      // }}
       data-testid={`string-field-${label}`}
       size="small"
       fullWidth
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
+      // value={value}
+      //@ts-ignore
+      // name={props.name}
+      // onChange={
+      //   (e) => {
+      //     //@ts-ignore
+      //     onChange(props.name, e.target.value)
+      //   }
+      // }
+      // onChange={(e) => onChange(e.target.value)}
+      // onChange
       onKeyPress={(event) => {
         const filteredValue = event.key?.replace(/[^a-zA-Z]/g, "");
         if (!filteredValue) {
