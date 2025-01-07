@@ -13,6 +13,7 @@ import IntegerComponent, { IntegerType } from "./types/IntegerComponent";
 import CodesComponent from "./types/CodesComponent";
 import { Instant } from "@madie/madie-design-system/dist/react";
 import TimeComponent from "./types/TimeComponent";
+import { useFormikContext } from "formik";
 
 const TypeEditor = ({
   type,
@@ -23,6 +24,12 @@ const TypeEditor = ({
   canEdit,
   label,
 }) => {
+  const formik = useFormikContext();
+  console.log("formik is", formik);
+  console.log("label is", label);
+
+  const fieldValue = _.get(formik.values, label); // Use lodash to safely get the value
+
   const [childTypeDefs, setChildTypeDefs] = useState([]);
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   useEffect(() => {
@@ -35,6 +42,12 @@ const TypeEditor = ({
     }
   }, [type]);
   if (fhirDefinitionsService.current.isComponentDataType(type)) {
+    console.log(
+      "formik.getFieldProps",
+      "id",
+      label,
+      formik.getFieldProps(label)
+    );
     switch (type) {
       case "string":
       case "http://hl7.org/fhirpath/System.String":
@@ -46,6 +59,9 @@ const TypeEditor = ({
               value={value}
               onChange={onChange}
               structureDefinition={null}
+              // {...formik.getFieldProps(`"${label}"`)}
+              {...formik.getFieldProps(label)}
+              // {...formik.getFieldMeta(label)}
               fieldRequired={required}
             />
           </Box>

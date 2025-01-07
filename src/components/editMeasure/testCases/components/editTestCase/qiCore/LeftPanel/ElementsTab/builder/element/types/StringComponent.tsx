@@ -16,6 +16,7 @@ const StringComponent = ({
   onChange,
   label = "VALUE",
   structureDefinition,
+  ...props
 }: TypeComponentProps) => {
   return (
     <TextField
@@ -41,6 +42,7 @@ const StringComponent = ({
           event.preventDefault();
         }
       }}
+      {...props}
     />
   );
 };

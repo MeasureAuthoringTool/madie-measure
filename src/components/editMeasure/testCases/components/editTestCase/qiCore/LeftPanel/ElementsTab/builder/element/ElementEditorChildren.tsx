@@ -4,7 +4,6 @@ import { Box } from "@mui/material";
 import TypeEditor from "./TypeEditor";
 import ElementSection from "../../../../../../common/ElementSection";
 import { transformArrays } from "./transformArrays";
-// import { useFormikContext } from "formik";
 
 const Element = ({ element, label, resource, handleChange, canEdit }) => {
   let elementValue = _.get(resource, label);
@@ -47,7 +46,6 @@ const ElementEditorChildren = ({
       childrenLeftOver.push(child);
     }
   });
-  console.log('allChildren', allChildren);
   let heading = "";
   if (childrenToRender?.length > 0) {
     const path = childrenToRender[0].path.split(".");

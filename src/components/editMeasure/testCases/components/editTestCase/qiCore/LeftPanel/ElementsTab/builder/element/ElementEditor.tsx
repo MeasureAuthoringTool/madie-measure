@@ -1,11 +1,16 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Box } from "@mui/material";
 import * as _ from "lodash";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import ElementEditorChildren from "./ElementEditorChildren";
 import "./ElementEditor.scss";
-import { FormikConsumer, FormikContext, useFormikContext, useFormik, FormikProvider } from "formik";
-// import { elementEditorFormBuilder } from "./ElementEditorFormBuilder";
+import {
+  FormikConsumer,
+  FormikContext,
+  useFormikContext,
+  useFormik,
+  FormikProvider,
+} from "formik";
 import * as Yup from "yup";
 import { getValidation } from "./typesValidations/fhirR4Validations";
 
@@ -27,21 +32,139 @@ const ElementEditor = ({
   onChange,
   canEdit,
 }: ElementEditorProps) => {
-  const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
+  // const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
+  const fhirDefinitionsServiceApi = useFhirDefinitionsServiceApi();
+  const fhirDefinitionsService = useRef(fhirDefinitionsServiceApi);
+  console.log("elementDefinition", elementDefinition);
+  const [loading, setLoading] = useState(true);
+  const [initialValues, setInitialValues] = useState({});
+  const [validationSchema, setValidationSchema] = useState({});
+  console.log("initialvalues are", initialValues);
+  console.log("validationSchema", validationSchema);
 
-  const [intialValues, setInitialValues] = useState({})
-  const [validationSchema, setValidationSchema] = useState({})
+  const buildNode = async (
+    child,
+    resourcePath,
+    fhirDefinitionsService,
+    resource,
+    nodeList = []
+  ) => {
+    const type = child?.type?.[0]?.code;
+    if (!fhirDefinitionsService.current.isComponentDataType(type)) {
+      // Fetch the resource tree asynchronously
+      const def = await fhirDefinitionsService.current.getResourceTree(type);
+      const elements = fhirDefinitionsService.current.getTopLevelElements(def);
 
+      // Recursively call buildNode for each element
+      for (const element of elements) {
+        nodeList = await buildNode(
+          element,
+          resourcePath,
+          fhirDefinitionsService,
+          resource,
+          nodeList
+        );
+      }
+
+      return nodeList; // Return the aggregated node list
+    } else {
+      // It's a single node. Add it to the node list
+      const required = +child.min > 0;
+      const elemPath = fhirDefinitionsService.current.stripResourcePath(
+        resourcePath,
+        child.path
+      );
+
+      const value = _.get(resource, elemPath);
+      const builtNode = {
+        id: child?.id,
+        label: child.path.split(".").pop(),
+        value,
+        type,
+        required,
+      };
+
+      return nodeList.concat(builtNode); // Add the single node to the list
+    }
+  };
+
+  const buildForm = async (
+    rootDefinition,
+    allChildren,
+    fhirDefinitionsService,
+    resourcePath,
+    resource
+  ) => {
+    const results = {};
+    const nodeList = [];
+    const allNodes = [rootDefinition, ...allChildren];
+    for (const node of allNodes) {
+      nodeList.push(
+        ...(await buildNode(
+          node,
+          resourcePath,
+          fhirDefinitionsService,
+          resource
+        ))
+      );
+    }
+    for (const builtNode of nodeList) {
+      // associate id with form
+      results[builtNode.id] = builtNode;
+    }
+    console.log("results are", results);
+    buildSchemaAndInitialValues(results);
+  };
+
+  // given form info, we're going to make an object of schemas and save it to state for formik.
+  const buildSchemaAndInitialValues = (formInfo) => {
+    const initialValuesObject = {};
+    const validationSchemaObject = {};
+    for (const key in formInfo) {
+      initialValuesObject[key] = formInfo[key].value; // attach value against id
+      // may return undefined if we're missing the validation
+      const validation = getValidation(formInfo[key].type);
+      if (validation) {
+        validationSchemaObject[formInfo[key].id] = validation(
+          formInfo[key].required
+        );
+        console.log("validation", validation);
+      }
+    }
+    console.log("schemaObject", validationSchemaObject);
+    setInitialValues(initialValuesObject);
+    // formik.setValues(initialValues); // Update formik values dynamically
+    setValidationSchema(Yup.object().shape(validationSchemaObject));
+    // formik.setValidationSchema(validationSchema); //
+    setLoading(false);
+  };
+  const triggerFormBuilder = async () => {
+    const currentPath = elementDefinition?.path;
+    const allChildren = fhirDefinitionsService?.current?.getAllChildren(
+      selectedResource,
+      currentPath
+    );
+    await buildForm(
+      elementDefinition,
+      allChildren,
+      fhirDefinitionsService,
+      resourcePath,
+      resource
+    );
+  };
+  useEffect(() => {
+    if (elementDefinition) {
+      console.log("firing");
+      triggerFormBuilder();
+    }
+  }, [elementDefinition?.id]);
 
   const formik = useFormik({
-    initialValues: {
-      intialValues
-
-    },
+    initialValues,
     enableReinitialize: true,
-    validationSchema: validationSchema,
-    onSubmit: values => {
-      console.log('values are', values)
+    validationSchema,
+    onSubmit: (values) => {
+      console.log("values are", values);
     },
   });
   if (_.isNil(elementDefinition)) {
@@ -52,123 +175,38 @@ const ElementEditor = ({
     selectedResource,
     currentPath
   );
-  
-  const getChildTypeDefs = (type) => {
-    if (!fhirDefinitionsService.current.isComponentDataType(type)) {
-      fhirDefinitionsService.current.getResourceTree(type).then((def) => {
-        const elements =
-          fhirDefinitionsService.current.getTopLevelElements(def);
-        return elements;
-      });
-    }
-    return null;
-  }
-
-  
-  // <TypeEditor will either render a node or all top level elements if it's not a root. We need to make that check here
-  
-  const buildNode = (child, resourcePath, fhirDefinitionsService, resource) => {
-    // given a child, 
-    // is it a single render type? 
-    const type = child?.type?.[0].code;
-    if (!fhirDefinitionsService.current.isComponentDataType(type)) {
-      console.log('!not', child)
-      fhirDefinitionsService.current.getResourceTree(type).then((def) => {
-        const elements =
-          fhirDefinitionsService.current.getTopLevelElements(def);
-        console.log('elements from build node are', elements);
-      });
-    }
-
-    const required = +child.min > 0;
-    const elemPath = fhirDefinitionsService.current.stripResourcePath(
-      resourcePath,
-      child.path
-    );
-    
-    let value = _.get(resource, elemPath);
-    return {
-      id: child?.id,
-      label: child.path.split(".")[child.path.split(".").length - 1],
-      value,
-      type,
-      required
-    }
-  }
-  
-
-  const buildForm = (rootDefinition, allChildren, fhirDefinitionsService, resourcePath, resource) => {
-    const results = {}; 
-    const node = buildNode(rootDefinition, resourcePath, fhirDefinitionsService, resource);
-    results[node.id] = node;
-    const childTypeDefs = getChildTypeDefs(node.type);
-    if (childTypeDefs){
-      for (const ch of childTypeDefs){
-        const builtNode = buildNode(ch, resourcePath, fhirDefinitionsService, resource);
-        results[builtNode.id] = builtNode;
-      }
-    }
-
-    for(const child of allChildren){
-      // console.log('child is', child)
-      const builtNode = buildNode(child, resourcePath, fhirDefinitionsService, resource);
-      results[builtNode.id] = builtNode;
-    }
-    return results;
-  }
   const currentDepth = elementDefinition?.path.split(".").length;
-  
-  const formInfo = buildForm(elementDefinition, allChildren,  fhirDefinitionsService, resourcePath, resource) // useThis to init values and schema
-  const form = {};
-  const validationSchemaObject = {}
-  // const validationSchema = Yup.object().shape({
-  //   // key: schema.getSchema
-  // });
-
-  for (const key in formInfo){
-    form[key] = formInfo[key].value
-    const validation = getValidation(formInfo[key].type);
-    if (validation){
-      validationSchemaObject[formInfo[key].id] = validation(formInfo[key].requried)
-    }
-  }
-  console.log('formInfo is', formInfo);
-  console.log('form is', form)
-  console.log('vaidationSchemaObject', validationSchemaObject);
-  // setInitialValues()
-
-  
-
-  if (formInfo){
+  // <TypeEditor will either render a node or all top level elements if it's not a root. We need to make that check here
+  if (!loading) {
     return (
       <FormikProvider value={formik}>
-      <Box
-        sx={{
-          p: 3,
-          display: "flex",
-          flexDirection: "column",
-          width: "100%",
-        }}
-        id="element-editor"
-      >
-        {/* we need to render not only the current item, but all children */}
-        <ElementEditorChildren //recursive render control
-          // stuff we need only at the init root
-          resourcePath={resourcePath}
-          fhirDefinitionsService={fhirDefinitionsService}
-          rootDefinition={elementDefinition}
-          // stuff we need everywhere
-          allChildren={allChildren}
-          currentDepth={currentDepth}
-          resource={resource}
-          handleChange={onChange}
-          canEdit={canEdit}
-        />
-      </Box>
+        <Box
+          sx={{
+            p: 3,
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+          }}
+          id="element-editor"
+        >
+          {/* we need to render not only the current item, but all children */}
+          <ElementEditorChildren //recursive render control
+            // stuff we need only at the init root
+            resourcePath={resourcePath}
+            fhirDefinitionsService={fhirDefinitionsService}
+            rootDefinition={elementDefinition}
+            // stuff we need everywhere
+            allChildren={allChildren}
+            currentDepth={currentDepth}
+            resource={resource}
+            handleChange={onChange}
+            canEdit={canEdit}
+          />
+        </Box>
       </FormikProvider>
     );
   }
-  return null;
+  return <div />;
 };
 
 export default ElementEditor;
