@@ -39,8 +39,6 @@ const mockFormik: FormikContextType<any> = {
       onBlur: jest.fn(),
     };
   },
-  errors: {},
-  touched: {},
   handleChange: () => {},
   setFieldValue: jest.fn(),
 };
@@ -137,6 +135,38 @@ describe("TypeEditor Component", () => {
     );
     expect(inputField).toBeInTheDocument();
     expect(inputField.value).toBe("test");
+  });
+
+  test("String field should display errors and helper text", () => {
+    const touched = {
+      ClaimResponse: {
+        id: true,
+      },
+    };
+    const errors = {
+      ClaimResponse: {
+        id: "This field is required",
+      },
+    };
+    const handleChange = jest.fn();
+    const errorFormik = { ...mockFormik, errors, touched };
+    render(
+      <FormikProvider value={errorFormik}>
+        <TypeEditor
+          type={`http://hl7.org/fhirpath/System.String`}
+          required={false}
+          onChange={handleChange}
+          structureDefinition={null}
+          label={"ClaimResponse.id"}
+        />
+      </FormikProvider>
+    );
+    const inputField = screen.getByTestId(
+      "string-field-input-ClaimResponse.id"
+    );
+    expect(inputField).toBeInTheDocument();
+    const errorText = screen.getByText("This field is required");
+    expect(errorText).toBeInTheDocument();
   });
 
   test("Should render Period component", () => {

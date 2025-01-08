@@ -4,13 +4,7 @@ import * as _ from "lodash";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import ElementEditorChildren from "./ElementEditorChildren";
 import "./ElementEditor.scss";
-import {
-  FormikConsumer,
-  FormikContext,
-  useFormikContext,
-  useFormik,
-  FormikProvider,
-} from "formik";
+import { useFormik, FormikProvider } from "formik";
 import * as Yup from "yup";
 import { getValidation } from "./typesValidations/fhirR4Validations";
 
