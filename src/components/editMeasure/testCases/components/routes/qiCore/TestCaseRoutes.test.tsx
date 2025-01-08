@@ -787,70 +787,72 @@ describe("TestCaseRoutes", () => {
     });
   });
 
-  it("should render 404 page", async () => {
-    const { getByTestId } = render(
-      <MemoryRouter initialEntries={["/measures/m1234/edit/invalid-url"]}>
-        <ApiContextProvider value={serviceConfig}>
-          <Routes>
-            <Route
-              path="/measures/:measureId/edit/test-cases/*"
-              element={<TestCaseRoutes />}
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </ApiContextProvider>
-      </MemoryRouter>
-    );
+  describe("Merge Safe", () => {
+    it("should render 404 page", async () => {
+      const { getByTestId } = render(
+        <MemoryRouter initialEntries={["/measures/m1234/edit/invalid-url"]}>
+          <ApiContextProvider value={serviceConfig}>
+            <Routes>
+              <Route
+                path="/measures/:measureId/edit/test-cases/*"
+                element={<TestCaseRoutes />}
+              />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </ApiContextProvider>
+        </MemoryRouter>
+      );
 
-    expect(getByTestId("404-page")).toBeInTheDocument();
-    expect(getByTestId("404-page-link")).toBeInTheDocument();
-  });
-
-  it("should display error message when fetch test cases fails", async () => {
-    mockedAxios.get.mockImplementation((args) => {
-      if (args && args.endsWith("series")) {
-        return Promise.resolve({ data: ["SeriesA"] });
-      } else if (
-        args &&
-        args.startsWith(serviceConfig.measureService.baseUrl)
-      ) {
-        return Promise.resolve({
-          data: {
-            id: "m1234",
-            createdBy: MEASURE_CREATEDBY,
-            measureScoring: MeasureScoring.COHORT,
-            measurementPeriodStart: "2023-01-01",
-            measurementPeriodEnd: "2023-12-31",
-          },
-        });
-      } else if (args && args.endsWith("test-cases")) {
-        return Promise.reject({
-          error: {
-            message: "Unable to retrieve test cases, please try later",
-          },
-        });
-      }
-      return Promise.resolve({ data: null });
+      expect(getByTestId("404-page")).toBeInTheDocument();
+      expect(getByTestId("404-page-link")).toBeInTheDocument();
     });
 
-    const { getByTestId } = render(
-      <MemoryRouter
-        initialEntries={["/measures/m1234/edit/test-cases/list-page"]}
-      >
-        <ApiContextProvider value={serviceConfig}>
-          <Routes>
-            <Route
-              path="/measures/:measureId/edit/test-cases/*"
-              element={<TestCaseRoutes />}
-            />
-          </Routes>
-        </ApiContextProvider>
-      </MemoryRouter>
-    );
+    it("should display error message when fetch test cases fails", async () => {
+      mockedAxios.get.mockImplementation((args) => {
+        if (args && args.endsWith("series")) {
+          return Promise.resolve({ data: ["SeriesA"] });
+        } else if (
+          args &&
+          args.startsWith(serviceConfig.measureService.baseUrl)
+        ) {
+          return Promise.resolve({
+            data: {
+              id: "m1234",
+              createdBy: MEASURE_CREATEDBY,
+              measureScoring: MeasureScoring.COHORT,
+              measurementPeriodStart: "2023-01-01",
+              measurementPeriodEnd: "2023-12-31",
+            },
+          });
+        } else if (args && args.endsWith("test-cases")) {
+          return Promise.reject({
+            error: {
+              message: "Unable to retrieve test cases, please try later",
+            },
+          });
+        }
+        return Promise.resolve({ data: null });
+      });
 
-    await waitFor(() => {
-      const error = getByTestId("execution_context_loading_errors");
-      expect(error).toBeInTheDocument();
+      const { getByTestId } = render(
+        <MemoryRouter
+          initialEntries={["/measures/m1234/edit/test-cases/list-page"]}
+        >
+          <ApiContextProvider value={serviceConfig}>
+            <Routes>
+              <Route
+                path="/measures/:measureId/edit/test-cases/*"
+                element={<TestCaseRoutes />}
+              />
+            </Routes>
+          </ApiContextProvider>
+        </MemoryRouter>
+      );
+
+      await waitFor(() => {
+        const error = getByTestId("execution_context_loading_errors");
+        expect(error).toBeInTheDocument();
+      });
     });
   });
 });
