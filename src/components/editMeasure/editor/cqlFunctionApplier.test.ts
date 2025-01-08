@@ -56,7 +56,7 @@ describe("Definition Apply Function tests", () => {
     const updatedCql = updatedCqlObject.cql;
     expect(updatedCql).toContain("/* numerator comment */");
     expect(updatedCql).toContain(
-      `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
+      `define function \"Function name here\"(\"arg1\" \"Integer\", \"arg2\" \"Integer\"):`
     );
   });
 
@@ -64,7 +64,7 @@ describe("Definition Apply Function tests", () => {
     const mockCql = getMock("cqlFunctionAppliernoDefines");
     const { cql } = applyCQLFunction(mockCql, testFunction);
     expect(cql).toContain(
-      `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
+      `define function \"Function name here\"(\"arg1\" \"Integer\", \"arg2\" \"Integer\"):`
     );
   });
 
@@ -105,7 +105,7 @@ describe("Definition Apply Function tests", () => {
     const mockCql = getMock("cqlFunctionAppliernoCodes");
     const { cql } = applyCQLFunction(mockCql, testFunction);
     expect(cql).toContain(
-      `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
+      `define function \"Function name here\"(\"arg1\" \"Integer\", \"arg2\" \"Integer\"):`
     );
   });
 
@@ -113,7 +113,7 @@ describe("Definition Apply Function tests", () => {
     const mockCql = getMock("cqlFunctionAppliernoCodeSystems");
     const { cql } = applyCQLFunction(mockCql, testFunction);
     expect(cql).toContain(
-      `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
+      `define function \"Function name here\"(\"arg1\" \"Integer\", \"arg2\" \"Integer\"):`
     );
   });
 
@@ -121,7 +121,7 @@ describe("Definition Apply Function tests", () => {
     const mockCql = getMock("cqlFunctionAppliernoValuesets");
     const { cql } = applyCQLFunction(mockCql, testFunction);
     expect(cql).toContain(
-      `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
+      `define function \"Function name here\"(\"arg1\" \"Integer\", \"arg2\" \"Integer\"):`
     );
   });
 
@@ -129,7 +129,7 @@ describe("Definition Apply Function tests", () => {
     const mockCql = getMock("cqlFunctionAppliernoParams");
     const { cql } = applyCQLFunction(mockCql, testFunction);
     expect(cql).toContain(
-      `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
+      `define function \"Function name here\"(\"arg1\" \"Integer\", \"arg2\" \"Integer\"):`
     );
   });
 
@@ -137,7 +137,7 @@ describe("Definition Apply Function tests", () => {
     const mockCql = getMock("cqlFunctionAppliernoCodeSystems");
     const { cql } = applyCQLFunction(mockCql, testFunction);
     expect(cql).toContain(
-      `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
+      `define function \"Function name here\"(\"arg1\" \"Integer\", \"arg2\" \"Integer\"):`
     );
   });
 
@@ -145,7 +145,7 @@ describe("Definition Apply Function tests", () => {
     const mockCql = getMock("cqlFunctionAppliernoIncludes");
     const { cql } = applyCQLFunction(mockCql, testFunction);
     expect(cql).toContain(
-      `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
+      `define function \"Function name here\"(\"arg1\" \"Integer\", \"arg2\" \"Integer\"):`
     );
   });
 
@@ -153,14 +153,14 @@ describe("Definition Apply Function tests", () => {
     const mockCql = getMock("cqlFunctionAppliernoUsings");
     const { cql } = applyCQLFunction(mockCql, testFunction);
     expect(cql).toContain(
-      `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
+      `define function \"Function name here\"(\"arg1\" \"Integer\", \"arg2\" \"Integer\"):`
     );
   });
   it("canInsert when no library", () => {
     const mockCql = getMock("cqlFunctionAppliernoLibrary");
     const { cql } = applyCQLFunction(mockCql, testFunction);
     expect(cql).toContain(
-      `define function \"Function name here\"(arg1 \"Integer\", arg2 \"Integer\"):`
+      `define function \"Function name here\"(\"arg1\" \"Integer\", \"arg2\" \"Integer\"):`
     );
   });
 
