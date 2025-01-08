@@ -343,7 +343,6 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       return `${formik.errors[name]}`;
     }
   }
-  console.log("formik is", formik);
 
   // we create a state to track current focus. We only display helper text on focus and remove current focus on blur
   const [focusedField, setFocusedField] = useState("");

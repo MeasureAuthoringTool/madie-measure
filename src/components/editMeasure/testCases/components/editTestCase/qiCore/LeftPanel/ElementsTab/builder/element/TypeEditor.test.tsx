@@ -5,7 +5,6 @@ import useFhirDefinitionsServiceApi, {
   FhirDefinitionsServiceApi,
 } from "../../../../../../../api/useFhirDefinitionsService";
 import { FormikProvider, FormikContextType } from "formik";
-import { useFormikContext } from "formik";
 
 const getNestedProperty = (obj, path) => {
   return path.split(".").reduce((current, key) => current && current[key], obj);
