@@ -13,6 +13,7 @@ export const getMarkDownValidator = (required) => {
   if (required) {
     return baseValidator.required("This field is required");
   }
+  return baseValidator;
 };
 
 export const getIdValidator = (required) => {
@@ -21,6 +22,7 @@ export const getIdValidator = (required) => {
   if (required) {
     return baseValidator.required("This field is required");
   }
+  return baseValidator;
 };
 
 export const getStringValidator = (required) => {
@@ -29,7 +31,10 @@ export const getStringValidator = (required) => {
     stringRegex,
     "Invalid String format"
   );
-  return baseValidator.required("This field is required");
+  if (required) {
+    return baseValidator.required("This field is required");
+  }
+  return baseValidator;
 };
 
 /*
@@ -46,7 +51,6 @@ export const validationLookup = {
 };
 
 export const getValidation = (type, required) => {
-  // return Yup.string().required();
   if (validationLookup[type]) {
     const validation = validationLookup[type];
     return validation(required);
