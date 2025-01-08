@@ -129,6 +129,32 @@ const measures = [
   },
 ] as unknown as Measure[];
 
+const defaultMeasure = {
+  id: "m1234",
+  measureScoring: MeasureScoring.COHORT,
+  createdBy: "testuser",
+  groups: [
+    {
+      groupId: "Group1_ID",
+      scoring: "Cohort",
+      populations: [
+        {
+          id: "id-1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Pop1",
+        },
+      ],
+      stratifications: [
+        {
+          id: "strat-id-1",
+        },
+      ],
+    },
+  ],
+  model: "QI-Core v4.1.1",
+  acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
+} as unknown as Measure;
+
 let mockApplyDefaults = false;
 jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: jest.fn().mockImplementation(() => ({
@@ -372,7 +398,6 @@ describe("TestCase component", () => {
     expect(setSelectedTestCasesMock).toHaveBeenCalled();
   });
 
-  describe("Merge Safe", () => {
     it("should show the delete confirmation dialog when delete button is clicked", async () => {
       const deleteTestCase = jest.fn();
       const exportTestCase = jest.fn();
@@ -441,8 +466,8 @@ describe("TestCase component", () => {
 
       fireEvent.click(confirmButton);
       expect(deleteTestCase).toHaveBeenCalled();
-       });
   });
+
   it("should display View button if the measure is not a draft and the TestCaseListActionCenter feature flag is true", async () => {
     (useFeatureFlags as jest.Mock).mockImplementation(() => ({
       TestCaseListActionCenter: true,
