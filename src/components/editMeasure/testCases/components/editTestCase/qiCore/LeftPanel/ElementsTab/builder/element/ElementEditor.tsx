@@ -32,7 +32,6 @@ const ElementEditor = ({
   onChange,
   canEdit,
 }: ElementEditorProps) => {
-  // const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   const fhirDefinitionsServiceApi = useFhirDefinitionsServiceApi();
   const fhirDefinitionsService = useRef(fhirDefinitionsServiceApi);
   const [loading, setLoading] = useState(true);
@@ -164,7 +163,6 @@ const ElementEditor = ({
     setValidationSchema(
       Yup.object().shape(recursiveAddYupObject(validationSchemaObject))
     );
-    console.log("validationschema", validationSchemaObject);
     // need a loading toggle or formikProvider dies violently.
     setLoading(false);
   };
@@ -193,9 +191,7 @@ const ElementEditor = ({
     initialValues,
     enableReinitialize: true,
     validationSchema,
-    onSubmit: (values) => {
-      console.log("values are", values);
-    },
+    onSubmit: (values) => {},
   });
   if (_.isNil(elementDefinition)) {
     return <span>No element selected</span>;
