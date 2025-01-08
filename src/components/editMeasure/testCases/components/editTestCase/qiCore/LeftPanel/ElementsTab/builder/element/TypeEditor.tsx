@@ -36,7 +36,6 @@ const TypeEditor = ({
       });
     }
   }, [type]);
-
   // helper neeeded for nested structures. cannot access with a string alone.
   const getNestedProperty = (obj, path) => {
     return path
