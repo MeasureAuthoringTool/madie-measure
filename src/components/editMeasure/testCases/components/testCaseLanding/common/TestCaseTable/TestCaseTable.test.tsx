@@ -398,74 +398,74 @@ describe("TestCase component", () => {
     expect(setSelectedTestCasesMock).toHaveBeenCalled();
   });
 
-    it("should show the delete confirmation dialog when delete button is clicked", async () => {
-      const deleteTestCase = jest.fn();
-      const exportTestCase = jest.fn();
-      const onCloneTestCase = jest.fn();
-      const setSelectedTestCasesMock = jest.fn();
+  it("should show the delete confirmation dialog when delete button is clicked", async () => {
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
 
-      let deleteDialogModalOpen = false;
+    let deleteDialogModalOpen = false;
 
-      const { rerender } = renderWithTestCase(
-        testCases,
-        true,
-        deleteTestCase,
-        exportTestCase,
-        onCloneTestCase,
-        defaultMeasure,
-        setSelectedTestCasesMock,
-        undefined,
-        [],
-        deleteDialogModalOpen,
-        (value) => {
-          deleteDialogModalOpen = value;
-        }
-      );
+    const { rerender } = renderWithTestCase(
+      testCases,
+      true,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      defaultMeasure,
+      setSelectedTestCasesMock,
+      undefined,
+      [],
+      deleteDialogModalOpen,
+      (value) => {
+        deleteDialogModalOpen = value;
+      }
+    );
 
-      const selectButton = await screen.findByTestId("select-action-ID");
-      expect(selectButton).toBeInTheDocument();
+    const selectButton = await screen.findByTestId("select-action-ID");
+    expect(selectButton).toBeInTheDocument();
 
-      fireEvent.click(selectButton);
+    fireEvent.click(selectButton);
 
-      const deleteButton = await screen.findByText("delete");
-      expect(deleteButton).toBeInTheDocument();
+    const deleteButton = await screen.findByText("delete");
+    expect(deleteButton).toBeInTheDocument();
 
-      fireEvent.click(deleteButton);
+    fireEvent.click(deleteButton);
 
-      expect(deleteDialogModalOpen).toBe(true);
+    expect(deleteDialogModalOpen).toBe(true);
 
-      rerender(
-        <MemoryRouter>
-          <TestCaseTable
-            sorting={[]}
-            setSorting={undefined}
-            testCases={testCases}
-            canEdit={true}
-            deleteTestCase={deleteTestCase}
-            exportTestCase={exportTestCase}
-            onCloneTestCase={onCloneTestCase}
-            measure={defaultMeasure}
-            setSelectedTestCases={setSelectedTestCasesMock}
-            selectedTestCases={[]}
-            deleteDialogModalOpen={true}
-            setDeleteDialogModalOpen={(value) => {
-              deleteDialogModalOpen = value;
-            }}
-          />
-        </MemoryRouter>
-      );
+    rerender(
+      <MemoryRouter>
+        <TestCaseTable
+          sorting={[]}
+          setSorting={undefined}
+          testCases={testCases}
+          canEdit={true}
+          deleteTestCase={deleteTestCase}
+          exportTestCase={exportTestCase}
+          onCloneTestCase={onCloneTestCase}
+          measure={defaultMeasure}
+          setSelectedTestCases={setSelectedTestCasesMock}
+          selectedTestCases={[]}
+          deleteDialogModalOpen={true}
+          setDeleteDialogModalOpen={(value) => {
+            deleteDialogModalOpen = value;
+          }}
+        />
+      </MemoryRouter>
+    );
 
-      const deleteDialog = screen.getByText("Delete Test Case");
-      expect(deleteDialog).toBeInTheDocument();
+    const deleteDialog = screen.getByText("Delete Test Case");
+    expect(deleteDialog).toBeInTheDocument();
 
-      const cancelButton = screen.getByText("Cancel");
-      const confirmButton = screen.getByText("Yes, Delete");
+    const cancelButton = screen.getByText("Cancel");
+    const confirmButton = screen.getByText("Yes, Delete");
 
-      expect(cancelButton).toBeInTheDocument();
-      expect(confirmButton).toBeInTheDocument();
+    expect(cancelButton).toBeInTheDocument();
+    expect(confirmButton).toBeInTheDocument();
 
-      fireEvent.click(confirmButton);
-      expect(deleteTestCase).toHaveBeenCalled();
+    fireEvent.click(confirmButton);
+    expect(deleteTestCase).toHaveBeenCalled();
   });
 
   it("should display View button if the measure is not a draft and the TestCaseListActionCenter feature flag is true", async () => {
