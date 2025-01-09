@@ -111,29 +111,31 @@ const Builder = ({ testCase, canEdit }: BuilderProps) => {
       </Box>
       <div className="panel-content-pane">
         {activeTab === "Available" && !activeResource && canEdit && (
-          <>
-            <ResourceList
-              resourceIdentifiers={resources}
-              onClick={(resourceIdentifier: ResourceIdentifier) => {
-                const id = uuidv4();
-                const newEntry = {
-                  fullUrl: `https://madie.cms.gov/${resourceIdentifier.type}/${id}`,
-                  resource: {
-                    id,
-                    resourceType: resourceIdentifier.type,
-                  },
+          <ResourceList
+            resourceIdentifiers={resources}
+            onClick={(resourceIdentifier: ResourceIdentifier) => {
+              const id = uuidv4();
+              const newEntry = {
+                fullUrl: `https://madie.cms.gov/${resourceIdentifier.type}/${id}`,
+                resource: {
+                  id,
+                  resourceType: resourceIdentifier.type,
+                },
+              };
+              if (!_.isEmpty(resourceIdentifier.profile)) {
+                newEntry.resource["meta"] = {
+                  profile: [resourceIdentifier.profile],
                 };
-                if (!_.isEmpty(resourceIdentifier.profile)) {
-                  newEntry.resource["meta"] = {
-                    profile: [resourceIdentifier.profile],
-                  };
-                }
-                dispatch({
-                  type: ResourceActionType.ADD_BUNDLE_ENTRY,
-                  payload: newEntry,
-                });
-              }}
-            />
+              }
+              dispatch({
+                type: ResourceActionType.ADD_BUNDLE_ENTRY,
+                payload: newEntry,
+              });
+            }}
+          />
+        )}
+        {activeTab === "Added" && (
+          <>
             {activeResource && (
               <ResourceEditor
                 selectedResource={activeResource}
@@ -145,26 +147,24 @@ const Builder = ({ testCase, canEdit }: BuilderProps) => {
                 canEdit={canEdit}
               />
             )}
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="h5">Resources</Typography>
+              <Divider sx={{ mb: 1 }} />
+              <TestCaseSummaryGrid
+                bundle={state?.bundle}
+                onRowEdit={(row) => {
+                  handleResourceSelected(row);
+                }}
+                onRowDelete={(row) => {
+                  dispatch({
+                    type: ResourceActionType.REMOVE_BUNDLE_ENTRY,
+                    payload: row,
+                  });
+                  setActiveResource(null);
+                }}
+              />
+            </Box>
           </>
-        )}
-        {activeTab === "Added" && (
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="h5">Resources</Typography>
-            <Divider sx={{ mb: 1 }} />
-            <TestCaseSummaryGrid
-              bundle={state?.bundle}
-              onRowEdit={(row) => {
-                handleResourceSelected(row);
-              }}
-              onRowDelete={(row) => {
-                dispatch({
-                  type: ResourceActionType.REMOVE_BUNDLE_ENTRY,
-                  payload: row,
-                });
-                setActiveResource(null);
-              }}
-            />
-          </Box>
         )}
       </div>
     </Box>
