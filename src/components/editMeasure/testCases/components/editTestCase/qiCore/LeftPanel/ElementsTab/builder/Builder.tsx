@@ -34,7 +34,7 @@ const Builder = ({ testCase, canEdit }: BuilderProps) => {
   const { state, dispatch } = useQiCoreResource();
   const { measureState } = useExecutionContext();
   const [measure] = measureState;
-
+  const addedResources = state?.bundle?.entry.length || 0;
   useEffect(() => {
     const resourcesPromise = fhirDefinitionsService.current.getResources();
     const relevantElementsPromise =
@@ -103,7 +103,7 @@ const Builder = ({ testCase, canEdit }: BuilderProps) => {
             type="B"
             tabIndex={0}
             aria-label="Added elements tab panel"
-            label={`Added ${0}`}
+            label={`Added (${addedResources})`}
             data-testid="added-tab"
             value="Added"
           />
