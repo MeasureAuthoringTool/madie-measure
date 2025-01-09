@@ -82,12 +82,7 @@ const Builder = ({ testCase, canEdit }: BuilderProps) => {
       id="qi-core-test-case-builder"
       data-testId="qi-core-test-case-builder"
     >
-      <Box
-        sx={{
-          height: 350,
-          overflowY: "scroll",
-        }}
-      >
+      <Box>
         <Tabs
           value={activeTab}
           onChange={(e, v) => {
@@ -103,21 +98,18 @@ const Builder = ({ testCase, canEdit }: BuilderProps) => {
             label={"Available"}
             data-testid="available-tab"
             value="Available"
-            // sx={defaultStyle}
           />
           <Tab
             type="B"
             tabIndex={0}
             aria-label="Added elements tab panel"
-            // sx={defaultStyle}
             label={`Added ${0}`}
             data-testid="added-tab"
             value="Added"
           />
         </Tabs>
-
-        {/* Lets build some more tabs */}
-
+      </Box>
+      <div className="panel-content-pane">
         {activeTab === "Available" && !activeResource && canEdit && (
           <>
             <ResourceList
@@ -155,24 +147,26 @@ const Builder = ({ testCase, canEdit }: BuilderProps) => {
             )}
           </>
         )}
-      </Box>
-      <Box sx={{ mt: 2 }}>
-        <Typography variant="h5">Resources</Typography>
-        <Divider sx={{ mb: 1 }} />
-        <TestCaseSummaryGrid
-          bundle={state?.bundle}
-          onRowEdit={(row) => {
-            handleResourceSelected(row);
-          }}
-          onRowDelete={(row) => {
-            dispatch({
-              type: ResourceActionType.REMOVE_BUNDLE_ENTRY,
-              payload: row,
-            });
-            setActiveResource(null);
-          }}
-        />
-      </Box>
+        {activeTab === "Added" && (
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="h5">Resources</Typography>
+            <Divider sx={{ mb: 1 }} />
+            <TestCaseSummaryGrid
+              bundle={state?.bundle}
+              onRowEdit={(row) => {
+                handleResourceSelected(row);
+              }}
+              onRowDelete={(row) => {
+                dispatch({
+                  type: ResourceActionType.REMOVE_BUNDLE_ENTRY,
+                  payload: row,
+                });
+                setActiveResource(null);
+              }}
+            />
+          </Box>
+        )}
+      </div>
     </Box>
   );
 };

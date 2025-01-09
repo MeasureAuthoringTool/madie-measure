@@ -305,28 +305,12 @@ describe("ElementsTab", () => {
     );
   };
 
-  it("displays Element Tab for a QICore case", async () => {
+  it("displays Element Tab for a QICore case, and navigates between added and available", async () => {
     renderElementTab();
-    expect(screen.getByText("Resources")).toBeInTheDocument();
     expect(await screen.findByText("QICore AdverseEvent")).toBeInTheDocument();
-  });
-  it("Allows tab change on tc list page", async () => {
-    renderElementTab();
-    expect(screen.getByText("Resources")).toBeInTheDocument();
-    expect(await screen.findByText("QICore AdverseEvent")).toBeInTheDocument();
-    const availableTab = screen.getByTestId("available-tab");
-    expect(availableTab).toBeInTheDocument();
-    expect(
-      screen.getByTestId("tc-builder-resource-editor")
-    ).toBeInTheDocument();
-    // check that it's gone
     const addedTab = screen.getByTestId("added-tab");
     expect(addedTab).toBeInTheDocument();
     userEvent.click(addedTab);
-    await waitFor(() => {
-      expect(
-        screen.queryByTestId("tc-builder-resource-editor")
-      ).not.toBeInTheDocument();
-    });
+    expect(screen.getByText("Resources")).toBeInTheDocument();
   });
 });
