@@ -155,7 +155,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
         )}
         {((featureFlags.TestCaseListActionCenter && canEdit) ||
           !featureFlags.TestCaseListActionCenter) && (
-          <div>
+          <>
             <Button
               variant="outline"
               onClick={onImportTestCases}
@@ -193,13 +193,14 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
               <AddIcon style={{ margin: "0 5px 0 -2px" }} fontSize="small" />
               New Case
             </Button>
-            <RunTestButton
-              hasErrors={hasErrors}
-              isExecutionContextReady={executionContextReady}
-              onRunTests={executeTestCases}
-            />
-          </div>
+          </>
         )}
+        <RunTestButton
+          hasErrors={hasErrors}
+          isExecutionContextReady={executionContextReady}
+          onRunTests={executeTestCases}
+        />
+
         {!featureFlags.TestCaseListActionCenter && (
           //Remove button when feature flag is removed
           <Button

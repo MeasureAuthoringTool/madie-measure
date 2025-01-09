@@ -90,23 +90,23 @@ describe("TestCaseLanding component", () => {
     );
   }
 
-  it("should render the landing component with a button to create new test case", async () => {
+  it("should render the landing component with a button to create New Case", async () => {
     renderTestCaseLandingComponent(measure);
 
     const newTestCase = await screen.findByRole("button", {
-      name: "New Test Case",
+      name: "New Case",
     });
     expect(newTestCase).toBeInTheDocument();
   });
 
-  it("should render the landing component without create new test case button if user is not the owner of the measure", async () => {
+  it("should render the landing component without create New Case button if user is not the owner of the measure", async () => {
     (checkUserCanEdit as jest.Mock).mockImplementationOnce(() => {
       return false;
     });
     const readOnlyMeasure = { ...measure, createdBy: "not me" };
     renderTestCaseLandingComponent(readOnlyMeasure);
     const newTestCase = await screen.queryByRole("button", {
-      name: "New Test Case",
+      name: "New Case",
     });
     expect(newTestCase).not.toBeInTheDocument();
   });

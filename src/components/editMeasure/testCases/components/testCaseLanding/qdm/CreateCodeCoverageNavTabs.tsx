@@ -205,32 +205,36 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
               Delete All
             </Button>
           )}
+          {((featureFlags.TestCaseListActionCenter && canEdit) ||
+            !featureFlags.TestCaseListActionCenter) && (
+            <>
+              <Button
+                onClick={() => {
+                  if (onImportTestCases) {
+                    onImportTestCases();
+                  }
+                }}
+                variant="outline"
+                disabled={!canEdit}
+                data-testid="show-import-test-cases-button"
+              >
+                <FileUploadIcon
+                  style={{ margin: "0 5px 0 -2px" }}
+                  fontSize="small"
+                />
+                Bonnie Import
+              </Button>
 
-          <Button
-            onClick={() => {
-              if (onImportTestCases) {
-                onImportTestCases();
-              }
-            }}
-            variant="outline"
-            disabled={!canEdit}
-            data-testid="show-import-test-cases-button"
-          >
-            <FileUploadIcon
-              style={{ margin: "0 5px 0 -2px" }}
-              fontSize="small"
-            />
-            Bonnie Import
-          </Button>
-
-          <Button
-            disabled={!canEdit}
-            onClick={createNewTestCase}
-            data-testid="create-new-test-case-button"
-          >
-            <AddIcon style={{ margin: "0 5px 0 -2px" }} fontSize="small" />
-            New Case
-          </Button>
+              <Button
+                disabled={!canEdit}
+                onClick={createNewTestCase}
+                data-testid="create-new-test-case-button"
+              >
+                <AddIcon style={{ margin: "0 5px 0 -2px" }} fontSize="small" />
+                New Case
+              </Button>
+            </>
+          )}
           <RunTestButton
             hasErrors={hasErrors}
             isExecutionContextReady={executionContextReady}
