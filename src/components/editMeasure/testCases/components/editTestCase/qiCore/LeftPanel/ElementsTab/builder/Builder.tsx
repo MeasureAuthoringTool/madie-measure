@@ -17,6 +17,8 @@ import useFhirElmTranslationServiceApi, {
   SourceDataCriteria,
 } from "../../../../../../../../../api/useFhirElmTranslationServiceApi";
 import useExecutionContext from "../../../../../routes/qiCore/useExecutionContext";
+import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
+import "./Builder.scss";
 
 interface BuilderProps {
   testCase: TestCase;
@@ -72,48 +74,86 @@ const Builder = ({ testCase, canEdit }: BuilderProps) => {
     setActiveDefinition({ ...resourceTree });
   };
 
+  const [activeTab, setActiveTab] = useState<string>("Available");
+
   return (
-    <Box sx={{ mr: 2 }}>
+    <Box
+      sx={{ mr: 2 }}
+      id="qi-core-test-case-builder"
+      data-testId="qi-core-test-case-builder"
+    >
       <Box
         sx={{
           height: 350,
           overflowY: "scroll",
         }}
       >
-        {!activeResource && canEdit && (
-          <ResourceList
-            resourceIdentifiers={resources}
-            onClick={(resourceIdentifier: ResourceIdentifier) => {
-              const id = uuidv4();
-              const newEntry = {
-                fullUrl: `https://madie.cms.gov/${resourceIdentifier.type}/${id}`,
-                resource: {
-                  id,
-                  resourceType: resourceIdentifier.type,
-                },
-              };
-              if (!_.isEmpty(resourceIdentifier.profile)) {
-                newEntry.resource["meta"] = {
-                  profile: [resourceIdentifier.profile],
+        <Tabs
+          value={activeTab}
+          onChange={(e, v) => {
+            setActiveTab(v);
+          }}
+          type="B"
+          orientation="horizontal"
+        >
+          <Tab
+            type="B"
+            tabIndex={0}
+            aria-label="Available elements tab panel"
+            label={"Available"}
+            data-testid="available-tab"
+            value="Available"
+            // sx={defaultStyle}
+          />
+          <Tab
+            type="B"
+            tabIndex={0}
+            aria-label="Added elements tab panel"
+            // sx={defaultStyle}
+            label={`Added ${0}`}
+            data-testid="added-tab"
+            value="Added"
+          />
+        </Tabs>
+
+        {/* Lets build some more tabs */}
+
+        {activeTab === "Available" && !activeResource && canEdit && (
+          <>
+            <ResourceList
+              resourceIdentifiers={resources}
+              onClick={(resourceIdentifier: ResourceIdentifier) => {
+                const id = uuidv4();
+                const newEntry = {
+                  fullUrl: `https://madie.cms.gov/${resourceIdentifier.type}/${id}`,
+                  resource: {
+                    id,
+                    resourceType: resourceIdentifier.type,
+                  },
                 };
-              }
-              dispatch({
-                type: ResourceActionType.ADD_BUNDLE_ENTRY,
-                payload: newEntry,
-              });
-            }}
-          />
-        )}
-        {activeResource && (
-          <ResourceEditor
-            selectedResource={activeResource}
-            selectedResourceDefinition={activeDefinition}
-            onSave={(resource) => {}}
-            onCancel={(resource) => {
-              setActiveResource(null);
-            }}
-            canEdit={canEdit}
-          />
+                if (!_.isEmpty(resourceIdentifier.profile)) {
+                  newEntry.resource["meta"] = {
+                    profile: [resourceIdentifier.profile],
+                  };
+                }
+                dispatch({
+                  type: ResourceActionType.ADD_BUNDLE_ENTRY,
+                  payload: newEntry,
+                });
+              }}
+            />
+            {activeResource && (
+              <ResourceEditor
+                selectedResource={activeResource}
+                selectedResourceDefinition={activeDefinition}
+                onSave={(resource) => {}}
+                onCancel={(resource) => {
+                  setActiveResource(null);
+                }}
+                canEdit={canEdit}
+              />
+            )}
+          </>
         )}
       </Box>
       <Box sx={{ mt: 2 }}>
