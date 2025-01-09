@@ -4,6 +4,44 @@ import TypeEditor from "./TypeEditor";
 import useFhirDefinitionsServiceApi, {
   FhirDefinitionsServiceApi,
 } from "../../../../../../../api/useFhirDefinitionsService";
+import { FormikProvider, FormikContextType } from "formik";
+
+const getNestedProperty = (obj, path) => {
+  return path.split(".").reduce((current, key) => current && current[key], obj);
+};
+
+const claimResponseValues = {
+  ClaimResponse: {
+    id: "test",
+    Coding: {
+      code: "",
+      id: "",
+      extension: {},
+      system: "",
+      version: "",
+      display: "",
+      userSelected: false,
+    },
+  },
+};
+
+//@ts-ignore
+const mockFormik: FormikContextType<any> = {
+  values: {
+    claimResponseValues,
+  },
+  getFieldProps: (label) => {
+    const name = getNestedProperty(claimResponseValues, label);
+    return {
+      value: name,
+      name,
+      onChange: jest.fn(),
+      onBlur: jest.fn(),
+    };
+  },
+  handleChange: () => {},
+  setFieldValue: jest.fn(),
+};
 
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
@@ -62,33 +100,73 @@ describe("TypeEditor Component", () => {
   test("Should render String component", () => {
     const handleChange = jest.fn();
     render(
-      <TypeEditor
-        type={`http://hl7.org/fhirpath/System.String`}
-        required={false}
-        value={`test string`}
-        onChange={handleChange}
-        structureDefinition={null}
-      />
+      <FormikProvider value={mockFormik}>
+        <TypeEditor
+          type={`http://hl7.org/fhirpath/System.String`}
+          required={false}
+          onChange={handleChange}
+          structureDefinition={null}
+          label={"ClaimResponse.id"}
+        />
+      </FormikProvider>
     );
-    const inputField = screen.getByTestId("string-field-input-VALUE");
+    const inputField = screen.getByTestId(
+      "string-field-input-ClaimResponse.id"
+    );
     expect(inputField).toBeInTheDocument();
-    expect(inputField.value).toBe("test string");
+    expect(inputField.value).toBe("test");
   });
 
   test("Should render String component", () => {
     const handleChange = jest.fn();
     render(
-      <TypeEditor
-        type={`http://hl7.org/fhirpath/System.String`}
-        required={false}
-        value={`test string`}
-        onChange={handleChange}
-        structureDefinition={null}
-      />
+      <FormikProvider value={mockFormik}>
+        <TypeEditor
+          type={`http://hl7.org/fhirpath/System.String`}
+          required={false}
+          onChange={handleChange}
+          structureDefinition={null}
+          label={"ClaimResponse.id"}
+        />
+      </FormikProvider>
     );
-    const inputField = screen.getByTestId("string-field-input-VALUE");
+    const inputField = screen.getByTestId(
+      "string-field-input-ClaimResponse.id"
+    );
     expect(inputField).toBeInTheDocument();
-    expect(inputField.value).toBe("test string");
+    expect(inputField.value).toBe("test");
+  });
+
+  test("String field should display errors and helper text", () => {
+    const touched = {
+      ClaimResponse: {
+        id: true,
+      },
+    };
+    const errors = {
+      ClaimResponse: {
+        id: "This field is required",
+      },
+    };
+    const handleChange = jest.fn();
+    const errorFormik = { ...mockFormik, errors, touched };
+    render(
+      <FormikProvider value={errorFormik}>
+        <TypeEditor
+          type={`http://hl7.org/fhirpath/System.String`}
+          required={false}
+          onChange={handleChange}
+          structureDefinition={null}
+          label={"ClaimResponse.id"}
+        />
+      </FormikProvider>
+    );
+    const inputField = screen.getByTestId(
+      "string-field-input-ClaimResponse.id"
+    );
+    expect(inputField).toBeInTheDocument();
+    const errorText = screen.getByText("This field is required");
+    expect(errorText).toBeInTheDocument();
   });
 
   test("Should render Period component", () => {
