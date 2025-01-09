@@ -698,21 +698,14 @@ describe("TestCaseList component", () => {
       expect(tableHeaders[4]).toHaveTextContent("Title");
       expect(tableHeaders[5]).toHaveTextContent("Description");
       expect(tableHeaders[6]).toHaveTextContent("Last Saved");
-      expect(tableHeaders[7]).toHaveTextContent("Action");
 
       const tableRows = table.querySelectorAll("tbody tr");
 
       expect(tableRows[0]).toHaveTextContent(testCases[2].title);
       expect(tableRows[0]).toHaveTextContent(testCases[2].series);
-      expect(
-        screen.getByTestId(`select-action-${testCases[0].id}`)
-      ).toBeInTheDocument();
 
       expect(tableRows[1]).toHaveTextContent(testCases[1].title);
       expect(tableRows[1]).toHaveTextContent(testCases[1].series);
-      expect(
-        screen.getByTestId(`select-action-${testCases[1].id}`)
-      ).toBeInTheDocument();
     });
   }, 15000);
 

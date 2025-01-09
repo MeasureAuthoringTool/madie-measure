@@ -14,6 +14,7 @@ import {
   MadieDeleteDialog,
   Toast,
   TruncateText,
+  Button,
 } from "@madie/madie-design-system/dist/react";
 import "../TestCase.scss";
 import TestCaseTablePopover from "./TestCaseTablePopover";
@@ -21,8 +22,9 @@ import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import ShiftDatesDialog from "../shiftDates/ShiftDatesDialog";
-import { useFeatureFlags } from "@madie/madie-util";
+import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
 import _ from "lodash";
+import { useNavigate } from "react-router-dom";
 
 interface TestCaseTableProps {
   testCases: TestCase[];
@@ -93,6 +95,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
   const [shiftDatesDialogOpen, setShiftDatesDialogOpen] =
     useState<boolean>(false);
   const featureFlags = useFeatureFlags();
+  const navigate = useNavigate();
 
   const handleOpen = (
     selected: TestCase,
@@ -239,13 +242,32 @@ const TestCaseTable = (props: TestCaseTableProps) => {
         accessorKey: "lastModifiedAt",
       },
       {
-        header: "Action",
-        cell: (info) => (
-          <TestCaseActionButton
-            testCase={info.row.original.action}
-            handleOpen={handleOpen}
-          />
-        ),
+        header: featureFlags.TestCaseListActionCenter ? "" : "Action",
+        cell: (info) =>
+          featureFlags.TestCaseListActionCenter ? (
+            <Button
+              variant="outline-filled"
+              data-testid={`view-edit-test-case-button-${info.row.original.id}`}
+              aria-label={`Test Case ${info.row.original.title}; Case Number ${info.row.original.caseNumber}`}
+              onClick={() => {
+                const editTestCaseUrl = `../../${info.row.original.id}`;
+                navigate(editTestCaseUrl);
+              }}
+              role="button"
+            >
+              {checkUserCanEdit(
+                measure.measureSet?.owner,
+                measure.measureSet?.acls
+              ) && measure.measureMetaData?.draft
+                ? "Edit"
+                : "View"}
+            </Button>
+          ) : (
+            <TestCaseActionButton
+              testCase={info.row.original.action}
+              handleOpen={handleOpen}
+            />
+          ),
         accessorKey: "action",
         enableSorting: false,
       },
