@@ -84,8 +84,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     setDeleteDialogModalOpen,
   } = props;
   const viewOrEdit = canEdit ? "edit" : "view";
-  // const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
-  //   useState<boolean>(false);
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");

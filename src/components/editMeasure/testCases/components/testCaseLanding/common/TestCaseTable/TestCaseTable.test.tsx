@@ -245,19 +245,6 @@ describe("TestCase component", () => {
     expect(screen.getByText("export collection bundle")).toBeInTheDocument();
     expect(screen.getByText("delete")).toBeInTheDocument();
     expect(screen.getByText("Shift Test Case dates")).toBeInTheDocument();
-
-    // const deleteButton = screen.getByText("delete");
-    // fireEvent.click(deleteButton);
-
-    // expect(screen.getByText("Delete Test Case")).toBeInTheDocument();
-    // expect(screen.getByText("Cancel")).toBeInTheDocument();
-    // expect(screen.getByText("Yes, Delete")).toBeInTheDocument();
-
-    // fireEvent.click(screen.getByText("Cancel"));
-    // await waitFor(() => {
-    //   const submitButton = screen.queryByText("Yes, Delete");
-    //   expect(submitButton).not.toBeInTheDocument();
-    // });
   });
 
   it("should render test case table with case numbers", async () => {
