@@ -138,68 +138,82 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
         />
       </Tabs>
       <div tw="flex flex-wrap space-x-4 justify-end h-10">
-        <Button
-          variant="danger-primary"
-          disabled={!canEdit || measure?.testCases?.length === 0}
-          onClick={onDeleteAllTestCases}
-          data-testid="delete-all-test-cases-button"
-        >
-          <KeyboardArrowRightIcon
-            style={{ margin: "0 5px 0 -2px" }}
-            fontSize="small"
-          />
-          Delete All
-        </Button>
-        <Button
-          variant="outline"
-          onClick={onImportTestCases}
-          disabled={!canEdit}
-          data-testid="import-test-cases-button"
-        >
-          <FileUploadIcon style={{ margin: "0 5px 0 -2px" }} fontSize="small" />
-          Import from MADiE
-        </Button>
-        {featureFlags?.qiCoreBonnieTestCases && (
+        {!featureFlags.TestCaseListActionCenter && (
+          //Remove button when feature flag is removed
           <Button
-            onClick={() => {
-              if (onImportTestCasesFromBonnie) {
-                onImportTestCasesFromBonnie();
-              }
-            }}
-            disabled={!canEdit}
-            data-testid="import-test-cases-from-bonnie-button"
+            variant="danger-primary"
+            disabled={!canEdit || measure?.testCases?.length === 0}
+            onClick={onDeleteAllTestCases}
+            data-testid="delete-all-test-cases-button"
           >
-            <FileUploadIcon
+            <KeyboardArrowRightIcon
               style={{ margin: "0 5px 0 -2px" }}
               fontSize="small"
             />
-            Import From Bonnie
+            Delete All
           </Button>
         )}
-        <Button
-          disabled={!canEdit}
-          onClick={createNewTestCase}
-          data-testid="create-new-test-case-button"
-        >
-          <AddIcon style={{ margin: "0 5px 0 -2px" }} fontSize="small" />
-          New Test Case
-        </Button>
-        <RunTestButton
-          hasErrors={hasErrors}
-          isExecutionContextReady={executionContextReady}
-          onRunTests={executeTestCases}
-        />
-        <Button
-          variant={"outline"}
-          className="export-bundle-button"
-          onClick={handleOpen}
-          data-testid="export-test-cases-button"
-        >
-          <div className="export-action">Export Test Cases</div>
-          <div className="export-chevron-container">
-            <ExpandMoreIcon />
+        {((featureFlags.TestCaseListActionCenter && canEdit) ||
+          !featureFlags.TestCaseListActionCenter) && (
+          <div>
+            <Button
+              variant="outline"
+              onClick={onImportTestCases}
+              disabled={!canEdit}
+              data-testid="import-test-cases-button"
+            >
+              <FileUploadIcon
+                style={{ margin: "0 5px 0 -2px" }}
+                fontSize="small"
+              />
+              MADiE Import
+            </Button>
+            {featureFlags?.qiCoreBonnieTestCases && (
+              <Button
+                onClick={() => {
+                  if (onImportTestCasesFromBonnie) {
+                    onImportTestCasesFromBonnie();
+                  }
+                }}
+                disabled={!canEdit}
+                data-testid="import-test-cases-from-bonnie-button"
+              >
+                <FileUploadIcon
+                  style={{ margin: "0 5px 0 -2px" }}
+                  fontSize="small"
+                />
+                Bonnie Import
+              </Button>
+            )}
+            <Button
+              disabled={!canEdit}
+              onClick={createNewTestCase}
+              data-testid="create-new-test-case-button"
+            >
+              <AddIcon style={{ margin: "0 5px 0 -2px" }} fontSize="small" />
+              New Case
+            </Button>
+            <RunTestButton
+              hasErrors={hasErrors}
+              isExecutionContextReady={executionContextReady}
+              onRunTests={executeTestCases}
+            />
           </div>
-        </Button>
+        )}
+        {!featureFlags.TestCaseListActionCenter && (
+          //Remove button when feature flag is removed
+          <Button
+            variant={"outline"}
+            className="export-bundle-button"
+            onClick={handleOpen}
+            data-testid="export-test-cases-button"
+          >
+            <div className="export-action">Export Test Cases</div>
+            <div className="export-chevron-container">
+              <ExpandMoreIcon />
+            </div>
+          </Button>
+        )}
 
         <Popover
           optionsOpen={optionsOpen}
