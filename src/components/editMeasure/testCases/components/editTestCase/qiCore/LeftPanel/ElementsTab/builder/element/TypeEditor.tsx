@@ -14,13 +14,17 @@ import CodesComponent from "./types/CodesComponent";
 import { Instant } from "@madie/madie-design-system/dist/react";
 import TimeComponent from "./types/TimeComponent";
 import { useFormikContext } from "formik";
+import ExtensionComponent from "./types/ExtensionComponent";
+import ProfiledExtensionComponent from "./types/ProfiledExtensionComponent";
 
 const TypeEditor = ({
   type,
+  resource,
   required,
   value,
   onChange,
   structureDefinition,
+  parentStructureDefinition,
   canEdit,
   label,
 }) => {
@@ -204,6 +208,25 @@ const TypeEditor = ({
             structureDefinition={structureDefinition}
           />
         );
+      case "uuid":
+        return <div>This is uuid</div>;
+      case "Extension":
+        return _.isEmpty(structureDefinition?.type?.[0]?.profile) ? (
+          <ExtensionComponent
+            canEdit={canEdit}
+            onChange={onChange}
+            fhirResource={resource}
+            elementDefinition={structureDefinition}
+            parentStructureDefinition={parentStructureDefinition}
+          />
+        ) : (
+          <ProfiledExtensionComponent
+            canEdit={true}
+            structureDefinition={structureDefinition}
+            fieldRequired={true}
+            resource={resource}
+          />
+        );
       default:
         return <div>Unsupported Type [{type}]</div>;
     }
@@ -216,12 +239,14 @@ const TypeEditor = ({
           return (
             <TypeEditor
               type={childType?.code}
+              resource={resource}
               onChange={(e) => {}}
               value={null}
               structureDefinition={childTypeDef}
               required={childRequired}
               canEdit={canEdit}
               label={childTypeDef?.id}
+              parentStructureDefinition={structureDefinition}
             />
           );
         })}
