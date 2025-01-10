@@ -39,7 +39,6 @@ const ResourceEditor = ({
   onCancel,
   canEdit,
 }: ResourceEditorProps) => {
-  console.log("selectedResource: ", selectedResource);
   const [activeTab, setActiveTab] = useState(0);
   const [allElements, setAllElements] = useState([]);
   const [displayedElements, setDisplayedElements] = useState<
@@ -56,7 +55,6 @@ const ResourceEditor = ({
       const topElements =
         fhirDefinitionsService.current.getTopLevelElements(selectedResource);
       setAllElements(topElements);
-      debugger;
       const requiredElements = [...topElements.filter((e) => e.min > 0)];
       const elementsWithValues = [
         ...topElements.filter((e) => {
