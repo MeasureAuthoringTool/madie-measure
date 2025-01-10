@@ -208,8 +208,6 @@ const TypeEditor = ({
             structureDefinition={structureDefinition}
           />
         );
-      case "uuid":
-        return <div>This is uuid</div>;
       case "Extension":
         return _.isEmpty(structureDefinition?.type?.[0]?.profile) ? (
           <ExtensionComponent
