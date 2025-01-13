@@ -27,6 +27,7 @@ export class FhirDefinitionsServiceApi {
       case "uuid":
       case "canonical":
       case "string":
+      case "markdown":
       case "http://hl7.org/fhirpath/System.String":
       case "code":
       case "Extension":

@@ -13,6 +13,7 @@ import IntegerComponent, { IntegerType } from "./types/IntegerComponent";
 import CodesComponent from "./types/CodesComponent";
 import { Instant } from "@madie/madie-design-system/dist/react";
 import TimeComponent from "./types/TimeComponent";
+import { useFormikContext } from "formik";
 
 const TypeEditor = ({
   type,
@@ -23,6 +24,7 @@ const TypeEditor = ({
   canEdit,
   label,
 }) => {
+  const formik = useFormikContext();
   const [childTypeDefs, setChildTypeDefs] = useState([]);
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   useEffect(() => {
@@ -34,6 +36,21 @@ const TypeEditor = ({
       });
     }
   }, [type]);
+  // helper neeeded for nested structures. cannot access with a string alone.
+  const getNestedProperty = (obj, path) => {
+    return path
+      .split(".")
+      .reduce((current, key) => current && current[key], obj);
+  };
+
+  const formikErrorHandler = (name: string) => {
+    const touched = getNestedProperty(formik.touched, name);
+    const errors = getNestedProperty(formik.errors, name);
+    if (touched && errors) {
+      return errors;
+    }
+  };
+
   if (fhirDefinitionsService.current.isComponentDataType(type)) {
     switch (type) {
       case "string":
@@ -43,10 +60,11 @@ const TypeEditor = ({
             <StringComponent
               label={label}
               canEdit={canEdit}
-              value={value}
-              onChange={onChange}
+              helperText={formikErrorHandler(label)}
+              error={getNestedProperty(formik.errors, label)}
               structureDefinition={null}
               fieldRequired={required}
+              {...formik.getFieldProps(label)}
             />
           </Box>
         );

@@ -2,13 +2,20 @@ import React from "react";
 import { TypeComponentProps } from "./TypeComponentProps";
 import { TextField } from "@madie/madie-design-system/dist/react";
 
+/*
+  String component is either going to need to be very smart, or we're going to have to provide validations ahead of time. 
+  We should figure out how to provide different validations depending on what type of string we're looking at, (UUID, Markdown?)
+  
+
+*/
+
 const StringComponent = ({
   canEdit,
   fieldRequired,
-  value,
-  onChange,
+  helperText,
   label = "VALUE",
   structureDefinition,
+  ...props
 }: TypeComponentProps) => {
   return (
     <TextField
@@ -16,6 +23,7 @@ const StringComponent = ({
       disabled={!canEdit}
       id={`string-field-${label}`}
       label={`> ${label}`}
+      helperText={helperText}
       labelColor="#1976d2"
       inputProps={{
         "data-testid": `string-field-input-${label}`,
@@ -26,14 +34,13 @@ const StringComponent = ({
       data-testid={`string-field-${label}`}
       size="small"
       fullWidth
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
       onKeyPress={(event) => {
         const filteredValue = event.key?.replace(/[^a-zA-Z]/g, "");
         if (!filteredValue) {
           event.preventDefault();
         }
       }}
+      {...props}
     />
   );
 };
