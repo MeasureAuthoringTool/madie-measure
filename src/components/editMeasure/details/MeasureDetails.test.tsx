@@ -7,6 +7,24 @@ import MeasureDetails from "./MeasureDetails";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
 import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureMetadata from "./measureMetadata/MeasureMetadata";
+import { Measure } from "@madie/madie-models";
+
+const testMeasure = {
+  id: "1",
+  measureName: "testMeasure",
+  cqlLibraryName: "TestLibrary",
+  model: "QI-Core v4.1.1",
+  ecqmTitle: "ecqmTitle",
+  measurementPeriodStart: "01/01/2022",
+  measurementPeriodEnd: "12/02/2022",
+  measureMetaData: {
+    steward: { name: "steward" },
+    description: "Test Description",
+    copyright: null,
+    disclaimer: null,
+    rationale: null,
+  },
+} as unknown as Measure;
 
 jest.mock("./measureInformation/MeasureInformation");
 jest.mock("./measureMetadata/MeasureMetadata");
@@ -14,8 +32,8 @@ jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
   measureStore: {
     updateMeasure: (measure) => measure,
-    state: jest.fn().mockImplementation(() => null),
-    initialState: jest.fn().mockImplementation(() => null),
+    state: jest.fn().mockImplementation(() => testMeasure),
+    initialState: jest.fn().mockImplementation(() => testMeasure),
     subscribe: (set) => {
       return { unsubscribe: () => null };
     },
