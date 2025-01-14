@@ -62,9 +62,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   const [measure, setMeasure] = useState<any>(measureStore.state);
 
   useEffect(() => {
-    const subscription = measureStore.subscribe((measure: Measure) => {
-      setMeasure(measure);
-    });
+    const subscription = measureStore.subscribe(setMeasure);
     return () => {
       subscription.unsubscribe();
     };
