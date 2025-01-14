@@ -1106,4 +1106,53 @@ define function MeasureObservation(e Encounter):
       );
     });
   });
+
+  it("should remove cql code successfully for QI Core measures", async () => {
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => {
+        return {
+          cql: "library RemoveCodeTest version '0.0.000'\nusing QICore version '4.1.1'",
+          isLibraryStatementChanged: false,
+          isUsingStatementChanged: false,
+          isValueSetChanged: false,
+        };
+      });
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        translation: null,
+        externalErrors: [],
+      });
+    });
+    const measureWithCqlCodes = {
+      ...measure,
+      model: Model.QICORE,
+      cql:
+        "library RemoveCodeTest version '0.0.000'\n" +
+        "\n" +
+        "using QICore version '4.1.1'\n" +
+        "\n" +
+        "codesystem \"RXNORM:05022022\": 'http://www.nlm.nih.gov/research/umls/rxnorm' version '05022022'\n" +
+        "code \"1 ML digoxin 0.1 MG/ML Injection (123)\": '204504' from \"RXNORM:05022022\" display '1 ML digoxin 0.1 MG/ML Injection'",
+    } as Measure;
+    const cqlWithNoCodes =
+      "library RemoveCodeTest version '0.0.000'\nusing QICore version '4.1.1'";
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measureWithCqlCodes });
+      }
+    });
+    renderEditor(measureWithCqlCodes);
+    const removeCodeBtn = await screen.findByText("Remove code");
+    expect(removeCodeBtn).toBeInTheDocument();
+    userEvent.click(removeCodeBtn);
+    await waitFor(() => {
+      const editor = screen.getByTestId("measure-editor");
+      expect(editor).toHaveValue(cqlWithNoCodes);
+    });
+    expect(screen.getByTestId("measure-editor-toast")).toHaveTextContent(
+      "Code 204504 and code system RXNORM has been successfully removed from the CQL"
+    );
+  });
 });
