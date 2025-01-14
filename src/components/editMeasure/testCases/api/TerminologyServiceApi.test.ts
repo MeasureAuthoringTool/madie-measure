@@ -100,7 +100,6 @@ describe("TerminologyServiceApi Tests", () => {
           id: "mu2-update-2015-05-01",
         },
         activeOnly: "true",
-        profile: "",
         valueSetParams: [
           { oid: "2.16.840.1.113883.3.666.5.307" },
           { oid: "2.16.840.1.113883.3.464.1003.103.12.1001" },
@@ -125,7 +124,6 @@ describe("TerminologyServiceApi Tests", () => {
         includeDraft: "yes",
         manifestExpansion: null,
         activeOnly: "false",
-        profile: "",
         valueSetParams: [
           { oid: "2.16.840.1.113883.3.666.5.307" },
           { oid: "2.16.840.1.113883.3.464.1003.103.12.1001" },

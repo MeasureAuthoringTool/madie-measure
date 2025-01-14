@@ -15,7 +15,6 @@ type ValueSetSearchParams = {
 };
 
 type ValueSetsSearchCriteria = {
-  profile: string;
   includeDraft: "yes" | "no";
   activeOnly: string;
   manifestExpansion: ManifestExpansion;
@@ -36,6 +35,8 @@ export class TerminologyServiceApi {
     }
     const searchCriteria = {
       includeDraft: "yes", // always yes for now
+      activeOnly: "false",
+      manifestExpansion: null, // always latest until we support manifest for QICore
       valueSetParams: this.getValueSetsOIdsFromBundle(measureBundle),
     } as ValueSetsSearchCriteria;
     if (searchCriteria.valueSetParams.length == 0) {
@@ -44,7 +45,7 @@ export class TerminologyServiceApi {
 
     try {
       const response = await axios.put(
-        `${this.baseUrl}/vsac/value-sets/searches`,
+        `${this.baseUrl}/terminology/value-sets/expansion/fhir`,
         searchCriteria,
         {
           headers: {
@@ -80,7 +81,6 @@ export class TerminologyServiceApi {
     const searchCriteria: ValueSetsSearchCriteria = {
       includeDraft: "yes", // always yes for now
       activeOnly: manifestExpansion ? "true" : "false",
-      profile: "",
       manifestExpansion: manifestExpansion,
       valueSetParams: this.getValueSetsOIDsFromCqmMeasure(
         JSON.parse(JSON.stringify(cqmMeasure))
