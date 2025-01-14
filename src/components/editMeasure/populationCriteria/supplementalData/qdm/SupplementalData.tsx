@@ -122,7 +122,7 @@ const SupplementalData = () => {
   const onCancel = () => {
     setDiscardDialogOpen(true);
   };
-
+  const MAX_LENGTH = 128;
   return (
     <MetaDataWrapper
       header="Supplemental Data"
@@ -157,6 +157,9 @@ const SupplementalData = () => {
           multipleSelect={true}
           limitTags={1}
           options={definitions}
+          getOptionDisabled={() =>
+            formik?.values?.supplementalData?.length >= MAX_LENGTH
+          }
           onClose={() => {}}
           onChange={(e, v, r) => {
             if (r === "removeOption") {
@@ -168,21 +171,23 @@ const SupplementalData = () => {
               formik.setFieldValue("supplementalData", filteredValues);
             }
             if (r === "selectOption") {
-              const copiedValues = formik.values.supplementalData.slice();
-              // we don't seem to have a good way of knowing exactly what was selected, but we can compare
-              const selectedOption = v.filter((v) => {
-                for (let i = 0; i < copiedValues.length; i++) {
-                  if (copiedValues[i].definition === v) {
-                    return false;
+              if (v?.length <= MAX_LENGTH) {
+                const copiedValues = formik.values.supplementalData.slice();
+                // we don't seem to have a good way of knowing exactly what was selected, but we can compare
+                const selectedOption = v.filter((v) => {
+                  for (let i = 0; i < copiedValues.length; i++) {
+                    if (copiedValues[i].definition === v) {
+                      return false;
+                    }
                   }
-                }
-                return true;
-              });
-              copiedValues.push({
-                definition: selectedOption[0],
-                description: "",
-              });
-              formik.setFieldValue("supplementalData", copiedValues);
+                  return true;
+                });
+                copiedValues.push({
+                  definition: selectedOption[0],
+                  description: "",
+                });
+                formik.setFieldValue("supplementalData", copiedValues);
+              }
             }
             if (r === "clear") {
               formik.setFieldValue("supplementalData", []);
