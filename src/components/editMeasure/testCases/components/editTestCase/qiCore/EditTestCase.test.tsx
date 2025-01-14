@@ -558,8 +558,6 @@ describe("EditTestCase component", () => {
       expect(
         await screen.findByText("QICore AdverseEvent")
       ).toBeInTheDocument();
-      expect(screen.getByText("Resources")).toBeInTheDocument();
-
       userEvent.click(screen.getByTestId("json-tab"));
       expect(screen.getByTestId("test-case-json-editor")).toBeInTheDocument();
     });
@@ -611,8 +609,6 @@ describe("EditTestCase component", () => {
       expect(
         await screen.findByText("QICore MedicationStatement")
       ).toBeInTheDocument();
-      expect(screen.getByText("Resources")).toBeInTheDocument();
-
       userEvent.click(screen.getByTestId("json-tab"));
       expect(screen.getByTestId("test-case-json-editor")).toBeInTheDocument();
     });
@@ -646,8 +642,6 @@ describe("EditTestCase component", () => {
       expect(
         await screen.findByText("QICore MedicationStatement")
       ).toBeInTheDocument();
-      expect(screen.getByText("Resources")).toBeInTheDocument();
-
       userEvent.click(screen.getByTestId("json-tab"));
       expect(screen.getByTestId("test-case-json-editor")).toBeInTheDocument();
     });

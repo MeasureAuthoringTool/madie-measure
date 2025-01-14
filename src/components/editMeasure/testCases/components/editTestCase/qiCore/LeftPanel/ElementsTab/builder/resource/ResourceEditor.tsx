@@ -87,6 +87,8 @@ const ResourceEditor = ({
         border: "2px solid gray",
         height: "100%",
       }}
+      id="tc-builder-resource-editor"
+      data-testId="tc-builder-resource-editor"
     >
       <Box
         sx={{
