@@ -3,13 +3,18 @@ import tw from "twin.macro";
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureMetadata from "./measureMetadata/MeasureMetadata";
-import { useDocumentTitle, useFeatureFlags } from "@madie/madie-util";
+import {
+  measureStore,
+  useDocumentTitle,
+  useFeatureFlags,
+} from "@madie/madie-util";
 import StewardAndDevelopers from "./stewardAndDevelopers/StewardAndDevelopers";
 import ModelAndMeasurementPeriod from "./modelAndMeasurementPeriod/ModelAndMeasurementPeriod";
 import "./MeasureDetails.scss";
 import EditMeasureDetailsSideNav from "./EditMeasureDetailsSideNav";
 import MeasureReferences from "./MeasureReferences/MeasureReferences";
 import TransmissionFormat from "./TransmissionFormat/TransmissionFormat";
+import { Measure } from "@madie/madie-models";
 const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
 export interface RouteHandlerState {
   canTravel: boolean;
@@ -20,6 +25,21 @@ export interface MeasureDetailsProps {
   setErrorMessage: Function;
   isQDM: boolean;
 }
+
+export interface LinkItem {
+  title: string;
+  href: string;
+  dataTestId: string;
+  id: string;
+  displayCompletedIcon: boolean;
+  displayIncompletedIcon?: boolean;
+}
+
+export interface Link {
+  title: string;
+  links: LinkItem[];
+}
+
 export default function MeasureDetails(props: MeasureDetailsProps) {
   const { setErrorMessage, isQDM } = props;
   useDocumentTitle("MADiE Edit Measure Details");
@@ -39,6 +59,17 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   const detailsLink = "";
   const measureSetLink = `measure-set`;
 
+  const [measure, setMeasure] = useState<any>(measureStore.state);
+
+  useEffect(() => {
+    const subscription = measureStore.subscribe((measure: Measure) => {
+      setMeasure(measure);
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   const links = [
     // General Information
     {
@@ -49,18 +80,51 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
           href: detailsLink,
           dataTestId: "leftPanelMeasureInformation",
           id: "sideNavMeasureInformation",
+          displayCompletedIcon:
+            measure?.measureName &&
+            measure?.cqlLibraryName &&
+            measure?.ecqmTitle
+              ? true
+              : false,
+          displayIncompletedIcon: !(
+            measure?.measureName &&
+            measure?.cqlLibraryName &&
+            measure?.ecqmTitle
+          )
+            ? true
+            : false,
         },
         {
           title: "Model & Measurement Period",
           href: modelPeriodLink,
           dataTestId: "leftPanelModelAndMeasurementPeriod",
           id: "sideNavMeasureModelAndMeasurementPeriod",
+          displayCompletedIcon:
+            measure?.measurementPeriodStart && measure?.measurementPeriodEnd
+              ? true
+              : false,
+          displayIncompletedIcon: !(
+            measure?.measurementPeriodStart && measure?.measurementPeriodEnd
+          )
+            ? true
+            : false,
         },
         {
           title: "Steward & Developers",
           href: stewardLink,
           dataTestId: "leftPanelMeasureSteward",
           id: "sideNavMeasureSteward",
+          displayCompletedIcon:
+            measure?.measureMetaData.steward &&
+            measure?.measureMetaData.developers
+              ? true
+              : false,
+          displayIncompletedIcon: !(
+            measure?.measureMetaData.steward &&
+            measure?.measureMetaData.developers
+          )
+            ? true
+            : false,
         },
       ],
     },
@@ -73,24 +137,36 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
           href: descriptionLink,
           dataTestId: "leftPanelMeasureDescription",
           id: "sideNavMeasureDescription",
+          displayCompletedIcon: measure?.measureMetaData.description
+            ? true
+            : false,
         },
         {
           title: "Rationale",
           href: rationaleLink,
           dataTestId: "leftPanelMeasureRationale",
           id: "sideNavMeasureRationale",
+          displayCompletedIcon: measure?.measureMetaData.rationale
+            ? true
+            : false,
         },
         {
           title: "Guidance (Usage)",
           href: guidanceLink,
           dataTestId: "leftPanelMeasureGuidance",
           id: "sideNavMeasureGuidance",
+          displayCompletedIcon: measure?.measureMetaData.guidance
+            ? true
+            : false,
         },
         {
           title: "Clinical Recommendation",
           href: clinicalLink,
           dataTestId: "leftPanelMeasureClinicalRecommendation",
           id: "sideNavMeasureClinicalRecommendation",
+          displayCompletedIcon: measure?.measureMetaData.clinicalRecommendation
+            ? true
+            : false,
         },
       ],
     },
@@ -102,23 +178,32 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
           href: copyrightLink,
           dataTestId: "leftPanelMeasureCopyright",
           id: "sideNavMeasureCopyright",
+          displayCompletedIcon: measure?.measureMetaData.copyright
+            ? true
+            : false,
         },
         {
           title: "Disclaimer",
           href: disclaimerLink,
           dataTestId: "leftPanelMeasureDisclaimer",
           id: "sideNavMeasureDisclaimer",
+          displayCompletedIcon: measure?.measureMetaData.disclaimer
+            ? true
+            : false,
         },
       ],
     },
-  ];
+  ] as Link[];
+
   const featureFlags = useFeatureFlags();
+
   if (isQDM) {
     links[1].links.splice(3, 0, {
       title: "Definition",
       href: definitionLink,
       dataTestId: "leftPanelQDMMeasureDefinition",
       id: "sideNavQDMMeasureDefinition",
+      displayCompletedIcon: measure?.measureMetaData.definition ? true : false,
     });
 
     links[1].links.push({
@@ -126,18 +211,26 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
       href: referencesLink,
       dataTestId: "leftPanelMeasureReferences",
       id: "sideNavMeasureReferences",
+      displayCompletedIcon: measure?.measureMetaData.references?.length > 0,
+      displayIncompletedIcon: measure?.measureMetaData.references?.length == 0,
     });
     links[1].links.push({
       title: "Transmission Format",
       href: transmissionFormat,
       dataTestId: "leftPanelMeasureTransmissionFormat",
       id: "sideNavMeasureTransmissionFormat",
+      displayCompletedIcon: measure?.measureMetaData.transmissionFormat
+        ? true
+        : false,
     });
     links[1].links.push({
       title: "Measure Set",
       href: measureSetLink,
       dataTestId: "leftPanelMeasureSet",
       id: "sideNavMeasureSet",
+      displayCompletedIcon: measure?.measureMetaData.measureSetTitle
+        ? true
+        : false,
     });
   }
   useEffect(() => {
