@@ -89,12 +89,14 @@ export function PopulationCriteriaHome() {
             title: `Criteria ${id + 1}`,
             href: groupsBaseUrl + "/" + (id + 1),
             dataTestId: `leftPanelMeasureInformation-MeasureGroup${id + 1}`,
+            groupPopulated: true,
           }))
         : [
             {
               title: "Criteria 1",
               href: groupsBaseUrl + "/1",
               dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
+              groupPopulated: false,
             },
           ];
     setSideNavLinks([
@@ -122,6 +124,27 @@ export function PopulationCriteriaHome() {
     [measure?.model]
   );
 
+  const checkBaseConfigPopuated = () => {
+    if (measure?.model.includes("QDM")) {
+      return (
+        measure?.baseConfigurationTypes?.length > 0 && measure.patientBasis
+      );
+    }
+    return false;
+  };
+
+  const checkReporting = () => {
+    return measure?.improvementNotation ? true : false;
+  };
+
+  const checkSupplementalData = () => {
+    return measure?.supplementalData?.length > 0 ? true : false;
+  };
+
+  const checkRiskAdjustment = () => {
+    return measure?.riskAdjustments?.length > 0 ? true : false;
+  };
+
   return (
     <div
       tw="grid lg:grid-cols-6 gap-4 mx-8 shadow-lg rounded-md border bg-white"
@@ -139,6 +162,10 @@ export function PopulationCriteriaHome() {
         measureId={measure?.id}
         isFormDirty={isFormDirty}
         isQDM={isQDM}
+        baseConfigPopuated={checkBaseConfigPopuated()}
+        reportingPopulated={checkReporting()}
+        supplementalDataPopulated={checkSupplementalData()}
+        riskAdjustmentPopulated={checkRiskAdjustment()}
       />
       {/* path can be independent of nav */}
       {pathname.includes("/base-configuration") && <BaseConfiguration />}

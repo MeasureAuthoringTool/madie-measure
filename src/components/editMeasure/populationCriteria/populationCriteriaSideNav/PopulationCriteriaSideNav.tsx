@@ -8,6 +8,9 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import "../../details/EditMeasureSideBarNav.scss";
 import "../../../common/madie-link.scss";
 import { DSLink, Tabs, Tab } from "@madie/madie-design-system/dist/react";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorIcon from "@mui/icons-material/Error";
+import { useTheme } from "@mui/material";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
 const InnerWrapper = tw.div`flex-grow flex flex-col`;
@@ -22,6 +25,10 @@ export interface PopulationCriteriaSideNavProp {
   measureId: string;
   isFormDirty: boolean;
   isQDM: boolean;
+  baseConfigPopuated?: boolean;
+  reportingPopulated?: boolean;
+  supplementalDataPopulated?: boolean;
+  riskAdjustmentPopulated?: boolean;
 }
 
 export default function PopulationCriteriaSideNav(
@@ -34,8 +41,13 @@ export default function PopulationCriteriaSideNav(
     measureId,
     measureGroupNumber,
     isQDM,
+    baseConfigPopuated,
+    reportingPopulated,
+    supplementalDataPopulated,
+    riskAdjustmentPopulated,
   } = props;
   const { pathname } = useLocation();
+  const theme = useTheme();
   const [showPopulationCriteriaTabs, setShowPopulationCriteriaTabs] =
     useState<boolean>(true);
   let navigate = useNavigate();
@@ -99,14 +111,31 @@ export default function PopulationCriteriaSideNav(
       value: supplementalDataBaseUrl,
       dataTestId: "leftPanelMeasurePopulationsSupplementalDataTab",
       id: "sideNavMeasurePopulationsSupplementalData",
+      populated: supplementalDataPopulated,
     },
     {
       label: "Risk Adjustment",
       value: riskAdjustmentBaseUrl,
       dataTestId: "leftPanelMeasurePopulationsRiskAdjustmentTab",
       id: "sideNavMeasurePopulationsRiskAdjustment",
+      populated: riskAdjustmentPopulated,
     },
   ];
+
+  const getCompletedIcon = () => {
+    return (
+      <span style={{ position: "absolute", left: "0" }}>
+        <CheckCircleIcon sx={{ color: theme.palette.success.main }} />
+      </span>
+    );
+  };
+  const getIncompletedIcon = () => {
+    return (
+      <span style={{ position: "absolute", left: "0" }}>
+        <ErrorIcon sx={{ color: theme.palette.error.main }} />
+      </span>
+    );
+  };
 
   return (
     <OuterWrapper>
@@ -123,6 +152,9 @@ export default function PopulationCriteriaSideNav(
             >
               <Tab
                 type="C"
+                icon={
+                  baseConfigPopuated ? getCompletedIcon() : getIncompletedIcon()
+                }
                 label="Base Configuration"
                 value={baseConfigurationUrl}
                 data-testId="leftPanelMeasureBaseConfigurationTab"
@@ -179,6 +211,11 @@ export default function PopulationCriteriaSideNav(
                               id={index}
                               label={linkInfo.title}
                               data-testid={linkInfo.dataTestId}
+                              icon={
+                                linkInfo.groupPopulated
+                                  ? getCompletedIcon()
+                                  : getIncompletedIcon()
+                              }
                             />
                           );
                         })}
@@ -212,6 +249,9 @@ export default function PopulationCriteriaSideNav(
             {isQDM && (
               <Tab
                 type="C"
+                icon={
+                  reportingPopulated ? getCompletedIcon() : getIncompletedIcon()
+                }
                 label="Reporting"
                 value={QdmReportingBaseUrl}
                 dataTestId="leftPanelMeasureReportingTab"
@@ -219,7 +259,13 @@ export default function PopulationCriteriaSideNav(
               />
             )}
             {additionalLinks.map((l) => {
-              return <Tab {...l} type="B" />;
+              return (
+                <Tab
+                  {...l}
+                  type="B"
+                  icon={l.populated ? getCompletedIcon() : getIncompletedIcon()}
+                />
+              );
             })}
           </Tabs>
         </Nav>

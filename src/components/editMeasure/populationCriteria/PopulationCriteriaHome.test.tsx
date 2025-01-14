@@ -29,6 +29,21 @@ const qdmMeasure = {
   id: "testMeasureId",
   measureName: "the measure for testing",
   model: "QDM v5.6",
+  baseConfigurationTypes: ["Outcome"],
+  patientBasis: true,
+  improvementNotation: "Increased score indicates improvement",
+  supplementalData: [
+    {
+      definition: "Initial Population",
+      description: "",
+    },
+  ],
+  riskAdjustments: [
+    {
+      definition: "Initial Population",
+      description: "",
+    },
+  ],
   groups: [
     {
       id: "testGroupId",
@@ -462,5 +477,17 @@ describe("PopulationCriteriaHome", () => {
     ).not.toBeInTheDocument();
     const allComboBoxes = screen.queryAllByRole("combobox");
     expect(allComboBoxes.length).toEqual(0);
+  });
+
+  it("Should navigate to 404", async () => {
+    await renderPopulationCriteriaHomeComponent(
+      "groups/:groupNumber",
+      "groups/0"
+    );
+
+    const populationCriteriaTab = await screen.queryByTestId(
+      "leftPanelMeasurePopulationCriteriaTab"
+    );
+    expect(populationCriteriaTab).not.toBeInTheDocument();
   });
 });
