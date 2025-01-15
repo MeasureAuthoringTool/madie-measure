@@ -1611,7 +1611,7 @@ it("CV Bool  MsrPop = true; MsrPopEx; true; 0 Measure Observation: Change MsrPop
     ).name
   ).toEqual(PopulationType.MEASURE_POPULATION);
 
-  expect(resultPops2[0].populationValues[2].name).toEqual(
+  expect(resultPops2[0].populationValues[3].name).toEqual(
     PopulationType.MEASURE_POPULATION_OBSERVATION
   );
 });
@@ -2316,10 +2316,10 @@ it("CV NonBool MsrPop = 2; MsrPopEx; 0; 1 Measure Observation; should result in 
       "Continuous Variable"
     ).name
   ).toEqual(PopulationType.INITIAL_POPULATION);
-  expect(resultPops[0].populationValues[2].name).toEqual(
+  expect(resultPops[0].populationValues[3].name).toEqual(
     PopulationType.MEASURE_POPULATION_OBSERVATION
   );
-  expect(resultPops[0].populationValues[3].name).toEqual(
+  expect(resultPops[0].populationValues[4].name).toEqual(
     PopulationType.MEASURE_POPULATION_OBSERVATION
   );
 

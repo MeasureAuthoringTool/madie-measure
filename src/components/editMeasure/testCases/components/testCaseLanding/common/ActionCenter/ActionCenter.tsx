@@ -26,6 +26,7 @@ interface ActionCenterProps {
   selectedTestCases: any;
   canEdit: boolean;
   isQDM: boolean;
+  setDeleteDialogModalOpen: Function;
   onCloneTestCase?: (testCase: TestCase) => void;
   exportTestCases?: Function;
   onExportQRDA?: Function;
@@ -43,6 +44,7 @@ export default function ActionCenter(props: ActionCenterProps) {
     canEdit,
     isQDM,
     onCloneTestCase,
+    setDeleteDialogModalOpen,
     exportTestCases,
     onExportQRDA,
     onExportExcel,
@@ -249,7 +251,7 @@ export default function ActionCenter(props: ActionCenterProps) {
         </div>
 
         {/* Action Buttons (Delete, Clone, Export) */}
-        {featureFlags.TestCaseListActionCenter && (
+        {featureFlags?.TestCaseListActionCenter && (
           <div tw="flex items-center">
             {canEdit && (
               <div tw="flex items-center">
@@ -265,7 +267,9 @@ export default function ActionCenter(props: ActionCenterProps) {
                 >
                   <span>
                     <IconButton
-                      onClick={() => {}}
+                      onClick={() => {
+                        setDeleteDialogModalOpen(true);
+                      }}
                       disabled={disableDeleteBtn}
                       data-testid="delete-action-btn"
                     >
