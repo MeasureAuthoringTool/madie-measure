@@ -165,8 +165,6 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [selectedTestCases, setSelectedTestCases] = useState<any>();
   const [exportExecuting, setExportExecuting] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
-  const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
-    useState<boolean>(false);
   const featureFlags = useFeatureFlags();
   const qdmCqlParsingService = useRef(useQdmCqlParsingService());
   const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
@@ -178,6 +176,8 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [groupCoverageResult, setGroupCoverageResult] = useState([]);
   useState<GroupCoverageResult>();
   const [createOpen, setCreateOpen] = useState<boolean>(false);
+  const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
+    useState<boolean>(false);
   useEffect(() => {
     setExecuteAllTestCases(false);
     if (
@@ -376,6 +376,25 @@ const TestCaseList = (props: TestCaseListProps) => {
         setToastType("danger");
         setToastMessage(
           `Unable to Delete test Case with ID ${testCaseId}. Please try again. If the issue continues, please contact helpdesk.`
+        );
+      });
+  };
+
+  const deleteMultipleTestCases = () => {
+    const testCaseIds = selectedTestCases.map((testCase) => testCase.id);
+    testCaseService.current
+      .deleteTestCases(measureId, testCaseIds)
+      .then(() => {
+        retrieveTestCases();
+      })
+      .catch((err) => {
+        console.error("deleteTestCases: err.message = " + err.message);
+        setToastOpen(true);
+        setToastType("danger");
+        setToastMessage(
+          `Unable to Delete test Case with ID ${testCaseIds.join(
+            ", "
+          )}. Please try again. If the issue continues, please contact helpdesk.`
         );
       });
   };
@@ -795,9 +814,9 @@ const TestCaseList = (props: TestCaseListProps) => {
                         selectedTestCases={selectedTestCases}
                         canEdit={canEdit}
                         isQDM={true}
-                        setDeleteDialogModalOpen={setDeleteDialogModalOpen}
                         onCloneTestCase={handleCloneTestCase}
                         onExportExcel={exportExcel}
+                        setDeleteDialogModalOpen={setDeleteDialogModalOpen}
                         onExportQRDA={exportQRDA}
                         measureId={measureId}
                         exportOptionsOpen={exportOptionsOpen}
@@ -808,7 +827,11 @@ const TestCaseList = (props: TestCaseListProps) => {
                         setSorting={setSorting}
                         testCases={currentSlice}
                         canEdit={canEdit}
-                        deleteTestCase={deleteTestCase}
+                        deleteTestCase={
+                          featureFlags.TestCaseListActionCenter
+                            ? deleteMultipleTestCases
+                            : deleteTestCase
+                        }
                         exportTestCase={null}
                         onCloneTestCase={handleCloneTestCase}
                         measure={measure}

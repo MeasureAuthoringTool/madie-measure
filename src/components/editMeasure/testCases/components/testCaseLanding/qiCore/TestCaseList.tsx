@@ -295,6 +295,19 @@ const TestCaseList = (props: TestCaseListProps) => {
       });
   };
 
+  const deleteMultipleTestCases = () => {
+    const testCaseIds = selectedTestCases.map((testCase) => testCase.id);
+    testCaseService.current
+      .deleteTestCases(measureId, testCaseIds)
+      .then(() => {
+        retrieveTestCases();
+      })
+      .catch((err) => {
+        console.error("deleteTestCases: err.message = " + err.message);
+        setErrors((prevState) => [...prevState, err.message]);
+      });
+  };
+
   const deleteAllTestCases = () => {
     const currentTestCaseIds = _.map(measure.testCases, "id");
     testCaseService.current
@@ -652,7 +665,11 @@ const TestCaseList = (props: TestCaseListProps) => {
                         // test cases doesn't know how to sort by category
                         testCases={currentSlice}
                         canEdit={canEdit}
-                        deleteTestCase={deleteTestCase}
+                        deleteTestCase={
+                          featureFlags.TestCaseListActionCenter
+                            ? deleteMultipleTestCases
+                            : deleteTestCase
+                        }
                         exportTestCase={exportTestCase}
                         measure={measure}
                         onTestCaseShiftDates={onTestCaseShiftDates}
