@@ -894,7 +894,10 @@ const EditTestCase = (props: EditTestCaseProps) => {
                       {leftPanelActiveTab === "elements" &&
                         isValidJson(editorVal) && (
                           <div className="panel-content">
-                            <div data-testid="elements-content">
+                            <div
+                              data-testid="elements-content"
+                              id="elements-content"
+                            >
                               <ElementsTab
                                 canEdit={canEdit}
                                 setEditorVal={setEditorVal}
