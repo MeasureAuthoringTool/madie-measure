@@ -430,7 +430,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           dialogTitle={`Delete Test Case`}
           name={
             featureFlags.TestCaseListActionCenter
-              ? selectedTestCases.map((testCase) => testCase.title).join(" ")
+              ? selectedTestCases?.map((testCase) => testCase.title).join(" ")
               : selectedTestCase?.title
           }
         />

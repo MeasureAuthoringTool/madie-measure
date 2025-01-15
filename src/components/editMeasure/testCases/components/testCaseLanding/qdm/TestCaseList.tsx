@@ -381,7 +381,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   };
 
   const deleteMultipleTestCases = () => {
-    const testCaseIds = selectedTestCases.map((testCase) => testCase.id);
+    const testCaseIds = selectedTestCases?.map((testCase) => testCase.id);
     testCaseService.current
       .deleteTestCases(measureId, testCaseIds)
       .then(() => {
