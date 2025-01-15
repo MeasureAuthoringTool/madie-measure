@@ -50,6 +50,7 @@ import {
   checkUserCanEdit,
 } from "@madie/madie-util";
 import StatusHandler from "./StatusHandler";
+import "./StatusHandler.scss";
 import { SuccessText } from "../../../styles/editMeasure/editor";
 import "./MeasureEditor.scss";
 import applyCode from "./codeApplier";
@@ -636,14 +637,15 @@ const MeasureEditor = () => {
   };
 
   const getIncludedCodeWithSystemVersion = (selectedCode, model) => {
-    if (
-      (model === Model.QICORE || model === Model.QICORE_6_0_0) &&
-      selectedCode.codeSystem === "SNOMEDCT"
-    ) {
-      const url = selectedCode.fhirVersion.replace(/['"]/g, "");
-      if (selectedCode?.fhirVersion?.startsWith("http://")) {
-        const parts = url.split("/");
-        return `${selectedCode.codeSystem}:${parts[parts.length - 1]}`;
+    if (model === Model.QICORE || model === Model.QICORE_6_0_0) {
+      if (selectedCode.codeSystem === "SNOMEDCT") {
+        const url = selectedCode.fhirVersion.replace(/['"]/g, "");
+        if (selectedCode?.fhirVersion?.startsWith("http://")) {
+          const parts = url.split("/");
+          return `${selectedCode.codeSystem}:${parts[parts.length - 1]}`;
+        }
+      } else {
+        return `${selectedCode.codeSystem}:${selectedCode.fhirVersion}`;
       }
     } else {
       return `${selectedCode.codeSystem}:${selectedCode.svsVersion}`;
