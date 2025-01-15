@@ -65,7 +65,7 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
         {
           model: measure.model,
           excludeMeasures: [measure.id],
-          // draft: true,
+          draft: true,
         },
         abortController.current.signal
       )
