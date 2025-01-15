@@ -38,7 +38,7 @@ const measure = {
     copyright: "copyright",
     disclaimer: "disclaimer",
     rationale: "rationale",
-    guidance: "guidance",
+    guidance: "measureGuidance",
     clinicalRecommendation: "clinicalRecommendation",
     draft: true,
     references: [
