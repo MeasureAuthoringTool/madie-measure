@@ -8,6 +8,10 @@ import { Measure } from "@madie/madie-models";
 import BaseConfiguration from "./baseConfiguration/BaseConfiguration";
 import QDMReporting from "./QDMReporting/QDMReporting";
 
+export const COMPLETE = "complete";
+export const INCOMPLETE = "incomplete";
+export const NONE = "none";
+
 export function PopulationCriteriaHome() {
   const { pathname } = useLocation();
   const { groupNumber } = useParams();
@@ -132,15 +136,59 @@ export function PopulationCriteriaHome() {
   };
 
   const checkReporting = () => {
-    return measure?.improvementNotation ? true : false;
+    if (
+      measure?.improvementNotation &&
+      measure?.improvementNotationDescription &&
+      measure?.rateAggregation
+    ) {
+      return COMPLETE;
+    } else {
+      if (
+        !measure?.improvementNotation &&
+        !measure?.improvementNotationDescription &&
+        !measure?.rateAggregation
+      ) {
+        return NONE;
+      } else {
+        return INCOMPLETE;
+      }
+    }
   };
 
   const checkSupplementalData = () => {
-    return measure?.supplementalData?.length > 0 ? true : false;
+    if (
+      measure?.supplementalData?.length > 0 &&
+      measure?.supplementalDataDescription
+    ) {
+      return COMPLETE;
+    } else {
+      if (
+        measure?.supplementalData?.length == 0 &&
+        !measure?.supplementalDataDescription
+      ) {
+        return NONE;
+      } else {
+        return INCOMPLETE;
+      }
+    }
   };
 
   const checkRiskAdjustment = () => {
-    return measure?.riskAdjustments?.length > 0 ? true : false;
+    if (
+      measure?.riskAdjustments?.length > 0 &&
+      measure?.riskAdjustmentDescription
+    ) {
+      return COMPLETE;
+    } else {
+      if (
+        measure?.riskAdjustments?.length == 0 &&
+        !measure?.riskAdjustmentDescription
+      ) {
+        return NONE;
+      } else {
+        return INCOMPLETE;
+      }
+    }
   };
 
   return (
@@ -161,9 +209,9 @@ export function PopulationCriteriaHome() {
         isFormDirty={isFormDirty}
         isQDM={isQDM}
         baseConfigPopuated={checkBaseConfigPopulated()}
-        reportingPopulated={checkReporting()}
-        supplementalDataPopulated={checkSupplementalData()}
-        riskAdjustmentPopulated={checkRiskAdjustment()}
+        reportingStatus={checkReporting()}
+        supplementalDataStatus={checkSupplementalData()}
+        riskAdjustmentStatus={checkRiskAdjustment()}
       />
       {/* path can be independent of nav */}
       {pathname.includes("/base-configuration") && <BaseConfiguration />}

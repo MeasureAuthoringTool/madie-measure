@@ -32,18 +32,22 @@ const qdmMeasure = {
   baseConfigurationTypes: ["Outcome"],
   patientBasis: true,
   improvementNotation: "Increased score indicates improvement",
+  improvementNotationDescription: "test improvementNotationDescription",
+  rateAggregation: "test rateAggregation",
   supplementalData: [
     {
       definition: "Initial Population",
       description: "",
     },
   ],
+  supplementalDataDescription: "test supplementalDataDescription",
   riskAdjustments: [
     {
       definition: "Initial Population",
       description: "",
     },
   ],
+  riskAdjustmentDescription: "test riskAdjustmentDescription",
   groups: [
     {
       id: "testGroupId",
@@ -489,5 +493,24 @@ describe("PopulationCriteriaHome", () => {
       "leftPanelMeasurePopulationCriteriaTab"
     );
     expect(populationCriteriaTab).not.toBeInTheDocument();
+  });
+
+  it("test no supplemental data and risk adjustment", async () => {
+    qdmMeasure.rateAggregation = undefined;
+    qdmMeasure.supplementalData = [];
+    qdmMeasure.supplementalDataDescription = undefined;
+    qdmMeasure.riskAdjustments = [];
+    qdmMeasure.riskAdjustmentDescription = undefined;
+    const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
+    mockedMeasureState.state = { ...qdmMeasure };
+    await renderPopulationCriteriaHomeComponent("reporting", "reporting");
+
+    const reportingTab = screen.getByRole("tab", {
+      name: /Reporting/i,
+    });
+    expect(reportingTab).toBeInTheDocument();
+
+    expect(screen.getByText("Rate Aggregation")).toBeInTheDocument();
+    expect(reportingTab).toHaveAttribute("aria-selected", "true");
   });
 });

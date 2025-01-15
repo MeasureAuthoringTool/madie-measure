@@ -11,6 +11,7 @@ import { DSLink, Tabs, Tab } from "@madie/madie-design-system/dist/react";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import { useTheme } from "@mui/material";
+import { COMPLETE, INCOMPLETE, NONE } from "../PopulationCriteriaHome";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
 const InnerWrapper = tw.div`flex-grow flex flex-col`;
@@ -26,9 +27,9 @@ export interface PopulationCriteriaSideNavProp {
   isFormDirty: boolean;
   isQDM: boolean;
   baseConfigPopuated?: boolean;
-  reportingPopulated?: boolean;
-  supplementalDataPopulated?: boolean;
-  riskAdjustmentPopulated?: boolean;
+  reportingStatus?: string;
+  supplementalDataStatus?: string;
+  riskAdjustmentStatus?: string;
 }
 
 export default function PopulationCriteriaSideNav(
@@ -42,9 +43,9 @@ export default function PopulationCriteriaSideNav(
     measureGroupNumber,
     isQDM,
     baseConfigPopuated,
-    reportingPopulated,
-    supplementalDataPopulated,
-    riskAdjustmentPopulated,
+    reportingStatus,
+    supplementalDataStatus,
+    riskAdjustmentStatus,
   } = props;
   const { pathname } = useLocation();
   const theme = useTheme();
@@ -111,14 +112,14 @@ export default function PopulationCriteriaSideNav(
       value: supplementalDataBaseUrl,
       dataTestId: "leftPanelMeasurePopulationsSupplementalDataTab",
       id: "sideNavMeasurePopulationsSupplementalData",
-      populated: supplementalDataPopulated,
+      status: supplementalDataStatus,
     },
     {
       label: "Risk Adjustment",
       value: riskAdjustmentBaseUrl,
       dataTestId: "leftPanelMeasurePopulationsRiskAdjustmentTab",
       id: "sideNavMeasurePopulationsRiskAdjustment",
-      populated: riskAdjustmentPopulated,
+      status: riskAdjustmentStatus,
     },
   ];
 
@@ -250,7 +251,11 @@ export default function PopulationCriteriaSideNav(
               <Tab
                 type="C"
                 icon={
-                  reportingPopulated ? getCompletedIcon() : getIncompletedIcon()
+                  reportingStatus == COMPLETE
+                    ? getCompletedIcon()
+                    : reportingStatus == INCOMPLETE
+                    ? getIncompletedIcon()
+                    : null
                 }
                 label="Reporting"
                 value={QdmReportingBaseUrl}
@@ -263,7 +268,13 @@ export default function PopulationCriteriaSideNav(
                 <Tab
                   {...l}
                   type="B"
-                  icon={l.populated ? getCompletedIcon() : getIncompletedIcon()}
+                  icon={
+                    l.status === COMPLETE
+                      ? getCompletedIcon()
+                      : l.status === INCOMPLETE
+                      ? getIncompletedIcon()
+                      : null
+                  }
                 />
               );
             })}
