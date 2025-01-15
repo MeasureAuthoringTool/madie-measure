@@ -76,7 +76,7 @@ const ProfiledExtensionComponent = ({
                   structureDefinition={elementDefinition}
                   resource={resource}
                   type={type.code}
-                  required={elementDefinition?.min > 0}
+                  required={required}
                   value={elementDefinition?.fixedUri}
                   onChange={() => {}} // do nothing for now
                   canEdit={canEdit}

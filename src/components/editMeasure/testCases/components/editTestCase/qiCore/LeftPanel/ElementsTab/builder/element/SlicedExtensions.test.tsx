@@ -69,7 +69,7 @@ describe("TypeEditor for profiled extensions/slices ", () => {
         ],
       },
     };
-    const structureDefinition = {
+    const qiCoreEthnicityStructureDefinition = {
       id: "Patient.extension:ethnicity",
       min: 0,
       max: 1,
@@ -98,7 +98,7 @@ describe("TypeEditor for profiled extensions/slices ", () => {
             required={false}
             value={undefined}
             onChange={handleChange}
-            structureDefinition={structureDefinition}
+            structureDefinition={qiCoreEthnicityStructureDefinition}
             parentStructureDefinition={null}
             label={label}
             canEdit={true}
@@ -109,5 +109,8 @@ describe("TypeEditor for profiled extensions/slices ", () => {
     await waitFor(() => {
       expect(screen.getByTestId("string-field-input-id")).toBeInTheDocument();
     });
+    expect(screen.getByTestId("extension:ombCategory")).toBeInTheDocument();
+    expect(screen.getByTestId("extension:detailed")).toBeInTheDocument();
+    expect(screen.getByTestId("extension:text")).toBeInTheDocument();
   });
 });
