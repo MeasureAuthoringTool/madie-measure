@@ -16,6 +16,11 @@ import TimeComponent from "./types/TimeComponent";
 import { useFormikContext } from "formik";
 import ExtensionComponent from "./types/ExtensionComponent";
 import ProfiledExtensionComponent from "./types/ProfiledExtensionComponent";
+import {
+  getTopLevelElements,
+  updateChildrenPaths,
+  isComponentDataType,
+} from "../../../../../../../api/fhirDefinitionServiceUtilities";
 
 const TypeEditor = ({
   type,
@@ -32,15 +37,13 @@ const TypeEditor = ({
   const [childTypeDefs, setChildTypeDefs] = useState([]);
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   useEffect(() => {
-    if (!fhirDefinitionsService.current.isComponentDataType(type)) {
+    if (!isComponentDataType(type)) {
       fhirDefinitionsService.current.getResourceTree(type).then((def) => {
-        const elements =
-          fhirDefinitionsService.current.getTopLevelElements(def);
-        const updatedElements =
-          fhirDefinitionsService.current.updateChildrenPaths(
-            structureDefinition,
-            elements
-          );
+        const elements = getTopLevelElements(def);
+        const updatedElements = updateChildrenPaths(
+          structureDefinition,
+          elements
+        );
         setChildTypeDefs(updatedElements);
       });
     }
@@ -59,7 +62,7 @@ const TypeEditor = ({
       return errors;
     }
   };
-  if (fhirDefinitionsService.current.isComponentDataType(type)) {
+  if (isComponentDataType(type)) {
     switch (type) {
       case "string":
       case "http://hl7.org/fhirpath/System.String":

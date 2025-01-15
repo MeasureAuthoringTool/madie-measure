@@ -55,44 +55,51 @@ const codingDef = {
 };
 const codingTopLevelElements = [
   {
-    id: "Coding.code",
-    path: "Coding.code",
+    id: "ClaimResponse.Coding.code",
+    path: "ClaimResponse.Coding.code",
   },
   {
-    id: "Coding.id",
-    path: "Coding.id",
+    id: "ClaimResponse.Coding.id",
+    path: "ClaimResponse.Coding.id",
   },
   {
-    id: "Coding.extension",
-    path: "Coding.extension",
+    id: "ClaimResponse.Coding.extension",
+    path: "ClaimResponse.Coding.extension",
   },
   {
-    id: "Coding.system",
-    path: "Coding.system",
+    id: "ClaimResponse.Coding.system",
+    path: "ClaimResponse.Coding.system",
   },
   {
-    id: "Coding.version",
-    path: "Coding.version",
+    id: "ClaimResponse.Coding.version",
+    path: "ClaimResponse.Coding.version",
   },
   {
-    id: "Coding.display",
-    path: "Coding.display",
+    id: "ClaimResponse.Coding.display",
+    path: "ClaimResponse.Coding.display",
   },
   {
-    id: "Coding.userSelected",
-    path: "Coding.userSelected",
+    id: "ClaimResponse.Coding.userSelected",
+    path: "ClaimResponse.Coding.userSelected",
   },
 ];
 jest.mock("../../../../../../../api/useFhirDefinitionsService");
 const useFhirDefinitionsServiceApiMock =
   useFhirDefinitionsServiceApi as jest.Mock<FhirDefinitionsServiceApi>;
 const fhirDefinitionsServiceApiMock = {
-  isComponentDataType: jest.fn().mockReturnValue(true),
   getResourceTree: jest.fn().mockResolvedValue(codingDef),
-  getTopLevelElements: jest.fn().mockReturnValue(codingTopLevelElements),
-  getAllChildren: jest.fn().mockResolvedValue(codingTopLevelElements),
-  updateChildrenPaths: jest.fn().mockReturnValue(codingTopLevelElements),
 } as unknown as FhirDefinitionsServiceApi;
+jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
+  return {
+    ...jest.requireActual(
+      "../../../../../../../api/fhirDefinitionServiceUtilities"
+    ),
+    isComponentDataType: jest.fn().mockReturnValue(true),
+    getAllChildren: jest.fn().mockReturnValue(codingTopLevelElements),
+    getTopLevelElements: jest.fn().mockReturnValue(codingTopLevelElements),
+    updateChildrenPaths: jest.fn().mockReturnValue(codingTopLevelElements),
+  };
+});
 useFhirDefinitionsServiceApiMock.mockImplementation(
   () => fhirDefinitionsServiceApiMock
 );
@@ -381,11 +388,8 @@ describe("TypeEditor Component", () => {
 
   test("Should handle missing isComponentDataType", async () => {
     const fhirDefinitionsServiceApiMock = {
-      isComponentDataType: jest.fn().mockReturnValue(false),
       getResourceTree: jest.fn().mockResolvedValue(codingDef),
-      getTopLevelElements: jest.fn().mockReturnValue(codingTopLevelElements),
       getAllChildren: jest.fn().mockReturnValue(codingTopLevelElements),
-      updateChildrenPaths: jest.fn().mockReturnValue(codingTopLevelElements),
     } as unknown as FhirDefinitionsServiceApi;
     useFhirDefinitionsServiceApiMock.mockImplementation(
       () => fhirDefinitionsServiceApiMock

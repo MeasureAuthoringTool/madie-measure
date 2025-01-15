@@ -4,6 +4,7 @@ import { Box } from "@mui/material";
 import TypeEditor from "./TypeEditor";
 import ElementSection from "../../../../../../common/ElementSection";
 import { transformArrays } from "./transformArrays";
+import { stripResourcePath } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 
 const Element = ({ element, label, resource, handleChange, canEdit }) => {
   let elementValue = _.get(resource, label);
@@ -57,10 +58,7 @@ const ElementEditorChildren = ({
   if (rootDefinition) {
     const type = rootDefinition?.type?.[0];
     const required = +rootDefinition.min > 0;
-    const elemPath = fhirDefinitionsService.current.stripResourcePath(
-      resourcePath,
-      rootDefinition.path
-    );
+    const elemPath = stripResourcePath(resourcePath, rootDefinition.path);
     let elementValue = _.get(resource, elemPath);
     return (
       <div
