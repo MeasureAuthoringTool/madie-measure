@@ -210,7 +210,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
       dataTestId: "leftPanelMeasureReferences",
       id: "sideNavMeasureReferences",
       displayCompletedIcon: measure?.measureMetaData.references?.length > 0,
-      displayIncompletedIcon: measure?.measureMetaData.references?.length == 0,
+      displayIncompletedIcon: measure?.measureMetaData.references?.length === 0,
     });
     links[1].links.push({
       title: "Transmission Format",

@@ -8,21 +8,80 @@ import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
 import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureMetadata from "./measureMetadata/MeasureMetadata";
 import { Measure } from "@madie/madie-models";
+// @ts-ignore
+import { measureStore } from "@madie/madie-util";
 
-const testMeasure = {
+const measure = {
   id: "1",
-  measureName: "testMeasure",
+  measureName: "measure",
   cqlLibraryName: "TestLibrary",
-  model: "QI-Core v4.1.1",
+  model: "QDM v5.6",
   ecqmTitle: "ecqmTitle",
   measurementPeriodStart: "01/01/2022",
   measurementPeriodEnd: "12/02/2022",
   measureMetaData: {
-    steward: { name: "steward" },
-    description: "Test Description",
-    copyright: null,
-    disclaimer: null,
-    rationale: null,
+    steward: {
+      id: "id",
+      name: "name",
+      oid: "oid",
+      url: "url",
+    },
+    developers: [
+      {
+        id: "id",
+        name: "name",
+        oid: "oid",
+        url: "url",
+      },
+    ],
+    description: "description",
+    copyright: "copyright",
+    disclaimer: "disclaimer",
+    rationale: "rationale",
+    guidance: "guidance",
+    clinicalRecommendation: "clinicalRecommendation",
+    draft: true,
+    references: [
+      {
+        id: "id",
+        referenceText: "referenceText",
+        referenceType: "referenceType",
+      },
+    ],
+    endorsements: [
+      {
+        endorser: "",
+        endorserSystemId: null,
+        endorsementId: "",
+      },
+    ],
+    definition: "definition",
+    experimental: null,
+    transmissionFormat: "transmissionFormat",
+    measureSetTitle: "measureSetTitle",
+    cqlMetaData: {
+      codeSystemMap: {},
+    },
+  },
+} as unknown as Measure;
+
+const incompletedIconMeasure = {
+  id: "2",
+  model: "QDM v5.6",
+  measureMetaData: {
+    draft: true,
+    references: [],
+    endorsements: [
+      {
+        endorser: "",
+        endorserSystemId: null,
+        endorsementId: "",
+      },
+    ],
+    experimental: null,
+    cqlMetaData: {
+      codeSystemMap: {},
+    },
   },
 } as unknown as Measure;
 
@@ -32,8 +91,8 @@ jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
   measureStore: {
     updateMeasure: (measure) => measure,
-    state: jest.fn().mockImplementation(() => testMeasure),
-    initialState: jest.fn().mockImplementation(() => testMeasure),
+    state: jest.fn().mockImplementation(() => measure),
+    initialState: jest.fn().mockImplementation(() => measure),
     subscribe: (set) => {
       return { unsubscribe: () => null };
     },
@@ -384,5 +443,103 @@ describe("MeasureDetails component", () => {
 
     expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureSet")).toBeInTheDocument();
+  });
+
+  it("should render the tabs in the measure details side nav with completed icons", () => {
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
+          <Routes>
+            <Route
+              path="/foo"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  isQDM={true}
+                />
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    expect(
+      getByTestId("measure-details-completed-icon-sideNavMeasureInformation")
+    ).toBeInTheDocument();
+    expect(
+      getByTestId(
+        "measure-details-completed-icon-sideNavMeasureModelAndMeasurementPeriod"
+      )
+    ).toBeInTheDocument();
+    expect(
+      getByTestId("measure-details-completed-icon-sideNavMeasureSteward")
+    ).toBeInTheDocument();
+    expect(
+      getByTestId("measure-details-completed-icon-sideNavMeasureDescription")
+    ).toBeInTheDocument();
+    expect(
+      getByTestId("measure-details-completed-icon-sideNavMeasureRationale")
+    ).toBeInTheDocument();
+    expect(
+      getByTestId("measure-details-completed-icon-sideNavMeasureGuidance")
+    ).toBeInTheDocument();
+    expect(
+      getByTestId("measure-details-completed-icon-sideNavQDMMeasureDefinition")
+    ).toBeInTheDocument();
+    expect(
+      getByTestId(
+        "measure-details-completed-icon-sideNavMeasureClinicalRecommendation"
+      )
+    ).toBeInTheDocument();
+    expect(
+      getByTestId("measure-details-completed-icon-sideNavMeasureReferences")
+    ).toBeInTheDocument();
+    expect(
+      getByTestId("measure-details-completed-icon-sideNavMeasureSet")
+    ).toBeInTheDocument();
+    expect(
+      getByTestId("measure-details-completed-icon-sideNavMeasureCopyright")
+    ).toBeInTheDocument();
+    expect(
+      getByTestId("measure-details-completed-icon-sideNavMeasureDisclaimer")
+    ).toBeInTheDocument();
+  });
+
+  it("should render the tabs in the measure details side nav with incompleted icons", () => {
+    measureStore.state.mockImplementationOnce(() => incompletedIconMeasure);
+
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
+          <Routes>
+            <Route
+              path="/foo"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  isQDM={true}
+                />
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    expect(
+      getByTestId("measure-details-incompleted-icon-sideNavMeasureInformation")
+    ).toBeInTheDocument();
+    expect(
+      getByTestId(
+        "measure-details-incompleted-icon-sideNavMeasureModelAndMeasurementPeriod"
+      )
+    ).toBeInTheDocument();
+    expect(
+      getByTestId("measure-details-incompleted-icon-sideNavMeasureSteward")
+    ).toBeInTheDocument();
+    expect(
+      getByTestId("measure-details-incompleted-icon-sideNavMeasureReferences")
+    ).toBeInTheDocument();
   });
 });
