@@ -33,6 +33,7 @@ import {
   Code,
   CqlMetaData,
   CodeSystem,
+  Model,
 } from "@madie/madie-models";
 
 import {
@@ -634,10 +635,26 @@ const MeasureEditor = () => {
     });
   };
 
-  const handleCodeDelete = (selectedCode) => {
+  const getIncludedCodeWithSystemVersion = (selectedCode, model) => {
+    if (model === Model.QICORE || model === Model.QICORE_6_0_0) {
+      if (selectedCode.codeSystem === "SNOMEDCT") {
+        const url = selectedCode.fhirVersion.replace(/['"]/g, "");
+        if (selectedCode?.fhirVersion?.startsWith("http://")) {
+          const parts = url.split("/");
+          return `${selectedCode.codeSystem}:${parts[parts.length - 1]}`;
+        }
+      } else {
+        return `${selectedCode.codeSystem}:${selectedCode.fhirVersion}`;
+      }
+    } else {
+      return `${selectedCode.codeSystem}:${selectedCode.svsVersion}`;
+    }
+  };
+
+  const handleCodeDelete = (selectedCode, measureModel) => {
     const cqlComponents = new CqlAntlr(editorVal).parse();
     const codeSystem = selectedCode?.versionIncluded
-      ? `${selectedCode.codeSystem}:${selectedCode.svsVersion}`
+      ? getIncludedCodeWithSystemVersion(selectedCode, measureModel)
       : selectedCode?.codeSystem;
     const matchingCodes = cqlComponents?.codes?.filter(
       (code) => code?.codeSystem.replace(/['"]/g, "") === codeSystem
