@@ -38,6 +38,9 @@ interface TestCaseTableProps {
   sorting: any;
   setSorting: any;
   setSelectedTestCases: any;
+  selectedTestCases: any;
+  deleteDialogModalOpen: any;
+  setDeleteDialogModalOpen: any;
 }
 
 export const convertDate = (date: string) => {
@@ -76,10 +79,11 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     sorting,
     setSorting,
     setSelectedTestCases,
+    selectedTestCases,
+    deleteDialogModalOpen,
+    setDeleteDialogModalOpen,
   } = props;
   const viewOrEdit = canEdit ? "edit" : "view";
-  const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
-    useState<boolean>(false);
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
@@ -96,7 +100,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     useState<boolean>(false);
   const featureFlags = useFeatureFlags();
   const navigate = useNavigate();
-
   const handleOpen = (
     selected: TestCase,
     event: React.MouseEvent<HTMLButtonElement>
@@ -149,7 +152,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
 
   const columns = useMemo<ColumnDef<TCRow>[]>(() => {
     const columnDefs = [];
-    if (featureFlags.TestCaseListActionCenter) {
+    if (featureFlags?.TestCaseListActionCenter) {
       columnDefs.push({
         id: "select",
         header: ({ table }) => (
@@ -272,7 +275,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
         enableSorting: false,
       },
     ];
-  }, [testCases]);
+  }, [testCases, featureFlags?.TestCaseListActionCenter]);
 
   const table = useReactTable({
     data,
@@ -414,7 +417,12 @@ const TestCaseTable = (props: TestCaseTableProps) => {
         <MadieDeleteDialog
           open={deleteDialogModalOpen}
           onContinue={() => {
-            deleteTestCase(selectedTestCase.id);
+            if (featureFlags?.TestCaseListActionCenter) {
+              deleteTestCase(selectedTestCases[0].id);
+              setDeleteDialogModalOpen(false);
+            } else {
+              deleteTestCase(selectedTestCase.id);
+            }
           }}
           onClose={() => {
             setDeleteDialogModalOpen(false);
