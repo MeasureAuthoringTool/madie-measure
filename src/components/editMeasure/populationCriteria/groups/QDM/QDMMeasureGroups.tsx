@@ -14,6 +14,8 @@ import {
   MeasureScoring,
 } from "@madie/madie-models";
 import { MenuItem as MuiMenuItem, Typography, Divider } from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorIcon from "@mui/icons-material/Error";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import {
   Button,
@@ -796,16 +798,30 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                         type="B"
                         aria-label="Populations tab panel"
                         tabIndex={0}
-                        label={`Populations 
-                ${
-                  !!formik.errors.populations && activeTab !== "populations"
-                    ? "🚫"
-                    : ""
-                }`}
-                        data-testid="populations-tab"
-                        onClick={() => {
-                          setActiveTab("populations");
-                        }}
+                        label={
+                          <div>
+                            {Boolean(formik.errors.populations) ? (
+                              <ErrorIcon
+                                sx={{
+                                  color: "#AE1C1C",
+                                  marginRight: "10px",
+                                  height: "20px",
+                                  width: "20px",
+                                }}
+                              />
+                            ) : (
+                              <CheckCircleIcon
+                                sx={{
+                                  color: "#4D7E23",
+                                  marginRight: "10px",
+                                  height: "20px",
+                                  width: "20px",
+                                }}
+                              />
+                            )}
+                            Populations
+                          </div>
+                        }
                         value="populations"
                       />
                       {formik.values.scoring !== "Ratio" && (
@@ -813,7 +829,30 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                           role="tabpanel"
                           aria-label="Stratifications tab panel"
                           tabIndex={0}
-                          label="Stratifications"
+                          label={
+                            <div>
+                              {Boolean(formik.errors.stratifications) ? (
+                                <ErrorIcon
+                                  sx={{
+                                    color: "#AE1C1C",
+                                    marginRight: "10px",
+                                    height: "20px",
+                                    width: "20px",
+                                  }}
+                                />
+                              ) : (
+                                <CheckCircleIcon
+                                  sx={{
+                                    color: "#4D7E23",
+                                    marginRight: "10px",
+                                    height: "20px",
+                                    width: "20px",
+                                  }}
+                                />
+                              )}
+                              Stratifications
+                            </div>
+                          }
                           type="B"
                           data-testid="stratifications-tab"
                           onClick={() => {

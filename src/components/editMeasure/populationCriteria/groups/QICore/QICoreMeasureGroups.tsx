@@ -11,7 +11,14 @@ import {
   MeasureErrorType,
   MeasureGroupTypes,
 } from "@madie/madie-models";
-import { MenuItem as MuiMenuItem, Typography, Divider } from "@mui/material";
+import {
+  MenuItem as MuiMenuItem,
+  Typography,
+  Divider,
+  useTheme,
+} from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorIcon from "@mui/icons-material/Error";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import {
   AutoComplete,
@@ -184,6 +191,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   const [stratAssociation, setStratAssociation] = useState<Array<any>>([]);
+  const theme = useTheme();
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
     return () => {
@@ -908,12 +916,30 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                         value="populations"
                         type="B"
                         data-testid="populations-tab"
-                        label={`Populations 
-                ${
-                  !!formik.errors.populations && activeTab !== "populations"
-                    ? "🚫"
-                    : ""
-                }`}
+                        label={
+                          <div>
+                            {Boolean(formik.errors.populations) ? (
+                              <ErrorIcon
+                                sx={{
+                                  color: "#AE1C1C",
+                                  marginRight: "10px",
+                                  height: "20px",
+                                  width: "20px",
+                                }}
+                              />
+                            ) : (
+                              <CheckCircleIcon
+                                sx={{
+                                  color: "#4D7E23",
+                                  marginRight: "10px",
+                                  height: "20px",
+                                  width: "20px",
+                                }}
+                              />
+                            )}
+                            Populations
+                          </div>
+                        }
                         onClick={() => {
                           setActiveTab("populations");
                         }}
@@ -922,7 +948,30 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                       {formik.values.scoring !== "Ratio" && (
                         <Tab
                           tabIndex={0}
-                          label="Stratifications"
+                          label={
+                            <div>
+                              {Boolean(formik.errors.stratifications) ? (
+                                <ErrorIcon
+                                  sx={{
+                                    color: "#AE1C1C",
+                                    marginRight: "10px",
+                                    height: "20px",
+                                    width: "20px",
+                                  }}
+                                />
+                              ) : (
+                                <CheckCircleIcon
+                                  sx={{
+                                    color: "#4D7E23",
+                                    marginRight: "10px",
+                                    height: "20px",
+                                    width: "20px",
+                                  }}
+                                />
+                              )}
+                              Stratifications
+                            </div>
+                          }
                           value="stratification"
                           type="B"
                           data-testid="stratifications-tab"
@@ -947,13 +996,30 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                       )}
                       <Tab
                         type="B"
-                        label={`Reporting 
-                          ${
-                            !!formik.errors.improvementNotation &&
-                            activeTab !== "reporting"
-                              ? "🚫"
-                              : ""
-                          }`}
+                        label={
+                          <div>
+                            {Boolean(formik.errors.improvementNotation) ? (
+                              <ErrorIcon
+                                sx={{
+                                  color: "#AE1C1C",
+                                  marginRight: "10px",
+                                  height: "20px",
+                                  width: "20px",
+                                }}
+                              />
+                            ) : (
+                              <CheckCircleIcon
+                                sx={{
+                                  color: "#4D7E23",
+                                  marginRight: "10px",
+                                  height: "20px",
+                                  width: "20px",
+                                }}
+                              />
+                            )}
+                            Reporting
+                          </div>
+                        }
                         data-testid="reporting-tab"
                         onClick={() => setActiveTab("reporting")}
                         value="reporting"
