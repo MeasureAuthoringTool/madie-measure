@@ -36,7 +36,12 @@ const TypeEditor = ({
       fhirDefinitionsService.current.getResourceTree(type).then((def) => {
         const elements =
           fhirDefinitionsService.current.getTopLevelElements(def);
-        setChildTypeDefs(elements);
+        const updatedElements =
+          fhirDefinitionsService.current.updateChildrenPaths(
+            structureDefinition,
+            elements
+          );
+        setChildTypeDefs(updatedElements);
       });
     }
   }, [type]);
@@ -54,11 +59,11 @@ const TypeEditor = ({
       return errors;
     }
   };
-
   if (fhirDefinitionsService.current.isComponentDataType(type)) {
     switch (type) {
       case "string":
       case "http://hl7.org/fhirpath/System.String":
+      case "markdown":
         return (
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
             <StringComponent

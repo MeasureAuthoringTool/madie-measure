@@ -96,6 +96,22 @@ export class FhirDefinitionsServiceApi {
     const elements = [...resource?.definition?.snapshot?.element];
     return elements?.filter((e) => e.path !== path && e.path.includes(path));
   }
+
+  updateChildrenPaths(structureDefinition, elements) {
+    // these childType defs need to have their id and path manipulated to play nice.
+    // Instead of Procedure.Annotation.text, it should be Procedure.note.text
+    const currentPath = structureDefinition?.id;
+    const updatedElements = elements.map((el) => {
+      let targetPath = el.id.split(".");
+      targetPath.shift();
+      targetPath.unshift(currentPath);
+      targetPath = targetPath.join(".");
+      el.id = targetPath;
+      el.path = targetPath;
+      return el;
+    });
+    return updatedElements;
+  }
 }
 
 export default function useFhirDefinitionsServiceApi(): FhirDefinitionsServiceApi {

@@ -93,7 +93,7 @@ const ElementEditorChildren = ({
         {childrenToRender.map((child) => (
           <Element
             element={child}
-            label={child.path.split(".")[child.path.split(".").length - 1]}
+            label={child?.id}
             resource={resource}
             handleChange={handleChange}
             canEdit={canEdit}
@@ -137,7 +137,7 @@ const ElementEditorChildren = ({
             {childrenToRender.map((child) => (
               <Element
                 element={child}
-                label={child.path.split(".")[child.path.split(".").length - 1]}
+                label={child?.id}
                 resource={resource}
                 handleChange={handleChange}
                 canEdit={canEdit}

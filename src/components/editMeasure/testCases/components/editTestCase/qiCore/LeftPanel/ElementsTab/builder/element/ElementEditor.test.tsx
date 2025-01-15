@@ -51,6 +51,7 @@ describe("ElementEditor Component", () => {
 
   const mockFhirDefinitionsService = {
     getAllChildren: jest.fn().mockReturnValue([]),
+    updateChildrenPaths: jest.fn().mockReturnValue([]),
     isComponentDataType: jest.fn().mockReturnValue(false),
     getResourceTree: jest.fn().mockResolvedValue({}),
     getTopLevelElements: jest.fn().mockReturnValue([]),

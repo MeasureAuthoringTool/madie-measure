@@ -91,6 +91,7 @@ const fhirDefinitionsServiceApiMock = {
   getResourceTree: jest.fn().mockResolvedValue(codingDef),
   getTopLevelElements: jest.fn().mockReturnValue(codingTopLevelElements),
   getAllChildren: jest.fn().mockResolvedValue(codingTopLevelElements),
+  updateChildrenPaths: jest.fn().mockReturnValue(codingTopLevelElements),
 } as unknown as FhirDefinitionsServiceApi;
 useFhirDefinitionsServiceApiMock.mockImplementation(
   () => fhirDefinitionsServiceApiMock
@@ -384,6 +385,7 @@ describe("TypeEditor Component", () => {
       getResourceTree: jest.fn().mockResolvedValue(codingDef),
       getTopLevelElements: jest.fn().mockReturnValue(codingTopLevelElements),
       getAllChildren: jest.fn().mockReturnValue(codingTopLevelElements),
+      updateChildrenPaths: jest.fn().mockReturnValue(codingTopLevelElements),
     } as unknown as FhirDefinitionsServiceApi;
     useFhirDefinitionsServiceApiMock.mockImplementation(
       () => fhirDefinitionsServiceApiMock

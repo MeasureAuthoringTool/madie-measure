@@ -48,10 +48,10 @@ const ElementEditor = ({
         if (def) {
           const elements =
             fhirDefinitionsService.current.getTopLevelElements(def);
-          if (elements) {
-            for (const element of elements) {
-              element.id = resourcePath + "." + element.id;
-              element.path = resourcePath + "." + element.path;
+          const updatedElements =
+            fhirDefinitionsService.current.updateChildrenPaths(child, elements);
+          if (updatedElements) {
+            for (const element of updatedElements) {
               nodeList = await buildNode(
                 element,
                 resourcePath,
