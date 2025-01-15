@@ -177,7 +177,6 @@ export function addRemoveObservationsForPopulationCriteria(
   ) {
     //for denom add observations 1 * expectedValue
     let expectedPopType = defineExpectedPopulationType(changedPopulationName);
-
     const expectedObservationsPerPop = countObservationsPerType(
       populationValues,
       measureGroups,
@@ -220,7 +219,7 @@ export function addRemoveObservationsForPopulationCriteria(
     const msrPpIdx =
       populationBucket.findIndex(
         (value) => value.name === PopulationType.MEASURE_POPULATION
-      ) + 1;
+      ) + 2;
     newPopBucket.splice(msrPpIdx, 0, ...msrPopBucket);
     populationValues = [...newPopBucket];
   }

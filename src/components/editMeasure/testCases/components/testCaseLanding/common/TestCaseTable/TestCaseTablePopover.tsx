@@ -175,17 +175,19 @@ const TestCaseTablePopover = (props: TestCaseTablePopoverProps) => {
 
           {canEdit && (
             <>
-              <button
-                id={`delete-test-case-btn-${selectedTestCase?.id}`}
-                aria-label={`delete-test-case-${selectedTestCase?.title}`}
-                data-testid={`delete-test-case-btn-${selectedTestCase?.id}`}
-                onClick={() => {
-                  setDeleteDialogModalOpen(true);
-                  setOptionsOpen(false);
-                }}
-              >
-                delete
-              </button>
+              {!featureFlags.TestCaseListActionCenter && (
+                <button
+                  id={`delete-test-case-btn-${selectedTestCase?.id}`}
+                  aria-label={`delete-test-case-${selectedTestCase?.title}`}
+                  data-testid={`delete-test-case-btn-${selectedTestCase?.id}`}
+                  onClick={() => {
+                    setDeleteDialogModalOpen(true);
+                    setOptionsOpen(false);
+                  }}
+                >
+                  delete
+                </button>
+              )}
               {model.startsWith("QI-Core") &&
                 selectedTestCase &&
                 selectedTestCase.executionStatus != "Invalid" && (
