@@ -81,7 +81,7 @@ export class FhirDefinitionsServiceApi {
     return resource?.definition?.snapshot?.element?.[0]?.path;
   }
 
-  getTopLevelElements(resource: any) {
+  getTopLevelElements(resource: StructureDefinitionDto) {
     const elements = [...resource?.definition?.snapshot?.element];
     return elements?.filter(
       (e) => e.path.split(".")?.length === 2 && e.max !== "0"

@@ -34,6 +34,7 @@ const getUrlAndValueElement = (
 
 const ExtensionComponent = ({
   fhirResource,
+  canEdit,
   elementDefinition,
   parentStructureDefinition,
 }: ExtensionProps) => {
@@ -68,28 +69,29 @@ const ExtensionComponent = ({
       }
     }
   }, [valueElement]);
+  const idPrefix = elementDefinition?.id?.split("Extension.").pop();
 
   return (
-    <>
+    <div data-testid={idPrefix}>
       <UriComponent
-        canEdit={true}
-        fieldRequired={true}
+        canEdit={canEdit}
+        fieldRequired={urlElement?.min > 0}
         label="url"
-        value={urlElement?.fixedUri || null}
+        value={urlElement?.fixedUri}
         structureDefinition={null}
         onChange={handleUriChange}
       />
       <Select
         label="Value"
-        id="code-selector-value"
         inputProps={{
-          "data-testid": `code-selector-input-value`,
+          "data-testid": `${idPrefix}-code-selector-input`,
         }}
-        data-testid={`code-selector-value`}
+        data-testid={`${idPrefix}-code-selector`}
         SelectDisplayProps={{
           "aria-required": "true",
         }}
         disabled={false}
+        required={valueElement?.min > 0}
         options={[
           <MenuItem
             key={selectedValueOption}
@@ -105,7 +107,7 @@ const ExtensionComponent = ({
       {valueElement && (
         <div>{codes?.length ? codes[0].code : selectedValueOption}</div>
       )}
-    </>
+    </div>
   );
 };
 

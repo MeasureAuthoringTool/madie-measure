@@ -1,6 +1,6 @@
 import * as React from "react";
 import { structuredDefinitionUSCoreEthnicity } from "../../../../../../../__mocks__/structuredDefinitions/StructureDefinition-us-core-ethnicity";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import TypeEditor from "./TypeEditor";
 import axios from "../../../../../../../../../../api/axios-instance";
 import { FormikProvider } from "formik";
@@ -25,9 +25,7 @@ const mockServiceConfig = {
 } as ServiceConfig;
 
 jest.mock("../../../../../../../../../../api/useServiceConfig", () => {
-  return {
-    useServiceConfig: jest.fn(() => Promise.resolve(mockServiceConfig)),
-  };
+  return jest.fn(() => mockServiceConfig);
 });
 
 const getNestedProperty = (obj, path) => {
@@ -59,7 +57,7 @@ const mockFormik: FormikContextType<any> = {
 };
 
 describe("TypeEditor for profiled extensions/slices ", () => {
-  it("should render form for Patient.extension:ethnicity", () => {
+  it("should render form for Patient.extension:ethnicity", async () => {
     const handleChange = jest.fn();
     const label = "Patient.extension:ethnicity";
     const resource = {
@@ -88,7 +86,7 @@ describe("TypeEditor for profiled extensions/slices ", () => {
       ],
     };
     mockedAxios.get.mockResolvedValue({
-      data: { structuredDefinitionUSCoreEthnicity },
+      data: { definition: structuredDefinitionUSCoreEthnicity },
     });
 
     render(
@@ -108,8 +106,8 @@ describe("TypeEditor for profiled extensions/slices ", () => {
         </FormikProvider>
       </ApiContextProvider>
     );
-    const inputField = screen.getByTestId("integer-field-input-");
-    expect(inputField).toBeInTheDocument();
-    expect(inputField.value).toBe("1234");
+    await waitFor(() => {
+      expect(screen.getByTestId("string-field-input-id")).toBeInTheDocument();
+    });
   });
 });

@@ -25,7 +25,6 @@ const ProfiledExtensionComponent = ({
         if (type.code === "Extension" && !_.isEmpty(type.profile)) {
           const loadProfiles = type.profile?.map((profile: string) => {
             const resourceId = profile.split("/").pop();
-            debugger
             return fhirDefinitionsService.current.getResourceTree(resourceId);
           });
           const profileDefinitions = await Promise.all(loadProfiles);
@@ -77,10 +76,10 @@ const ProfiledExtensionComponent = ({
                   structureDefinition={elementDefinition}
                   resource={resource}
                   type={type.code}
-                  required={required}
-                  value={elementDefinition.fixedUri || null}
-                  onChange={() => {}}
-                  canEdit={true}
+                  required={elementDefinition?.min > 0}
+                  value={elementDefinition?.fixedUri}
+                  onChange={() => {}} // do nothing for now
+                  canEdit={canEdit}
                   label={elemPath}
                   parentStructureDefinition={extensionProfileDef}
                 />

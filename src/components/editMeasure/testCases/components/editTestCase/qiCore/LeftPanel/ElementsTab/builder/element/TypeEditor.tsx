@@ -68,6 +68,7 @@ const TypeEditor = ({
               error={getNestedProperty(formik.errors, label)}
               structureDefinition={null}
               fieldRequired={required}
+              value={value}
               {...formik.getFieldProps(label)}
             />
           </Box>
@@ -219,9 +220,9 @@ const TypeEditor = ({
           />
         ) : (
           <ProfiledExtensionComponent
-            canEdit={true}
+            canEdit={canEdit}
             structureDefinition={structureDefinition}
-            fieldRequired={true}
+            fieldRequired={false}
             resource={resource}
           />
         );
