@@ -124,11 +124,9 @@ export function PopulationCriteriaHome() {
     [measure?.model]
   );
 
-  const checkBaseConfigPopuated = () => {
+  const checkBaseConfigPopulated = () => {
     if (measure?.model.includes("QDM")) {
-      return (
-        measure?.baseConfigurationTypes?.length > 0 && measure.patientBasis
-      );
+      return measure?.baseConfigurationTypes?.length > 0;
     }
     return false;
   };
@@ -162,7 +160,7 @@ export function PopulationCriteriaHome() {
         measureId={measure?.id}
         isFormDirty={isFormDirty}
         isQDM={isQDM}
-        baseConfigPopuated={checkBaseConfigPopuated()}
+        baseConfigPopuated={checkBaseConfigPopulated()}
         reportingPopulated={checkReporting()}
         supplementalDataPopulated={checkSupplementalData()}
         riskAdjustmentPopulated={checkRiskAdjustment()}
