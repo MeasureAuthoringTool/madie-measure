@@ -157,6 +157,8 @@ const TestCaseList = (props: TestCaseListProps) => {
     useState<boolean>(false);
   const abortController = useRef(null);
   const [createOpen, setCreateOpen] = useState<boolean>(false);
+  const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
+    useState<boolean>(false);
   const featureFlags = useFeatureFlags();
   const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
 
@@ -353,7 +355,7 @@ const TestCaseList = (props: TestCaseListProps) => {
       abortController.current = new AbortController();
       const { ecqmTitle, model, version } = measure ?? {};
       const testCaseIds: string[] = [];
-      if (selectedTestCases) {
+      if (selectedTestCases && selectedTestCases.size > 0) {
         selectedTestCases.forEach((testCase) => {
           testCaseIds.push(testCase.id);
         });
@@ -638,6 +640,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                         selectedTestCases={selectedTestCases}
                         canEdit={canEdit}
                         isQDM={false}
+                        setDeleteDialogModalOpen={setDeleteDialogModalOpen}
                         onCloneTestCase={handleQiCloneTestCase}
                         exportTestCases={exportTestCases}
                         exportOptionsOpen={exportOptionsOpen}
@@ -655,6 +658,9 @@ const TestCaseList = (props: TestCaseListProps) => {
                         onTestCaseShiftDates={onTestCaseShiftDates}
                         handleQiCloneTestCase={handleQiCloneTestCase}
                         setSelectedTestCases={setSelectedTestCases}
+                        selectedTestCases={selectedTestCases}
+                        deleteDialogModalOpen={deleteDialogModalOpen}
+                        setDeleteDialogModalOpen={setDeleteDialogModalOpen}
                       />
                       {currentSlice?.length > 0 && (
                         <Pagination
