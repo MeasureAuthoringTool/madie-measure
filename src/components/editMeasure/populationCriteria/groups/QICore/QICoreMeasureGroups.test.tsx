@@ -464,7 +464,7 @@ describe("Measure Groups Page", () => {
     });
   });
 
-  test.only("Navigating between the tabs in measure groups page", async () => {
+  test("Navigating between the tabs in measure groups page", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "Description Text";
     group.rateAggregation = "Rate Aggregation Text";
