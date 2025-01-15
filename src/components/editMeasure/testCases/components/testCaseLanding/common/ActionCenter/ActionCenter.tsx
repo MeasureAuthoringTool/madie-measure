@@ -26,7 +26,7 @@ interface ActionCenterProps {
   selectedTestCases: any;
   canEdit: boolean;
   isQDM: boolean;
-  setDeleteDialogModalOpen: Function;
+  setDeleteDialogModalOpen?: Function;
   onCloneTestCase?: (testCase: TestCase) => void;
   exportTestCases?: Function;
   onExportQRDA?: Function;
@@ -34,6 +34,7 @@ interface ActionCenterProps {
   measureId?: string;
   exportOptionsOpen?: boolean;
   setExportOptionsOpen?: Function;
+  displayTestCaseCopyDialog?: Function;
 }
 
 const filterByOptions = ["Case #", "Status", "Group", "Title", "Description"];
@@ -51,6 +52,7 @@ export default function ActionCenter(props: ActionCenterProps) {
     measureId,
     exportOptionsOpen,
     setExportOptionsOpen,
+    displayTestCaseCopyDialog,
   } = props;
 
   const [disableDeleteBtn, setDisableDeleteBtn] = useState<boolean>(true);
@@ -330,7 +332,9 @@ export default function ActionCenter(props: ActionCenterProps) {
               >
                 <span>
                   <IconButton
-                    onClick={() => {}}
+                    onClick={() => {
+                      displayTestCaseCopyDialog();
+                    }}
                     disabled={disableCopyBtn}
                     data-testid="copy-action-btn"
                   >

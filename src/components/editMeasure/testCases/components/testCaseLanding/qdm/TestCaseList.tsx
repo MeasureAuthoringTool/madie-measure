@@ -15,7 +15,7 @@ import {
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import queryString from "query-string";
 import calculationService from "../../../api/CalculationService";
-import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
+import { checkUserCanEdit } from "@madie/madie-util";
 import CreateCodeCoverageNavTabs from "./CreateCodeCoverageNavTabs";
 import CreateNewTestCaseDialog from "../../createTestCase/CreateNewTestCaseDialog";
 import {
@@ -59,9 +59,9 @@ import {
   QrdaTestCaseDTO,
   QrdaGroupExportDTO,
 } from "../../../api/useTestCaseServiceApi";
-
 import useQdmCqlParsingService from "../../../api/cqlElmTranslationService/useQdmCqlParsingService";
 import ActionCenter from "../common/ActionCenter/ActionCenter";
+import CopyTestCaseDialog from "../common/copyTestCases/CopyTestCaseDialog";
 
 export const IMPORT_ERROR =
   "An error occurred while importing your test cases. Please try again, or reach out to the Help Desk.";
@@ -167,9 +167,10 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
   const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
     useState<boolean>(false);
-  const featureFlags = useFeatureFlags();
   const qdmCqlParsingService = useRef(useQdmCqlParsingService());
   const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
+  const [openCopyTestCaseDialog, setOpenCopyTestCaseDialog] =
+    useState<boolean>(false);
 
   // const [callstackMap, setCallstackMap] = useState<CqlDefinitionCallstack>();
   // callStackMap is used for generating Excel Export
@@ -802,6 +803,9 @@ const TestCaseList = (props: TestCaseListProps) => {
                         measureId={measureId}
                         exportOptionsOpen={exportOptionsOpen}
                         setExportOptionsOpen={setExportOptionsOpen}
+                        displayTestCaseCopyDialog={() =>
+                          setOpenCopyTestCaseDialog(true)
+                        }
                       />
                       <TestCaseTable
                         sorting={sorting}
@@ -886,6 +890,12 @@ const TestCaseList = (props: TestCaseListProps) => {
         }}
         dialogTitle="Delete All Test Cases"
         name="All Test Cases"
+      />
+      <CopyTestCaseDialog
+        open={openCopyTestCaseDialog}
+        onClose={() => setOpenCopyTestCaseDialog(false)}
+        onSubmit={() => {}}
+        measure={measure}
       />
       <TestCaseImportFromBonnieDialogQDM
         openDialog={importDialogState.open}

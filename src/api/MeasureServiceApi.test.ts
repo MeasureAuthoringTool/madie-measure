@@ -225,33 +225,32 @@ describe("MeasureServiceApi Tests", () => {
       } as Measure,
     ];
     const resp: any = { status: 200, data: measures };
-    mockedAxios.get.mockResolvedValue(resp);
+    mockedAxios.put.mockResolvedValue(resp);
 
-    const measuresList =
-      await measureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle(
-        true,
-        25,
-        0,
-        "test",
-        new AbortController().signal
-      );
-    expect(mockedAxios.get).toBeCalledTimes(1);
+    const measuresList = await measureServiceApi.searchMeasuresByCriteria(
+      true,
+      25,
+      0,
+      { query: "test" },
+      new AbortController().signal
+    );
+    expect(mockedAxios.put).toBeCalledTimes(1);
     expect(measuresList).toEqual(measures);
   });
 
   it("test searchMeasuresByMeasureNameOrEcqmTitle fail", async () => {
     const resp = { status: 500, data: "failure", error: { message: "error" } };
-    mockedAxios.get.mockRejectedValueOnce(resp);
+    mockedAxios.put.mockRejectedValueOnce(resp);
 
     try {
-      await measureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle(
+      await measureServiceApi.searchMeasuresByCriteria(
         true,
         25,
         0,
-        "test",
+        { query: "test" },
         new AbortController().signal
       );
-      expect(mockedAxios.get).toBeCalledTimes(1);
+      expect(mockedAxios.put).toBeCalledTimes(1);
     } catch (error) {
       expect(error.message).toBe("Unable to search measures");
     }
@@ -263,17 +262,17 @@ describe("MeasureServiceApi Tests", () => {
       data: "failure",
       message: "canceled",
     };
-    mockedAxios.get.mockRejectedValueOnce(resp);
+    mockedAxios.put.mockRejectedValueOnce(resp);
 
     try {
-      await measureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle(
+      await measureServiceApi.searchMeasuresByCriteria(
         true,
         25,
         0,
-        "test",
+        { query: "test" },
         new AbortController().signal
       );
-      expect(mockedAxios.get).toBeCalledTimes(1);
+      expect(mockedAxios.put).toBeCalledTimes(1);
     } catch (error) {
       expect(error.message).toBe("canceled");
     }
@@ -480,7 +479,11 @@ describe("MeasureServiceApi Tests", () => {
     mockedAxios.put.mockRejectedValueOnce(resp);
 
     try {
-      await measureServiceApi.associateCmdId("qiCoreMeasureId", "qdmMeasureId");
+      await measureServiceApi.associateCmdId(
+        "qiCoreMeasureId",
+        "qdmMeasureId",
+        false
+      );
       expect(mockedAxios.put).toBeCalledTimes(1);
     } catch (error) {
       expect(error.message).toBe(

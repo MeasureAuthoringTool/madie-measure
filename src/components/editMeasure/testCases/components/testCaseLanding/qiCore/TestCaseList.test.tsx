@@ -190,7 +190,6 @@ jest.mock(
     }
 );
 
-const mockedUsedNavigate = jest.fn();
 // output from calculationService
 const executionResults = {
   results: [
@@ -1845,41 +1844,69 @@ describe("TestCaseList component", () => {
       expect(setWarnings).toHaveBeenCalledWith(mockedOutcome);
     });
   });
-  describe("clone test case", () => {
-    it("should clone a test case when the clone button is clicked", async () => {
-      const createTestCaseApiMock = jest.fn().mockResolvedValue({});
-      const getTestCasesByMeasureIdMock = jest
-        .fn()
-        .mockResolvedValue(testCases);
-      useTestCaseServiceMock.mockImplementation(() => {
-        return {
-          ...useTestCaseServiceMockResolved,
-          getTestCasesByMeasureId: getTestCasesByMeasureIdMock,
-          createTestCase: createTestCaseApiMock,
-        } as unknown as TestCaseServiceApi;
-      });
-      renderTestCaseListComponent();
-      await waitFor(() => {
-        expect(getTestCasesByMeasureIdMock).toHaveBeenCalled();
-        const selectButton = screen.getByTestId(
-          `select-action-${testCases[0].id}`
-        );
-        expect(selectButton).toBeInTheDocument();
-        userEvent.click(selectButton);
-      });
-      const cloneButton = screen.getByTestId(
-        `clone-test-case-btn-${testCases[0].id}`
-      );
-      userEvent.click(cloneButton);
 
-      await waitFor(() => {
-        expect(createTestCaseApiMock).toHaveBeenCalled();
-        expect(getTestCasesByMeasureIdMock).toHaveBeenCalled();
-        expect(
-          screen.getByText("Test case cloned successfully")
-        ).toBeInTheDocument();
-      });
+  it("should clone a test case when the clone button is clicked", async () => {
+    const createTestCaseApiMock = jest.fn().mockResolvedValue({});
+    const getTestCasesByMeasureIdMock = jest.fn().mockResolvedValue(testCases);
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        ...useTestCaseServiceMockResolved,
+        getTestCasesByMeasureId: getTestCasesByMeasureIdMock,
+        createTestCase: createTestCaseApiMock,
+      } as unknown as TestCaseServiceApi;
     });
+    renderTestCaseListComponent();
+    await waitFor(() => {
+      expect(getTestCasesByMeasureIdMock).toHaveBeenCalled();
+      const selectButton = screen.getByTestId(
+        `select-action-${testCases[0].id}`
+      );
+      expect(selectButton).toBeInTheDocument();
+      userEvent.click(selectButton);
+    });
+    const cloneButton = screen.getByTestId(
+      `clone-test-case-btn-${testCases[0].id}`
+    );
+    userEvent.click(cloneButton);
+
+    await waitFor(() => {
+      expect(createTestCaseApiMock).toHaveBeenCalled();
+      expect(getTestCasesByMeasureIdMock).toHaveBeenCalled();
+      expect(
+        screen.getByText("Test case cloned successfully")
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("Should display test case copy dialog when at least one test case is selected", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      applyDefaults: false,
+      qiCoreBonnieTestCases: false,
+      CopyTestCases: true,
+      TestCaseListActionCenter: true,
+    }));
+    renderTestCaseListComponent();
+
+    const table = await screen.findByTestId("test-case-tbl");
+    const tableHeaders = table.querySelectorAll("thead th");
+
+    expect(tableHeaders[1]).toHaveTextContent("Case #");
+    expect(tableHeaders[2]).toHaveTextContent("Status");
+    expect(tableHeaders[3]).toHaveTextContent("Group");
+    expect(tableHeaders[4]).toHaveTextContent("Title");
+    expect(tableHeaders[5]).toHaveTextContent("Description");
+
+    const checkboxes = await screen.findAllByRole("checkbox");
+    expect(checkboxes.length).toBe(4);
+
+    const copyTestCaseButton = await screen.findByTestId("copy-action-btn");
+    expect(copyTestCaseButton).toBeDisabled();
+
+    userEvent.click(checkboxes[1]);
+    expect(copyTestCaseButton).not.toBeDisabled();
+
+    userEvent.click(copyTestCaseButton);
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
   });
 });
 

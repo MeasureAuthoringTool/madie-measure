@@ -1,5 +1,3 @@
-import React from "react";
-import { AxiosResponse } from "axios";
 import axios from "./axios-instance";
 import useServiceConfig from "./useServiceConfig";
 import { ServiceConfig } from "./ServiceContext";
@@ -377,23 +375,23 @@ export class MeasureServiceApi {
     return {};
   }
 
-  async searchMeasuresByMeasureNameOrEcqmTitle(
+  async searchMeasuresByCriteria(
     filterByCurrentUser: boolean,
     limit: number = 25,
     page: number = 0,
-    searchCriteria: string,
+    searchCriteria: any,
     signal
   ): Promise<any> {
     try {
-      const encodedCriteria = encodeURI(searchCriteria);
-      const response = await axios.get<any>(
-        `${this.baseUrl}/measures/search`, // Changed to endpoint without path variable
+      const response = await axios.put<any>(
+        `${this.baseUrl}/measures/search`,
+        searchCriteria,
         {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
+            "Content-Type": "application/json",
           },
           params: {
-            query: encodedCriteria, // putting encoded chars here doesn't trigger spring preflight failure
             currentUser: filterByCurrentUser,
             limit,
             page,

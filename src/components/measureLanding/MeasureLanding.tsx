@@ -79,11 +79,13 @@ export default function MeasureLanding() {
           });
       } else {
         measureServiceApi
-          .searchMeasuresByMeasureNameOrEcqmTitle(
+          .searchMeasuresByCriteria(
             tab === 0,
             limit,
             page,
-            searchCriteria,
+            {
+              query: encodeURI(searchCriteria), // putting encoded chars here doesn't trigger spring preflight failure}
+            },
             abortController.current.signal
           )
           .then((data) => {

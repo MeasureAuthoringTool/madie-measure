@@ -393,11 +393,13 @@ export default function MeasureList(props: {
     abortController.current = new AbortController();
     props.setErrMsg();
     measureServiceApi
-      .searchMeasuresByMeasureNameOrEcqmTitle(
+      .searchMeasuresByCriteria(
         props.activeTab === 0,
         props.currentLimit,
         0,
-        props.searchCriteria,
+        {
+          query: encodeURI(props.searchCriteria), // putting encoded chars here doesn't trigger spring preflight failure}
+        },
         abortController.current.signal
       )
       .then((data) => {
