@@ -51,6 +51,7 @@ const ExtensionComponent = ({
   useEffect(() => {
     if (valueElement) {
       setSelectedValueOption(valueElement.type[0].code);
+      // fetch expansion for binding if present
       if (valueElement.binding) {
         const valueSetUrl = valueElement.binding.valueSet;
         terminologyServiceApi.current

@@ -25,6 +25,7 @@ const ProfiledExtensionComponent = ({
         if (type.code === "Extension" && !_.isEmpty(type.profile)) {
           const loadProfiles = type.profile?.map((profile: string) => {
             const resourceId = profile.split("/").pop();
+            debugger
             return fhirDefinitionsService.current.getResourceTree(resourceId);
           });
           const profileDefinitions = await Promise.all(loadProfiles);
