@@ -278,6 +278,7 @@ describe("ActionCenter Component", () => {
             measureId="1"
             exportOptionsOpen={true}
             setExportOptionsOpen={setExportOptionsOpen}
+            executeAllTestCases={true}
           />
         </MemoryRouter>
       );
@@ -306,6 +307,7 @@ describe("ActionCenter Component", () => {
             measureId="1"
             exportOptionsOpen={true}
             setExportOptionsOpen={setExportOptionsOpen}
+            executeAllTestCases={true}
           />
         </MemoryRouter>
       );
@@ -334,6 +336,7 @@ describe("ActionCenter Component", () => {
             measureId="1"
             exportOptionsOpen={false}
             setExportOptionsOpen={setExportOptionsOpen}
+            executeAllTestCases={false}
           />
         </MemoryRouter>
       );
