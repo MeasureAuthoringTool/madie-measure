@@ -806,6 +806,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                         displayTestCaseCopyDialog={() =>
                           setOpenCopyTestCaseDialog(true)
                         }
+                        executeAllTestCases={executeAllTestCases}
                       />
                       <TestCaseTable
                         sorting={sorting}
