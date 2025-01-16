@@ -363,7 +363,7 @@ describe("Measure List component", () => {
       true,
       10,
       0,
-      { query: "test" },
+      { searchField: "test" },
       abortController.signal
     );
     unmount();

@@ -231,7 +231,7 @@ describe("MeasureServiceApi Tests", () => {
       true,
       25,
       0,
-      { query: "test" },
+      { searchField: "test" },
       new AbortController().signal
     );
     expect(mockedAxios.put).toBeCalledTimes(1);
@@ -247,7 +247,7 @@ describe("MeasureServiceApi Tests", () => {
         true,
         25,
         0,
-        { query: "test" },
+        { searchField: "test" },
         new AbortController().signal
       );
       expect(mockedAxios.put).toBeCalledTimes(1);
@@ -269,7 +269,7 @@ describe("MeasureServiceApi Tests", () => {
         true,
         25,
         0,
-        { query: "test" },
+        { searchField: "test" },
         new AbortController().signal
       );
       expect(mockedAxios.put).toBeCalledTimes(1);

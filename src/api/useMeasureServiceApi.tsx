@@ -384,7 +384,7 @@ export class MeasureServiceApi {
   ): Promise<any> {
     try {
       const response = await axios.put<any>(
-        `${this.baseUrl}/measures/search`,
+        `${this.baseUrl}/measures/searches`,
         searchCriteria,
         {
           headers: {

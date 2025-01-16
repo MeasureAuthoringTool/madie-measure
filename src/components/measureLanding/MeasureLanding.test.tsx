@@ -140,7 +140,7 @@ describe("Measure Page", () => {
       true,
       10,
       0,
-      { query: "test" },
+      { searchField: "test" },
       abortController.signal
     );
   });

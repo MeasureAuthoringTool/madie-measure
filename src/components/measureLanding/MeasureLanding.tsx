@@ -84,7 +84,7 @@ export default function MeasureLanding() {
             limit,
             page,
             {
-              query: encodeURI(searchCriteria), // putting encoded chars here doesn't trigger spring preflight failure}
+              searchField: searchCriteria,
             },
             abortController.current.signal
           )

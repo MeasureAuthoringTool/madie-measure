@@ -398,7 +398,7 @@ export default function MeasureList(props: {
         props.currentLimit,
         0,
         {
-          query: encodeURI(props.searchCriteria), // putting encoded chars here doesn't trigger spring preflight failure}
+          searchField: props.searchCriteria,
         },
         abortController.current.signal
       )
