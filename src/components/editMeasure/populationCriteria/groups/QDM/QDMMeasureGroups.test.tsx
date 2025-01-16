@@ -424,7 +424,7 @@ describe("Measure Groups Page", () => {
       });
     });
 
-    test.only("On clicking discard button,should be able to discard the changes", async () => {
+    test("On clicking discard button,should be able to discard the changes", async () => {
       group.id = "7p03-5r29-7O0I";
       group.groupDescription = "testDescription";
       group.improvementNotation = "Increased score indicates improvement";
@@ -482,7 +482,6 @@ describe("Measure Groups Page", () => {
         { timeout: 10000 }
       );
       // navigate to population and verify initial population is reverted to value from group object
-      screen.debug(undefined, 1000000);
       const populationsTab = screen.getByText("Populations");
       expect(populationsTab).toBeInTheDocument();
       userEvent.click(populationsTab);
