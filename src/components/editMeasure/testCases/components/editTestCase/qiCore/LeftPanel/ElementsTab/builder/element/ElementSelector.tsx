@@ -3,16 +3,30 @@ import Autocomplete from "@mui/material/Autocomplete";
 import { Checkbox, TextField } from "@mui/material";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import { ElementDefinition } from "fhir/r4";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 interface ElementSelectorProps {
   basePath: string;
-  options: any[];
-  value: any;
-  onChange: (event, newValue: any | null) => void;
+  options: ElementDefinition[];
+  value: ElementDefinition[];
+  onChange: (event, newValue: ElementDefinition[] | null) => void;
 }
+
+/**
+ * Prepares the label for element selector options
+ * for slice- it will be slice:sliceName. e.g. Patient.extension:race results into extension:race
+ * for regular element- it will be the path of an element. e.g. Patient.gender results into gender
+ */
+const getOptionLabel = (option: ElementDefinition, basePath: string) => {
+  const label = option.path?.substring(basePath.length + 1);
+  if (option.sliceName) {
+    return `${label}:${option.sliceName}`;
+  }
+  return label;
+};
 
 const ElementSelector = ({
   basePath,
@@ -31,7 +45,7 @@ const ElementSelector = ({
         value={value}
         onChange={onChange}
         disableCloseOnSelect
-        getOptionLabel={(option) => `${option.path}`}
+        getOptionLabel={(option) => getOptionLabel(option, basePath)}
         renderOption={(props, option, { selected }) => (
           <li {...props}>
             <Checkbox
@@ -40,7 +54,7 @@ const ElementSelector = ({
               style={{ marginRight: 8 }}
               checked={selected}
             />
-            {option.path?.substring(basePath.length + 1)}
+            {getOptionLabel(option, basePath)}
           </li>
         )}
         renderInput={(params) => (

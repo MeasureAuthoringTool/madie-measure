@@ -78,22 +78,13 @@ export class FhirDefinitionsServiceApi {
   }
 
   getBasePath(resource: any): string {
-    // const elements = [...resource?.definition?.snapshot?.element];
-    // return elements?.[0].path;
     return resource?.definition?.snapshot?.element?.[0]?.path;
   }
 
-  getTopLevelElements(resource: any) {
+  getTopLevelElements(resource: StructureDefinitionDto) {
     const elements = [...resource?.definition?.snapshot?.element];
-    const basePath = this.getBasePath(resource);
-    return elements?.filter((e) => e.path.split(".")?.length === 2);
-  }
-
-  getRequiredElements(resource: any) {
-    const elements = [...resource?.definition?.snapshot?.element];
-    const basePath = this.getBasePath(resource);
     return elements?.filter(
-      (e) => e.min > 0 && e.path.split(".")?.length === 2
+      (e) => e.path.split(".")?.length === 2 && e.max !== "0"
     );
   }
 
