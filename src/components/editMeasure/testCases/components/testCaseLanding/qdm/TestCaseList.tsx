@@ -802,6 +802,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                         measureId={measureId}
                         exportOptionsOpen={exportOptionsOpen}
                         setExportOptionsOpen={setExportOptionsOpen}
+                        executeAllTestCases={executeAllTestCases}
                       />
                       <TestCaseTable
                         sorting={sorting}
