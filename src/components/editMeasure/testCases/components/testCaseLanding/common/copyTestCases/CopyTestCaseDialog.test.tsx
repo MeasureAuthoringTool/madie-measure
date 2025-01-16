@@ -1,11 +1,12 @@
 import CopyTestCaseDialog from "./CopyTestCaseDialog";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import * as React from "react";
 import { Measure, MeasureSet, Model, TestCase } from "@madie/madie-models";
 import * as _ from "lodash";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../../../../api/useMeasureServiceApi";
+import userEvent from "@testing-library/user-event";
 
 const MEASURE_OWNER = "test.user";
 
@@ -212,6 +213,21 @@ describe("Copy Test Case Dialog Component", () => {
     expect(tableRows[0]).toHaveTextContent(
       _.toString(otherMeasuresOwnedByUser[0].measureSet.cmsId)
     );
+
+    // test sorting
+    const measureNameColumnHeader = await screen.findByRole("button", {
+      name: "Measure Name",
+    });
+    expect(measureNameColumnHeader).toHaveAttribute("title", "Sort ascending");
+
+    userEvent.click(measureNameColumnHeader);
+
+    await waitFor(() => {
+      expect(measureNameColumnHeader).toHaveAttribute(
+        "title",
+        "Sort descending"
+      );
+    });
   });
 
   it("should display a text when user doesn't have any other measures from same model", async () => {

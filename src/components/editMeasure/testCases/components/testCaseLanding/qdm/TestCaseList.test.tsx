@@ -3458,6 +3458,9 @@ describe("TestCaseList component", () => {
 
     userEvent.click(copyTestCaseButton);
     expect(await screen.findByRole("dialog")).toBeInTheDocument();
+
+    userEvent.click(await screen.findByRole("button", { name: "Cancel" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
 });
 
