@@ -34,6 +34,7 @@ interface ActionCenterProps {
   measureId?: string;
   exportOptionsOpen?: boolean;
   setExportOptionsOpen?: Function;
+  executeAllTestCases?: boolean;
 }
 
 const filterByOptions = ["Case #", "Status", "Group", "Title", "Description"];
@@ -51,6 +52,7 @@ export default function ActionCenter(props: ActionCenterProps) {
     measureId,
     exportOptionsOpen,
     setExportOptionsOpen,
+    executeAllTestCases,
   } = props;
 
   const [disableDeleteBtn, setDisableDeleteBtn] = useState<boolean>(true);
@@ -132,12 +134,7 @@ export default function ActionCenter(props: ActionCenterProps) {
 
   const exportButtonCheck = () => {
     if (isQDM) {
-      if (
-        selectedTestCases?.length > 0 &&
-        selectedTestCases?.some(
-          (testCase) => testCase?.executionStatus !== "NA"
-        )
-      ) {
+      if (executeAllTestCases) {
         setDisableExportBtn(false);
       } else {
         setDisableExportBtn(true);
@@ -354,7 +351,9 @@ export default function ActionCenter(props: ActionCenterProps) {
               title={
                 disableExportBtn
                   ? isQDM
-                    ? "Test cases must be executed prior to exporting."
+                    ? executeAllTestCases
+                      ? "Select test cases to export"
+                      : "Test cases must be executed prior to exporting."
                     : "Select test cases to export"
                   : "Export test cases"
               }

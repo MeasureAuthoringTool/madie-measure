@@ -155,6 +155,7 @@ const SupplementalData = () => {
       definitions?.indexOf(a.definition) - definitions?.indexOf(b.definition)
   );
 
+  const MAX_LENGTH = 128;
   return (
     <MetaDataWrapper
       header="Supplemental Data"
@@ -194,6 +195,9 @@ const SupplementalData = () => {
             limitTags={1}
             options={definitions}
             onClose={() => {}}
+            getOptionDisabled={() =>
+              formik?.values?.supplementalData?.length >= MAX_LENGTH
+            }
             onChange={(e, v, r) => {
               if (r === "removeOption") {
                 const copiedValues = _.cloneDeep(
@@ -206,24 +210,26 @@ const SupplementalData = () => {
                 formik.setFieldValue("supplementalData", filteredValues);
               }
               if (r === "selectOption") {
-                const copiedValues = _.cloneDeep(
-                  formik.values.supplementalData
-                );
-                // we don't seem to have a good way of knowing exactly what was selected, but we can compare
-                const selectedOption = v.filter((v) => {
-                  for (let i = 0; i < copiedValues.length; i++) {
-                    if (copiedValues[i].definition === v) {
-                      return false;
+                if (v?.length <= MAX_LENGTH) {
+                  const copiedValues = _.cloneDeep(
+                    formik.values.supplementalData
+                  );
+                  // we don't seem to have a good way of knowing exactly what was selected, but we can compare
+                  const selectedOption = v.filter((v) => {
+                    for (let i = 0; i < copiedValues.length; i++) {
+                      if (copiedValues[i].definition === v) {
+                        return false;
+                      }
                     }
-                  }
-                  return true;
-                });
-                copiedValues.push({
-                  definition: selectedOption[0],
-                  description: "",
-                  includeInReportType: [...measureReportTypeOptions],
-                });
-                formik.setFieldValue("supplementalData", copiedValues);
+                    return true;
+                  });
+                  copiedValues.push({
+                    definition: selectedOption[0],
+                    description: "",
+                    includeInReportType: [...measureReportTypeOptions],
+                  });
+                  formik.setFieldValue("supplementalData", copiedValues);
+                }
               }
               if (r === "clear") {
                 formik.setFieldValue("supplementalData", []);
