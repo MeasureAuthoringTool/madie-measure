@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Box } from "@mui/material";
 import * as _ from "lodash";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";

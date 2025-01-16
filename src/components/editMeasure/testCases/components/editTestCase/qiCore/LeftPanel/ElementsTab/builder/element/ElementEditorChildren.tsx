@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import * as _ from "lodash";
 import { Box } from "@mui/material";
 import TypeEditor from "./TypeEditor";
@@ -20,6 +20,8 @@ const Element = ({ element, label, resource, handleChange, canEdit }) => {
         structureDefinition={element}
         canEdit={canEdit}
         label={label}
+        resource={resource}
+        parentStructureDefinition={null}
       />
     </Box>
   );
@@ -76,6 +78,7 @@ const ElementEditorChildren = ({
         {/* given root definition we do a base level render */}
         <TypeEditor
           type={type.code}
+          resource={resource}
           required={required}
           value={elementValue}
           onChange={(e) => {
@@ -83,6 +86,7 @@ const ElementEditorChildren = ({
             handleChange(elemPath, e);
           }}
           structureDefinition={rootDefinition}
+          parentStructureDefinition={null}
           canEdit={canEdit}
           label={rootDefinition?.id}
         />
