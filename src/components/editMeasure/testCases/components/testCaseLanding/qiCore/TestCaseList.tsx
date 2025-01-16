@@ -301,6 +301,9 @@ const TestCaseList = (props: TestCaseListProps) => {
       .deleteTestCases(measureId, testCaseIds)
       .then(() => {
         retrieveTestCases();
+        setToastOpen(true);
+        setToastType("success");
+        setToastMessage("Test cases successfully deleted");
       })
       .catch((err) => {
         console.error("deleteTestCases: err.message = " + err.message);
