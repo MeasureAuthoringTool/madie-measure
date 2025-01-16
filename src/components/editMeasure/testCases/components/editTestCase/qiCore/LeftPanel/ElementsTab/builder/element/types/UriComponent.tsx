@@ -16,7 +16,8 @@ const UriComponent = ({
       required={fieldRequired}
       disabled={!canEdit}
       id={`uri-field-${label}`}
-      label={label}
+      label={`${label}`}
+      labelColor="#1976d2"
       placeholder={label}
       inputProps={{
         "data-testid": `uri-input-field-${label}`,
