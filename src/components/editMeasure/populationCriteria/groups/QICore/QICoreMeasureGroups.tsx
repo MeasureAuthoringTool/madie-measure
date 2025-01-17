@@ -935,7 +935,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                               label="Stratifications"
                               hasErrors={formik.errors.stratifications}
                               displayIcon={
-                                formik.values.stratifications.filter(
+                                formik.values.stratifications?.filter(
                                   (value) =>
                                     value.association !==
                                       getEmptyStrat().association ||
