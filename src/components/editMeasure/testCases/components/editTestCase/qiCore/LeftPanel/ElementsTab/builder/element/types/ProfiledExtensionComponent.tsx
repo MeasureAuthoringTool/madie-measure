@@ -6,6 +6,10 @@ import * as _ from "lodash";
 import TypeEditor from "../TypeEditor";
 import useFhirDefinitionsServiceApi from "../../../../../../../../api/useFhirDefinitionsService";
 import { StructureDefinitionDto } from "../../../../../../../../api/models/StructureDefinitionDto";
+import {
+  stripResourcePath,
+  getTopLevelElements,
+} from "../../../../../../../../api/fhirDefinitionServiceUtilities";
 
 const ProfiledExtensionComponent = ({
   structureDefinition,
@@ -48,45 +52,43 @@ const ProfiledExtensionComponent = ({
     <Box sx={{ display: "flex", flexDirection: "column" }}>
       <Box>{structureDefinition.short}</Box>
       <Box sx={{ display: "flex", flexDirection: "column" }}>
-        {fhirDefinitionsService.current
-          .getTopLevelElements(extensionProfileDef)
-          .map((elementDefinition) => {
-            const type = elementDefinition?.type?.[0];
-            const required = +elementDefinition.min > 0;
-            const elemPath = fhirDefinitionsService.current.stripResourcePath(
-              "Extension",
-              elementDefinition.path
-            );
-            // let elementValue = _.get(resource, elemPath);
-            return (
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  marginTop: "10px",
-                }}
-              >
-                <Typography>
-                  {_.startCase(elemPath)}
-                  {elementDefinition.sliceName
-                    ? `:${elementDefinition.sliceName}`
-                    : ""}
-                </Typography>
-                <TypeEditor
-                  structureDefinition={elementDefinition}
-                  resource={resource}
-                  type={type.code}
-                  required={required}
-                  value={elementDefinition?.fixedUri}
-                  onChange={() => {}} // do nothing for now
-                  canEdit={canEdit}
-                  label={elemPath}
-                  parentStructureDefinition={extensionProfileDef}
-                />
-                <Divider />
-              </Box>
-            );
-          })}
+        {getTopLevelElements(extensionProfileDef).map((elementDefinition) => {
+          const type = elementDefinition?.type?.[0];
+          const required = +elementDefinition.min > 0;
+          const elemPath = stripResourcePath(
+            "Extension",
+            elementDefinition.path
+          );
+          // let elementValue = _.get(resource, elemPath);
+          return (
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                marginTop: "10px",
+              }}
+            >
+              <Typography>
+                {_.startCase(elemPath)}
+                {elementDefinition.sliceName
+                  ? `:${elementDefinition.sliceName}`
+                  : ""}
+              </Typography>
+              <TypeEditor
+                structureDefinition={elementDefinition}
+                resource={resource}
+                type={type.code}
+                required={required}
+                value={elementDefinition?.fixedUri}
+                onChange={() => {}} // do nothing for now
+                canEdit={canEdit}
+                label={elemPath}
+                parentStructureDefinition={extensionProfileDef}
+              />
+              <Divider />
+            </Box>
+          );
+        })}
       </Box>
     </Box>
   ) : (
