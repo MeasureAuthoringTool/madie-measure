@@ -419,10 +419,10 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           onContinue={() => {
             if (featureFlags?.TestCaseListActionCenter) {
               deleteTestCase();
-              setDeleteDialogModalOpen(false);
             } else {
               deleteTestCase(selectedTestCase.id);
             }
+            setDeleteDialogModalOpen(false);
           }}
           onClose={() => {
             setDeleteDialogModalOpen(false);
