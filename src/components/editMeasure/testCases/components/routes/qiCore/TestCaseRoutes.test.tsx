@@ -250,7 +250,7 @@ describe("TestCaseRoutes", () => {
 
     const testCaseTitle = await screen.findByText("TC1");
     expect(testCaseTitle).toBeInTheDocument();
-    const newBtn = await screen.findByRole("button", { name: "New Test Case" });
+    const newBtn = await screen.findByRole("button", { name: "New Case" });
     userEvent.click(newBtn);
 
     const createTestCaseDialog = await screen.findByTestId(
@@ -276,7 +276,7 @@ describe("TestCaseRoutes", () => {
     );
     expect(cancelButton).toBeInTheDocument();
 
-    const newBtn2 = screen.queryByRole("button", { name: "New Test Case" });
+    const newBtn2 = screen.queryByRole("button", { name: "New Case" });
     expect(newBtn2).not.toBeInTheDocument();
   });
 
@@ -333,7 +333,7 @@ describe("TestCaseRoutes", () => {
     const testCaseTitle = await screen.findByText("TC1");
     expect(testCaseTitle).toBeInTheDocument();
 
-    const newBtn = await screen.findByRole("button", { name: "New Test Case" });
+    const newBtn = await screen.findByRole("button", { name: "New Case" });
     userEvent.click(newBtn);
 
     const createTestCaseDialog = await screen.findByTestId(
@@ -362,7 +362,7 @@ describe("TestCaseRoutes", () => {
     userEvent.click(cancelButton);
 
     const newBtn2 = await screen.findByRole("button", {
-      name: "New Test Case",
+      name: "New Case",
     });
     expect(newBtn2).toBeInTheDocument();
   });
@@ -418,7 +418,7 @@ describe("TestCaseRoutes", () => {
 
     const testCaseTitle = await screen.findByText("TC1");
     expect(testCaseTitle).toBeInTheDocument();
-    const newBtn = screen.getByRole("button", { name: "New Test Case" });
+    const newBtn = screen.getByRole("button", { name: "New Case" });
     userEvent.click(newBtn);
 
     const createTestCaseDialog = await screen.findByTestId(
@@ -508,7 +508,7 @@ describe("TestCaseRoutes", () => {
 
     const testCaseTitle = await screen.findByText("TC1");
     expect(testCaseTitle).toBeInTheDocument();
-    const newBtn = screen.getByRole("button", { name: "New Test Case" });
+    const newBtn = screen.getByRole("button", { name: "New Case" });
     await act(async () => {
       userEvent.click(newBtn);
     });
@@ -606,7 +606,7 @@ describe("TestCaseRoutes", () => {
     const testCaseTitle = await screen.findByText("TC1");
     expect(testCaseTitle).toBeInTheDocument();
 
-    const newBtn = screen.getByRole("button", { name: "New Test Case" });
+    const newBtn = screen.getByRole("button", { name: "New Case" });
     // await act(async () => {
     userEvent.click(newBtn);
     // });
