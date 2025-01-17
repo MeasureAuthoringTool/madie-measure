@@ -395,7 +395,7 @@ const TestCaseList = (props: TestCaseListProps) => {
         setToastOpen(true);
         setToastType("danger");
         setToastMessage(
-          `Unable to Delete test Case with ID ${testCaseIds.join(
+          `Unable to Delete test Case(s) with ID(s) ${testCaseIds.join(
             ", "
           )}. Please try again. If the issue continues, please contact helpdesk.`
         );
