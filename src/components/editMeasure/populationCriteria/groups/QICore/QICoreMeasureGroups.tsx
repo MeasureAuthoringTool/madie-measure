@@ -17,8 +17,6 @@ import {
   Divider,
   useTheme,
 } from "@mui/material";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ErrorIcon from "@mui/icons-material/Error";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import {
   AutoComplete,
@@ -71,6 +69,7 @@ import {
   FieldSeparator,
   MenuItemContainer,
 } from "../../../../../styles/editMeasure/populationCriteria/groups/index";
+import CompletionIndicator from "../CompletionIndicator";
 
 interface ColSpanPopulationsType {
   isExclusionPop?: boolean;
@@ -917,28 +916,10 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                         type="B"
                         data-testid="populations-tab"
                         label={
-                          <div>
-                            {Boolean(formik.errors.populations) ? (
-                              <ErrorIcon
-                                sx={{
-                                  color: "#AE1C1C",
-                                  marginRight: "10px",
-                                  height: "20px",
-                                  width: "20px",
-                                }}
-                              />
-                            ) : (
-                              <CheckCircleIcon
-                                sx={{
-                                  color: "#4D7E23",
-                                  marginRight: "10px",
-                                  height: "20px",
-                                  width: "20px",
-                                }}
-                              />
-                            )}
-                            Populations
-                          </div>
+                          <CompletionIndicator
+                            label="Populations"
+                            isComplete={Boolean(formik.errors.populations)}
+                          />
                         }
                         onClick={() => {
                           setActiveTab("populations");
@@ -949,28 +930,12 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                         <Tab
                           tabIndex={0}
                           label={
-                            <div>
-                              {Boolean(formik.errors.stratifications) ? (
-                                <ErrorIcon
-                                  sx={{
-                                    color: "#AE1C1C",
-                                    marginRight: "10px",
-                                    height: "20px",
-                                    width: "20px",
-                                  }}
-                                />
-                              ) : (
-                                <CheckCircleIcon
-                                  sx={{
-                                    color: "#4D7E23",
-                                    marginRight: "10px",
-                                    height: "20px",
-                                    width: "20px",
-                                  }}
-                                />
+                            <CompletionIndicator
+                              label="Stratifications"
+                              isComplete={Boolean(
+                                formik.errors.stratifications
                               )}
-                              Stratifications
-                            </div>
+                            />
                           }
                           value="stratification"
                           type="B"
@@ -997,28 +962,12 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                       <Tab
                         type="B"
                         label={
-                          <div>
-                            {Boolean(formik.errors.improvementNotation) ? (
-                              <ErrorIcon
-                                sx={{
-                                  color: "#AE1C1C",
-                                  marginRight: "10px",
-                                  height: "20px",
-                                  width: "20px",
-                                }}
-                              />
-                            ) : (
-                              <CheckCircleIcon
-                                sx={{
-                                  color: "#4D7E23",
-                                  marginRight: "10px",
-                                  height: "20px",
-                                  width: "20px",
-                                }}
-                              />
+                          <CompletionIndicator
+                            label="Reporting"
+                            isComplete={Boolean(
+                              formik.errors.improvementNotation
                             )}
-                            Reporting
-                          </div>
+                          />
                         }
                         data-testid="reporting-tab"
                         onClick={() => setActiveTab("reporting")}
