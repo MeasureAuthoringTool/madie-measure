@@ -2,10 +2,12 @@ import React from "react";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 
-const CompletionIndicator = ({ isComplete, label }) => {
+const CompletionIndicator = ({ hasErrors, displayIcon, label }) => {
   return (
     <div>
-      {isComplete ? (
+      {!displayIcon ? (
+        <></>
+      ) : hasErrors ? (
         <ErrorIcon
           sx={{
             color: "#AE1C1C",
