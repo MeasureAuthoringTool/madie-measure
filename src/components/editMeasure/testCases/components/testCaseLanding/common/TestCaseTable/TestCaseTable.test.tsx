@@ -366,7 +366,7 @@ describe("TestCase component", () => {
     expect(setSelectedTestCasesMock).toHaveBeenCalled();
   });
 
-  it("should display View button if the measure is not a draft and the TestCaseListActionCenter feature flag is true", async () => {
+  it("should display View button if the measure without population criteria and is not a draft and the TestCaseListActionCenter feature flag is true", async () => {
     (useFeatureFlags as jest.Mock).mockImplementation(() => ({
       TestCaseListActionCenter: true,
     }));
@@ -399,11 +399,11 @@ describe("TestCase component", () => {
 
       expect(mockPush).toHaveBeenCalled();
       expect(mockPush).toHaveBeenCalledTimes(1);
-      expect(mockPush).toHaveBeenCalledWith("../../ID");
+      expect(mockPush).toHaveBeenCalledWith("../ID");
     });
   });
 
-  it("should display View button if the user does not have edit access to the measure and the TestCaseListActionCenter feature flag is true", async () => {
+  it("should display View button if the user does not have edit access to the measure without population criteria and the TestCaseListActionCenter feature flag is true and navigate to test case onClick", async () => {
     checkUserCanEdit.mockImplementation(() => false);
 
     (useFeatureFlags as jest.Mock).mockImplementation(() => ({
@@ -438,11 +438,11 @@ describe("TestCase component", () => {
 
       expect(mockPush).toHaveBeenCalled();
       expect(mockPush).toHaveBeenCalledTimes(1);
-      expect(mockPush).toHaveBeenCalledWith("../../ID");
+      expect(mockPush).toHaveBeenCalledWith("../ID");
     });
   });
 
-  it("should display Edit button if the user has edit access to the measure and it's a draft and the TestCaseListActionCenter feature flag is true", async () => {
+  it("should display Edit button if the user has edit access to the measure without population criteria and it's a draft and the TestCaseListActionCenter feature flag is true and navigate to test case onClick", async () => {
     checkUserCanEdit.mockImplementation(() => true);
 
     (useFeatureFlags as jest.Mock).mockImplementation(() => ({
@@ -477,7 +477,7 @@ describe("TestCase component", () => {
 
       expect(mockPush).toHaveBeenCalled();
       expect(mockPush).toHaveBeenCalledTimes(1);
-      expect(mockPush).toHaveBeenCalledWith("../../ID");
+      expect(mockPush).toHaveBeenCalledWith("../ID");
     });
   });
 });

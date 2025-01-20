@@ -250,7 +250,9 @@ const TestCaseTable = (props: TestCaseTableProps) => {
               data-testid={`view-edit-test-case-button-${info.row.original.id}`}
               aria-label={`Test Case ${info.row.original.title}; Case Number ${info.row.original.caseNumber}`}
               onClick={() => {
-                const editTestCaseUrl = `../../${info.row.original.id}`;
+                const editTestCaseUrl = _.isEmpty(measure?.groups)
+                  ? `../${info.row.original.id}`
+                  : `../../${info.row.original.id}`;
                 navigate(editTestCaseUrl);
               }}
               role="button"
