@@ -129,6 +129,32 @@ const measures = [
   },
 ] as unknown as Measure[];
 
+const defaultMeasure = {
+  id: "m1234",
+  measureScoring: MeasureScoring.COHORT,
+  createdBy: "testuser",
+  groups: [
+    {
+      groupId: "Group1_ID",
+      scoring: "Cohort",
+      populations: [
+        {
+          id: "id-1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Pop1",
+        },
+      ],
+      stratifications: [
+        {
+          id: "strat-id-1",
+        },
+      ],
+    },
+  ],
+  model: "QI-Core v4.1.1",
+  acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
+} as unknown as Measure;
+
 let mockApplyDefaults = false;
 jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: jest.fn().mockImplementation(() => ({
@@ -151,8 +177,11 @@ const renderWithTestCase = (
   exportTestCase,
   onCloneTestCase,
   measure,
-  setSelectedTestCases = jest.fn(), // Default to mock function
-  setSorting = undefined
+  setSelectedTestCases = jest.fn(),
+  setSorting = undefined,
+  selectedTestCases,
+  deleteDialogModalOpen = false,
+  setDeleteDialogModalOpen = jest.fn()
 ) => {
   return render(
     <MemoryRouter>
@@ -165,7 +194,10 @@ const renderWithTestCase = (
         exportTestCase={exportTestCase}
         onCloneTestCase={onCloneTestCase}
         measure={measure}
-        setSelectedTestCases={setSelectedTestCases} // Always pass mock function
+        setSelectedTestCases={setSelectedTestCases}
+        selectedTestCases={selectedTestCases}
+        deleteDialogModalOpen={deleteDialogModalOpen}
+        setDeleteDialogModalOpen={setDeleteDialogModalOpen}
       />
     </MemoryRouter>
   );
@@ -213,19 +245,6 @@ describe("TestCase component", () => {
     expect(screen.getByText("export collection bundle")).toBeInTheDocument();
     expect(screen.getByText("delete")).toBeInTheDocument();
     expect(screen.getByText("Shift Test Case dates")).toBeInTheDocument();
-
-    const deleteButton = screen.getByText("delete");
-    fireEvent.click(deleteButton);
-
-    expect(screen.getByText("Delete Test Case")).toBeInTheDocument();
-    expect(screen.getByText("Cancel")).toBeInTheDocument();
-    expect(screen.getByText("Yes, Delete")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByText("Cancel"));
-    await waitFor(() => {
-      const submitButton = screen.queryByText("Yes, Delete");
-      expect(submitButton).not.toBeInTheDocument();
-    });
   });
 
   it("should render test case table with case numbers", async () => {
@@ -366,7 +385,77 @@ describe("TestCase component", () => {
     expect(setSelectedTestCasesMock).toHaveBeenCalled();
   });
 
-  it("should display View button if the measure without population criteria and is not a draft and the TestCaseListActionCenter feature flag is true", async () => {
+  it("should show the delete confirmation dialog when delete button is clicked", async () => {
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
+
+    let deleteDialogModalOpen = false;
+
+    const { rerender } = renderWithTestCase(
+      testCases,
+      true,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      defaultMeasure,
+      setSelectedTestCasesMock,
+      undefined,
+      [],
+      deleteDialogModalOpen,
+      (value) => {
+        deleteDialogModalOpen = value;
+      }
+    );
+
+    const selectButton = await screen.findByTestId("select-action-ID");
+    expect(selectButton).toBeInTheDocument();
+
+    fireEvent.click(selectButton);
+
+    const deleteButton = await screen.findByText("delete");
+    expect(deleteButton).toBeInTheDocument();
+
+    fireEvent.click(deleteButton);
+
+    expect(deleteDialogModalOpen).toBe(true);
+
+    rerender(
+      <MemoryRouter>
+        <TestCaseTable
+          sorting={[]}
+          setSorting={undefined}
+          testCases={testCases}
+          canEdit={true}
+          deleteTestCase={deleteTestCase}
+          exportTestCase={exportTestCase}
+          onCloneTestCase={onCloneTestCase}
+          measure={defaultMeasure}
+          setSelectedTestCases={setSelectedTestCasesMock}
+          selectedTestCases={[]}
+          deleteDialogModalOpen={true}
+          setDeleteDialogModalOpen={(value) => {
+            deleteDialogModalOpen = value;
+          }}
+        />
+      </MemoryRouter>
+    );
+
+    const deleteDialog = screen.getByText("Delete Test Case");
+    expect(deleteDialog).toBeInTheDocument();
+
+    const cancelButton = screen.getByText("Cancel");
+    const confirmButton = screen.getByText("Yes, Delete");
+
+    expect(cancelButton).toBeInTheDocument();
+    expect(confirmButton).toBeInTheDocument();
+
+    fireEvent.click(confirmButton);
+    expect(deleteTestCase).toHaveBeenCalled();
+  });
+
+  it("should display View button if the measure without population criteria is not a draft and the TestCaseListActionCenter feature flag is true", async () => {
     (useFeatureFlags as jest.Mock).mockImplementation(() => ({
       TestCaseListActionCenter: true,
     }));

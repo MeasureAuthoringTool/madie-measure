@@ -19,12 +19,14 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useFeatureFlags } from "@madie/madie-util";
 import { blue, grey, red } from "@mui/material/colors";
 import { TestCase } from "@madie/madie-models";
+import { Icon } from "@iconify-icon/react";
 
 interface ActionCenterProps {
   onSubmit?: any;
   selectedTestCases: any;
   canEdit: boolean;
   isQDM: boolean;
+  setDeleteDialogModalOpen: Function;
   onCloneTestCase?: (testCase: TestCase) => void;
   exportTestCases?: Function;
   onExportQRDA?: Function;
@@ -32,6 +34,7 @@ interface ActionCenterProps {
   measureId?: string;
   exportOptionsOpen?: boolean;
   setExportOptionsOpen?: Function;
+  executeAllTestCases?: boolean;
 }
 
 const filterByOptions = ["Case #", "Status", "Group", "Title", "Description"];
@@ -42,22 +45,26 @@ export default function ActionCenter(props: ActionCenterProps) {
     canEdit,
     isQDM,
     onCloneTestCase,
+    setDeleteDialogModalOpen,
     exportTestCases,
     onExportQRDA,
     onExportExcel,
     measureId,
     exportOptionsOpen,
     setExportOptionsOpen,
+    executeAllTestCases,
   } = props;
 
   const [disableDeleteBtn, setDisableDeleteBtn] = useState<boolean>(true);
   const [disableCloneBtn, setDisableCloneBtn] = useState<boolean>(true);
   const [disableExportBtn, setDisableExportBtn] = useState<boolean>(true);
+  const [disableCopyBtn, setDisableCopyBtn] = useState<boolean>(true);
 
   useEffect(() => {
     deleteButtonCheck();
     cloneButtonCheck();
     exportButtonCheck();
+    copyButtonCheck();
   }, [selectedTestCases, canEdit, isQDM]);
 
   const { search } = useLocation();
@@ -127,12 +134,7 @@ export default function ActionCenter(props: ActionCenterProps) {
 
   const exportButtonCheck = () => {
     if (isQDM) {
-      if (
-        selectedTestCases?.length > 0 &&
-        selectedTestCases?.some(
-          (testCase) => testCase?.executionStatus !== "NA"
-        )
-      ) {
+      if (executeAllTestCases) {
         setDisableExportBtn(false);
       } else {
         setDisableExportBtn(true);
@@ -143,6 +145,14 @@ export default function ActionCenter(props: ActionCenterProps) {
       } else {
         setDisableExportBtn(true);
       }
+    }
+  };
+
+  const copyButtonCheck = () => {
+    if (selectedTestCases?.length > 0) {
+      setDisableCopyBtn(false);
+    } else {
+      setDisableCopyBtn(true);
     }
   };
 
@@ -238,7 +248,7 @@ export default function ActionCenter(props: ActionCenterProps) {
         </div>
 
         {/* Action Buttons (Delete, Clone, Export) */}
-        {featureFlags.TestCaseListActionCenter && (
+        {featureFlags?.TestCaseListActionCenter && (
           <div tw="flex items-center">
             {canEdit && (
               <div tw="flex items-center">
@@ -254,7 +264,9 @@ export default function ActionCenter(props: ActionCenterProps) {
                 >
                   <span>
                     <IconButton
-                      onClick={() => {}}
+                      onClick={() => {
+                        setDeleteDialogModalOpen(true);
+                      }}
                       disabled={disableDeleteBtn}
                       data-testid="delete-action-btn"
                     >
@@ -302,12 +314,46 @@ export default function ActionCenter(props: ActionCenterProps) {
               </div>
             )}
 
+            {featureFlags.CopyTestCases && (
+              <Tooltip
+                data-testid="copy-tooltip"
+                title={
+                  disableCopyBtn
+                    ? "Select test cases to copy to another measure"
+                    : "Copy to another measure"
+                }
+                placement="top"
+                arrow
+              >
+                <span>
+                  <IconButton
+                    onClick={() => {}}
+                    disabled={disableCopyBtn}
+                    data-testid="copy-action-btn"
+                  >
+                    <Icon
+                      icon="fluent:share-screen-start-24-regular"
+                      data-testid={`copy-action-icon`}
+                      rotate={45}
+                      style={
+                        disableCopyBtn
+                          ? { color: grey[500] }
+                          : { color: blue[700] }
+                      }
+                    />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            )}
+
             <Tooltip
               data-testid="export-tooltip"
               title={
                 disableExportBtn
                   ? isQDM
-                    ? "Test cases must be executed prior to exporting."
+                    ? executeAllTestCases
+                      ? "Select test cases to export"
+                      : "Test cases must be executed prior to exporting."
                     : "Select test cases to export"
                   : "Export test cases"
               }

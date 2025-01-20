@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import * as _ from "lodash";
 import { Box } from "@mui/material";
 import TypeEditor from "./TypeEditor";
 import ElementSection from "../../../../../../common/ElementSection";
 import { transformArrays } from "./transformArrays";
+import { stripResourcePath } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 
 const Element = ({ element, label, resource, handleChange, canEdit }) => {
   let elementValue = _.get(resource, label);
@@ -20,6 +21,8 @@ const Element = ({ element, label, resource, handleChange, canEdit }) => {
         structureDefinition={element}
         canEdit={canEdit}
         label={label}
+        resource={resource}
+        parentStructureDefinition={null}
       />
     </Box>
   );
@@ -55,10 +58,7 @@ const ElementEditorChildren = ({
   if (rootDefinition) {
     const type = rootDefinition?.type?.[0];
     const required = +rootDefinition.min > 0;
-    const elemPath = fhirDefinitionsService.current.stripResourcePath(
-      resourcePath,
-      rootDefinition.path
-    );
+    const elemPath = stripResourcePath(resourcePath, rootDefinition.path);
     let elementValue = _.get(resource, elemPath);
     return (
       <div
@@ -76,6 +76,7 @@ const ElementEditorChildren = ({
         {/* given root definition we do a base level render */}
         <TypeEditor
           type={type.code}
+          resource={resource}
           required={required}
           value={elementValue}
           onChange={(e) => {
@@ -83,13 +84,14 @@ const ElementEditorChildren = ({
             handleChange(elemPath, e);
           }}
           structureDefinition={rootDefinition}
+          parentStructureDefinition={null}
           canEdit={canEdit}
           label={rootDefinition?.id}
         />
         {childrenToRender.map((child) => (
           <Element
             element={child}
-            label={child.path.split(".")[child.path.split(".").length - 1]}
+            label={child?.id}
             resource={resource}
             handleChange={handleChange}
             canEdit={canEdit}
@@ -133,7 +135,7 @@ const ElementEditorChildren = ({
             {childrenToRender.map((child) => (
               <Element
                 element={child}
-                label={child.path.split(".")[child.path.split(".").length - 1]}
+                label={child?.id}
                 resource={resource}
                 handleChange={handleChange}
                 canEdit={canEdit}

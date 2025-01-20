@@ -121,7 +121,7 @@ const RiskAdjustment = () => {
   const onCancel = () => {
     setDiscardDialogOpen(true);
   };
-
+  const MAX_LENGTH = 128;
   return (
     <MetaDataWrapper
       header="Risk Adjustment"
@@ -157,6 +157,9 @@ const RiskAdjustment = () => {
           multipleSelect={true}
           limitTags={1}
           options={definitions}
+          getOptionDisabled={() =>
+            formik?.values?.riskAdjustments?.length >= MAX_LENGTH
+          }
           onClose={() => {}}
           onChange={(e, v, r) => {
             if (r === "removeOption") {
@@ -168,21 +171,23 @@ const RiskAdjustment = () => {
               formik.setFieldValue("riskAdjustments", filteredValues);
             }
             if (r === "selectOption") {
-              const copiedValues = formik.values.riskAdjustments.slice();
-              // we don't seem to have a good way of knowing exactly what was selected, but we can compare
-              const selectedOption = v.filter((v) => {
-                for (let i = 0; i < copiedValues.length; i++) {
-                  if (copiedValues[i].definition === v) {
-                    return false;
+              if (v?.length <= MAX_LENGTH) {
+                const copiedValues = formik.values.riskAdjustments.slice();
+                // we don't seem to have a good way of knowing exactly what was selected, but we can compare
+                const selectedOption = v.filter((v) => {
+                  for (let i = 0; i < copiedValues.length; i++) {
+                    if (copiedValues[i].definition === v) {
+                      return false;
+                    }
                   }
-                }
-                return true;
-              });
-              copiedValues.push({
-                definition: selectedOption[0],
-                description: "",
-              });
-              formik.setFieldValue("riskAdjustments", copiedValues);
+                  return true;
+                });
+                copiedValues.push({
+                  definition: selectedOption[0],
+                  description: "",
+                });
+                formik.setFieldValue("riskAdjustments", copiedValues);
+              }
             }
             if (r === "clear") {
               formik.setFieldValue("riskAdjustments", []);

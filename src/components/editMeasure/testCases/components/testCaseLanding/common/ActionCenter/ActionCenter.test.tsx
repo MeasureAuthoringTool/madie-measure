@@ -1,5 +1,5 @@
 import * as React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import ActionCenter from "./ActionCenter";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
@@ -24,6 +24,7 @@ describe("ActionCenter Component", () => {
     (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
     (useFeatureFlags as jest.Mock).mockReturnValue({
       TestCaseListActionCenter: true,
+      CopyTestCases: true,
     });
   });
 
@@ -152,6 +153,12 @@ describe("ActionCenter Component", () => {
       const cloneTooltip = await screen.findByTestId("clone-tooltip");
       expect(cloneTooltip).toHaveAttribute("aria-label", "Clone test case");
 
+      const copyTooltip = await screen.findByTestId("copy-tooltip");
+      expect(copyTooltip).toHaveAttribute(
+        "aria-label",
+        "Copy to another measure"
+      );
+
       const exportTooltip = await screen.findByTestId("export-tooltip");
       expect(exportTooltip).toHaveAttribute("aria-label", "Export test cases");
     });
@@ -176,10 +183,33 @@ describe("ActionCenter Component", () => {
       expect(onCloneTestCase).toBeCalled();
     });
 
+    it("should not show copy test cases tooltips when feature flag is not on", async () => {
+      (useFeatureFlags as jest.Mock).mockReturnValue({
+        TestCaseListActionCenter: true,
+        CopyTestCases: false,
+      });
+      const selectedTestCase = [{ id: "1", validResource: true }];
+      const onCloneTestCase = jest.fn();
+      render(
+        <MemoryRouter>
+          <ActionCenter
+            selectedTestCases={selectedTestCase}
+            canEdit={true}
+            isQDM={true}
+            onCloneTestCase={onCloneTestCase}
+          />
+        </MemoryRouter>
+      );
+
+      const copyTooltip = await screen.queryByTestId("copy-tooltip");
+      expect(copyTooltip).not.toBeInTheDocument();
+    });
+
     it("should export transaction bundle for QI-Core", () => {
       const selectedTestCase = [{ id: "1", validResource: true }];
       const setExportOptionsOpen = jest.fn();
       const exportTestCases = jest.fn();
+
       render(
         <MemoryRouter>
           <ActionCenter
@@ -248,6 +278,7 @@ describe("ActionCenter Component", () => {
             measureId="1"
             exportOptionsOpen={true}
             setExportOptionsOpen={setExportOptionsOpen}
+            executeAllTestCases={true}
           />
         </MemoryRouter>
       );
@@ -276,6 +307,7 @@ describe("ActionCenter Component", () => {
             measureId="1"
             exportOptionsOpen={true}
             setExportOptionsOpen={setExportOptionsOpen}
+            executeAllTestCases={true}
           />
         </MemoryRouter>
       );
@@ -288,6 +320,35 @@ describe("ActionCenter Component", () => {
       expect(exportExcel).toBeInTheDocument();
       userEvent.click(exportExcel);
       expect(onExportExcel).toBeCalled();
+    });
+
+    it("should disable export button if execution status is NA for QDM", async () => {
+      const selectedTestCase = [{ id: "1", executionStatus: "NA" }];
+      const setExportOptionsOpen = jest.fn();
+      const onExportExcel = jest.fn();
+      render(
+        <MemoryRouter>
+          <ActionCenter
+            selectedTestCases={selectedTestCase}
+            canEdit={true}
+            isQDM={true}
+            onExportExcel={onExportExcel}
+            measureId="1"
+            exportOptionsOpen={false}
+            setExportOptionsOpen={setExportOptionsOpen}
+            executeAllTestCases={false}
+          />
+        </MemoryRouter>
+      );
+
+      const exportActionBtn = screen.getByTestId("export-action-icon");
+      expect(exportActionBtn).toBeInTheDocument();
+
+      const exportTooltip = await screen.findByTestId("export-tooltip");
+      expect(exportTooltip).toHaveAttribute(
+        "aria-label",
+        "Test cases must be executed prior to exporting."
+      );
     });
   });
 });

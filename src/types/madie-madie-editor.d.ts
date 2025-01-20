@@ -119,7 +119,7 @@ declare module "@madie/madie-editor" {
     measureStoreCql?: string;
     cqlMetaData?: CqlMetaData;
     measureModel?: string;
-    handleCodeDelete?: (code: string) => void;
+    handleCodeDelete?: (code: string, measureModel: string) => void;
     handleDefinitionDelete?: (definition: string) => void;
     setEditorVal?: Function;
     setIsCQLUnchanged?: Function;

@@ -1,8 +1,13 @@
+import { ElementDefinition, Resource } from "fhir/r4";
+
 export interface TypeComponentProps {
   label?: string;
   canEdit: boolean;
   value?: any;
   onChange?: (nextValue: any) => void;
-  structureDefinition: any;
+  structureDefinition: ElementDefinition;
   fieldRequired: boolean;
+  helperText?: any;
+  error?: any;
+  resource?: Resource;
 }

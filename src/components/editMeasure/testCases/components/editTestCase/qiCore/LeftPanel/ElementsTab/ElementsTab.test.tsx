@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { QiCoreResourceProvider } from "../../../../../util/QiCorePatientProvider";
 import ElementsTab from "./ElementsTab";
 import {
@@ -14,6 +14,7 @@ import {
 } from "@madie/madie-models";
 import axios from "../../../../../../../../api/axios-instance";
 import { ExecutionContextProvider } from "../../../../routes/qiCore/ExecutionContext";
+import userEvent from "@testing-library/user-event";
 
 const patientBundle = {
   resourceType: "Bundle",
@@ -304,9 +305,12 @@ describe("ElementsTab", () => {
     );
   };
 
-  it("displays Element Tab for a QICore case", async () => {
+  it("displays Element Tab for a QICore case, and navigates between added and available", async () => {
     renderElementTab();
-    expect(screen.getByText("Resources")).toBeInTheDocument();
     expect(await screen.findByText("QICore AdverseEvent")).toBeInTheDocument();
+    const addedTab = screen.getByTestId("added-tab");
+    expect(addedTab).toBeInTheDocument();
+    userEvent.click(addedTab);
+    expect(screen.getByText("Resources")).toBeInTheDocument();
   });
 });

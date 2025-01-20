@@ -37,6 +37,12 @@
           > #details-panel {
             margin-right: 16px;
           }
+          > #elements-content {
+            height: 100%;
+            > #qi-core-test-case-builder {
+              height: inherit;
+            }
+          }
         }
         > .tab-container {
           > .MuiButtonBase-root {

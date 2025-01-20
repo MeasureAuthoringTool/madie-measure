@@ -17,6 +17,8 @@ import useFhirElmTranslationServiceApi, {
   SourceDataCriteria,
 } from "../../../../../../../../../api/useFhirElmTranslationServiceApi";
 import useExecutionContext from "../../../../../routes/qiCore/useExecutionContext";
+import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
+import "./Builder.scss";
 
 interface BuilderProps {
   testCase: TestCase;
@@ -32,7 +34,7 @@ const Builder = ({ testCase, canEdit }: BuilderProps) => {
   const { state, dispatch } = useQiCoreResource();
   const { measureState } = useExecutionContext();
   const [measure] = measureState;
-
+  const addedResources = state?.bundle?.entry.length || 0;
   useEffect(() => {
     const resourcesPromise = fhirDefinitionsService.current.getResources();
     const relevantElementsPromise =
@@ -72,15 +74,43 @@ const Builder = ({ testCase, canEdit }: BuilderProps) => {
     setActiveDefinition({ ...resourceTree });
   };
 
+  const [activeTab, setActiveTab] = useState<string>("Available");
+
   return (
-    <Box sx={{ mr: 2 }}>
-      <Box
-        sx={{
-          height: 350,
-          overflowY: "scroll",
-        }}
-      >
-        {!activeResource && canEdit && (
+    <Box
+      sx={{ mr: 2 }}
+      id="qi-core-test-case-builder"
+      data-testId="qi-core-test-case-builder"
+    >
+      <Box>
+        <Tabs
+          value={activeTab}
+          onChange={(e, v) => {
+            setActiveTab(v);
+          }}
+          type="B"
+          orientation="horizontal"
+        >
+          <Tab
+            type="B"
+            tabIndex={0}
+            aria-label="Available elements tab panel"
+            label={"Available"}
+            data-testid="available-tab"
+            value="Available"
+          />
+          <Tab
+            type="B"
+            tabIndex={0}
+            aria-label="Added elements tab panel"
+            label={`Added (${addedResources})`}
+            data-testid="added-tab"
+            value="Added"
+          />
+        </Tabs>
+      </Box>
+      <div className="panel-content-pane">
+        {activeTab === "Available" && !activeResource && canEdit && (
           <ResourceList
             resourceIdentifiers={resources}
             onClick={(resourceIdentifier: ResourceIdentifier) => {
@@ -104,35 +134,39 @@ const Builder = ({ testCase, canEdit }: BuilderProps) => {
             }}
           />
         )}
-        {activeResource && (
-          <ResourceEditor
-            selectedResource={activeResource}
-            selectedResourceDefinition={activeDefinition}
-            onSave={(resource) => {}}
-            onCancel={(resource) => {
-              setActiveResource(null);
-            }}
-            canEdit={canEdit}
-          />
+        {activeTab === "Added" && (
+          <>
+            {activeResource && (
+              <ResourceEditor
+                selectedResource={activeResource}
+                selectedResourceDefinition={activeDefinition}
+                onSave={(resource) => {}}
+                onCancel={(resource) => {
+                  setActiveResource(null);
+                }}
+                canEdit={canEdit}
+              />
+            )}
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="h5">Resources</Typography>
+              <Divider sx={{ mb: 1 }} />
+              <TestCaseSummaryGrid
+                bundle={state?.bundle}
+                onRowEdit={(row) => {
+                  handleResourceSelected(row);
+                }}
+                onRowDelete={(row) => {
+                  dispatch({
+                    type: ResourceActionType.REMOVE_BUNDLE_ENTRY,
+                    payload: row,
+                  });
+                  setActiveResource(null);
+                }}
+              />
+            </Box>
+          </>
         )}
-      </Box>
-      <Box sx={{ mt: 2 }}>
-        <Typography variant="h5">Resources</Typography>
-        <Divider sx={{ mb: 1 }} />
-        <TestCaseSummaryGrid
-          bundle={state?.bundle}
-          onRowEdit={(row) => {
-            handleResourceSelected(row);
-          }}
-          onRowDelete={(row) => {
-            dispatch({
-              type: ResourceActionType.REMOVE_BUNDLE_ENTRY,
-              payload: row,
-            });
-            setActiveResource(null);
-          }}
-        />
-      </Box>
+      </div>
     </Box>
   );
 };
