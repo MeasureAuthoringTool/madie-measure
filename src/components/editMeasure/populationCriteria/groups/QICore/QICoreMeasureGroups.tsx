@@ -937,14 +937,10 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                               displayIcon={
                                 formik.values.stratifications?.filter(
                                   (value) =>
-                                    value.association !==
-                                      getEmptyStrat().association ||
-                                    value.associations.length !==
-                                      getEmptyStrat().associations.length ||
-                                    value.cqlDefinition !==
-                                      getEmptyStrat().cqlDefinition ||
-                                    value.description !==
-                                      getEmptyStrat().description
+                                    value.association !== null ||
+                                    value.associations.length !== 0 ||
+                                    value.cqlDefinition !== "" ||
+                                    value.description !== ""
                                 ).length > 0
                               }
                             />

@@ -816,14 +816,11 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                               label="Stratifications"
                               hasErrors={Boolean(formik.errors.stratifications)}
                               displayIcon={
-                                formik.values.stratifications.filter(
+                                formik.values.stratifications?.filter(
                                   (value) =>
-                                    value.association !==
-                                      getEmptyStrat().association ||
-                                    value.cqlDefinition !==
-                                      getEmptyStrat().cqlDefinition ||
-                                    value.description !==
-                                      getEmptyStrat().description
+                                    value.association !== null ||
+                                    value.cqlDefinition !== "" ||
+                                    value.description !== ""
                                 ).length > 0
                               }
                             />
