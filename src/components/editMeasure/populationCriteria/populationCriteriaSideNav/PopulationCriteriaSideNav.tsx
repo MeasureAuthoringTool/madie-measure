@@ -8,10 +8,9 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import "../../details/EditMeasureSideBarNav.scss";
 import "../../../common/madie-link.scss";
 import { DSLink, Tabs, Tab } from "@madie/madie-design-system/dist/react";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ErrorIcon from "@mui/icons-material/Error";
 import { useTheme } from "@mui/material";
-import { COMPLETE, INCOMPLETE, NONE } from "../PopulationCriteriaHome";
+import { INCOMPLETE, NONE } from "../PopulationCriteriaHome";
+import CompletionIndicator from "../groups/CompletionIndicator";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
 const InnerWrapper = tw.div`flex-grow flex flex-col`;
@@ -123,21 +122,6 @@ export default function PopulationCriteriaSideNav(
     },
   ];
 
-  const getCompletedIcon = () => {
-    return (
-      <span style={{ position: "absolute", left: "0" }}>
-        <CheckCircleIcon sx={{ color: theme.palette.success.main }} />
-      </span>
-    );
-  };
-  const getIncompletedIcon = () => {
-    return (
-      <span style={{ position: "absolute", left: "0" }}>
-        <ErrorIcon sx={{ color: theme.palette.error.main }} />
-      </span>
-    );
-  };
-
   return (
     <OuterWrapper>
       <InnerWrapper className="edit-measure-side-nav">
@@ -153,10 +137,13 @@ export default function PopulationCriteriaSideNav(
             >
               <Tab
                 type="C"
-                icon={
-                  baseConfigPopuated ? getCompletedIcon() : getIncompletedIcon()
+                label={
+                  <CompletionIndicator
+                    label="Base Configuration"
+                    hasErrors={!baseConfigPopuated}
+                    displayIcon={true}
+                  />
                 }
-                label="Base Configuration"
                 value={baseConfigurationUrl}
                 data-testId="leftPanelMeasureBaseConfigurationTab"
                 id="sideNavMeasureBaseConfiguration"
@@ -210,12 +197,13 @@ export default function PopulationCriteriaSideNav(
                               type="C"
                               orientation="vertical"
                               id={index}
-                              label={linkInfo.title}
                               data-testid={linkInfo.dataTestId}
-                              icon={
-                                linkInfo.groupPopulated
-                                  ? getCompletedIcon()
-                                  : getIncompletedIcon()
+                              label={
+                                <CompletionIndicator
+                                  label={linkInfo.title}
+                                  hasErrors={!linkInfo.groupPopulated}
+                                  displayIcon={true}
+                                />
                               }
                             />
                           );
@@ -250,14 +238,13 @@ export default function PopulationCriteriaSideNav(
             {isQDM && (
               <Tab
                 type="C"
-                icon={
-                  reportingStatus == COMPLETE
-                    ? getCompletedIcon()
-                    : reportingStatus == INCOMPLETE
-                    ? getIncompletedIcon()
-                    : null
+                label={
+                  <CompletionIndicator
+                    label="Reporting"
+                    hasErrors={reportingStatus === INCOMPLETE}
+                    displayIcon={reportingStatus !== NONE}
+                  />
                 }
-                label="Reporting"
                 value={QdmReportingBaseUrl}
                 dataTestId="leftPanelMeasureReportingTab"
                 id="sideNavMeasureReporting"
@@ -268,12 +255,28 @@ export default function PopulationCriteriaSideNav(
                 <Tab
                   {...l}
                   type="B"
-                  icon={
-                    l.status === COMPLETE
-                      ? getCompletedIcon()
-                      : l.status === INCOMPLETE
-                      ? getIncompletedIcon()
-                      : null
+                  label={
+                    <CompletionIndicator
+                      label={l.label}
+                      hasErrors={
+                        l.label === "Supplemental Data" &&
+                        supplementalDataStatus === INCOMPLETE
+                          ? true
+                          : l.label === "Risk Adjustment" &&
+                            riskAdjustmentStatus === INCOMPLETE
+                          ? true
+                          : false
+                      }
+                      displayIcon={
+                        l.label === "Supplemental Data" &&
+                        supplementalDataStatus === NONE
+                          ? false
+                          : l.label === "Risk Adjustment" &&
+                            riskAdjustmentStatus === NONE
+                          ? false
+                          : true
+                      }
+                    />
                   }
                 />
               );
