@@ -12,8 +12,8 @@ import {
   updateChildrenPaths,
   getAllChildren,
   stripResourcePath,
+  isComponentDataType,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
-import { isComponentDataType } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 interface ElementEditorProps {
   resource?: any;
   selectedResource?: any;
