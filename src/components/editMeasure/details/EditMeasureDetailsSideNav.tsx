@@ -3,10 +3,8 @@ import tw from "twin.macro";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Tab, Tabs } from "@madie/madie-design-system/dist/react";
 import "./EditMeasureSideBarNav.scss";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ErrorIcon from "@mui/icons-material/Error";
-import { useTheme } from "@mui/material";
 import { Link } from "./MeasureDetails";
+import CompletionIndicator from "../populationCriteria/groups/CompletionIndicator";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
 const InnerWrapper = tw.div`flex-grow flex flex-col`;
@@ -31,41 +29,36 @@ export default function EditMeasureDetailsSideNav(
     navigate(newPath);
   };
 
-  const theme = useTheme();
-
-  const getCompletedIcon = (linkInfo) => {
-    return (
-      <span style={{ position: "absolute", left: "8px" }}>
-        <CheckCircleIcon
-          data-testid={`measure-details-completed-icon-${linkInfo.id}`}
-          sx={{ color: theme.palette.success.main, fontSize: 15 }}
-        />
-      </span>
-    );
-  };
-  const getIncompletedIcon = (linkInfo) => {
-    return (
-      <span style={{ position: "absolute", left: "8px" }}>
-        <ErrorIcon
-          data-testid={`measure-details-incompleted-icon-${linkInfo.id}`}
-          sx={{ color: theme.palette.error.main, fontSize: 15 }}
-        />
-      </span>
-    );
-  };
-
-  function getIcon(linkInfo) {
-    let icon;
-
+  function getTabLabel(linkInfo) {
     if (linkInfo.displayCompletedIcon) {
-      icon = getCompletedIcon(linkInfo);
+      return (
+        <CompletionIndicator
+          data-testid={`measure-details-completed-icon-${linkInfo.id}`}
+          label={`${linkInfo.title}`}
+          hasErrors={false}
+          displayIcon={true}
+        />
+      );
     }
 
     if (linkInfo.displayIncompletedIcon) {
-      icon = getIncompletedIcon(linkInfo);
+      return (
+        <CompletionIndicator
+          data-testid={`measure-details-incompleted-icon-${linkInfo.id}`}
+          label={`${linkInfo.title}`}
+          hasErrors={true}
+          displayIcon={true}
+        />
+      );
     }
 
-    return icon;
+    return (
+      <CompletionIndicator
+        label={`${linkInfo.title}`}
+        hasErrors={false}
+        displayIcon={false}
+      />
+    );
   }
 
   return (
@@ -87,8 +80,7 @@ export default function EditMeasureDetailsSideNav(
                 {link.links.map((linkInfo) => {
                   return (
                     <Tab
-                      label={linkInfo.title}
-                      icon={getIcon(linkInfo)}
+                      label={getTabLabel(linkInfo)}
                       type="C"
                       value={linkInfo.href}
                       id={linkInfo.id}
