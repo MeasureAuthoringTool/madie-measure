@@ -13,6 +13,8 @@ interface InvalidTestCaseDialogProps {
   versionType: String;
   loading: boolean;
 }
+
+// Todo Rohit this is not invalid test case dialog, update it also the form is having some default actions that is triggereign a page refresh
 const InvalidTestCaseDialog = (props: InvalidTestCaseDialogProps) => {
   const { open, onClose, onContinue, versionType, loading } = props;
   return (

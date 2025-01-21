@@ -37,6 +37,7 @@ import DraftMeasureDialog from "../common/draftMeasureDialog/DraftMeasureDialog"
 import ExportDialog from "../measureLanding/measureList/exportDialog/ExportDialog";
 import { exportMeasure } from "../../utils/exportUtil";
 import TestCases from "./testCases/TestCases";
+import { AxiosResponse } from "axios";
 
 const OBJECT_ID_REGEX = /\/[a-f0-9]{24}/g;
 
@@ -92,6 +93,7 @@ export default function EditMeasure() {
 
   useEffect(() => {
     if (currentMeasureId) {
+      debugger;
       loadMeasure();
     }
   }, [currentMeasureId]);
@@ -109,10 +111,6 @@ export default function EditMeasure() {
         }
       });
   };
-
-  useEffect(() => {
-    loadMeasure();
-  }, [currentMeasureId]);
 
   const loadingDiv = <div data-testid="loading">Loading...</div>;
 
@@ -267,15 +265,15 @@ export default function EditMeasure() {
   };
   const createVersion = (versionType: string) => {
     setLoading(true);
-    return measureServiceApi
+    measureServiceApi
       .createVersion(measure.id, versionType)
-      .then((r) => {
+      .then((response: AxiosResponse<Measure>) => {
         handleDialogClose();
         setToastOpen(true);
         setToastType("success");
         setLoading(false);
         setToastMessage("New version of measure is Successfully created");
-        loadMeasure();
+        updateMeasure(response.data);
       })
       .catch((error) => {
         handleCreateError(error);
@@ -295,9 +293,9 @@ export default function EditMeasure() {
       });
       setLoading(false);
     } else {
-      await measureServiceApi
+      measureServiceApi
         .checkValidVersion(measure.id, versionType)
-        .then(async (successResponse) => {
+        .then((successResponse) => {
           setLoading(false);
           // if we get a 202, we have invalid test cases, but no other issues so we can create it
           if (successResponse?.status === 202) {
@@ -343,9 +341,9 @@ export default function EditMeasure() {
     }
   };
   const draftMeasure = async (measureName: string, model: Model) => {
-    await measureServiceApi
+    measureServiceApi
       .draftMeasure(measure.id, model, measureName)
-      .then(async (response) => {
+      .then((response) => {
         // remove the old ids from url and split urls into parts
         // e.g. /measures/673f9da22d51c65a00afb8a2/edit/test-cases/list-page/673f9da22d51c65a00afb89f
         const routeParts = location.pathname
