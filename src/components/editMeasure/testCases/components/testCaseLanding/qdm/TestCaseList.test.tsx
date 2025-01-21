@@ -1393,10 +1393,6 @@ jest.mock("../../../api/useExcelExportService");
 const useExcelExportServiceMock =
   useExcelExportService as jest.Mock<ExcelExportService>;
 
-const useExcelExportServiceMockResolved = {
-  generateExcel: jest.fn().mockResolvedValue("test excel"),
-} as unknown as ExcelExportService;
-
 jest.useFakeTimers();
 jest.spyOn(global, "setTimeout");
 
@@ -2715,10 +2711,14 @@ describe("TestCaseList component", () => {
       expect(screen.getByText(testCases[0].title)).toBeInTheDocument()
     );
   });
+
   it("should render list of test cases and truncate title and series with checkboxes if flag is true", async () => {
-    (useFeatureFlags as jest.Mock).mockReturnValue({
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      applyDefaults: false,
+      qiCoreBonnieTestCases: false,
+      CopyTestCases: true,
       TestCaseListActionCenter: true,
-    });
+    }));
     const testCases = [
       {
         id: "9010",
@@ -3427,6 +3427,40 @@ describe("TestCaseList component", () => {
         2
       );
     });
+  });
+
+  it("Should display test case copy dialog when at least one test case is selected", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      applyDefaults: false,
+      qiCoreBonnieTestCases: false,
+      CopyTestCases: true,
+      TestCaseListActionCenter: true,
+    }));
+    renderTestCaseListComponent();
+
+    const table = await screen.findByTestId("test-case-tbl");
+    const tableHeaders = table.querySelectorAll("thead th");
+
+    expect(tableHeaders[1]).toHaveTextContent("Case #");
+    expect(tableHeaders[2]).toHaveTextContent("Status");
+    expect(tableHeaders[3]).toHaveTextContent("Group");
+    expect(tableHeaders[4]).toHaveTextContent("Title");
+    expect(tableHeaders[5]).toHaveTextContent("Description");
+
+    const checkboxes = await screen.findAllByRole("checkbox");
+    expect(checkboxes.length).toBe(4);
+
+    const copyTestCaseButton = await screen.findByTestId("copy-action-btn");
+    expect(copyTestCaseButton).toBeDisabled();
+
+    userEvent.click(checkboxes[1]);
+    expect(copyTestCaseButton).not.toBeDisabled();
+
+    userEvent.click(copyTestCaseButton);
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+
+    userEvent.click(await screen.findByRole("button", { name: "Cancel" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
 });
 
