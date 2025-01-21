@@ -15,7 +15,7 @@ import {
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import queryString from "query-string";
 import calculationService from "../../../api/CalculationService";
-import { checkUserCanEdit } from "@madie/madie-util";
+import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
 import CreateCodeCoverageNavTabs from "./CreateCodeCoverageNavTabs";
 import CreateNewTestCaseDialog from "../../createTestCase/CreateNewTestCaseDialog";
 import {
@@ -62,7 +62,6 @@ import {
 import useQdmCqlParsingService from "../../../api/cqlElmTranslationService/useQdmCqlParsingService";
 import ActionCenter from "../common/ActionCenter/ActionCenter";
 import CopyTestCaseDialog from "../common/copyTestCases/CopyTestCaseDialog";
-import { useFeatureFlags } from "@madie/madie-util";
 
 export const IMPORT_ERROR =
   "An error occurred while importing your test cases. Please try again, or reach out to the Help Desk.";

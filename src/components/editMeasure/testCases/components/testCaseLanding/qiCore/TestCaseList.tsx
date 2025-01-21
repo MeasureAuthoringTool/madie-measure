@@ -17,7 +17,11 @@ import {
   DetailedPopulationGroupResult,
 } from "fqm-execution/build/types/Calculator";
 import { ObjectId } from "bson";
-import { checkUserCanEdit, measureStore } from "@madie/madie-util";
+import {
+  checkUserCanEdit,
+  measureStore,
+  useFeatureFlags,
+} from "@madie/madie-util";
 import useExecutionContext from "../../routes/qiCore/useExecutionContext";
 import CreateCodeCoverageNavTabs from "./CreateCodeCoverageNavTabs";
 import CodeCoverageHighlighting from "../common/CodeCoverageHighlighting";
@@ -42,7 +46,6 @@ import FileSaver from "file-saver";
 import TestCaseImportDialog from "../common/import/TestCaseImportDialog";
 import ActionCenter from "../common/ActionCenter/ActionCenter";
 import CopyTestCaseDialog from "../common/copyTestCases/CopyTestCaseDialog";
-import { useFeatureFlags } from "@madie/madie-util";
 
 export const IMPORT_ERROR =
   "An error occurred while importing your test cases. Please try again, or reach out to the Help Desk.";
