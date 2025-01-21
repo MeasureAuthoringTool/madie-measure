@@ -13,7 +13,7 @@ import {
   getAllChildren,
   stripResourcePath,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
-
+import { isComponentDataType } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 interface ElementEditorProps {
   resource?: any;
   selectedResource?: any;
@@ -46,7 +46,7 @@ const ElementEditor = ({
     nodeList = []
   ) => {
     const type = child?.type?.[0]?.code;
-    if (!fhirDefinitionsService.current.isComponentDataType(type)) {
+    if (!isComponentDataType(type)) {
       // Fetch the resource tree asynchronously
       // nesting these ifs to avoid a crash in deeply nested Claimresponse.item. Might cause issue elsewhere.
       if (type) {
