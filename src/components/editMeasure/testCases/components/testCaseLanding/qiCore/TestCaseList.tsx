@@ -17,11 +17,7 @@ import {
   DetailedPopulationGroupResult,
 } from "fqm-execution/build/types/Calculator";
 import { ObjectId } from "bson";
-import {
-  checkUserCanEdit,
-  measureStore,
-  useFeatureFlags,
-} from "@madie/madie-util";
+import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 import useExecutionContext from "../../routes/qiCore/useExecutionContext";
 import CreateCodeCoverageNavTabs from "./CreateCodeCoverageNavTabs";
 import CodeCoverageHighlighting from "../common/CodeCoverageHighlighting";
@@ -45,6 +41,7 @@ import getModelFamily from "../../../util/measureModelHelpers";
 import FileSaver from "file-saver";
 import TestCaseImportDialog from "../common/import/TestCaseImportDialog";
 import ActionCenter from "../common/ActionCenter/ActionCenter";
+import CopyTestCaseDialog from "../common/copyTestCases/CopyTestCaseDialog";
 
 export const IMPORT_ERROR =
   "An error occurred while importing your test cases. Please try again, or reach out to the Help Desk.";
@@ -126,6 +123,8 @@ const TestCaseList = (props: TestCaseListProps) => {
     [key: string]: DetailedPopulationGroupResult[];
   }>({});
 
+  const [openCopyTestCaseDialog, setOpenCopyTestCaseDialog] =
+    useState<boolean>(false);
   const calculation = useRef(calculationService());
   const { updateMeasure } = measureStore;
   const [canEdit, setCanEdit] = useState<boolean>(false);
@@ -159,7 +158,6 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [createOpen, setCreateOpen] = useState<boolean>(false);
   const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
     useState<boolean>(false);
-  const featureFlags = useFeatureFlags();
   const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
 
   useEffect(() => {
@@ -661,6 +659,9 @@ const TestCaseList = (props: TestCaseListProps) => {
                         exportTestCases={exportTestCases}
                         exportOptionsOpen={exportOptionsOpen}
                         setExportOptionsOpen={setExportOptionsOpen}
+                        displayTestCaseCopyDialog={() =>
+                          setOpenCopyTestCaseDialog(true)
+                        }
                       />
                       <TestCaseTable
                         sorting={sorting}
@@ -740,6 +741,12 @@ const TestCaseList = (props: TestCaseListProps) => {
         }}
         dialogTitle="Delete All Test Cases"
         name="All Test Cases"
+      />
+      <CopyTestCaseDialog
+        open={openCopyTestCaseDialog}
+        onClose={() => setOpenCopyTestCaseDialog(false)}
+        onSubmit={() => {}}
+        measure={measure}
       />
       {openImportDialog && (
         <TestCaseImportDialog

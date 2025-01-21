@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import ActionCenter from "./ActionCenter";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
@@ -201,7 +201,7 @@ describe("ActionCenter Component", () => {
         </MemoryRouter>
       );
 
-      const copyTooltip = await screen.queryByTestId("copy-tooltip");
+      const copyTooltip = screen.queryByTestId("copy-tooltip");
       expect(copyTooltip).not.toBeInTheDocument();
     });
 
