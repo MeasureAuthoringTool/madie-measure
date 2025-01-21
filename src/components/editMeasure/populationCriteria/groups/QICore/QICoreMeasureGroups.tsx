@@ -918,7 +918,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                         label={
                           <CompletionIndicator
                             label="Populations"
-                            isComplete={Boolean(formik.errors.populations)}
+                            hasErrors={formik.errors.populations}
+                            displayIcon={true}
                           />
                         }
                         onClick={() => {
@@ -932,9 +933,16 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                           label={
                             <CompletionIndicator
                               label="Stratifications"
-                              isComplete={Boolean(
-                                formik.errors.stratifications
-                              )}
+                              hasErrors={formik.errors.stratifications}
+                              displayIcon={
+                                formik.values.stratifications?.filter(
+                                  (value) =>
+                                    value.association !== null ||
+                                    value.associations.length !== 0 ||
+                                    value.cqlDefinition !== "" ||
+                                    value.description !== ""
+                                ).length > 0
+                              }
                             />
                           }
                           value="stratification"
@@ -964,9 +972,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                         label={
                           <CompletionIndicator
                             label="Reporting"
-                            isComplete={Boolean(
-                              formik.errors.improvementNotation
-                            )}
+                            hasErrors={formik.errors.improvementNotation}
+                            displayIcon={true}
                           />
                         }
                         data-testid="reporting-tab"
