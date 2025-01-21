@@ -15,14 +15,14 @@ import {
 } from "../__mocks__/mockMeasureResponses";
 import { within } from "@testing-library/dom";
 
-const serviceConfig: ServiceConfig = {
+const serviceConfig = {
   fhirElmTranslationService: { baseUrl: "fhir/services" },
   qdmElmTranslationService: { baseUrl: "qdm/services" },
   terminologyService: { baseUrl: "example-service-url" },
   measureService: {
     baseUrl: "example-service-url",
   },
-};
+} as unknown as ServiceConfig;
 
 const abortController = new AbortController();
 const mockUser = "TestUser1";
@@ -47,9 +47,7 @@ jest.mock("react-router-dom", () => ({
 
 const mockMeasureServiceApi = {
   fetchMeasures: jest.fn().mockResolvedValue(multipleItemsResponse),
-  searchMeasuresByMeasureNameOrEcqmTitle: jest
-    .fn()
-    .mockResolvedValue(oneItemResponse),
+  searchMeasuresByCriteria: jest.fn().mockResolvedValue(oneItemResponse),
 } as unknown as MeasureServiceApi;
 
 jest.mock("../../api/useMeasureServiceApi", () =>
@@ -138,9 +136,13 @@ describe("Measure Page", () => {
     userEvent.type(measureInput, "test");
     expect(measureInput.value).toBe("test");
     fireEvent.submit(measureInput);
-    expect(
-      mockMeasureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle
-    ).toHaveBeenCalledWith(true, 10, 0, "test", abortController.signal);
+    expect(mockMeasureServiceApi.searchMeasuresByCriteria).toHaveBeenCalledWith(
+      true,
+      10,
+      0,
+      { searchField: "test" },
+      abortController.signal
+    );
   });
 
   test("Create event triggers the event listener", async () => {
@@ -211,7 +213,7 @@ describe("Measure Page", () => {
     (mockMeasureServiceApi.fetchMeasures as jest.Mock)
       .mockClear()
       .mockRejectedValueOnce(new Error("Unable to fetch measures"));
-    (mockMeasureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle as jest.Mock)
+    (mockMeasureServiceApi.searchMeasuresByCriteria as jest.Mock)
       .mockClear()
       .mockRejectedValueOnce(new Error("Unable to fetch measures"));
     renderRouter(["/measures"]);
@@ -233,7 +235,7 @@ describe("Measure Page", () => {
     (mockMeasureServiceApi.fetchMeasures as jest.Mock)
       .mockClear()
       .mockRejectedValueOnce(new Error("canceled"));
-    (mockMeasureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle as jest.Mock)
+    (mockMeasureServiceApi.searchMeasuresByCriteria as jest.Mock)
       .mockClear()
       .mockRejectedValueOnce(new Error("canceled"));
     renderRouter(["/measures"]);

@@ -11,6 +11,10 @@
   margin-top: -64px;
   overflow: hidden;
 
+  &.no-margin-top {
+    margin-top: 0;
+  }
+
   > div {
     > .table {
       overflow: hidden;
