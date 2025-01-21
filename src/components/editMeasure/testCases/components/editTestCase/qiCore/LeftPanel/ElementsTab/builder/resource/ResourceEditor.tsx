@@ -11,6 +11,11 @@ import {
   useQiCoreResource,
 } from "../../../../../../../util/QiCorePatientProvider";
 import { ElementDefinition } from "fhir/r4";
+import {
+  getTopLevelElements,
+  getBasePath,
+  stripResourcePath,
+} from "../../../../../../../api/fhirDefinitionServiceUtilities";
 
 interface ResourceEditorProps {
   selectedResource: any;
@@ -52,13 +57,12 @@ const ResourceEditor = ({
   useEffect(() => {
     if (selectedResource) {
       // TODO: look at the data that exists on the resource and combine fields from that
-      const topElements =
-        fhirDefinitionsService.current.getTopLevelElements(selectedResource);
+      const topElements = getTopLevelElements(selectedResource);
       setAllElements(topElements);
       const requiredElements = [...topElements.filter((e) => e.min > 0)];
       const elementsWithValues = [
         ...topElements.filter((e) => {
-          const elemPath = fhirDefinitionsService.current.stripResourcePath(
+          const elemPath = stripResourcePath(
             selectedResource.definition.type,
             e.path
           );
@@ -78,8 +82,7 @@ const ResourceEditor = ({
     }
   }, [selectedResource]);
 
-  const resourceBasePath =
-    fhirDefinitionsService.current.getBasePath(selectedResource);
+  const resourceBasePath = getBasePath(selectedResource);
 
   return (
     <Box

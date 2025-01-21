@@ -5,9 +5,10 @@ import * as Yup from "yup";
 
 // stu references markdown regex as \s*(\S|\s)*  our matcher should look like /^\s*(\S|\s)*$/;
 export const getMarkDownValidator = (required) => {
-  const markdownRegex = /^\s*(\S|\s)*$/;
+  // const markdownRegex = /^\s*(\S|\s)*$/; //this is hl7 regex, but it allows required fields to be empty.
+  const stringRegex = /^[ \r\n\t\S]+$/;
   const baseValidator = Yup.string().matches(
-    markdownRegex,
+    stringRegex,
     "Invalid markdown format"
   );
   if (required) {
