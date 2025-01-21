@@ -455,7 +455,7 @@ describe("TestCase component", () => {
     expect(deleteTestCase).toHaveBeenCalled();
   });
 
-  it("should display View button if the measure is not a draft and the TestCaseListActionCenter feature flag is true", async () => {
+  it("should display View button if the measure without population criteria is not a draft and the TestCaseListActionCenter feature flag is true", async () => {
     (useFeatureFlags as jest.Mock).mockImplementation(() => ({
       TestCaseListActionCenter: true,
     }));
@@ -488,11 +488,11 @@ describe("TestCase component", () => {
 
       expect(mockPush).toHaveBeenCalled();
       expect(mockPush).toHaveBeenCalledTimes(1);
-      expect(mockPush).toHaveBeenCalledWith("../../ID");
+      expect(mockPush).toHaveBeenCalledWith("../ID");
     });
   });
 
-  it("should display View button if the user does not have edit access to the measure and the TestCaseListActionCenter feature flag is true", async () => {
+  it("should display View button if the user does not have edit access to the measure without population criteria and the TestCaseListActionCenter feature flag is true and navigate to test case onClick", async () => {
     checkUserCanEdit.mockImplementation(() => false);
 
     (useFeatureFlags as jest.Mock).mockImplementation(() => ({
@@ -527,11 +527,11 @@ describe("TestCase component", () => {
 
       expect(mockPush).toHaveBeenCalled();
       expect(mockPush).toHaveBeenCalledTimes(1);
-      expect(mockPush).toHaveBeenCalledWith("../../ID");
+      expect(mockPush).toHaveBeenCalledWith("../ID");
     });
   });
 
-  it("should display Edit button if the user has edit access to the measure and it's a draft and the TestCaseListActionCenter feature flag is true", async () => {
+  it("should display Edit button if the user has edit access to the measure without population criteria and it's a draft and the TestCaseListActionCenter feature flag is true and navigate to test case onClick", async () => {
     checkUserCanEdit.mockImplementation(() => true);
 
     (useFeatureFlags as jest.Mock).mockImplementation(() => ({
@@ -560,6 +560,45 @@ describe("TestCase component", () => {
 
       expect(actionButton).toBeInTheDocument();
       expect(actionButton).toHaveTextContent("Edit");
+      expect(mockPush).toHaveBeenCalledTimes(0);
+
+      userEvent.click(actionButton);
+
+      expect(mockPush).toHaveBeenCalled();
+      expect(mockPush).toHaveBeenCalledTimes(1);
+      expect(mockPush).toHaveBeenCalledWith("../ID");
+    });
+  });
+
+  it("should display View button if the user does not have edit access to the measure with population criteria and the TestCaseListActionCenter feature flag is true and navigate to test case onClick", async () => {
+    checkUserCanEdit.mockImplementation(() => true);
+
+    (useFeatureFlags as jest.Mock).mockImplementation(() => ({
+      TestCaseListActionCenter: true,
+    }));
+
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn(); // Mock setSelectedTestCases
+
+    renderWithTestCase(
+      testCases,
+      true,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      measures[0],
+      setSelectedTestCasesMock
+    );
+
+    await waitFor(() => {
+      const actionButton = screen.getByTestId(
+        `view-edit-test-case-button-${testCases[0].id}`
+      );
+
+      expect(actionButton).toBeInTheDocument();
+      expect(actionButton).toHaveTextContent("View");
       expect(mockPush).toHaveBeenCalledTimes(0);
 
       userEvent.click(actionButton);
