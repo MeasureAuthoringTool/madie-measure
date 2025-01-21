@@ -79,11 +79,13 @@ export default function MeasureLanding() {
           });
       } else {
         measureServiceApi
-          .searchMeasuresByMeasureNameOrEcqmTitle(
+          .searchMeasuresByCriteria(
             tab === 0,
             limit,
             page,
-            searchCriteria,
+            {
+              searchField: searchCriteria,
+            },
             abortController.current.signal
           )
           .then((data) => {
