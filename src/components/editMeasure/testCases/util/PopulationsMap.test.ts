@@ -60,16 +60,39 @@ let measureGroup2 = [
     populationBasis: "Encounter",
   },
 ];
-it("shall return array of populationexpectvalues with no observations if denomr expected are zero", () => {
-  const populationVal: DisplayPopulationValue = {
+it("shall return array of populationexpectvalues with no observations if numer expected are zero", () => {
+  const ippPopulationVal: DisplayPopulationValue = {
     id: "1",
-    name: PopulationType.DENOMINATOR,
+    name: PopulationType.INITIAL_POPULATION,
     expected: 0,
     actual: undefined,
   };
 
+  const denomPopulationVal: DisplayPopulationValue = {
+    id: "2",
+    name: PopulationType.DENOMINATOR,
+    expected: 0,
+    actual: undefined,
+  };
+  const numerPopulationVal: DisplayPopulationValue = {
+    id: "3",
+    name: PopulationType.NUMERATOR,
+    expected: 0,
+    actual: undefined,
+  };
+  const numerObservValue: DisplayPopulationValue = {
+    id: "o-3",
+    name: PopulationType.MEASURE_OBSERVATION,
+    expected: 0,
+    actual: undefined,
+    criteriaReference: "3",
+  };
+
   const populationValues: DisplayPopulationValue[] = [];
-  populationValues.push(populationVal);
+  populationValues.push(ippPopulationVal);
+  populationValues.push(denomPopulationVal);
+  populationValues.push(numerPopulationVal);
+  populationValues.push(numerObservValue);
 
   const groupPop1: GroupPopulation = {
     groupId: "shrug",
@@ -86,16 +109,22 @@ it("shall return array of populationexpectvalues with no observations if denomr 
     groupPop1.groupId,
     {
       id: "1",
-      name: PopulationType.DENOMINATOR,
+      name: PopulationType.NUMERATOR,
       expected: 0,
       actual: undefined,
     },
     measureGroup
   );
-  expect(resultPops.length).toEqual(groupPopulations.length);
+  expect(resultPops[0].populationValues.length).toEqual(3);
 
   expect(resultPops[0].populationValues[0].name).toEqual(
+    PopulationType.INITIAL_POPULATION
+  );
+  expect(resultPops[0].populationValues[1].name).toEqual(
     PopulationType.DENOMINATOR
+  );
+  expect(resultPops[0].populationValues[2].name).toEqual(
+    PopulationType.NUMERATOR
   );
 });
 
