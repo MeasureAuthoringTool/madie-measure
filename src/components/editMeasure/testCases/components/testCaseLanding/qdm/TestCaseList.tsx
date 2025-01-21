@@ -62,6 +62,7 @@ import {
 import useQdmCqlParsingService from "../../../api/cqlElmTranslationService/useQdmCqlParsingService";
 import ActionCenter from "../common/ActionCenter/ActionCenter";
 import CopyTestCaseDialog from "../common/copyTestCases/CopyTestCaseDialog";
+import { useFeatureFlags } from "@madie/madie-util";
 
 export const IMPORT_ERROR =
   "An error occurred while importing your test cases. Please try again, or reach out to the Help Desk.";
@@ -166,8 +167,6 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [exportExecuting, setExportExecuting] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
   const featureFlags = useFeatureFlags();
-  const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
-    useState<boolean>(false);
   const qdmCqlParsingService = useRef(useQdmCqlParsingService());
   const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
   const [openCopyTestCaseDialog, setOpenCopyTestCaseDialog] =

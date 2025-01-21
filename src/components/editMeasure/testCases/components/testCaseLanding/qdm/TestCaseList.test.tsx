@@ -3468,8 +3468,7 @@ describe("TestCaseList component", () => {
       expect(toastMessage).toHaveTextContent("Test cases successfully deleted");
       expect(screen.queryByTestId("delete-dialog-body")).toBeNull();
     }, 15000);
-    });
-
+  });
 
   it("Should display test case copy dialog when at least one test case is selected", async () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({

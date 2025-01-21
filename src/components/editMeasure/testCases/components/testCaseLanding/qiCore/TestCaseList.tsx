@@ -42,6 +42,7 @@ import FileSaver from "file-saver";
 import TestCaseImportDialog from "../common/import/TestCaseImportDialog";
 import ActionCenter from "../common/ActionCenter/ActionCenter";
 import CopyTestCaseDialog from "../common/copyTestCases/CopyTestCaseDialog";
+import { useFeatureFlags } from "@madie/madie-util";
 
 export const IMPORT_ERROR =
   "An error occurred while importing your test cases. Please try again, or reach out to the Help Desk.";
@@ -159,6 +160,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
     useState<boolean>(false);
   const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
+  const featureFlags = useFeatureFlags();
 
   useEffect(() => {
     if (testCases?.length != measure?.testCases?.length) {
