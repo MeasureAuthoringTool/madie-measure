@@ -50,9 +50,7 @@ jest.mock("../../../api/useMeasureServiceApi");
 const useMeasureServiceMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 const mockMeasureServiceApi = {
-  searchMeasuresByMeasureNameOrEcqmTitle: jest
-    .fn()
-    .mockResolvedValue(oneItemResponse),
+  searchMeasuresByCriteria: jest.fn().mockResolvedValue(oneItemResponse),
   fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
   createVersion: jest.fn().mockResolvedValue({}),
   deleteMeasure: jest.fn().mockResolvedValue({}),
@@ -200,7 +198,6 @@ const measures = [
     },
   },
 ] as unknown as Measure[];
-const selectedIds = {};
 const badCqlLibraryName = {
   ...measures[0],
   cqlLibraryName: "Q1!@#_",
@@ -219,7 +216,6 @@ const serviceConfig = {
 } as unknown as ServiceConfig;
 const abortController = new AbortController();
 
-const changeSelectedIds = jest.fn();
 const setMeasureListMock = jest.fn();
 const setTotalPagesMock = jest.fn();
 const setTotalItemsMock = jest.fn();
@@ -228,7 +224,6 @@ const setOffsetMock = jest.fn();
 const setInitialLoadMock = jest.fn();
 const setSearchCriteriaMock = jest.fn();
 const setErrMsgMock = jest.fn();
-const setSelectedIds = jest.fn();
 
 describe("Measure List component", () => {
   beforeEach(() => {
@@ -251,9 +246,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -280,9 +272,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -312,9 +301,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -344,9 +330,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -376,9 +359,13 @@ describe("Measure List component", () => {
       expect(getByText(m.measureName)).toBeInTheDocument();
     });
 
-    expect(
-      mockMeasureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle
-    ).toHaveBeenCalledWith(true, 10, 0, "test", abortController.signal);
+    expect(mockMeasureServiceApi.searchMeasuresByCriteria).toHaveBeenCalledWith(
+      true,
+      10,
+      0,
+      { searchField: "test" },
+      abortController.signal
+    );
     unmount();
   });
 
@@ -387,9 +374,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -440,9 +424,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -467,7 +448,7 @@ describe("Measure List component", () => {
     fireEvent.submit(searchFieldInput);
 
     expect(
-      mockMeasureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle
+      mockMeasureServiceApi.searchMeasuresByCriteria
     ).not.toHaveBeenCalledWith(true, 10, 0, "");
     unmount();
   });
@@ -476,16 +457,13 @@ describe("Measure List component", () => {
     (mockMeasureServiceApi.fetchMeasures as jest.Mock)
       .mockClear()
       .mockRejectedValueOnce(new Error("Unable to fetch measures"));
-    (mockMeasureServiceApi.searchMeasuresByMeasureNameOrEcqmTitle as jest.Mock)
+    (mockMeasureServiceApi.searchMeasuresByCriteria as jest.Mock)
       .mockClear()
       .mockRejectedValueOnce(new Error("Unable to fetch measures"));
     const { getByTestId, getByRole, getByText, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -536,9 +514,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -566,7 +541,7 @@ describe("Measure List component", () => {
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
     fireEvent.click(createVersionButton);
-    expect(await getByTestId("create-version-dialog")).toBeInTheDocument();
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
     unmount();
   });
 
@@ -596,9 +571,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -620,7 +592,7 @@ describe("Measure List component", () => {
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
     fireEvent.click(createVersionButton);
-    expect(await getByTestId("create-version-dialog")).toBeInTheDocument();
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
 
     const typeInput = screen.getByTestId(
       "version-type-input"
@@ -675,9 +647,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -699,7 +668,7 @@ describe("Measure List component", () => {
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
     fireEvent.click(createVersionButton);
-    expect(await getByTestId("create-version-dialog")).toBeInTheDocument();
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
 
     const typeInput = screen.getByTestId(
       "version-type-input"
@@ -752,9 +721,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -776,7 +742,7 @@ describe("Measure List component", () => {
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
     fireEvent.click(createVersionButton);
-    expect(await getByTestId("create-version-dialog")).toBeInTheDocument();
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
 
     const typeInput = screen.getByTestId(
       "version-type-input"
@@ -830,9 +796,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -854,7 +817,7 @@ describe("Measure List component", () => {
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
     fireEvent.click(createVersionButton);
-    expect(await getByTestId("create-version-dialog")).toBeInTheDocument();
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
 
     const typeInput = screen.getByTestId(
       "version-type-input"
@@ -902,9 +865,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -926,7 +886,7 @@ describe("Measure List component", () => {
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
     fireEvent.click(createVersionButton);
-    expect(await getByTestId("create-version-dialog")).toBeInTheDocument();
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
 
     const typeInput = screen.getByTestId(
       "version-type-input"
@@ -990,9 +950,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -1014,7 +971,7 @@ describe("Measure List component", () => {
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
     fireEvent.click(createVersionButton);
-    expect(await getByTestId("create-version-dialog")).toBeInTheDocument();
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
 
     const typeInput = screen.getByTestId(
       "version-type-input"
@@ -1060,9 +1017,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -1095,9 +1049,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -1151,9 +1102,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -1213,9 +1161,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -1283,9 +1228,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -1356,9 +1298,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -1410,9 +1349,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -1459,13 +1395,10 @@ describe("Measure List component", () => {
       } as unknown as MeasureServiceApi;
     });
 
-    const { getByTestId, unmount, queryByTestId } = render(
+    const { unmount, queryByTestId } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -1515,9 +1448,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -1570,9 +1500,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -1622,9 +1549,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -1674,9 +1598,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -1726,9 +1647,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -1778,9 +1696,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -1848,9 +1763,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -1886,9 +1798,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -1940,13 +1849,10 @@ describe("Measure List component", () => {
       } as unknown as MeasureServiceApi;
     });
 
-    const { getByTestId, getByText, unmount } = render(
+    const { getByTestId } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -1976,7 +1882,6 @@ describe("Measure List component", () => {
       userEvent.click(continueButton);
       expect(continueButton).not.toBeInTheDocument();
     });
-    unmount();
   });
 
   it("Should be able to version QDM Measure when enableQdmRepeatTransfer is false", async () => {
@@ -1987,9 +1892,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -2012,7 +1914,7 @@ describe("Measure List component", () => {
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
     fireEvent.click(createVersionButton);
-    expect(await getByTestId("create-version-dialog")).toBeInTheDocument();
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
     unmount();
   });
 
@@ -2021,9 +1923,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -2057,9 +1956,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -2085,9 +1981,6 @@ describe("Measure List component", () => {
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
-          selectedIds={selectedIds}
-          changeSelectedIds={changeSelectedIds}
-          setSelectedIds={setSelectedIds}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -2127,9 +2020,6 @@ describe("Measure List component", () => {
         <ServiceContext.Provider value={serviceConfig}>
           <MeasureList
             measureList={measures}
-            selectedIds={selectedIds}
-            changeSelectedIds={changeSelectedIds}
-            setSelectedIds={setSelectedIds}
             setMeasureList={setMeasureListMock}
             setTotalPages={setTotalPagesMock}
             setTotalItems={setTotalItemsMock}
@@ -2160,9 +2050,6 @@ describe("Measure List component", () => {
         <ServiceContext.Provider value={serviceConfig}>
           <MeasureList
             measureList={measures}
-            selectedIds={selectedIds}
-            changeSelectedIds={changeSelectedIds}
-            setSelectedIds={setSelectedIds}
             setMeasureList={setMeasureListMock}
             setTotalPages={setTotalPagesMock}
             setTotalItems={setTotalItemsMock}
@@ -2191,9 +2078,6 @@ describe("Measure List component", () => {
         <ServiceContext.Provider value={serviceConfig}>
           <MeasureList
             measureList={measures}
-            selectedIds={selectedIds}
-            changeSelectedIds={changeSelectedIds}
-            setSelectedIds={setSelectedIds}
             setMeasureList={setMeasureListMock}
             setTotalPages={setTotalPagesMock}
             setTotalItems={setTotalItemsMock}
