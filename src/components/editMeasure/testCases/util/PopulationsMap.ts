@@ -51,7 +51,6 @@ export function triggerPopChanges(
 
   let stratMap = buildStratificationMap(targetGroup, changedTarget);
   let popMap = buildPopulationMap(targetGroup);
-
   const targetPopulationValues = targetGroup.populationValues;
 
   targetGroup.populationValues = addRemoveObservationsForPopulationCriteria(
@@ -60,6 +59,30 @@ export function triggerPopChanges(
     changedGroupId,
     measureGroups
   );
+  // We want to auto update expected values for populations like initialpopulation when denom or numerator become cbecked.
+  if (targetGroup.scoring === MeasureScoring.RATIO) {
+    //update target group.populationValues off of associations. Associations live MeasureGroup level not in populationValues. We need to check up
+    const { expected } = changedTarget;
+    const { populationValues } = targetGroup;
+    const targedMeasureGroup = measureGroups.find(
+      (groupPop) => groupPop.id === changedGroupId
+    );
+    const matchingAssociations = targedMeasureGroup?.populations?.filter(
+      (item) => {
+        return item?.associationType?.toLowerCase() === changedPopulationName;
+      }
+    );
+    const matchingIds = matchingAssociations?.map(
+      (association) => association.id
+    );
+    populationValues.forEach((popValue) => {
+      // if popValue.id is included in the matchingId's array, then update PpValue.expected to the new expected.
+      if (popValue?.id && matchingIds?.includes(popValue?.id)) {
+        popValue.expected = expected;
+      }
+    });
+  }
+
   if (targetGroup.scoring === "Proportion") {
     //denominator
     if (changedPopulationName === "denominator") {
