@@ -60,6 +60,7 @@ import {
   FieldSeparator,
   MenuItemContainer,
 } from "../../../../../styles/editMeasure/populationCriteria/groups/index";
+import CompletionIndicator from "../CompletionIndicator";
 
 interface ColSpanPopulationsType {
   isExclusionPop?: boolean;
@@ -796,16 +797,13 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                         type="B"
                         aria-label="Populations tab panel"
                         tabIndex={0}
-                        label={`Populations 
-                ${
-                  !!formik.errors.populations && activeTab !== "populations"
-                    ? "🚫"
-                    : ""
-                }`}
-                        data-testid="populations-tab"
-                        onClick={() => {
-                          setActiveTab("populations");
-                        }}
+                        label={
+                          <CompletionIndicator
+                            label="Populations"
+                            hasErrors={Boolean(formik.errors.populations)}
+                            displayIcon={true}
+                          />
+                        }
                         value="populations"
                       />
                       {formik.values.scoring !== "Ratio" && (
@@ -813,7 +811,20 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                           role="tabpanel"
                           aria-label="Stratifications tab panel"
                           tabIndex={0}
-                          label="Stratifications"
+                          label={
+                            <CompletionIndicator
+                              label="Stratifications"
+                              hasErrors={Boolean(formik.errors.stratifications)}
+                              displayIcon={
+                                formik.values.stratifications?.filter(
+                                  (value) =>
+                                    value.association !== null ||
+                                    value.cqlDefinition !== "" ||
+                                    value.description !== ""
+                                ).length > 0
+                              }
+                            />
+                          }
                           type="B"
                           data-testid="stratifications-tab"
                           onClick={() => {
