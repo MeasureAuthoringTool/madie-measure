@@ -482,7 +482,9 @@ describe("Measure Groups Page", () => {
         { timeout: 10000 }
       );
       // navigate to population and verify initial population is reverted to value from group object
-      userEvent.click(screen.getByTestId("populations-tab"));
+      const populationsTab = screen.getByText("Populations");
+      expect(populationsTab).toBeInTheDocument();
+      userEvent.click(populationsTab);
       expect(
         (
           (await screen.getByTestId(

@@ -17,7 +17,11 @@ import {
   DetailedPopulationGroupResult,
 } from "fqm-execution/build/types/Calculator";
 import { ObjectId } from "bson";
-import { checkUserCanEdit, measureStore } from "@madie/madie-util";
+import {
+  checkUserCanEdit,
+  measureStore,
+  useFeatureFlags,
+} from "@madie/madie-util";
 import useExecutionContext from "../../routes/qiCore/useExecutionContext";
 import CreateCodeCoverageNavTabs from "./CreateCodeCoverageNavTabs";
 import CodeCoverageHighlighting from "../common/CodeCoverageHighlighting";
@@ -159,6 +163,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
     useState<boolean>(false);
   const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
+  const featureFlags = useFeatureFlags();
 
   useEffect(() => {
     if (testCases?.length != measure?.testCases?.length) {
@@ -289,6 +294,22 @@ const TestCaseList = (props: TestCaseListProps) => {
         console.error(
           "deleteTestCaseByTestCaseId: err.message = " + err.message
         );
+        setErrors((prevState) => [...prevState, err.message]);
+      });
+  };
+
+  const deleteMultipleTestCases = () => {
+    const testCaseIds = selectedTestCases?.map((testCase) => testCase.id);
+    testCaseService.current
+      .deleteTestCases(measureId, testCaseIds)
+      .then(() => {
+        retrieveTestCases();
+        setToastOpen(true);
+        setToastType("success");
+        setToastMessage("Test cases successfully deleted");
+      })
+      .catch((err) => {
+        console.error("deleteTestCases: err.message = " + err.message);
         setErrors((prevState) => [...prevState, err.message]);
       });
   };
@@ -653,7 +674,11 @@ const TestCaseList = (props: TestCaseListProps) => {
                         // test cases doesn't know how to sort by category
                         testCases={currentSlice}
                         canEdit={canEdit}
-                        deleteTestCase={deleteTestCase}
+                        deleteTestCase={
+                          featureFlags.TestCaseListActionCenter
+                            ? deleteMultipleTestCases
+                            : deleteTestCase
+                        }
                         exportTestCase={exportTestCase}
                         measure={measure}
                         onTestCaseShiftDates={onTestCaseShiftDates}
