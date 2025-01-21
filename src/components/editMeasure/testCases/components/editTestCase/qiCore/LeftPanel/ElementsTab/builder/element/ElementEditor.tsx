@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Box } from "@mui/material";
 import * as _ from "lodash";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
@@ -7,6 +7,12 @@ import "./ElementEditor.scss";
 import { useFormik, FormikProvider } from "formik";
 import * as Yup from "yup";
 import { getValidation } from "./typesValidations/fhirR4Validations";
+import {
+  getTopLevelElements,
+  updateChildrenPaths,
+  getAllChildren,
+  stripResourcePath,
+} from "../../../../../../../api/fhirDefinitionServiceUtilities";
 
 interface ElementEditorProps {
   resource?: any;
@@ -46,12 +52,10 @@ const ElementEditor = ({
       if (type) {
         const def = await fhirDefinitionsService.current.getResourceTree(type);
         if (def) {
-          const elements =
-            fhirDefinitionsService.current.getTopLevelElements(def);
-          if (elements) {
-            for (const element of elements) {
-              element.id = resourcePath + "." + element.id;
-              element.path = resourcePath + "." + element.path;
+          const elements = getTopLevelElements(def);
+          const updatedElements = updateChildrenPaths(child, elements);
+          if (updatedElements) {
+            for (const element of updatedElements) {
               nodeList = await buildNode(
                 element,
                 resourcePath,
@@ -67,10 +71,7 @@ const ElementEditor = ({
     } else {
       // It's a single node. Add it to the node list
       const required = +child.min > 0;
-      const elemPath = fhirDefinitionsService.current.stripResourcePath(
-        resourcePath,
-        child.path
-      );
+      const elemPath = stripResourcePath(resourcePath, child.path);
 
       const value = _.get(resource, elemPath);
       const builtNode = {
@@ -163,10 +164,7 @@ const ElementEditor = ({
 
   const triggerFormBuilder = async () => {
     const currentPath = elementDefinition?.path;
-    const allChildren = fhirDefinitionsService?.current?.getAllChildren(
-      selectedResource,
-      currentPath
-    );
+    const allChildren = getAllChildren(selectedResource, currentPath);
     await buildForm(
       elementDefinition,
       allChildren,
@@ -191,10 +189,7 @@ const ElementEditor = ({
     return <span>No element selected</span>;
   }
   const currentPath = elementDefinition?.path;
-  const allChildren = fhirDefinitionsService?.current?.getAllChildren(
-    selectedResource,
-    currentPath
-  );
+  const allChildren = getAllChildren(selectedResource, currentPath);
   const currentDepth = elementDefinition?.path.split(".").length;
   // <TypeEditor will either render a node or all top level elements if it's not a root. We need to make that check here
   if (!loading) {

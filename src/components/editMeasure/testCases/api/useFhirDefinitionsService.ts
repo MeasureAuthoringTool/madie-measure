@@ -7,37 +7,6 @@ import { StructureDefinitionDto } from "./models/StructureDefinitionDto";
 
 export class FhirDefinitionsServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
-
-  isComponentDataType(datatype) {
-    switch (datatype) {
-      case "boolean":
-      case "date":
-      case "dateTime":
-      case "http://hl7.org/fhirpath/System.DateTime":
-      case "decimal":
-      case "id":
-      case "instant":
-      case "integer":
-      case "integer64":
-      case "positiveInt":
-      case "time":
-      case "unsignedInt":
-      case "uri":
-      case "url":
-      case "uuid":
-      case "canonical":
-      case "string":
-      case "markdown":
-      case "http://hl7.org/fhirpath/System.String":
-      case "code":
-      case "Extension":
-      case "Reference":
-        return true;
-      default:
-        return false;
-    }
-  }
-
   async getResources(): Promise<ResourceIdentifier[]> {
     try {
       const response = await axios.get<any>(
@@ -75,35 +44,6 @@ export class FhirDefinitionsServiceApi {
       );
     }
     return null;
-  }
-
-  getBasePath(resource: any): string {
-    // const elements = [...resource?.definition?.snapshot?.element];
-    // return elements?.[0].path;
-    return resource?.definition?.snapshot?.element?.[0]?.path;
-  }
-
-  getTopLevelElements(resource: any) {
-    const elements = [...resource?.definition?.snapshot?.element];
-    const basePath = this.getBasePath(resource);
-    return elements?.filter((e) => e.path.split(".")?.length === 2);
-  }
-
-  getRequiredElements(resource: any) {
-    const elements = [...resource?.definition?.snapshot?.element];
-    const basePath = this.getBasePath(resource);
-    return elements?.filter(
-      (e) => e.min > 0 && e.path.split(".")?.length === 2
-    );
-  }
-
-  stripResourcePath(resourcePath, elementPath) {
-    return elementPath.substring(`${resourcePath}.`.length);
-  }
-
-  getAllChildren(resource, path) {
-    const elements = [...resource?.definition?.snapshot?.element];
-    return elements?.filter((e) => e.path !== path && e.path.includes(path));
   }
 }
 

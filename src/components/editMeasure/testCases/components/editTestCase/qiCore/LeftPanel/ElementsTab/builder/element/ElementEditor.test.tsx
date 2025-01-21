@@ -5,6 +5,17 @@ import ElementEditor from "./ElementEditor";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 
 jest.mock("../../../../../../../api/useFhirDefinitionsService");
+
+jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
+  return {
+    getBasePath: jest.fn().mockReturnValue("ClaimResponse"),
+    getAllChildren: jest.fn().mockReturnValue([]),
+    isComponentDataType: jest.fn().mockReturnValue(false),
+    getTopLevelElements: jest.fn().mockReturnValue([]),
+    stripResourcePath: jest.fn().mockReturnValue("ClaimResponse.id"),
+    updateChildrenPaths: jest.fn().mockReturnValue([]),
+  };
+});
 jest.mock("formik", () => ({
   ...jest.requireActual("formik"),
   useFormik: jest.fn(),
@@ -52,9 +63,9 @@ describe("ElementEditor Component", () => {
   const mockFhirDefinitionsService = {
     getAllChildren: jest.fn().mockReturnValue([]),
     isComponentDataType: jest.fn().mockReturnValue(false),
-    getResourceTree: jest.fn().mockResolvedValue({}),
     getTopLevelElements: jest.fn().mockReturnValue([]),
     stripResourcePath: jest.fn().mockReturnValue("ClaimResponse.id"),
+    getResourceTree: jest.fn().mockResolvedValue({}),
   };
 
   beforeEach(() => {

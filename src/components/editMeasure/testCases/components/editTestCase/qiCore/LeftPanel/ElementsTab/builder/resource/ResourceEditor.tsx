@@ -10,6 +10,12 @@ import {
   ResourceActionType,
   useQiCoreResource,
 } from "../../../../../../../util/QiCorePatientProvider";
+import { ElementDefinition } from "fhir/r4";
+import {
+  getTopLevelElements,
+  getBasePath,
+  stripResourcePath,
+} from "../../../../../../../api/fhirDefinitionServiceUtilities";
 
 interface ResourceEditorProps {
   selectedResource: any;
@@ -19,6 +25,19 @@ interface ResourceEditorProps {
   canEdit: boolean;
 }
 
+/**
+ * Prepares the element name to be displayed for tab labels
+ * for sliced elements- it will be sliceName. e.g. Patient.extension:race results into race
+ * for regular element- it will be the path of an element. e.g. Patient.gender results gender
+ */
+const getElementName = (element: ElementDefinition, basePath: string) => {
+  const requiredIndicator = element.min > 0 ? " *" : "";
+  if (element.sliceName) {
+    return `${element.sliceName}${requiredIndicator}`;
+  }
+  return `${element.path.substring(basePath.length + 1)}${requiredIndicator}`;
+};
+
 const ResourceEditor = ({
   selectedResource,
   onSave,
@@ -27,7 +46,9 @@ const ResourceEditor = ({
 }: ResourceEditorProps) => {
   const [activeTab, setActiveTab] = useState(0);
   const [allElements, setAllElements] = useState([]);
-  const [displayedElements, setDisplayedElements] = useState([]);
+  const [displayedElements, setDisplayedElements] = useState<
+    ElementDefinition[]
+  >([]);
   const [editingResource, setEditingResource] = useState(
     selectedResource?.bundleEntry?.resource
   );
@@ -36,13 +57,12 @@ const ResourceEditor = ({
   useEffect(() => {
     if (selectedResource) {
       // TODO: look at the data that exists on the resource and combine fields from that
-      const topElements =
-        fhirDefinitionsService.current.getTopLevelElements(selectedResource);
+      const topElements = getTopLevelElements(selectedResource);
       setAllElements(topElements);
       const requiredElements = [...topElements.filter((e) => e.min > 0)];
       const elementsWithValues = [
         ...topElements.filter((e) => {
-          const elemPath = fhirDefinitionsService.current.stripResourcePath(
+          const elemPath = stripResourcePath(
             selectedResource.definition.type,
             e.path
           );
@@ -62,8 +82,7 @@ const ResourceEditor = ({
     }
   }, [selectedResource]);
 
-  const resourceBasePath =
-    fhirDefinitionsService.current.getBasePath(selectedResource);
+  const resourceBasePath = getBasePath(selectedResource);
 
   return (
     <Box
@@ -95,13 +114,9 @@ const ResourceEditor = ({
       <Box sx={{ m: 2 }}>
         <ElementSelector
           basePath={resourceBasePath}
-          options={allElements.filter(
-            (e) =>
-              e.path.toUpperCase() !==
-              `${resourceBasePath}.extension`.toUpperCase()
-          )}
+          options={allElements}
           value={displayedElements}
-          onChange={(event, newValue: any | null) => {
+          onChange={(event, newValue: ElementDefinition[] | null) => {
             setDisplayedElements(newValue ?? []);
           }}
         />
@@ -135,9 +150,7 @@ const ResourceEditor = ({
             return (
               <Tab
                 sx={{ textAlign: "left" }}
-                label={`${element.path.substring(resourceBasePath.length + 1)}${
-                  element.min > 0 ? " *" : ""
-                }`}
+                label={getElementName(element, resourceBasePath)}
               />
             );
           })}

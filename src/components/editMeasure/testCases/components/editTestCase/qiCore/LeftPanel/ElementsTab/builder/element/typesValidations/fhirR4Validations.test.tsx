@@ -28,6 +28,9 @@ describe("Validation Functions", () => {
       "validmarkdown"
     );
     expect(requiredMarkdown.validate("")).rejects.toThrow(
+      "Invalid markdown format"
+    );
+    expect(requiredMarkdown.validate(undefined)).rejects.toThrow(
       "This field is required"
     );
 

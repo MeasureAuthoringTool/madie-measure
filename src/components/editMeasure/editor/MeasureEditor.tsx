@@ -50,6 +50,7 @@ import {
   checkUserCanEdit,
 } from "@madie/madie-util";
 import StatusHandler from "./StatusHandler";
+import "./StatusHandler.scss";
 import { SuccessText } from "../../../styles/editMeasure/editor";
 import "./MeasureEditor.scss";
 import applyCode from "./codeApplier";

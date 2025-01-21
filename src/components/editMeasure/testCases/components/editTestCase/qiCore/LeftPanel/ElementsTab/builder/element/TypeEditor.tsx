@@ -14,13 +14,22 @@ import CodesComponent from "./types/CodesComponent";
 import { Instant } from "@madie/madie-design-system/dist/react";
 import TimeComponent from "./types/TimeComponent";
 import { useFormikContext } from "formik";
+import ExtensionComponent from "./types/ExtensionComponent";
+import ProfiledExtensionComponent from "./types/ProfiledExtensionComponent";
+import {
+  getTopLevelElements,
+  updateChildrenPaths,
+  isComponentDataType,
+} from "../../../../../../../api/fhirDefinitionServiceUtilities";
 
 const TypeEditor = ({
   type,
+  resource,
   required,
   value,
   onChange,
   structureDefinition,
+  parentStructureDefinition,
   canEdit,
   label,
 }) => {
@@ -28,11 +37,14 @@ const TypeEditor = ({
   const [childTypeDefs, setChildTypeDefs] = useState([]);
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   useEffect(() => {
-    if (!fhirDefinitionsService.current.isComponentDataType(type)) {
+    if (!isComponentDataType(type)) {
       fhirDefinitionsService.current.getResourceTree(type).then((def) => {
-        const elements =
-          fhirDefinitionsService.current.getTopLevelElements(def);
-        setChildTypeDefs(elements);
+        const elements = getTopLevelElements(def);
+        const updatedElements = updateChildrenPaths(
+          structureDefinition,
+          elements
+        );
+        setChildTypeDefs(updatedElements);
       });
     }
   }, [type]);
@@ -50,11 +62,11 @@ const TypeEditor = ({
       return errors;
     }
   };
-
-  if (fhirDefinitionsService.current.isComponentDataType(type)) {
+  if (isComponentDataType(type)) {
     switch (type) {
       case "string":
       case "http://hl7.org/fhirpath/System.String":
+      case "markdown":
         return (
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
             <StringComponent
@@ -64,6 +76,7 @@ const TypeEditor = ({
               error={getNestedProperty(formik.errors, label)}
               structureDefinition={null}
               fieldRequired={required}
+              value={value}
               {...formik.getFieldProps(label)}
             />
           </Box>
@@ -204,6 +217,23 @@ const TypeEditor = ({
             structureDefinition={structureDefinition}
           />
         );
+      case "Extension":
+        return _.isEmpty(structureDefinition?.type?.[0]?.profile) ? (
+          <ExtensionComponent
+            canEdit={canEdit}
+            onChange={onChange}
+            fhirResource={resource}
+            elementDefinition={structureDefinition}
+            parentStructureDefinition={parentStructureDefinition}
+          />
+        ) : (
+          <ProfiledExtensionComponent
+            canEdit={canEdit}
+            structureDefinition={structureDefinition}
+            fieldRequired={false}
+            resource={resource}
+          />
+        );
       default:
         return <div>Unsupported Type [{type}]</div>;
     }
@@ -216,12 +246,14 @@ const TypeEditor = ({
           return (
             <TypeEditor
               type={childType?.code}
+              resource={resource}
               onChange={(e) => {}}
               value={null}
               structureDefinition={childTypeDef}
               required={childRequired}
               canEdit={canEdit}
               label={childTypeDef?.id}
+              parentStructureDefinition={structureDefinition}
             />
           );
         })}
