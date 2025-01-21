@@ -3429,6 +3429,47 @@ describe("TestCaseList component", () => {
     });
   });
 
+  describe("TestCaseList component with deleteMultipleTestCases", () => {
+    it("should delete the selected test cases if the flag is true", async () => {
+      useTestCaseServiceMock.mockImplementation(() => {
+        return {
+          ...useTestCaseServiceMockResolved,
+          deleteTestCases: jest
+            .fn()
+            .mockResolvedValueOnce("Test cases are deleted successfully"),
+        } as unknown as TestCaseServiceApi;
+      });
+
+      (useFeatureFlags as jest.Mock).mockReturnValue({
+        TestCaseListActionCenter: true,
+      });
+      renderTestCaseListComponent();
+      await waitFor(() => {
+        const table = screen.getByTestId("test-case-tbl");
+      });
+      // expect(table).toBeInTheDocument()
+      const checkboxes = screen.getAllByRole("checkbox");
+      userEvent.click(checkboxes[1]);
+      userEvent.click(checkboxes[2]);
+
+      const deleteButton = screen.getByTestId("delete-action-btn");
+      expect(deleteButton).toBeInTheDocument();
+      userEvent.click(deleteButton);
+      const deleteDialog = screen.getByTestId("delete-dialog");
+      expect(deleteDialog).toBeInTheDocument();
+      const confirmDelete = screen.getByTestId("delete-dialog-continue-button");
+      expect(confirmDelete).toBeInTheDocument();
+      expect(
+        screen.getByTestId("delete-dialog-cancel-button")
+      ).toBeInTheDocument();
+      userEvent.click(confirmDelete);
+
+      const toastMessage = await screen.findByTestId("test-case-list-success");
+      expect(toastMessage).toHaveTextContent("Test cases successfully deleted");
+      expect(screen.queryByTestId("delete-dialog-body")).toBeNull();
+    }, 15000);
+  });
+
   it("Should display test case copy dialog when at least one test case is selected", async () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       applyDefaults: false,

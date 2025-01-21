@@ -420,17 +420,21 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           open={deleteDialogModalOpen}
           onContinue={() => {
             if (featureFlags?.TestCaseListActionCenter) {
-              deleteTestCase(selectedTestCases[0].id);
-              setDeleteDialogModalOpen(false);
+              deleteTestCase();
             } else {
               deleteTestCase(selectedTestCase.id);
             }
+            setDeleteDialogModalOpen(false);
           }}
           onClose={() => {
             setDeleteDialogModalOpen(false);
           }}
           dialogTitle={`Delete Test Case`}
-          name={selectedTestCase?.title}
+          name={
+            featureFlags.TestCaseListActionCenter
+              ? selectedTestCases?.map((testCase) => testCase.title).join(" ")
+              : selectedTestCase?.title
+          }
         />
         <ShiftDatesDialog
           open={shiftDatesDialogOpen}

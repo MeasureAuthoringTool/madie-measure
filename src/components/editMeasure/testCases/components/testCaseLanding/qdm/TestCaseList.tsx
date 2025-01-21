@@ -15,7 +15,7 @@ import {
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import queryString from "query-string";
 import calculationService from "../../../api/CalculationService";
-import { checkUserCanEdit } from "@madie/madie-util";
+import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
 import CreateCodeCoverageNavTabs from "./CreateCodeCoverageNavTabs";
 import CreateNewTestCaseDialog from "../../createTestCase/CreateNewTestCaseDialog";
 import {
@@ -165,8 +165,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [selectedTestCases, setSelectedTestCases] = useState<any>();
   const [exportExecuting, setExportExecuting] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
-  const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
-    useState<boolean>(false);
+  const featureFlags = useFeatureFlags();
   const qdmCqlParsingService = useRef(useQdmCqlParsingService());
   const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
   const [openCopyTestCaseDialog, setOpenCopyTestCaseDialog] =
@@ -179,6 +178,8 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [groupCoverageResult, setGroupCoverageResult] = useState([]);
   useState<GroupCoverageResult>();
   const [createOpen, setCreateOpen] = useState<boolean>(false);
+  const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
+    useState<boolean>(false);
   useEffect(() => {
     setExecuteAllTestCases(false);
     if (
@@ -377,6 +378,28 @@ const TestCaseList = (props: TestCaseListProps) => {
         setToastType("danger");
         setToastMessage(
           `Unable to Delete test Case with ID ${testCaseId}. Please try again. If the issue continues, please contact helpdesk.`
+        );
+      });
+  };
+
+  const deleteMultipleTestCases = () => {
+    const testCaseIds = selectedTestCases?.map((testCase) => testCase.id);
+    testCaseService.current
+      .deleteTestCases(measureId, testCaseIds)
+      .then(() => {
+        retrieveTestCases();
+        setToastOpen(true);
+        setToastType("success");
+        setToastMessage("Test cases successfully deleted");
+      })
+      .catch((err) => {
+        console.error("deleteTestCases: err.message = " + err.message);
+        setToastOpen(true);
+        setToastType("danger");
+        setToastMessage(
+          `Unable to Delete test Case(s) with ID(s) ${testCaseIds.join(
+            ", "
+          )}. Please try again. If the issue continues, please contact helpdesk.`
         );
       });
   };
@@ -796,9 +819,9 @@ const TestCaseList = (props: TestCaseListProps) => {
                         selectedTestCases={selectedTestCases}
                         canEdit={canEdit}
                         isQDM={true}
-                        setDeleteDialogModalOpen={setDeleteDialogModalOpen}
                         onCloneTestCase={handleCloneTestCase}
                         onExportExcel={exportExcel}
+                        setDeleteDialogModalOpen={setDeleteDialogModalOpen}
                         onExportQRDA={exportQRDA}
                         measureId={measureId}
                         exportOptionsOpen={exportOptionsOpen}
@@ -813,7 +836,11 @@ const TestCaseList = (props: TestCaseListProps) => {
                         setSorting={setSorting}
                         testCases={currentSlice}
                         canEdit={canEdit}
-                        deleteTestCase={deleteTestCase}
+                        deleteTestCase={
+                          featureFlags.TestCaseListActionCenter
+                            ? deleteMultipleTestCases
+                            : deleteTestCase
+                        }
                         exportTestCase={null}
                         onCloneTestCase={handleCloneTestCase}
                         measure={measure}
