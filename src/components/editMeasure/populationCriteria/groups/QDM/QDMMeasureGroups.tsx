@@ -801,7 +801,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                           <CompletionIndicator
                             label="Populations"
                             hasErrors={Boolean(formik.errors.populations)}
-                            displayIcon={true}
+                            displayIcon={Boolean(formik.values.scoring)}
                           />
                         }
                         value="populations"
