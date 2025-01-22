@@ -145,7 +145,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       (measure?.model === Model.QDM_5_6 ? null : false),
     endorsements: measure?.measureMetaData?.endorsements || [],
     endorsementId: measure?.measureMetaData?.endorsements?.[0]?.endorsementId,
-    intendedVenue: measure?.intendedVenue || null,
+    intendedVenue: measure?.measureMetaData?.intendedVenue || null,
   } as measureInformationForm;
 
   const schema =
@@ -292,10 +292,10 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   ];
 
   const handleIntendedVenueChange = (selectedIntendedVenue: string) => {
-    if (selectedIntendedVenue.includes("(EC)")) {
+    if (selectedIntendedVenue?.includes("(EC)")) {
       return intendedVenueValues[0];
     }
-    if (selectedIntendedVenue.includes("EH")) {
+    if (selectedIntendedVenue?.includes("EH")) {
       return intendedVenueValues[1];
     }
     return null;
