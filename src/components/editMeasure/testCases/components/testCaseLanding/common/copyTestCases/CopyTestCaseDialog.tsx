@@ -7,13 +7,18 @@ import React, {
 } from "react";
 import tw from "twin.macro";
 import "styled-components/macro";
-import { Chip } from "@mui/material";
+import { IconButton, MenuItem, Tooltip, Chip } from "@mui/material";
 import {
   MadieDialog,
   MadieSpinner,
   TruncateText,
   Pagination,
+  Select,
+  TextField,
 } from "@madie/madie-design-system/dist/react";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import SearchIcon from "@mui/icons-material/Search";
+import ClearIcon from "@mui/icons-material/Clear";
 import * as _ from "lodash";
 import "../../../../../../measureLanding/MeasureLanding.scss";
 import {
@@ -30,8 +35,10 @@ import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import useMeasureServiceApi from "../../../../../../../api/useMeasureServiceApi";
-
+import "./tcPagination.scss";
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
+
+export const filterByOptions = ["Measure", "Version", "CMS ID"];
 
 const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
   const measureSearchApi = useRef(useMeasureServiceApi());
@@ -46,8 +53,21 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
   const [totalPages, setTotalPages] = useState<number>(0);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [visibleItems, setVisibleItems] = useState<number>(0);
+  // utilities for filter & search
+  const [filterBy, setFilterBy] = useState<string>("");
+  const [searchValue, setSearchValue] = useState<string>("")
+
+  const handleSearch = (e) => {
+    setSearchValue(e.target.value)
+
+  }
+  const handleFilter = (e) => {
+    setFilterBy(e.target.value)
+
+  }
   // measures owned or shared for the current user excluding the current measure
   const [measureList, setMeasureList] = useState<Measure[]>([]);
+  console.log('measureList', measureList)
   const [offset, setOffset] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -210,6 +230,91 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
       maxWidth={"lg"}
     >
       <div id="measure-landing" data-testid="measure-landing">
+        <div id="tc-search">
+        {/* <div tw="flex w-1/2 pr-4"> */}
+          {/* <div tw="w-1/2 pr-2"> */}
+          <div>
+            <Select
+              label="Filter By"
+              id="filter-by-select"
+              data-testid="filter-by-select"
+              // tw="w-full"
+              inputProps={{ "data-testid": "filter-by-select-input" }}
+              placeHolder={{ name: "Filter By", value: "" }}
+              SelectDisplayProps={{
+                "aria-required": "true",
+              }}
+              size="small"
+              name="filterBy"
+              value={filterBy}
+              onChange={handleFilter}
+              options={filterByOptions
+                ?.map((option) => {
+                  return (
+                    <MenuItem
+                      key={option}
+                      value={option}
+                      data-testid={`filter-by-${option}`}
+                    >
+                      {option}
+                    </MenuItem>
+                  );
+                })
+                .concat(
+                  <MenuItem key="-" value="" data-testid={`filter-by--`}>
+                    -
+                  </MenuItem>
+                )}
+            />
+          </div>
+          {/* <div tw="w-1/2 pl-2"> */}
+          <div>
+            <TextField
+              id="search"
+              // tw="w-full"
+              label="Search"
+              placeholder="Search"
+              inputProps={{
+                "data-testid": "test-case-list-search-input",
+              }}
+              data-testid="test-case-list-search"
+              name="searchValue"
+              value={searchValue}
+              onChange={handleSearch}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  // handleNavigate();
+                }
+              }}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment
+                      position="start"
+                      data-testid="test-cases-trigger-search"
+                      // onClick={handleNavigate}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment
+                      data-testid="test-cases-clear-search"
+                      position="end"
+                      style={{ cursor: "pointer" }}
+                      // onClick={handleClearClick}
+                    >
+                      <IconButton>
+                        <ClearIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
+          </div>
+        </div>
         <div className="measure-table no-margin-top">
           <div className="table" style={{ overflow: "auto" }}>
             <table
@@ -217,8 +322,8 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
               data-testid="measure-list-tbl"
               className="ml-table"
               style={{
-                borderTop: "solid 1px #8c8c8c",
                 borderSpacing: "0 2em !important",
+                borderBottom: "1px solid rgb(140, 140, 140)"
               }}
             >
               <thead tw="bg-slate">

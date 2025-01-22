@@ -38,7 +38,7 @@ interface ActionCenterProps {
   executeAllTestCases?: boolean;
 }
 
-const filterByOptions = ["Case #", "Status", "Group", "Title", "Description"];
+export const filterByOptions = ["Case #", "Status", "Group", "Title", "Description"];
 
 export default function ActionCenter(props: ActionCenterProps) {
   const {
