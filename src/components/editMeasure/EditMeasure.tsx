@@ -25,6 +25,7 @@ import {
   Toast,
   MadieAlert,
   MadieDiscardDialog,
+  MadieSpinner,
 } from "@madie/madie-design-system/dist/react";
 import DeleteDialog from "./DeleteDialog";
 import NotFound from "../notfound/NotFound";
@@ -93,7 +94,6 @@ export default function EditMeasure() {
 
   useEffect(() => {
     if (currentMeasureId) {
-      debugger;
       loadMeasure();
     }
   }, [currentMeasureId]);
@@ -111,8 +111,6 @@ export default function EditMeasure() {
         }
       });
   };
-
-  const loadingDiv = <div data-testid="loading">Loading...</div>;
 
   // Delete utilities
   const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
@@ -415,129 +413,150 @@ export default function EditMeasure() {
   // At this time it appears only possible to have a single error at a time because of the way state is updated.
   const [errorMessage, setErrorMessage] = useState<string>("");
   const isQDM = measure?.model?.includes("QDM");
-  const contentDiv = (
+  return (
     <div data-testid="editMeasure">
-      <div tw="relative" style={{ marginTop: "-60px" }}>
-        <EditMeasureNav isQDM={isQDM} />
-        <div
-          style={{
-            marginLeft: "2rem",
-            marginRight: "2rem",
-            marginTop: 16,
-          }}
-        >
-          {errorMessage && (
-            <MadieAlert
-              type="error"
-              content={
-                <>
-                  <h5 tw="py-1">Error found</h5>
-                  <p data-testid="edit-measure-alert">{errorMessage}</p>
-                </>
-              }
-              canClose={false}
-            />
-          )}
+      {loading ? (
+        <div data-testid="loading">
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <MadieSpinner style={{ height: 50, width: 50 }} />
+          </div>
         </div>
-        <Routes>
-          {/* root nav links with wild card operators. We always want these displayed regardless of deeper navigation */}
-          <Route
-            path="/details/*"
-            element={
-              <MeasureDetails setErrorMessage={setErrorMessage} isQDM={isQDM} />
-            }
+      ) : (
+        <>
+          <div tw="relative" style={{ marginTop: "-60px" }}>
+            <EditMeasureNav isQDM={isQDM} />
+            <div
+              style={{
+                marginLeft: "2rem",
+                marginRight: "2rem",
+                marginTop: 16,
+              }}
+            >
+              {errorMessage && (
+                <MadieAlert
+                  type="error"
+                  content={
+                    <>
+                      <h5 tw="py-1">Error found</h5>
+                      <p data-testid="edit-measure-alert">{errorMessage}</p>
+                    </>
+                  }
+                  canClose={false}
+                />
+              )}
+            </div>
+            <Routes>
+              {/* root nav links with wild card operators. We always want these displayed regardless of deeper navigation */}
+              <Route
+                path="/details/*"
+                element={
+                  <MeasureDetails
+                    setErrorMessage={setErrorMessage}
+                    isQDM={isQDM}
+                  />
+                }
+              />
+              <Route path={`/cql-editor`} element={<MeasureEditor />} />
+              <Route
+                path={`/test-cases/*`}
+                element={
+                  <Suspense fallback={<div>loading</div>}>
+                    <TestCases />
+                  </Suspense>
+                }
+              />
+              <Route
+                path={`/groups/:groupNumber`}
+                element={<PopulationCriteriaWrapper />}
+              />
+              <Route
+                path={`/supplemental-data`}
+                element={<PopulationCriteriaWrapper />}
+              />
+              <Route
+                path={`/risk-adjustment`}
+                element={<PopulationCriteriaWrapper />}
+              />
+              <Route
+                path={`/base-configuration`}
+                element={<PopulationCriteriaWrapper />}
+              />
+              <Route
+                path={`/reporting`}
+                element={<PopulationCriteriaWrapper />}
+              />
+              <Route path={`/review-info`} element={<ReviewInfo />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
+          <DeleteDialog
+            open={deleteOpen}
+            onClose={() => setDeleteOpen(false)}
+            measureName={measure?.measureName}
+            deleteMeasure={deleteMeasure}
           />
-          <Route path={`/cql-editor`} element={<MeasureEditor />} />
-          <Route
-            path={`/test-cases/*`}
-            element={
-              <Suspense fallback={<div>loading</div>}>
-                <TestCases />
-              </Suspense>
-            }
-          />
-          <Route
-            path={`/groups/:groupNumber`}
-            element={<PopulationCriteriaWrapper />}
-          />
-          <Route
-            path={`/supplemental-data`}
-            element={<PopulationCriteriaWrapper />}
-          />
-          <Route
-            path={`/risk-adjustment`}
-            element={<PopulationCriteriaWrapper />}
-          />
-          <Route
-            path={`/base-configuration`}
-            element={<PopulationCriteriaWrapper />}
-          />
-          <Route path={`/reporting`} element={<PopulationCriteriaWrapper />} />
-          <Route path={`/review-info`} element={<ReviewInfo />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </div>
-      <DeleteDialog
-        open={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
-        measureName={measure?.measureName}
-        deleteMeasure={deleteMeasure}
-      />
 
-      <InvalidTestCaseDialog
-        open={invalidTestCaseOpen}
-        onContinue={createVersion}
-        onClose={handleDialogClose}
-        versionType={versionType}
-        loading={loading}
-      />
-      <DraftMeasureDialog
-        open={draftMeasureDialog.open}
-        onClose={handleDialogClose}
-        onSubmit={draftMeasure}
-        measure={measure}
-      />
-      <CreateVersionDialog
-        currentVersion={measure?.version}
-        open={createVersionDialog.open}
-        onClose={handleDialogClose}
-        onSubmit={checkValidCqlLibraryName}
-        versionHelperText={versionHelperText}
-        loading={loading}
-        measureId={measure?.id}
-      />
-      <ExportDialog
-        failureMessage={failureMessage}
-        measureName={measure?.measureName}
-        downloadState={downloadState}
-        open={Boolean(downloadState)}
-        handleContinueDialog={handleContinueDialog}
-        handleCancelDialog={handleCancelDialog}
-      />
-      <Toast
-        toastKey="measure-information-toast"
-        aria-live="polite"
-        toastType={toastType}
-        testId={
-          toastType === "danger"
-            ? "edit-measure-information-generic-error-text"
-            : "edit-measure-information-success-text"
-        }
-        closeButtonProps={{
-          "data-testid": "close-error-button",
-        }}
-        open={toastOpen}
-        message={toastMessage}
-        onClose={onToastClose}
-        autoHideDuration={6000}
-      />
-      <MadieDiscardDialog
-        open={dialogOpen}
-        onContinue={onContinue}
-        onClose={onClose}
-      />
+          <InvalidTestCaseDialog
+            open={invalidTestCaseOpen}
+            onContinue={createVersion}
+            onClose={handleDialogClose}
+            versionType={versionType}
+            loading={loading}
+          />
+          <DraftMeasureDialog
+            open={draftMeasureDialog.open}
+            onClose={handleDialogClose}
+            onSubmit={draftMeasure}
+            measure={measure}
+          />
+          <CreateVersionDialog
+            currentVersion={measure?.version}
+            open={createVersionDialog.open}
+            onClose={handleDialogClose}
+            onSubmit={checkValidCqlLibraryName}
+            versionHelperText={versionHelperText}
+            loading={loading}
+            measureId={measure?.id}
+          />
+          <ExportDialog
+            failureMessage={failureMessage}
+            measureName={measure?.measureName}
+            downloadState={downloadState}
+            open={Boolean(downloadState)}
+            handleContinueDialog={handleContinueDialog}
+            handleCancelDialog={handleCancelDialog}
+          />
+          <Toast
+            toastKey="measure-information-toast"
+            aria-live="polite"
+            toastType={toastType}
+            testId={
+              toastType === "danger"
+                ? "edit-measure-information-generic-error-text"
+                : "edit-measure-information-success-text"
+            }
+            closeButtonProps={{
+              "data-testid": "close-error-button",
+            }}
+            open={toastOpen}
+            message={toastMessage}
+            onClose={onToastClose}
+            autoHideDuration={6000}
+          />
+          <MadieDiscardDialog
+            open={dialogOpen}
+            onContinue={onContinue}
+            onClose={onClose}
+          />
+        </>
+      )}
     </div>
   );
-
-  return loading ? loadingDiv : contentDiv;
 }
