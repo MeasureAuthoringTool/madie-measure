@@ -406,9 +406,6 @@ describe("Measure List component", () => {
       name: /Clear-Search/i,
     });
     userEvent.click(clearButton);
-    setTimeout(() => {
-      expect(searchFieldInput.value).toBe("");
-    }, 25000);
 
     expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
       true,
