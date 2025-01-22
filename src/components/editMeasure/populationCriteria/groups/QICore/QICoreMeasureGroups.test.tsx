@@ -345,6 +345,19 @@ describe("Measure Groups Page", () => {
 
     mockedAxios.post.mockResolvedValue({ data: { group } });
 
+    userEvent.click(screen.getByTestId("reporting-tab"));
+
+    const improvementNotationSelect = screen.getByTestId(
+      "improvement-notation-select"
+    ) as HTMLInputElement;
+
+    userEvent.click(await getByRole(improvementNotationSelect, "combobox"));
+    await waitFor(() => {
+      userEvent.click(
+        screen.getByText("Increased score indicates improvement")
+      );
+    });
+
     // submit the form
     await expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
@@ -464,7 +477,7 @@ describe("Measure Groups Page", () => {
     });
   });
 
-  test.only("Navigating between the tabs in measure groups page", async () => {
+  test("Navigating between the tabs in measure groups page", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "Description Text";
     group.rateAggregation = "Rate Aggregation Text";
@@ -573,6 +586,19 @@ describe("Measure Groups Page", () => {
       },
     });
 
+    userEvent.click(screen.getByTestId("reporting-tab"));
+
+    const improvementNotationSelect = screen.getByTestId(
+      "improvement-notation-select"
+    ) as HTMLInputElement;
+
+    userEvent.click(await getByRole(improvementNotationSelect, "combobox"));
+    await waitFor(() => {
+      userEvent.click(
+        screen.getByText("Increased score indicates improvement")
+      );
+    });
+
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
 
@@ -655,6 +681,19 @@ describe("Measure Groups Page", () => {
       },
     });
 
+    userEvent.click(screen.getByTestId("reporting-tab"));
+
+    const improvementNotationSelect2 = screen.getByTestId(
+      "improvement-notation-select"
+    ) as HTMLInputElement;
+
+    userEvent.click(await getByRole(improvementNotationSelect2, "combobox"));
+    await waitFor(() => {
+      userEvent.click(
+        screen.getByText("Increased score indicates improvement")
+      );
+    });
+
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
 
@@ -723,8 +762,22 @@ describe("Measure Groups Page", () => {
       measureGroupTypes: ["Patient Reported Outcome"],
       populationBasis: populationBasis,
       scoringUnit: "testScoringUnit",
-      improvementNotation: "",
+      improvementNotation: "Increased score indicates improvement",
     };
+
+    userEvent.click(screen.getByTestId("reporting-tab"));
+
+    const improvementNotationSelect = screen.getByTestId(
+      "improvement-notation-select"
+    ) as HTMLInputElement;
+
+    userEvent.click(await getByRole(improvementNotationSelect, "combobox"));
+    await waitFor(() => {
+      userEvent.click(
+        screen.getByText("Increased score indicates improvement")
+      );
+    });
+
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
 
     // submit the form
@@ -781,6 +834,19 @@ describe("Measure Groups Page", () => {
     ) as HTMLInputElement;
     fireEvent.change(groupPopulationInput, {
       target: { value: definitionToUpdate },
+    });
+
+    userEvent.click(screen.getByTestId("reporting-tab"));
+
+    const improvementNotationSelect = screen.getByTestId(
+      "improvement-notation-select"
+    ) as HTMLInputElement;
+
+    userEvent.click(await getByRole(improvementNotationSelect, "combobox"));
+    await waitFor(() => {
+      userEvent.click(
+        screen.getByText("Increased score indicates improvement")
+      );
     });
 
     await waitFor(() => {
@@ -872,6 +938,20 @@ describe("Measure Groups Page", () => {
       target: { value: definitionToUpdate },
     });
     expect(groupPopulationInput.value).toBe(definitionToUpdate);
+
+    userEvent.click(screen.getByTestId("reporting-tab"));
+
+    const improvementNotationSelect = screen.getByTestId(
+      "improvement-notation-select"
+    ) as HTMLInputElement;
+
+    userEvent.click(await getByRole(improvementNotationSelect, "combobox"));
+    await waitFor(() => {
+      userEvent.click(
+        screen.getByText("Increased score indicates improvement")
+      );
+    });
+
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Save" })).toBeEnabled()
     );
@@ -896,7 +976,7 @@ describe("Measure Groups Page", () => {
       groupDescription: "testDescription",
       measureGroupTypes: ["Patient Reported Outcome"],
       rateAggregation: "",
-      improvementNotation: "",
+      improvementNotation: "Increased score indicates improvement",
       stratifications: [],
       populationBasis: populationBasis,
     };
@@ -1040,6 +1120,19 @@ describe("Measure Groups Page", () => {
       },
     });
 
+    userEvent.click(screen.getByTestId("reporting-tab"));
+
+    const improvementNotationSelect = screen.getByTestId(
+      "improvement-notation-select"
+    ) as HTMLInputElement;
+
+    userEvent.click(await getByRole(improvementNotationSelect, "combobox"));
+    await waitFor(() => {
+      userEvent.click(
+        screen.getByText("Increased score indicates improvement")
+      );
+    });
+
     // submit the form
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
     const alert = await screen.findByTestId("error-alerts");
@@ -1068,6 +1161,19 @@ describe("Measure Groups Page", () => {
       data: {
         error: "500error",
       },
+    });
+
+    userEvent.click(screen.getByTestId("reporting-tab"));
+
+    const improvementNotationSelect = screen.getByTestId(
+      "improvement-notation-select"
+    ) as HTMLInputElement;
+
+    userEvent.click(await getByRole(improvementNotationSelect, "combobox"));
+    await waitFor(() => {
+      userEvent.click(
+        screen.getByText("Increased score indicates improvement")
+      );
     });
 
     // submit the form
@@ -1105,6 +1211,19 @@ describe("Measure Groups Page", () => {
           },
         },
       },
+    });
+
+    userEvent.click(screen.getByTestId("reporting-tab"));
+
+    const improvementNotationSelect = screen.getByTestId(
+      "improvement-notation-select"
+    ) as HTMLInputElement;
+
+    userEvent.click(await getByRole(improvementNotationSelect, "combobox"));
+    await waitFor(() => {
+      userEvent.click(
+        screen.getByText("Increased score indicates improvement")
+      );
     });
 
     // submit the form
@@ -1151,6 +1270,19 @@ describe("Measure Groups Page", () => {
     userEvent.click(getByRole(measureGroupTypeSelect, "combobox"));
     await waitFor(() => {
       userEvent.click(screen.getByText("Patient Reported Outcome"));
+    });
+
+    userEvent.click(screen.getByTestId("reporting-tab"));
+
+    const improvementNotationSelect = screen.getByTestId(
+      "improvement-notation-select"
+    ) as HTMLInputElement;
+
+    userEvent.click(await getByRole(improvementNotationSelect, "combobox"));
+    await waitFor(() => {
+      userEvent.click(
+        screen.getByText("Increased score indicates improvement")
+      );
     });
 
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
@@ -1314,6 +1446,19 @@ describe("Measure Groups Page", () => {
       userEvent.click(screen.getByText("Patient Reported Outcome"));
     });
 
+    userEvent.click(screen.getByTestId("reporting-tab"));
+
+    const improvementNotationSelect = screen.getByTestId(
+      "improvement-notation-select"
+    ) as HTMLInputElement;
+
+    userEvent.click(await getByRole(improvementNotationSelect, "combobox"));
+    await waitFor(() => {
+      userEvent.click(
+        screen.getByText("Increased score indicates improvement")
+      );
+    });
+
     expect(screen.getByTestId("group-form-submit-btn")).not.toBeDisabled();
   });
 
@@ -1339,6 +1484,19 @@ describe("Measure Groups Page", () => {
     });
 
     mockedAxios.put.mockResolvedValue({ data: null });
+
+    userEvent.click(screen.getByTestId("reporting-tab"));
+
+    const improvementNotationSelect = screen.getByTestId(
+      "improvement-notation-select"
+    ) as HTMLInputElement;
+
+    userEvent.click(await getByRole(improvementNotationSelect, "combobox"));
+    await waitFor(() => {
+      userEvent.click(
+        screen.getByText("Increased score indicates improvement")
+      );
+    });
 
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
     await act(async () => {
@@ -1377,6 +1535,19 @@ describe("Measure Groups Page", () => {
     });
 
     mockedAxios.put.mockResolvedValue({ data: null });
+
+    userEvent.click(screen.getByTestId("reporting-tab"));
+
+    const improvementNotationSelect = screen.getByTestId(
+      "improvement-notation-select"
+    ) as HTMLInputElement;
+
+    userEvent.click(await getByRole(improvementNotationSelect, "combobox"));
+    await waitFor(() => {
+      userEvent.click(
+        screen.getByText("Increased score indicates improvement")
+      );
+    });
 
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
     await act(async () => {
@@ -1802,6 +1973,19 @@ describe("Measure Groups Page", () => {
       },
     });
 
+    userEvent.click(screen.getByTestId("reporting-tab"));
+
+    const improvementNotationSelect = screen.getByTestId(
+      "improvement-notation-select"
+    ) as HTMLInputElement;
+
+    userEvent.click(await getByRole(improvementNotationSelect, "combobox"));
+    await waitFor(() => {
+      userEvent.click(
+        screen.getByText("Increased score indicates improvement")
+      );
+    });
+
     expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
 
@@ -1886,6 +2070,19 @@ describe("Measure Groups Page", () => {
     );
     userEvent.click(getByRole(aggregateSelect, "combobox"));
     userEvent.click(screen.getByText(AggregateFunctionType.MAXIMUM));
+
+    userEvent.click(screen.getByTestId("reporting-tab"));
+
+    const improvementNotationSelect = screen.getByTestId(
+      "improvement-notation-select"
+    ) as HTMLInputElement;
+
+    userEvent.click(await getByRole(improvementNotationSelect, "combobox"));
+    await waitFor(() => {
+      userEvent.click(
+        screen.getByText("Increased score indicates improvement")
+      );
+    });
 
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Save" })).not.toBeDisabled()
