@@ -6,46 +6,48 @@ import { TypeComponentProps } from "./TypeComponentProps";
 const BooleanComponent = ({
   canEdit,
   fieldRequired,
-  value,
-  onChange,
   label,
+  helperText,
+  error,
+  ...props
 }: TypeComponentProps) => {
   const booleanOptions = [
     <MuiMenuItem
       key={`boolean-True-${label}`}
-      value={`True`}
+      value={`true`}
       data-testid={`boolean-True-${label}`}
-      defaultValue={`True`}
+      defaultValue={`true`}
     >
-      True
+      true
     </MuiMenuItem>,
     <MuiMenuItem
       key={`boolean-False-${label}`}
-      value={`False`}
+      value={`false`}
       data-testid={`boolean-False-${label}`}
     >
-      False
+      false
     </MuiMenuItem>,
   ];
-
   return (
-    <Select
-      id={`boolean-selector-${label}`}
-      inputProps={{
-        "data-testid": `boolean-input-field-${label}`,
-        "aria-describedby": `boolean-input-field-helper-text-${label}`,
-      }}
-      data-testid={`boolean-field-${label}`}
-      disabled={!canEdit}
-      SelectDisplayProps={{
-        "aria-required": "true",
-      }}
-      value={value === "True" ? "True" : "False"}
-      onChange={(event) => {
-        onChange(event.target.value === "True");
-      }}
-      options={booleanOptions}
-    ></Select>
+    <>
+      <Select
+        id={`boolean-selector-${label}`}
+        label={label}
+        inputProps={{
+          "data-testid": `boolean-input-field-${label}`,
+          "aria-describedby": `boolean-input-field-helper-text-${label}`,
+        }}
+        data-testid={`boolean-field-${label}`}
+        disabled={!canEdit}
+        SelectDisplayProps={{
+          "aria-required": "true",
+        }}
+        helperText={helperText}
+        error={error}
+        options={booleanOptions}
+        {...props}
+      ></Select>
+    </>
   );
 };
 

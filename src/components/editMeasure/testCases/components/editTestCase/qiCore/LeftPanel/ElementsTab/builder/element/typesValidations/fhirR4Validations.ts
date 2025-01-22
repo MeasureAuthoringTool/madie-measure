@@ -26,6 +26,18 @@ export const getIdValidator = (required) => {
   return baseValidator;
 };
 
+export const getBooleanValidator = (required) => {
+  const booleaReg = /^true$|^false$/;
+  const baseValidator = Yup.string().matches(
+    booleaReg,
+    "Invalid Boolean format"
+  );
+  if (required) {
+    return baseValidator.required("This field is required");
+  }
+  return baseValidator;
+};
+
 export const getStringValidator = (required) => {
   const stringRegex = /^[ \r\n\t\S]+$/;
   const baseValidator = Yup.string().matches(
@@ -45,6 +57,7 @@ export const getStringValidator = (required) => {
 */
 
 export const validationLookup = {
+  boolean: getBooleanValidator,
   "http://hl7.org/fhirpath/System.String": getStringValidator,
   string: getStringValidator,
   markdown: getMarkDownValidator,
