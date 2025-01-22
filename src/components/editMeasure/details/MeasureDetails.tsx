@@ -78,29 +78,25 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
           href: detailsLink,
           dataTestId: "leftPanelMeasureInformation",
           id: "sideNavMeasureInformation",
-          displayCompletedIcon:
+          displayCompletedIcon: !!(
             measure?.measureName &&
             measure?.cqlLibraryName &&
             measure?.ecqmTitle
-              ? true
-              : false,
+          ),
           displayIncompletedIcon: !(
             measure?.measureName &&
             measure?.cqlLibraryName &&
             measure?.ecqmTitle
-          )
-            ? true
-            : false,
+          ),
         },
         {
           title: "Model & Measurement Period",
           href: modelPeriodLink,
           dataTestId: "leftPanelModelAndMeasurementPeriod",
           id: "sideNavMeasureModelAndMeasurementPeriod",
-          displayCompletedIcon:
+          displayCompletedIcon: !!(
             measure?.measurementPeriodStart && measure?.measurementPeriodEnd
-              ? true
-              : false,
+          ),
           displayIncompletedIcon: !(
             measure?.measurementPeriodStart && measure?.measurementPeriodEnd
           )
@@ -112,17 +108,14 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
           href: stewardLink,
           dataTestId: "leftPanelMeasureSteward",
           id: "sideNavMeasureSteward",
-          displayCompletedIcon:
+          displayCompletedIcon: !!(
             measure?.measureMetaData.steward &&
             measure?.measureMetaData.developers
-              ? true
-              : false,
+          ),
           displayIncompletedIcon: !(
             measure?.measureMetaData.steward &&
             measure?.measureMetaData.developers
-          )
-            ? true
-            : false,
+          ),
         },
       ],
     },
@@ -135,36 +128,30 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
           href: descriptionLink,
           dataTestId: "leftPanelMeasureDescription",
           id: "sideNavMeasureDescription",
-          displayCompletedIcon: measure?.measureMetaData.description
-            ? true
-            : false,
+          displayCompletedIcon: !!measure?.measureMetaData.description,
+          displayIncompletedIcon: !measure?.measureMetaData.description,
         },
         {
           title: "Rationale",
           href: rationaleLink,
           dataTestId: "leftPanelMeasureRationale",
           id: "sideNavMeasureRationale",
-          displayCompletedIcon: measure?.measureMetaData.rationale
-            ? true
-            : false,
+          displayCompletedIcon: !!measure?.measureMetaData.rationale,
         },
         {
           title: "Guidance (Usage)",
           href: guidanceLink,
           dataTestId: "leftPanelMeasureGuidance",
           id: "sideNavMeasureGuidance",
-          displayCompletedIcon: measure?.measureMetaData.guidance
-            ? true
-            : false,
+          displayCompletedIcon: !!measure?.measureMetaData.guidance,
         },
         {
           title: "Clinical Recommendation",
           href: clinicalLink,
           dataTestId: "leftPanelMeasureClinicalRecommendation",
           id: "sideNavMeasureClinicalRecommendation",
-          displayCompletedIcon: measure?.measureMetaData.clinicalRecommendation
-            ? true
-            : false,
+          displayCompletedIcon:
+            !!measure?.measureMetaData.clinicalRecommendation,
         },
       ],
     },
@@ -176,18 +163,14 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
           href: copyrightLink,
           dataTestId: "leftPanelMeasureCopyright",
           id: "sideNavMeasureCopyright",
-          displayCompletedIcon: measure?.measureMetaData.copyright
-            ? true
-            : false,
+          displayCompletedIcon: !!measure?.measureMetaData.copyright,
         },
         {
           title: "Disclaimer",
           href: disclaimerLink,
           dataTestId: "leftPanelMeasureDisclaimer",
           id: "sideNavMeasureDisclaimer",
-          displayCompletedIcon: measure?.measureMetaData.disclaimer
-            ? true
-            : false,
+          displayCompletedIcon: !!measure?.measureMetaData.disclaimer,
         },
       ],
     },
@@ -201,7 +184,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
       href: definitionLink,
       dataTestId: "leftPanelQDMMeasureDefinition",
       id: "sideNavQDMMeasureDefinition",
-      displayCompletedIcon: measure?.measureMetaData.definition ? true : false,
+      displayCompletedIcon: !!measure?.measureMetaData.definition,
     });
 
     links[1].links.push({
@@ -210,25 +193,20 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
       dataTestId: "leftPanelMeasureReferences",
       id: "sideNavMeasureReferences",
       displayCompletedIcon: measure?.measureMetaData.references?.length > 0,
-      displayIncompletedIcon: measure?.measureMetaData.references?.length === 0,
     });
     links[1].links.push({
       title: "Transmission Format",
       href: transmissionFormat,
       dataTestId: "leftPanelMeasureTransmissionFormat",
       id: "sideNavMeasureTransmissionFormat",
-      displayCompletedIcon: measure?.measureMetaData.transmissionFormat
-        ? true
-        : false,
+      displayCompletedIcon: !!measure?.measureMetaData.transmissionFormat,
     });
     links[1].links.push({
       title: "Measure Set",
       href: measureSetLink,
       dataTestId: "leftPanelMeasureSet",
       id: "sideNavMeasureSet",
-      displayCompletedIcon: measure?.measureMetaData.measureSetTitle
-        ? true
-        : false,
+      displayCompletedIcon: !!measure?.measureMetaData.measureSetTitle,
     });
   }
   useEffect(() => {

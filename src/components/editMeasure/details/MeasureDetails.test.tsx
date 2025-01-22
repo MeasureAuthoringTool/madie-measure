@@ -539,7 +539,7 @@ describe("MeasureDetails component", () => {
       getByTestId("measure-details-incompleted-icon-sideNavMeasureSteward")
     ).toBeInTheDocument();
     expect(
-      getByTestId("measure-details-incompleted-icon-sideNavMeasureReferences")
+      getByTestId("measure-details-incompleted-icon-sideNavMeasureDescription")
     ).toBeInTheDocument();
   });
 });
