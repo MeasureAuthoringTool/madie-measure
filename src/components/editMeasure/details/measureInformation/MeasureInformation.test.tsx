@@ -303,10 +303,15 @@ describe("MeasureInformation component", () => {
     });
     expect(intendedVenueComplete.value).toBe("Eligible Clinician (EC)");
 
-    const discardButton = screen.getByRole("button", {
-      name: "Discard Changes",
-    }) as HTMLButtonElement;
-    expect(discardButton).toBeEnabled();
+    fireEvent.change(intendedVenueComplete, {
+      target: { value: "-" },
+    });
+    expect(intendedVenueComplete.value).toBe("-");
+
+    fireEvent.change(intendedVenueComplete, {
+      target: { value: "Eligible Hospital (EH)" },
+    });
+    expect(intendedVenueComplete.value).toBe("Eligible Hospital (EH)");
 
     await waitFor(async () => {
       const input = await findByTestId("measure-name-input");
