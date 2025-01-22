@@ -3,13 +3,15 @@ import tw from "twin.macro";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Tab, Tabs } from "@madie/madie-design-system/dist/react";
 import "./EditMeasureSideBarNav.scss";
+import { Link } from "./MeasureDetails";
+import CompletionIndicator from "../populationCriteria/groups/CompletionIndicator";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
 const InnerWrapper = tw.div`flex-grow flex flex-col`;
 const Nav = tw.nav`flex-1 space-y-1 bg-slate`;
 
 export interface EditMeasureDetailsSideNavProps {
-  links: Array<any>;
+  links: Array<Link>;
 }
 
 export default function EditMeasureDetailsSideNav(
@@ -26,6 +28,39 @@ export default function EditMeasureDetailsSideNav(
     const newPath = `/measures/${measureId}/edit/details/${v}`;
     navigate(newPath);
   };
+
+  function getTabLabel(linkInfo) {
+    if (linkInfo.displayCompletedIcon) {
+      return (
+        <CompletionIndicator
+          data-testid={`measure-details-completed-icon-${linkInfo.id}`}
+          label={`${linkInfo.title}`}
+          hasErrors={false}
+          displayIcon={true}
+        />
+      );
+    }
+
+    if (linkInfo.displayIncompletedIcon) {
+      return (
+        <CompletionIndicator
+          data-testid={`measure-details-incompleted-icon-${linkInfo.id}`}
+          label={`${linkInfo.title}`}
+          hasErrors={true}
+          displayIcon={true}
+        />
+      );
+    }
+
+    return (
+      <CompletionIndicator
+        label={`${linkInfo.title}`}
+        hasErrors={false}
+        displayIcon={false}
+      />
+    );
+  }
+
   return (
     <OuterWrapper>
       <InnerWrapper
@@ -45,7 +80,7 @@ export default function EditMeasureDetailsSideNav(
                 {link.links.map((linkInfo) => {
                   return (
                     <Tab
-                      label={linkInfo.title}
+                      label={getTabLabel(linkInfo)}
                       type="C"
                       value={linkInfo.href}
                       id={linkInfo.id}

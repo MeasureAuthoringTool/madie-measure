@@ -2,7 +2,7 @@ import React from "react";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 
-const CompletionIndicator = ({ hasErrors, displayIcon, label }) => {
+const CompletionIndicator = ({ hasErrors, displayIcon, label, ...rest }) => {
   return (
     <div>
       {!displayIcon ? (
@@ -15,6 +15,7 @@ const CompletionIndicator = ({ hasErrors, displayIcon, label }) => {
             height: "20px",
             width: "20px",
           }}
+          {...rest}
         />
       ) : (
         <CheckCircleIcon
@@ -24,6 +25,7 @@ const CompletionIndicator = ({ hasErrors, displayIcon, label }) => {
             height: "20px",
             width: "20px",
           }}
+          {...rest}
         />
       )}
       {label}
