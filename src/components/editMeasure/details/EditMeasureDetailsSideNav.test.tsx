@@ -12,25 +12,112 @@ describe("EditMeasureDetailsSideNav", () => {
   const initialProps: EditMeasureDetailsSideNavProps = {
     links: [
       {
+        title: "General Information",
+        links: [
+          {
+            title: "Name, Version & ID",
+            href: "",
+            dataTestId: "leftPanelMeasureInformation",
+            id: "sideNavMeasureInformation",
+            displayCompletedIcon: true,
+            displayIncompletedIcon: false,
+          },
+          {
+            title: "Model & Measurement Period",
+            href: "model&measurement-period",
+            dataTestId: "leftPanelModelAndMeasurementPeriod",
+            id: "sideNavMeasureModelAndMeasurementPeriod",
+            displayCompletedIcon: false,
+            displayIncompletedIcon: true,
+          },
+          {
+            title: "Steward & Developers",
+            href: "measure-steward",
+            dataTestId: "leftPanelMeasureSteward",
+            id: "sideNavMeasureSteward",
+            displayCompletedIcon: false,
+            displayIncompletedIcon: true,
+          },
+        ],
+      },
+      {
         title: "Measure Overview",
         links: [
           {
             title: "Description",
-            href: "descriptionLink",
+            href: "measure-description",
             dataTestId: "leftPanelMeasureDescription",
             id: "sideNavMeasureDescription",
+            displayCompletedIcon: false,
           },
           {
             title: "Rationale",
-            href: "rationaleLink",
+            href: "measure-rationale",
             dataTestId: "leftPanelMeasureRationale",
             id: "sideNavMeasureRationale",
+            displayCompletedIcon: false,
           },
           {
-            title: "Guidance",
-            href: "guidanceLink",
+            title: "Guidance (Usage)",
+            href: "measure-guidance",
             dataTestId: "leftPanelMeasureGuidance",
             id: "sideNavMeasureGuidance",
+            displayCompletedIcon: true,
+          },
+          {
+            title: "Definition",
+            href: "measure-definition",
+            dataTestId: "leftPanelQDMMeasureDefinition",
+            id: "sideNavQDMMeasureDefinition",
+            displayCompletedIcon: true,
+          },
+          {
+            title: "Clinical Recommendation",
+            href: "measure-clinical-recommendation",
+            dataTestId: "leftPanelMeasureClinicalRecommendation",
+            id: "sideNavMeasureClinicalRecommendation",
+            displayCompletedIcon: true,
+          },
+          {
+            title: "References",
+            href: "measure-references",
+            dataTestId: "leftPanelMeasureReferences",
+            id: "sideNavMeasureReferences",
+            displayCompletedIcon: true,
+            displayIncompletedIcon: false,
+          },
+          {
+            title: "Transmission Format",
+            href: "transmission-format",
+            dataTestId: "leftPanelMeasureTransmissionFormat",
+            id: "sideNavMeasureTransmissionFormat",
+            displayCompletedIcon: true,
+          },
+          {
+            title: "Measure Set",
+            href: "measure-set",
+            dataTestId: "leftPanelMeasureSet",
+            id: "sideNavMeasureSet",
+            displayCompletedIcon: true,
+          },
+        ],
+      },
+      {
+        title: "Legal",
+        links: [
+          {
+            title: "Copyright",
+            href: "measure-copyright",
+            dataTestId: "leftPanelMeasureCopyright",
+            id: "sideNavMeasureCopyright",
+            displayCompletedIcon: true,
+          },
+          {
+            title: "Disclaimer",
+            href: "measure-disclaimer",
+            dataTestId: "leftPanelMeasureDisclaimer",
+            id: "sideNavMeasureDisclaimer",
+            displayCompletedIcon: true,
           },
         ],
       },
@@ -46,11 +133,104 @@ describe("EditMeasureDetailsSideNav", () => {
     );
   };
 
-  test("Measure Details side nav bar is rendered with appropriate titles and nav links", async () => {
+  test("Measure Details side nav bar is rendered with appropriate titles, icons, and nav links", async () => {
     await waitFor(() => RenderEditMeasureDetailsSideNav(initialProps));
-    expect(screen.getByText("Measure Overview")).toBeInTheDocument();
-    expect(screen.getByText("Description")).toBeInTheDocument();
-    expect(screen.getByText("Rationale")).toBeInTheDocument();
-    expect(screen.getByText("Guidance")).toBeInTheDocument();
+    screen.debug();
+
+    expect(screen.queryByText("General Information")).toBeInTheDocument();
+    expect(screen.queryByText("Name, Version & ID")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Model & Measurement Period")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Steward & Developers")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(
+        `measure-details-completed-icon-${initialProps.links[0].links[0].id}`
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(
+        `measure-details-incompleted-icon-${initialProps.links[0].links[1].id}`
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(
+        `measure-details-incompleted-icon-${initialProps.links[0].links[2].id}`
+      )
+    ).toBeInTheDocument();
+
+    expect(screen.queryByText("Measure Overview")).toBeInTheDocument();
+    expect(screen.queryByText("Description")).toBeInTheDocument();
+    expect(screen.queryByText("Rationale")).toBeInTheDocument();
+    expect(screen.queryByText("Guidance (Usage)")).toBeInTheDocument();
+    expect(screen.queryByText("Definition")).toBeInTheDocument();
+    expect(screen.queryByText("Clinical Recommendation")).toBeInTheDocument();
+    expect(screen.queryByText("References")).toBeInTheDocument();
+    expect(screen.queryByText("Transmission Format")).toBeInTheDocument();
+    expect(screen.queryByText("Measure Set")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(
+        `measure-details-completed-icon-${initialProps.links[1].links[0].id}`
+      )
+    ).toBeNull();
+    expect(
+      screen.queryByTestId(
+        `measure-details-incompleted-icon-${initialProps.links[1].links[0].id}`
+      )
+    ).toBeNull();
+    expect(
+      screen.queryByTestId(
+        `measure-details-completed-icon-${initialProps.links[1].links[1].id}`
+      )
+    ).toBeNull();
+    expect(
+      screen.queryByTestId(
+        `measure-details-incompleted-icon-${initialProps.links[1].links[1].id}`
+      )
+    ).toBeNull();
+    expect(
+      screen.queryByTestId(
+        `measure-details-completed-icon-${initialProps.links[1].links[2].id}`
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(
+        `measure-details-completed-icon-${initialProps.links[1].links[3].id}`
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(
+        `measure-details-completed-icon-${initialProps.links[1].links[4].id}`
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(
+        `measure-details-completed-icon-${initialProps.links[1].links[5].id}`
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(
+        `measure-details-completed-icon-${initialProps.links[1].links[6].id}`
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(
+        `measure-details-completed-icon-${initialProps.links[1].links[7].id}`
+      )
+    ).toBeInTheDocument();
+
+    expect(screen.queryByText("Legal")).toBeInTheDocument();
+    expect(screen.queryByText("Copyright")).toBeInTheDocument();
+    expect(screen.queryByText("Disclaimer")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(
+        `measure-details-completed-icon-${initialProps.links[2].links[0].id}`
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(
+        `measure-details-completed-icon-${initialProps.links[2].links[1].id}`
+      )
+    ).toBeInTheDocument();
   });
 });
