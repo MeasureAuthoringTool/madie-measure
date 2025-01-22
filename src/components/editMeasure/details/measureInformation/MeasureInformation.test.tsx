@@ -282,6 +282,40 @@ describe("MeasureInformation component", () => {
     });
   });
 
+  test("Adding intended venue and saving it", async () => {
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
+      return true;
+    });
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+
+    const intendedVenueComplete = await screen.findByTestId("intendedVenue");
+    fireEvent.keyDown(intendedVenueComplete, { key: "ArrowDown" });
+    const endorserOptions = await screen.findAllByRole("option");
+    fireEvent.click(endorserOptions[1]);
+
+    const intendedVenueComboBox = within(intendedVenueComplete).getByRole(
+      "combobox"
+    );
+    expect(intendedVenueComboBox).toHaveValue("Eligible Clinician (EC)");
+
+    const discardButton = screen.getByRole("button", {
+      name: "Discard Changes",
+    }) as HTMLButtonElement;
+    expect(discardButton).toBeEnabled();
+
+    await act(async () => {
+      const input = await findByTestId("measure-name-input");
+      fireEvent.change(input, {
+        target: { value: "new value" },
+      });
+      const createBtn = getByTestId("measurement-information-save-button");
+      expect(createBtn).toBeEnabled();
+      act(() => {
+        fireEvent.click(createBtn);
+      });
+    });
+  });
+
   it("Toast error shows when endorsement Id is not alphanumeric", async () => {
     measureStore.state.mockImplementationOnce(() => measure);
     checkUserCanEdit.mockImplementationOnce(() => true);
@@ -379,6 +413,7 @@ describe("MeasureInformation component", () => {
         // This can be removed after MAT-5396
         measureMetaData: {
           experimental: false,
+          intendedVenue: null,
           endorsements: [
             {
               endorsementId: "NQF",

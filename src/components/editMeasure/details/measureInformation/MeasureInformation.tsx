@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import "twin.macro";
+import "styled-components/macro";
 import { Endorsement, Measure, Model } from "@madie/madie-models";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import "styled-components/macro";
@@ -43,6 +45,7 @@ interface measureInformationForm {
   experimental: boolean;
   endorsements: Array<Endorsement>;
   endorsementId: string;
+  intendedVenue?: any;
 }
 
 interface MeasureInformationProps {
@@ -143,6 +146,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       (measure?.model === Model.QDM_5_6 ? null : false),
     endorsements: measure?.measureMetaData?.endorsements || [],
     endorsementId: measure?.measureMetaData?.endorsements?.[0]?.endorsementId,
+    intendedVenue: measure?.intendedVenue || null,
   } as measureInformationForm;
 
   const schema =
@@ -154,8 +158,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     initialValues: { ...INITIAL_VALUES },
     validationSchema: schema,
     enableReinitialize: true, // formik will auto set initial variables whenever measure delivers new results
-    onSubmit: async (values: measureInformationForm) =>
-      await handleSubmit(values),
+    onSubmit: async (values: measureInformationForm) => handleSubmit(values),
   });
   const { resetForm } = formik;
   // tell our routehandler no go
@@ -262,6 +265,52 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     }
     return true;
   };
+
+  const intendedVenueValues = [
+    {
+      code: "ec",
+      codeSystem:
+        "http://hl7.org/fhir/us/cqfmeasures/CodeSystem/intended-venue-codes",
+      display: "EC",
+      definition:
+        "An eligible clinician is a clinician who is eligible to participate in a quality measurement intiative.",
+    },
+    {
+      code: "eh",
+      codeSystem:
+        "http://hl7.org/fhir/us/cqfmeasures/CodeSystem/intended-venue-codes",
+      display: "EH",
+      definition:
+        "An eligible hospital is an acute care facility that is eligible to participate in a quality measurement initiative.",
+    },
+  ];
+
+  const intendedVenueOptions = [
+    "-",
+    "Eligible Clinician (EC)",
+    "Eligible Hospital (EH)",
+  ];
+
+  const handleIntendedVenueChange = (selectedIntendedVenue: string) => {
+    if (selectedIntendedVenue.includes("(EC)")) {
+      return intendedVenueValues[0];
+    }
+    if (selectedIntendedVenue.includes("EH")) {
+      return intendedVenueValues[1];
+    }
+    return null;
+  };
+
+  const displayIntendedVenue = (intendedVenueCode: string) => {
+    if (intendedVenueCode === "ec") {
+      return intendedVenueOptions[1];
+    }
+    if (intendedVenueCode === "eh") {
+      return intendedVenueOptions[2];
+    }
+    return intendedVenueOptions[0];
+  };
+
   const handleSubmit = async (values) => {
     let endorsersValid = true;
     // we only want to validate this field if it's not an empty array.
@@ -318,6 +367,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
                 values.endorsements[0]?.endorserSystemId || null,
             },
           ],
+          intendedVenue: values?.intendedVenue,
         },
       };
       measureServiceApi
@@ -576,6 +626,30 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             size="small"
           />
         </Box>
+
+        {measure?.model !== Model.QDM_5_6 && (
+          <div tw="mb-4 w-1/2">
+            <AutoComplete
+              id="intendedVenue"
+              dataTestId="intendedVenue"
+              label="Intended Venue"
+              placeholder="-"
+              disabled={!canEdit}
+              options={intendedVenueOptions.map(
+                (intendedVenue) => intendedVenue
+              )}
+              value={`${displayIntendedVenue(
+                formik.values?.intendedVenue?.code
+              )}`}
+              onChange={(_event: any, selectedValue: string | null) => {
+                const updatedIntendedVenue =
+                  handleIntendedVenueChange(selectedValue);
+                formik.setFieldValue("intendedVenue", updatedIntendedVenue);
+              }}
+              onKeyDown={goBackToNav}
+            />
+          </div>
+        )}
       </div>
       {canEdit && (
         <div className="form-actions">
