@@ -208,7 +208,7 @@ export function PopulationCriteriaHome() {
         measureId={measure?.id}
         isFormDirty={isFormDirty}
         isQDM={isQDM}
-        baseConfigPopuated={checkBaseConfigPopulated()}
+        baseConfigPopulated={checkBaseConfigPopulated()}
         reportingStatus={checkReporting()}
         supplementalDataStatus={checkSupplementalData()}
         riskAdjustmentStatus={checkRiskAdjustment()}

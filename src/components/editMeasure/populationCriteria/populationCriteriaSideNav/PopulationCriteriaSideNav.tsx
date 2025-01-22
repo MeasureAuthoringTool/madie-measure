@@ -25,7 +25,7 @@ export interface PopulationCriteriaSideNavProp {
   measureId: string;
   isFormDirty: boolean;
   isQDM: boolean;
-  baseConfigPopuated?: boolean;
+  baseConfigPopulated?: boolean;
   reportingStatus?: string;
   supplementalDataStatus?: string;
   riskAdjustmentStatus?: string;
@@ -41,7 +41,7 @@ export default function PopulationCriteriaSideNav(
     measureId,
     measureGroupNumber,
     isQDM,
-    baseConfigPopuated,
+    baseConfigPopulated,
     reportingStatus,
     supplementalDataStatus,
     riskAdjustmentStatus,
@@ -140,7 +140,7 @@ export default function PopulationCriteriaSideNav(
                 label={
                   <CompletionIndicator
                     label="Base Configuration"
-                    hasErrors={!baseConfigPopuated}
+                    hasErrors={!baseConfigPopulated}
                     displayIcon={true}
                   />
                 }
