@@ -283,36 +283,42 @@ describe("MeasureInformation component", () => {
   });
 
   test("Adding intended venue and saving it", async () => {
+    serviceApiMock = {
+      getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
+      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
+    } as unknown as MeasureServiceApi;
+    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
       return true;
     });
     render(<MeasureInformation setErrorMessage={setErrorMessage} />);
 
-    const intendedVenueComplete = await screen.findByTestId("intendedVenue");
-    fireEvent.keyDown(intendedVenueComplete, { key: "ArrowDown" });
-    const endorserOptions = await screen.findAllByRole("option");
-    fireEvent.click(endorserOptions[1]);
-
-    const intendedVenueComboBox = within(intendedVenueComplete).getByRole(
-      "combobox"
-    );
-    expect(intendedVenueComboBox).toHaveValue("Eligible Clinician (EC)");
+    const intendedVenueComplete = (await screen.findByTestId(
+      "intended-venue-input"
+    )) as HTMLInputElement;
+    expect(intendedVenueComplete).toBeInTheDocument();
+    expect(intendedVenueComplete.value).toBe("-");
+    fireEvent.change(intendedVenueComplete, {
+      target: { value: "Eligible Clinician (EC)" },
+    });
+    expect(intendedVenueComplete.value).toBe("Eligible Clinician (EC)");
 
     const discardButton = screen.getByRole("button", {
       name: "Discard Changes",
     }) as HTMLButtonElement;
     expect(discardButton).toBeEnabled();
 
-    await act(async () => {
+    await waitFor(async () => {
       const input = await findByTestId("measure-name-input");
       fireEvent.change(input, {
         target: { value: "new value" },
       });
       const createBtn = getByTestId("measurement-information-save-button");
       expect(createBtn).toBeEnabled();
-      act(() => {
-        fireEvent.click(createBtn);
-      });
+      userEvent.click(createBtn);
+      expect(
+        getByTestId("edit-measure-information-success-text")
+      ).toBeInTheDocument();
     });
   });
 
