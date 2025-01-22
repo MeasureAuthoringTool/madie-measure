@@ -10,4 +10,5 @@ export interface TypeComponentProps {
   helperText?: any;
   error?: any;
   resource?: Resource;
+  stringOnly?: boolean;
 }
