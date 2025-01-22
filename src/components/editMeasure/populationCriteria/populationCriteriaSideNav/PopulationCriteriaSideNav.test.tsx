@@ -62,6 +62,7 @@ const initialProps: PopulationCriteriaSideNavProp = {
   setMeasureGroupNumber: jest.fn().mockImplementation((v) => v),
   isFormDirty: false,
   isQDM: false,
+  reportingPopulated: true,
 };
 
 describe("PopulationCriteriaSideNav", () => {
@@ -235,5 +236,26 @@ describe("PopulationCriteriaSideNav", () => {
     expect(mockHistoryPush).toHaveBeenCalledWith(
       "/measures/testMeasureId/edit/groups/2"
     );
+  });
+
+  it("Should be able to add criteria", () => {
+    RenderPopulationCriteriaSideNav(initialProps);
+    expect(
+      screen.getByRole("button", {
+        name: /Population Criteria/i,
+      })
+    ).toBeInTheDocument();
+    const criteria1 = screen.getByRole("tab", {
+      name: /Criteria 1/i,
+    });
+    expect(criteria1).toBeInTheDocument();
+    expect(criteria1).toHaveAttribute("aria-selected", "true");
+
+    const addGroup = screen.getByTestId("add-measure-group-button");
+    userEvent.click(addGroup);
+    const criteria2 = screen.getByRole("tab", {
+      name: /Criteria 2/i,
+    });
+    expect(criteria2).toBeInTheDocument();
   });
 });
