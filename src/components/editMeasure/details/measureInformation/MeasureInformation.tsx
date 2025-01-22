@@ -158,7 +158,8 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     initialValues: { ...INITIAL_VALUES },
     validationSchema: schema,
     enableReinitialize: true, // formik will auto set initial variables whenever measure delivers new results
-    onSubmit: async (values: measureInformationForm) => handleSubmit(values),
+    onSubmit: async (values: measureInformationForm) =>
+      await handleSubmit(values),
   });
   const { resetForm } = formik;
   // tell our routehandler no go
