@@ -29,6 +29,25 @@ const qdmMeasure = {
   id: "testMeasureId",
   measureName: "the measure for testing",
   model: "QDM v5.6",
+  baseConfigurationTypes: ["Outcome"],
+  patientBasis: true,
+  improvementNotation: "Increased score indicates improvement",
+  improvementNotationDescription: "test improvementNotationDescription",
+  rateAggregation: "test rateAggregation",
+  supplementalData: [
+    {
+      definition: "Initial Population",
+      description: "",
+    },
+  ],
+  supplementalDataDescription: "test supplementalDataDescription",
+  riskAdjustments: [
+    {
+      definition: "Initial Population",
+      description: "",
+    },
+  ],
+  riskAdjustmentDescription: "test riskAdjustmentDescription",
   groups: [
     {
       id: "testGroupId",
@@ -462,5 +481,36 @@ describe("PopulationCriteriaHome", () => {
     ).not.toBeInTheDocument();
     const allComboBoxes = screen.queryAllByRole("combobox");
     expect(allComboBoxes.length).toEqual(0);
+  });
+
+  it("Should navigate to 404", async () => {
+    await renderPopulationCriteriaHomeComponent(
+      "groups/:groupNumber",
+      "groups/0"
+    );
+
+    const populationCriteriaTab = await screen.queryByTestId(
+      "leftPanelMeasurePopulationCriteriaTab"
+    );
+    expect(populationCriteriaTab).not.toBeInTheDocument();
+  });
+
+  it("test no supplemental data and risk adjustment", async () => {
+    qdmMeasure.rateAggregation = undefined;
+    qdmMeasure.supplementalData = [];
+    qdmMeasure.supplementalDataDescription = undefined;
+    qdmMeasure.riskAdjustments = [];
+    qdmMeasure.riskAdjustmentDescription = undefined;
+    const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
+    mockedMeasureState.state = { ...qdmMeasure };
+    await renderPopulationCriteriaHomeComponent("reporting", "reporting");
+
+    const reportingTab = screen.getByRole("tab", {
+      name: /Reporting/i,
+    });
+    expect(reportingTab).toBeInTheDocument();
+
+    expect(screen.getByText("Rate Aggregation")).toBeInTheDocument();
+    expect(reportingTab).toHaveAttribute("aria-selected", "true");
   });
 });

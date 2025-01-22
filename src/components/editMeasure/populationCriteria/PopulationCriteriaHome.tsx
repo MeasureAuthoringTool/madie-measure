@@ -8,6 +8,10 @@ import { Measure } from "@madie/madie-models";
 import BaseConfiguration from "./baseConfiguration/BaseConfiguration";
 import QDMReporting from "./QDMReporting/QDMReporting";
 
+export const COMPLETE = "complete";
+export const INCOMPLETE = "incomplete";
+export const NONE = "none";
+
 export function PopulationCriteriaHome() {
   const { pathname } = useLocation();
   const { groupNumber } = useParams();
@@ -89,12 +93,14 @@ export function PopulationCriteriaHome() {
             title: `Criteria ${id + 1}`,
             href: groupsBaseUrl + "/" + (id + 1),
             dataTestId: `leftPanelMeasureInformation-MeasureGroup${id + 1}`,
+            groupPopulated: true,
           }))
         : [
             {
               title: "Criteria 1",
               href: groupsBaseUrl + "/1",
               dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
+              groupPopulated: false,
             },
           ];
     setSideNavLinks([
@@ -122,6 +128,69 @@ export function PopulationCriteriaHome() {
     [measure?.model]
   );
 
+  const checkBaseConfigPopulated = () => {
+    if (measure?.model.includes("QDM")) {
+      return measure?.baseConfigurationTypes?.length > 0;
+    }
+    return false;
+  };
+
+  const checkReporting = () => {
+    if (
+      measure?.improvementNotation &&
+      measure?.improvementNotationDescription &&
+      measure?.rateAggregation
+    ) {
+      return COMPLETE;
+    } else {
+      if (
+        !measure?.improvementNotation &&
+        !measure?.improvementNotationDescription &&
+        !measure?.rateAggregation
+      ) {
+        return NONE;
+      } else {
+        return INCOMPLETE;
+      }
+    }
+  };
+
+  const checkSupplementalData = () => {
+    if (
+      measure?.supplementalData?.length > 0 &&
+      measure?.supplementalDataDescription
+    ) {
+      return COMPLETE;
+    } else {
+      if (
+        measure?.supplementalData?.length == 0 &&
+        !measure?.supplementalDataDescription
+      ) {
+        return NONE;
+      } else {
+        return INCOMPLETE;
+      }
+    }
+  };
+
+  const checkRiskAdjustment = () => {
+    if (
+      measure?.riskAdjustments?.length > 0 &&
+      measure?.riskAdjustmentDescription
+    ) {
+      return COMPLETE;
+    } else {
+      if (
+        measure?.riskAdjustments?.length == 0 &&
+        !measure?.riskAdjustmentDescription
+      ) {
+        return NONE;
+      } else {
+        return INCOMPLETE;
+      }
+    }
+  };
+
   return (
     <div
       tw="grid lg:grid-cols-6 gap-4 mx-8 shadow-lg rounded-md border bg-white"
@@ -139,6 +208,10 @@ export function PopulationCriteriaHome() {
         measureId={measure?.id}
         isFormDirty={isFormDirty}
         isQDM={isQDM}
+        baseConfigPopulated={checkBaseConfigPopulated()}
+        reportingStatus={checkReporting()}
+        supplementalDataStatus={checkSupplementalData()}
+        riskAdjustmentStatus={checkRiskAdjustment()}
       />
       {/* path can be independent of nav */}
       {pathname.includes("/base-configuration") && <BaseConfiguration />}
