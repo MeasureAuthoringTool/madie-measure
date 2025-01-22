@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import "twin.macro";
-import "styled-components/macro";
 import { Endorsement, Measure, Model } from "@madie/madie-models";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import "styled-components/macro";
