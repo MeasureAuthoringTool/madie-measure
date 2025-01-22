@@ -8,6 +8,9 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import "../../details/EditMeasureSideBarNav.scss";
 import "../../../common/madie-link.scss";
 import { DSLink, Tabs, Tab } from "@madie/madie-design-system/dist/react";
+import { useTheme } from "@mui/material";
+import { INCOMPLETE, NONE } from "../PopulationCriteriaHome";
+import CompletionIndicator from "../groups/CompletionIndicator";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
 const InnerWrapper = tw.div`flex-grow flex flex-col`;
@@ -22,6 +25,10 @@ export interface PopulationCriteriaSideNavProp {
   measureId: string;
   isFormDirty: boolean;
   isQDM: boolean;
+  baseConfigPopulated?: boolean;
+  reportingStatus?: string;
+  supplementalDataStatus?: string;
+  riskAdjustmentStatus?: string;
 }
 
 export default function PopulationCriteriaSideNav(
@@ -34,8 +41,13 @@ export default function PopulationCriteriaSideNav(
     measureId,
     measureGroupNumber,
     isQDM,
+    baseConfigPopulated,
+    reportingStatus,
+    supplementalDataStatus,
+    riskAdjustmentStatus,
   } = props;
   const { pathname } = useLocation();
+  const theme = useTheme();
   const [showPopulationCriteriaTabs, setShowPopulationCriteriaTabs] =
     useState<boolean>(true);
   let navigate = useNavigate();
@@ -99,12 +111,14 @@ export default function PopulationCriteriaSideNav(
       value: supplementalDataBaseUrl,
       dataTestId: "leftPanelMeasurePopulationsSupplementalDataTab",
       id: "sideNavMeasurePopulationsSupplementalData",
+      status: supplementalDataStatus,
     },
     {
       label: "Risk Adjustment",
       value: riskAdjustmentBaseUrl,
       dataTestId: "leftPanelMeasurePopulationsRiskAdjustmentTab",
       id: "sideNavMeasurePopulationsRiskAdjustment",
+      status: riskAdjustmentStatus,
     },
   ];
 
@@ -123,7 +137,13 @@ export default function PopulationCriteriaSideNav(
             >
               <Tab
                 type="C"
-                label="Base Configuration"
+                label={
+                  <CompletionIndicator
+                    label="Base Configuration"
+                    hasErrors={!baseConfigPopulated}
+                    displayIcon={true}
+                  />
+                }
                 value={baseConfigurationUrl}
                 data-testId="leftPanelMeasureBaseConfigurationTab"
                 id="sideNavMeasureBaseConfiguration"
@@ -177,8 +197,14 @@ export default function PopulationCriteriaSideNav(
                               type="C"
                               orientation="vertical"
                               id={index}
-                              label={linkInfo.title}
                               data-testid={linkInfo.dataTestId}
+                              label={
+                                <CompletionIndicator
+                                  label={linkInfo.title}
+                                  hasErrors={!linkInfo.groupPopulated}
+                                  displayIcon={true}
+                                />
+                              }
                             />
                           );
                         })}
@@ -212,14 +238,48 @@ export default function PopulationCriteriaSideNav(
             {isQDM && (
               <Tab
                 type="C"
-                label="Reporting"
+                label={
+                  <CompletionIndicator
+                    label="Reporting"
+                    hasErrors={reportingStatus === INCOMPLETE}
+                    displayIcon={reportingStatus !== NONE}
+                  />
+                }
                 value={QdmReportingBaseUrl}
                 dataTestId="leftPanelMeasureReportingTab"
                 id="sideNavMeasureReporting"
               />
             )}
             {additionalLinks.map((l) => {
-              return <Tab {...l} type="B" />;
+              return (
+                <Tab
+                  {...l}
+                  type="B"
+                  label={
+                    <CompletionIndicator
+                      label={l.label}
+                      hasErrors={
+                        l.label === "Supplemental Data" &&
+                        supplementalDataStatus === INCOMPLETE
+                          ? true
+                          : l.label === "Risk Adjustment" &&
+                            riskAdjustmentStatus === INCOMPLETE
+                          ? true
+                          : false
+                      }
+                      displayIcon={
+                        l.label === "Supplemental Data" &&
+                        supplementalDataStatus === NONE
+                          ? false
+                          : l.label === "Risk Adjustment" &&
+                            riskAdjustmentStatus === NONE
+                          ? false
+                          : true
+                      }
+                    />
+                  }
+                />
+              );
             })}
           </Tabs>
         </Nav>
