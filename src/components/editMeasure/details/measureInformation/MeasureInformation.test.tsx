@@ -282,6 +282,24 @@ describe("MeasureInformation component", () => {
     });
   });
 
+  test("Intended venue field being disable when user is not owner", async () => {
+    serviceApiMock = {
+      getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
+      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
+    } as unknown as MeasureServiceApi;
+    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
+      return false;
+    });
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+
+    const intendedVenueComplete = (await screen.findByTestId(
+      "intended-venue-input"
+    )) as HTMLInputElement;
+    expect(intendedVenueComplete).toBeInTheDocument();
+    expect(intendedVenueComplete).toBeDisabled();
+  });
+
   test("Adding intended venue and saving it", async () => {
     serviceApiMock = {
       getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
@@ -312,6 +330,75 @@ describe("MeasureInformation component", () => {
       target: { value: "Eligible Hospital (EH)" },
     });
     expect(intendedVenueComplete.value).toBe("Eligible Hospital (EH)");
+
+    await waitFor(async () => {
+      const input = await findByTestId("measure-name-input");
+      fireEvent.change(input, {
+        target: { value: "new value" },
+      });
+      const createBtn = getByTestId("measurement-information-save-button");
+      expect(createBtn).toBeEnabled();
+      userEvent.click(createBtn);
+      expect(
+        getByTestId("edit-measure-information-success-text")
+      ).toBeInTheDocument();
+    });
+  });
+  test("Adding Eligible Clinician (EC) intended venue and saving it", async () => {
+    serviceApiMock = {
+      getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
+      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
+    } as unknown as MeasureServiceApi;
+    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
+      return true;
+    });
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+
+    const intendedVenueComplete = (await screen.findByTestId(
+      "intended-venue-input"
+    )) as HTMLInputElement;
+    expect(intendedVenueComplete).toBeInTheDocument();
+    expect(intendedVenueComplete.value).toBe("-");
+    fireEvent.change(intendedVenueComplete, {
+      target: { value: "Eligible Clinician (EC)" },
+    });
+    expect(intendedVenueComplete.value).toBe("Eligible Clinician (EC)");
+
+    await waitFor(async () => {
+      const input = await findByTestId("measure-name-input");
+      fireEvent.change(input, {
+        target: { value: "new value" },
+      });
+      const createBtn = getByTestId("measurement-information-save-button");
+      expect(createBtn).toBeEnabled();
+      userEvent.click(createBtn);
+      expect(
+        getByTestId("edit-measure-information-success-text")
+      ).toBeInTheDocument();
+    });
+  });
+
+  test("Adding no value for intended venue and saving it", async () => {
+    serviceApiMock = {
+      getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
+      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
+    } as unknown as MeasureServiceApi;
+    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
+      return true;
+    });
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+
+    const intendedVenueComplete = (await screen.findByTestId(
+      "intended-venue-input"
+    )) as HTMLInputElement;
+    expect(intendedVenueComplete).toBeInTheDocument();
+    expect(intendedVenueComplete.value).toBe("-");
+    fireEvent.change(intendedVenueComplete, {
+      target: { value: "-" },
+    });
+    expect(intendedVenueComplete.value).toBe("-");
 
     await waitFor(async () => {
       const input = await findByTestId("measure-name-input");
