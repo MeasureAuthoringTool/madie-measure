@@ -66,10 +66,25 @@ const TypeEditor = ({
     switch (type) {
       case "string":
       case "http://hl7.org/fhirpath/System.String":
+        return (
+          <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
+            <StringComponent
+              label={label}
+              canEdit={canEdit}
+              helperText={formikErrorHandler(label)}
+              error={getNestedProperty(formik.errors, label)}
+              structureDefinition={null}
+              fieldRequired={required}
+              value={value}
+              {...formik.getFieldProps(label)}
+            />
+          </Box>
+        );
       case "markdown":
         return (
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
             <StringComponent
+              stringOnly={false}
               label={label}
               canEdit={canEdit}
               helperText={formikErrorHandler(label)}

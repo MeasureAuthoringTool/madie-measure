@@ -919,7 +919,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                           <CompletionIndicator
                             label="Populations"
                             hasErrors={formik.errors.populations}
-                            displayIcon={true}
+                            displayIcon={Boolean(formik.values.scoring)}
                           />
                         }
                         onClick={() => {
