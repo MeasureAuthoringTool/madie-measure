@@ -15,6 +15,7 @@ const StringComponent = ({
   helperText,
   label = "VALUE",
   structureDefinition,
+  stringOnly = true,
   ...props
 }: TypeComponentProps) => {
   return (
@@ -34,12 +35,16 @@ const StringComponent = ({
       data-testid={`string-field-${label}`}
       size="small"
       fullWidth
-      onKeyPress={(event) => {
-        const filteredValue = event.key?.replace(/[^a-zA-Z]/g, "");
-        if (!filteredValue) {
-          event.preventDefault();
-        }
-      }}
+      onKeyPress={
+        stringOnly
+          ? (event) => {
+              const filteredValue = event.key?.replace(/[^a-zA-Z]/g, "");
+              if (!filteredValue) {
+                event.preventDefault();
+              }
+            }
+          : undefined
+      }
       {...props}
     />
   );
