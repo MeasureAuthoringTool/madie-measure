@@ -19,37 +19,34 @@ const StringComponent = ({
   ...props
 }: TypeComponentProps) => {
   return (
-    <>
-      <p>{`Required ${fieldRequired}`}</p>
-      <TextField
-        required={fieldRequired}
-        disabled={!canEdit}
-        id={`string-field-${label}`}
-        label={label}
-        helperText={helperText}
-        labelColor="#1976d2"
-        inputProps={{
-          "data-testid": `string-field-input-${label}`,
-          "aria-describedby": `string-field-input-helper-text-${label}`,
-          required: fieldRequired,
-          "aria-required": fieldRequired,
-        }}
-        data-testid={`string-field-${label}`}
-        size="small"
-        fullWidth
-        onKeyPress={
-          stringOnly
-            ? (event) => {
-                const filteredValue = event.key?.replace(/[^a-zA-Z]/g, "");
-                if (!filteredValue) {
-                  event.preventDefault();
-                }
+    <TextField
+      required={fieldRequired}
+      disabled={!canEdit}
+      id={`string-field-${label}`}
+      label={label}
+      helperText={helperText}
+      labelColor="#1976d2"
+      inputProps={{
+        "data-testid": `string-field-input-${label}`,
+        "aria-describedby": `string-field-input-helper-text-${label}`,
+        required: fieldRequired,
+        "aria-required": fieldRequired,
+      }}
+      data-testid={`string-field-${label}`}
+      size="small"
+      fullWidth
+      onKeyPress={
+        stringOnly
+          ? (event) => {
+              const filteredValue = event.key?.replace(/[^a-zA-Z]/g, "");
+              if (!filteredValue) {
+                event.preventDefault();
               }
-            : undefined
-        }
-        {...props}
-      />
-    </>
+            }
+          : undefined
+      }
+      {...props}
+    />
   );
 };
 
