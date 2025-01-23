@@ -20,6 +20,18 @@ describe("Validation Functions", () => {
     expect(nonRequiredString.validate("test")).resolves.toBe("test");
   });
 
+  it("getValidation BooleanValidator", () => {
+    const requiredString = getValidation("boolean", true);
+    const nonRequiredString = getValidation("boolean", false);
+    expect(requiredString).toBeInstanceOf(Yup.StringSchema);
+    expect(requiredString.validate("true")).resolves.toBe("true");
+    expect(requiredString.validate("xxx")).rejects.toThrow(
+      "Invalid Boolean format"
+    );
+
+    expect(nonRequiredString.validate("false")).resolves.toBe("false");
+  });
+
   it("getValidation markdownValidator", () => {
     const requiredMarkdown = getValidation("markdown", true);
     const nonRequiredMarkdown = getValidation("markdown", false);
