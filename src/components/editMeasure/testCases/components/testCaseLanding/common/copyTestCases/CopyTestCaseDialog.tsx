@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import tw from "twin.macro";
 import "styled-components/macro";
-import { IconButton, MenuItem, Tooltip, Chip } from "@mui/material";
+import { IconButton, MenuItem, Chip } from "@mui/material";
 import {
   MadieDialog,
   MadieSpinner,
@@ -76,6 +76,8 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
   const [offset, setOffset] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
 
+  console.log("filterBy", filterBy, finalFilterBy);
+  console.log("searchValue", searchField, finalSearchField);
   const fetchMeasures = useCallback(() => {
     if (!measure || !measure.model || !measure.id || !open) {
       return;
@@ -86,6 +88,22 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
     if (finalFilterBy) {
       optionalSearchProperties.push(filterMap[finalFilterBy]);
     }
+    // We have a condition when we first load the table where we don't want to apply the filters.
+    // We want this to still fire, so we only want to append all possible filters for when "-" is selected in filters, if a searchValue is also provided
+    if (!finalFilterBy && finalSearchField) {
+      console.log("trigger");
+      // apply all conditions
+      filterByOptions.forEach((condition) => {
+        optionalSearchProperties.push(filterMap[condition]);
+      });
+    }
+    console.log("obj", {
+      searchField: finalSearchField,
+      model: measure.model,
+      excludeByMeasureIds: [measure.id],
+      draft: true,
+      optionalSearchProperties,
+    });
     measureSearchApi.current
       .searchMeasuresByCriteria(
         true,
@@ -219,6 +237,18 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
     },
   });
 
+  const finalizeSearchCriteria = () => {
+    setFinalFilterBy(filterBy);
+    setFinalSearchField(searchField);
+  };
+
+  const blankSearchCriteria = () => {
+    setSearchField("");
+    setFilterBy("");
+    setFinalFilterBy("");
+    setFinalSearchField("");
+  };
+
   return (
     <MadieDialog
       form
@@ -244,14 +274,11 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
     >
       <div id="measure-landing" data-testid="measure-landing">
         <div id="tc-search">
-          {/* <div tw="flex w-1/2 pr-4"> */}
-          {/* <div tw="w-1/2 pr-2"> */}
           <div>
             <Select
               label="Filter By"
               id="filter-by-select"
               data-testid="filter-by-select"
-              // tw="w-full"
               inputProps={{ "data-testid": "filter-by-select-input" }}
               placeHolder={{ name: "Filter By", value: "" }}
               SelectDisplayProps={{
@@ -259,7 +286,7 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
               }}
               size="small"
               name="filterBy"
-              value={filterBy?.[0] || undefined}
+              value={filterBy}
               onChange={handleFilter}
               options={filterByOptions
                 ?.map((option) => {
@@ -280,11 +307,9 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
                 )}
             />
           </div>
-          {/* <div tw="w-1/2 pl-2"> */}
           <div>
             <TextField
               id="search"
-              // tw="w-full"
               label="Search"
               placeholder="Search"
               inputProps={{
@@ -296,13 +321,7 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
               onChange={handleSearch}
               onKeyPress={(e) => {
                 if (e.key === "Enter") {
-                  setFinalFilterBy(filterBy);
-                  setFinalSearchField(searchField);
-                  // if (!isNaN(Number(searchField))){
-                  //   setFinalSearchField(Number(searchField));
-                  // } else {
-                  //   setFinalSearchField(searchField)
-                  // }
+                  finalizeSearchCriteria();
                 }
               }}
               slotProps={{
@@ -311,7 +330,7 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
                     <InputAdornment
                       position="start"
                       data-testid="test-cases-trigger-search"
-                      // onClick={handleNavigate}
+                      onClick={finalizeSearchCriteria}
                       style={{ cursor: "pointer" }}
                     >
                       <SearchIcon />
@@ -322,7 +341,7 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
                       data-testid="test-cases-clear-search"
                       position="end"
                       style={{ cursor: "pointer" }}
-                      // onClick={handleClearClick}
+                      onClick={blankSearchCriteria}
                     >
                       <IconButton>
                         <ClearIcon />
