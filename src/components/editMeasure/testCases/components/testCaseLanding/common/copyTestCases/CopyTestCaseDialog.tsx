@@ -39,6 +39,11 @@ import "./tcPagination.scss";
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
 export const filterByOptions = ["Measure", "Version", "CMS ID"];
+const filterMap = {
+  Measure: "measureName",
+  Version: "version",
+  "CMS ID": "cmsId",
+};
 
 const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
   const measureSearchApi = useRef(useMeasureServiceApi());
@@ -55,19 +60,19 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
   const [visibleItems, setVisibleItems] = useState<number>(0);
   // utilities for filter & search
   const [filterBy, setFilterBy] = useState<string>("");
-  const [searchValue, setSearchValue] = useState<string>("")
+  const [searchField, setSearchField] = useState<string>("");
+
+  const [finalFilterBy, setFinalFilterBy] = useState<string>("");
+  const [finalSearchField, setFinalSearchField] = useState<string>("");
 
   const handleSearch = (e) => {
-    setSearchValue(e.target.value)
-
-  }
+    setSearchField(e.target.value);
+  };
   const handleFilter = (e) => {
-    setFilterBy(e.target.value)
-
-  }
+    setFilterBy(e.target.value);
+  };
   // measures owned or shared for the current user excluding the current measure
   const [measureList, setMeasureList] = useState<Measure[]>([]);
-  console.log('measureList', measureList)
   const [offset, setOffset] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -77,15 +82,21 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
     }
     setLoading(true);
     abortController.current = new AbortController();
+    const optionalSearchProperties = [];
+    if (finalFilterBy) {
+      optionalSearchProperties.push(filterMap[finalFilterBy]);
+    }
     measureSearchApi.current
       .searchMeasuresByCriteria(
         true,
         limit,
         page,
         {
+          searchField: finalSearchField,
           model: measure.model,
           excludeByMeasureIds: [measure.id],
           draft: true,
+          optionalSearchProperties,
         },
         abortController.current.signal
       )
@@ -110,7 +121,9 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
           console.error("Failed to fetch measures:", error);
         }
       });
-  }, [measure, open, limit, page]);
+    // usually we'd attach the filter conditions as url params, but I don't think it makes sense if it's part of a dialog.
+    // may be a smarter way to do this using a non controlled component, but it's not apparent to me now
+  }, [measure, open, limit, page, finalFilterBy, finalSearchField]);
 
   useEffect(() => {
     fetchMeasures();
@@ -231,7 +244,7 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
     >
       <div id="measure-landing" data-testid="measure-landing">
         <div id="tc-search">
-        {/* <div tw="flex w-1/2 pr-4"> */}
+          {/* <div tw="flex w-1/2 pr-4"> */}
           {/* <div tw="w-1/2 pr-2"> */}
           <div>
             <Select
@@ -246,7 +259,7 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
               }}
               size="small"
               name="filterBy"
-              value={filterBy}
+              value={filterBy?.[0] || undefined}
               onChange={handleFilter}
               options={filterByOptions
                 ?.map((option) => {
@@ -278,12 +291,18 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
                 "data-testid": "test-case-list-search-input",
               }}
               data-testid="test-case-list-search"
-              name="searchValue"
-              value={searchValue}
+              name="searchField"
+              value={searchField}
               onChange={handleSearch}
               onKeyPress={(e) => {
                 if (e.key === "Enter") {
-                  // handleNavigate();
+                  setFinalFilterBy(filterBy);
+                  setFinalSearchField(searchField);
+                  // if (!isNaN(Number(searchField))){
+                  //   setFinalSearchField(Number(searchField));
+                  // } else {
+                  //   setFinalSearchField(searchField)
+                  // }
                 }
               }}
               slotProps={{
@@ -323,7 +342,7 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
               className="ml-table"
               style={{
                 borderSpacing: "0 2em !important",
-                borderBottom: "1px solid rgb(140, 140, 140)"
+                borderBottom: "1px solid rgb(140, 140, 140)",
               }}
             >
               <thead tw="bg-slate">
