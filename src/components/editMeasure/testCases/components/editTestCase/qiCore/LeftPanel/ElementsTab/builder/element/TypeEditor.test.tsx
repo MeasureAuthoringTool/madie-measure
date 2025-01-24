@@ -217,16 +217,19 @@ describe("TypeEditor Component", () => {
   test("Should render Boolean component", () => {
     const handleChange = jest.fn();
     render(
-      <TypeEditor
-        type={`boolean`}
-        required={false}
-        value={`True`}
-        onChange={handleChange}
-        structureDefinition={null}
-      />
+      <FormikProvider value={mockFormik}>
+        <TypeEditor
+          type={`boolean`}
+          required={false}
+          value={`true`}
+          onChange={handleChange}
+          structureDefinition={null}
+          label={"MedicationAbsent.meta"}
+        />
+      </FormikProvider>
     );
     expect(
-      screen.getByTestId("boolean-input-field-undefined")
+      screen.getByTestId("boolean-input-field-MedicationAbsent.meta")
     ).toBeInTheDocument();
   });
 
