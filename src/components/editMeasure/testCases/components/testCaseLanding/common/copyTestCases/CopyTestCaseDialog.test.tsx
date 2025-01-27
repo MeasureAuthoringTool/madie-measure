@@ -1,5 +1,5 @@
 import CopyTestCaseDialog from "./CopyTestCaseDialog";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import * as React from "react";
 import { Measure, MeasureSet, Model, TestCase } from "@madie/madie-models";
 import * as _ from "lodash";
@@ -7,6 +7,8 @@ import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../../../../api/useMeasureServiceApi";
 import userEvent from "@testing-library/user-event";
+import { Simulate } from "react-dom/test-utils";
+const { getByTestId } = screen;
 
 const MEASURE_OWNER = "test.user";
 
@@ -228,6 +230,108 @@ describe("Copy Test Case Dialog Component", () => {
         "Sort descending"
       );
     });
+  });
+
+  it("Filter and Search, changes, fire, clear", async () => {
+    const testFn = jest.fn().mockResolvedValue(mockMeasureSearchResponse);
+    const useMeasureServiceMockResolvedMultiple = {
+      searchMeasuresByCriteria: testFn,
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockResolvedMultiple;
+    });
+    const test = new AbortController();
+    render(
+      <CopyTestCaseDialog
+        open={true}
+        onClose={() => jest.fn()}
+        onSubmit={() => jest.fn()}
+        measure={mockCurrentMeasure}
+      />
+    );
+
+    await waitFor(() => expect(testFn).toHaveBeenCalledTimes(1));
+    const table = await screen.findByTestId("measure-list-tbl");
+    const tableHeaders = table.querySelectorAll("thead th");
+    expect(tableHeaders[1]).toHaveTextContent("Measure Name");
+    expect(tableHeaders[2]).toHaveTextContent("Version");
+    expect(tableHeaders[3]).toHaveTextContent("CMS ID");
+    const tableRows = table.querySelectorAll("tbody tr");
+    expect(tableRows[0]).toHaveTextContent(
+      otherMeasuresOwnedByUser[0].measureName
+    );
+    expect(tableRows[0]).toHaveTextContent(otherMeasuresOwnedByUser[0].version);
+    expect(tableRows[0]).toHaveTextContent(
+      _.toString(otherMeasuresOwnedByUser[0].measureSet.cmsId)
+    );
+    //changes
+    const filterInput = getByTestId(
+      "filter-by-select-input"
+    ) as HTMLInputElement;
+    expect(filterInput).toBeInTheDocument();
+    expect(filterInput.value).toBe("");
+    fireEvent.change(filterInput, {
+      target: { value: "Measure" },
+    });
+    expect(filterInput.value).toBe("Measure");
+
+    // fire condition 1
+    const searchFieldInput = getByTestId("test-case-list-search-input");
+    expect(searchFieldInput.value).toBe("");
+    userEvent.type(searchFieldInput, "test{enter}");
+
+    // await waitFor(() => expect(searchFieldInput.value).toBe("test"));
+    await waitFor(() => expect(testFn).toHaveBeenCalledTimes(2));
+    expect(testFn).toHaveBeenNthCalledWith(
+      2, // Second call
+      true,
+      5,
+      0,
+      {
+        draft: true,
+        excludeByMeasureIds: ["1"],
+        model: "QDM v5.6",
+        optionalSearchProperties: ["measureName"],
+        searchField: "test",
+      },
+      test
+    );
+    // Finally, check the second call for the correct values
+    const clearIcon = getByTestId("ClearIcon");
+    userEvent.click(clearIcon);
+    await waitFor(() => expect(testFn).toHaveBeenCalledTimes(3));
+    expect(testFn).toHaveBeenNthCalledWith(
+      3,
+      true,
+      5,
+      0,
+      {
+        draft: true,
+        excludeByMeasureIds: ["1"],
+        model: "QDM v5.6",
+        optionalSearchProperties: [],
+        searchField: "",
+      },
+      test
+    );
+
+    userEvent.type(searchFieldInput, "test{enter}");
+    await waitFor(() => expect(testFn).toHaveBeenCalledTimes(4));
+    expect(testFn).toHaveBeenNthCalledWith(
+      4,
+      true,
+      5,
+      0,
+      {
+        draft: true,
+        excludeByMeasureIds: ["1"],
+        model: "QDM v5.6",
+        optionalSearchProperties: ["measureName", "version", "cmsId"],
+        searchField: "test",
+      },
+      test
+    );
   });
 
   it("should display a text when user doesn't have any other measures from same model", async () => {

@@ -380,9 +380,10 @@ export class MeasureServiceApi {
     limit: number = 25,
     page: number = 0,
     searchCriteria: any,
-    signal
+    abortController: AbortController
   ): Promise<any> {
     try {
+      console.log("what are my ssearchCriteria", searchCriteria);
       const response = await axios.put<any>(
         `${this.baseUrl}/measures/searches`,
         searchCriteria,
@@ -396,7 +397,7 @@ export class MeasureServiceApi {
             limit,
             page,
           },
-          signal,
+          signal: abortController.signal,
         }
       );
       return response.data;

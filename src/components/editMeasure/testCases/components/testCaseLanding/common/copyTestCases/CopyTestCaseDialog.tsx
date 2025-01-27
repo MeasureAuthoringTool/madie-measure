@@ -48,7 +48,6 @@ const filterMap = {
 const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
   const measureSearchApi = useRef(useMeasureServiceApi());
   const abortController = useRef(null);
-
   // utilities for pagination
   const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(0);
@@ -62,8 +61,10 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
   const [filterBy, setFilterBy] = useState<string>("");
   const [searchField, setSearchField] = useState<string>("");
 
-  const [finalFilterBy, setFinalFilterBy] = useState<string>("");
-  const [finalSearchField, setFinalSearchField] = useState<string>("");
+  const [finalSearchAndFilterby, setFinalSearchAndFilterby] = useState({
+    finalSearchField: "",
+    finalFilterBy: "",
+  });
 
   const handleSearch = (e) => {
     setSearchField(e.target.value);
@@ -75,15 +76,13 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
   const [measureList, setMeasureList] = useState<Measure[]>([]);
   const [offset, setOffset] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
-
-  console.log("filterBy", filterBy, finalFilterBy);
-  console.log("searchValue", searchField, finalSearchField);
   const fetchMeasures = useCallback(() => {
     if (!measure || !measure.model || !measure.id || !open) {
       return;
     }
     setLoading(true);
     abortController.current = new AbortController();
+    const { finalSearchField, finalFilterBy } = finalSearchAndFilterby;
     const optionalSearchProperties = [];
     if (finalFilterBy) {
       optionalSearchProperties.push(filterMap[finalFilterBy]);
@@ -91,19 +90,11 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
     // We have a condition when we first load the table where we don't want to apply the filters.
     // We want this to still fire, so we only want to append all possible filters for when "-" is selected in filters, if a searchValue is also provided
     if (!finalFilterBy && finalSearchField) {
-      console.log("trigger");
       // apply all conditions
       filterByOptions.forEach((condition) => {
         optionalSearchProperties.push(filterMap[condition]);
       });
     }
-    console.log("obj", {
-      searchField: finalSearchField,
-      model: measure.model,
-      excludeByMeasureIds: [measure.id],
-      draft: true,
-      optionalSearchProperties,
-    });
     measureSearchApi.current
       .searchMeasuresByCriteria(
         true,
@@ -116,7 +107,7 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
           draft: true,
           optionalSearchProperties,
         },
-        abortController.current.signal
+        abortController.current
       )
       .then((response) => {
         const {
@@ -141,7 +132,15 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
       });
     // usually we'd attach the filter conditions as url params, but I don't think it makes sense if it's part of a dialog.
     // may be a smarter way to do this using a non controlled component, but it's not apparent to me now
-  }, [measure, open, limit, page, finalFilterBy, finalSearchField]);
+  }, [
+    measure,
+    limit,
+    page,
+    finalSearchAndFilterby,
+    filterMap,
+    abortController,
+    open,
+  ]);
 
   useEffect(() => {
     fetchMeasures();
@@ -150,7 +149,7 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
         abortController.current.abort();
       }
     };
-  }, [fetchMeasures]);
+  }, [fetchMeasures, measure?.id]);
 
   const columns = useMemo<ColumnDef<Measure>[]>(() => {
     const columnDefs = [];
@@ -238,15 +237,17 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
   });
 
   const finalizeSearchCriteria = () => {
-    setFinalFilterBy(filterBy);
-    setFinalSearchField(searchField);
+    const finalSearchAndFilter = {
+      finalSearchField: searchField,
+      finalFilterBy: filterBy,
+    };
+    setFinalSearchAndFilterby(finalSearchAndFilter);
   };
 
   const blankSearchCriteria = () => {
     setSearchField("");
     setFilterBy("");
-    setFinalFilterBy("");
-    setFinalSearchField("");
+    setFinalSearchAndFilterby({ finalFilterBy: "", finalSearchField: "" });
   };
 
   return (
