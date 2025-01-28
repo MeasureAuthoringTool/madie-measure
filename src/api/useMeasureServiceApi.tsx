@@ -383,7 +383,6 @@ export class MeasureServiceApi {
     abortController: AbortController
   ): Promise<any> {
     try {
-      console.log("what are my ssearchCriteria", searchCriteria);
       const response = await axios.put<any>(
         `${this.baseUrl}/measures/searches`,
         searchCriteria,
