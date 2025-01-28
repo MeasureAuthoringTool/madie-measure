@@ -78,12 +78,6 @@ export default function ActionCenter(props: PropTypes) {
 
   return (
     <div data-testid="action-center">
-      <DeleteAction
-        measures={props.measures}
-        onClick={deleteMeasure}
-        canEdit={canEdit}
-      />
-      <ExportAction measures={props.measures} onClick={exportMeasure} />
       <DraftAction
         measures={props.measures}
         onClick={draftMeasure}
@@ -94,6 +88,12 @@ export default function ActionCenter(props: PropTypes) {
         onClick={versionMeasure}
         canEdit={canEdit}
       />
+      <DeleteAction
+        measures={props.measures}
+        onClick={deleteMeasure}
+        canEdit={canEdit}
+      />
+      <ExportAction measures={props.measures} onClick={exportMeasure} />
       <AssociateCmsIdAction
         measures={props.measures}
         onClick={props.associateCmsId}
