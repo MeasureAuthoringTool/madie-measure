@@ -29,6 +29,7 @@ import {
   Tab,
   Tabs,
   TextArea,
+  TextField,
 } from "@madie/madie-design-system/dist/react";
 import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
 import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
@@ -920,7 +921,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                     canEdit={canEdit}
                     placeholder="UCUM Code or Name"
                   />
-                  <TextArea
+                  <TextField
                     disabled={!canEdit}
                     label="Scoring Precision"
                     name="scoring-precision"
