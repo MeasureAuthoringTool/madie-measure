@@ -67,20 +67,36 @@ export function triggerPopChanges(
     const targedMeasureGroup = measureGroups.find(
       (groupPop) => groupPop.id === changedGroupId
     );
-    const matchingAssociations = targedMeasureGroup?.populations?.filter(
-      (item) => {
-        return item?.associationType?.toLowerCase() === changedPopulationName;
-      }
-    );
-    const matchingIds = matchingAssociations?.map(
-      (association) => association.id
-    );
-    populationValues.forEach((popValue) => {
-      // if popValue.id is included in the matchingId's array, then update PpValue.expected to the new expected.
-      if (popValue?.id && matchingIds?.includes(popValue?.id)) {
-        popValue.expected = expected;
-      }
+    const associationTarget = targedMeasureGroup?.populations?.find((item) => {
+      return item?.id === changedTarget.id;
     });
+    // if we can already get the associationType from it's id on the group, we can just look for the startCase of it on the names of other populations
+    if (associationTarget?.associationType) {
+      populationValues.forEach((popValue) => {
+        if (
+          _.startCase(popValue?.name) === associationTarget?.associationType
+        ) {
+          popValue.expected = expected;
+        }
+      });
+      // if we can't get the associationType, we need to look for it another way.
+    } else {
+      // works for denom and numer
+      const matchingAssociations = targedMeasureGroup?.populations?.filter(
+        (item) => {
+          return item?.associationType?.toLowerCase() === changedPopulationName;
+        }
+      );
+      const matchingIds = matchingAssociations?.map(
+        (association) => association.id
+      );
+      populationValues.forEach((popValue) => {
+        // if popValue.id is included in the matchingId's array, then update PpValue.expected to the new expected.
+        if (popValue?.id && matchingIds?.includes(popValue?.id)) {
+          popValue.expected = expected;
+        }
+      });
+    }
   }
 
   if (targetGroup.scoring === "Proportion") {
