@@ -7,9 +7,9 @@ const UriComponent = ({
   canEdit,
   fieldRequired,
   value,
-  onChange,
-  label = "URI",
+  label,
   structureDefinition,
+  ...props
 }: TypeComponentProps) => {
   return (
     <TextField
@@ -29,7 +29,7 @@ const UriComponent = ({
       size="small"
       fullWidth
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      {...props}
     />
   );
 };

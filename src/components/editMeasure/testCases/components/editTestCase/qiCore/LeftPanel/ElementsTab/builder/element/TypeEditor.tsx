@@ -162,8 +162,10 @@ const TypeEditor = ({
             structureDefinition={structureDefinition}
             fieldRequired={required}
             label={label}
-            onChange={onChange}
+            helperText={formikErrorHandler(label)}
+            error={getNestedProperty(formik.errors, label)}
             value={value}
+            {...formik.getFieldProps(label)}
           />
         );
       case "url":
