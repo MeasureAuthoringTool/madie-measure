@@ -27,10 +27,22 @@ export const getIdValidator = (required) => {
 };
 
 export const getBooleanValidator = (required) => {
-  const booleaReg = /^true$|^false$/;
+  const booleanReg = /^true$|^false$/;
   const baseValidator = Yup.string().matches(
-    booleaReg,
+    booleanReg,
     "Invalid Boolean format"
+  );
+  if (required) {
+    return baseValidator.required("This field is required");
+  }
+  return baseValidator;
+};
+
+export const getIntegerValidator = (required) => {
+  const integerReg = /[0]|[-+]?[1-9][0-9]*/;
+  const baseValidator = Yup.string().matches(
+    integerReg,
+    "Invalid Integer format"
   );
   if (required) {
     return baseValidator.required("This field is required");
@@ -57,6 +69,9 @@ export const getStringValidator = (required) => {
 */
 
 export const validationLookup = {
+  "http://hl7.org/fhirpath/System.Integer": getIntegerValidator,
+  positiveInt: getIntegerValidator,
+  unsignedInt: getIntegerValidator,
   boolean: getBooleanValidator,
   "http://hl7.org/fhirpath/System.String": getStringValidator,
   string: getStringValidator,

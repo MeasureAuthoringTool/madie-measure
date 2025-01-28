@@ -17,11 +17,11 @@ interface IntegerComponentProps extends TypeComponentProps {
 const IntegerComponent = ({
   canEdit,
   fieldRequired,
-  value,
   onChange,
   label = "Integer",
   structureDefinition,
   integerType,
+  ...props
 }: IntegerComponentProps) => {
   const POSITIVEINT_MINIMUM = 1;
   const POSITIVEINT_MAXIMUM = 2147483647;
@@ -29,9 +29,12 @@ const IntegerComponent = ({
   const UNSIGNED_MAXIMUN = 2147483647;
   const SIGNED_MINIMUM = -2147483648;
   const SIGNED_MAXIMUN = 2147483647;
-  const [inputValue, setInputValue] = useState<string>(value ? value : "");
+  const [inputValue, setInputValue] = useState<string>(
+    props.value ? props.value : ""
+  );
   const [error, setError] = useState<string>("");
   useEffect(() => {
+    const value = props.value;
     if (integerType === IntegerType.UNSIGNED) {
       if (
         Number(value) < UNSIGNED_MINIMUM ||
@@ -63,7 +66,7 @@ const IntegerComponent = ({
       required={fieldRequired}
       disabled={!canEdit}
       id={`integer-field-${label}`}
-      label={`${label}`}
+      label={label}
       inputProps={{
         "data-testid": `integer-field-input-${label}`,
         "aria-describedby": `integer-field-input-helper-text-${label}`,
@@ -73,7 +76,6 @@ const IntegerComponent = ({
       data-testid={`integer-field-${label}`}
       size="small"
       fullWidth
-      value={inputValue}
       onKeyPress={(e) => {
         if (
           integerType !== IntegerType.SIGNED &&
@@ -128,7 +130,7 @@ const IntegerComponent = ({
             Number(value) >= UNSIGNED_MINIMUM &&
             Number(value) <= UNSIGNED_MAXIMUN
           ) {
-            onChange(Number(value));
+            onChange(e);
           } else {
             setError(
               `Unsigned integer range is [${UNSIGNED_MINIMUM} to ${UNSIGNED_MAXIMUN}]`
@@ -139,7 +141,7 @@ const IntegerComponent = ({
             Number(value) >= POSITIVEINT_MINIMUM &&
             Number(value) <= POSITIVEINT_MAXIMUM
           ) {
-            onChange(Number(value));
+            onChange(e);
           } else {
             setError(
               `Positive integer range is [${POSITIVEINT_MINIMUM} to ${POSITIVEINT_MAXIMUM}]`
@@ -150,7 +152,7 @@ const IntegerComponent = ({
             Number(value) >= SIGNED_MINIMUM &&
             Number(value) <= SIGNED_MAXIMUN
           ) {
-            onChange(Number(value));
+            onChange(e);
           } else {
             setError(
               `Signed integer range is [${SIGNED_MINIMUM} to ${SIGNED_MAXIMUN}]`
@@ -160,6 +162,7 @@ const IntegerComponent = ({
       }}
       error={error}
       helperText={error}
+      {...props}
     />
   );
 };

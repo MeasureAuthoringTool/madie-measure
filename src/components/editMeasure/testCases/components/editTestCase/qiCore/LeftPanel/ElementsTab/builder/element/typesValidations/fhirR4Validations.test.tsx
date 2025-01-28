@@ -32,6 +32,17 @@ describe("Validation Functions", () => {
     expect(nonRequiredString.validate("false")).resolves.toBe("false");
   });
 
+  it("getValidation IntegerValidator", () => {
+    const requiredString = getValidation("positiveInt", true);
+    const nonRequiredString = getValidation("positiveInt", false);
+    expect(requiredString).toBeInstanceOf(Yup.StringSchema);
+    expect(requiredString.validate("1")).resolves.toBe("1");
+    expect(requiredString.validate("abc")).rejects.toThrow(
+      "Invalid Integer format"
+    );
+    expect(nonRequiredString.validate("1")).resolves.toBe("1");
+  });
+
   it("getValidation markdownValidator", () => {
     const requiredMarkdown = getValidation("markdown", true);
     const nonRequiredMarkdown = getValidation("markdown", false);
