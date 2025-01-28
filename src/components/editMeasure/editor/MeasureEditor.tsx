@@ -724,13 +724,13 @@ const MeasureEditor = () => {
   // structure of statement: valueset "<name>": "urn:oid:<oid>"
   // valueset "Ethnicity": 'urn:oid:2.16.840.1.114222.4.11.837'
   const handleUpdateVs = (vs) => {
-    setRefValueSetDetails(vs);
     const result = applyValueset(
       editorVal,
       measure.model,
       vs,
       prevSelectedValueSetDetails?.current
     ); // should have updated editorVal but doesn't
+    setRefValueSetDetails(vs);
     if (result.status !== "danger") {
       handleMadieEditorValue(result.cql);
       setEditorVal(result.cql);
