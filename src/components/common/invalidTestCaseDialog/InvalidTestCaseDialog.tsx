@@ -13,6 +13,7 @@ interface InvalidTestCaseDialogProps {
   versionType: String;
   loading: boolean;
 }
+
 const InvalidTestCaseDialog = (props: InvalidTestCaseDialogProps) => {
   const { open, onClose, onContinue, versionType, loading } = props;
   return (
