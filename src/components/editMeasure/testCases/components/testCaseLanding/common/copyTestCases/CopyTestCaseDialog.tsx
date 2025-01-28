@@ -248,6 +248,7 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
     setSearchField("");
     setFilterBy("");
     setFinalSearchAndFilterby({ finalFilterBy: "", finalSearchField: "" });
+    setPage(0);
   };
 
   return (
