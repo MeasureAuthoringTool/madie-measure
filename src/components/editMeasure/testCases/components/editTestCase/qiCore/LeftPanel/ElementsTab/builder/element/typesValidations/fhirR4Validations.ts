@@ -56,6 +56,7 @@ export const getDecimalValidator = (required) => {
     decimalRegex,
     "Invalid Decimal format"
   );
+
   if (required) {
     return baseValidator.required("This field is required");
   }
