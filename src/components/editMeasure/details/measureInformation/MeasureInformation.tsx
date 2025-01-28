@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "twin.macro";
 import { Endorsement, Measure, Model } from "@madie/madie-models";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import "styled-components/macro";
@@ -9,8 +10,14 @@ import {
   Toast,
   TextField,
   ReadOnlyTextField,
+  Select,
 } from "@madie/madie-design-system/dist/react";
-import { Typography, FormControlLabel, Checkbox } from "@mui/material";
+import {
+  Typography,
+  FormControlLabel,
+  Checkbox,
+  MenuItem,
+} from "@mui/material";
 import { useFormik } from "formik";
 import { MeasureSchemaValidator } from "../../../../validations/MeasureSchemaValidator";
 import {
@@ -30,6 +37,7 @@ import { QdmMeasureSchemaValidator } from "../../../../validations/QDMMeasureSch
 import useQdmElmTranslationServiceApi from "../../../../api/useQdmElmTranslationServiceApi";
 import useFhirElmTranslationServiceApi from "../../../../api/useFhirElmTranslationServiceApi";
 import GenerateCmsIdConfirmationDialog from "../cmsIdentifier/GenerateCmsIdConfirmationDialog";
+import _ from "lodash";
 
 interface measureInformationForm {
   versionId: string;
@@ -43,6 +51,7 @@ interface measureInformationForm {
   experimental: boolean;
   endorsements: Array<Endorsement>;
   endorsementId: string;
+  intendedVenue?: any;
 }
 
 interface MeasureInformationProps {
@@ -126,6 +135,52 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
+
+  const intendedVenueValues = [
+    {
+      code: "ec",
+      codeSystem:
+        "http://hl7.org/fhir/us/cqfmeasures/CodeSystem/intended-venue-codes",
+      display: "EC",
+      definition:
+        "An eligible clinician is a clinician who is eligible to participate in a quality measurement intiative.",
+    },
+    {
+      code: "eh",
+      codeSystem:
+        "http://hl7.org/fhir/us/cqfmeasures/CodeSystem/intended-venue-codes",
+      display: "EH",
+      definition:
+        "An eligible hospital is an acute care facility that is eligible to participate in a quality measurement initiative.",
+    },
+  ];
+
+  const intendedVenueOptions = [
+    "-",
+    "Eligible Clinician (EC)",
+    "Eligible Hospital (EH)",
+  ];
+
+  const selectedIntendedVenueValue = (selectedIntendedVenue: string) => {
+    if (selectedIntendedVenue?.includes("(EC)")) {
+      return intendedVenueValues[0];
+    }
+    if (selectedIntendedVenue?.includes("EH")) {
+      return intendedVenueValues[1];
+    }
+    return null;
+  };
+
+  const displayIntendedVenue = (intendedVenueCode: string) => {
+    if (intendedVenueCode === "ec") {
+      return intendedVenueOptions[1];
+    }
+    if (intendedVenueCode === "eh") {
+      return intendedVenueOptions[2];
+    }
+    return intendedVenueOptions[0];
+  };
+
   // our initial values are taken from the measure we subscribe to
   const INITIAL_VALUES = {
     measurementPeriodStart: measure?.measurementPeriodStart,
@@ -143,6 +198,9 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       (measure?.model === Model.QDM_5_6 ? null : false),
     endorsements: measure?.measureMetaData?.endorsements || [],
     endorsementId: measure?.measureMetaData?.endorsements?.[0]?.endorsementId,
+    intendedVenue:
+      displayIntendedVenue(measure?.measureMetaData?.intendedVenue?.code) ||
+      null,
   } as measureInformationForm;
 
   const schema =
@@ -262,6 +320,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     }
     return true;
   };
+
   const handleSubmit = async (values) => {
     let endorsersValid = true;
     // we only want to validate this field if it's not an empty array.
@@ -318,6 +377,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
                 values.endorsements[0]?.endorserSystemId || null,
             },
           ],
+          intendedVenue: selectedIntendedVenueValue(values?.intendedVenue),
         },
       };
       measureServiceApi
@@ -576,6 +636,38 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             size="small"
           />
         </Box>
+
+        {measure?.model !== Model.QDM_5_6 && (
+          <div tw="mb-4 w-1/2">
+            <Select
+              placeHolder={"-"}
+              label="Intended Venue"
+              id="intended-venue"
+              inputProps={{
+                "data-testid": "intended-venue-input",
+              }}
+              data-testid="intended-venue"
+              value={`${formik.values?.intendedVenue}`}
+              disabled={!canEdit}
+              size="small"
+              SelectDisplayProps={{
+                "aria-required": "true",
+              }}
+              onChange={(e) =>
+                formik.setFieldValue("intendedVenue", e.target.value)
+              }
+              options={intendedVenueOptions.map((intendedVenue, i) => (
+                <MenuItem
+                  key={`${intendedVenue}-${i}`}
+                  data-testid={`${_.camelCase(intendedVenue)}-option`}
+                  value={intendedVenue}
+                >
+                  {intendedVenue}
+                </MenuItem>
+              ))}
+            />
+          </div>
+        )}
       </div>
       {canEdit && (
         <div className="form-actions">
