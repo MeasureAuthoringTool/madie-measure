@@ -3,7 +3,7 @@ import { CqlApplyActionResult } from "./CqlApplyActionResult";
 import { CQLFunction } from "@madie/madie-editor";
 
 function findMatchingArguments(objects, matchCriteria) {
-    // first parse out and compare function names.
+  // first parse out and compare function names.
   const appliedFuntionName = matchCriteria.functionName.toLowerCase();
   const functionName = /"(.*?)"/;
   // further filter down objects array with only members whos name matches applied function name
@@ -12,9 +12,9 @@ function findMatchingArguments(objects, matchCriteria) {
     const res = matchResult ? matchResult[1].toLowerCase() : null;
     return res === appliedFuntionName;
   });
-// string values inside of arguments parens
+  // string values inside of arguments parens
   const firstParensRegex = /\(([^)]+)\)/;
-   // Extracts arguments (name and data type)
+  // Extracts arguments (name and data type)
   const argumentRegex = /"([^"]+)"\s+"([^"]+)"/g;
 
   const result = [];
@@ -32,7 +32,7 @@ function findMatchingArguments(objects, matchCriteria) {
     }
     //get only first parens
     const parensContent = parensMatch[1];
-     //parse out the args from the string to compare
+    //parse out the args from the string to compare
     const args = [];
     let match;
     while ((match = argumentRegex.exec(parensContent)) !== null) {
@@ -45,11 +45,14 @@ function findMatchingArguments(objects, matchCriteria) {
       return null;
     }
 
-     // iterate through all cql matches, if args shallowEqual functionsArguments we push the object.
+    // iterate through all cql matches, if args shallowEqual functionsArguments we push the object.
     let missed = false;
     args.forEach((arg, index) => {
       const target = functionsArguments[index];
-      if (target.argumentName !== arg.argumentName || target.dataType !== arg.dataType) {
+      if (
+        target.argumentName !== arg.argumentName ||
+        target.dataType !== arg.dataType
+      ) {
         missed = true;
         return;
       }
