@@ -6,7 +6,6 @@ import { TextField } from "@madie/madie-design-system/dist/react/";
 const UriComponent = ({
   canEdit,
   fieldRequired,
-  value,
   label,
   structureDefinition,
   ...props
@@ -28,7 +27,6 @@ const UriComponent = ({
       data-testid={`uri-field-${label}`}
       size="small"
       fullWidth
-      value={value}
       {...props}
     />
   );

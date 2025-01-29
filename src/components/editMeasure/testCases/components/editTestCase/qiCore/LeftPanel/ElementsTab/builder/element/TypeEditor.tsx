@@ -164,7 +164,6 @@ const TypeEditor = ({
             label={label}
             helperText={formikErrorHandler(label)}
             error={getNestedProperty(formik.errors, label)}
-            value={value}
             {...formik.getFieldProps(label)}
           />
         );
