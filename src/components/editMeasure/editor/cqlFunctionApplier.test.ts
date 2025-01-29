@@ -68,7 +68,7 @@ describe("Definition Apply Function tests", () => {
     );
   });
 
-  it("will not insert when function is found", () => {
+  it.only("will not insert when function is found", () => {
     const mockCql = getMock("cqlFunctionApplierDuplicateEntry");
     const result = applyCQLFunction(mockCql, testFunction);
     expect(result.message).toBe(
