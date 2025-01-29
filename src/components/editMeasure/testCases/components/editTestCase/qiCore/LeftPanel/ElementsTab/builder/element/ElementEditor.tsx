@@ -23,7 +23,6 @@ interface ElementEditorProps {
   onChange?: (path: string, value: any) => void;
   canEdit: boolean;
 }
-
 const ElementEditor = ({
   selectedResource,
   resource,
@@ -32,6 +31,7 @@ const ElementEditor = ({
   onChange,
   canEdit,
 }: ElementEditorProps) => {
+  console.log("selectedResource", selectedResource);
   const fhirDefinitionsServiceApi = useFhirDefinitionsServiceApi();
   const fhirDefinitionsService = useRef(fhirDefinitionsServiceApi);
   const [loading, setLoading] = useState(true);
@@ -68,11 +68,25 @@ const ElementEditor = ({
           return nodeList; // Return the aggregated node list
         }
       }
+      // This is the edge case for when we're providing the root of the structure like ClaimResponse as it's not a componentDataType and there is no type
+      const required = +child.min > 0;
+      // const elemPath = stripResourcePath(resourcePath, child.path);
+      const elemPath = child.path;
+      const value = _.get(resource, elemPath);
+      console.log("CHILD IS", child);
+      const builtNode = {
+        id: child?.id,
+        label: child.path.split(".").pop(),
+        value,
+        type,
+        required,
+        validation: null,
+      };
+      return nodeList.concat(builtNode);
     } else {
       // It's a single node. Add it to the node list
       const required = +child.min > 0;
       const elemPath = stripResourcePath(resourcePath, child.path);
-
       const value = _.get(resource, elemPath);
       const builtNode = {
         id: child?.id,
@@ -134,6 +148,7 @@ const ElementEditor = ({
 
   // given form info, we're going to make an object of schemas and save it to state for formik.
   const buildSchemaAndInitialValues = (formInfo) => {
+    console.log("formInfo", formInfo);
     const initialValuesObject = {};
     const validationSchemaObject = {};
     const setNestedValue = (obj, path, value) => {
@@ -163,10 +178,16 @@ const ElementEditor = ({
   };
 
   const triggerFormBuilder = async () => {
-    const currentPath = elementDefinition?.path;
+    // const currentPath = elementDefinition?.path;
+    const currentPath = selectedResource.definition.type;
+    // console.log('currentPath', selectedResource.definition.type)
     const allChildren = getAllChildren(selectedResource, currentPath);
+    // console.log('allChildren', allChildren);
+    // console.log('rootDefinition', selectedResource?.definition?.snapshot?.element?.[0]);
+    // console.log('resourcePath', resourcePath);
+    // console.log('resource', resource);
     await buildForm(
-      elementDefinition,
+      selectedResource?.definition?.snapshot?.element?.[0],
       allChildren,
       fhirDefinitionsService,
       resourcePath,
@@ -174,10 +195,13 @@ const ElementEditor = ({
     );
   };
   useEffect(() => {
-    if (elementDefinition) {
+    if (selectedResource) {
+      // console.log('elementDefinittion', elementDefinition)
+      // console.log('selectedResource', selectedResource)
+
       triggerFormBuilder();
     }
-  }, [elementDefinition?.id]);
+  }, [selectedResource]);
 
   const formik = useFormik({
     initialValues,
@@ -185,6 +209,7 @@ const ElementEditor = ({
     validationSchema,
     onSubmit: (values) => {},
   });
+  console.log("formik", formik);
   if (_.isNil(elementDefinition)) {
     return <span>No element selected</span>;
   }
