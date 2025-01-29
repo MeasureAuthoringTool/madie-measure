@@ -18,9 +18,18 @@ export function stripResourcePath(resourcePath, elementPath) {
   return elementPath.substring(`${resourcePath}.`.length);
 }
 
+/**
+ * In the provided list of FHIR resource's elements,
+ * return the list of elements that is not the original path but all its child attributes.
+ * Ex: path = claimResponse.item then return all its child elements such as claimResponse.item.id, claimResponse.item.detail etc.
+ * @param resource a FHIR resource ex: ClaimResponse
+ * @param path path to a resource or its child attributes ex: claimResponse.status
+ */
 export function getAllChildren(resource, path) {
   const elements = [...resource?.definition?.snapshot?.element];
-  return elements?.filter((e) => e.path !== path && e.path.includes(path));
+  return elements?.filter(
+    (e) => e.path !== path && e.path.startsWith(`${path}.`)
+  );
 }
 
 export function updateChildrenPaths(structureDefinition, elements) {
