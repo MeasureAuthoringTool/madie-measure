@@ -23,13 +23,13 @@ import {
   AutoComplete,
   Button,
   MadieDiscardDialog,
+  NumberInput,
   Select,
   DSLink,
   Toast,
   Tab,
   Tabs,
   TextArea,
-  TextField,
 } from "@madie/madie-design-system/dist/react";
 import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
 import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
@@ -921,7 +921,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                     canEdit={canEdit}
                     placeholder="UCUM Code or Name"
                   />
-                  <TextField
+                  <NumberInput
                     disabled={!canEdit}
                     label="Scoring Precision"
                     name="scoring-precision"
