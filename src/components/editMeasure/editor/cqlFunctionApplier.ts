@@ -3,41 +3,49 @@ import { CqlApplyActionResult } from "./CqlApplyActionResult";
 import { CQLFunction } from "@madie/madie-editor";
 
 function findMatchingArguments(objects, matchCriteria) {
+    // first parse out and compare function names.
   const appliedFuntionName = matchCriteria.functionName.toLowerCase();
   const functionName = /"(.*?)"/;
-
+  // further filter down objects array with only members whos name matches applied function name
   objects = objects.filter((obj) => {
     const matchResult = obj.text.match(functionName);
     const res = matchResult ? matchResult[1].toLowerCase() : null;
     return res === appliedFuntionName;
   });
-
+// string values inside of arguments parens
   const firstParensRegex = /\(([^)]+)\)/;
+   // Extracts arguments (name and data type)
   const argumentRegex = /"([^"]+)"\s+"([^"]+)"/g;
 
   const result = [];
+  // iterate through all objects text properties
   const { functionsArguments } = matchCriteria;
 
   objects.forEach((obj) => {
     if (!obj.text) return;
 
     const parensMatch = obj.text.match(firstParensRegex);
+    // if nothing in the parens of our comparison obj and nothing in the supplied fn to apply, we know it's the same by earlier name match
     if (!parensMatch && functionsArguments.length === 0) {
       result.push(obj);
       return;
     }
-
+    //get only first parens
     const parensContent = parensMatch[1];
+     //parse out the args from the string to compare
     const args = [];
     let match;
     while ((match = argumentRegex.exec(parensContent)) !== null) {
       args.push({ argumentName: match[1], dataType: match[2] });
     }
 
+    // now we need to make sure that there are no misses on all args.
+    // if they don't have the same number of arguments we know we can skip a deeper check
     if (functionsArguments.length !== args.length) {
-      return;
+      return null;
     }
 
+     // iterate through all cql matches, if args shallowEqual functionsArguments we push the object.
     let missed = false;
     args.forEach((arg, index) => {
       const target = functionsArguments[index];
@@ -58,8 +66,6 @@ function findMatchingArguments(objects, matchCriteria) {
 
   return null;
 }
-
-
 
 const findExistingCQLFunction = (cqlFunction, expressionDefinitions) => {
   if (!cqlFunction || !expressionDefinitions) {
