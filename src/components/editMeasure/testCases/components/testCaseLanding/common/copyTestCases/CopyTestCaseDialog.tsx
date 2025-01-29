@@ -204,7 +204,7 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
         variant: "cyan",
         type: "submit",
         "data-testid": "copy-test-cases-continue-button",
-        continueText: "Continue",
+        continueText: "Save",
         disabled: _.isEmpty(selectedRowId),
       }}
       maxWidth={"lg"}
