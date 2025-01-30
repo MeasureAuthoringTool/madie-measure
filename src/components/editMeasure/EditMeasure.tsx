@@ -433,7 +433,7 @@ export default function EditMeasure() {
         </div>
       ) : (
         <>
-          <div tw="relative" style={{ marginTop: "-60px" }}>
+          <div tw="relative" style={{ marginTop: "-48px" }}>
             <EditMeasureNav isQDM={isQDM} />
             <div
               style={{

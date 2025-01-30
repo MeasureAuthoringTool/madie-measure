@@ -60,13 +60,13 @@ const EditMeasureNav = ({ isQDM }) => {
   return (
     <div>
       <div style={{ marginLeft: "32px" }} id="edit-measure-nav-a">
-        <Tabs value={match} type="A" size="large">
+        <Tabs value={match} type="A" size="standard">
           <Tab
             value={`details`}
             to="details"
             data-testid="measure-details-tab"
             type="A"
-            size="large"
+            size="standard"
             label="Details"
             component={NavLink}
           />
@@ -75,7 +75,7 @@ const EditMeasureNav = ({ isQDM }) => {
             to={`cql-editor`}
             data-testid="cql-editor-tab"
             type="A"
-            size="large"
+            size="standard"
             label="CQL Editor"
             component={NavLink}
           />
@@ -84,7 +84,7 @@ const EditMeasureNav = ({ isQDM }) => {
             to={isQDM ? `base-configuration` : `groups/1`}
             data-testid="groups-tab"
             type="A"
-            size="large"
+            size="standard"
             label="Population Criteria"
             component={NavLink}
           />
@@ -93,7 +93,7 @@ const EditMeasureNav = ({ isQDM }) => {
             to={`test-cases/list-page`}
             data-testid="patients-tab"
             type="A"
-            size="large"
+            size="standard"
             label={testCaseLabel}
             component={NavLink}
           />
