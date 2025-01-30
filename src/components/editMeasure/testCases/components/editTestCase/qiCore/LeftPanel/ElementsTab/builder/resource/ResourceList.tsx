@@ -27,6 +27,7 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { customSort } from "../../../../../../testCaseLanding/common/Hooks/UseTestCases";
 import EditIcon from "../../../../../../../../../common/EditIcon";
+import { ClearIcon } from "@mui/x-date-pickers";
 import "./ResourceList.scss";
 
 export interface ResourceListProps {
@@ -42,8 +43,7 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
   const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(1);
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [selectedRowId, setSelectedRowId] = React.useState<string | null>(null);
-  const [hoveredHeader, setHoveredHeader] = useState<string>("");
+  // const [hoveredHeader, setHoveredHeader] = useState<string>("");
   const [totalPages, setTotalPages] = useState<number>(0);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [visibleItems, setVisibleItems] = useState<number>(0);
@@ -102,15 +102,7 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
       },
       {
         header: "Value Set",
-        cell: (info) => (
-          <>
-            <TruncateText
-              text={info.row.original.title}
-              maxLength={20}
-              dataTestId={`value-set-${info.row.original.id}`}
-            />
-          </>
-        ),
+        cell: (info) => <></>,
         accessorKey: "title",
         sortingFn: (rowA, rowB) =>
           customSort(rowA.original.title, rowB.original.title),
@@ -118,7 +110,6 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
       {
         header: "",
         cell: (info) => {
-          console.log("info", info);
           return (
             <>
               <IconButton
@@ -137,7 +128,7 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
         accessorKey: "action",
       },
     ];
-  }, [selectedRowId]);
+  }, [visibleResources]);
   const canGoNext = (() => {
     return page < totalPages;
   })();
@@ -168,29 +159,29 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
     },
   });
 
-  // add in later.
-  // const handleClearClick = () => {
-  //   setResourceFilter("");
-  // };
+  // if there isnt a start adornment and end adornment the field gets really small like 1/4 the height. Going to just leave it in for now
+  const handleClearClick = () => {
+    setResourceFilter("");
+  };
   const searchInputProps = {
     startAdornment: (
       <InputAdornment position="start">
         <SearchIcon />
       </InputAdornment>
     ),
-    // endAdornment: (
-    //   <IconButton
-    //     aria-label="Clear-Search"
-    //     sx={
-    //       {
-    //         // visibility: props.searchCriteria ? "visible" : "hidden",
-    //       }
-    //     }
-    //     onClick={handleClearClick}
-    //   >
-    //     <ClearIcon />
-    //   </IconButton>
-    // ),
+    endAdornment: (
+      <IconButton
+        aria-label="Clear-Search"
+        sx={
+          {
+            // visibility: props.searchCriteria ? "visible" : "hidden",
+          }
+        }
+        onClick={handleClearClick}
+      >
+        <ClearIcon />
+      </IconButton>
+    ),
   };
   return (
     <div id="qi-core-6-tc-builder">
@@ -198,6 +189,12 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
         <TextField
           onChange={(e) => {
             setResourceFilter(e.target.value);
+          }}
+          onKeyPress={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              // finalizeSearchCriteria();
+            }
           }}
           id="search-elements-input"
           name="searchElements"
@@ -209,7 +206,7 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
           variant="outlined"
           value={resourceFilter}
           inputProps={{
-            "data-testid": "search-elements-input",
+            "data-testid": "search-elements-input-input",
             "aria-required": "false",
           }}
           InputProps={searchInputProps}
@@ -233,18 +230,21 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
                   {table.getHeaderGroups().map((headerGroup) => (
                     <tr key={headerGroup.id}>
                       {headerGroup.headers.map((header) => {
-                        const isHovered = hoveredHeader?.includes(header.id);
+                        // const isHovered = hoveredHeader?.includes(header.id); add in later for visibility toggle
                         return (
                           <TH
                             key={header.id}
                             scope="col"
-                            onClick={header.column.getToggleSortingHandler()}
-                            onMouseEnter={() => setHoveredHeader(header.id)}
-                            onMouseLeave={() => setHoveredHeader(null)}
+                            // onClick={header.column.getToggleSortingHandler()} //add in later
+                            // onMouseEnter={() => setHoveredHeader(header.id)}
+                            // onMouseLeave={() => setHoveredHeader(null)}
                             className="header-cell"
                           >
                             {header.isPlaceholder ? null : (
                               <button
+                                onClick={(e) => {
+                                  e.preventDefault(); // needs this or it triggers a submit somewhere up the form and errors
+                                }}
                                 className={
                                   header.column.getCanSort()
                                     ? "cursor-pointer select-none header-button"
@@ -262,6 +262,9 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
                                     : undefined
                                 }
                               >
+                                {/* 
+                                add in later for sorting.
+                                add a negative margin on the arrow display to not make the table jump
                                 <span className="arrowDisplay">
                                   {header.column.getCanSort() &&
                                     isHovered &&
@@ -273,7 +276,7 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
                                     desc: <KeyboardArrowDownIcon />,
                                   }[header.column.getIsSorted() as string] ??
                                     null}
-                                </span>
+                                </span> */}
                                 {flexRender(
                                   header.column.columnDef.header,
                                   header.getContext()

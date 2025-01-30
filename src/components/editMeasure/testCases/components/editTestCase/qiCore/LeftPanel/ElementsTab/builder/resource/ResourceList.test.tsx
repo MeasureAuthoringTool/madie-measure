@@ -1,0 +1,107 @@
+import ResourceList from "./ResourceList";
+import { ResourceIdentifier } from "../../../../../../../api/models/ResourceIdentifier";
+import { render, screen, waitFor, act } from "@testing-library/react";
+import * as React from "react";
+import userEvent from "@testing-library/user-event";
+const { getByTestId } = screen;
+
+const generateResources = (number: number): ResourceIdentifier[] => {
+  const resourceList: ResourceIdentifier[] = [];
+  for (let i = 0; i < number; i++) {
+    const resource: ResourceIdentifier = {
+      id: `${i}`,
+      title: `title${i}`,
+      type: `type${i}`,
+      category: `category${i}`,
+      profile: `profile${i}`,
+    };
+    resourceList.push(resource);
+  }
+  return resourceList;
+};
+
+describe("ResourceList component", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should display list of resources limited to 5", async () => {
+    const resourceList = generateResources(50);
+    const onClick = jest.fn();
+    render(
+      <ResourceList resourceIdentifiers={resourceList} onClick={onClick} />
+    );
+
+    const table = await screen.findByTestId("measure-list-tbl");
+    const tableHeaders = table.querySelectorAll("thead th");
+    expect(tableHeaders[0]).toHaveTextContent("Profile");
+    userEvent.click(tableHeaders[0]); // doesn't do anything right now, but i have a prevent default in there so i want the code coverage.
+    expect(tableHeaders[1]).toHaveTextContent("Value Set");
+    const tableRows = table.querySelectorAll("tbody tr");
+    expect(tableRows.length).toBe(5);
+  });
+
+  it("should display list of resources limited to 4", async () => {
+    const resourceList = generateResources(4);
+    const onClick = jest.fn();
+    render(
+      <ResourceList resourceIdentifiers={resourceList} onClick={onClick} />
+    );
+    const table = await screen.findByTestId("measure-list-tbl");
+    const tableRows = table.querySelectorAll("tbody tr");
+    expect(tableRows.length).toBe(4);
+  });
+
+  it("should enter text, clear text, hit enter button", async () => {
+    const resourceList = generateResources(5);
+    const onClick = jest.fn();
+    render(
+      <ResourceList resourceIdentifiers={resourceList} onClick={onClick} />
+    );
+    const table = await screen.findByTestId("measure-list-tbl");
+    const tableRows = table.querySelectorAll("tbody tr");
+    expect(tableRows.length).toBe(5);
+    const searchFieldInput = getByTestId("search-elements-input-input");
+    expect(searchFieldInput.value).toBe("");
+    userEvent.type(searchFieldInput, "test{enter}");
+    expect(searchFieldInput.value).toBe("test");
+    const clearIcon = getByTestId("ClearIcon");
+    userEvent.click(clearIcon);
+    await waitFor(() => {
+      expect(searchFieldInput.value).toBe("");
+    });
+  });
+
+  it("change limit and page", async () => {
+    const resourceList = generateResources(50);
+    const onClick = jest.fn();
+    render(
+      <ResourceList resourceIdentifiers={resourceList} onClick={onClick} />
+    );
+    const table = await screen.findByTestId("measure-list-tbl");
+    const tableRows = table.querySelectorAll("tbody tr");
+    expect(tableRows.length).toBe(5);
+    await waitFor(() => {
+      const resource1 = screen.getByText("title1");
+      expect(resource1).toBeInTheDocument();
+    });
+    // change page
+    const pageButton = await screen.findByLabelText("Go to page 2");
+    act(() => {
+      userEvent.click(pageButton);
+    });
+    await waitFor(() => {
+      const resource6 = screen.getByText("title6");
+      expect(resource6).toBeInTheDocument();
+    });
+    // change limit
+    const [combobox] = await screen.findAllByText("5");
+    userEvent.click(combobox);
+    const pageLimit25 = screen.getByRole("option", {
+      name: /25/i,
+    });
+    userEvent.click(pageLimit25);
+    const resource24 = await screen.findByText("title24");
+    expect(resource24).toBeInTheDocument();
+  });
+});
