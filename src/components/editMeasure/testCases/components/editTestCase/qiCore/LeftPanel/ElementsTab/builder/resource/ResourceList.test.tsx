@@ -1,7 +1,8 @@
+import * as React from "react";
 import ResourceList from "./ResourceList";
 import { ResourceIdentifier } from "../../../../../../../api/models/ResourceIdentifier";
 import { render, screen, waitFor, act } from "@testing-library/react";
-import * as React from "react";
+import { Simulate } from "react-dom/test-utils";
 import userEvent from "@testing-library/user-event";
 const { getByTestId } = screen;
 
@@ -84,6 +85,7 @@ describe("ResourceList component", () => {
     const searchFieldInput = getByTestId("search-elements-input-input");
     expect(searchFieldInput.value).toBe("");
     userEvent.type(searchFieldInput, "test{enter}");
+    Simulate.change(searchFieldInput);
     expect(searchFieldInput.value).toBe("test");
     const clearIcon = getByTestId("ClearIcon");
     userEvent.click(clearIcon);

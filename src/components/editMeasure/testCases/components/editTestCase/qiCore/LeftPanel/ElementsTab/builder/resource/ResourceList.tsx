@@ -99,15 +99,17 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
           />
         ),
         accessorKey: "profile",
-        sortingFn: (rowA, rowB) =>
-          customSort(rowA.original.profile, rowB.original.title),
+        // add in later for sorting
+        // sortingFn: (rowA, rowB) =>
+        //   customSort(rowA.original.profile, rowB.original.title),
       },
       {
         header: "Value Set",
         cell: (info) => <></>,
         accessorKey: "title",
-        sortingFn: (rowA, rowB) =>
-          customSort(rowA.original.title, rowB.original.title),
+        // add in later for sorting
+        // sortingFn: (rowA, rowB) =>
+        //   customSort(rowA.original.title, rowB.original.title),
       },
       {
         header: "",
