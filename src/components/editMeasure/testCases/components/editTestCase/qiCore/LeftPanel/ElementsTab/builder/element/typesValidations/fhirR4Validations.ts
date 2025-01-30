@@ -1,4 +1,10 @@
 import * as Yup from "yup";
+import {
+  POSITIVEINT_MINIMUM,
+  UNSIGNED_MINIMUM,
+  SIGNED_MINIMUM,
+  INTEGER_MAXIMUM,
+} from "./FhirNumbers";
 // https://hl7.org/fhir/R4/datatypes.html
 
 // Fields can be required or not required, we need a place to house all the individual validations and a build a dynamic form validation spot
@@ -38,12 +44,45 @@ export const getBooleanValidator = (required) => {
   return baseValidator;
 };
 
-export const getIntegerValidator = (required) => {
+export const getPositiveIntegerValidator = (required) => {
   const integerReg = /[0]|[-+]?[1-9][0-9]*/;
-  const baseValidator = Yup.string().matches(
-    integerReg,
-    "Invalid Integer format"
-  );
+  const baseValidator = Yup.string()
+    .matches(integerReg, "Invalid Integer format")
+    .test(
+      "len",
+      `Positive integer range is [${POSITIVEINT_MINIMUM} to ${INTEGER_MAXIMUM}]`,
+      (val) =>
+        val.length >= POSITIVEINT_MINIMUM && val.length <= INTEGER_MAXIMUM
+    );
+  if (required) {
+    return baseValidator.required("This field is required");
+  }
+  return baseValidator;
+};
+export const getUnsignedIntegerValidator = (required) => {
+  const integerReg = /[0]|[-+]?[1-9][0-9]*/;
+  const baseValidator = Yup.string()
+    .matches(integerReg, "Invalid Integer format")
+    .test(
+      "len",
+      `Unsigned integer range is [${UNSIGNED_MINIMUM} to ${INTEGER_MAXIMUM}]`,
+      (val) => val.length >= UNSIGNED_MINIMUM && val.length <= INTEGER_MAXIMUM
+    );
+  if (required) {
+    return baseValidator.required("This field is required");
+  }
+  return baseValidator;
+};
+
+export const getSignedIntegerValidator = (required) => {
+  const integerReg = /[0]|[-+]?[1-9][0-9]*/;
+  const baseValidator = Yup.string()
+    .matches(integerReg, "Invalid Integer format")
+    .test(
+      "len",
+      `Signed integer range is [${SIGNED_MINIMUM} to ${INTEGER_MAXIMUM}]`,
+      (val) => val.length >= SIGNED_MINIMUM && val.length <= INTEGER_MAXIMUM
+    );
   if (required) {
     return baseValidator.required("This field is required");
   }
@@ -69,9 +108,9 @@ export const getStringValidator = (required) => {
 */
 
 export const validationLookup = {
-  "http://hl7.org/fhirpath/System.Integer": getIntegerValidator,
-  positiveInt: getIntegerValidator,
-  unsignedInt: getIntegerValidator,
+  "http://hl7.org/fhirpath/System.Integer": getSignedIntegerValidator,
+  positiveInt: getPositiveIntegerValidator,
+  unsignedInt: getUnsignedIntegerValidator,
   boolean: getBooleanValidator,
   "http://hl7.org/fhirpath/System.String": getStringValidator,
   string: getStringValidator,

@@ -371,11 +371,31 @@ describe("TypeEditor Component", () => {
           type={`unsignedInt`}
           required={false}
           onChange={handleChange}
-          structureDefinition={null}
           label={"ClaimResponse.order"}
         />
       </FormikProvider>
     );
+
+    const inputField = screen.getByTestId(
+      "integer-field-input-ClaimResponse.order"
+    );
+    expect(inputField).toBeInTheDocument();
+    expect(inputField.value).toBe("1234");
+  });
+
+  test("Should render unsignedInt component", () => {
+    const handleChange = jest.fn();
+    render(
+      <FormikProvider value={mockFormik}>
+        <TypeEditor
+          type={`http://hl7.org/fhirpath/System.Integer`}
+          required={false}
+          onChange={handleChange}
+          label={"ClaimResponse.order"}
+        />
+      </FormikProvider>
+    );
+
     const inputField = screen.getByTestId(
       "integer-field-input-ClaimResponse.order"
     );

@@ -185,7 +185,6 @@ const ElementEditor = ({
     validationSchema,
     onSubmit: (values) => {},
   });
-
   if (_.isNil(elementDefinition)) {
     return <span>No element selected</span>;
   }

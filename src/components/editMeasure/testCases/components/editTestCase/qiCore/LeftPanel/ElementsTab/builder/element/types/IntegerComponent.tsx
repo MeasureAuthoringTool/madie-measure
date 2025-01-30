@@ -3,7 +3,12 @@ import { TextField } from "@madie/madie-design-system/dist/react/";
 import "twin.macro";
 import "styled-components/macro";
 import { TypeComponentProps } from "./TypeComponentProps";
-
+import {
+  POSITIVEINT_MINIMUM,
+  UNSIGNED_MINIMUM,
+  SIGNED_MINIMUM,
+  INTEGER_MAXIMUM,
+} from "../typesValidations/FhirNumbers";
 export enum IntegerType {
   UNSIGNED = "Unsigned",
   SIGNED = "Signed",
@@ -17,53 +22,14 @@ interface IntegerComponentProps extends TypeComponentProps {
 const IntegerComponent = ({
   canEdit,
   fieldRequired,
-  onChange,
   label = "Integer",
-  structureDefinition,
   integerType,
+  helperText,
+  error,
   ...props
 }: IntegerComponentProps) => {
-  const POSITIVEINT_MINIMUM = 1;
-  const POSITIVEINT_MAXIMUM = 2147483647;
-  const UNSIGNED_MINIMUM = 0;
-  const UNSIGNED_MAXIMUN = 2147483647;
-  const SIGNED_MINIMUM = -2147483648;
-  const SIGNED_MAXIMUN = 2147483647;
-  const [inputValue, setInputValue] = useState<string>(
-    props.value ? props.value : ""
-  );
-  const [error, setError] = useState<string>("");
-  useEffect(() => {
-    const value = props.value;
-    if (integerType === IntegerType.UNSIGNED) {
-      if (
-        Number(value) < UNSIGNED_MINIMUM ||
-        Number(value) > UNSIGNED_MAXIMUN
-      ) {
-        setError(
-          `Unsigned integer range is [${UNSIGNED_MINIMUM} to ${UNSIGNED_MAXIMUN}]`
-        );
-      }
-    } else if (integerType === IntegerType.POSITIVE_INT) {
-      if (
-        Number(value) < POSITIVEINT_MINIMUM ||
-        Number(value) > POSITIVEINT_MAXIMUM
-      ) {
-        setError(
-          `Positive integer range is [${POSITIVEINT_MINIMUM} to ${POSITIVEINT_MAXIMUM}]`
-        );
-      }
-    } else {
-      if (Number(value) < SIGNED_MINIMUM || Number(value) > SIGNED_MAXIMUN) {
-        setError(
-          `Signed integer range is [${SIGNED_MINIMUM} to ${SIGNED_MAXIMUN}]`
-        );
-      }
-    }
-  });
   return (
     <TextField
-      required={fieldRequired}
       disabled={!canEdit}
       id={`integer-field-${label}`}
       label={label}
@@ -77,6 +43,7 @@ const IntegerComponent = ({
       size="small"
       fullWidth
       onKeyPress={(e) => {
+        const inputValue = e.target.value;
         if (
           integerType !== IntegerType.SIGNED &&
           !Number(e.key) &&
@@ -100,63 +67,19 @@ const IntegerComponent = ({
             e.preventDefault();
           } else if (
             Number(inputValue + e.key) < SIGNED_MINIMUM ||
-            Number(inputValue + e.key) > SIGNED_MAXIMUN
+            Number(inputValue + e.key) > INTEGER_MAXIMUM
           ) {
             e.preventDefault();
           }
         } else {
           if (integerType === IntegerType.UNSIGNED) {
-            if (Number(inputValue + e.key) > UNSIGNED_MAXIMUN) {
+            if (Number(inputValue + e.key) > INTEGER_MAXIMUM) {
               e.preventDefault();
             }
           } else {
-            if (Number(inputValue + e.key) > POSITIVEINT_MAXIMUM) {
+            if (Number(inputValue + e.key) > INTEGER_MAXIMUM) {
               e.preventDefault();
             }
-          }
-        }
-      }}
-      onChange={(e) => {
-        const value = e.target.value;
-        setInputValue(value.toString());
-        if (!Number(value) && Number(value) != 0) {
-          setError("Invalid format");
-          return;
-        } else {
-          setError("");
-        }
-        if (integerType === IntegerType.UNSIGNED) {
-          if (
-            Number(value) >= UNSIGNED_MINIMUM &&
-            Number(value) <= UNSIGNED_MAXIMUN
-          ) {
-            onChange(e);
-          } else {
-            setError(
-              `Unsigned integer range is [${UNSIGNED_MINIMUM} to ${UNSIGNED_MAXIMUN}]`
-            );
-          }
-        } else if (integerType === IntegerType.POSITIVE_INT) {
-          if (
-            Number(value) >= POSITIVEINT_MINIMUM &&
-            Number(value) <= POSITIVEINT_MAXIMUM
-          ) {
-            onChange(e);
-          } else {
-            setError(
-              `Positive integer range is [${POSITIVEINT_MINIMUM} to ${POSITIVEINT_MAXIMUM}]`
-            );
-          }
-        } else {
-          if (
-            Number(value) >= SIGNED_MINIMUM &&
-            Number(value) <= SIGNED_MAXIMUN
-          ) {
-            onChange(e);
-          } else {
-            setError(
-              `Signed integer range is [${SIGNED_MINIMUM} to ${SIGNED_MAXIMUN}]`
-            );
           }
         }
       }}
