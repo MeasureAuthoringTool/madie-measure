@@ -33,11 +33,14 @@ function findMatchingArguments(objects, matchCriteria) {
     //get only first parens
     const parensContent = parensMatch[1];
     // build an object array with argumentName and dataType
-    const parensObj = parensContent.split(",").map(item => {
-      const parts = item.match(/"([^"]+)"|([^\s"]+)/g).map(part => part.replace(/"/g, ''));
-    
+    const parensObj = parensContent.split(",").map((item) => {
+      const parts = item
+        .match(/"([^"]+)"|([^\s"]+)/g)
+        .map((part) => part.replace(/"/g, ""));
+
       return {
-        argumentName: parts[0], dataType: parts[1]
+        argumentName: parts[0],
+        dataType: parts[1],
       };
     });
     if (functionsArguments.length !== parensObj.length) {
