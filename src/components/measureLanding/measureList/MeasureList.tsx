@@ -815,9 +815,11 @@ export default function MeasureList(props: {
   };
 
   const draftMeasure = async (measureName: string, model: Model) => {
+    setLoading(true);
     await measureServiceApi
       .draftMeasure(targetMeasure.current?.id, model, measureName)
       .then(async () => {
+        setLoading(false);
         setOptionsOpen(false);
         handleDialogClose();
         setToastOpen(true);
@@ -826,6 +828,7 @@ export default function MeasureList(props: {
         doUpdateList();
       })
       .catch((error) => {
+        setLoading(false);
         const errorOb = error?.response?.data;
         setToastOpen(true);
         if (errorOb?.message) {
@@ -1076,6 +1079,7 @@ export default function MeasureList(props: {
           open={draftMeasureDialog.open}
           onClose={handleDialogClose}
           onSubmit={draftMeasure}
+          loading={loading}
           measure={targetMeasure.current}
         />
         <ExportDialog
