@@ -32,22 +32,21 @@ function findMatchingArguments(objects, matchCriteria) {
     }
     //get only first parens
     const parensContent = parensMatch[1];
-    //parse out the args from the string to compare
-    const args = [];
-    let match;
-    while ((match = argumentRegex.exec(parensContent)) !== null) {
-      args.push({ argumentName: match[1], dataType: match[2] });
-    }
-
-    // now we need to make sure that there are no misses on all args.
-    // if they don't have the same number of arguments we know we can skip a deeper check
-    if (functionsArguments.length !== args.length) {
+    // build an object array with argumentName and dataType
+    const parensObj = parensContent.split(",").map(item => {
+      const parts = item.match(/"([^"]+)"|([^\s"]+)/g).map(part => part.replace(/"/g, ''));
+    
+      return {
+        argumentName: parts[0], dataType: parts[1]
+      };
+    });
+    if (functionsArguments.length !== parensObj.length) {
       return null;
     }
 
     // iterate through all cql matches, if args shallowEqual functionsArguments we push the object.
     let missed = false;
-    args.forEach((arg, index) => {
+    parensObj.forEach((arg, index) => {
       const target = functionsArguments[index];
       if (
         target.argumentName !== arg.argumentName ||
