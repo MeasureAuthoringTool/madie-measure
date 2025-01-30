@@ -191,7 +191,6 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
           onKeyPress={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
-              // finalizeSearchCriteria();
             }
           }}
           id="search-elements-input"
