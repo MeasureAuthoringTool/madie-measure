@@ -5,7 +5,7 @@ export interface TypeComponentProps {
   canEdit: boolean;
   value?: any;
   onChange?: (nextValue: any) => void;
-  structureDefinition: ElementDefinition;
+  structureDefinition?: ElementDefinition;
   fieldRequired: boolean;
   helperText?: any;
   error?: any;

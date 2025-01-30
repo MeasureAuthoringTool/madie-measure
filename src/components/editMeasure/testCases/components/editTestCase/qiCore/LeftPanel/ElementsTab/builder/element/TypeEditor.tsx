@@ -142,6 +142,26 @@ const TypeEditor = ({
             handleDateTimeChange={onChange}
           />
         );
+      case "http://hl7.org/fhirpath/System.Integer":
+      case "positiveInt":
+      case "unsignedInt":
+        return (
+          <IntegerComponent
+            canEdit={canEdit}
+            fieldRequired={required}
+            label={label}
+            helperText={formikErrorHandler(label)}
+            error={getNestedProperty(formik.errors, label)}
+            value={value}
+            integerType={
+              type === "unsignedInt"
+                ? IntegerType.UNSIGNED
+                : IntegerType.POSITIVE_INT
+            }
+            {...formik.getFieldProps(label)}
+          />
+        );
+      case "http://hl7.org/fhirpath/System.Boolean":
       case "boolean":
         return (
           <BooleanComponent
@@ -190,38 +210,7 @@ const TypeEditor = ({
             value={value}
           />
         );
-      case "positiveInt":
-        return (
-          <IntegerComponent
-            canEdit={canEdit}
-            structureDefinition={structureDefinition}
-            fieldRequired={required}
-            label={_.capitalize(
-              structureDefinition?.id?.substring(
-                structureDefinition?.id?.lastIndexOf(".") + 1
-              )
-            )}
-            onChange={onChange}
-            value={value}
-            integerType={IntegerType.POSITIVE_INT}
-          />
-        );
-      case "unsignedInt":
-        return (
-          <IntegerComponent
-            canEdit={canEdit}
-            structureDefinition={structureDefinition}
-            fieldRequired={required}
-            label={_.capitalize(
-              structureDefinition?.id?.substring(
-                structureDefinition?.id?.lastIndexOf(".") + 1
-              )
-            )}
-            onChange={onChange}
-            value={value}
-            integerType={IntegerType.UNSIGNED}
-          />
-        );
+
       case "code":
         return (
           <CodesComponent

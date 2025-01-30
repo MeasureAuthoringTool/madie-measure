@@ -339,9 +339,11 @@ export default function EditMeasure() {
     }
   };
   const draftMeasure = async (measureName: string, model: Model) => {
+    setLoading(true);
     measureServiceApi
       .draftMeasure(measure.id, model, measureName)
       .then((response) => {
+        setLoading(false);
         // remove the old ids from url and split urls into parts
         // e.g. /measures/673f9da22d51c65a00afb8a2/edit/test-cases/list-page/673f9da22d51c65a00afb89f
         const routeParts = location.pathname
@@ -359,6 +361,7 @@ export default function EditMeasure() {
         }, 3000);
       })
       .catch((error) => {
+        setLoading(false);
         const errorOb = error?.response?.data;
         setToastOpen(true);
         if (errorOb?.message) {
@@ -514,6 +517,7 @@ export default function EditMeasure() {
             open={draftMeasureDialog.open}
             onClose={handleDialogClose}
             onSubmit={draftMeasure}
+            loading={loading}
             measure={measure}
           />
           <CreateVersionDialog

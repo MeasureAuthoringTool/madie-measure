@@ -60,45 +60,6 @@ let measureGroup2 = [
     populationBasis: "Encounter",
   },
 ];
-it("shall return array of populationexpectvalues with no observations if denomr expected are zero", () => {
-  const populationVal: DisplayPopulationValue = {
-    id: "1",
-    name: PopulationType.DENOMINATOR,
-    expected: 0,
-    actual: undefined,
-  };
-
-  const populationValues: DisplayPopulationValue[] = [];
-  populationValues.push(populationVal);
-
-  const groupPop1: GroupPopulation = {
-    groupId: "shrug",
-    populationBasis: "Encounter",
-    scoring: "Ratio",
-    populationValues,
-    stratificationValues: [],
-  };
-
-  const groupPopulations: GroupPopulation[] = [groupPop1];
-
-  const resultPops = triggerPopChanges(
-    groupPopulations,
-    groupPop1.groupId,
-    {
-      id: "1",
-      name: PopulationType.DENOMINATOR,
-      expected: 0,
-      actual: undefined,
-    },
-    measureGroup
-  );
-  expect(resultPops.length).toEqual(groupPopulations.length);
-
-  expect(resultPops[0].populationValues[0].name).toEqual(
-    PopulationType.DENOMINATOR
-  );
-});
-
 it("shall return array of populationexpectvalues with no observations if numer expected are zero", () => {
   const ippPopulationVal: DisplayPopulationValue = {
     id: "1",
@@ -164,6 +125,173 @@ it("shall return array of populationexpectvalues with no observations if numer e
   );
   expect(resultPops[0].populationValues[2].name).toEqual(
     PopulationType.NUMERATOR
+  );
+});
+
+it("For ratio measures, updating a population like denominator will also update population with such association", () => {
+  const ippPopulationVal: DisplayPopulationValue = {
+    id: "1",
+    name: PopulationType.INITIAL_POPULATION,
+    expected: false,
+    actual: false,
+  };
+
+  const ippPopulationVal2: DisplayPopulationValue = {
+    id: "2",
+    name: PopulationType.INITIAL_POPULATION,
+    expected: false,
+    actual: false,
+  };
+  const denomPopulationVal: DisplayPopulationValue = {
+    id: "3",
+    name: PopulationType.DENOMINATOR,
+    expected: false,
+    actual: false,
+  };
+  const numerPopulationVal: DisplayPopulationValue = {
+    id: "4",
+    name: PopulationType.NUMERATOR,
+    expected: false,
+    actual: false,
+  };
+
+  const populationValues: DisplayPopulationValue[] = [];
+  // copy the values and add associations
+  populationValues.push(ippPopulationVal);
+  populationValues.push(ippPopulationVal2);
+  populationValues.push(denomPopulationVal);
+  populationValues.push(numerPopulationVal);
+
+  const populations = [
+    // pops with associationTypes
+    {
+      associationType: "Denominator",
+      definition: "Initial Population",
+      description: "",
+      id: "1",
+      name: "initialPopulation",
+    },
+    {
+      associationType: "Numerator",
+      definition: "Initial Population",
+      description: "",
+      id: "2",
+      name: "initialPopulation",
+    },
+    // other pops to link as associations
+    {
+      associationType: null,
+      definition: "Denominator",
+      description: "",
+      id: "3",
+      name: "denominator",
+    },
+    {
+      associationType: null,
+      definition: "Numerator",
+      description: "",
+      id: "4",
+      name: "numerator",
+    },
+  ];
+  // @ts-ignore
+  let ratioMeasureGroup = [
+    {
+      id: "shrug",
+      measureName: "the measure for testing",
+      cql: "",
+      elmJson: "",
+      createdBy: "testuser@example.com",
+      measureObservations: [
+        {
+          id: "uuid-1",
+          definition: "fun",
+          criteriaReference: "pid-2",
+        },
+        {
+          id: "uuid-2",
+          definition: "fun",
+          criteriaReference: "pid-4",
+        },
+      ],
+      scoring: "Ratio",
+      populationBasis: "boolean",
+      populations: populations,
+    },
+  ];
+
+  const groupPop1: GroupPopulation = {
+    groupId: "shrug",
+    populationBasis: "Boolean",
+    scoring: "Ratio",
+    populationValues,
+    stratificationValues: [],
+  };
+
+  const groupPopulations: GroupPopulation[] = [groupPop1];
+
+  const changedTarget: DisplayPopulationValue = {
+    id: "3",
+    name: PopulationType.DENOMINATOR,
+    expected: true,
+    actual: false,
+  };
+
+  const resultPops = triggerPopChanges(
+    groupPopulations,
+    groupPop1.groupId,
+    changedTarget,
+    ratioMeasureGroup
+  );
+  expect(resultPops[0].populationValues[0].expected).toEqual(true);
+});
+
+it("shall return array of populationexpectvalues with no observations if numer expected are zero", () => {
+  const ippPopulationVal: DisplayPopulationValue = {
+    id: "1",
+    name: PopulationType.INITIAL_POPULATION,
+    expected: 0,
+    actual: undefined,
+  };
+
+  const denomPopulationVal: DisplayPopulationValue = {
+    id: "2",
+    name: PopulationType.DENOMINATOR,
+    expected: 0,
+    actual: undefined,
+  };
+  const numerPopulationVal: DisplayPopulationValue = {
+    id: "3",
+    name: PopulationType.NUMERATOR,
+    expected: 0,
+    actual: undefined,
+  };
+
+  const populationValues: DisplayPopulationValue[] = [];
+  populationValues.push(ippPopulationVal);
+  populationValues.push(denomPopulationVal);
+  populationValues.push(numerPopulationVal);
+
+  const groupPop1: GroupPopulation = {
+    groupId: "shrug",
+    populationBasis: "Encounter",
+    scoring: "Ratio",
+    populationValues,
+    stratificationValues: [],
+  };
+
+  const groupPopulations: GroupPopulation[] = [groupPop1];
+
+  const resultPops = triggerPopChanges(
+    groupPopulations,
+    groupPop1.groupId,
+    {
+      id: "1",
+      name: PopulationType.NUMERATOR,
+      expected: 0,
+      actual: undefined,
+    },
+    measureGroup
   );
 });
 it("Does number | boolean => number correctly; true returns 1", () => {
