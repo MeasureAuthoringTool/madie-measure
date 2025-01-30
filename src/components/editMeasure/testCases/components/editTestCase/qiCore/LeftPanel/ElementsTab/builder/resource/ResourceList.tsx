@@ -217,7 +217,7 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
         />
       </div>
 
-      {visibleResources ? (
+      {visibleResources?.length ? (
         <div id="measure-landing" data-testid="measure-landing">
           <div className="measure-table no-margin-top">
             <div className="table" style={{ overflow: "auto" }}>
@@ -340,7 +340,10 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
         </div>
       ) : (
         <div style={{ display: "flex", justifyContent: "center" }}>
-          <MadieSpinner style={{ height: 50, width: 50 }} />
+          <MadieSpinner
+            data-testId="madie-loading-spinner"
+            style={{ height: 50, width: 50 }}
+          />
         </div>
       )}
     </div>

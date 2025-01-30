@@ -25,6 +25,17 @@ describe("ResourceList component", () => {
     jest.clearAllMocks();
   });
 
+  it("should render a spinner", async () => {
+    const resourceList = generateResources(0);
+    const onClick = jest.fn();
+    render(
+      <ResourceList resourceIdentifiers={resourceList} onClick={onClick} />
+    );
+    await waitFor(() => {
+      expect(getByTestId("madie-loading-spinner")).toBeInTheDocument();
+    });
+  });
+
   it("should display list of resources limited to 5", async () => {
     const resourceList = generateResources(50);
     const onClick = jest.fn();
