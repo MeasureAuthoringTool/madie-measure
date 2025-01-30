@@ -28,6 +28,7 @@ const IntegerComponent = ({
 }: IntegerComponentProps) => {
   return (
     <TextField
+      required={fieldRequired}
       disabled={!canEdit}
       id={`integer-field-${label}`}
       label={label}

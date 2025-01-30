@@ -93,10 +93,7 @@ const ElementEditorChildren = ({
             element={child}
             label={child?.id}
             resource={resource}
-            handleChange={(e) => {
-              elementValue = e;
-              handleChange(elemPath, e);
-            }}
+            handleChange={handleChange}
             canEdit={canEdit}
           />
         ))}
@@ -115,10 +112,7 @@ const ElementEditorChildren = ({
               allChildren={item}
               currentDepth={currentDepth}
               resource={resource}
-              handleChange={(e) => {
-                elementValue = e;
-                handleChange(elemPath, e);
-              }}
+              handleChange={handleChange}
               canEdit={canEdit}
             />
           ))}
@@ -143,9 +137,7 @@ const ElementEditorChildren = ({
                 element={child}
                 label={child?.id}
                 resource={resource}
-                handleChange={(e) => {
-                  handleChange(e);
-                }}
+                handleChange={handleChange}
                 canEdit={canEdit}
               />
             ))}
@@ -159,9 +151,7 @@ const ElementEditorChildren = ({
                     allChildren={item}
                     currentDepth={currentDepth}
                     resource={resource}
-                    handleChange={(e) => {
-                      handleChange(e);
-                    }}
+                    handleChange={handleChange}
                     canEdit={canEdit}
                   />
                 )

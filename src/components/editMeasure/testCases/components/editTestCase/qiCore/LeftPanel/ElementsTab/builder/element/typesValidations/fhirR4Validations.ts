@@ -51,8 +51,15 @@ export const getPositiveIntegerValidator = (required) => {
     .test(
       "len",
       `Positive integer range is [${POSITIVEINT_MINIMUM} to ${INTEGER_MAXIMUM}]`,
-      (val) =>
-        val.length >= POSITIVEINT_MINIMUM && val.length <= INTEGER_MAXIMUM
+      (val) => {
+        if (val && val.length > 0) {
+          return (
+            Number(val) >= POSITIVEINT_MINIMUM && Number(val) <= INTEGER_MAXIMUM
+          );
+        } else {
+          return true;
+        }
+      }
     );
   if (required) {
     return baseValidator.required("This field is required");
