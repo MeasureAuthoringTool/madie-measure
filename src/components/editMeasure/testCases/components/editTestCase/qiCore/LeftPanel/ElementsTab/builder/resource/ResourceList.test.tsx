@@ -52,7 +52,13 @@ describe("ResourceList component", () => {
     expect(tableRows.length).toBe(4);
     // trigger onClick function
     userEvent.click(screen.getByTestId("add-element-2"));
-    expect(onClick).toHaveBeenCalledOnce();
+    expect(onClick).toHaveBeenCalledWith({
+      id: `2`,
+      title: `title2`,
+      type: `type2`,
+      category: `category2`,
+      profile: `profile2`,
+    });
   });
 
   it("should enter text, clear text, hit enter button", async () => {
