@@ -111,12 +111,14 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
       },
       {
         header: "",
-        cell: (info) => {
+        cell: ({ row }) => {
+          const { original } = row;
           return (
             <>
               <IconButton
+                data-testId={`add-element-${original.id}`}
                 onClick={() => {
-                  onClick(info.row.original);
+                  onClick(original);
                 }}
               >
                 <AddCircleOutlineIcon sx={{ color: "#0073C8" }} />

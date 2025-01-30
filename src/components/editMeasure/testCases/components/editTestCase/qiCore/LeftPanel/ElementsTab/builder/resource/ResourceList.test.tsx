@@ -50,6 +50,9 @@ describe("ResourceList component", () => {
     const table = await screen.findByTestId("measure-list-tbl");
     const tableRows = table.querySelectorAll("tbody tr");
     expect(tableRows.length).toBe(4);
+    // trigger onClick function
+    userEvent.click(screen.getByTestId("add-element-2"));
+    expect(onClick).toHaveBeenCalledOnce();
   });
 
   it("should enter text, clear text, hit enter button", async () => {
