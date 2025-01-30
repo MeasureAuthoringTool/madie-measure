@@ -4,8 +4,6 @@ import "twin.macro";
 import "styled-components/macro";
 import { TypeComponentProps } from "./TypeComponentProps";
 import {
-  POSITIVEINT_MINIMUM,
-  UNSIGNED_MINIMUM,
   SIGNED_MINIMUM,
   INTEGER_MAXIMUM,
 } from "../typesValidations/FhirNumbers";

@@ -408,6 +408,31 @@ describe("IntegerComponent", () => {
       expect(integerFieldInput.value).toBe("214748364");
     });
 
+    test("Test 4 on key press of reaching maximum number causes prevent default for PositiveInt IntegerComponent", () => {
+      const handleChange = jest.fn();
+      render(
+        <IntegerComponent
+          value={null}
+          label=""
+          canEdit={true}
+          fieldRequired={false}
+          onChange={handleChange}
+          integerType={IntegerType.POSITIVE_INT}
+        />
+      );
+      const integerField = screen.getByTestId("integer-field-");
+      expect(integerField).toBeInTheDocument();
+      const integerFieldInput = screen.getByTestId("integer-field-input-");
+      expect(integerFieldInput).toBeInTheDocument();
+      expect(integerFieldInput.value).toBe("");
+
+      fireEvent.change(integerFieldInput, { target: { value: "214748364" } });
+      expect(integerFieldInput.value).toBe("214748364");
+      //Adding an 8 to that value with be MAX_INTEGER + 1 and should not change
+      fireEvent.keyPress(integerFieldInput, { key: "8", charCode: 56 });
+      expect(integerFieldInput.value).toBe("214748364");
+    });
+
     test("Test on key press of valid Signed IntegerComponent", () => {
       const handleChange = jest.fn();
       render(
