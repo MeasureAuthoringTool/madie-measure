@@ -174,15 +174,7 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
       </InputAdornment>
     ),
     endAdornment: (
-      <IconButton
-        aria-label="Clear-Search"
-        sx={
-          {
-            // visibility: props.searchCriteria ? "visible" : "hidden",
-          }
-        }
-        onClick={handleClearClick}
-      >
+      <IconButton aria-label="Clear-Search" onClick={handleClearClick}>
         <ClearIcon />
       </IconButton>
     ),
@@ -204,7 +196,6 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
           name="searchElements"
           placeholder="Search"
           type="search"
-          fullWidth
           data-testid="elements-search-input"
           label="Search"
           variant="outlined"
