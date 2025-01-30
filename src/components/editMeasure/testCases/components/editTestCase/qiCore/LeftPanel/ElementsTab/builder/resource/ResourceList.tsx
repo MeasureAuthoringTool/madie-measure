@@ -22,6 +22,7 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import SearchIcon from "@mui/icons-material/Search";
 import { IconButton } from "@mui/material";
+// Add in later for sorting icons
 // import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 // import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 // import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -43,6 +44,7 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
   const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(1);
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  // add in later for sorting
   // const [hoveredHeader, setHoveredHeader] = useState<string>("");
   const [totalPages, setTotalPages] = useState<number>(0);
   const [totalItems, setTotalItems] = useState<number>(0);
