@@ -1,4 +1,10 @@
 import * as Yup from "yup";
+import {
+  POSITIVEINT_MINIMUM,
+  UNSIGNED_MINIMUM,
+  SIGNED_MINIMUM,
+  INTEGER_MAXIMUM,
+} from "./FhirNumbers";
 // https://hl7.org/fhir/R4/datatypes.html
 
 // Fields can be required or not required, we need a place to house all the individual validations and a build a dynamic form validation spot
@@ -27,11 +33,63 @@ export const getIdValidator = (required) => {
 };
 
 export const getBooleanValidator = (required) => {
-  const booleaReg = /^true$|^false$/;
+  const booleanReg = /^true$|^false$/;
   const baseValidator = Yup.string().matches(
-    booleaReg,
+    booleanReg,
     "Invalid Boolean format"
   );
+  if (required) {
+    return baseValidator.required("This field is required");
+  }
+  return baseValidator;
+};
+
+export const getPositiveIntegerValidator = (required) => {
+  const integerReg = /[0]|[-+]?[1-9][0-9]*/;
+  const baseValidator = Yup.string()
+    .matches(integerReg, "Invalid Integer format")
+    .test(
+      "len",
+      `Positive integer range is [${POSITIVEINT_MINIMUM} to ${INTEGER_MAXIMUM}]`,
+      (val) => {
+        if (val && val.length > 0) {
+          return (
+            Number(val) >= POSITIVEINT_MINIMUM && Number(val) <= INTEGER_MAXIMUM
+          );
+        } else {
+          return true;
+        }
+      }
+    );
+  if (required) {
+    return baseValidator.required("This field is required");
+  }
+  return baseValidator;
+};
+export const getUnsignedIntegerValidator = (required) => {
+  const integerReg = /[0]|[-+]?[1-9][0-9]*/;
+  const baseValidator = Yup.string()
+    .matches(integerReg, "Invalid Integer format")
+    .test(
+      "len",
+      `Unsigned integer range is [${UNSIGNED_MINIMUM} to ${INTEGER_MAXIMUM}]`,
+      (val) => val.length >= UNSIGNED_MINIMUM && val.length <= INTEGER_MAXIMUM
+    );
+  if (required) {
+    return baseValidator.required("This field is required");
+  }
+  return baseValidator;
+};
+
+export const getSignedIntegerValidator = (required) => {
+  const integerReg = /[0]|[-+]?[1-9][0-9]*/;
+  const baseValidator = Yup.string()
+    .matches(integerReg, "Invalid Integer format")
+    .test(
+      "len",
+      `Signed integer range is [${SIGNED_MINIMUM} to ${INTEGER_MAXIMUM}]`,
+      (val) => val.length >= SIGNED_MINIMUM && val.length <= INTEGER_MAXIMUM
+    );
   if (required) {
     return baseValidator.required("This field is required");
   }
@@ -50,6 +108,29 @@ export const getStringValidator = (required) => {
   return baseValidator;
 };
 
+export const getDecimalValidator = (required) => {
+  const decimalRegex = /^-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?/;
+  const baseValidator = Yup.string().matches(
+    decimalRegex,
+    "Invalid Decimal format"
+  );
+
+  if (required) {
+    return baseValidator.required("This field is required");
+  }
+  return baseValidator;
+};
+
+export const getUriValidator = (required) => {
+  const uriRegex = /\S*/;
+  const baseValidator = Yup.string().matches(uriRegex, "Invalid Uri format");
+
+  if (required) {
+    return baseValidator.required("This field is required");
+  }
+  return baseValidator;
+};
+
 /*
   This object will hold all references to validations with keys for type matching up against a validation
   We can then use the lookup to see if it exists, if it does, we return the validation function, we pass in the required value attached,
@@ -57,11 +138,16 @@ export const getStringValidator = (required) => {
 */
 
 export const validationLookup = {
+  "http://hl7.org/fhirpath/System.Integer": getSignedIntegerValidator,
+  positiveInt: getPositiveIntegerValidator,
+  unsignedInt: getUnsignedIntegerValidator,
   boolean: getBooleanValidator,
   "http://hl7.org/fhirpath/System.String": getStringValidator,
   string: getStringValidator,
   markdown: getMarkDownValidator,
   id: getIdValidator,
+  uri: getUriValidator,
+  decimal: getDecimalValidator,
 };
 
 export const getValidation = (type, required) => {

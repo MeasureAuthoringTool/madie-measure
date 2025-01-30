@@ -8,9 +8,10 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import "../../details/EditMeasureSideBarNav.scss";
 import "../../../common/madie-link.scss";
 import { DSLink, Tabs, Tab } from "@madie/madie-design-system/dist/react";
-import { useTheme } from "@mui/material";
 import { INCOMPLETE, NONE } from "../PopulationCriteriaHome";
 import CompletionIndicator from "../groups/CompletionIndicator";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorIcon from "@mui/icons-material/Error";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
 const InnerWrapper = tw.div`flex-grow flex flex-col`;
@@ -47,7 +48,6 @@ export default function PopulationCriteriaSideNav(
     riskAdjustmentStatus,
   } = props;
   const { pathname } = useLocation();
-  const theme = useTheme();
   const [showPopulationCriteriaTabs, setShowPopulationCriteriaTabs] =
     useState<boolean>(true);
   let navigate = useNavigate();
@@ -121,6 +121,34 @@ export default function PopulationCriteriaSideNav(
       status: riskAdjustmentStatus,
     },
   ];
+  const getCompletedIcon = () => {
+    return (
+      <span style={{ position: "absolute", left: "0" }}>
+        <CheckCircleIcon
+          sx={{
+            color: "#4D7E23",
+            marginLeft: "10px",
+            height: "20px",
+            width: "20px",
+          }}
+        />
+      </span>
+    );
+  };
+  const getIncompletedIcon = () => {
+    return (
+      <span style={{ position: "absolute", left: "0" }}>
+        <ErrorIcon
+          sx={{
+            color: "#AE1C1C",
+            marginLeft: "10px",
+            height: "20px",
+            width: "20px",
+          }}
+        />
+      </span>
+    );
+  };
 
   return (
     <OuterWrapper>
@@ -197,13 +225,12 @@ export default function PopulationCriteriaSideNav(
                               type="C"
                               orientation="vertical"
                               id={index}
+                              label={linkInfo.title}
                               data-testid={linkInfo.dataTestId}
-                              label={
-                                <CompletionIndicator
-                                  label={linkInfo.title}
-                                  hasErrors={!linkInfo.groupPopulated}
-                                  displayIcon={true}
-                                />
+                              icon={
+                                linkInfo.groupPopulated
+                                  ? getCompletedIcon()
+                                  : getIncompletedIcon()
                               }
                             />
                           );

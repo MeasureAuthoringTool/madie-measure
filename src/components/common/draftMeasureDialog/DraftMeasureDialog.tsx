@@ -1,5 +1,5 @@
 import React from "react";
-import { DialogContent, MenuItem, Typography } from "@mui/material";
+import { DialogContent, MenuItem, Typography, Backdrop } from "@mui/material";
 import { Box } from "@mui/system";
 import { makeStyles } from "@mui/styles";
 import { useFormik } from "formik";
@@ -8,6 +8,7 @@ import {
   MadieDialog,
   Select,
   TextField,
+  MadieSpinner,
 } from "@madie/madie-design-system/dist/react";
 import { MeasureNameSchema } from "../../../validations/MeasureSchemaValidator";
 import { Model } from "@madie/madie-models";
@@ -30,7 +31,7 @@ const useStyles = makeStyles({
   },
 });
 
-const DraftMeasureDialog = ({ open, onClose, onSubmit, measure }) => {
+const DraftMeasureDialog = ({ open, onClose, onSubmit, measure, loading }) => {
   let modelOptions = Object.keys(Model);
   const classes = useStyles();
   const featureFlags = useFeatureFlags();
@@ -155,6 +156,12 @@ const DraftMeasureDialog = ({ open, onClose, onSubmit, measure }) => {
           ) : null}
         </>
       </DialogContent>
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <MadieSpinner style={{ height: 50, width: 50 }} />
+      </Backdrop>
     </MadieDialog>
   );
 };

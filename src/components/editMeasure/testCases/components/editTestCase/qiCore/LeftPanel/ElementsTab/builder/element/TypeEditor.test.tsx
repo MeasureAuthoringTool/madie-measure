@@ -13,6 +13,7 @@ const getNestedProperty = (obj, path) => {
 const claimResponseValues = {
   ClaimResponse: {
     id: "test",
+    order: "1234",
     Coding: {
       code: "",
       id: "",
@@ -236,15 +237,20 @@ describe("TypeEditor Component", () => {
   test("Should render URI component", () => {
     const handleChange = jest.fn();
     render(
-      <TypeEditor
-        type={`uri`}
-        required={true}
-        value={`urn:oid:2.16.840.1.113883.6.238`}
-        onChange={handleChange}
-        structureDefinition={null}
-      />
+      <FormikProvider value={mockFormik}>
+        <TypeEditor
+          type={`uri`}
+          required={true}
+          value={`urn:oid:2.16.840.1.113883.6.238`}
+          onChange={handleChange}
+          structureDefinition={null}
+          label={"DiagnosticReport.presentedForm.uri"}
+        />
+      </FormikProvider>
     );
-    expect(screen.getByTestId("uri-input-field-URI")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("uri-input-field-DiagnosticReport.presentedForm.uri")
+    ).toBeInTheDocument();
   });
 
   test("Should render URL component", () => {
@@ -345,15 +351,19 @@ describe("TypeEditor Component", () => {
   test("Should render PositiveInt component", () => {
     const handleChange = jest.fn();
     render(
-      <TypeEditor
-        type={`positiveInt`}
-        required={false}
-        value={`1234`}
-        onChange={handleChange}
-        structureDefinition={null}
-      />
+      <FormikProvider value={mockFormik}>
+        <TypeEditor
+          type={`positiveInt`}
+          required={false}
+          onChange={handleChange}
+          structureDefinition={null}
+          label={"ClaimResponse.order"}
+        />
+      </FormikProvider>
     );
-    const inputField = screen.getByTestId("integer-field-input-");
+    const inputField = screen.getByTestId(
+      "integer-field-input-ClaimResponse.order"
+    );
     expect(inputField).toBeInTheDocument();
     expect(inputField.value).toBe("1234");
   });
@@ -361,15 +371,39 @@ describe("TypeEditor Component", () => {
   test("Should render unsignedInt component", () => {
     const handleChange = jest.fn();
     render(
-      <TypeEditor
-        type={`unsignedInt`}
-        required={false}
-        value={`1234`}
-        onChange={handleChange}
-        structureDefinition={null}
-      />
+      <FormikProvider value={mockFormik}>
+        <TypeEditor
+          type={`unsignedInt`}
+          required={false}
+          onChange={handleChange}
+          label={"ClaimResponse.order"}
+        />
+      </FormikProvider>
     );
-    const inputField = screen.getByTestId("integer-field-input-");
+
+    const inputField = screen.getByTestId(
+      "integer-field-input-ClaimResponse.order"
+    );
+    expect(inputField).toBeInTheDocument();
+    expect(inputField.value).toBe("1234");
+  });
+
+  test("Should render unsignedInt component", () => {
+    const handleChange = jest.fn();
+    render(
+      <FormikProvider value={mockFormik}>
+        <TypeEditor
+          type={`http://hl7.org/fhirpath/System.Integer`}
+          required={false}
+          onChange={handleChange}
+          label={"ClaimResponse.order"}
+        />
+      </FormikProvider>
+    );
+
+    const inputField = screen.getByTestId(
+      "integer-field-input-ClaimResponse.order"
+    );
     expect(inputField).toBeInTheDocument();
     expect(inputField.value).toBe("1234");
   });

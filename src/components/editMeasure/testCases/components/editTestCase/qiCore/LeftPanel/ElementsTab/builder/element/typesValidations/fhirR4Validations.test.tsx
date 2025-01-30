@@ -32,6 +32,70 @@ describe("Validation Functions", () => {
     expect(nonRequiredString.validate("false")).resolves.toBe("false");
   });
 
+  it("getValidation IntegerValidator positiveInt", () => {
+    const requiredString = getValidation("positiveInt", true);
+    const nonRequiredString = getValidation("positiveInt", false);
+    expect(requiredString).toBeInstanceOf(Yup.StringSchema);
+    expect(requiredString.validate("1")).resolves.toBe("1");
+    expect(requiredString.validate("abc")).rejects.toThrow(
+      "Invalid Integer format"
+    );
+    expect(nonRequiredString.validate("1")).resolves.toBe("1");
+  });
+
+  it("getValidation IntegerValidator unsignedInt", () => {
+    const requiredString = getValidation("unsignedInt", true);
+    const nonRequiredString = getValidation("unsignedInt", false);
+    expect(requiredString).toBeInstanceOf(Yup.StringSchema);
+    expect(requiredString.validate("1")).resolves.toBe("1");
+    expect(requiredString.validate("abc")).rejects.toThrow(
+      "Invalid Integer format"
+    );
+    expect(nonRequiredString.validate("1")).resolves.toBe("1");
+  });
+
+  it("getValidation IntegerValidator System.Integer", () => {
+    const requiredString = getValidation(
+      "http://hl7.org/fhirpath/System.Integer",
+      true
+    );
+    const nonRequiredString = getValidation(
+      "http://hl7.org/fhirpath/System.Integer",
+      false
+    );
+    expect(requiredString).toBeInstanceOf(Yup.StringSchema);
+    expect(requiredString.validate("1")).resolves.toBe("1");
+    expect(requiredString.validate("abc")).rejects.toThrow(
+      "Invalid Integer format"
+    );
+    expect(nonRequiredString.validate("1")).resolves.toBe("1");
+  });
+
+  it("getValidation uriValidator", () => {
+    const requiredString = getValidation("uri", true);
+    const nonRequiredString = getValidation("uri", false);
+    expect(requiredString).toBeInstanceOf(Yup.StringSchema);
+    expect(
+      requiredString.validate("http://hl7.org/fhirpath/System.String")
+    ).resolves.toBe("http://hl7.org/fhirpath/System.String");
+    expect(requiredString.validate("")).rejects.toThrow(
+      "This field is required"
+    );
+    expect(nonRequiredString.validate("false")).resolves.toBe("false");
+  });
+
+  it("getValidation DecimalValidator", () => {
+    const requiredString = getValidation("decimal", true);
+    const nonRequiredString = getValidation("decimal", false);
+    expect(requiredString).toBeInstanceOf(Yup.StringSchema);
+    expect(requiredString.validate("1.23")).resolves.toBe("1.23");
+    expect(requiredString.validate("")).rejects.toThrow(
+      "Invalid Decimal format"
+    );
+
+    expect(nonRequiredString.validate("1.23")).resolves.toBe("1.23");
+  });
+
   it("getValidation markdownValidator", () => {
     const requiredMarkdown = getValidation("markdown", true);
     const nonRequiredMarkdown = getValidation("markdown", false);
