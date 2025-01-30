@@ -37,6 +37,7 @@ describe("DraftMeasureDialog component", () => {
         onClose={onCloseFn}
         onSubmit={onSubmitFn}
         measure={measure}
+        loading={false}
       />
     );
   };
@@ -147,6 +148,7 @@ describe("DraftMeasureDialog component", () => {
         onClose={onCloseFn}
         onSubmit={onSubmitFn}
         measure={qdmMeasure}
+        loading={false}
       />
     );
     expect(await screen.findByText("Create Draft")).toBeInTheDocument();
