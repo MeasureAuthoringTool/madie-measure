@@ -237,15 +237,20 @@ describe("TypeEditor Component", () => {
   test("Should render URI component", () => {
     const handleChange = jest.fn();
     render(
-      <TypeEditor
-        type={`uri`}
-        required={true}
-        value={`urn:oid:2.16.840.1.113883.6.238`}
-        onChange={handleChange}
-        structureDefinition={null}
-      />
+      <FormikProvider value={mockFormik}>
+        <TypeEditor
+          type={`uri`}
+          required={true}
+          value={`urn:oid:2.16.840.1.113883.6.238`}
+          onChange={handleChange}
+          structureDefinition={null}
+          label={"DiagnosticReport.presentedForm.uri"}
+        />
+      </FormikProvider>
     );
-    expect(screen.getByTestId("uri-input-field-URI")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("uri-input-field-DiagnosticReport.presentedForm.uri")
+    ).toBeInTheDocument();
   });
 
   test("Should render URL component", () => {
