@@ -166,9 +166,7 @@ export const findCodeInsertPoint = (parseResults: CqlResult) => {
   if (parseResults.codes.length > 0) {
     return parseResults.codes[parseResults.codes.length - 1].stop.line;
   } else if (parseResults.valueSets.length > 0) {
-    return (
-      parseResults.valueSets[parseResults.valueSets.length - 1].stop.line + 1
-    );
+    return parseResults.valueSets[parseResults.valueSets.length - 1].stop.line;
   } else if (parseResults.codeSystems.length > 0) {
     return (
       parseResults.codeSystems[parseResults.codeSystems.length - 1].stop.line +
