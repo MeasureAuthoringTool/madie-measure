@@ -78,17 +78,17 @@ const findExistingCQLFunction = (cqlFunction, expressionDefinitions) => {
   }
 
   //   Do a primary check on function name before we regex it.
-  const matchingCqlFunctionNames = [];
+  const matchingCqlFunctions = [];
   expressionDefinitions.forEach((expression) => {
     // get the name of the expression (first encounter of characters in double quotes)
     const match = expression?.text.match(/"([^"]+)"/);
     const expressionName = match ? match[1] : null;
     if (expressionName && expressionName === cqlFunction.functionName) {
-      matchingCqlFunctionNames.push(expressionName);
+      matchingCqlFunctions.push(expression);
     }
   });
   //   if we have a matching functionName, we want to compare the args # and dataTypes in order;
-  const result = findMatchingArguments(expressionDefinitions, cqlFunction);
+  const result = findMatchingArguments(matchingCqlFunctions, cqlFunction);
   return result;
 };
 
