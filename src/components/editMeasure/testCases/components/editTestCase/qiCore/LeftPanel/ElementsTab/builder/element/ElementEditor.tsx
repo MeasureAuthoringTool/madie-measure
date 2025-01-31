@@ -70,7 +70,6 @@ const ElementEditor = ({
       const required = +child.min > 0;
       const elemPath = child.path;
       const value = _.get(resource, elemPath);
-      console.log("CHILD IS", child);
       const builtNode = {
         id: child?.id,
         label: child.path.split(".").pop(),
@@ -182,7 +181,6 @@ const ElementEditor = ({
   };
   useEffect(() => {
     if (selectedResource) {
-      console.log("elementDefinittion", elementDefinition);
       triggerFormBuilder();
     }
   }, [selectedResource]);
@@ -192,7 +190,6 @@ const ElementEditor = ({
     validationSchema,
     onSubmit: (values) => {},
   });
-  console.log("formik", formik);
   if (_.isNil(elementDefinition)) {
     return <span>No element selected</span>;
   }
