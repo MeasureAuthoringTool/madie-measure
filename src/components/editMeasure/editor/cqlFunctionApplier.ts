@@ -3,19 +3,8 @@ import { CqlApplyActionResult } from "./CqlApplyActionResult";
 import { CQLFunction } from "@madie/madie-editor";
 
 function findMatchingArguments(objects, matchCriteria) {
-  // first parse out and compare function names.
-  const appliedFuntionName = matchCriteria.functionName.toLowerCase();
-  const functionName = /"(.*?)"/;
-  // further filter down objects array with only members whos name matches applied function name
-  objects = objects.filter((obj) => {
-    const matchResult = obj.text.match(functionName);
-    const res = matchResult ? matchResult[1].toLowerCase() : null;
-    return res === appliedFuntionName;
-  });
   // string values inside of arguments parens
   const firstParensRegex = /\(([^)]+)\)/;
-  // Extracts arguments (name and data type)
-  const argumentRegex = /"([^"]+)"\s+"([^"]+)"/g;
 
   const result = [];
   // iterate through all objects text properties
