@@ -101,6 +101,9 @@ export const measureGroupSchemaValidator = (
     scoring: Yup.string()
       .oneOf(Object.values(GroupScoring))
       .required("Group Scoring is required."),
+    scoringPrecision: Yup.number()
+      .positive("Scoring Precision must be a positive integer")
+      .nullable(),
     improvementNotation: Yup.string().required(
       "Improvement Notation is required."
     ),

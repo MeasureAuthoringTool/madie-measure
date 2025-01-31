@@ -143,6 +143,7 @@ describe("Measure Groups Page", () => {
       measureGroupTypes: [],
       populationBasis: "boolean",
       scoringUnit: "",
+      scoringPrecision: "",
     };
 
     const mockUuid = require("uuid") as { v4: jest.Mock<string, []> };
@@ -717,6 +718,7 @@ describe("Measure Groups Page", () => {
     const populationBasis = "MedicationAdministration";
     group.id = "7p03-5r29-7O0I";
     group.scoringUnit = "testScoringUnit";
+    group.scoringPrecision = "2";
     group.populationBasis = populationBasis;
     measure.groups = [group];
     const { getByTestId, getByText } = renderMeasureGroupComponent();
@@ -762,6 +764,7 @@ describe("Measure Groups Page", () => {
       measureGroupTypes: ["Patient Reported Outcome"],
       populationBasis: populationBasis,
       scoringUnit: "testScoringUnit",
+      scoringPrecision: "2",
       improvementNotation: "Increased score indicates improvement",
     };
 
@@ -813,6 +816,7 @@ describe("Measure Groups Page", () => {
       measureGroupTypes: [MeasureGroupTypes.PATIENT_REPORTED_OUTCOME],
       populationBasis: "boolean",
       scoringUnit: "",
+      scoringPrecision: "",
     };
     measure.groups = [newGroup];
 
@@ -869,6 +873,7 @@ describe("Measure Groups Page", () => {
         measureGroupTypes: [MeasureGroupTypes.PATIENT_REPORTED_OUTCOME],
         populationBasis: "Encounter",
         scoringUnit: "",
+        scoringPrecision: "",
       },
     });
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
@@ -2140,6 +2145,7 @@ describe("Measure Groups Page", () => {
       measureGroupTypes: [MeasureGroupTypes.PROCESS],
       populationBasis: "boolean",
       scoringUnit: "",
+      scoringPrecision: "",
     };
     measure.groups = [group1];
     renderMeasureGroupComponent();
@@ -2171,6 +2177,7 @@ describe("Measure Groups Page", () => {
       measureGroupTypes: [MeasureGroupTypes.PROCESS],
       populationBasis: "boolean",
       scoringUnit: "",
+      scoringPrecision: "",
     };
     measure.groups = [group1];
     renderMeasureGroupComponent();
