@@ -16,12 +16,14 @@ import {
   Typography,
   Divider,
   useTheme,
+  Box,
 } from "@mui/material";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import {
   AutoComplete,
   Button,
   MadieDiscardDialog,
+  NumberInput,
   Select,
   DSLink,
   Toast,
@@ -211,6 +213,19 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   const [alertMessage, setAlertMessage] = useState({
     ...INITIAL_ALERT_MESSAGE,
   });
+  const row = {
+    display: "flex",
+    flexDirection: "row",
+    marginTop: "32px",
+  };
+  const gap = {
+    columnGap: "33px",
+    "& > * ": {
+      flex: 1,
+    },
+  };
+  const formRow = Object.assign({}, row);
+  const formRowGapped = Object.assign({}, formRow, gap);
 
   // toast utilities
   // toast is only used for success messages
@@ -330,6 +345,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
             measureGroupTypes: [],
             populationBasis: defaultPopulationBasis,
             scoringUnit: "",
+            scoringPrecision: "",
           },
         });
       }
@@ -355,6 +371,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       measureGroupTypes: group?.measureGroupTypes || [],
       populationBasis: group?.populationBasis || defaultPopulationBasis,
       scoringUnit: group?.scoringUnit || null, // autocomplete can't init with string
+      scoringPrecision: group?.scoringPrecision || null,
     } as Group,
     validationSchema: measureGroupSchemaValidator(
       cqlDefinitionDataTypes,
@@ -473,6 +490,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           improvementNotationDescription: "",
           populationBasis: defaultPopulationBasis,
           scoringUnit: "",
+          scoringPrecision: "",
         },
       });
     } else {
@@ -786,15 +804,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                     </FieldSeparator>
                   </FormFieldInner>
                 </div>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    flexGrow: 1,
-                    marginTop: 44,
-                    columnGap: 33,
-                  }}
-                >
+                <Box sx={formRowGapped}>
                   <MultipleSelectDropDown
                     formControl={formik.getFieldProps("measureGroupTypes")}
                     id="measure-group-type"
@@ -836,6 +846,10 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                     {...formik.getFieldProps("populationBasis")}
                     onChange={formik.setFieldValue}
                   />
+                  <div className="spacer" />
+                  <div className="spacer" />
+                </Box>
+                <Box sx={formRowGapped}>
                   <Select
                     placeHolder={{ name: "Select Scoring", value: "" }}
                     required
@@ -907,7 +921,26 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                     canEdit={canEdit}
                     placeholder="UCUM Code or Name"
                   />
-                </div>
+                  <NumberInput
+                    disabled={!canEdit}
+                    label="Scoring Precision"
+                    name="scoring-precision"
+                    id="scoring-precision"
+                    placeholder=""
+                    data-testid="scoringPrecisionText"
+                    {...formik.getFieldProps("scoringPrecision")}
+                    error={
+                      formik.touched.scoringPrecision &&
+                      Boolean(formik.errors.scoringPrecision)
+                    }
+                    helperText={
+                      formik.touched.scoringPrecision &&
+                      Boolean(formik.errors.scoringPrecision) &&
+                      formik.errors.scoringPrecision
+                    }
+                  />
+                  <div className="spacer" />
+                </Box>
                 <div>
                   <MenuItemContainer style={{ borderColor: "#8c8c8c" }}>
                     <Tabs value={activeTab} type="B" size="large">
