@@ -105,7 +105,6 @@ const ProfiledExtensionComponent = ({
             "Extension",
             elementDefinition.path
           );
-          // let elementValue = _.get(resource, elemPath);
           return (
             <Box
               sx={{
@@ -127,7 +126,7 @@ const ProfiledExtensionComponent = ({
                 type={type.code}
                 required={required}
                 value={elementDefinition?.fixedUri}
-                onChange={handleChange} // do nothing for now
+                onChange={handleChange}
                 canEdit={canEdit}
                 label={elemPath}
               />
