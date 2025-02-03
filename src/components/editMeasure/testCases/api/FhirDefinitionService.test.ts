@@ -34,7 +34,7 @@ describe("MeasureServiceApi", () => {
       });
   });
 
-  it("should return error if fetching value set definition failed", async () => {
+  it("should return null if value set definition not found", async () => {
     const url =
       "http://hl7.org/fhir/us/core/ValueSet/us-core-observation-value-codes";
     mockedAxios.get.mockRejectedValueOnce({ status: 404 });
