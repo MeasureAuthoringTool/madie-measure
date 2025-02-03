@@ -48,7 +48,7 @@ const ElementEditor = ({
     const type = child?.type?.[0]?.code;
     if (!isComponentDataType(type)) {
       // Fetch the resource tree asynchronously
-      // nesting these ifs to avoid a crash in deeply nested Claimresponse.item. Might cause issue elsewhere.
+      // nesting these ifs to avoid a crash in deeply nested ClaimResponse.item. Might cause issue elsewhere.
       if (type) {
         const def = await fhirDefinitionsService.current.getResourceTree(type);
         if (def) {
@@ -77,6 +77,7 @@ const ElementEditor = ({
       const builtNode = {
         id: child?.id,
         label: child.path.split(".").pop(),
+        path: child.path,
         value,
         type,
         required,
@@ -142,7 +143,8 @@ const ElementEditor = ({
       // start nested structure
       keys.forEach((key, index) => {
         if (index === keys.length - 1) {
-          currentObj[key] = value;
+          const cleanKey = key.split(":")[0];
+          currentObj[cleanKey] = value;
         } else {
           currentObj[key] = currentObj[key] || {};
           currentObj = currentObj[key];

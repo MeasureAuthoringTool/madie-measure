@@ -21,6 +21,7 @@ import {
   updateChildrenPaths,
   isComponentDataType,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
+import CodingComponent from "./types/CodingComponent";
 
 const TypeEditor = ({
   type,
@@ -48,7 +49,7 @@ const TypeEditor = ({
       });
     }
   }, [type]);
-  // helper neeeded for nested structures. cannot access with a string alone.
+  // helper needed for nested structures. cannot access with a string alone.
   const getNestedProperty = (obj, path) => {
     return path
       .split(".")
@@ -69,6 +70,7 @@ const TypeEditor = ({
         return (
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
             <StringComponent
+              {...formik.getFieldProps(label)}
               label={label}
               canEdit={canEdit}
               helperText={formikErrorHandler(label)}
@@ -76,7 +78,6 @@ const TypeEditor = ({
               structureDefinition={null}
               fieldRequired={required}
               value={value}
-              {...formik.getFieldProps(label)}
             />
           </Box>
         );
@@ -147,6 +148,7 @@ const TypeEditor = ({
       case "unsignedInt":
         return (
           <IntegerComponent
+            structureDefinition={undefined}
             canEdit={canEdit}
             fieldRequired={required}
             label={label}
@@ -224,6 +226,15 @@ const TypeEditor = ({
             structureDefinition={structureDefinition}
           />
         );
+      case "Coding":
+        return (
+          <CodingComponent
+            canEdit={canEdit}
+            structureDefinition={structureDefinition}
+            fieldRequired={required}
+            onChange={onChange}
+          />
+        );
       case "Extension":
         return _.isEmpty(structureDefinition?.type?.[0]?.profile) ? (
           <ExtensionComponent
@@ -239,6 +250,7 @@ const TypeEditor = ({
             structureDefinition={structureDefinition}
             fieldRequired={false}
             resource={resource}
+            onChange={onChange}
           />
         );
       default:

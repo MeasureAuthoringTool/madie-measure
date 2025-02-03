@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { TypeComponentProps } from "./TypeComponentProps";
 import { Box, Divider } from "@mui/material";
 import Typography from "@mui/material/Typography";
+import { useFormikContext } from "formik";
+import { Extension } from "fhir/r4";
 import * as _ from "lodash";
 import TypeEditor from "../TypeEditor";
 import useFhirDefinitionsServiceApi from "../../../../../../../../api/useFhirDefinitionsService";
@@ -21,6 +23,7 @@ const ProfiledExtensionComponent = ({
   const [extensionProfileDef, setExtensionProfileDef] =
     useState<StructureDefinitionDto>();
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
+  const formik = useFormikContext();
 
   useEffect(() => {
     if (structureDefinition) {
@@ -33,11 +36,6 @@ const ProfiledExtensionComponent = ({
           });
           const profileDefinitions = await Promise.all(loadProfiles);
           setExtensionProfileDef(profileDefinitions[0]);
-        } else {
-          console.error(
-            "Not a profiled extension...collecting fields from structure definition...",
-            structureDefinition
-          );
         }
       })().catch((error) =>
         console.error(
@@ -48,11 +46,59 @@ const ProfiledExtensionComponent = ({
     }
   }, [structureDefinition]);
 
+  const topLevelElements = extensionProfileDef
+    ? getTopLevelElements(extensionProfileDef)
+    : null;
+
+  const handleChange = (value) => {
+    // get extension from formik if present
+    const extensions: Extension[] =
+      _.get(formik.values, "Patient.extension") || [];
+    // structured elements for extension
+    const complexElements = topLevelElements.filter(
+      // ignore extension of extension
+      (element) => element.path.includes("Extension.extension")
+    );
+    // for complex extensions like race, ethnicity, tribalAffiliation
+    if (complexElements.length > 1) {
+      // get relevant nested extension within extension
+      const extension = _.find(
+        extensions,
+        (extension) => extension?.url === extensionProfileDef.definition.url
+      );
+      if (extension) {
+        // relevant extension element definition to check cardinality
+        const elementDefinition = topLevelElements.find((element) =>
+          element.id.includes(value.url)
+        );
+        // if cardinality is one-toone, update existing else add new
+        if (elementDefinition.max == 1) {
+          const filteredExtension = extension.extension.filter(
+            (extension) => extension.url !== value.url
+          );
+          extension.extension = [...filteredExtension, value];
+        } else {
+          extension.extension.push(value);
+        }
+      } else {
+        extensions.push({
+          extension: [value],
+          url: extensionProfileDef.definition.url,
+        });
+      }
+    } else {
+      // for simple extensions like birthSex, sex
+      extensions.push({ ...value });
+    }
+    formik.setFieldValue("Patient.extension", extensions);
+    onChange(extensions);
+  };
+
   return extensionProfileDef ? (
     <Box sx={{ display: "flex", flexDirection: "column" }}>
       <Box>{structureDefinition.short}</Box>
       <Box sx={{ display: "flex", flexDirection: "column" }}>
-        {getTopLevelElements(extensionProfileDef).map((elementDefinition) => {
+        {topLevelElements.map((elementDefinition) => {
           const type = elementDefinition?.type?.[0];
           const required = +elementDefinition.min > 0;
           const elemPath = stripResourcePath(
@@ -75,15 +121,15 @@ const ProfiledExtensionComponent = ({
                   : ""}
               </Typography>
               <TypeEditor
-                structureDefinition={elementDefinition}
                 resource={resource}
+                structureDefinition={elementDefinition}
+                parentStructureDefinition={extensionProfileDef}
                 type={type.code}
                 required={required}
                 value={elementDefinition?.fixedUri}
-                onChange={() => {}} // do nothing for now
+                onChange={handleChange} // do nothing for now
                 canEdit={canEdit}
                 label={elemPath}
-                parentStructureDefinition={extensionProfileDef}
               />
               <Divider />
             </Box>

@@ -8,7 +8,7 @@ import * as _ from "lodash";
 import md5 from "blueimp-md5";
 import { ManifestExpansion } from "@madie/madie-models";
 
-type ValueSetSearchParams = {
+export type ValueSetSearchParams = {
   oid: string;
   release?: string;
   version?: string;
@@ -29,20 +29,16 @@ type CQLCodeWithCodeSystemOid = {
 export class TerminologyServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
 
-  async getValueSetsExpansion(measureBundle: Bundle): Promise<ValueSet[]> {
-    if (!measureBundle) {
-      return null;
-    }
+  async getExpansion(valueSetParams: ValueSetSearchParams[]) {
     const searchCriteria = {
       includeDraft: "yes", // always yes for now
       activeOnly: "false",
       manifestExpansion: null, // always latest until we support manifest for QICore
-      valueSetParams: this.getValueSetsOIdsFromBundle(measureBundle),
+      valueSetParams: valueSetParams,
     } as ValueSetsSearchCriteria;
     if (searchCriteria.valueSetParams.length == 0) {
       return [];
     }
-
     try {
       const response = await axios.put(
         `${this.baseUrl}/terminology/value-sets/expansion/fhir`,
@@ -68,6 +64,24 @@ export class TerminologyServiceApi {
       }
       throw new Error(message);
     }
+  }
+
+  async getValueSetsExpansion(measureBundle: Bundle): Promise<ValueSet[]> {
+    if (!measureBundle) {
+      return [];
+    }
+    const valueSetSearchParams = this.getValueSetsOIdsFromBundle(measureBundle);
+    return this.getExpansion(valueSetSearchParams);
+  }
+
+  async getValueSetsExpansionForOids(oids: string[]): Promise<ValueSet[]> {
+    if (!oids) {
+      return [];
+    }
+    const valueSetSearchParams = oids.map((oid) => {
+      return { oid: oid };
+    });
+    return this.getExpansion(valueSetSearchParams);
   }
 
   async getQdmValueSetsExpansion(

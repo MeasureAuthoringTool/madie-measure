@@ -33,7 +33,13 @@ const CodesComponent = ({
         terminologyServiceApi.current
           .getInternalValueSetExpansion(valueSetUrl)
           .then((expansion) => {
-            setCodes(expansion?.expansion?.contains);
+            setCodes([
+              {
+                code: "2135-2",
+                display: "Hispanic or Latino",
+                system: "urn:oid:2.16.840.1.113883.6.238",
+              },
+            ]);
           })
           .catch((error) => {
             console.error(
