@@ -73,7 +73,14 @@ export const getUnsignedIntegerValidator = (required) => {
     .test(
       "len",
       `Unsigned integer range is [${UNSIGNED_MINIMUM} to ${INTEGER_MAXIMUM}]`,
-      (val) => val.length >= UNSIGNED_MINIMUM && val.length <= INTEGER_MAXIMUM
+      (val) => {
+        if (val && val.length) {
+          return (
+            val.length >= UNSIGNED_MINIMUM && val.length <= INTEGER_MAXIMUM
+          );
+        }
+        return true;
+      }
     );
   if (required) {
     return baseValidator.required("This field is required");
@@ -88,7 +95,12 @@ export const getSignedIntegerValidator = (required) => {
     .test(
       "len",
       `Signed integer range is [${SIGNED_MINIMUM} to ${INTEGER_MAXIMUM}]`,
-      (val) => val.length >= SIGNED_MINIMUM && val.length <= INTEGER_MAXIMUM
+      (val) => {
+        if (val && val.length) {
+          return val.length >= SIGNED_MINIMUM && val.length <= INTEGER_MAXIMUM;
+        }
+        return true;
+      }
     );
   if (required) {
     return baseValidator.required("This field is required");
