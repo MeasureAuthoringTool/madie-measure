@@ -67,12 +67,12 @@ const ElementEditor = ({
         }
       }
       // This is the edge case for when we're providing the root of the structure like ClaimResponse as it's not a componentDataType and there is no type
-      const required = +child.min > 0;
-      const elemPath = child.path;
+      const required = +child?.min > 0;
+      const elemPath = child?.path;
       const value = _.get(resource, elemPath);
       const builtNode = {
         id: child?.id,
-        label: child.path.split(".").pop(),
+        label: child?.path.split(".").pop(),
         value,
         type,
         required,

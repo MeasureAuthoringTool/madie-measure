@@ -31,6 +31,9 @@ describe("ElementEditor Component", () => {
     id: "ClaimResponse.id",
     path: "ClaimResponse",
     type: [{ code: "string" }],
+    snapshot: {
+      element: [{ type: [{ code: "string" }] }],
+    },
   };
   const mockAllChildren = [
     {
@@ -58,6 +61,7 @@ describe("ElementEditor Component", () => {
         userSelected: false,
       },
     },
+    definition: mockElementDefinition,
   };
 
   const mockFhirDefinitionsService = {
