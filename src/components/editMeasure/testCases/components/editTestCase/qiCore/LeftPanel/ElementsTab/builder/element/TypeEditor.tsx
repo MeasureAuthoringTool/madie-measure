@@ -38,14 +38,18 @@ const TypeEditor = ({
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   useEffect(() => {
     if (!isComponentDataType(type)) {
-      fhirDefinitionsService.current.getResourceTree(type).then((def) => {
-        const elements = getTopLevelElements(def);
-        const updatedElements = updateChildrenPaths(
-          structureDefinition,
-          elements
-        );
-        setChildTypeDefs(updatedElements);
-      });
+      if (type) {
+        fhirDefinitionsService.current.getResourceTree(type).then((def) => {
+          if (def) {
+            const elements = getTopLevelElements(def);
+            const updatedElements = updateChildrenPaths(
+              structureDefinition,
+              elements
+            );
+            setChildTypeDefs(updatedElements);
+          }
+        });
+      }
     }
   }, [type]);
   // helper neeeded for nested structures. cannot access with a string alone.
