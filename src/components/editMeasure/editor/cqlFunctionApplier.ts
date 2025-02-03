@@ -3,42 +3,49 @@ import { CqlApplyActionResult } from "./CqlApplyActionResult";
 import { CQLFunction } from "@madie/madie-editor";
 
 function findMatchingArguments(objects, matchCriteria) {
-  // string values inside of arguments parens
-  const firstParensRegex = /\(([^)]+)\)/;
+  // Function to extract arguments from inside parentheses
+  function extractArguments(text) {
+    const parensMatch = text.match(/\((.*)\)/);
+    if (!parensMatch) return [];
+
+    const parensContent = parensMatch[1];
+    const argumentBuilder = [];
+    const regex = /"([^"]+)"|([^\s",()]+)/g;
+    let match;
+
+    while ((match = regex.exec(parensContent)) !== null) {
+      if (match[1]) {
+        argumentBuilder.push(match[1]); // Remove quotes
+      } else if (match[2]) {
+        argumentBuilder.push(match[2]);
+      }
+    }
+
+    const argumentsArray = [];
+    for (let i = 0; i < argumentBuilder.length; i += 2) {
+      argumentsArray.push({
+        argumentName: argumentBuilder[i],
+        dataType: argumentBuilder[i + 1] || "",
+      });
+    }
+
+    return argumentsArray;
+  }
+
+  // Map over each object and extract the formatted arguments from `text`
+  const outputArray = objects.map((item) => extractArguments(item.text));
 
   const result = [];
-  // iterate through all objects text properties
   const { functionsArguments } = matchCriteria;
+  outputArray.forEach((obj) => {
+    if (!obj) return;
 
-  objects.forEach((obj) => {
-    if (!obj.text) return;
-
-    const parensMatch = obj.text.match(firstParensRegex);
-    // if nothing in the parens of our comparison obj and nothing in the supplied fn to apply, we know it's the same by earlier name match
-    if (!parensMatch && functionsArguments.length === 0) {
-      result.push(obj);
+    if (functionsArguments.length !== obj.length) {
       return;
     }
-    //get only first parens
-    const parensContent = parensMatch[1];
-    // build an object array with argumentName and dataType
-    const parensObj = parensContent.split(",").map((item) => {
-      const parts = item
-        .match(/"([^"]+)"|([^\s"]+)/g)
-        .map((part) => part.replace(/"/g, ""));
 
-      return {
-        argumentName: parts[0],
-        dataType: parts[1],
-      };
-    });
-    if (functionsArguments.length !== parensObj.length) {
-      return null;
-    }
-
-    // iterate through all cql matches, if args shallowEqual functionsArguments we push the object.
     let missed = false;
-    parensObj.forEach((arg, index) => {
+    obj.forEach((arg, index) => {
       const target = functionsArguments[index];
       if (
         target.argumentName !== arg.argumentName ||
@@ -54,11 +61,7 @@ function findMatchingArguments(objects, matchCriteria) {
     }
   });
 
-  if (result.length) {
-    return result[0];
-  }
-
-  return null;
+  return result.length ? result[0] : null;
 }
 
 const findExistingCQLFunction = (cqlFunction, expressionDefinitions) => {
