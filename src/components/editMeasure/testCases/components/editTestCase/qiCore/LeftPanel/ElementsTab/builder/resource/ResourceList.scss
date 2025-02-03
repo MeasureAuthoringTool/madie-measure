@@ -1,0 +1,19 @@
+#qi-core-6-tc-builder {
+  > #measure-landing > .measure-table {
+    margin: 0;
+  }
+
+  > #search-container {
+    margin: 24px 0;
+    max-width: 400px;
+  }
+
+  #tc-builder-pagination-container {
+    > div {
+      padding: 0;
+      border: none;
+      display: flex;
+      flex-direction: row-reverse;
+    }
+  }
+}
