@@ -66,7 +66,9 @@ export class TerminologyServiceApi {
     }
   }
 
-  async getValueSetsExpansion(measureBundle: Bundle): Promise<ValueSet[]> {
+  async getValueSetsExpansionForBundle(
+    measureBundle: Bundle
+  ): Promise<ValueSet[]> {
     if (!measureBundle) {
       return [];
     }

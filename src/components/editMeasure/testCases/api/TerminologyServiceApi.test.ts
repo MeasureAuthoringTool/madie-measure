@@ -29,7 +29,7 @@ describe("TerminologyServiceApi Tests", () => {
   });
 
   it("gives no ValueSets when no bundle provided", () => {
-    terminologyService.getValueSetsExpansion(null).then((data) => {
+    terminologyService.getValueSetsExpansionForBundle(null).then((data) => {
       expect(data.length).toEqual(0);
     });
   });
@@ -40,7 +40,7 @@ describe("TerminologyServiceApi Tests", () => {
       .mockResolvedValueOnce({ data: [officeVisitValueSet] });
 
     terminologyService
-      .getValueSetsExpansion(officeVisitMeasureBundle)
+      .getValueSetsExpansionForBundle(officeVisitMeasureBundle)
       .then((data) => {
         expect(data.length).toEqual(1);
         expect(data[0].name).toEqual("Office Visit");
@@ -67,12 +67,41 @@ describe("TerminologyServiceApi Tests", () => {
       .fn()
       .mockRejectedValue({ response: { status: 404, data: response } });
     try {
-      await terminologyService.getValueSetsExpansion(officeVisitMeasureBundle);
+      await terminologyService.getValueSetsExpansionForBundle(
+        officeVisitMeasureBundle
+      );
     } catch (error) {
       expect(error.message).toEqual(
         "An error exists with the measure CQL, please review the CQL Editor tab."
       );
     }
+  });
+
+  it("Should return expansions for value set oids", () => {
+    axios.put = jest
+      .fn()
+      .mockResolvedValue({ status: 200, data: [officeVisitValueSet] });
+    const oid = "2.16.840.1.113883.3.464.1003.101.12.1001";
+    terminologyService
+      .getValueSetsExpansionForOids([oid])
+      .then((valueSets: ValueSet[]) => {
+        expect(valueSets.length).toEqual(1);
+        expect(valueSets[0].name).toEqual("Office Visit");
+        expect(valueSets[0].name).toEqual("Office Visit");
+        expect(valueSets[0].id).toEqual(oid);
+        expect(valueSets[0].compose.include[0].concept.length).toEqual(5);
+      });
+  });
+
+  it("Should return empty expansion list if oids not provided", () => {
+    axios.put = jest
+      .fn()
+      .mockResolvedValue({ status: 200, data: [officeVisitValueSet] });
+    terminologyService
+      .getValueSetsExpansionForOids([])
+      .then((valueSets: ValueSet[]) => {
+        expect(valueSets.length).toEqual(0);
+      });
   });
 
   it("gives no ValueSets when no cqm measure provided", () => {
