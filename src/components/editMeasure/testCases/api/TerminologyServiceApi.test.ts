@@ -27,9 +27,10 @@ describe("TerminologyServiceApi Tests", () => {
     const getAccessToken = jest.fn();
     terminologyService = new TerminologyServiceApi("test.url", getAccessToken);
   });
+
   it("gives no ValueSets when no bundle provided", () => {
     terminologyService.getValueSetsExpansion(null).then((data) => {
-      expect(data).toBeNull();
+      expect(data.length).toEqual(0);
     });
   });
 
