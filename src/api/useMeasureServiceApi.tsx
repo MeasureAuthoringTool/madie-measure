@@ -380,7 +380,7 @@ export class MeasureServiceApi {
     limit: number = 25,
     page: number = 0,
     searchCriteria: any,
-    signal
+    abortController: AbortController
   ): Promise<any> {
     try {
       const response = await axios.put<any>(
@@ -396,7 +396,7 @@ export class MeasureServiceApi {
             limit,
             page,
           },
-          signal,
+          signal: abortController.signal,
         }
       );
       return response.data;

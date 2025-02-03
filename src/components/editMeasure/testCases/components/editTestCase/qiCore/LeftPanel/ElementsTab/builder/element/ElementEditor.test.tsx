@@ -9,7 +9,24 @@ jest.mock("../../../../../../../api/useFhirDefinitionsService");
 jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
   return {
     getBasePath: jest.fn().mockReturnValue("ClaimResponse"),
-    getAllChildren: jest.fn().mockReturnValue([]),
+    getAllChildren: jest.fn().mockReturnValue([
+      { id: "ClaimResponse", path: "ClaimResponse" },
+      {
+        id: "ClaimResponse.id",
+        path: "ClaimResponse",
+        type: [{ code: "string" }],
+      },
+      {
+        id: "ClaimResponse.dispostion",
+        path: "ClaimResponse.dispostion",
+        type: [{ code: "string" }],
+      },
+      {
+        id: "ClaimResponse.extension",
+        path: "ClaimResponse.extension",
+        type: [{ code: "Extension" }],
+      },
+    ]),
     isComponentDataType: jest.fn().mockReturnValue(false),
     getTopLevelElements: jest.fn().mockReturnValue([]),
     stripResourcePath: jest.fn().mockReturnValue("ClaimResponse.id"),
@@ -28,22 +45,30 @@ jest.mock("./ElementEditorChildren", () => () => (
 describe("ElementEditor Component", () => {
   const mockOnChange = jest.fn();
   const mockElementDefinition = {
-    id: "ClaimResponse.id",
+    id: "qicore-claimresponse",
     path: "ClaimResponse",
-    type: [{ code: "string" }],
+    type: "ClaimResponse",
+    snapshot: {
+      element: [
+        { id: "ClaimResponse", path: "ClaimResponse" },
+        {
+          id: "ClaimResponse.id",
+          path: "ClaimResponse",
+          type: [{ code: "string" }],
+        },
+        {
+          id: "ClaimResponse.dispostion",
+          path: "ClaimResponse.dispostion",
+          type: [{ code: "string" }],
+        },
+        {
+          id: "ClaimResponse.extension",
+          path: "ClaimResponse.extension",
+          type: [{ code: "Extension" }],
+        },
+      ],
+    },
   };
-  const mockAllChildren = [
-    {
-      id: "ClaimResponse.code",
-      path: "ClaimResponse.code",
-      type: [{ code: "string" }],
-    },
-    {
-      id: "ClaimResponse.extension",
-      path: "ClaimResponse.extension",
-      type: [{ code: "string" }],
-    },
-  ];
 
   const mockResource = {
     ClaimResponse: {
@@ -60,8 +85,15 @@ describe("ElementEditor Component", () => {
     },
   };
 
+  const mockSelectedResource = {
+    bundleEntry: { resource: mockResource },
+    definition: mockElementDefinition,
+  };
+
   const mockFhirDefinitionsService = {
-    getAllChildren: jest.fn().mockReturnValue([]),
+    getAllChildren: jest
+      .fn()
+      .mockReturnValue(mockElementDefinition.snapshot.element),
     isComponentDataType: jest.fn().mockReturnValue(false),
     getTopLevelElements: jest.fn().mockReturnValue([]),
     stripResourcePath: jest.fn().mockReturnValue("ClaimResponse.id"),
@@ -82,7 +114,7 @@ describe("ElementEditor Component", () => {
   test("renders without crashing when elementDefinition is provided", async () => {
     render(
       <ElementEditor
-        selectedResource={mockResource}
+        selectedResource={mockSelectedResource}
         resource={mockResource}
         elementDefinition={mockElementDefinition}
         resourcePath="ClaimResponse"
@@ -104,7 +136,7 @@ describe("ElementEditor Component", () => {
   test("renders a fallback when no elementDefinition is provided", () => {
     render(
       <ElementEditor
-        selectedResource={mockResource}
+        selectedResource={mockSelectedResource}
         resource={mockResource}
         elementDefinition={null}
         resourcePath="ClaimResponse"
@@ -119,7 +151,7 @@ describe("ElementEditor Component", () => {
   test("checks loading state", async () => {
     render(
       <ElementEditor
-        selectedResource={mockResource}
+        selectedResource={mockSelectedResource}
         resource={mockResource}
         elementDefinition={mockElementDefinition}
         resourcePath="ClaimResponse"
