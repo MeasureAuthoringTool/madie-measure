@@ -1,4 +1,10 @@
-import React, { useEffect, useState, Suspense, useRef } from "react";
+import React, {
+  useEffect,
+  useState,
+  Suspense,
+  useRef,
+  useCallback,
+} from "react";
 import {
   useBlocker,
   Route,
@@ -39,6 +45,7 @@ import ExportDialog from "../measureLanding/measureList/exportDialog/ExportDialo
 import { exportMeasure } from "../../utils/exportUtil";
 import TestCases from "./testCases/TestCases";
 import { AxiosResponse } from "axios";
+import ViewHRModal from "../common/viewHumanReadableModal/ViewHRModal";
 
 const OBJECT_ID_REGEX = /\/[a-f0-9]{24}/g;
 
@@ -120,6 +127,10 @@ export default function EditMeasure() {
   });
   const [draftMeasureDialog, setDraftMeasureDialog] = useState({
     open: false,
+  });
+  const [viewHumanReadableModal, setViewHumanReadableModal] = useState({
+    open: false,
+    measureId: "",
   });
   const [versionHelperText, setVersionHelperText] = useState("");
   const [invalidTestCaseOpen, setInvalidTestCaseOpen] =
@@ -211,6 +222,21 @@ export default function EditMeasure() {
     setToastMessage,
   ]);
 
+  useEffect(() => {
+    const viewHRListener = () => {
+      setViewHumanReadableModal({
+        open: true,
+        measureId: measure?.id,
+      });
+    };
+    window.addEventListener("view-humanreadable", viewHRListener, {
+      passive: true,
+    });
+    return () => {
+      window.removeEventListener("view-humanreadable", viewHRListener);
+    };
+  }, []);
+
   // whenever measureID changes we need to update all pagination items except for limit which should be retained as a user preference
   useEffect(() => {
     return () => {
@@ -260,6 +286,10 @@ export default function EditMeasure() {
       open: false,
     });
     setVersionHelperText("");
+    setViewHumanReadableModal({
+      open: false,
+      measureId: "",
+    });
   };
   const createVersion = (versionType: string) => {
     setLoading(true);
@@ -532,6 +562,11 @@ export default function EditMeasure() {
             open={Boolean(downloadState)}
             handleContinueDialog={handleContinueDialog}
             handleCancelDialog={handleCancelDialog}
+          />
+          <ViewHRModal
+            measureId={measure?.id}
+            onClose={handleDialogClose}
+            open={viewHumanReadableModal.open}
           />
           <Toast
             toastKey="measure-information-toast"

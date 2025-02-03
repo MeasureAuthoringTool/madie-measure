@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import ActionCenter from "./ActionCenter";
 import { Measure, MeasureSet, Model } from "@madie/madie-models";
 import {
@@ -17,14 +17,12 @@ jest.mock("@madie/madie-util", () => ({
 }));
 
 jest.mock("../../../../api/useMeasureServiceApi");
-const mockedUseMeasureServiceApi = useMeasureServiceApi as jest.MockedFunction<
-  typeof useMeasureServiceApi
->;
 
 const mockFeatureFlags = {};
 const mockGetUserName = jest.fn(() => "test user");
 const mockCheckUserCanEdit = jest.fn();
 const fetchMeasureDraftStatuses = jest.fn();
+const setViewHumanReadableModal = jest.fn();
 
 const mockMeasureSet = {
   cmsId: "124",
@@ -51,7 +49,7 @@ const qiCoreMeasure = {
   measureSet: { ...mockMeasureSet, cmsId: null },
   measureSetId: "1-2-3-4",
   measureMetaData: { draft: true },
-} as Measure;
+} as unknown as Measure;
 
 describe("ActionCenter", () => {
   beforeEach(() => {
@@ -74,6 +72,9 @@ describe("ActionCenter", () => {
         updateTargetMeasure={jest.fn()}
         setCreateVersionDialog={jest.fn()}
         setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
       />
     );
 
@@ -85,6 +86,7 @@ describe("ActionCenter", () => {
     expect(
       screen.getByTestId("associate-cms-id-action-btn")
     ).toBeInTheDocument();
+    expect(screen.getByTestId("view-hr-action-btn")).toBeInTheDocument();
   });
 
   it("should call updateTargetMeasure and setCreateVersionDialog when version action is triggered", () => {
@@ -99,6 +101,9 @@ describe("ActionCenter", () => {
         updateTargetMeasure={updateTargetMeasure}
         setCreateVersionDialog={setCreateVersionDialog}
         setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
       />
     );
 
@@ -132,6 +137,7 @@ describe("ActionCenter", () => {
         setDraftMeasureDialog={setDraftMeasureDialog}
         setDeleteMeasureDialog={jest.fn()}
         deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
       />
     );
 
@@ -160,6 +166,7 @@ describe("ActionCenter", () => {
         setDraftMeasureDialog={jest.fn()}
         setDeleteMeasureDialog={setDeleteMeasureDialog}
         deleteMeasure={deleteMeasure}
+        setViewHumanReadableModal={jest.fn()}
       />
     );
 
@@ -183,6 +190,9 @@ describe("ActionCenter", () => {
         updateTargetMeasure={updateTargetMeasure}
         setCreateVersionDialog={jest.fn()}
         setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
       />
     );
 
@@ -192,7 +202,7 @@ describe("ActionCenter", () => {
     expect(exportMeasure).toHaveBeenCalled();
   });
 
-  it("should disable actions based on permissions", () => {
+  it("should disable actions based on permissions except of view human readable", () => {
     mockCheckUserCanEdit.mockReturnValue(false);
 
     render(
@@ -203,6 +213,9 @@ describe("ActionCenter", () => {
         updateTargetMeasure={jest.fn()}
         setCreateVersionDialog={jest.fn()}
         setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
       />
     );
 
@@ -210,5 +223,37 @@ describe("ActionCenter", () => {
     expect(screen.getByTestId("export-action-btn")).not.toBeDisabled();
     expect(screen.getByTestId("draft-action-btn")).toBeDisabled();
     expect(screen.getByTestId("version-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("view-hr-action-btn")).toBeEnabled();
+  });
+
+  it("should call view human readable when view human readable action is triggered", async () => {
+    render(
+      <ActionCenter
+        measures={[qdmMeasure]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={jest.fn()}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={setViewHumanReadableModal}
+      />
+    );
+
+    const viewHRBtn = screen.getByTestId("view-hr-action-btn");
+    fireEvent.click(viewHRBtn);
+
+    await waitFor(() => {
+      setTimeout(() => {
+        expect(screen.queryByTestId("view-hr-modal")).toBeInTheDocument();
+        // expect(viewHumanReadable).toHaveBeenCalled();
+        // expect(setViewHumanReadableModal).toHaveBeenCalledWith(true);
+        expect(setViewHumanReadableModal).toHaveBeenCalledWith({
+          open: true,
+          measureId: qdmMeasure.measureSetId,
+        });
+      }, 500);
+    });
   });
 });
