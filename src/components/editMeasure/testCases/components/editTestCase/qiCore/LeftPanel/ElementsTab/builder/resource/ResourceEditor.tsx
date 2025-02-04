@@ -24,7 +24,6 @@ interface ResourceEditorProps {
   onSave: (resource: any) => void;
   onCancel: (resource: any) => void;
   canEdit: boolean;
-  setEditorVal: React.Dispatch<React.SetStateAction<Object>>;
 }
 
 /**
@@ -45,7 +44,6 @@ const ResourceEditor = ({
   onSave,
   onCancel,
   canEdit,
-  setEditorVal,
 }: ResourceEditorProps) => {
   const [activeTab, setActiveTab] = useState(0);
   const [allElements, setAllElements] = useState([]);
@@ -57,7 +55,7 @@ const ResourceEditor = ({
     selectedResource?.bundleEntry?.resource
   );
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
-  const { state, dispatch } = useQiCoreResource();
+  const { dispatch } = useQiCoreResource();
   useEffect(() => {
     if (selectedResource) {
       // TODO: look at the data that exists on the resource and combine fields from that
@@ -168,7 +166,6 @@ const ResourceEditor = ({
           selectedResource={selectedResource}
           resource={editingResource}
           resourcePath={resourceBasePath}
-          setEditorVal={setEditorVal}
           displayedElementsTree={displayedElementsTree}
           onChange={(path, value) => {
             const nextEntry = _.cloneDeep(selectedResource.bundleEntry);

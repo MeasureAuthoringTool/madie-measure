@@ -900,8 +900,8 @@ const EditTestCase = (props: EditTestCaseProps) => {
                               id="elements-content"
                             >
                               <ElementsTab
-                                canEdit={canEdit}
                                 setEditorVal={setEditorVal}
+                                canEdit={canEdit}
                                 editorVal={editorVal}
                                 testCase={testCase}
                               />

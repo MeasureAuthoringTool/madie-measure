@@ -1,8 +1,9 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { useFormik } from "formik";
 import ElementEditor from "./ElementEditor";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
+import { QiCoreResourceProvider } from "../../../../../../../util/QiCorePatientProvider";
 
 jest.mock("../../../../../../../api/useFhirDefinitionsService");
 
@@ -27,6 +28,7 @@ jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
         type: [{ code: "Extension" }],
       },
     ]),
+    setNestedValue: jest.fn(),
     isComponentDataType: jest.fn().mockReturnValue(false),
     getTopLevelElements: jest.fn().mockReturnValue([]),
     stripResourcePath: jest.fn().mockReturnValue("ClaimResponse.id"),
@@ -100,6 +102,43 @@ describe("ElementEditor Component", () => {
     getResourceTree: jest.fn().mockResolvedValue({}),
   };
 
+  const mockDisplayedElementsTree = {
+    ClaimResponse: {
+      created: true,
+      id: true,
+      insurer: true,
+      outcome: true,
+      patient: true,
+      status: true,
+      type: true,
+      use: true,
+    },
+  };
+
+  const renderElementEditor = (
+    selectedResource,
+    resource,
+    elementDefinition,
+    resourcePath,
+    onChange,
+    canEdit,
+    displayedElementsTree
+  ) => {
+    render(
+      <QiCoreResourceProvider>
+        <ElementEditor
+          selectedResource={selectedResource}
+          resource={resource}
+          elementDefinition={elementDefinition}
+          resourcePath={resourcePath}
+          onChange={onChange}
+          canEdit={canEdit}
+          displayedElementsTree={displayedElementsTree}
+        />
+      </QiCoreResourceProvider>
+    );
+  };
+
   beforeEach(() => {
     useFhirDefinitionsServiceApi.mockReturnValue(mockFhirDefinitionsService);
     useFormik.mockReturnValue({
@@ -112,17 +151,15 @@ describe("ElementEditor Component", () => {
   });
 
   test("renders without crashing when elementDefinition is provided", async () => {
-    render(
-      <ElementEditor
-        selectedResource={mockSelectedResource}
-        resource={mockResource}
-        elementDefinition={mockElementDefinition}
-        resourcePath="ClaimResponse"
-        onChange={mockOnChange}
-        canEdit={true}
-      />
+    renderElementEditor(
+      mockSelectedResource,
+      mockResource,
+      mockElementDefinition,
+      "ClaimResponse",
+      mockOnChange,
+      true,
+      mockDisplayedElementsTree
     );
-
     await waitFor(() =>
       expect(mockFhirDefinitionsService.getResourceTree).toHaveBeenCalled()
     );
@@ -134,32 +171,28 @@ describe("ElementEditor Component", () => {
   });
 
   test("renders a fallback when no elementDefinition is provided", () => {
-    render(
-      <ElementEditor
-        selectedResource={mockSelectedResource}
-        resource={mockResource}
-        elementDefinition={null}
-        resourcePath="ClaimResponse"
-        onChange={mockOnChange}
-        canEdit={true}
-      />
+    renderElementEditor(
+      mockSelectedResource,
+      mockResource,
+      null,
+      "ClaimResponse",
+      mockOnChange,
+      true,
+      mockDisplayedElementsTree
     );
-
     expect(screen.getByText("No element selected")).toBeInTheDocument();
   });
 
   test("checks loading state", async () => {
-    render(
-      <ElementEditor
-        selectedResource={mockSelectedResource}
-        resource={mockResource}
-        elementDefinition={mockElementDefinition}
-        resourcePath="ClaimResponse"
-        onChange={mockOnChange}
-        canEdit={true}
-      />
+    renderElementEditor(
+      mockSelectedResource,
+      mockResource,
+      mockElementDefinition,
+      "ClaimResponse",
+      mockOnChange,
+      true,
+      mockDisplayedElementsTree
     );
-
     expect(screen.queryByText("ElementEditorChildren")).not.toBeInTheDocument();
 
     await waitFor(() => {

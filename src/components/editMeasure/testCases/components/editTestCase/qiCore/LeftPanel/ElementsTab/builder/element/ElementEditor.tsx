@@ -15,6 +15,11 @@ import {
   isComponentDataType,
   setNestedValue,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
+import {
+  useQiCoreResource,
+  ResourceActionType,
+} from "../../../../../../../util/QiCorePatientProvider";
+
 interface ElementEditorProps {
   resource?: any;
   selectedResource?: any;
@@ -23,7 +28,6 @@ interface ElementEditorProps {
   value?: any;
   onChange?: (path: string, value: any) => void;
   canEdit: boolean;
-  setEditorVal: React.Dispatch<React.SetStateAction<Object>>;
   displayedElementsTree: Object;
 }
 const ElementEditor = ({
@@ -34,13 +38,15 @@ const ElementEditor = ({
   onChange,
   canEdit,
   displayedElementsTree,
-  setEditorVal,
 }: ElementEditorProps) => {
   const fhirDefinitionsServiceApi = useFhirDefinitionsServiceApi();
   const fhirDefinitionsService = useRef(fhirDefinitionsServiceApi);
   const [loading, setLoading] = useState(true);
   const [initialValues, setInitialValues] = useState({});
   const [validationSchema, setValidationSchema] = useState({});
+  // We want to dispatch an action that contains a payload of our updated selectedResource.entry
+  // The resource reducer will in turn update the testcase json string
+  const { dispatch } = useQiCoreResource();
 
   const buildNode = async (
     child,
@@ -218,41 +224,31 @@ const ElementEditor = ({
         }
       }
     }
-
     return obj;
   }
 
+  // on debounced change, we will update tc json with formik values
   useEffect(() => {
     const debouncedSetEditorVal = _.debounce(() => {
       if (formik.values && formik.dirty) {
-        setEditorVal((editorVal) => {
-          // bundle object to a string
-          // Only add the new keys that aren't already in prev
-          // We need to traverse the bundle object, knowing that our resource matches our id. ClaimResponse.id -> editorVal.entry. is a list of resources with matching ids
-          const editorObject = JSON.parse(`${editorVal}`); // there's no quotes on this string so wrapping it
-          const { type } = selectedResource?.definition; // matches to ClaimResponse
-          const { id } = formik.values[type]; // ClaimResponse.id
-          const targetedEntry = editorObject.entry.find(
-            ({ resource }) => resource.id === id
-          ); // what we want to update
-          const formikCleanedValues = removeUndefinedAndEmptyObjects(
-            formik.values
-          ); // what we want to update it to
-          const updatedValues = {
-            resourceType: type,
-            ...formikCleanedValues[type],
-          }; // referencing the value at ClaimResponse, including the type to match
-          targetedEntry.resource = updatedValues;
-          return JSON.stringify(editorObject);
+        const { type } = selectedResource?.definition;
+        const formikCleanedValues = removeUndefinedAndEmptyObjects(
+          formik.values
+        );
+        const { bundleEntry } = selectedResource;
+        // need type to access formik values, as well as append to to the resource object so it is not lost.
+        bundleEntry.resource = formikCleanedValues[type];
+        bundleEntry.resource.resourceType = type;
+        dispatch({
+          type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
+          payload: bundleEntry,
         });
       }
     }, 300);
-
     debouncedSetEditorVal();
-
-    // Clean up the debounce function on component unmount or effect cleanup
+    // should this still be running during unmount we cancel it. not sure if it matters here
     return () => debouncedSetEditorVal.cancel();
-  }, [formik.values, formik.dirty, selectedResource]);
+  }, [formik.values, formik.dirty, selectedResource, dispatch]);
 
   if (_.isNil(elementDefinition)) {
     return <span>No element selected</span>;

@@ -13,9 +13,7 @@ import {
 } from "../../../../../../util/QiCorePatientProvider";
 import useFhirDefinitionsServiceApi from "../../../../../../api/useFhirDefinitionsService";
 import { ResourceIdentifier } from "../../../../../../api/models/ResourceIdentifier";
-import useFhirElmTranslationServiceApi, {
-  SourceDataCriteria,
-} from "../../../../../../../../../api/useFhirElmTranslationServiceApi";
+import useFhirElmTranslationServiceApi from "../../../../../../../../../api/useFhirElmTranslationServiceApi";
 import useExecutionContext from "../../../../../routes/qiCore/useExecutionContext";
 import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
 import "./Builder.scss";
@@ -23,10 +21,9 @@ import "./Builder.scss";
 interface BuilderProps {
   testCase: TestCase;
   canEdit: boolean;
-  setEditorVal: React.Dispatch<React.SetStateAction<Object>>;
 }
 
-const Builder = ({ testCase, canEdit, setEditorVal }: BuilderProps) => {
+const Builder = ({ testCase, canEdit }: BuilderProps) => {
   const [resources, setResources] = useState<ResourceIdentifier[]>(null);
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   const fhirElmTranslationService = useRef(useFhirElmTranslationServiceApi());
@@ -146,7 +143,6 @@ const Builder = ({ testCase, canEdit, setEditorVal }: BuilderProps) => {
                   setActiveResource(null);
                 }}
                 canEdit={canEdit}
-                setEditorVal={setEditorVal}
               />
             )}
             <Box sx={{ mt: 2 }}>

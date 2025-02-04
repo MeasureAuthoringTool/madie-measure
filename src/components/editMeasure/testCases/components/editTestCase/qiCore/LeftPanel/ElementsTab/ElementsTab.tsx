@@ -6,10 +6,9 @@ import {
 import _ from "lodash";
 import Builder from "./builder/Builder";
 
-const ElementsTab = ({ canEdit, setEditorVal, editorVal, testCase }) => {
+const ElementsTab = ({ canEdit, editorVal, setEditorVal, testCase }) => {
   const { state, dispatch } = useQiCoreResource();
   const lastJsonRef = useRef(null);
-
   useEffect(() => {
     if (
       !_.isEmpty(editorVal) &&
@@ -35,11 +34,7 @@ const ElementsTab = ({ canEdit, setEditorVal, editorVal, testCase }) => {
 
   return (
     <>
-      <Builder
-        testCase={testCase}
-        canEdit={canEdit}
-        setEditorVal={setEditorVal}
-      />
+      <Builder testCase={testCase} canEdit={canEdit} />
     </>
   );
 };
