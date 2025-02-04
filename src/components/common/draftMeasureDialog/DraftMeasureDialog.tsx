@@ -117,7 +117,7 @@ const DraftMeasureDialog = ({ open, onClose, onSubmit, measure, loading }) => {
           />
         </Box>
         <>
-          { !measure?.model.includes("QDM") ? (
+          {!measure?.model.includes("QDM") ? (
             <Box sx={formRowGapped}>
               <Select
                 placeHolder={{ name: "Model", value: "" }}
