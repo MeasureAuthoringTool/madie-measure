@@ -35,7 +35,11 @@ const ElementsTab = ({ canEdit, setEditorVal, editorVal, testCase }) => {
 
   return (
     <>
-      <Builder testCase={testCase} canEdit={canEdit} />
+      <Builder
+        testCase={testCase}
+        canEdit={canEdit}
+        setEditorVal={setEditorVal}
+      />
     </>
   );
 };

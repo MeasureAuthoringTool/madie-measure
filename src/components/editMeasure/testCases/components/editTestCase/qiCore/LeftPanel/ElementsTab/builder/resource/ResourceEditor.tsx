@@ -15,6 +15,7 @@ import {
   getTopLevelElements,
   getBasePath,
   stripResourcePath,
+  getDisplayedElementsTree,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 
 interface ResourceEditorProps {
@@ -23,6 +24,7 @@ interface ResourceEditorProps {
   onSave: (resource: any) => void;
   onCancel: (resource: any) => void;
   canEdit: boolean;
+  setEditorVal: React.Dispatch<React.SetStateAction<Object>>;
 }
 
 /**
@@ -43,12 +45,14 @@ const ResourceEditor = ({
   onSave,
   onCancel,
   canEdit,
+  setEditorVal,
 }: ResourceEditorProps) => {
   const [activeTab, setActiveTab] = useState(0);
   const [allElements, setAllElements] = useState([]);
   const [displayedElements, setDisplayedElements] = useState<
     ElementDefinition[]
   >([]);
+  const [displayedElementsTree, setDisplayedElementsTree] = useState({});
   const [editingResource, setEditingResource] = useState(
     selectedResource?.bundleEntry?.resource
   );
@@ -73,9 +77,11 @@ const ResourceEditor = ({
           return !_.isNil(elemValue);
         }),
       ];
-      setDisplayedElements(
-        _.uniq(_.concat(requiredElements, elementsWithValues))
+      const uniqueElements = _.uniq(
+        _.concat(requiredElements, elementsWithValues)
       );
+      setDisplayedElements(uniqueElements);
+      setDisplayedElementsTree(getDisplayedElementsTree(uniqueElements));
     } else {
       setAllElements([]);
       setDisplayedElements([]);
@@ -112,12 +118,14 @@ const ResourceEditor = ({
       </Box>
       <Divider />
       <Box sx={{ m: 2 }}>
+        {/* This is our element select multiple select. We need to match this with formik. */}
         <ElementSelector
           basePath={resourceBasePath}
           options={allElements}
           value={displayedElements}
           onChange={(event, newValue: ElementDefinition[] | null) => {
             setDisplayedElements(newValue ?? []);
+            setDisplayedElementsTree(getDisplayedElementsTree(newValue ?? []));
           }}
         />
       </Box>
@@ -160,6 +168,8 @@ const ResourceEditor = ({
           selectedResource={selectedResource}
           resource={editingResource}
           resourcePath={resourceBasePath}
+          setEditorVal={setEditorVal}
+          displayedElementsTree={displayedElementsTree}
           onChange={(path, value) => {
             const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
             _.set(nextEntry.resource, path, value);

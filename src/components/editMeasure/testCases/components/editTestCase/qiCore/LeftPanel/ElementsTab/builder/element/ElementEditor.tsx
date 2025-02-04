@@ -13,6 +13,7 @@ import {
   getAllChildren,
   stripResourcePath,
   isComponentDataType,
+  setNestedValue,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 interface ElementEditorProps {
   resource?: any;
@@ -22,6 +23,8 @@ interface ElementEditorProps {
   value?: any;
   onChange?: (path: string, value: any) => void;
   canEdit: boolean;
+  setEditorVal: React.Dispatch<React.SetStateAction<Object>>;
+  displayedElementsTree: Object;
 }
 const ElementEditor = ({
   selectedResource,
@@ -30,12 +33,15 @@ const ElementEditor = ({
   resourcePath,
   onChange,
   canEdit,
+  displayedElementsTree,
+  setEditorVal,
 }: ElementEditorProps) => {
   const fhirDefinitionsServiceApi = useFhirDefinitionsServiceApi();
   const fhirDefinitionsService = useRef(fhirDefinitionsServiceApi);
   const [loading, setLoading] = useState(true);
   const [initialValues, setInitialValues] = useState({});
   const [validationSchema, setValidationSchema] = useState({});
+
   const buildNode = async (
     child,
     resourcePath,
@@ -143,23 +149,24 @@ const ElementEditor = ({
   const buildSchemaAndInitialValues = (formInfo) => {
     const initialValuesObject = {};
     const validationSchemaObject = {};
-    const setNestedValue = (obj, path, value) => {
-      const keys = path.split(".");
-      let currentObj = obj;
-      // start nested structure
-      keys.forEach((key, index) => {
-        if (index === keys.length - 1) {
-          currentObj[key] = value;
-        } else {
-          currentObj[key] = currentObj[key] || {};
-          currentObj = currentObj[key];
-        }
-      });
-    };
+    // we need to only set the nested value here if
     for (const key in formInfo) {
       const { value, type, validation } = formInfo[key];
-      setNestedValue(initialValuesObject, key, value);
-      setNestedValue(validationSchemaObject, key, validation);
+      // we need to check and see if the key has a baspath that exists within the displayed elements tree.
+      const splitPath: Array<string> = key.split(".");
+      //it's a base path, we want it
+      if (splitPath.length === 1) {
+        setNestedValue(initialValuesObject, key, value);
+        setNestedValue(validationSchemaObject, key, validation);
+      } else {
+        // it's not a base path we need to compare the first two path entries.
+        const firstKey = splitPath[0];
+        const secondKey = splitPath[1];
+        if (displayedElementsTree?.[firstKey]?.[secondKey]) {
+          setNestedValue(initialValuesObject, key, value);
+          setNestedValue(validationSchemaObject, key, validation);
+        }
+      }
     }
     setInitialValues(initialValuesObject);
     setValidationSchema(
@@ -180,19 +187,77 @@ const ElementEditor = ({
     );
   };
   useEffect(() => {
-    if (selectedResource) {
+    if (selectedResource && Object.keys(displayedElementsTree).length) {
       triggerFormBuilder();
     }
-  }, [selectedResource]);
+  }, [selectedResource, displayedElementsTree]);
   const formik = useFormik({
     initialValues,
     enableReinitialize: true,
     validationSchema,
     onSubmit: (values) => {},
   });
+  // remove all the falsey values from an object recursively so we have only what the user has generated.
+
+  function removeUndefinedAndEmptyObjects(obj) {
+    if (typeof obj !== "object" || obj === null) {
+      return obj;
+    }
+    for (let key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const value = obj[key];
+        // Remove the key if the value is undefined
+        if (value === undefined) {
+          delete obj[key];
+        } else if (typeof value === "object") {
+          // Recursively remove undefined values and empty objects
+          removeUndefinedAndEmptyObjects(value);
+          if (Object.keys(value).length === 0) {
+            delete obj[key];
+          }
+        }
+      }
+    }
+
+    return obj;
+  }
+
+  useEffect(() => {
+    const debouncedSetEditorVal = _.debounce(() => {
+      if (formik.values && formik.dirty) {
+        setEditorVal((editorVal) => {
+          // bundle object to a string
+          // Only add the new keys that aren't already in prev
+          // We need to traverse the bundle object, knowing that our resource matches our id. ClaimResponse.id -> editorVal.entry. is a list of resources with matching ids
+          const editorObject = JSON.parse(`${editorVal}`);
+          const { type } = selectedResource?.definition; // matches to ClaimResponse
+          const { id } = formik.values[type]; // ClaimResponse.id
+          const targetedEntry = editorObject.entry.find(
+            ({ resource }) => resource.id === id
+          ); // what we want to update
+          const formikCleanedValues = removeUndefinedAndEmptyObjects(
+            formik.values
+          ); // what we want to update it to
+          const updatedValues = {
+            resourceType: type,
+            ...formikCleanedValues[type],
+          }; // referencing the value at ClaimResponse, including the type to match
+          targetedEntry.resource = updatedValues;
+          return JSON.stringify(editorObject);
+        });
+      }
+    }, 300);
+
+    debouncedSetEditorVal();
+
+    // Clean up the debounce function on component unmount or effect cleanup
+    return () => debouncedSetEditorVal.cancel();
+  }, [formik.values, formik.dirty, selectedResource]);
+
   if (_.isNil(elementDefinition)) {
     return <span>No element selected</span>;
   }
+
   const currentPath = elementDefinition?.path;
   const allChildren = getAllChildren(selectedResource, currentPath);
   const currentDepth = elementDefinition?.path.split(".").length;

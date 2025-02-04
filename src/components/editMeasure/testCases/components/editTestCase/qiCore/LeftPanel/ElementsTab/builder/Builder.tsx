@@ -23,9 +23,10 @@ import "./Builder.scss";
 interface BuilderProps {
   testCase: TestCase;
   canEdit: boolean;
+  setEditorVal: React.Dispatch<React.SetStateAction<Object>>;
 }
 
-const Builder = ({ testCase, canEdit }: BuilderProps) => {
+const Builder = ({ testCase, canEdit, setEditorVal }: BuilderProps) => {
   const [resources, setResources] = useState<ResourceIdentifier[]>(null);
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   const fhirElmTranslationService = useRef(useFhirElmTranslationServiceApi());
@@ -145,6 +146,7 @@ const Builder = ({ testCase, canEdit }: BuilderProps) => {
                   setActiveResource(null);
                 }}
                 canEdit={canEdit}
+                setEditorVal={setEditorVal}
               />
             )}
             <Box sx={{ mt: 2 }}>
