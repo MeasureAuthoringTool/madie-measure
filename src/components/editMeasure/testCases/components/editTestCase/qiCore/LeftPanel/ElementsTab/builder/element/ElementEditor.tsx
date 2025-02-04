@@ -48,7 +48,6 @@ const ElementEditor = ({
   // We want to dispatch an action that contains a payload of our updated selectedResource.entry
   // The resource reducer will in turn update the testcase json string
   const { dispatch } = useQiCoreResource();
-
   const buildNode = async (
     child,
     resourcePath,

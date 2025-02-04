@@ -5,7 +5,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import ElementEditor from "../element/ElementEditor";
 import ElementSelector from "../element/ElementSelector";
 import * as _ from "lodash";
-import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import {
   ResourceActionType,
   useQiCoreResource,
@@ -20,8 +19,6 @@ import {
 
 interface ResourceEditorProps {
   selectedResource: any;
-  selectedResourceDefinition: any;
-  onSave: (resource: any) => void;
   onCancel: (resource: any) => void;
   canEdit: boolean;
 }
@@ -41,7 +38,6 @@ const getElementName = (element: ElementDefinition, basePath: string) => {
 
 const ResourceEditor = ({
   selectedResource,
-  onSave,
   onCancel,
   canEdit,
 }: ResourceEditorProps) => {
@@ -54,7 +50,6 @@ const ResourceEditor = ({
   const [editingResource, setEditingResource] = useState(
     selectedResource?.bundleEntry?.resource
   );
-  const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   const { dispatch } = useQiCoreResource();
   useEffect(() => {
     if (selectedResource) {

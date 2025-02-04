@@ -137,8 +137,6 @@ const Builder = ({ testCase, canEdit }: BuilderProps) => {
             {activeResource && (
               <ResourceEditor
                 selectedResource={activeResource}
-                selectedResourceDefinition={activeDefinition}
-                onSave={(resource) => {}}
                 onCancel={(resource) => {
                   setActiveResource(null);
                 }}

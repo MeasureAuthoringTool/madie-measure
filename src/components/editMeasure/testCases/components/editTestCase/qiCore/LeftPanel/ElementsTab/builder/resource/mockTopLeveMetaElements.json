@@ -1,0 +1,95 @@
+[
+  {
+    "id": "ClaimResponse.meta.id",
+    "path": "ClaimResponse.meta.id",
+    "min": 0,
+    "type": [
+      {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+            "valueUrl": "string"
+          }
+        ],
+        "code": "http://hl7.org/fhirpath/System.String"
+      }
+    ]
+  },
+  {
+    "id": "ClaimResponse.meta.extension",
+    "path": "ClaimResponse.meta.extension",
+    "min": 0,
+    "type": [
+      {
+        "code": "Extension"
+      }
+    ]
+  },
+  {
+    "id": "ClaimResponse.meta.versionId",
+    "path": "ClaimResponse.meta.versionId",
+    "min": 0,
+    "type": [
+      {
+        "code": "id"
+      }
+    ],
+    "constraint": []
+  },
+  {
+    "id": "ClaimResponse.meta.lastUpdated",
+    "path": "ClaimResponse.meta.lastUpdated",
+
+    "min": 0,
+    "type": [
+      {
+        "code": "instant"
+      }
+    ]
+  },
+  {
+    "id": "ClaimResponse.meta.source",
+    "path": "ClaimResponse.meta.source",
+    "min": 0,
+    "type": [
+      {
+        "code": "uri"
+      }
+    ],
+    "isModifier": false,
+    "isSummary": true
+  },
+  {
+    "id": "ClaimResponse.meta.profile",
+    "path": "ClaimResponse.meta.profile",
+    "min": 0,
+    "type": [
+      {
+        "code": "canonical",
+        "targetProfile": [
+          "http://hl7.org/fhir/StructureDefinition/StructureDefinition"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ClaimResponse.meta.security",
+    "path": "ClaimResponse.meta.security",
+    "min": 0,
+    "type": [
+      {
+        "code": "Coding"
+      }
+    ]
+  },
+  {
+    "id": "ClaimResponse.meta.tag",
+    "path": "ClaimResponse.meta.tag",
+    "min": 0,
+    "type": [
+      {
+        "code": "Coding"
+      }
+    ]
+  }
+]
