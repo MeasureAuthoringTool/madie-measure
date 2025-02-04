@@ -1925,6 +1925,151 @@ describe("TestCaseList component", () => {
     });
   });
 
+  it("Should display shift test case dialog when at least one test case is selected", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      TestCaseListActionCenter: true,
+    }));
+    renderTestCaseListComponent();
+
+    const table = await screen.findByTestId("test-case-tbl");
+    const tableHeaders = table.querySelectorAll("thead th");
+
+    expect(tableHeaders[1]).toHaveTextContent("Case #");
+    expect(tableHeaders[2]).toHaveTextContent("Status");
+    expect(tableHeaders[3]).toHaveTextContent("Group");
+    expect(tableHeaders[4]).toHaveTextContent("Title");
+    expect(tableHeaders[5]).toHaveTextContent("Description");
+
+    const checkboxes = await screen.findAllByRole("checkbox");
+    expect(checkboxes.length).toBe(4);
+
+    const shiftTestCaseButton = await screen.findByTestId(
+      "shift-test-case-dates-action-btn"
+    );
+    expect(shiftTestCaseButton).toBeDisabled();
+
+    userEvent.click(checkboxes[1]);
+    expect(shiftTestCaseButton).not.toBeDisabled();
+
+    userEvent.click(shiftTestCaseButton);
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+
+    userEvent.click(await screen.findByRole("button", { name: "Cancel" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
+
+  it("should attempt to shift the dates in test case when the Save button within the shift test case dates dialogue is clicked and display a success message", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      TestCaseListActionCenter: true,
+    }));
+
+    const responseData: string[] = [];
+
+    const shiftQdmTestCaseDates = jest.fn().mockResolvedValueOnce(responseData);
+
+    useTestCaseServiceMock.mockImplementationOnce(() => {
+      return {
+        getTestCasesByMeasureId: jest.fn().mockResolvedValue(testCases),
+        shiftQdmTestCaseDates: shiftQdmTestCaseDates,
+      } as unknown as TestCaseServiceApi;
+    });
+
+    renderTestCaseListComponent();
+
+    const checkboxes = await screen.findAllByRole("checkbox");
+
+    const shiftTestCaseButton = await screen.findByTestId(
+      "shift-test-case-dates-action-btn"
+    );
+    expect(shiftTestCaseButton).toBeDisabled();
+
+    userEvent.click(checkboxes[1]);
+    expect(shiftTestCaseButton).not.toBeDisabled();
+
+    userEvent.click(shiftTestCaseButton);
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+
+    expect(screen.getByTestId("shift-dates-dialog")).toBeInTheDocument();
+    expect(screen.getByTestId("shift-dates-cancel-button")).toBeInTheDocument();
+
+    const saveBtn = await screen.findByTestId("shift-dates-save-button");
+    expect(saveBtn).toBeInTheDocument();
+    expect(saveBtn).not.toBeEnabled();
+
+    const shiftDatesInput = (await screen.findByTestId(
+      "shift-dates-input"
+    )) as HTMLInputElement;
+    expect(shiftDatesInput).toBeInTheDocument();
+
+    userEvent.type(shiftDatesInput, "1");
+    expect(shiftDatesInput.value).toBe("1");
+    expect(saveBtn).toBeEnabled();
+
+    userEvent.click(saveBtn);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("test-case-list-success")).toHaveTextContent(
+        "All Test Case dates successfully shifted."
+      );
+    });
+  });
+
+  it("should attempt to shift the dates in test case when the Save button within the shift test case dates dialogue is clicked and display an error message", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      TestCaseListActionCenter: true,
+    }));
+
+    const responseData: string[] = ["testId1", "testId2"];
+
+    const shiftQdmTestCaseDates = jest.fn().mockResolvedValueOnce(responseData);
+
+    useTestCaseServiceMock.mockImplementationOnce(() => {
+      return {
+        getTestCasesByMeasureId: jest.fn().mockResolvedValue(testCases),
+        shiftQdmTestCaseDates: shiftQdmTestCaseDates,
+      } as unknown as TestCaseServiceApi;
+    });
+
+    renderTestCaseListComponent();
+
+    const checkboxes = await screen.findAllByRole("checkbox");
+
+    const shiftTestCaseButton = await screen.findByTestId(
+      "shift-test-case-dates-action-btn"
+    );
+    expect(shiftTestCaseButton).toBeDisabled();
+
+    userEvent.click(checkboxes[1]);
+    expect(shiftTestCaseButton).not.toBeDisabled();
+
+    userEvent.click(shiftTestCaseButton);
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+
+    expect(screen.getByTestId("shift-dates-dialog")).toBeInTheDocument();
+    expect(screen.getByTestId("shift-dates-cancel-button")).toBeInTheDocument();
+
+    const saveBtn = await screen.findByTestId("shift-dates-save-button");
+    expect(saveBtn).toBeInTheDocument();
+    expect(saveBtn).not.toBeEnabled();
+
+    const shiftDatesInput = (await screen.findByTestId(
+      "shift-dates-input"
+    )) as HTMLInputElement;
+    expect(shiftDatesInput).toBeInTheDocument();
+
+    userEvent.type(shiftDatesInput, "1");
+    expect(shiftDatesInput.value).toBe("1");
+    expect(saveBtn).toBeEnabled();
+
+    userEvent.click(saveBtn);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("test-case-list-error")).toHaveTextContent(
+        "The following Test Case dates could not be shifted. Please try again. If the issue continues, please contact helpdesk.testId1testId2"
+      );
+    });
+  });
+
   it("should display an error toast when the clone button is clicked", async () => {
     const createTestCaseApiMock = jest
       .fn()
@@ -3308,127 +3453,6 @@ describe("TestCaseList component", () => {
     });
   });
 
-  it("should render shift test case dates dialogue on Test Case list page when shift test case dates button is clicked", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({}));
-
-    const { getByTestId } = renderTestCaseListComponent();
-    await waitFor(() => {
-      const selectButton = getByTestId(`select-action-${testCases[0].id}`);
-      expect(selectButton).toBeInTheDocument();
-      fireEvent.click(selectButton);
-    });
-
-    const shiftDatesButton = getByTestId(`shift-dates-btn-${testCases[0].id}`);
-    fireEvent.click(shiftDatesButton);
-
-    expect(screen.getByTestId("shift-dates-dialog")).toBeInTheDocument();
-    expect(screen.getByTestId("shift-dates-save-button")).toBeInTheDocument();
-    expect(screen.getByTestId("shift-dates-cancel-button")).toBeInTheDocument();
-  });
-
-  it("should shift test case dates successfully", async () => {
-    testCases[0].title = "WhenAllGood";
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({}));
-    const responseDto: TestCase = {
-      id: "1234",
-      json: "date2",
-    } as TestCase;
-    const shiftTestCaseDatesApiMock = jest
-      .fn()
-      .mockResolvedValueOnce({ data: responseDto });
-    useTestCaseServiceMock.mockImplementationOnce(() => {
-      return {
-        getTestCasesByMeasureId: jest.fn().mockResolvedValue(testCases),
-        shiftQdmTestCaseDates: shiftTestCaseDatesApiMock,
-      } as unknown as TestCaseServiceApi;
-    });
-    const { getByTestId } = renderTestCaseListComponent();
-    await waitFor(() => {
-      const selectButton = getByTestId(`select-action-${testCases[0].id}`);
-      expect(selectButton).toBeInTheDocument();
-      fireEvent.click(selectButton);
-    });
-
-    const shiftDatesButton = getByTestId(`shift-dates-btn-${testCases[0].id}`);
-    fireEvent.click(shiftDatesButton);
-
-    expect(screen.getByTestId("shift-dates-dialog")).toBeInTheDocument();
-    expect(screen.getByTestId("shift-dates-save-button")).toBeInTheDocument();
-    expect(screen.getByTestId("shift-dates-cancel-button")).toBeInTheDocument();
-
-    const shiftDatesInput = (await screen.findByTestId(
-      "shift-dates-input"
-    )) as HTMLInputElement;
-    expect(shiftDatesInput).toBeInTheDocument();
-
-    const saveBtn = await screen.findByTestId("shift-dates-save-button");
-    expect(saveBtn).toBeInTheDocument();
-    expect(saveBtn).not.toBeEnabled();
-
-    userEvent.type(shiftDatesInput, "1");
-    expect(shiftDatesInput.value).toBe("1");
-    expect(saveBtn).toBeEnabled();
-
-    userEvent.click(saveBtn);
-
-    await waitFor(() => {
-      expect(screen.getByTestId("test-case-list-success")).toHaveTextContent(
-        "Test Case Shift Dates for IPP-Pass - WhenAllGood successful."
-      );
-      expect(measureStore.updateTestCases as jest.Mock).toHaveBeenCalledTimes(
-        2
-      );
-    });
-  });
-
-  it("should handle shift test case dates failure", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({}));
-    const shiftTestCaseDatesApiMock = jest.fn().mockRejectedValueOnce(null);
-    useTestCaseServiceMock.mockImplementationOnce(() => {
-      return {
-        getTestCasesByMeasureId: jest.fn().mockResolvedValue(testCases),
-        shiftQdmTestCaseDates: shiftTestCaseDatesApiMock,
-      } as unknown as TestCaseServiceApi;
-    });
-    const { getByTestId } = renderTestCaseListComponent();
-    await waitFor(() => {
-      const selectButton = getByTestId(`select-action-${testCases[0].id}`);
-      expect(selectButton).toBeInTheDocument();
-      fireEvent.click(selectButton);
-    });
-
-    const shiftDatesButton = getByTestId(`shift-dates-btn-${testCases[0].id}`);
-    fireEvent.click(shiftDatesButton);
-
-    expect(screen.getByTestId("shift-dates-dialog")).toBeInTheDocument();
-    expect(screen.getByTestId("shift-dates-save-button")).toBeInTheDocument();
-    expect(screen.getByTestId("shift-dates-cancel-button")).toBeInTheDocument();
-
-    const shiftDatesInput = (await screen.findByTestId(
-      "shift-dates-input"
-    )) as HTMLInputElement;
-    expect(shiftDatesInput).toBeInTheDocument();
-
-    const saveBtn = await screen.findByTestId("shift-dates-save-button");
-    expect(saveBtn).toBeInTheDocument();
-    expect(saveBtn).not.toBeEnabled();
-
-    userEvent.type(shiftDatesInput, "1");
-    expect(shiftDatesInput.value).toBe("1");
-    expect(saveBtn).toBeEnabled();
-
-    userEvent.click(saveBtn);
-
-    await waitFor(() => {
-      expect(screen.getByTestId("test-case-list-error")).toHaveTextContent(
-        "Unable to shift test Case dates with ID 1. Please try again. If the issue continues, please contact helpdesk."
-      );
-      expect(measureStore.updateTestCases as jest.Mock).toHaveBeenCalledTimes(
-        2
-      );
-    });
-  });
-
   describe("TestCaseList component with deleteMultipleTestCases", () => {
     it("should delete the selected test cases if the flag is true", async () => {
       useTestCaseServiceMock.mockImplementation(() => {
@@ -3503,47 +3527,46 @@ describe("TestCaseList component", () => {
     userEvent.click(await screen.findByRole("button", { name: "Cancel" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
-});
 
-describe("retrieve coverage value from HTML coverage", () => {
-  it("should retrieve the numeric coverage value for decimal percentages", () => {
-    const coverageHtml: Record<string, string> = {
-      a345sda45: `<div><h2> a345sda45 Clause Coverage: 50.0%</h2></div>`,
-    };
-    const coverageValue = getCoverageValueFromHtml(coverageHtml, "a345sda45");
-    expect(coverageValue).toEqual(expect.any(Number));
-    expect(coverageValue).toEqual(50);
+  describe("retrieve coverage value from HTML coverage", () => {
+    it("should retrieve the numeric coverage value for decimal percentages", () => {
+      const coverageHtml: Record<string, string> = {
+        a345sda45: `<div><h2> a345sda45 Clause Coverage: 50.0%</h2></div>`,
+      };
+      const coverageValue = getCoverageValueFromHtml(coverageHtml, "a345sda45");
+      expect(coverageValue).toEqual(expect.any(Number));
+      expect(coverageValue).toEqual(50);
+    });
+
+    it("should retrieve the numeric coverage value for whole numbers", () => {
+      const coverageHtml: Record<string, string> = {
+        a345sda45: `<div><h2> a345sda45 Clause Coverage: 100%</h2></div>`,
+      };
+      const coverageValue = getCoverageValueFromHtml(coverageHtml, "a345sda45");
+      expect(coverageValue).toEqual(100);
+    });
+
+    it("should return 0 for NaN percentages", () => {
+      const coverageHtml: Record<string, string> = {
+        a345sda45: `<div><h2> a345sda45 Clause Coverage: NaN%</h2></div>`,
+      };
+      const coverageValue = getCoverageValueFromHtml(coverageHtml, "a345sda45");
+      expect(coverageValue).toEqual(0);
+    });
+
+    it("should return 0 for missing percentages", () => {
+      const coverageHtml: Record<string, string> = {
+        a345sda45: `<div><h2> a345sda45 Clause Coverage: %</h2></div>`,
+      };
+      const coverageValue = getCoverageValueFromHtml(coverageHtml, "a345sda45");
+      expect(coverageValue).toEqual(0);
+    });
   });
 
-  it("should retrieve the numeric coverage value for whole numbers", () => {
-    const coverageHtml: Record<string, string> = {
-      a345sda45: `<div><h2> a345sda45 Clause Coverage: 100%</h2></div>`,
-    };
-    const coverageValue = getCoverageValueFromHtml(coverageHtml, "a345sda45");
-    expect(coverageValue).toEqual(100);
-  });
-
-  it("should return 0 for NaN percentages", () => {
-    const coverageHtml: Record<string, string> = {
-      a345sda45: `<div><h2> a345sda45 Clause Coverage: NaN%</h2></div>`,
-    };
-    const coverageValue = getCoverageValueFromHtml(coverageHtml, "a345sda45");
-    expect(coverageValue).toEqual(0);
-  });
-
-  it("should return 0 for missing percentages", () => {
-    const coverageHtml: Record<string, string> = {
-      a345sda45: `<div><h2> a345sda45 Clause Coverage: %</h2></div>`,
-    };
-    const coverageValue = getCoverageValueFromHtml(coverageHtml, "a345sda45");
-    expect(coverageValue).toEqual(0);
-  });
-});
-
-describe("removeHtmlCoverageHeader", () => {
-  it("should remove header with numeric percentage", () => {
-    const coverage: Record<string, string> = {
-      a345sda45: `
+  describe("removeHtmlCoverageHeader", () => {
+    it("should remove header with numeric percentage", () => {
+      const coverage: Record<string, string> = {
+        a345sda45: `
       <div><h2> a345sda45 Clause Coverage: 50.0%</h2><pre style="tab-size: 2; border-bottom-width: 4px; line-height: 1.4">
         <code>
         <span data-ref-id="55" style="background-color:#daeaf5;color:#004e82;border-bottom-color:#006cb4;border-bottom-style:dashed"><span>define &quot;boolIpp&quot;:
@@ -3554,9 +3577,9 @@ describe("removeHtmlCoverageHeader", () => {
         </pre>
        </div>
       `,
-    };
-    const htmlCoverage = removeHtmlCoverageHeader(coverage);
-    expect(htmlCoverage["a345sda45"]).toEqual(`
+      };
+      const htmlCoverage = removeHtmlCoverageHeader(coverage);
+      expect(htmlCoverage["a345sda45"]).toEqual(`
       <div><pre style="tab-size: 2; border-bottom-width: 4px; line-height: 1.4">
         <code>
         <span data-ref-id="55" style="background-color:#daeaf5;color:#004e82;border-bottom-color:#006cb4;border-bottom-style:dashed"><span>define &quot;boolIpp&quot;:
@@ -3567,25 +3590,25 @@ describe("removeHtmlCoverageHeader", () => {
         </pre>
        </div>
       `);
-  });
-
-  it("should remove header with NaN percentage", () => {
-    const htmlCoverage = removeHtmlCoverageHeader({
-      ab4c23fd5f: `<div><h2> ab4c23fd5f Clause Coverage: NaN%</h2></div>`,
     });
-    expect(htmlCoverage["ab4c23fd5f"]).toEqual(`<div></div>`);
-  });
 
-  it("should remove header with 100 percentage", () => {
-    const htmlCoverage = removeHtmlCoverageHeader({
-      ab4c23fd5f: `<div><h2> ab4c23fd5f Clause Coverage: 100%</h2></div>`,
+    it("should remove header with NaN percentage", () => {
+      const htmlCoverage = removeHtmlCoverageHeader({
+        ab4c23fd5f: `<div><h2> ab4c23fd5f Clause Coverage: NaN%</h2></div>`,
+      });
+      expect(htmlCoverage["ab4c23fd5f"]).toEqual(`<div></div>`);
     });
-    expect(htmlCoverage["ab4c23fd5f"]).toEqual(`<div></div>`);
-  });
 
-  it("should leave regular HTML alone", () => {
-    const htmlCoverage = removeHtmlCoverageHeader({
-      ab4c23fd5f: `
+    it("should remove header with 100 percentage", () => {
+      const htmlCoverage = removeHtmlCoverageHeader({
+        ab4c23fd5f: `<div><h2> ab4c23fd5f Clause Coverage: 100%</h2></div>`,
+      });
+      expect(htmlCoverage["ab4c23fd5f"]).toEqual(`<div></div>`);
+    });
+
+    it("should leave regular HTML alone", () => {
+      const htmlCoverage = removeHtmlCoverageHeader({
+        ab4c23fd5f: `
       <div><h2>Different Header</h2><pre style="tab-size: 2; border-bottom-width: 4px; line-height: 1.4">
         <code>
         <span data-ref-id="55" style="background-color:#daeaf5;color:#004e82;border-bottom-color:#006cb4;border-bottom-style:dashed"><span>define &quot;boolIpp&quot;:
@@ -3596,8 +3619,8 @@ describe("removeHtmlCoverageHeader", () => {
         </pre>
        </div>
     `,
-    });
-    expect(htmlCoverage["ab4c23fd5f"]).toEqual(`
+      });
+      expect(htmlCoverage["ab4c23fd5f"]).toEqual(`
       <div><h2>Different Header</h2><pre style="tab-size: 2; border-bottom-width: 4px; line-height: 1.4">
         <code>
         <span data-ref-id="55" style="background-color:#daeaf5;color:#004e82;border-bottom-color:#006cb4;border-bottom-style:dashed"><span>define &quot;boolIpp&quot;:
@@ -3608,5 +3631,6 @@ describe("removeHtmlCoverageHeader", () => {
         </pre>
        </div>
     `);
+    });
   });
 });

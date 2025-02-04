@@ -11,6 +11,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import EditCalendarOutlinedIcon from "@mui/icons-material/EditCalendarOutlined";
 import LibraryAddIcon from "@mui/icons-material/LibraryAdd";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import { useFormik } from "formik";
@@ -27,6 +28,7 @@ interface ActionCenterProps {
   canEdit: boolean;
   isQDM: boolean;
   setDeleteDialogModalOpen?: Function;
+  setShiftDatesDialogModalOpen?: Function;
   onCloneTestCase?: (testCase: TestCase) => void;
   exportTestCases?: Function;
   onExportQRDA?: Function;
@@ -47,6 +49,7 @@ export default function ActionCenter(props: ActionCenterProps) {
     isQDM,
     onCloneTestCase,
     setDeleteDialogModalOpen,
+    setShiftDatesDialogModalOpen,
     exportTestCases,
     onExportQRDA,
     onExportExcel,
@@ -58,12 +61,15 @@ export default function ActionCenter(props: ActionCenterProps) {
   } = props;
 
   const [disableDeleteBtn, setDisableDeleteBtn] = useState<boolean>(true);
+  const [disableShiftDatesBtn, setDisableShiftDatesBtn] =
+    useState<boolean>(true);
   const [disableCloneBtn, setDisableCloneBtn] = useState<boolean>(true);
   const [disableExportBtn, setDisableExportBtn] = useState<boolean>(true);
   const [disableCopyBtn, setDisableCopyBtn] = useState<boolean>(true);
 
   useEffect(() => {
     deleteButtonCheck();
+    shiftDatesButtonCheck();
     cloneButtonCheck();
     exportButtonCheck();
     copyButtonCheck();
@@ -119,6 +125,14 @@ export default function ActionCenter(props: ActionCenterProps) {
       setDisableDeleteBtn(false);
     } else {
       setDisableDeleteBtn(true);
+    }
+  };
+
+  const shiftDatesButtonCheck = () => {
+    if (canEdit && selectedTestCases?.length >= 1) {
+      setDisableShiftDatesBtn(false);
+    } else {
+      setDisableShiftDatesBtn(true);
     }
   };
 
@@ -249,7 +263,7 @@ export default function ActionCenter(props: ActionCenterProps) {
           </div>
         </div>
 
-        {/* Action Buttons (Delete, Clone, Export) */}
+        {/* Action Buttons (Delete, Shift Test Case Dates, Clone, Export) */}
         {featureFlags?.TestCaseListActionCenter && (
           <div tw="flex items-center">
             {canEdit && (
@@ -278,6 +292,36 @@ export default function ActionCenter(props: ActionCenterProps) {
                           disableDeleteBtn
                             ? { color: grey[500] }
                             : { color: red[500] }
+                        }
+                      />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+
+                <Tooltip
+                  data-testid="shift-test-case-dates-tooltip"
+                  title={
+                    disableShiftDatesBtn
+                      ? "Select test cases to shift test case dates"
+                      : "Shift test case dates"
+                  }
+                  placement="top"
+                  arrow
+                >
+                  <span>
+                    <IconButton
+                      onClick={() => {
+                        setShiftDatesDialogModalOpen(true);
+                      }}
+                      disabled={disableShiftDatesBtn}
+                      data-testid="shift-test-case-dates-action-btn"
+                    >
+                      <EditCalendarOutlinedIcon
+                        data-testid={`shift-test-case-dates-action-icon`}
+                        sx={
+                          disableShiftDatesBtn
+                            ? { color: grey[500] }
+                            : { color: blue[700] }
                         }
                       />
                     </IconButton>

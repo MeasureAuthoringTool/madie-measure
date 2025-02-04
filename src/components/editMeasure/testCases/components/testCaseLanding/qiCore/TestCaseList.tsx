@@ -162,6 +162,8 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [createOpen, setCreateOpen] = useState<boolean>(false);
   const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
     useState<boolean>(false);
+  const [shiftDatesDialogModalOpen, setShiftDatesDialogModalOpen] =
+    useState<boolean>(false);
   const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
   const featureFlags = useFeatureFlags();
 
@@ -539,21 +541,40 @@ const TestCaseList = (props: TestCaseListProps) => {
     }
   };
 
-  const onTestCaseShiftDates = (testCase: TestCase, shifted: number) => {
+  const onTestCaseShiftDates = (testCases: TestCase[], shifted: number) => {
     testCaseService.current
-      .shiftQiCoreTestCaseDates(measureId, testCase.id, shifted)
-      .then(() => {
+      .shiftQiCoreTestCaseDates(
+        measureId,
+        testCases.map((testCase) => testCase.id),
+        shifted
+      )
+      .then((response) => {
         setToastOpen(true);
-        setToastType("success");
-        setToastMessage(
-          `Test Case Shift Dates for ${testCase.series} - ${testCase.title} successful.`
-        );
+
+        if (response.length === 0) {
+          setToastType("success");
+          setToastMessage(`All Test Case dates successfully shifted.`);
+          setToastMessage(`All Test Case dates successfully shifted.`);
+        } else {
+          setToastType("danger");
+          setToastMessage(
+            <div>
+              The following Test Case dates could not be shifted. Please try
+              again. If the issue continues, please contact helpdesk.
+              <ul>
+                {response.map((tc) => (
+                  <li>{tc}</li>
+                ))}
+              </ul>
+            </div>
+          );
+        }
       })
       .catch((err) => {
         setToastOpen(true);
         setToastType("danger");
         setToastMessage(
-          `Unable to shift test Case dates with ID ${testCase.id}. Please try again. If the issue continues, please contact helpdesk.`
+          `Unable to shift test Case dates. Please try again. If the issue continues, please contact helpdesk.`
         );
       });
   };
@@ -660,6 +681,9 @@ const TestCaseList = (props: TestCaseListProps) => {
                         canEdit={canEdit}
                         isQDM={false}
                         setDeleteDialogModalOpen={setDeleteDialogModalOpen}
+                        setShiftDatesDialogModalOpen={
+                          setShiftDatesDialogModalOpen
+                        }
                         onCloneTestCase={handleQiCloneTestCase}
                         exportTestCases={exportTestCases}
                         exportOptionsOpen={exportOptionsOpen}
@@ -687,6 +711,10 @@ const TestCaseList = (props: TestCaseListProps) => {
                         selectedTestCases={selectedTestCases}
                         deleteDialogModalOpen={deleteDialogModalOpen}
                         setDeleteDialogModalOpen={setDeleteDialogModalOpen}
+                        shiftDatesDialogModalOpen={shiftDatesDialogModalOpen}
+                        setShiftDatesDialogModalOpen={
+                          setShiftDatesDialogModalOpen
+                        }
                       />
                       {currentSlice?.length > 0 && (
                         <Pagination

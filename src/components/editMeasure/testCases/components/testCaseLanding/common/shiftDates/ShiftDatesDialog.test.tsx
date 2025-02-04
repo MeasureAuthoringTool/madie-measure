@@ -1,15 +1,21 @@
 import * as React from "react";
 import "@testing-library/jest-dom";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
 import userEvent from "@testing-library/user-event";
 import ShiftDatesDialog from "./ShiftDatesDialog";
 import { TestCase } from "@madie/madie-models";
 
-const testCase = {
-  title: "test case title",
-  series: "test case series",
-} as TestCase;
+const testCases = [
+  {
+    title: "test case 1 title",
+    series: "test case 1 series",
+  },
+  {
+    title: "test case 2 title",
+    series: "test case 2 series",
+  },
+] as TestCase[];
 
 describe("Shift Test Case Dates Dialog", () => {
   test("should render ShiftDatesDialog", async () => {
@@ -19,14 +25,23 @@ describe("Shift Test Case Dates Dialog", () => {
           open={true}
           onClose={jest.fn}
           canEdit={true}
-          testCase={testCase}
+          testCases={testCases}
         />
       );
 
       expect(await findByTestId("shift-dates-dialog")).toBeInTheDocument();
-      expect(await findByTestId("test case series")).toBeInTheDocument();
-      expect(await findByTestId("test case title")).toBeInTheDocument();
-      expect(await findByTestId("shift-dates-input")).toBeInTheDocument();
+      expect(
+        await findByTestId("shift-dates-selected-test-cases")
+      ).toBeInTheDocument();
+      expect(
+        await findByTestId("test case 1 series - test case 1 title")
+      ).toBeInTheDocument();
+      expect(
+        await findByTestId("test case 2 series - test case 2 title")
+      ).toBeInTheDocument();
+      expect(
+        await findByTestId("shift-dates-number-input")
+      ).toBeInTheDocument();
 
       const cancelBtn = await findByTestId("shift-dates-cancel-button");
       expect(cancelBtn).toBeInTheDocument();
@@ -38,16 +53,17 @@ describe("Shift Test Case Dates Dialog", () => {
     });
   });
 
-  test("Save button enalbed when user fill in shift dates input", async () => {
+  test("Save button enabled when user fills in shift dates input", async () => {
     const onClose = jest.fn();
+    const onTestCaseShiftDates = jest.fn();
     await act(async () => {
       const { findByTestId, queryByTestId } = render(
         <ShiftDatesDialog
           open={true}
           onClose={onClose}
           canEdit={true}
-          testCase={testCase}
-          onTestCaseShiftDates={jest.fn()}
+          testCases={testCases}
+          onTestCaseShiftDates={onTestCaseShiftDates}
         />
       );
 
@@ -65,7 +81,11 @@ describe("Shift Test Case Dates Dialog", () => {
       expect(saveBtn).toBeEnabled();
 
       userEvent.click(saveBtn);
-      expect(queryByTestId("shift-dates-dialog")).toBeInTheDocument();
+
+      await waitFor(() => {
+        expect(onClose).toBeCalledTimes(1);
+        expect(onTestCaseShiftDates).toBeCalledTimes(1);
+      });
     });
   });
 });
