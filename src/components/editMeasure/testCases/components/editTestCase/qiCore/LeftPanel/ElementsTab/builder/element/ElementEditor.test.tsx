@@ -8,7 +8,11 @@ import { QiCoreResourceProvider } from "../../../../../../../util/QiCorePatientP
 jest.mock("../../../../../../../api/useFhirDefinitionsService");
 
 jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
+  const actualModule = jest.requireActual(
+    "../../../../../../../api/fhirDefinitionServiceUtilities"
+  );
   return {
+    ...actualModule,
     getBasePath: jest.fn().mockReturnValue("ClaimResponse"),
     getAllChildren: jest.fn().mockReturnValue([
       { id: "ClaimResponse", path: "ClaimResponse" },
@@ -28,7 +32,6 @@ jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
         type: [{ code: "Extension" }],
       },
     ]),
-    setNestedValue: jest.fn(),
     isComponentDataType: jest.fn().mockReturnValue(false),
     getTopLevelElements: jest.fn().mockReturnValue([]),
     stripResourcePath: jest.fn().mockReturnValue("ClaimResponse.id"),

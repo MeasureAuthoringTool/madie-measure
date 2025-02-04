@@ -14,6 +14,7 @@ import {
   stripResourcePath,
   isComponentDataType,
   setNestedValue,
+  removeUndefinedAndEmptyObjects,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import {
   useQiCoreResource,
@@ -204,32 +205,9 @@ const ElementEditor = ({
     onSubmit: (values) => {},
   });
 
-  // remove all the falsey values from an object recursively so we have only what the user has generated.
-  function removeUndefinedAndEmptyObjects(obj) {
-    if (typeof obj !== "object" || obj === null) {
-      return obj;
-    }
-    for (let key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        const value = obj[key];
-        // Remove the key if the value is undefined
-        if (value === undefined) {
-          delete obj[key];
-        } else if (typeof value === "object") {
-          // Recursively remove undefined values and empty objects
-          removeUndefinedAndEmptyObjects(value);
-          if (Object.keys(value).length === 0) {
-            delete obj[key];
-          }
-        }
-      }
-    }
-    return obj;
-  }
-
   // on debounced change, we will update tc json with formik values
   useEffect(() => {
-    const debouncedSetEditorVal = _.debounce(() => {
+    const debouncedDispatchModifyTestCase = _.debounce(() => {
       if (formik.values && formik.dirty) {
         const { type } = selectedResource?.definition;
         const formikCleanedValues = removeUndefinedAndEmptyObjects(
@@ -245,9 +223,9 @@ const ElementEditor = ({
         });
       }
     }, 300);
-    debouncedSetEditorVal();
+    debouncedDispatchModifyTestCase();
     // should this still be running during unmount we cancel it. not sure if it matters here
-    return () => debouncedSetEditorVal.cancel();
+    return () => debouncedDispatchModifyTestCase.cancel();
   }, [formik.values, formik.dirty, selectedResource, dispatch]);
 
   if (_.isNil(elementDefinition)) {

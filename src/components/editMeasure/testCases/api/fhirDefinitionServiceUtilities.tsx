@@ -40,6 +40,29 @@ export function getDisplayedElementsTree(uniqueElements) {
   return { ...displayedElementPaths };
 }
 
+// remove all the falsey values from an object recursively so we have only what the user has generated.
+export function removeUndefinedAndEmptyObjects(obj) {
+  if (typeof obj !== "object" || obj === null) {
+    return obj;
+  }
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      const value = obj[key];
+      // Remove the key if the value is undefined
+      if (value === undefined) {
+        delete obj[key];
+      } else if (typeof value === "object") {
+        // Recursively remove undefined values and empty objects
+        removeUndefinedAndEmptyObjects(value);
+        if (Object.keys(value).length === 0) {
+          delete obj[key];
+        }
+      }
+    }
+  }
+  return obj;
+}
+
 export function getBasePath(resource: any): string {
   return resource?.definition?.snapshot?.element?.[0]?.path;
 }
