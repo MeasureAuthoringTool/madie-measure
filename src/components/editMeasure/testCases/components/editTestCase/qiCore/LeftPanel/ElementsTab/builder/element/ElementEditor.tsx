@@ -197,8 +197,8 @@ const ElementEditor = ({
     validationSchema,
     onSubmit: (values) => {},
   });
-  // remove all the falsey values from an object recursively so we have only what the user has generated.
 
+  // remove all the falsey values from an object recursively so we have only what the user has generated.
   function removeUndefinedAndEmptyObjects(obj) {
     if (typeof obj !== "object" || obj === null) {
       return obj;
@@ -229,7 +229,7 @@ const ElementEditor = ({
           // bundle object to a string
           // Only add the new keys that aren't already in prev
           // We need to traverse the bundle object, knowing that our resource matches our id. ClaimResponse.id -> editorVal.entry. is a list of resources with matching ids
-          const editorObject = JSON.parse(`${editorVal}`);
+          const editorObject = JSON.parse(`${editorVal}`); // there's no quotes on this string so wrapping it
           const { type } = selectedResource?.definition; // matches to ClaimResponse
           const { id } = formik.values[type]; // ClaimResponse.id
           const targetedEntry = editorObject.entry.find(
