@@ -42,7 +42,7 @@ export default function ViewHRAction(props: PropTypes) {
     >
       <span>
         <IconButton
-          onClick={props.onClick}
+          onClick={onClick}
           disabled={disableViewHRBtn}
           data-testid="view-hr-action-btn"
         >
