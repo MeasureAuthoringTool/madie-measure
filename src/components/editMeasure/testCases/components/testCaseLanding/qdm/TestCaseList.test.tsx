@@ -2070,6 +2070,58 @@ describe("TestCaseList component", () => {
     });
   });
 
+  it("should attempt to shift the dates in test case when the Save button within the shift test case dates dialogue is clicked and display an error message when the endpoint throws an error", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      TestCaseListActionCenter: true,
+    }));
+
+    useTestCaseServiceMock.mockImplementationOnce(() => {
+      return {
+        getTestCasesByMeasureId: jest.fn().mockResolvedValue(testCases),
+        shiftQdmTestCaseDates: jest.fn().mockRejectedValue(new Error("ERROR")),
+      } as unknown as TestCaseServiceApi;
+    });
+
+    renderTestCaseListComponent();
+
+    const checkboxes = await screen.findAllByRole("checkbox");
+
+    const shiftTestCaseButton = await screen.findByTestId(
+      "shift-test-case-dates-action-btn"
+    );
+    expect(shiftTestCaseButton).toBeDisabled();
+
+    userEvent.click(checkboxes[1]);
+    expect(shiftTestCaseButton).not.toBeDisabled();
+
+    userEvent.click(shiftTestCaseButton);
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+
+    expect(screen.getByTestId("shift-dates-dialog")).toBeInTheDocument();
+    expect(screen.getByTestId("shift-dates-cancel-button")).toBeInTheDocument();
+
+    const saveBtn = await screen.findByTestId("shift-dates-save-button");
+    expect(saveBtn).toBeInTheDocument();
+    expect(saveBtn).not.toBeEnabled();
+
+    const shiftDatesInput = (await screen.findByTestId(
+      "shift-dates-input"
+    )) as HTMLInputElement;
+    expect(shiftDatesInput).toBeInTheDocument();
+
+    userEvent.type(shiftDatesInput, "1");
+    expect(shiftDatesInput.value).toBe("1");
+    expect(saveBtn).toBeEnabled();
+
+    userEvent.click(saveBtn);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("test-case-list-error")).toHaveTextContent(
+        "Unable to shift test Case dates. Please try again. If the issue continues, please contact helpdesk."
+      );
+    });
+  });
+
   it("should display an error toast when the clone button is clicked", async () => {
     const createTestCaseApiMock = jest
       .fn()
