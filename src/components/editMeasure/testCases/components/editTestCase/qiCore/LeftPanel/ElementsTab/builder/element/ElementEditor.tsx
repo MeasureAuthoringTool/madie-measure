@@ -1,10 +1,15 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import { Box } from "@mui/material";
 import * as _ from "lodash";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import ElementEditorChildren from "./ElementEditorChildren";
 import "./ElementEditor.scss";
-import { useFormik, FormikProvider } from "formik";
 import * as Yup from "yup";
 import { getValidation } from "./typesValidations/fhirR4Validations";
 import {
@@ -20,6 +25,7 @@ import {
   useQiCoreResource,
   ResourceActionType,
 } from "../../../../../../../util/QiCorePatientProvider";
+import { useFormikContext } from "formik";
 
 interface ElementEditorProps {
   resource?: any;
@@ -30,6 +36,8 @@ interface ElementEditorProps {
   onChange?: (path: string, value: any) => void;
   canEdit: boolean;
   displayedElementsTree: Object;
+  setInitialFormikValuesStu6: Dispatch<SetStateAction<Object>>;
+  setValidationSchema: Dispatch<SetStateAction<Object>>;
 }
 const ElementEditor = ({
   selectedResource,
@@ -39,12 +47,12 @@ const ElementEditor = ({
   onChange,
   canEdit,
   displayedElementsTree,
+  setInitialFormikValuesStu6,
+  setValidationSchema,
 }: ElementEditorProps) => {
   const fhirDefinitionsServiceApi = useFhirDefinitionsServiceApi();
   const fhirDefinitionsService = useRef(fhirDefinitionsServiceApi);
   const [loading, setLoading] = useState(true);
-  const [initialValues, setInitialValues] = useState({});
-  const [validationSchema, setValidationSchema] = useState({});
   // We want to dispatch an action that contains a payload of our updated selectedResource.entry
   // The resource reducer will in turn update the testcase json string
   const { dispatch } = useQiCoreResource();
@@ -174,7 +182,7 @@ const ElementEditor = ({
         }
       }
     }
-    setInitialValues(initialValuesObject);
+    setInitialFormikValuesStu6(initialValuesObject);
     setValidationSchema(
       Yup.object().shape(recursiveAddYupObject(validationSchemaObject))
     );
@@ -197,36 +205,26 @@ const ElementEditor = ({
       triggerFormBuilder();
     }
   }, [selectedResource, displayedElementsTree]);
-  const formik = useFormik({
-    initialValues,
-    enableReinitialize: true,
-    validationSchema,
-    onSubmit: (values) => {},
-  });
+  const formik = useFormikContext();
 
-  // on debounced change, we will update tc json with formik values
-  useEffect(() => {
-    const debouncedDispatchModifyTestCase = _.debounce(() => {
-      if (formik.values && formik.dirty) {
-        const { type } = selectedResource?.definition;
-        const formikCleanedValues = removeUndefinedAndEmptyObjects(
-          formik.values
-        );
-        const { bundleEntry } = selectedResource;
-        // need type to access formik values, as well as append to to the resource object so it is not lost.
-        bundleEntry.resource = formikCleanedValues[type];
-        bundleEntry.resource.resourceType = type;
-        dispatch({
-          type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
-          payload: bundleEntry,
-        });
-      }
-    }, 300);
-    debouncedDispatchModifyTestCase();
-    // should this still be running during unmount we cancel it. not sure if it matters here
-    return () => debouncedDispatchModifyTestCase.cancel();
-  }, [formik.values, formik.dirty, selectedResource, dispatch]);
-
+  // on individual apply
+  const handleIndividualElementApplyButtonClick = (e) => {
+    // this is wrapped in a form and we need to prevent submit on click with e.prevent
+    e.preventDefault();
+    if (formik.values && formik.dirty) {
+      const { type } = selectedResource?.definition;
+      const formikCleanedValues = removeUndefinedAndEmptyObjects(formik.values);
+      const { bundleEntry } = selectedResource;
+      // need type to access formik values, as well as append to to the resource object so it is not lost.
+      bundleEntry.resource = formikCleanedValues[type];
+      bundleEntry.resource.resourceType = type;
+      dispatch({
+        type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
+        payload: bundleEntry,
+      });
+      formik.resetForm();
+    }
+  };
   if (_.isNil(elementDefinition)) {
     return <span>No element selected</span>;
   }
@@ -237,31 +235,32 @@ const ElementEditor = ({
   // <TypeEditor will either render a node or all top level elements if it's not a root. We need to make that check here
   if (!loading) {
     return (
-      <FormikProvider value={formik}>
-        <Box
-          sx={{
-            p: 3,
-            display: "flex",
-            flexDirection: "column",
-            width: "100%",
-          }}
-          id="element-editor"
-        >
-          {/* we need to render not only the current item, but all children */}
-          <ElementEditorChildren //recursive render control
-            // stuff we need only at the init root
-            resourcePath={resourcePath}
-            fhirDefinitionsService={fhirDefinitionsService}
-            rootDefinition={elementDefinition}
-            // stuff we need everywhere
-            allChildren={allChildren}
-            currentDepth={currentDepth}
-            resource={resource}
-            handleChange={onChange}
-            canEdit={canEdit}
-          />
-        </Box>
-      </FormikProvider>
+      <Box
+        sx={{
+          padding: "0 24px 24px",
+          display: "flex",
+          flexDirection: "column",
+          width: "100%",
+        }}
+        id="element-editor"
+      >
+        {/* we need to render not only the current item, but all children */}
+        <ElementEditorChildren //recursive render control
+          // stuff we need only at the init root
+          resourcePath={resourcePath}
+          fhirDefinitionsService={fhirDefinitionsService}
+          rootDefinition={elementDefinition}
+          // stuff we need everywhere
+          allChildren={allChildren}
+          currentDepth={currentDepth}
+          resource={resource}
+          handleChange={onChange}
+          canEdit={canEdit}
+          handleIndividualElementApplyButtonClick={
+            handleIndividualElementApplyButtonClick
+          }
+        />
+      </Box>
     );
   }
   return <div />;

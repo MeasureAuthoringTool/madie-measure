@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import { Box, Divider } from "@mui/material";
 import * as _ from "lodash";
 import ResourceList from "./resource/ResourceList";
@@ -21,14 +27,19 @@ import "./Builder.scss";
 interface BuilderProps {
   testCase: TestCase;
   canEdit: boolean;
+  setInitialFormikValuesStu6: Dispatch<SetStateAction<Object>>;
+  setValidationSchema: Dispatch<SetStateAction<Object>>;
 }
 
-const Builder = ({ testCase, canEdit }: BuilderProps) => {
+const Builder = ({
+  canEdit,
+  setInitialFormikValuesStu6,
+  setValidationSchema,
+}: BuilderProps) => {
   const [resources, setResources] = useState<ResourceIdentifier[]>(null);
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   const fhirElmTranslationService = useRef(useFhirElmTranslationServiceApi());
   const [activeResource, setActiveResource] = useState(null);
-  const [activeDefinition, setActiveDefinition] = useState(null);
   const { state, dispatch } = useQiCoreResource();
   const { measureState } = useExecutionContext();
   const [measure] = measureState;
@@ -69,7 +80,6 @@ const Builder = ({ testCase, canEdit }: BuilderProps) => {
     );
     const resource = { ...resourceTree, bundleEntry };
     setActiveResource(resource);
-    setActiveDefinition({ ...resourceTree });
   };
 
   const [activeTab, setActiveTab] = useState<string>("Available");
@@ -136,6 +146,8 @@ const Builder = ({ testCase, canEdit }: BuilderProps) => {
           <>
             {activeResource && (
               <ResourceEditor
+                setValidationSchema={setValidationSchema}
+                setInitialFormikValuesStu6={setInitialFormikValuesStu6}
                 selectedResource={activeResource}
                 onCancel={(resource) => {
                   setActiveResource(null);

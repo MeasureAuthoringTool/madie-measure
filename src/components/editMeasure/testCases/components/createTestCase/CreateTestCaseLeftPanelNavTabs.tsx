@@ -9,10 +9,11 @@ export interface NavTabProps {
   leftPanelActiveTab: string;
   setLeftPanelActiveTab: (value: string) => void;
   isQICore6: boolean;
+  dirty: boolean;
 }
 
 export default function CreateTestCaseNavTabs(props: NavTabProps) {
-  const { leftPanelActiveTab, setLeftPanelActiveTab } = props;
+  const { leftPanelActiveTab, setLeftPanelActiveTab, dirty } = props;
   const isQICore6 = props.isQICore6;
   return (
     <>

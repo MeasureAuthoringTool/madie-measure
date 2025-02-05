@@ -2,4 +2,14 @@
   .test-case-tab-heading {
     margin-top: 24px;
   }
+
+  .element-editor-submission {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    margin-top: 24px;
+    > button {
+      margin-left: 24px;
+    }
+  }
 }

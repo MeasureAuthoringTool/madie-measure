@@ -6,7 +6,14 @@ import {
 import _ from "lodash";
 import Builder from "./builder/Builder";
 
-const ElementsTab = ({ canEdit, editorVal, setEditorVal, testCase }) => {
+const ElementsTab = ({
+  canEdit,
+  editorVal,
+  setEditorVal,
+  testCase,
+  setValidationSchema,
+  setInitialFormikValuesStu6,
+}) => {
   const { state, dispatch } = useQiCoreResource();
   const lastJsonRef = useRef(null);
   useEffect(() => {
@@ -34,7 +41,12 @@ const ElementsTab = ({ canEdit, editorVal, setEditorVal, testCase }) => {
 
   return (
     <>
-      <Builder testCase={testCase} canEdit={canEdit} />
+      <Builder
+        testCase={testCase}
+        canEdit={canEdit}
+        setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+        setValidationSchema={setValidationSchema}
+      />
     </>
   );
 };

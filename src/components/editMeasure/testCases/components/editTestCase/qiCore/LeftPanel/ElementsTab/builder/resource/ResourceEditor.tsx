@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import { Box, Divider, IconButton, Tab, Tabs } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
@@ -16,11 +22,13 @@ import {
   stripResourcePath,
   getDisplayedElementsTree,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
-
+import { useFormikContext } from "formik";
 interface ResourceEditorProps {
   selectedResource: any;
   onCancel: (resource: any) => void;
   canEdit: boolean;
+  setInitialFormikValuesStu6: Dispatch<SetStateAction<Object>>;
+  setValidationSchema: Dispatch<SetStateAction<Object>>;
 }
 
 /**
@@ -40,7 +48,10 @@ const ResourceEditor = ({
   selectedResource,
   onCancel,
   canEdit,
+  setInitialFormikValuesStu6,
+  setValidationSchema,
 }: ResourceEditorProps) => {
+  const formik = useFormikContext();
   const [activeTab, setActiveTab] = useState(0);
   const [allElements, setAllElements] = useState([]);
   const [displayedElements, setDisplayedElements] = useState<
@@ -102,15 +113,20 @@ const ResourceEditor = ({
       >
         <Typography>{selectedResource.path}</Typography>
         <Box sx={{ flexGrow: 1 }} />
-        <Typography>
-          ID: {selectedResource?.bundleEntry?.resource?.id}
+        <Typography sx={{ fontSize: "14px" }}>
+          <span style={{ color: "125496", fontWeight: 700 }}>
+            ID:&nbsp;&nbsp;
+          </span>
+          <span style={{ color: "#333333" }}>
+            {selectedResource?.bundleEntry?.resource?.id}
+          </span>
         </Typography>
         <IconButton onClick={() => onCancel(selectedResource)}>
-          <CloseIcon />
+          <CloseIcon sx={{ color: "#D92F2F" }} />
         </IconButton>
       </Box>
       <Divider />
-      <Box sx={{ m: 2 }}>
+      <Box sx={{ margin: "16px 16px 0" }}>
         {/* This is our element select multiple select. We need to match this with formik. */}
         <ElementSelector
           basePath={resourceBasePath}
@@ -152,11 +168,14 @@ const ResourceEditor = ({
               <Tab
                 sx={{ textAlign: "left" }}
                 label={getElementName(element, resourceBasePath)}
+                disabled={formik.dirty}
               />
             );
           })}
         </Tabs>
         <ElementEditor
+          setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+          setValidationSchema={setValidationSchema}
           elementDefinition={displayedElements?.[activeTab]}
           selectedResource={selectedResource}
           resource={editingResource}
