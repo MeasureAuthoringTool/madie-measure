@@ -5,7 +5,6 @@ import TypeEditor from "./TypeEditor";
 import ElementSection from "../../../../../../common/ElementSection";
 import { transformArrays } from "./transformArrays";
 import { stripResourcePath } from "../../../../../../../api/fhirDefinitionServiceUtilities";
-import { Button } from "@madie/madie-design-system/dist/react";
 import { useFormikContext } from "formik";
 
 const Element = ({ element, label, resource, handleChange, canEdit }) => {
@@ -102,22 +101,6 @@ const ElementEditorChildren = ({
             canEdit={canEdit}
           />
         ))}
-        <div className="element-editor-submission">
-          <Button
-            variant="outline"
-            disabled={!formikContext.dirty}
-            onClick={formikContext.resetForm}
-          >
-            Undo
-          </Button>
-          <Button
-            variant="submit"
-            disabled={!formikContext.dirty}
-            onClick={handleIndividualElementApplyButtonClick}
-          >
-            Apply
-          </Button>
-        </div>
         {/* item.detail vs item.adjudication are 2 separate trees, we need to split them into separate children trees.  
           how do we do that?
           We group them based on a normalizedPrefix.
@@ -182,22 +165,6 @@ const ElementEditorChildren = ({
                   />
                 )
               )}
-            <div className="element-editor-submission">
-              <Button
-                variant="outline"
-                disabled={!formikContext.dirty}
-                onClick={formikContext.resetForm}
-              >
-                Undo
-              </Button>
-              <Button
-                variant="submit"
-                disabled={!formikContext.dirty}
-                onClick={handleIndividualElementApplyButtonClick}
-              >
-                Apply
-              </Button>
-            </div>
           </Box>
         }
       />

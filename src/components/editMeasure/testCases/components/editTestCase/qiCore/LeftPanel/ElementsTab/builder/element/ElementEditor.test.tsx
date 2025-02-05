@@ -1,12 +1,11 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
-import { useFormik } from "formik";
+import userEvent from "@testing-library/user-event";
 import ElementEditor from "./ElementEditor";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import { QiCoreResourceProvider } from "../../../../../../../util/QiCorePatientProvider";
 
 jest.mock("../../../../../../../api/useFhirDefinitionsService");
-
 jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
   const actualModule = jest.requireActual(
     "../../../../../../../api/fhirDefinitionServiceUtilities"
@@ -38,9 +37,23 @@ jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
     updateChildrenPaths: jest.fn().mockReturnValue([]),
   };
 });
+const mockFormikObj = {
+  touched: {},
+  errors: {},
+  values: {},
+  isSubmitting: false,
+  setFieldValue: undefined,
+  dirty: false,
+  resetForm: jest.fn(),
+};
+
 jest.mock("formik", () => ({
-  ...jest.requireActual("formik"),
-  useFormik: jest.fn(),
+  useFormikContext: () => {
+    return mockFormikObj;
+  },
+  getIn: (context: Record<string, unknown>, fieldName: string) => {
+    return context[fieldName];
+  },
 }));
 
 jest.mock("./ElementEditorChildren", () => () => (
@@ -148,19 +161,11 @@ describe("ElementEditor Component", () => {
 
   beforeEach(() => {
     useFhirDefinitionsServiceApi.mockReturnValue(mockFhirDefinitionsService);
-    useFormik.mockReturnValue({
-      values: {},
-      setFieldValue: jest.fn(),
-      errors: {},
-      touched: {},
-      handleSubmit: jest.fn(),
-    });
   });
 
-  test("renders without crashing when elementDefinition is provided", async () => {
+  test("renders without crashing when elementDefinition is provided. buttons disabled", async () => {
     const setInitialFormikValuesStu6 = jest.fn();
     const setValidationSchema = jest.fn();
-
     renderElementEditor(
       mockSelectedResource,
       mockResource,
@@ -180,6 +185,45 @@ describe("ElementEditor Component", () => {
       "ElementEditorChildren"
     );
     expect(elementEditorChildrenMock).toBeInTheDocument();
+    const undoButton = screen.getByTestId("element-editor-undo-button");
+    const submitButton = screen.getByTestId("element-editor-submit-button");
+    expect(undoButton).toBeDisabled();
+    expect(submitButton).toBeDisabled();
+  });
+
+  test("renders without crashing when elementDefinition is provided, trigger buttons", async () => {
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
+    const mockResetForm = jest.fn();
+    mockFormikObj.resetForm = mockResetForm;
+    mockFormikObj.dirty = true;
+    renderElementEditor(
+      mockSelectedResource,
+      mockResource,
+      mockElementDefinition,
+      "ClaimResponse",
+      mockOnChange,
+      true,
+      mockDisplayedElementsTree,
+      setValidationSchema,
+      setInitialFormikValuesStu6
+    );
+    await waitFor(() =>
+      expect(mockFhirDefinitionsService.getResourceTree).toHaveBeenCalled()
+    );
+
+    const elementEditorChildrenMock = await screen.findByText(
+      "ElementEditorChildren"
+    );
+    expect(elementEditorChildrenMock).toBeInTheDocument();
+    const undoButton = screen.getByTestId("element-editor-undo-button");
+    const submitButton = screen.getByTestId("element-editor-submit-button");
+    expect(undoButton).toBeEnabled();
+    expect(submitButton).toBeEnabled();
+    userEvent.click(undoButton);
+    await waitFor(() => {
+      expect(mockResetForm).toHaveBeenCalled();
+    });
   });
 
   test("renders a fallback when no elementDefinition is provided", () => {

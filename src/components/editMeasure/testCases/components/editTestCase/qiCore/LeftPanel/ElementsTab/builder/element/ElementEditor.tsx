@@ -26,6 +26,7 @@ import {
   ResourceActionType,
 } from "../../../../../../../util/QiCorePatientProvider";
 import { useFormikContext } from "formik";
+import { Button } from "@madie/madie-design-system/dist/react";
 
 interface ElementEditorProps {
   resource?: any;
@@ -260,6 +261,26 @@ const ElementEditor = ({
             handleIndividualElementApplyButtonClick
           }
         />
+        <div className="element-editor-submission">
+          <Button
+            variant="outline"
+            id="element-editor-undo-button"
+            data-testId="element-editor-undo-button"
+            disabled={!formik.dirty}
+            onClick={formik.resetForm}
+          >
+            Undo
+          </Button>
+          <Button
+            variant="submit"
+            id="element-editor-submit-button"
+            data-testId="element-editor-submit-button"
+            disabled={!formik.dirty}
+            onClick={handleIndividualElementApplyButtonClick}
+          >
+            Apply
+          </Button>
+        </div>
       </Box>
     );
   }
