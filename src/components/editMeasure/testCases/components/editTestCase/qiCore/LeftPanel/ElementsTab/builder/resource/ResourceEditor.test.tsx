@@ -16,7 +16,6 @@ jest.mock("../../../../../../../api/useFhirDefinitionsService", () => {
     getResourceTree: jest.fn(() => Promise.resolve(mockTopLevelMetaElements)),
   }));
 });
-
 jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
   const actualModule = jest.requireActual(
     "../../../../../../../api/fhirDefinitionServiceUtilities"
@@ -26,12 +25,42 @@ jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
   };
 });
 
+const mockFormikObj = {
+  touched: {},
+  errors: {},
+  values: {},
+  isSubmitting: false,
+  setFieldValue: undefined,
+  getFieldProps: () => ({}),
+};
+
+jest.mock("formik", () => ({
+  useFormikContext: () => {
+    return mockFormikObj;
+  },
+  getIn: (context: Record<string, unknown>, fieldName: string) => {
+    return context[fieldName];
+  },
+}));
+
+beforeEach(() => {
+  mockFormikObj.touched = {};
+  mockFormikObj.errors = {};
+  mockFormikObj.values = {};
+  mockFormikObj.isSubmitting = false;
+  mockFormikObj.setFieldValue = undefined;
+});
 describe("ResourceEditor", () => {
   const mockOnCancel = jest.fn();
   it("renders the ResourceEditor correctly", async () => {
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
+
     render(
       <QiCoreResourceProvider>
         <ResourceEditor
+          setValidationSchema={setValidationSchema}
+          setInitialFormikValuesStu6={setInitialFormikValuesStu6}
           selectedResource={mockSelectedResource}
           onCancel={mockOnCancel}
           canEdit={true}
@@ -46,6 +75,8 @@ describe("ResourceEditor", () => {
       );
       expect(stringInput).toBeInTheDocument();
       expect(stringInput.value).toBe("6fb9d817-76c5-4b68-ba06-92c7429e6b5c");
+      expect(setValidationSchema).toHaveBeenCalled();
+      expect(setInitialFormikValuesStu6).toHaveBeenCalled();
     });
   });
 });

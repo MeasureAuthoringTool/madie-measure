@@ -125,11 +125,15 @@ describe("ElementEditor Component", () => {
     resourcePath,
     onChange,
     canEdit,
-    displayedElementsTree
+    displayedElementsTree,
+    setValidationSchema,
+    setInitialFormikValuesStu6
   ) => {
     render(
       <QiCoreResourceProvider>
         <ElementEditor
+          setValidationSchema={setValidationSchema}
+          setInitialFormikValuesStu6={setInitialFormikValuesStu6}
           selectedResource={selectedResource}
           resource={resource}
           elementDefinition={elementDefinition}
@@ -154,6 +158,9 @@ describe("ElementEditor Component", () => {
   });
 
   test("renders without crashing when elementDefinition is provided", async () => {
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
+
     renderElementEditor(
       mockSelectedResource,
       mockResource,
@@ -161,7 +168,9 @@ describe("ElementEditor Component", () => {
       "ClaimResponse",
       mockOnChange,
       true,
-      mockDisplayedElementsTree
+      mockDisplayedElementsTree,
+      setValidationSchema,
+      setInitialFormikValuesStu6
     );
     await waitFor(() =>
       expect(mockFhirDefinitionsService.getResourceTree).toHaveBeenCalled()
@@ -174,6 +183,9 @@ describe("ElementEditor Component", () => {
   });
 
   test("renders a fallback when no elementDefinition is provided", () => {
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
+
     renderElementEditor(
       mockSelectedResource,
       mockResource,
@@ -181,12 +193,17 @@ describe("ElementEditor Component", () => {
       "ClaimResponse",
       mockOnChange,
       true,
-      mockDisplayedElementsTree
+      mockDisplayedElementsTree,
+      setValidationSchema,
+      setInitialFormikValuesStu6
     );
     expect(screen.getByText("No element selected")).toBeInTheDocument();
   });
 
   test("checks loading state", async () => {
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
+
     renderElementEditor(
       mockSelectedResource,
       mockResource,
@@ -194,7 +211,9 @@ describe("ElementEditor Component", () => {
       "ClaimResponse",
       mockOnChange,
       true,
-      mockDisplayedElementsTree
+      mockDisplayedElementsTree,
+      setValidationSchema,
+      setInitialFormikValuesStu6
     );
     expect(screen.queryByText("ElementEditorChildren")).not.toBeInTheDocument();
 
