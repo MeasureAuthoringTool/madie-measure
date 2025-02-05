@@ -197,6 +197,12 @@ describe("ElementEditor Component", () => {
     const mockResetForm = jest.fn();
     mockFormikObj.resetForm = mockResetForm;
     mockFormikObj.dirty = true;
+    const mockFormikValues = {
+      ClaimResponse: {
+        id: "test",
+      },
+    };
+    mockFormikObj.values = mockFormikValues;
     renderElementEditor(
       mockSelectedResource,
       mockResource,
@@ -223,6 +229,10 @@ describe("ElementEditor Component", () => {
     userEvent.click(undoButton);
     await waitFor(() => {
       expect(mockResetForm).toHaveBeenCalled();
+    });
+    userEvent.click(submitButton);
+    await waitFor(() => {
+      expect(mockResetForm).toHaveBeenCalledTimes(2);
     });
   });
 
