@@ -371,10 +371,10 @@ const EditTestCase = (props: EditTestCaseProps) => {
   const { updateRouteHandlerState } = routeHandlerStore;
   useEffect(() => {
     updateRouteHandlerState({
-      canTravel: !formik.dirty && !isJsonModified(), // both formik.dirty fields are required
+      canTravel: !formik.dirty && !isJsonModified() && !formikStu6Context.dirty, // both formik.dirty fields are required
       pendingRoute: "",
     });
-  }, [formik.dirty, editorVal, testCase?.json]);
+  }, [formik.dirty, editorVal, testCase?.json, formikStu6Context.dirty]);
 
   const standardizeJson = (testCase) => {
     try {
@@ -926,7 +926,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
                             </div>
                           </div>
                         )}
-                      {/* end */}
                       {leftPanelActiveTab === "elements" &&
                         !isValidJson(editorVal) && (
                           <div style={{ width: "98%" }}>
