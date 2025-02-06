@@ -20,21 +20,22 @@ describe("MeasureServiceApi Tests", () => {
   const accessToken = jest.fn();
   const measureServiceApi = new MeasureServiceApi(baseUrl, accessToken);
 
+  const measures: Measure[] = [
+    {
+      id: "IDIDID1",
+      measureName: "measure - A",
+    } as Measure,
+    {
+      id: "IDIDID2",
+      measureName: "measure - B",
+    } as Measure,
+    {
+      id: "IDIDID3",
+      measureName: "measure - C",
+    } as Measure,
+  ];
+
   it("test fetchMeasures success", async () => {
-    const measures: Measure[] = [
-      {
-        id: "IDIDID1",
-        measureName: "measure - A",
-      } as Measure,
-      {
-        id: "IDIDID2",
-        measureName: "measure - B",
-      } as Measure,
-      {
-        id: "IDIDID3",
-        measureName: "measure - C",
-      } as Measure,
-    ];
     const resp: any = { status: 200, data: measures };
     mockedAxios.get.mockResolvedValue(resp);
 
@@ -518,21 +519,18 @@ describe("MeasureServiceApi Tests", () => {
     const resp: any = { status: 200, data: humanReadable };
     mockedAxios.get.mockResolvedValue(resp);
 
-    const hr = await measureServiceApi.fetchHumanReadable(
-      "679a9143c5e6e17027d081c4"
-    );
+    const hr = await measureServiceApi.fetchHumanReadable(measures[0].id);
     expect(mockedAxios.get).toBeCalledTimes(1);
     expect(hr).toEqual(humanReadable);
   });
 
   it("test fetch human readable failure", async () => {
-    const errorMessage =
-      "Unable to fetch human readable for measure 679a9143c5e6e17027d081c4";
+    const errorMessage = "Unable to fetch human readable for measure IDIDID1";
     mockedAxios.get.mockImplementationOnce(() =>
       Promise.reject(new Error(errorMessage))
     );
     await expect(
-      measureServiceApi.fetchHumanReadable("679a9143c5e6e17027d081c4")
+      measureServiceApi.fetchHumanReadable(measures[0].id)
     ).rejects.toThrow(errorMessage);
   });
 });
