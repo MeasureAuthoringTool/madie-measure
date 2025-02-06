@@ -532,7 +532,7 @@ describe("MeasureServiceApi Tests", () => {
       Promise.reject(new Error(errorMessage))
     );
     await expect(
-      measureServiceApi.fetchMeasure("679a9143c5e6e17027d081c4")
+      measureServiceApi.fetchHumanReadable("679a9143c5e6e17027d081c4")
     ).rejects.toThrow(errorMessage);
   });
 });
