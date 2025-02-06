@@ -1,5 +1,9 @@
 import React, { useState } from "react";
-import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
+import {
+  MadieDiscardDialog,
+  Tabs,
+  Tab,
+} from "@madie/madie-design-system/dist/react";
 import "./CreateTestCaseNavTabs.scss";
 import "twin.macro";
 import "styled-components/macro";
@@ -11,7 +15,6 @@ export interface NavTabProps {
   isQICore6: boolean;
   dirty: boolean;
 }
-import { MadieDiscardDialog } from "@madie/madie-design-system/dist/react";
 export default function CreateTestCaseNavTabs(props: NavTabProps) {
   const { leftPanelActiveTab, setLeftPanelActiveTab, dirty } = props;
   const [pendingPanel, setPendingPanel] = useState(leftPanelActiveTab);
