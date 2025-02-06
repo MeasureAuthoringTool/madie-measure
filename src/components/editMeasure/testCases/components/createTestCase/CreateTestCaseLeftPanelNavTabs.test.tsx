@@ -1,8 +1,8 @@
 import * as React from "react";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import CreateTestCaseLeftPanelNavTabs from "./CreateTestCaseLeftPanelNavTabs";
-
 import userEvent from "@testing-library/user-event";
+
 const { getByText, getByRole } = screen;
 describe("Create Test Case nav tabs", () => {
   it("Follows discard behavior when dirty attempting to navigate to JSON", async () => {

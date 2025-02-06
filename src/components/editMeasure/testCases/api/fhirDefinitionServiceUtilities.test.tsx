@@ -9,6 +9,7 @@ import {
   setNestedValue,
   getDisplayedElementsTree,
   removeUndefinedAndEmptyObjects,
+  getElementName,
 } from "./fhirDefinitionServiceUtilities";
 
 describe("FhirDefinitionServiceUtilities", () => {
