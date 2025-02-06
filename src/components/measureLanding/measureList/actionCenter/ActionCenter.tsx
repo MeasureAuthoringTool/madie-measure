@@ -1,16 +1,12 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { IconButton } from "@mui/material";
-import { Measure, Model } from "@madie/madie-models";
+import React, { useCallback, useEffect, useState } from "react";
+import { Measure } from "@madie/madie-models";
 import DeleteAction from "./deleteAction/DeleteAction";
 import ExportAction from "./exportAction/ExportAction";
 import DraftAction from "./draftAction/DraftAction";
 import VersionAction from "./versionAction/VersionAction";
 import AssociateCmsIdAction from "./associateCmsIdAction/AccociateCmsIdAction";
-import {
-  checkUserCanEdit,
-  useFeatureFlags,
-  useOktaTokens,
-} from "@madie/madie-util";
+import ViewHRAction from "./viewHumanReadableAction/ViewHRAction";
+import { checkUserCanEdit } from "@madie/madie-util";
 
 interface PropTypes {
   measures: Measure[];
@@ -21,10 +17,9 @@ interface PropTypes {
   setDraftMeasureDialog: any;
   setDeleteMeasureDialog: any;
   deleteMeasure: () => void;
+  setViewHumanReadableModal: any;
 }
 export default function ActionCenter(props: PropTypes) {
-  const featureFlags = useFeatureFlags();
-  const { getUserName } = useOktaTokens();
   const [canEdit, setCanEdit] = useState<boolean>(false);
 
   const versionMeasure = useCallback(() => {
@@ -36,6 +31,20 @@ export default function ActionCenter(props: PropTypes) {
       });
     }
   }, [props.measures, props.setCreateVersionDialog, props.updateTargetMeasure]);
+
+  const viewHumanReadable = useCallback(() => {
+    if (props.measures?.length === 1) {
+      props.updateTargetMeasure(props.measures[0]);
+      props.setViewHumanReadableModal({
+        open: true,
+        measureId: props.measures[0]?.measureSetId,
+      });
+    }
+  }, [
+    props.measures,
+    props.setViewHumanReadableModal,
+    props.updateTargetMeasure,
+  ]);
 
   const draftMeasure = useCallback(() => {
     if (props.measures?.length === 1) {
@@ -98,6 +107,7 @@ export default function ActionCenter(props: PropTypes) {
         measures={props.measures}
         onClick={props.associateCmsId}
       />
+      <ViewHRAction measures={props.measures} onClick={viewHumanReadable} />
     </div>
   );
 }

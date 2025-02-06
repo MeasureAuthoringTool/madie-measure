@@ -44,6 +44,7 @@ import getLibraryNameErrors from "./InvalidMeasureNameDialog/getLibraryNameError
 import AssociateCmsIdDialog from "./associateCmsIdDialog/AssociateCmsIdDialog";
 import ActionCenter from "./actionCenter/ActionCenter";
 import DeleteDialog from "../../editMeasure/DeleteDialog";
+import ViewHRModal from "../../common/viewHumanReadableModal/ViewHRModal";
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -123,6 +124,11 @@ export default function MeasureList(props: {
   const [invalidLibraryErrors, setInvalidLibraryErrors] = useState<string[]>(
     []
   );
+
+  const [viewHumanReadableModal, setViewHumanReadableModal] = useState({
+    open: false,
+    measureId: "",
+  });
 
   const [versionHelperText, setVersionHelperText] = useState("");
   const [deleteMeasureDialog, setDeleteMeasureDialog] =
@@ -359,6 +365,10 @@ export default function MeasureList(props: {
     });
     setInvalidLibraryErrors([]);
     setVersionHelperText("");
+    setViewHumanReadableModal({
+      open: false,
+      measureId: "",
+    });
   };
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
@@ -941,6 +951,7 @@ export default function MeasureList(props: {
             setDraftMeasureDialog={setDraftMeasureDialog}
             setDeleteMeasureDialog={setDeleteMeasureDialog}
             deleteMeasure={deleteMeasure}
+            setViewHumanReadableModal={setViewHumanReadableModal}
           />
         </div>
       </div>
@@ -1101,6 +1112,11 @@ export default function MeasureList(props: {
           onClose={() => setOpenAssociateCmsIdDialog(false)}
           open={openAssociateCmsIdDialog}
           handleCmsIdAssociationContinueDialog={handleCmsIdAssociation}
+        />
+        <ViewHRModal
+          open={viewHumanReadableModal.open}
+          onClose={handleDialogClose}
+          measureId={targetMeasure?.current?.id}
         />
       </table>
     </div>

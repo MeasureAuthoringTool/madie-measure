@@ -508,6 +508,24 @@ export class MeasureServiceApi {
       }
     );
   }
+
+  async fetchHumanReadable(id: string): Promise<any> {
+    try {
+      const response = await axios.get<String>(
+        `${this.baseUrl}/humanreadable/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      const message = `Unable to fetch human readable for ${id}`;
+      console.error(message, error);
+      throw error;
+    }
+  }
 }
 
 export default function useMeasureServiceApi(): MeasureServiceApi {

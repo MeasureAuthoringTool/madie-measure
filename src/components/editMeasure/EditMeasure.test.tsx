@@ -161,6 +161,7 @@ const serviceApiMock = {
     .fn()
     .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
   getReturnTypesForAllCqlFunctions: jest.fn().mockResolvedValue({}),
+  fetchHumanReadable: jest.fn().mockResolvedValue("test human readable"),
 } as unknown as MeasureServiceApi;
 
 useMeasureServiceApiMock.mockImplementation(() => {
@@ -413,6 +414,41 @@ describe("EditMeasure Component", () => {
     renderRouter();
     await waitFor(() => {
       expect(mockedNavigate).toHaveBeenCalledWith("/404");
+    });
+  });
+
+  it("should display view human readable modal when the event is triggered, discards.", async () => {
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+    expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+    const loading = queryByTestId("loading");
+    setTimeout(() => {
+      expect(loading).toBeNull();
+    }, 500);
+
+    act(() => {
+      window.dispatchEvent(new Event("view-humanreadable"));
+    });
+
+    await waitFor(() =>
+      setTimeout(() => {
+        expect(queryByTestId("view-hr-modal")).toBeInTheDocument();
+      }, 500)
+    );
+
+    setTimeout(async () => {
+      const cancelButton = await findByTestId("modal-secondary-btn");
+      fireEvent.click(cancelButton);
+    }, 500);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText(
+          "The human readable file is not available for this measure.  Contact Help Desk for additional information."
+        )
+      ).not.toBeInTheDocument();
     });
   });
 });
