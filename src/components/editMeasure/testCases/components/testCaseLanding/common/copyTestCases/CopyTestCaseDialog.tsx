@@ -30,12 +30,15 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { customSort } from "../Hooks/UseTestCases";
-import { Measure } from "@madie/madie-models";
+import { Measure, TestCase } from "@madie/madie-models";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import useMeasureServiceApi from "../../../../../../../api/useMeasureServiceApi";
 import "./tcPagination.scss";
+import useTestCaseServiceApi from "../../../../api/useTestCaseServiceApi";
+import Typography from "@mui/material/Typography";
+
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
 export const filterByOptions = ["Measure", "Version", "CMS ID"];
@@ -45,9 +48,11 @@ const filterMap = {
   "CMS ID": "cmsId",
 };
 
-const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
+const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
   const measureSearchApi = useRef(useMeasureServiceApi());
+  const testCaseServiceApi = useRef(useTestCaseServiceApi());
   const abortController = useRef(null);
+
   // utilities for pagination
   const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(0);
@@ -76,11 +81,17 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
   const [measureList, setMeasureList] = useState<Measure[]>([]);
   const [offset, setOffset] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
+  const [executing, setExecuting] = useState<boolean>(false);
+  const [continueDisabled, setContinueDisabled] = useState<boolean>(
+    _.isEmpty(selectedRowId)
+  );
+
   const fetchMeasures = useCallback(() => {
     if (!measure || !measure.model || !measure.id || !open) {
       return;
     }
     setLoading(true);
+    setSelectedRowId(null);
     abortController.current = new AbortController();
     const { finalSearchField, finalFilterBy } = finalSearchAndFilterby;
     const optionalSearchProperties = [];
@@ -152,6 +163,7 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
   }, [fetchMeasures, measure?.id]);
 
   const columns = useMemo<ColumnDef<Measure>[]>(() => {
+    setContinueDisabled(_.isEmpty(selectedRowId));
     const columnDefs = [];
     columnDefs.push({
       id: "select",
@@ -251,240 +263,310 @@ const CopyTestCaseDialog = ({ open, onClose, onSubmit, measure }) => {
     setPage(0);
   };
 
+  const onSubmit = async (e) => {
+    if (_.isEmpty(selectedRowId)) {
+      return;
+    }
+    setExecuting(true);
+    setContinueDisabled(true);
+    testCaseServiceApi.current
+      .copyTestCasesToMeasure(
+        measure.id,
+        selectedRowId,
+        selectedTestCases?.map((tc: TestCase) => tc.id)
+      )
+      .then((copiedTestCaseIds: string[]) => {
+        if (
+          copiedTestCaseIds.length ===
+          selectedTestCases?.map((tc: TestCase) => tc.id).length
+        ) {
+          onClose("Test Cases have been successfully copied.", "success");
+        } else if (copiedTestCaseIds.length > 0) {
+          onClose(
+            "Test Cases have been successfully copied. Some Test Cases were invalid and were not copied.",
+            "warning"
+          );
+        } else {
+          onClose("Test Cases were invalid and not copied.", "danger");
+        }
+      })
+      .catch((e) => {
+        console.error(e);
+        onClose(
+          "Unable to copy Test Cases. Please contact the Help Desk.",
+          "danger"
+        );
+      })
+      .finally(() => {
+        setExecuting(false);
+      });
+  };
+
+  const handleDialogClose = async (e) => {
+    onClose();
+  };
+
   return (
     <MadieDialog
       form
       title="Copy To"
       dialogProps={{
-        onClose,
+        onClose: handleDialogClose,
         open,
-        onSubmit: () => {},
+        onSubmit,
       }}
       cancelButtonProps={{
         variant: "secondary",
         cancelText: "Cancel",
         "data-testid": "copy-test-cases-cancel-button",
+        disabled: executing,
       }}
       continueButtonProps={{
         variant: "cyan",
         type: "submit",
         "data-testid": "copy-test-cases-continue-button",
         continueText: "Save",
-        disabled: _.isEmpty(selectedRowId),
+        disabled: continueDisabled,
       }}
       maxWidth={"lg"}
     >
-      <div id="measure-landing" data-testid="measure-landing">
-        <div id="tc-search">
-          <div>
-            <Select
-              label="Filter By"
-              id="filter-by-select"
-              data-testid="filter-by-select"
-              inputProps={{ "data-testid": "filter-by-select-input" }}
-              placeHolder={{ name: "Filter By", value: "" }}
-              SelectDisplayProps={{
-                "aria-required": "true",
-              }}
-              size="small"
-              name="filterBy"
-              value={filterBy}
-              onChange={handleFilter}
-              options={filterByOptions
-                ?.map((option) => {
-                  return (
-                    <MenuItem
-                      key={option}
-                      value={option}
-                      data-testid={`filter-by-${option}`}
-                    >
-                      {option}
+      {!executing && (
+        <div id="measure-landing" data-testid="measure-landing">
+          <div id="tc-search">
+            <div>
+              <Select
+                label="Filter By"
+                id="filter-by-select"
+                data-testid="filter-by-select"
+                inputProps={{ "data-testid": "filter-by-select-input" }}
+                placeHolder={{ name: "Filter By", value: "" }}
+                SelectDisplayProps={{
+                  "aria-required": "true",
+                }}
+                size="small"
+                name="filterBy"
+                value={filterBy}
+                onChange={handleFilter}
+                options={filterByOptions
+                  ?.map((option) => {
+                    return (
+                      <MenuItem
+                        key={option}
+                        value={option}
+                        data-testid={`filter-by-${option}`}
+                      >
+                        {option}
+                      </MenuItem>
+                    );
+                  })
+                  .concat(
+                    <MenuItem key="-" value="" data-testid={`filter-by--`}>
+                      -
                     </MenuItem>
-                  );
-                })
-                .concat(
-                  <MenuItem key="-" value="" data-testid={`filter-by--`}>
-                    -
-                  </MenuItem>
-                )}
-            />
+                  )}
+              />
+            </div>
+            <div>
+              <TextField
+                id="search"
+                label="Search"
+                placeholder="Search"
+                inputProps={{
+                  "data-testid": "test-case-list-search-input",
+                }}
+                data-testid="test-case-list-search"
+                name="searchField"
+                value={searchField}
+                onChange={handleSearch}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    finalizeSearchCriteria();
+                  }
+                }}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment
+                        position="start"
+                        data-testid="test-cases-trigger-search"
+                        onClick={finalizeSearchCriteria}
+                        style={{ cursor: "pointer" }}
+                      >
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment
+                        data-testid="test-cases-clear-search"
+                        position="end"
+                        style={{ cursor: "pointer" }}
+                        onClick={blankSearchCriteria}
+                      >
+                        <IconButton>
+                          <ClearIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+            </div>
           </div>
-          <div>
-            <TextField
-              id="search"
-              label="Search"
-              placeholder="Search"
-              inputProps={{
-                "data-testid": "test-case-list-search-input",
-              }}
-              data-testid="test-case-list-search"
-              name="searchField"
-              value={searchField}
-              onChange={handleSearch}
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  finalizeSearchCriteria();
-                }
-              }}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment
-                      position="start"
-                      data-testid="test-cases-trigger-search"
-                      onClick={finalizeSearchCriteria}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment
-                      data-testid="test-cases-clear-search"
-                      position="end"
-                      style={{ cursor: "pointer" }}
-                      onClick={blankSearchCriteria}
-                    >
-                      <IconButton>
-                        <ClearIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                },
-              }}
-            />
-          </div>
-        </div>
-        <div className="measure-table no-margin-top">
-          <div className="table" style={{ overflow: "auto" }}>
-            <table
-              tw="min-w-full"
-              data-testid="measure-list-tbl"
-              className="ml-table"
-              style={{
-                borderSpacing: "0 2em !important",
-                borderBottom: "1px solid rgb(140, 140, 140)",
-              }}
-            >
-              <thead tw="bg-slate">
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => {
-                      const isHovered = hoveredHeader?.includes(header.id);
-                      return (
-                        <TH
-                          key={header.id}
-                          scope="col"
-                          onClick={header.column.getToggleSortingHandler()}
-                          onMouseEnter={() => setHoveredHeader(header.id)}
-                          onMouseLeave={() => setHoveredHeader(null)}
-                          className="header-cell"
-                        >
-                          {header.isPlaceholder ? null : (
-                            <button
-                              className={
-                                header.column.getCanSort()
-                                  ? "cursor-pointer select-none header-button"
-                                  : "header-button"
-                              }
-                              title={
-                                header.column.getCanSort()
-                                  ? header.column.getNextSortingOrder() ===
-                                    "asc"
-                                    ? "Sort ascending"
-                                    : header.column.getNextSortingOrder() ===
-                                      "desc"
-                                    ? "Sort descending"
-                                    : "Clear sort"
-                                  : undefined
-                              }
-                            >
-                              <span className="arrowDisplay">
-                                {header.column.getCanSort() &&
-                                  isHovered &&
-                                  !header.column.getIsSorted() && (
-                                    <UnfoldMoreIcon />
-                                  )}
-                                {{
-                                  asc: <KeyboardArrowUpIcon />,
-                                  desc: <KeyboardArrowDownIcon />,
-                                }[header.column.getIsSorted() as string] ??
-                                  null}
-                              </span>
-                              {flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
-                            </button>
-                          )}
-                        </TH>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </thead>
-              <tbody className="table-body" style={{ padding: 20 }}>
-                {loading ? (
-                  <div style={{ display: "flex", justifyContent: "center" }}>
-                    <MadieSpinner style={{ height: 50, width: 50 }} />
-                  </div>
-                ) : _.isEmpty(measureList) ? (
-                  <tr>
-                    <td colSpan={columns.length} tw="text-center p-2">
-                      You don't have any other measures that you own or are
-                      shared with you, belonging to the same model.
-                    </td>
-                  </tr>
-                ) : (
-                  table.getRowModel().rows.map((row) => (
-                    <tr
-                      key={row.id}
-                      className="ml-tr"
-                      data-testid={`row-item`}
-                      style={{
-                        borderTop: "solid 1px #8c8c8c",
-                        borderSpacing: "0 2em !important",
-                      }}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <td
-                          key={cell.id}
-                          data-testid={`measure-name-${cell.id}`}
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </td>
-                      ))}
+          <div className="measure-table no-margin-top">
+            <div className="table" style={{ overflow: "auto" }}>
+              <table
+                tw="min-w-full"
+                data-testid="measure-list-tbl"
+                className="ml-table"
+                style={{
+                  borderSpacing: "0 2em !important",
+                  borderBottom: "1px solid rgb(140, 140, 140)",
+                }}
+              >
+                <thead tw="bg-slate">
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <tr key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => {
+                        const isHovered = hoveredHeader?.includes(header.id);
+                        return (
+                          <TH
+                            key={header.id}
+                            scope="col"
+                            onClick={header.column.getToggleSortingHandler()}
+                            onMouseEnter={() => setHoveredHeader(header.id)}
+                            onMouseLeave={() => setHoveredHeader(null)}
+                            className="header-cell"
+                          >
+                            {header.isPlaceholder ? null : (
+                              <button
+                                className={
+                                  header.column.getCanSort()
+                                    ? "cursor-pointer select-none header-button"
+                                    : "header-button"
+                                }
+                                title={
+                                  header.column.getCanSort()
+                                    ? header.column.getNextSortingOrder() ===
+                                      "asc"
+                                      ? "Sort ascending"
+                                      : header.column.getNextSortingOrder() ===
+                                        "desc"
+                                      ? "Sort descending"
+                                      : "Clear sort"
+                                    : undefined
+                                }
+                              >
+                                <span className="arrowDisplay">
+                                  {header.column.getCanSort() &&
+                                    isHovered &&
+                                    !header.column.getIsSorted() && (
+                                      <UnfoldMoreIcon />
+                                    )}
+                                  {{
+                                    asc: <KeyboardArrowUpIcon />,
+                                    desc: <KeyboardArrowDownIcon />,
+                                  }[header.column.getIsSorted() as string] ??
+                                    null}
+                                </span>
+                                {flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
+                              </button>
+                            )}
+                          </TH>
+                        );
+                      })}
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-            <Pagination
-              totalItems={totalItems}
-              visibleItems={visibleItems}
-              limitOptions={[5, 10, 25, 50]}
-              offset={offset}
-              page={page + 1}
-              limit={limit}
-              handlePageChange={(e, v) => {
-                setPage(v - 1);
-                setMeasureList([]);
-              }}
-              handleLimitChange={(e) => {
-                setLimit(e.target.value);
-                setMeasureList([]);
-              }}
-              count={totalPages}
-              shape="rounded"
-              hideNextButton={!(page + 1 < totalPages)}
-              hidePrevButton={!(page > 0)}
-            />
+                  ))}
+                </thead>
+                <tbody className="table-body" style={{ padding: 20 }}>
+                  {loading ? (
+                    <div style={{ display: "flex", justifyContent: "center" }}>
+                      <MadieSpinner style={{ height: 50, width: 50 }} />
+                    </div>
+                  ) : _.isEmpty(measureList) ? (
+                    <tr>
+                      <td colSpan={columns.length} tw="text-center p-2">
+                        You don't have any other measures that you own or are
+                        shared with you, belonging to the same model.
+                      </td>
+                    </tr>
+                  ) : (
+                    table.getRowModel().rows.map((row) => (
+                      <tr
+                        key={row.id}
+                        className="ml-tr"
+                        data-testid={`row-item`}
+                        style={{
+                          borderTop: "solid 1px #8c8c8c",
+                          borderSpacing: "0 2em !important",
+                        }}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <td
+                            key={cell.id}
+                            data-testid={`measure-name-${cell.id}`}
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+              <Pagination
+                totalItems={totalItems}
+                visibleItems={visibleItems}
+                limitOptions={[5, 10, 25, 50]}
+                offset={offset}
+                page={page + 1}
+                limit={limit}
+                handlePageChange={(e, v) => {
+                  setPage(v - 1);
+                  setMeasureList([]);
+                }}
+                handleLimitChange={(e) => {
+                  setLimit(e.target.value);
+                  setMeasureList([]);
+                }}
+                count={totalPages}
+                shape="rounded"
+                hideNextButton={!(page + 1 < totalPages)}
+                hidePrevButton={!(page > 0)}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      )}
+      {executing && (
+        <>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <MadieSpinner style={{ height: 50, width: 50 }} />
+            <Typography color="inherit">Copying Test Cases...</Typography>
+          </div>
+          {/*<div*/}
+          {/*  style={{*/}
+          {/*    display: "flex",*/}
+          {/*    justifyContent: "center",*/}
+          {/*  }}*/}
+          {/*>*/}
+          {/*  */}
+          {/*</div>*/}
+        </>
+      )}
     </MadieDialog>
   );
 };
