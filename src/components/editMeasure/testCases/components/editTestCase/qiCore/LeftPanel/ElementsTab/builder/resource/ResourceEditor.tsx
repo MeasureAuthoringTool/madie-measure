@@ -15,8 +15,10 @@ import {
   getBasePath,
   stripResourcePath,
   getDisplayedElementsTree,
+  getElementName,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import { useFormikContext } from "formik";
+import { MadieDiscardDialog } from "@madie/madie-design-system/dist/react";
 interface ResourceEditorProps {
   selectedResource: any;
   onCancel: (resource: any) => void;
@@ -25,19 +27,6 @@ interface ResourceEditorProps {
   setValidationSchema: Dispatch<SetStateAction<Object>>;
 }
 
-/**
- * Prepares the element name to be displayed for tab labels
- * for sliced elements- it will be sliceName. e.g. Patient.extension:race results into race
- * for regular element- it will be the path of an element. e.g. Patient.gender results gender
- */
-const getElementName = (element: ElementDefinition, basePath: string) => {
-  const requiredIndicator = element.min > 0 ? " *" : "";
-  if (element.sliceName) {
-    return `${element.sliceName}${requiredIndicator}`;
-  }
-  return `${element.path.substring(basePath.length + 1)}${requiredIndicator}`;
-};
-
 const ResourceEditor = ({
   selectedResource,
   onCancel,
@@ -45,8 +34,9 @@ const ResourceEditor = ({
   setInitialFormikValuesStu6,
   setValidationSchema,
 }: ResourceEditorProps) => {
-  const formik = useFormikContext();
+  const { dirty, resetForm } = useFormikContext();
   const [activeTab, setActiveTab] = useState(0);
+  const [pendingTab, setPendingTab] = useState(0);
   const [allElements, setAllElements] = useState([]);
   const [displayedElements, setDisplayedElements] = useState<
     ElementDefinition[]
@@ -56,6 +46,12 @@ const ResourceEditor = ({
     selectedResource?.bundleEntry?.resource
   );
   const { dispatch } = useQiCoreResource();
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const onContinue = () => {
+    setDialogOpen(false);
+    setActiveTab(pendingTab);
+    resetForm();
+  };
   useEffect(() => {
     if (selectedResource) {
       // TODO: look at the data that exists on the resource and combine fields from that
@@ -87,7 +83,6 @@ const ResourceEditor = ({
   }, [selectedResource]);
 
   const resourceBasePath = getBasePath(selectedResource);
-
   return (
     <Box
       sx={{
@@ -145,7 +140,12 @@ const ResourceEditor = ({
           variant="scrollable"
           value={activeTab}
           onChange={(e, newValue) => {
-            setActiveTab(newValue);
+            if (dirty) {
+              setPendingTab(newValue);
+              setDialogOpen(true);
+            } else {
+              setActiveTab(newValue);
+            }
           }}
           aria-label="Resource element tabs"
           sx={{
@@ -162,7 +162,6 @@ const ResourceEditor = ({
               <Tab
                 sx={{ textAlign: "left" }}
                 label={getElementName(element, resourceBasePath)}
-                disabled={formik.dirty}
               />
             );
           })}
@@ -187,6 +186,13 @@ const ResourceEditor = ({
           canEdit={canEdit}
         />
       </Box>
+      <MadieDiscardDialog
+        open={dialogOpen}
+        onContinue={onContinue}
+        onClose={() => {
+          setDialogOpen(false);
+        }}
+      />
     </Box>
   );
 };

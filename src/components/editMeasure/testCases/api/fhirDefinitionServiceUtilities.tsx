@@ -1,3 +1,18 @@
+import { ElementDefinition } from "fhir/r4";
+
+/**
+ * Prepares the element name to be displayed for tab labels
+ * for sliced elements- it will be sliceName. e.g. Patient.extension:race results into race
+ * for regular element- it will be the path of an element. e.g. Patient.gender results gender
+ */
+export function getElementName(element: ElementDefinition, basePath: string) {
+  const requiredIndicator = element.min > 0 ? " *" : "";
+  if (element.sliceName) {
+    return `${element.sliceName}${requiredIndicator}`;
+  }
+  return `${element.path.substring(basePath.length + 1)}${requiredIndicator}`;
+}
+
 // given an object that we want to copy to
 // a path that looks like "Claimresponse.item.something"
 // and a value that can be anything

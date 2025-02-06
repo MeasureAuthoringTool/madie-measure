@@ -186,3 +186,25 @@ describe("FhirDefinitionServiceUtilities", () => {
     });
   });
 });
+
+describe("getElementName", () => {
+  it("returns the slice if exists", () => {
+    const element = { min: 0, sliceName: "testSlice", path: "some.path" };
+    expect(getElementName(element, "some")).toBe("testSlice");
+  });
+
+  it("returns path minus base", () => {
+    const element = { min: 0, path: "some.path" };
+    expect(getElementName(element, "some")).toBe("path");
+  });
+
+  it("adds required indicator", () => {
+    const element = { min: 1, path: "some.path" };
+    expect(getElementName(element, "some")).toBe("path *");
+  });
+
+  it("adds required indicator", () => {
+    const element = { min: 1, sliceName: "testSlice", path: "some.path" };
+    expect(getElementName(element, "some")).toBe("testSlice *");
+  });
+});
