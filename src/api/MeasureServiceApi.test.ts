@@ -518,18 +518,18 @@ describe("MeasureServiceApi Tests", () => {
     const resp: any = { status: 200, data: humanReadable };
     mockedAxios.get.mockResolvedValue(resp);
 
-    const hr = await measureServiceApi.fetchHumanReadable("1234AFDE");
+    const hr = await measureServiceApi.fetchHumanReadable("7Z94A3FDE");
     expect(mockedAxios.get).toBeCalledTimes(1);
     expect(hr).toEqual(humanReadable);
   });
 
   it("test fetch human readable failure", async () => {
-    const errorMessage = "Unable to fetch human readable for measure 1234AFDE";
+    const errorMessage = "Unable to fetch human readable for measure 7Z94A3FDE";
     mockedAxios.get.mockImplementationOnce(() =>
       Promise.reject(new Error(errorMessage))
     );
-    await expect(
-      measureServiceApi.fetchMeasure("fetchHumanReadable")
-    ).rejects.toThrow(errorMessage);
+    await expect(measureServiceApi.fetchMeasure("7Z94A3FDE")).rejects.toThrow(
+      errorMessage
+    );
   });
 });
