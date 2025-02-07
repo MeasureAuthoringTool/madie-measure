@@ -91,5 +91,15 @@
         "code": "Coding"
       }
     ]
+  },
+  {
+    "id": "ClaimResponse.disposition",
+    "path": "ClaimResponse.disposition",
+    "min": 0,
+    "type": [
+      {
+        "code": "string"
+      }
+    ]
   }
 ]

@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import ResourceEditor from "./ResourceEditor";
 import { QiCoreResourceProvider } from "../../../../../../../util/QiCorePatientProvider";
 import mockSelectedResource from "./mockSelectedResource.json";
-import mockTopLevelMetaElements from "./mockTopLeveMetaElements.json";
+import userEvent from "@testing-library/user-event";
 
 jest.mock("../../../../../../../api/useFhirDefinitionsService", () => {
   return jest.fn(() => ({
@@ -12,8 +12,6 @@ jest.mock("../../../../../../../api/useFhirDefinitionsService", () => {
       accessToken: "fakeAccessToken",
       baseUrl: "fakeurl",
     },
-    getResources: jest.fn(() => Promise.resolve([])),
-    getResourceTree: jest.fn(() => Promise.resolve(mockTopLevelMetaElements)),
   }));
 });
 jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
@@ -24,7 +22,7 @@ jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
     ...actualModule,
   };
 });
-
+const resetForm = jest.fn();
 const mockFormikObj = {
   touched: {},
   errors: {},
@@ -32,6 +30,8 @@ const mockFormikObj = {
   isSubmitting: false,
   setFieldValue: undefined,
   getFieldProps: () => ({}),
+  dirty: true,
+  resetForm,
 };
 
 jest.mock("formik", () => ({
@@ -50,12 +50,12 @@ beforeEach(() => {
   mockFormikObj.isSubmitting = false;
   mockFormikObj.setFieldValue = undefined;
 });
+const { getByText, getByRole } = screen;
 describe("ResourceEditor", () => {
   const mockOnCancel = jest.fn();
-  it("renders the ResourceEditor correctly", async () => {
+  it("renders the ResourceEditor correctly, can hit dirty check", async () => {
     const setInitialFormikValuesStu6 = jest.fn();
     const setValidationSchema = jest.fn();
-
     render(
       <QiCoreResourceProvider>
         <ResourceEditor
@@ -77,6 +77,30 @@ describe("ResourceEditor", () => {
       expect(stringInput.value).toBe("6fb9d817-76c5-4b68-ba06-92c7429e6b5c");
       expect(setValidationSchema).toHaveBeenCalled();
       expect(setInitialFormikValuesStu6).toHaveBeenCalled();
+    });
+    const dispositionButton = screen.getByRole("tab", { name: "disposition" });
+
+    expect(dispositionButton).toBeInTheDocument();
+    userEvent.click(dispositionButton);
+    const discardDialog = await getByRole("dialog", {
+      name: "Discard Changes?",
+    });
+    expect(discardDialog).toBeInTheDocument();
+    // close
+    const closeButton = screen.getByRole("button", { name: /close/i });
+    userEvent.click(closeButton);
+    await waitFor(() => {
+      expect(closeButton).not.toBeInTheDocument();
+    });
+    userEvent.click(dispositionButton);
+    await waitFor(() => {
+      expect(getByText("Discard Changes?")).toBeInTheDocument();
+    });
+    // on continue
+    userEvent.click(getByText("Yes, Discard All Changes"));
+    await waitFor(() => {
+      expect(closeButton).not.toBeInTheDocument();
+      expect(resetForm).toHaveBeenCalled();
     });
   });
 });
