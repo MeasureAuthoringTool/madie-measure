@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import AceEditor from "react-ace";
 import { Ace } from "ace-builds";
 import "ace-builds/src-noconflict/mode-json";
@@ -13,14 +13,13 @@ export interface EditorPropsType {
   readOnly?: boolean;
 }
 
-var originalCommands;
+let originalCommands;
 const setCommandEnabled = (editor, name, enabled) => {
-  var command = editor.commands.byName[name];
-  var bindKeyOriginal;
+  let command = editor.commands.byName[name];
   if (!originalCommands) {
     originalCommands = JSON.parse(JSON.stringify(editor.commands));
   }
-  var bindKeyOriginal = originalCommands.byName[name].bindKey;
+  let bindKeyOriginal = originalCommands.byName[name].bindKey;
   command.bindKey = enabled ? bindKeyOriginal : null;
   editor.commands.addCommand(command);
 };
@@ -64,6 +63,36 @@ const Editor = ({
       setCommandEnabled(editor, "outdent", false);
     },
   });
+
+  const toggleSearchBox = useCallback(() => {
+    //@ts-ignore
+    if (!editor?.searchBox) {
+      editor.execCommand("find");
+      // @ts-ignore
+    } else if (editor.searchBox.active) {
+      // @ts-ignore
+      editor.searchBox.hide();
+      // assume that it's been executed
+    } else {
+      //@ts-ignore
+      editor.searchBox.show();
+    }
+  }, [editor]);
+
+  useEffect(() => {
+    if (editor) {
+      window.addEventListener(
+        "toggleEditorSearchBox",
+        toggleSearchBox as EventListener
+      );
+    }
+    return () => {
+      window.removeEventListener(
+        "toggleEditorSearchBox",
+        toggleSearchBox as EventListener
+      );
+    };
+  }, [editor, toggleSearchBox]);
 
   return (
     <div

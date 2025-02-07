@@ -1,10 +1,8 @@
 import * as React from "react";
 import Editor from "./Editor";
-import { TestCase } from "@madie/madie-models";
-import { waitFor, act, render, screen } from "@testing-library/react";
+import { act, render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-const { findByText } = screen;
 describe("Test Case Editor component", () => {
   it("should render Editor Component", () => {
     const handleChange = jest.fn();
