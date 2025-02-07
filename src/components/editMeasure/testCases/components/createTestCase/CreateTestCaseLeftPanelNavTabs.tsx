@@ -1,5 +1,9 @@
-import React from "react";
-import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
+import React, { useState } from "react";
+import {
+  MadieDiscardDialog,
+  Tabs,
+  Tab,
+} from "@madie/madie-design-system/dist/react";
 import "./CreateTestCaseNavTabs.scss";
 import "twin.macro";
 import "styled-components/macro";
@@ -9,11 +13,18 @@ export interface NavTabProps {
   leftPanelActiveTab: string;
   setLeftPanelActiveTab: (value: string) => void;
   isQICore6: boolean;
+  dirty: boolean;
 }
-
 export default function CreateTestCaseNavTabs(props: NavTabProps) {
-  const { leftPanelActiveTab, setLeftPanelActiveTab } = props;
+  const { leftPanelActiveTab, setLeftPanelActiveTab, dirty } = props;
+  const [pendingPanel, setPendingPanel] = useState(leftPanelActiveTab);
+
   const isQICore6 = props.isQICore6;
+  const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
+  const onContinue = () => {
+    setLeftPanelActiveTab(pendingPanel);
+    setDiscardDialogOpen(false);
+  };
   return (
     <>
       {isQICore6 && (
@@ -23,7 +34,12 @@ export default function CreateTestCaseNavTabs(props: NavTabProps) {
               id="test-case-nav-container"
               value={leftPanelActiveTab}
               onChange={(e, v) => {
-                setLeftPanelActiveTab(v);
+                if (dirty) {
+                  setPendingPanel(v);
+                  setDiscardDialogOpen(true);
+                } else {
+                  setLeftPanelActiveTab(v);
+                }
               }}
               type="D"
             >
@@ -48,6 +64,13 @@ export default function CreateTestCaseNavTabs(props: NavTabProps) {
           <div tw="mr-auto p-2">
             {leftPanelActiveTab === "json" && <EditorSearch />}
           </div>
+          {isQICore6 && (
+            <MadieDiscardDialog
+              open={discardDialogOpen}
+              onClose={() => setDiscardDialogOpen(false)}
+              onContinue={onContinue}
+            />
+          )}
         </div>
       )}
     </>
