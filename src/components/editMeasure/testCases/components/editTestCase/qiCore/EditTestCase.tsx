@@ -896,12 +896,12 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 {featureFlags?.qiCoreElementsTab && isQICore6 ? (
                   <>
                     <div className="tab-container">
-                    <CreateTestCaseLeftPanelNavTabs
-                      leftPanelActiveTab={leftPanelActiveTab}
-                      setLeftPanelActiveTab={setLeftPanelActiveTab}
-                      isQICore6={isQICore6}
-                      dirty={formikStu6Context.dirty}
-                    />
+                      <CreateTestCaseLeftPanelNavTabs
+                        leftPanelActiveTab={leftPanelActiveTab}
+                        setLeftPanelActiveTab={setLeftPanelActiveTab}
+                        isQICore6={isQICore6}
+                        dirty={formikStu6Context.dirty}
+                      />
                     </div>
                     <QiCoreResourceProvider>
                       {leftPanelActiveTab === "elements" &&
