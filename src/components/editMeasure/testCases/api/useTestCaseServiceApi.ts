@@ -35,6 +35,11 @@ export type QrdaRequestDTO = {
   groupDTOs: QrdaGroupExportDTO[];
 };
 
+export interface CopyResult {
+  copiedTestCases: TestCase[];
+  didClearExpectedValues: boolean;
+}
+
 export class TestCaseServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
 
@@ -429,7 +434,7 @@ export class TestCaseServiceApi {
     sourceMeasureId: string,
     targetMeasureId: string,
     testCaseIds: string[]
-  ): Promise<string[]> {
+  ): Promise<CopyResult> {
     try {
       const response = await axios.put(
         `${this.baseUrl}/measures/${sourceMeasureId}/test-cases/copy-to?targetMeasureId=${targetMeasureId}`,

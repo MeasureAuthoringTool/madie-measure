@@ -275,17 +275,27 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
         selectedRowId,
         selectedTestCases?.map((tc: TestCase) => tc.id)
       )
-      .then((copiedTestCaseIds: string[]) => {
+      .then((result) => {
         if (
-          copiedTestCaseIds.length ===
+          result?.copiedTestCases?.length ===
           selectedTestCases?.map((tc: TestCase) => tc.id).length
         ) {
-          onClose("Test Cases have been successfully copied.", "success");
-        } else if (copiedTestCaseIds.length > 0) {
-          onClose(
-            "Test Cases have been successfully copied. Some Test Cases were invalid and were not copied.",
-            "warning"
-          );
+          result.didClearExpectedValues
+            ? onClose(
+                "Test Cases successfully copied without expected values due to differing Population Criteria on target Measure.",
+                "success"
+              )
+            : onClose("Test Cases have been successfully copied.", "success");
+        } else if (result?.copiedTestCases?.length > 0) {
+          result.didClearExpectedValues
+            ? onClose(
+                "Test Cases have been successfully copied without expected values due to differing Population Criteria on target Measure. Some Test Cases were invalid and were not copied. ",
+                "warning"
+              )
+            : onClose(
+                "Test Cases have been successfully copied. Some Test Cases were invalid and were not copied.",
+                "warning"
+              );
         } else {
           onClose("Test Cases were invalid and not copied.", "danger");
         }
