@@ -424,6 +424,31 @@ export class TestCaseServiceApi {
       throw new Error(message);
     }
   }
+
+  async copyTestCasesToMeasure(
+    sourceMeasureId: string,
+    targetMeasureId: string,
+    testCaseIds: string[]
+  ): Promise<string[]> {
+    try {
+      const response = await axios.put(
+        `${this.baseUrl}/measures/${sourceMeasureId}/test-cases/copy-to?targetMeasureId=${targetMeasureId}`,
+        testCaseIds,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      if (!response || !response.data) {
+        throw new Error(`Unable to copy test cases`);
+      }
+      return response.data;
+    } catch (err) {
+      const message = `Unable to copy test cases`;
+      throw new Error(message);
+    }
+  }
 }
 
 const useTestCaseServiceApi = (): TestCaseServiceApi => {
