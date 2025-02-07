@@ -8,7 +8,6 @@
       position: relative;
       height: inherit;
       .left-panel {
-        margin-top: 48px;
         height: inherit;
         > .panel-content {
           padding-left: 32px;
@@ -107,6 +106,11 @@
           width: 100%;
           background-color: #fff;
           // going to need to uncomment this background-color: #ededed;
+        }
+      }
+      .ace_search {
+        &.right {
+          right: 16px;
         }
       }
     }

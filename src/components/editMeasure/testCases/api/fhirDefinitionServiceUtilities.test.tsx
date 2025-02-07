@@ -6,6 +6,10 @@ import {
   getAllChildren,
   updateChildrenPaths,
   isComponentDataType,
+  setNestedValue,
+  getDisplayedElementsTree,
+  removeUndefinedAndEmptyObjects,
+  getElementName,
 } from "./fhirDefinitionServiceUtilities";
 
 describe("FhirDefinitionServiceUtilities", () => {
@@ -102,5 +106,106 @@ describe("FhirDefinitionServiceUtilities", () => {
       expect(isComponentDataType("customType")).toBe(false);
       expect(isComponentDataType("unknown")).toBe(false);
     });
+  });
+
+  describe("setNestedValue", () => {
+    it("should set a nested value", () => {
+      const obj = {};
+      setNestedValue(obj, "a.b.c", 42);
+      expect(obj).toEqual({ a: { b: { c: 42 } } });
+    });
+
+    it("should override", () => {
+      const obj = { a: { b: { c: 10 } } };
+      setNestedValue(obj, "a.b.c", 99);
+      expect(obj.a.b.c).toBe(99);
+    });
+
+    it("should create nested structure when missing", () => {
+      const obj = {};
+      setNestedValue(obj, "x.y.z", "test");
+      expect(obj).toEqual({ x: { y: { z: "test" } } });
+    });
+  });
+  describe("getDisplayedElementsTree", () => {
+    it("should return an empty object when no elements are provided", () => {
+      expect(getDisplayedElementsTree([])).toEqual({});
+    });
+
+    it("should build a nested structure from paths", () => {
+      const elements = [{ path: "a.b" }, { path: "a.c" }, { path: "a.b.d" }];
+      expect(getDisplayedElementsTree(elements)).toEqual({
+        a: {
+          b: { d: true },
+          c: true,
+        },
+      });
+    });
+
+    it("should handle duplicate paths", () => {
+      const elements = [{ path: "x.y" }, { path: "x.y" }, { path: "x.y.z" }];
+      expect(getDisplayedElementsTree(elements)).toEqual({
+        x: {
+          y: { z: true },
+        },
+      });
+    });
+
+    it("should ignore undefined or empty paths", () => {
+      const elements = [{ path: "a.b" }, { path: "" }, { path: undefined }];
+      expect(getDisplayedElementsTree(elements)).toEqual({ a: { b: true } });
+    });
+  });
+  describe("removeUndefinedAndEmptyObjects", () => {
+    it("should remove undefined values from an object", () => {
+      const obj = { a: 1, b: undefined, c: 3 };
+      expect(removeUndefinedAndEmptyObjects(obj)).toEqual({ a: 1, c: 3 });
+    });
+
+    it("should remove empty nested objects", () => {
+      const obj = { a: { b: {} }, c: 3 };
+      expect(removeUndefinedAndEmptyObjects(obj)).toEqual({ c: 3 });
+    });
+
+    it("should handle deeply nested empty objects", () => {
+      const obj = { a: { b: { c: {} } }, d: 4 };
+      expect(removeUndefinedAndEmptyObjects(obj)).toEqual({ d: 4 });
+    });
+
+    it("should keep nested objects with values", () => {
+      const obj = { a: { b: { c: 5 } }, d: 4 };
+      expect(removeUndefinedAndEmptyObjects(obj)).toEqual({
+        a: { b: { c: 5 } },
+        d: 4,
+      });
+    });
+
+    it("should return the same value if not an object", () => {
+      expect(removeUndefinedAndEmptyObjects(null)).toBe(null);
+      expect(removeUndefinedAndEmptyObjects(12)).toBe(12);
+      expect(removeUndefinedAndEmptyObjects("test")).toBe("test");
+    });
+  });
+});
+
+describe("getElementName", () => {
+  it("returns the slice if exists", () => {
+    const element = { min: 0, sliceName: "testSlice", path: "some.path" };
+    expect(getElementName(element, "some")).toBe("testSlice");
+  });
+
+  it("returns path minus base", () => {
+    const element = { min: 0, path: "some.path" };
+    expect(getElementName(element, "some")).toBe("path");
+  });
+
+  it("adds required indicator", () => {
+    const element = { min: 1, path: "some.path" };
+    expect(getElementName(element, "some")).toBe("path *");
+  });
+
+  it("adds required indicator", () => {
+    const element = { min: 1, sliceName: "testSlice", path: "some.path" };
+    expect(getElementName(element, "some")).toBe("testSlice *");
   });
 });
