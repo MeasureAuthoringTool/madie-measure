@@ -302,7 +302,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
       });
   };
 
-  const handleDialogClose = async (e) => {
+  const handleDialogClose = (e) => {
     onClose();
   };
 
@@ -557,14 +557,6 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
             <MadieSpinner style={{ height: 50, width: 50 }} />
             <Typography color="inherit">Copying Test Cases...</Typography>
           </div>
-          {/*<div*/}
-          {/*  style={{*/}
-          {/*    display: "flex",*/}
-          {/*    justifyContent: "center",*/}
-          {/*  }}*/}
-          {/*>*/}
-          {/*  */}
-          {/*</div>*/}
         </>
       )}
     </MadieDialog>
