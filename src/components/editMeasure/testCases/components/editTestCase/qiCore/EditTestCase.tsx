@@ -81,6 +81,7 @@ import { QiCoreResourceProvider } from "../../../util/QiCorePatientProvider";
 import { CqlDefinitionCallstack } from "../groupCoverage/QiCoreGroupCoverage";
 import useFhirCqlParsingService from "../../../api/cqlElmTranslationService/useFhirCqlParsingService";
 import checkSpecialCharacters from "../../../util/checkSpecialCharacters";
+import EditorSearch from "./LeftPanel/EditorSearch";
 
 const TestCaseForm = tw.form`m-3`;
 const ValidationErrorsButton = tw.button`
@@ -880,16 +881,16 @@ const EditTestCase = (props: EditTestCaseProps) => {
             onDragEnd={resizeEditor}
           >
             <Allotment.Pane>
-              {featureFlags?.qiCoreElementsTab ? (
-                <div className="nav-panel">
-                  <div className="tab-container">
-                    <CreateTestCaseLeftPanelNavTabs
-                      leftPanelActiveTab={leftPanelActiveTab}
-                      setLeftPanelActiveTab={setLeftPanelActiveTab}
-                      isQICore6={isQICore6}
-                    />
-                  </div>
-                  {isQICore6 ? (
+              <div className="nav-panel">
+                {featureFlags?.qiCoreElementsTab && isQICore6 ? (
+                  <>
+                    <div className="tab-container">
+                      <CreateTestCaseLeftPanelNavTabs
+                        leftPanelActiveTab={leftPanelActiveTab}
+                        setLeftPanelActiveTab={setLeftPanelActiveTab}
+                        isQICore6={isQICore6}
+                      />
+                    </div>
                     <QiCoreResourceProvider>
                       {leftPanelActiveTab === "elements" &&
                         isValidJson(editorVal) && (
@@ -944,29 +945,22 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         />
                       )}
                     </QiCoreResourceProvider>
-                  ) : (
-                    <QiCoreResourceProvider>
-                      <Editor
-                        onChange={(val: string) => setEditorVal(val)}
-                        value={editorVal}
-                        setEditor={setEditor}
-                        readOnly={!canEdit || _.isNil(testCase)}
-                        height="100%"
-                      />
-                    </QiCoreResourceProvider>
-                  )}
-                </div>
-              ) : (
-                <div className="left-panel">
-                  <Editor
-                    onChange={(val: string) => setEditorVal(val)}
-                    value={editorVal}
-                    setEditor={setEditor}
-                    readOnly={!canEdit || _.isNil(testCase)}
-                    height="100%"
-                  />
-                </div>
-              )}
+                  </>
+                ) : (
+                  <>
+                    <div tw="float-right mr-4">
+                      <EditorSearch />
+                    </div>
+                    <Editor
+                      onChange={(val: string) => setEditorVal(val)}
+                      value={editorVal}
+                      setEditor={setEditor}
+                      readOnly={!canEdit || _.isNil(testCase)}
+                      height="100%"
+                    />
+                  </>
+                )}
+              </div>
             </Allotment.Pane>
 
             <Allotment.Pane>
