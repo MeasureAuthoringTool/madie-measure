@@ -8,7 +8,6 @@ import ShareIcon from "../../../../common/ShareIcon";
 
 interface PropTypes {
   measures: Measure[];
-  onClick: () => void;
   canEdit: boolean;
 }
 
@@ -16,7 +15,7 @@ export const NOTHING_SELECTED = "Select measure to share";
 export const SHARE_MEASURE = "Share measure";
 
 export default function ShareAction(props: PropTypes) {
-  const { measures, canEdit, onClick } = props;
+  const { measures, canEdit } = props;
   const [disableShareBtn, setDisableShareBtn] = useState(true);
   const [tooltipMessage, setTooltipMessage] = useState(NOTHING_SELECTED);
 
@@ -41,11 +40,7 @@ export default function ShareAction(props: PropTypes) {
       arrow
     >
       <span>
-        <IconButton
-          onClick={() => onClick()}
-          disabled={disableShareBtn}
-          data-testid="share-action-btn"
-        >
+        <IconButton disabled={disableShareBtn} data-testid="share-action-btn">
           <ShareIcon color={disableShareBtn ? "#8C8C8C" : "#0073C8"} />
         </IconButton>
       </span>

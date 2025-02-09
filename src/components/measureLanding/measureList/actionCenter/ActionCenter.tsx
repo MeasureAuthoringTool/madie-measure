@@ -71,12 +71,6 @@ export default function ActionCenter(props: PropTypes) {
     }
   }, [props.measures, props.updateTargetMeasure, props.setDeleteMeasureDialog]);
 
-  const shareMeasure = useCallback(() => {
-    if (props.measures?.length === 1) {
-      props.updateTargetMeasure(props.measures[0]);
-    }
-  }, [props.measures, props.updateTargetMeasure]);
-
   const isSelectedMeasureEditable = (measures) => {
     return (
       measures &&
@@ -103,11 +97,7 @@ export default function ActionCenter(props: PropTypes) {
       <ExportAction measures={props.measures} onClick={exportMeasure} />
 
       {featureFlags?.ShareMeasure && (
-        <ShareAction
-          measures={props.measures}
-          canEdit={canEdit}
-          onClick={shareMeasure}
-        />
+        <ShareAction measures={props.measures} canEdit={canEdit} />
       )}
 
       <AssociateCmsIdAction

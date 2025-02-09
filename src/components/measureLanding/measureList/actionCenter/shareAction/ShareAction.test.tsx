@@ -32,7 +32,7 @@ const qiCoreMeasure = {
 
 describe("ShareAction", () => {
   it("Should disable share action btn if no measure selected", () => {
-    render(<ShareAction measures={[]} onClick={jest.fn()} canEdit={false} />);
+    render(<ShareAction measures={[]} canEdit={false} />);
     expect(screen.getByTestId("share-action-btn")).toBeDisabled();
     expect(screen.getByTestId("share-action-tooltip")).toHaveAttribute(
       "aria-label",
@@ -41,13 +41,7 @@ describe("ShareAction", () => {
   });
 
   it("Should enable share action btn if user select one measure ", () => {
-    render(
-      <ShareAction
-        measures={[qiCoreMeasure]}
-        onClick={jest.fn()}
-        canEdit={true}
-      />
-    );
+    render(<ShareAction measures={[qiCoreMeasure]} canEdit={true} />);
     expect(screen.getByTestId("share-action-btn")).not.toBeDisabled();
     expect(screen.getByTestId("share-action-tooltip")).toHaveAttribute(
       "aria-label",
@@ -57,33 +51,11 @@ describe("ShareAction", () => {
 
   it("Should disable btn if user selects two measures", () => {
     const measure2 = { ...qiCoreMeasure, model: Model.QDM_5_6 };
-    render(
-      <ShareAction
-        measures={[qdmMeasure, measure2]}
-        onClick={jest.fn()}
-        canEdit={true}
-      />
-    );
+    render(<ShareAction measures={[qdmMeasure, measure2]} canEdit={true} />);
     expect(screen.getByTestId("share-action-btn")).toBeDisabled();
     expect(screen.getByTestId("share-action-tooltip")).toHaveAttribute(
       "aria-label",
       NOTHING_SELECTED
     );
-  });
-
-  it("should call onClick when btn is clicked", () => {
-    const handleClick = jest.fn();
-    render(
-      <ShareAction
-        measures={[qiCoreMeasure]}
-        onClick={handleClick}
-        canEdit={true}
-      />
-    );
-
-    const exportButton = screen.getByTestId("share-action-btn");
-    userEvent.click(exportButton);
-
-    expect(handleClick).toHaveBeenCalledTimes(1);
   });
 });
