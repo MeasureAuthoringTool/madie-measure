@@ -597,6 +597,15 @@ const TestCaseList = (props: TestCaseListProps) => {
     }
   };
 
+  const onCopyTestCaseClose = (msg?: string, toastType?: string) => {
+    setOpenCopyTestCaseDialog(false);
+    if (toastType) {
+      setToastType(toastType);
+      setToastMessage(msg);
+      setToastOpen(true);
+    }
+  };
+
   return (
     <div>
       {!loadingState.loading && (
@@ -776,9 +785,9 @@ const TestCaseList = (props: TestCaseListProps) => {
         name="All Test Cases"
       />
       <CopyTestCaseDialog
+        selectedTestCases={selectedTestCases}
         open={openCopyTestCaseDialog}
-        onClose={() => setOpenCopyTestCaseDialog(false)}
-        onSubmit={() => {}}
+        onClose={onCopyTestCaseClose}
         measure={measure}
       />
       {openImportDialog && (

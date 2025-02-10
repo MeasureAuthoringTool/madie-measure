@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import { Box, Divider } from "@mui/material";
 import * as _ from "lodash";
 import ResourceList from "./resource/ResourceList";
@@ -13,24 +19,32 @@ import {
 } from "../../../../../../util/QiCorePatientProvider";
 import useFhirDefinitionsServiceApi from "../../../../../../api/useFhirDefinitionsService";
 import { ResourceIdentifier } from "../../../../../../api/models/ResourceIdentifier";
-import useFhirElmTranslationServiceApi, {
-  SourceDataCriteria,
-} from "../../../../../../../../../api/useFhirElmTranslationServiceApi";
+import useFhirElmTranslationServiceApi from "../../../../../../../../../api/useFhirElmTranslationServiceApi";
 import useExecutionContext from "../../../../../routes/qiCore/useExecutionContext";
-import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
+import {
+  Tabs,
+  Tab,
+  MadieDiscardDialog,
+} from "@madie/madie-design-system/dist/react";
+import { useFormikContext } from "formik";
 import "./Builder.scss";
 
 interface BuilderProps {
   testCase: TestCase;
   canEdit: boolean;
+  setInitialFormikValuesStu6: Dispatch<SetStateAction<Object>>;
+  setValidationSchema: Dispatch<SetStateAction<Object>>;
 }
 
-const Builder = ({ testCase, canEdit }: BuilderProps) => {
+const Builder = ({
+  canEdit,
+  setInitialFormikValuesStu6,
+  setValidationSchema,
+}: BuilderProps) => {
   const [resources, setResources] = useState<ResourceIdentifier[]>(null);
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   const fhirElmTranslationService = useRef(useFhirElmTranslationServiceApi());
   const [activeResource, setActiveResource] = useState(null);
-  const [activeDefinition, setActiveDefinition] = useState(null);
   const { state, dispatch } = useQiCoreResource();
   const { measureState } = useExecutionContext();
   const [measure] = measureState;
@@ -71,11 +85,17 @@ const Builder = ({ testCase, canEdit }: BuilderProps) => {
     );
     const resource = { ...resourceTree, bundleEntry };
     setActiveResource(resource);
-    setActiveDefinition({ ...resourceTree });
   };
-
+  // track form dirty and an intermediate tab to know what the discard dialog should nav to
+  const { dirty, resetForm } = useFormikContext();
   const [activeTab, setActiveTab] = useState<string>("Available");
-
+  const [pendingTab, setPendingTab] = useState<string>(activeTab);
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const onContinue = () => {
+    setDialogOpen(false);
+    setActiveTab(pendingTab);
+    resetForm();
+  };
   return (
     <Box
       sx={{ mr: 2 }}
@@ -86,7 +106,12 @@ const Builder = ({ testCase, canEdit }: BuilderProps) => {
         <Tabs
           value={activeTab}
           onChange={(e, v) => {
-            setActiveTab(v);
+            if (dirty) {
+              setDialogOpen(true);
+              setPendingTab(v);
+            } else {
+              setActiveTab(v);
+            }
           }}
           type="B"
           orientation="horizontal"
@@ -138,9 +163,9 @@ const Builder = ({ testCase, canEdit }: BuilderProps) => {
           <>
             {activeResource && (
               <ResourceEditor
+                setValidationSchema={setValidationSchema}
+                setInitialFormikValuesStu6={setInitialFormikValuesStu6}
                 selectedResource={activeResource}
-                selectedResourceDefinition={activeDefinition}
-                onSave={(resource) => {}}
                 onCancel={(resource) => {
                   setActiveResource(null);
                 }}
@@ -167,6 +192,13 @@ const Builder = ({ testCase, canEdit }: BuilderProps) => {
           </>
         )}
       </div>
+      <MadieDiscardDialog
+        open={dialogOpen}
+        onContinue={onContinue}
+        onClose={() => {
+          setDialogOpen(false);
+        }}
+      />
     </Box>
   );
 };
