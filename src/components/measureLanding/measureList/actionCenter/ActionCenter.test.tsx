@@ -18,7 +18,7 @@ jest.mock("@madie/madie-util", () => ({
 
 jest.mock("../../../../api/useMeasureServiceApi");
 
-const mockFeatureFlags = {};
+const mockFeatureFlags = { ShareMeasure: true };
 const mockGetUserName = jest.fn(() => "test user");
 const mockCheckUserCanEdit = jest.fn();
 const fetchMeasureDraftStatuses = jest.fn();
@@ -80,6 +80,7 @@ describe("ActionCenter", () => {
 
     expect(screen.getByTestId("action-center")).toBeInTheDocument();
     expect(screen.getByTestId("delete-action-btn")).toBeInTheDocument();
+    expect(screen.getByTestId("share-action-btn")).toBeInTheDocument();
     expect(screen.getByTestId("export-action-btn")).toBeInTheDocument();
     expect(screen.getByTestId("draft-action-btn")).toBeInTheDocument();
     expect(screen.getByTestId("version-action-btn")).toBeInTheDocument();
