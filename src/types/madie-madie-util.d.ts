@@ -19,6 +19,8 @@ declare module "@madie/madie-util" {
     stu6TestCaseValidation: boolean;
     TestCaseListActionCenter: boolean;
     CopyTestCases: boolean;
+    QICoreMeasureDefinitions: boolean;
+    ShareMeasure: boolean;
   }
 
   export interface ServiceConfig {

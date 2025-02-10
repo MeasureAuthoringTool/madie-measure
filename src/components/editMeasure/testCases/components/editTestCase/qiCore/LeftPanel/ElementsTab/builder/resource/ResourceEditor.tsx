@@ -1,11 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState, Dispatch, SetStateAction } from "react";
 import { Box, Divider, IconButton, Tab, Tabs } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import ElementEditor from "../element/ElementEditor";
 import ElementSelector from "../element/ElementSelector";
 import * as _ from "lodash";
-import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import {
   ResourceActionType,
   useQiCoreResource,
@@ -15,45 +14,44 @@ import {
   getTopLevelElements,
   getBasePath,
   stripResourcePath,
+  getDisplayedElementsTree,
+  getElementName,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
-
+import { useFormikContext } from "formik";
+import { MadieDiscardDialog } from "@madie/madie-design-system/dist/react";
 interface ResourceEditorProps {
   selectedResource: any;
-  selectedResourceDefinition: any;
-  onSave: (resource: any) => void;
   onCancel: (resource: any) => void;
   canEdit: boolean;
+  setInitialFormikValuesStu6: Dispatch<SetStateAction<Object>>;
+  setValidationSchema: Dispatch<SetStateAction<Object>>;
 }
-
-/**
- * Prepares the element name to be displayed for tab labels
- * for sliced elements- it will be sliceName. e.g. Patient.extension:race results into race
- * for regular element- it will be the path of an element. e.g. Patient.gender results gender
- */
-const getElementName = (element: ElementDefinition, basePath: string) => {
-  const requiredIndicator = element.min > 0 ? " *" : "";
-  if (element.sliceName) {
-    return `${element.sliceName}${requiredIndicator}`;
-  }
-  return `${element.path.substring(basePath.length + 1)}${requiredIndicator}`;
-};
 
 const ResourceEditor = ({
   selectedResource,
-  onSave,
   onCancel,
   canEdit,
+  setInitialFormikValuesStu6,
+  setValidationSchema,
 }: ResourceEditorProps) => {
+  const { dirty, resetForm } = useFormikContext();
   const [activeTab, setActiveTab] = useState(0);
+  const [pendingTab, setPendingTab] = useState(0);
   const [allElements, setAllElements] = useState([]);
   const [displayedElements, setDisplayedElements] = useState<
     ElementDefinition[]
   >([]);
+  const [displayedElementsTree, setDisplayedElementsTree] = useState({});
   const [editingResource, setEditingResource] = useState(
     selectedResource?.bundleEntry?.resource
   );
-  const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
-  const { state, dispatch } = useQiCoreResource();
+  const { dispatch } = useQiCoreResource();
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const onContinue = () => {
+    setDialogOpen(false);
+    setActiveTab(pendingTab);
+    resetForm();
+  };
   useEffect(() => {
     if (selectedResource) {
       // TODO: look at the data that exists on the resource and combine fields from that
@@ -81,9 +79,11 @@ const ResourceEditor = ({
           return !_.isNil(elemValue);
         }),
       ];
-      setDisplayedElements(
-        _.uniq(_.concat(requiredElements, elementsWithValues))
+      const uniqueElements = _.uniq(
+        _.concat(requiredElements, elementsWithValues)
       );
+      setDisplayedElements(uniqueElements);
+      setDisplayedElementsTree(getDisplayedElementsTree(uniqueElements));
     } else {
       setAllElements([]);
       setDisplayedElements([]);
@@ -91,7 +91,6 @@ const ResourceEditor = ({
   }, [selectedResource]);
 
   const resourceBasePath = getBasePath(selectedResource);
-
   return (
     <Box
       sx={{
@@ -111,21 +110,28 @@ const ResourceEditor = ({
       >
         <Typography>{selectedResource.path}</Typography>
         <Box sx={{ flexGrow: 1 }} />
-        <Typography>
-          ID: {selectedResource?.bundleEntry?.resource?.id}
+        <Typography sx={{ fontSize: "14px" }}>
+          <span style={{ color: "125496", fontWeight: 700 }}>
+            ID:&nbsp;&nbsp;
+          </span>
+          <span style={{ color: "#333333" }}>
+            {selectedResource?.bundleEntry?.resource?.id}
+          </span>
         </Typography>
         <IconButton onClick={() => onCancel(selectedResource)}>
-          <CloseIcon />
+          <CloseIcon sx={{ color: "#D92F2F" }} />
         </IconButton>
       </Box>
       <Divider />
-      <Box sx={{ m: 2 }}>
+      <Box sx={{ margin: "16px 16px 0" }}>
+        {/* This is our element select multiple select. We need to match this with formik. */}
         <ElementSelector
           basePath={resourceBasePath}
           options={allElements}
           value={displayedElements}
           onChange={(event, newValue: ElementDefinition[] | null) => {
             setDisplayedElements(newValue ?? []);
+            setDisplayedElementsTree(getDisplayedElementsTree(newValue ?? []));
           }}
         />
       </Box>
@@ -142,7 +148,12 @@ const ResourceEditor = ({
           variant="scrollable"
           value={activeTab}
           onChange={(e, newValue) => {
-            setActiveTab(newValue);
+            if (dirty) {
+              setPendingTab(newValue);
+              setDialogOpen(true);
+            } else {
+              setActiveTab(newValue);
+            }
           }}
           aria-label="Resource element tabs"
           sx={{
@@ -164,10 +175,13 @@ const ResourceEditor = ({
           })}
         </Tabs>
         <ElementEditor
+          setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+          setValidationSchema={setValidationSchema}
           elementDefinition={displayedElements?.[activeTab]}
           selectedResource={selectedResource}
           resource={editingResource}
           resourcePath={resourceBasePath}
+          displayedElementsTree={displayedElementsTree}
           onChange={(path, value) => {
             const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
             _.set(nextEntry.resource, path, value);
@@ -180,6 +194,13 @@ const ResourceEditor = ({
           canEdit={canEdit}
         />
       </Box>
+      <MadieDiscardDialog
+        open={dialogOpen}
+        onContinue={onContinue}
+        onClose={() => {
+          setDialogOpen(false);
+        }}
+      />
     </Box>
   );
 };

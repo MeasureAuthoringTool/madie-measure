@@ -1,10 +1,15 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import { Box } from "@mui/material";
 import * as _ from "lodash";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import ElementEditorChildren from "./ElementEditorChildren";
 import "./ElementEditor.scss";
-import { useFormik, FormikProvider } from "formik";
 import * as Yup from "yup";
 import { getValidation } from "./typesValidations/fhirR4Validations";
 import {
@@ -13,7 +18,16 @@ import {
   getAllChildren,
   stripResourcePath,
   isComponentDataType,
+  setNestedValue,
+  removeUndefinedAndEmptyObjects,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
+import {
+  useQiCoreResource,
+  ResourceActionType,
+} from "../../../../../../../util/QiCorePatientProvider";
+import { useFormikContext } from "formik";
+import { Button } from "@madie/madie-design-system/dist/react";
+
 interface ElementEditorProps {
   resource?: any;
   selectedResource?: any;
@@ -22,6 +36,9 @@ interface ElementEditorProps {
   value?: any;
   onChange?: (path: string, value: any) => void;
   canEdit: boolean;
+  displayedElementsTree: Object;
+  setInitialFormikValuesStu6: Dispatch<SetStateAction<Object>>;
+  setValidationSchema: Dispatch<SetStateAction<Object>>;
 }
 const ElementEditor = ({
   selectedResource,
@@ -30,12 +47,16 @@ const ElementEditor = ({
   resourcePath,
   onChange,
   canEdit,
+  displayedElementsTree,
+  setInitialFormikValuesStu6,
+  setValidationSchema,
 }: ElementEditorProps) => {
   const fhirDefinitionsServiceApi = useFhirDefinitionsServiceApi();
   const fhirDefinitionsService = useRef(fhirDefinitionsServiceApi);
   const [loading, setLoading] = useState(true);
-  const [initialValues, setInitialValues] = useState({});
-  const [validationSchema, setValidationSchema] = useState({});
+  // We want to dispatch an action that contains a payload of our updated selectedResource.entry
+  // The resource reducer will in turn update the testcase json string
+  const { dispatch } = useQiCoreResource();
   const buildNode = async (
     child,
     resourcePath,
@@ -46,7 +67,7 @@ const ElementEditor = ({
     const type = child?.type?.[0]?.code;
     if (!isComponentDataType(type)) {
       // Fetch the resource tree asynchronously
-      // nesting these ifs to avoid a crash in deeply nested ClaimResponse.item. Might cause issue elsewhere.
+      // nesting these ifs to avoid a crash in deeply nested Claimresponse.item. Might cause issue elsewhere.
       if (type) {
         const def = await fhirDefinitionsService.current.getResourceTree(type);
         if (def) {
@@ -87,7 +108,6 @@ const ElementEditor = ({
       const builtNode = {
         id: child?.id,
         label: child.path.split(".").pop(),
-        path: child.path,
         value,
         type,
         required,
@@ -144,26 +164,26 @@ const ElementEditor = ({
   const buildSchemaAndInitialValues = (formInfo) => {
     const initialValuesObject = {};
     const validationSchemaObject = {};
-    const setNestedValue = (obj, path, value) => {
-      const keys = path.split(".");
-      let currentObj = obj;
-      // start nested structure
-      keys.forEach((key, index) => {
-        if (index === keys.length - 1) {
-          const cleanKey = key.split(":")[0];
-          currentObj[cleanKey] = value;
-        } else {
-          currentObj[key] = currentObj[key] || {};
-          currentObj = currentObj[key];
-        }
-      });
-    };
+    // we need to only set the nested value here if
     for (const key in formInfo) {
       const { value, type, validation } = formInfo[key];
-      setNestedValue(initialValuesObject, key, value);
-      setNestedValue(validationSchemaObject, key, validation);
+      // we need to check and see if the key has a baspath that exists within the displayed elements tree.
+      const splitPath: Array<string> = key.split(".");
+      //it's a base path, we want it
+      if (splitPath.length === 1) {
+        setNestedValue(initialValuesObject, key, value);
+        setNestedValue(validationSchemaObject, key, validation);
+      } else {
+        // it's not a base path we need to compare the first two path entries.
+        const firstKey = splitPath[0];
+        const secondKey = splitPath[1];
+        if (displayedElementsTree?.[firstKey]?.[secondKey]) {
+          setNestedValue(initialValuesObject, key, value);
+          setNestedValue(validationSchemaObject, key, validation);
+        }
+      }
     }
-    setInitialValues(initialValuesObject);
+    setInitialFormikValuesStu6(initialValuesObject);
     setValidationSchema(
       Yup.object().shape(recursiveAddYupObject(validationSchemaObject))
     );
@@ -182,50 +202,86 @@ const ElementEditor = ({
     );
   };
   useEffect(() => {
-    if (selectedResource) {
+    if (selectedResource && Object.keys(displayedElementsTree).length) {
       triggerFormBuilder();
     }
-  }, [selectedResource]);
-  const formik = useFormik({
-    initialValues,
-    enableReinitialize: true,
-    validationSchema,
-    onSubmit: (values) => {},
-  });
+  }, [selectedResource, displayedElementsTree]);
+  const formik = useFormikContext();
+
+  // on individual apply
+  const handleIndividualElementApplyButtonClick = (e) => {
+    // this is wrapped in a form and we need to prevent submit on click with e.prevent
+    e.preventDefault();
+    if (formik.values && formik.dirty) {
+      const { type } = selectedResource?.definition;
+      const formikCleanedValues = removeUndefinedAndEmptyObjects(formik.values);
+      const { bundleEntry } = selectedResource;
+      // need type to access formik values, as well as append to to the resource object so it is not lost.
+      bundleEntry.resource = formikCleanedValues[type];
+      bundleEntry.resource.resourceType = type;
+      dispatch({
+        type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
+        payload: bundleEntry,
+      });
+      formik.resetForm();
+    }
+  };
   if (_.isNil(elementDefinition)) {
     return <span>No element selected</span>;
   }
+
   const currentPath = elementDefinition?.path;
   const allChildren = getAllChildren(selectedResource, currentPath);
   const currentDepth = elementDefinition?.path.split(".").length;
   // <TypeEditor will either render a node or all top level elements if it's not a root. We need to make that check here
   if (!loading) {
     return (
-      <FormikProvider value={formik}>
-        <Box
-          sx={{
-            p: 3,
-            display: "flex",
-            flexDirection: "column",
-            width: "100%",
-          }}
-          id="element-editor"
-        >
-          {/* we need to render not only the current item, but all children */}
-          <ElementEditorChildren //recursive render control
-            // stuff we need only at the init root
-            resourcePath={resourcePath}
-            fhirDefinitionsService={fhirDefinitionsService}
-            rootDefinition={elementDefinition}
-            // stuff we need everywhere
-            allChildren={allChildren}
-            currentDepth={currentDepth}
-            resource={resource}
-            handleChange={onChange}
-            canEdit={canEdit}
-          />
-        </Box>
-      </FormikProvider>
+      <Box
+        sx={{
+          padding: "0 24px 24px",
+          display: "flex",
+          flexDirection: "column",
+          width: "100%",
+        }}
+        id="element-editor"
+      >
+        {/* we need to render not only the current item, but all children */}
+        <ElementEditorChildren //recursive render control
+          // stuff we need only at the init root
+          resourcePath={resourcePath}
+          fhirDefinitionsService={fhirDefinitionsService}
+          rootDefinition={elementDefinition}
+          // stuff we need everywhere
+          allChildren={allChildren}
+          currentDepth={currentDepth}
+          resource={resource}
+          handleChange={onChange}
+          canEdit={canEdit}
+          handleIndividualElementApplyButtonClick={
+            handleIndividualElementApplyButtonClick
+          }
+        />
+        <div className="element-editor-submission">
+          <Button
+            variant="outline"
+            id="element-editor-undo-button"
+            data-testId="element-editor-undo-button"
+            disabled={!formik.dirty}
+            onClick={formik.resetForm}
+          >
+            Undo
+          </Button>
+          <Button
+            variant="submit"
+            id="element-editor-submit-button"
+            data-testId="element-editor-submit-button"
+            disabled={!formik.dirty}
+            onClick={handleIndividualElementApplyButtonClick}
+          >
+            Apply
+          </Button>
+        </div>
+      </Box>
     );
   }
   return <div />;

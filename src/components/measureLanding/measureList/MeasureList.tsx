@@ -563,6 +563,10 @@ export default function MeasureList(props: {
   };
 
   const exportMeasure = async () => {
+    setViewHumanReadableModal({
+      open: false,
+      measureId: "",
+    });
     setFailureMessage(null);
     setDownloadState("downloading");
     try {
@@ -1117,6 +1121,7 @@ export default function MeasureList(props: {
           open={viewHumanReadableModal.open}
           onClose={handleDialogClose}
           measureId={targetMeasure?.current?.id}
+          exportMeasure={exportMeasure}
         />
       </table>
     </div>
