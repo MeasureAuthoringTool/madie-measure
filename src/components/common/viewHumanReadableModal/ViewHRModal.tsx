@@ -43,6 +43,7 @@ export default function ViewHRModal(props: ModalProps) {
     <div data-testid="view-hr-modal">
       <Modal
         useDesignSystem
+        width="70rem"
         isOpen={props.open}
         title="Human Readable"
         onRequestClose={props.onClose}

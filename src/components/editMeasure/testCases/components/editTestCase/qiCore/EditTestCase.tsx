@@ -9,7 +9,7 @@ import React, {
   useState,
 } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useFormik } from "formik";
+import { FormikProvider, useFormik } from "formik";
 import EditTestCaseBreadCrumbs from "../EditTestCaseBreadCrumbs";
 
 import tw, { styled } from "twin.macro";
@@ -81,6 +81,7 @@ import { QiCoreResourceProvider } from "../../../util/QiCorePatientProvider";
 import { CqlDefinitionCallstack } from "../groupCoverage/QiCoreGroupCoverage";
 import useFhirCqlParsingService from "../../../api/cqlElmTranslationService/useFhirCqlParsingService";
 import checkSpecialCharacters from "../../../util/checkSpecialCharacters";
+import EditorSearch from "./LeftPanel/EditorSearch";
 
 const TestCaseForm = tw.form`m-3`;
 const ValidationErrorsButton = tw.button`
@@ -301,6 +302,17 @@ const EditTestCase = (props: EditTestCaseProps) => {
   });
   const { resetForm } = formik;
 
+  //stu6 validation logic required
+  const [validationSchema, setValidationSchema] = useState({});
+  const [initialFormikValuesStu6, setInitialFormikValuesStu6] = useState({});
+
+  const formikStu6Context = useFormik({
+    initialValues: initialFormikValuesStu6,
+    enableReinitialize: true,
+    validationSchema,
+    onSubmit: () => {},
+  });
+
   //needs to be added to feature flag config once the feature flags are moved to Util
   const testCaseAlertToast = false;
 
@@ -359,10 +371,10 @@ const EditTestCase = (props: EditTestCaseProps) => {
   const { updateRouteHandlerState } = routeHandlerStore;
   useEffect(() => {
     updateRouteHandlerState({
-      canTravel: !formik.dirty && !isJsonModified(),
+      canTravel: !formik.dirty && !isJsonModified() && !formikStu6Context.dirty, // both formik.dirty fields are required
       pendingRoute: "",
     });
-  }, [formik.dirty, editorVal, testCase?.json]);
+  }, [formik.dirty, editorVal, testCase?.json, formikStu6Context.dirty]);
 
   const standardizeJson = (testCase) => {
     try {
@@ -880,16 +892,17 @@ const EditTestCase = (props: EditTestCaseProps) => {
             onDragEnd={resizeEditor}
           >
             <Allotment.Pane>
-              {featureFlags?.qiCoreElementsTab ? (
-                <div className="nav-panel">
-                  <div className="tab-container">
-                    <CreateTestCaseLeftPanelNavTabs
-                      leftPanelActiveTab={leftPanelActiveTab}
-                      setLeftPanelActiveTab={setLeftPanelActiveTab}
-                      isQICore6={isQICore6}
-                    />
-                  </div>
-                  {isQICore6 ? (
+              <div className="nav-panel">
+                {featureFlags?.qiCoreElementsTab && isQICore6 ? (
+                  <>
+                    <div className="tab-container">
+                      <CreateTestCaseLeftPanelNavTabs
+                        leftPanelActiveTab={leftPanelActiveTab}
+                        setLeftPanelActiveTab={setLeftPanelActiveTab}
+                        isQICore6={isQICore6}
+                        dirty={formikStu6Context.dirty}
+                      />
+                    </div>
                     <QiCoreResourceProvider>
                       {leftPanelActiveTab === "elements" &&
                         isValidJson(editorVal) && (
@@ -898,12 +911,18 @@ const EditTestCase = (props: EditTestCaseProps) => {
                               data-testid="elements-content"
                               id="elements-content"
                             >
-                              <ElementsTab
-                                canEdit={canEdit}
-                                setEditorVal={setEditorVal}
-                                editorVal={editorVal}
-                                testCase={testCase}
-                              />
+                              <FormikProvider value={formikStu6Context}>
+                                <ElementsTab
+                                  setValidationSchema={setValidationSchema}
+                                  setInitialFormikValuesStu6={
+                                    setInitialFormikValuesStu6
+                                  }
+                                  setEditorVal={setEditorVal}
+                                  canEdit={canEdit}
+                                  editorVal={editorVal}
+                                  testCase={testCase}
+                                />
+                              </FormikProvider>
                             </div>
                           </div>
                         )}
@@ -944,29 +963,22 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         />
                       )}
                     </QiCoreResourceProvider>
-                  ) : (
-                    <QiCoreResourceProvider>
-                      <Editor
-                        onChange={(val: string) => setEditorVal(val)}
-                        value={editorVal}
-                        setEditor={setEditor}
-                        readOnly={!canEdit || _.isNil(testCase)}
-                        height="100%"
-                      />
-                    </QiCoreResourceProvider>
-                  )}
-                </div>
-              ) : (
-                <div className="left-panel">
-                  <Editor
-                    onChange={(val: string) => setEditorVal(val)}
-                    value={editorVal}
-                    setEditor={setEditor}
-                    readOnly={!canEdit || _.isNil(testCase)}
-                    height="100%"
-                  />
-                </div>
-              )}
+                  </>
+                ) : (
+                  <>
+                    <div tw="float-right mr-4">
+                      <EditorSearch />
+                    </div>
+                    <Editor
+                      onChange={(val: string) => setEditorVal(val)}
+                      value={editorVal}
+                      setEditor={setEditor}
+                      readOnly={!canEdit || _.isNil(testCase)}
+                      height="100%"
+                    />
+                  </>
+                )}
+              </div>
             </Allotment.Pane>
 
             <Allotment.Pane>
@@ -1274,6 +1286,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
             </Allotment.Pane>
           </Allotment>
 
+          {/* button wrap in context */}
           <div tw="bg-gray-75 w-full sticky bottom-0 left-0 z-40">
             <div tw="flex items-center">
               <div tw="w-1/2 flex items-center px-2">
@@ -1283,50 +1296,53 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 tw="w-1/2 flex justify-end items-center px-10 py-6"
                 style={{ alignItems: "end" }}
               >
-                <Button
-                  tw="m-2"
-                  variant="outline"
-                  onClick={() => setDiscardDialogOpen(true)}
-                  data-testid="edit-test-case-discard-button"
-                  disabled={!isModified()}
-                >
-                  Discard Changes
-                </Button>
-                <Button
-                  tw="m-2"
-                  type="button"
-                  onClick={calculate}
-                  disabled={
-                    !!measure?.cqlErrors ||
-                    measure?.errors?.includes(
-                      MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
-                    ) ||
-                    _.isNil(measure?.groups) ||
-                    measure?.groups.length === 0 ||
-                    (!isJsonModified() && hasErrorSeverity(validationErrors)) ||
-                    isEmptyTestCaseJsonString(editorVal) ||
-                    !executionContextReady ||
-                    executing
-                  }
-                  /*
+                <FormikProvider value={formikStu6Context}>
+                  <Button
+                    tw="m-2"
+                    variant="outline"
+                    onClick={() => setDiscardDialogOpen(true)}
+                    data-testid="edit-test-case-discard-button"
+                    disabled={!isModified()}
+                  >
+                    Discard Changes
+                  </Button>
+                  <Button
+                    tw="m-2"
+                    type="button"
+                    onClick={calculate}
+                    disabled={
+                      !!measure?.cqlErrors ||
+                      measure?.errors?.includes(
+                        MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+                      ) ||
+                      _.isNil(measure?.groups) ||
+                      measure?.groups.length === 0 ||
+                      (!isJsonModified() &&
+                        hasErrorSeverity(validationErrors)) ||
+                      isEmptyTestCaseJsonString(editorVal) ||
+                      !executionContextReady ||
+                      executing
+                    }
+                    /*
                   if new test case
                     enable run button if json modified, regardless of errors
                  */
-                  data-testid="run-test-case-button"
-                >
-                  Run Test Case
-                </Button>
-                {canEdit && (
-                  <Button
-                    tw="m-2"
-                    variant="cyan"
-                    type="submit"
-                    data-testid="edit-test-case-save-button"
-                    disabled={!isModified()}
+                    data-testid="run-test-case-button"
                   >
-                    Save
+                    Run Test Case
                   </Button>
-                )}
+                  {canEdit && (
+                    <Button
+                      tw="m-2"
+                      variant="cyan"
+                      type="submit"
+                      data-testid="edit-test-case-save-button"
+                      disabled={!isModified()}
+                    >
+                      Save
+                    </Button>
+                  )}
+                </FormikProvider>
               </div>
             </div>
           </div>

@@ -7,8 +7,10 @@ import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../../../../api/useMeasureServiceApi";
 import userEvent from "@testing-library/user-event";
-import { Simulate } from "react-dom/test-utils";
-const { getByTestId } = screen;
+import useTestCaseServiceApi, {
+  TestCaseServiceApi,
+} from "../../../../api/useTestCaseServiceApi";
+const { getByTestId, getByRole } = screen;
 
 const MEASURE_OWNER = "test.user";
 
@@ -180,6 +182,10 @@ const useMeasureServiceMockResolvedWithNoMeasure = {
     .mockResolvedValueOnce(mockMeasureSearchResponseWithNoMeasures),
 } as unknown as MeasureServiceApi;
 
+jest.mock("../../../../api/useTestCaseServiceApi");
+const useTestCaseServiceMock =
+  useTestCaseServiceApi as jest.Mock<TestCaseServiceApi>;
+
 describe("Copy Test Case Dialog Component", () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -189,12 +195,17 @@ describe("Copy Test Case Dialog Component", () => {
     useMeasureServiceMock.mockImplementation(() => {
       return useMeasureServiceMockResolved;
     });
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        copyTestCasesToMeasure: jest.fn().mockResolvedValueOnce(["1", "2"]),
+      } as unknown as TestCaseServiceApi;
+    });
     render(
       <CopyTestCaseDialog
         open={true}
         onClose={() => jest.fn()}
-        onSubmit={() => jest.fn()}
         measure={mockCurrentMeasure}
+        selectedTestCases={testCases.map((tc) => tc.id)}
       />
     );
 
@@ -246,8 +257,8 @@ describe("Copy Test Case Dialog Component", () => {
       <CopyTestCaseDialog
         open={true}
         onClose={() => jest.fn()}
-        onSubmit={() => jest.fn()}
         measure={mockCurrentMeasure}
+        selectedTestCases={testCases.map((tc) => tc.id)}
       />
     );
 
@@ -277,11 +288,13 @@ describe("Copy Test Case Dialog Component", () => {
     expect(filterInput.value).toBe("Measure");
 
     // fire condition 1
-    const searchFieldInput = getByTestId("test-case-list-search-input");
+    const searchFieldInput = getByTestId(
+      "test-case-list-search-input"
+    ) as HTMLInputElement;
     expect(searchFieldInput.value).toBe("");
+
     userEvent.type(searchFieldInput, "test{enter}");
 
-    // await waitFor(() => expect(searchFieldInput.value).toBe("test"));
     await waitFor(() => expect(testFn).toHaveBeenCalledTimes(2));
     expect(testFn).toHaveBeenNthCalledWith(
       2, // Second call
@@ -342,8 +355,8 @@ describe("Copy Test Case Dialog Component", () => {
       <CopyTestCaseDialog
         open={true}
         onClose={() => jest.fn()}
-        onSubmit={() => jest.fn()}
         measure={mockCurrentMeasure}
+        selectedTestCases={testCases.map((tc) => tc.id)}
       />
     );
 
