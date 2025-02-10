@@ -1,15 +1,20 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Modal, MadieSpinner } from "@madie/madie-design-system/dist/react";
+import {
+  MadieDialog,
+  MadieSpinner,
+} from "@madie/madie-design-system/dist/react";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
-import { Backdrop } from "@mui/material";
+import { DialogContent, Typography, Backdrop } from "@mui/material";
 
 interface ModalProps {
   open;
   onClose;
+  exportMeasure;
   measureId;
 }
 
 export default function ViewHRModal(props: ModalProps) {
+  const { open, onClose, exportMeasure, measureId } = props;
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [loading, setLoading] = useState(true);
   const [hr, setHr] = useState<string>();
@@ -40,42 +45,64 @@ export default function ViewHRModal(props: ModalProps) {
   }, [props.measureId]);
 
   return (
-    <div data-testid="view-hr-modal">
-      <Modal
-        useDesignSystem
-        width="70rem"
-        isOpen={props.open}
-        title="Human Readable"
-        onRequestClose={props.onClose}
-        secondary={{
-          title: "Cancel",
-          onClick: props.onClose,
-        }}
+    <MadieDialog
+      form
+      title="Human Readable"
+      sx={{
+        "#modal-body": {
+          h2: {
+            borderTop: "1px solid black",
+          },
+        },
+      }}
+      dialogProps={{
+        id: "view-hr-modal",
+        onClose,
+        open,
+        maxWidth: "lg",
+        fullWidth: true,
+        onSubmit: exportMeasure,
+      }}
+      cancelButtonProps={{
+        variant: "secondary",
+        cancelText: "Cancel",
+        "data-testid": "human-readable-cancel-button",
+      }}
+      continueButtonProps={{
+        variant: "cyan",
+        type: "submit",
+        "data-testid": "human-readable-export-button",
+        continueText: "Export",
+      }}
+    >
+      <DialogContent>
+        <div data-testid="view-hr-modal">
+          <Typography>
+            {!loading && (
+              <div>
+                <div
+                  className="modal-body"
+                  dangerouslySetInnerHTML={{
+                    __html: hr,
+                  }}
+                />
+              </div>
+            )}
+
+            {error && (
+              <div>
+                <p>{error}</p>
+              </div>
+            )}
+          </Typography>
+        </div>
+      </DialogContent>
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
       >
-        {loading && (
-          <Backdrop
-            sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-            open={loading}
-          >
-            <MadieSpinner style={{ height: 50, width: 50 }} />
-          </Backdrop>
-        )}
-
-        {!loading && (
-          <div>
-            <div
-              className="modal-body"
-              dangerouslySetInnerHTML={{ __html: hr }}
-            />
-          </div>
-        )}
-
-        {error && (
-          <div>
-            <p>{error}</p>
-          </div>
-        )}
-      </Modal>
-    </div>
+        <MadieSpinner style={{ height: 50, width: 50 }} />
+      </Backdrop>
+    </MadieDialog>
   );
 }
