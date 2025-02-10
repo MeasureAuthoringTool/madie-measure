@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   MadieDialog,
   MadieSpinner,
@@ -20,7 +20,7 @@ export default function ViewHRModal(props: ModalProps) {
   const [hr, setHr] = useState<string>();
   const [error, setError] = useState<string>();
 
-  const getHumanReadable = async (measureId) => {
+  const getHumanReadable = useCallback(async (measureId) => {
     setLoading(true);
     if (!measureId) {
       setLoading(false);
@@ -38,7 +38,7 @@ export default function ViewHRModal(props: ModalProps) {
         );
       }
     }
-  };
+  }, []);
 
   useEffect(() => {
     getHumanReadable(props.measureId);
@@ -73,6 +73,7 @@ export default function ViewHRModal(props: ModalProps) {
         type: "submit",
         "data-testid": "human-readable-export-button",
         continueText: "Export",
+        hidden: error,
       }}
     >
       <DialogContent>
