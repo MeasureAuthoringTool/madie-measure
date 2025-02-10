@@ -11,7 +11,6 @@ declare module "@madie/madie-util" {
 
   interface FeatureFlags {
     enableQdmRepeatTransfer: boolean;
-    qiCore6: boolean;
     qiCoreBonnieTestCases: boolean;
     qiCoreElementsTab: boolean;
     qdmHideJson: boolean;
