@@ -16,8 +16,6 @@ import {
 const ProfiledExtensionComponent = ({
   structureDefinition,
   canEdit,
-  value,
-  onChange,
   resource,
 }: TypeComponentProps) => {
   const [extensionProfileDef, setExtensionProfileDef] =
@@ -91,7 +89,6 @@ const ProfiledExtensionComponent = ({
       extensions.push({ ...value });
     }
     formik.setFieldValue("Patient.extension", extensions);
-    onChange(extensions);
   };
 
   return extensionProfileDef ? (

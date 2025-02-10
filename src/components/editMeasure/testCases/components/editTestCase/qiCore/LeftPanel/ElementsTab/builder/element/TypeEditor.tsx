@@ -254,7 +254,6 @@ const TypeEditor = ({
             structureDefinition={structureDefinition}
             fieldRequired={false}
             resource={resource}
-            onChange={onChange}
           />
         );
       default:
