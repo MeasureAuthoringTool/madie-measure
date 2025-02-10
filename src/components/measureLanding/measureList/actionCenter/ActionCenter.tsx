@@ -6,7 +6,8 @@ import DraftAction from "./draftAction/DraftAction";
 import VersionAction from "./versionAction/VersionAction";
 import AssociateCmsIdAction from "./associateCmsIdAction/AccociateCmsIdAction";
 import ViewHRAction from "./viewHumanReadableAction/ViewHRAction";
-import { checkUserCanEdit } from "@madie/madie-util";
+import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
+import ShareAction from "./shareAction/ShareAction";
 
 interface PropTypes {
   measures: Measure[];
@@ -21,6 +22,7 @@ interface PropTypes {
 }
 export default function ActionCenter(props: PropTypes) {
   const [canEdit, setCanEdit] = useState<boolean>(false);
+  const featureFlags = useFeatureFlags();
 
   const versionMeasure = useCallback(() => {
     if (props.measures?.length === 1) {
@@ -87,25 +89,30 @@ export default function ActionCenter(props: PropTypes) {
 
   return (
     <div data-testid="action-center">
-      <DraftAction
-        measures={props.measures}
-        onClick={draftMeasure}
-        canEdit={canEdit}
-      />
-      <VersionAction
-        measures={props.measures}
-        onClick={versionMeasure}
-        canEdit={canEdit}
-      />
       <DeleteAction
         measures={props.measures}
         onClick={deleteMeasure}
         canEdit={canEdit}
       />
       <ExportAction measures={props.measures} onClick={exportMeasure} />
+
+      {featureFlags?.ShareMeasure && (
+        <ShareAction measures={props.measures} canEdit={canEdit} />
+      )}
+
       <AssociateCmsIdAction
         measures={props.measures}
         onClick={props.associateCmsId}
+      />
+      <VersionAction
+        measures={props.measures}
+        onClick={versionMeasure}
+        canEdit={canEdit}
+      />
+      <DraftAction
+        measures={props.measures}
+        onClick={draftMeasure}
+        canEdit={canEdit}
       />
       <ViewHRAction measures={props.measures} onClick={viewHumanReadable} />
     </div>
