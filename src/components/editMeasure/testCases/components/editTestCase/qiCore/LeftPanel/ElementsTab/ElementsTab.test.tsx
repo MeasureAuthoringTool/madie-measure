@@ -210,6 +210,24 @@ jest.mock("@madie/madie-util", () => {
 jest.mock("../../../../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
+const mockFormikObj = {
+  touched: {},
+  errors: {},
+  values: {},
+  isSubmitting: false,
+  setFieldValue: undefined,
+  dirty: false,
+  resetForm: jest.fn(),
+};
+
+jest.mock("formik", () => ({
+  useFormikContext: () => {
+    return mockFormikObj;
+  },
+  getIn: (context: Record<string, unknown>, fieldName: string) => {
+    return context[fieldName];
+  },
+}));
 describe("ElementsTab", () => {
   beforeEach(() => {
     mockedAxios.get.mockImplementation((args) => {

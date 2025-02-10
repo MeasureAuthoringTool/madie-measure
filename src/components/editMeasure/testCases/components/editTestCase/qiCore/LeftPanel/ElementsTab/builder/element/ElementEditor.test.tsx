@@ -1,13 +1,17 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { useFormik } from "formik";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import ElementEditor from "./ElementEditor";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
+import { QiCoreResourceProvider } from "../../../../../../../util/QiCorePatientProvider";
 
 jest.mock("../../../../../../../api/useFhirDefinitionsService");
-
 jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
+  const actualModule = jest.requireActual(
+    "../../../../../../../api/fhirDefinitionServiceUtilities"
+  );
   return {
+    ...actualModule,
     getBasePath: jest.fn().mockReturnValue("ClaimResponse"),
     getAllChildren: jest.fn().mockReturnValue([
       { id: "ClaimResponse", path: "ClaimResponse" },
@@ -33,9 +37,23 @@ jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
     updateChildrenPaths: jest.fn().mockReturnValue([]),
   };
 });
+const mockFormikObj = {
+  touched: {},
+  errors: {},
+  values: {},
+  isSubmitting: false,
+  setFieldValue: undefined,
+  dirty: false,
+  resetForm: jest.fn(),
+};
+
 jest.mock("formik", () => ({
-  ...jest.requireActual("formik"),
-  useFormik: jest.fn(),
+  useFormikContext: () => {
+    return mockFormikObj;
+  },
+  getIn: (context: Record<string, unknown>, fieldName: string) => {
+    return context[fieldName];
+  },
 }));
 
 jest.mock("./ElementEditorChildren", () => () => (
@@ -100,29 +118,65 @@ describe("ElementEditor Component", () => {
     getResourceTree: jest.fn().mockResolvedValue({}),
   };
 
+  const mockDisplayedElementsTree = {
+    ClaimResponse: {
+      created: true,
+      id: true,
+      insurer: true,
+      outcome: true,
+      patient: true,
+      status: true,
+      type: true,
+      use: true,
+    },
+  };
+
+  const renderElementEditor = (
+    selectedResource,
+    resource,
+    elementDefinition,
+    resourcePath,
+    onChange,
+    canEdit,
+    displayedElementsTree,
+    setValidationSchema,
+    setInitialFormikValuesStu6
+  ) => {
+    render(
+      <QiCoreResourceProvider>
+        <ElementEditor
+          setValidationSchema={setValidationSchema}
+          setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+          selectedResource={selectedResource}
+          resource={resource}
+          elementDefinition={elementDefinition}
+          resourcePath={resourcePath}
+          onChange={onChange}
+          canEdit={canEdit}
+          displayedElementsTree={displayedElementsTree}
+        />
+      </QiCoreResourceProvider>
+    );
+  };
+
   beforeEach(() => {
     useFhirDefinitionsServiceApi.mockReturnValue(mockFhirDefinitionsService);
-    useFormik.mockReturnValue({
-      values: {},
-      setFieldValue: jest.fn(),
-      errors: {},
-      touched: {},
-      handleSubmit: jest.fn(),
-    });
   });
 
-  test("renders without crashing when elementDefinition is provided", async () => {
-    render(
-      <ElementEditor
-        selectedResource={mockSelectedResource}
-        resource={mockResource}
-        elementDefinition={mockElementDefinition}
-        resourcePath="ClaimResponse"
-        onChange={mockOnChange}
-        canEdit={true}
-      />
+  test("renders without crashing when elementDefinition is provided. buttons disabled", async () => {
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
+    renderElementEditor(
+      mockSelectedResource,
+      mockResource,
+      mockElementDefinition,
+      "ClaimResponse",
+      mockOnChange,
+      true,
+      mockDisplayedElementsTree,
+      setValidationSchema,
+      setInitialFormikValuesStu6
     );
-
     await waitFor(() =>
       expect(mockFhirDefinitionsService.getResourceTree).toHaveBeenCalled()
     );
@@ -131,35 +185,90 @@ describe("ElementEditor Component", () => {
       "ElementEditorChildren"
     );
     expect(elementEditorChildrenMock).toBeInTheDocument();
+    const undoButton = screen.getByTestId("element-editor-undo-button");
+    const submitButton = screen.getByTestId("element-editor-submit-button");
+    expect(undoButton).toBeDisabled();
+    expect(submitButton).toBeDisabled();
+  });
+
+  test("renders without crashing when elementDefinition is provided, trigger buttons", async () => {
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
+    const mockResetForm = jest.fn();
+    mockFormikObj.resetForm = mockResetForm;
+    mockFormikObj.dirty = true;
+    const mockFormikValues = {
+      ClaimResponse: {
+        id: "test",
+      },
+    };
+    mockFormikObj.values = mockFormikValues;
+    renderElementEditor(
+      mockSelectedResource,
+      mockResource,
+      mockElementDefinition,
+      "ClaimResponse",
+      mockOnChange,
+      true,
+      mockDisplayedElementsTree,
+      setValidationSchema,
+      setInitialFormikValuesStu6
+    );
+    await waitFor(() =>
+      expect(mockFhirDefinitionsService.getResourceTree).toHaveBeenCalled()
+    );
+
+    const elementEditorChildrenMock = await screen.findByText(
+      "ElementEditorChildren"
+    );
+    expect(elementEditorChildrenMock).toBeInTheDocument();
+    const undoButton = screen.getByTestId("element-editor-undo-button");
+    const submitButton = screen.getByTestId("element-editor-submit-button");
+    expect(undoButton).toBeEnabled();
+    expect(submitButton).toBeEnabled();
+    userEvent.click(undoButton);
+    await waitFor(() => {
+      expect(mockResetForm).toHaveBeenCalled();
+    });
+    userEvent.click(submitButton);
+    await waitFor(() => {
+      expect(mockResetForm).toHaveBeenCalledTimes(2);
+    });
   });
 
   test("renders a fallback when no elementDefinition is provided", () => {
-    render(
-      <ElementEditor
-        selectedResource={mockSelectedResource}
-        resource={mockResource}
-        elementDefinition={null}
-        resourcePath="ClaimResponse"
-        onChange={mockOnChange}
-        canEdit={true}
-      />
-    );
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
 
+    renderElementEditor(
+      mockSelectedResource,
+      mockResource,
+      null,
+      "ClaimResponse",
+      mockOnChange,
+      true,
+      mockDisplayedElementsTree,
+      setValidationSchema,
+      setInitialFormikValuesStu6
+    );
     expect(screen.getByText("No element selected")).toBeInTheDocument();
   });
 
   test("checks loading state", async () => {
-    render(
-      <ElementEditor
-        selectedResource={mockSelectedResource}
-        resource={mockResource}
-        elementDefinition={mockElementDefinition}
-        resourcePath="ClaimResponse"
-        onChange={mockOnChange}
-        canEdit={true}
-      />
-    );
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
 
+    renderElementEditor(
+      mockSelectedResource,
+      mockResource,
+      mockElementDefinition,
+      "ClaimResponse",
+      mockOnChange,
+      true,
+      mockDisplayedElementsTree,
+      setValidationSchema,
+      setInitialFormikValuesStu6
+    );
     expect(screen.queryByText("ElementEditorChildren")).not.toBeInTheDocument();
 
     await waitFor(() => {

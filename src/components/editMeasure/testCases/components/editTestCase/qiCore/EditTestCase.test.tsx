@@ -263,19 +263,6 @@ const resourceIdentifiers: ResourceIdentifier[] = [
       "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedure",
   },
 ];
-
-const relevantElements = [
-  {
-    oid: "ts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1110.42",
-    title: "Statin Allergen",
-    description: "AdverseEvent: Statin Allergen",
-    type: "AdverseEvent",
-    drc: false,
-    codeId: null,
-    name: "Statin Allergen",
-  },
-];
-
 const testTitle = async (title: string, clear = false) => {
   const tcTitle = await screen.findByTestId("test-case-title");
   expect(tcTitle).toBeInTheDocument();

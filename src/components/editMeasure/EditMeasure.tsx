@@ -570,6 +570,7 @@ export default function EditMeasure() {
           <ViewHRModal
             measureId={measure?.id}
             onClose={handleDialogClose}
+            exportMeasure={exportMeasure}
             open={viewHumanReadableModal.open}
           />
           <Toast

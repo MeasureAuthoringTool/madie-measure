@@ -14,10 +14,11 @@ interface MeasureMetaDataRowProps {
   id?: string;
   handleClick?: Function;
   canEdit?: boolean;
+  type?: string;
 }
 
 const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
-  const { name, description, id, handleClick, canEdit } = props;
+  const { name, description, id, handleClick, canEdit, type } = props;
 
   return (
     <>
@@ -36,7 +37,7 @@ const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
                 onClick={() => {
                   handleClick(id, "delete");
                 }}
-                data-testid={`delete-measure-reference-${id}`}
+                data-testid={`delete-measure-${type}-${id}`}
                 style={{ cursor: "pointer", marginRight: "8px" }}
                 sx={{ color: red[500] }}
               />
@@ -52,7 +53,7 @@ const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
                 onClick={() => {
                   handleClick(id, "edit");
                 }}
-                data-testid={`edit-measure-reference-${id}`}
+                data-testid={`edit-measure-${type}-${id}`}
                 style={{ cursor: "pointer" }}
                 sx={{ color: blue[500] }}
               />
