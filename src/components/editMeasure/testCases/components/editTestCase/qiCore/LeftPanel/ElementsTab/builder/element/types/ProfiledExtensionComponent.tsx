@@ -57,19 +57,19 @@ const ProfiledExtensionComponent = ({
       // ignore extension of extension
       (element) => element.path.includes("Extension.extension")
     );
+    // get relevant nested extension within extension
+    const extension = _.find(
+      extensions,
+      (extension) => extension?.url === extensionProfileDef.definition.url
+    );
     // for complex extensions like race, ethnicity, tribalAffiliation
     if (complexElements.length > 1) {
-      // get relevant nested extension within extension
-      const extension = _.find(
-        extensions,
-        (extension) => extension?.url === extensionProfileDef.definition.url
-      );
       if (extension) {
         // relevant extension element definition to check cardinality
         const elementDefinition = topLevelElements.find((element) =>
           element.id.includes(value.url)
         );
-        // if cardinality is one-toone, update existing else add new
+        // if cardinality is one-to-one, update existing else add new
         if (elementDefinition.max == 1) {
           const filteredExtension = extension.extension.filter(
             (extension) => extension.url !== value.url
@@ -86,7 +86,21 @@ const ProfiledExtensionComponent = ({
       }
     } else {
       // for simple extensions like birthSex, sex
-      extensions.push({ ...value });
+      const elementDefinition = topLevelElements.find((element) =>
+        element.path.includes("Extension.value")
+      );
+      const ext = {
+        url: extensionProfileDef.definition.url,
+      };
+      const valueKey = `value${_.capitalize(elementDefinition.type[0].code)}`;
+      ext[valueKey] = value;
+
+      // if cardinality is one-to-one, update existing else add new
+      if (extension && elementDefinition.max === "1") {
+        extension[valueKey] = value;
+      } else {
+        extensions.push(ext);
+      }
     }
     formik.setFieldValue("Patient.extension", extensions);
   };
