@@ -110,24 +110,29 @@ const TypeEditor = ({
       case "http://hl7.org/fhirpath/System.DateTime":
         return (
           <DateTimeComponent
-            canEdit={canEdit}
-            structureDefinition={structureDefinition}
+          label={label}
+          canEdit={canEdit}
+          helperText={formikErrorHandler(label)}
+          error={getNestedProperty(formik.errors, label)}
             fieldRequired={required}
-            label={``}
-            onChange={onChange}
             value={value}
+            onChange={(value) => {
+            formik.setFieldValue(label, value);
+            }}
           />
         );
+      // I think this is functionally unreachable code. Cant find any evidence of fhir element type = time
       case "time":
       case "http://hl7.org/fhir/R4/datatypes.html#time":
         return (
           <TimeComponent
             canEdit={canEdit}
-            structureDefinition={null}
-            fieldRequired={false}
+            fieldRequired={required}
             label={label}
-            onChange={onChange}
+            helperText={formikErrorHandler(label)}
+            error={getNestedProperty(formik.errors, label)}
             value={value}
+            {...formik.getFieldProps(label)}
           />
         );
       case "instant":
@@ -200,7 +205,9 @@ const TypeEditor = ({
             value={value}
           />
         );
+        // I think this is functionally unreachable code. Cant find any evidence of fhir element type = date
       case "date":
+        console.log('date!', label)
         return (
           <DateComponent
             canEdit={canEdit}

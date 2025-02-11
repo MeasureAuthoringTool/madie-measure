@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { TypeComponentProps } from "./TypeComponentProps";
-import { InputLabel, MenuItem as MuiMenuItem } from "@mui/material";
+import {  MenuItem as MuiMenuItem } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import Box from "@mui/material/Box";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -12,6 +12,7 @@ import {
   Select,
   DateField,
   TimeField,
+  InputLabel
 } from "@madie/madie-design-system/dist/react";
 
 dayjs.extend(utc);
@@ -75,12 +76,11 @@ const DateTimeComponent = ({
   canEdit,
   fieldRequired,
   value,
-  onChange,
+  onChange, // onChange should Probably only be triggered once the fields are all filled out
   label = "DateTime",
-  structureDefinition,
 }: TypeComponentProps) => {
-  const [date, setDate] = useState<string>();
-  const [time, setTime] = useState<string>();
+  const [date, setDate] = useState<string>(); // dayjs obj
+  const [time, setTime] = useState<any>(); // dayjs obj
   const [formattedTime, setFormattedTime] = useState("");
   const [timeZone, setTimeZone] = useState("");
 
@@ -88,19 +88,20 @@ const DateTimeComponent = ({
   const DATE_FORMAT = "YYYY-MM-DD";
   const TIME_FORMAT = "HH:mm:ss";
 
-  useEffect(() => {
-    if (value) {
-      const zone = value.slice(-6);
 
+  useEffect(() => {
+    // value cones in as a string // 2025-02-12T00:00:00.000-05:00
+    if (value) {
+      console.log('value is', value)
+      const zone = value.slice(-6); // fine
       setDate(value.slice(0, 10));
+      setTimeZone(findByOffSet(zone));
       const formattedDate = dayjs(value)
         .utcOffset(zone)
         .format("YYYY-MM-DDTHH:mm:ss");
-      setTime(formattedDate);
-      setFormattedTime(value.slice(11, 19));
-      setTimeZone(findByOffSet(zone));
+     setTime(formattedDate)
     }
-  }, []);
+  }, [value]);
 
   const renderMenuItems = (options: MenuObj[]) => {
     return [
@@ -138,7 +139,7 @@ const DateTimeComponent = ({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column" }}>
-      <InputLabel>{label}</InputLabel>
+      <InputLabel required={fieldRequired}>{label}</InputLabel>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <div
           style={{
@@ -152,6 +153,7 @@ const DateTimeComponent = ({
         >
           <DateField
             label="Date Field"
+            required={fieldRequired}
             value={date ? dayjs(date) : null}
             disabled={!canEdit}
             id="date-field"
@@ -163,7 +165,10 @@ const DateTimeComponent = ({
                 formattedTime,
                 offset
               );
-              onChange(changedDate);
+              setDate(changedDate)
+              if (changedDate){
+                onChange(changedDate)
+              }
             }}
             onBlur={() => {}}
           />
@@ -171,6 +176,7 @@ const DateTimeComponent = ({
           <div>
             <TimeField
               disabled={!canEdit}
+              required={fieldRequired}
               label="Time Field"
               id="time-field"
               seconds
@@ -178,21 +184,24 @@ const DateTimeComponent = ({
               data-testid="time-input"
               handleTimeChange={(time) => {
                 setTime(time);
-                setFormattedTime(time?.format(TIME_FORMAT));
-
+                setFormattedTime(time?.format(TIME_FORMAT)); // force zeros here?
+                console.log('formattedTime',time?.format(TIME_FORMAT))
                 const offset = getOffSet(timeZone);
                 const changedDate = handleDateTimeChange(
                   date,
                   time?.format(TIME_FORMAT),
                   offset
                 );
-                onChange(changedDate);
+                if (changedDate && !changedDate.includes("Invalid Date")){
+                  onChange(changedDate)
+                }
               }}
               value={time ? dayjs(time) : null}
             />
           </div>
           <Select
             style={{ height: "38.125px", marginBottim: "2px" }}
+            required={fieldRequired}
             id={`timezone-selector-${label}`}
             label={`Zone`}
             inputProps={{
@@ -204,7 +213,8 @@ const DateTimeComponent = ({
             SelectDisplayProps={{
               "aria-required": "true",
             }}
-            value={value ? timeZone : null}
+            // value={value ? timeZone : null}
+            value={timeZone}
             options={renderMenuItems(options)}
             renderValue={(value) => {
               return findAndRenderLabel(value);
@@ -218,7 +228,9 @@ const DateTimeComponent = ({
                 formattedTime,
                 offset
               );
-              onChange(changedDate);
+              if (changedDate && !changedDate.includes("Invalid Date")){
+                onChange(changedDate)
+              }
             }}
           ></Select>
         </div>
@@ -228,3 +240,4 @@ const DateTimeComponent = ({
 };
 
 export default DateTimeComponent;
+// 
