@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { TypeComponentProps } from "./TypeComponentProps";
-import {  MenuItem as MuiMenuItem } from "@mui/material";
+import { MenuItem as MuiMenuItem } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import Box from "@mui/material/Box";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -10,15 +10,16 @@ import utc from "dayjs/plugin/utc";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import {
   Select,
-  DateField,
+  // DateField,
   TimeField,
-  InputLabel
+  InputLabel,
 } from "@madie/madie-design-system/dist/react";
+import DateField from "./DateField";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(advancedFormat);
-dayjs.utc().format();
+// dayjs.utc().format();
 
 interface MenuObj {
   value: string;
@@ -71,7 +72,40 @@ const findByOffSet = (value) => {
   }
   return result;
 };
+const DATE_FORMAT = "YYYY-MM-DD";
+const TIME_FORMAT = "HH:mm:ss";
+const DATE_TIME_ZONE_FORMAT = "YYYY-MM-DDThh:mm:ss+zz:zz";
 
+const YEAR_FORMAT = "YYYY";
+const YEAR_MONTH_FORMAT = "YYYY-MM";
+const YEAR_MONTH_DAY_FORMAT = "YYYY-MM-DD";
+
+export const isYearFormat = (dateStr) => {
+  return dayjs(dateStr, YEAR_FORMAT, true).isValid();
+};
+export const isYearMonthFormat = (dateStr) => {
+  return dayjs(dateStr, YEAR_MONTH_FORMAT, true).isValid();
+};
+export const isYearMonthDayFormat = (dateStr) => {
+  return dayjs(dateStr, YEAR_MONTH_DAY_FORMAT, true).isValid();
+};
+export const isValidDateTimeFormat = (dateStr) => {
+  return dayjs(dateStr, DATE_TIME_ZONE_FORMAT, true).isValid();
+};
+
+export const getCurrentFormat = (dateStr) => {
+  if (dayjs(dateStr, YEAR_FORMAT, true).isValid()) {
+    return YEAR_FORMAT;
+  } else if (dayjs(dateStr, YEAR_MONTH_FORMAT, true).isValid()) {
+    return YEAR_MONTH_FORMAT;
+  } else if (dayjs(dateStr, YEAR_MONTH_DAY_FORMAT, true).isValid()) {
+    return YEAR_MONTH_FORMAT;
+  } else if (dayjs(dateStr, DATE_TIME_ZONE_FORMAT, true).isValid()) {
+    return DATE_TIME_ZONE_FORMAT;
+  } else {
+    return "Invalid format";
+  }
+};
 const DateTimeComponent = ({
   canEdit,
   fieldRequired,
@@ -84,24 +118,42 @@ const DateTimeComponent = ({
   const [formattedTime, setFormattedTime] = useState("");
   const [timeZone, setTimeZone] = useState("");
 
-  const DATE_TIME_ZONE_FORMAT = "YYYY-MM-DDTHH:mm:ss.000Z";
-  const DATE_FORMAT = "YYYY-MM-DD";
-  const TIME_FORMAT = "HH:mm:ss";
+  /*
+    When a value comes in it could be either 
+    YYYY, 
+    YYYY-MM, 
+    YYYY-MM-DD
+    YYYY-MM-DDThh:mm:ss+zz:zz
 
+    This means that a user can update the date string in partial values
+  */
 
   useEffect(() => {
-    // value cones in as a string // 2025-02-12T00:00:00.000-05:00
+    // we need to find out what type of dateTime format it is, and translate to related parts
     if (value) {
-      console.log('value is', value)
-      const zone = value.slice(-6); // fine
-      setDate(value.slice(0, 10));
-      setTimeZone(findByOffSet(zone));
-      const formattedDate = dayjs(value)
-        .utcOffset(zone)
-        .format("YYYY-MM-DDTHH:mm:ss");
-     setTime(formattedDate)
+      if (isValidDateTimeFormat(value)) {
+      } else if (isYearMonthDayFormat(value)) {
+        setDate(value)
+      } else if (isYearMonthFormat(value)) {
+        setDate(value)
+      } else if (isYearFormat(value)) {
+        setDate(value)
+      }
+
+      //   const zone = value.slice(-6); // fine
+      //   setDate(value.slice(0, 10));
+      //   setTimeZone(findByOffSet(zone));
+      //   const formattedDate = dayjs(value)
+      //     .utcOffset(zone)
+      //     .format("YYYY-MM-DDTHH:mm:ss");
+      //  setTime(formattedDate)
+      setDate(value);
     }
   }, [value]);
+
+  console.log("new year is", date);
+
+
 
   const renderMenuItems = (options: MenuObj[]) => {
     return [
@@ -154,28 +206,40 @@ const DateTimeComponent = ({
           <DateField
             label="Date Field"
             required={fieldRequired}
-            value={date ? dayjs(date) : null}
+            error={true}
+            helperText={undefined}
+            // id="date-time-component"
+            // value={date ? dayjs(date) : null}
+            // @ts-ignore
+            // value={date || null}
+            value={date}
             disabled={!canEdit}
             id="date-field"
             handleDateChange={(date) => {
-              setDate(date?.format(DATE_FORMAT));
-              const offset = getOffSet(timeZone);
-              const changedDate = handleDateTimeChange(
-                date?.format(DATE_FORMAT),
-                formattedTime,
-                offset
-              );
-              setDate(changedDate)
-              if (changedDate){
-                onChange(changedDate)
-              }
+              // console.log('date is', date)
+              // if (date.isValid()){
+              //   console.log('date is', date)
+              // }
+              // console.log('date is', date)
+              // setDate(date?.format(DATE_FORMAT));
+              // const offset = getOffSet(timeZone);
+              // const changedDate = handleDateTimeChange(
+              //   date?.format(DATE_FORMAT),
+              //   formattedTime,
+              //   offset
+              // );
+              // setDate(changedDate)
+              // if (changedDate){
+              //   onChange(changedDate)
+              // }
+              setDate(date);
             }}
             onBlur={() => {}}
           />
 
           <div>
-            <TimeField
-              disabled={!canEdit}
+          <TimeField
+              disabled={!canEdit || !date}
               required={fieldRequired}
               label="Time Field"
               id="time-field"
@@ -209,7 +273,7 @@ const DateTimeComponent = ({
               "aria-describedby": `timezone-input-field-helper-text-${label}`,
             }}
             data-testid={`timezone-field-${label}`}
-            disabled={!canEdit}
+            disabled={!canEdit || !time}
             SelectDisplayProps={{
               "aria-required": "true",
             }}
@@ -240,4 +304,4 @@ const DateTimeComponent = ({
 };
 
 export default DateTimeComponent;
-// 
+//

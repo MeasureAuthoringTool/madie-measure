@@ -143,6 +143,30 @@ export const getUriValidator = (required) => {
   return baseValidator;
 };
 
+export const getDateTimeValidator = (required) => {
+  const stringRegex = /^[ \r\n\t\S]+$/;
+  const baseValidator = Yup.string().matches(
+    stringRegex,
+    "Invalid String format"
+  );
+  if (required) {
+    return baseValidator.required("This field is required");
+  }
+  return baseValidator;
+};
+
+export const getTimeValidator = (required) => {
+  const stringRegex = /^[ \r\n\t\S]+$/;
+  const baseValidator = Yup.string().matches(
+    stringRegex,
+    "Invalid String format"
+  );
+  if (required) {
+    return baseValidator.required("This field is required");
+  }
+  return baseValidator;
+};
+
 /*
   This object will hold all references to validations with keys for type matching up against a validation
   We can then use the lookup to see if it exists, if it does, we return the validation function, we pass in the required value attached,
@@ -160,6 +184,8 @@ export const validationLookup = {
   id: getIdValidator,
   uri: getUriValidator,
   decimal: getDecimalValidator,
+  dateTime: getDateTimeValidator,
+  time: getTimeValidator,
 };
 
 export const getValidation = (type, required) => {
