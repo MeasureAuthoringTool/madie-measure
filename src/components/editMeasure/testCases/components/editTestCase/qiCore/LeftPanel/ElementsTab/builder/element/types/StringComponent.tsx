@@ -16,6 +16,7 @@ const StringComponent = ({
   label = "VALUE",
   structureDefinition,
   stringOnly = true,
+  value,
   ...props
 }: TypeComponentProps) => {
   return (
@@ -45,6 +46,7 @@ const StringComponent = ({
             }
           : undefined
       }
+      value={value}
       {...props}
     />
   );

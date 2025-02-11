@@ -87,7 +87,10 @@ export function getBasePath(resource: any): string {
 export function getTopLevelElements(resource: any) {
   const elements = [...resource?.definition?.snapshot?.element];
   return elements?.filter(
-    (e) => e.path.split(".")?.length === 2 && e.max !== "0"
+    (e) =>
+      e.path.split(".")?.length === 2 &&
+      e.id !== "Extension.extension" &&
+      e.max !== "0"
   );
 }
 // find out who needs to be required on formik validation
@@ -154,6 +157,7 @@ export function isComponentDataType(datatype) {
     case "markdown":
     case "http://hl7.org/fhirpath/System.String":
     case "code":
+    case "Coding":
     case "Extension":
     case "Reference":
       return true;
