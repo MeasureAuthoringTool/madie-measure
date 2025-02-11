@@ -9,7 +9,7 @@ import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureMetadata from "./measureMetadata/MeasureMetadata";
 import { Measure } from "@madie/madie-models";
 // @ts-ignore
-import { measureStore } from "@madie/madie-util";
+import { measureStore, useFeatureFlags } from "@madie/madie-util";
 
 const measure = {
   id: "1",
@@ -62,6 +62,13 @@ const measure = {
     cqlMetaData: {
       codeSystemMap: {},
     },
+    measureDefinitions: [
+      {
+        id: "def1",
+        term: "term 1",
+        definition: "definition 1",
+      },
+    ],
   },
 } as unknown as Measure;
 
@@ -97,7 +104,9 @@ jest.mock("@madie/madie-util", () => ({
       return { unsubscribe: () => null };
     },
   },
-  useFeatureFlags: jest.fn(),
+  useFeatureFlags: jest.fn().mockReturnValue({
+    QICoreMeasureDefinitions: true,
+  }),
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),
@@ -443,6 +452,67 @@ describe("MeasureDetails component", () => {
 
     expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureSet")).toBeInTheDocument();
+  });
+
+  it("should render measure definitions for qi core measure", () => {
+    const { getByTestId, queryByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
+          <Routes>
+            <Route
+              path="/foo/*"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  isQDM={false}
+                />
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
+    const leftPanelQiCoreMeasureDefinitions = queryByTestId(
+      "leftPanelQiCoreMeasureDefinition"
+    );
+    expect(leftPanelQiCoreMeasureDefinitions).not.toBeNull();
+    const measureDefinitionTerms = queryByTestId("measure-definitions");
+    expect(measureDefinitionTerms).toBeNull();
+  });
+
+  it("should not render qi-core measure definitions if feature flag is not on", () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => {
+      return {
+        QICoreMeasureDefinitions: false,
+      };
+    });
+    const { getByTestId, queryByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
+          <Routes>
+            <Route
+              path="/foo/*"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  isQDM={false}
+                />
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
+    const leftPanelQiCoreMeasureDefinitions = queryByTestId(
+      "leftPanelQiCoreMeasureDefinition"
+    );
+    expect(leftPanelQiCoreMeasureDefinitions).toBeNull();
+    const measureDefinitionTerms = queryByTestId("measure-definitions");
+    expect(measureDefinitionTerms).toBeNull();
   });
 
   it("should render the tabs in the measure details side nav with completed icons", () => {

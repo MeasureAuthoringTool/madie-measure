@@ -15,6 +15,7 @@ import EditMeasureDetailsSideNav from "./EditMeasureDetailsSideNav";
 import MeasureReferences from "./MeasureReferences/MeasureReferences";
 import TransmissionFormat from "./TransmissionFormat/TransmissionFormat";
 import { Measure } from "@madie/madie-models";
+import MeasureDefinitions from "./MeasureDefinitions/MeasureDefinitions";
 const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
 export interface RouteHandlerState {
   canTravel: boolean;
@@ -58,6 +59,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   const transmissionFormat = `transmission-format`;
   const detailsLink = "";
   const measureSetLink = `measure-set`;
+  const measureDefinitionLink = `measure-definition`;
 
   const [measure, setMeasure] = useState<any>(measureStore.state);
 
@@ -208,6 +210,17 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
       id: "sideNavMeasureSet",
       displayCompletedIcon: !!measure?.measureMetaData.measureSetTitle,
     });
+  } else {
+    if (featureFlags.QICoreMeasureDefinitions) {
+      links[1].links.push({
+        title: "Definition",
+        href: measureDefinitionLink,
+        dataTestId: "leftPanelQiCoreMeasureDefinition",
+        id: "sideNavQiCoreMeasureDefinition",
+        displayCompletedIcon:
+          !!measure?.measureMetaData.measureDefinitions?.[0].term,
+      });
+    }
   }
   useEffect(() => {
     setErrorMessage("");
@@ -334,6 +347,16 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                     header="Definition"
                     setErrorMessage={setErrorMessage}
                   />
+                }
+              />
+            </>
+          )}
+          {!isQDM && featureFlags.QICoreMeasureDefinitions && (
+            <>
+              <Route
+                path={measureDefinitionLink}
+                element={
+                  <MeasureDefinitions setErrorMessage={setErrorMessage} />
                 }
               />
             </>
