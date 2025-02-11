@@ -5,6 +5,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 import { DialogContent, Typography, Backdrop } from "@mui/material";
+import { measureStore } from "@madie/madie-util";
 
 interface ModalProps {
   open;
@@ -19,6 +20,13 @@ export default function ViewHRModal(props: ModalProps) {
   const [loading, setLoading] = useState(true);
   const [hr, setHr] = useState<string>();
   const [error, setError] = useState<string>();
+  const [measure, setMeasure] = useState<any>(measureStore.state);
+  useEffect(() => {
+    const subscription = measureStore.subscribe(setMeasure);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const getHumanReadable = useCallback(async (measureId) => {
     setLoading(true);
@@ -42,7 +50,7 @@ export default function ViewHRModal(props: ModalProps) {
 
   useEffect(() => {
     getHumanReadable(props.measureId);
-  }, [props.measureId]);
+  }, [props.measureId, measure]);
 
   return (
     <MadieDialog
