@@ -1,6 +1,7 @@
 import * as React from "react";
+import userEvent from "@testing-library/user-event";
 import { structuredDefinitionUSCoreEthnicity } from "../../../../../../../__mocks__/structuredDefinitions/StructureDefinition-us-core-ethnicity";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import TypeEditor from "./TypeEditor";
 import axios from "../../../../../../../../../../api/axios-instance";
 import { FormikProvider } from "formik";
@@ -85,9 +86,74 @@ describe("TypeEditor for profiled extensions/slices ", () => {
         },
       ],
     };
-    mockedAxios.get.mockResolvedValue({
-      data: { definition: structuredDefinitionUSCoreEthnicity },
-    });
+    mockedAxios.get
+      // get structured definition for ethnicity
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          status: 200,
+          data: {
+            definition: structuredDefinitionUSCoreEthnicity,
+          },
+        })
+      )
+      // expansion for omb ethnicity
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          status: 200,
+          data: {
+            expansion: {
+              contains: [
+                {
+                  code: "2135-2",
+                  system: "urn:oid:2.16.840.1.113883.6.238",
+                  display: "Hispanic or Latino",
+                },
+              ],
+            },
+          },
+        })
+      )
+      // expansion for detailed ethnicity
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          status: 200,
+          data: undefined, // detailed ethnicity expansion not found in local hapi
+        })
+      )
+      // get value set definition
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          status: 200,
+          data: {
+            compose: {
+              include: [
+                {
+                  valueSet: "2.16.840.1.114222.4.11.877",
+                },
+              ],
+            },
+          },
+        })
+      );
+    // mock detailed ethnicity expansion from VSAC
+    mockedAxios.put.mockImplementationOnce(() =>
+      Promise.resolve({
+        status: 200,
+        data: [
+          {
+            expansion: {
+              contains: [
+                {
+                  code: "2137-8",
+                  system: "urn:oid:2.16.840.1.113883.6.238",
+                  display: "Spaniard",
+                },
+              ],
+            },
+          },
+        ],
+      })
+    );
 
     render(
       <ApiContextProvider value={mockServiceConfig}>
@@ -112,5 +178,17 @@ describe("TypeEditor for profiled extensions/slices ", () => {
     expect(screen.getByTestId("extension:ombCategory")).toBeInTheDocument();
     expect(screen.getByTestId("extension:detailed")).toBeInTheDocument();
     expect(screen.getByTestId("extension:text")).toBeInTheDocument();
+    const ethnicityCodeSelectors = screen.getAllByRole("combobox");
+    // select omb ethnicity option
+    userEvent.click(ethnicityCodeSelectors[1]);
+    const ombOptions = screen.getByRole("listbox");
+    const ombOption = within(ombOptions).getByRole("option");
+    expect(ombOption.getAttribute("data-value")).toBe("2135-2");
+
+    // select detailed ethnicity option
+    userEvent.click(ethnicityCodeSelectors[3]);
+    const detailedOptions = screen.getByRole("listbox");
+    const detailedOption = within(detailedOptions).getByRole("option");
+    expect(detailedOption.getAttribute("data-value")).toBe("2137-8");
   });
 });
