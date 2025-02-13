@@ -143,6 +143,16 @@ export const getUriValidator = (required) => {
   return baseValidator;
 };
 
+export const getInstantValidator = (required: boolean) => {
+  const regex =
+    /([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)(\.[0-9]{1,9})?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))/;
+  const baseValidator = Yup.string().matches(regex, "Invalid Instant format");
+  if (required) {
+    return baseValidator.required("This field is required");
+  }
+  return baseValidator;
+};
+
 /*
   This object will hold all references to validations with keys for type matching up against a validation
   We can then use the lookup to see if it exists, if it does, we return the validation function, we pass in the required value attached,
@@ -160,6 +170,7 @@ export const validationLookup = {
   id: getIdValidator,
   uri: getUriValidator,
   decimal: getDecimalValidator,
+  instant: getInstantValidator,
 };
 
 export const getValidation = (type, required) => {

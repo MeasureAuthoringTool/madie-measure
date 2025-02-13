@@ -288,30 +288,67 @@ describe("TypeEditor Component", () => {
 
   test("Should render Instant component by instant", () => {
     const handleChange = jest.fn();
+    const touched = {
+      Observation: {
+        issued: true,
+      },
+    };
     render(
-      <TypeEditor
-        type={`instant`}
-        required={true}
-        value={`urn:oid:2.16.840.1.113883.6.238`}
-        onChange={handleChange}
-        structureDefinition={null}
-      />
+      <FormikProvider value={{ ...mockFormik, touched }}>
+        <TypeEditor
+          type="instant"
+          required={true}
+          value="2025-02-04T00:00:00.000+00:00"
+          onChange={handleChange}
+          structureDefinition={null}
+          resource={undefined}
+          parentStructureDefinition={undefined}
+          canEdit={true}
+          label="Observation.issued"
+        />
+      </FormikProvider>
     );
-    expect(screen.getByTestId("instant-input")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("Observation.issued_instant")
+    ).toBeInTheDocument();
   });
 
-  test("Should render Instant component by hl7 code", () => {
+  test("Instant validation should display field errors", () => {
+    const touched = {
+      Observation: {
+        issued: true,
+      },
+    };
+    const errors = {
+      Observation: {
+        issued: "This field is required",
+      },
+    };
     const handleChange = jest.fn();
+    const formik = { ...mockFormik, errors, touched };
     render(
-      <TypeEditor
-        type={`http://hl7.org/fhir/R4/datatypes.html#instant`}
-        required={true}
-        value={``}
-        onChange={handleChange}
-        structureDefinition={null}
-      />
+      <FormikProvider value={formik}>
+        <TypeEditor
+          type="instant"
+          required={true}
+          value="2025-02-04T00:00:00.000+00:00"
+          onChange={handleChange}
+          structureDefinition={null}
+          resource={undefined}
+          parentStructureDefinition={undefined}
+          canEdit={true}
+          label="Observation.issued"
+        />
+      </FormikProvider>
     );
-    expect(screen.getByTestId("instant-input")).toBeInTheDocument();
+    const inputField = screen.getByTestId("Observation.issued_instant-input");
+    expect(inputField).toBeInTheDocument();
+    expect(inputField.getAttribute("aria-invalid")).toBe(
+      errors.Observation.issued
+    );
+    expect(
+      screen.getByTestId("Observation.issued_instant-helper-text")
+    ).toHaveTextContent(errors.Observation.issued);
   });
 
   test("Should render Date component", () => {
