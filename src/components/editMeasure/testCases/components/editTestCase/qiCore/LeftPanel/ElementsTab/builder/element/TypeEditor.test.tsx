@@ -116,12 +116,13 @@ describe("TypeEditor Component", () => {
           onChange={handleChange}
           structureDefinition={null}
           label={"ClaimResponse.id"}
+          value={claimResponseValues.ClaimResponse.id}
         />
       </FormikProvider>
     );
     const inputField = screen.getByTestId(
       "string-field-input-ClaimResponse.id"
-    );
+    ) as HTMLInputElement;
     expect(inputField).toBeInTheDocument();
     expect(inputField.value).toBe("test");
   });
@@ -136,12 +137,13 @@ describe("TypeEditor Component", () => {
           onChange={handleChange}
           structureDefinition={null}
           label={"ClaimResponse.id"}
+          value={claimResponseValues.ClaimResponse.id}
         />
       </FormikProvider>
     );
     const inputField = screen.getByTestId(
       "string-field-input-ClaimResponse.id"
-    );
+    ) as HTMLInputElement;
     expect(inputField).toBeInTheDocument();
     expect(inputField.value).toBe("test");
   });

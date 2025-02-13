@@ -94,7 +94,7 @@ const TestCaseRoutes = () => {
   useEffect(() => {
     if (measureBundle) {
       terminologyService.current
-        .getValueSetsExpansion(measureBundle)
+        .getValueSetsExpansionForBundle(measureBundle)
         .then((vs: ValueSet[]) => {
           setValueSets(vs);
         })
