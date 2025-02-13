@@ -2,11 +2,11 @@ import { useState } from "react";
 
 function UseToast() {
   const [toastOpen, setToastOpen] = useState<boolean>(false);
-  const [toastMessage, setToastMessage] = useState<string>("");
+  const [toastMessage, setToastMessage] = useState(null);
   const [toastType, setToastType] = useState<string>("danger");
   const onToastClose = () => {
     setToastOpen(false);
-    setToastMessage("");
+    setToastMessage(null);
     setToastType("danger");
   };
 
