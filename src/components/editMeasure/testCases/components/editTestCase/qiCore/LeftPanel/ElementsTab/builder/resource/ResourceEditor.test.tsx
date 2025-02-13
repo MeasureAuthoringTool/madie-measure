@@ -22,14 +22,33 @@ jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
     ...actualModule,
   };
 });
+const formikValues = {
+  ClaimResponse: {
+    id: "test",
+    disposition: "test",
+  },
+};
+
+const getProps = (label) => {
+  if (label === "ClaimResponse.id") {
+    return {
+      value: "6fb9d817-76c5-4b68-ba06-92c7429e6b5c",
+    };
+  } else {
+    return {
+      value: "test1",
+    };
+  }
+};
+
 const resetForm = jest.fn();
 const mockFormikObj = {
   touched: {},
   errors: {},
-  values: {},
+  values: formikValues,
   isSubmitting: false,
   setFieldValue: undefined,
-  getFieldProps: () => ({}),
+  getFieldProps: getProps,
   dirty: true,
   resetForm,
 };
@@ -43,13 +62,6 @@ jest.mock("formik", () => ({
   },
 }));
 
-beforeEach(() => {
-  mockFormikObj.touched = {};
-  mockFormikObj.errors = {};
-  mockFormikObj.values = {};
-  mockFormikObj.isSubmitting = false;
-  mockFormikObj.setFieldValue = undefined;
-});
 const { getByText, getByRole } = screen;
 describe("ResourceEditor", () => {
   const mockOnCancel = jest.fn();
@@ -74,9 +86,13 @@ describe("ResourceEditor", () => {
         "string-field-input-ClaimResponse.id"
       );
       expect(stringInput).toBeInTheDocument();
-      expect(stringInput.value).toBe("6fb9d817-76c5-4b68-ba06-92c7429e6b5c");
       expect(setValidationSchema).toHaveBeenCalled();
       expect(setInitialFormikValuesStu6).toHaveBeenCalled();
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("string-field-input-ClaimResponse.id").value
+      ).toBe("6fb9d817-76c5-4b68-ba06-92c7429e6b5c");
     });
     const dispositionButton = screen.getByRole("tab", { name: "disposition" });
 
