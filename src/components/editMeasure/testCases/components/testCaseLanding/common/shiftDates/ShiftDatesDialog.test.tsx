@@ -31,15 +31,6 @@ describe("Shift Test Case Dates Dialog", () => {
 
       expect(await findByTestId("shift-dates-dialog")).toBeInTheDocument();
       expect(
-        await findByTestId("shift-dates-selected-test-cases")
-      ).toBeInTheDocument();
-      expect(
-        await findByTestId("test case 1 series - test case 1 title")
-      ).toBeInTheDocument();
-      expect(
-        await findByTestId("test case 2 series - test case 2 title")
-      ).toBeInTheDocument();
-      expect(
         await findByTestId("shift-dates-number-input")
       ).toBeInTheDocument();
 

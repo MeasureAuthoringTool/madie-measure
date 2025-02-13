@@ -66,25 +66,10 @@ const ShiftDatesDialog = ({
         id="shift-dates-dialog"
         className="shift-dates-grid"
       >
-        <div
-          data-testid="shift-dates-selected-test-cases"
-          className={"test-case-list-container"}
-          style={{ fontSize: 14 }}
-        >
-          Test Case(s)
-          <ul>
-            {testCases.map((testCase) => (
-              <li
-                data-testid={`${testCase.series} - ${testCase.title}`}
-              >{`\u2022 ${testCase.title}`}</li>
-            ))}
-          </ul>
-        </div>
-
         <div id="shift-dates-info " style={{ fontSize: 15 }}>
-          Shift dates on test case(s) by the number of years being changed.
-          Entering a negative number will shift the test case(s) years
-          backwards. Feb 29 in Leap Years - Feb 28 in non Leap Years.
+          Shift dates on all test cases by the number of years being changed.
+          Entering a negative number will shift the test cases years backwards.
+          Feb 29 in Leap Years - Feb 28 in non Leap Years.
         </div>
 
         <div id="shift-dates-info " style={{ fontSize: 15 }}>
