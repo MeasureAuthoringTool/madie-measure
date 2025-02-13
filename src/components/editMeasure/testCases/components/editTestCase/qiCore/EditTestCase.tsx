@@ -297,7 +297,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
   const formik = useFormik({
     initialValues: { ...INITIAL_VALUES },
     validationSchema: TestCaseValidator,
-    // enableReinitialize: true,
+    enableReinitialize: true,
     onSubmit: async (values: TestCase) => await handleSubmit(values),
   });
   const { resetForm } = formik;
