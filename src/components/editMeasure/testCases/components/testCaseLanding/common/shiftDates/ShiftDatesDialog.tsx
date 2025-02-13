@@ -2,9 +2,7 @@ import React from "react";
 import { TestCase } from "@madie/madie-models";
 import {
   MadieDialog,
-  ReadOnlyTextField,
   NumberInput,
-  Toast,
 } from "@madie/madie-design-system/dist/react";
 import { useFormik } from "formik";
 import * as _ from "lodash";
@@ -14,15 +12,15 @@ interface shiftDatesDialogProps {
   open: boolean;
   onClose: Function;
   canEdit?: boolean;
-  testCase?: TestCase;
-  onTestCaseShiftDates?: (testCase: TestCase, shifted: number) => void;
+  testCases?: TestCase[];
+  onTestCaseShiftDates?: (testCases: TestCase[], shifted: number) => void;
 }
 
 const ShiftDatesDialog = ({
   open,
   onClose,
   canEdit,
-  testCase,
+  testCases,
   onTestCaseShiftDates,
 }: shiftDatesDialogProps) => {
   const formik = useFormik({
@@ -36,13 +34,13 @@ const ShiftDatesDialog = ({
   });
 
   const handleSubmit = async (value) => {
-    onTestCaseShiftDates(testCase, value.shiftDatesInput);
+    onTestCaseShiftDates(testCases, value.shiftDatesInput);
   };
 
   return (
     <MadieDialog
       form
-      title="Shift Test Case dates"
+      title="Shift Test Case Date(s)"
       dialogProps={{
         onClose,
         open,
@@ -68,47 +66,24 @@ const ShiftDatesDialog = ({
         id="shift-dates-dialog"
         className="shift-dates-grid"
       >
-        <div>
-          <ReadOnlyTextField
-            readOnly
-            label="Group"
-            placeholder=""
-            id="testcase-series"
-            data-testid={testCase?.series}
-            value={testCase?.series}
-            inputProps={{
-              "data-testid": "current-testcase-series",
-            }}
-          />
-        </div>
-        <div>
-          <ReadOnlyTextField
-            readOnly
-            label="Title"
-            placeholder=""
-            id="testcase-title"
-            data-testid={testCase?.title}
-            value={testCase?.title}
-            inputProps={{
-              "data-testid": "current-testcase-title",
-            }}
-          />
+        <div id="shift-dates-info " style={{ fontSize: 15 }}>
+          Shift dates on all test cases by the number of years being changed.
+          Entering a negative number will shift the test cases years backwards.
+          Feb 29 in Leap Years - Feb 28 in non Leap Years.
         </div>
 
-        <div id="shift-test-case-dates-info" style={{ fontSize: 15 }}>
-          Shift years on this test case by the number you enter. February 29th
-          in leap years = February 28th in non leap years.
-        </div>
-        <div id="shift-test-case-dates-info" style={{ fontSize: 15 }}>
+        <div id="shift-dates-info " style={{ fontSize: 15 }}>
           Note that resulting years prior to 1900 will be set to 1900 and after
           9999 will be set to 9999.
         </div>
-        <div>
+
+        <div className="shift-dates-number-input">
           <NumberInput
             id="shift-dates"
+            data-testid="shift-dates-number-input"
             label="Shift Test Case Dates"
             placeholder="# of Years"
-            disabled={!canEdit || _.isEmpty(testCase)}
+            disabled={!canEdit || _.isEmpty(testCases)}
             required={true}
             allowNegative={true}
             {...formik.getFieldProps("shiftDatesInput")}
@@ -120,11 +95,6 @@ const ShiftDatesDialog = ({
               formik.touched.shiftDatesInput && formik.errors.shiftDatesInput
             }
           ></NumberInput>
-        </div>
-
-        <div id="shift-test-case-dates-info-2" style={{ fontSize: 14 }}>
-          Shift years on this test case by the number you enter. February 29th
-          in leap years = February 28th in non leap years.
         </div>
       </div>
     </MadieDialog>
