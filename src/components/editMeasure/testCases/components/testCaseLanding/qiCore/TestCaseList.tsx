@@ -554,7 +554,6 @@ const TestCaseList = (props: TestCaseListProps) => {
         if (response.length === 0) {
           setToastType("success");
           setToastMessage(`All Test Case dates successfully shifted.`);
-          setToastMessage(`All Test Case dates successfully shifted.`);
         } else {
           setToastType("danger");
           setToastMessage(
