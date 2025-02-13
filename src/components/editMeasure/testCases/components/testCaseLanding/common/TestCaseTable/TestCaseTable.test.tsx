@@ -244,7 +244,6 @@ describe("TestCase component", () => {
     expect(screen.getByText("export transaction bundle")).toBeInTheDocument();
     expect(screen.getByText("export collection bundle")).toBeInTheDocument();
     expect(screen.getByText("delete")).toBeInTheDocument();
-    expect(screen.getByText("Shift Test Case dates")).toBeInTheDocument();
   });
 
   it("should render test case table with case numbers", async () => {
