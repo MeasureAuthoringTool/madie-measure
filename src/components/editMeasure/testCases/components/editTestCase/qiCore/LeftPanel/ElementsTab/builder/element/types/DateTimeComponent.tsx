@@ -216,6 +216,7 @@ const DateTimeComponent = ({
             disabled={!canEdit}
             id="date-field"
             handleDateChange={(date) => {
+              console.log('date is', date)
               // console.log('date is', date)
               // if (date.isValid()){
               //   console.log('date is', date)

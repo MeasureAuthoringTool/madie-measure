@@ -104,20 +104,24 @@ const DateField = ({
   const isOnlyYear = (date) =>
     date.year() && date.month() === "NaN" && date.date() === "NaN";
   console.log("value is", value);
+
   const manipulateDate = (v) => {
-    if (isOnlyYear(v)) {
-    }
+    console.log('onChange', v);
+    // if (isOnlyYear(v)) {
+    //   console.log('isonlyYear')
+    // }
   };
   const handleInput = (v) => {
     console.log("input is", v);
     handleDateChange(v);
   };
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
+    // <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ ...containerSx }}>
         <DatePicker
           // value={value ? dayjs.utc(value) : null}
           // value={dayjs(value)}
+          value={null}
           onChange={(v) => {
             manipulateDate(v);
           }}
@@ -129,13 +133,17 @@ const DateField = ({
               const { InputProps } = params;
               InputProps["data-testid"] = id;
               InputProps["aria-required"] = required;
-              InputProps.value = generatedStringInput;
+              // InputProps.value = generatedStringInput;
               return {
                 id: id,
                 label,
                 sx: { ...dateTextFieldStyle, ...textFieldSx },
-                value: value ? value : null,
-                onChange: handleDateChange,
+                // value: value ? value : null,
+                // onChange: handleDateChange,
+                onChange: (v) => {
+                  // given input, save only string
+                  console.log('v is', v)
+                },
                 // onChange: (v) => {
                 //   handleInput(v);
                 // },
@@ -154,7 +162,7 @@ const DateField = ({
           slots={{ textField: TextField }}
         />
       </Box>
-    </LocalizationProvider>
+    // </LocalizationProvider>
   );
 };
 export default DateField;
