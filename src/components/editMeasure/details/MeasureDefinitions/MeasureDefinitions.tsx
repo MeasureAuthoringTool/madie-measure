@@ -111,14 +111,14 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
       if (term1 < term2) {
         return -1;
       }
-      if (term2 > term1) {
+      if (term1 > term2) {
         return 1;
       }
       if (term1 === term2) {
         if (definition1 < definition2) {
           return -1;
         }
-        if (definition2 > definition1) {
+        if (definition1 > definition2) {
           return 1;
         }
       }
