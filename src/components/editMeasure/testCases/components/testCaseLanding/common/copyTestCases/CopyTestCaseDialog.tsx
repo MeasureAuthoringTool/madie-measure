@@ -289,15 +289,15 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
         } else if (result?.copiedTestCases?.length > 0) {
           result.didClearExpectedValues
             ? onClose(
-                "Test Cases have been successfully copied without expected values due to differing Population Criteria on target Measure. Some Test Cases were invalid and were not copied. ",
+                "Test Cases have been successfully copied without expected values due to differing Population Criteria on target Measure. Some Test Cases could not be copied.",
                 "warning"
               )
             : onClose(
-                "Test Cases have been successfully copied. Some Test Cases were invalid and were not copied.",
+                "Test Cases have been successfully copied. Some Test Cases could not be copied.",
                 "warning"
               );
         } else {
-          onClose("Test Cases were invalid and not copied.", "danger");
+          onClose("Test Cases could not copied.", "danger");
         }
       })
       .catch((e) => {
