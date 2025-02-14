@@ -22,6 +22,7 @@ jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
     ...actualModule,
   };
 });
+
 const formikValues = {
   ClaimResponse: {
     id: "test",
