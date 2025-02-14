@@ -5,6 +5,19 @@ import ViewHRModal from "./ViewHRModal";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../api/useMeasureServiceApi";
+// @ts-ignore
+import { measureStore } from "@madie/madie-util";
+
+jest.mock("@madie/madie-util", () => ({
+  measureStore: {
+    updateMeasure: jest.fn((measure) => measure),
+    state: jest.fn().mockImplementation(() => null),
+    initialState: jest.fn().mockImplementation(() => null),
+    subscribe: () => {
+      return { unsubscribe: () => null };
+    },
+  },
+}));
 
 jest.mock("../../../api/useMeasureServiceApi");
 const mockMeasureServiceApi = {

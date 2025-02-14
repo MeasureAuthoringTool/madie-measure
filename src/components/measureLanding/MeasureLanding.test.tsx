@@ -36,6 +36,14 @@ jest.mock("@madie/madie-util", () => ({
     return true;
   }),
   useFeatureFlags: jest.fn(),
+  measureStore: {
+    updateMeasure: jest.fn((measure) => measure),
+    state: jest.fn().mockImplementation(() => null),
+    initialState: jest.fn().mockImplementation(() => null),
+    subscribe: () => {
+      return { unsubscribe: () => null };
+    },
+  },
 }));
 
 const mockedUsedNavigate = jest.fn();
