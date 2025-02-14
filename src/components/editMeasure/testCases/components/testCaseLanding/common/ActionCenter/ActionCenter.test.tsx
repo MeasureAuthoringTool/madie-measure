@@ -81,6 +81,9 @@ describe("ActionCenter Component", () => {
       );
 
       expect(screen.queryByTestId("delete-action-btn")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("shift-test-case-dates-action-btn")
+      ).not.toBeInTheDocument();
       expect(screen.queryByTestId("clone-action-btn")).not.toBeInTheDocument();
       expect(screen.queryByTestId("export-action-btn")).not.toBeInTheDocument();
     });
@@ -97,6 +100,9 @@ describe("ActionCenter Component", () => {
       );
 
       expect(screen.getByTestId("delete-action-btn")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("shift-test-case-dates-action-btn")
+      ).toBeInTheDocument();
       expect(screen.getByTestId("clone-action-btn")).toBeInTheDocument();
       expect(screen.getByTestId("export-action-btn")).toBeInTheDocument();
     });
@@ -114,6 +120,9 @@ describe("ActionCenter Component", () => {
       );
 
       expect(screen.getByTestId("delete-action-btn")).toBeEnabled();
+      expect(
+        screen.getByTestId("shift-test-case-dates-action-btn")
+      ).toBeEnabled();
       expect(screen.getByTestId("clone-action-btn")).toBeEnabled();
       expect(screen.getByTestId("export-action-btn")).toBeEnabled();
     });
@@ -131,6 +140,9 @@ describe("ActionCenter Component", () => {
       );
 
       expect(screen.getByTestId("delete-action-btn")).toBeEnabled();
+      expect(
+        screen.getByTestId("shift-test-case-dates-action-btn")
+      ).toBeEnabled();
       expect(screen.getByTestId("clone-action-btn")).toBeDisabled();
       expect(screen.getByTestId("export-action-btn")).toBeEnabled();
     });
@@ -149,6 +161,14 @@ describe("ActionCenter Component", () => {
 
       const deleteTooltip = await screen.findByTestId("delete-tooltip");
       expect(deleteTooltip).toHaveAttribute("aria-label", "Delete test case");
+
+      const shiftTestCaseDatesTooltip = await screen.findByTestId(
+        "shift-test-case-dates-tooltip"
+      );
+      expect(shiftTestCaseDatesTooltip).toHaveAttribute(
+        "aria-label",
+        "Shift test case dates"
+      );
 
       const cloneTooltip = await screen.findByTestId("clone-tooltip");
       expect(cloneTooltip).toHaveAttribute("aria-label", "Clone test case");
