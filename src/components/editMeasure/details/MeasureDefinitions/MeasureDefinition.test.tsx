@@ -351,8 +351,6 @@ describe("Measure Definitions Component", () => {
     fireEvent.click(getByTestId("delete-dialog-continue-button"));
 
     await waitFor(() => {
-      const toastMessage = findByTestId("measure-definitions-success");
-      expect(toastMessage).not.toBeNull();
       expect(queryByTestId("delete-dialog-body")).toBeNull();
     });
   });
