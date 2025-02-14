@@ -16,9 +16,9 @@ const StringComponent = ({
   label = "VALUE",
   structureDefinition,
   stringOnly = true,
-  value,
   ...props
 }: TypeComponentProps) => {
+  const { value } = props;
   return (
     <TextField
       required={fieldRequired}
@@ -46,8 +46,8 @@ const StringComponent = ({
             }
           : undefined
       }
-      value={value}
       {...props}
+      value={value || ""}
     />
   );
 };

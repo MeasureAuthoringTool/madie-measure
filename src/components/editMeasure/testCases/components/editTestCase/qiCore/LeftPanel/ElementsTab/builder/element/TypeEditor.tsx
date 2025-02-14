@@ -74,14 +74,12 @@ const TypeEditor = ({
         return (
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
             <StringComponent
-              {...formik.getFieldProps(label)}
               label={label}
               canEdit={canEdit}
               helperText={formikErrorHandler(label)}
               error={getNestedProperty(formik.errors, label)}
-              structureDefinition={null}
               fieldRequired={required}
-              value={value}
+              {...formik.getFieldProps(label)}
             />
           </Box>
         );
@@ -94,9 +92,7 @@ const TypeEditor = ({
               canEdit={canEdit}
               helperText={formikErrorHandler(label)}
               error={getNestedProperty(formik.errors, label)}
-              structureDefinition={null}
               fieldRequired={required}
-              value={value}
               {...formik.getFieldProps(label)}
             />
           </Box>
@@ -158,7 +154,6 @@ const TypeEditor = ({
             label={label}
             helperText={formikErrorHandler(label)}
             error={getNestedProperty(formik.errors, label)}
-            value={value}
             integerType={
               type === "unsignedInt"
                 ? IntegerType.UNSIGNED

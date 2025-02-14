@@ -26,6 +26,7 @@ const IntegerComponent = ({
   error,
   ...props
 }: IntegerComponentProps) => {
+  const { value } = props;
   return (
     <TextField
       required={fieldRequired}
@@ -85,6 +86,7 @@ const IntegerComponent = ({
       error={error}
       helperText={error}
       {...props}
+      value={value || ""}
     />
   );
 };
