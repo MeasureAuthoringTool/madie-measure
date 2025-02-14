@@ -2149,7 +2149,7 @@ describe("TestCaseList component", () => {
   });
 
   describe("TestCaseList component with deleteMultipleTestCases", () => {
-    it.skip("should delete selected test cases if the flag is true", async () => {
+    it("should delete selected test cases if the flag is true", async () => {
       useTestCaseServiceMock.mockImplementation(() => {
         return {
           ...useTestCaseServiceMockResolved,
