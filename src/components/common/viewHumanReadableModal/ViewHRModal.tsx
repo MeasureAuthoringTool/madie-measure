@@ -82,6 +82,7 @@ export default function ViewHRModal(props: ModalProps) {
         "data-testid": "human-readable-export-button",
         continueText: "Export",
         hidden: error,
+        onClick: () => window.dispatchEvent(new Event("export-measure")),
       }}
     >
       <DialogContent>
