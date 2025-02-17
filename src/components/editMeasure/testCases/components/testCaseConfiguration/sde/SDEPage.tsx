@@ -16,6 +16,7 @@ import "../testCaseConfiguration.scss";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 import { Typography } from "@mui/material";
 import { useQdmExecutionContext } from "../../routes/qdm/QdmExecutionContext";
+import useFormikResetOnEvent from "../../../../../common/useFormikResetOnEvent";
 
 const SDEPage = () => {
   const { setExecutionContextReady } = useQdmExecutionContext();
@@ -48,6 +49,7 @@ const SDEPage = () => {
     enableReinitialize: true,
     onSubmit: async () => await handleSubmit(),
   });
+  useFormikResetOnEvent(formik);
   const { resetForm } = formik;
 
   useEffect(() => {
