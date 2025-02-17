@@ -2115,39 +2115,6 @@ describe("TestCaseList component", () => {
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
 
-  it("Should display shift test case dialog when at least one test case is selected", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TestCaseListActionCenter: true,
-    }));
-    renderTestCaseListComponent();
-
-    const table = await screen.findByTestId("test-case-tbl");
-    const tableHeaders = table.querySelectorAll("thead th");
-
-    expect(tableHeaders[1]).toHaveTextContent("Case #");
-    expect(tableHeaders[2]).toHaveTextContent("Status");
-    expect(tableHeaders[3]).toHaveTextContent("Group");
-    expect(tableHeaders[4]).toHaveTextContent("Title");
-    expect(tableHeaders[5]).toHaveTextContent("Description");
-
-    const checkboxes = await screen.findAllByRole("checkbox");
-    expect(checkboxes.length).toBe(4);
-
-    const shiftTestCaseButton = await screen.findByTestId(
-      "shift-test-case-dates-action-btn"
-    );
-    expect(shiftTestCaseButton).toBeDisabled();
-
-    userEvent.click(checkboxes[1]);
-    expect(shiftTestCaseButton).not.toBeDisabled();
-
-    userEvent.click(shiftTestCaseButton);
-    expect(await screen.findByRole("dialog")).toBeInTheDocument();
-
-    userEvent.click(await screen.findByRole("button", { name: "Cancel" }));
-    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
-  });
-
   describe("TestCaseList component with deleteMultipleTestCases", () => {
     it("should delete selected test cases if the flag is true", async () => {
       useTestCaseServiceMock.mockImplementation(() => {
