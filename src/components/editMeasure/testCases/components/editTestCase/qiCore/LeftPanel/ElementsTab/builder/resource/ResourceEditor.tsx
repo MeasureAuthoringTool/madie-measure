@@ -64,18 +64,10 @@ const ResourceEditor = ({
             selectedResource.definition.type,
             e.path
           );
-          let elemValue;
-          // these are extensions. search for presence of extension value
-          if (e.type[0]?.profile) {
-            elemValue = _.find(
-              selectedResource.bundleEntry.resource.extension,
-              {
-                url: e.type[0]?.profile[0],
-              }
-            );
-          } else {
-            elemValue = _.get(selectedResource.bundleEntry.resource, elemPath);
-          }
+          const elemValue = _.get(
+            selectedResource.bundleEntry.resource,
+            elemPath
+          );
           return !_.isNil(elemValue);
         }),
       ];

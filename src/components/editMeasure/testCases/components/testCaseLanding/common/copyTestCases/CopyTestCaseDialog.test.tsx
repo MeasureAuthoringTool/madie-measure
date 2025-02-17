@@ -10,7 +10,7 @@ import userEvent from "@testing-library/user-event";
 import useTestCaseServiceApi, {
   TestCaseServiceApi,
 } from "../../../../api/useTestCaseServiceApi";
-const { getByTestId, getByRole } = screen;
+const { getByTestId, getByRole, findByTestId, findByRole } = screen;
 
 const MEASURE_OWNER = "test.user";
 
@@ -209,7 +209,7 @@ describe("Copy Test Case Dialog Component", () => {
       />
     );
 
-    const table = await screen.findByTestId("measure-list-tbl");
+    const table = await findByTestId("measure-list-tbl");
 
     const tableHeaders = table.querySelectorAll("thead th");
 
@@ -263,7 +263,7 @@ describe("Copy Test Case Dialog Component", () => {
     );
 
     await waitFor(() => expect(testFn).toHaveBeenCalledTimes(1));
-    const table = await screen.findByTestId("measure-list-tbl");
+    const table = await findByTestId("measure-list-tbl");
     const tableHeaders = table.querySelectorAll("thead th");
     expect(tableHeaders[1]).toHaveTextContent("Measure Name");
     expect(tableHeaders[2]).toHaveTextContent("Version");
@@ -374,4 +374,124 @@ describe("Copy Test Case Dialog Component", () => {
       "You don't have any other measures that you own or are shared with you, belonging to the same model."
     );
   });
+
+  it("should display a spinner while copying", async () => {
+    const testFn = jest.fn().mockResolvedValue(mockMeasureSearchResponse);
+    const closeFn = jest.fn().mockName("close");
+    const useMeasureServiceMockResolvedMultiple = {
+      searchMeasuresByCriteria: testFn,
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockResolvedMultiple;
+    });
+
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        copyTestCasesToMeasure: jest.fn().mockResolvedValue({
+          copiedTestCases: testCases,
+          didClearExpectedValues: false,
+        }),
+      } as unknown as TestCaseServiceApi;
+    });
+    const test = new AbortController();
+    await prepCopy(closeFn, testFn);
+    await runCopy();
+    expect(closeFn).toHaveBeenCalledTimes(1);
+    expect(closeFn).toHaveBeenCalledWith(
+      "Test Cases have been successfully copied.",
+      "success"
+    );
+  });
+
+  it("should return toast message indicating cleared expected values", async () => {
+    const testFn = jest.fn().mockResolvedValue(mockMeasureSearchResponse);
+    const closeFn = jest.fn().mockName("close");
+    const useMeasureServiceMockResolvedMultiple = {
+      searchMeasuresByCriteria: testFn,
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockResolvedMultiple;
+    });
+
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        copyTestCasesToMeasure: jest.fn().mockResolvedValue({
+          copiedTestCases: testCases,
+          didClearExpectedValues: true,
+        }),
+      } as unknown as TestCaseServiceApi;
+    });
+    const test = new AbortController();
+    await prepCopy(closeFn, testFn);
+    await runCopy();
+    expect(closeFn).toHaveBeenCalledTimes(1);
+    expect(closeFn).toHaveBeenCalledWith(
+      "Test Cases successfully copied without expected values due to differing Population Criteria on target Measure.",
+      "success"
+    );
+  });
+
+  it("should return toast message indicating partial copy", async () => {
+    const testFn = jest.fn().mockResolvedValue(mockMeasureSearchResponse);
+    const closeFn = jest.fn().mockName("close");
+    const useMeasureServiceMockResolvedMultiple = {
+      searchMeasuresByCriteria: testFn,
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockResolvedMultiple;
+    });
+
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        copyTestCasesToMeasure: jest.fn().mockResolvedValue({
+          copiedTestCases: [...testCases].pop(),
+          didClearExpectedValues: true,
+        }),
+      } as unknown as TestCaseServiceApi;
+    });
+    const test = new AbortController();
+    await prepCopy(closeFn, testFn);
+    await runCopy();
+    expect(closeFn).toHaveBeenCalledTimes(1);
+    expect(closeFn).toHaveBeenCalledWith(
+      "Test Cases could not copied.",
+      "danger"
+    );
+  });
 });
+
+const prepCopy = async (closeFn, testFn) => {
+  render(
+    <CopyTestCaseDialog
+      open={true}
+      onClose={closeFn}
+      measure={mockCurrentMeasure}
+      selectedTestCases={testCases.map((tc) => tc.id)}
+    />
+  );
+  await waitFor(() => expect(testFn).toHaveBeenCalledTimes(1));
+  const table = await findByTestId("measure-list-tbl");
+  const tableRows = table.querySelectorAll("tbody tr");
+  expect(tableRows[0]).toHaveTextContent(
+    otherMeasuresOwnedByUser[0].measureName
+  );
+  const radioButtons = await screen.findAllByRole("radio");
+  radioButtons.forEach((radioButton) => {
+    expect(radioButton).not.toBeChecked();
+  });
+  // Requires double click. Not sure why.
+  userEvent.click(radioButtons[0]);
+  userEvent.click(radioButtons[0]);
+  await waitFor(() => {
+    expect(radioButtons.at(0)).toBeChecked();
+  });
+};
+
+const runCopy = async () => {
+  expect(getByTestId("copy-test-cases-continue-button")).toBeEnabled();
+  userEvent.click(getByTestId("copy-test-cases-continue-button"));
+  await findByRole("progressbar");
+};

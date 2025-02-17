@@ -11,6 +11,7 @@ const BooleanComponent = ({
   error,
   ...props
 }: TypeComponentProps) => {
+  const { value } = props;
   const booleanOptions = [
     <MuiMenuItem
       key={`boolean-True-${label}`}
@@ -46,6 +47,7 @@ const BooleanComponent = ({
         error={error}
         options={booleanOptions}
         {...props}
+        value={value || ""} // mui thinks undefined is an uncontrolled input. We need to display this otherwise.
       ></Select>
     </>
   );
