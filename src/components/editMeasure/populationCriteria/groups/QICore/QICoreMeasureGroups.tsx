@@ -718,6 +718,13 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     }
   }, [ucum, ucumUnits]);
 
+  const isImprovementNotationRequired = () => {
+    if (formik.values.scoring !== GroupScoring.COHORT) {
+      return true;
+    }
+    return false;
+  };
+
   return (
     <div tw="lg:col-span-5 pl-2 pr-2" data-testid="qi-core-groups">
       <FormikProvider value={formik}>
@@ -1405,7 +1412,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                           name: "Select Improvement Notation",
                           value: "",
                         }}
-                        required
+                        required={isImprovementNotationRequired()}
                         label="Improvement Notation"
                         id="improvement-notation-select"
                         inputProps={{
@@ -1415,10 +1422,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                         helperText={formik.errors.improvementNotation}
                         data-testid="improvement-notation-select"
                         {...formik.getFieldProps("improvementNotation")}
-                        error={
-                          formik.touched.improvementNotation &&
-                          Boolean(formik.errors.improvementNotation)
-                        }
+                        error={Boolean(formik.errors.improvementNotation)}
                         size="small"
                         options={Object.values(improvementNotationOptions).map(
                           (opt) => (
