@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import queryString from "query-string";
+import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import {
   Button,
   Pagination,
   TextField,
+  TextArea,
+  Toast,
+  MadieDialog,
+  MadieDeleteDialog,
 } from "@madie/madie-design-system/dist/react";
 import "twin.macro";
 import SearchIcon from "@mui/icons-material/Search";
@@ -14,8 +19,8 @@ import { Typography, IconButton } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { measureStore, checkUserCanEdit } from "@madie/madie-util";
 import { useFormik } from "formik";
+import { MeasureDefinition, Measure } from "@madie/madie-models";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
-import { MeasureDefinition } from "@madie/madie-models";
 import MeasureMetaDataRow from "../MeasureMetaDataRow";
 import { MeasureDefinitionValidator } from "./MeasureDefinitionValidator";
 import "../MeasureMetaDataTable.scss";
@@ -25,8 +30,11 @@ interface MeasureDefinitionsProps {
 }
 
 const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
+  const { setErrorMessage } = props;
   const { search } = useLocation();
   let navigate = useNavigate();
+  const measureServiceApi = useMeasureServiceApi();
+  const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -61,8 +69,15 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
     },
     enableReinitialize: true,
     validationSchema: MeasureDefinitionValidator,
-    onSubmit: async (values) => await handleSubmit(values),
+    onSubmit: async (values: any) => await handleSubmit(values),
   });
+
+  function formikErrorHandler(name: string, isError: boolean) {
+    if (formik.touched[name] && formik.errors[name]) {
+      return `${formik.errors[name]}`;
+    }
+  }
+
   useFormikResetOnEvent(formik);
 
   useEffect(() => {
@@ -74,7 +89,109 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
     }
   }, [setMeasureDefinitions, measure]);
 
-  const handleSubmit = (values: MeasureDefinition) => {};
+  // Toast utilities
+  const [toastOpen, setToastOpen] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string>("");
+  const [toastType, setToastType] = useState<string>("danger");
+  const onToastClose = () => {
+    setToastType("danger");
+    setToastMessage("");
+    setToastOpen(false);
+  };
+  const handleToast = (type, message, open) => {
+    setToastType(type);
+    setToastMessage(message);
+    setToastOpen(open);
+  };
+  //first sort by term then by definition
+  const sortDefinitions = (
+    definitions: MeasureDefinition[]
+  ): MeasureDefinition[] => {
+    const sortFunction = (a: MeasureDefinition, b: MeasureDefinition) => {
+      const term1 = a.term ? a.term.toLowerCase() : "";
+      const term2 = b.term ? b.term.toLowerCase() : "";
+      const definition1 = a.definition.toLowerCase();
+      const definition2 = b.definition.toLowerCase();
+      if (term1 < term2) {
+        return -1;
+      }
+      if (term1 > term2) {
+        return 1;
+      }
+      if (term1 === term2) {
+        if (definition1 < definition2) {
+          return -1;
+        }
+        if (definition1 > definition2) {
+          return 1;
+        }
+      }
+      return 0;
+    };
+    return definitions.sort(sortFunction);
+  };
+
+  const handleSubmit = (values: MeasureDefinition) => {
+    const copiedMetaData = { ...measure?.measureMetaData };
+    // if metadata has measureDefinitions
+    if (
+      copiedMetaData.hasOwnProperty("measureDefinitions") &&
+      Array.isArray(copiedMetaData.measureDefinitions)
+    ) {
+      if (!selectedDefinition) {
+        // adding a new measure definition
+        copiedMetaData.measureDefinitions.push(values);
+        copiedMetaData.measureDefinitions = sortDefinitions(
+          copiedMetaData.measureDefinitions
+        );
+      } else {
+        //edit a measure defintion
+        const newDefinitions: Array<MeasureDefinition> =
+          copiedMetaData.measureDefinitions.filter(
+            (definition) => definition.id !== selectedDefinition.id
+          );
+        newDefinitions.push(values);
+        copiedMetaData.measureDefinitions = sortDefinitions(newDefinitions);
+      }
+    } else {
+      // if metadata does not have measureDefinitions
+      copiedMetaData.measureDefinitions = [values];
+    }
+    const modifiedMeasure = {
+      ...measure,
+      measureMetaData: copiedMetaData,
+    };
+    measureServiceApi
+      .updateMeasure(modifiedMeasure)
+      .then((res) => {
+        //@ts-ignore
+        const { status, data } = res;
+        if (status === 200) {
+          setErrorMessage("");
+          handleToast("success", "Measure Definition saved Successfully", true);
+          updateMeasure(data);
+          toggleOpen();
+          formik.resetForm();
+        } else {
+          let message = `Error updating measure ${measure.measureName}`;
+          handleToast("danger", message, true);
+          setErrorMessage(message);
+        }
+      })
+      .catch((reason) => {
+        let message = `Error updating measure "${measure.measureName}"`;
+        handleToast("danger", message, true);
+        setErrorMessage(message);
+      });
+  };
+
+  const [open, setOpen] = useState<boolean>(false);
+  const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
+    useState<boolean>(false);
+  const toggleOpen = () => {
+    setOpen(!open);
+    setSelectedDefinition(null);
+  };
 
   const [totalPages, setTotalPages] = useState<number>(0);
   const [totalItems, setTotalItems] = useState<number>(0);
@@ -136,8 +253,18 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
     navigate(`?page=${1}&limit=${e.target.value}`);
   };
 
-  const handleClick = (id, operation) => {};
-
+  const handleClick = (id, operation) => {
+    if (operation === "delete") {
+      setDeleteDialogModalOpen(true);
+    } else {
+      setOpen(true);
+    }
+    setSelectedDefinition(
+      measure?.measureMetaData?.measureDefinitions.find((definition) => {
+        return id === definition.id;
+      })
+    );
+  };
   const createEncodedQuery = (values) => {
     const searchEncoded = encodeURIComponent(values.searchValue);
     return `?search=${searchEncoded}&page=1&limit=${values.limit || 10}`;
@@ -146,6 +273,45 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
     navigate(createEncodedQuery(formik.values));
   };
   const handleClearClick = () => {};
+
+  const deleteMeasureDefinition = useCallback(
+    (id) => {
+      const modifiedMetaData =
+        measure?.measureMetaData?.measureDefinitions?.filter(
+          (definition) => definition?.id !== id
+        );
+      const modifiedMeasure: Measure = {
+        ...measure,
+        measureMetaData: {
+          ...measure.measureMetaData,
+          measureDefinitions: modifiedMetaData,
+        },
+      };
+
+      measureServiceApi
+        .updateMeasure(modifiedMeasure)
+        .then((res) => {
+          //@ts-ignore
+          const { status, data } = res;
+          if (status === 200) {
+            handleToast(
+              "success",
+              "Measure definition deleted successfully",
+              true
+            );
+            updateMeasure(data);
+            setDeleteDialogModalOpen(false);
+            formik.resetForm();
+          }
+        })
+        .catch((reason) => {
+          const message = `Error updating measure "${measure.measureName}"`;
+          handleToast("danger", message, true);
+          setErrorMessage(message);
+        });
+    },
+    [measure?.measureMetaData?.measureDefinitions, measureServiceApi]
+  );
 
   return (
     <div
@@ -226,8 +392,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
                   variant="outline-filled"
                   className="page-header-action-button"
                   data-testid="create-definition-button"
-                  //onClick={toggleOpen}
-                  onClick={() => {}}
+                  onClick={toggleOpen}
                   sx={{
                     display: "flex",
                     flexDirection: "row-reverse",
@@ -294,6 +459,93 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
           />
         </div>
       </div>
+
+      <Toast
+        toastKey="measure-information-toast"
+        toastType={toastType}
+        testId={
+          toastType === "danger"
+            ? `measure-definitions-error`
+            : `measure-definitions-success`
+        }
+        open={toastOpen}
+        message={toastMessage}
+        onClose={onToastClose}
+        autoHideDuration={6000}
+        closeButtonProps={{
+          "data-testid": "close-error-button",
+        }}
+      />
+      <MadieDialog
+        form={true}
+        title={selectedDefinition ? "Edit Term" : "Add Term"}
+        dialogProps={{
+          open,
+          onClose: toggleOpen,
+          id: "add-measure-meta-data-dialog",
+          onSubmit: formik.handleSubmit,
+        }}
+        cancelButtonProps={{
+          cancelText: selectedDefinition ? "Discard Changes" : "Cancel",
+          "data-testid": "cancel-button",
+        }}
+        continueButtonProps={{
+          continueText: "Save",
+          "data-testid": "save-button",
+          disabled: !(formik.isValid && formik.dirty),
+        }}
+        children={
+          <div>
+            <TextField
+              required
+              disabled={!canEdit}
+              label="Term"
+              placeholder="Placeholder"
+              readOnly={!canEdit}
+              id="measure-definition-term"
+              data-testid="measure-definition-term"
+              inputProps={{
+                "data-testid": "measure-definition-term-input",
+                "aria-describedby": "measure-definition-term-helper-text",
+              }}
+              error={formik.touched.term && Boolean(formik.errors.term)}
+              helperText={formikErrorHandler("term", true)}
+              {...formik.getFieldProps("term")}
+            />
+
+            <TextArea
+              required
+              disabled={!canEdit}
+              label="Definition"
+              placeholder="Enter"
+              readOnly={!canEdit}
+              id="measure-definition"
+              data-testid="measure-definition"
+              inputProps={{
+                "data-testid": "measure-definition-input",
+                "aria-describedby": "measure-definition-helper-text",
+              }}
+              error={
+                formik.touched.definition && Boolean(formik.errors.definition)
+              }
+              helperText={formikErrorHandler("definition", true)}
+              {...formik.getFieldProps("definition")}
+            />
+          </div>
+        }
+      />
+
+      <MadieDeleteDialog
+        open={deleteDialogModalOpen}
+        onContinue={() => {
+          deleteMeasureDefinition(selectedDefinition.id);
+        }}
+        onClose={() => {
+          setDeleteDialogModalOpen(false);
+        }}
+        dialogTitle="Delete Measure Definition"
+        name={selectedDefinition?.term}
+      />
     </div>
   );
 };
