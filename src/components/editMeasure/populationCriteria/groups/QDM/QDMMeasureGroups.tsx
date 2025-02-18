@@ -26,6 +26,7 @@ import {
   TextArea,
 } from "@madie/madie-design-system/dist/react";
 import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
+import useFormikResetOnEvent from "../../../../common/useFormikResetOnEvent";
 import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -349,6 +350,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       }
     },
   });
+  useFormikResetOnEvent(formik);
   const { resetForm, validateForm } = formik;
   useEffect(() => {
     if (measure?.groups && measure?.groups[measureGroupNumber]) {

@@ -20,6 +20,7 @@ import "./QDMReporting.scss";
 import { MenuItem as MuiMenuItem } from "@mui/material";
 import { QDMReportingValidator } from "./QDMReportingValidator";
 import _ from "lodash";
+import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 const Grid = tw.div`grid grid-cols-2 gap-4   overflow-hidden w-full`;
 const improvementNotationOptions = [
   {
@@ -90,8 +91,8 @@ const QDMReporting = () => {
     validationSchema: QDMReportingValidator,
     onSubmit: async (values: ReportingForm) => await handleSubmit(values),
   });
+  useFormikResetOnEvent(formik);
   const { resetForm } = formik;
-
   useEffect(() => {
     updateRouteHandlerState({
       canTravel: !formik.dirty,
