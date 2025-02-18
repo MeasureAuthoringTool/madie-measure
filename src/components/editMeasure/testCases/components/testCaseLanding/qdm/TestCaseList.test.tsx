@@ -3515,6 +3515,9 @@ describe("TestCaseList component", () => {
             .mockResolvedValueOnce("Test cases are deleted successfully"),
         } as unknown as TestCaseServiceApi;
       });
+      window.URL.createObjectURL = jest
+        .fn()
+        .mockReturnValueOnce("http://fileurl");
 
       (useFeatureFlags as jest.Mock).mockReturnValue({
         TestCaseListActionCenter: true,

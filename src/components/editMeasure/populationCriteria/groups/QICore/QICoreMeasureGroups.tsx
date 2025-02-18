@@ -10,6 +10,7 @@ import {
   PopulationType,
   MeasureErrorType,
   MeasureGroupTypes,
+  MeasureScoring,
 } from "@madie/madie-models";
 import {
   MenuItem as MuiMenuItem,
@@ -153,7 +154,14 @@ const associationSelect = {
     PopulationType.MEASURE_POPULATION_EXCLUSION,
   ],
   Cohort: [PopulationType.INITIAL_POPULATION],
-  Ratio: [],
+  Ratio: [
+    PopulationType.INITIAL_POPULATION,
+    PopulationType.DENOMINATOR,
+    PopulationType.DENOMINATOR_EXCLUSION,
+    PopulationType.NUMERATOR,
+    PopulationType.NUMERATOR_EXCLUSION,
+    PopulationType.DENOMINATOR_EXCEPTION,
+  ],
 };
 
 export interface ExpressionDefinition {
@@ -963,54 +971,53 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                           setActiveTab("populations");
                         }}
                       />
-
-                      {formik.values.scoring !== "Ratio" && (
-                        <Tab
-                          tabIndex={0}
-                          label={
-                            <CompletionIndicator
-                              label="Stratifications"
-                              hasErrors={formik.errors.stratifications}
-                              displayIcon={
-                                formik.values.stratifications?.filter(
-                                  (value) =>
-                                    value.association !== null ||
-                                    value.associations.length !== 0 ||
-                                    value.cqlDefinition !== "" ||
-                                    value.description !== ""
-                                ).length > 0
-                              }
-                            />
-                          }
-                          value="stratification"
-                          type="B"
-                          data-testid="stratifications-tab"
-                          onClick={() => {
-                            setActiveTab("stratification");
-                            if (!!formik.values.stratifications) {
-                              while (formik.values.stratifications.length < 2) {
-                                formik.values.stratifications.push(
-                                  getEmptyStrat()
-                                );
-                                setVisibleStrats(2);
-                              }
-                            } else {
-                              formik.values.stratifications = [
-                                getEmptyStrat(),
-                                getEmptyStrat(),
-                              ];
+                      <Tab
+                        tabIndex={0}
+                        label={
+                          <CompletionIndicator
+                            label="Stratifications"
+                            hasErrors={formik.errors.stratifications}
+                            displayIcon={
+                              formik.values.stratifications?.filter(
+                                (value) =>
+                                  value.association !== null ||
+                                  value.associations.length !== 0 ||
+                                  value.cqlDefinition !== "" ||
+                                  value.description !== ""
+                              ).length > 0
+                            }
+                          />
+                        }
+                        value="stratification"
+                        type="B"
+                        data-testid="stratifications-tab"
+                        onClick={() => {
+                          setActiveTab("stratification");
+                          if (!!formik.values.stratifications) {
+                            while (formik.values.stratifications.length < 2) {
+                              formik.values.stratifications.push(
+                                getEmptyStrat()
+                              );
                               setVisibleStrats(2);
                             }
-                          }}
-                        />
-                      )}
+                          } else {
+                            formik.values.stratifications = [
+                              getEmptyStrat(),
+                              getEmptyStrat(),
+                            ];
+                            setVisibleStrats(2);
+                          }
+                        }}
+                      />
                       <Tab
                         type="B"
                         label={
                           <CompletionIndicator
                             label="Reporting"
                             hasErrors={formik.errors.improvementNotation}
-                            displayIcon={true}
+                            displayIcon={
+                              formik.values.scoring !== MeasureScoring.COHORT
+                            }
                           />
                         }
                         data-testid="reporting-tab"
