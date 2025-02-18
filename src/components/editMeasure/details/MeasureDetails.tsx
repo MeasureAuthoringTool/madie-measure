@@ -52,6 +52,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   const copyrightLink = `measure-copyright`;
   const disclaimerLink = `measure-disclaimer`;
   const rationaleLink = `measure-rationale`;
+  const purposeLink = `measure-purpose`;
   const guidanceLink = `measure-guidance`;
   const clinicalLink = `measure-clinical-recommendation`;
   const definitionLink = `measure-definition`;
@@ -221,6 +222,13 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
           !!measure?.measureMetaData.measureDefinitions?.[0]?.term,
       });
     }
+    links[1].links.splice(2, 0, {
+      title: "Purpose",
+      href: purposeLink,
+      dataTestId: "leftPanelMeasurePurpose",
+      id: "sideNavMeasurePurpose",
+      displayCompletedIcon: !!measure?.measureMetaData.purpose,
+    });
   }
   useEffect(() => {
     setErrorMessage("");
@@ -290,6 +298,19 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               />
             }
           />
+          {!isQDM && (
+            <Route
+              path={purposeLink}
+              element={
+                <MeasureMetadata
+                  measureMetadataId="Purpose"
+                  measureMetadataType="Purpose"
+                  header="Purpose"
+                  setErrorMessage={setErrorMessage}
+                />
+              }
+            />
+          )}
           <Route
             path={guidanceLink}
             element={
