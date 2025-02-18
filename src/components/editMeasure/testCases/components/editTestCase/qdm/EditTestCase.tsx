@@ -20,6 +20,7 @@ import EditTestCaseBreadCrumbs from "../EditTestCaseBreadCrumbs";
 import { useNavigate, useParams } from "react-router-dom";
 import useTestCaseServiceApi from "../../../api/useTestCaseServiceApi";
 import { useFormik, FormikProvider } from "formik";
+import useFormikResetOnEvent from "../../../../../common/useFormikResetOnEvent";
 import { QDMPatientSchemaValidator } from "./QDMPatientSchemaValidator";
 
 import "allotment/dist/style.css";
@@ -123,6 +124,7 @@ const EditTestCase = () => {
     validationSchema: QDMPatientSchemaValidator,
     onSubmit: async (values: any) => await handleSubmit(values),
   });
+  useFormikResetOnEvent(formik);
   const { resetForm } = formik;
 
   // Fetches test case based on ID, identifies measure.group converts it to testcase.groupPopulation

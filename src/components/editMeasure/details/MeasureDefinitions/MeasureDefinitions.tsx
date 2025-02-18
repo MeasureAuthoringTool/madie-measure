@@ -20,6 +20,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { measureStore, checkUserCanEdit } from "@madie/madie-util";
 import { useFormik } from "formik";
 import { MeasureDefinition, Measure } from "@madie/madie-models";
+import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 import MeasureMetaDataRow from "../MeasureMetaDataRow";
 import { MeasureDefinitionValidator } from "./MeasureDefinitionValidator";
 import "../MeasureMetaDataTable.scss";
@@ -70,11 +71,14 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
     validationSchema: MeasureDefinitionValidator,
     onSubmit: async (values: any) => await handleSubmit(values),
   });
+
   function formikErrorHandler(name: string, isError: boolean) {
     if (formik.touched[name] && formik.errors[name]) {
       return `${formik.errors[name]}`;
     }
   }
+
+  useFormikResetOnEvent(formik);
 
   useEffect(() => {
     if (measure?.measureMetaData?.measureDefinitions) {
