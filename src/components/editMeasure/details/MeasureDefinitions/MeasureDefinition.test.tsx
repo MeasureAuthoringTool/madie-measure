@@ -256,7 +256,7 @@ describe("Measure Definitions Component", () => {
 
     expect(
       await screen.findByTestId("measure-definitions-success")
-    ).toHaveTextContent("Measure Definition Saved Successfully");
+    ).toHaveTextContent("Measure Definition saved Successfully");
     const toastCloseButton = await findByTestId("close-error-button");
     expect(toastCloseButton).toBeInTheDocument();
     fireEvent.click(toastCloseButton);
@@ -451,6 +451,66 @@ describe("Measure Definitions Component", () => {
 
     expect(await findByTestId("measure-definitions-error")).toHaveTextContent(
       'Error updating measure "measureName"'
+    );
+    const toastCloseButton = await findByTestId("close-error-button");
+    expect(toastCloseButton).toBeInTheDocument();
+    fireEvent.click(toastCloseButton);
+    await waitFor(() => {
+      expect(toastCloseButton).not.toBeInTheDocument();
+    });
+  });
+
+  it("test create measure definition status not 200", async () => {
+    measureStore.initialState.mockImplementationOnce(
+      () => measureWithNineItems
+    );
+    measureStore.state.mockImplementationOnce(() => measureWithNineItems);
+
+    serviceApiMock = {
+      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 409, data: {} }),
+    } as unknown as MeasureServiceApi;
+
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureDefinitions setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    expect(getByTestId("create-definition-button")).toBeEnabled();
+
+    const createButton = await findByTestId("create-definition-button");
+    expect(createButton).toBeInTheDocument();
+    await checkDialogExists();
+
+    const termInput = getByTestId(
+      "measure-definition-term-input"
+    ) as HTMLInputElement;
+    expect(termInput).toBeInTheDocument();
+    expect(termInput.value).toBe("");
+
+    fireEvent.change(termInput, {
+      target: { value: "term 1" },
+    });
+    expect(termInput.value).toBe("term 1");
+
+    const definitionInput = getByTestId(
+      "measure-definition"
+    ) as HTMLTextAreaElement;
+    expectInputValue(definitionInput, "");
+    act(() => {
+      fireEvent.change(definitionInput, {
+        target: { value: "definition 1" },
+      });
+    });
+    fireEvent.blur(definitionInput);
+    expectInputValue(definitionInput, "definition 1");
+    const submitButton = getByTestId("save-button");
+    expect(submitButton).toHaveProperty("disabled", false);
+    fireEvent.click(submitButton);
+
+    expect(await findByTestId("measure-definitions-error")).toHaveTextContent(
+      "Error updating measure measureName"
     );
     const toastCloseButton = await findByTestId("close-error-button");
     expect(toastCloseButton).toBeInTheDocument();

@@ -172,6 +172,10 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
           updateMeasure(data);
           toggleOpen();
           formik.resetForm();
+        } else {
+          let message = `Error updating measure ${measure.measureName}`;
+          handleToast("danger", message, true);
+          setErrorMessage(message);
         }
       })
       .catch((reason) => {
