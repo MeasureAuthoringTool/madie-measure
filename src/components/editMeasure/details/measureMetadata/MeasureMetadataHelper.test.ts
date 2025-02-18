@@ -106,6 +106,16 @@ describe("MeasureMetadataHelper", () => {
     expect(actual).toBe("");
   });
 
+  it("should return empty string instead of null when purpose is null", () => {
+    measure = {
+      id: MEASUREID,
+      measureMetaData: { purpose: null } as unknown as MeasureMetadata,
+    } as Measure;
+
+    const actual = getInitialValues(measure, "purpose");
+    expect(actual).toBe("");
+  });
+
   it("should retrieve clinical recommendation statement value", () => {
     const actual = getInitialValues(
       measure,
