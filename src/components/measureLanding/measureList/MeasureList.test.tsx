@@ -82,7 +82,7 @@ const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
 const testGroup = [
   {
     id: "test",
-    scoring: "Cohort",
+    scoring: "Ratio",
     measureGroupTypes: ["OUTCOME"],
   },
 ];
@@ -167,7 +167,12 @@ const measures = [
     cqlLibraryName: "IDIDID4",
     cql: "Sample Cql",
     cqlErrors: true,
-    groups: [testGroup],
+    groups: [
+      {
+        id: "test",
+        scoring: "Cohort",
+      },
+    ],
     createdAt: null,
     createdBy: null,
     lastModifiedAt: null,
@@ -191,7 +196,7 @@ const measures = [
     cqlLibraryName: "IDIDID4",
     cql: "Sample Cql",
     cqlErrors: true,
-    groups: [testGroup],
+    groups: testGroup,
     createdAt: null,
     createdBy: null,
     lastModifiedAt: null,
@@ -1673,7 +1678,69 @@ describe("Measure List component", () => {
 
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
-        "Unable to Export measure.CQL Contains ErrorsMissing Measure DevelopersMissing StewardMissing DescriptionAt least one Population Criteria is missing TypeAt least one Population Criteria is missing Improvement Notation"
+        "Unable to Export measure.CQL Contains ErrorsMissing Measure DevelopersMissing StewardMissing DescriptionAt least one Population Criteria is missing Improvement Notation"
+      );
+    });
+    unmount();
+  });
+
+  it("should NOT display the error of at least one Population Criteria is missing Improvement Notation for Cohort", async () => {
+    const copiedMeasure: Measure = {
+      ...measures[4],
+      groups: [
+        {
+          id: "test",
+          scoring: "Cohort",
+          measureGroupTypes: ["OUTCOME"],
+        },
+      ],
+    } as unknown as Measure;
+
+    const error = {
+      response: {
+        status: 409,
+      },
+    };
+    let allMeasures: Measure[] = [];
+    allMeasures.push(copiedMeasure);
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return {
+        ...mockMeasureServiceApi,
+        getMeasureExport: jest.fn().mockRejectedValue(error),
+        fetchMeasure: jest.fn().mockResolvedValue(copiedMeasure),
+      } as unknown as MeasureServiceApi;
+    });
+
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={allMeasures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    expect(checkBoxes.length).toBe(2);
+    fireEvent.click(checkBoxes[1]);
+    const exportButton = screen.getByTestId("export-action-btn");
+    expect(exportButton).toBeInTheDocument();
+    fireEvent.click(exportButton);
+
+    await waitFor(() => {
+      expect(getByTestId("error-message")).toHaveTextContent(
+        "Unable to Export measure.CQL Contains ErrorsMissing Measure DevelopersMissing StewardMissing Description"
       );
     });
     unmount();
