@@ -10,6 +10,7 @@ import {
   PopulationType,
   MeasureErrorType,
   MeasureGroupTypes,
+  MeasureScoring,
 } from "@madie/madie-models";
 import {
   MenuItem as MuiMenuItem,
@@ -1014,7 +1015,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                           <CompletionIndicator
                             label="Reporting"
                             hasErrors={formik.errors.improvementNotation}
-                            displayIcon={true}
+                            displayIcon={
+                              formik.values.scoring !== MeasureScoring.COHORT
+                            }
                           />
                         }
                         data-testid="reporting-tab"
