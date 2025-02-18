@@ -218,7 +218,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
         dataTestId: "leftPanelQiCoreMeasureDefinition",
         id: "sideNavQiCoreMeasureDefinition",
         displayCompletedIcon:
-          !!measure?.measureMetaData.measureDefinitions?.[0].term,
+          !!measure?.measureMetaData.measureDefinitions?.[0]?.term,
       });
     }
   }
