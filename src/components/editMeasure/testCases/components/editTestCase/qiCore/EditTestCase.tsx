@@ -434,8 +434,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
         });
     }
 
-    if (id && _.isNil(testCase) && measure && load.current === 0) {
-      load.current = +1;
+    if (id && measure) {
       loadTestCase();
     }
 
