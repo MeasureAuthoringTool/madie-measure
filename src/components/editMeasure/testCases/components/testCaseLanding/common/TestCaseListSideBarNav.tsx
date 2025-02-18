@@ -6,6 +6,7 @@ import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import "./TestCaseListSideBarNav.scss";
+import { useFeatureFlags } from "@madie/madie-util";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-10 bg-slate overflow-y-auto border-r border-slate`;
 const Nav = tw.nav`flex-1 space-y-1 bg-slate`;
@@ -27,6 +28,7 @@ const TestCaseListSideBarNav = ({
 
   let location = useLocation();
   const { pathname } = location;
+  const featureFlags = useFeatureFlags();
 
   const [showConfigTabs, setShowConfigTabs] = useState<boolean>(true);
   const [showPopulationCriteriaTabs, setShowPopulationCriteriaTabs] =
@@ -115,14 +117,16 @@ const TestCaseListSideBarNav = ({
               onChange={handleChange}
               value={endRoute}
             >
-              <Tab
-                label="SDE"
-                value="sde"
-                data-testid="nav-link-sde"
-                type="C"
-                orientation="vertical"
-                onChange={handleChange}
-              />
+              {featureFlags?.QICoreIncludeSDEValues && (
+                <Tab
+                  label="SDE"
+                  value="sde"
+                  data-testid="nav-link-sde"
+                  type="C"
+                  orientation="vertical"
+                  onChange={handleChange}
+                />
+              )}
               {qdm && (
                 <Tab
                   label="Expansion"
