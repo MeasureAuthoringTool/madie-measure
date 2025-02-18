@@ -78,7 +78,7 @@ describe("TestCase component", () => {
     userEvent.click(inactiveLink);
   });
 
-  it("shouldn't render SDE tab for QI Core measures when ", async () => {
+  it("shouldn't render SDE tab for QI Core measures when QICoreIncludeSDEValues flag is false", async () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => {
       return {
         QICoreIncludeSDEValues: false,
