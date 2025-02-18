@@ -287,7 +287,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
         if (status === 200) {
           handleToast(
             "success",
-            `Measure definition deleted successfully`,
+            "Measure definition deleted successfully",
             true
           );
           updateMeasure(data);
