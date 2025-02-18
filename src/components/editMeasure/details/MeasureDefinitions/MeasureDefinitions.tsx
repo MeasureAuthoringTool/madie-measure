@@ -168,7 +168,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
         const { status, data } = res;
         if (status === 200) {
           setErrorMessage("");
-          handleToast("success", `Measure Definition Saved Successfully`, true);
+          handleToast("success", "Measure Definition saved Successfully", true);
           updateMeasure(data);
           toggleOpen();
           formik.resetForm();
@@ -291,7 +291,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
         if (status === 200) {
           handleToast(
             "success",
-            `Measure definition deleted successfully`,
+            "Measure definition deleted successfully",
             true
           );
           updateMeasure(data);
