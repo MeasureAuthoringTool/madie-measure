@@ -11,6 +11,7 @@ import DisplayAttributeInputs from "./DisplayAttributeInputs";
 import AttributeChipList from "../AttributeChipList";
 import { MadieDiscardDialog } from "@madie/madie-design-system/dist/react";
 import { routeHandlerStore } from "@madie/madie-util";
+import useFormikResetOnEvent from "../../../../../../../../../../common/useFormikResetOnEvent";
 
 export interface Chip {
   title?: String;
@@ -48,6 +49,7 @@ const AttributeSection = ({
       onAddClicked(values.attribute, values.type, values.attributeValue);
     },
   });
+  useFormikResetOnEvent(formik);
   const { resetForm } = formik;
 
   const { updateRouteHandlerState } = routeHandlerStore;
