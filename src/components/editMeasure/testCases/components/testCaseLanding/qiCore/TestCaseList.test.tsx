@@ -1179,9 +1179,7 @@ describe("TestCaseList component", () => {
     const tableRows2 = table2.querySelectorAll("tbody tr");
     await waitFor(() => {
       expect(tableRows2[2]).toHaveTextContent("Pass");
-      screen.debug();
       expect(tableRows2[1]).toHaveTextContent("Fail");
-      screen.debug();
       expect(tableRows2[0]).toHaveTextContent("Invalid");
     });
 
