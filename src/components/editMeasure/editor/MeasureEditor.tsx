@@ -760,7 +760,13 @@ const MeasureEditor = () => {
     setEditorVal(measure?.cql || "");
     setIsCQLUnchanged(true);
   };
-
+  // force a reset on this similair to formik objects.
+  useEffect(() => {
+    window.addEventListener("resetAllForms", resetCql);
+    return () => {
+      window.removeEventListener("resetAllForms", resetCql);
+    };
+  }, [resetCql]); // need access to resetCQl or it will not track what cql is and will set to ""
   const handleApplyDefinition = (defValues: Definition) => {
     handleMadieEditorValue(applyDefinition(defValues, editorVal));
     setToastType("success");

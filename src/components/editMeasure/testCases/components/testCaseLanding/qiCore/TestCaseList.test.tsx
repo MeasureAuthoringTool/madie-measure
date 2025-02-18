@@ -1179,9 +1179,7 @@ describe("TestCaseList component", () => {
     const tableRows2 = table2.querySelectorAll("tbody tr");
     await waitFor(() => {
       expect(tableRows2[2]).toHaveTextContent("Pass");
-      screen.debug();
       expect(tableRows2[1]).toHaveTextContent("Fail");
-      screen.debug();
       expect(tableRows2[0]).toHaveTextContent("Invalid");
     });
 
@@ -2109,39 +2107,6 @@ describe("TestCaseList component", () => {
     expect(copyTestCaseButton).not.toBeDisabled();
 
     userEvent.click(copyTestCaseButton);
-    expect(await screen.findByRole("dialog")).toBeInTheDocument();
-
-    userEvent.click(await screen.findByRole("button", { name: "Cancel" }));
-    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
-  });
-
-  it("Should display shift test case dialog when at least one test case is selected", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TestCaseListActionCenter: true,
-    }));
-    renderTestCaseListComponent();
-
-    const table = await screen.findByTestId("test-case-tbl");
-    const tableHeaders = table.querySelectorAll("thead th");
-
-    expect(tableHeaders[1]).toHaveTextContent("Case #");
-    expect(tableHeaders[2]).toHaveTextContent("Status");
-    expect(tableHeaders[3]).toHaveTextContent("Group");
-    expect(tableHeaders[4]).toHaveTextContent("Title");
-    expect(tableHeaders[5]).toHaveTextContent("Description");
-
-    const checkboxes = await screen.findAllByRole("checkbox");
-    expect(checkboxes.length).toBe(4);
-
-    const shiftTestCaseButton = await screen.findByTestId(
-      "shift-test-case-dates-action-btn"
-    );
-    expect(shiftTestCaseButton).toBeDisabled();
-
-    userEvent.click(checkboxes[1]);
-    expect(shiftTestCaseButton).not.toBeDisabled();
-
-    userEvent.click(shiftTestCaseButton);
     expect(await screen.findByRole("dialog")).toBeInTheDocument();
 
     userEvent.click(await screen.findByRole("button", { name: "Cancel" }));

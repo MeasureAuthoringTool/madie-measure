@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { useFormik } from "formik";
+import useFormikResetOnEvent from "../../../../common/useFormikResetOnEvent";
 import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
 import {
   checkUserCanEdit,
@@ -64,6 +65,7 @@ const RiskAdjustment = () => {
     validateOnChange: true,
     onSubmit: (values) => handleSubmit(values),
   });
+  useFormikResetOnEvent(formik);
   const { resetForm } = formik;
 
   const handleSubmit = (values) => {

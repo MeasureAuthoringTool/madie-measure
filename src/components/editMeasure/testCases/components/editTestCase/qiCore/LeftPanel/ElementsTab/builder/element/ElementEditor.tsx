@@ -27,6 +27,7 @@ import {
 } from "../../../../../../../util/QiCorePatientProvider";
 import { useFormikContext } from "formik";
 import { Button } from "@madie/madie-design-system/dist/react";
+import useFormikResetOnEvent from "../../../../../../../../../common/useFormikResetOnEvent";
 
 interface ElementEditorProps {
   resource?: any;
@@ -207,7 +208,7 @@ const ElementEditor = ({
     }
   }, [selectedResource, displayedElementsTree]);
   const formik = useFormikContext();
-
+  useFormikResetOnEvent(formik);
   // on individual apply
   const handleIndividualElementApplyButtonClick = (e) => {
     // this is wrapped in a form and we need to prevent submit on click with e.prevent

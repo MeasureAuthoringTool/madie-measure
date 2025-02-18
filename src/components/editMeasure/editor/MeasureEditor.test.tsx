@@ -544,6 +544,21 @@ describe("MeasureEditor component", () => {
     });
   });
 
+  it("reset editor on emitted event", async () => {
+    const { getByTestId } = renderEditor(measure);
+    const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
+    expect(measure.cql).toEqual(editorContainer.value);
+    fireEvent.change(getByTestId("measure-editor"), {
+      target: {
+        value: "library testCql version '2.0.000'",
+      },
+    });
+    window.dispatchEvent(new Event("resetAllForms"));
+    await waitFor(() => {
+      expect(measure.cql).toEqual(editorContainer.value);
+    });
+  });
+
   it("it closes the dialog without changing the cql", async () => {
     const { getByTestId, queryByText } = renderEditor(measure);
     const editorContainer = getByTestId("measure-editor") as HTMLInputElement;

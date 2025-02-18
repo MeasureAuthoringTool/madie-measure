@@ -82,6 +82,7 @@ import { CqlDefinitionCallstack } from "../groupCoverage/QiCoreGroupCoverage";
 import useFhirCqlParsingService from "../../../api/cqlElmTranslationService/useFhirCqlParsingService";
 import checkSpecialCharacters from "../../../util/checkSpecialCharacters";
 import EditorSearch from "./LeftPanel/EditorSearch";
+import useFormikResetOnEvent from "../../../../../common/useFormikResetOnEvent";
 
 const TestCaseForm = tw.form`m-3`;
 const ValidationErrorsButton = tw.button`
@@ -300,6 +301,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
     // enableReinitialize: true,
     onSubmit: async (values: TestCase) => await handleSubmit(values),
   });
+  useFormikResetOnEvent(formik);
   const { resetForm } = formik;
 
   //stu6 validation logic required
@@ -312,7 +314,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
     validationSchema,
     onSubmit: () => {},
   });
-
+  useFormikResetOnEvent(formikStu6Context);
   //needs to be added to feature flag config once the feature flags are moved to Util
   const testCaseAlertToast = false;
 
@@ -432,8 +434,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
         });
     }
 
-    if (id && _.isNil(testCase) && measure && load.current === 0) {
-      load.current = +1;
+    if (id && measure) {
       loadTestCase();
     }
 

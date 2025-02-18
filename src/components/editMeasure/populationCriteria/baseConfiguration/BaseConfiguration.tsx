@@ -23,6 +23,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import "./BaseConfiguration.scss";
 import MeasureGroupsWarningDialog from "../groups/MeasureGroupWarningDialog";
+import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 
 interface BaseConfigurationForm {
   scoring: string;
@@ -74,8 +75,8 @@ const BaseConfiguration = () => {
     validationSchema: QDMMeasureSchemaValidator,
     onSubmit: async (values: BaseConfigurationForm) => await handleSubmit(),
   });
+  useFormikResetOnEvent(formik);
   const { resetForm } = formik;
-
   useEffect(() => {
     updateRouteHandlerState({
       canTravel: !formik.dirty,
