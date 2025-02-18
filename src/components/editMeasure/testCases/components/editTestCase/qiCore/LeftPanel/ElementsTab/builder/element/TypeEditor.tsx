@@ -207,7 +207,6 @@ const TypeEditor = ({
         );
       // I think this is functionally unreachable code. Cant find any evidence of fhir element type = date
       case "date":
-        console.log("date!", label);
         return (
           <DateComponent
             canEdit={canEdit}

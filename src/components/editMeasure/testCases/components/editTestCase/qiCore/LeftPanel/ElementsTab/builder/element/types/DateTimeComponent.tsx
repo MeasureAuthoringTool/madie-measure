@@ -72,13 +72,20 @@ const findByOffSet = (value) => {
   }
   return result;
 };
-const DATE_FORMAT = "YYYY-MM-DD";
-const TIME_FORMAT = "HH:mm:ss";
-const DATE_TIME_ZONE_FORMAT = "YYYY-MM-DDThh:mm:ss+zz:zz";
-
 const YEAR_FORMAT = "YYYY";
 const YEAR_MONTH_FORMAT = "YYYY-MM";
 const YEAR_MONTH_DAY_FORMAT = "YYYY-MM-DD";
+const DATE_TIME_ZONE_FORMAT = "YYYY-MM-DDThh:mm:ss+zz:zz";
+const formatOptions1 = [
+  YEAR_FORMAT, YEAR_MONTH_FORMAT, YEAR_MONTH_DAY_FORMAT, DATE_TIME_ZONE_FORMAT
+]
+const formatMap = {
+  [YEAR_FORMAT]: ["year"],
+  [YEAR_MONTH_FORMAT]: ["year", "month"], 
+  [YEAR_MONTH_DAY_FORMAT]: ["year", "month", "day"], 
+  [DATE_TIME_ZONE_FORMAT]: ["year", "month", "day"]
+}
+
 
 export const isYearFormat = (dateStr) => {
   return dayjs(dateStr, YEAR_FORMAT, true).isValid();
@@ -106,14 +113,43 @@ export const getCurrentFormat = (dateStr) => {
     return "Invalid format";
   }
 };
+const renderMenuItems = (options: MenuObj[]) => {
+  return [
+    ...options.map(({ value, label }) => (
+      <MuiMenuItem
+        key={`${label}-option`}
+        value={`${value} - ${label}`}
+        data-testid={`${label}-option`}
+      >
+        {label}
+      </MuiMenuItem>
+    )),
+  ];
+};
+const renderFormats = (formats) => {
+  return [
+    ...formats.map(( value ) => (
+      <MuiMenuItem
+        key={`${value}-option`}
+        value={value}
+        data-testid={`${value}-option`}
+      >
+        {value}
+      </MuiMenuItem>
+    )),
+  ];
+}
 const DateTimeComponent = ({
   canEdit,
   fieldRequired,
   value,
   onChange, // onChange should Probably only be triggered once the fields are all filled out
   label = "DateTime",
+  error
 }: TypeComponentProps) => {
-  const [date, setDate] = useState<string>(); // dayjs obj
+  const [format, setFormat] = useState<string>();
+
+  const [date, setDate] = useState<any>(); // dayjs obj
   const [time, setTime] = useState<any>(); // dayjs obj
   const [formattedTime, setFormattedTime] = useState("");
   const [timeZone, setTimeZone] = useState("");
@@ -129,45 +165,28 @@ const DateTimeComponent = ({
   */
 
   useEffect(() => {
+    console.log('!value is v', value)
+    console.log('format is', format)
     // we need to find out what type of dateTime format it is, and translate to related parts
     if (value) {
-      if (isValidDateTimeFormat(value)) {
-      } else if (isYearMonthDayFormat(value)) {
-        setDate(value)
-      } else if (isYearMonthFormat(value)) {
-        setDate(value)
-      } else if (isYearFormat(value)) {
-        setDate(value)
-      }
-
-      //   const zone = value.slice(-6); // fine
-      //   setDate(value.slice(0, 10));
-      //   setTimeZone(findByOffSet(zone));
-      //   const formattedDate = dayjs(value)
-      //     .utcOffset(zone)
-      //     .format("YYYY-MM-DDTHH:mm:ss");
-      //  setTime(formattedDate)
-      setDate(value);
+      setFormat(getCurrentFormat(value));
+      // //   const zone = value.slice(-6); // fine
+      // //   setDate(value.slice(0, 10));
+      // //   setTimeZone(findByOffSet(zone));
+      // //   const formattedDate = dayjs(value)
+      // //     .utcOffset(zone)
+      // //     .format("YYYY-MM-DDTHH:mm:ss");
+      // //  setTime(formattedDate)
+      // // setDate(dayjs(value).utc());
+      // const dayjsdate = dayjs.utc(value);
+      // setDate(dayjsdate)
+    } else {
+      setFormat(null);
     }
   }, [value]);
 
-  console.log("new year is", date);
 
 
-
-  const renderMenuItems = (options: MenuObj[]) => {
-    return [
-      ...options.map(({ value, label }) => (
-        <MuiMenuItem
-          key={`${label}-option`}
-          value={`${value} - ${label}`}
-          data-testid={`${label}-option`}
-        >
-          {label}
-        </MuiMenuItem>
-      )),
-    ];
-  };
   const findAndRenderLabel = (value) => {
     let result = "--";
     if (value && options) {
@@ -188,6 +207,9 @@ const DateTimeComponent = ({
     }
     return null;
   };
+  console.log("format", format)
+  console.log("formatMap", formatMap)
+  console.log("formatMap[format]", formatMap[format])
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column" }}>
@@ -203,7 +225,55 @@ const DateTimeComponent = ({
           }}
           data-testid="date-div"
         >
-          <DateField
+          {/* select a format and render a picker */}
+          <Select
+            style={{ height: "38.125px", marginBottim: "2px" }}
+            required={fieldRequired}
+            id={`date-format-selector-${label}`}
+            label={`Format`}
+            inputProps={{
+              "data-testid": `date-format-selector-input-field-${label}`,
+              "aria-describedby": `date-format-selector-input-field-helper-text-${label}`,
+            }}
+            data-testid={`date-format-selector-field-${label}`}
+            disabled={!canEdit}
+            SelectDisplayProps={{
+              "aria-required": "true",
+            }}
+            options={renderFormats(formatOptions1)}
+            onChange={(event) => {
+              console.log('event.target.value', event.target.value)
+              setFormat(event.target.value)
+            }}
+            placeHolder={{ name: "Select Format", value: "" }}
+            value={format ? format : ""}
+          ></Select>
+
+          {/* {
+            format === YEAR_FORMAT && ( */}
+            <DateField
+            // disabled={}
+            label="Date Field"
+            required={fieldRequired}
+            error={error}
+            helperText={undefined}
+            value={value ? dayjs(value) : null}
+            views={ format ? formatMap[format] : ["year"]}
+            disabled={!canEdit || !format}
+            id="year-field"
+            onChange={(date) => {
+              // console.log("date.format(YEAR_FORMAT)", date.format(YEAR_FORMAT))
+              if (date){
+                onChange(date.format(YEAR_FORMAT));
+              }
+            }}
+            onBlur={() => {}}
+          />
+            {/* )
+          } */}
+
+
+          {/* <DateField
             label="Date Field"
             required={fieldRequired}
             error={true}
@@ -236,10 +306,10 @@ const DateTimeComponent = ({
               setDate(date);
             }}
             onBlur={() => {}}
-          />
+          /> */}
 
           <div>
-          <TimeField
+          {/* <TimeField
               disabled={!canEdit || !date}
               required={fieldRequired}
               label="Time Field"
@@ -262,9 +332,9 @@ const DateTimeComponent = ({
                 }
               }}
               value={time ? dayjs(time) : null}
-            />
+            /> */}
           </div>
-          <Select
+          {/* <Select
             style={{ height: "38.125px", marginBottim: "2px" }}
             required={fieldRequired}
             id={`timezone-selector-${label}`}
@@ -281,9 +351,7 @@ const DateTimeComponent = ({
             // value={value ? timeZone : null}
             value={timeZone}
             options={renderMenuItems(options)}
-            renderValue={(value) => {
-              return findAndRenderLabel(value);
-            }}
+          
             onChange={(event) => {
               const newTimeZone = event.target.value;
               setTimeZone(newTimeZone);
@@ -297,7 +365,7 @@ const DateTimeComponent = ({
                 onChange(changedDate)
               }
             }}
-          ></Select>
+          ></Select> */}
         </div>
       </LocalizationProvider>
     </Box>

@@ -1,4 +1,6 @@
-import React from "react";
+// import React from "react";
+import React, { useRef, useState } from "react";
+
 import PropTypes from "prop-types";
 import { TextField } from "@madie/madie-design-system/dist/react";
 import { Box } from "@mui/material";
@@ -65,92 +67,62 @@ const DateField = ({
   id = "default_id",
   label,
   value,
-  handleDateChange,
   disabled,
   error,
   helperText,
   required = false,
   containerSx = {},
   textFieldSx = {},
+  views,
+  onChange,
   ...rest
 }) => {
+  // const inputRef = useRef<HTMLInputElement | null>(null);
+  const inputRef = useRef()
+
   if (containerSx === undefined || containerSx === null) {
     containerSx = {};
   }
   if (textFieldSx === undefined || textFieldSx === null) {
     textFieldSx = {};
   }
-  let coercedValue = null;
-
-  let generatedStringInput = generateTextFieldInput(value);
-
-
-  if (isYearFormat(value)) {
-    console.log("truth it is ", value);
-    // if it's a year format we want to avoid populating the other dayjs values
-    const yearOnly = dayjs(value).utc();
-    // @ts-ignore
-    yearOnly.$D = 0;
-    // @ts-ignore
-    yearOnly.$W = 0;
-
-    console.log(yearOnly);
-    // value = yearOnly;
-    coercedValue = yearOnly;
-  }
-
   console.log("value passed into dateField", value);
 
   const isOnlyYear = (date) =>
     date.year() && date.month() === "NaN" && date.date() === "NaN";
   console.log("value is", value);
-
-  const manipulateDate = (v) => {
-    console.log('onChange', v);
-    // if (isOnlyYear(v)) {
-    //   console.log('isonlyYear')
-    // }
-  };
-  const handleInput = (v) => {
-    console.log("input is", v);
-    handleDateChange(v);
-  };
+  console.log('views are',)
   return (
-    // <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ ...containerSx }}>
         <DatePicker
+          // key={value?.toISOString() || "empty"}
+          emptyLabel="custom label"
           // value={value ? dayjs.utc(value) : null}
-          // value={dayjs(value)}
-          value={null}
-          onChange={(v) => {
-            manipulateDate(v);
-          }}
-          // views={['year']}
+          value={value || null}
+          onChange={onChange}
+          views={views}
           disabled={disabled}
           onClose={() => rest?.onBlur()}
           slotProps={{
             textField: (params) => {
               const { InputProps } = params;
+              console.log('inputProps', InputProps);
               InputProps["data-testid"] = id;
               InputProps["aria-required"] = required;
+              // InputProps: {
+                // ...InputProps,
+                // InputProps.value=  value ? dayjs(value).format("MM/DD/YYYY") : "" // Override display value
+              // },
               // InputProps.value = generatedStringInput;
               return {
                 id: id,
                 label,
                 sx: { ...dateTextFieldStyle, ...textFieldSx },
-                // value: value ? value : null,
-                // onChange: handleDateChange,
-                onChange: (v) => {
-                  // given input, save only string
-                  console.log('v is', v)
-                },
-                // onChange: (v) => {
-                //   handleInput(v);
-                // },
-                //...rest,
+                placeholder: "TEST",
                 error: error,
                 helperText: helperText,
                 onBlur: rest?.onBlur,
+                // key: value?.toISOString() || "empty"
               };
             },
             openPickerButton: {
@@ -160,9 +132,9 @@ const DateField = ({
             },
           }}
           slots={{ textField: TextField }}
+          {...rest}
         />
       </Box>
-    // </LocalizationProvider>
   );
 };
 export default DateField;
