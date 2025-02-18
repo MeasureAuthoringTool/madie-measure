@@ -2248,4 +2248,32 @@ describe("Measure Groups Page", () => {
     const saveButton = queryByTestId("group-form-submit-btn");
     expect(saveButton).not.toBeInTheDocument();
   });
+
+  test("should allow Ratio measures to select stratifications", async () => {
+    const group1: Group = {
+      id: "1",
+      scoring: "Ratio",
+      populations: [
+        {
+          id: "id-1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+          associationType: InitialPopulationAssociationType.NUMERATOR,
+        },
+      ],
+      groupDescription: "",
+      measureGroupTypes: [MeasureGroupTypes.PROCESS],
+      populationBasis: "boolean",
+      scoringUnit: "",
+      scoringPrecision: "",
+    };
+    measure.groups = [group1];
+    renderMeasureGroupComponent();
+
+    const stratTab = screen.getByTestId("stratifications-tab");
+    expect(stratTab).toBeInTheDocument();
+    userEvent.click(stratTab);
+
+    expect(screen.getByTestId("stratification-1-input")).toBeInTheDocument();
+  });
 });
