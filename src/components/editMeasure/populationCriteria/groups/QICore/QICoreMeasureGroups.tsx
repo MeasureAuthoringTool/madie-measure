@@ -719,12 +719,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     }
   }, [ucum, ucumUnits]);
 
-  const isImprovementNotationRequired = () => {
-    if (formik.values.scoring !== GroupScoring.COHORT) {
-      return true;
-    }
-    return false;
-  };
+  const isImprovementNotationRequired = () =>
+    formik.values.scoring !== GroupScoring.COHORT;
 
   return (
     <div tw="lg:col-span-5 pl-2 pr-2" data-testid="qi-core-groups">
