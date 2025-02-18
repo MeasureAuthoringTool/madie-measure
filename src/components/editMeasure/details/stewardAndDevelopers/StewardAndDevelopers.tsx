@@ -15,6 +15,7 @@ import {
   checkUserCanEdit,
 } from "@madie/madie-util";
 import { useFormik } from "formik";
+import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 import * as Yup from "yup";
 import { Checkbox, Typography } from "@mui/material";
 import { Organization } from "@madie/madie-models";
@@ -73,6 +74,7 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
       submitForm(values);
     },
   });
+  useFormikResetOnEvent(formik);
   const { resetForm } = formik;
 
   // Updates the measure in DB, and also the measureStore
