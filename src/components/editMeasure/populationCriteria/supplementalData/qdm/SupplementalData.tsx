@@ -14,6 +14,7 @@ import {
   checkUserCanEdit,
 } from "@madie/madie-util";
 import { useFormik } from "formik";
+import useFormikResetOnEvent from "../../../../common/useFormikResetOnEvent";
 import "../../../details/MeasureDetails.scss";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import { Measure } from "@madie/madie-models";
@@ -65,6 +66,7 @@ const SupplementalData = () => {
     validateOnChange: true,
     onSubmit: (values) => handleSubmit(values),
   });
+  useFormikResetOnEvent(formik);
   const { resetForm } = formik;
 
   const handleSubmit = (values) => {

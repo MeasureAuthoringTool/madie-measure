@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
+import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 import { Typography } from "@mui/material";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import getInitialValues, { setMeasureMetadata } from "./MeasureMetadataHelper";
@@ -67,6 +68,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
       submitForm(values.genericField.trim());
     },
   });
+  useFormikResetOnEvent(formik);
 
   const goBackToNav = (e) => {
     if (e.shiftKey && e.keyCode == 9) {

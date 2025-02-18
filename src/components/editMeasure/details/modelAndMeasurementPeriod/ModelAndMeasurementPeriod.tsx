@@ -12,6 +12,7 @@ import {
 
 import { Typography } from "@mui/material";
 import { useFormik } from "formik";
+import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 import { MeasurementPeriodValidator } from "../../../../validations/MeasurementPeriodValidator";
 import {
   measureStore,
@@ -83,6 +84,7 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
     onSubmit: async (values: modelAndMeasurementPeriod) =>
       await handleSubmit(values),
   });
+  useFormikResetOnEvent(formik);
   const { resetForm } = formik;
   // update our routehandler discard dialog
   const { updateRouteHandlerState } = routeHandlerStore;

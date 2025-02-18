@@ -19,6 +19,7 @@ import { MenuItem, Typography } from "@mui/material";
 import * as Yup from "yup";
 import { useQdmExecutionContext } from "../../routes/qdm/QdmExecutionContext";
 import useTerminologyServiceApi from "../../../api/useTerminologyServiceApi";
+import useFormikResetOnEvent from "../../../../../common/useFormikResetOnEvent";
 
 const Expansion = () => {
   const { setExecutionContextReady } = useQdmExecutionContext();
@@ -78,6 +79,7 @@ const Expansion = () => {
     enableReinitialize: true,
     onSubmit: async (values) => await handleSubmit(values),
   });
+  useFormikResetOnEvent(formik);
   const { resetForm } = formik;
 
   const handleSubmit = async (values) => {

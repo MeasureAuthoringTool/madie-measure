@@ -20,6 +20,7 @@ import {
 } from "@mui/material";
 import { useFormik } from "formik";
 import { MeasureSchemaValidator } from "../../../../validations/MeasureSchemaValidator";
+import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 import {
   measureStore,
   routeHandlerStore,
@@ -215,6 +216,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     onSubmit: async (values: measureInformationForm) =>
       await handleSubmit(values),
   });
+  useFormikResetOnEvent(formik);
   const { resetForm } = formik;
   // tell our routehandler no go
   const { updateRouteHandlerState } = routeHandlerStore;
