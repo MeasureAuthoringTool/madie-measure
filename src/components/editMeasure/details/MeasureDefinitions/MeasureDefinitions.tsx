@@ -274,41 +274,44 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
   };
   const handleClearClick = () => {};
 
-  const deleteMeasureDefinition = (id) => {
-    const modifiedMetaData =
-      measure?.measureMetaData?.measureDefinitions?.filter(
-        (definition) => definition?.id !== id
-      );
-    const modifiedMeasure: Measure = {
-      ...measure,
-      measureMetaData: {
-        ...measure.measureMetaData,
-        measureDefinitions: modifiedMetaData,
-      },
-    };
+  const deleteMeasureDefinition = useCallback(
+    (id) => {
+      const modifiedMetaData =
+        measure?.measureMetaData?.measureDefinitions?.filter(
+          (definition) => definition?.id !== id
+        );
+      const modifiedMeasure: Measure = {
+        ...measure,
+        measureMetaData: {
+          ...measure.measureMetaData,
+          measureDefinitions: modifiedMetaData,
+        },
+      };
 
-    measureServiceApi
-      .updateMeasure(modifiedMeasure)
-      .then((res) => {
-        //@ts-ignore
-        const { status, data } = res;
-        if (status === 200) {
-          handleToast(
-            "success",
-            "Measure definition deleted successfully",
-            true
-          );
-          updateMeasure(data);
-          setDeleteDialogModalOpen(false);
-          formik.resetForm();
-        }
-      })
-      .catch((reason) => {
-        const message = `Error updating measure "${measure.measureName}"`;
-        handleToast("danger", message, true);
-        setErrorMessage(message);
-      });
-  };
+      measureServiceApi
+        .updateMeasure(modifiedMeasure)
+        .then((res) => {
+          //@ts-ignore
+          const { status, data } = res;
+          if (status === 200) {
+            handleToast(
+              "success",
+              "Measure definition deleted successfully",
+              true
+            );
+            updateMeasure(data);
+            setDeleteDialogModalOpen(false);
+            formik.resetForm();
+          }
+        })
+        .catch((reason) => {
+          const message = `Error updating measure "${measure.measureName}"`;
+          handleToast("danger", message, true);
+          setErrorMessage(message);
+        });
+    },
+    [measure?.measureMetaData?.measureDefinitions, measureServiceApi]
+  );
 
   return (
     <div
