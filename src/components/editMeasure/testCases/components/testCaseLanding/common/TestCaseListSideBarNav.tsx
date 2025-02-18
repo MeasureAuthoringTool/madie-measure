@@ -115,16 +115,14 @@ const TestCaseListSideBarNav = ({
               onChange={handleChange}
               value={endRoute}
             >
-              {qdm && (
-                <Tab
-                  label="SDE"
-                  value="sde"
-                  data-testid="nav-link-sde"
-                  type="C"
-                  orientation="vertical"
-                  onChange={handleChange}
-                />
-              )}
+              <Tab
+                label="SDE"
+                value="sde"
+                data-testid="nav-link-sde"
+                type="C"
+                orientation="vertical"
+                onChange={handleChange}
+              />
               {qdm && (
                 <Tab
                   label="Expansion"
