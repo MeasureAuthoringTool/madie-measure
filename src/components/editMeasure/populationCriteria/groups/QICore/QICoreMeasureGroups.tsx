@@ -1016,7 +1016,10 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                             label="Reporting"
                             hasErrors={formik.errors.improvementNotation}
                             displayIcon={
-                              formik.values.scoring !== MeasureScoring.COHORT
+                              formik.values.improvementNotation
+                                ? true
+                                : formik.values.scoring !==
+                                  MeasureScoring.COHORT
                             }
                           />
                         }
