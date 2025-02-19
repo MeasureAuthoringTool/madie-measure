@@ -10,7 +10,6 @@ import utc from "dayjs/plugin/utc";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import {
   Select,
-  // DateField,
   TimeField,
   InputLabel,
 } from "@madie/madie-design-system/dist/react";
@@ -19,7 +18,7 @@ import DateField from "./DateField";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(advancedFormat);
-// dayjs.utc().format();
+dayjs.utc().format();
 
 interface MenuObj {
   value: string;
@@ -32,60 +31,60 @@ const options: MenuObj[] = [
   { value: "America/Denver", label: "MST" },
   { value: "America/Los_Angeles", label: "PST" },
   { value: "America/Anchorage", label: "AKST" },
-  { value: "America/honolulu", label: "HST" },
+  { value: "America/Honolulu", label: "HST" },
   { value: "America/American_Samoa", label: "WST" },
   { value: "America/Saipan", label: "CHST" },
+  { value: "America/Atikokan", label: "EST" },
+  { value: "America/Barbados", label: "AST" },
+  { value: "America/Bogota", label: "COT" },
+  { value: "America/Belize", label: "CST" },
+  { value: "America/Guatemala", label: "CST" },
+  { value: "America/Cancun", label: "EST" },
+  { value: "America/Regina", label: "CST" },
+  { value: "America/Winnipeg", label: "CST" },
+  { value: "America/Guayaquil", label: "ECT" },
+  { value: "America/Los_Angeles", label: "PST" },
+  { value: "America/Marigot", label: "AST" },
+  { value: "America/Nassau", label: "EST" },
+  { value: "America/Panama", label: "EST" },
+  { value: "America/Toronto", label: "EST" },
+  { value: "America/Thunder_Bay", label: "EST" },
+  { value: "America/Moncton", label: "AST" },
+  { value: "America/Edmonton", label: "MST" },
+  { value: "America/Yellowknife", label: "MST" },
 ];
 
-const offSets = [
-  { id: "America/Puerto_Rico - AST", value: "-04:00" },
-  { id: "America/New_York - EST", value: "-05:00" },
-  { id: "America/Chicago - CST", value: "-06:00" },
-  { id: "America/Denver - MST", value: "-07:00" },
-  { id: "America/Los_Angeles - PST", value: "-08:00" },
-  { id: "America/Anchorage - AKST", value: "-09:00" },
-  { id: "America/honolulu - HST", value: "-10:00" },
-  { id: "America/American_Samoa - WST", value: "-11:00" },
-  { id: "America/Saipan - CHST", value: "+10:00" },
+const timezones = [
+  { id: "America/Puerto_Rico - AST", value: "-04:00", label: "AST" },
+  { id: "America/New_York - EST", value: "-05:00", label: "EST" },
+  { id: "America/Chicago - CST", value: "-06:00", label: "CST" },
+  { id: "America/Denver - MST", value: "-07:00", label: "MST" },
+  { id: "America/Los_Angeles - PST", value: "-08:00", label: "PST" },
+  { id: "America/Anchorage - AKST", value: "-09:00", label: "AKST" },
+  { id: "America/Honolulu - HST", value: "-10:00", label: "HST" },
+  { id: "America/American_Samoa - WST", value: "-11:00", label: "WST" },
+  { id: "America/Saipan - CHST", value: "+10:00", label: "CHST" },
+  { id: "America/Bogota - COT", value: "-05:00", label: "COT" },
+  { id: "America/Guayaquil - ECT", value: "-05:00", label: "ECT" },
 ];
 
-const getOffSet = (value) => {
-  let result = "-05:00";
-  if (value) {
-    offSets.forEach((opt) => {
-      if (opt.id === value) {
-        result = opt.value;
-      }
-    });
-  }
-  return result;
-};
-
-const findByOffSet = (value) => {
-  let result = "America/New_York - EST";
-  if (value) {
-    offSets.forEach((opt) => {
-      if (opt.value === value) {
-        result = opt.id;
-      }
-    });
-  }
-  return result;
-};
 const YEAR_FORMAT = "YYYY";
 const YEAR_MONTH_FORMAT = "YYYY-MM";
 const YEAR_MONTH_DAY_FORMAT = "YYYY-MM-DD";
-const DATE_TIME_ZONE_FORMAT = "YYYY-MM-DDThh:mm:ss+zz:zz";
+const DATE_TIME_ZONE_FORMAT = "YYYY-MM-DDTHH:mm:ssZ";
+
 const formatOptions1 = [
-  YEAR_FORMAT, YEAR_MONTH_FORMAT, YEAR_MONTH_DAY_FORMAT, DATE_TIME_ZONE_FORMAT
-]
+  YEAR_FORMAT,
+  YEAR_MONTH_FORMAT,
+  YEAR_MONTH_DAY_FORMAT,
+  DATE_TIME_ZONE_FORMAT,
+];
 const formatMap = {
   [YEAR_FORMAT]: ["year"],
-  [YEAR_MONTH_FORMAT]: ["year", "month"], 
-  [YEAR_MONTH_DAY_FORMAT]: ["year", "month", "day"], 
-  [DATE_TIME_ZONE_FORMAT]: ["year", "month", "day"]
-}
-
+  [YEAR_MONTH_FORMAT]: ["year", "month"],
+  [YEAR_MONTH_DAY_FORMAT]: ["year", "month", "day"],
+  [DATE_TIME_ZONE_FORMAT]: ["year", "month", "day"],
+};
 
 export const isYearFormat = (dateStr) => {
   return dayjs(dateStr, YEAR_FORMAT, true).isValid();
@@ -96,8 +95,11 @@ export const isYearMonthFormat = (dateStr) => {
 export const isYearMonthDayFormat = (dateStr) => {
   return dayjs(dateStr, YEAR_MONTH_DAY_FORMAT, true).isValid();
 };
-export const isValidDateTimeFormat = (dateStr) => {
-  return dayjs(dateStr, DATE_TIME_ZONE_FORMAT, true).isValid();
+const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/;
+const isValidFormattedDate = (dateString) => {
+  if (!dateRegex.test(dateString)) return false; 
+  const parsedDate = dayjs.tz(dateString); 
+  return parsedDate.isValid(); 
 };
 
 export const getCurrentFormat = (dateStr) => {
@@ -106,8 +108,8 @@ export const getCurrentFormat = (dateStr) => {
   } else if (dayjs(dateStr, YEAR_MONTH_FORMAT, true).isValid()) {
     return YEAR_MONTH_FORMAT;
   } else if (dayjs(dateStr, YEAR_MONTH_DAY_FORMAT, true).isValid()) {
-    return YEAR_MONTH_FORMAT;
-  } else if (dayjs(dateStr, DATE_TIME_ZONE_FORMAT, true).isValid()) {
+    return YEAR_MONTH_DAY_FORMAT;
+  } else if (isValidFormattedDate(dateStr)) {
     return DATE_TIME_ZONE_FORMAT;
   } else {
     return "Invalid format";
@@ -115,10 +117,10 @@ export const getCurrentFormat = (dateStr) => {
 };
 const renderMenuItems = (options: MenuObj[]) => {
   return [
-    ...options.map(({ value, label }) => (
+    ...timezones.map(({ value, label, id }) => (
       <MuiMenuItem
-        key={`${label}-option`}
-        value={`${value} - ${label}`}
+        key={`${id}-option`}
+        value={value}
         data-testid={`${label}-option`}
       >
         {label}
@@ -126,9 +128,10 @@ const renderMenuItems = (options: MenuObj[]) => {
     )),
   ];
 };
+
 const renderFormats = (formats) => {
   return [
-    ...formats.map(( value ) => (
+    ...formats.map((value) => (
       <MuiMenuItem
         key={`${value}-option`}
         value={value}
@@ -138,22 +141,19 @@ const renderFormats = (formats) => {
       </MuiMenuItem>
     )),
   ];
-}
+};
 const DateTimeComponent = ({
   canEdit,
   fieldRequired,
   value,
   onChange, // onChange should Probably only be triggered once the fields are all filled out
   label = "DateTime",
-  error
+  error,
 }: TypeComponentProps) => {
-  const [format, setFormat] = useState<string>();
-
-  const [date, setDate] = useState<any>(); // dayjs obj
-  const [time, setTime] = useState<any>(); // dayjs obj
-  const [formattedTime, setFormattedTime] = useState("");
+  const [format, setFormat] = useState<string>(null);
+  const [date, setDate] = useState<any>(null); // dayjs obj
   const [timeZone, setTimeZone] = useState("");
-
+  console.log('timezone is', timeZone)
   /*
     When a value comes in it could be either 
     YYYY, 
@@ -164,53 +164,29 @@ const DateTimeComponent = ({
     This means that a user can update the date string in partial values
   */
 
+
   useEffect(() => {
-    console.log('!value is v', value)
-    console.log('format is', format)
     // we need to find out what type of dateTime format it is, and translate to related parts
     if (value) {
+      console.log('value is', value)
+      const format = getCurrentFormat(value);
+      if (format === DATE_TIME_ZONE_FORMAT) {
+        const dayjsObject = dayjs(value)
+        const timezoneOffset = value.slice(-6)
+        if (timezoneOffset){
+          const selectedTimezone = timezones.find((v) => {
+            return v.value === timezoneOffset
+          })
+          setTimeZone(selectedTimezone.label)
+        }
+        setDate(dayjsObject);
+      }
       setFormat(getCurrentFormat(value));
-      // //   const zone = value.slice(-6); // fine
-      // //   setDate(value.slice(0, 10));
-      // //   setTimeZone(findByOffSet(zone));
-      // //   const formattedDate = dayjs(value)
-      // //     .utcOffset(zone)
-      // //     .format("YYYY-MM-DDTHH:mm:ss");
-      // //  setTime(formattedDate)
-      // // setDate(dayjs(value).utc());
-      // const dayjsdate = dayjs.utc(value);
-      // setDate(dayjsdate)
     } else {
+      // we don't have a value here we're just going to set nothing on the format
       setFormat(null);
     }
   }, [value]);
-
-
-
-  const findAndRenderLabel = (value) => {
-    let result = "--";
-    if (value && options) {
-      options.forEach((opt) => {
-        if (opt.value + " - " + opt.label === value) {
-          result = opt.label;
-        }
-      });
-    }
-    return result;
-  };
-
-  const handleDateTimeChange = (date, time, offset) => {
-    if (date) {
-      const dateTime = dayjs(date + "T" + time + ".000");
-      const dateTimeStr = dateTime.format(DATE_TIME_ZONE_FORMAT).slice(0, 23);
-      return dateTimeStr + offset;
-    }
-    return null;
-  };
-  console.log("format", format)
-  console.log("formatMap", formatMap)
-  console.log("formatMap[format]", formatMap[format])
-
   return (
     <Box sx={{ display: "flex", flexDirection: "column" }}>
       <InputLabel required={fieldRequired}>{label}</InputLabel>
@@ -242,130 +218,94 @@ const DateTimeComponent = ({
             }}
             options={renderFormats(formatOptions1)}
             onChange={(event) => {
-              console.log('event.target.value', event.target.value)
-              setFormat(event.target.value)
+              setFormat(event.target.value);
             }}
             placeHolder={{ name: "Select Format", value: "" }}
             value={format ? format : ""}
           ></Select>
 
-          {/* {
-            format === YEAR_FORMAT && ( */}
-            <DateField
-            // disabled={}
+          <DateField
             label="Date Field"
             required={fieldRequired}
             error={error}
             helperText={undefined}
-            value={value ? dayjs(value) : null}
-            views={ format ? formatMap[format] : ["year"]}
+            value={date ? dayjs(date) : null}
+            views={format ? formatMap[format] : ["year"]}
             disabled={!canEdit || !format}
             id="year-field"
             onChange={(date) => {
-              // console.log("date.format(YEAR_FORMAT)", date.format(YEAR_FORMAT))
-              if (date){
-                onChange(date.format(YEAR_FORMAT));
+              if (date) {
+                if (format === DATE_TIME_ZONE_FORMAT) {
+                  console.log('its a timezone')
+                  if (isValidFormattedDate(date.format(DATE_TIME_ZONE_FORMAT))){
+                    onChange(date.tz(timeZone).format(DATE_TIME_ZONE_FORMAT))
+                  } else {
+                    setDate(date)
+                  }
+                } 
+                else {
+                  if (date.format(format) !== "Invalid Date") {
+                    onChange(date.format(format));
+                  }
+                }
               }
             }}
             onBlur={() => {}}
           />
-            {/* )
-          } */}
 
+          {format === DATE_TIME_ZONE_FORMAT && (
+            <>
+              <div>
+                <TimeField
+                  disabled={!canEdit || !date}
+                  required={fieldRequired}
+                  label="Time Field"
+                  id="time-field"
+                  seconds
+                  views={["hours", "minutes", "seconds"]}
+                  data-testid="time-input"
+                  handleTimeChange={(time) => {
+                    console.log('time is', time);
+                    if (isValidFormattedDate(time.format(DATE_TIME_ZONE_FORMAT))){
+                      onChange(time.tz(timeZone).format(DATE_TIME_ZONE_FORMAT))
+                      // if it's a valid format we need to update the json, if it's not we don't do anything
+                    } else {
+                      setDate(time);
+                    }
+                  }}
+                  value={date}
+                />
+              </div>
+              <Select
+                style={{ height: "38.125px", marginBottim: "2px" }}
+                required={fieldRequired}
+                id={`timezone-selector-${label}`}
+                label={`Zone`}
+                inputProps={{
+                  "data-testid": `timezone-input-field-${label}`,
+                  "aria-describedby": `timezone-input-field-helper-text-${label}`,
+                }}
+                data-testid={`timezone-field-${label}`}
+                disabled={!canEdit}
+                SelectDisplayProps={{
+                  "aria-required": "true",
+                }}
+                value={timeZone || null}
+                options={renderMenuItems(options)}
+                renderValue={(value) => {
+                  console.log('true value of time is', value);
+                  return value
+                }}
+                onChange={(event) => {
+                  const { value } = event.target;
+                  const appendedTimeZone = date.tz(value);
+                  console.log('value im passing up', appendedTimeZone.format(DATE_TIME_ZONE_FORMAT))
+                  onChange(appendedTimeZone.format(DATE_TIME_ZONE_FORMAT))
 
-          {/* <DateField
-            label="Date Field"
-            required={fieldRequired}
-            error={true}
-            helperText={undefined}
-            // id="date-time-component"
-            // value={date ? dayjs(date) : null}
-            // @ts-ignore
-            // value={date || null}
-            value={date}
-            disabled={!canEdit}
-            id="date-field"
-            handleDateChange={(date) => {
-              console.log('date is', date)
-              // console.log('date is', date)
-              // if (date.isValid()){
-              //   console.log('date is', date)
-              // }
-              // console.log('date is', date)
-              // setDate(date?.format(DATE_FORMAT));
-              // const offset = getOffSet(timeZone);
-              // const changedDate = handleDateTimeChange(
-              //   date?.format(DATE_FORMAT),
-              //   formattedTime,
-              //   offset
-              // );
-              // setDate(changedDate)
-              // if (changedDate){
-              //   onChange(changedDate)
-              // }
-              setDate(date);
-            }}
-            onBlur={() => {}}
-          /> */}
-
-          <div>
-          {/* <TimeField
-              disabled={!canEdit || !date}
-              required={fieldRequired}
-              label="Time Field"
-              id="time-field"
-              seconds
-              views={["hours", "minutes", "seconds"]}
-              data-testid="time-input"
-              handleTimeChange={(time) => {
-                setTime(time);
-                setFormattedTime(time?.format(TIME_FORMAT)); // force zeros here?
-                console.log('formattedTime',time?.format(TIME_FORMAT))
-                const offset = getOffSet(timeZone);
-                const changedDate = handleDateTimeChange(
-                  date,
-                  time?.format(TIME_FORMAT),
-                  offset
-                );
-                if (changedDate && !changedDate.includes("Invalid Date")){
-                  onChange(changedDate)
-                }
-              }}
-              value={time ? dayjs(time) : null}
-            /> */}
-          </div>
-          {/* <Select
-            style={{ height: "38.125px", marginBottim: "2px" }}
-            required={fieldRequired}
-            id={`timezone-selector-${label}`}
-            label={`Zone`}
-            inputProps={{
-              "data-testid": `timezone-input-field-${label}`,
-              "aria-describedby": `timezone-input-field-helper-text-${label}`,
-            }}
-            data-testid={`timezone-field-${label}`}
-            disabled={!canEdit || !time}
-            SelectDisplayProps={{
-              "aria-required": "true",
-            }}
-            // value={value ? timeZone : null}
-            value={timeZone}
-            options={renderMenuItems(options)}
-          
-            onChange={(event) => {
-              const newTimeZone = event.target.value;
-              setTimeZone(newTimeZone);
-              const offset = getOffSet(newTimeZone);
-              const changedDate = handleDateTimeChange(
-                date,
-                formattedTime,
-                offset
-              );
-              if (changedDate && !changedDate.includes("Invalid Date")){
-                onChange(changedDate)
-              }
-            }}
-          ></Select> */}
+                }}
+              ></Select>
+            </>
+          )}
         </div>
       </LocalizationProvider>
     </Box>

@@ -115,7 +115,7 @@ const TypeEditor = ({
             helperText={formikErrorHandler(label)}
             error={getNestedProperty(formik.errors, label)}
             fieldRequired={required}
-            value={value}
+            {...formik.getFieldProps(label)}
             onChange={(value) => {
               formik.setFieldValue(label, value);
             }}
@@ -209,12 +209,15 @@ const TypeEditor = ({
       case "date":
         return (
           <DateComponent
+            label={label}
             canEdit={canEdit}
-            structureDefinition={structureDefinition}
+            helperText={formikErrorHandler(label)}
+            error={getNestedProperty(formik.errors, label)}
             fieldRequired={required}
-            label={``}
-            onChange={onChange}
-            value={value}
+            {...formik.getFieldProps(label)}
+            onChange={(value) => {
+              formik.setFieldValue(label, value);
+            }}
           />
         );
 
