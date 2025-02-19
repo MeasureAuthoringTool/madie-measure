@@ -15,11 +15,9 @@ import {
 import "../testCaseConfiguration.scss";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 import { Typography } from "@mui/material";
-import { useQdmExecutionContext } from "../../routes/qdm/QdmExecutionContext";
 import useFormikResetOnEvent from "../../../../../common/useFormikResetOnEvent";
 
-const SDEPage = () => {
-  const { setExecutionContextReady } = useQdmExecutionContext();
+const SDEPage = ({ setExecutionContextReady }) => {
   const [measure, setMeasure] = useState<any>(measureStore.state);
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
@@ -87,7 +85,6 @@ const SDEPage = () => {
           "Test Case Configuration Updated Successfully",
           true
         );
-        // To disable Run test case button, until cqmMeasure is rebuilt
         setExecutionContextReady(false);
         // updating measure will propagate update state site wide.
         updateMeasure(newMeasure);
