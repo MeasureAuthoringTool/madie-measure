@@ -209,6 +209,32 @@ describe("Measure Definitions Component", () => {
     await checkRows(10);
   });
 
+  it("does not do search when there is no search value", async () => {
+    measureStore.state.mockImplementation(() => measureWithElevenItems);
+    measureStore.initialState.mockImplementation(() => measureWithElevenItems);
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureDefinitions setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    await checkRows(10);
+
+    const searchInput = getByRole("textbox", { name: "Search" });
+    expect(searchInput).toBeInTheDocument();
+    const searchInputField = getByTestId("measure-definition-search-input");
+    userEvent.type(searchInputField, "");
+    userEvent.keyboard("{Enter}");
+
+    await checkRows(10);
+
+    const clearSearch = getByTestId("ClearIcon");
+    userEvent.click(clearSearch);
+
+    await checkRows(10);
+  });
+
   it("test edit measure definition.", async () => {
     measureStore.state.mockImplementation(() => measureWithNineItems);
     measureStore.initialState.mockImplementation(() => measureWithNineItems);
