@@ -846,6 +846,7 @@ const MeasureEditor = () => {
               isCQLUnchanged={isCQLUnchanged}
               resetCql={resetCql}
               getCqlDefinitionReturnTypes={getCqlDefinitionReturnTypes}
+              hasCqlError={error}
             />
           )}
           {processing && (
