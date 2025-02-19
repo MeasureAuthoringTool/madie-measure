@@ -20,6 +20,7 @@ declare module "@madie/madie-util" {
     CopyTestCases: boolean;
     QICoreMeasureDefinitions: boolean;
     ShareMeasure: boolean;
+    QICoreIncludeSDEValues: boolean;
   }
 
   export interface ServiceConfig {

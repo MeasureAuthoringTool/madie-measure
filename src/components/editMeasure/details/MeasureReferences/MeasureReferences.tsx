@@ -15,6 +15,7 @@ import { Typography, MenuItem } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { measureStore, checkUserCanEdit } from "@madie/madie-util";
 import { useFormik } from "formik";
+import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 import MeasureMetaDataRow from "../MeasureMetaDataRow";
 import { MeasureReferencesValidator } from "./MeasureReferencesValidator";
 import { Measure, Reference } from "@madie/madie-models";
@@ -181,6 +182,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
     validationSchema: MeasureReferencesValidator,
     onSubmit: async (values: Reference) => await handleSubmit(values),
   });
+  useFormikResetOnEvent(formik);
 
   function formikErrorHandler(name: string, isError: boolean) {
     if (formik.touched[name] && formik.errors[name]) {

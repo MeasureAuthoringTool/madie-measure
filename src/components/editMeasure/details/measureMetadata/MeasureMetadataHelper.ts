@@ -19,6 +19,9 @@ export default function getInitialValues(measure: Measure, typeLower: string) {
     case "rationale":
       const rationale = measure?.measureMetaData?.rationale;
       return !!rationale ? rationale : "";
+    case "purpose":
+      const purpose = measure?.measureMetaData?.purpose;
+      return !!purpose ? purpose : "";
     case "guidance-usage":
       const guidance = measure?.measureMetaData?.guidance;
       return !!guidance ? guidance : "";
@@ -53,6 +56,9 @@ export const setMeasureMetadata = (
       break;
     case "rationale":
       measure.measureMetaData.rationale = newValue;
+      break;
+    case "purpose":
+      measure.measureMetaData.purpose = newValue;
       break;
     case "guidance-usage":
       measure.measureMetaData.guidance = newValue;

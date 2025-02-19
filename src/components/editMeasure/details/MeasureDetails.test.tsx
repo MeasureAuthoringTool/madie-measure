@@ -38,6 +38,7 @@ const measure = {
     copyright: "copyright",
     disclaimer: "disclaimer",
     rationale: "rationale",
+    purpose: "test purpose",
     guidance: "test",
     clinicalRecommendation: "clinicalRecommendation",
     draft: true,
@@ -320,6 +321,40 @@ describe("MeasureDetails component", () => {
     expect(getByTestId("leftPanelMeasureDisclaimer")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureRationale")).toBeInTheDocument();
     expect(getByTestId("leftPanelMeasureGuidance")).toBeInTheDocument();
+  });
+
+  it("should render the MeasurePurpose component for measure-purpose URL", () => {
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={[{ pathname: "/foo/measure-purpose" }]}>
+          <Routes>
+            <Route
+              path="/foo/*"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  isQDM={false}
+                />
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    expect(
+      screen.getByTestId("leftPanelModelAndMeasurementPeriod")
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("leftPanelMeasureSteward")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("leftPanelMeasureDescription")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("leftPanelMeasureDisclaimer")
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("leftPanelMeasureRationale")).toBeInTheDocument();
+    expect(screen.getByTestId("leftPanelMeasurePurpose")).toBeInTheDocument();
+    expect(screen.getByTestId("leftPanelMeasureGuidance")).toBeInTheDocument();
   });
 
   it("should render the MeasureMetadata component for measure-guidance URL", () => {

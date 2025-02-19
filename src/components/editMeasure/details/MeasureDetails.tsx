@@ -46,20 +46,21 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   useDocumentTitle("MADiE Edit Measure Details");
   const location = useLocation();
   const { pathname } = location;
-  const modelPeriodLink = `model&measurement-period`;
-  const stewardLink = `measure-steward`;
-  const descriptionLink = `measure-description`;
-  const copyrightLink = `measure-copyright`;
-  const disclaimerLink = `measure-disclaimer`;
-  const rationaleLink = `measure-rationale`;
-  const guidanceLink = `measure-guidance`;
-  const clinicalLink = `measure-clinical-recommendation`;
-  const definitionLink = `measure-definition`;
-  const referencesLink = `measure-references`;
-  const transmissionFormat = `transmission-format`;
+  const modelPeriodLink = "model&measurement-period";
+  const stewardLink = "measure-steward";
+  const descriptionLink = "measure-description";
+  const copyrightLink = "measure-copyright";
+  const disclaimerLink = "measure-disclaimer";
+  const rationaleLink = "measure-rationale";
+  const purposeLink = "measure-purpose";
+  const guidanceLink = "measure-guidance";
+  const clinicalLink = "measure-clinical-recommendation";
+  const definitionLink = "measure-definition";
+  const referencesLink = "measure-references";
+  const transmissionFormat = "transmission-format";
   const detailsLink = "";
-  const measureSetLink = `measure-set`;
-  const measureDefinitionLink = `measure-definition`;
+  const measureSetLink = "measure-set";
+  const measureDefinitionLink = "measure-definition";
 
   const [measure, setMeasure] = useState<any>(measureStore.state);
 
@@ -218,9 +219,16 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
         dataTestId: "leftPanelQiCoreMeasureDefinition",
         id: "sideNavQiCoreMeasureDefinition",
         displayCompletedIcon:
-          !!measure?.measureMetaData.measureDefinitions?.[0].term,
+          !!measure?.measureMetaData.measureDefinitions?.[0]?.term,
       });
     }
+    links[1].links.splice(2, 0, {
+      title: "Purpose",
+      href: purposeLink,
+      dataTestId: "leftPanelMeasurePurpose",
+      id: "sideNavMeasurePurpose",
+      displayCompletedIcon: !!measure?.measureMetaData.purpose,
+    });
   }
   useEffect(() => {
     setErrorMessage("");
@@ -290,6 +298,19 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               />
             }
           />
+          {!isQDM && (
+            <Route
+              path={purposeLink}
+              element={
+                <MeasureMetadata
+                  measureMetadataId="Purpose"
+                  measureMetadataType="Purpose"
+                  header="Purpose"
+                  setErrorMessage={setErrorMessage}
+                />
+              }
+            />
+          )}
           <Route
             path={guidanceLink}
             element={

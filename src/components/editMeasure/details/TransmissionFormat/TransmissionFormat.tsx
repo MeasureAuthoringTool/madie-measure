@@ -14,6 +14,7 @@ import {
 } from "@madie/madie-util";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 
 interface TransmissionFormatProps {
   setErrorMessage: Function;
@@ -85,6 +86,8 @@ const TransmissionFormat = (props: TransmissionFormatProps) => {
     enableReinitialize: true,
     onSubmit: async (values) => await handleSubmit(values),
   });
+  useFormikResetOnEvent(formik);
+
   function formikErrorHandler(name: string, isError: boolean) {
     if (formik.touched[name] && formik.errors[name]) {
       return `${formik.errors[name]}`;
