@@ -104,4 +104,31 @@ describe("TestCase component", () => {
     expect(inactiveLink).toBeInTheDocument();
     userEvent.click(inactiveLink);
   });
+
+  it("should render SDE tab for QDM measures", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => {
+      return {
+        QICoreIncludeSDEValues: false,
+      };
+    });
+    const onChange = jest.fn();
+    render(
+      <MemoryRouter>
+        <TestCaseListSideBarNav allPopulationCriteria={groups} qdm={true} />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole("navigation")).toBeInTheDocument();
+    expect(screen.getAllByRole("tab").length).toEqual(5);
+    const activeLink = screen.getByRole("tab", {
+      name: "Population Criteria 2",
+    });
+    expect(activeLink).toBeInTheDocument();
+    userEvent.click(activeLink);
+    const inactiveLink = screen.getByRole("tab", {
+      name: "Population Criteria 1",
+    });
+    expect(inactiveLink).toBeInTheDocument();
+    userEvent.click(inactiveLink);
+  });
 });
