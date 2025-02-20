@@ -10,15 +10,17 @@ import utc from "dayjs/plugin/utc";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import { Select, InputLabel } from "@madie/madie-design-system/dist/react";
 import DateField from "./DateField";
-
+import {
+  isFormatLessComplex,
+  YEAR_FORMAT,
+  YEAR_MONTH_FORMAT,
+  YEAR_MONTH_DAY_FORMAT,
+} from "./DateTimeComponent";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(advancedFormat);
 dayjs.utc().format();
 
-const YEAR_FORMAT = "YYYY";
-const YEAR_MONTH_FORMAT = "YYYY-MM";
-const YEAR_MONTH_DAY_FORMAT = "YYYY-MM-DD";
 const formatOptions1 = [YEAR_FORMAT, YEAR_MONTH_FORMAT, YEAR_MONTH_DAY_FORMAT];
 const formatMap = {
   [YEAR_FORMAT]: ["year"],
@@ -109,6 +111,15 @@ const DateTimeComponent = ({
             }}
             options={renderFormats(formatOptions1)}
             onChange={(event) => {
+              const newFormat = event.target.value;
+              if (format) {
+                // if we're going to a less complex format, we want to trigger an onChange instead
+                if (isFormatLessComplex(newFormat, format)) {
+                  if (dayjs(value)) {
+                    onChange(dayjs(value).format(newFormat));
+                  }
+                }
+              }
               setFormat(event.target.value);
             }}
             placeHolder={{ name: "Select Format", value: "" }}

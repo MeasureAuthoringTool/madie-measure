@@ -259,4 +259,29 @@ describe("DateComponent", () => {
     userEvent.type(dateFieldInput, "01-01-1992");
     expect(handleChange).toBeCalledWith("1992-01-01");
   });
+
+  test("Should automatically update dateString when format decreases in complexity.", () => {
+    const handleChange = jest.fn();
+    render(
+      <DateComponent
+        canEdit={true}
+        label="birthday"
+        fieldRequired={false}
+        value="1992-01-01"
+        onChange={handleChange}
+      />
+    );
+    const formatSelectorField = getByTestId(
+      "date-format-selector-input-field-birthday"
+    );
+    expect(formatSelectorField).toBeInTheDocument();
+    fireEvent.change(formatSelectorField, {
+      target: { value: YEAR_MONTH_FORMAT },
+    });
+    expect(handleChange).toBeCalledWith("1992-01");
+    fireEvent.change(formatSelectorField, {
+      target: { value: YEAR_FORMAT },
+    });
+    expect(handleChange).toBeCalledWith("1992");
+  });
 });

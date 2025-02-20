@@ -1,8 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import DateTimeComponent from "./DateTimeComponent";
 import userEvent from "@testing-library/user-event";
-import {
+import DateTimeComponent, {
   YEAR_FORMAT,
   YEAR_MONTH_FORMAT,
   YEAR_MONTH_DAY_FORMAT,
@@ -280,5 +279,33 @@ describe("DateTimeComponent", () => {
     );
     userEvent.type(dateFieldInput, "01-01-1992");
     expect(handleChange).toBeCalledWith("1992-01-01");
+  });
+  test("Should automatically update dateString when format decreases in complexity.", () => {
+    const handleChange = jest.fn();
+    render(
+      <DateTimeComponent
+        canEdit={true}
+        label="birthday"
+        fieldRequired={false}
+        value="1992-01-01T00:00:00-08:00"
+        onChange={handleChange}
+      />
+    );
+    const formatSelectorField = getByTestId(
+      "date-time-format-selector-input-field-birthday"
+    );
+    expect(formatSelectorField).toBeInTheDocument();
+    fireEvent.change(formatSelectorField, {
+      target: { value: YEAR_MONTH_DAY_FORMAT },
+    });
+    expect(handleChange).toBeCalledWith("1992-01-01");
+    fireEvent.change(formatSelectorField, {
+      target: { value: YEAR_MONTH_FORMAT },
+    });
+    expect(handleChange).toBeCalledWith("1992-01");
+    fireEvent.change(formatSelectorField, {
+      target: { value: YEAR_FORMAT },
+    });
+    expect(handleChange).toBeCalledWith("1992");
   });
 });

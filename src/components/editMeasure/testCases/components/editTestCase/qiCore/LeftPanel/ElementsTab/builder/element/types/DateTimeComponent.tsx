@@ -47,17 +47,27 @@ export const YEAR_MONTH_FORMAT = "YYYY-MM";
 export const YEAR_MONTH_DAY_FORMAT = "YYYY-MM-DD";
 export const DATE_TIME_ZONE_FORMAT = "YYYY-MM-DDTHH:mm:ssZ";
 
-const formatOptions1 = [
+export const formatOptions1 = [
   YEAR_FORMAT,
   YEAR_MONTH_FORMAT,
   YEAR_MONTH_DAY_FORMAT,
   DATE_TIME_ZONE_FORMAT,
 ];
-const formatMap = {
+export const formatMap = {
   [YEAR_FORMAT]: ["year"],
   [YEAR_MONTH_FORMAT]: ["year", "month"],
   [YEAR_MONTH_DAY_FORMAT]: ["year", "month", "day"],
   [DATE_TIME_ZONE_FORMAT]: ["year", "day", "month"],
+};
+export const formatRank = {
+  [YEAR_FORMAT]: 1,
+  [YEAR_MONTH_FORMAT]: 2,
+  [YEAR_MONTH_DAY_FORMAT]: 3,
+  [DATE_TIME_ZONE_FORMAT]: 4,
+};
+
+export const isFormatLessComplex = (format, currentFormat) => {
+  return formatRank[format] < formatRank[currentFormat];
 };
 
 export const isYearFormat = (dateStr) => {
@@ -127,6 +137,7 @@ const DateTimeComponent = ({
   const [format, setFormat] = useState<string>(null);
   const [date, setDate] = useState<any>(null); // dayjs obj
   const [timeZone, setTimeZone] = useState(null);
+  console.log("date", date);
   /*
     When a value comes in it could be either 
     YYYY, 
@@ -192,6 +203,17 @@ const DateTimeComponent = ({
               }}
               options={renderFormats(formatOptions1)}
               onChange={(event) => {
+                const { value } = event.target;
+                if (format) {
+                  // if we're going to a less complex format, we want to trigger an onChange instead
+                  if (isFormatLessComplex(value, format)) {
+                    if (date) {
+                      onChange(date.format(value));
+                    }
+                  } else {
+                    setDate(null);
+                  }
+                }
                 setFormat(event.target.value);
               }}
               placeHolder={{ name: "Select Format", value: "" }}
