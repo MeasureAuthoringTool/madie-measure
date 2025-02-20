@@ -162,6 +162,7 @@ const serviceApiMock = {
     .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
   getReturnTypesForAllCqlFunctions: jest.fn().mockResolvedValue({}),
   fetchHumanReadable: jest.fn().mockResolvedValue("test human readable"),
+  getSharedWithUserIds: jest.fn().mockResolvedValue([]),
 } as unknown as MeasureServiceApi;
 
 useMeasureServiceApiMock.mockImplementation(() => {
@@ -450,5 +451,33 @@ describe("EditMeasure Component", () => {
         )
       ).not.toBeInTheDocument();
     });
+  });
+
+  it("should display a share dialog when the event is triggered and close dialog when cancel button is clicked", async () => {
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event("share-measure"));
+    });
+
+    await waitFor(() =>
+      setTimeout(async () => {
+        expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+        expect(queryByTestId("share-dialog")).toBeInTheDocument();
+        expect(serviceApiMock.getSharedWithUserIds).toHaveBeenCalled();
+        expect(
+          queryByText(
+            "This measure is not yet shared with anyone. Enter the HARP ID of the user you'd like to share it with and click the (Add User) button above to share the measure."
+          )
+        ).toBeVisible();
+
+        const cancelButton = await findByTestId("share-cancel-button");
+        fireEvent.click(cancelButton);
+        expect(queryByTestId("share-dialog")).not.toBeVisible();
+      }, 500)
+    );
   });
 });

@@ -411,6 +411,24 @@ export class MeasureServiceApi {
     }
   }
 
+  async getSharedWithUserIds(measureId: string): Promise<string[]> {
+    try {
+      const response = await axios.get<string[]>(
+        `${this.baseUrl}/measures/shared?measureId=${measureId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      const message = `Unable to retrieve users that the measure is shared with. If the error persists, please contact the help desk.`;
+      console.error(message, err);
+      throw new Error(message);
+    }
+  }
+
   // this expects endpoint should return a success or error message, no content
   async checkValidVersion(id: string, versionType: string): Promise<any> {
     return await axios.get<any>(
