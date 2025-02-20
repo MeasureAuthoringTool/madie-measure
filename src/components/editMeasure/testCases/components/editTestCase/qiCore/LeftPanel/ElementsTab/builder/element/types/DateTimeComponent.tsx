@@ -137,7 +137,6 @@ const DateTimeComponent = ({
   const [format, setFormat] = useState<string>(null);
   const [date, setDate] = useState<any>(null); // dayjs obj
   const [timeZone, setTimeZone] = useState(null);
-  console.log("date", date);
   /*
     When a value comes in it could be either 
     YYYY, 
