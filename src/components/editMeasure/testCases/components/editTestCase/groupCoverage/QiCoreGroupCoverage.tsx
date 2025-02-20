@@ -3,14 +3,18 @@ import "twin.macro";
 import "styled-components/macro";
 import parse from "html-react-parser";
 import _, { isEmpty } from "lodash";
-import { GroupPopulation, PopulationType, SupplementalData } from "@madie/madie-models";
+import {
+  GroupPopulation,
+  PopulationType,
+  SupplementalData,
+} from "@madie/madie-models";
 import { Select } from "@madie/madie-design-system/dist/react";
 import GroupCoverageNav, {
   Population,
 } from "./groupCoverageNav/GroupCoverageNav";
 import { MenuItem } from "@mui/material";
 import { FHIR_POPULATION_CODES } from "../../../util/PopulationsMap";
-import { mapCalculationResults, MappedCalculationResults } from "../qiCore/calculationResults/CalculationResults";
+import { MappedCalculationResults } from "../qiCore/calculationResults/CalculationResults";
 import { Relevance } from "fqm-execution/build/types/Enums";
 import GroupCoverageResultsSection from "./GroupCoverageResultsSection";
 import {
@@ -63,7 +67,7 @@ const QiCoreGroupCoverage = ({
   cqlDefinitionCallstack,
   mainCqlLibraryName,
   includeSDE,
-  supplementalData
+  supplementalData,
 }: Props) => {
   // selected group/criteria
   const [selectedCriteria, setSelectedCriteria] = useState<string>("");
@@ -230,30 +234,26 @@ const QiCoreGroupCoverage = ({
 
   const changeSDE = (population) => {
     setSelectedHighlightingTab(population);
-   
     if (mappedCalculationResults) {
       const statementResults =
         mappedCalculationResults[selectedCriteria]["statementResults"];
-      console.log("statementResults", statementResults)
-      console.log(supplementalData);
-      const filteredSDEDefinitions = Object.entries(statementResults).filter(([key, value]) => key)
-      console.log("filteredSDEDefinitions", filteredSDEDefinitions)
-
-      const t= supplementalData?.filter(data =>{
-        return Object.keys(statementResults).filter(([key, value]) => key === data?.definition)
-      })
-      console.log(t)
+      const filteredSDEDefinitions = supplementalData?.reduce((acc, item) => {
+        if (statementResults[item?.definition]) {
+          acc[item?.definition] = statementResults[item?.definition];
+        }
+        return acc;
+      }, {});
+      setSelectedAllDefinitions(filteredSDEDefinitions);
     }
-  }
+  };
 
   const onHighlightingNavTabClick = (selectedTab) => {
     if (isPopulation(selectedTab.name)) {
       changePopulation(selectedTab);
-    } 
-    else {
-      if(selectedTab.name === "SDE"){
-        changeSDE (selectedTab)
-      }else{
+    } else {
+      if (selectedTab.name === "SDE") {
+        changeSDE(selectedTab);
+      } else {
         changeDefinitions(selectedTab);
       }
     }

@@ -115,7 +115,7 @@ export class CalculationService {
           buildStatementLevelHTML: true,
           measurementPeriodStart: measurementPeriodStart,
           measurementPeriodEnd: measurementPeriodEnd,
-          calculateSDEs: sdeIncluded
+          calculateSDEs: sdeIncluded,
         },
         valueSets
       );
