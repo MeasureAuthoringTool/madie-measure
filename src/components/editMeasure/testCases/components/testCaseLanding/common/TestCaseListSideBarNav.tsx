@@ -117,7 +117,7 @@ const TestCaseListSideBarNav = ({
               onChange={handleChange}
               value={endRoute}
             >
-              {featureFlags?.QICoreIncludeSDEValues && (
+              {(featureFlags?.QICoreIncludeSDEValues || qdm) && (
                 <Tab
                   label="SDE"
                   value="sde"

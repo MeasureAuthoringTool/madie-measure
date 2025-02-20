@@ -71,7 +71,8 @@ export class CalculationService {
       TestCaseBundles,
       valueSets,
       measure.measurementPeriodStart,
-      measure.measurementPeriodEnd
+      measure.measurementPeriodEnd,
+      measure?.testCaseConfiguration?.sdeIncluded
     );
 
     // set onto window for any environment debug purposes
@@ -101,7 +102,8 @@ export class CalculationService {
     patientBundles: Bundle[],
     valueSets: ValueSet[],
     measurementPeriodStart,
-    measurementPeriodEnd
+    measurementPeriodEnd,
+    sdeIncluded: boolean
   ): Promise<CalculationOutput<any>> {
     try {
       return await Calculator.calculate(
@@ -113,6 +115,7 @@ export class CalculationService {
           buildStatementLevelHTML: true,
           measurementPeriodStart: measurementPeriodStart,
           measurementPeriodEnd: measurementPeriodEnd,
+          calculateSDEs: sdeIncluded
         },
         valueSets
       );
