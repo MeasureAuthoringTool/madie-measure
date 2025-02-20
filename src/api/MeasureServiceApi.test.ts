@@ -533,4 +533,27 @@ describe("MeasureServiceApi Tests", () => {
       measureServiceApi.fetchHumanReadable(measures[0].id)
     ).rejects.toThrow(errorMessage);
   });
+
+  it("test getSharedWithUserIds success", async () => {
+    const data = ["userId1", "userId2"];
+    const resp: any = { status: 200, data };
+
+    mockedAxios.get.mockResolvedValue(resp);
+
+    const userIds = await measureServiceApi.getSharedWithUserIds("measureId");
+    expect(mockedAxios.get).toBeCalledTimes(1);
+    expect(userIds).toEqual(data);
+  });
+
+  it("test getSharedWithUserIds failure", async () => {
+    const errorMessage =
+      "Unable to retrieve users that the measure is shared with. If the error persists, please contact the help desk.";
+
+    mockedAxios.get.mockImplementationOnce(() =>
+      Promise.reject(new Error(errorMessage))
+    );
+    await expect(
+      measureServiceApi.getSharedWithUserIds("measureId")
+    ).rejects.toThrow(errorMessage);
+  });
 });
