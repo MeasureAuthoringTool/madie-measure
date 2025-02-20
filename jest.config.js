@@ -7,7 +7,7 @@ module.exports = {
     "^.+\\.js?$": require.resolve("babel-jest"),
     "^.+\\.svg$": "<rootDir>/svgTransform.js",
   },
-  transformIgnorePatterns: ["node_modules/(?!formik)/"],
+  transformIgnorePatterns: ["node_modules/(?!formik|dayjs)/"],
   moduleNameMapper: {
     "\\.(css)$": "identity-obj-proxy",
     "single-spa-react/parcel": "single-spa-react/lib/cjs/parcel.cjs",

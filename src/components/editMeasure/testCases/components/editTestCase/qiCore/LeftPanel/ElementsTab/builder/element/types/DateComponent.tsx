@@ -109,7 +109,6 @@ const DateTimeComponent = ({
             }}
             options={renderFormats(formatOptions1)}
             onChange={(event) => {
-              console.log("event.target.value", event.target.value);
               setFormat(event.target.value);
             }}
             placeHolder={{ name: "Select Format", value: "" }}
@@ -125,10 +124,8 @@ const DateTimeComponent = ({
             value={value ? dayjs(value) : null}
             views={format ? formatMap[format] : ["year"]}
             disabled={!canEdit || !format}
-            id="year-field"
+            id={`${format || "year"}-field-${label}`}
             onChange={(date) => {
-              console.log("dateOnChange is", date);
-              console.log("date.format(YEAR_FORMAT)", date.format(YEAR_FORMAT));
               if (date) {
                 if (date.format(format) !== "Invalid Date") {
                   onChange(date.format(format));

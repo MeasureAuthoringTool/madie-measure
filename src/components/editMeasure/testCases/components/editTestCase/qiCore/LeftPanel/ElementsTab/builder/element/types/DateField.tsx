@@ -59,7 +59,7 @@ const DateField = ({
     <Box sx={{ ...containerSx }}>
       <DatePicker
         emptyLabel="custom label"
-        value={value || null}
+        value={value}
         onChange={onChange}
         views={views}
         disabled={disabled}

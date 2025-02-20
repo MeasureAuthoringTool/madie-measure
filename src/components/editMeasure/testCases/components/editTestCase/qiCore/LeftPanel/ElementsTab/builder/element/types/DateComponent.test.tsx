@@ -8,6 +8,7 @@ describe("DateComponent", () => {
     render(
       <DateComponent
         value={`2024-09-26`}
+        label="birthday"
         canEdit={true}
         fieldRequired={false}
         onChange={handleChange}
@@ -15,9 +16,11 @@ describe("DateComponent", () => {
       />
     );
 
-    const dateField = screen.getByTestId("date-field-Date");
+    const dateField = screen.getByTestId("YYYY-MM-DD-field-birthday");
     expect(dateField).toBeInTheDocument();
-    const dateFieldInput = screen.getByTestId("date-field-Date-input");
+    const dateFieldInput = screen.getByTestId(
+      "YYYY-MM-DD-field-birthday-input"
+    );
     expect(dateFieldInput).toBeInTheDocument();
     expect(dateFieldInput.value).toBe("09/26/2024");
   });
@@ -30,14 +33,16 @@ describe("DateComponent", () => {
         canEdit={true}
         fieldRequired={false}
         onChange={handleChange}
-        label="BIRTHDATE"
+        label="birthday"
         structureDefinition={null}
       />
     );
 
-    const dateField = screen.getByTestId("date-field-BIRTHDATE");
+    const dateField = screen.getByTestId("YYYY-MM-DD-field-birthday");
     expect(dateField).toBeInTheDocument();
-    const dateFieldInput = screen.getByTestId("date-field-BIRTHDATE-input");
+    const dateFieldInput = screen.getByTestId(
+      "YYYY-MM-DD-field-birthday-input"
+    );
     expect(dateFieldInput).toBeInTheDocument();
     expect(dateFieldInput.value).toBe("09/26/2024");
 

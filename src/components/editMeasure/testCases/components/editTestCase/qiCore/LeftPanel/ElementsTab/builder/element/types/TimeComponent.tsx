@@ -18,7 +18,6 @@ const TimeComponent = ({
     value ? dayjs(value, TIME_FORMAT) : ""
   );
 
-  console.log("time label", label);
   return (
     <TimeField
       required={fieldRequired}
