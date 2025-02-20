@@ -1,7 +1,14 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import DateComponent from "./DateComponent";
+import userEvent from "@testing-library/user-event";
+import {
+  YEAR_FORMAT,
+  YEAR_MONTH_FORMAT,
+  YEAR_MONTH_DAY_FORMAT,
+} from "./DateTimeComponent";
 
+const { getByTestId } = screen;
 describe("DateComponent", () => {
   test("Should render DateComponent", () => {
     const handleChange = jest.fn();
@@ -60,5 +67,196 @@ describe("DateComponent", () => {
       />
     );
     expect(dateFieldInput.value).toBe("09/27/2024");
+  });
+
+  test("Should handleFormat and and date from empty", async () => {
+    const handleChange = jest.fn();
+    render(
+      <DateComponent
+        canEdit={true}
+        label="birthday"
+        fieldRequired={false}
+        value={null}
+        onChange={handleChange}
+      />
+    );
+
+    const formatSelectorField = getByTestId(
+      "date-format-selector-input-field-birthday"
+    );
+    expect(formatSelectorField).toBeInTheDocument();
+    fireEvent.change(formatSelectorField, {
+      target: { value: YEAR_FORMAT },
+    });
+    const dateField = screen.getByTestId(`${YEAR_FORMAT}-field-birthday`);
+    expect(dateField).toBeInTheDocument();
+
+    fireEvent.change(formatSelectorField, {
+      target: { value: YEAR_MONTH_FORMAT },
+    });
+
+    const yearMonthField = screen.getByTestId(
+      `${YEAR_MONTH_FORMAT}-field-birthday`
+    );
+    expect(yearMonthField).toBeInTheDocument();
+    fireEvent.change(formatSelectorField, {
+      target: { value: YEAR_MONTH_DAY_FORMAT },
+    });
+
+    const yearMonthDayFORMAT = screen.getByTestId(
+      `${YEAR_MONTH_DAY_FORMAT}-field-birthday`
+    );
+    expect(yearMonthDayFORMAT).toBeInTheDocument();
+  });
+
+  test("Should handle year", async () => {
+    const handleChange = jest.fn();
+    render(
+      <DateComponent
+        canEdit={true}
+        label="birthday"
+        fieldRequired={false}
+        value={null}
+        onChange={handleChange}
+      />
+    );
+
+    const formatSelectorField = getByTestId(
+      "date-format-selector-input-field-birthday"
+    );
+    expect(formatSelectorField).toBeInTheDocument();
+    fireEvent.change(formatSelectorField, {
+      target: { value: YEAR_FORMAT },
+    });
+    const dateField = screen.getByTestId(`${YEAR_FORMAT}-field-birthday`);
+    expect(dateField).toBeInTheDocument();
+    const dateFieldInput = screen.getByTestId(
+      `${YEAR_FORMAT}-field-birthday-input`
+    );
+    userEvent.type(dateFieldInput, "2022");
+    expect(dateFieldInput.value).toBe("2022");
+    expect(handleChange).toBeCalledWith("2022");
+  });
+
+  test("Should handle YEARMONTH", async () => {
+    const handleChange = jest.fn();
+    render(
+      <DateComponent
+        canEdit={true}
+        label="birthday"
+        fieldRequired={false}
+        value={null}
+        onChange={handleChange}
+      />
+    );
+
+    const formatSelectorField = getByTestId(
+      "date-format-selector-input-field-birthday"
+    );
+    expect(formatSelectorField).toBeInTheDocument();
+    fireEvent.change(formatSelectorField, {
+      target: { value: YEAR_MONTH_FORMAT },
+    });
+    const dateField = screen.getByTestId(`${YEAR_MONTH_FORMAT}-field-birthday`);
+    expect(dateField).toBeInTheDocument();
+    const dateFieldInput = screen.getByTestId(
+      `${YEAR_MONTH_FORMAT}-field-birthday-input`
+    );
+    userEvent.type(dateFieldInput, "January-2025");
+    expect(dateFieldInput.value).toBe("January 2025");
+    expect(handleChange).toBeCalledWith("2025-01");
+  });
+
+  test("Should handle YEARMONTHDAY", async () => {
+    const handleChange = jest.fn();
+    render(
+      <DateComponent
+        canEdit={true}
+        label="birthday"
+        fieldRequired={false}
+        value={null}
+        onChange={handleChange}
+      />
+    );
+
+    const formatSelectorField = getByTestId(
+      "date-format-selector-input-field-birthday"
+    );
+    expect(formatSelectorField).toBeInTheDocument();
+    fireEvent.change(formatSelectorField, {
+      target: { value: YEAR_MONTH_DAY_FORMAT },
+    });
+    const dateField = screen.getByTestId(
+      `${YEAR_MONTH_DAY_FORMAT}-field-birthday`
+    );
+    expect(dateField).toBeInTheDocument();
+    const dateFieldInput = screen.getByTestId(
+      `${YEAR_MONTH_DAY_FORMAT}-field-birthday-input`
+    );
+    userEvent.type(dateFieldInput, "01/01/2025");
+    expect(dateFieldInput.value).toBe("01/01/2025");
+    expect(handleChange).toBeCalledWith("2025-01-01");
+  });
+
+  test(`"Should render ${YEAR_FORMAT}"`, () => {
+    const handleChange = jest.fn();
+    render(
+      <DateComponent
+        canEdit={true}
+        label="birthday"
+        fieldRequired={false}
+        value={"1992"}
+        onChange={handleChange}
+      />
+    );
+    const dateField = screen.getByTestId(`${YEAR_FORMAT}-field-birthday`);
+    expect(dateField).toBeInTheDocument();
+    const dateFieldInput = screen.getByTestId(
+      `${YEAR_FORMAT}-field-birthday-input`
+    );
+    userEvent.type(dateFieldInput, "1992");
+    expect(handleChange).toBeCalledWith("1992");
+  });
+
+  test(`"Should render ${YEAR_MONTH_FORMAT}"`, () => {
+    const handleChange = jest.fn();
+    render(
+      <DateComponent
+        canEdit={true}
+        label="birthday"
+        fieldRequired={false}
+        value={"1992-01"}
+        onChange={handleChange}
+      />
+    );
+    const dateField = screen.getByTestId(`${YEAR_MONTH_FORMAT}-field-birthday`);
+    expect(dateField).toBeInTheDocument();
+    const dateFieldInput = screen.getByTestId(
+      `${YEAR_MONTH_FORMAT}-field-birthday-input`
+    );
+    userEvent.type(dateFieldInput, "January 1992");
+    expect(handleChange).toBeCalledWith("1992-01");
+  });
+
+  test(`"Should render ${YEAR_MONTH_DAY_FORMAT}"`, () => {
+    const handleChange = jest.fn();
+    render(
+      <DateComponent
+        canEdit={true}
+        label="birthday"
+        fieldRequired={false}
+        value={"2019-01-01"}
+        onChange={handleChange}
+      />
+    );
+    const dateField = screen.getByTestId(
+      `${YEAR_MONTH_DAY_FORMAT}-field-birthday`
+    );
+    expect(dateField).toBeInTheDocument();
+    const dateFieldInput = screen.getByTestId(
+      `${YEAR_MONTH_DAY_FORMAT}-field-birthday-input`
+    );
+    userEvent.type(dateFieldInput, "01-01-1992");
+    expect(handleChange).toBeCalledWith("1992-01-01");
   });
 });

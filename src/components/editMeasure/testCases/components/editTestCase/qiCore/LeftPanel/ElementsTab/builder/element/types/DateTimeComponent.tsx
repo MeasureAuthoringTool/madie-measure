@@ -28,21 +28,24 @@ interface MenuObj {
 // Iana Codes. If you pass in just number they work only in source.
 // same thing fails in test. Need to use the aiana timecode instead.
 const timezones = [
-  { value: "America/Puerto_Rico", offset: "-04:00", label: "AST" },
-  { value: "America/New_York", offset: "-05:00", label: "EST" },
-  { value: "America/Chicago", offset: "-06:00", label: "CST" },
-  { value: "America/Denver", offset: "-07:00", label: "MST" },
-  { value: "America/Los_Angeles", offset: "-08:00", label: "PST" },
-  { value: "US/Alaska", offset: "-09:00", label: "AKST" },
-  { value: "Pacific/Honolulu", offset: "-10:00", label: "HST" },
-  { value: "Pacific/Pago_Pago", offset: "-11:00", label: "WST" },
-  { value: "Pacific/Guam", offset: "+10:00", label: "CHST" },
+  // { value: "America/New_York", offset: "-04:00", label: "EDT" }, //daylight savings time issues -05:00 || -04:00
+  { value: "America/Puerto_Rico", offset: "-04:00", label: "AST" }, // works
+  // daylight savings time starts second Sunday in March. At 2:00 AM
+  { value: "America/New_York", offset: "-05:00", label: "EST" }, //daylight savings time issues -05:00 || -04:00
+  { value: "America/Chicago", offset: "-06:00", label: "CST" }, //daylight savings time issues -06 || -05
+  { value: "America/Denver", offset: "-07:00", label: "MST" }, //daylight savings time issues -6 or -7
+  { value: "America/Los_Angeles", offset: "-08:00", label: "PST" }, //daylight savings time issues -7 or -8
+  { value: "US/Alaska", offset: "-09:00", label: "AKST" }, //daylight savings time issues -8 or -9
+  // first Sunday in November in the U.S. At 2:00 AM
+  { value: "Pacific/Honolulu", offset: "-10:00", label: "HST" }, // works
+  { value: "Pacific/Pago_Pago", offset: "-11:00", label: "SST" }, // works
+  { value: "Pacific/Guam", offset: "+10:00", label: "CHST" }, // works
 ];
 
-const YEAR_FORMAT = "YYYY";
-const YEAR_MONTH_FORMAT = "YYYY-MM";
-const YEAR_MONTH_DAY_FORMAT = "YYYY-MM-DD";
-const DATE_TIME_ZONE_FORMAT = "YYYY-MM-DDTHH:mm:ssZ";
+export const YEAR_FORMAT = "YYYY";
+export const YEAR_MONTH_FORMAT = "YYYY-MM";
+export const YEAR_MONTH_DAY_FORMAT = "YYYY-MM-DD";
+export const DATE_TIME_ZONE_FORMAT = "YYYY-MM-DDTHH:mm:ssZ";
 
 const formatOptions1 = [
   YEAR_FORMAT,
@@ -137,7 +140,6 @@ const DateTimeComponent = ({
     // we need to find out what type of dateTime format it is, and translate to related parts
     if (value) {
       const format = getCurrentFormat(value);
-      console.log('value', value)
       if (format === DATE_TIME_ZONE_FORMAT) {
         const dayjsObject = dayjs(value);
         const timezoneOffset = value.slice(-6);
@@ -216,20 +218,14 @@ const DateTimeComponent = ({
                   ) {
                     if (timeZone) {
                       // its not valid until we have a timezone
-                      console.log('date is', date);
-                      console.log('date.tz', date.tz(timeZone));
-                      // date.$offset = 0;
-                      console.log("date.tz(timeZone).format(DATE_TIME_ZONE_FORMAT))", date.tz(timeZone).format(DATE_TIME_ZONE_FORMAT));
                       onChange(date.tz(timeZone).format(DATE_TIME_ZONE_FORMAT));
                     } else {
-                      console.log('no tz')
                       setDate(date);
                     }
                   }
                 }
                 // works for year, ym, ydm
                 else {
-                  console.log('else onChange', date.format(format))
                   if (date.format(format) !== "Invalid Date") {
                     onChange(date.format(format));
                   }
