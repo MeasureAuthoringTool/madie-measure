@@ -3,8 +3,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ElementEditor from "./ElementEditor";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
-import { QiCoreResourceProvider } from "../../../../../../../util/QiCorePatientProvider";
-
+import { QiCoreResourceContext } from "../../../../../../../util/QiCorePatientProvider";
+import mockPatientState from "../resource/mockPatientState.json";
 jest.mock("../../../../../../../api/useFhirDefinitionsService");
 jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
   const actualModule = jest.requireActual(
@@ -140,11 +140,16 @@ describe("ElementEditor Component", () => {
     canEdit,
     displayedElementsTree,
     setValidationSchema,
-    setInitialFormikValuesStu6
+    setInitialFormikValuesStu6,
+    dispatch
   ) => {
     render(
-      <QiCoreResourceProvider>
+      <QiCoreResourceContext.Provider
+        value={{ state: mockPatientState, dispatch }}
+      >
+        {" "}
         <ElementEditor
+          selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
           setValidationSchema={setValidationSchema}
           setInitialFormikValuesStu6={setInitialFormikValuesStu6}
           selectedResource={selectedResource}
@@ -155,7 +160,7 @@ describe("ElementEditor Component", () => {
           canEdit={canEdit}
           displayedElementsTree={displayedElementsTree}
         />
-      </QiCoreResourceProvider>
+      </QiCoreResourceContext.Provider>
     );
   };
 
@@ -166,6 +171,7 @@ describe("ElementEditor Component", () => {
   test("renders without crashing when elementDefinition is provided. buttons disabled", async () => {
     const setInitialFormikValuesStu6 = jest.fn();
     const setValidationSchema = jest.fn();
+    const dispatch = jest.fn();
     renderElementEditor(
       mockSelectedResource,
       mockResource,
@@ -175,7 +181,8 @@ describe("ElementEditor Component", () => {
       true,
       mockDisplayedElementsTree,
       setValidationSchema,
-      setInitialFormikValuesStu6
+      setInitialFormikValuesStu6,
+      dispatch
     );
     await waitFor(() =>
       expect(mockFhirDefinitionsService.getResourceTree).toHaveBeenCalled()
@@ -195,6 +202,7 @@ describe("ElementEditor Component", () => {
     const setInitialFormikValuesStu6 = jest.fn();
     const setValidationSchema = jest.fn();
     const mockResetForm = jest.fn();
+    const dispatch = jest.fn();
     mockFormikObj.resetForm = mockResetForm;
     mockFormikObj.dirty = true;
     const mockFormikValues = {
@@ -212,7 +220,8 @@ describe("ElementEditor Component", () => {
       true,
       mockDisplayedElementsTree,
       setValidationSchema,
-      setInitialFormikValuesStu6
+      setInitialFormikValuesStu6,
+      dispatch
     );
     await waitFor(() =>
       expect(mockFhirDefinitionsService.getResourceTree).toHaveBeenCalled()
@@ -232,13 +241,14 @@ describe("ElementEditor Component", () => {
     });
     userEvent.click(submitButton);
     await waitFor(() => {
-      expect(mockResetForm).toHaveBeenCalledTimes(2);
+      expect(dispatch).toHaveBeenCalled();
     });
   });
 
   test("renders a fallback when no elementDefinition is provided", () => {
     const setInitialFormikValuesStu6 = jest.fn();
     const setValidationSchema = jest.fn();
+    const dispatch = jest.fn();
 
     renderElementEditor(
       mockSelectedResource,
@@ -249,7 +259,8 @@ describe("ElementEditor Component", () => {
       true,
       mockDisplayedElementsTree,
       setValidationSchema,
-      setInitialFormikValuesStu6
+      setInitialFormikValuesStu6,
+      dispatch
     );
     expect(screen.getByText("No element selected")).toBeInTheDocument();
   });
@@ -257,6 +268,7 @@ describe("ElementEditor Component", () => {
   test("checks loading state", async () => {
     const setInitialFormikValuesStu6 = jest.fn();
     const setValidationSchema = jest.fn();
+    const dispatch = jest.fn();
 
     renderElementEditor(
       mockSelectedResource,
@@ -267,7 +279,8 @@ describe("ElementEditor Component", () => {
       true,
       mockDisplayedElementsTree,
       setValidationSchema,
-      setInitialFormikValuesStu6
+      setInitialFormikValuesStu6,
+      dispatch
     );
     expect(screen.queryByText("ElementEditorChildren")).not.toBeInTheDocument();
 

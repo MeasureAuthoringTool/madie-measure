@@ -45,6 +45,7 @@ const Builder = ({
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   const fhirElmTranslationService = useRef(useFhirElmTranslationServiceApi());
   const [activeResource, setActiveResource] = useState(null);
+  const [selectedResourceID, setSelectedResourceId] = useState(null); // one single source of truth.
   const { state, dispatch } = useQiCoreResource();
   const { measureState } = useExecutionContext();
   const [measure] = measureState;
@@ -85,6 +86,7 @@ const Builder = ({
     );
     const resource = { ...resourceTree, bundleEntry };
     setActiveResource(resource);
+    setSelectedResourceId(bundleEntry.resource.id);
   };
   // track form dirty and an intermediate tab to know what the discard dialog should nav to
   const { dirty, resetForm } = useFormikContext();
@@ -163,6 +165,7 @@ const Builder = ({
           <>
             {activeResource && (
               <ResourceEditor
+                selectedResourceID={selectedResourceID}
                 setValidationSchema={setValidationSchema}
                 setInitialFormikValuesStu6={setInitialFormikValuesStu6}
                 selectedResource={activeResource}

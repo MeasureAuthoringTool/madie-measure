@@ -25,9 +25,11 @@ interface ResourceEditorProps {
   canEdit: boolean;
   setInitialFormikValuesStu6: Dispatch<SetStateAction<Object>>;
   setValidationSchema: Dispatch<SetStateAction<Object>>;
+  selectedResourceID: string;
 }
 
 const ResourceEditor = ({
+  selectedResourceID,
   selectedResource,
   onCancel,
   canEdit,
@@ -171,6 +173,7 @@ const ResourceEditor = ({
           setValidationSchema={setValidationSchema}
           elementDefinition={displayedElements?.[activeTab]}
           selectedResource={selectedResource}
+          selectedResourceID={selectedResourceID}
           resource={editingResource}
           resourcePath={resourceBasePath}
           displayedElementsTree={displayedElementsTree}
