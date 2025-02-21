@@ -354,7 +354,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
                     startAdornment: (
                       <InputAdornment
                         position="start"
-                        data-testid="test-cases-trigger-search"
+                        data-testid="measure-definition-search"
                         onClick={handleNavigate}
                         style={{ cursor: "pointer" }}
                       >
