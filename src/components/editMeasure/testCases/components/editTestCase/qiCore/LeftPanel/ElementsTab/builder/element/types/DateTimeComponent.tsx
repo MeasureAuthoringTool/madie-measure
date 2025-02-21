@@ -70,15 +70,6 @@ export const isFormatLessComplex = (format, currentFormat) => {
   return formatRank[format] < formatRank[currentFormat];
 };
 
-export const isYearFormat = (dateStr) => {
-  return dayjs(dateStr, YEAR_FORMAT, true).isValid();
-};
-export const isYearMonthFormat = (dateStr) => {
-  return dayjs(dateStr, YEAR_MONTH_FORMAT, true).isValid();
-};
-export const isYearMonthDayFormat = (dateStr) => {
-  return dayjs(dateStr, YEAR_MONTH_DAY_FORMAT, true).isValid();
-};
 const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/;
 const isValidFormattedDate = (dateString) => {
   if (!dateRegex.test(dateString)) return false;
@@ -133,6 +124,7 @@ const DateTimeComponent = ({
   onChange, // onChange should Probably only be triggered once the fields are all filled out
   label = "DateTime",
   error,
+  helperText,
 }: TypeComponentProps) => {
   const [format, setFormat] = useState<string>(null);
   const [date, setDate] = useState<any>(null); // dayjs obj
@@ -224,7 +216,7 @@ const DateTimeComponent = ({
             label="Date Field"
             required={fieldRequired}
             error={error}
-            helperText={undefined}
+            helperText={helperText}
             value={date ? dayjs(date) : null}
             views={format ? formatMap[format] : ["year"]}
             disabled={!canEdit || !format}

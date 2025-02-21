@@ -70,6 +70,7 @@ const DateTimeComponent = ({
   onChange,
   label = "DateTime",
   error,
+  helperText,
 }: TypeComponentProps) => {
   const [format, setFormat] = useState<string>();
   useEffect(() => {
@@ -128,10 +129,10 @@ const DateTimeComponent = ({
 
           <DateField
             label="Date Field"
+            helperText={helperText}
             placeholder={format}
             required={fieldRequired}
             error={error}
-            helperText={undefined}
             value={value ? dayjs(value) : null}
             views={format ? formatMap[format] : ["year"]}
             disabled={!canEdit || !format}
