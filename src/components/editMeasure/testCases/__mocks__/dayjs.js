@@ -7,6 +7,4 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.tz.setDefault("America/Los_Angeles");
 
-// Force dayjs to use Los Angeles time in tests
-dayjs.tz.setDefault("America/Los_Angeles");
 module.exports = dayjs;
