@@ -267,18 +267,16 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
   };
 
   const handleSearch = () => {
-    if (formik.values.searchValue) {
-      const filtered = measureDefinitions.filter(
-        (def) =>
-          def.term
-            .toLowerCase()
-            .includes(formik.values.searchValue.toLowerCase()) ||
-          def.definition
-            .toLowerCase()
-            .includes(formik.values.searchValue.toLowerCase())
-      );
-      setMeasureDefinitions(filtered);
-    }
+    const filtered = measure?.measureMetaData?.measureDefinitions.filter(
+      (def) =>
+        def.term
+          .toLowerCase()
+          .includes(formik.values.searchValue.toLowerCase()) ||
+        def.definition
+          .toLowerCase()
+          .includes(formik.values.searchValue.toLowerCase())
+    );
+    setMeasureDefinitions(filtered);
   };
   const handleClearSearch = () => {
     if (formik.values.searchValue) {
