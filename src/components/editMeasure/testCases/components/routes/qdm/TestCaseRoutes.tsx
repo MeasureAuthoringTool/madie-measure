@@ -234,7 +234,16 @@ const TestCaseRoutes = () => {
           />
           <Route
             path="/list-page/sde"
-            element={<TestCaseLandingWrapper qdm children={<SDEPage />} />}
+            element={
+              <TestCaseLandingWrapper
+                qdm
+                children={
+                  <SDEPage
+                    setExecutionContextReady={setExecutionContextReady}
+                  />
+                }
+              />
+            }
           />
           <Route
             path="/list-page/expansion"

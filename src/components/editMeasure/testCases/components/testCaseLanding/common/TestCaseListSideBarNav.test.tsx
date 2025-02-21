@@ -21,8 +21,8 @@ const groups: Group[] = [
   },
 ];
 jest.mock("@madie/madie-util", () => ({
-  useFeatureFlags: jest.fn(() => {
-    return {};
+  useFeatureFlags: jest.fn().mockReturnValue({
+    QICoreIncludeSDEValues: true,
   }),
 }));
 describe("TestCase component", () => {
@@ -65,6 +65,33 @@ describe("TestCase component", () => {
     );
 
     expect(screen.getByRole("navigation")).toBeInTheDocument();
+    expect(screen.getAllByRole("tab").length).toEqual(4);
+    const activeLink = screen.getByRole("tab", {
+      name: "Population Criteria 2",
+    });
+    expect(activeLink).toBeInTheDocument();
+    userEvent.click(activeLink);
+    const inactiveLink = screen.getByRole("tab", {
+      name: "Population Criteria 1",
+    });
+    expect(inactiveLink).toBeInTheDocument();
+    userEvent.click(inactiveLink);
+  });
+
+  it("shouldn't render SDE tab for QI Core measures when QICoreIncludeSDEValues flag is false", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => {
+      return {
+        QICoreIncludeSDEValues: false,
+      };
+    });
+    const onChange = jest.fn();
+    render(
+      <MemoryRouter>
+        <TestCaseListSideBarNav allPopulationCriteria={groups} />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole("navigation")).toBeInTheDocument();
     expect(screen.getAllByRole("tab").length).toEqual(3);
     const activeLink = screen.getByRole("tab", {
       name: "Population Criteria 2",
@@ -76,5 +103,22 @@ describe("TestCase component", () => {
     });
     expect(inactiveLink).toBeInTheDocument();
     userEvent.click(inactiveLink);
+  });
+
+  it("should render SDE tab for QDM measures", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => {
+      return {
+        QICoreIncludeSDEValues: false,
+      };
+    });
+    const onChange = jest.fn();
+    render(
+      <MemoryRouter>
+        <TestCaseListSideBarNav allPopulationCriteria={groups} qdm={true} />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole("navigation")).toBeInTheDocument();
+    expect(screen.getAllByRole("tab").length).toEqual(5);
   });
 });

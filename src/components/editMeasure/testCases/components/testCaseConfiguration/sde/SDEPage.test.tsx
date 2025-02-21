@@ -50,19 +50,7 @@ jest.mock("@madie/madie-util", () => ({
 const setExecutionContextReady = jest.fn();
 function renderSdePageComponent() {
   return render(
-    <QdmExecutionContextProvider
-      value={{
-        measureState: [null, jest.fn()],
-        cqmMeasureState: [null, jest.fn()],
-        executionContextReady: true,
-        setExecutionContextReady: setExecutionContextReady,
-        executing: false,
-        setExecuting: jest.fn(),
-        contextFailure: false,
-      }}
-    >
-      <SDEPage />
-    </QdmExecutionContextProvider>
+    <SDEPage setExecutionContextReady={setExecutionContextReady} />
   );
 }
 
