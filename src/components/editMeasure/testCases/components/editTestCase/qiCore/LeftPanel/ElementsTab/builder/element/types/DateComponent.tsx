@@ -28,16 +28,6 @@ const formatMap = {
   [YEAR_MONTH_DAY_FORMAT]: ["year", "month", "day"],
 };
 
-export const isYearFormat = (dateStr) => {
-  return dayjs(dateStr, YEAR_FORMAT, true).isValid();
-};
-export const isYearMonthFormat = (dateStr) => {
-  return dayjs(dateStr, YEAR_MONTH_FORMAT, true).isValid();
-};
-export const isYearMonthDayFormat = (dateStr) => {
-  return dayjs(dateStr, YEAR_MONTH_DAY_FORMAT, true).isValid();
-};
-
 export const getCurrentFormat = (dateStr) => {
   if (dayjs(dateStr, YEAR_FORMAT, true).isValid()) {
     return YEAR_FORMAT;
