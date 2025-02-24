@@ -5,8 +5,7 @@ import { TextField } from "@madie/madie-design-system/dist/react";
 /*
   String component is either going to need to be very smart, or we're going to have to provide validations ahead of time. 
   We should figure out how to provide different validations depending on what type of string we're looking at, (UUID, Markdown?)
-  
-
+  Should always be read only if it's the root ID
 */
 
 const StringComponent = ({
@@ -18,6 +17,10 @@ const StringComponent = ({
   stringOnly = true,
   ...props
 }: TypeComponentProps) => {
+  function isRootLabel(label) {
+    const parts = label.split(".");
+    return parts.length === 2 && parts[1] === "id";
+  }
   const { value } = props;
   return (
     <TextField
@@ -32,6 +35,7 @@ const StringComponent = ({
         "aria-describedby": `string-field-input-helper-text-${label}`,
         required: fieldRequired,
         "aria-required": fieldRequired,
+        readOnly: isRootLabel(label),
       }}
       data-testid={`string-field-${label}`}
       size="small"
