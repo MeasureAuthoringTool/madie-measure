@@ -32,6 +32,7 @@ import useFormikResetOnEvent from "../../../../../../../../../common/useFormikRe
 interface ElementEditorProps {
   resource?: any;
   selectedResource?: any;
+  selectedResourceID: string;
   elementDefinition: any;
   resourcePath: string;
   value?: any;
@@ -41,8 +42,14 @@ interface ElementEditorProps {
   setInitialFormikValuesStu6: Dispatch<SetStateAction<Object>>;
   setValidationSchema: Dispatch<SetStateAction<Object>>;
 }
+/*
+  TO DO: We have too many copies of state.
+  Need to do away with either resource or selected resource, or both and just pass in definition. We know what resource we have already from the provider.
+  Currently working on dateTime and date validations, and only fixing stale state because it will affect the capacity to test it.
+*/
 const ElementEditor = ({
-  selectedResource,
+  selectedResource, // this will always be a stale reference because we set it one time. we need the id and to look at the provider
+  selectedResourceID,
   resource,
   elementDefinition,
   resourcePath,
@@ -57,7 +64,16 @@ const ElementEditor = ({
   const [loading, setLoading] = useState(true);
   // We want to dispatch an action that contains a payload of our updated selectedResource.entry
   // The resource reducer will in turn update the testcase json string
-  const { dispatch } = useQiCoreResource();
+  const { dispatch, state } = useQiCoreResource();
+  const statefulSelectedResource = state.bundle.entry.find(
+    (entry) => entry.resource.id === selectedResourceID
+  )?.resource;
+  // The reducer that we use in the provider always returns a new object. This allows us to use that object as a reference object in use effects
+  // Whenever a javascript object changes it's memory address, it will be seen as a new object and rerender. Mutating objects do not trigger downstream rerenders.
+  // We need this reference instead of the selectedResource prop since it's being preserved in state only on selection.
+  // This means that when we hit apply, the form appears to revert to it's last saved state, since that was the only time it was retrieved
+  // Need to simplify this workflow with less copies of state. Will be too heavy later.
+
   const buildNode = async (
     child,
     resourcePath,
@@ -199,14 +215,14 @@ const ElementEditor = ({
       allChildren,
       fhirDefinitionsService,
       resourcePath,
-      resource
+      statefulSelectedResource
     );
   };
   useEffect(() => {
-    if (selectedResource && Object.keys(displayedElementsTree).length) {
+    if (statefulSelectedResource && Object.keys(displayedElementsTree).length) {
       triggerFormBuilder();
     }
-  }, [selectedResource, displayedElementsTree]);
+  }, [displayedElementsTree, state, selectedResourceID]);
   const formik = useFormikContext();
   useFormikResetOnEvent(formik);
   // on individual apply
@@ -224,7 +240,6 @@ const ElementEditor = ({
         type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
         payload: bundleEntry,
       });
-      formik.resetForm();
     }
   };
   if (_.isNil(elementDefinition)) {
