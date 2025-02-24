@@ -137,7 +137,8 @@ const Builder = ({
         </Tabs>
       </Box>
       <div className="panel-content-pane">
-        {activeTab === "Available" && !activeResource && canEdit && (
+        {/* available elements that we don't want to display when a resource is selected */}
+        {activeTab === "Available" && canEdit && (
           <ResourceList
             resourceIdentifiers={resources}
             onClick={(resourceIdentifier: ResourceIdentifier) => {
