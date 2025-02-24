@@ -140,12 +140,16 @@ const TypeEditor = ({
         return (
           <Instant
             disabled={false}
-            id="instant"
-            label="Date Time"
+            id={`${label}_instant`}
+            name={label}
+            label={label}
             canEdit={canEdit}
             required={required}
-            dateTimeValue={value}
-            handleDateTimeChange={onChange}
+            helperText={formikErrorHandler(label)}
+            error={getNestedProperty(formik.errors, label)}
+            handleDateTimeChange={(value) => formik.setFieldValue(label, value)}
+            dateTimeValue={formik.getFieldProps(label).value}
+            onBlur={() => formik.setFieldTouched(label)}
           />
         );
       case "http://hl7.org/fhirpath/System.Integer":
