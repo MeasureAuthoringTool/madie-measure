@@ -103,4 +103,4 @@ function useQiCoreResource() {
   return context;
 }
 
-export { QiCoreResourceProvider, useQiCoreResource };
+export { QiCoreResourceProvider, useQiCoreResource, QiCoreResourceContext };

@@ -1,8 +1,9 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import ResourceEditor from "./ResourceEditor";
-import { QiCoreResourceProvider } from "../../../../../../../util/QiCorePatientProvider";
+import { QiCoreResourceContext } from "../../../../../../../util/QiCorePatientProvider";
 import mockSelectedResource from "./mockSelectedResource.json";
+import mockPatientState from "./mockPatientState.json";
 import userEvent from "@testing-library/user-event";
 
 jest.mock("../../../../../../../api/useFhirDefinitionsService", () => {
@@ -70,15 +71,18 @@ describe("ResourceEditor", () => {
     const setInitialFormikValuesStu6 = jest.fn();
     const setValidationSchema = jest.fn();
     render(
-      <QiCoreResourceProvider>
+      <QiCoreResourceContext.Provider
+        value={{ state: mockPatientState, dispatch: jest.fn() }}
+      >
         <ResourceEditor
+          selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
           setValidationSchema={setValidationSchema}
           setInitialFormikValuesStu6={setInitialFormikValuesStu6}
           selectedResource={mockSelectedResource}
           onCancel={mockOnCancel}
           canEdit={true}
         />
-      </QiCoreResourceProvider>
+      </QiCoreResourceContext.Provider>
     );
 
     await waitFor(() => {

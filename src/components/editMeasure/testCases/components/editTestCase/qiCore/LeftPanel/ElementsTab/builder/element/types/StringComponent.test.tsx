@@ -39,6 +39,7 @@ describe("StringComponent", () => {
     const stringField = screen.getByTestId("string-field-String");
     expect(stringField).toBeInTheDocument();
     const stringFieldInput = screen.getByTestId("string-field-input-String");
+    expect(stringFieldInput).not.toHaveAttribute("readOnly");
     expect(stringFieldInput).toBeInTheDocument();
     expect(stringFieldInput.value).toBe("This is a string component");
 
@@ -80,5 +81,24 @@ describe("StringComponent", () => {
     expect(stringFieldInput.value).toBe("This is a string component");
     fireEvent.keyPress(stringFieldInput, { key: "a", charCode: 97 });
     expect(stringFieldInput.value).toBe("This is a string component");
+  });
+  test("StringComponent should be read only if root id", () => {
+    const handleChange = jest.fn();
+    const { rerender } = render(
+      <StringComponent
+        value={`This is a string component`}
+        canEdit={true}
+        label="AdverseEvent.id"
+        fieldRequired={false}
+        onChange={handleChange}
+        structureDefinition={null}
+      />
+    );
+
+    const stringFieldInput = screen.getByTestId(
+      "string-field-input-AdverseEvent.id"
+    );
+    expect(stringFieldInput).toBeInTheDocument();
+    expect(stringFieldInput).toHaveAttribute("readOnly");
   });
 });
