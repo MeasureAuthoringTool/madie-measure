@@ -29,7 +29,6 @@ const TimeComponent = ({
       data-testid={`time-field-${label}`}
       handleTimeChange={(time) => {
         const formatted = time.format(TIME_FORMAT);
-
         setTime(time);
         onChange(formatted);
       }}

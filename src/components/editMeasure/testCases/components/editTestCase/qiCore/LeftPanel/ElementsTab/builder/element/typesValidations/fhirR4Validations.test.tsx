@@ -127,6 +127,49 @@ describe("Validation Functions", () => {
     expect(nonRequiredId.validate("test")).resolves.toBe("test");
   });
 
+  it("getValidation DateValidator", () => {
+    const requiredDate = getValidation("date", true);
+    const nonRequiredDate = getValidation("date", false);
+
+    expect(requiredDate).toBeInstanceOf(Yup.StringSchema);
+
+    expect(requiredDate.validate("01010101011010")).rejects.toThrow(
+      "Invalid Date format"
+    );
+
+    expect(nonRequiredDate.validate("1992/01/01")).resolves.toBe("1992/01/01");
+  });
+
+  it("getValidation timeValidator", () => {
+    const requiredTime = getValidation("time", true);
+    const nonrequiredTime = getValidation("time", false);
+
+    expect(requiredTime).toBeInstanceOf(Yup.StringSchema);
+    expect(requiredTime.validate("")).rejects.toThrow("Invalid Time format");
+
+    expect(requiredTime.validate("random time")).rejects.toThrow(
+      "Invalid Time format"
+    );
+    expect(nonrequiredTime.validate("23:15:07")).resolves.toBe("23:15:07");
+  });
+
+  it("getValidation DateTimeValidator", () => {
+    const requiredDateTime = getValidation("dateTime", true);
+    const nonrequiredDateTime = getValidation("dateTime", false);
+
+    expect(requiredDateTime).toBeInstanceOf(Yup.StringSchema);
+    expect(requiredDateTime.validate("")).rejects.toThrow(
+      "Invalid DateTime format"
+    );
+
+    expect(requiredDateTime.validate("random time")).rejects.toThrow(
+      "Invalid DateTime format"
+    );
+    expect(nonrequiredDateTime.validate("1992/01/01")).resolves.toBe(
+      "1992/01/01"
+    );
+  });
+
   it("returns aa yup. mixed if lookup fails", () => {
     const mixed = getValidation("test", false);
     expect(mixed).toBeInstanceOf(Yup.MixedSchema);

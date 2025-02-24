@@ -143,6 +143,40 @@ export const getUriValidator = (required) => {
   return baseValidator;
 };
 
+export const getDateTimeValidator = (required) => {
+  const dateTimeRegex =
+    /^(?:\d{4}|\d{4}\/(?:0[1-9]|1[0-2])|\d{4}\/(?:0[1-9]|1[0-2])\/(?:0[1-9]|[12]\d|3[01])|\d{4}\/(?:0[1-9]|1[0-2])\/(?:0[1-9]|[12]\d|3[01])T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-](?:0[0-9]|1[0-4]):[0-5]\d))$/;
+  const baseValidator = Yup.string().matches(
+    dateTimeRegex,
+    "Invalid DateTime format"
+  );
+  if (required) {
+    return baseValidator.required("This field is required");
+  }
+  return baseValidator;
+};
+
+export const getDateValidator = (required) => {
+  // Regex breakdown:
+  const dateRegex =
+    /^(?:\d{4}(?:\/(?:0[1-9]|1[0-2])(?:\/(?:0[1-9]|[12]\d|3[01]))?)?)$/;
+  const baseValidator = Yup.string().matches(dateRegex, "Invalid Date format");
+
+  if (required) {
+    return baseValidator.required("This field is required");
+  }
+  return baseValidator;
+};
+
+export const getTimeValidator = (required) => {
+  const timeRegex = /^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d$/;
+  const baseValidator = Yup.string().matches(timeRegex, "Invalid Time format");
+  if (required) {
+    return baseValidator.required("This field is required");
+  }
+  return baseValidator;
+};
+
 export const getInstantValidator = (required: boolean) => {
   const regex =
     /([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)(\.[0-9]{1,9})?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))/;
@@ -170,6 +204,9 @@ export const validationLookup = {
   id: getIdValidator,
   uri: getUriValidator,
   decimal: getDecimalValidator,
+  dateTime: getDateTimeValidator,
+  date: getDateValidator,
+  time: getTimeValidator,
   instant: getInstantValidator,
 };
 
