@@ -1,5 +1,5 @@
 import * as Yup from "yup";
-import { getValidation } from "./fhirR4Validations";
+import { getInstantValidator, getValidation } from "./fhirR4Validations";
 
 describe("Validation Functions", () => {
   it("getValidation StringValidator", () => {
@@ -173,5 +173,18 @@ describe("Validation Functions", () => {
   it("returns aa yup. mixed if lookup fails", () => {
     const mixed = getValidation("test", false);
     expect(mixed).toBeInstanceOf(Yup.MixedSchema);
+  });
+
+  it("should return validation schema for Instant type", () => {
+    // if Instant is invalid
+    let schema = getInstantValidator(true);
+    expect(schema).toBeInstanceOf(Yup.MixedSchema);
+    expect(schema.validate("2025-02")).rejects.toThrow(
+      "Invalid Instant format"
+    );
+    // valid instant
+    expect(
+      schema.validate("2025-02-04T00:00:00.000+00:00")
+    ).resolves.not.toThrow();
   });
 });
