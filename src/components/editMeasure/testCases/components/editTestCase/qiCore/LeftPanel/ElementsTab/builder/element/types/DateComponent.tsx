@@ -61,16 +61,28 @@ const DateTimeComponent = ({
   label = "DateTime",
   error,
   helperText,
+  name,
+  setTouched,
 }: TypeComponentProps) => {
-  const [format, setFormat] = useState<string>();
+  const [format, setFormat] = useState<string>(null);
+  const [date, setDate] = useState<any>(null);
   useEffect(() => {
     if (value) {
-      setFormat(getCurrentFormat(value));
+      const format = getCurrentFormat(value);
+      if (format === "Invalid format") {
+        // trigger the red text
+        setDate(null);
+        setFormat(format);
+        setTouched();
+      } else {
+        setFormat(format);
+        setDate(dayjs(value));
+      }
     } else {
       setFormat(null);
+      setDate(null);
     }
   }, [value]);
-
   return (
     <Box sx={{ display: "flex", flexDirection: "column" }}>
       <InputLabel required={fieldRequired}>{label}</InputLabel>
@@ -82,6 +94,7 @@ const DateTimeComponent = ({
             flexGrow: 1,
             columnGap: "32px",
             minWidth: "200px",
+            alignItems: "flex-end",
           }}
           data-testid="date-div"
         >
@@ -102,13 +115,15 @@ const DateTimeComponent = ({
             }}
             options={renderFormats(formatOptions1)}
             onChange={(event) => {
-              const newFormat = event.target.value;
+              const { value } = event.target;
               if (format) {
                 // if we're going to a less complex format, we want to trigger an onChange instead
-                if (isFormatLessComplex(newFormat, format)) {
-                  if (dayjs(value)) {
-                    onChange(dayjs(value).format(newFormat));
+                if (isFormatLessComplex(value, format)) {
+                  if (date) {
+                    onChange(date.format(value));
                   }
+                } else {
+                  setDate(null); // blank the date if we're going to a more complex format since we cant make up values
                 }
               }
               setFormat(event.target.value);
@@ -116,16 +131,16 @@ const DateTimeComponent = ({
             placeHolder={{ name: "Select Format", value: "" }}
             value={format ? format : ""}
           ></Select>
-
           <DateField
             label="Date Field"
+            name={name}
             helperText={helperText}
             placeholder={format}
             required={fieldRequired}
             error={error}
-            value={value ? dayjs(value) : null}
+            value={date ? dayjs(date) : null}
             views={format ? formatMap[format] : ["year"]}
-            disabled={!canEdit || !format}
+            disabled={!canEdit || !format || format === "Invalid Format"}
             id={`${format || "year"}-field-${label}`}
             onChange={(date) => {
               if (date) {

@@ -125,6 +125,8 @@ const DateTimeComponent = ({
   label = "DateTime",
   error,
   helperText,
+  name,
+  setTouched,
 }: TypeComponentProps) => {
   const [format, setFormat] = useState<string>(null);
   const [date, setDate] = useState<any>(null); // dayjs obj
@@ -152,10 +154,20 @@ const DateTimeComponent = ({
           setTimeZone(selectedTimezone.value);
         }
         setDate(dayjsObject);
+        setFormat(format);
       } else {
-        setDate(dayjs(value));
+        // it's not in datetime, we need to check if the format is valid
+        const otherFormat = getCurrentFormat(value);
+        if (otherFormat === "Invalid format") {
+          setFormat("Invalid Format");
+          setDate(null);
+          setTouched();
+        } else {
+          setDate(dayjs(value));
+          setFormat(otherFormat);
+        }
+        // set local dayjs value. we don't want to do this if it's an invalid date. since it still works somehow
       }
-      setFormat(getCurrentFormat(value));
     } else {
       // we don't have a value here we're just going to set nothing on the format
       setFormat(null);
@@ -173,6 +185,7 @@ const DateTimeComponent = ({
             flexGrow: 1,
             columnGap: "32px",
             minWidth: "200px",
+            alignItems: "flex-end",
           }}
           data-testid="date-div"
         >
@@ -202,7 +215,7 @@ const DateTimeComponent = ({
                       onChange(date.format(value));
                     }
                   } else {
-                    setDate(null);
+                    setDate(null); // blank the date if we're going to a more complex format since we cant make up values
                   }
                 }
                 setFormat(event.target.value);
@@ -214,12 +227,13 @@ const DateTimeComponent = ({
 
           <DateField
             label="Date Field"
+            // name={name}
             required={fieldRequired}
             error={error}
             helperText={helperText}
             value={date ? dayjs(date) : null}
             views={format ? formatMap[format] : ["year"]}
-            disabled={!canEdit || !format}
+            disabled={!canEdit || !format || format === "Invalid Format"}
             placeholder={format || ""}
             id={`${format || "year"}-field-${label}`}
             onChange={(date) => {
