@@ -87,7 +87,7 @@ export const getCurrentFormat = (dateStr) => {
   } else if (isValidFormattedDate(dateStr)) {
     return DATE_TIME_ZONE_FORMAT;
   } else {
-    return "Invalid format";
+    return "Invalid Format";
   }
 };
 const renderMenuItems = (options: MenuObj[]) => {
@@ -125,7 +125,6 @@ const DateTimeComponent = ({
   label = "DateTime",
   error,
   helperText,
-  name,
   setTouched,
 }: TypeComponentProps) => {
   const [format, setFormat] = useState<string>(null);
@@ -158,7 +157,7 @@ const DateTimeComponent = ({
       } else {
         // it's not in datetime, we need to check if the format is valid
         const otherFormat = getCurrentFormat(value);
-        if (otherFormat === "Invalid format") {
+        if (otherFormat === "Invalid Format") {
           setFormat("Invalid Format");
           setDate(null);
           setTouched();
@@ -227,7 +226,6 @@ const DateTimeComponent = ({
 
           <DateField
             label="Date Field"
-            // name={name}
             required={fieldRequired}
             error={error}
             helperText={helperText}
@@ -284,7 +282,7 @@ const DateTimeComponent = ({
                         setDate(time);
                       }
                     } else {
-                      setDate(time);
+                      setDate(time); // might be unreachable
                     }
                   }}
                   value={date}

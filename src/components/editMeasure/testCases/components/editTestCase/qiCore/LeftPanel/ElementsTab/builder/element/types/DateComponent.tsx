@@ -36,7 +36,7 @@ export const getCurrentFormat = (dateStr) => {
   } else if (dayjs(dateStr, YEAR_MONTH_DAY_FORMAT, true).isValid()) {
     return YEAR_MONTH_DAY_FORMAT;
   } else {
-    return "Invalid format";
+    return "Invalid Format";
   }
 };
 
@@ -61,7 +61,6 @@ const DateTimeComponent = ({
   label = "DateTime",
   error,
   helperText,
-  name,
   setTouched,
 }: TypeComponentProps) => {
   const [format, setFormat] = useState<string>(null);
@@ -69,7 +68,7 @@ const DateTimeComponent = ({
   useEffect(() => {
     if (value) {
       const format = getCurrentFormat(value);
-      if (format === "Invalid format") {
+      if (format === "Invalid Format") {
         // trigger the red text
         setDate(null);
         setFormat(format);
@@ -133,7 +132,6 @@ const DateTimeComponent = ({
           ></Select>
           <DateField
             label="Date Field"
-            name={name}
             helperText={helperText}
             placeholder={format}
             required={fieldRequired}
@@ -158,4 +156,3 @@ const DateTimeComponent = ({
 };
 
 export default DateTimeComponent;
-//

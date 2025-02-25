@@ -163,7 +163,6 @@ export const getDateTimeValidator = (required) => {
 export const getDateValidator = (required) => {
   const dateRegex =
     /^(?:\d{4}(?:-(?:0[1-9]|1[0-2])(?:-(?:0[1-9]|[12]\d|3[01]))?)?)$/;
-  // const baseValidator = Yup.string().matches(dateRegex, "Invalid Date format");
   const baseValidator = Yup.string().test(
     "matches-regex",
     "Invalid Date format",
