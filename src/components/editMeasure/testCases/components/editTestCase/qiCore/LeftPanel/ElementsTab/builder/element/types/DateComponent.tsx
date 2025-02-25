@@ -58,7 +58,7 @@ const DateTimeComponent = ({
   fieldRequired,
   value,
   onChange,
-  label = "DateTime",
+  label = "Date",
   error,
   helperText,
   setTouched,

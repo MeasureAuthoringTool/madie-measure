@@ -40,6 +40,19 @@ describe("DateTimeComponent", () => {
     const timeZone = screen.getByTestId("timezone-input-field-birthday-input");
     expect(timeZone.value).toBe("America/Los_Angeles");
   });
+  test("Should render DateTimeComponent with default label", () => {
+    const handleChange = jest.fn();
+    render(
+      <DateTimeComponent
+        canEdit={true}
+        fieldRequired={false}
+        value={`2024-09-26`}
+        onChange={handleChange}
+      />
+    );
+    const dateField = screen.getByTestId("YYYY-MM-DD-field-DateTime");
+    expect(dateField).toBeInTheDocument();
+  });
 
   test("Should render invalid date", () => {
     const handleChange = jest.fn();
@@ -231,6 +244,7 @@ describe("DateTimeComponent", () => {
     expect(input).toHaveValue("12:01:00 PM");
     expect(handleChange).toBeCalledWith("1992-01-01T18:00:00+10:00");
   });
+
   test("Should handle DateTimeFormat", async () => {
     const handleChange = jest.fn();
     render(
