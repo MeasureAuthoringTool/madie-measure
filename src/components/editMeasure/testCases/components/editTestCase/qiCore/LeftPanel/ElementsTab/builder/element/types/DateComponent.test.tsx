@@ -6,6 +6,7 @@ import {
   YEAR_FORMAT,
   YEAR_MONTH_FORMAT,
   YEAR_MONTH_DAY_FORMAT,
+  getCurrentFormat,
 } from "./DateTimeComponent";
 
 const { getByTestId } = screen;
@@ -30,6 +31,48 @@ describe("DateComponent", () => {
     );
     expect(dateFieldInput).toBeInTheDocument();
     expect(dateFieldInput.value).toBe("09/26/2024");
+  });
+  test("Should render DateComponent with default label", () => {
+    const handleChange = jest.fn();
+    render(
+      <DateComponent
+        value={`2024-09-26`}
+        canEdit={true}
+        fieldRequired={false}
+        onChange={handleChange}
+        structureDefinition={null}
+      />
+    );
+
+    const dateField = screen.getByTestId("YYYY-MM-DD-field-Date");
+    expect(dateField).toBeInTheDocument();
+  });
+
+  test("Should render invalid date", () => {
+    const handleChange = jest.fn();
+    const setTouched = jest.fn();
+    render(
+      <DateComponent
+        value={`2024-09-26222234`}
+        label="birthday"
+        canEdit={true}
+        fieldRequired={false}
+        onChange={handleChange}
+        setTouched={setTouched}
+        structureDefinition={null}
+      />
+    );
+    const dateFieldInput = screen.getByTestId(
+      "Invalid Format-field-birthday-input"
+    );
+    expect(dateFieldInput).toBeInTheDocument();
+    const formatSelectorField = getByTestId(
+      "date-format-selector-input-field-birthday"
+    );
+    expect(formatSelectorField).toBeInTheDocument();
+    expect(formatSelectorField.value).toBe("Invalid Format");
+    expect(dateFieldInput.value).toBe("");
+    expect(setTouched).toHaveBeenCalled();
   });
 
   test("Test DateComponent change of value", () => {
@@ -283,5 +326,8 @@ describe("DateComponent", () => {
       target: { value: YEAR_FORMAT },
     });
     expect(handleChange).toBeCalledWith("1992");
+  });
+  it("Should get invalid format correctly", () => {
+    expect(getCurrentFormat("123123")).toBe("Invalid Format");
   });
 });
