@@ -133,11 +133,11 @@ describe("Validation Functions", () => {
 
     expect(requiredDate).toBeInstanceOf(Yup.StringSchema);
 
+    expect(requiredDate.validate("")).rejects.toThrow("This field is required");
     expect(requiredDate.validate("01010101011010")).rejects.toThrow(
       "Invalid Date format"
     );
-
-    expect(nonRequiredDate.validate("1992/01/01")).resolves.toBe("1992/01/01");
+    expect(nonRequiredDate.validate("1992-01-01")).resolves.toBe("1992-01-01");
   });
 
   it("getValidation timeValidator", () => {
@@ -159,14 +159,13 @@ describe("Validation Functions", () => {
 
     expect(requiredDateTime).toBeInstanceOf(Yup.StringSchema);
     expect(requiredDateTime.validate("")).rejects.toThrow(
-      "Invalid DateTime format"
+      "This field is required"
     );
-
     expect(requiredDateTime.validate("random time")).rejects.toThrow(
       "Invalid DateTime format"
     );
-    expect(nonrequiredDateTime.validate("1992/01/01")).resolves.toBe(
-      "1992/01/01"
+    expect(nonrequiredDateTime.validate("1992-01-01")).resolves.toBe(
+      "1992-01-01"
     );
   });
 

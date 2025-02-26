@@ -117,7 +117,11 @@ const TypeEditor = ({
             fieldRequired={required}
             {...formik.getFieldProps(label)}
             onChange={(value) => {
+              formik.setFieldTouched(label);
               formik.setFieldValue(label, value);
+            }}
+            setTouched={() => {
+              formik.setFieldTouched(label);
             }}
           />
         );
@@ -219,7 +223,11 @@ const TypeEditor = ({
             fieldRequired={required}
             {...formik.getFieldProps(label)}
             onChange={(value) => {
+              formik.setFieldTouched(label);
               formik.setFieldValue(label, value);
+            }}
+            setTouched={() => {
+              formik.setFieldTouched(label);
             }}
           />
         );
