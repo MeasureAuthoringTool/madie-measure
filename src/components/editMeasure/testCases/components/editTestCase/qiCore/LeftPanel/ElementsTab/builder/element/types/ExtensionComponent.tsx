@@ -1,17 +1,21 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ElementDefinition, Resource, StructureDefinition } from "fhir/r4";
+import {
+  DomainResource,
+  ElementDefinition,
+  StructureDefinition,
+} from "fhir/r4";
 import UriComponent from "./UriComponent";
 import { Select } from "@madie/madie-design-system/dist/react";
 import { MenuItem } from "@mui/material";
-import useTerminologyServiceApi from "../../../../../../../../api/useTerminologyServiceApi";
+import TypeEditor from "../TypeEditor";
+import { StructureDefinitionDto } from "../../../../../../../../api/models/StructureDefinitionDto";
 
 export interface ExtensionProps {
-  fhirResource: Resource;
+  fhirResource: DomainResource;
   canEdit: boolean;
-  onChange: () => void;
-  value?: any;
+  onChange: (value) => void;
   elementDefinition: ElementDefinition;
-  parentStructureDefinition: any;
+  parentStructureDefinition: StructureDefinitionDto;
 }
 
 const getUrlAndValueElement = (
@@ -36,16 +40,14 @@ const getUrlAndValueElement = (
 const ExtensionComponent = ({
   fhirResource,
   canEdit,
-  value,
   elementDefinition,
   parentStructureDefinition,
+  onChange,
 }: ExtensionProps) => {
-  const [codes, setCodes] = useState([]);
-  const [selectedValueOption, setSelectedValueOption] = useState<string>("");
-  const terminologyServiceApi = useRef(useTerminologyServiceApi());
+  const [selectedValueType, setSelectedValueType] = useState<string>("");
+  const [url, setUrl] = useState<string>();
+  const [value, setValue] = useState();
 
-  // prepare extension object
-  const handleUriChange = () => {};
   const [urlElement, valueElement] = getUrlAndValueElement(
     parentStructureDefinition?.definition,
     elementDefinition?.id
@@ -53,42 +55,36 @@ const ExtensionComponent = ({
 
   useEffect(() => {
     if (valueElement) {
-      setSelectedValueOption(valueElement.type[0].code);
-      // fetch expansion for binding if present
-      if (valueElement.binding) {
-        const valueSetUrl = valueElement.binding.valueSet;
-        terminologyServiceApi.current
-          .getInternalValueSetExpansion(valueSetUrl)
-          .then((expansion) => {
-            setCodes(expansion?.expansion?.contains);
-          })
-          .catch((error) => {
-            console.error(
-              `An error occurred while fetching valueSet expansion for valueSet [${valueSetUrl}]`,
-              error
-            );
-          });
-      }
+      setSelectedValueType(valueElement.type[0].code);
     }
   }, [valueElement]);
+
+  useEffect(() => {
+    if ((url || urlElement?.fixedUri) && value) {
+      const extension = { url: url ?? urlElement?.fixedUri };
+      extension[`value${selectedValueType}`] = value;
+      onChange(extension);
+    }
+  }, [selectedValueType, url, value]);
+
   const idPrefix = elementDefinition?.id?.split("Extension.").pop();
 
   return (
     <div data-testid={idPrefix}>
       <UriComponent
-        canEdit={canEdit}
+        canEdit={!urlElement?.fixedUri} // disable if this is fixed value
         fieldRequired={urlElement?.min > 0}
         label="url"
         value={urlElement?.fixedUri}
         structureDefinition={null}
-        onChange={handleUriChange}
+        onChange={(value) => setUrl(value)}
       />
       <Select
-        label="Value"
+        label="Value[x]"
         inputProps={{
-          "data-testid": `${idPrefix}-code-selector-input`,
+          "data-testid": `${idPrefix}-type-selector-input`,
         }}
-        data-testid={`${idPrefix}-code-selector`}
+        data-testid={`${idPrefix}-type-selector`}
         SelectDisplayProps={{
           "aria-required": "true",
         }}
@@ -96,18 +92,28 @@ const ExtensionComponent = ({
         required={valueElement?.min > 0}
         options={[
           <MenuItem
-            key={selectedValueOption}
-            value={selectedValueOption}
-            data-testid={`value-option-${selectedValueOption}`}
+            key={selectedValueType}
+            value={selectedValueType}
+            data-testid={`type-option-${selectedValueType}`}
           >
-            {selectedValueOption}
+            {selectedValueType}
           </MenuItem>,
         ]}
-        value={selectedValueOption}
-        onChange={(e) => setSelectedValueOption(e.target.value)}
+        value={selectedValueType}
+        onChange={(e) => setSelectedValueType(e.target.value)}
       />
-      {valueElement && (
-        <div>{codes?.length ? codes[0].code : selectedValueOption}</div>
+      {selectedValueType && (
+        <TypeEditor
+          structureDefinition={valueElement}
+          resource={fhirResource}
+          type={valueElement?.type[0]?.code}
+          required={valueElement.min > 0}
+          value={elementDefinition?.fixedUri}
+          onChange={(value) => setValue(value)} // do nothing for now
+          canEdit={canEdit}
+          label={`value${selectedValueType}`}
+          parentStructureDefinition={elementDefinition}
+        />
       )}
     </div>
   );

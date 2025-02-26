@@ -33,7 +33,7 @@ interface TestCaseTableProps {
   exportTestCase: Function;
   onCloneTestCase?: (testCase: TestCase) => void;
   measure: any;
-  onTestCaseShiftDates?: (testCase: TestCase, shifted: number) => void;
+  onTestCaseShiftDates?: (testCases: TestCase[], shifted: number) => void;
   handleQiCloneTestCase?: (testCase: TestCase) => void;
   sorting: any;
   setSorting: any;
@@ -41,6 +41,8 @@ interface TestCaseTableProps {
   selectedTestCases: any;
   deleteDialogModalOpen: any;
   setDeleteDialogModalOpen: any;
+  shiftDatesDialogModalOpen: any;
+  setShiftDatesDialogModalOpen: any;
 }
 
 export const convertDate = (date: string) => {
@@ -82,6 +84,8 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     selectedTestCases,
     deleteDialogModalOpen,
     setDeleteDialogModalOpen,
+    shiftDatesDialogModalOpen,
+    setShiftDatesDialogModalOpen,
   } = props;
   const viewOrEdit = canEdit ? "edit" : "view";
   const [toastOpen, setToastOpen] = useState<boolean>(false);
@@ -398,9 +402,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           onCloneTestCase={onCloneTestCase}
           setDeleteDialogModalOpen={setDeleteDialogModalOpen}
           handleClose={handleClose}
-          shiftDatesDialogOpen={shiftDatesDialogOpen}
-          setShiftDatesDialogOpen={setShiftDatesDialogOpen}
-          onTestCaseShiftDates={onTestCaseShiftDates}
           handleQiCloneTestCase={handleQiCloneTestCase}
         />
         <Toast
@@ -436,11 +437,14 @@ const TestCaseTable = (props: TestCaseTableProps) => {
               : selectedTestCase?.title
           }
         />
+
         <ShiftDatesDialog
-          open={shiftDatesDialogOpen}
-          onClose={handleClose}
+          open={shiftDatesDialogModalOpen}
+          onClose={() => {
+            setShiftDatesDialogModalOpen(false);
+          }}
           canEdit={canEdit}
-          testCase={selectedTestCase}
+          testCases={selectedTestCases ? selectedTestCases : []}
           onTestCaseShiftDates={onTestCaseShiftDates}
         />
       </table>

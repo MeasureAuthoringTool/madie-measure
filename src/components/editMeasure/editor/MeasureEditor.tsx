@@ -241,8 +241,10 @@ const MeasureEditor = () => {
       // right now we are only displaying the external errors related to included libraries
       // and only the first error returned by elm translator
       if (errors?.length > 0 || externalErrors?.length > 0) {
-        const elmErrors = _.filter(errors, { errorSeverity: "Error" });
-        setError(!_.isEmpty(elmErrors) || externalErrors.length > 0);
+        setError(
+          !_.isEmpty(_.filter(errors, { errorSeverity: "Error" })) ||
+            !_.isEmpty(_.filter(externalErrors, { errorSeverity: "Error" }))
+        );
       }
       setErrorMessage(externalErrors[0]?.message);
       if (isLoggedInUMLS(errors)) {
@@ -376,7 +378,10 @@ const MeasureEditor = () => {
       const cqlElmErrors =
         !_.isEmpty(
           _.filter(validationResult?.errors, { errorSeverity: "Error" })
-        ) || !_.isEmpty(validationResult?.externalErrors);
+        ) ||
+        !_.isEmpty(
+          _.filter(validationResult?.externalErrors, { errorSeverity: "Error" })
+        );
 
       if (editorValue !== measure.cql) {
         const cqlErrors = parseErrors || cqlElmErrors;
@@ -760,7 +765,13 @@ const MeasureEditor = () => {
     setEditorVal(measure?.cql || "");
     setIsCQLUnchanged(true);
   };
-
+  // force a reset on this similair to formik objects.
+  useEffect(() => {
+    window.addEventListener("resetAllForms", resetCql);
+    return () => {
+      window.removeEventListener("resetAllForms", resetCql);
+    };
+  }, [resetCql]); // need access to resetCQl or it will not track what cql is and will set to ""
   const handleApplyDefinition = (defValues: Definition) => {
     handleMadieEditorValue(applyDefinition(defValues, editorVal));
     setToastType("success");
@@ -840,6 +851,7 @@ const MeasureEditor = () => {
               isCQLUnchanged={isCQLUnchanged}
               resetCql={resetCql}
               getCqlDefinitionReturnTypes={getCqlDefinitionReturnTypes}
+              hasCqlError={error}
             />
           )}
           {processing && (

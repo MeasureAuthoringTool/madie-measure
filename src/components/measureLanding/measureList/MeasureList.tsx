@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import tw from "twin.macro";
 import "styled-components/macro";
-import { Measure, Model } from "@madie/madie-models";
+import { Measure, Model, MeasureScoring } from "@madie/madie-models";
 import { useNavigate } from "react-router-dom";
 import { Chip, IconButton } from "@mui/material";
 import {
@@ -563,6 +563,10 @@ export default function MeasureList(props: {
   };
 
   const exportMeasure = async () => {
+    setViewHumanReadableModal({
+      open: false,
+      measureId: "",
+    });
     setFailureMessage(null);
     setDownloadState("downloading");
     try {
@@ -653,7 +657,13 @@ export default function MeasureList(props: {
             (model === Model.QICORE || model === Model.QICORE_6_0_0) &&
             measureMetaData.draft
           ) {
-            if (groups?.some((group) => _.isEmpty(group.improvementNotation))) {
+            if (
+              groups?.some(
+                (group) =>
+                  _.isEmpty(group.improvementNotation) &&
+                  group.scoring !== MeasureScoring.COHORT
+              )
+            ) {
               missing.push(
                 "At least one Population Criteria is missing Improvement Notation"
               );
@@ -1117,6 +1127,7 @@ export default function MeasureList(props: {
           open={viewHumanReadableModal.open}
           onClose={handleDialogClose}
           measureId={targetMeasure?.current?.id}
+          exportMeasure={exportMeasure}
         />
       </table>
     </div>

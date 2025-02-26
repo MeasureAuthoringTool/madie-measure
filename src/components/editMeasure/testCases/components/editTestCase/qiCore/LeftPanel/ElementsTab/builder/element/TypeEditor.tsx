@@ -22,6 +22,7 @@ import {
   isComponentDataType,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import ExtensionWrapper from "./types/ExtensionWrapper";
+import CodingComponent from "./types/CodingComponent";
 
 const TypeEditor = ({
   type,
@@ -53,7 +54,7 @@ const TypeEditor = ({
       }
     }
   }, [type]);
-  // helper neeeded for nested structures. cannot access with a string alone.
+  // helper needed for nested structures. cannot access with a string alone.
   const getNestedProperty = (obj, path) => {
     return path
       .split(".")
@@ -78,9 +79,7 @@ const TypeEditor = ({
               canEdit={canEdit}
               helperText={formikErrorHandler(label)}
               error={getNestedProperty(formik.errors, label)}
-              structureDefinition={null}
               fieldRequired={required}
-              value={value}
               {...formik.getFieldProps(label)}
             />
           </Box>
@@ -94,9 +93,7 @@ const TypeEditor = ({
               canEdit={canEdit}
               helperText={formikErrorHandler(label)}
               error={getNestedProperty(formik.errors, label)}
-              structureDefinition={null}
               fieldRequired={required}
-              value={value}
               {...formik.getFieldProps(label)}
             />
           </Box>
@@ -114,24 +111,33 @@ const TypeEditor = ({
       case "http://hl7.org/fhirpath/System.DateTime":
         return (
           <DateTimeComponent
+            label={label}
             canEdit={canEdit}
-            structureDefinition={structureDefinition}
+            helperText={formikErrorHandler(label)}
+            error={getNestedProperty(formik.errors, label)}
             fieldRequired={required}
-            label={``}
-            onChange={onChange}
-            value={value}
+            {...formik.getFieldProps(label)}
+            onChange={(value) => {
+              formik.setFieldTouched(label);
+              formik.setFieldValue(label, value);
+            }}
+            setTouched={() => {
+              formik.setFieldTouched(label);
+            }}
           />
         );
+      // I think this is functionally unreachable code. Cant find any evidence of fhir element type = time
       case "time":
       case "http://hl7.org/fhir/R4/datatypes.html#time":
         return (
           <TimeComponent
             canEdit={canEdit}
-            structureDefinition={null}
-            fieldRequired={false}
+            fieldRequired={required}
             label={label}
-            onChange={onChange}
+            helperText={formikErrorHandler(label)}
+            error={getNestedProperty(formik.errors, label)}
             value={value}
+            {...formik.getFieldProps(label)}
           />
         );
       case "instant":
@@ -139,12 +145,16 @@ const TypeEditor = ({
         return (
           <Instant
             disabled={false}
-            id="instant"
-            label="Date Time"
+            id={`${label}_instant`}
+            name={label}
+            label={label}
             canEdit={canEdit}
             required={required}
-            dateTimeValue={value}
-            handleDateTimeChange={onChange}
+            helperText={formikErrorHandler(label)}
+            error={getNestedProperty(formik.errors, label)}
+            handleDateTimeChange={(value) => formik.setFieldValue(label, value)}
+            dateTimeValue={formik.getFieldProps(label).value}
+            onBlur={() => formik.setFieldTouched(label)}
           />
         );
       case "http://hl7.org/fhirpath/System.Integer":
@@ -152,12 +162,12 @@ const TypeEditor = ({
       case "unsignedInt":
         return (
           <IntegerComponent
+            structureDefinition={undefined}
             canEdit={canEdit}
             fieldRequired={required}
             label={label}
             helperText={formikErrorHandler(label)}
             error={getNestedProperty(formik.errors, label)}
-            value={value}
             integerType={
               type === "unsignedInt"
                 ? IntegerType.UNSIGNED
@@ -207,12 +217,19 @@ const TypeEditor = ({
       case "date":
         return (
           <DateComponent
+            label={label}
             canEdit={canEdit}
-            structureDefinition={structureDefinition}
+            helperText={formikErrorHandler(label)}
+            error={getNestedProperty(formik.errors, label)}
             fieldRequired={required}
-            label={``}
-            onChange={onChange}
-            value={value}
+            {...formik.getFieldProps(label)}
+            onChange={(value) => {
+              formik.setFieldTouched(label);
+              formik.setFieldValue(label, value);
+            }}
+            setTouched={() => {
+              formik.setFieldTouched(label);
+            }}
           />
         );
 
@@ -227,6 +244,15 @@ const TypeEditor = ({
             onChange={onChange}
             value={value}
             structureDefinition={structureDefinition}
+          />
+        );
+      case "Coding":
+        return (
+          <CodingComponent
+            canEdit={canEdit}
+            structureDefinition={structureDefinition}
+            fieldRequired={required}
+            onChange={onChange}
           />
         );
       case "Extension":

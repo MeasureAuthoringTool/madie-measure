@@ -10,6 +10,7 @@ const UriComponent = ({
   structureDefinition,
   ...props
 }: TypeComponentProps) => {
+  const { value } = props;
   return (
     <TextField
       required={fieldRequired}
@@ -28,6 +29,7 @@ const UriComponent = ({
       size="small"
       fullWidth
       {...props}
+      value={value || ""}
     />
   );
 };

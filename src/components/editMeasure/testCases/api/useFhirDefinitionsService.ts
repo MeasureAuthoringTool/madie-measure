@@ -4,6 +4,7 @@ import { useOktaTokens } from "@madie/madie-util";
 import axios from "../../../../api/axios-instance";
 import { ResourceIdentifier } from "./models/ResourceIdentifier";
 import { StructureDefinitionDto } from "./models/StructureDefinitionDto";
+import { ValueSet } from "fhir/r4";
 
 export class FhirDefinitionsServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
@@ -66,6 +67,26 @@ export class FhirDefinitionsServiceApi {
       );
     }
     return [];
+  }
+
+  async getValueSetDefinition(url: string): Promise<ValueSet> {
+    try {
+      const response = await axios.get<ValueSet>(
+        `${this.baseUrl}/qicore/resources/value-set-definition?url=${url}`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(
+        `An error occurred while loading definition for resourceId [${url}]: `,
+        error
+      );
+    }
+    return null;
   }
 }
 

@@ -439,6 +439,12 @@ export default function EditMeasure() {
     setDownloadState(null);
     setFailureMessage(null);
   };
+  const handleHumanReadableDialog = () => {
+    setViewHumanReadableModal({
+      open: false,
+      measureId: "",
+    });
+  };
   const handleCancelDialog = () => {
     abortController.current && abortController.current.abort();
     handleContinueDialog();
@@ -570,6 +576,7 @@ export default function EditMeasure() {
           <ViewHRModal
             measureId={measure?.id}
             onClose={handleDialogClose}
+            exportMeasure={handleHumanReadableDialog}
             open={viewHumanReadableModal.open}
           />
           <Toast

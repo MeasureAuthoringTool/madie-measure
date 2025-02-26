@@ -104,9 +104,12 @@ export const measureGroupSchemaValidator = (
     scoringPrecision: Yup.number()
       .positive("Scoring Precision must be a positive integer")
       .nullable(),
-    improvementNotation: Yup.string().required(
-      "Improvement Notation is required."
-    ),
+    improvementNotation: Yup.string().when("scoring", (scoring, schema) => {
+      if (scoring !== GroupScoring.COHORT) {
+        return schema.required("Improvement Notation is required.");
+      }
+      return schema;
+    }),
     measureGroupTypes: Yup.array().min(
       1,
       "At least one measure group type is required."

@@ -15,6 +15,7 @@ import EditMeasureDetailsSideNav from "./EditMeasureDetailsSideNav";
 import MeasureReferences from "./MeasureReferences/MeasureReferences";
 import TransmissionFormat from "./TransmissionFormat/TransmissionFormat";
 import { Measure } from "@madie/madie-models";
+import MeasureDefinitions from "./MeasureDefinitions/MeasureDefinitions";
 const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
 export interface RouteHandlerState {
   canTravel: boolean;
@@ -45,19 +46,21 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   useDocumentTitle("MADiE Edit Measure Details");
   const location = useLocation();
   const { pathname } = location;
-  const modelPeriodLink = `model&measurement-period`;
-  const stewardLink = `measure-steward`;
-  const descriptionLink = `measure-description`;
-  const copyrightLink = `measure-copyright`;
-  const disclaimerLink = `measure-disclaimer`;
-  const rationaleLink = `measure-rationale`;
-  const guidanceLink = `measure-guidance`;
-  const clinicalLink = `measure-clinical-recommendation`;
-  const definitionLink = `measure-definition`;
-  const referencesLink = `measure-references`;
-  const transmissionFormat = `transmission-format`;
+  const modelPeriodLink = "model&measurement-period";
+  const stewardLink = "measure-steward";
+  const descriptionLink = "measure-description";
+  const copyrightLink = "measure-copyright";
+  const disclaimerLink = "measure-disclaimer";
+  const rationaleLink = "measure-rationale";
+  const purposeLink = "measure-purpose";
+  const guidanceLink = "measure-guidance";
+  const clinicalLink = "measure-clinical-recommendation";
+  const definitionLink = "measure-definition";
+  const referencesLink = "measure-references";
+  const transmissionFormat = "transmission-format";
   const detailsLink = "";
-  const measureSetLink = `measure-set`;
+  const measureSetLink = "measure-set";
+  const measureDefinitionLink = "measure-definition";
 
   const [measure, setMeasure] = useState<any>(measureStore.state);
 
@@ -208,6 +211,24 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
       id: "sideNavMeasureSet",
       displayCompletedIcon: !!measure?.measureMetaData.measureSetTitle,
     });
+  } else {
+    if (featureFlags.QICoreMeasureDefinitions) {
+      links[1].links.push({
+        title: "Definition",
+        href: measureDefinitionLink,
+        dataTestId: "leftPanelQiCoreMeasureDefinition",
+        id: "sideNavQiCoreMeasureDefinition",
+        displayCompletedIcon:
+          !!measure?.measureMetaData.measureDefinitions?.[0]?.term,
+      });
+    }
+    links[1].links.splice(2, 0, {
+      title: "Purpose",
+      href: purposeLink,
+      dataTestId: "leftPanelMeasurePurpose",
+      id: "sideNavMeasurePurpose",
+      displayCompletedIcon: !!measure?.measureMetaData.purpose,
+    });
   }
   useEffect(() => {
     setErrorMessage("");
@@ -277,6 +298,19 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               />
             }
           />
+          {!isQDM && (
+            <Route
+              path={purposeLink}
+              element={
+                <MeasureMetadata
+                  measureMetadataId="Purpose"
+                  measureMetadataType="Purpose"
+                  header="Purpose"
+                  setErrorMessage={setErrorMessage}
+                />
+              }
+            />
+          )}
           <Route
             path={guidanceLink}
             element={
@@ -334,6 +368,16 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                     header="Definition"
                     setErrorMessage={setErrorMessage}
                   />
+                }
+              />
+            </>
+          )}
+          {!isQDM && featureFlags.QICoreMeasureDefinitions && (
+            <>
+              <Route
+                path={measureDefinitionLink}
+                element={
+                  <MeasureDefinitions setErrorMessage={setErrorMessage} />
                 }
               />
             </>

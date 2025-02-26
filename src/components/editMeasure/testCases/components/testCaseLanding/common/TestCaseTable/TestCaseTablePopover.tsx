@@ -18,9 +18,6 @@ interface TestCaseTablePopoverProps {
   model: string;
   groups: Group[];
   setDeleteDialogModalOpen: Function;
-  shiftDatesDialogOpen: boolean;
-  setShiftDatesDialogOpen: (boolean) => void;
-  onTestCaseShiftDates?: (testCase: TestCase, shifted: number) => void;
   handleQiCloneTestCase?: (testCase: TestCase) => void;
 }
 
@@ -38,9 +35,6 @@ const TestCaseTablePopover = (props: TestCaseTablePopoverProps) => {
     model,
     onCloneTestCase,
     setDeleteDialogModalOpen,
-    shiftDatesDialogOpen,
-    setShiftDatesDialogOpen,
-    onTestCaseShiftDates,
     handleQiCloneTestCase,
   } = props;
   const editTestCaseUrl = _.isEmpty(props.groups)
@@ -204,20 +198,6 @@ const TestCaseTablePopover = (props: TestCaseTablePopoverProps) => {
                   </button>
                 )}
             </>
-          )}
-
-          {canEdit && (
-            <button
-              id={`shift-dates-btn-${selectedTestCase?.id}`}
-              aria-label={`shift-dates-${selectedTestCase?.title}`}
-              data-testid={`shift-dates-btn-${selectedTestCase?.id}`}
-              onClick={() => {
-                setShiftDatesDialogOpen(true);
-                setOptionsOpen(false);
-              }}
-            >
-              Shift Test Case dates
-            </button>
           )}
         </div>
       </div>

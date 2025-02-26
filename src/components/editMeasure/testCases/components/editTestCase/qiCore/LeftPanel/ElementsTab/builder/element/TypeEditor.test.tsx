@@ -1,10 +1,11 @@
 import * as React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import TypeEditor from "./TypeEditor";
 import useFhirDefinitionsServiceApi, {
   FhirDefinitionsServiceApi,
 } from "../../../../../../../api/useFhirDefinitionsService";
 import { FormikProvider, FormikContextType } from "formik";
+import userEvent from "@testing-library/user-event";
 
 const getNestedProperty = (obj, path) => {
   return path.split(".").reduce((current, key) => current && current[key], obj);
@@ -14,6 +15,7 @@ const claimResponseValues = {
   ClaimResponse: {
     id: "test",
     order: "1234",
+    time: "01:23:45",
     Coding: {
       code: "",
       id: "",
@@ -31,6 +33,7 @@ const mockFormik: FormikContextType<any> = {
   values: {
     claimResponseValues,
   },
+  touched: {},
   getFieldProps: (label) => {
     const name = getNestedProperty(claimResponseValues, label);
     return {
@@ -42,6 +45,7 @@ const mockFormik: FormikContextType<any> = {
   },
   handleChange: () => {},
   setFieldValue: jest.fn(),
+  setFieldTouched: jest.fn(),
 };
 
 jest.mock("@madie/madie-util", () => ({
@@ -49,7 +53,6 @@ jest.mock("@madie/madie-util", () => ({
     getAccessToken: () => "test.jwt",
   }),
 }));
-
 const codingDef = {
   path: "Coding",
   definition: { resourceType: "StructureDefinition", id: "Coding" },
@@ -116,12 +119,13 @@ describe("TypeEditor Component", () => {
           onChange={handleChange}
           structureDefinition={null}
           label={"ClaimResponse.id"}
+          value={claimResponseValues.ClaimResponse.id}
         />
       </FormikProvider>
     );
     const inputField = screen.getByTestId(
       "string-field-input-ClaimResponse.id"
-    );
+    ) as HTMLInputElement;
     expect(inputField).toBeInTheDocument();
     expect(inputField.value).toBe("test");
   });
@@ -136,12 +140,13 @@ describe("TypeEditor Component", () => {
           onChange={handleChange}
           structureDefinition={null}
           label={"ClaimResponse.id"}
+          value={claimResponseValues.ClaimResponse.id}
         />
       </FormikProvider>
     );
     const inputField = screen.getByTestId(
       "string-field-input-ClaimResponse.id"
-    );
+    ) as HTMLInputElement;
     expect(inputField).toBeInTheDocument();
     expect(inputField.value).toBe("test");
   });
@@ -197,22 +202,182 @@ describe("TypeEditor Component", () => {
   test("Should render DateTime component", () => {
     const handleChange = jest.fn();
     render(
-      <TypeEditor
-        type={`http://hl7.org/fhirpath/System.DateTime`}
-        required={false}
-        value={`2024-09-26T08:33:33.000-05:00`}
-        onChange={handleChange}
-        structureDefinition={null}
-      />
+      <FormikProvider value={mockFormik}>
+        <TypeEditor
+          type={`http://hl7.org/fhirpath/System.DateTime`}
+          required={false}
+          value={`2024-09-26T08:33:33.000-05:00`}
+          onChange={handleChange}
+          structureDefinition={null}
+          label="ClaimResponse.date"
+        />
+      </FormikProvider>
     );
-    const inputDate = screen.getByTestId("date-field-input");
+
+    const inputDate = screen.getByTestId(
+      `date-time-format-selector-field-ClaimResponse.date`
+    );
     expect(inputDate).toBeInTheDocument();
+  });
 
-    const inputTime = screen.getByPlaceholderText("hh:mm:ss aa");
-    expect(inputTime).toBeInTheDocument();
+  test("Should render DateTime component, should trigger onChange", () => {
+    const onChange = jest.fn();
+    const setFieldTouched = jest.fn();
+    const updatedMockFormik = {
+      ...mockFormik,
+      setFieldTouched: setFieldTouched,
+      setFieldValue: onChange,
+      getFieldProps: () => ({
+        label: "ClaimResponse.date",
+        value: "1992-01-01T00:00:00-08:00",
+        setFieldTouched: jest.fn(),
+        setFieldValue: jest.fn(),
+      }),
+    };
+    // need to figure out how to check this mock
+    render(
+      <FormikProvider value={updatedMockFormik}>
+        <TypeEditor
+          type={`http://hl7.org/fhirpath/System.DateTime`}
+          required={false}
+          value="1992-01-01T00:00:00-08:00"
+          onChange={() => {}}
+          structureDefinition={null}
+          label="ClaimResponse.date"
+        />
+      </FormikProvider>
+    );
 
-    const inputZone = screen.getByTestId("timezone-input-field-");
-    expect(inputZone).toBeInTheDocument();
+    const inputDate = screen.getByTestId(
+      `date-time-format-selector-field-ClaimResponse.date`
+    );
+    expect(inputDate).toBeInTheDocument();
+    const timeZone = screen.getByTestId(
+      "timezone-input-field-ClaimResponse.date-input"
+    );
+    expect(timeZone.value).toBe("America/Los_Angeles");
+    const guam = "Pacific/Guam";
+    fireEvent.change(timeZone, {
+      target: {
+        value: guam,
+      },
+    });
+    expect(onChange).toHaveBeenCalledWith(
+      "ClaimResponse.date",
+      "1992-01-01T18:00:00+10:00"
+    );
+  });
+
+  test("Should render DateTime component, should trigger setTouched", () => {
+    const onChange = jest.fn();
+    const setFieldTouched = jest.fn();
+    const updatedMockFormik = {
+      ...mockFormik,
+      setFieldTouched: setFieldTouched,
+      setFieldValue: onChange,
+      getFieldProps: () => ({
+        label: "ClaimResponse.date",
+        value: "2024-09-262342342343423423",
+        setFieldTouched: jest.fn(),
+        setFieldValue: jest.fn(),
+      }),
+    };
+    // need to figure out how to check this mock
+    render(
+      <FormikProvider value={updatedMockFormik}>
+        <TypeEditor
+          type={`http://hl7.org/fhirpath/System.DateTime`}
+          required={false}
+          value="2024-09-26asdf332324234"
+          onChange={() => {}}
+          structureDefinition={null}
+          label="ClaimResponse.date"
+        />
+      </FormikProvider>
+    );
+
+    expect(updatedMockFormik.setFieldTouched).toHaveBeenCalledWith(
+      "ClaimResponse.date"
+    );
+  });
+
+  test("Should render Date component, should trigger onChange", () => {
+    const onChange = jest.fn();
+    const setFieldTouched = jest.fn();
+    const dateFormik = {
+      ...mockFormik,
+      setFieldTouched: setFieldTouched,
+      setFieldValue: onChange,
+      getFieldProps: () => ({
+        label: "ClaimResponse.date",
+        value: "2019-01-01",
+        setFieldTouched: jest.fn(),
+        setFieldValue: jest.fn(),
+      }),
+    };
+    // need to figure out how to check this mock
+    render(
+      <FormikProvider value={dateFormik}>
+        <TypeEditor
+          type="date"
+          required={false}
+          value="01-01-1992"
+          onChange={() => {}}
+          structureDefinition={null}
+          label="ClaimResponse.date"
+        />
+      </FormikProvider>
+    );
+
+    const dateField = screen.getByTestId("YYYY-MM-DD-field-ClaimResponse.date");
+    expect(dateField).toBeInTheDocument();
+    const dateFieldInput = screen.getByTestId(
+      "YYYY-MM-DD-field-ClaimResponse.date-input"
+    );
+    expect(dateFieldInput).toBeInTheDocument();
+    expect(dateFieldInput.value).toBe("01/01/2019");
+
+    const formatSelectorField = screen.getByTestId(
+      "date-format-selector-input-field-ClaimResponse.date"
+    );
+    expect(formatSelectorField).toBeInTheDocument();
+    fireEvent.change(formatSelectorField, {
+      target: { value: "YYYY" },
+    });
+    expect(onChange).toHaveBeenCalledWith("ClaimResponse.date", "2019");
+  });
+
+  test("Should render DateTime component, should trigger setTouched", () => {
+    const onChange = jest.fn();
+    const setFieldTouched = jest.fn();
+    const updatedMockFormik = {
+      ...mockFormik,
+      setFieldTouched: setFieldTouched,
+      setFieldValue: onChange,
+      getFieldProps: () => ({
+        label: "ClaimResponse.date",
+        value: "1992-01-2342301T00:00:00234-08:00a234234",
+        setFieldTouched: jest.fn(),
+        setFieldValue: jest.fn(),
+      }),
+    };
+    // need to figure out how to check this mock
+    render(
+      <FormikProvider value={updatedMockFormik}>
+        <TypeEditor
+          type={`http://hl7.org/fhirpath/System.DateTime`}
+          required={false}
+          value="1992-01-01T00:00:00-08:00"
+          onChange={() => {}}
+          structureDefinition={null}
+          label="ClaimResponse.date"
+        />
+      </FormikProvider>
+    );
+
+    expect(updatedMockFormik.setFieldTouched).toHaveBeenCalledWith(
+      "ClaimResponse.date"
+    );
   });
 
   test("Should render Boolean component", () => {
@@ -288,61 +453,104 @@ describe("TypeEditor Component", () => {
 
   test("Should render Instant component by instant", () => {
     const handleChange = jest.fn();
+    const touched = {
+      Observation: {
+        issued: true,
+      },
+    };
     render(
-      <TypeEditor
-        type={`instant`}
-        required={true}
-        value={`urn:oid:2.16.840.1.113883.6.238`}
-        onChange={handleChange}
-        structureDefinition={null}
-      />
+      <FormikProvider value={{ ...mockFormik, touched }}>
+        <TypeEditor
+          type="instant"
+          required={true}
+          value="2025-02-04T00:00:00.000+00:00"
+          onChange={handleChange}
+          structureDefinition={null}
+          resource={undefined}
+          parentStructureDefinition={undefined}
+          canEdit={true}
+          label="Observation.issued"
+        />
+      </FormikProvider>
     );
-    expect(screen.getByTestId("instant-input")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("Observation.issued_instant")
+    ).toBeInTheDocument();
   });
 
-  test("Should render Instant component by hl7 code", () => {
+  test("Instant validation should display field errors", () => {
+    const touched = {
+      Observation: {
+        issued: true,
+      },
+    };
+    const errors = {
+      Observation: {
+        issued: "This field is required",
+      },
+    };
     const handleChange = jest.fn();
+    const formik = { ...mockFormik, errors, touched };
     render(
-      <TypeEditor
-        type={`http://hl7.org/fhir/R4/datatypes.html#instant`}
-        required={true}
-        value={``}
-        onChange={handleChange}
-        structureDefinition={null}
-      />
+      <FormikProvider value={formik}>
+        <TypeEditor
+          type="instant"
+          required={true}
+          value="2025-02-04T00:00:00.000+00:00"
+          onChange={handleChange}
+          structureDefinition={null}
+          resource={undefined}
+          parentStructureDefinition={undefined}
+          canEdit={true}
+          label="Observation.issued"
+        />
+      </FormikProvider>
     );
-    expect(screen.getByTestId("instant-input")).toBeInTheDocument();
+    const inputField = screen.getByTestId("Observation.issued_instant-input");
+    expect(inputField).toBeInTheDocument();
+    expect(inputField.getAttribute("aria-invalid")).toBe(
+      errors.Observation.issued
+    );
+    expect(
+      screen.getByTestId("Observation.issued_instant-helper-text")
+    ).toHaveTextContent(errors.Observation.issued);
   });
 
   test("Should render Date component", () => {
     const handleChange = jest.fn();
     render(
-      <TypeEditor
-        type={`date`}
-        required={false}
-        value={`2024-09-26`}
-        onChange={handleChange}
-        structureDefinition={null}
-      />
+      <FormikProvider value={mockFormik}>
+        <TypeEditor
+          type={`date`}
+          required={false}
+          value={`2024-09-26`}
+          onChange={handleChange}
+          structureDefinition={null}
+          label="ClaimResponse.date"
+        />
+      </FormikProvider>
     );
 
-    const inputField = screen.getByTestId("date-field--input");
-    expect(inputField).toBeInTheDocument();
-    expect(inputField.value).toBe("09/26/2024");
+    const inputDate = screen.getByTestId(
+      `date-format-selector-field-ClaimResponse.date`
+    );
+    expect(inputDate).toBeInTheDocument();
   });
 
   test("Should render Time component", () => {
     const handleChange = jest.fn();
     render(
-      <TypeEditor
-        type={`http://hl7.org/fhir/R4/datatypes.html#time`}
-        required={false}
-        value={`01:23:45`}
-        onChange={handleChange}
-        structureDefinition={null}
-      />
+      <FormikProvider value={mockFormik}>
+        <TypeEditor
+          type={`http://hl7.org/fhir/R4/datatypes.html#time`}
+          required={false}
+          value={`01:23:45`}
+          onChange={handleChange}
+          structureDefinition={null}
+          label="ClaimResponse.time"
+        />
+      </FormikProvider>
     );
-
     const inputTime = screen.getByPlaceholderText("hh:mm:ss aa");
     expect(inputTime).toBeInTheDocument();
     expect(inputTime.value).toBe("01:23:45 AM");

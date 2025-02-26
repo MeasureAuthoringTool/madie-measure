@@ -5,6 +5,19 @@ import ViewHRModal from "./ViewHRModal";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../api/useMeasureServiceApi";
+// @ts-ignore
+import { measureStore } from "@madie/madie-util";
+
+jest.mock("@madie/madie-util", () => ({
+  measureStore: {
+    updateMeasure: jest.fn((measure) => measure),
+    state: jest.fn().mockImplementation(() => null),
+    initialState: jest.fn().mockImplementation(() => null),
+    subscribe: () => {
+      return { unsubscribe: () => null };
+    },
+  },
+}));
 
 jest.mock("../../../api/useMeasureServiceApi");
 const mockMeasureServiceApi = {
@@ -23,35 +36,65 @@ useMeasureServiceApiMock.mockImplementation(() => {
 });
 
 const onCloseFn = jest.fn();
+const exportMeasure = jest.fn();
 
 describe("View Human Readable Modal component", () => {
   beforeEach(() => {
     clearAllMocks();
   });
 
+  const renderComponent = () => {
+    render(
+      <ViewHRModal
+        open={true}
+        onClose={onCloseFn}
+        exportMeasure={exportMeasure}
+        measureId="testMeasureId"
+      />
+    );
+  };
+
   it("should display human readable modal", async () => {
-    render(<ViewHRModal open={true} onClose={onCloseFn} measureId="" />);
+    render(
+      <ViewHRModal
+        open={true}
+        onClose={onCloseFn}
+        exportMeasure={exportMeasure}
+        measureId=""
+      />
+    );
     expect(screen.getByTestId("view-hr-modal")).toBeInTheDocument();
+    expect(screen.getByTestId("close-button")).toBeInTheDocument();
+    expect(screen.getByText(/Cancel/i)).toBeInTheDocument();
+    expect(screen.getByText(/Export/i)).toBeInTheDocument();
   });
 
   it("should still display human readable modal when it has error", async () => {
     useMeasureServiceApiMock.mockReset().mockImplementation(() => {
       return mockMeasureServiceApiError;
     });
-    render(
-      <ViewHRModal open={true} onClose={onCloseFn} measureId="testMeasureId" />
-    );
+    renderComponent();
     expect(screen.getByTestId("view-hr-modal")).toBeInTheDocument();
   });
 
-  it("should call onClose when the cancel button is clicked", async () => {
-    render(
-      <ViewHRModal open={true} onClose={onCloseFn} measureId="testMeasureId" />
-    );
+  it("should call onClose when the close button is clicked", async () => {
+    renderComponent();
     expect(screen.getByTestId("view-hr-modal")).toBeInTheDocument();
     act(() => {
-      fireEvent.click(screen.getByTestId("modal-close-btn"));
+      fireEvent.click(screen.getByTestId("close-button"));
       expect(onCloseFn).toHaveBeenCalled();
     });
+  });
+
+  it("should call onClose when the cancel button is clicked", async () => {
+    renderComponent();
+    fireEvent.click(screen.getByText(/Cancel/i));
+    expect(onCloseFn).toHaveBeenCalled();
+  });
+
+  it("should call exportMeasure when the export button is clicked", async () => {
+    renderComponent();
+    fireEvent.click(screen.getByText(/Export/i));
+    expect(exportMeasure).toHaveBeenCalled();
   });
 });

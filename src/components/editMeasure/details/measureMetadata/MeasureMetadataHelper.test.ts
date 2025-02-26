@@ -11,6 +11,7 @@ describe("MeasureMetadataHelper", () => {
   const COPYRIGHT = "Test Copyright";
   const DISCLAIMER = "Test Disclaimer";
   const RATIONALE = "Test Rationale";
+  const PURPOSE = "Test Purpose";
   const GUIDANCE = "Test Guidance";
   const CLINICAL = "Test Clinical";
   const RISKADJUSTMENT = "Test Risk Adjustment";
@@ -26,6 +27,7 @@ describe("MeasureMetadataHelper", () => {
       copyright: COPYRIGHT,
       disclaimer: DISCLAIMER,
       rationale: RATIONALE,
+      purpose: PURPOSE,
       guidance: GUIDANCE,
       clinicalRecommendation: CLINICAL,
       definition: definition,
@@ -89,6 +91,11 @@ describe("MeasureMetadataHelper", () => {
     expect(actual).toBe(RATIONALE);
   });
 
+  it("should retrieve purpose value", () => {
+    const actual = getInitialValues(measure, "purpose");
+    expect(actual).toBe(PURPOSE);
+  });
+
   it("should return empty string instead of null when rationale is null", () => {
     measure = {
       id: MEASUREID,
@@ -96,6 +103,16 @@ describe("MeasureMetadataHelper", () => {
     } as Measure;
 
     const actual = getInitialValues(measure, "rationale");
+    expect(actual).toBe("");
+  });
+
+  it("should return empty string instead of null when purpose is null", () => {
+    measure = {
+      id: MEASUREID,
+      measureMetaData: { purpose: null } as unknown as MeasureMetadata,
+    } as Measure;
+
+    const actual = getInitialValues(measure, "purpose");
     expect(actual).toBe("");
   });
 
@@ -185,6 +202,11 @@ describe("MeasureMetadataHelper", () => {
   it("should reset rationale value", () => {
     setMeasureMetadata(measure, "rationale", NEWVALUE);
     expect(measure.measureMetaData?.rationale).toBe(NEWVALUE);
+  });
+
+  it("should reset purpose value", () => {
+    setMeasureMetadata(measure, "purpose", NEWVALUE);
+    expect(measure.measureMetaData.purpose).toBe(NEWVALUE);
   });
 
   it("should reset guidance value", () => {
