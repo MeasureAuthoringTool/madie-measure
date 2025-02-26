@@ -148,7 +148,12 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
     setPage(1);
   };
   const table = useReactTable({
-    data: visibleResources,
+    data:
+      visibleResources?.filter(
+        (vs) =>
+          _.isEmpty(resourceFilter.trim()) ||
+          vs.title.toUpperCase().includes(resourceFilter.toUpperCase())
+      ) ?? [],
     columns,
     getRowId: (row) => row.id,
     defaultColumn: {
@@ -187,6 +192,7 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
         <TextField
           onChange={(e) => {
             setResourceFilter(e.target.value);
+            console.log("filter: ", e.target.value);
           }}
           onKeyPress={(e) => {
             if (e.key === "Enter") {

@@ -21,6 +21,7 @@ import {
   updateChildrenPaths,
   isComponentDataType,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
+import ExtensionWrapper from "./types/ExtensionWrapper";
 
 const TypeEditor = ({
   type,
@@ -230,12 +231,13 @@ const TypeEditor = ({
         );
       case "Extension":
         return _.isEmpty(structureDefinition?.type?.[0]?.profile) ? (
-          <ExtensionComponent
+          <ExtensionWrapper
             canEdit={canEdit}
             onChange={onChange}
             fhirResource={resource}
             elementDefinition={structureDefinition}
             parentStructureDefinition={parentStructureDefinition}
+            value={value}
           />
         ) : (
           <ProfiledExtensionComponent

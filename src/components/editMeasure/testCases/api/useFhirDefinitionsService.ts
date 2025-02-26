@@ -45,6 +45,28 @@ export class FhirDefinitionsServiceApi {
     }
     return null;
   }
+
+  async getExtensionsForTargetElementPath(
+    targetElementPath
+  ): Promise<StructureDefinitionDto[]> {
+    try {
+      const response = await axios.get<any>(
+        `${this.baseUrl}/qicore/resources/extensions/${targetElementPath}`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(
+        `An error occurred while loading Extensions for target element path [${targetElementPath}]: `,
+        error
+      );
+    }
+    return [];
+  }
 }
 
 export default function useFhirDefinitionsServiceApi(): FhirDefinitionsServiceApi {

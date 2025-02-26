@@ -5,10 +5,11 @@ import { Select } from "@madie/madie-design-system/dist/react";
 import { MenuItem } from "@mui/material";
 import useTerminologyServiceApi from "../../../../../../../../api/useTerminologyServiceApi";
 
-interface ExtensionProps {
+export interface ExtensionProps {
   fhirResource: Resource;
   canEdit: boolean;
   onChange: () => void;
+  value?: any;
   elementDefinition: ElementDefinition;
   parentStructureDefinition: any;
 }
@@ -35,6 +36,7 @@ const getUrlAndValueElement = (
 const ExtensionComponent = ({
   fhirResource,
   canEdit,
+  value,
   elementDefinition,
   parentStructureDefinition,
 }: ExtensionProps) => {
