@@ -207,8 +207,14 @@ const serviceConfig = {
   terminologyService: { baseUrl: "" },
 } as ServiceConfig;
 
-const { getByTestId, findByTestId, queryByTestId, queryByText, findByText } =
-  screen;
+const {
+  getByText,
+  getByTestId,
+  findByTestId,
+  queryByTestId,
+  queryByText,
+  findByText,
+} = screen;
 
 const renderRouter = (
   initialEntries = [{ pathname: "/measures/fakeid/edit/details/" }]
@@ -410,7 +416,7 @@ describe("EditMeasure Component", () => {
     const serviceApiRejectedMock = {
       fetchMeasure: jest.fn().mockRejectedValue("404"),
     } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => {
+    useMeasureServiceApiMock.mockImplementationOnce(() => {
       return serviceApiRejectedMock;
     });
     renderRouter();
@@ -464,21 +470,19 @@ describe("EditMeasure Component", () => {
       window.dispatchEvent(new Event("share-measure"));
     });
 
-    await waitFor(() =>
-      setTimeout(async () => {
-        expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
-        expect(queryByTestId("share-dialog")).toBeInTheDocument();
-        expect(serviceApiMock.getSharedWithUserIds).toHaveBeenCalled();
-        expect(
-          queryByText(
-            "This measure is not yet shared with anyone. Enter the HARP ID of the user you'd like to share it with and click the (Add User) button above to share the measure."
-          )
-        ).toBeVisible();
+    await waitFor(async () => {
+      expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+      expect(getByTestId("share-dialog")).toBeInTheDocument();
+      expect(serviceApiMock.getSharedWithUserIds).toHaveBeenCalled();
+      expect(
+        getByText(
+          "This measure is not yet shared with anyone. Enter the HARP ID of the user you'd like to share it with and click the (Add User) button above to share the measure."
+        )
+      ).toBeVisible();
+    });
 
-        const cancelButton = await findByTestId("share-cancel-button");
-        fireEvent.click(cancelButton);
-        expect(queryByTestId("share-dialog")).not.toBeVisible();
-      }, 500)
-    );
+    const cancelButton = getByTestId("share-cancel-button");
+    fireEvent.click(cancelButton);
+    expect(queryByTestId("share-dialog")).not.toBeVisible();
   });
 });
