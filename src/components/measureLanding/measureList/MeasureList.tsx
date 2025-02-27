@@ -141,7 +141,7 @@ export default function MeasureList(props: {
   const [openAssociateCmsIdDialog, setOpenAssociateCmsIdDialog] =
     useState(false);
 
-  const [shareDialog, setShareDialog] = useState<boolean>(false);
+  const [shareDialog, setShareDialog] = useState({ open: false, option: "" });
 
   const buildLookup = useCallback(
     async (measureList) => {
@@ -1116,9 +1116,15 @@ export default function MeasureList(props: {
           handleCancelDialog={handleCancelDialog}
         />
         <ShareDialog
-          measure={selectedMeasures[0]}
-          open={shareDialog}
-          onClose={() => setShareDialog(false)}
+          measures={selectedMeasures}
+          open={shareDialog.open}
+          option={shareDialog.option}
+          onClose={() =>
+            setShareDialog({
+              open: false,
+              option: "",
+            })
+          }
         />
         <DeleteDialog
           open={deleteMeasureDialog}
