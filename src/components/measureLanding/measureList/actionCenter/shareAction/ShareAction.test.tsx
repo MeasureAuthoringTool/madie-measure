@@ -2,7 +2,6 @@ import * as React from "react";
 import { render, screen } from "@testing-library/react";
 import ShareAction, { SHARE_MEASURE, NOTHING_SELECTED } from "./ShareAction";
 import { Measure, MeasureSet, Model } from "@madie/madie-models";
-import userEvent from "@testing-library/user-event";
 
 const mockUser = "test user";
 jest.mock("@madie/madie-util", () => ({
@@ -32,7 +31,7 @@ const qiCoreMeasure = {
 
 describe("ShareAction", () => {
   it("Should disable share action btn if no measure selected", () => {
-    render(<ShareAction measures={[]} canEdit={false} />);
+    render(<ShareAction measures={[]} onClick={() => {}} canEdit={false} />);
     expect(screen.getByTestId("share-action-btn")).toBeDisabled();
     expect(screen.getByTestId("share-action-tooltip")).toHaveAttribute(
       "aria-label",
@@ -41,7 +40,13 @@ describe("ShareAction", () => {
   });
 
   it("Should enable share action btn if user select one measure ", () => {
-    render(<ShareAction measures={[qiCoreMeasure]} canEdit={true} />);
+    render(
+      <ShareAction
+        measures={[qiCoreMeasure]}
+        onClick={() => {}}
+        canEdit={true}
+      />
+    );
     expect(screen.getByTestId("share-action-btn")).not.toBeDisabled();
     expect(screen.getByTestId("share-action-tooltip")).toHaveAttribute(
       "aria-label",
@@ -51,7 +56,13 @@ describe("ShareAction", () => {
 
   it("Should disable btn if user selects two measures", () => {
     const measure2 = { ...qiCoreMeasure, model: Model.QDM_5_6 };
-    render(<ShareAction measures={[qdmMeasure, measure2]} canEdit={true} />);
+    render(
+      <ShareAction
+        measures={[qdmMeasure, measure2]}
+        onClick={() => {}}
+        canEdit={true}
+      />
+    );
     expect(screen.getByTestId("share-action-btn")).toBeDisabled();
     expect(screen.getByTestId("share-action-tooltip")).toHaveAttribute(
       "aria-label",

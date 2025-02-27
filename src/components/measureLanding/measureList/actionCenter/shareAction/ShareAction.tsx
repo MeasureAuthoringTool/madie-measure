@@ -2,12 +2,11 @@ import React, { useCallback, useEffect, useState } from "react";
 import { IconButton } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import { Measure } from "@madie/madie-models";
-import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
-import { grey, red } from "@mui/material/colors";
 import ShareIcon from "../../../../common/ShareIcon";
 
 interface PropTypes {
   measures: Measure[];
+  onClick: () => void;
   canEdit: boolean;
 }
 
@@ -40,7 +39,11 @@ export default function ShareAction(props: PropTypes) {
       arrow
     >
       <span>
-        <IconButton disabled={disableShareBtn} data-testid="share-action-btn">
+        <IconButton
+          onClick={() => props.onClick()}
+          disabled={disableShareBtn}
+          data-testid="share-action-btn"
+        >
           <ShareIcon color={disableShareBtn ? "#8C8C8C" : "#0073C8"} />
         </IconButton>
       </span>
