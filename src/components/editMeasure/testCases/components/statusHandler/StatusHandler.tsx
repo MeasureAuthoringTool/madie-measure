@@ -8,14 +8,18 @@ import "styled-components/macro";
 import { EXPORT_ERROR_CHARACTERS_MESSAGE } from "../../util/checkSpecialCharacters";
 interface StatusHandlerProps {
   error?: boolean;
+  warning?: boolean;
   errorMessages?: Array<string>;
+  warningMessages?: Array<string>;
   testDataId?: string;
   importWarnings?: TestCaseImportOutcome[];
 }
 
 const StatusHandler = ({
   error,
+  warning,
   errorMessages,
+  warningMessages,
   testDataId,
   importWarnings,
 }: StatusHandlerProps) => {
@@ -78,6 +82,35 @@ const StatusHandler = ({
                 </h3>
                 {exportErrorContent}
                 <ul data-testid="generic-fail-text-list">{mappedMessages}</ul>
+              </div>
+            }
+            canClose={false}
+          />
+        </div>
+      );
+    }
+  }
+  if (warning && warningMessages) {
+    const withoutDuplicates = [...new Set(warningMessages)];
+
+    if (withoutDuplicates.length > 0) {
+      return (
+        <div id="status-handler">
+          <MadieAlert
+            data-testid={testDataId}
+            type="warning"
+            copyButton="true"
+            content={
+              <div aria-live="polite" role="alert" data-testid={testDataId}>
+                <div data-testid="warn-title">
+                  The following Test Case dates could not be shifted. Please try
+                  again. If the issue continues, please contact helpdesk.
+                  <ul>
+                    {withoutDuplicates.map((tc) => (
+                      <li>{tc}</li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             }
             canClose={false}

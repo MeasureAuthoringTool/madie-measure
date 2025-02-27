@@ -31,6 +31,7 @@ import {
   MadieSpinner,
   Pagination,
   Toast,
+  MadieAlert,
 } from "@madie/madie-design-system/dist/react";
 import Typography from "@mui/material/Typography";
 import TestCaseImportFromBonnieDialog from "../common/import/TestCaseImportFromBonnieDialog";
@@ -77,7 +78,7 @@ export const getCoverageValueFromHtml = (
 };
 
 const TestCaseList = (props: TestCaseListProps) => {
-  const { setErrors, setWarnings } = props;
+  const { setErrors, setWarnings, setImportWarnings } = props;
   const { measureId, criteriaId } = useParams<{
     measureId: string;
     criteriaId: string;
@@ -158,6 +159,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [openImportDialog, setOpenImportDialog] = useState<boolean>(false);
   const [openDeleteAllTestCasesDialog, setOpenDeleteAllTestCasesDialog] =
     useState<boolean>(false);
+  const [testCaseShiftWarning, setTestCaseShiftWarning] = useState<any>();
   const abortController = useRef(null);
   const [createOpen, setCreateOpen] = useState<boolean>(false);
   const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
@@ -501,7 +503,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   const onTestCaseImport = async (
     testCaseImportRequest: TestCaseImportRequest[]
   ) => {
-    setWarnings(null);
+    setImportWarnings(null);
     setOpenImportDialog(false);
     setLoadingState(() => ({
       loading: true,
@@ -517,7 +519,7 @@ const TestCaseList = (props: TestCaseListProps) => {
         if (outcome.message) return outcome;
       });
       if (failedImports && failedImports.length > 0) {
-        setWarnings(testCaseImportOutcome);
+        setImportWarnings(testCaseImportOutcome);
       } else {
         const successfulImports =
           testCaseImportOutcome.length - failedImports.length;
@@ -549,24 +551,12 @@ const TestCaseList = (props: TestCaseListProps) => {
         shifted
       )
       .then((response) => {
-        setToastOpen(true);
-
         if (response.length === 0) {
+          setToastOpen(true);
           setToastType("success");
           setToastMessage(`All Test Case dates successfully shifted.`);
         } else {
-          setToastType("danger");
-          setToastMessage(
-            <div>
-              The following Test Case dates could not be shifted. Please try
-              again. If the issue continues, please contact helpdesk.
-              <ul>
-                {response.map((tc) => (
-                  <li>{tc}</li>
-                ))}
-              </ul>
-            </div>
-          );
+          setWarnings((prevState) => [...prevState, response]);
         }
       })
       .catch((err) => {
@@ -700,6 +690,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                           setOpenCopyTestCaseDialog(true)
                         }
                       />
+                      <div id="status-handler"></div>
                       <TestCaseTable
                         sorting={sorting}
                         setSorting={setSorting}
