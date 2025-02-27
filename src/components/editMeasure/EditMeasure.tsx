@@ -46,6 +46,7 @@ import { exportMeasure } from "../../utils/exportUtil";
 import TestCases from "./testCases/TestCases";
 import { AxiosResponse } from "axios";
 import ViewHRModal from "../common/viewHumanReadableModal/ViewHRModal";
+import ShareDialog from "../common/shareDialog/ShareDialog";
 
 const OBJECT_ID_REGEX = /\/[a-f0-9]{24}/g;
 
@@ -121,6 +122,7 @@ export default function EditMeasure() {
 
   // Delete utilities
   const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
+  const [shareDialog, setShareDialog] = useState<boolean>(false);
   const [createVersionDialog, setCreateVersionDialog] = useState({
     open: false,
     measureId: "",
@@ -154,6 +156,19 @@ export default function EditMeasure() {
       window.removeEventListener("delete-measure", deleteListener, false);
     };
   }, []);
+
+  useEffect(() => {
+    const shareListener = () => {
+      setShareDialog(true);
+    };
+    window.addEventListener("share-measure", shareListener, {
+      passive: true,
+    });
+    return () => {
+      window.removeEventListener("share-measure", shareListener);
+    };
+  }, []);
+
   useEffect(() => {
     const versionListener = () => {
       setCreateVersionDialog({
@@ -290,6 +305,7 @@ export default function EditMeasure() {
       open: false,
       measureId: "",
     });
+    setShareDialog(false);
   };
   const createVersion = (versionType: string) => {
     setLoading(true);
@@ -540,6 +556,12 @@ export default function EditMeasure() {
             onClose={() => setDeleteOpen(false)}
             measureName={measure?.measureName}
             deleteMeasure={deleteMeasure}
+          />
+
+          <ShareDialog
+            measure={measure}
+            open={shareDialog}
+            onClose={handleDialogClose}
           />
 
           <InvalidTestCaseDialog
