@@ -19,7 +19,6 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
-  getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { Measure } from "@madie/madie-models";
@@ -29,7 +28,6 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import "../../measureLanding/MeasureLanding.scss";
 import tw from "twin.macro";
 import "styled-components/macro";
-import { customSort } from "../../editMeasure/testCases/components/testCaseLanding/common/Hooks/UseTestCases";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
@@ -100,8 +98,6 @@ const ShareDialog = ({ measure, open, onClose }: ShareDialogProps) => {
           />
         ),
         accessorKey: "measureName",
-        sortingFn: (rowA, rowB) =>
-          customSort(rowA.original.measureName, rowB.original.measureName),
       },
       {
         header: "User",
@@ -113,8 +109,6 @@ const ShareDialog = ({ measure, open, onClose }: ShareDialogProps) => {
           />
         ),
         accessorKey: "userId",
-        sortingFn: (rowA, rowB) =>
-          customSort(rowA.original.userId, rowB.original.userId),
       },
       {
         header: "Date Shared",
@@ -126,8 +120,6 @@ const ShareDialog = ({ measure, open, onClose }: ShareDialogProps) => {
           />
         ),
         accessorKey: "dateShared",
-        sortingFn: (rowA, rowB) =>
-          customSort(rowA.original.dateShared, rowB.original.dateShared),
       },
     ];
   }, [measure]);
@@ -141,7 +133,6 @@ const ShareDialog = ({ measure, open, onClose }: ShareDialogProps) => {
       maxSize: 500,
     },
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
   });
 
   return (
@@ -210,47 +201,11 @@ const ShareDialog = ({ measure, open, onClose }: ShareDialogProps) => {
                           <TH
                             key={header.id}
                             scope="col"
-                            onClick={header.column.getToggleSortingHandler()}
-                            onMouseEnter={() => setHoveredHeader(header.id)}
-                            onMouseLeave={() => setHoveredHeader(null)}
                             className="header-cell"
                           >
-                            {header.isPlaceholder ? null : (
-                              <button
-                                className={
-                                  header.column.getCanSort()
-                                    ? "cursor-pointer select-none header-button"
-                                    : "header-button"
-                                }
-                                title={
-                                  header.column.getCanSort()
-                                    ? header.column.getNextSortingOrder() ===
-                                      "asc"
-                                      ? "Sort ascending"
-                                      : header.column.getNextSortingOrder() ===
-                                        "desc"
-                                      ? "Sort descending"
-                                      : "Clear sort"
-                                    : undefined
-                                }
-                              >
-                                <span className="arrowDisplay">
-                                  {header.column.getCanSort() &&
-                                    isHovered &&
-                                    !header.column.getIsSorted() && (
-                                      <UnfoldMoreIcon />
-                                    )}
-                                  {{
-                                    asc: <KeyboardArrowUpIcon />,
-                                    desc: <KeyboardArrowDownIcon />,
-                                  }[header.column.getIsSorted() as string] ??
-                                    null}
-                                </span>
-                                {flexRender(
-                                  header.column.columnDef.header,
-                                  header.getContext()
-                                )}
-                              </button>
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
                             )}
                           </TH>
                         );
