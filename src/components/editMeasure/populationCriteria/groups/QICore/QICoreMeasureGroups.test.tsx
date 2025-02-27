@@ -748,6 +748,7 @@ describe("Measure Groups Page", () => {
 
     const expectedGroup = {
       id: "7p03-5r29-7O0I",
+      displayId: "Group_1",
       populations: [
         {
           id: "id-1",
@@ -907,11 +908,13 @@ describe("Measure Groups Page", () => {
           id: "id-1",
           name: PopulationType.INITIAL_POPULATION,
           definition: "Initial Population",
+          displayId: "InitialPopulation_1",
         },
         {
           id: "id-2",
           name: PopulationType.MEASURE_POPULATION,
           definition: "Measure Population",
+          displayId: "MeasurePopulation_1",
         },
       ],
       groupDescription: "testDescription",
@@ -965,6 +968,7 @@ describe("Measure Groups Page", () => {
 
     const expectedGroup = {
       id: "7p03-5r29-7O0I",
+      displayId: "Group_1",
       populations: [
         {
           id: "uuid-3",
@@ -973,6 +977,7 @@ describe("Measure Groups Page", () => {
             "VTE Prophylaxis by Medication Administered or Device Applied",
           description: "",
           associationType: undefined,
+          displayId: "InitialPopulation_1",
         },
       ],
       measureObservations: null,
