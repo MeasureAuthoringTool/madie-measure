@@ -265,7 +265,7 @@ describe("ActionCenter", () => {
     });
   });
 
-  it("should call updateTargetMeasure and setShareDialog when share action button is clicked and a measure is passed into ActionCenter", async () => {
+  it("should call setShareDialog when share action button is clicked and a measure is passed into ActionCenter", async () => {
     mockCheckUserCanEdit.mockReturnValue(true);
 
     const updateTargetMeasure = jest.fn();
