@@ -122,7 +122,7 @@ export default function EditMeasure() {
 
   // Delete utilities
   const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
-  const [shareDialog, setShareDialog] = useState<boolean>(false);
+  const [shareDialog, setShareDialog] = useState({ open: false, option: "" });
   const [createVersionDialog, setCreateVersionDialog] = useState({
     open: false,
     measureId: "",
@@ -159,13 +159,31 @@ export default function EditMeasure() {
 
   useEffect(() => {
     const shareListener = () => {
-      setShareDialog(true);
+      setShareDialog({
+        open: true,
+        option: "Share With",
+      });
     };
     window.addEventListener("share-measure", shareListener, {
       passive: true,
     });
     return () => {
       window.removeEventListener("share-measure", shareListener);
+    };
+  }, []);
+
+  useEffect(() => {
+    const unshareListener = () => {
+      setShareDialog({
+        open: true,
+        option: "Unshare",
+      });
+    };
+    window.addEventListener("unshare-measure", unshareListener, {
+      passive: true,
+    });
+    return () => {
+      window.removeEventListener("unshare-measure", unshareListener);
     };
   }, []);
 
@@ -305,7 +323,10 @@ export default function EditMeasure() {
       open: false,
       measureId: "",
     });
-    setShareDialog(false);
+    setShareDialog({
+      open: false,
+      option: "",
+    });
   };
   const createVersion = (versionType: string) => {
     setLoading(true);
@@ -559,8 +580,9 @@ export default function EditMeasure() {
           />
 
           <ShareDialog
-            measure={measure}
-            open={shareDialog}
+            measures={[measure]}
+            open={shareDialog.open}
+            option={shareDialog.option}
             onClose={handleDialogClose}
           />
 

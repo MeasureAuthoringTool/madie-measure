@@ -72,7 +72,10 @@ const mockMeasureServiceApi = {
   getMeasureExport: jest
     .fn()
     .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
-  getSharedWithUserIds: jest.fn().mockResolvedValue([]),
+  getSharedWithUserIds: jest.fn().mockResolvedValue({
+    measureId1: ["userId1"],
+    measureId2: ["userId1", "userId2"],
+  }),
 } as unknown as MeasureServiceApi;
 
 jest.mock("../../../api/useMeasureServiceApi", () =>
@@ -2201,11 +2204,16 @@ describe("Measure List component", () => {
       const shareButton = screen.getByTestId("share-action-btn");
       expect(shareButton).toBeInTheDocument();
       fireEvent.click(shareButton);
+      fireEvent.click(screen.getByRole("menuitem", { name: "Share With" }));
       const shareDialog = screen.getByTestId("share-dialog");
       expect(shareDialog).toBeInTheDocument();
-      const cancelButton = await findByTestId("share-cancel-button");
+      const cancelButton = screen.getByTestId("share-cancel-button");
       fireEvent.click(cancelButton);
-      expect(shareDialog).not.toBeVisible();
+
+      await waitFor(() => {
+        expect(shareDialog).not.toBeVisible();
+      });
+
       unmount();
     });
   });

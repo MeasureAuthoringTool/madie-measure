@@ -289,8 +289,11 @@ describe("ActionCenter", () => {
     const shareButton = await screen.findByTestId("share-action-btn");
     expect(shareButton).toBeEnabled();
     fireEvent.click(shareButton);
+    fireEvent.click(screen.getByRole("menuitem", { name: "Share With" }));
 
-    expect(updateTargetMeasure).toHaveBeenCalledWith(qdmMeasure);
-    expect(setShareDialog).toHaveBeenCalledWith(true);
+    expect(setShareDialog).toHaveBeenCalledWith({
+      open: true,
+      option: "Share With",
+    });
   });
 });

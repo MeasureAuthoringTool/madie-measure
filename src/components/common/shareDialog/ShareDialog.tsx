@@ -5,7 +5,7 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
-import { Backdrop, Typography } from "@mui/material";
+import { Backdrop, Checkbox, Typography } from "@mui/material";
 import {
   TextField,
   MadieDialog,
@@ -19,6 +19,7 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getExpandedRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
@@ -26,6 +27,9 @@ import { Measure } from "@madie/madie-models";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import "../../measureLanding/MeasureLanding.scss";
 import tw from "twin.macro";
 import "styled-components/macro";
@@ -33,10 +37,18 @@ import { customSort } from "../../editMeasure/testCases/components/testCaseLandi
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
+const icon = <CheckBoxOutlineBlankIcon fontSize="large" />;
+const checkedIcon = <CheckBoxIcon fontSize="large" />;
+const keyboardArrowStyles = {
+  color: "#0073C8",
+  width: 40,
+  height: 40,
+};
 
 interface ShareDialogProps {
-  measure: Measure;
+  measures: Measure[];
   open: boolean;
+  option: string;
   onClose: Function;
 }
 
@@ -45,9 +57,10 @@ interface SharedMeasure {
   measureName: string;
   userId: string;
   dateShared: string;
+  subRows: SharedMeasure[];
 }
 
-const ShareDialog = ({ measure, open, onClose }: ShareDialogProps) => {
+const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
   const measureSearchApi = useRef(useMeasureServiceApi());
 
   const [sharedMeasures, setSharedMeasures] = useState<SharedMeasure[]>([]);
@@ -56,7 +69,7 @@ const ShareDialog = ({ measure, open, onClose }: ShareDialogProps) => {
   const [errorMessage, setErrorMessage] = useState<string>("");
 
   const getSharedMeasure = useCallback(() => {
-    if (!measure || !open) {
+    if (measures.length === 0 || !open) {
       return;
     }
 
@@ -64,15 +77,25 @@ const ShareDialog = ({ measure, open, onClose }: ShareDialogProps) => {
     setErrorMessage("");
     setLoading(true);
 
+    const measureMap = new Map(
+      measures.map((measure) => [measure.id, measure])
+    );
+    const measureIds = Array.from(measureMap.keys());
+
     measureSearchApi.current
-      .getSharedWithUserIds(measure.id)
-      .then((response: string[]) => {
+      .getSharedWithUserIds(measureIds)
+      .then((response) => {
         setSharedMeasures(
-          response.map((userId) => ({
-            measureId: measure.id,
-            measureName: measure.measureName,
-            userId,
-            dateShared: "-",
+          measureIds.map((measureId) => ({
+            measureId,
+            measureName: measureMap.get(measureId).measureName,
+            userId: "",
+            dateShared: "",
+            subRows: response[measureId].map((userId) => ({
+              measureId,
+              userId,
+              dateShared: "-",
+            })),
           }))
         );
       })
@@ -82,15 +105,17 @@ const ShareDialog = ({ measure, open, onClose }: ShareDialogProps) => {
       .finally(() => {
         setLoading(false);
       });
-  }, [measure, open]);
+  }, [open]);
 
   useEffect(() => {
     getSharedMeasure();
   }, [getSharedMeasure]);
 
   const columns = useMemo<ColumnDef<SharedMeasure>[]>(() => {
-    return [
-      {
+    let columnDefs = [];
+
+    if (option === "Share With") {
+      columnDefs.push({
         header: "Measure",
         cell: (info) => (
           <TruncateText
@@ -102,7 +127,33 @@ const ShareDialog = ({ measure, open, onClose }: ShareDialogProps) => {
         accessorKey: "measureName",
         sortingFn: (rowA, rowB) =>
           customSort(rowA.original.measureName, rowB.original.measureName),
-      },
+      });
+    } else if (option === "Unshare") {
+      columnDefs.push({
+        header: "Measure",
+        cell: (info) =>
+          info.row.original.measureName ? (
+            <TruncateText
+              text={info.row.original.measureName}
+              maxLength={120}
+              dataTestId={`measure-name-${info.row.original.measureName}`}
+            />
+          ) : (
+            <Checkbox
+              icon={icon}
+              checkedIcon={checkedIcon}
+              checked={true}
+              data-testid={`unshare-checkbox-${info.row.original.measureId}-${info.row.original.userId}`}
+            />
+          ),
+        accessorKey: "measureName",
+        sortingFn: (rowA, rowB) =>
+          customSort(rowA.original.measureName, rowB.original.measureName),
+      });
+    }
+
+    columnDefs = [
+      ...columnDefs,
       {
         header: "User",
         cell: (info) => (
@@ -129,8 +180,30 @@ const ShareDialog = ({ measure, open, onClose }: ShareDialogProps) => {
         sortingFn: (rowA, rowB) =>
           customSort(rowA.original.dateShared, rowB.original.dateShared),
       },
+      {
+        cell: ({ row }) => (
+          <>
+            {row.getCanExpand() ? (
+              <button
+                data-testid={`expand-button-${row.original.measureId}`}
+                onClick={row.getToggleExpandedHandler()}
+                style={{ cursor: "pointer" }}
+              >
+                {row.getIsExpanded() ? (
+                  <KeyboardArrowDownIcon sx={keyboardArrowStyles} />
+                ) : (
+                  <KeyboardArrowRightIcon sx={keyboardArrowStyles} />
+                )}
+              </button>
+            ) : null}
+          </>
+        ),
+        id: "expand-button",
+      },
     ];
-  }, [measure]);
+
+    return columnDefs;
+  }, [measures]);
 
   const table = useReactTable({
     data: sharedMeasures,
@@ -142,16 +215,19 @@ const ShareDialog = ({ measure, open, onClose }: ShareDialogProps) => {
     },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
+    getSubRows: (row) => row.subRows,
   });
 
   return (
     <MadieDialog
       form={false}
-      title="Shared With"
+      title={option}
       dialogProps={{
         onClose,
         open,
         maxWidth: "lg",
+        "data-testid": "share-dialog",
       }}
       cancelButtonProps={{
         variant: "outline",
@@ -165,8 +241,8 @@ const ShareDialog = ({ measure, open, onClose }: ShareDialogProps) => {
         "data-testid": "share-save-button",
       }}
     >
-      <div data-testid="share-dialog">
-        <div id="measure-landing" data-testid="measure-landing">
+      <div id="measure-landing" data-testid="measure-landing">
+        {option === "Share With" && (
           <div id="add-user-id-search">
             <div>
               <TextField
@@ -189,126 +265,118 @@ const ShareDialog = ({ measure, open, onClose }: ShareDialogProps) => {
               </Button>
             </div>
           </div>
+        )}
 
-          <div className="measure-table no-margin-top">
-            <div className="table" style={{ overflow: "auto" }}>
-              <table
-                tw="min-w-full"
-                data-testid="shared-measure-list-tbl"
-                className="ml-table"
-                style={{
-                  borderSpacing: "0 2em !important",
-                  borderBottom: "1px solid rgb(140, 140, 140)",
-                }}
-              >
-                <thead tw="bg-slate">
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <tr key={headerGroup.id}>
-                      {headerGroup.headers.map((header) => {
-                        const isHovered = hoveredHeader?.includes(header.id);
-                        return (
-                          <TH
-                            key={header.id}
-                            scope="col"
-                            onClick={header.column.getToggleSortingHandler()}
-                            onMouseEnter={() => setHoveredHeader(header.id)}
-                            onMouseLeave={() => setHoveredHeader(null)}
-                            className="header-cell"
-                          >
-                            {header.isPlaceholder ? null : (
-                              <button
-                                className={
-                                  header.column.getCanSort()
-                                    ? "cursor-pointer select-none header-button"
-                                    : "header-button"
-                                }
-                                title={
-                                  header.column.getCanSort()
-                                    ? header.column.getNextSortingOrder() ===
-                                      "asc"
-                                      ? "Sort ascending"
-                                      : header.column.getNextSortingOrder() ===
-                                        "desc"
-                                      ? "Sort descending"
-                                      : "Clear sort"
-                                    : undefined
-                                }
-                              >
-                                <span className="arrowDisplay">
-                                  {header.column.getCanSort() &&
-                                    isHovered &&
-                                    !header.column.getIsSorted() && (
-                                      <UnfoldMoreIcon />
-                                    )}
-                                  {{
-                                    asc: <KeyboardArrowUpIcon />,
-                                    desc: <KeyboardArrowDownIcon />,
-                                  }[header.column.getIsSorted() as string] ??
-                                    null}
-                                </span>
-                                {flexRender(
-                                  header.column.columnDef.header,
-                                  header.getContext()
-                                )}
-                              </button>
-                            )}
-                          </TH>
-                        );
-                      })}
+        <div className="measure-table no-margin-top">
+          <div className="table" style={{ overflow: "auto" }}>
+            <table
+              tw="min-w-full"
+              data-testid="share-measure-tbl"
+              className="ml-table"
+              style={{
+                borderSpacing: "0 2em !important",
+                borderBottom: "1px solid rgb(140, 140, 140)",
+              }}
+            >
+              <thead tw="bg-slate">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => {
+                      const isHovered = hoveredHeader?.includes(header.id);
+                      return (
+                        <TH
+                          key={header.id}
+                          scope="col"
+                          onClick={header.column.getToggleSortingHandler()}
+                          onMouseEnter={() => setHoveredHeader(header.id)}
+                          onMouseLeave={() => setHoveredHeader(null)}
+                          className="header-cell"
+                        >
+                          {header.isPlaceholder ? null : (
+                            <button
+                              className={
+                                header.column.getCanSort()
+                                  ? "cursor-pointer select-none header-button"
+                                  : "header-button"
+                              }
+                              title={
+                                header.column.getCanSort()
+                                  ? header.column.getNextSortingOrder() ===
+                                    "asc"
+                                    ? "Sort ascending"
+                                    : header.column.getNextSortingOrder() ===
+                                      "desc"
+                                    ? "Sort descending"
+                                    : "Clear sort"
+                                  : undefined
+                              }
+                            >
+                              <span className="arrowDisplay">
+                                {header.column.getCanSort() &&
+                                  isHovered &&
+                                  !header.column.getIsSorted() && (
+                                    <UnfoldMoreIcon />
+                                  )}
+                                {{
+                                  asc: <KeyboardArrowUpIcon />,
+                                  desc: <KeyboardArrowDownIcon />,
+                                }[header.column.getIsSorted() as string] ??
+                                  null}
+                              </span>
+                              {flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
+                            </button>
+                          )}
+                        </TH>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </thead>
+              <tbody className="table-body" style={{ padding: 20 }}>
+                {errorMessage ? (
+                  <tr>
+                    <td colSpan={columns.length}>{errorMessage}</td>
+                  </tr>
+                ) : (
+                  table.getRowModel().rows.map((row) => (
+                    <tr
+                      key={row.id}
+                      className="ml-tr"
+                      data-testid={`row-item`}
+                      style={{
+                        borderTop: "solid 1px #8c8c8c",
+                        borderSpacing: "0 2em !important",
+                      }}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <td
+                          key={cell.id}
+                          data-testid={`measure-name-${cell.id}`}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </td>
+                      ))}
                     </tr>
-                  ))}
-                </thead>
-                <tbody className="table-body" style={{ padding: 20 }}>
-                  {errorMessage ? (
-                    <tr>
-                      <td colSpan={columns.length}>{errorMessage}</td>
-                    </tr>
-                  ) : _.isEmpty(sharedMeasures) ? (
-                    <tr>
-                      <td colSpan={columns.length}>
-                        This measure is not yet shared with anyone. Enter the
-                        HARP ID of the user you'd like to share it with and
-                        click the (Add User) button above to share the measure.
-                      </td>
-                    </tr>
-                  ) : (
-                    table.getRowModel().rows.map((row) => (
-                      <tr
-                        key={row.id}
-                        className="ml-tr"
-                        data-testid={`row-item`}
-                        style={{
-                          borderTop: "solid 1px #8c8c8c",
-                          borderSpacing: "0 2em !important",
-                        }}
-                      >
-                        {row.getVisibleCells().map((cell) => (
-                          <td
-                            key={cell.id}
-                            data-testid={`measure-name-${cell.id}`}
-                          >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext()
-                            )}
-                          </td>
-                        ))}
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
-        <Backdrop
-          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-          open={loading}
-        >
-          <MadieSpinner style={{ height: 50, width: 50 }} />
-          <Typography color="inherit">Loading shared measures...</Typography>
-        </Backdrop>
       </div>
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <MadieSpinner style={{ height: 50, width: 50 }} />
+        <Typography color="inherit">Loading shared measures...</Typography>
+      </Backdrop>
     </MadieDialog>
   );
 };
