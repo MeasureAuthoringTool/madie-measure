@@ -323,6 +323,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   };
   const [allPopulationsWithDisplayId, setAllPopulationsWithDisplayId] =
     useState<Population[]>(getPopulationsWithDisplayId(allPopulations));
+  useEffect(() => {
+    setAllPopulationsWithDisplayId(getPopulationsWithDisplayId(allPopulations));
+  }, [measureGroupNumber]);
 
   useEffect(() => {
     if (measure?.groups && measure?.groups[measureGroupNumber]) {
@@ -1133,7 +1136,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                   removeCallback={arrayHelpers.remove}
                                   replaceCallback={arrayHelpers.replace}
                                   setAssociationChanged={setAssociationChanged}
-                                  isQdm={false}
                                 />
                                 {/* add or remove logic must live here */}
                                 <MeasureGroupObservation

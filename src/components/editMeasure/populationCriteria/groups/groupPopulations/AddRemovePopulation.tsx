@@ -39,7 +39,6 @@ const AddRemovePopulation = ({
   insertCallback,
   removeCallback,
   replaceCallback,
-  isQdm = true,
 }) => {
   const label = correctPopulationLabel(populations, population, index);
   population.associationType = getAssociationType(label, scoring, population);
@@ -53,9 +52,7 @@ const AddRemovePopulation = ({
     //remove the second IP first IP displayId changes from InitialPopulation_1_1 to: InitialPopulation_1
     replaceCallback(0, {
       ...populations[0],
-      displayId: isQdm
-        ? null
-        : populations[0].displayId?.replace(/_1([^_1]*)$/, "" + "$1"),
+      displayId: populations[0].displayId?.replace(/_1([^_1]*)$/, "" + "$1"),
     });
   };
 
@@ -103,7 +100,7 @@ const AddRemovePopulation = ({
       //add a second IP, the first IP displayId changes from InitialPopulation_1 to: InitialPopulation_1_1
       replaceCallback(index, {
         ...ip,
-        displayId: isQdm ? null : ip.displayId + "_1",
+        displayId: ip.displayId + "_1",
       });
       if (
         ip?.associationType === InitialPopulationAssociationType.DENOMINATOR
@@ -121,7 +118,7 @@ const AddRemovePopulation = ({
       definition: "",
       description: "",
       associationType: secondAssociation,
-      displayId: isQdm ? null : population.displayId + "_2",
+      displayId: population.displayId + "_2",
     });
   };
 
