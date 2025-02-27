@@ -47,7 +47,7 @@ export default function DraftAction(props: PropTypes) {
   const validateDraftActionState = useCallback(async () => {
     setDisableDraftBtn(true);
     setTooltipMessage(NOTHING_SELECTED);
-    const selectedMeasure = measures[0];
+    const selectedMeasure = measures?.[0];
     if (
       measures?.length === 1 &&
       !selectedMeasure?.measureMetaData.draft &&
@@ -71,6 +71,10 @@ export default function DraftAction(props: PropTypes) {
           setDisableDraftBtn(false);
           setTooltipMessage(DRAFT_MEASURE);
         }
+        // its qdm
+      } else {
+        setDisableDraftBtn(false);
+        setTooltipMessage(DRAFT_MEASURE);
       }
     } else if (toastMessage) {
       setTooltipMessage(LOOKUP_ERROR);
@@ -111,7 +115,6 @@ export default function DraftAction(props: PropTypes) {
     <Tooltip
       data-testid="draft-action-tooltip"
       title={tooltipMessage}
-      onMouseOver={validateDraftActionState}
       arrow
     >
       <span>
