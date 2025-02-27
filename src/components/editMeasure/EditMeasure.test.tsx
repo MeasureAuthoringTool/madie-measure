@@ -317,6 +317,7 @@ describe("EditMeasure Component", () => {
     const popCriteria = await screen.findByTestId("groups-tab");
     expect(popCriteria).toHaveAttribute("aria-selected", "true");
   });
+
   it("should render test-cases", async () => {
     renderRouter([{ pathname: "/measures/fakeid/edit/test-cases/" }]);
     const tcLink = await screen.findByTestId("patients-tab");
