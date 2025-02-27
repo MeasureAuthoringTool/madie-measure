@@ -112,11 +112,7 @@ export default function DraftAction(props: PropTypes) {
   }, [measures, draftLookup]);
 
   return (
-    <Tooltip
-      data-testid="draft-action-tooltip"
-      title={tooltipMessage}
-      arrow
-    >
+    <Tooltip data-testid="draft-action-tooltip" title={tooltipMessage} arrow>
       <span>
         <IconButton
           onClick={props.onClick}

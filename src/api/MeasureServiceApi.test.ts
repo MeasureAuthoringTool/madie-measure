@@ -555,12 +555,12 @@ describe("MeasureServiceApi Tests", () => {
   it("test getSharedWithUserIds failure", async () => {
     const errorMessage =
       "Unable to retrieve users that the selected measure(s) is shared with. If the error persists, please contact the help desk.";
-      mockedAxios.get.mockImplementationOnce(() =>
-        Promise.reject(new Error(errorMessage))
-      );
-      
-      await expect(measureServiceApi.measureServiceApi.getSharedWithUserIds(["measureId1", "measureId2"])).rejects.toThrow(errorMessage);
-
+    mockedAxios.get.mockImplementationOnce(() =>
+      Promise.reject(new Error(errorMessage))
+    );
+    await expect(
+      measureServiceApi.getSharedWithUserIds(["measureId1", "measureId2"])
+    ).rejects.toThrow(errorMessage);
   });
   it("Successfully returns for getMeasuresByMeasureSetId", async () => {
     const resp: any = {
@@ -572,7 +572,6 @@ describe("MeasureServiceApi Tests", () => {
       },
     };
     mockedAxios.get.mockResolvedValueOnce(resp);
-
     try {
       const measures = await measureServiceApi.getMeasuresByMeasureSetId(
         "test"
@@ -583,10 +582,12 @@ describe("MeasureServiceApi Tests", () => {
     }
   });
   it("Throws Error For for getMeasuresByMeasureSetId", async () => {
-    const errorMessage = "Unable to fetch measures by neasureSetId";
+    const errorMessage = "Unable to fetch measures by measureSetId";
     mockedAxios.get.mockImplementationOnce(() =>
       Promise.reject(new Error(errorMessage))
     );
-    await expect(measureServiceApi.getMeasuresByMeasureSetId(measures[0].id)).rejects.toThrow(errorMessage);
+    await expect(
+      measureServiceApi.getMeasuresByMeasureSetId(measures[0].id)
+    ).rejects.toThrow(errorMessage);
   });
 });
