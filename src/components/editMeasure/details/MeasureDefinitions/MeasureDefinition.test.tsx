@@ -198,11 +198,41 @@ describe("Measure Definitions Component", () => {
     const searchInput = getByRole("textbox", { name: "Search" });
     expect(searchInput).toBeInTheDocument();
     const searchInputField = getByTestId("measure-definition-search-input");
-    userEvent.type(searchInputField, "test");
+    userEvent.type(searchInputField, "term 1");
     userEvent.keyboard("{Enter}");
-    expect(mockedNavigate).toHaveBeenCalledWith(
-      expect.stringContaining("search=test&page=1&limit=10")
+
+    await checkRows(2);
+
+    const clearSearch = getByTestId("ClearIcon");
+    userEvent.click(clearSearch);
+
+    await checkRows(10);
+  });
+
+  it("does not do search when there is no search value", async () => {
+    measureStore.state.mockImplementation(() => measureWithElevenItems);
+    measureStore.initialState.mockImplementation(() => measureWithElevenItems);
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureDefinitions setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
     );
+    await checkRows(10);
+
+    const searchInput = getByRole("textbox", { name: "Search" });
+    expect(searchInput).toBeInTheDocument();
+    const searchInputField = getByTestId("measure-definition-search-input");
+    userEvent.type(searchInputField, "");
+    userEvent.keyboard("{Enter}");
+
+    await checkRows(10);
+
+    const clearSearch = getByTestId("ClearIcon");
+    userEvent.click(clearSearch);
+
+    await checkRows(10);
   });
 
   it("test edit measure definition.", async () => {
@@ -440,11 +470,11 @@ describe("Measure Definitions Component", () => {
     expectInputValue(definitionInput, "");
     act(() => {
       fireEvent.change(definitionInput, {
-        target: { value: "definition 1" },
+        target: { value: "definition 11" },
       });
     });
     fireEvent.blur(definitionInput);
-    expectInputValue(definitionInput, "definition 1");
+    expectInputValue(definitionInput, "definition 11");
     const submitButton = getByTestId("save-button");
     expect(submitButton).toHaveProperty("disabled", false);
     fireEvent.click(submitButton);
@@ -518,5 +548,58 @@ describe("Measure Definitions Component", () => {
     await waitFor(() => {
       expect(toastCloseButton).not.toBeInTheDocument();
     });
+  });
+
+  it("test create measure defintition no previous definitions.", async () => {
+    const copiedMeasure = {
+      ...measure,
+      measureMetaData: {},
+    };
+    measureStore.state.mockImplementation(() => copiedMeasure);
+    measureStore.initialState.mockImplementation(() => copiedMeasure);
+    serviceApiMock = {
+      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200, data: {} }),
+    } as unknown as MeasureServiceApi;
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureDefinitions setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    expect(getByTestId("create-definition-button")).toBeEnabled();
+
+    const createButton = await findByTestId("create-definition-button");
+    expect(createButton).toBeInTheDocument();
+    await checkDialogExists();
+
+    const termInput = getByTestId(
+      "measure-definition-term-input"
+    ) as HTMLInputElement;
+    expect(termInput).toBeInTheDocument();
+    expect(termInput.value).toBe("");
+
+    fireEvent.change(termInput, {
+      target: { value: "term 1" },
+    });
+    expect(termInput.value).toBe("term 1");
+
+    const definitionInput = getByTestId(
+      "measure-definition"
+    ) as HTMLTextAreaElement;
+    expectInputValue(definitionInput, "");
+    act(() => {
+      fireEvent.change(definitionInput, {
+        target: { value: "definition 1" },
+      });
+    });
+    fireEvent.blur(definitionInput);
+    expectInputValue(definitionInput, "definition 1");
+    const cancelButton = getByTestId("cancel-button");
+    expect(cancelButton).toHaveProperty("disabled", false);
+    const saveButton = getByTestId("save-button");
+    fireEvent.click(saveButton);
+    await checkDialogHidden();
   });
 });

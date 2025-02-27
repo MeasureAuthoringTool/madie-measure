@@ -34,7 +34,7 @@ describe("TimeComponent", () => {
 
     const input = screen.getByPlaceholderText("hh:mm:ss aa");
     userEvent.type(input, "082359AM");
-
     expect(input).toHaveValue("08:23:59 AM");
+    expect(handleChange).toHaveBeenCalledWith("08:23:59");
   });
 });
