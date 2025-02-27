@@ -55,6 +55,31 @@ export class MeasureServiceApi {
     }
   }
 
+  async getMeasuresByMeasureSetId(measureSetId: string): Promise<any> {
+    try {
+      const response = await axios.get(
+        `${this.baseUrl}/measures/byMeasureSetId`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+          // responseType: "blob",
+          // signal,
+          params: {
+            measureSetId: measureSetId,
+          },
+        }
+      );
+      if (response.data) {
+        return response.data;
+      }
+    } catch (error) {
+      // need to bubble the error up.
+      console.error("error requesting measure export ", error);
+      throw error;
+    }
+  }
+
   async fetchMeasures(
     filterByCurrentUser: boolean,
     limit: number = 25,
