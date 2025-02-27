@@ -265,7 +265,7 @@ describe("ActionCenter", () => {
     });
   });
 
-  it("should call updateTargetMeasure and setShareDialog when share action button is clicked and a measure is passed into ActionCenter", async () => {
+  it("should call setShareDialog when share action button is clicked and a measure is passed into ActionCenter", async () => {
     mockCheckUserCanEdit.mockReturnValue(true);
 
     const updateTargetMeasure = jest.fn();
@@ -289,9 +289,12 @@ describe("ActionCenter", () => {
     const shareButton = await screen.findByTestId("share-action-btn");
     expect(shareButton).toBeEnabled();
     fireEvent.click(shareButton);
+    fireEvent.click(screen.getByRole("menuitem", { name: "Share With" }));
 
-    expect(updateTargetMeasure).toHaveBeenCalledWith(qdmMeasure);
-    expect(setShareDialog).toHaveBeenCalledWith(true);
+    expect(setShareDialog).toHaveBeenCalledWith({
+      open: true,
+      option: "Share With",
+    });
   });
 
   it("should not call updateTargetMeasure and setShareDialog when no measure is passed into ActionCenter and the share action button should be disabled", async () => {

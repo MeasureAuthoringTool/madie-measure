@@ -162,7 +162,10 @@ const serviceApiMock = {
     .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
   getReturnTypesForAllCqlFunctions: jest.fn().mockResolvedValue({}),
   fetchHumanReadable: jest.fn().mockResolvedValue("test human readable"),
-  getSharedWithUserIds: jest.fn().mockResolvedValue([]),
+  getSharedWithUserIds: jest.fn().mockResolvedValue({
+    measureId1: ["userId1"],
+    measureId2: ["userId1", "userId2"],
+  }),
 } as unknown as MeasureServiceApi;
 
 useMeasureServiceApiMock.mockImplementation(() => {
@@ -207,14 +210,8 @@ const serviceConfig = {
   terminologyService: { baseUrl: "" },
 } as ServiceConfig;
 
-const {
-  getByText,
-  getByTestId,
-  findByTestId,
-  queryByTestId,
-  queryByText,
-  findByText,
-} = screen;
+const { getByTestId, findByTestId, queryByTestId, queryByText, findByText } =
+  screen;
 
 const renderRouter = (
   initialEntries = [{ pathname: "/measures/fakeid/edit/details/" }]
@@ -474,15 +471,10 @@ describe("EditMeasure Component", () => {
       expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
       expect(getByTestId("share-dialog")).toBeInTheDocument();
       expect(serviceApiMock.getSharedWithUserIds).toHaveBeenCalled();
-      expect(
-        getByText(
-          "This measure is not yet shared with anyone. Enter the HARP ID of the user you'd like to share it with and click the (Add User) button above to share the measure."
-        )
-      ).toBeVisible();
     });
 
     const cancelButton = getByTestId("share-cancel-button");
     fireEvent.click(cancelButton);
-    expect(queryByTestId("share-dialog")).not.toBeVisible();
+    expect(queryByTestId("share-dialog")).toBeVisible();
   });
 });

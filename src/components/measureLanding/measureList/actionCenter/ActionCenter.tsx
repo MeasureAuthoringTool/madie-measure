@@ -72,12 +72,15 @@ export default function ActionCenter(props: PropTypes) {
     }
   }, [props.measures, props.updateTargetMeasure, props.setDeleteMeasureDialog]);
 
-  const shareMeasure = useCallback(() => {
-    if (props.measures?.length === 1) {
-      props.updateTargetMeasure(props.measures[0]);
-      props.setShareDialog(true);
-    }
-  }, [props.measures, props.updateTargetMeasure, props.setShareDialog]);
+  const shareMeasure = useCallback(
+    (option: string) => {
+      props.setShareDialog({
+        open: true,
+        option,
+      });
+    },
+    [props.setShareDialog]
+  );
 
   const isSelectedMeasureEditable = (measures) => {
     return (
