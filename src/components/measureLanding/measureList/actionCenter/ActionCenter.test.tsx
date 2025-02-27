@@ -265,7 +265,7 @@ describe("ActionCenter", () => {
     });
   });
 
-  it("should call updateTargetMeasure and setShareDialog when share action button is clicked", async () => {
+  it("should call updateTargetMeasure and setShareDialog when share action button is clicked and a measure is passed into ActionCenter", async () => {
     mockCheckUserCanEdit.mockReturnValue(true);
 
     const updateTargetMeasure = jest.fn();
@@ -295,5 +295,33 @@ describe("ActionCenter", () => {
       open: true,
       option: "Share With",
     });
+  });
+
+  it("should not call updateTargetMeasure and setShareDialog when no measure is passed into ActionCenter and the share action button should be disabled", async () => {
+    mockCheckUserCanEdit.mockReturnValue(true);
+
+    const updateTargetMeasure = jest.fn();
+    const setShareDialog = jest.fn();
+
+    render(
+      <ActionCenter
+        measures={[]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={updateTargetMeasure}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={setShareDialog}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+      />
+    );
+
+    const shareButton = await screen.findByTestId("share-action-btn");
+    expect(shareButton).toBeDisabled();
+
+    expect(updateTargetMeasure).not.toHaveBeenCalledWith(qdmMeasure);
+    expect(setShareDialog).not.toHaveBeenCalledWith(true);
   });
 });
