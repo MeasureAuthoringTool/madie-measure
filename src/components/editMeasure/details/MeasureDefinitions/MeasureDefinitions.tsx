@@ -65,7 +65,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
   const formik = useFormik({
     initialValues: {
       ...INITIAL_VALUES,
-      searchValue: values.search ? values.search : "",
+      searchValue: "",
     },
     enableReinitialize: true,
     validationSchema: MeasureDefinitionValidator,
@@ -265,14 +265,27 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
       })
     );
   };
-  const createEncodedQuery = (values) => {
-    const searchEncoded = encodeURIComponent(values.searchValue);
-    return `?search=${searchEncoded}&page=1&limit=${values.limit || 10}`;
+
+  const handleSearch = () => {
+    const filtered = measure?.measureMetaData?.measureDefinitions.filter(
+      (def) =>
+        def.term
+          .toLowerCase()
+          .includes(formik.values.searchValue.toLowerCase()) ||
+        def.definition
+          .toLowerCase()
+          .includes(formik.values.searchValue.toLowerCase())
+    );
+    setMeasureDefinitions(filtered);
   };
-  const handleNavigate = () => {
-    navigate(createEncodedQuery(formik.values));
+  const handleClearSearch = () => {
+    if (formik.values.searchValue) {
+      formik.values.searchValue = "";
+      setCurrentPage(1);
+      setMeasureDefinitions(measure?.measureMetaData?.measureDefinitions);
+      navigate(`?page=1&limit=${values?.limit || 10}`);
+    }
   };
-  const handleClearClick = () => {};
 
   const deleteMeasureDefinition = useCallback(
     (id) => {
@@ -330,80 +343,82 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
         </div>
 
         <table>
-          <tr>
-            <td>
-              <TextField
-                id="search"
-                style={{ width: "280px", paddingBottom: "32px" }}
-                label="Search"
-                placeholder="Search"
-                inputProps={{
-                  "data-testid": "measure-definition-search-input",
-                }}
-                data-testid="measure-definition-list-search"
-                name="searchValue"
-                value={formik.values.searchValue}
-                onChange={formik.handleChange}
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    handleNavigate();
-                  }
-                }}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment
-                        position="start"
-                        data-testid="test-cases-trigger-search"
-                        onClick={handleNavigate}
-                        style={{ cursor: "pointer" }}
-                      >
-                        <SearchIcon />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment
-                        data-testid="measure-definition-clear-search"
-                        position="end"
-                        style={{ cursor: "pointer" }}
-                        onClick={handleClearClick}
-                      >
-                        <IconButton>
-                          <ClearIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-              />
-            </td>
+          <tbody>
+            <tr>
+              <td>
+                <TextField
+                  id="search"
+                  style={{ width: "280px", paddingBottom: "32px" }}
+                  label="Search"
+                  placeholder="Search"
+                  inputProps={{
+                    "data-testid": "measure-definition-search-input",
+                  }}
+                  data-testid="measure-definition-list-search"
+                  name="searchValue"
+                  value={formik.values.searchValue}
+                  onChange={formik.handleChange}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      handleSearch();
+                    }
+                  }}
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment
+                          position="start"
+                          data-testid="measure-definition-search"
+                          onClick={handleSearch}
+                          style={{ cursor: "pointer" }}
+                        >
+                          <SearchIcon />
+                        </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <InputAdornment
+                          data-testid="measure-definition-clear-search"
+                          position="end"
+                          style={{ cursor: "pointer" }}
+                          onClick={handleClearSearch}
+                        >
+                          <IconButton>
+                            <ClearIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                />
+              </td>
 
-            <td>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row-reverse",
-                  paddingBottom: "15px",
-                }}
-              >
-                <Button
-                  id="create-definition"
-                  disabled={!canEdit}
-                  variant="outline-filled"
-                  className="page-header-action-button"
-                  data-testid="create-definition-button"
-                  onClick={toggleOpen}
-                  sx={{
+              <td>
+                <div
+                  style={{
                     display: "flex",
                     flexDirection: "row-reverse",
+                    paddingBottom: "15px",
                   }}
                 >
-                  <AddIcon className="page-header-action-icon" />
-                  Add Term
-                </Button>
-              </div>
-            </td>
-          </tr>
+                  <Button
+                    id="create-definition"
+                    disabled={!canEdit}
+                    variant="outline-filled"
+                    className="page-header-action-button"
+                    data-testid="create-definition-button"
+                    onClick={toggleOpen}
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row-reverse",
+                    }}
+                  >
+                    <AddIcon className="page-header-action-icon" />
+                    Add Term
+                  </Button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
         </table>
 
         <div id="measure-meta-data-table">
@@ -420,7 +435,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
               </tr>
             </thead>
             <tbody data-testId="measure-definitions-table-body">
-              {visibleDefinitions.length > 0 ? (
+              {measureDefinitions.length > 0 ? (
                 visibleDefinitions.map((definition, index) => (
                   <MeasureMetaDataRow
                     name={definition.term}

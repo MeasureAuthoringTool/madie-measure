@@ -11,4 +11,6 @@ export interface TypeComponentProps {
   error?: any;
   resource?: Resource;
   stringOnly?: boolean;
+  name?: string;
+  setTouched?: () => void;
 }
