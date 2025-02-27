@@ -63,8 +63,6 @@ export class MeasureServiceApi {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
           },
-          // responseType: "blob",
-          // signal,
           params: {
             measureSetId: measureSetId,
           },
@@ -74,7 +72,6 @@ export class MeasureServiceApi {
         return response.data;
       }
     } catch (error) {
-      // need to bubble the error up.
       console.error("error requesting measure export ", error);
       throw error;
     }
