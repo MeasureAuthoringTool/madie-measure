@@ -535,25 +535,59 @@ describe("MeasureServiceApi Tests", () => {
   });
 
   it("test getSharedWithUserIds success", async () => {
-    const data = ["userId1", "userId2"];
+    const data = {
+      measureId1: ["userId1"],
+      measureId2: ["userId1", "userId2"],
+    };
+
     const resp: any = { status: 200, data };
 
     mockedAxios.get.mockResolvedValue(resp);
 
-    const userIds = await measureServiceApi.getSharedWithUserIds("measureId");
+    const userIds = await measureServiceApi.getSharedWithUserIds([
+      "measureId1",
+      "measureId2",
+    ]);
     expect(mockedAxios.get).toBeCalledTimes(1);
     expect(userIds).toEqual(data);
   });
 
   it("test getSharedWithUserIds failure", async () => {
     const errorMessage =
-      "Unable to retrieve users that the measure is shared with. If the error persists, please contact the help desk.";
-
+      "Unable to retrieve users that the selected measure(s) is shared with. If the error persists, please contact the help desk.";
     mockedAxios.get.mockImplementationOnce(() =>
       Promise.reject(new Error(errorMessage))
     );
     await expect(
-      measureServiceApi.getSharedWithUserIds("measureId")
+      measureServiceApi.getSharedWithUserIds(["measureId1", "measureId2"])
+    ).rejects.toThrow(errorMessage);
+  });
+  it("Successfully returns for getMeasuresByMeasureSetId", async () => {
+    const resp: any = {
+      status: 200,
+      data: {
+        aaaaa: true,
+        bbbbb: true,
+        ccccc: false,
+      },
+    };
+    mockedAxios.get.mockResolvedValueOnce(resp);
+    try {
+      const measures = await measureServiceApi.getMeasuresByMeasureSetId(
+        "test"
+      );
+      expect(measures).toEqual(resp.data);
+    } catch (error) {
+      expect(error.message).toBe("Unable to fetch measure draft statuses");
+    }
+  });
+  it("Throws Error For for getMeasuresByMeasureSetId", async () => {
+    const errorMessage = "Unable to fetch measures by measureSetId";
+    mockedAxios.get.mockImplementationOnce(() =>
+      Promise.reject(new Error(errorMessage))
+    );
+    await expect(
+      measureServiceApi.getMeasuresByMeasureSetId(measures[0].id)
     ).rejects.toThrow(errorMessage);
   });
 });

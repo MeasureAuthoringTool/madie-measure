@@ -1,6 +1,10 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
-import DraftAction, { DRAFT_MEASURE, NOTHING_SELECTED } from "./DraftAction";
+import DraftAction, {
+  DRAFT_MEASURE,
+  NOTHING_SELECTED,
+  MODEL_MISMATCH,
+} from "./DraftAction";
 import { Measure, MeasureSet, Model } from "@madie/madie-models";
 import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
 
@@ -43,6 +47,13 @@ const qiCoreMeasureVersioned = {
   measureMetaData: { draft: false },
 } as Measure;
 
+const QICore6MeasureVersioned = {
+  model: Model.QICORE_6_0_0,
+  measureSet: { ...mockMeasureSet, cmsId: null },
+  measureSetId: "1-2-3-4",
+  measureMetaData: { draft: false },
+};
+
 describe("DraftAction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -57,16 +68,79 @@ describe("DraftAction", () => {
     );
   });
 
-  it("Should enable action btn if user selects one versioned measure", async () => {
+  it("Should enable action btn if user selects one 4.1 measure and there are no 6.0 measures in MeasureSet", async () => {
     mockedUseMeasureServiceApi.mockReturnValue({
       fetchMeasureDraftStatuses: jest
         .fn()
         .mockResolvedValue({ "1-2-3-4": true }),
+      getMeasuresByMeasureSetId: jest
+        .fn()
+        .mockResolvedValue([{ model: Model.QICORE }, { model: Model.QICORE }]),
     });
 
     render(
       <DraftAction
         measures={[qiCoreMeasureVersioned]}
+        onClick={() => {}}
+        canEdit={true}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("draft-action-btn")).not.toBeDisabled();
+      expect(screen.getByTestId("draft-action-tooltip")).toHaveAttribute(
+        "aria-label",
+        DRAFT_MEASURE
+      );
+    });
+  });
+
+  it("Should disable action btn if user selects a 4.1.1 versioned measure and there are QI-core-6", async () => {
+    mockedUseMeasureServiceApi.mockReturnValue({
+      fetchMeasureDraftStatuses: jest
+        .fn()
+        .mockResolvedValue({ "1-2-3-4": true }),
+      getMeasuresByMeasureSetId: jest
+        .fn()
+        .mockResolvedValue([
+          { model: Model.QICORE_6_0_0 },
+          { model: Model.QICORE },
+        ]),
+    });
+
+    render(
+      <DraftAction
+        measures={[qiCoreMeasureVersioned]}
+        onClick={() => {}}
+        canEdit={true}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("draft-action-btn")).toBeDisabled();
+      expect(screen.getByTestId("draft-action-tooltip")).toHaveAttribute(
+        "aria-label",
+        MODEL_MISMATCH
+      );
+    });
+  });
+
+  it("Should enable action btn if user selects one versioned QI-Core6 measure", async () => {
+    mockedUseMeasureServiceApi.mockReturnValue({
+      fetchMeasureDraftStatuses: jest
+        .fn()
+        .mockResolvedValue({ "1-2-3-4": true }),
+      getMeasuresByMeasureSetId: jest
+        .fn()
+        .mockResolvedValue([
+          { model: Model.QICORE_6_0_0 },
+          { model: Model.QICORE },
+        ]),
+    });
+
+    render(
+      <DraftAction
+        measures={[QICore6MeasureVersioned]}
         onClick={() => {}}
         canEdit={true}
       />

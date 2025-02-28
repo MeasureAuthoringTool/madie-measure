@@ -55,6 +55,28 @@ export class MeasureServiceApi {
     }
   }
 
+  async getMeasuresByMeasureSetId(measureSetId: string): Promise<any> {
+    try {
+      const response = await axios.get(
+        `${this.baseUrl}/measures/byMeasureSetId`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+          params: {
+            measureSetId: measureSetId,
+          },
+        }
+      );
+      if (response.data) {
+        return response.data;
+      }
+    } catch (error) {
+      console.error("error requesting Measures By measureSetId ", error);
+      throw error;
+    }
+  }
+
   async fetchMeasures(
     filterByCurrentUser: boolean,
     limit: number = 25,
@@ -411,10 +433,10 @@ export class MeasureServiceApi {
     }
   }
 
-  async getSharedWithUserIds(measureId: string): Promise<string[]> {
+  async getSharedWithUserIds(measureIds: string[]): Promise<any> {
     try {
-      const response = await axios.get<string[]>(
-        `${this.baseUrl}/measures/shared?measureId=${measureId}`,
+      const response = await axios.get(
+        `${this.baseUrl}/measures/shared?measureIds=${measureIds}`,
         {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
@@ -423,7 +445,8 @@ export class MeasureServiceApi {
       );
       return response.data;
     } catch (err) {
-      const message = `Unable to retrieve users that the measure is shared with. If the error persists, please contact the help desk.`;
+      const message =
+        "Unable to retrieve users that the selected measure(s) is shared with. If the error persists, please contact the help desk.";
       console.error(message, err);
       throw new Error(message);
     }
