@@ -52,6 +52,30 @@ describe("DraftMeasureDialog component", () => {
     expect(screen.getByTestId("create-draft-continue-button")).toBeEnabled();
   });
 
+  it("should render draft measure in readOnly", async () => {
+    const QICore6Measure = { ...measure, model: Model.QICORE_6_0_0 };
+    render(
+      <DraftMeasureDialog
+        open={true}
+        onClose={onCloseFn}
+        onSubmit={onSubmitFn}
+        measure={QICore6Measure}
+        loading={false}
+      />
+    );
+    expect(screen.getByText("Create Draft")).toBeInTheDocument();
+    const measureName = (await screen.findByRole("textbox", {
+      name: "Measure Name",
+    })) as HTMLInputElement;
+    expect(measureName.value).toEqual(measure.measureName);
+    const modelSelect = screen.getByTestId("measure-model-select");
+    const modelSelectDropdown = within(modelSelect).getByRole(
+      "combobox"
+    ) as HTMLInputElement;
+    userEvent.click(modelSelectDropdown);
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+  });
+
   it("should check for required measure name", async () => {
     renderComponent();
     expect(screen.getByText("Create Draft")).toBeInTheDocument();

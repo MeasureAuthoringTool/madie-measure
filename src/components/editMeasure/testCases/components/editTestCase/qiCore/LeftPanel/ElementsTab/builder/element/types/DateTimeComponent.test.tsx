@@ -6,6 +6,7 @@ import DateTimeComponent, {
   YEAR_MONTH_FORMAT,
   YEAR_MONTH_DAY_FORMAT,
   DATE_TIME_ZONE_FORMAT,
+  getCurrentFormat,
 } from "./DateTimeComponent";
 
 const { getByTestId } = screen;
@@ -38,6 +39,45 @@ describe("DateTimeComponent", () => {
 
     const timeZone = screen.getByTestId("timezone-input-field-birthday-input");
     expect(timeZone.value).toBe("America/Los_Angeles");
+  });
+  test("Should render DateTimeComponent with default label", () => {
+    const handleChange = jest.fn();
+    render(
+      <DateTimeComponent
+        canEdit={true}
+        fieldRequired={false}
+        value={`2024-09-26`}
+        onChange={handleChange}
+      />
+    );
+    const dateField = screen.getByTestId("YYYY-MM-DD-field-DateTime");
+    expect(dateField).toBeInTheDocument();
+  });
+
+  test("Should render invalid date", () => {
+    const handleChange = jest.fn();
+    const setTouched = jest.fn();
+    render(
+      <DateTimeComponent
+        value={`2024-09-26222234`}
+        label="birthday"
+        canEdit={true}
+        fieldRequired={false}
+        onChange={handleChange}
+        setTouched={setTouched}
+      />
+    );
+    const dateFieldInput = screen.getByTestId(
+      "Invalid Format-field-birthday-input"
+    );
+    expect(dateFieldInput).toBeInTheDocument();
+    const formatSelectorField = getByTestId(
+      "date-time-format-selector-input-field-birthday"
+    );
+    expect(formatSelectorField).toBeInTheDocument();
+    expect(formatSelectorField.value).toBe("Invalid Format");
+    expect(dateFieldInput.value).toBe("");
+    expect(setTouched).toHaveBeenCalled();
   });
 
   test("Should handleFormat and and date from empty", async () => {
@@ -178,12 +218,40 @@ describe("DateTimeComponent", () => {
 
   test("Should handle DATETIMEFORMAT", async () => {
     const handleChange = jest.fn();
+    const setTouched = jest.fn();
     render(
       <DateTimeComponent
         canEdit={true}
         label="birthday"
         fieldRequired={false}
-        value={null}
+        onChange={handleChange}
+        value="1992-01-01T00:00:00-08:00"
+        setTouched={setTouched}
+      />
+    );
+
+    const timeZone = screen.getByTestId("timezone-input-field-birthday-input");
+    expect(timeZone.value).toBe("America/Los_Angeles");
+    const guam = "Pacific/Guam";
+    fireEvent.change(timeZone, {
+      target: {
+        value: guam,
+      },
+    });
+    expect(handleChange).toBeCalledWith("1992-01-01T18:00:00+10:00");
+    const input = screen.getByPlaceholderText("hh:mm:ss aa");
+    userEvent.type(input, "12:01:00 PM");
+    expect(input).toHaveValue("12:01:00 PM");
+    expect(handleChange).toBeCalledWith("1992-01-01T18:00:00+10:00");
+  });
+
+  test("Should handle DateTimeFormat", async () => {
+    const handleChange = jest.fn();
+    render(
+      <DateTimeComponent
+        canEdit={true}
+        label="birthday"
+        fieldRequired={false}
         onChange={handleChange}
       />
     );
@@ -308,5 +376,9 @@ describe("DateTimeComponent", () => {
       target: { value: YEAR_FORMAT },
     });
     expect(handleChange).toBeCalledWith("1992");
+  });
+
+  it("Should find invalid formats correctly", () => {
+    expect(getCurrentFormat("123444")).toBe("Invalid Format");
   });
 });

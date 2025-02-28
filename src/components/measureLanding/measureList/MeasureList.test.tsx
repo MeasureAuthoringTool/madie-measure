@@ -72,6 +72,13 @@ const mockMeasureServiceApi = {
   getMeasureExport: jest
     .fn()
     .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
+  getSharedWithUserIds: jest.fn().mockResolvedValue({
+    measureId1: ["userId1"],
+    measureId2: ["userId1", "userId2"],
+  }),
+  getMeasuresByMeasureSetId: jest
+    .fn()
+    .mockResolvedValue([{ model: Model.QICORE }, { model: Model.QICORE }]),
 } as unknown as MeasureServiceApi;
 
 jest.mock("../../../api/useMeasureServiceApi", () =>
@@ -2169,7 +2176,48 @@ describe("Measure List component", () => {
       expect(actionButton).toBeInTheDocument();
       userEvent.click(actionButton);
       expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID4/edit/details");
-      jest.resetAllMocks();
+    });
+    it("should display share dialog on clicking share action button", async () => {
+      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+        ShareMeasure: true,
+      }));
+
+      const { findByTestId, unmount } = render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={measures}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setInitialLoad={setInitialLoadMock}
+            activeTab={0}
+            searchCriteria={""}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            setErrMsg={setErrMsgMock}
+          />
+        </ServiceContext.Provider>
+      );
+      const checkBoxes = await screen.findAllByRole("checkbox");
+      expect(checkBoxes.length).toBe(6);
+      fireEvent.click(checkBoxes[1]);
+      const shareButton = screen.getByTestId("share-action-btn");
+      expect(shareButton).toBeInTheDocument();
+      fireEvent.click(shareButton);
+      fireEvent.click(screen.getByRole("menuitem", { name: "Share With" }));
+      const shareDialog = screen.getByTestId("share-dialog");
+      expect(shareDialog).toBeInTheDocument();
+      const cancelButton = screen.getByTestId("share-cancel-button");
+      fireEvent.click(cancelButton);
+
+      await waitFor(() => {
+        expect(shareDialog).not.toBeVisible();
+      });
+
+      unmount();
     });
   });
 });

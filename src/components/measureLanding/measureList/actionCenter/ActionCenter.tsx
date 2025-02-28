@@ -17,6 +17,7 @@ interface PropTypes {
   setCreateVersionDialog: any;
   setDraftMeasureDialog: any;
   setDeleteMeasureDialog: any;
+  setShareDialog: any;
   deleteMeasure: () => void;
   setViewHumanReadableModal: any;
 }
@@ -71,6 +72,16 @@ export default function ActionCenter(props: PropTypes) {
     }
   }, [props.measures, props.updateTargetMeasure, props.setDeleteMeasureDialog]);
 
+  const shareMeasure = useCallback(
+    (option: string) => {
+      props.setShareDialog({
+        open: true,
+        option,
+      });
+    },
+    [props.setShareDialog]
+  );
+
   const isSelectedMeasureEditable = (measures) => {
     return (
       measures &&
@@ -97,7 +108,11 @@ export default function ActionCenter(props: PropTypes) {
       <ExportAction measures={props.measures} onClick={exportMeasure} />
 
       {featureFlags?.ShareMeasure && (
-        <ShareAction measures={props.measures} canEdit={canEdit} />
+        <ShareAction
+          measures={props.measures}
+          onClick={shareMeasure}
+          canEdit={canEdit}
+        />
       )}
 
       <AssociateCmsIdAction

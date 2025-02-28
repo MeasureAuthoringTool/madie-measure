@@ -162,6 +162,10 @@ const serviceApiMock = {
     .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
   getReturnTypesForAllCqlFunctions: jest.fn().mockResolvedValue({}),
   fetchHumanReadable: jest.fn().mockResolvedValue("test human readable"),
+  getSharedWithUserIds: jest.fn().mockResolvedValue({
+    measureId1: ["userId1"],
+    measureId2: ["userId1", "userId2"],
+  }),
 } as unknown as MeasureServiceApi;
 
 useMeasureServiceApiMock.mockImplementation(() => {
@@ -409,7 +413,7 @@ describe("EditMeasure Component", () => {
     const serviceApiRejectedMock = {
       fetchMeasure: jest.fn().mockRejectedValue("404"),
     } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => {
+    useMeasureServiceApiMock.mockImplementationOnce(() => {
       return serviceApiRejectedMock;
     });
     renderRouter();
@@ -451,5 +455,26 @@ describe("EditMeasure Component", () => {
         )
       ).not.toBeInTheDocument();
     });
+  });
+
+  it("should display a share dialog when the event is triggered and close dialog when cancel button is clicked", async () => {
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event("share-measure"));
+    });
+
+    await waitFor(async () => {
+      expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+      expect(getByTestId("share-dialog")).toBeInTheDocument();
+      expect(serviceApiMock.getSharedWithUserIds).toHaveBeenCalled();
+    });
+
+    const cancelButton = getByTestId("share-cancel-button");
+    fireEvent.click(cancelButton);
+    expect(queryByTestId("share-dialog")).toBeVisible();
   });
 });

@@ -46,6 +46,7 @@ import { exportMeasure } from "../../utils/exportUtil";
 import TestCases from "./testCases/TestCases";
 import { AxiosResponse } from "axios";
 import ViewHRModal from "../common/viewHumanReadableModal/ViewHRModal";
+import ShareDialog from "../common/shareDialog/ShareDialog";
 
 const OBJECT_ID_REGEX = /\/[a-f0-9]{24}/g;
 
@@ -121,6 +122,7 @@ export default function EditMeasure() {
 
   // Delete utilities
   const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
+  const [shareDialog, setShareDialog] = useState({ open: false, option: "" });
   const [createVersionDialog, setCreateVersionDialog] = useState({
     open: false,
     measureId: "",
@@ -154,6 +156,37 @@ export default function EditMeasure() {
       window.removeEventListener("delete-measure", deleteListener, false);
     };
   }, []);
+
+  useEffect(() => {
+    const shareListener = () => {
+      setShareDialog({
+        open: true,
+        option: "Share With",
+      });
+    };
+    window.addEventListener("share-measure", shareListener, {
+      passive: true,
+    });
+    return () => {
+      window.removeEventListener("share-measure", shareListener);
+    };
+  }, []);
+
+  useEffect(() => {
+    const unshareListener = () => {
+      setShareDialog({
+        open: true,
+        option: "Unshare",
+      });
+    };
+    window.addEventListener("unshare-measure", unshareListener, {
+      passive: true,
+    });
+    return () => {
+      window.removeEventListener("unshare-measure", unshareListener);
+    };
+  }, []);
+
   useEffect(() => {
     const versionListener = () => {
       setCreateVersionDialog({
@@ -289,6 +322,10 @@ export default function EditMeasure() {
     setViewHumanReadableModal({
       open: false,
       measureId: "",
+    });
+    setShareDialog({
+      open: false,
+      option: "",
     });
   };
   const createVersion = (versionType: string) => {
@@ -540,6 +577,13 @@ export default function EditMeasure() {
             onClose={() => setDeleteOpen(false)}
             measureName={measure?.measureName}
             deleteMeasure={deleteMeasure}
+          />
+
+          <ShareDialog
+            measures={[measure]}
+            open={shareDialog.open}
+            option={shareDialog.option}
+            onClose={handleDialogClose}
           />
 
           <InvalidTestCaseDialog

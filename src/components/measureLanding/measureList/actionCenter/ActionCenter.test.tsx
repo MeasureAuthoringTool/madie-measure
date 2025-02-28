@@ -73,6 +73,7 @@ describe("ActionCenter", () => {
         setCreateVersionDialog={jest.fn()}
         setDraftMeasureDialog={jest.fn()}
         setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={jest.fn}
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={jest.fn()}
       />
@@ -103,6 +104,7 @@ describe("ActionCenter", () => {
         setCreateVersionDialog={setCreateVersionDialog}
         setDraftMeasureDialog={jest.fn()}
         setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={jest.fn}
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={jest.fn()}
       />
@@ -137,6 +139,7 @@ describe("ActionCenter", () => {
         setCreateVersionDialog={jest.fn()}
         setDraftMeasureDialog={setDraftMeasureDialog}
         setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={jest.fn}
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={jest.fn()}
       />
@@ -166,6 +169,7 @@ describe("ActionCenter", () => {
         setCreateVersionDialog={jest.fn()}
         setDraftMeasureDialog={jest.fn()}
         setDeleteMeasureDialog={setDeleteMeasureDialog}
+        setShareDialog={jest.fn}
         deleteMeasure={deleteMeasure}
         setViewHumanReadableModal={jest.fn()}
       />
@@ -192,6 +196,7 @@ describe("ActionCenter", () => {
         setCreateVersionDialog={jest.fn()}
         setDraftMeasureDialog={jest.fn()}
         setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={jest.fn}
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={jest.fn()}
       />
@@ -215,6 +220,7 @@ describe("ActionCenter", () => {
         setCreateVersionDialog={jest.fn()}
         setDraftMeasureDialog={jest.fn()}
         setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={jest.fn}
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={jest.fn()}
       />
@@ -237,6 +243,7 @@ describe("ActionCenter", () => {
         setCreateVersionDialog={jest.fn()}
         setDraftMeasureDialog={jest.fn()}
         setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={jest.fn}
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={setViewHumanReadableModal}
       />
@@ -256,5 +263,65 @@ describe("ActionCenter", () => {
         });
       }, 500);
     });
+  });
+
+  it("should call setShareDialog when share action button is clicked and a measure is passed into ActionCenter", async () => {
+    mockCheckUserCanEdit.mockReturnValue(true);
+
+    const updateTargetMeasure = jest.fn();
+    const setShareDialog = jest.fn();
+
+    render(
+      <ActionCenter
+        measures={[qdmMeasure]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={updateTargetMeasure}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={setShareDialog}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+      />
+    );
+
+    const shareButton = await screen.findByTestId("share-action-btn");
+    expect(shareButton).toBeEnabled();
+    fireEvent.click(shareButton);
+    fireEvent.click(screen.getByRole("menuitem", { name: "Share With" }));
+
+    expect(setShareDialog).toHaveBeenCalledWith({
+      open: true,
+      option: "Share With",
+    });
+  });
+
+  it("should not call updateTargetMeasure and setShareDialog when no measure is passed into ActionCenter and the share action button should be disabled", async () => {
+    mockCheckUserCanEdit.mockReturnValue(true);
+
+    const updateTargetMeasure = jest.fn();
+    const setShareDialog = jest.fn();
+
+    render(
+      <ActionCenter
+        measures={[]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={updateTargetMeasure}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={setShareDialog}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+      />
+    );
+
+    const shareButton = await screen.findByTestId("share-action-btn");
+    expect(shareButton).toBeDisabled();
+
+    expect(updateTargetMeasure).not.toHaveBeenCalledWith(qdmMeasure);
+    expect(setShareDialog).not.toHaveBeenCalledWith(true);
   });
 });

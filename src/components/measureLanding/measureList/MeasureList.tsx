@@ -45,6 +45,7 @@ import AssociateCmsIdDialog from "./associateCmsIdDialog/AssociateCmsIdDialog";
 import ActionCenter from "./actionCenter/ActionCenter";
 import DeleteDialog from "../../editMeasure/DeleteDialog";
 import ViewHRModal from "../../common/viewHumanReadableModal/ViewHRModal";
+import ShareDialog from "../../common/shareDialog/ShareDialog";
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -139,6 +140,8 @@ export default function MeasureList(props: {
 
   const [openAssociateCmsIdDialog, setOpenAssociateCmsIdDialog] =
     useState(false);
+
+  const [shareDialog, setShareDialog] = useState({ open: false, option: "" });
 
   const buildLookup = useCallback(
     async (measureList) => {
@@ -960,6 +963,7 @@ export default function MeasureList(props: {
             setCreateVersionDialog={setCreateVersionDialog}
             setDraftMeasureDialog={setDraftMeasureDialog}
             setDeleteMeasureDialog={setDeleteMeasureDialog}
+            setShareDialog={setShareDialog}
             deleteMeasure={deleteMeasure}
             setViewHumanReadableModal={setViewHumanReadableModal}
           />
@@ -1110,6 +1114,17 @@ export default function MeasureList(props: {
           open={Boolean(downloadState)}
           handleContinueDialog={handleContinueDialog}
           handleCancelDialog={handleCancelDialog}
+        />
+        <ShareDialog
+          measures={selectedMeasures}
+          open={shareDialog.open}
+          option={shareDialog.option}
+          onClose={() =>
+            setShareDialog({
+              open: false,
+              option: "",
+            })
+          }
         />
         <DeleteDialog
           open={deleteMeasureDialog}
