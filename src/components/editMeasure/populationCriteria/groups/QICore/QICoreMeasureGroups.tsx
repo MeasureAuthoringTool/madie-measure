@@ -161,7 +161,6 @@ const associationSelect = {
     PopulationType.DENOMINATOR_EXCLUSION,
     PopulationType.NUMERATOR,
     PopulationType.NUMERATOR_EXCLUSION,
-    PopulationType.DENOMINATOR_EXCEPTION,
   ],
 };
 
