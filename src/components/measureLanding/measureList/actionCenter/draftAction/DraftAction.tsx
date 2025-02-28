@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { IconButton } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
-import { Measure, Model } from "@madie/madie-models";
-import { useOktaTokens } from "@madie/madie-util";
+import { Measure } from "@madie/madie-models";
 import EditCalendarOutlinedIcon from "@mui/icons-material/EditCalendarOutlined";
 import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
 import { Toast } from "@madie/madie-design-system/dist/react";
@@ -19,6 +18,8 @@ interface PropTypes {
 export const NOTHING_SELECTED = "Select measure to draft";
 export const DRAFT_MEASURE = "Draft measure";
 export const LOOKUP_ERROR = "There was an error checking draftability. ";
+export const MODEL_MISMATCH =
+  "You cannot draft a 4.1.1 measure when a 6.0.0 version is available";
 
 export default function DraftAction(props: PropTypes) {
   const { measures, canEdit } = props;
@@ -29,24 +30,52 @@ export default function DraftAction(props: PropTypes) {
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
 
+  // if a a QICore6 measure exists, only QICore 6 can be selected from draft dialog.
+  const isQiCore6MeasuresInMeasureSet = async (measureSetId) => {
+    const results = await measureServiceApi.getMeasuresByMeasureSetId(
+      measureSetId
+    );
+    return (
+      results?.some((measure) => measure.model === "QI-Core v6.0.0") ?? false
+    );
+  };
+
   const onToastClose = () => {
     setToastMessage("");
     setToastOpen(false);
   };
-
-  const validateDraftActionState = useCallback(() => {
-    // set button state to disabled by default
+  const validateDraftActionState = useCallback(async () => {
     setDisableDraftBtn(true);
     setTooltipMessage(NOTHING_SELECTED);
-
+    const selectedMeasure = measures?.[0];
     if (
       measures?.length === 1 &&
-      !measures[0]?.measureMetaData.draft &&
+      !selectedMeasure?.measureMetaData.draft &&
       canEdit &&
       canDraft
     ) {
-      setDisableDraftBtn(false);
-      setTooltipMessage(DRAFT_MEASURE);
+      // if it's a 6
+      if (selectedMeasure.model === "QI-Core v6.0.0") {
+        // set
+        setDisableDraftBtn(false);
+        setTooltipMessage(DRAFT_MEASURE);
+        // we want to only allow options to include 6.0
+      } else if (selectedMeasure.model === "QI-Core v4.1.1") {
+        const areAnyQiCore6 = await isQiCore6MeasuresInMeasureSet(
+          selectedMeasure.measureSetId
+        );
+        if (areAnyQiCore6) {
+          setDisableDraftBtn(true);
+          setTooltipMessage(MODEL_MISMATCH);
+        } else {
+          setDisableDraftBtn(false);
+          setTooltipMessage(DRAFT_MEASURE);
+        }
+        // its qdm
+      } else {
+        setDisableDraftBtn(false);
+        setTooltipMessage(DRAFT_MEASURE);
+      }
     } else if (toastMessage) {
       setTooltipMessage(LOOKUP_ERROR);
     }
@@ -83,12 +112,7 @@ export default function DraftAction(props: PropTypes) {
   }, [measures, draftLookup]);
 
   return (
-    <Tooltip
-      data-testid="draft-action-tooltip"
-      title={tooltipMessage}
-      onMouseOver={validateDraftActionState}
-      arrow
-    >
+    <Tooltip data-testid="draft-action-tooltip" title={tooltipMessage} arrow>
       <span>
         <IconButton
           onClick={props.onClick}
