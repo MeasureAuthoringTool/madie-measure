@@ -1026,6 +1026,8 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         calculationErrors={calculationErrors}
                         groupPopulations={groupPopulations}
                         cqlDefinitionCallstack={callstackMap}
+                        includeSDE={measure?.testCaseConfiguration?.sdeIncluded}
+                        supplementalData={measure?.supplementalData}
                       />
                     )}
                   </div>

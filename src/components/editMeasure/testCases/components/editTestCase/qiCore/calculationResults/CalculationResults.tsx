@@ -3,7 +3,11 @@ import "styled-components/macro";
 import { isEmpty } from "lodash";
 import { DetailedPopulationGroupResult } from "fqm-execution/build/types/Calculator";
 import { MadieAlert } from "@madie/madie-design-system/dist/react";
-import { GroupPopulation, PopulationType } from "@madie/madie-models";
+import {
+  GroupPopulation,
+  PopulationType,
+  SupplementalData,
+} from "@madie/madie-models";
 import { useFeatureFlags } from "@madie/madie-util";
 import { Relevance } from "fqm-execution";
 import QiCoreGroupCoverage, {
@@ -21,6 +25,8 @@ type CalculationResultType = {
   groupPopulations: GroupPopulation[];
   cqlDefinitionCallstack?: CqlDefinitionCallstack;
   mainCqlLibraryName: string;
+  includeSDE: boolean;
+  supplementalData: SupplementalData[];
 };
 
 export interface MappedCalculationResults {
@@ -112,6 +118,8 @@ const CalculationResults = ({
   groupPopulations,
   cqlDefinitionCallstack = {},
   mainCqlLibraryName,
+  includeSDE,
+  supplementalData,
 }: CalculationResultType) => {
   // template for group name coming from execution engine
   const originalGroupName = (name) => {
@@ -161,6 +169,8 @@ const CalculationResults = ({
           )}
           cqlDefinitionCallstack={cqlDefinitionCallstack}
           mainCqlLibraryName={mainCqlLibraryName}
+          includeSDE={includeSDE}
+          supplementalData={supplementalData}
         />
       )}
     </div>
