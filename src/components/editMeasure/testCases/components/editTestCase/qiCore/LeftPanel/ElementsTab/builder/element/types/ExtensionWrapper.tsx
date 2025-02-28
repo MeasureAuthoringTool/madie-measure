@@ -14,6 +14,7 @@ const ExtensionWrapper = ({
   parentStructureDefinition,
   children,
   value,
+  onChange,
 }: ExtensionWrapperProps) => {
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   const [registeredExtensions, setRegisteredExtensions] = useState([]);
@@ -21,8 +22,6 @@ const ExtensionWrapper = ({
 
   useEffect(() => {
     // check for any registered extensions on this element/resource
-    console.log("elementDefinition: ", elementDefinition);
-    console.log("fhirResource: ", fhirResource);
     const parts = elementDefinition.id.split(".");
     const target =
       parts[parts.length - 1].toUpperCase() === "EXTENSION"
@@ -61,6 +60,7 @@ const ExtensionWrapper = ({
             width: "100%",
             display: "flex",
             justifyContent: "flex-end",
+            p: 1,
           }}
         >
           <TextField
@@ -86,14 +86,9 @@ const ExtensionWrapper = ({
           </TextField>
           <Button
             onClick={() => {
-              console.log(
-                `Add extension [${selectedExtension}] to resource `,
-                fhirResource
-              );
-              console.log(`Current value: `, value);
-              console.log("typeof value: ", typeof value);
-              console.log("is array: ", _.isArray(value));
-              console.log("elementDefinition: ", elementDefinition);
+              const extensionDefinition = registeredExtensions.find(registeredExtensions => registeredExtensions.definition.id === selectedExtension);
+              const nextValue = _.isNil(value) ? [{ url: selectedExtension.url}] : [...value, { url: extensionDefinition?.definition?.url}];
+              onChange(nextValue);
             }}
             disabled={_.isEmpty(selectedExtension)}
           >
@@ -103,7 +98,7 @@ const ExtensionWrapper = ({
       )}
       <Box>
         {_.isEmpty(value)
-          ? "No Extensions"
+          ? ""
           : _.isArray(value)
           ? value?.map((extension) => {
               return (
