@@ -72,7 +72,7 @@ export class MeasureServiceApi {
         return response.data;
       }
     } catch (error) {
-      console.error("error requesting measure export ", error);
+      console.error("error requesting Measures By measureSetId ", error);
       throw error;
     }
   }
