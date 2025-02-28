@@ -76,6 +76,9 @@ const mockMeasureServiceApi = {
     measureId1: ["userId1"],
     measureId2: ["userId1", "userId2"],
   }),
+  getMeasuresByMeasureSetId: jest
+    .fn()
+    .mockResolvedValue([{ model: Model.QICORE }, { model: Model.QICORE }]),
 } as unknown as MeasureServiceApi;
 
 jest.mock("../../../api/useMeasureServiceApi", () =>
