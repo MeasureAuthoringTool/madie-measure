@@ -350,8 +350,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
         if (updatedCqlOb && updatedCqlOb.cql?.trim()) {
           const cqlErrors = parseContent(updatedCqlOb.cql);
           const { errors, translation } = await validateContent(
-            updatedCqlOb.cql,
-            true
+            updatedCqlOb.cql
           );
           if (cqlErrors.length === 0 && errors.length === 0) {
             var updatedElm = JSON.stringify(translation);
