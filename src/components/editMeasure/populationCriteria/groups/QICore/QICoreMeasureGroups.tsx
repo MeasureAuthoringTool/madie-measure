@@ -323,11 +323,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   };
   const [allPopulationsWithDisplayId, setAllPopulationsWithDisplayId] =
     useState<Population[]>(getPopulationsWithDisplayId(allPopulations));
-  useEffect(() => {
-    setAllPopulationsWithDisplayId(getPopulationsWithDisplayId(allPopulations));
-  }, [measureGroupNumber]);
 
   useEffect(() => {
+    setAllPopulationsWithDisplayId(getPopulationsWithDisplayId(allPopulations));
     if (measure?.groups && measure?.groups[measureGroupNumber]) {
       // manually sort group populations in existing groups on retrieval
       const group = measure?.groups[measureGroupNumber];
