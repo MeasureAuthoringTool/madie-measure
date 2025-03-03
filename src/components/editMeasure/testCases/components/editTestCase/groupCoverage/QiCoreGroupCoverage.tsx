@@ -3,7 +3,11 @@ import "twin.macro";
 import "styled-components/macro";
 import parse from "html-react-parser";
 import _, { isEmpty } from "lodash";
-import { GroupPopulation, PopulationType } from "@madie/madie-models";
+import {
+  GroupPopulation,
+  PopulationType,
+  SupplementalData,
+} from "@madie/madie-models";
 import { Select } from "@madie/madie-design-system/dist/react";
 import GroupCoverageNav, {
   Population,
@@ -30,6 +34,8 @@ interface Props {
   mappedCalculationResults: MappedCalculationResults;
   cqlDefinitionCallstack?: CqlDefinitionCallstack;
   mainCqlLibraryName: string;
+  includeSDE: boolean;
+  supplementalData: SupplementalData[];
 }
 
 interface Statement {
@@ -60,6 +66,8 @@ const QiCoreGroupCoverage = ({
   mappedCalculationResults,
   cqlDefinitionCallstack,
   mainCqlLibraryName,
+  includeSDE,
+  supplementalData,
 }: Props) => {
   // selected group/criteria
   const [selectedCriteria, setSelectedCriteria] = useState<string>("");
@@ -224,11 +232,30 @@ const QiCoreGroupCoverage = ({
     );
   };
 
+  const changeSDE = (population) => {
+    setSelectedHighlightingTab(population);
+    if (mappedCalculationResults) {
+      const statementResults =
+        mappedCalculationResults[selectedCriteria]["statementResults"];
+      const filteredSDEDefinitions = supplementalData?.reduce((acc, item) => {
+        if (statementResults[item?.definition]) {
+          acc[item?.definition] = statementResults[item?.definition];
+        }
+        return acc;
+      }, {});
+      setSelectedAllDefinitions(filteredSDEDefinitions);
+    }
+  };
+
   const onHighlightingNavTabClick = (selectedTab) => {
     if (isPopulation(selectedTab.name)) {
       changePopulation(selectedTab);
     } else {
-      changeDefinitions(selectedTab);
+      if (selectedTab.name === "SDE") {
+        changeSDE(selectedTab);
+      } else {
+        changeDefinitions(selectedTab);
+      }
     }
   };
 
@@ -340,6 +367,7 @@ const QiCoreGroupCoverage = ({
             allDefinitions={allDefinitions}
             selectedHighlightingTab={selectedHighlightingTab}
             onClick={onHighlightingNavTabClick}
+            includeSDE={includeSDE}
           />
         </div>
 

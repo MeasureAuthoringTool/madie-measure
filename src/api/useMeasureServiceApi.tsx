@@ -55,6 +55,28 @@ export class MeasureServiceApi {
     }
   }
 
+  async getMeasuresByMeasureSetId(measureSetId: string): Promise<any> {
+    try {
+      const response = await axios.get(
+        `${this.baseUrl}/measures/byMeasureSetId`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+          params: {
+            measureSetId: measureSetId,
+          },
+        }
+      );
+      if (response.data) {
+        return response.data;
+      }
+    } catch (error) {
+      console.error("error requesting Measures By measureSetId ", error);
+      throw error;
+    }
+  }
+
   async fetchMeasures(
     filterByCurrentUser: boolean,
     limit: number = 25,

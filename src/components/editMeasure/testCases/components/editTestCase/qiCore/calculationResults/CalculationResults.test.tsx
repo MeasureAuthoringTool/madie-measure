@@ -4,7 +4,7 @@ import CalculationResults, {
   mapCalculationResults,
 } from "./CalculationResults";
 import { DetailedPopulationGroupResult } from "fqm-execution/build/types/Calculator";
-import { GroupPopulation } from "@madie/madie-models";
+import { GroupPopulation, SupplementalData } from "@madie/madie-models";
 import { FinalResult, PopulationType, Relevance } from "fqm-execution";
 import userEvent from "@testing-library/user-event";
 
@@ -13,6 +13,19 @@ jest.mock("@madie/madie-util", () => {
     useFeatureFlags: jest.fn(),
   };
 });
+
+const supplementalData = [
+  {
+    definition: "test",
+    description: "",
+    includeInReportType: [
+      "Individual",
+      "Subject List",
+      "Summary",
+      "Data Collection",
+    ],
+  },
+] as SupplementalData[];
 
 const groups = [
   {
@@ -66,6 +79,8 @@ const renderCoverageComponent = (
       calculationResults={calculationResults}
       calculationErrors={calculationErrors}
       mainCqlLibraryName={mainCqlLibraryName}
+      includeSDE={true}
+      supplementalData={supplementalData}
     />
   );
 };
@@ -183,6 +198,18 @@ describe("CalculationResults with new tabbed highlighting layout on", () => {
           isFunction: true,
           pretty: "FUNCTION",
           statementLevelHTML: "<pre>ToCalendarUnit Function Covered</pre>",
+        },
+        {
+          final: FinalResult.TRUE,
+          isFunction: false,
+          libraryName: "OncologyMeasureTest",
+          localId: "356",
+          pretty: "true",
+          raw: true,
+          relevance: Relevance.TRUE,
+          statementLevelHTML:
+            '<pre style="tab-size: 2; line-height: 1.51em"\n  data-library-name="ErrorTest" data-statement-name="test">\n<code>\n<span data-ref-id="356" style="background-color:#ccebe0;color:#20744c;border-bottom-color:#20744c;border-bottom-style:solid;border-bottom-width:0.35em"><span data-ref-id="357" style="background-color:#ccebe0;color:#20744c;border-bottom-color:#20744c;border-bottom-style:solid;border-bottom-width:0.35em">define &quot;test&quot;:\n  true</span></span></code>\n</pre>',
+          statementName: "test",
         },
       ],
     },
@@ -370,6 +397,14 @@ describe("CalculationResults with new tabbed highlighting layout on", () => {
     expect(screen.getByTestId("functions-highlighting")).toHaveTextContent(
       "ToCalendarUnit Function Covered"
     );
+
+    const sde = await screen.findByTestId("sde-tab");
+    expect(sde).toBeInTheDocument();
+    userEvent.click(sde);
+
+    // Check for SDE result value
+    const result2 = await screen.findByTestId("results-section");
+    expect(result2).toHaveTextContent("true");
 
     // select population criteria 2
     const criteriaOptions = await getCriteriaOptions();
