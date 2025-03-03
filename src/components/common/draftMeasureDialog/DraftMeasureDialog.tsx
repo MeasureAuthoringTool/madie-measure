@@ -129,7 +129,9 @@ const DraftMeasureDialog = ({ open, onClose, onSubmit, measure, loading }) => {
                   id: "model-select",
                   "aria-describedby": "model-select-helper-text",
                   required: true,
+                  readOnly: measure?.model === "QI-Core v6.0.0",
                 }}
+                readOnly={measure?.model === "QI-Core v6.0.0"}
                 SelectDisplayProps={{
                   "aria-required": "true",
                 }}
