@@ -20,7 +20,7 @@ const ElementEditorActionCenter = (props: PropTypes) => {
 
   return (
     <div
-      data-testid="action-center"
+      data-testid="elements-action-center"
       style={{
         display: "flex",
         alignItems: "center",
@@ -31,7 +31,7 @@ const ElementEditorActionCenter = (props: PropTypes) => {
     >
       <SpeedDial
         ariaLabel="Element action center"
-        data-testid="action-center-button"
+        data-testid="elements-action-center-button"
         sx={{
           "& .MuiSpeedDial-fab": {
             width: 40,
@@ -48,7 +48,7 @@ const ElementEditorActionCenter = (props: PropTypes) => {
         }}
         icon={
           <div
-            data-testid="action-center-actual-icon"
+            data-testid="elements-action-center-actual-icon"
             style={{
               display: "flex",
               alignItems: "center",
@@ -71,7 +71,7 @@ const ElementEditorActionCenter = (props: PropTypes) => {
             key={action.name}
             icon={action.icon}
             tooltipTitle={action.name}
-            data-testid={action.name.replace(/\s/g, "")}
+            data-testid={`elements-${action.name.replace(/\s/g, "")}`}
             onClick={() => {
               setOpen(false);
             }}
