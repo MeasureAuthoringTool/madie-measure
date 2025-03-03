@@ -236,7 +236,7 @@ const MeasureEditor = () => {
     // setElmTranslationError(null); ? set Error false?
     setError(false);
     if (cql && cql.trim().length > 0) {
-      const result = await validateContent(cql);
+      const result = await validateContent(cql, true);
       const { errors, externalErrors } = result;
       // right now we are only displaying the external errors related to included libraries
       // and only the first error returned by elm translator
