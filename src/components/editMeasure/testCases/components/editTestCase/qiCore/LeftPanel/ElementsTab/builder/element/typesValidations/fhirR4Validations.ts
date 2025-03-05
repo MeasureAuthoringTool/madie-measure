@@ -5,6 +5,10 @@ import {
   SIGNED_MINIMUM,
   INTEGER_MAXIMUM,
 } from "./FhirNumbers";
+
+export const INSTANT_REGEX =
+  /([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)(\.[0-9]{1,9})?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))$/;
+
 // https://hl7.org/fhir/R4/datatypes.html
 
 // Fields can be required or not required, we need a place to house all the individual validations and a build a dynamic form validation spot
@@ -187,9 +191,14 @@ export const getTimeValidator = (required) => {
 };
 
 export const getInstantValidator = (required: boolean) => {
-  const regex =
-    /([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)(\.[0-9]{1,9})?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))/;
-  const baseValidator = Yup.string().matches(regex, "Invalid Instant format");
+  const baseValidator = Yup.string().test(
+    "matches-regex",
+    "Invalid instant format",
+    function (value) {
+      if (!value) return true;
+      return INSTANT_REGEX.test(value);
+    }
+  );
   if (required) {
     return baseValidator.required("This field is required");
   }
