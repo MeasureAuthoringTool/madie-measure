@@ -13,9 +13,9 @@ const ElementEditorActionCenter = (props: PropTypes) => {
   const [open, setOpen] = useState(false);
 
   const actions = [
-    { name: "Copy", icon: <ContentCopyIcon sx={{ color: blue[500] }} /> },
-    { name: "Add", icon: <AddCircleOutlineIcon sx={{ color: blue[500] }} /> },
-    { name: "Delete", icon: <DeleteOutlinedIcon sx={{ color: red[500] }} /> },
+    { name: "Copy", icon: <ContentCopyIcon sx={{ color: "#3171C2" }} /> },
+    { name: "Add", icon: <AddCircleOutlineIcon sx={{ color: "#3171C2" }} /> },
+    { name: "Delete", icon: <DeleteOutlinedIcon sx={{ color: "#c83f38" }} /> },
   ];
 
   return (
@@ -42,7 +42,7 @@ const ElementEditorActionCenter = (props: PropTypes) => {
               backgroundColor: "#f0f0f0",
             },
             outline: "auto",
-            outlineColor: "#2196f3",
+            outlineColor: "#3171C2",
             boxShadow: 0,
           },
         }}
@@ -57,9 +57,9 @@ const ElementEditorActionCenter = (props: PropTypes) => {
               transform: open ? "rotate(90deg)" : "none",
             }}
           >
-            <div style={{ margin: "0 2px", color: "#2196f3" }}>•</div>
-            <div style={{ margin: "0 2px", color: "#2196f3" }}>•</div>
-            <div style={{ margin: "0 2px", color: "#2196f3" }}>•</div>
+            <div style={{ margin: "0 2px", color: "#3171C2" }}>•</div>
+            <div style={{ margin: "0 2px", color: "#3171C2" }}>•</div>
+            <div style={{ margin: "0 2px", color: "#3171C2" }}>•</div>
           </div>
         }
         direction="left"
@@ -71,7 +71,9 @@ const ElementEditorActionCenter = (props: PropTypes) => {
             key={action.name}
             icon={action.icon}
             tooltipTitle={action.name}
-            data-testid={`elements-${action.name.replace(/\s/g, "")}`}
+            data-testid={`elements-${action.name
+              .replace(/\s/g, "")
+              .toLowerCase()}`}
             onClick={() => {
               setOpen(false);
             }}
