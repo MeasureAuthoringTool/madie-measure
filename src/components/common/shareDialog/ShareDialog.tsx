@@ -59,14 +59,14 @@ interface SharedMeasure {
 }
 
 const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
-  const measureSearchApi = useRef(useMeasureServiceApi());
+  const measureServiceApi = useRef(useMeasureServiceApi()).current;
 
   const [sharedMeasures, setSharedMeasures] = useState<SharedMeasure[]>([]);
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
 
-  const getSharedMeasure = useCallback(() => {
+  const getSharedMeasure = useCallback(async () => {
     if (measures.length === 0 || !open) {
       return;
     }
@@ -75,34 +75,45 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
     setErrorMessage("");
     setLoading(true);
 
-    const measureMap = new Map(
-      measures.map((measure) => [measure.id, measure])
-    );
-    const measureIds = Array.from(measureMap.keys());
+    const uniqueMeasureSets = [
+      ...new Map(measures.map((item) => [item.measureSetId, item])).values(),
+    ];
 
-    measureSearchApi.current
-      .getSharedWithUserIds(measureIds)
-      .then((response) => {
-        setSharedMeasures(
-          measureIds.map((measureId) => ({
+    try {
+      const responses = await Promise.all(
+        uniqueMeasureSets.map(async (measureSet) => {
+          const response = await measureServiceApi.getMeasuresByMeasureSetId(
+            measureSet.measureSetId
+          );
+          return response[response.length - 1];
+        })
+      );
+      const measureIds = responses.map((measure) => measure.id);
+      const measureMap = new Map(
+        responses.map((measure) => [measure.id, measure])
+      );
+
+      const sharedWithUserIds = await measureServiceApi.getSharedWithUserIds(
+        measureIds
+      );
+      setSharedMeasures(
+        measureIds.map((measureId) => ({
+          measureId,
+          measureName: measureMap.get(measureId).measureName,
+          userId: "",
+          dateShared: "",
+          subRows: sharedWithUserIds[measureId].map((userId) => ({
             measureId,
-            measureName: measureMap.get(measureId).measureName,
-            userId: "",
-            dateShared: "",
-            subRows: response[measureId].map((userId) => ({
-              measureId,
-              userId,
-              dateShared: "-",
-            })),
-          }))
-        );
-      })
-      .catch((error) => {
-        setErrorMessage(error.message);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+            userId,
+            dateShared: "-",
+          })),
+        }))
+      );
+    } catch (error) {
+      setErrorMessage(error.message);
+    } finally {
+      setLoading(false);
+    }
   }, [open]);
 
   useEffect(() => {
@@ -255,7 +266,10 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
             </div>
           </div>
         )}
-
+        <div style={{ marginLeft: 32, marginRight: 32 }}>
+          When sharing a measure, all versions and drafts are shared, so only
+          the most recent measure name appears here.
+        </div>
         <div className="measure-table no-margin-top">
           <div className="table" style={{ overflow: "auto" }}>
             <table

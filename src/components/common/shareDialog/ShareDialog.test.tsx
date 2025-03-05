@@ -20,6 +20,7 @@ const mockMeasure1 = {
   measureName: "The Measure for Testing 1",
   createdBy: testUser,
   measureMetaData: { ...mockMetaData },
+  measureSetId: "MeasureSetId1",
 } as Measure;
 
 const mockMeasure2 = {
@@ -27,6 +28,7 @@ const mockMeasure2 = {
   measureName: "The Measure for Testing 2",
   createdBy: testUser,
   measureMetaData: { ...mockMetaData },
+  measureSetId: "MeasureSetId2",
   acls: [
     { userId: "userId1", roles: ["SHARED_WITH"] },
     { userId: "userId2", roles: ["SHARED_WITH"] },
@@ -44,6 +46,9 @@ const mockMeasureServiceApi = {
       ? mockMeasure2.acls.map((acls) => acls.userId)
       : [],
   }),
+  getMeasuresByMeasureSetId: jest.fn().mockImplementation((measureSetId) => {
+    return measureSetId === "MeasureSetId1" ? [mockMeasure1] : [mockMeasure2];
+  }),
 } as unknown as MeasureServiceApi;
 
 jest.mock("../../../api/useMeasureServiceApi", () =>
@@ -60,7 +65,7 @@ describe("Create Share Dialog component", () => {
     });
   });
 
-  it("should render share dialog", () => {
+  it("should render share dialog", async () => {
     render(
       <ShareDialog
         measures={[mockMeasure1, mockMeasure2]}
@@ -69,6 +74,8 @@ describe("Create Share Dialog component", () => {
         onClose={jest.fn()}
       />
     );
+    const table = await screen.findByTestId("share-measure-tbl");
+
     expect(getByTestId("share-dialog")).toBeInTheDocument();
     expect(mockMeasureServiceApi.getSharedWithUserIds).toBeCalled();
   });
@@ -236,6 +243,7 @@ describe("Create Share Dialog component", () => {
     );
 
     expect(getByTestId("share-dialog")).toBeInTheDocument();
+    const table = await screen.findByTestId("share-measure-tbl");
     expect(mockMeasureServiceApi.getSharedWithUserIds).toBeCalled();
     expect(await screen.findByText(errorMessage)).toBeVisible();
   });
@@ -266,6 +274,7 @@ describe("Create Share Dialog component", () => {
       />
     );
     expect(getByTestId("share-dialog")).toBeInTheDocument();
+    const table = await screen.findByTestId("share-measure-tbl");
     expect(mockMeasureServiceApi.getSharedWithUserIds).toBeCalled();
 
     expect(await screen.findByTestId("harp-id-input")).toBeInTheDocument();
