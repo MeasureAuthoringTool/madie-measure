@@ -690,7 +690,6 @@ const TestCaseList = (props: TestCaseListProps) => {
                           setOpenCopyTestCaseDialog(true)
                         }
                       />
-                      <div id="status-handler"></div>
                       <TestCaseTable
                         sorting={sorting}
                         setSorting={setSorting}
