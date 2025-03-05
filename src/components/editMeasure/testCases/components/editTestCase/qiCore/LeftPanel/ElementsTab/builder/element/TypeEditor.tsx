@@ -11,7 +11,7 @@ import UrlComponent from "./types/UrlComponent";
 import DateComponent from "./types/DateComponent";
 import IntegerComponent, { IntegerType } from "./types/IntegerComponent";
 import CodesComponent from "./types/CodesComponent";
-import { Instant } from "@madie/madie-design-system/dist/react";
+import InstantComponent from "./types/InstantComponent";
 import TimeComponent from "./types/TimeComponent";
 import { useFormikContext } from "formik";
 import ExtensionComponent from "./types/ExtensionComponent";
@@ -142,16 +142,19 @@ const TypeEditor = ({
       case "instant":
       case "http://hl7.org/fhir/R4/datatypes.html#instant":
         return (
-          <Instant
-            disabled={false}
-            id={`${label}_instant`}
+          <InstantComponent
             name={label}
             label={label}
-            canEdit={canEdit}
             required={required}
             helperText={formikErrorHandler(label)}
             error={getNestedProperty(formik.errors, label)}
-            handleDateTimeChange={(value) => formik.setFieldValue(label, value)}
+            handleDateTimeChange={(value) => {
+              formik.setFieldTouched(label);
+              formik.setFieldValue(label, value);
+            }}
+            setTouched={() => {
+              formik.setFieldTouched(label);
+            }}
             dateTimeValue={formik.getFieldProps(label).value}
             onBlur={() => formik.setFieldTouched(label)}
           />

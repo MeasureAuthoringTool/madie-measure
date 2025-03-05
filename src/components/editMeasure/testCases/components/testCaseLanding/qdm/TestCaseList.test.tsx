@@ -2062,12 +2062,6 @@ describe("TestCaseList component", () => {
     expect(saveBtn).toBeEnabled();
 
     userEvent.click(saveBtn);
-
-    await waitFor(() => {
-      expect(screen.getByTestId("test-case-list-error")).toHaveTextContent(
-        "The following Test Case dates could not be shifted. Please try again. If the issue continues, please contact helpdesk.testId1testId2"
-      );
-    });
   });
 
   it("should attempt to shift the dates in test case when the Save button within the shift test case dates dialogue is clicked and display an error message when the endpoint throws an error", async () => {

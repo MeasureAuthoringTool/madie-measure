@@ -49,6 +49,11 @@ const AddRemovePopulation = ({
   const removePopulation = (evt, index) => {
     evt.preventDefault();
     removeCallback(index);
+    //remove the second IP first IP displayId changes from InitialPopulation_1_1 to: InitialPopulation_1
+    replaceCallback(0, {
+      ...populations[0],
+      displayId: populations[0].displayId?.replace(/_1([^_1]*)$/, "" + "$1"),
+    });
   };
 
   const changeAssociationCallback = () => {
@@ -92,6 +97,11 @@ const AddRemovePopulation = ({
     let secondAssociation = undefined;
     if (scoring === GroupScoring.RATIO) {
       const ip = populations[index];
+      //add a second IP, the first IP displayId changes from InitialPopulation_1 to: InitialPopulation_1_1
+      replaceCallback(index, {
+        ...ip,
+        displayId: ip.displayId + "_1",
+      });
       if (
         ip?.associationType === InitialPopulationAssociationType.DENOMINATOR
       ) {
@@ -108,6 +118,7 @@ const AddRemovePopulation = ({
       definition: "",
       description: "",
       associationType: secondAssociation,
+      displayId: population.displayId + "_2",
     });
   };
 

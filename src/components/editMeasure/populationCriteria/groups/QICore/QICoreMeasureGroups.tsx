@@ -11,6 +11,7 @@ import {
   MeasureErrorType,
   MeasureGroupTypes,
   MeasureScoring,
+  Population,
 } from "@madie/madie-models";
 import {
   MenuItem as MuiMenuItem,
@@ -306,14 +307,31 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     );
   }, [measure?.elmJson]);
 
+  //default population displayId is: PopulationName_groupNumber
+  const getPopulationsWithDisplayId = (pops: Population[]): Population[] => {
+    return pops.map((population) => {
+      return {
+        ...population,
+        displayId: (
+          population.name.replace(" ", "") +
+          "_" +
+          (measureGroupNumber + 1)
+        ).replace(/^./, (match) => match.toUpperCase()),
+      };
+    });
+  };
+  const [allPopulationsWithDisplayId, setAllPopulationsWithDisplayId] =
+    useState<Population[]>(getPopulationsWithDisplayId(allPopulations));
+
   useEffect(() => {
+    setAllPopulationsWithDisplayId(getPopulationsWithDisplayId(allPopulations));
     if (measure?.groups && measure?.groups[measureGroupNumber]) {
       // manually sort group populations in existing groups on retrieval
       const group = measure?.groups[measureGroupNumber];
       group.populations.sort((a, b) => {
         return (
-          allPopulations.findIndex((all) => all.name === a.name) -
-          allPopulations.findIndex((all) => all.name === b.name)
+          allPopulationsWithDisplayId.findIndex((all) => all.name === a.name) -
+          allPopulationsWithDisplayId.findIndex((all) => all.name === b.name)
         );
       });
       // here we need to modify the order of measure groups on initial db
@@ -321,6 +339,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       resetForm({
         values: {
           ...measure?.groups[measureGroupNumber],
+          displayId: null,
           groupDescription:
             measure?.groups[measureGroupNumber].groupDescription || "",
           scoringUnit: measure?.groups[measureGroupNumber].scoringUnit || "",
@@ -343,6 +362,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
         resetForm({
           values: {
             id: null,
+            displayId: null,
             scoring: "",
             populations: [],
             measureObservations: null,
@@ -365,7 +385,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     initialValues: {
       id: group?.id || null,
       scoring: group?.scoring || "",
-      populations: allPopulations,
+      displayId: group?.displayId || "Group_" + (measureGroupNumber + 1),
+      populations: allPopulationsWithDisplayId,
       measureObservations: null,
       rateAggregation: group?.rateAggregation || "",
       improvementNotation: group?.improvementNotation || "",
@@ -490,6 +511,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       resetForm({
         values: {
           id: null,
+          displayId: null,
           groupDescription: "",
           scoring: "",
           measureGroupTypes: [],
@@ -523,6 +545,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   };
 
   const submitForm = (group: Group) => {
+    group.displayId = "Group_" + (measureGroupNumber + 1);
     if (group.stratifications) {
       group.stratifications = group.stratifications.filter(
         (strat) =>
@@ -886,7 +909,11 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                     }}
                     onChange={(e) => {
                       const nextScoring = e.target.value;
-                      const populations = getPopulationsForScoring(nextScoring);
+                      const populationsNoDisplayId =
+                        getPopulationsForScoring(nextScoring);
+                      const populations = getPopulationsWithDisplayId(
+                        populationsNoDisplayId
+                      );
                       const observations =
                         getDefaultObservationsForScoring(nextScoring);
                       formik.setFieldValue("scoring", nextScoring);
