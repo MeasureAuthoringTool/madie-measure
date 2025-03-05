@@ -194,14 +194,12 @@ const TestCaseRoutes = () => {
           testDataId="import-error-messages"
         />
       )}
-      {warnings && warnings.length > 0 && (
-        <>
-          <StatusHandler
-            warning={true}
-            warningMessages={warnings}
-            testDataId="execution_context_loading_warning"
-          />
-        </>
+      {warnings?.length > 0 && (
+        <StatusHandler
+          warning={true}
+          warningMessages={warnings}
+          testDataId="execution_context_loading_warning"
+        />
       )}
 
       {importWarnings && importWarnings.length > 0 && (
