@@ -1843,11 +1843,11 @@ describe("TestCaseList component", () => {
     const dropZone = screen.getByTestId("file-drop-input");
     userEvent.upload(dropZone, zipFile);
 
-    // await waitFor(async () => {
-    //   expect(importButton).toBeEnabled();
-    //   userEvent.click(importButton);
-    //   expect(setWarnings).toHaveBeenCalledWith(mockedOutcome);
-    // });
+    await waitFor(async () => {
+      expect(importButton).toBeEnabled();
+      userEvent.click(importButton);
+      expect(setImportWarnings).toHaveBeenCalledWith(mockedOutcome);
+    });
   });
 
   it("should clone a test case when the clone button is clicked", async () => {

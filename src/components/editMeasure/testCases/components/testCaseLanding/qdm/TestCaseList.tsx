@@ -775,27 +775,7 @@ const TestCaseList = (props: TestCaseListProps) => {
               "data-testid": "close-error-button",
             }}
           />
-          {testCaseShiftWarning && (
-            <MadieAlert
-              type="warning"
-              copyButton="true"
-              data-testid="testcase-import-warning"
-              content={
-                <div aria-live="polite" role="alert">
-                  <div>
-                    The following Test Case dates could not be shifted. Please
-                    try again. If the issue continues, please contact helpdesk.
-                    <ul>
-                      {testCaseShiftWarning.map((tc) => (
-                        <li>{tc}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              }
-              canClose={false}
-            />
-          )}
+
           <div tw="lg:col-span-5 pl-2 pr-2">
             <div data-testid="code-coverage-tabs">
               <CreateCodeCoverageNavTabs

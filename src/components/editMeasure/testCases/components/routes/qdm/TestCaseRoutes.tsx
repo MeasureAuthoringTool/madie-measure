@@ -221,6 +221,7 @@ const TestCaseRoutes = () => {
                   <TestCaseLandingQdm
                     errors={cqmMeasureErrors}
                     setErrors={setCqmMeasureErrors}
+                    setWarnings={setWarnings}
                     setImportWarnings={setImportWarnings}
                     setImportErrors={setImportErrors}
                   />

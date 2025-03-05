@@ -1,11 +1,6 @@
 import * as React from "react";
 import { render, screen } from "@testing-library/react";
-import StatusHandler from "./StatusHandler";
-import { EXPORT_ERROR_CHARACTERS_MESSAGE } from "../../util/checkSpecialCharacters";
-import {
-  createImportMessage,
-  createWarningMessage,
-} from "./StatusHandlerMessage";
+import { createImportMessage } from "./StatusHandlerMessage";
 import { TestCaseImportOutcome } from "@madie/madie-models";
 
 describe("StatusHandler Messages", () => {
