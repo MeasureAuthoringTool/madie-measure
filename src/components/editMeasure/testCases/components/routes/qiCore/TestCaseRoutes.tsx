@@ -131,7 +131,7 @@ const TestCaseRoutes = () => {
           testDataId="execution_context_loading_errors"
         />
       )}
-      {warnings && warnings.length > 0 && (
+      {warnings?.length > 0 && (
         <>
           <StatusHandler
             warning={true}
