@@ -5,7 +5,6 @@ import useFhirDefinitionsServiceApi, {
   FhirDefinitionsServiceApi,
 } from "../../../../../../../api/useFhirDefinitionsService";
 import { FormikProvider, FormikContextType } from "formik";
-import userEvent from "@testing-library/user-event";
 
 const getNestedProperty = (obj, path) => {
   return path.split(".").reduce((current, key) => current && current[key], obj);
@@ -451,15 +450,25 @@ describe("TypeEditor Component", () => {
     ).toHaveValue(canonicalUri);
   });
 
-  test("Should render Instant component by instant", () => {
+  test("Should render Instant component for valid format", () => {
     const handleChange = jest.fn();
-    const touched = {
-      Observation: {
-        issued: true,
-      },
+    const onChange = jest.fn();
+    const setFieldTouched = jest.fn();
+    const updatedMockFormik = {
+      ...mockFormik,
+      setFieldTouched: setFieldTouched,
+      setFieldValue: onChange,
+      getFieldProps: () => ({
+        label: "Observation.issued",
+        name: "Observation.issued",
+        value: "2025-02-04T00:00:00.000+00:00",
+        setFieldTouched: jest.fn(),
+        setFieldValue: jest.fn(),
+      }),
     };
+
     render(
-      <FormikProvider value={{ ...mockFormik, touched }}>
+      <FormikProvider value={updatedMockFormik}>
         <TypeEditor
           type="instant"
           required={true}
@@ -473,9 +482,54 @@ describe("TypeEditor Component", () => {
         />
       </FormikProvider>
     );
-    expect(
-      screen.getByTestId("Observation.issued_instant")
-    ).toBeInTheDocument();
+    const dateInput = screen.getByTestId("Observation.issued_instant-input");
+    expect(dateInput).toBeInTheDocument();
+    expect(dateInput.getAttribute("aria-invalid")).toBe("false");
+  });
+
+  test("Should render errors if Invalid Instant format", () => {
+    const errors = {
+      Observation: {
+        issued: "Invalid instant format",
+      },
+    };
+    const handleChange = jest.fn();
+    const onChange = jest.fn();
+    const setFieldTouched = jest.fn();
+    const updatedMockFormik = {
+      ...mockFormik,
+      setFieldTouched: setFieldTouched,
+      setFieldValue: onChange,
+      errors: errors,
+      getFieldProps: () => ({
+        label: "Observation.issued",
+        name: "Observation.issued",
+        value: "2025-02-04T00:00:00.000+00:00test",
+        setFieldTouched: jest.fn(),
+        setFieldValue: jest.fn(),
+      }),
+    };
+
+    render(
+      <FormikProvider value={updatedMockFormik}>
+        <TypeEditor
+          type="instant"
+          required={true}
+          value="2025-02-04T00:00:00.000+00:00"
+          onChange={handleChange}
+          structureDefinition={null}
+          resource={undefined}
+          parentStructureDefinition={undefined}
+          canEdit={true}
+          label="Observation.issued"
+        />
+      </FormikProvider>
+    );
+    const dateInput = screen.getByTestId("Observation.issued_instant-input");
+    expect(dateInput).toBeInTheDocument();
+    expect(dateInput.getAttribute("aria-invalid")).toBe(
+      errors.Observation.issued
+    );
   });
 
   test("Instant validation should display field errors", () => {
