@@ -179,7 +179,7 @@ describe("Validation Functions", () => {
     let schema = getInstantValidator(true);
     expect(schema).toBeInstanceOf(Yup.MixedSchema);
     expect(schema.validate("2025-02")).rejects.toThrow(
-      "Invalid Instant format"
+      "Invalid instant format"
     );
     // valid instant
     expect(
