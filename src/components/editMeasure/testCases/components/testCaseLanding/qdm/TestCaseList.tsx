@@ -734,7 +734,7 @@ const TestCaseList = (props: TestCaseListProps) => {
           setToastType("success");
           setToastMessage(`All Test Case dates successfully shifted.`);
         } else {
-          setWarnings((prevState) => [...prevState, response]);
+          setWarnings((prevState) => [...prevState, ...response]);
         }
       })
       .catch((err) => {
