@@ -124,4 +124,50 @@ describe("ResourceEditor", () => {
       expect(resetForm).toHaveBeenCalled();
     });
   });
+  it("renders the action center, opens when clicked", async () => {
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
+    render(
+      <QiCoreResourceContext.Provider
+        value={{ state: mockPatientState, dispatch: jest.fn() }}
+      >
+        <ResourceEditor
+          selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
+          setValidationSchema={setValidationSchema}
+          setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+          selectedResource={mockSelectedResource}
+          onCancel={mockOnCancel}
+          canEdit={true}
+        />
+      </QiCoreResourceContext.Provider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("ClaimResponse.id")).toBeInTheDocument();
+      const stringInput = screen.getByTestId(
+        "string-field-input-ClaimResponse.id"
+      );
+      expect(stringInput).toBeInTheDocument();
+      expect(setValidationSchema).toHaveBeenCalled();
+      expect(setInitialFormikValuesStu6).toHaveBeenCalled();
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("string-field-input-ClaimResponse.id").value
+      ).toBe("6fb9d817-76c5-4b68-ba06-92c7429e6b5c");
+    });
+    const dispositionButton = screen.getByRole("tab", { name: "disposition" });
+
+    expect(dispositionButton).toBeInTheDocument();
+    const actionCenter = screen.getByTestId(
+      "elements-action-center-actual-icon"
+    );
+    expect(actionCenter).toBeInTheDocument();
+    userEvent.click(actionCenter);
+    await waitFor(() => {
+      expect(screen.getByTestId("elements-copy")).toBeInTheDocument;
+    });
+    userEvent.click(actionCenter);
+    expect(screen.getByTestId("elements-copy")).not.toBeInTheDocument;
+  });
 });

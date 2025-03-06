@@ -6,6 +6,7 @@ import ElementSection from "../../../../../../common/ElementSection";
 import { transformArrays } from "./transformArrays";
 import { stripResourcePath } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import { useFormikContext } from "formik";
+import ElementEditorActionCenter from "./ElementEditorActionCenter";
 
 const Element = ({ element, label, resource, handleChange, canEdit }) => {
   let elementValue = _.get(resource, label);
@@ -76,6 +77,9 @@ const ElementEditorChildren = ({
           <h4 className="header">
             {_.startCase(rootDefinition?.id.split(".")[1])}
           </h4>
+          <div style={{ position: "relative", top: "-7px" }}>
+            <ElementEditorActionCenter />
+          </div>
         </div>
         {/* given root definition we do a base level render */}
         <TypeEditor
