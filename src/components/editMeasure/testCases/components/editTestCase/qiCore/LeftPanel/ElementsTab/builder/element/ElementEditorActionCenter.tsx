@@ -13,8 +13,8 @@ const ElementEditorActionCenter = (props: PropTypes) => {
   const [open, setOpen] = useState(false);
 
   const actions = [
-    { name: "Copy", icon: <ContentCopyIcon sx={{ color: "#3171C2" }} /> },
     { name: "Add", icon: <AddCircleOutlineIcon sx={{ color: "#3171C2" }} /> },
+    { name: "Copy", icon: <ContentCopyIcon sx={{ color: "#3171C2" }} /> },
     { name: "Delete", icon: <DeleteOutlinedIcon sx={{ color: "#c83f38" }} /> },
   ];
 
