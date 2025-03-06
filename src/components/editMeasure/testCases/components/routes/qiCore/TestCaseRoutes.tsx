@@ -197,7 +197,18 @@ const TestCaseRoutes = () => {
           <Route
             path="/list-page/test-case-data"
             element={
-              <TestCaseLandingWrapper qdm={false} children={<TestCaseData />} />
+              <TestCaseLandingWrapper
+                qdm={false}
+                children={
+                  <TestCaseData
+                    errors={errors}
+                    warnings={warnings}
+                    setErrors={setErrors}
+                    setImportWarnings={setImportWarnings}
+                    setWarnings={setWarnings}
+                  />
+                }
+              />
             }
           />
         </Route>
