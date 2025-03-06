@@ -748,6 +748,7 @@ describe("Measure Groups Page", () => {
 
     const expectedGroup = {
       id: "7p03-5r29-7O0I",
+      displayId: "Group_1",
       populations: [
         {
           id: "id-1",
@@ -907,11 +908,13 @@ describe("Measure Groups Page", () => {
           id: "id-1",
           name: PopulationType.INITIAL_POPULATION,
           definition: "Initial Population",
+          displayId: "InitialPopulation_1",
         },
         {
           id: "id-2",
           name: PopulationType.MEASURE_POPULATION,
           definition: "Measure Population",
+          displayId: "MeasurePopulation_1",
         },
       ],
       groupDescription: "testDescription",
@@ -965,6 +968,7 @@ describe("Measure Groups Page", () => {
 
     const expectedGroup = {
       id: "7p03-5r29-7O0I",
+      displayId: "Group_1",
       populations: [
         {
           id: "uuid-3",
@@ -973,6 +977,7 @@ describe("Measure Groups Page", () => {
             "VTE Prophylaxis by Medication Administered or Device Applied",
           description: "",
           associationType: undefined,
+          displayId: "InitialPopulation_1",
         },
       ],
       measureObservations: null,
@@ -2275,5 +2280,151 @@ describe("Measure Groups Page", () => {
     userEvent.click(stratTab);
 
     expect(screen.getByTestId("stratification-1-input")).toBeInTheDocument();
+  });
+
+  test("should fail Ratio measures with multiple IPs when selecting multiple stratification associations", async () => {
+    const errorMessage =
+      "Ratio measures with two IPs must have one population for associations";
+    const group1: Group = {
+      id: "1",
+      scoring: "Ratio",
+      populations: [
+        {
+          id: "id-1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+          associationType: InitialPopulationAssociationType.DENOMINATOR,
+        },
+        {
+          id: "id-2",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population 2",
+          associationType: InitialPopulationAssociationType.NUMERATOR,
+        },
+      ],
+      groupDescription: "",
+      measureGroupTypes: [MeasureGroupTypes.PROCESS],
+      populationBasis: "boolean",
+      scoringUnit: "",
+      scoringPrecision: "",
+      stratifications: [
+        {
+          id: "strat1",
+          cqlDefinition: "Initial Population",
+          associations: [
+            PopulationType.INITIAL_POPULATION,
+            PopulationType.DENOMINATOR,
+            PopulationType.NUMERATOR,
+          ],
+        },
+      ],
+    };
+    measure.groups = [group1];
+    renderMeasureGroupComponent();
+
+    const stratTab = screen.getByTestId("stratifications-tab");
+    expect(stratTab).toBeInTheDocument();
+    userEvent.click(stratTab);
+
+    expect(screen.getByTestId("stratification-1-input")).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("association-select-1-helper-text")
+      ).toBeInTheDocument();
+      expect(screen.queryByText(errorMessage)).toBeInTheDocument();
+    });
+  });
+
+  test("should pass when Ratio measures with multiple IPs when selecting single stratification associations", async () => {
+    const errorMessage =
+      "Ratio measures with two IPs must have one population for associations";
+    const group1: Group = {
+      id: "1",
+      scoring: "Ratio",
+      populations: [
+        {
+          id: "id-1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+          associationType: InitialPopulationAssociationType.DENOMINATOR,
+        },
+        {
+          id: "id-2",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population 2",
+          associationType: InitialPopulationAssociationType.NUMERATOR,
+        },
+      ],
+      groupDescription: "",
+      measureGroupTypes: [MeasureGroupTypes.PROCESS],
+      populationBasis: "boolean",
+      scoringUnit: "",
+      scoringPrecision: "",
+      stratifications: [
+        {
+          id: "strat1",
+          cqlDefinition: "Initial Population",
+          associations: [PopulationType.INITIAL_POPULATION],
+        },
+      ],
+    };
+    measure.groups = [group1];
+    renderMeasureGroupComponent();
+
+    const stratTab = screen.getByTestId("stratifications-tab");
+    expect(stratTab).toBeInTheDocument();
+    userEvent.click(stratTab);
+
+    expect(screen.getByTestId("stratification-1-input")).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
+    });
+  });
+
+  test("should pass when Ratio measures with single IP when selecting one or many stratification associations", async () => {
+    const errorMessage =
+      "Ratio measures with two IPs must have one population for associations";
+    const group1: Group = {
+      id: "1",
+      scoring: "Ratio",
+      populations: [
+        {
+          id: "id-1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+          associationType: InitialPopulationAssociationType.DENOMINATOR,
+        },
+      ],
+      groupDescription: "",
+      measureGroupTypes: [MeasureGroupTypes.PROCESS],
+      populationBasis: "boolean",
+      scoringUnit: "",
+      scoringPrecision: "",
+      stratifications: [
+        {
+          id: "strat1",
+          cqlDefinition: "Initial Population",
+          associations: [
+            PopulationType.INITIAL_POPULATION,
+            PopulationType.DENOMINATOR,
+            PopulationType.NUMERATOR,
+          ],
+        },
+      ],
+    };
+    measure.groups = [group1];
+    renderMeasureGroupComponent();
+
+    const stratTab = screen.getByTestId("stratifications-tab");
+    expect(stratTab).toBeInTheDocument();
+    userEvent.click(stratTab);
+
+    expect(screen.getByTestId("stratification-1-input")).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
+    });
   });
 });

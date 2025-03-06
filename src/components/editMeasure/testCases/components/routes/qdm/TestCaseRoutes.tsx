@@ -18,6 +18,8 @@ import TestCaseData from "../../testCaseConfiguration/testCaseData/TestCaseData"
 
 const TestCaseRoutes = () => {
   const [cqmMeasureErrors, setCqmMeasureErrors] = useState<Array<string>>([]);
+  const [warnings, setWarnings] = useState<Array<string>>([]);
+
   const [importWarnings, setImportWarnings] = useState<TestCaseImportOutcome[]>(
     []
   );
@@ -192,6 +194,14 @@ const TestCaseRoutes = () => {
           testDataId="import-error-messages"
         />
       )}
+      {warnings?.length > 0 && (
+        <StatusHandler
+          warning={true}
+          warningMessages={warnings}
+          testDataId="execution_context_loading_warning"
+        />
+      )}
+
       {importWarnings && importWarnings.length > 0 && (
         <StatusHandler
           importWarnings={importWarnings}
@@ -209,7 +219,8 @@ const TestCaseRoutes = () => {
                   <TestCaseLandingQdm
                     errors={cqmMeasureErrors}
                     setErrors={setCqmMeasureErrors}
-                    setWarnings={setImportWarnings}
+                    setWarnings={setWarnings}
+                    setImportWarnings={setImportWarnings}
                     setImportErrors={setImportErrors}
                   />
                 }
@@ -225,7 +236,8 @@ const TestCaseRoutes = () => {
                   <TestCaseLandingQdm
                     errors={cqmMeasureErrors}
                     setErrors={setCqmMeasureErrors}
-                    setWarnings={setImportWarnings}
+                    setWarnings={setWarnings}
+                    setImportWarnings={setImportWarnings}
                     setImportErrors={setImportErrors}
                   />
                 }

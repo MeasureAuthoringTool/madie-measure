@@ -1,5 +1,9 @@
 import * as Yup from "yup";
-import { AggregateFunctionType, GroupScoring } from "@madie/madie-models";
+import {
+  AggregateFunctionType,
+  Group,
+  GroupScoring,
+} from "@madie/madie-models";
 import _ from "lodash";
 
 export type CqlDefineDataTypes = {
@@ -8,6 +12,13 @@ export type CqlDefineDataTypes = {
 export type CqlFunctionDataTypes = {
   [key: string]: string;
 };
+
+// Create an extended context to allow nested values validate against base values
+interface TestContextExtended {
+  from: {
+    value: Group;
+  }[];
+}
 
 const returnTypeCheckOptions = (
   populationBasis: string,
@@ -238,18 +249,38 @@ export const measureGroupSchemaValidator = (
                 },
               }),
             // we need to make sure Associations have at least 1 value when Definition exists
-            associations: Yup.array().test({
-              name: "associationCheck",
-              message:
-                "Associations are required when CQL Definition is provided.",
-              test: function (associations) {
-                const { cqlDefinition } = this.parent;
-                if (cqlDefinition && cqlDefinition.trim() !== "") {
-                  return associations && associations.length > 0;
-                }
-                return true;
-              },
-            }),
+            associations: Yup.array()
+              .test({
+                name: "associationCheck",
+                message:
+                  "Associations are required when CQL Definition is provided.",
+                test: function (associations) {
+                  const { cqlDefinition } = this.parent;
+                  if (cqlDefinition && cqlDefinition.trim() !== "") {
+                    return associations && associations.length > 0;
+                  }
+                  return true;
+                },
+              })
+              .test({
+                name: "ratioCheck",
+                message:
+                  "Ratio measures with two IPs must have one population for associations",
+                test: function (associations) {
+                  const { from } = this as Yup.TestContext &
+                    TestContextExtended;
+                  if (from[1].value.scoring === GroupScoring.RATIO) {
+                    const ipCount = from[1].value.populations.filter(
+                      (p) => p.name === "initialPopulation"
+                    ).length;
+                    if (ipCount > 1) {
+                      return associations.length < 2;
+                    }
+                    return true;
+                  }
+                  return true;
+                },
+              }),
           })
         )
         .nullable();

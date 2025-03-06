@@ -8,7 +8,9 @@ export interface TestCasesPassingDetailsProps {
 
 export interface TestCaseListProps {
   errors: Array<string>;
+  warnings?: Array<string>;
   setErrors: Dispatch<SetStateAction<Array<string>>>;
   setImportErrors?: Dispatch<SetStateAction<Array<string>>>;
-  setWarnings?: Dispatch<SetStateAction<TestCaseImportOutcome[]>>;
+  setWarnings?: Dispatch<SetStateAction<Array<string>>>;
+  setImportWarnings?: Dispatch<SetStateAction<TestCaseImportOutcome[]>>;
 }
