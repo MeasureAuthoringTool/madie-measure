@@ -628,6 +628,13 @@ const MeasureGroups = (props: MeasureGroupProps) => {
             (measureGroupNumber === 0 ? 1 : measureGroupNumber)
         );
         handleDialogClose();
+        if (response && response.groups?.length > 0) {
+          setToastOpen(true);
+          setToastType("success");
+          setToastMessage(
+            "Measure criteria successfully deleted. Your Criteria's and populations have been re numbered."
+          );
+        }
       });
   };
 

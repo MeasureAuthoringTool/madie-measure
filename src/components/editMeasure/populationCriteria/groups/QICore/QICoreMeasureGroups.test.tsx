@@ -2427,4 +2427,85 @@ describe("Measure Groups Page", () => {
       expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
     });
   });
+
+  test("On clicking delete button, measure group should be deleted, toast should open.", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.groupDescription = "testDescription";
+    const group2: Group = (group = {
+      id: "group2",
+      scoring: "Cohort",
+      populations: [
+        {
+          id: "id-2",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "Initial Population",
+          description: "",
+        },
+      ],
+      groupDescription: "",
+      measureGroupTypes: [],
+      populationBasis: "boolean",
+      scoringUnit: "",
+      scoringPrecision: "",
+    });
+    measure.groups = [group, group2];
+    const expectedConfig = {
+      headers: {
+        Authorization: `Bearer test.jwt`,
+      },
+    };
+    const updatedMeasure = {
+      id: "test-measure",
+      measureName: "the measure for testing",
+      cql: MeasureCQL,
+      createdBy: MEASURE_CREATEDBY,
+      groups: [
+        {
+          id: "groupId1",
+          displayId: "Group_1",
+          populations: [
+            {
+              id: "population1",
+              name: PopulationType.INITIAL_POPULATION,
+              displayId: "InitialPopulation_1",
+            },
+          ],
+        } as Group,
+      ],
+    };
+    mockedAxios.delete.mockResolvedValue({ data: updatedMeasure });
+    const { getByTestId, getByText } = renderMeasureGroupComponent();
+
+    expect(getByTestId("title").textContent).toBe("Population Criteria 1");
+
+    await waitFor(() => {
+      setTimeout(() => {
+        expect(getByTestId("group-form-delete-btn")).toBeInTheDocument();
+        expect(getByTestId("group-form-delete-btn")).toBeEnabled();
+        userEvent.click(getByTestId("group-form-delete-btn"));
+
+        expect(
+          getByTestId("delete-measure-group-modal-cancel-btn")
+        ).toBeInTheDocument();
+        expect(
+          getByTestId("delete-measure-group-modal-agree-btn")
+        ).toBeInTheDocument();
+
+        act(() => {
+          userEvent.click(getByTestId("delete-measure-group-modal-agree-btn"));
+        });
+
+        expect(mockedAxios.delete).toHaveBeenCalledWith(
+          `example-service-url/measures/test-measure/groups/group2`,
+          expectedConfig
+        );
+
+        expect(
+          getByText(
+            "Measure criteria successfully deleted. Your Criteria's and populations have been re numbered."
+          )
+        ).toBeInTheDocument();
+      }, 500);
+    });
+  });
 });
