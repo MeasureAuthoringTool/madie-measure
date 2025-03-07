@@ -23,7 +23,6 @@ import {
   MadieSpinner,
   Pagination,
   Toast,
-  MadieAlert,
 } from "@madie/madie-design-system/dist/react";
 import Typography from "@mui/material/Typography";
 import {
@@ -145,7 +144,6 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [activeTab, setActiveTab] = useState<string>("passing");
   const [calculationOutput, setCalculationOutput] =
     useState<CqmExecutionResultsByPatient>();
-  const [testCaseShiftWarning, setTestCaseShiftWarning] = useState<any>();
   const [executeAllTestCases, setExecuteAllTestCases] =
     useState<boolean>(false);
   const [coveragePercentage, setCoveragePercentage] = useState<string>("-");
