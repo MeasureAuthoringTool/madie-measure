@@ -67,7 +67,7 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
   const [errorMessage, setErrorMessage] = useState<string>("");
 
   const getSharedMeasure = useCallback(() => {
-    if (measures.length === 0 || !open) {
+    if ((measures && measures?.length === 0) || !open) {
       return;
     }
 

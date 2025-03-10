@@ -18,8 +18,9 @@ import _ from "lodash";
 import * as Yup from "yup";
 import Tooltip from "@mui/material/Tooltip";
 import useTestCaseServiceApi from "../../../api/useTestCaseServiceApi";
+import { TestCaseListProps } from "../../testCaseLanding/common/interfaces";
 
-const TestCaseData = () => {
+const TestCaseData = (props: TestCaseListProps) => {
   const [measure, setMeasure] = useState<any>(measureStore.state);
   const { updateRouteHandlerState } = routeHandlerStore;
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
@@ -28,6 +29,7 @@ const TestCaseData = () => {
   const [toastType, setToastType] = useState<string>("danger");
   const testCaseService = useRef(useTestCaseServiceApi());
   const [executing, setExecuting] = useState<boolean>(false);
+  const { setErrors, setImportErrors, setWarnings, setImportWarnings } = props;
 
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -111,19 +113,7 @@ const TestCaseData = () => {
         )
         .then((failedTestCases) => {
           if (failedTestCases.length > 0) {
-            handleToast(
-              "danger",
-              <div className={"test-case-list-container"}>
-                The following Test Case dates could not be shifted. Please try
-                again.
-                <ul>
-                  {failedTestCases.map((tc) => (
-                    <li>{tc}</li>
-                  ))}
-                </ul>
-              </div>,
-              true
-            );
+            setWarnings((prevState) => [...prevState, ...failedTestCases]);
           } else {
             handleToast(
               "success",
