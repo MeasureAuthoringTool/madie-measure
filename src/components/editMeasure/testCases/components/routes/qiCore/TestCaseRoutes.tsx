@@ -26,6 +26,7 @@ const TestCaseRoutes = () => {
   const [measureBundle, setMeasureBundle] = useState<Bundle>();
   const [valueSets, setValueSets] = useState<ValueSet[]>();
   const [errors, setErrors] = useState<Array<string>>([]);
+  const [warnings, setWarnings] = useState<Array<string>>([]);
   const [importWarnings, setImportWarnings] = useState<TestCaseImportOutcome[]>(
     []
   );
@@ -130,6 +131,15 @@ const TestCaseRoutes = () => {
           testDataId="execution_context_loading_errors"
         />
       )}
+      {warnings?.length > 0 && (
+        <>
+          <StatusHandler
+            warning={true}
+            warningMessages={warnings}
+            testDataId="execution_context_loading_warning"
+          />
+        </>
+      )}
       {importWarnings && importWarnings.length > 0 && (
         <StatusHandler importWarnings={importWarnings} />
       )}
@@ -143,8 +153,10 @@ const TestCaseRoutes = () => {
                 children={
                   <TestCaseLanding
                     errors={errors}
+                    warnings={warnings}
                     setErrors={setErrors}
-                    setWarnings={setImportWarnings}
+                    setImportWarnings={setImportWarnings}
+                    setWarnings={setWarnings}
                   />
                 }
               />
@@ -158,8 +170,10 @@ const TestCaseRoutes = () => {
                 children={
                   <TestCaseLanding
                     errors={errors}
+                    warnings={warnings}
                     setErrors={setErrors}
-                    setWarnings={setImportWarnings}
+                    setImportWarnings={setImportWarnings}
+                    setWarnings={setWarnings}
                   />
                 }
               />
@@ -183,7 +197,18 @@ const TestCaseRoutes = () => {
           <Route
             path="/list-page/test-case-data"
             element={
-              <TestCaseLandingWrapper qdm={false} children={<TestCaseData />} />
+              <TestCaseLandingWrapper
+                qdm={false}
+                children={
+                  <TestCaseData
+                    errors={errors}
+                    warnings={warnings}
+                    setErrors={setErrors}
+                    setImportWarnings={setImportWarnings}
+                    setWarnings={setWarnings}
+                  />
+                }
+              />
             }
           />
         </Route>

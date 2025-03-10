@@ -94,7 +94,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   let navigate = useNavigate();
   const { search } = useLocation();
   const values = queryString.parse(search);
-  const { setErrors, setImportErrors, setWarnings } = props;
+  const { setErrors, setImportErrors, setWarnings, setImportWarnings } = props;
   const { measureId, criteriaId } = useParams<{
     measureId: string;
     criteriaId: string;
@@ -545,7 +545,7 @@ const TestCaseList = (props: TestCaseListProps) => {
         if (outcome.message) return outcome;
       });
       if (failedImports && failedImports.length > 0) {
-        setWarnings(testCaseImportOutcome);
+        setImportWarnings(testCaseImportOutcome);
       } else {
         const successfulImports =
           testCaseImportOutcome.length - failedImports.length;
@@ -727,24 +727,12 @@ const TestCaseList = (props: TestCaseListProps) => {
         shifted
       )
       .then((response) => {
-        setToastOpen(true);
-
         if (response.length === 0) {
+          setToastOpen(true);
           setToastType("success");
           setToastMessage(`All Test Case dates successfully shifted.`);
         } else {
-          setToastType("danger");
-          setToastMessage(
-            <div>
-              The following Test Case dates could not be shifted. Please try
-              again. If the issue continues, please contact helpdesk.
-              <ul>
-                {response.map((tc) => (
-                  <li>{tc}</li>
-                ))}
-              </ul>
-            </div>
-          );
+          setWarnings((prevState) => [...prevState, ...response]);
         }
       })
       .catch((err) => {
@@ -785,6 +773,7 @@ const TestCaseList = (props: TestCaseListProps) => {
               "data-testid": "close-error-button",
             }}
           />
+
           <div tw="lg:col-span-5 pl-2 pr-2">
             <div data-testid="code-coverage-tabs">
               <CreateCodeCoverageNavTabs

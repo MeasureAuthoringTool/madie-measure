@@ -58,6 +58,19 @@ describe("StatusHandler Component", () => {
     expect(queryByText("~title")).toBeInTheDocument();
   });
 
+  test("Should display single warning with exportErrors", () => {
+    render(
+      <StatusHandler
+        warning={true}
+        warningMessages={[specialCharsErrors[0]]}
+        testDataId="test_data_id"
+      />
+    );
+    screen.debug();
+    expect(queryByTestId("test_data_id")).toBeInTheDocument();
+    expect(queryByTestId("warn-title")).toBeInTheDocument();
+  });
+
   test("Should display multiple errors", () => {
     render(
       <StatusHandler
