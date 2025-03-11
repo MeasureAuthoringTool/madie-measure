@@ -121,6 +121,7 @@ const ElementEditor = ({
       // It's a single node. Add it to the node list
       const required = +child.min > 0;
       const elemPath = stripResourcePath(resourcePath, child.path);
+
       const value = _.get(resource, elemPath);
       const builtNode = {
         id: child?.id,
@@ -184,7 +185,7 @@ const ElementEditor = ({
     // we need to only set the nested value here if
     for (const key in formInfo) {
       const { value, type, validation } = formInfo[key];
-      // we need to check and see if the key has a baspath that exists within the displayed elements tree.
+      // we need to check and see if the key has a basepath that exists within the displayed elements tree.
       const splitPath: Array<string> = key.split(".");
       //it's a base path, we want it
       if (splitPath.length === 1) {
