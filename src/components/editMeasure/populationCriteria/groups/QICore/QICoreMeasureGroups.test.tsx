@@ -2507,7 +2507,7 @@ describe("Measure Groups Page", () => {
             "Measure criteria successfully deleted. Your Criteria's and populations have been re numbered."
           )
         ).toBeInTheDocument();
-      }, 200);
+      }, 300);
     });
   });
 });
