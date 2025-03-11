@@ -124,12 +124,6 @@ const ProfiledExtensionComponent = ({
                 marginTop: "10px",
               }}
             >
-              <Typography>
-                {_.startCase(elemPath)}
-                {elementDefinition.sliceName
-                  ? `:${elementDefinition.sliceName}`
-                  : ""}
-              </Typography>
               <TypeEditor
                 resource={resource}
                 structureDefinition={elementDefinition}
