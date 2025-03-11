@@ -2479,9 +2479,10 @@ describe("Measure Groups Page", () => {
     expect(getByTestId("title").textContent).toBe("Population Criteria 1");
 
     setTimeout(() => {
-      expect(getByTestId("group-form-delete-btn")).toBeInTheDocument();
-      expect(getByTestId("group-form-delete-btn")).toBeEnabled();
-      userEvent.click(getByTestId("group-form-delete-btn"));
+      const deleteBtn = getByTestId("group-form-delete-btn");
+      expect(deleteBtn).toBeInTheDocument();
+      expect(deleteBtn).toBeEnabled();
+      userEvent.click(deleteBtn);
 
       expect(
         getByTestId("delete-measure-group-modal-cancel-btn")
@@ -2493,7 +2494,7 @@ describe("Measure Groups Page", () => {
       act(() => {
         userEvent.click(getByTestId("delete-measure-group-modal-agree-btn"));
       });
-    }, 500);
+    }, 100);
 
     await waitFor(() => {
       setTimeout(() => {
@@ -2507,7 +2508,7 @@ describe("Measure Groups Page", () => {
             "Measure criteria successfully deleted. Your Criteria's and populations have been re numbered."
           )
         ).toBeInTheDocument();
-      }, 500);
+      }, 100);
     });
   });
 });
