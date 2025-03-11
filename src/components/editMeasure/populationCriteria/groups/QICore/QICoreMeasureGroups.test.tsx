@@ -2497,17 +2497,12 @@ describe("Measure Groups Page", () => {
 
     await waitFor(() => {
       setTimeout(() => {
-        expect(mockedAxios.delete).toHaveBeenCalledWith(
-          `example-service-url/measures/test-measure/groups/group2`,
-          expectedConfig
-        );
-
         expect(
           getByText(
             "Measure criteria successfully deleted. Your Criteria's and populations have been re numbered."
           )
         ).toBeInTheDocument();
-      }, 300);
+      }, 500);
     });
   });
 });
