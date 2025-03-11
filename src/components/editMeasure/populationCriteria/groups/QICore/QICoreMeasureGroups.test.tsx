@@ -2478,23 +2478,25 @@ describe("Measure Groups Page", () => {
 
     expect(getByTestId("title").textContent).toBe("Population Criteria 1");
 
+    setTimeout(() => {
+      expect(getByTestId("group-form-delete-btn")).toBeInTheDocument();
+      expect(getByTestId("group-form-delete-btn")).toBeEnabled();
+      userEvent.click(getByTestId("group-form-delete-btn"));
+
+      expect(
+        getByTestId("delete-measure-group-modal-cancel-btn")
+      ).toBeInTheDocument();
+      expect(
+        getByTestId("delete-measure-group-modal-agree-btn")
+      ).toBeInTheDocument();
+
+      act(() => {
+        userEvent.click(getByTestId("delete-measure-group-modal-agree-btn"));
+      });
+    }, 100);
+
     await waitFor(() => {
       setTimeout(() => {
-        expect(getByTestId("group-form-delete-btn")).toBeInTheDocument();
-        expect(getByTestId("group-form-delete-btn")).toBeEnabled();
-        userEvent.click(getByTestId("group-form-delete-btn"));
-
-        expect(
-          getByTestId("delete-measure-group-modal-cancel-btn")
-        ).toBeInTheDocument();
-        expect(
-          getByTestId("delete-measure-group-modal-agree-btn")
-        ).toBeInTheDocument();
-
-        act(() => {
-          userEvent.click(getByTestId("delete-measure-group-modal-agree-btn"));
-        });
-
         expect(mockedAxios.delete).toHaveBeenCalledWith(
           `example-service-url/measures/test-measure/groups/group2`,
           expectedConfig
@@ -2505,7 +2507,7 @@ describe("Measure Groups Page", () => {
             "Measure criteria successfully deleted. Your Criteria's and populations have been re numbered."
           )
         ).toBeInTheDocument();
-      }, 500);
+      }, 200);
     });
   });
 });
