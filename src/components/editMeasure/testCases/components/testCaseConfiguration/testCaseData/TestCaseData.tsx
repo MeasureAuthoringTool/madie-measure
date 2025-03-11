@@ -29,7 +29,7 @@ const TestCaseData = (props: TestCaseListProps) => {
   const [toastType, setToastType] = useState<string>("danger");
   const testCaseService = useRef(useTestCaseServiceApi());
   const [executing, setExecuting] = useState<boolean>(false);
-  const { setErrors, setImportErrors, setWarnings, setImportWarnings } = props;
+  const { setWarnings } = props;
 
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -80,6 +80,8 @@ const TestCaseData = (props: TestCaseListProps) => {
   };
 
   const handleSubmit = async (values) => {
+    //TODO. could we make the APIs return the same structure so we don't need two separate error handlers?
+    // sure Greg ...  Tech Debt MAT-8377
     if (isQdm) {
       testCaseService.current
         .shiftAllQdmTestCaseDates(
@@ -94,13 +96,10 @@ const TestCaseData = (props: TestCaseListProps) => {
           );
         })
         .catch((err) => {
-          handleToast(
-            "danger",
-            err?.response?.data?.message
-              ? err?.response?.data?.message
-              : "Test Case dates could not be shifted. Please try again.",
-            true
-          );
+          setWarnings((prevState) => [
+            ...prevState,
+            err?.response?.data?.message,
+          ]);
         })
         .finally(() => {
           setExecuting(false);
