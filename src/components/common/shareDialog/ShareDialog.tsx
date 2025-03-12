@@ -401,7 +401,7 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
                         className={
                           row.original.measureName
                             ? String.raw`ml-tr`
-                            : String.raw`ml-tr-sub`
+                            : String.raw`ml-tr subtr`
                         }
                         data-testid={`row-item`}
                         style={{
