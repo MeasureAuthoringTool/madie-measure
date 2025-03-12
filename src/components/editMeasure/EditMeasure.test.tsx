@@ -137,6 +137,7 @@ const measure = {
   createdBy: "testuser@example.com",
   model: "QI-Core v4.1.1",
   testCases: testCases,
+  measureSetId: "MeasureSetId1",
 } as Measure;
 
 const serviceApiMock = {
@@ -165,6 +166,9 @@ const serviceApiMock = {
   getSharedWithUserIds: jest.fn().mockResolvedValue({
     measureId1: ["userId1"],
     measureId2: ["userId1", "userId2"],
+  }),
+  getMeasuresByMeasureSetId: jest.fn().mockImplementation((measureSetId) => {
+    return [measure];
   }),
 } as unknown as MeasureServiceApi;
 
@@ -470,9 +474,8 @@ describe("EditMeasure Component", () => {
     await waitFor(async () => {
       expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
       expect(getByTestId("share-dialog")).toBeInTheDocument();
-      expect(serviceApiMock.getSharedWithUserIds).toHaveBeenCalled();
     });
-
+    expect(serviceApiMock.getSharedWithUserIds).toHaveBeenCalled();
     const cancelButton = getByTestId("share-cancel-button");
     fireEvent.click(cancelButton);
     expect(queryByTestId("share-dialog")).toBeVisible();
