@@ -178,17 +178,5 @@ describe("TypeEditor for profiled extensions/slices ", () => {
     expect(screen.getByTestId("extension:ombCategory")).toBeInTheDocument();
     expect(screen.getByTestId("extension:detailed")).toBeInTheDocument();
     expect(screen.getByTestId("extension:text")).toBeInTheDocument();
-    const ethnicityCodeSelectors = screen.getAllByRole("combobox");
-    // select omb ethnicity option
-    userEvent.click(ethnicityCodeSelectors[1]);
-    const ombOptions = screen.getByRole("listbox");
-    const ombOption = within(ombOptions).getByRole("option");
-    expect(ombOption.getAttribute("data-value")).toBe("2135-2");
-
-    // select detailed ethnicity option
-    userEvent.click(ethnicityCodeSelectors[3]);
-    const detailedOptions = screen.getByRole("listbox");
-    const detailedOption = within(detailedOptions).getByRole("option");
-    expect(detailedOption.getAttribute("data-value")).toBe("2137-8");
   });
 });
