@@ -3,11 +3,7 @@ import tw from "twin.macro";
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureMetadata from "./measureMetadata/MeasureMetadata";
-import {
-  measureStore,
-  useDocumentTitle,
-  useFeatureFlags,
-} from "@madie/madie-util";
+import { measureStore, useDocumentTitle } from "@madie/madie-util";
 import StewardAndDevelopers from "./stewardAndDevelopers/StewardAndDevelopers";
 import ModelAndMeasurementPeriod from "./modelAndMeasurementPeriod/ModelAndMeasurementPeriod";
 import "./MeasureDetails.scss";
@@ -25,6 +21,7 @@ export interface RouteHandlerState {
 export interface MeasureDetailsProps {
   setErrorMessage: Function;
   isQDM: boolean;
+  featureFlags;
 }
 
 export interface LinkItem {
@@ -42,7 +39,7 @@ export interface Link {
 }
 
 export default function MeasureDetails(props: MeasureDetailsProps) {
-  const { setErrorMessage, isQDM } = props;
+  const { setErrorMessage, isQDM, featureFlags } = props;
   useDocumentTitle("MADiE Edit Measure Details");
   const location = useLocation();
   const { pathname } = location;
@@ -179,8 +176,6 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
     },
   ] as Link[];
 
-  const featureFlags = useFeatureFlags();
-
   if (isQDM) {
     links[1].links.splice(3, 0, {
       title: "Definition",
@@ -212,7 +207,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
       displayCompletedIcon: !!measure?.measureMetaData.measureSetTitle,
     });
   } else {
-    if (featureFlags.QICoreMeasureDefinitions) {
+    if (featureFlags?.QICoreMeasureDefinitions) {
       links[1].links.push({
         title: "Definition",
         href: measureDefinitionLink,
@@ -372,7 +367,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               />
             </>
           )}
-          {!isQDM && featureFlags.QICoreMeasureDefinitions && (
+          {!isQDM && featureFlags?.QICoreMeasureDefinitions && (
             <>
               <Route
                 path={measureDefinitionLink}

@@ -208,21 +208,23 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
   >([]);
 
   const managePagination = useCallback(() => {
-    if (measureDefinitions.length < currentLimit) {
-      setOffset(0);
-      setVisibleDefinitions([...measureDefinitions]);
-      setVisibleItems(measureDefinitions.length);
-      setTotalItems(measureDefinitions.length);
-      setTotalPages(1);
-    } else {
-      const start = (currentPage - 1) * currentLimit;
-      const end = start + currentLimit;
-      const newVisibleDefinitions = [...measureDefinitions].slice(start, end);
-      setOffset(start);
-      setVisibleDefinitions(newVisibleDefinitions);
-      setVisibleItems(newVisibleDefinitions.length);
-      setTotalItems(measureDefinitions.length);
-      setTotalPages(Math.ceil(measureDefinitions.length / currentLimit));
+    if (measureDefinitions?.length > 0) {
+      if (measureDefinitions?.length < currentLimit) {
+        setOffset(0);
+        setVisibleDefinitions([...measureDefinitions]);
+        setVisibleItems(measureDefinitions.length);
+        setTotalItems(measureDefinitions.length);
+        setTotalPages(1);
+      } else {
+        const start = (currentPage - 1) * currentLimit;
+        const end = start + currentLimit;
+        const newVisibleDefinitions = [...measureDefinitions].slice(start, end);
+        setOffset(start);
+        setVisibleDefinitions(newVisibleDefinitions);
+        setVisibleItems(newVisibleDefinitions.length);
+        setTotalItems(measureDefinitions.length);
+        setTotalPages(Math.ceil(measureDefinitions.length / currentLimit));
+      }
     }
   }, [
     currentLimit,
@@ -260,14 +262,14 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
       setOpen(true);
     }
     setSelectedDefinition(
-      measure?.measureMetaData?.measureDefinitions.find((definition) => {
+      measure?.measureMetaData?.measureDefinitions?.find((definition) => {
         return id === definition.id;
       })
     );
   };
 
   const handleSearch = () => {
-    const filtered = measure?.measureMetaData?.measureDefinitions.filter(
+    const filtered = measure?.measureMetaData?.measureDefinitions?.filter(
       (def) =>
         def.term
           .toLowerCase()
@@ -280,10 +282,9 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
   };
   const handleClearSearch = () => {
     if (formik.values.searchValue) {
-      formik.values.searchValue = "";
+      formik.resetForm();
       setCurrentPage(1);
       setMeasureDefinitions(measure?.measureMetaData?.measureDefinitions);
-      navigate(`?page=1&limit=${values?.limit || 10}`);
     }
   };
 
@@ -435,7 +436,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
               </tr>
             </thead>
             <tbody data-testId="measure-definitions-table-body">
-              {measureDefinitions.length > 0 ? (
+              {measureDefinitions?.length > 0 ? (
                 visibleDefinitions.map((definition, index) => (
                   <MeasureMetaDataRow
                     name={definition.term}
