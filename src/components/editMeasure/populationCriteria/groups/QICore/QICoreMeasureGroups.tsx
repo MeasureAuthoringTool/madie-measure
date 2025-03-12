@@ -632,7 +632,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           setToastOpen(true);
           setToastType("success");
           setToastMessage(
-            "Measure criteria successfully deleted. Your Criteria's and populations have been re numbered."
+            "Measure criteria successfully deleted. Your Criteria and populations have been re numbered."
           );
         }
       });
