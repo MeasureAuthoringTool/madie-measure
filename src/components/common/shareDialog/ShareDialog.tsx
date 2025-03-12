@@ -29,7 +29,7 @@ import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import "../../measureLanding/MeasureLanding.scss";
-import tw, { css } from "twin.macro";
+import tw from "twin.macro";
 import "styled-components/macro";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 import { useFormik } from "formik";
