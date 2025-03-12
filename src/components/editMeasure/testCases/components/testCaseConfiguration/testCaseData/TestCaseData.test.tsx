@@ -68,6 +68,7 @@ jest.mock("@madie/madie-util", () => ({
 }));
 
 const setExecutionContextReady = jest.fn();
+const mockWarning = jest.fn();
 
 // mocking testCaseService
 jest.mock("../../../api/useTestCaseServiceApi");
@@ -88,7 +89,13 @@ function renderTestCaseDataComponent() {
           contextFailure: false,
         }}
       >
-        <TestCaseData />
+        <TestCaseData
+          errors={[]}
+          warnings={[]}
+          setErrors={() => {}}
+          setImportWarnings={() => {}}
+          setWarnings={mockWarning}
+        />
       </QdmExecutionContextProvider>
     </ApiContextProvider>
   );
@@ -329,12 +336,7 @@ describe("TestCaseData", () => {
     act(() => {
       fireEvent.click(saveButton);
     });
-
-    await waitFor(() => {
-      expect(
-        screen.getByTestId("shift-all-test-case-dates-generic-error-text")
-      ).toHaveTextContent("something went wrong");
-    });
+    await waitFor(() => expect(mockWarning.mock.calls).toHaveLength(1));
   });
 
   it("should display disabled state of the form when user doesn't have authorization to edit", () => {
