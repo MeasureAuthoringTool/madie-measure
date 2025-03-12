@@ -500,6 +500,7 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
+                  featureFlags={{ QICoreMeasureDefinitions: true }}
                 />
               }
             />
@@ -518,11 +519,6 @@ describe("MeasureDetails component", () => {
   });
 
   it("should not render qi-core measure definitions if feature flag is not on", () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => {
-      return {
-        QICoreMeasureDefinitions: false,
-      };
-    });
     const { getByTestId, queryByTestId } = render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
@@ -533,6 +529,7 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
+                  featureFlags={{ QICoreMeasureDefinitions: false }}
                 />
               }
             />
