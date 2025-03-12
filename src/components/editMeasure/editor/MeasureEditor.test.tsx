@@ -676,6 +676,75 @@ describe("MeasureEditor component", () => {
       ).not.toBeInTheDocument()
     );
   });
+
+  it("should remove concept successfully", async () => {
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => {
+        return {
+          cql: "library RemoveConceptTest version '0.0.000'\nusing QDM version '5.6'",
+          isLibraryStatementChanged: false,
+          isUsingStatementChanged: false,
+          isValueSetChanged: false,
+          isConceptRemoved: true,
+        };
+      });
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        translation: null,
+        externalErrors: [],
+      });
+    });
+    const measureWithCqlCodes = {
+      ...measure,
+      model: Model.QDM_5_6,
+      cql:
+        "library RemoveConceptTest version '0.0.000'\n" +
+        "\n" +
+        "using QDM version '5.6'\n",
+    } as Measure;
+    const cqlWithNoConcept =
+      "library RemoveConceptTest version '0.0.000'\nusing QDM version '5.6'";
+    mockedAxios.put.mockImplementation((args) => {
+      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        return Promise.resolve({ data: measureWithCqlCodes });
+      }
+    });
+    const { getByTestId } = renderEditor(measureWithCqlCodes);
+
+    // set new value to editor
+    fireEvent.change(getByTestId("measure-editor"), {
+      target: {
+        value:
+          "library RemoveCodeTest version '0.0.000'\n" +
+          "\n" +
+          "using QDM version '5.6'\n" +
+          "\n" +
+          'concept "Type B Hepatitis": { "Hepatitis Type B (SNOMED)", "Hepatitis Type B (ICD-10)" } display \'Type B Hepatitis\'\n' +
+          "\n" +
+          "Concept {\n" +
+          "Code '66071002' from \"SNOMED-CT\",\n" +
+          "Code 'B18.1' from \"ICD-10-CM\"\n" +
+          "} display 'Type B viral hepatitis'\n",
+      },
+    });
+    // click on save button
+    fireEvent.click(getByTestId("save-cql-btn"));
+    await waitFor(() => {
+      const success = getByTestId("generic-success-text-header");
+      expect(success.textContent).toEqual(
+        "CQL updated successfully but the following issues were found"
+      );
+    });
+    await waitFor(() => {
+      const editor = screen.getByTestId("measure-editor");
+      expect(editor).toHaveValue(cqlWithNoConcept);
+    });
+    expect(screen.getByTestId("library-warning")).toHaveTextContent(
+      "Concept Constructs are not supported in MADiE. It has been removed."
+    );
+  });
 });
 
 describe("mapElmErrorsToAceAnnotations", () => {

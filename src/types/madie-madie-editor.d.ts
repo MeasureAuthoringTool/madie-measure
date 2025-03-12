@@ -174,6 +174,7 @@ declare module "@madie/madie-editor" {
     isUsingStatementChanged?: boolean;
     isValueSetChanged?: boolean;
     isFhirHelpersAliasChanged?: boolean;
+    isConceptRemoved?: boolean;
   }
   export const parseContent: (content: string) => CqlError[];
   export const validateContent: (
@@ -192,6 +193,7 @@ declare module "@madie/madie-editor" {
   ) => Promise<UpdatedCqlObject>;
 
   export function isUsingEmpty(editorVal: string): boolean;
+  export function isPatientContext(editorVal: string): boolean;
 
   export const MadieTerminologyEditor: FC<EditorPropsType>;
   export const MadieEditor: FC<EditorPropsType>;
