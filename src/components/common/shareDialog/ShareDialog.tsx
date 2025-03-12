@@ -23,8 +23,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { Measure } from "@madie/madie-models";
-import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
@@ -33,6 +31,8 @@ import "../../measureLanding/MeasureLanding.scss";
 import tw from "twin.macro";
 import "styled-components/macro";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 const icon = <CheckBoxOutlineBlankIcon fontSize="large" />;
@@ -41,6 +41,12 @@ const keyboardArrowStyles = {
   color: "#0073C8",
   width: 40,
   height: 40,
+};
+
+const sortSharedMeasures = (a: SharedMeasure, b: SharedMeasure) => {
+  return (
+    b.dateShared.localeCompare(a.dateShared) || a.userId.localeCompare(b.userId)
+  );
 };
 
 interface ShareDialogProps {
@@ -59,14 +65,77 @@ interface SharedMeasure {
 }
 
 const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
-  const measureSearchApi = useRef(useMeasureServiceApi());
+  const measureServiceApi = useRef(useMeasureServiceApi()).current;
 
   const [sharedMeasures, setSharedMeasures] = useState<SharedMeasure[]>([]);
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [sharedWithAllSelectedMeasures, setSharedWithAllSelectedMeasures] =
+    useState<boolean>(false);
+  const [saveDisabled, setSaveDisabled] = useState<boolean>(true);
 
-  const getSharedMeasure = useCallback(() => {
+  const harpIdCheck = (isSharedWithAllSelectedMeasures: boolean) => {
+    return {
+      message: `The selected measure(s) are already shared with this user.`,
+      test: () => {
+        return !isSharedWithAllSelectedMeasures;
+      },
+    };
+  };
+
+  const formik = useFormik({
+    initialValues: {
+      harpId: "",
+    },
+    validationSchema: Yup.object().shape({
+      harpId: Yup.string().test(harpIdCheck(sharedWithAllSelectedMeasures)),
+    }),
+    onSubmit: (values) => {
+      handleSubmit(values);
+    },
+  });
+
+  const handleSubmit = (values) => {
+    let sharedWithAllSelectedMeasures = true;
+
+    let updatedSharedMeasures = sharedMeasures.map((measure) => {
+      if (
+        measure.subRows.length &&
+        measure.subRows.some((subRow) => subRow.userId === values.harpId)
+      ) {
+        return { ...measure };
+      } else {
+        sharedWithAllSelectedMeasures = false;
+
+        return {
+          ...measure,
+          subRows: [
+            ...measure.subRows,
+            {
+              measureId: measure.measureId,
+              measureName: "",
+              userId: values.harpId,
+              dateShared: new Date().toLocaleDateString(),
+              subRows: null,
+            },
+          ].sort(sortSharedMeasures),
+        };
+      }
+    });
+
+    setSharedMeasures(updatedSharedMeasures);
+
+    if (!sharedWithAllSelectedMeasures) {
+      setSaveDisabled(false);
+      formik.resetForm();
+    }
+
+    setSharedWithAllSelectedMeasures(sharedWithAllSelectedMeasures);
+    formik.validateForm();
+  };
+
+  const getSharedMeasure = useCallback(async () => {
     if ((measures && measures?.length === 0) || !open) {
       return;
     }
@@ -75,39 +144,57 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
     setErrorMessage("");
     setLoading(true);
 
-    const measureMap = new Map(
-      measures.map((measure) => [measure.id, measure])
-    );
-    const measureIds = Array.from(measureMap.keys());
+    const uniqueMeasureSets = [
+      ...new Map(measures.map((item) => [item.measureSetId, item])).values(),
+    ];
 
-    measureSearchApi.current
-      .getSharedWithUserIds(measureIds)
-      .then((response) => {
-        setSharedMeasures(
-          measureIds.map((measureId) => ({
+    try {
+      const responses = await Promise.all(
+        uniqueMeasureSets.map(async (measureSet) => {
+          const response = await measureServiceApi.getMeasuresByMeasureSetId(
+            measureSet.measureSetId
+          );
+          return response[response.length - 1];
+        })
+      );
+      const measureIds = responses.map((measure) => measure.id);
+      const measureMap = new Map(
+        responses.map((measure) => [measure.id, measure])
+      );
+
+      const sharedWithUserIds = await measureServiceApi.getSharedWithUserIds(
+        measureIds
+      );
+      setSharedMeasures(
+        measureIds
+          .map((measureId) => ({
             measureId,
             measureName: measureMap.get(measureId).measureName,
             userId: "",
             dateShared: "",
-            subRows: response[measureId].map((userId) => ({
+            subRows: sharedWithUserIds[measureId].map((userId) => ({
               measureId,
               userId,
               dateShared: "-",
             })),
           }))
-        );
-      })
-      .catch((error) => {
-        setErrorMessage(error.message);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+          .sort(sortSharedMeasures)
+      );
+    } catch (error) {
+      setErrorMessage(error.message);
+    } finally {
+      setLoading(false);
+    }
   }, [open]);
 
   useEffect(() => {
     getSharedMeasure();
   }, [getSharedMeasure]);
+
+  useEffect(() => {
+    table.resetExpanded();
+    formik.resetForm();
+  }, [onClose]);
 
   const columns = useMemo<ColumnDef<SharedMeasure>[]>(() => {
     let columnDefs = [];
@@ -119,7 +206,7 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
           <TruncateText
             text={info.row.original.measureName}
             maxLength={120}
-            dataTestId={`measure-name-${info.row.original.measureName}`}
+            dataTestId={`measure-name-${info.row.original.measureName}_${info.row.original.measureId}`}
           />
         ),
         accessorKey: "measureName",
@@ -132,14 +219,14 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
             <TruncateText
               text={info.row.original.measureName}
               maxLength={120}
-              dataTestId={`measure-name-${info.row.original.measureName}`}
+              dataTestId={`measure-name-${info.row.original.measureName}_${info.row.original.measureId}`}
             />
           ) : (
             <Checkbox
               icon={icon}
               checkedIcon={checkedIcon}
               checked={true}
-              data-testid={`unshare-checkbox-${info.row.original.measureId}-${info.row.original.userId}`}
+              data-testid={`unshare-checkbox-${info.row.original.userId}_${info.row.original.measureId}`}
             />
           ),
         accessorKey: "measureName",
@@ -154,7 +241,7 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
           <TruncateText
             text={info.row.original.userId}
             maxLength={120}
-            dataTestId={`user-${info.row.original.userId}`}
+            dataTestId={`user-${info.row.original.userId}_${info.row.original.measureId}`}
           />
         ),
         accessorKey: "userId",
@@ -165,7 +252,7 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
           <TruncateText
             text={info.row.original.dateShared}
             maxLength={120}
-            dataTestId={`date-shared-${info.row.original.dateShared}`}
+            dataTestId={`date-shared-${info.row.original.dateShared}_${info.row.original.measureId}`}
           />
         ),
         accessorKey: "dateShared",
@@ -228,6 +315,7 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
         type: "submit",
         continueText: "Save",
         "data-testid": "share-save-button",
+        disabled: saveDisabled,
       }}
     >
       <div id="measure-landing" data-testid="measure-landing">
@@ -236,26 +324,33 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
             <div>
               <TextField
                 label="HARP ID"
-                id="harp-id-field"
-                name="harpId"
+                id="harp-id-input"
                 inputProps={{
                   "data-testid": "harp-id-input",
                 }}
+                error={Boolean(formik.errors.harpId)}
+                helperText={formik.errors.harpId}
+                onFocus={() => setSharedWithAllSelectedMeasures(false)}
+                {...formik.getFieldProps("harpId")}
               />
             </div>
             <div>
               <Button
-                data-testid={`add-user-btn`}
+                id="add-user-btn"
+                data-testid="add-user-btn"
                 variant="outline"
-                disabled={true}
-                style={{ marginTop: 20 }}
+                disabled={!formik.getFieldProps("harpId").value}
+                onClick={formik.handleSubmit}
               >
                 Add User
               </Button>
             </div>
           </div>
         )}
-
+        <div style={{ marginLeft: 32, marginRight: 32 }}>
+          When sharing a measure, all versions and drafts are shared, so only
+          the most recent measure name appears here.
+        </div>
         <div className="measure-table no-margin-top">
           <div className="table" style={{ overflow: "auto" }}>
             <table
@@ -310,7 +405,7 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
                       {row.getVisibleCells().map((cell) => (
                         <td
                           key={cell.id}
-                          data-testid={`measure-name-${cell.id}`}
+                          data-testid={`${cell.id}_${cell.row.original.measureId}`}
                         >
                           {flexRender(
                             cell.column.columnDef.cell,
