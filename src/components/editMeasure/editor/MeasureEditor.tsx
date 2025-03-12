@@ -465,6 +465,11 @@ const MeasureEditor = () => {
                   "MADiE does not currently support use of value set version directly in measures at this time. Your value set versions have been removed. Please use the relevant manifest for value set expansion for testing."
                 );
               }
+              if (updatedCqlObj.isConceptRemoved) {
+                secondaryMessages.push(
+                  "Concept Constructs are not supported in MADiE. It has been removed."
+                );
+              }
               if (secondaryMessages.length > 0) {
                 primaryMessage += " but the following issues were found";
               }
