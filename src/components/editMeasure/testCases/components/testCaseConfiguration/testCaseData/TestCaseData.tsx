@@ -82,6 +82,7 @@ const TestCaseData = (props: TestCaseListProps) => {
   const handleSubmit = async (values) => {
     //TODO. could we make the APIs return the same structure so we don't need two separate error handlers?
     // sure Greg ...  Tech Debt MAT-8377
+    //  OTOH, I think there is ticket for just getting rid of the TestCaseData testShiftCase https://jira.cms.gov/browse/MAT-8379
     if (isQdm) {
       testCaseService.current
         .shiftAllQdmTestCaseDates(
