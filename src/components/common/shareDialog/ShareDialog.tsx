@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
+import GlobalStyles from "../../../styles/GlobalStyles";
 import { Backdrop, Checkbox, Typography } from "@mui/material";
 import {
   TextField,
@@ -296,139 +297,146 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
   });
 
   return (
-    <MadieDialog
-      form={false}
-      title={option}
-      dialogProps={{
-        onClose,
-        open,
-        maxWidth: "lg",
-        "data-testid": "share-dialog",
-      }}
-      cancelButtonProps={{
-        variant: "outline",
-        cancelText: "Cancel",
-        "data-testid": "share-cancel-button",
-      }}
-      continueButtonProps={{
-        variant: "cyan",
-        type: "submit",
-        continueText: "Save",
-        "data-testid": "share-save-button",
-        disabled: saveDisabled,
-      }}
-    >
-      <div id="measure-landing" data-testid="measure-landing">
-        {option === "Share With" && (
-          <div id="add-user-id-search">
-            <div>
-              <TextField
-                label="HARP ID"
-                id="harp-id-input"
-                inputProps={{
-                  "data-testid": "harp-id-input",
-                }}
-                error={Boolean(formik.errors.harpId)}
-                helperText={formik.errors.harpId}
-                onFocus={() => setSharedWithAllSelectedMeasures(false)}
-                {...formik.getFieldProps("harpId")}
-              />
-            </div>
-            <div>
-              <Button
-                id="add-user-btn"
-                data-testid="add-user-btn"
-                variant="outline"
-                disabled={!formik.getFieldProps("harpId").value}
-                onClick={formik.handleSubmit}
-              >
-                Add User
-              </Button>
-            </div>
-          </div>
-        )}
-        <div style={{ marginLeft: 32, marginRight: 32 }}>
-          When sharing a measure, all versions and drafts are shared, so only
-          the most recent measure name appears here.
-        </div>
-        <div className="measure-table no-margin-top">
-          <div className="table" style={{ overflow: "auto" }}>
-            <table
-              tw="min-w-full"
-              data-testid="share-measure-tbl"
-              className="ml-table"
-              style={{
-                borderSpacing: "0 2em !important",
-                borderBottom: "1px solid rgb(140, 140, 140)",
-              }}
-            >
-              <thead tw="bg-slate">
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => {
-                      const isHovered = hoveredHeader?.includes(header.id);
-                      return (
-                        <TH
-                          key={header.id}
-                          scope="col"
-                          onClick={header.column.getToggleSortingHandler()}
-                          onMouseEnter={() => setHoveredHeader(header.id)}
-                          onMouseLeave={() => setHoveredHeader(null)}
-                          className="header-cell"
-                        >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                        </TH>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </thead>
-              <tbody className="table-body" style={{ padding: 20 }}>
-                {errorMessage ? (
-                  <tr>
-                    <td colSpan={columns.length}>{errorMessage}</td>
-                  </tr>
-                ) : (
-                  table.getRowModel().rows.map((row) => (
-                    <tr
-                      key={row.id}
-                      className="ml-tr"
-                      data-testid={`row-item`}
-                      style={{
-                        borderTop: "solid 1px #8c8c8c",
-                        borderSpacing: "0 2em !important",
-                      }}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <td
-                          key={cell.id}
-                          data-testid={`${cell.id}_${cell.row.original.measureId}`}
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </td>
-                      ))}
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      <Backdrop
-        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={loading}
+    <>
+      <GlobalStyles />
+      <MadieDialog
+        form={false}
+        title={option}
+        dialogProps={{
+          onClose,
+          open,
+          maxWidth: "lg",
+          "data-testid": "share-dialog",
+        }}
+        cancelButtonProps={{
+          variant: "outline",
+          cancelText: "Cancel",
+          "data-testid": "share-cancel-button",
+        }}
+        continueButtonProps={{
+          variant: "cyan",
+          type: "submit",
+          continueText: "Save",
+          "data-testid": "share-save-button",
+          disabled: saveDisabled,
+        }}
       >
-        <MadieSpinner style={{ height: 50, width: 50 }} />
-        <Typography color="inherit">Loading shared measures...</Typography>
-      </Backdrop>
-    </MadieDialog>
+        <div id="measure-landing" data-testid="measure-landing">
+          {option === "Share With" && (
+            <div id="add-user-id-search">
+              <div>
+                <TextField
+                  label="HARP ID"
+                  id="harp-id-input"
+                  inputProps={{
+                    "data-testid": "harp-id-input",
+                  }}
+                  error={Boolean(formik.errors.harpId)}
+                  helperText={formik.errors.harpId}
+                  onFocus={() => setSharedWithAllSelectedMeasures(false)}
+                  {...formik.getFieldProps("harpId")}
+                />
+              </div>
+              <div>
+                <Button
+                  id="add-user-btn"
+                  data-testid="add-user-btn"
+                  variant="outline"
+                  disabled={!formik.getFieldProps("harpId").value}
+                  onClick={formik.handleSubmit}
+                >
+                  Add User
+                </Button>
+              </div>
+            </div>
+          )}
+          <div style={{ marginLeft: 32, marginRight: 32 }}>
+            When sharing a measure, all versions and drafts are shared, so only
+            the most recent measure name appears here.
+          </div>
+          <div className="measure-table no-margin-top">
+            <div className="table" style={{ overflow: "auto" }}>
+              <table
+                tw="min-w-full"
+                data-testid="share-measure-tbl"
+                className="ml-table"
+                style={{
+                  borderSpacing: "0 2em !important",
+                  borderBottom: "1px solid rgb(140, 140, 140)",
+                }}
+              >
+                <thead tw="bg-slate">
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <tr key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => {
+                        const isHovered = hoveredHeader?.includes(header.id);
+                        return (
+                          <TH
+                            key={header.id}
+                            scope="col"
+                            onClick={header.column.getToggleSortingHandler()}
+                            onMouseEnter={() => setHoveredHeader(header.id)}
+                            onMouseLeave={() => setHoveredHeader(null)}
+                            className="header-cell"
+                          >
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                          </TH>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </thead>
+                <tbody className="table-body" style={{ padding: 20 }}>
+                  {errorMessage ? (
+                    <tr>
+                      <td colSpan={columns.length}>{errorMessage}</td>
+                    </tr>
+                  ) : (
+                    table.getRowModel().rows.map((row) => (
+                      <tr
+                        key={row.id}
+                        className={
+                          row.original.measureName
+                            ? String.raw`ml-tr`
+                            : String.raw`ml-tr subtr`
+                        }
+                        data-testid={`row-item`}
+                        style={{
+                          borderTop: "solid 1px #8c8c8c",
+                          borderSpacing: "0 2em !important",
+                        }}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <td
+                            key={cell.id}
+                            data-testid={`${cell.id}_${cell.row.original.measureId}`}
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <Backdrop
+          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={loading}
+        >
+          <MadieSpinner style={{ height: 50, width: 50 }} />
+          <Typography color="inherit">Loading shared measures...</Typography>
+        </Backdrop>
+      </MadieDialog>
+    </>
   );
 };
 
