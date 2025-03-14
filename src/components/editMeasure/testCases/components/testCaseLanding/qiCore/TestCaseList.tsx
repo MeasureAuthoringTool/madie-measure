@@ -388,11 +388,9 @@ const TestCaseList = (props: TestCaseListProps) => {
     try {
       abortController.current = new AbortController();
       const { ecqmTitle, model, version } = measure ?? {};
-      const testCaseIds: string[] = [];
+      let testCaseIds: string[] = [];
       if (selectedTestCaseIds && selectedTestCaseIds.length > 0) {
-        selectedTestCases.forEach((testCase) => {
-          testCaseIds.push(testCase.id);
-        });
+        testCaseIds = selectedTestCaseIds;
       } else {
         measure?.testCases?.forEach((testCase) => {
           testCaseIds.push(testCase.id);
