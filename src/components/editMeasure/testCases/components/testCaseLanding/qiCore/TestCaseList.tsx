@@ -372,13 +372,24 @@ const TestCaseList = (props: TestCaseListProps) => {
     }
   };
 
+  const [selectedTestCaseIds, setSelectedTestCaseIds] = useState<string[]>();
+  useEffect(() => {
+    const testCaseIds: string[] = [];
+    if (selectedTestCases) {
+      selectedTestCases.forEach((testCase) => {
+        testCaseIds.push(testCase.id);
+      });
+    }
+    setSelectedTestCaseIds(testCaseIds);
+  }, [selectedTestCases]);
+
   const exportTestCases = async (bundleType: string) => {
     setExportOptionsOpen(false);
     try {
       abortController.current = new AbortController();
       const { ecqmTitle, model, version } = measure ?? {};
       const testCaseIds: string[] = [];
-      if (selectedTestCases && selectedTestCases.size > 0) {
+      if (selectedTestCaseIds && selectedTestCaseIds.length > 0) {
         selectedTestCases.forEach((testCase) => {
           testCaseIds.push(testCase.id);
         });
