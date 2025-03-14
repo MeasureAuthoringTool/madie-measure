@@ -44,10 +44,25 @@ const keyboardArrowStyles = {
   height: 40,
 };
 
+//Convert date string to format of mm/dd/yyyy with no leading zeroes in month
+const convertDate = (date: string) => {
+  if (!date) {
+    return "";
+  }
+  const dateObj = new Date(date);
+  const year = dateObj.getUTCFullYear().toString();
+  const month = String(dateObj.getUTCMonth() + 1);
+  const day = String(dateObj.getUTCDate()).padStart(2, "0");
+  return `${month}/${day}/${year}`;
+};
+
 const sortSharedMeasures = (a: SharedMeasure, b: SharedMeasure) => {
-  return (
-    b.dateShared.localeCompare(a.dateShared) || a.userId.localeCompare(b.userId)
-  );
+  //Move SharedMeasure(s) with dateShared of "-" to end of list
+  if (a.dateShared === "-" || b.dateShared === "-") {
+    return 1;
+  }
+
+  return new Date(b.dateShared).getTime() - new Date(a.dateShared).getTime();
 };
 
 interface ShareDialogProps {
@@ -85,25 +100,22 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
     };
   };
 
-  const formik = useFormik({
-    initialValues: {
-      harpId: "",
-    },
-    validationSchema: Yup.object().shape({
-      harpId: Yup.string().test(harpIdCheck(sharedWithAllSelectedMeasures)),
-    }),
-    onSubmit: (values) => {
-      handleSubmit(values);
-    },
-  });
+  const handleAdd = () => {
+    // Remove all spaces from harpId
+    const harpId = formik.getFieldProps("harpId").value.replace(/\s/g, "");
 
-  const handleSubmit = (values) => {
+    // If no harpId is passed in (string with all whitespace), only clear out the harpId field
+    if (!harpId) {
+      formik.setFieldValue("harpId", "");
+      return;
+    }
+
     let sharedWithAllSelectedMeasures = true;
 
     let updatedSharedMeasures = sharedMeasures.map((measure) => {
       if (
         measure.subRows.length &&
-        measure.subRows.some((subRow) => subRow.userId === values.harpId)
+        measure.subRows.some((subRow) => subRow.userId === harpId)
       ) {
         return { ...measure };
       } else {
@@ -112,15 +124,15 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
         return {
           ...measure,
           subRows: [
-            ...measure.subRows,
             {
               measureId: measure.measureId,
               measureName: "",
-              userId: values.harpId,
+              userId: harpId,
               dateShared: new Date().toLocaleDateString(),
               subRows: null,
             },
-          ].sort(sortSharedMeasures),
+            ...measure.subRows,
+          ],
         };
       }
     });
@@ -135,6 +147,16 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
     setSharedWithAllSelectedMeasures(sharedWithAllSelectedMeasures);
     formik.validateForm();
   };
+
+  const formik = useFormik({
+    initialValues: {
+      harpId: "",
+    },
+    validationSchema: Yup.object().shape({
+      harpId: Yup.string().test(harpIdCheck(sharedWithAllSelectedMeasures)),
+    }),
+    onSubmit: handleAdd,
+  });
 
   const getSharedMeasure = useCallback(async () => {
     if ((measures && measures?.length === 0) || !open) {
@@ -173,9 +195,9 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
               measureId,
               userId,
               dateShared: "-",
-            })),
-          }))
-          .sort(sortSharedMeasures)
+            }))
+            .sort(sortSharedMeasures),
+        }))
       );
     } catch (error) {
       setErrorMessage(error.message);
@@ -189,6 +211,7 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
   }, [getSharedMeasure]);
 
   useEffect(() => {
+    setSaveDisabled(true);
     table.resetExpanded();
     formik.resetForm();
   }, [onClose]);
@@ -247,7 +270,13 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
         header: "Date Shared",
         cell: (info) => (
           <TruncateText
-            text={info.row.original.dateShared}
+            text={
+              info.row.original.dateShared === "-"
+                ? "-"
+                : info.row.original.dateShared
+                ? convertDate(info.row.original.dateShared)
+                : ""
+            }
             maxLength={120}
             dataTestId={`date-shared-${info.row.original.dateShared}_${info.row.original.measureId}`}
           />

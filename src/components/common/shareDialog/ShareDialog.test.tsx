@@ -372,6 +372,45 @@ describe("Create Share Dialog component", () => {
     });
   });
 
+  it("should not add any user row to the grid for any measure if a string with all whitespace is entered", async () => {
+    render(
+      <ShareDialog
+        measures={[mockMeasure1]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+    expect(await screen.findByTestId("share-measure-tbl")).toBeInTheDocument();
+    expect(mockMeasureServiceApi.getSharedWithUserIds).toBeCalled();
+
+    const addUserBtn = await screen.findByTestId("add-user-btn");
+    expect(addUserBtn).toBeDisabled();
+    const saveBtn = await screen.findByTestId("share-save-button");
+    expect(saveBtn).toBeDisabled();
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+    expect(harpIdInput).toBeInTheDocument();
+
+    const userIdWithAllwhiteSpace = "    ";
+
+    fireEvent.change(harpIdInput, {
+      target: { value: userIdWithAllwhiteSpace },
+    });
+    expect(harpIdInput.value).toBe(userIdWithAllwhiteSpace);
+    expect(addUserBtn).toBeEnabled();
+
+    fireEvent.click(addUserBtn);
+
+    await waitFor(() => {
+      expect(addUserBtn).toBeDisabled();
+      expect(saveBtn).toBeDisabled();
+      expect(harpIdInput.value).toBe("");
+    });
+  });
+
   it("should add a user row to the grid for each measure that does not already have that user", async () => {
     render(
       <ShareDialog
@@ -396,6 +435,91 @@ describe("Create Share Dialog component", () => {
 
     fireEvent.change(harpIdInput, { target: { value: "userId3" } });
     expect(harpIdInput.value).toBe("userId3");
+    expect(addUserBtn).toBeEnabled();
+
+    fireEvent.click(addUserBtn);
+
+    await waitFor(() => {
+      expect(addUserBtn).toBeDisabled();
+      expect(saveBtn).toBeEnabled();
+      expect(harpIdInput.value).toBe("");
+    });
+
+    const expandButtonMockMeasure1 = screen.getByTestId(
+      `expand-button-TestMeasureId1`
+    );
+    fireEvent.click(expandButtonMockMeasure1);
+
+    const expandButtonMockMeasure2 = screen.getByTestId(
+      `expand-button-TestMeasureId2`
+    );
+    fireEvent.click(expandButtonMockMeasure2);
+
+    //Row 1
+    expect(
+      screen.getByTestId("0_measureName_TestMeasureId1")
+    ).toHaveTextContent("The Measure for Testing 1");
+    //Subrow 1 of Row 1
+    expect(screen.getByTestId("0.0_userId_TestMeasureId1")).toHaveTextContent(
+      "userId3"
+    );
+    expect(
+      screen.getByTestId("0.0_dateShared_TestMeasureId1")
+    ).toHaveTextContent(date);
+
+    //Row 2
+    expect(
+      screen.getByTestId("1_measureName_TestMeasureId2")
+    ).toHaveTextContent("The Measure for Testing 2");
+    //Subrow 1 of Row 2
+    expect(screen.getByTestId("1.0_userId_TestMeasureId2")).toHaveTextContent(
+      "userId3"
+    );
+    expect(
+      screen.getByTestId("1.0_dateShared_TestMeasureId2")
+    ).toHaveTextContent(date);
+    //Subrow 2 of Row 2
+    expect(screen.getByTestId("1.1_userId_TestMeasureId2")).toHaveTextContent(
+      "userId1"
+    );
+    expect(
+      screen.getByTestId("1.1_dateShared_TestMeasureId2")
+    ).toHaveTextContent("-");
+    //Subrow 3 of Row 2
+    expect(screen.getByTestId("1.2_userId_TestMeasureId2")).toHaveTextContent(
+      "userId2"
+    );
+    expect(
+      screen.getByTestId("1.2_dateShared_TestMeasureId2")
+    ).toHaveTextContent("-");
+  });
+
+  it("should add a user row to the grid for each measure that does not already have that user (after stripping all whitespace in HARP ID field)", async () => {
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+    expect(await screen.findByTestId("share-measure-tbl")).toBeInTheDocument();
+    expect(mockMeasureServiceApi.getSharedWithUserIds).toBeCalled();
+
+    const addUserBtn = await screen.findByTestId("add-user-btn");
+    expect(addUserBtn).toBeDisabled();
+    const saveBtn = await screen.findByTestId("share-save-button");
+    expect(saveBtn).toBeDisabled();
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+    expect(harpIdInput).toBeInTheDocument();
+
+    const userIdWithExtraSpaces = " userId 3 ";
+
+    fireEvent.change(harpIdInput, { target: { value: userIdWithExtraSpaces } });
+    expect(harpIdInput.value).toBe(userIdWithExtraSpaces);
     expect(addUserBtn).toBeEnabled();
 
     fireEvent.click(addUserBtn);
