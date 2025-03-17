@@ -16,12 +16,7 @@ import {
   PatientCharacteristicRace,
   PatientCharacteristicSex,
 } from "cqm-models";
-import {
-  Measure,
-  MeasureScoring,
-  Model,
-  PopulationType,
-} from "@madie/madie-models";
+import { Measure } from "@madie/madie-models";
 
 const emptyPatient = new QDMPatient();
 jest.mock("../../../../../../util/QdmPatientContext", () => ({
@@ -45,30 +40,7 @@ const mockFormik: FormikContextType<any> = {
   },
   setFieldValue: jest.fn(),
 };
-
 const mockUseQdmPatientDispatch = jest.fn();
-const mockMeasure = {
-  id: "1",
-  measureName: "test measure",
-  scoring: MeasureScoring.COHORT,
-  model: Model.QDM_5_6,
-  createdBy: "test",
-  patientBasis: true,
-  groups: [
-    {
-      id: "test_groupId",
-      scoring: MeasureScoring.COHORT,
-      populations: [
-        {
-          id: "4f0a1989-205f-45df-a476-8e19999d21c7",
-          name: PopulationType.INITIAL_POPULATION,
-          definition: "IP",
-        },
-      ],
-    },
-  ],
-} as Measure;
-
 const cqmMeasure = {
   source_data_criteria: [
     { qdmStatus: "race", codeListId: "2.16.840.1.114222.4.11.836" },
@@ -91,7 +63,7 @@ describe("DemographicsSection", () => {
     render(
       <QdmExecutionContextProvider
         value={{
-          measureState: [mockMeasure, jest.fn()],
+          measureState: [{} as Measure, jest.fn()],
           cqmMeasureState: [cqmMeasure, jest.fn()],
           executionContextReady: true,
           setExecutionContextReady: jest.fn(),

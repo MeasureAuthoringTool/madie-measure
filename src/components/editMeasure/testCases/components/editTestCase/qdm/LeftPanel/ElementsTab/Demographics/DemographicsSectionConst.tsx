@@ -60,6 +60,7 @@ export const getRaceDataElement = (
     : new PatientCharacteristicRace();
   pcr.description = `${pcr.qdmTitle}: ${raceValueSet.name}`;
   pcr.dataElementCodes = [newCode];
+  pcr.codeListId = raceValueSet.oid;
   return pcr;
 };
 
@@ -74,6 +75,7 @@ export const getGenderDataElement = (
     : new PatientCharacteristicSex();
   pcs.description = `${pcs.qdmTitle}: ${genderValueSet.name}`;
   pcs.dataElementCodes = [newCode];
+  pcs.codeListId = genderValueSet.oid;
   return pcs;
 };
 
@@ -91,6 +93,7 @@ export const getEthnicityDataElement = (
     : new PatientCharacteristicEthnicity();
   pce.description = `${pce.qdmTitle}: ${ethnicityValueSet.name}`;
   pce.dataElementCodes = [newCode];
+  pce.codeListId = ethnicityValueSet.oid;
   return pce;
 };
 
