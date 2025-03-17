@@ -372,17 +372,7 @@ const TestCaseList = (props: TestCaseListProps) => {
     }
   };
 
-  const [selectedTestCaseIds, setSelectedTestCaseIds] = useState<string[]>();
-  useEffect(() => {
-    const testCaseIds: string[] = [];
-    if (selectedTestCases) {
-      selectedTestCases.forEach((testCase) => {
-        testCaseIds.push(testCase.id);
-      });
-    }
-    setSelectedTestCaseIds(testCaseIds);
-  }, [selectedTestCases]);
-
+  const selectedTestCaseIds = selectedTestCases?.map((testCase) => testCase.id);
   const exportTestCases = async (bundleType: string) => {
     setExportOptionsOpen(false);
     try {
