@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import ElementSection from "../../../../../common/ElementSection";
 import { Select } from "@madie/madie-design-system/dist/react";
 import FormControl from "@mui/material/FormControl";
-import { DataElement, QDMPatient } from "cqm-models";
+import { DataElement } from "cqm-models";
 import DateTimeInput from "../../../../../common/dateTimeInput/DateTimeInput";
 import dayjs from "dayjs";
 import "./DemographicsSection.scss";
@@ -10,36 +10,32 @@ import utc from "dayjs/plugin/utc";
 
 // utils for
 import {
-  ETHNICITY_CODE_OPTIONS,
-  GENDER_CODE_OPTIONS,
   getBirthDateElement,
   getEthnicityDataElement,
   getGenderDataElement,
   getLivingStatusDataElement,
   getRaceDataElement,
   LIVING_STATUS_CODE_OPTIONS,
-  RACE_CODE_OPTIONS,
   PATIENT_CHARACTERISTIC_EXPIRED,
   getPatientCharacteristicExpiredDateElement,
+  getValueSetForDemographic,
+  getDataElementByStatus,
 } from "./DemographicsSectionConst";
-import { MenuItem as MuiMenuItem } from "@mui/material";
+import { MenuItem, MenuItem as MuiMenuItem, Skeleton } from "@mui/material";
 import {
   PatientActionType,
   useQdmPatient,
 } from "../../../../../../util/QdmPatientContext";
-
-export interface CodeSystem {
-  code: string;
-  display: string;
-  version: string;
-  system: string;
-}
+import { useQdmExecutionContext } from "../../../../../routes/qdm/QdmExecutionContext";
 
 const DemographicsSection = ({ canEdit }) => {
   dayjs.extend(utc);
   dayjs.utc().format(); // utc format
   const { state, dispatch } = useQdmPatient();
   const { patient } = state;
+  // Access cqmMeasure from QdmExecutionContext
+  const { cqmMeasureState, executionContextReady } = useQdmExecutionContext();
+  const [cqmMeasure] = cqmMeasureState;
   // this will be local
   const [raceDataElement, setRaceDataElement] = useState<DataElement>();
   const [genderDataElement, setGenderDataElement] = useState<DataElement>();
@@ -48,7 +44,21 @@ const DemographicsSection = ({ canEdit }) => {
   const [livingStatusDataElement, setLivingStatusDataElement] =
     useState<DataElement>();
 
+  // value sets for Demographics
+  const genderValueSet = getValueSetForDemographic(cqmMeasure, "gender");
+  const raceValueSet = getValueSetForDemographic(cqmMeasure, "race");
+  const ethnicityValueSet = getValueSetForDemographic(cqmMeasure, "ethnicity");
+
   const selectOptions = (options) => {
+    // loading skeleton
+    if (!executionContextReady && !options) {
+      return [<MuiMenuItem value="">Loading...</MuiMenuItem>];
+    }
+
+    if (!options) {
+      return [];
+    }
+
     return [
       options
         .sort((a, b) =>
@@ -71,12 +81,6 @@ const DemographicsSection = ({ canEdit }) => {
           );
         }),
     ];
-  };
-
-  const getDataElementByStatus = (status: string, patient: QDMPatient) => {
-    return patient?.dataElements?.find(
-      (element) => element?.qdmStatus === status
-    );
   };
 
   // this populates the json making it able to be edited. we should only do this before change
@@ -116,9 +120,13 @@ const DemographicsSection = ({ canEdit }) => {
 
   // gender race change
   const handleRaceChange = (event) => {
+    if (!event.target.value) {
+      return;
+    }
     const existingElement = getDataElementByStatus("race", patient);
     const newRaceDataElement: DataElement = getRaceDataElement(
       event.target.value,
+      raceValueSet,
       existingElement
     );
     setRaceDataElement(newRaceDataElement);
@@ -131,9 +139,13 @@ const DemographicsSection = ({ canEdit }) => {
   };
 
   const handleGenderChange = (event) => {
+    if (!event.target.value) {
+      return;
+    }
     const existingElement = getDataElementByStatus("gender", patient);
     const newGenderDataElement: DataElement = getGenderDataElement(
       event.target.value,
+      genderValueSet,
       existingElement
     );
     setGenderDataElement(newGenderDataElement);
@@ -146,9 +158,13 @@ const DemographicsSection = ({ canEdit }) => {
   };
 
   const handleEthnicityChange = (event) => {
+    if (!event.target.value) {
+      return;
+    }
     const existingElement = getDataElementByStatus("ethnicity", patient);
     const newEthnicityDataElement: DataElement = getEthnicityDataElement(
       event.target.value,
+      ethnicityValueSet,
       existingElement
     );
     setEthnicityDataElement(newEthnicityDataElement);
@@ -276,7 +292,6 @@ const DemographicsSection = ({ canEdit }) => {
                 <Select
                   labelId="demographics-race-select-label"
                   id="demographics-race-select-id"
-                  defaultValue="American Indian or Alaska Native"
                   label="Race"
                   disabled={!canEdit}
                   inputProps={{
@@ -285,14 +300,13 @@ const DemographicsSection = ({ canEdit }) => {
                   value={raceDataElement?.dataElementCodes?.[0].display ?? ""}
                   placeHolder={{ name: "Select a Race", value: "" }}
                   onChange={handleRaceChange}
-                  options={selectOptions(RACE_CODE_OPTIONS)}
+                  options={selectOptions(raceValueSet?.concepts)}
                 ></Select>
               </FormControl>
               <FormControl>
                 <Select
                   labelId="demographics-gender-select-label"
                   id="demographics-gender-select-id"
-                  defaultValue="Female"
                   label="Sex"
                   disabled={!canEdit}
                   inputProps={{
@@ -301,7 +315,7 @@ const DemographicsSection = ({ canEdit }) => {
                   value={genderDataElement?.dataElementCodes?.[0].display ?? ""}
                   placeHolder={{ name: "Select a Gender", value: "" }}
                   onChange={handleGenderChange}
-                  options={selectOptions(GENDER_CODE_OPTIONS)}
+                  options={selectOptions(genderValueSet?.concepts)}
                 ></Select>
               </FormControl>
             </div>
@@ -310,7 +324,6 @@ const DemographicsSection = ({ canEdit }) => {
                 <Select
                   labelId="demographics-ethnicity-select-label"
                   id="demographics-ethnicity-select-id"
-                  defaultValue="Hispanic or Latino"
                   label="Ethnicity"
                   disabled={!canEdit}
                   inputProps={{
@@ -321,7 +334,7 @@ const DemographicsSection = ({ canEdit }) => {
                   }
                   placeHolder={{ name: "Select an Ethnicity", value: "" }}
                   onChange={handleEthnicityChange}
-                  options={selectOptions(ETHNICITY_CODE_OPTIONS)}
+                  options={selectOptions(ethnicityValueSet?.concepts)}
                   style={{ minWidth: "250px" }}
                 ></Select>
               </FormControl>

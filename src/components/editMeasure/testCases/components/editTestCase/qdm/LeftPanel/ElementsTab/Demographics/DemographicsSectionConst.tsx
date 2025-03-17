@@ -1,4 +1,5 @@
 import {
+  Measure,
   QDMPatient,
   DataElement,
   DataElementCode,
@@ -9,112 +10,12 @@ import {
   PatientCharacteristicExpired,
 } from "cqm-models";
 
-export interface CodeSystem {
-  code: string;
-  display: string;
-  version: string;
-  system: string;
-}
-
 export const BIRTHDATE_CODE: DataElementCode = {
   code: "21112-8",
   system: "2.16.840.1.113883.6.1",
   version: undefined,
   display: "Birth date",
 };
-
-export const RACE_CODE_OPTIONS: DataElementCode[] = [
-  {
-    code: "1002-5",
-    display: "American Indian or Alaska Native",
-    version: undefined,
-    system: "2.16.840.1.113883.6.238",
-  },
-  {
-    code: "2028-9",
-    display: "Asian",
-    version: undefined,
-    system: "2.16.840.1.113883.6.238",
-  },
-  {
-    code: "2054-5",
-    display: "Black or African American",
-    version: undefined,
-    system: "2.16.840.1.113883.6.238",
-  },
-  {
-    code: "2076-8",
-    display: "Native Hawaiian or Other Pacific Islander",
-    version: undefined,
-    system: "2.16.840.1.113883.6.238",
-  },
-  {
-    code: "2106-3",
-    display: "White",
-    version: undefined,
-    system: "2.16.840.1.113883.6.238",
-  },
-  {
-    code: "2131-1",
-    display: "Other Race",
-    version: undefined,
-    system: "2.16.840.1.113883.6.238",
-  },
-];
-
-export const GENDER_CODE_OPTIONS: DataElementCode[] = [
-  {
-    system: "2.16.840.1.113883.6.96",
-    version: "20240901",
-    code: "184115007",
-    display: "Patient sex unknown (finding)",
-  },
-  {
-    system: "2.16.840.1.113883.6.96",
-    version: "20240901",
-    code: "248152002",
-    display: "Female (finding)",
-  },
-  {
-    system: "2.16.840.1.113883.6.96",
-    version: "20240901",
-    code: "248153007",
-    display: "Male (finding)",
-  },
-  {
-    system: "2.16.840.1.113883.5.1",
-    version: "2023-02-01",
-    code: "F",
-    display: "Female",
-  },
-  {
-    system: "2.16.840.1.113883.5.1",
-    version: "2023-02-01",
-    code: "M",
-    display: "Male",
-  },
-  {
-    system: "2.16.840.1.113883.4.642.4.1048",
-    version: "0.1.0",
-    code: "asked-declined",
-    display: "Asked But Declined",
-  },
-];
-
-export const ETHNICITY_CODE_OPTIONS: DataElementCode[] = [
-  {
-    code: "2135-2",
-    display: "Hispanic or Latino",
-    version: undefined,
-    system: "2.16.840.1.113883.6.238",
-  },
-  {
-    code: "2186-5",
-    display: "Not Hispanic or Latino",
-    version: undefined,
-    system: "2.16.840.1.113883.6.238",
-  },
-];
 
 export const LIVING_STATUS_CODE_OPTIONS = ["Living", "Expired"];
 export const PATIENT_CHARACTERISTIC_EXPIRED: DataElementCode = {
@@ -150,36 +51,45 @@ export const getBirthDateElement = (
 // given a value, return a data element
 export const getRaceDataElement = (
   value: string,
+  raceValueSet,
   existingElement: DataElement
 ): DataElement => {
-  const newCode: DataElementCode = getNewCode(RACE_CODE_OPTIONS, value);
+  const newCode: DataElementCode = getNewCode(raceValueSet.concepts, value);
   const pcr: DataElement = existingElement
     ? new PatientCharacteristicRace(existingElement)
     : new PatientCharacteristicRace();
+  pcr.description = `${pcr.qdmTitle}: ${raceValueSet.name}`;
   pcr.dataElementCodes = [newCode];
   return pcr;
 };
 
 export const getGenderDataElement = (
   value: string,
+  genderValueSet,
   existingElement: DataElement
 ): DataElement => {
-  const newCode: DataElementCode = getNewCode(GENDER_CODE_OPTIONS, value);
+  const newCode: DataElementCode = getNewCode(genderValueSet?.concepts, value);
   const pcs: DataElement = existingElement
     ? new PatientCharacteristicSex(existingElement)
     : new PatientCharacteristicSex();
+  pcs.description = `${pcs.qdmTitle}: ${genderValueSet.name}`;
   pcs.dataElementCodes = [newCode];
   return pcs;
 };
 
 export const getEthnicityDataElement = (
   value: string,
+  ethnicityValueSet,
   existingElement: DataElement
 ): DataElement => {
-  const newCode: DataElementCode = getNewCode(ETHNICITY_CODE_OPTIONS, value);
+  const newCode: DataElementCode = getNewCode(
+    ethnicityValueSet.concepts,
+    value
+  );
   const pce: DataElement = existingElement
     ? new PatientCharacteristicEthnicity(existingElement)
     : new PatientCharacteristicEthnicity();
+  pce.description = `${pce.qdmTitle}: ${ethnicityValueSet.name}`;
   pce.dataElementCodes = [newCode];
   return pce;
 };
@@ -191,9 +101,7 @@ export const getLivingStatusDataElement = (): DataElement => {
 };
 
 export const getNewCode = (options, selectedValue: string) => {
-  const found: CodeSystem = options.find(
-    (option) => selectedValue === option.display
-  );
+  const found = options.find((option) => selectedValue === option.display);
   const newCode: DataElementCode = {
     code: found?.code,
     system: found?.system,
@@ -201,4 +109,40 @@ export const getNewCode = (options, selectedValue: string) => {
     display: found?.display,
   };
   return newCode;
+};
+
+export const getDataElementByStatus = (status: string, patient: QDMPatient) => {
+  return patient?.dataElements?.find(
+    (element) => element?.qdmStatus === status
+  );
+};
+
+export const getValueSetForDemographic = (
+  cqmMeasure: Measure,
+  demographicType: string
+) => {
+  const genderSourceDataCriteria = cqmMeasure?.source_data_criteria?.find(
+    (criteria) => criteria?.qdmStatus === demographicType
+  );
+  if (!genderSourceDataCriteria) {
+    return null;
+  }
+  const valueSet = cqmMeasure?.value_sets?.find(
+    (valueSet) => valueSet.oid === genderSourceDataCriteria?.codeListId
+  );
+  if (!valueSet) {
+    return null;
+  }
+  return {
+    name: valueSet?.display_name,
+    oid: valueSet?.oid,
+    concepts: valueSet?.concepts.map((concept) => {
+      return {
+        system: concept?.code_system_oid,
+        version: concept?.code_system_version,
+        code: concept?.code,
+        display: concept?.display_name,
+      };
+    }),
+  };
 };
