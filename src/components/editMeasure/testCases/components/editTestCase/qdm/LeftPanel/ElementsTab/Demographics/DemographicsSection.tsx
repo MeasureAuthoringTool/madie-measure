@@ -21,7 +21,7 @@ import {
   getValueSetForDemographic,
   getDataElementByStatus,
 } from "./DemographicsSectionConst";
-import { MenuItem, MenuItem as MuiMenuItem, Skeleton } from "@mui/material";
+import { MenuItem } from "@mui/material";
 import {
   PatientActionType,
   useQdmPatient,
@@ -52,7 +52,7 @@ const DemographicsSection = ({ canEdit }) => {
   const selectOptions = (options) => {
     // loading skeleton
     if (!executionContextReady && !options) {
-      return [<MuiMenuItem value="">Loading...</MuiMenuItem>];
+      return [<MenuItem value="">Loading...</MenuItem>];
     }
 
     if (!options) {
@@ -72,12 +72,9 @@ const DemographicsSection = ({ canEdit }) => {
             ? display.replace(/"/g, "")
             : opt?.replace(/"/g, "");
           return (
-            <MuiMenuItem
-              key={`${sanitizedString}-${i}`}
-              value={sanitizedString}
-            >
+            <MenuItem key={`${sanitizedString}-${i}`} value={sanitizedString}>
               {sanitizedString}
-            </MuiMenuItem>
+            </MenuItem>
           );
         }),
     ];
