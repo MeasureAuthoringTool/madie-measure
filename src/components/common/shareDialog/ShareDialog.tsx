@@ -184,14 +184,14 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
         measureIds
       );
       setSharedMeasures(
-        measureIds
-          .map((measureId) => ({
-            measureId,
-            //@ts-ignore
-            measureName: measureMap.get(measureId).measureName,
-            userId: "",
-            dateShared: "",
-            subRows: sharedWithUserIds[measureId].map((userId) => ({
+        measureIds.map((measureId) => ({
+          measureId,
+          //@ts-ignore
+          measureName: measureMap.get(measureId).measureName,
+          userId: "",
+          dateShared: "",
+          subRows: sharedWithUserIds[measureId]
+            .map((userId) => ({
               measureId,
               userId,
               dateShared: "-",
