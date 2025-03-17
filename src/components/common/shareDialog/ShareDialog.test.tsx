@@ -116,7 +116,7 @@ describe("Create Share Dialog component", () => {
     useMeasureServiceMock.mockImplementation(() => {
       return mockMeasureServiceApi;
     });
-    
+
     render(
       <ShareDialog
         measures={[]}
