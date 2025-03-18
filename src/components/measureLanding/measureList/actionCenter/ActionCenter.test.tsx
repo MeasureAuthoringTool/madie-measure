@@ -6,6 +6,7 @@ import {
   checkUserCanEdit,
   useFeatureFlags,
   useOktaTokens,
+  checkUserCanDelete,
 } from "@madie/madie-util";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 
@@ -14,6 +15,7 @@ jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: jest.fn(),
   useOktaTokens: jest.fn(),
   fetchMeasureDraftStatuses: jest.fn(),
+  checkUserCanDelete: jest.fn(),
 }));
 
 jest.mock("../../../../api/useMeasureServiceApi");
@@ -23,6 +25,7 @@ const mockGetUserName = jest.fn(() => "test user");
 const mockCheckUserCanEdit = jest.fn();
 const fetchMeasureDraftStatuses = jest.fn();
 const setViewHumanReadableModal = jest.fn();
+const mockCheckUserCanDelete = jest.fn();
 
 const mockMeasureSet = {
   cmsId: "124",
@@ -59,6 +62,9 @@ describe("ActionCenter", () => {
       getUserName: mockGetUserName,
     });
     (checkUserCanEdit as jest.Mock).mockImplementation(mockCheckUserCanEdit);
+    (checkUserCanDelete as jest.Mock).mockImplementation(
+      mockCheckUserCanDelete
+    );
   });
 
   it("should render all action components", () => {
@@ -159,6 +165,7 @@ describe("ActionCenter", () => {
     const updateTargetMeasure = jest.fn();
     const setDeleteMeasureDialog = jest.fn();
     const deleteMeasure = jest.fn();
+    mockCheckUserCanDelete.mockReturnValue(true);
 
     render(
       <ActionCenter
@@ -175,9 +182,9 @@ describe("ActionCenter", () => {
       />
     );
 
-    const draftButton = await screen.findByTestId("delete-action-btn");
-    expect(draftButton).toBeEnabled();
-    fireEvent.click(draftButton);
+    const deleteButton = await screen.findByTestId("delete-action-btn");
+    expect(deleteButton).toBeEnabled();
+    fireEvent.click(deleteButton);
 
     expect(updateTargetMeasure).toHaveBeenCalledWith(qdmMeasure);
     expect(setDeleteMeasureDialog).toHaveBeenCalledWith(true);
