@@ -328,11 +328,21 @@ export default function EditMeasure() {
       open: false,
       measureId: "",
     });
+  };
+
+  const handleShareDialogClose = ({
+    toastType = "danger",
+    toastMessage = "",
+    toastOpen = false,
+  } = {}) => {
     setShareDialog({
       open: false,
       option: "",
     });
+
+    handleToast(toastType, toastMessage, toastOpen);
   };
+
   const createVersion = (versionType: string) => {
     setLoading(true);
     measureServiceApi
@@ -589,7 +599,7 @@ export default function EditMeasure() {
             measures={[measure]}
             open={shareDialog.open}
             option={shareDialog.option}
-            onClose={handleDialogClose}
+            onClose={handleShareDialogClose}
           />
 
           <InvalidTestCaseDialog

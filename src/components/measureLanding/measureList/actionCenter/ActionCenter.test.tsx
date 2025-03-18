@@ -228,6 +228,7 @@ describe("ActionCenter", () => {
 
     expect(screen.getByTestId("delete-action-btn")).toBeDisabled();
     expect(screen.getByTestId("export-action-btn")).not.toBeDisabled();
+    expect(screen.getByTestId("share-action-btn")).toBeDisabled();
     expect(screen.getByTestId("draft-action-btn")).toBeDisabled();
     expect(screen.getByTestId("version-action-btn")).toBeDisabled();
     expect(screen.getByTestId("view-hr-action-btn")).toBeEnabled();
@@ -268,7 +269,6 @@ describe("ActionCenter", () => {
   it("should call setShareDialog when share action button is clicked and a measure is passed into ActionCenter", async () => {
     mockCheckUserCanEdit.mockReturnValue(true);
 
-    const updateTargetMeasure = jest.fn();
     const setShareDialog = jest.fn();
 
     render(
@@ -276,7 +276,7 @@ describe("ActionCenter", () => {
         measures={[qdmMeasure]}
         associateCmsId={jest.fn()}
         exportMeasure={jest.fn()}
-        updateTargetMeasure={updateTargetMeasure}
+        updateTargetMeasure={jest.fn()}
         setCreateVersionDialog={jest.fn()}
         setDraftMeasureDialog={jest.fn()}
         setDeleteMeasureDialog={jest.fn()}
@@ -297,10 +297,9 @@ describe("ActionCenter", () => {
     });
   });
 
-  it("should not call updateTargetMeasure and setShareDialog when no measure is passed into ActionCenter and the share action button should be disabled", async () => {
+  it("should not call setShareDialog when no measure is passed into ActionCenter and the share action button should be disabled", async () => {
     mockCheckUserCanEdit.mockReturnValue(true);
 
-    const updateTargetMeasure = jest.fn();
     const setShareDialog = jest.fn();
 
     render(
@@ -308,7 +307,7 @@ describe("ActionCenter", () => {
         measures={[]}
         associateCmsId={jest.fn()}
         exportMeasure={jest.fn()}
-        updateTargetMeasure={updateTargetMeasure}
+        updateTargetMeasure={jest.fn()}
         setCreateVersionDialog={jest.fn()}
         setDraftMeasureDialog={jest.fn()}
         setDeleteMeasureDialog={jest.fn()}
@@ -321,7 +320,6 @@ describe("ActionCenter", () => {
     const shareButton = await screen.findByTestId("share-action-btn");
     expect(shareButton).toBeDisabled();
 
-    expect(updateTargetMeasure).not.toHaveBeenCalledWith(qdmMeasure);
     expect(setShareDialog).not.toHaveBeenCalledWith(true);
   });
 });

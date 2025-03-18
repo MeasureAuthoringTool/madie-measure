@@ -373,6 +373,20 @@ export default function MeasureList(props: {
       measureId: "",
     });
   };
+
+  const handleShareDialogClose = ({
+    toastType = "danger",
+    toastMessage = "",
+    toastOpen = false,
+  } = {}) => {
+    setShareDialog({
+      open: false,
+      option: "",
+    });
+
+    handleToast(toastType, toastMessage, toastOpen);
+  };
+
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
@@ -380,6 +394,12 @@ export default function MeasureList(props: {
     setToastType("danger");
     setToastMessage("");
     setToastOpen(false);
+  };
+
+  const handleToast = (type, message, open) => {
+    setToastType(type);
+    setToastMessage(message);
+    setToastOpen(open);
   };
 
   const handleClearClick = async (event) => {
@@ -1119,12 +1139,7 @@ export default function MeasureList(props: {
           measures={selectedMeasures}
           open={shareDialog.open}
           option={shareDialog.option}
-          onClose={() =>
-            setShareDialog({
-              open: false,
-              option: "",
-            })
-          }
+          onClose={handleShareDialogClose}
         />
         <DeleteDialog
           open={deleteMeasureDialog}

@@ -7,7 +7,7 @@ import ShareIcon from "../../../../common/ShareIcon";
 interface PropTypes {
   measures: Measure[];
   onClick: (option: string) => void;
-  canEdit: boolean;
+  isOwner: boolean;
 }
 
 export const NOTHING_SELECTED = "Select a measure to share/unshare";
@@ -18,7 +18,7 @@ export const VALID_SHARE_MEASURE = "Share/Unshare";
 const options = ["Share With", "Unshare"];
 
 export default function ShareAction(props: PropTypes) {
-  const { measures, canEdit } = props;
+  const { measures, isOwner } = props;
   const [disableShareBtn, setDisableShareBtn] = useState(true);
   const [tooltipMessage, setTooltipMessage] = useState(NOTHING_SELECTED);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -29,13 +29,13 @@ export default function ShareAction(props: PropTypes) {
 
     if (measures?.length === 0) {
       setTooltipMessage(NOTHING_SELECTED);
-    } else if (canEdit) {
+    } else if (isOwner) {
       setDisableShareBtn(false);
       setTooltipMessage(VALID_SHARE_MEASURE);
     } else {
       setTooltipMessage(INVALID_SHARE_MEASURE);
     }
-  }, [measures, canEdit]);
+  }, [measures, isOwner]);
 
   useEffect(() => {
     validateShareActionState();
