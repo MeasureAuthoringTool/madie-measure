@@ -76,6 +76,31 @@ export class MeasureServiceApi {
       throw error;
     }
   }
+  async getRecentMeasuresByMeasureSetId(measureSetIds: string[]): Promise<any> {
+    const idsParam = measureSetIds.join(",");
+    try {
+      const response = await axios.get(
+        `${this.baseUrl}/measures/recentsByMeasureSetId`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+          params: {
+            measureSetIds: idsParam,
+          },
+        }
+      );
+      if (response.data) {
+        return response.data;
+      }
+    } catch (error) {
+      console.error(
+        "error requesting Measures By multiple measureSetIds ",
+        error
+      );
+      throw error;
+    }
+  }
 
   async fetchMeasures(
     filterByCurrentUser: boolean,

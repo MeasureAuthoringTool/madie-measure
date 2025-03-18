@@ -172,13 +172,8 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
     ];
 
     try {
-      const responses = await Promise.all(
-        uniqueMeasureSets.map(async (measureSet) => {
-          const response = await measureServiceApi.getMeasuresByMeasureSetId(
-            measureSet.measureSetId
-          );
-          return response[response.length - 1];
-        })
+      const responses = await measureServiceApi.getRecentMeasuresByMeasureSetId(
+        uniqueMeasureSets.map((measureSet) => measureSet.measureSetId)
       );
       const measureIds = responses.map((measure) => measure.id);
       const measureMap = new Map(
@@ -191,9 +186,10 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
       setSharedMeasures(
         measureIds.map((measureId) => ({
           measureId,
+          //@ts-ignore
           measureName: measureMap.get(measureId).measureName,
           userId: "",
-          dateShared: null,
+          dateShared: "",
           subRows: sharedWithUserIds[measureId]
             .map((userId) => ({
               measureId,

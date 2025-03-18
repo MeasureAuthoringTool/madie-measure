@@ -145,7 +145,7 @@ const TestCaseList = (props: TestCaseListProps) => {
       passPercentage: undefined,
       passFailRatio: "",
     });
-  const [selectedTestCases, setSelectedTestCases] = useState<any>();
+  const [selectedTestCases, setSelectedTestCases] = useState<Array<TestCase>>();
   const { measureState, bundleState, valueSetsState, executing, setExecuting } =
     useExecutionContext();
   const [measure] = measureState;
@@ -377,15 +377,11 @@ const TestCaseList = (props: TestCaseListProps) => {
     try {
       abortController.current = new AbortController();
       const { ecqmTitle, model, version } = measure ?? {};
-      const testCaseIds: string[] = [];
-      if (selectedTestCases && selectedTestCases.size > 0) {
-        selectedTestCases.forEach((testCase) => {
-          testCaseIds.push(testCase.id);
-        });
+      let testCaseIds: string[] = [];
+      if (_.size(selectedTestCases) > 0) {
+        testCaseIds = selectedTestCases?.map((testCase) => testCase.id);
       } else {
-        measure?.testCases?.forEach((testCase) => {
-          testCaseIds.push(testCase.id);
-        });
+        testCaseIds = measure?.testCases?.map((testCase) => testCase.id);
       }
       const exportData = await testCaseService?.current.exportTestCases(
         measure?.id,
