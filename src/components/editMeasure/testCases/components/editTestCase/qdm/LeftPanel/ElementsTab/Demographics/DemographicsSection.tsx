@@ -117,9 +117,6 @@ const DemographicsSection = ({ canEdit }) => {
 
   // gender race change
   const handleRaceChange = (event) => {
-    if (!event.target.value) {
-      return;
-    }
     const existingElement = getDataElementByStatus("race", patient);
     const newRaceDataElement: DataElement = getRaceDataElement(
       event.target.value,
@@ -155,9 +152,6 @@ const DemographicsSection = ({ canEdit }) => {
   };
 
   const handleEthnicityChange = (event) => {
-    if (!event.target.value) {
-      return;
-    }
     const existingElement = getDataElementByStatus("ethnicity", patient);
     const newEthnicityDataElement: DataElement = getEthnicityDataElement(
       event.target.value,
