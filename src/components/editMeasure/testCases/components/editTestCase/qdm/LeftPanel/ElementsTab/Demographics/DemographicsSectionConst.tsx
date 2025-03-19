@@ -124,14 +124,14 @@ export const getValueSetForDemographic = (
   cqmMeasure: Measure,
   demographicType: string
 ) => {
-  const genderSourceDataCriteria = cqmMeasure?.source_data_criteria?.find(
+  const sourceDataCriteria = cqmMeasure?.source_data_criteria?.find(
     (criteria) => criteria?.qdmStatus === demographicType
   );
-  if (!genderSourceDataCriteria) {
+  if (!sourceDataCriteria) {
     return null;
   }
   const valueSet = cqmMeasure?.value_sets?.find(
-    (valueSet) => valueSet.oid === genderSourceDataCriteria?.codeListId
+    (valueSet) => valueSet.oid === sourceDataCriteria?.codeListId
   );
   if (!valueSet) {
     return null;
