@@ -27,6 +27,7 @@ interface PropTypes {
 }
 export default function ActionCenter(props: PropTypes) {
   const [canEdit, setCanEdit] = useState<boolean>(false);
+  const [isOwner, setIsOwner] = useState<boolean>(false);
   const featureFlags = useFeatureFlags();
 
   const versionMeasure = useCallback(() => {
@@ -98,8 +99,18 @@ export default function ActionCenter(props: PropTypes) {
     );
   };
 
+  const isOwnerOfSelectedMeasure = (measures) => {
+    return (
+      measures &&
+      measures.every((measure) => {
+        return checkUserCanEdit(measure?.measureSet?.owner, []);
+      })
+    );
+  };
+
   useEffect(() => {
     setCanEdit(isSelectedMeasureEditable(props.measures));
+    setIsOwner(isOwnerOfSelectedMeasure(props.measures));
   }, [props.measures]);
 
   return (
@@ -121,7 +132,7 @@ export default function ActionCenter(props: PropTypes) {
         <ShareAction
           measures={props.measures}
           onClick={shareMeasure}
-          canEdit={canEdit}
+          isOwner={isOwner}
         />
       )}
 

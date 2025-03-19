@@ -164,7 +164,7 @@ const serviceApiMock = {
     .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
   getReturnTypesForAllCqlFunctions: jest.fn().mockResolvedValue({}),
   fetchHumanReadable: jest.fn().mockResolvedValue("test human readable"),
-  getSharedWithUserIds: jest.fn().mockResolvedValue({
+  getSharedMeasures: jest.fn().mockResolvedValue({
     measureId1: ["userId1"],
     measureId2: ["userId1", "userId2"],
   }),
@@ -476,6 +476,7 @@ describe("EditMeasure Component", () => {
       expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
       expect(getByTestId("share-dialog")).toBeInTheDocument();
     });
+    expect(serviceApiMock.getSharedMeasures).toHaveBeenCalled();
     expect(serviceApiMock.getRecentMeasuresByMeasureSetId).toHaveBeenCalled();
     const cancelButton = getByTestId("share-cancel-button");
     fireEvent.click(cancelButton);

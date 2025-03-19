@@ -77,7 +77,7 @@ const mockMeasureServiceApi = {
   getMeasureExport: jest
     .fn()
     .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
-  getSharedWithUserIds: jest.fn().mockResolvedValue({
+  getSharedMeasures: jest.fn().mockResolvedValue({
     measureId1: ["userId1"],
     measureId2: ["userId1", "userId2"],
   }),

@@ -35,6 +35,26 @@ import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
+interface ShareDialogProps {
+  measures: Measure[];
+  open: boolean;
+  option: string;
+  onClose: Function;
+}
+
+interface SharedMeasure {
+  measureId: string;
+  measureName: string;
+  userId: string;
+  dateShared: string;
+  subRows: SharedMeasure[];
+}
+
+export interface SharedUser {
+  userId: string;
+  performedAt: Date;
+}
+
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 const icon = <CheckBoxOutlineBlankIcon fontSize="large" />;
 const checkedIcon = <CheckBoxIcon fontSize="large" />;
@@ -59,37 +79,34 @@ const convertDate = (date: string) => {
 const sortSharedMeasures = (a: SharedMeasure, b: SharedMeasure) => {
   //Move SharedMeasure(s) with dateShared of "-" to end of list
   if (a.dateShared === "-" || b.dateShared === "-") {
-    return 1;
+    return -1;
   }
 
   return new Date(b.dateShared).getTime() - new Date(a.dateShared).getTime();
 };
 
-interface ShareDialogProps {
-  measures: Measure[];
-  open: boolean;
-  option: string;
-  onClose: Function;
-}
-
-interface SharedMeasure {
-  measureId: string;
-  measureName: string;
-  userId: string;
-  dateShared: string;
-  subRows: SharedMeasure[];
-}
-
 const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
 
   const [sharedMeasures, setSharedMeasures] = useState<SharedMeasure[]>([]);
-  const [hoveredHeader, setHoveredHeader] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [sharedWithAllSelectedMeasures, setSharedWithAllSelectedMeasures] =
     useState<boolean>(false);
   const [saveDisabled, setSaveDisabled] = useState<boolean>(true);
+  const [executing, setExecuting] = useState<boolean>(false);
+  const [sharedMeasuresRequest, setSharedMeasuresRequest] = useState(
+    new Map<string, string[]>()
+  );
+
+  const updateSharedMeasures = (measureId, harpId) => {
+    setSharedMeasuresRequest((map) => {
+      const current = map.get(measureId) || [];
+      current.push(harpId);
+
+      return map.set(measureId, current);
+    });
+  };
 
   const harpIdCheck = (isSharedWithAllSelectedMeasures: boolean) => {
     return {
@@ -100,7 +117,7 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
     };
   };
 
-  const handleAdd = () => {
+  const handleAddUser = () => {
     // Remove all spaces from harpId
     const harpId = formik.getFieldProps("harpId").value.replace(/\s/g, "");
 
@@ -112,7 +129,7 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
 
     let sharedWithAllSelectedMeasures = true;
 
-    let updatedSharedMeasures = sharedMeasures.map((measure) => {
+    const updatedSharedMeasures = sharedMeasures.map((measure) => {
       if (
         measure.subRows.length &&
         measure.subRows.some((subRow) => subRow.userId === harpId)
@@ -121,6 +138,8 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
       } else {
         sharedWithAllSelectedMeasures = false;
 
+        updateSharedMeasures(measure.measureId, harpId);
+
         return {
           ...measure,
           subRows: [
@@ -128,7 +147,7 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
               measureId: measure.measureId,
               measureName: "",
               userId: harpId,
-              dateShared: new Date().toLocaleDateString(),
+              dateShared: new Date().toLocaleString(),
               subRows: null,
             },
             ...measure.subRows,
@@ -145,18 +164,29 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
     }
 
     setSharedWithAllSelectedMeasures(sharedWithAllSelectedMeasures);
-    formik.validateForm();
   };
 
-  const formik = useFormik({
-    initialValues: {
-      harpId: "",
-    },
-    validationSchema: Yup.object().shape({
-      harpId: Yup.string().test(harpIdCheck(sharedWithAllSelectedMeasures)),
-    }),
-    onSubmit: handleAdd,
-  });
+  const handleSubmit = async () => {
+    setExecuting(true);
+
+    try {
+      await measureServiceApi.shareMeasures(sharedMeasuresRequest);
+
+      onClose({
+        toastType: "success",
+        toastMessage: "The measure(s) were successfully shared.",
+        toastOpen: true,
+      });
+    } catch (error) {
+      onClose({
+        toastType: "danger",
+        toastMessage: error.message,
+        toastOpen: true,
+      });
+    } finally {
+      setExecuting(false);
+    }
+  };
 
   const getSharedMeasure = useCallback(async () => {
     if ((measures && measures?.length === 0) || !open) {
@@ -180,21 +210,23 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
         responses.map((measure) => [measure.id, measure])
       );
 
-      const sharedWithUserIds = await measureServiceApi.getSharedWithUserIds(
+      const sharedMeasures = await measureServiceApi.getSharedMeasures(
         measureIds
       );
       setSharedMeasures(
-        measureIds.map((measureId) => ({
+        measureIds.map((measureId: string) => ({
           measureId,
           //@ts-ignore
           measureName: measureMap.get(measureId).measureName,
           userId: "",
-          dateShared: "",
-          subRows: sharedWithUserIds[measureId]
-            .map((userId) => ({
+          dateShared: null,
+          subRows: sharedMeasures[measureId]
+            .map((sharedUser: SharedUser) => ({
               measureId,
-              userId,
-              dateShared: "-",
+              userId: sharedUser.userId,
+              dateShared: sharedUser.performedAt
+                ? sharedUser.performedAt.toLocaleString()
+                : "-",
             }))
             .sort(sortSharedMeasures),
         }))
@@ -206,12 +238,27 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
     }
   }, [open]);
 
+  const formik = useFormik({
+    initialValues: {
+      harpId: "",
+    },
+    validationSchema: Yup.object().shape({
+      harpId: Yup.string().test(harpIdCheck(sharedWithAllSelectedMeasures)),
+    }),
+    onSubmit: handleSubmit,
+  });
+
   useEffect(() => {
     getSharedMeasure();
   }, [getSharedMeasure]);
 
   useEffect(() => {
+    formik.validateForm();
+  }, [sharedWithAllSelectedMeasures]);
+
+  useEffect(() => {
     setSaveDisabled(true);
+    setSharedMeasuresRequest(new Map<string, string[]>());
     table.resetExpanded();
     formik.resetForm();
   }, [onClose]);
@@ -288,6 +335,7 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
           <>
             {row.getCanExpand() ? (
               <button
+                type="button"
                 data-testid={`expand-button-${row.original.measureId}`}
                 onClick={row.getToggleExpandedHandler()}
                 style={{ cursor: "pointer" }}
@@ -325,11 +373,12 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
     <>
       <GlobalStyles />
       <MadieDialog
-        form={false}
+        form
         title={option}
         dialogProps={{
           onClose,
           open,
+          onSubmit: formik.handleSubmit,
           maxWidth: "lg",
           "data-testid": "share-dialog",
         }}
@@ -337,13 +386,14 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
           variant: "outline",
           cancelText: "Cancel",
           "data-testid": "share-cancel-button",
+          disabled: executing,
         }}
         continueButtonProps={{
           variant: "cyan",
           type: "submit",
           continueText: "Save",
           "data-testid": "share-save-button",
-          disabled: saveDisabled,
+          disabled: saveDisabled || !formik.isValid || executing,
         }}
       >
         <div id="measure-landing" data-testid="measure-landing">
@@ -367,8 +417,10 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
                   id="add-user-btn"
                   data-testid="add-user-btn"
                   variant="outline"
-                  disabled={!formik.getFieldProps("harpId").value}
-                  onClick={formik.handleSubmit}
+                  disabled={
+                    !formik.getFieldProps("harpId").value || !formik.isValid
+                  }
+                  onClick={handleAddUser}
                 >
                   Add User
                 </Button>
@@ -394,14 +446,10 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
                   {table.getHeaderGroups().map((headerGroup) => (
                     <tr key={headerGroup.id}>
                       {headerGroup.headers.map((header) => {
-                        const isHovered = hoveredHeader?.includes(header.id);
                         return (
                           <TH
                             key={header.id}
                             scope="col"
-                            onClick={header.column.getToggleSortingHandler()}
-                            onMouseEnter={() => setHoveredHeader(header.id)}
-                            onMouseLeave={() => setHoveredHeader(null)}
                             className="header-cell"
                           >
                             {flexRender(
