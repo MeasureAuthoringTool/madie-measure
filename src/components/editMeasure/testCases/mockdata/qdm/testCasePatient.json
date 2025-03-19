@@ -22,10 +22,10 @@
     {
       "dataElementCodes": [
         {
-          "code": "M",
-          "system": "2.16.840.1.113883.5.1",
-          "version": "2022-11",
-          "display": "Male"
+          "code": "248153007",
+          "system": "2.16.840.1.113883.6.96",
+          "version": "2024-09",
+          "display": "Male (finding)"
         }
       ],
       "_id": "648c6a93f48905000012a6a2",
