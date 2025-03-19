@@ -34,6 +34,9 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn(() => {
     return true;
   }),
+  checkUserCanDelete: jest.fn(() => {
+    return true;
+  }),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => null),

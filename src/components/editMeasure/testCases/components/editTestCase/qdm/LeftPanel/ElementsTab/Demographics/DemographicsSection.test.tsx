@@ -6,6 +6,8 @@ import {
   PatientActionType,
   useQdmPatient,
 } from "../../../../../../util/QdmPatientContext";
+import { QdmExecutionContextProvider } from "../../../../../routes/qdm/QdmExecutionContext";
+import { demographicValueSets } from "../../../../../../__mocks__/demographicValueSets";
 import {
   QDMPatient,
   PatientCharacteristicEthnicity,
@@ -14,6 +16,7 @@ import {
   PatientCharacteristicRace,
   PatientCharacteristicSex,
 } from "cqm-models";
+import { Measure } from "@madie/madie-models";
 
 const emptyPatient = new QDMPatient();
 jest.mock("../../../../../../util/QdmPatientContext", () => ({
@@ -37,8 +40,15 @@ const mockFormik: FormikContextType<any> = {
   },
   setFieldValue: jest.fn(),
 };
-
 const mockUseQdmPatientDispatch = jest.fn();
+const cqmMeasure = {
+  source_data_criteria: [
+    { qdmStatus: "race", codeListId: "2.16.840.1.114222.4.11.836" },
+    { qdmStatus: "ethnicity", codeListId: "2.16.840.1.114222.4.11.837" },
+    { qdmStatus: "gender", codeListId: "2.16.840.1.113762.1.4.1021.121" },
+  ],
+  value_sets: demographicValueSets,
+};
 
 describe("DemographicsSection", () => {
   beforeEach(() => {
@@ -49,12 +59,28 @@ describe("DemographicsSection", () => {
     }));
   });
 
-  it("should handle birth date time change", async () => {
+  const renderDemographicsSection = () => {
     render(
-      <FormikProvider value={mockFormik}>
-        <DemographicsSection canEdit={true} />
-      </FormikProvider>
+      <QdmExecutionContextProvider
+        value={{
+          measureState: [{} as Measure, jest.fn()],
+          cqmMeasureState: [cqmMeasure, jest.fn()],
+          executionContextReady: true,
+          setExecutionContextReady: jest.fn(),
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <FormikProvider value={mockFormik}>
+          <DemographicsSection canEdit={true} />
+        </FormikProvider>
+      </QdmExecutionContextProvider>
     );
+  };
+
+  it("should handle birth date time change", async () => {
+    renderDemographicsSection();
 
     expect(screen.getByText("Date of Birth")).toBeInTheDocument();
 
@@ -76,11 +102,7 @@ describe("DemographicsSection", () => {
   });
 
   it("should handle expired date time change", async () => {
-    render(
-      <FormikProvider value={mockFormik}>
-        <DemographicsSection canEdit={true} />
-      </FormikProvider>
-    );
+    renderDemographicsSection();
 
     expect(screen.getByText("Living Status")).toBeInTheDocument();
     const livingStatusInput = screen.getByTestId(
@@ -109,11 +131,7 @@ describe("DemographicsSection", () => {
   });
 
   it("should handle Living Status change", () => {
-    render(
-      <FormikProvider value={mockFormik}>
-        <DemographicsSection canEdit={true} />
-      </FormikProvider>
-    );
+    renderDemographicsSection();
 
     expect(screen.getByText("Living Status")).toBeInTheDocument();
     const livingStatusInput = screen.getByTestId(
@@ -148,11 +166,7 @@ describe("DemographicsSection", () => {
       state: { patient: qdmPatient },
       dispatch: mockUseQdmPatientDispatch,
     }));
-    render(
-      <FormikProvider value={mockFormik}>
-        <DemographicsSection canEdit={true} />
-      </FormikProvider>
-    );
+    renderDemographicsSection();
 
     expect(screen.getByText("Ethnicity")).toBeInTheDocument();
     const ethnicityInput = screen.getByTestId(
@@ -176,11 +190,7 @@ describe("DemographicsSection", () => {
       state: { patient: qdmPatient },
       dispatch: mockUseQdmPatientDispatch,
     }));
-    render(
-      <FormikProvider value={mockFormik}>
-        <DemographicsSection canEdit={true} />
-      </FormikProvider>
-    );
+    renderDemographicsSection();
 
     expect(screen.getByText("Living Status")).toBeInTheDocument();
     const livingStatusInput = screen.getByTestId(
@@ -216,11 +226,7 @@ describe("DemographicsSection", () => {
       state: { patient: qdmPatient },
       dispatch: mockUseQdmPatientDispatch,
     }));
-    render(
-      <FormikProvider value={mockFormik}>
-        <DemographicsSection canEdit={true} />
-      </FormikProvider>
-    );
+    renderDemographicsSection();
 
     expect(screen.getByText("Race")).toBeInTheDocument();
     const raceInput = screen.getByTestId(
@@ -239,33 +245,30 @@ describe("DemographicsSection", () => {
     const qdmPatient = new QDMPatient();
     const genderElement = new PatientCharacteristicSex();
     const newCode: DataElementCode = {
-      system: "2.16.840.1.113883.5.1",
-      version: "2023-02-01",
-      code: "F",
-      display: "Female",
+      system: "2.16.840.1.113883.6.96",
+      version: "2024-09",
+      code: "248152002",
+      display: "Female (finding)",
     };
+
     genderElement.dataElementCodes = [newCode];
     qdmPatient.dataElements.push(genderElement);
     (useQdmPatient as jest.Mock).mockImplementation(() => ({
       state: { patient: qdmPatient },
       dispatch: mockUseQdmPatientDispatch,
     }));
-    render(
-      <FormikProvider value={mockFormik}>
-        <DemographicsSection canEdit={true} />
-      </FormikProvider>
-    );
+    renderDemographicsSection();
 
     expect(screen.getByText("Sex")).toBeInTheDocument();
     const genderInput = screen.getByTestId(
       "demographics-gender-input"
     ) as HTMLInputElement;
     expect(genderInput).toBeInTheDocument();
-    expect(genderInput.value).toBe("Female");
+    expect(genderInput.value).toBe("Female (finding)");
 
     fireEvent.change(genderInput, {
-      target: { value: "Male" },
+      target: { value: "Male (finding)" },
     });
-    expect(genderInput.value).toBe("Male");
+    expect(genderInput.value).toBe("Male (finding)");
   });
 });
