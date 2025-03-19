@@ -6,7 +6,11 @@ import DraftAction from "./draftAction/DraftAction";
 import VersionAction from "./versionAction/VersionAction";
 import AssociateCmsIdAction from "./associateCmsIdAction/AccociateCmsIdAction";
 import ViewHRAction from "./viewHumanReadableAction/ViewHRAction";
-import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
+import {
+  checkUserCanEdit,
+  useFeatureFlags,
+  checkUserCanDelete,
+} from "@madie/madie-util";
 import ShareAction from "./shareAction/ShareAction";
 
 interface PropTypes {
@@ -103,7 +107,13 @@ export default function ActionCenter(props: PropTypes) {
       <DeleteAction
         measures={props.measures}
         onClick={deleteMeasure}
-        canEdit={canEdit}
+        canEdit={
+          canEdit &&
+          checkUserCanDelete(
+            props.measures?.[0]?.measureSet?.owner,
+            props.measures?.[0]?.measureMetaData?.draft
+          )
+        }
       />
       <ExportAction measures={props.measures} onClick={exportMeasure} />
 
