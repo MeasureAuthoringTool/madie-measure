@@ -477,7 +477,7 @@ export class MeasureServiceApi {
     }
   }
 
-  async updateSharedMeasures(measures: Map<string, string[]>): Promise<any> {
+  async shareMeasures(measures: Map<string, string[]>): Promise<any> {
     try {
       const response = await axios.put(
         `${this.baseUrl}/measures/shared`,

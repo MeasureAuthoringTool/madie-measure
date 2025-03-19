@@ -170,7 +170,7 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
     setExecuting(true);
 
     try {
-      await measureServiceApi.updateSharedMeasures(sharedMeasuresRequest);
+      await measureServiceApi.shareMeasures(sharedMeasuresRequest);
 
       onClose({
         toastType: "success",

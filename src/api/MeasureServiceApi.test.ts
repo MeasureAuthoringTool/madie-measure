@@ -590,7 +590,7 @@ describe("MeasureServiceApi Tests", () => {
       measureServiceApi.getMeasuresByMeasureSetId(measures[0].id)
     ).rejects.toThrow(errorMessage);
   });
-  it("test updateSharedMeasures success", async () => {
+  it("test shareMeasures success", async () => {
     const data = {
       measureId1: [
         {
@@ -614,7 +614,7 @@ describe("MeasureServiceApi Tests", () => {
 
     mockedAxios.put.mockResolvedValue(resp);
 
-    const updatedShareMeasures = await measureServiceApi.updateSharedMeasures(
+    const sharedMeasures = await measureServiceApi.shareMeasures(
       new Map([
         ["measureId1", ["userId1"]],
         ["measureId2", ["userId1"]],
@@ -622,14 +622,14 @@ describe("MeasureServiceApi Tests", () => {
     );
   });
 
-  it("test updateSharedMeasures failure", async () => {
+  it("test shareMeasures failure", async () => {
     const errorMessage =
       "Unable to share the selected measure(s) with the added users. If the error persists, please contact the help desk.";
     mockedAxios.put.mockImplementationOnce(() =>
       Promise.reject(new Error(errorMessage))
     );
     await expect(
-      measureServiceApi.updateSharedMeasures(
+      measureServiceApi.shareMeasures(
         new Map([
           ["measureId1", ["userId1"]],
           ["measureId2", ["userId1"]],

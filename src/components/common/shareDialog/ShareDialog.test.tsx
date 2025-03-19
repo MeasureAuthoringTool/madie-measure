@@ -76,14 +76,14 @@ const mockGetRecentMeasuresByMeasureSetId = jest.fn((measureSetIds) => {
   return Promise.resolve(measures);
 });
 
-const mockUpdateSharedMeasures = jest.fn().mockResolvedValue({
+const mockShareMeasures = jest.fn().mockResolvedValue({
   [mockMeasure1.id]: mockMeasure1?.acls,
   [mockMeasure2.id]: mockMeasure2?.acls,
 });
 
 const mockMeasureServiceApi = {
   getSharedMeasures: mockGetSharedMeasures,
-  updateSharedMeasures: mockUpdateSharedMeasures,
+  shareMeasures: mockShareMeasures,
   getRecentMeasuresByMeasureSetId: mockGetRecentMeasuresByMeasureSetId,
 } as unknown as MeasureServiceApi;
 
@@ -623,7 +623,7 @@ describe("Create Share Dialog component", () => {
     fireEvent.click(saveBtn);
 
     await waitFor(async () => {
-      expect(mockMeasureServiceApi.updateSharedMeasures).toBeCalled();
+      expect(mockMeasureServiceApi.shareMeasures).toBeCalled();
       expect(mockOnClose).toHaveBeenCalledWith({
         toastType: "success",
         toastMessage: "The measure(s) were successfully shared.",
@@ -639,9 +639,7 @@ describe("Create Share Dialog component", () => {
     const mockMeasureServiceApi = {
       getSharedMeasures: mockGetSharedMeasures,
       getRecentMeasuresByMeasureSetId: mockGetRecentMeasuresByMeasureSetId,
-      updateSharedMeasures: jest
-        .fn()
-        .mockRejectedValue(new Error(errorMessage)),
+      shareMeasures: jest.fn().mockRejectedValue(new Error(errorMessage)),
     } as unknown as MeasureServiceApi;
 
     useMeasureServiceMock.mockImplementation(() => {
@@ -686,7 +684,7 @@ describe("Create Share Dialog component", () => {
     fireEvent.click(saveBtn);
 
     await waitFor(async () => {
-      expect(mockMeasureServiceApi.updateSharedMeasures).toBeCalled();
+      expect(mockMeasureServiceApi.shareMeasures).toBeCalled();
       expect(mockOnClose).toHaveBeenCalledWith({
         toastType: "danger",
         toastMessage: errorMessage,
