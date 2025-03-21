@@ -477,11 +477,11 @@ export class MeasureServiceApi {
     }
   }
 
-  async shareMeasures(measures: Map<string, string[]>): Promise<any> {
+  async shareMeasures(measureUserIdMap: Map<string, string[]>): Promise<any> {
     try {
       const response = await axios.put(
         `${this.baseUrl}/measures/shared`,
-        Object.fromEntries(measures),
+        Object.fromEntries(measureUserIdMap),
         {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
@@ -492,6 +492,26 @@ export class MeasureServiceApi {
     } catch (err) {
       const message =
         "Unable to share the selected measure(s) with the added users. If the error persists, please contact the help desk.";
+      console.error(message, err);
+      throw new Error(message);
+    }
+  }
+
+  async unshareMeasures(measureUserIdMap: Map<string, string[]>): Promise<any> {
+    try {
+      const response = await axios.put(
+        `${this.baseUrl}/measures/unshared`,
+        Object.fromEntries(measureUserIdMap),
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      const message =
+        "Unable to unshare the selected measure(s) with the users who were unchecked. If the error persists, please contact the help desk.";
       console.error(message, err);
       throw new Error(message);
     }
