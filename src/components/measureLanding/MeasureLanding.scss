@@ -8,7 +8,6 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   margin: 0 32px 32px 32px;
   border-radius: 6px;
-  margin-top: -64px;
   overflow: hidden;
 
   &.no-margin-top {
@@ -53,6 +52,9 @@
       font-size: 16px;
       font-weight: 400;
       vertical-align: top;
+      margin: 0 auto;
+      max-height: 16px;
+      line-height: 16px;
 
       div > .activity {
         display: flex;
@@ -84,9 +86,6 @@
       }
     }
   }
-}
-
-.table-body {
   .expanded-row {
     background-color: #f8f8f8;
 
