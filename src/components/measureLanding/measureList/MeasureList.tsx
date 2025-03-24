@@ -50,7 +50,6 @@ import {
   ExpandIcon,
   CollapseIcon,
 } from "../../../icons/MeasureListTableRightArrowIcons";
-import "./ExpandedTableComponent.scss";
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -379,7 +378,7 @@ export default function MeasureList(props: {
             return <></>;
           }
         },
-        accessorKey: "rightArrow",
+        accessorKey: "expandArrow",
         enableSorting: false,
       });
     }
@@ -1204,7 +1203,7 @@ export default function MeasureList(props: {
                 expandedSectionData?.map((subRow) => (
                   <tr key={subRow.id} className="expanded-row">
                     {expandedcolumns.map((column: any) =>
-                      column?.accessorKey === "rightArrow" ? (
+                      column?.accessorKey === "expandArrow" ? (
                         <td></td>
                       ) : (
                         <td key={column?.accessorKey || column.id}>

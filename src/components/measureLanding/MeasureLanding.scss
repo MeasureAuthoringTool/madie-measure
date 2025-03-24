@@ -85,3 +85,24 @@
     }
   }
 }
+
+.table-body {
+  .expanded-row {
+    background-color: #f8f8f8;
+
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #8c8c8c;
+      border-top: 1px solid #8c8c8c;
+      height: 72px;
+
+      &:nth-last-child(2) {
+        padding-right: 8px;
+      }
+
+      &:last-child {
+        padding-right: 8px;
+      }
+    }
+  }
+}
