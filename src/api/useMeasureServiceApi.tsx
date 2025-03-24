@@ -55,7 +55,10 @@ export class MeasureServiceApi {
     }
   }
 
-  async getMeasuresByMeasureSetId(measureSetId: string): Promise<any> {
+  async getMeasuresByMeasureSetId(
+    measureSetId: string,
+    sortByLatestVersion?: boolean
+  ): Promise<any> {
     try {
       const response = await axios.get(
         `${this.baseUrl}/measures/byMeasureSetId`,
@@ -65,6 +68,7 @@ export class MeasureServiceApi {
           },
           params: {
             measureSetId: measureSetId,
+            sortByLatestVersion: sortByLatestVersion,
           },
         }
       );

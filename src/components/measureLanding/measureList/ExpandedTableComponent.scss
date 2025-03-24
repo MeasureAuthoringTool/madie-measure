@@ -1,0 +1,46 @@
+.table-body {
+  padding: 20px;
+
+  .ml-tr {
+    background-color: #ffffff;
+    transition: background-color 0.3s ease;
+
+    &.expanded-main {
+      background-color: #f3f3f3;
+    }
+
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #e0e0e0;
+      height: 72px;
+
+      &:nth-last-child(2) {
+        padding-right: 8px; // gap between second last and last column
+      }
+
+      &:last-child {
+        padding-right: 8px; // gap between last column and table end
+      }
+    }
+  }
+
+  .expanded-row {
+    background-color: #f8f8f8;
+    transition: background-color 0.3s ease;
+
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #8c8c8c;
+      border-top: 1px solid #8c8c8c;
+      height: 72px;
+
+      &:nth-last-child(2) {
+        padding-right: 8px;
+      }
+
+      &:last-child {
+        padding-right: 8px;
+      }
+    }
+  }
+}
