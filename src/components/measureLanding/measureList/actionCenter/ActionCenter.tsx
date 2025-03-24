@@ -6,7 +6,11 @@ import DraftAction from "./draftAction/DraftAction";
 import VersionAction from "./versionAction/VersionAction";
 import AssociateCmsIdAction from "./associateCmsIdAction/AccociateCmsIdAction";
 import ViewHRAction from "./viewHumanReadableAction/ViewHRAction";
-import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
+import {
+  checkUserCanEdit,
+  useFeatureFlags,
+  checkUserCanDelete,
+} from "@madie/madie-util";
 import ShareAction from "./shareAction/ShareAction";
 
 interface PropTypes {
@@ -23,6 +27,7 @@ interface PropTypes {
 }
 export default function ActionCenter(props: PropTypes) {
   const [canEdit, setCanEdit] = useState<boolean>(false);
+  const [isOwner, setIsOwner] = useState<boolean>(false);
   const featureFlags = useFeatureFlags();
 
   const versionMeasure = useCallback(() => {
@@ -94,8 +99,18 @@ export default function ActionCenter(props: PropTypes) {
     );
   };
 
+  const isOwnerOfSelectedMeasure = (measures) => {
+    return (
+      measures &&
+      measures.every((measure) => {
+        return checkUserCanEdit(measure?.measureSet?.owner, []);
+      })
+    );
+  };
+
   useEffect(() => {
     setCanEdit(isSelectedMeasureEditable(props.measures));
+    setIsOwner(isOwnerOfSelectedMeasure(props.measures));
   }, [props.measures]);
 
   return (
@@ -103,7 +118,13 @@ export default function ActionCenter(props: PropTypes) {
       <DeleteAction
         measures={props.measures}
         onClick={deleteMeasure}
-        canEdit={canEdit}
+        canEdit={
+          canEdit &&
+          checkUserCanDelete(
+            props.measures?.[0]?.measureSet?.owner,
+            props.measures?.[0]?.measureMetaData?.draft
+          )
+        }
       />
       <ExportAction measures={props.measures} onClick={exportMeasure} />
 
@@ -111,7 +132,7 @@ export default function ActionCenter(props: PropTypes) {
         <ShareAction
           measures={props.measures}
           onClick={shareMeasure}
-          canEdit={canEdit}
+          isOwner={isOwner}
         />
       )}
 

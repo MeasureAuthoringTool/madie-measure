@@ -534,7 +534,7 @@ describe("MeasureServiceApi Tests", () => {
     ).rejects.toThrow(errorMessage);
   });
 
-  it("test getSharedWithUserIds success", async () => {
+  it("test getSharedMeasures success", async () => {
     const data = {
       measureId1: ["userId1"],
       measureId2: ["userId1", "userId2"],
@@ -544,7 +544,7 @@ describe("MeasureServiceApi Tests", () => {
 
     mockedAxios.get.mockResolvedValue(resp);
 
-    const userIds = await measureServiceApi.getSharedWithUserIds([
+    const userIds = await measureServiceApi.getSharedMeasures([
       "measureId1",
       "measureId2",
     ]);
@@ -552,14 +552,14 @@ describe("MeasureServiceApi Tests", () => {
     expect(userIds).toEqual(data);
   });
 
-  it("test getSharedWithUserIds failure", async () => {
+  it("test getSharedMeasures failure", async () => {
     const errorMessage =
       "Unable to retrieve users that the selected measure(s) is shared with. If the error persists, please contact the help desk.";
     mockedAxios.get.mockImplementationOnce(() =>
       Promise.reject(new Error(errorMessage))
     );
     await expect(
-      measureServiceApi.getSharedWithUserIds(["measureId1", "measureId2"])
+      measureServiceApi.getSharedMeasures(["measureId1", "measureId2"])
     ).rejects.toThrow(errorMessage);
   });
   it("Successfully returns for getMeasuresByMeasureSetId", async () => {
@@ -588,6 +588,53 @@ describe("MeasureServiceApi Tests", () => {
     );
     await expect(
       measureServiceApi.getMeasuresByMeasureSetId(measures[0].id)
+    ).rejects.toThrow(errorMessage);
+  });
+  it("test shareMeasures success", async () => {
+    const data = {
+      measureId1: [
+        {
+          userId: "userId1",
+          roles: ["SHARED_WITH"],
+        },
+        {
+          userId: "userId2",
+          roles: ["SHARED_WITH"],
+        },
+      ],
+      measureId2: [
+        {
+          userId: "userId1",
+          roles: ["SHARED_WITH"],
+        },
+      ],
+    };
+
+    const resp: any = { status: 200, data };
+
+    mockedAxios.put.mockResolvedValue(resp);
+
+    const sharedMeasures = await measureServiceApi.shareMeasures(
+      new Map([
+        ["measureId1", ["userId1"]],
+        ["measureId2", ["userId1"]],
+      ])
+    );
+  });
+
+  it("test shareMeasures failure", async () => {
+    const errorMessage =
+      "Unable to share the selected measure(s) with the added users. If the error persists, please contact the help desk.";
+    mockedAxios.put.mockImplementationOnce(() =>
+      Promise.reject(new Error(errorMessage))
+    );
+    await expect(
+      measureServiceApi.shareMeasures(
+        new Map([
+          ["measureId1", ["userId1"]],
+          ["measureId2", ["userId1"]],
+        ])
+      )
     ).rejects.toThrow(errorMessage);
   });
 });

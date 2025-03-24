@@ -92,6 +92,11 @@ declare module "@madie/madie-util" {
     draft?: boolean
   ): boolean;
 
+  export function checkUserCanDelete(
+    createdBy: string,
+    draft?: boolean
+  ): boolean;
+
   export function wafIntercept(): void;
 
   export function getOidFromString(

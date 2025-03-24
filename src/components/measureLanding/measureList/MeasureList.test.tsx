@@ -26,7 +26,11 @@ import { v4 as uuid } from "uuid";
 import ServiceContext, { ServiceConfig } from "../../../api/ServiceContext";
 import { Simulate } from "react-dom/test-utils";
 // @ts-ignore
-import { useFeatureFlags, checkUserCanEdit } from "@madie/madie-util";
+import {
+  useFeatureFlags,
+  checkUserCanEdit,
+  checkUserCanDelete,
+} from "@madie/madie-util";
 
 // CSSStyleDeclaration
 const mockPush = jest.fn();
@@ -41,6 +45,7 @@ jest.mock("@madie/madie-util", () => ({
     getUserName: () => "test user",
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
+  checkUserCanDelete: jest.fn().mockImplementation(() => true),
   useFeatureFlags: jest.fn(() => ({
     enableQdmRepeatTransfer: false,
   })),
@@ -72,7 +77,7 @@ const mockMeasureServiceApi = {
   getMeasureExport: jest
     .fn()
     .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
-  getSharedWithUserIds: jest.fn().mockResolvedValue({
+  getSharedMeasures: jest.fn().mockResolvedValue({
     measureId1: ["userId1"],
     measureId2: ["userId1", "userId2"],
   }),

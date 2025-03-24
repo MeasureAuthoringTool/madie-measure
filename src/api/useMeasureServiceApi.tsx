@@ -80,6 +80,31 @@ export class MeasureServiceApi {
       throw error;
     }
   }
+  async getRecentMeasuresByMeasureSetId(measureSetIds: string[]): Promise<any> {
+    const idsParam = measureSetIds.join(",");
+    try {
+      const response = await axios.get(
+        `${this.baseUrl}/measures/recentsByMeasureSetId`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+          params: {
+            measureSetIds: idsParam,
+          },
+        }
+      );
+      if (response.data) {
+        return response.data;
+      }
+    } catch (error) {
+      console.error(
+        "error requesting Measures By multiple measureSetIds ",
+        error
+      );
+      throw error;
+    }
+  }
 
   async fetchMeasures(
     filterByCurrentUser: boolean,
@@ -437,7 +462,7 @@ export class MeasureServiceApi {
     }
   }
 
-  async getSharedWithUserIds(measureIds: string[]): Promise<any> {
+  async getSharedMeasures(measureIds: string[]): Promise<any> {
     try {
       const response = await axios.get(
         `${this.baseUrl}/measures/shared?measureIds=${measureIds}`,
@@ -451,6 +476,26 @@ export class MeasureServiceApi {
     } catch (err) {
       const message =
         "Unable to retrieve users that the selected measure(s) is shared with. If the error persists, please contact the help desk.";
+      console.error(message, err);
+      throw new Error(message);
+    }
+  }
+
+  async shareMeasures(measures: Map<string, string[]>): Promise<any> {
+    try {
+      const response = await axios.put(
+        `${this.baseUrl}/measures/shared`,
+        Object.fromEntries(measures),
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      const message =
+        "Unable to share the selected measure(s) with the added users. If the error persists, please contact the help desk.";
       console.error(message, err);
       throw new Error(message);
     }
