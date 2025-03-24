@@ -37,7 +37,8 @@ export const exportMeasure = async (
   measureServiceApi,
   setToastOpen,
   setToastType,
-  setToastMessage
+  setToastMessage,
+  elmErrorSeverity
 ) => {
   setFailureMessage(null);
   setDownloadState("downloading");
@@ -48,6 +49,7 @@ export const exportMeasure = async (
     const { ecqmTitle, model, version } = measure ?? {};
     const { status, data } = await measureServiceApi?.getMeasureExport(
       measure.id,
+      elmErrorSeverity,
       abortController.current.signal
     );
     const warn = status === 201 && !measure?.measureMetaData?.draft;

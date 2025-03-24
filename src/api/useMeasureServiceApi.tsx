@@ -558,20 +558,22 @@ export class MeasureServiceApi {
     }
   }
 
-  // add abort signal.
-  async getMeasureExport(measureId: string, signal): Promise<any> {
+  async getMeasureExport(
+    measureId: string,
+    elmErrorSeverity: string,
+    signal
+  ): Promise<any> {
     try {
-      const response = await axios.get(
-        `${this.baseUrl}/measures/${measureId}/exports`,
-        {
-          headers: {
-            Authorization: `Bearer ${this.getAccessToken()}`,
-          },
-          responseType: "blob",
-          signal,
-        }
-      );
-      return response;
+      return await axios.get(`${this.baseUrl}/measures/${measureId}/exports`, {
+        params: {
+          elmErrorSeverity,
+        },
+        headers: {
+          Authorization: `Bearer ${this.getAccessToken()}`,
+        },
+        responseType: "blob",
+        signal,
+      });
     } catch (error) {
       // need to bubble the error up.
       console.error("error requesting measure export ", error);

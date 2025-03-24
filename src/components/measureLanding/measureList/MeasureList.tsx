@@ -585,7 +585,7 @@ export default function MeasureList(props: {
     document.body.removeChild(link);
   };
 
-  const exportMeasure = async () => {
+  const exportMeasure = async (elmErrorSeverity: string) => {
     setViewHumanReadableModal({
       open: false,
       measureId: "",
@@ -598,6 +598,7 @@ export default function MeasureList(props: {
       const { ecqmTitle, model, version } = targetMeasure?.current ?? {};
       const { status, data } = await measureServiceApi?.getMeasureExport(
         targetMeasure.current?.id,
+        elmErrorSeverity,
         abortController.current.signal
       );
       const warn =

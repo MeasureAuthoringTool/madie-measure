@@ -1,10 +1,4 @@
-import React, {
-  useEffect,
-  useState,
-  Suspense,
-  useRef,
-  useCallback,
-} from "react";
+import React, { useEffect, useState, Suspense, useRef } from "react";
 import {
   useBlocker,
   Route,
@@ -227,22 +221,26 @@ export default function EditMeasure() {
   }, []);
 
   useEffect(() => {
-    const exportListener = async () => {
-      try {
-        const measure = await measureServiceApi.fetchMeasure(measureId);
-        await exportMeasure(
-          setFailureMessage,
-          setDownloadState,
-          abortController,
-          measure,
-          measureServiceApi,
-          setToastOpen,
-          setToastType,
-          setToastMessage
-        );
-      } catch (error) {
-        console.error("Error fetching measure:", error);
-        setFailureMessage("Failed to fetch measure");
+    const exportListener = async (event: CustomEvent) => {
+      if (event instanceof CustomEvent && event.detail) {
+        const { elmErrorSeverity } = event.detail;
+        try {
+          const measure = await measureServiceApi.fetchMeasure(measureId);
+          await exportMeasure(
+            setFailureMessage,
+            setDownloadState,
+            abortController,
+            measure,
+            measureServiceApi,
+            setToastOpen,
+            setToastType,
+            setToastMessage,
+            elmErrorSeverity
+          );
+        } catch (error) {
+          console.error("Error fetching measure:", error);
+          setFailureMessage("Failed to fetch measure");
+        }
       }
     };
     window.addEventListener("export-measure", exportListener, false);
