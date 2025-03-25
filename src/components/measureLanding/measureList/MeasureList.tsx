@@ -349,6 +349,7 @@ export default function MeasureList(props: {
           if (info.row.original?.hasAssociatedMeasures) {
             const handleKeyDown = (e) => {
               if (e.key === "Enter" || e.key === " ") {
+                setSelectedExpandedMeasuresIds([]);
                 handleRowClick(info.row.original.actions);
               }
             };
@@ -356,7 +357,10 @@ export default function MeasureList(props: {
               <span
                 role="button"
                 tabIndex={0}
-                onClick={() => handleRowClick(info.row.original.actions)}
+                onClick={() => {
+                  setSelectedExpandedMeasuresIds([]);
+                  handleRowClick(info.row.original.actions);
+                }}
                 onKeyDown={handleKeyDown}
                 style={{
                   cursor: "pointer",
@@ -481,9 +485,10 @@ export default function MeasureList(props: {
   const selectedMeasures =
     parentMeasures?.length === 0 && expandedMeasures?.length === 0
       ? []
-      : isRowExpanded
-      ? [...parentMeasures, ...expandedMeasures]
-      : [...parentMeasures];
+      : [
+          ...parentMeasures,
+          ...expandedMeasures?.filter((expMeasure) => expMeasure !== undefined),
+        ];
 
   const handleDialogClose = () => {
     setInvalidLibraryDialogOpen(false);
