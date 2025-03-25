@@ -55,6 +55,18 @@
       margin: 0 auto;
       max-height: 16px;
       line-height: 16px;
+      padding-top: 16px !important;
+      padding-bottom: 16px !important;
+
+      &:last-of-type {
+        padding-left: 0 !important;
+        max-width: 41px;
+      }
+
+      &:nth-of-type(5) {
+        padding-right: 0 !important;
+        max-width: 62px;
+      }
 
       div > .activity {
         display: flex;
@@ -95,14 +107,6 @@
       border-bottom: 1px solid #8c8c8c;
       border-top: 1px solid #8c8c8c;
       height: 72px;
-
-      &:nth-last-child(2) {
-        padding-right: 8px;
-      }
-
-      &:last-child {
-        padding-right: 8px;
-      }
     }
   }
 }
