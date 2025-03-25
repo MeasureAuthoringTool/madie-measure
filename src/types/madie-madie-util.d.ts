@@ -22,6 +22,7 @@ declare module "@madie/madie-util" {
     ShareMeasure: boolean;
     QICoreIncludeSDEValues: boolean;
     MeasureSearch: boolean;
+    QICoreManifestExpansion: boolean;
   }
 
   export interface ServiceConfig {
