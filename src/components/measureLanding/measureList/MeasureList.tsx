@@ -423,7 +423,7 @@ export default function MeasureList(props: {
         accessorKey: "",
       },
     ];
-  }, [selectedExpandedMeasuresIds]);
+  }, [selectedExpandedMeasuresIds, isRowExpanded]);
 
   const handleRowClick = async (actions) => {
     if (!isRowExpanded || selectedIdForExpansion !== actions?.measureSetId) {
@@ -473,15 +473,17 @@ export default function MeasureList(props: {
 
   const expandedMeasures = selectedExpandedMeasuresIds?.map(
     (expandedMeasureId) => {
-      return expandedSectionData.find((data) => data.id === expandedMeasureId)
+      return expandedSectionData?.find((data) => data?.id === expandedMeasureId)
         ?.actions;
     }
   );
 
   const selectedMeasures =
-    parentMeasures.length === 0 && expandedMeasures.length === 0
+    parentMeasures?.length === 0 && expandedMeasures?.length === 0
       ? []
-      : [...parentMeasures, ...expandedMeasures];
+      : isRowExpanded
+      ? [...parentMeasures, ...expandedMeasures]
+      : [...parentMeasures];
 
   const handleDialogClose = () => {
     setInvalidLibraryDialogOpen(false);
@@ -499,6 +501,11 @@ export default function MeasureList(props: {
       open: false,
       measureId: "",
     });
+    setOpenAssociateCmsIdDialog(false);
+    setDeleteMeasureDialog(false);
+    setIsRowExpanded(false);
+    setSelectedIdForExpansion(null);
+    setSelectedExpandedMeasuresIds([]);
   };
 
   const handleShareDialogClose = ({
@@ -1021,7 +1028,7 @@ export default function MeasureList(props: {
         setToastMessage("Measure successfully deleted");
         setToastOpen(true);
         doUpdateList();
-        setDeleteMeasureDialog(false);
+        handleDialogClose();
       }
     } catch (e) {
       if (e?.response?.data) {
@@ -1032,7 +1039,7 @@ export default function MeasureList(props: {
       }
       setToastType("danger");
       setToastOpen(true);
-      setDeleteMeasureDialog(false);
+      handleDialogClose();
     }
   };
 
@@ -1058,7 +1065,7 @@ export default function MeasureList(props: {
             copyMetaData ? " and meta data is copied over" : ""
           }.`
         );
-        setOpenAssociateCmsIdDialog(false);
+        handleDialogClose();
       })
       .catch((err) => {
         const errorOb = err?.response?.data;
@@ -1290,13 +1297,13 @@ export default function MeasureList(props: {
         />
         <DeleteDialog
           open={deleteMeasureDialog}
-          onClose={() => setDeleteMeasureDialog(false)}
+          onClose={handleDialogClose}
           measureName={targetMeasure?.current?.measureName}
           deleteMeasure={deleteMeasure}
         />
         <AssociateCmsIdDialog
           measures={selectedMeasures}
-          onClose={() => setOpenAssociateCmsIdDialog(false)}
+          onClose={handleDialogClose}
           open={openAssociateCmsIdDialog}
           handleCmsIdAssociationContinueDialog={handleCmsIdAssociation}
         />
