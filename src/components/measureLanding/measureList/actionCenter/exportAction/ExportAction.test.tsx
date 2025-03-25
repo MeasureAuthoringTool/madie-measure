@@ -61,7 +61,7 @@ describe("ExportAction", () => {
     );
   });
 
-  it("should call onClick when btn is clicked", async () => {
+  it("should call onClick for publishing exports when btn is clicked", async () => {
     const handleClick = jest.fn();
     render(<ExportAction measures={[qiCoreMeasure]} onClick={handleClick} />);
 
@@ -73,5 +73,21 @@ describe("ExportAction", () => {
     });
     userEvent.click(exportForPublishingButton);
     expect(handleClick).toHaveBeenCalledTimes(1);
+    expect(handleClick).toHaveBeenCalledWith("Export for Publishing");
+  });
+
+  it("should call onClick for exports when btn is clicked", async () => {
+    const handleClick = jest.fn();
+    render(<ExportAction measures={[qiCoreMeasure]} onClick={handleClick} />);
+
+    const exportIcon = screen.getByTestId("export-action-btn");
+    userEvent.click(exportIcon);
+
+    const exportForPublishingButton = await screen.findByRole("button", {
+      name: "Export",
+    });
+    userEvent.click(exportForPublishingButton);
+    expect(handleClick).toHaveBeenCalledTimes(1);
+    expect(handleClick).toHaveBeenCalledWith("Export");
   });
 });

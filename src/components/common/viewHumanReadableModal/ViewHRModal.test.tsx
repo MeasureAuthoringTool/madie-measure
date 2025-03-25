@@ -91,13 +91,23 @@ describe("View Human Readable Modal component", () => {
     expect(onCloseFn).toHaveBeenCalled();
   });
 
-  it("should call exportMeasure when the export button is clicked", async () => {
+  it("should call exportMeasure for publishing when the export button is clicked", async () => {
     renderComponent();
     userEvent.click(screen.getByText(/Export/i));
     const exportForPublishingButton = await screen.findByRole("button", {
       name: "Export for Publishing",
     });
     userEvent.click(exportForPublishingButton);
-    expect(exportMeasure).toHaveBeenCalled();
+    expect(exportMeasure).toHaveBeenCalledWith("Error");
+  });
+
+  it("should call exportMeasure when the export button is clicked", async () => {
+    renderComponent();
+    userEvent.click(screen.getByText(/Export/i));
+    const exportForPublishingButton = await screen.findByRole("button", {
+      name: "Export",
+    });
+    userEvent.click(exportForPublishingButton);
+    expect(exportMeasure).toHaveBeenCalledWith("Info");
   });
 });

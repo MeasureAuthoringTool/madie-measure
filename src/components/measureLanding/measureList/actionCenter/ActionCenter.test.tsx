@@ -183,7 +183,7 @@ describe("ActionCenter", () => {
     expect(setDeleteMeasureDialog).toHaveBeenCalledWith(true);
   });
 
-  it("should call exportMeasure when export action is triggered", async () => {
+  it("should call exportMeasure with severity info when publishable export action is triggered", async () => {
     const exportMeasure = jest.fn();
     const updateTargetMeasure = jest.fn();
 
@@ -211,6 +211,36 @@ describe("ActionCenter", () => {
 
     expect(updateTargetMeasure).toHaveBeenCalledWith(qdmMeasure);
     expect(exportMeasure).toHaveBeenCalledWith("Error");
+  });
+
+  it("should call exportMeasure with severity info when export action is triggered", async () => {
+    const exportMeasure = jest.fn();
+    const updateTargetMeasure = jest.fn();
+
+    render(
+      <ActionCenter
+        measures={[qdmMeasure]}
+        associateCmsId={jest.fn()}
+        exportMeasure={exportMeasure}
+        updateTargetMeasure={updateTargetMeasure}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={jest.fn}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+      />
+    );
+
+    userEvent.click(await screen.findByTestId("export-action-btn"));
+
+    const exportForPublishingButton = await screen.findByRole("button", {
+      name: "Export",
+    });
+    userEvent.click(exportForPublishingButton);
+
+    expect(updateTargetMeasure).toHaveBeenCalledWith(qdmMeasure);
+    expect(exportMeasure).toHaveBeenCalledWith("Info");
   });
 
   it("should disable actions based on permissions except of view human readable", () => {
