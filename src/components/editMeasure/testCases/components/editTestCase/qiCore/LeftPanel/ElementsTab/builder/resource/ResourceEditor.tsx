@@ -55,12 +55,11 @@ const ResourceEditor = ({
     setActiveTab(pendingTab);
     resetForm();
   };
-  
-  const  saveElements=(newValue:ElementDefinition[] | null) =>{
+
+  const saveElements = (newValue: ElementDefinition[] | null) => {
     setDisplayedElements(newValue ?? []);
     setDisplayedElementsTree(getDisplayedElementsTree(newValue ?? []));
-    
-  }
+  };
   useEffect(() => {
     if (selectedResource) {
       // TODO: look at the data that exists on the resource and combine fields from that
@@ -137,53 +136,53 @@ const ResourceEditor = ({
         /> */}
       </Box>
       <Box
-  sx={{
-    flexGrow: 1,
-    bgcolor: "background.paper",
-    display: "flex",
-    height: "100%",
-  }}
->
-  <Box sx={{ display: 'flex', flexDirection: 'column', width: 150 }}>
-    <Box sx={{ p: 1 }}>
-      <IconButton 
-        onClick={() => setDialogOpen(true)}
-        sx={{ width: '100%' }}
+        sx={{
+          flexGrow: 1,
+          bgcolor: "background.paper",
+          display: "flex",
+          height: "100%",
+        }}
       >
-        <CloseIcon sx={{ color: "#55FF55" }} />
-      </IconButton>
-    </Box>
-    <Tabs
-      orientation="vertical"
-      variant="scrollable"
-      value={activeTab}
-      onChange={(e, newValue) => {
-        if (dirty) {
-          setPendingTab(newValue);
-          setDialogOpen(true);
-        } else {
-          setActiveTab(newValue);
-        }
-      }}
-      aria-label="Resource element tabs"
-      sx={{
-        borderRight: 1,
-        borderColor: "divider",
-        "&& .MuiTab-root": {
-          alignItems: "baseline",
-        },
-      }}
-    >
-      {displayedElements?.map((element, index) => (
-        <Tab
-          key={index}
-          sx={{ textAlign: "left" }}
-          label={getElementName(element, resourceBasePath)}
-        />
-      ))}
-    </Tabs>
-  </Box>
-  <ElementEditor
+        <Box sx={{ display: "flex", flexDirection: "column", width: 150 }}>
+          <Box sx={{ p: 1 }}>
+            <IconButton
+              onClick={() => setDialogOpen(true)}
+              sx={{ width: "100%" }}
+            >
+              <CloseIcon sx={{ color: "#55FF55" }} />
+            </IconButton>
+          </Box>
+          <Tabs
+            orientation="vertical"
+            variant="scrollable"
+            value={activeTab}
+            onChange={(e, newValue) => {
+              if (dirty) {
+                setPendingTab(newValue);
+                setDialogOpen(true);
+              } else {
+                setActiveTab(newValue);
+              }
+            }}
+            aria-label="Resource element tabs"
+            sx={{
+              borderRight: 1,
+              borderColor: "divider",
+              "&& .MuiTab-root": {
+                alignItems: "baseline",
+              },
+            }}
+          >
+            {displayedElements?.map((element, index) => (
+              <Tab
+                key={index}
+                sx={{ textAlign: "left" }}
+                label={getElementName(element, resourceBasePath)}
+              />
+            ))}
+          </Tabs>
+        </Box>
+        <ElementEditor
           setInitialFormikValuesStu6={setInitialFormikValuesStu6}
           setValidationSchema={setValidationSchema}
           elementDefinition={displayedElements?.[activeTab]}
