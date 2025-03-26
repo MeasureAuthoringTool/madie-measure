@@ -58,16 +58,6 @@
       padding-top: 16px !important;
       padding-bottom: 16px !important;
 
-      &:last-of-type {
-        padding-left: 0 !important;
-        max-width: 41px;
-      }
-
-      &:nth-of-type(5) {
-        padding-right: 0 !important;
-        max-width: 62px;
-      }
-
       div > .activity {
         display: flex;
         flex-direction: row;
@@ -110,6 +100,22 @@
 
       &:nth-of-type(2) {
         padding-left: 40px !important;
+      }
+    }
+  }
+}
+
+.measures-list {
+  > tr {
+    > td {
+      &:last-of-type {
+        padding-left: 0 !important;
+        max-width: 41px;
+      }
+
+      &:nth-of-type(5) {
+        padding-right: 0 !important;
+        max-width: 62px;
       }
     }
   }
