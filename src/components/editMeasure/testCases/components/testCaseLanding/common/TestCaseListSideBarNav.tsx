@@ -127,7 +127,7 @@ const TestCaseListSideBarNav = ({
                   onChange={handleChange}
                 />
               )}
-              {qdm && (
+              {(featureFlags.QICoreManifestExpansion || qdm) && (
                 <Tab
                   label="Expansion"
                   value="expansion"
