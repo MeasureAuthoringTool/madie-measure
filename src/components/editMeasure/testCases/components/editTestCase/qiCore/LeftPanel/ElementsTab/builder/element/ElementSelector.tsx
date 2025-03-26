@@ -31,9 +31,9 @@ const getOptionLabel = (option: ElementDefinition, basePath: string) => {
 
 const ElementSelector = ({
   basePath,
-  options = [],
-  value = [],
-  newValues = [],
+  options,
+  value,
+  newValues,
   onChange,
 }: ElementSelectorProps) => {
   return (

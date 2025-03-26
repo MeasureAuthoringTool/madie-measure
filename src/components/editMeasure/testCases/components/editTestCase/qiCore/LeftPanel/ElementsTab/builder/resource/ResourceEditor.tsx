@@ -153,18 +153,6 @@ const ResourceEditor = ({
         </IconButton>
       </Box>
       <Divider />
-      <Box sx={{ margin: "16px 16px 0" }}>
-        {/* This is our element select multiple select. We need to match this with formik. */}
-        {/* <ElementSelector
-          basePath={resourceBasePath}
-          options={allElements}
-          value={displayedElements}
-          onChange={(event, newValue: ElementDefinition[] | null) => {
-            setDisplayedElements(newValue ?? []);
-            setDisplayedElementsTree(getDisplayedElementsTree(newValue ?? []));
-          }}
-        /> */}
-      </Box>
       <Box
         sx={{
           flexGrow: 1,

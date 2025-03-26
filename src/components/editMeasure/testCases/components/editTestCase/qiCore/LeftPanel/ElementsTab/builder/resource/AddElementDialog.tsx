@@ -15,14 +15,7 @@ export interface AddElementDialogProps {
 }
 
 const AddElementDialog = (props: AddElementDialogProps) => {
-  const {
-    open,
-    onClose,
-    basePath,
-    options = [],
-    value = [],
-    saveElements,
-  } = props;
+  const { open, onClose, basePath, options, value, saveElements } = props;
 
   const [newValues, setNewValues] = useState<ElementDefinition[]>([]);
   useEffect(() => {
