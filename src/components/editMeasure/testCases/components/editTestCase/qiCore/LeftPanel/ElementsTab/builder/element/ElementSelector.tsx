@@ -38,6 +38,7 @@ const ElementSelector = ({
 }: ElementSelectorProps) => {
   return (
     <>
+      Attribute Selector
       <Autocomplete
         disableClearable={true}
         multiple
@@ -78,7 +79,7 @@ const ElementSelector = ({
           })
         }
         renderInput={(params) => (
-          <TextField {...params} label="Elements" placeholder="Elements" />
+          <TextField {...params} placeholder="Attributes" />
         )}
       />
     </>

@@ -2,6 +2,7 @@ import React, { useEffect, useState, Dispatch, SetStateAction } from "react";
 import { Box, Divider, IconButton, Tab, Tabs } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import ElementEditor from "../element/ElementEditor";
 import ElementSelector from "../element/ElementSelector";
 import * as _ from "lodash";
@@ -16,6 +17,7 @@ import {
   stripResourcePath,
   getDisplayedElementsTree,
   getElementName,
+  removeUndefinedAndEmptyObjects,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import { useFormikContext } from "formik";
 import { MadieDiscardDialog } from "@madie/madie-design-system/dist/react";
@@ -37,7 +39,7 @@ const ResourceEditor = ({
   setInitialFormikValuesStu6,
   setValidationSchema,
 }: ResourceEditorProps) => {
-  const { dirty, resetForm } = useFormikContext();
+  const { dirty, resetForm, setValues, values } = useFormikContext();
   const [activeTab, setActiveTab] = useState(0);
   const [pendingTab, setPendingTab] = useState(0);
   const [allElements, setAllElements] = useState([]);
@@ -59,6 +61,33 @@ const ResourceEditor = ({
   const saveElements = (newValue: ElementDefinition[] | null) => {
     setDisplayedElements(newValue ?? []);
     setDisplayedElementsTree(getDisplayedElementsTree(newValue ?? []));
+
+    const { type } = selectedResource?.definition;
+    const formikCleanedValues = removeUndefinedAndEmptyObjects(values);
+    const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
+
+    // Update with formik values
+    nextEntry.resource = formikCleanedValues[type];
+    nextEntry.resource.resourceType = type;
+
+    // Add empty values for new elements
+    newValue?.forEach((element) => {
+      const elemPath = stripResourcePath(
+        selectedResource.definition.type,
+        element.path
+      );
+      const currentValue = _.get(nextEntry.resource, elemPath);
+      if (_.isNil(currentValue)) {
+        _.set(nextEntry.resource, elemPath, "");
+      }
+    });
+
+    // Update resource state
+    setEditingResource(nextEntry.resource);
+    dispatch({
+      type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
+      payload: nextEntry,
+    });
   };
   useEffect(() => {
     if (selectedResource) {
@@ -147,9 +176,19 @@ const ResourceEditor = ({
           <Box sx={{ p: 1 }}>
             <IconButton
               onClick={() => setDialogOpen(true)}
-              sx={{ width: "100%" }}
+              sx={{
+                width: "100%",
+                fontSize: "0.875rem",
+                textTransform: "none",
+                fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
+                "&:hover": {
+                  backgroundColor: "transparent",
+                },
+                padding: 0,
+              }}
             >
-              <CloseIcon sx={{ color: "#55FF55" }} />
+              <AddCircleOutlineIcon sx={{ color: "#3171C2" }} />
+              <div>Add Attribute(s)</div>
             </IconButton>
           </Box>
           <Tabs
