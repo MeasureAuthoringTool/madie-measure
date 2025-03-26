@@ -32,7 +32,7 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
-import { checkUserCanEdit } from "@madie/madie-util";
+import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
 import CreatVersionDialog from "../../common/createVersionDialog/CreateVersionDialog";
 import DraftMeasureDialog from "../../common/draftMeasureDialog/DraftMeasureDialog";
 import versionErrorHelper from "../../../utils/versionErrorHelper";
@@ -46,6 +46,10 @@ import ActionCenter from "./actionCenter/ActionCenter";
 import DeleteDialog from "../../editMeasure/DeleteDialog";
 import ViewHRModal from "../../common/viewHumanReadableModal/ViewHRModal";
 import ShareDialog from "../../common/shareDialog/ShareDialog";
+import {
+  ExpandIcon,
+  CollapseIcon,
+} from "../../../icons/MeasureListTableRightArrowIcons";
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -142,6 +146,11 @@ export default function MeasureList(props: {
     useState(false);
 
   const [shareDialog, setShareDialog] = useState({ open: false, option: "" });
+  const [selectedIdForExpansion, setSelectedIdForExpansion] = useState(null);
+  const [isRowExpanded, setIsRowExpanded] = useState<boolean>(false);
+  const [selectedExpandedMeasuresIds, setSelectedExpandedMeasuresIds] =
+    useState([]);
+  const featureFlags = useFeatureFlags();
 
   const buildLookup = useCallback(
     async (measureList) => {
@@ -160,13 +169,14 @@ export default function MeasureList(props: {
     [measureServiceApi]
   );
   const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
-  const transFormData = (measureList: Measure[]): TCRow[] => {
-    return measureList.map((measure: Measure) => ({
-      id: measure.id,
-      measureName: measure.measureName,
-      version: measure.version,
-      model: measure.model,
+  const transFormData = (measureList): TCRow[] => {
+    return measureList.map((measure) => ({
+      id: measure?.id,
+      measureName: measure?.measureName,
+      version: measure?.version,
+      model: measure?.model,
       actions: measure,
+      hasAssociatedMeasures: measure?.hasAssociatedMeasures,
     }));
   };
 
@@ -177,6 +187,7 @@ export default function MeasureList(props: {
     version: string;
     model: string;
     actions: any;
+    hasAssociatedMeasures: boolean;
   };
 
   function customSort(a: string, b: string) {
@@ -193,6 +204,7 @@ export default function MeasureList(props: {
   }
 
   const [data, setData] = useState<TCRow[]>([]);
+  const [expandedSectionData, setExpandedSectionData] = useState<TCRow[]>([]);
   useEffect(() => {
     if (props.measureList && measureServiceApi) {
       buildLookup(props.measureList);
@@ -228,106 +240,213 @@ export default function MeasureList(props: {
     );
   }
 
-  const columns = useMemo<ColumnDef<TCRow>[]>(() => {
-    const columnDefs = [];
-    columnDefs.push({
-      id: "select",
-      header: ({ table }) => (
-        <IndeterminateCheckbox
-          {...{
-            checked: table.getIsAllRowsSelected(),
-            indeterminate: table.getIsSomePageRowsSelected(),
-            onChange: table.getToggleAllPageRowsSelectedHandler(),
-          }}
+  const columnsToBeAdded = [
+    {
+      header: "Measure Name",
+      cell: (info) => (
+        <TruncateText
+          text={info.row.original.measureName}
+          maxLength={120}
+          dataTestId={`measure-name-${info.row.original.id}`}
         />
       ),
-      cell: ({ row }) => {
-        return (
-          <div className="px-1">
-            <IndeterminateCheckbox
-              {...{
-                checked: row.getIsSelected(), //props.selectedIds[row.original.id],
-                disabled: !row.getCanSelect(),
-                indeterminate: row.getIsSomeSelected(),
-                onChange: row.getToggleSelectedHandler(),
-                id: row.original.id,
+      accessorKey: "measureName",
+      sortingFn: (rowA, rowB) =>
+        customSort(rowA.original.measureName, rowB.original.measureName),
+    },
+    {
+      header: "Version",
+      cell: (info) => (
+        <>
+          <TruncateText
+            text={info.row.original.version}
+            maxLength={60}
+            dataTestId={`measure-version-${info.row.original.id}`}
+          />
+          {`${info.row.original.actions.measureMetaData?.draft}` === "true" && (
+            <Chip tw="ml-6" className="chip-draft" label="Draft" />
+          )}
+        </>
+      ),
+      accessorKey: "version",
+      sortingFn: (rowA, rowB) =>
+        customSort(rowA.original.version, rowB.original.version),
+    },
+    {
+      header: "Model",
+      cell: (info) => (
+        <TruncateText
+          text={info.row.original.model}
+          maxLength={120}
+          dataTestId={`measure-model-${info.row.original.id}`}
+        />
+      ),
+      accessorKey: "model",
+      sortingFn: (rowA, rowB) =>
+        customSort(rowA.original.model, rowB.original.model),
+    },
+    {
+      header: "",
+      cell: (info) => (
+        <Button
+          variant="outline-filled"
+          data-testid={`measure-action-${info.row.original.id}`}
+          aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
+          onClick={() =>
+            navigate(`/measures/${info.row.original.id}/edit/details`)
+          }
+          role="button"
+        >
+          {checkUserCanEdit(
+            info.row.original.actions?.measureSet?.owner,
+            info.row.original.actions?.measureSet?.acls
+          ) && info.row.original.actions.measureMetaData?.draft
+            ? "Edit"
+            : "View"}
+        </Button>
+      ),
+      accessorKey: "actions",
+      enableSorting: false,
+    },
+  ];
+
+  const columns = useMemo<ColumnDef<TCRow>[]>(() => {
+    const t = [
+      {
+        id: "select",
+        accessorKey: "select",
+        header: ({ table }) => (
+          <IndeterminateCheckbox
+            {...{
+              checked: table.getIsAllRowsSelected(),
+              indeterminate: table.getIsSomePageRowsSelected(),
+              onChange: table.getToggleAllPageRowsSelectedHandler(),
+            }}
+          />
+        ),
+        cell: ({ row }) => {
+          return (
+            <div className="px-1">
+              <IndeterminateCheckbox
+                {...{
+                  checked: row.getIsSelected(), //props.selectedIds[row.original.id],
+                  disabled: !row.getCanSelect(),
+                  indeterminate: row.getIsSomeSelected(),
+                  onChange: row.getToggleSelectedHandler(),
+                  id: row.original.id,
+                }}
+              />
+            </div>
+          );
+        },
+      },
+      ...columnsToBeAdded,
+    ];
+    if (featureFlags?.MeasureSearch) {
+      t.push({
+        header: "",
+        cell: (info) => {
+          if (info.row.original?.hasAssociatedMeasures) {
+            const handleKeyDown = (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                setSelectedExpandedMeasuresIds([]);
+                handleRowClick(info.row.original.actions);
+              }
+            };
+            return (
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  setSelectedExpandedMeasuresIds([]);
+                  handleRowClick(info.row.original.actions);
+                }}
+                onKeyDown={handleKeyDown}
+                style={{
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {isRowExpanded &&
+                selectedIdForExpansion ===
+                  info.row.original.actions?.measureSetId ? (
+                  <CollapseIcon />
+                ) : (
+                  <ExpandIcon />
+                )}
+              </span>
+            );
+          } else {
+            return <></>;
+          }
+        },
+        accessorKey: "expandArrow",
+        enableSorting: false,
+      });
+    }
+    return t;
+  }, [featureFlags?.MeasureSearch, selectedIdForExpansion, isRowExpanded]);
+
+  const expandedcolumns = useMemo<ColumnDef<TCRow>[]>(() => {
+    return [
+      {
+        id: "select",
+        accessorKey: "select",
+        header: "Select",
+        cell: (info) => {
+          const isChecked = selectedExpandedMeasuresIds.includes(
+            info.row.original.id
+          );
+          return (
+            <input
+              type="checkbox"
+              checked={isChecked}
+              onChange={(event) => {
+                const checked = event.target.checked;
+                if (checked) {
+                  setSelectedExpandedMeasuresIds((prev) => [
+                    ...prev,
+                    info.row.original.id,
+                  ]);
+                } else {
+                  setSelectedExpandedMeasuresIds((prev) =>
+                    prev.filter((id) => id !== info.row.original.id)
+                  );
+                }
               }}
             />
-          </div>
-        );
+          );
+        },
       },
-    });
-
-    return [
-      ...columnDefs,
-      {
-        header: "Measure Name",
-        cell: (info) => (
-          <TruncateText
-            text={info.row.original.measureName}
-            maxLength={120}
-            dataTestId={`measure-name-${info.row.original.id}`}
-          />
-        ),
-        accessorKey: "measureName",
-        sortingFn: (rowA, rowB) =>
-          customSort(rowA.original.measureName, rowB.original.measureName),
-      },
-      {
-        header: "Version",
-        cell: (info) => (
-          <>
-            <TruncateText
-              text={info.row.original.version}
-              maxLength={60}
-              dataTestId={`measure-version-${info.row.original.id}`}
-            />
-            {`${info.row.original.actions.measureMetaData?.draft}` ===
-              "true" && <Chip tw="ml-6" className="chip-draft" label="Draft" />}
-          </>
-        ),
-        accessorKey: "version",
-        sortingFn: (rowA, rowB) =>
-          customSort(rowA.original.version, rowB.original.version),
-      },
-      {
-        header: "Model",
-        cell: (info) => (
-          <TruncateText
-            text={info.row.original.model}
-            maxLength={120}
-            dataTestId={`measure-model-${info.row.original.id}`}
-          />
-        ),
-        accessorKey: "model",
-        sortingFn: (rowA, rowB) =>
-          customSort(rowA.original.model, rowB.original.model),
-      },
+      ...columnsToBeAdded,
       {
         header: "",
-        cell: (info) => (
-          <Button
-            variant="outline-filled"
-            data-testid={`measure-action-${info.row.original.id}`}
-            aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
-            onClick={() =>
-              navigate(`/measures/${info.row.original.id}/edit/details`)
-            }
-            role="button"
-          >
-            {checkUserCanEdit(
-              info.row.original.actions?.measureSet?.owner,
-              info.row.original.actions?.measureSet?.acls
-            ) && info.row.original.actions.measureMetaData?.draft
-              ? "Edit"
-              : "View"}
-          </Button>
-        ),
-        accessorKey: "actions",
-        enableSorting: false,
+        cell: (info) => <></>,
+        accessorKey: "",
       },
     ];
-  }, []);
+  }, [selectedExpandedMeasuresIds, isRowExpanded]);
+
+  const handleRowClick = async (actions) => {
+    if (!isRowExpanded || selectedIdForExpansion !== actions?.measureSetId) {
+      setSelectedIdForExpansion(actions?.measureSetId);
+      const results = await measureServiceApi.getMeasuresByMeasureSetId(
+        actions?.measureSetId,
+        true
+      );
+      const filteredResults = results.filter(
+        (result) => result.id !== actions?.id
+      );
+      setIsRowExpanded(true);
+      setExpandedSectionData(transFormData(filteredResults));
+    } else {
+      setIsRowExpanded(false);
+      setExpandedSectionData(null);
+      setSelectedIdForExpansion(null);
+    }
+  };
 
   const table = useReactTable({
     data,
@@ -350,11 +469,26 @@ export default function MeasureList(props: {
     table.toggleAllRowsSelected(false);
   }, [props.currentLimit, props.currentPage]);
 
-  const selectedMeasures = props.measureList?.filter((measure) => {
+  const parentMeasures = props.measureList?.filter((measure) => {
     return table
       .getSelectedRowModel()
       .rows.find((row) => row.original.id === measure.id);
   });
+
+  const expandedMeasures = selectedExpandedMeasuresIds?.map(
+    (expandedMeasureId) => {
+      return expandedSectionData?.find((data) => data?.id === expandedMeasureId)
+        ?.actions;
+    }
+  );
+
+  const selectedMeasures =
+    parentMeasures?.length === 0 && expandedMeasures?.length === 0
+      ? []
+      : [
+          ...parentMeasures,
+          ...expandedMeasures?.filter((expMeasure) => expMeasure !== undefined),
+        ];
 
   const handleDialogClose = () => {
     setInvalidLibraryDialogOpen(false);
@@ -372,6 +506,11 @@ export default function MeasureList(props: {
       open: false,
       measureId: "",
     });
+    setOpenAssociateCmsIdDialog(false);
+    setDeleteMeasureDialog(false);
+    setIsRowExpanded(false);
+    setSelectedIdForExpansion(null);
+    setSelectedExpandedMeasuresIds([]);
   };
 
   const handleShareDialogClose = ({
@@ -894,7 +1033,7 @@ export default function MeasureList(props: {
         setToastMessage("Measure successfully deleted");
         setToastOpen(true);
         doUpdateList();
-        setDeleteMeasureDialog(false);
+        handleDialogClose();
       }
     } catch (e) {
       if (e?.response?.data) {
@@ -905,7 +1044,7 @@ export default function MeasureList(props: {
       }
       setToastType("danger");
       setToastOpen(true);
-      setDeleteMeasureDialog(false);
+      handleDialogClose();
     }
   };
 
@@ -931,7 +1070,7 @@ export default function MeasureList(props: {
             copyMetaData ? " and meta data is copied over" : ""
           }.`
         );
-        setOpenAssociateCmsIdDialog(false);
+        handleDialogClose();
       })
       .catch((err) => {
         const errorOb = err?.response?.data;
@@ -1055,21 +1194,41 @@ export default function MeasureList(props: {
         </thead>
         <tbody className="table-body" style={{ padding: 20 }}>
           {table.getRowModel().rows.map((row) => (
-            <tr
-              key={row.id}
-              className="ml-tr"
-              data-testid={`row-item`}
-              style={{
-                borderTop: "solid 1px #8c8c8c",
-                borderSpacing: "0 2em !important",
-              }}
-            >
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} data-testid={`measure-name-${cell.id}`}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
+            <React.Fragment key={row.id}>
+              <tr
+                key={row.id}
+                className="ml-tr"
+                data-testid={`row-item`}
+                style={{
+                  borderTop: "solid 1px #8c8c8c",
+                  borderSpacing: "0 2em !important",
+                }}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id} data-testid={`measure-name-${cell.id}`}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+              {featureFlags?.MeasureSearch &&
+                selectedIdForExpansion === row.original.actions?.measureSetId &&
+                expandedSectionData?.map((subRow) => (
+                  <tr key={subRow.id} className="expanded-row">
+                    {expandedcolumns.map((column: any) =>
+                      column?.accessorKey === "expandArrow" ? (
+                        <td></td>
+                      ) : (
+                        <td key={column?.accessorKey || column.id}>
+                          {flexRender(column.cell ?? column.accessorKey, {
+                            row: { original: subRow },
+                            getValue: () => subRow[column.accessorKey],
+                          })}
+                        </td>
+                      )
+                    )}
+                  </tr>
+                ))}
+            </React.Fragment>
           ))}
         </tbody>
         <Popover
@@ -1143,13 +1302,13 @@ export default function MeasureList(props: {
         />
         <DeleteDialog
           open={deleteMeasureDialog}
-          onClose={() => setDeleteMeasureDialog(false)}
+          onClose={handleDialogClose}
           measureName={targetMeasure?.current?.measureName}
           deleteMeasure={deleteMeasure}
         />
         <AssociateCmsIdDialog
           measures={selectedMeasures}
-          onClose={() => setOpenAssociateCmsIdDialog(false)}
+          onClose={handleDialogClose}
           open={openAssociateCmsIdDialog}
           handleCmsIdAssociationContinueDialog={handleCmsIdAssociation}
         />
