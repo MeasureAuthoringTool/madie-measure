@@ -19,6 +19,7 @@ import {
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import { useFormikContext } from "formik";
 import { MadieDiscardDialog } from "@madie/madie-design-system/dist/react";
+import AddElementDialog from "./AddElementDialog";
 interface ResourceEditorProps {
   selectedResource: any;
   onCancel: (resource: any) => void;
@@ -54,6 +55,13 @@ const ResourceEditor = ({
     setActiveTab(pendingTab);
     resetForm();
   };
+  
+  const  saveElements=(newValue:ElementDefinition[] | null) =>{
+    setDisplayedElements(newValue ?? []);
+    setDisplayedElementsTree(getDisplayedElementsTree(newValue ?? []));
+    
+    
+  }
   useEffect(() => {
     if (selectedResource) {
       // TODO: look at the data that exists on the resource and combine fields from that
@@ -119,7 +127,7 @@ const ResourceEditor = ({
       <Divider />
       <Box sx={{ margin: "16px 16px 0" }}>
         {/* This is our element select multiple select. We need to match this with formik. */}
-        <ElementSelector
+        {/* <ElementSelector
           basePath={resourceBasePath}
           options={allElements}
           value={displayedElements}
@@ -127,7 +135,7 @@ const ResourceEditor = ({
             setDisplayedElements(newValue ?? []);
             setDisplayedElementsTree(getDisplayedElementsTree(newValue ?? []));
           }}
-        />
+        /> */}
       </Box>
       <Box
         sx={{
@@ -159,6 +167,9 @@ const ResourceEditor = ({
             width: 150,
           }}
         >
+        <IconButton onClick={() =>  setDialogOpen(true)}>
+          <CloseIcon sx={{ color: "#55FF55" }} />
+        </IconButton>
           {displayedElements?.map((element) => {
             return (
               <Tab
@@ -189,9 +200,12 @@ const ResourceEditor = ({
           canEdit={canEdit}
         />
       </Box>
-      <MadieDiscardDialog
+      <AddElementDialog
         open={dialogOpen}
-        onContinue={onContinue}
+        basePath={resourceBasePath}
+        options={allElements}
+        value={displayedElements}
+        saveElements={saveElements}
         onClose={() => {
           setDialogOpen(false);
         }}
