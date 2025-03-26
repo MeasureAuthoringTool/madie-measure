@@ -23,6 +23,7 @@ const groups: Group[] = [
 jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: jest.fn().mockReturnValue({
     QICoreIncludeSDEValues: true,
+    QICoreManifestExpansion: true,
   }),
 }));
 describe("TestCase component", () => {
@@ -65,7 +66,7 @@ describe("TestCase component", () => {
     );
 
     expect(screen.getByRole("navigation")).toBeInTheDocument();
-    expect(screen.getAllByRole("tab").length).toEqual(4);
+    expect(screen.getAllByRole("tab").length).toEqual(5);
     const activeLink = screen.getByRole("tab", {
       name: "Population Criteria 2",
     });
@@ -120,5 +121,35 @@ describe("TestCase component", () => {
 
     expect(screen.getByRole("navigation")).toBeInTheDocument();
     expect(screen.getAllByRole("tab").length).toEqual(5);
+  });
+
+  it("shouldn't render Expansion tab for QI Core measures when QICoreManifestExpansion flag is false", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => {
+      return {
+        QICoreManifestExpansion: false,
+      };
+    });
+
+    render(
+      <MemoryRouter>
+        <TestCaseListSideBarNav allPopulationCriteria={groups} />
+      </MemoryRouter>
+    );
+
+    expect(
+      screen.queryByRole("tab", { name: "Expansion" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("should render Expansion tab for QI Core measures when QICoreManifestExpansion flag is true", async () => {
+    render(
+      <MemoryRouter>
+        <TestCaseListSideBarNav allPopulationCriteria={groups} />
+      </MemoryRouter>
+    );
+
+    expect(
+      screen.queryByRole("tab", { name: "Expansion" })
+    ).toBeInTheDocument();
   });
 });
