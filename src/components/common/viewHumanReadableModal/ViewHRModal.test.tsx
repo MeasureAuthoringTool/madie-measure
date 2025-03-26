@@ -104,7 +104,7 @@ describe("View Human Readable Modal component", () => {
   it("should call exportMeasure when the export button is clicked", async () => {
     renderComponent();
     userEvent.click(screen.getByText(/Export/i));
-    const exportForPublishingButton = await screen.findByRole("button", {
+    const exportButton = await screen.findByRole("button", {
       name: "Export",
     });
     userEvent.click(exportForPublishingButton);
