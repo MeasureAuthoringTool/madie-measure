@@ -85,6 +85,18 @@ const sortSharedMeasures = (a: SharedMeasure, b: SharedMeasure) => {
   return new Date(b.dateShared).getTime() - new Date(a.dateShared).getTime();
 };
 
+const getErrorMessage = (error, baseMessage: string) => {
+  let toastMessage;
+
+  if (error?.response?.data?.message) {
+    toastMessage = error.response.data.message;
+  } else {
+    toastMessage = baseMessage;
+  }
+
+  return toastMessage;
+};
+
 const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
 
@@ -233,7 +245,12 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
       table.toggleAllRowsSelected(true);
       setInitialRowIdsSelected(Object.keys(table.getState().rowSelection));
     } catch (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(
+        getErrorMessage(
+          error,
+          "Unable to retrieve users that the selected measure(s) is shared with. If the error persists, please contact the help desk."
+        )
+      );
     } finally {
       setLoading(false);
     }
@@ -255,7 +272,10 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
       } catch (error) {
         onClose({
           toastType: "danger",
-          toastMessage: error.message,
+          toastMessage: getErrorMessage(
+            error,
+            "Unable to share the selected measure(s) with the added users. If the error persists, please contact the help desk."
+          ),
           toastOpen: true,
         });
       } finally {
@@ -273,7 +293,10 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
       } catch (error) {
         onClose({
           toastType: "danger",
-          toastMessage: error.message,
+          toastMessage: getErrorMessage(
+            error,
+            "Unable to unshare the selected measure(s) with the users who were unchecked. If the error persists, please contact the help desk."
+          ),
           toastOpen: true,
         });
       } finally {
@@ -282,8 +305,8 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
     }
   };
 
-  const onRowSelectionChange = () => {
-    if (initialRowIdsSelected) {
+  const onRowSelectionChange = useCallback(async () => {
+    if (initialRowIdsSelected.length) {
       const rowIdsSelected = Object.keys(rowSelection);
 
       const rowIdsUnselected: string[] = initialRowIdsSelected.filter(
@@ -297,7 +320,7 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
         updateUnsharedMeasuresRequest(measureId, userId);
       });
     }
-  };
+  }, [rowSelection]);
 
   const confirmationDialogWarningContent = () => {
     return (

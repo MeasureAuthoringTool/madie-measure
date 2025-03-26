@@ -614,12 +614,15 @@ describe("MeasureServiceApi Tests", () => {
 
     mockedAxios.put.mockResolvedValue(resp);
 
-    await measureServiceApi.shareMeasures(
+    const measureIdToAclSpecification = await measureServiceApi.shareMeasures(
       new Map([
         ["measureId1", ["userId1"]],
         ["measureId2", ["userId1"]],
       ])
     );
+
+    expect(mockedAxios.put).toBeCalledTimes(1);
+    expect(measureIdToAclSpecification).toEqual(data);
   });
 
   it("test shareMeasures failure", async () => {
@@ -658,12 +661,15 @@ describe("MeasureServiceApi Tests", () => {
 
     mockedAxios.put.mockResolvedValue(resp);
 
-    await measureServiceApi.unshareMeasures(
+    const measureIdToAclSpecification = await measureServiceApi.unshareMeasures(
       new Map([
         ["measureId1", ["userId2"]],
         ["measureId2", ["userId2"]],
       ])
     );
+
+    expect(mockedAxios.put).toBeCalledTimes(1);
+    expect(measureIdToAclSpecification).toEqual(data);
   });
 
   it("test unshareMeasures failure", async () => {

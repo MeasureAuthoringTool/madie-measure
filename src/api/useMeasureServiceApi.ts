@@ -75,9 +75,9 @@ export class MeasureServiceApi {
       if (response.data) {
         return response.data;
       }
-    } catch (error) {
-      console.error("error requesting Measures By measureSetId ", error);
-      throw error;
+    } catch (err) {
+      console.error("Failed to get measures by measure set id ", err);
+      throw err;
     }
   }
   async getRecentMeasuresByMeasureSetId(measureSetIds: string[]): Promise<any> {
@@ -474,10 +474,8 @@ export class MeasureServiceApi {
       );
       return response.data;
     } catch (err) {
-      const message =
-        "Unable to retrieve users that the selected measure(s) is shared with. If the error persists, please contact the help desk.";
-      console.error(message, err);
-      throw new Error(message);
+      console.error("Failed to get shared measures", err);
+      throw err;
     }
   }
 
@@ -494,10 +492,8 @@ export class MeasureServiceApi {
       );
       return response.data;
     } catch (err) {
-      const message =
-        "Unable to share the selected measure(s) with the added users. If the error persists, please contact the help desk.";
-      console.error(message, err);
-      throw new Error(message);
+      console.error("Failed to share measures", err);
+      throw err;
     }
   }
 
@@ -514,10 +510,8 @@ export class MeasureServiceApi {
       );
       return response.data;
     } catch (err) {
-      const message =
-        "Unable to unshare the selected measure(s) with the users who were unchecked. If the error persists, please contact the help desk.";
-      console.error(message, err);
-      throw new Error(message);
+      console.error("Failed to unshare measures", err);
+      throw err;
     }
   }
 
