@@ -183,7 +183,7 @@ describe("ActionCenter", () => {
     expect(setDeleteMeasureDialog).toHaveBeenCalledWith(true);
   });
 
-  it("should call exportMeasure with severity info when publishable export action is triggered", async () => {
+  it("should call exportMeasure with severity Error when publishable export action is triggered", async () => {
     const exportMeasure = jest.fn();
     const updateTargetMeasure = jest.fn();
 

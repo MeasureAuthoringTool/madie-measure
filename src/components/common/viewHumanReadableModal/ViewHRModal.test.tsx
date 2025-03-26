@@ -107,7 +107,7 @@ describe("View Human Readable Modal component", () => {
     const exportButton = await screen.findByRole("button", {
       name: "Export",
     });
-    userEvent.click(exportForPublishingButton);
+    userEvent.click(exportButton);
     expect(exportMeasure).toHaveBeenCalledWith("Info");
   });
 });
