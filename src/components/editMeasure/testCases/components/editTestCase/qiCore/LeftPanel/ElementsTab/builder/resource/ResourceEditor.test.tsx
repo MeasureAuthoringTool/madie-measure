@@ -170,4 +170,75 @@ describe("ResourceEditor", () => {
     userEvent.click(actionCenter);
     expect(screen.getByTestId("elements-copy")).not.toBeInTheDocument;
   });
+
+  it("opens AddElementDialog, interacts with it, and can close it", async () => {
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
+    const mockDispatch = jest.fn();
+
+    render(
+      <QiCoreResourceContext.Provider
+        value={{ state: mockPatientState, dispatch: mockDispatch }}
+      >
+        <ResourceEditor
+          selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
+          setValidationSchema={setValidationSchema}
+          setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+          selectedResource={mockSelectedResource}
+          onCancel={mockOnCancel}
+          canEdit={true}
+        />
+      </QiCoreResourceContext.Provider>
+    );
+
+    // Click the "Add Attribute(s)" button to open dialog
+    const addAttributeButton = screen.getByTestId(
+      "add-attribute-dialog-button"
+    );
+    userEvent.click(addAttributeButton);
+
+    // Verify dialog is open
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("add-element-close-dialog-button")
+      ).toBeInTheDocument();
+    });
+
+    // Verify attribute selector is present
+    expect(screen.getByText("Attribute Selector")).toBeInTheDocument();
+
+    // Test closing with "Discard Changes" button
+    const discardButton = screen.getByTestId("cancel-add-element-button");
+    userEvent.click(discardButton);
+
+    // Verify dialog is closed
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+
+    // Reopen dialog
+    userEvent.click(addAttributeButton);
+
+    // Test closing with X button
+    const closeButton = screen.getByTestId("add-element-close-dialog-button");
+    userEvent.click(closeButton);
+
+    // Verify dialog is closed
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+
+    // Reopen dialog one more time to test save
+    userEvent.click(addAttributeButton);
+
+    // Click save button
+    const saveButton = screen.getByTestId("add-element-button-2");
+    userEvent.click(saveButton);
+
+    // Verify dialog is closed and dispatch was called
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(mockDispatch).toHaveBeenCalled();
+    });
+  });
 });

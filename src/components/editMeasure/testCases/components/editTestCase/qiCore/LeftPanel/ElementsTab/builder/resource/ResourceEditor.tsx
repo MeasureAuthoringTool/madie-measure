@@ -187,6 +187,7 @@ const ResourceEditor = ({
                 },
                 padding: 0,
               }}
+              data-testid="add-attribute-dialog-button"
             >
               <AddCircleOutlineIcon sx={{ color: "#3171C2" }} />
               <div>Add Attribute(s)</div>
@@ -251,6 +252,13 @@ const ResourceEditor = ({
         saveElements={saveElements}
         onClose={() => {
           setAddDialogOpen(false);
+        }}
+      />
+      <MadieDiscardDialog
+        open={dialogOpen}
+        onContinue={onContinue}
+        onClose={() => {
+          setDialogOpen(false);
         }}
       />
     </Box>
