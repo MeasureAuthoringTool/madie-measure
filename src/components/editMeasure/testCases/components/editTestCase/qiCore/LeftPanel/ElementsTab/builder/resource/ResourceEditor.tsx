@@ -52,6 +52,7 @@ const ResourceEditor = ({
   );
   const { dispatch } = useQiCoreResource();
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const [addDialogOpen, setAddDialogOpen] = useState<boolean>(false);
   const onContinue = () => {
     setDialogOpen(false);
     setActiveTab(pendingTab);
@@ -175,7 +176,7 @@ const ResourceEditor = ({
         <Box sx={{ display: "flex", flexDirection: "column", width: 150 }}>
           <Box sx={{ p: 1 }}>
             <IconButton
-              onClick={() => setDialogOpen(true)}
+              onClick={() => setAddDialogOpen(true)}
               sx={{
                 width: "100%",
                 fontSize: "0.875rem",
@@ -243,13 +244,13 @@ const ResourceEditor = ({
         />
       </Box>
       <AddElementDialog
-        open={dialogOpen}
+        open={addDialogOpen}
         basePath={resourceBasePath}
         options={allElements}
         value={displayedElements}
         saveElements={saveElements}
         onClose={() => {
-          setDialogOpen(false);
+          setAddDialogOpen(false);
         }}
       />
     </Box>
