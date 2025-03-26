@@ -18,6 +18,7 @@ import {
 } from "@madie/madie-models";
 import TestCaseData from "../../testCaseConfiguration/testCaseData/TestCaseData";
 import SDEPage from "../../testCaseConfiguration/sde/SDEPage";
+import Expansion from "../../testCaseConfiguration/expansion/Expansion";
 
 export const CQL_RETURN_TYPES_MISMATCH_ERROR =
   "One or more Population Criteria has a mismatch with CQL return types. Test Cases cannot be executed until this is resolved.";
@@ -194,6 +195,16 @@ const TestCaseRoutes = () => {
               }
             />
           )}
+
+          {featureFlags?.QICoreManifestExpansion && (
+            <Route
+              path="/list-page/expansion"
+              element={
+                <TestCaseLandingWrapper qdm={false} children={<Expansion />} />
+              }
+            />
+          )}
+
           <Route
             path="/list-page/test-case-data"
             element={
