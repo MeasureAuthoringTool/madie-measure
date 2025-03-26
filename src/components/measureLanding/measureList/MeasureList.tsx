@@ -1192,7 +1192,7 @@ export default function MeasureList(props: {
             </tr>
           ))}
         </thead>
-        <tbody className="table-body" style={{ padding: 20 }}>
+        <tbody className="table-body measures-list" style={{ padding: 20 }}>
           {table.getRowModel().rows.map((row) => (
             <React.Fragment key={row.id}>
               <tr
