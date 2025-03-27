@@ -819,7 +819,9 @@ describe("EditTestCase component", () => {
       expect(debugOutput).toHaveTextContent(
         "Test case updated successfully with errors in JSON"
       );
-      expect(debugOutput).toHaveTextContent("Timezones updated in json");
+      expect(debugOutput).toHaveTextContent(
+        "MADiE only supports a timezone offset of 0. MADiE has overwritten any timezone offsets that are not zero."
+      );
     });
 
     it("Displaying successful message when Id is not present in the JSON while editing a test case", async () => {

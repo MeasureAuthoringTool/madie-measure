@@ -83,7 +83,8 @@ import useFhirCqlParsingService from "../../../api/cqlElmTranslationService/useF
 import checkSpecialCharacters from "../../../util/checkSpecialCharacters";
 import EditorSearch from "./LeftPanel/EditorSearch";
 import useFormikResetOnEvent from "../../../../../common/useFormikResetOnEvent";
-import moment from "moment";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 
 const TestCaseForm = tw.form`m-3`;
 const ValidationErrorsButton = tw.button`
@@ -490,11 +491,12 @@ const EditTestCase = (props: EditTestCaseProps) => {
 
   const convertDatesToUTC = (jsonData) => {
     let timezoneUpdated = false;
+    dayjs.extend(utc);
     const regex =
       /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})/g;
     const updatedData = JSON.stringify(jsonData, (key, value) => {
       if (typeof value === "string" && regex.test(value)) {
-        const newValue = moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ");
+        const newValue = dayjs(value).utc().format();
         if (value != newValue) {
           timezoneUpdated = true;
         }
@@ -645,7 +647,12 @@ const EditTestCase = (props: EditTestCaseProps) => {
               Changes {action}d successfully but the following{" "}
               {severityOfValidationErrors(validationErrors)}(s) were found
             </h3>
-            {timezoneUpdated && <ul>Timezones updated in json</ul>}
+            {timezoneUpdated && (
+              <ul>
+                MADiE only supports a timezone offset of 0. MADiE has
+                overwritten any timezone offsets that are not zero.
+              </ul>
+            )}
             <ul>{valErrors}</ul>
           </div>
         ) : (
@@ -656,7 +663,10 @@ const EditTestCase = (props: EditTestCaseProps) => {
             </h3>
             {timezoneUpdated && (
               <ul style={{ listStyle: "inside" }}>
-                <li>Timezones updated in json</li>
+                <li>
+                  MADiE only supports a timezone offset of 0. MADiE has
+                  overwritten any timezone offsets that are not zero.
+                </li>
               </ul>
             )}
           </div>
