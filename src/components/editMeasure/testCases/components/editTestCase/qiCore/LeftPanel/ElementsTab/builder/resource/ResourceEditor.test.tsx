@@ -172,8 +172,8 @@ describe("ResourceEditor", () => {
   });
 
   it("opens AddElementDialog, interacts with it, and can close it", async () => {
-    const setInitialFormikValuesStu6 = jest.fn();
-    const setValidationSchema = jest.fn();
+    const mockSetInitialFormikValuesStu6 = jest.fn();
+    const mockSetValidationSchema = jest.fn();
     const mockDispatch = jest.fn();
 
     render(
@@ -182,8 +182,8 @@ describe("ResourceEditor", () => {
       >
         <ResourceEditor
           selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
-          setValidationSchema={setValidationSchema}
-          setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+          setValidationSchema={mockSetValidationSchema}
+          setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
           selectedResource={mockSelectedResource}
           onCancel={mockOnCancel}
           canEdit={true}
@@ -198,11 +198,10 @@ describe("ResourceEditor", () => {
     userEvent.click(addAttributeButton);
 
     // Verify dialog is open
-    await waitFor(() => {
       expect(
         screen.getByTestId("add-element-close-dialog-button")
       ).toBeInTheDocument();
-    });
+
 
     // Verify attribute selector is present
     expect(screen.getByText("Attribute Selector")).toBeInTheDocument();
