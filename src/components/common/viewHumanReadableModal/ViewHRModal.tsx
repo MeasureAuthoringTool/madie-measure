@@ -15,7 +15,7 @@ interface ModalProps {
 }
 
 export default function ViewHRModal(props: ModalProps) {
-  const { open, onClose, exportMeasure, measureId } = props;
+  const { open, onClose, exportMeasure } = props;
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [loading, setLoading] = useState(true);
   const [hr, setHr] = useState<string>();
@@ -69,7 +69,6 @@ export default function ViewHRModal(props: ModalProps) {
         open,
         maxWidth: "lg",
         fullWidth: true,
-        onSubmit: exportMeasure,
       }}
       cancelButtonProps={{
         variant: "secondary",
@@ -78,11 +77,33 @@ export default function ViewHRModal(props: ModalProps) {
       }}
       continueButtonProps={{
         variant: "cyan",
-        type: "submit",
         "data-testid": "human-readable-export-button",
         continueText: "Export",
         hidden: error,
-        onClick: () => window.dispatchEvent(new Event("export-measure")),
+        popoverOptions: [
+          {
+            label: "Export",
+            dataTestId: "export-option",
+            toImplementFunction: () => {
+              const event = new CustomEvent("export-measure", {
+                detail: { elmErrorSeverity: "Info" },
+              });
+              window.dispatchEvent(event);
+              exportMeasure("Info");
+            },
+          },
+          {
+            label: "Export for Publishing",
+            dataTestId: "export-publishing-option",
+            toImplementFunction: () => {
+              const event = new CustomEvent("export-measure", {
+                detail: { elmErrorSeverity: "Error" },
+              });
+              window.dispatchEvent(event);
+              exportMeasure("Error");
+            },
+          },
+        ],
       }}
     >
       <DialogContent>
