@@ -10,7 +10,6 @@ import "./MeasureDetails.scss";
 import EditMeasureDetailsSideNav from "./EditMeasureDetailsSideNav";
 import MeasureReferences from "./MeasureReferences/MeasureReferences";
 import TransmissionFormat from "./TransmissionFormat/TransmissionFormat";
-import { Measure } from "@madie/madie-models";
 import MeasureDefinitions from "./MeasureDefinitions/MeasureDefinitions";
 const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
 export interface RouteHandlerState {
@@ -58,6 +57,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   const detailsLink = "";
   const measureSetLink = "measure-set";
   const measureDefinitionLink = "measure-definition";
+  const measureReferencesLink = "measure-references";
 
   const [measure, setMeasure] = useState<any>(measureStore.state);
 
@@ -224,6 +224,15 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
       id: "sideNavMeasurePurpose",
       displayCompletedIcon: !!measure?.measureMetaData.purpose,
     });
+    if (featureFlags?.QICoreMeasureReferences){ 
+      links[1].links.splice(links[1].links.length - 1,0,
+        { title: "References",
+          href: referencesLink,
+          dataTestId: "leftPanelMeasureReferences",
+          id: "sideNavMeasureReferences",
+          displayCompletedIcon: measure?.measureMetaData.references?.length > 0,}
+      )
+    }
   }
   useEffect(() => {
     setErrorMessage("");
@@ -376,6 +385,16 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                 }
               />
             </>
+          )}
+          {!isQDM && featureFlags.QICoreMeasureReferences && (
+            <>
+            <Route
+              path={measureReferencesLink}
+              element={
+                <MeasureReferences setErrorMessage={setErrorMessage} />
+              }
+            />
+          </>
           )}
           <Route path="*" element={<Navigate to="/404" />} />
         </Routes>
