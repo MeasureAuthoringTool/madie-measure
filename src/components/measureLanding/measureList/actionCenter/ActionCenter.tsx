@@ -16,7 +16,7 @@ import ShareAction from "./shareAction/ShareAction";
 interface PropTypes {
   measures: Measure[];
   associateCmsId: any;
-  exportMeasure: () => void;
+  exportMeasure: (elmErrorSeverity: string) => void;
   updateTargetMeasure: (Measure) => void;
   setCreateVersionDialog: any;
   setDraftMeasureDialog: any;
@@ -63,12 +63,16 @@ export default function ActionCenter(props: PropTypes) {
     }
   }, [props.measures, props.setDraftMeasureDialog, props.updateTargetMeasure]);
 
-  const exportMeasure = useCallback(() => {
-    if (props.measures?.length === 1) {
-      props.updateTargetMeasure(props.measures[0]);
-      props.exportMeasure();
-    }
-  }, [props.measures, props.exportMeasure, props.updateTargetMeasure]);
+  const exportMeasure = useCallback(
+    (exportType: string) => {
+      const elmErrorSeverity = exportType === "Export" ? "Info" : "Error";
+      if (props.measures?.length === 1) {
+        props.updateTargetMeasure(props.measures[0]);
+        props.exportMeasure(elmErrorSeverity);
+      }
+    },
+    [props.measures, props.exportMeasure, props.updateTargetMeasure]
+  );
 
   const deleteMeasure = useCallback(() => {
     if (props.measures?.length === 1) {
