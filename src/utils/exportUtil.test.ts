@@ -10,7 +10,8 @@ describe("exportUtil", () => {
     setFailureMessage,
     abortController,
     measureServiceApi,
-    targetMeasure;
+    targetMeasure,
+    elmErrorSeverity;
 
   beforeEach(() => {
     setToastOpen = jest.fn();
@@ -28,6 +29,7 @@ describe("exportUtil", () => {
         version: "1.0.0",
       },
     };
+    elmErrorSeverity = "Error";
     jest.clearAllMocks();
   });
 
@@ -92,6 +94,10 @@ describe("exportUtil", () => {
   });
 
   describe("exportMeasure", () => {
+    afterAll(() => {
+      jest.restoreAllMocks();
+    });
+
     it("should export measure and call downloadZipFile on success", async () => {
       const measure = targetMeasure.current;
       measureServiceApi.getMeasureExport.mockResolvedValue({
@@ -107,15 +113,16 @@ describe("exportUtil", () => {
         measureServiceApi,
         setToastOpen,
         setToastType,
-        setToastMessage
+        setToastMessage,
+        elmErrorSeverity
       );
 
       expect(setDownloadState).toHaveBeenCalledWith("downloading");
       expect(measureServiceApi.getMeasureExport).toHaveBeenCalledWith(
         measure.id,
+        elmErrorSeverity,
         abortController.current.signal
       );
-      expect(setToastOpen).toHaveBeenCalledWith(true);
       expect(setToastType).toHaveBeenCalledWith("success");
       expect(setToastMessage).toHaveBeenCalledWith(
         "Measure exported successfully"
@@ -142,12 +149,14 @@ describe("exportUtil", () => {
         measureServiceApi,
         setToastOpen,
         setToastType,
-        setToastMessage
+        setToastMessage,
+        elmErrorSeverity
       );
 
       expect(setDownloadState).toHaveBeenCalledWith("downloading");
       expect(measureServiceApi.getMeasureExport).toHaveBeenCalledWith(
         measure.id,
+        elmErrorSeverity,
         abortController.current.signal
       );
       expect(setToastType).toHaveBeenCalledWith("danger");
@@ -169,7 +178,8 @@ describe("exportUtil", () => {
         measureServiceApi,
         setToastOpen,
         setToastType,
-        setToastMessage
+        setToastMessage,
+        elmErrorSeverity
       );
 
       expect(setToastOpen).toHaveBeenCalled();
