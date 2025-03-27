@@ -43,42 +43,61 @@ const AddElementDialog = (props: AddElementDialogProps) => {
     <Dialog
       title="Add Attribute(s)"
       dialogProps={{
-        onClose,
         open,
+        onClose,
+        maxWidth: "sm",
+        fullWidth: true,
+        sx: {
+          "& .MuiDialog-paper": {
+            height: "70vh",
+            maxHeight: "900px",
+          },
+        },
       }}
-      // open={open}
-      maxWidth="sm"
-      fullWidth
+      cancelButtonProps={{
+        id: "discardBtn",
+        "data-testid": "cancel-add-element-button",
+        "aria-label": "discard button",
+        variant: "action",
+        onClick: handleClose,
+        cancelText: "Discard Changes",
+      }}
+      continueButtonProps={{
+        id: "saveBtn",
+        "data-testid": "add-element-button-2",
+        "aria-label": "save button",
+        variant: "primary",
+        onClick: handleSave,
+        continueText: "Save",
+      }}
       sx={{
         display: "flex",
         flexDirection: "column",
-        ".top-row": {
+        "& .MuiDialog-paper": {
           display: "flex",
-          flexDirection: "row",
-          flexGrow: 1,
-          justifyContent: "space-between",
-          px: 4,
-          py: 3,
-          h3: {
-            color: "#222222",
-            mb: 0,
-            mt: 1,
-          },
-          ".MuiButtonBase-root": {
-            ".MuiSvgIcon-root": {
-              color: "#242424",
-            },
-          },
+          flexDirection: "column",
+          overflow: "hidden",
         },
         ".message": {
-          mt: 4.5,
+          flex: "1 1 auto",
+          overflow: "hidden",
+          mt: 2,
           mx: 3.75,
-          mb: 12.5,
-          fontSize: 16,
+          mb: 2,
+          position: "relative",
+          "& .MuiAutocomplete-root": {
+            height: "100%",
+          },
+          "& .MuiAutocomplete-inputRoot": {
+            maxHeight: "calc(100% - 32px)",
+            overflow: "auto",
+          },
         },
         ".MuiDialogActions-root": {
+          flex: "0 0 auto",
           py: 2,
           px: 4.25,
+          borderTop: "1px solid #E0E0E0",
           ".qpp-c-button": {
             ml: 2.375,
           },
@@ -94,22 +113,6 @@ const AddElementDialog = (props: AddElementDialogProps) => {
           onChange={handleChange}
         />
       </p>
-      <DialogActions>
-        <Button
-          variant="action"
-          onClick={handleClose}
-          data-testid="cancel-add-element-button"
-        >
-          Discard Changes
-        </Button>
-        <Button
-          variant="primary"
-          onClick={handleSave}
-          data-testid="add-element-button-2"
-        >
-          Save
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 };

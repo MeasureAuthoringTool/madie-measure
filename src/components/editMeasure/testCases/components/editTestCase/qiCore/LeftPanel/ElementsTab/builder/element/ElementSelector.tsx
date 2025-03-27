@@ -1,5 +1,6 @@
 import React from "react";
-import Autocomplete from "@mui/material/Autocomplete";
+// import Autocomplete from "@mui/material/Autocomplete";
+import { AutoComplete } from "@madie/madie-design-system/dist/react";
 import { Checkbox, TextField, Chip } from "@mui/material";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
@@ -38,10 +39,11 @@ const ElementSelector = ({
 }: ElementSelectorProps) => {
   return (
     <>
-      Attribute Selector
-      <Autocomplete
+      <AutoComplete
         disableClearable={true}
         multiple
+        open={true}
+        label="Attribute Selector"
         fullWidth
         limitTags={2}
         id="resource-element-selector-autocomplete"
@@ -51,6 +53,9 @@ const ElementSelector = ({
         disableCloseOnSelect
         getOptionLabel={(option) => getOptionLabel(option, basePath)}
         getOptionDisabled={(option) => value.includes(option)}
+        ListboxProps={{
+          style: { height: "40vh", maxHeight: "700px" },
+        }}
         renderOption={(props, option, { selected }) => (
           <li {...props}>
             <Checkbox

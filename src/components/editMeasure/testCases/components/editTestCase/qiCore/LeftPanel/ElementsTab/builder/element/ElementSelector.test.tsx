@@ -42,15 +42,11 @@ describe("ElementSelector", () => {
   it("generates correct labels for regular elements and slices", () => {
     render(<ElementSelector {...defaultProps} />);
 
-    // Open dropdown
     const input = screen.getByPlaceholderText("Attributes");
     userEvent.click(input);
 
-    // Check regular element labels
     expect(screen.getByText("gender")).toBeInTheDocument();
     expect(screen.getByText("birthDate")).toBeInTheDocument();
-
-    // Check slice element label
     expect(screen.getByText("extension:race")).toBeInTheDocument();
   });
 
@@ -60,7 +56,6 @@ describe("ElementSelector", () => {
     const input = screen.getByPlaceholderText("Attributes");
     userEvent.click(input);
 
-    // Select an option
     const genderOption = screen.getByText("gender");
     userEvent.click(genderOption);
 
@@ -70,7 +65,7 @@ describe("ElementSelector", () => {
   it("disables already selected options", () => {
     const props = {
       ...defaultProps,
-      value: [mockOptions[0]], // gender is already selected
+      value: [mockOptions[0]],
     };
 
     render(<ElementSelector {...props} />);
@@ -78,7 +73,6 @@ describe("ElementSelector", () => {
     const input = screen.getByPlaceholderText("Attributes");
     userEvent.click(input);
 
-    // First option (gender) should be disabled
     const listbox = screen.getByRole("listbox");
     const options = within(listbox).getAllByRole("option");
     expect(options[0]).toHaveAttribute("aria-disabled", "true");
@@ -87,7 +81,7 @@ describe("ElementSelector", () => {
   it("renders chips for selected values", () => {
     const props = {
       ...defaultProps,
-      newValues: [mockOptions[0]], // gender is selected
+      newValues: [mockOptions[0]],
     };
 
     render(<ElementSelector {...props} />);
@@ -99,8 +93,8 @@ describe("ElementSelector", () => {
   it("disables delete for chips that are in value prop", () => {
     const props = {
       ...defaultProps,
-      value: [mockOptions[0]], // gender in value
-      newValues: [mockOptions[0]], // gender in newValues
+      value: [mockOptions[0]],
+      newValues: [mockOptions[0]],
     };
 
     render(<ElementSelector {...props} />);
@@ -115,7 +109,6 @@ describe("ElementSelector", () => {
     const input = screen.getByPlaceholderText("Attributes");
     userEvent.click(input);
 
-    // Select multiple options
     userEvent.click(screen.getByText("gender"));
     userEvent.click(screen.getByText("birthDate"));
 
@@ -132,15 +125,15 @@ describe("ElementSelector", () => {
     expect(checkboxes.length).toBe(mockOptions.length);
   });
 
-  it("limits visible tags to 2", () => {
+  it("limits visible tags to 3", () => {
     const props = {
       ...defaultProps,
-      newValues: mockOptions, // All 3 options selected
+      newValues: mockOptions,
     };
 
     render(<ElementSelector {...props} />);
 
-    const chips = screen.getAllByRole("button"); // Chips are buttons
-    expect(chips.length).toBe(3); // Should only show 2 chips
+    const chips = screen.getAllByRole("button");
+    expect(chips.length).toBe(3);
   });
 });
