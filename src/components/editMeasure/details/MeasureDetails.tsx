@@ -224,14 +224,14 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
       id: "sideNavMeasurePurpose",
       displayCompletedIcon: !!measure?.measureMetaData.purpose,
     });
-    if (featureFlags?.QICoreMeasureReferences){ 
-      links[1].links.splice(links[1].links.length - 1,0,
-        { title: "References",
-          href: referencesLink,
-          dataTestId: "leftPanelMeasureReferences",
-          id: "sideNavMeasureReferences",
-          displayCompletedIcon: measure?.measureMetaData.references?.length > 0,}
-      )
+    if (featureFlags?.QICoreMeasureReferences) {
+      links[1].links.splice(links[1].links.length - 1, 0, {
+        title: "References",
+        href: referencesLink,
+        dataTestId: "leftPanelMeasureReferences",
+        id: "sideNavMeasureReferences",
+        displayCompletedIcon: measure?.measureMetaData.references?.length > 0,
+      });
     }
   }
   useEffect(() => {
@@ -388,13 +388,13 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
           )}
           {!isQDM && featureFlags.QICoreMeasureReferences && (
             <>
-            <Route
-              path={measureReferencesLink}
-              element={
-                <MeasureReferences setErrorMessage={setErrorMessage} />
-              }
-            />
-          </>
+              <Route
+                path={measureReferencesLink}
+                element={
+                  <MeasureReferences setErrorMessage={setErrorMessage} />
+                }
+              />
+            </>
           )}
           <Route path="*" element={<Navigate to="/404" />} />
         </Routes>
