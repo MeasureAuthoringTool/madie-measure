@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import { Button } from "@madie/madie-design-system/dist/react";
-import { Dialog, IconButton, DialogActions, Divider } from "@mui/material";
+import { IconButton, DialogActions, Divider } from "@mui/material";
 import ElementSelector from "../element/ElementSelector";
 import { ElementDefinition } from "fhir/r4";
+import { MadieDialog as Dialog } from "@madie/madie-design-system/dist/react";
 
 export interface AddElementDialogProps {
   open: boolean;
@@ -30,7 +31,7 @@ const AddElementDialog = (props: AddElementDialogProps) => {
     [value]
   );
   const handleClose = useCallback(() => {
-    setNewValues(value); // Reset to initial values
+    setNewValues(value);
     onClose();
   }, [onClose, value]);
   const handleSave = useCallback(() => {
@@ -40,7 +41,12 @@ const AddElementDialog = (props: AddElementDialogProps) => {
 
   return (
     <Dialog
-      open={open}
+      title="Add Attribute(s)"
+      dialogProps={{
+        onClose,
+        open,
+      }}
+      // open={open}
       maxWidth="sm"
       fullWidth
       sx={{
@@ -79,16 +85,6 @@ const AddElementDialog = (props: AddElementDialogProps) => {
         },
       }}
     >
-      <div className="top-row">
-        <h3>Add Attribute(s)</h3>
-        <IconButton
-          onClick={handleClose}
-          data-testid="add-element-close-dialog-button"
-        >
-          <CloseIcon />
-        </IconButton>
-      </div>
-      <Divider sx={{ borderColor: "#8c8c8c" }} />
       <p className="message">
         <ElementSelector
           basePath={basePath}
@@ -98,7 +94,6 @@ const AddElementDialog = (props: AddElementDialogProps) => {
           onChange={handleChange}
         />
       </p>
-      <Divider sx={{ borderColor: "#8c8c8c" }} />
       <DialogActions>
         <Button
           variant="action"
