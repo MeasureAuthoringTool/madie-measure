@@ -26,11 +26,7 @@ import { v4 as uuid } from "uuid";
 import ServiceContext, { ServiceConfig } from "../../../api/ServiceContext";
 import { Simulate } from "react-dom/test-utils";
 // @ts-ignore
-import {
-  useFeatureFlags,
-  checkUserCanEdit,
-  checkUserCanDelete,
-} from "@madie/madie-util";
+import { useFeatureFlags, checkUserCanEdit } from "@madie/madie-util";
 
 // CSSStyleDeclaration
 const mockPush = jest.fn();
@@ -555,11 +551,11 @@ describe("Measure List component", () => {
 
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
-    fireEvent.click(checkBoxes[1]);
+    userEvent.click(checkBoxes[1]);
 
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
-    fireEvent.click(createVersionButton);
+    userEvent.click(createVersionButton);
     expect(getByTestId("create-version-dialog")).toBeInTheDocument();
     unmount();
   });
@@ -607,10 +603,10 @@ describe("Measure List component", () => {
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
-    fireEvent.click(checkBoxes[1]);
+    userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
-    fireEvent.click(createVersionButton);
+    userEvent.click(createVersionButton);
     expect(getByTestId("create-version-dialog")).toBeInTheDocument();
 
     const typeInput = screen.getByTestId(
@@ -630,10 +626,10 @@ describe("Measure List component", () => {
     expect(confirmVersionNode.value).toBe("1.0.000");
     expect(getByTestId("create-version-continue-button")).toBeEnabled();
     await waitFor(() => {
-      fireEvent.click(getByTestId("create-version-continue-button"));
+      userEvent.click(getByTestId("create-version-continue-button"));
       expect(getByTestId("invalid-cancel")).toBeInTheDocument();
     });
-    fireEvent.click(getByTestId("invalid-cancel"));
+    userEvent.click(getByTestId("invalid-cancel"));
     await waitForElementToBeRemoved(() =>
       queryByText("Measure CQL Library Name is invalid")
     );
@@ -683,10 +679,10 @@ describe("Measure List component", () => {
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
-    fireEvent.click(checkBoxes[1]);
+    userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
-    fireEvent.click(createVersionButton);
+    userEvent.click(createVersionButton);
     expect(getByTestId("create-version-dialog")).toBeInTheDocument();
 
     const typeInput = screen.getByTestId(
@@ -706,7 +702,7 @@ describe("Measure List component", () => {
     expect(confirmVersionNode.value).toBe("1.0.000");
 
     await waitFor(() => {
-      fireEvent.click(getByTestId("create-version-continue-button"));
+      userEvent.click(getByTestId("create-version-continue-button"));
       expect(getByTestId("error-toast")).toHaveTextContent(
         "User is unauthorized to create a version"
       );
@@ -757,10 +753,10 @@ describe("Measure List component", () => {
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
-    fireEvent.click(checkBoxes[1]);
+    userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
-    fireEvent.click(createVersionButton);
+    userEvent.click(createVersionButton);
     expect(getByTestId("create-version-dialog")).toBeInTheDocument();
 
     const typeInput = screen.getByTestId(
@@ -780,7 +776,7 @@ describe("Measure List component", () => {
     expect(confirmVersionNode.value).toBe("1.0.000");
 
     await waitFor(() => {
-      fireEvent.click(getByTestId("create-version-continue-button"));
+      userEvent.click(getByTestId("create-version-continue-button"));
       expect(getByTestId("error-toast")).toHaveTextContent(
         "Requested measure cannot be versioned"
       );
@@ -832,10 +828,10 @@ describe("Measure List component", () => {
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
-    fireEvent.click(checkBoxes[1]);
+    userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
-    fireEvent.click(createVersionButton);
+    userEvent.click(createVersionButton);
     expect(getByTestId("create-version-dialog")).toBeInTheDocument();
 
     const typeInput = screen.getByTestId(
@@ -854,7 +850,7 @@ describe("Measure List component", () => {
     Simulate.change(confirmVersionNode);
     expect(confirmVersionNode.value).toBe("1.0.000");
     await waitFor(() => {
-      fireEvent.click(getByTestId("create-version-continue-button"));
+      userEvent.click(getByTestId("create-version-continue-button"));
       expect(getByTestId("error-toast")).toHaveTextContent("server error");
     });
     unmount();
@@ -901,10 +897,10 @@ describe("Measure List component", () => {
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
-    fireEvent.click(checkBoxes[1]);
+    userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
-    fireEvent.click(createVersionButton);
+    userEvent.click(createVersionButton);
     expect(getByTestId("create-version-dialog")).toBeInTheDocument();
 
     const typeInput = screen.getByTestId(
@@ -923,13 +919,13 @@ describe("Measure List component", () => {
     Simulate.change(confirmVersionNode);
     expect(confirmVersionNode.value).toBe("1.0.000");
     await waitFor(() => {
-      fireEvent.click(getByTestId("create-version-continue-button"));
+      userEvent.click(getByTestId("create-version-continue-button"));
       expect(getByTestId("success-toast")).toHaveTextContent(
         "New version of measure is Successfully created"
       );
 
       const closeButton = getByTestId("close-toast-button");
-      fireEvent.click(closeButton);
+      userEvent.click(closeButton);
       setTimeout(() => {
         expect(
           queryByTestId("create-version-success-text")
@@ -986,10 +982,10 @@ describe("Measure List component", () => {
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
-    fireEvent.click(checkBoxes[1]);
+    userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
-    fireEvent.click(createVersionButton);
+    userEvent.click(createVersionButton);
     expect(getByTestId("create-version-dialog")).toBeInTheDocument();
 
     const typeInput = screen.getByTestId(
@@ -1008,11 +1004,11 @@ describe("Measure List component", () => {
     Simulate.change(confirmVersionNode);
     expect(confirmVersionNode.value).toBe("1.0.000");
     await waitFor(() => {
-      fireEvent.click(getByTestId("create-version-continue-button"));
+      userEvent.click(getByTestId("create-version-continue-button"));
       expect(
         screen.getByTestId("invalid-test-case-dialog")
       ).toBeInTheDocument();
-      fireEvent.click(
+      userEvent.click(
         screen.getByTestId("invalid-test-dialog-continue-button")
       );
     });
@@ -1021,7 +1017,7 @@ describe("Measure List component", () => {
         "New version of measure is Successfully created"
       );
       const closeButton = getByTestId("close-toast-button");
-      fireEvent.click(closeButton);
+      userEvent.click(closeButton);
       setTimeout(() => {
         expect(
           queryByTestId("create-version-success-text")
@@ -1056,7 +1052,7 @@ describe("Measure List component", () => {
     });
 
     // first measure should have Version action as this is a draft measure
-    fireEvent.click(selectButton0);
+    userEvent.click(selectButton0);
     const versionButton = await findByRole("button", {
       name: "Version",
     });
@@ -1086,18 +1082,18 @@ describe("Measure List component", () => {
     const selectButton2 = await findByRole("button", {
       name: "Measure versioned measure - C version 1.3 draft status false Select",
     });
-    fireEvent.click(selectButton2);
+    userEvent.click(selectButton2);
     const draftButton = await findByRole("button", {
       name: "Draft",
     });
-    fireEvent.click(draftButton);
+    userEvent.click(draftButton);
     expect(getByText("Create Draft")).toBeInTheDocument();
     const measureName = (await screen.findByRole("textbox", {
       name: "Measure Name",
     })) as HTMLInputElement;
     expect(measureName.value).toEqual(measures[2].measureName);
     // close dialog
-    fireEvent.click(getByText(/Cancel/i));
+    userEvent.click(getByText(/Cancel/i));
     unmount();
   });
 
@@ -1140,13 +1136,13 @@ describe("Measure List component", () => {
     const selectButton2 = await findByRole("button", {
       name: "Measure versioned measure - C version 1.3 draft status false Select",
     });
-    fireEvent.click(selectButton2);
+    userEvent.click(selectButton2);
     const draftButton = await findByRole("button", {
       name: "Draft",
     });
-    fireEvent.click(draftButton);
+    userEvent.click(draftButton);
     expect(getByText("Create Draft")).toBeInTheDocument();
-    fireEvent.click(getByText(/Continue/i));
+    userEvent.click(getByText(/Continue/i));
     await waitFor(() => {
       expect(getByTestId("success-toast")).toHaveTextContent(
         "New draft created successfully."
@@ -1204,13 +1200,13 @@ describe("Measure List component", () => {
     const selectButton2 = await findByRole("button", {
       name: "Measure versioned measure - C version 1.3 draft status false Select",
     });
-    fireEvent.click(selectButton2);
+    userEvent.click(selectButton2);
     const draftButton = await findByRole("button", {
       name: "Draft",
     });
-    fireEvent.click(draftButton);
+    userEvent.click(draftButton);
     expect(getByText("Create Draft")).toBeInTheDocument();
-    fireEvent.click(getByText(/Continue/i));
+    userEvent.click(getByText(/Continue/i));
     await waitFor(() => {
       expect(getByTestId("error-toast")).toHaveTextContent(
         error.response.data.message
@@ -1272,7 +1268,7 @@ describe("Measure List component", () => {
     const selectButton2 = await findByRole("button", {
       name: "Measure versioned measure - C version 1.3 draft status false Select",
     });
-    fireEvent.click(selectButton2);
+    userEvent.click(selectButton2);
 
     await waitFor(() => {
       expect(
@@ -1284,9 +1280,9 @@ describe("Measure List component", () => {
     const draftButton = await findByRole("button", {
       name: "Draft",
     });
-    fireEvent.click(draftButton);
+    userEvent.click(draftButton);
     expect(getByText("Create Draft")).toBeInTheDocument();
-    fireEvent.click(getByText(/Continue/i));
+    userEvent.click(getByText(/Continue/i));
     await waitFor(() => {
       expect(getByTestId("error-toast")).toHaveTextContent(
         "An error occurred, please try again. If the error persists, please contact the help desk."
@@ -1334,10 +1330,15 @@ describe("Measure List component", () => {
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
-    fireEvent.click(checkBoxes[1]);
+    userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
-    fireEvent.click(exportButton);
+    userEvent.click(exportButton);
+
+    const exportForPublishingButton = await screen.findByRole("button", {
+      name: "Export for Publishing",
+    });
+    userEvent.click(exportForPublishingButton);
 
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
@@ -1385,10 +1386,15 @@ describe("Measure List component", () => {
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
-    fireEvent.click(checkBoxes[1]);
+    userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
-    fireEvent.click(exportButton);
+    userEvent.click(exportButton);
+
+    const exportForPublishingButton = await screen.findByRole("button", {
+      name: "Export for Publishing",
+    });
+    userEvent.click(exportForPublishingButton);
 
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
@@ -1435,10 +1441,10 @@ describe("Measure List component", () => {
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
-    fireEvent.click(checkBoxes[2]);
+    userEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
-    fireEvent.click(exportButton);
+    userEvent.click(exportButton);
 
     await waitFor(() => {
       expect(queryByTestId("error-message")).not.toBeInTheDocument();
@@ -1484,10 +1490,15 @@ describe("Measure List component", () => {
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
-    fireEvent.click(checkBoxes[2]);
+    userEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
-    fireEvent.click(exportButton);
+    userEvent.click(exportButton);
+
+    const exportForPublishingButton = await screen.findByRole("button", {
+      name: "Export for Publishing",
+    });
+    userEvent.click(exportForPublishingButton);
 
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
@@ -1536,10 +1547,15 @@ describe("Measure List component", () => {
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
-    fireEvent.click(checkBoxes[2]);
+    userEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
-    fireEvent.click(exportButton);
+    userEvent.click(exportButton);
+
+    const exportForPublishingButton = await screen.findByRole("button", {
+      name: "Export for Publishing",
+    });
+    userEvent.click(exportForPublishingButton);
 
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
@@ -1585,10 +1601,15 @@ describe("Measure List component", () => {
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
-    fireEvent.click(checkBoxes[3]);
+    userEvent.click(checkBoxes[3]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
-    fireEvent.click(exportButton);
+    userEvent.click(exportButton);
+
+    const exportForPublishingButton = await screen.findByRole("button", {
+      name: "Export for Publishing",
+    });
+    userEvent.click(exportForPublishingButton);
 
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
@@ -1634,10 +1655,15 @@ describe("Measure List component", () => {
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
-    fireEvent.click(checkBoxes[1]);
+    userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
-    fireEvent.click(exportButton);
+    userEvent.click(exportButton);
+
+    const exportForPublishingButton = await screen.findByRole("button", {
+      name: "Export for Publishing",
+    });
+    userEvent.click(exportForPublishingButton);
 
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
@@ -1683,10 +1709,15 @@ describe("Measure List component", () => {
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
-    fireEvent.click(checkBoxes[5]);
+    userEvent.click(checkBoxes[5]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
-    fireEvent.click(exportButton);
+    userEvent.click(exportButton);
+
+    const exportForPublishingButton = await screen.findByRole("button", {
+      name: "Export for Publishing",
+    });
+    userEvent.click(exportForPublishingButton);
 
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
@@ -1745,10 +1776,15 @@ describe("Measure List component", () => {
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(2);
-    fireEvent.click(checkBoxes[1]);
+    userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
-    fireEvent.click(exportButton);
+    userEvent.click(exportButton);
+
+    const exportForPublishingButton = await screen.findByRole("button", {
+      name: "Export for Publishing",
+    });
+    userEvent.click(exportForPublishingButton);
 
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
@@ -1794,10 +1830,15 @@ describe("Measure List component", () => {
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
-    fireEvent.click(checkBoxes[2]);
+    userEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
-    fireEvent.click(exportButton);
+    userEvent.click(exportButton);
+
+    const exportForPublishingButton = await screen.findByRole("button", {
+      name: "Export for Publishing",
+    });
+    userEvent.click(exportForPublishingButton);
 
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
@@ -1861,10 +1902,15 @@ describe("Measure List component", () => {
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
-    fireEvent.click(checkBoxes[2]);
+    userEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
-    fireEvent.click(exportButton);
+    userEvent.click(exportButton);
+
+    const exportForPublishingButton = await screen.findByRole("button", {
+      name: "Export for Publishing",
+    });
+    userEvent.click(exportForPublishingButton);
 
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
@@ -1900,10 +1946,15 @@ describe("Measure List component", () => {
       .mockReturnValueOnce("http://fileurl");
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
-    fireEvent.click(checkBoxes[1]);
+    userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
     userEvent.click(exportButton);
+
+    const exportForPublishingButton = await screen.findByRole("button", {
+      name: "Export for Publishing",
+    });
+    userEvent.click(exportForPublishingButton);
 
     const cancelButton = getByTestId("ds-btn");
     expect(cancelButton).toBeInTheDocument();
@@ -1952,10 +2003,15 @@ describe("Measure List component", () => {
 
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
-    fireEvent.click(checkBoxes[1]);
+    userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
-    fireEvent.click(exportButton);
+    userEvent.click(exportButton);
+
+    const exportForPublishingButton = await screen.findByRole("button", {
+      name: "Export for Publishing",
+    });
+    userEvent.click(exportForPublishingButton);
 
     await waitFor(() => {
       const continueButton = getByTestId("ds-btn");
@@ -1990,11 +2046,11 @@ describe("Measure List component", () => {
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
-    fireEvent.click(checkBoxes[1]);
+    userEvent.click(checkBoxes[1]);
 
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
-    fireEvent.click(createVersionButton);
+    userEvent.click(createVersionButton);
     expect(getByTestId("create-version-dialog")).toBeInTheDocument();
     unmount();
   });
@@ -2079,15 +2135,15 @@ describe("Measure List component", () => {
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
-    fireEvent.click(checkBoxes[1]);
+    userEvent.click(checkBoxes[1]);
     const deleteButton = screen.getByTestId("delete-action-btn");
     expect(deleteButton).toBeInTheDocument();
-    fireEvent.click(deleteButton);
+    userEvent.click(deleteButton);
     expect(
       await findByTestId("delete-measure-dialog-button")
     ).toBeInTheDocument();
     const cancelDelete = await findByTestId("cancel-delete-measure-button");
-    fireEvent.click(cancelDelete);
+    userEvent.click(cancelDelete);
     unmount();
   });
 
@@ -2187,7 +2243,7 @@ describe("Measure List component", () => {
         ShareMeasure: true,
       }));
 
-      const { findByTestId, unmount } = render(
+      const { unmount } = render(
         <ServiceContext.Provider value={serviceConfig}>
           <MeasureList
             measureList={measures}
@@ -2208,15 +2264,15 @@ describe("Measure List component", () => {
       );
       const checkBoxes = await screen.findAllByRole("checkbox");
       expect(checkBoxes.length).toBe(6);
-      fireEvent.click(checkBoxes[1]);
+      userEvent.click(checkBoxes[1]);
       const shareButton = screen.getByTestId("share-action-btn");
       expect(shareButton).toBeInTheDocument();
-      fireEvent.click(shareButton);
-      fireEvent.click(screen.getByRole("menuitem", { name: "Share With" }));
+      userEvent.click(shareButton);
+      userEvent.click(screen.getByRole("menuitem", { name: "Share With" }));
       const shareDialog = screen.getByTestId("share-dialog");
       expect(shareDialog).toBeInTheDocument();
       const cancelButton = screen.getByTestId("share-cancel-button");
-      fireEvent.click(cancelButton);
+      userEvent.click(cancelButton);
 
       await waitFor(() => {
         expect(shareDialog).not.toBeVisible();

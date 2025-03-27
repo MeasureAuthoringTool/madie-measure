@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import ActionCenter from "./ActionCenter";
 import { Measure, MeasureSet, Model } from "@madie/madie-models";
@@ -9,6 +9,7 @@ import {
   checkUserCanDelete,
 } from "@madie/madie-util";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
+import userEvent from "@testing-library/user-event";
 
 jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn(),
@@ -23,7 +24,6 @@ jest.mock("../../../../api/useMeasureServiceApi");
 const mockFeatureFlags = { ShareMeasure: true };
 const mockGetUserName = jest.fn(() => "test user");
 const mockCheckUserCanEdit = jest.fn();
-const fetchMeasureDraftStatuses = jest.fn();
 const setViewHumanReadableModal = jest.fn();
 const mockCheckUserCanDelete = jest.fn();
 
@@ -46,13 +46,6 @@ const qdmMeasureVersion = {
   measureSetId: "1-2-3-4",
   measureMetaData: { draft: false },
 } as Measure;
-
-const qiCoreMeasure = {
-  model: Model.QICORE,
-  measureSet: { ...mockMeasureSet, cmsId: null },
-  measureSetId: "1-2-3-4",
-  measureMetaData: { draft: true },
-} as unknown as Measure;
 
 describe("ActionCenter", () => {
   beforeEach(() => {
@@ -190,7 +183,7 @@ describe("ActionCenter", () => {
     expect(setDeleteMeasureDialog).toHaveBeenCalledWith(true);
   });
 
-  it("should call exportMeasure when export action is triggered", () => {
+  it("should call exportMeasure with severity Error when publishable export action is triggered", async () => {
     const exportMeasure = jest.fn();
     const updateTargetMeasure = jest.fn();
 
@@ -209,10 +202,45 @@ describe("ActionCenter", () => {
       />
     );
 
-    fireEvent.click(screen.getByTestId("export-action-btn"));
+    userEvent.click(await screen.findByTestId("export-action-btn"));
+
+    const exportForPublishingButton = await screen.findByRole("button", {
+      name: "Export for Publishing",
+    });
+    userEvent.click(exportForPublishingButton);
 
     expect(updateTargetMeasure).toHaveBeenCalledWith(qdmMeasure);
-    expect(exportMeasure).toHaveBeenCalled();
+    expect(exportMeasure).toHaveBeenCalledWith("Error");
+  });
+
+  it("should call exportMeasure with severity info when export action is triggered", async () => {
+    const exportMeasure = jest.fn();
+    const updateTargetMeasure = jest.fn();
+
+    render(
+      <ActionCenter
+        measures={[qdmMeasure]}
+        associateCmsId={jest.fn()}
+        exportMeasure={exportMeasure}
+        updateTargetMeasure={updateTargetMeasure}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={jest.fn}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+      />
+    );
+
+    userEvent.click(await screen.findByTestId("export-action-btn"));
+
+    const exportForPublishingButton = await screen.findByRole("button", {
+      name: "Export",
+    });
+    userEvent.click(exportForPublishingButton);
+
+    expect(updateTargetMeasure).toHaveBeenCalledWith(qdmMeasure);
+    expect(exportMeasure).toHaveBeenCalledWith("Info");
   });
 
   it("should disable actions based on permissions except of view human readable", () => {
@@ -263,8 +291,6 @@ describe("ActionCenter", () => {
     await waitFor(() => {
       setTimeout(() => {
         expect(screen.queryByTestId("view-hr-modal")).toBeInTheDocument();
-        // expect(viewHumanReadable).toHaveBeenCalled();
-        // expect(setViewHumanReadableModal).toHaveBeenCalledWith(true);
         expect(setViewHumanReadableModal).toHaveBeenCalledWith({
           open: true,
           measureId: qdmMeasure.measureSetId,
