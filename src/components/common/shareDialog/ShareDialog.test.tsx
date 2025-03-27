@@ -81,10 +81,15 @@ const mockShareMeasures = jest.fn().mockResolvedValue({
   [mockMeasure2.id]: mockMeasure2?.acls,
 });
 
+const mockUnshareMeasures = jest.fn().mockResolvedValue({
+  [mockMeasure1.id]: mockMeasure1?.acls,
+});
+
 const mockMeasureServiceApi = {
   getSharedMeasures: mockGetSharedMeasures,
   shareMeasures: mockShareMeasures,
   getRecentMeasuresByMeasureSetId: mockGetRecentMeasuresByMeasureSetId,
+  unshareMeasures: mockUnshareMeasures,
 } as unknown as MeasureServiceApi;
 
 describe("Create Share Dialog component", () => {
@@ -114,7 +119,7 @@ describe("Create Share Dialog component", () => {
     expect(mockMeasureServiceApi.getRecentMeasuresByMeasureSetId).toBeCalled();
   });
 
-  it("should render share dialog but not call getSharedMeasures if no measure is passed in to share dialog component", () => {
+  it("should render share dialog but not call getSharedMeasures if no measure is passed in to share dialog component", async () => {
     const mockMeasureServiceApi = {
       getSharedMeasures: jest.fn().mockResolvedValue([]),
       getRecentMeasuresByMeasureSetId: jest.fn().mockResolvedValue([]),
@@ -132,7 +137,7 @@ describe("Create Share Dialog component", () => {
         onClose={jest.fn()}
       />
     );
-    expect(getByTestId("share-dialog")).toBeInTheDocument();
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
     expect(mockMeasureServiceApi.getSharedMeasures).not.toBeCalled();
     expect(
       mockMeasureServiceApi.getRecentMeasuresByMeasureSetId
@@ -163,7 +168,7 @@ describe("Create Share Dialog component", () => {
       />
     );
 
-    expect(getByTestId("share-dialog")).toBeInTheDocument();
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
     const table = await screen.findByTestId("share-measure-tbl");
     expect(mockMeasureServiceApi.getSharedMeasures).toBeCalled();
     expect(mockMeasureServiceApi.getRecentMeasuresByMeasureSetId).toBeCalled();
@@ -191,7 +196,7 @@ describe("Create Share Dialog component", () => {
         onClose={jest.fn()}
       />
     );
-    expect(getByTestId("share-dialog")).toBeInTheDocument();
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
     expect(await screen.findByText("Share With")).toBeInTheDocument();
   });
 
@@ -204,7 +209,7 @@ describe("Create Share Dialog component", () => {
         onClose={jest.fn()}
       />
     );
-    expect(getByTestId("share-dialog")).toBeInTheDocument();
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
     expect(await screen.findByText("Unshare")).toBeInTheDocument();
   });
 
@@ -217,7 +222,7 @@ describe("Create Share Dialog component", () => {
         onClose={jest.fn()}
       />
     );
-    expect(getByTestId("share-dialog")).toBeInTheDocument();
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
     const table = await screen.findByTestId("share-measure-tbl");
     expect(mockMeasureServiceApi.getSharedMeasures).toBeCalled();
     expect(mockMeasureServiceApi.getRecentMeasuresByMeasureSetId).toBeCalled();
@@ -234,7 +239,7 @@ describe("Create Share Dialog component", () => {
         onClose={jest.fn()}
       />
     );
-    expect(getByTestId("share-dialog")).toBeInTheDocument();
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
     expect(mockMeasureServiceApi.getSharedMeasures).toBeCalled();
     expect(mockMeasureServiceApi.getRecentMeasuresByMeasureSetId).toBeCalled();
 
@@ -251,7 +256,7 @@ describe("Create Share Dialog component", () => {
       />
     );
 
-    expect(getByTestId("share-dialog")).toBeInTheDocument();
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
     expect(mockMeasureServiceApi.getSharedMeasures).toBeCalled();
     expect(mockMeasureServiceApi.getRecentMeasuresByMeasureSetId).toBeCalled();
 
@@ -299,7 +304,7 @@ describe("Create Share Dialog component", () => {
       />
     );
 
-    expect(getByTestId("share-dialog")).toBeInTheDocument();
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
     expect(mockMeasureServiceApi.getSharedMeasures).toBeCalled();
     expect(mockMeasureServiceApi.getRecentMeasuresByMeasureSetId).toBeCalled();
 
@@ -461,41 +466,41 @@ describe("Create Share Dialog component", () => {
     fireEvent.click(expandButtonMockMeasure2);
 
     //Row 1
-    expect(
-      screen.getByTestId("0_measureName_TestMeasureId1")
-    ).toHaveTextContent("The Measure for Testing 1");
-    //Subrow 1 of Row 1
-    expect(screen.getByTestId("0.0_userId_TestMeasureId1")).toHaveTextContent(
-      "userId3"
+    expect(screen.getByTestId("TestMeasureId1_measureName")).toHaveTextContent(
+      "The Measure for Testing 1"
     );
+    //Subrow 1 of Row 1
     expect(
-      screen.getByTestId("0.0_dateShared_TestMeasureId1")
+      screen.getByTestId("TestMeasureId1 userId3_userId")
+    ).toHaveTextContent("userId3");
+    expect(
+      screen.getByTestId("TestMeasureId1 userId3_dateShared")
     ).toHaveTextContent(today.toLocaleDateString());
 
     //Row 2
-    expect(
-      screen.getByTestId("1_measureName_TestMeasureId2")
-    ).toHaveTextContent("The Measure for Testing 2");
-    //Subrow 1 of Row 2
-    expect(screen.getByTestId("1.0_userId_TestMeasureId2")).toHaveTextContent(
-      "userId3"
+    expect(screen.getByTestId("TestMeasureId2_measureName")).toHaveTextContent(
+      "The Measure for Testing 2"
     );
+    //Subrow 1 of Row 2
     expect(
-      screen.getByTestId("1.0_dateShared_TestMeasureId2")
+      screen.getByTestId("TestMeasureId2 userId3_userId")
+    ).toHaveTextContent("userId3");
+    expect(
+      screen.getByTestId("TestMeasureId2 userId3_dateShared")
     ).toHaveTextContent(today.toLocaleDateString());
     //Subrow 2 of Row 2
-    expect(screen.getByTestId("1.1_userId_TestMeasureId2")).toHaveTextContent(
-      "userId1"
-    );
     expect(
-      screen.getByTestId("1.1_dateShared_TestMeasureId2")
+      screen.getByTestId("TestMeasureId2 userId1_userId")
+    ).toHaveTextContent("userId1");
+    expect(
+      screen.getByTestId("TestMeasureId2 userId1_dateShared")
     ).toHaveTextContent(yesterday.toLocaleDateString());
     //Subrow 3 of Row 2
-    expect(screen.getByTestId("1.2_userId_TestMeasureId2")).toHaveTextContent(
-      "userId2"
-    );
     expect(
-      screen.getByTestId("1.2_dateShared_TestMeasureId2")
+      screen.getByTestId("TestMeasureId2 userId2_userId")
+    ).toHaveTextContent("userId2");
+    expect(
+      screen.getByTestId("TestMeasureId2 userId2_dateShared")
     ).toHaveTextContent(yesterday.toLocaleDateString());
   });
 
@@ -546,41 +551,41 @@ describe("Create Share Dialog component", () => {
     fireEvent.click(expandButtonMockMeasure2);
 
     //Row 1
-    expect(
-      screen.getByTestId("0_measureName_TestMeasureId1")
-    ).toHaveTextContent("The Measure for Testing 1");
-    //Subrow 1 of Row 1
-    expect(screen.getByTestId("0.0_userId_TestMeasureId1")).toHaveTextContent(
-      "userId3"
+    expect(screen.getByTestId("TestMeasureId1_measureName")).toHaveTextContent(
+      "The Measure for Testing 1"
     );
+    //Subrow 1 of Row 1
     expect(
-      screen.getByTestId("0.0_dateShared_TestMeasureId1")
+      screen.getByTestId("TestMeasureId1 userId3_userId")
+    ).toHaveTextContent("userId3");
+    expect(
+      screen.getByTestId("TestMeasureId1 userId3_dateShared")
     ).toHaveTextContent(today.toLocaleDateString());
 
     //Row 2
-    expect(
-      screen.getByTestId("1_measureName_TestMeasureId2")
-    ).toHaveTextContent("The Measure for Testing 2");
-    //Subrow 1 of Row 2
-    expect(screen.getByTestId("1.0_userId_TestMeasureId2")).toHaveTextContent(
-      "userId3"
+    expect(screen.getByTestId("TestMeasureId2_measureName")).toHaveTextContent(
+      "The Measure for Testing 2"
     );
+    //Subrow 1 of Row 2
     expect(
-      screen.getByTestId("1.0_dateShared_TestMeasureId2")
+      screen.getByTestId("TestMeasureId2 userId3_userId")
+    ).toHaveTextContent("userId3");
+    expect(
+      screen.getByTestId("TestMeasureId2 userId3_dateShared")
     ).toHaveTextContent(today.toLocaleDateString());
     //Subrow 2 of Row 2
-    expect(screen.getByTestId("1.1_userId_TestMeasureId2")).toHaveTextContent(
-      "userId1"
-    );
     expect(
-      screen.getByTestId("1.1_dateShared_TestMeasureId2")
+      screen.getByTestId("TestMeasureId2 userId1_userId")
+    ).toHaveTextContent("userId1");
+    expect(
+      screen.getByTestId("TestMeasureId2 userId1_dateShared")
     ).toHaveTextContent(yesterday.toLocaleDateString());
     //Subrow 3 of Row 2
-    expect(screen.getByTestId("1.2_userId_TestMeasureId2")).toHaveTextContent(
-      "userId2"
-    );
     expect(
-      screen.getByTestId("1.2_dateShared_TestMeasureId2")
+      screen.getByTestId("TestMeasureId2 userId2_userId")
+    ).toHaveTextContent("userId2");
+    expect(
+      screen.getByTestId("TestMeasureId2 userId2_dateShared")
     ).toHaveTextContent(yesterday.toLocaleDateString());
   });
 
@@ -693,88 +698,124 @@ describe("Create Share Dialog component", () => {
     });
   });
 
-  it("should add a user row to the grid for each measure that does not already have that user (after stripping all whitespace in HARP ID field)", async () => {
+  it("should successfully unshare a user from a measure.", async () => {
+    const mockOnClose = jest.fn();
+
     render(
       <ShareDialog
         measures={[mockMeasure1, mockMeasure2]}
         open={true}
-        option={"Share With"}
-        onClose={jest.fn()}
+        option={"Unshare"}
+        onClose={mockOnClose}
       />
     );
-    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
-    expect(await screen.findByTestId("share-measure-tbl")).toBeInTheDocument();
-    expect(mockMeasureServiceApi.getSharedMeasures).toBeCalled();
 
-    const addUserBtn = await screen.findByTestId("add-user-btn");
-    expect(addUserBtn).toBeDisabled();
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+    expect(mockMeasureServiceApi.getSharedMeasures).toBeCalled();
+    expect(mockMeasureServiceApi.getRecentMeasuresByMeasureSetId).toBeCalled();
+
     const saveBtn = await screen.findByTestId("share-save-button");
     expect(saveBtn).toBeDisabled();
-    const harpIdInput = (await screen.findByTestId(
-      "harp-id-input"
-    )) as HTMLInputElement;
-    expect(harpIdInput).toBeInTheDocument();
 
-    const userIdWithExtraSpaces = " userId 3 ";
+    const expandButton = await screen.findByTestId(
+      `expand-button-${mockMeasure2.id}`
+    );
+    fireEvent.click(expandButton);
 
-    fireEvent.change(harpIdInput, { target: { value: userIdWithExtraSpaces } });
-    expect(harpIdInput.value).toBe(userIdWithExtraSpaces);
-    expect(addUserBtn).toBeEnabled();
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    expect(checkBoxes.length).toBe(2);
+    expect(checkBoxes[0]).toBeChecked();
+    expect(checkBoxes[1]).toBeChecked();
 
-    fireEvent.click(addUserBtn);
+    fireEvent.click(checkBoxes[0]);
 
-    await waitFor(() => {
-      expect(addUserBtn).toBeDisabled();
-      expect(saveBtn).toBeEnabled();
-      expect(harpIdInput.value).toBe("");
+    await waitFor(() => expect(checkBoxes[0]).not.toBeChecked());
+    expect(saveBtn).toBeEnabled();
+
+    fireEvent.click(saveBtn);
+
+    expect(await screen.findByText("Are you sure?")).toBeInTheDocument();
+
+    const acceptBtn = await screen.findByTestId(
+      "share-confirmation-dialog-accept-button"
+    );
+    expect(acceptBtn).toBeEnabled();
+
+    fireEvent.click(acceptBtn);
+    await waitFor(async () => {
+      expect(mockMeasureServiceApi.unshareMeasures).toBeCalled();
+      expect(mockOnClose).toHaveBeenCalledWith({
+        toastType: "success",
+        toastMessage: "The measure(s) were successfully unshared.",
+        toastOpen: true,
+      });
+    });
+  });
+
+  it("should fail to unshare a user from a measure.", async () => {
+    const errorMessage =
+      "Unable to unshare the selected measure(s) with the users who were unchecked. If the error persists, please contact the help desk.";
+
+    const mockMeasureServiceApi = {
+      getSharedMeasures: mockGetSharedMeasures,
+      getRecentMeasuresByMeasureSetId: mockGetRecentMeasuresByMeasureSetId,
+      unshareMeasures: jest.fn().mockRejectedValue(new Error(errorMessage)),
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return mockMeasureServiceApi;
     });
 
-    const expandButtonMockMeasure1 = screen.getByTestId(
-      `expand-button-TestMeasureId1`
-    );
-    fireEvent.click(expandButtonMockMeasure1);
+    const mockOnClose = jest.fn();
 
-    const expandButtonMockMeasure2 = screen.getByTestId(
-      `expand-button-TestMeasureId2`
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option={"Unshare"}
+        onClose={mockOnClose}
+      />
     );
-    fireEvent.click(expandButtonMockMeasure2);
 
-    //Row 1
-    expect(
-      screen.getByTestId("0_measureName_TestMeasureId1")
-    ).toHaveTextContent("The Measure for Testing 1");
-    //Subrow 1 of Row 1
-    expect(screen.getByTestId("0.0_userId_TestMeasureId1")).toHaveTextContent(
-      "userId3"
-    );
-    expect(
-      screen.getByTestId("0.0_dateShared_TestMeasureId1")
-    ).toHaveTextContent(today.toLocaleDateString());
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+    expect(mockMeasureServiceApi.getSharedMeasures).toBeCalled();
+    expect(mockMeasureServiceApi.getRecentMeasuresByMeasureSetId).toBeCalled();
 
-    //Row 2
-    expect(
-      screen.getByTestId("1_measureName_TestMeasureId2")
-    ).toHaveTextContent("The Measure for Testing 2");
-    //Subrow 1 of Row 2
-    expect(screen.getByTestId("1.0_userId_TestMeasureId2")).toHaveTextContent(
-      "userId3"
+    const saveBtn = await screen.findByTestId("share-save-button");
+    expect(saveBtn).toBeDisabled();
+
+    const expandButton = await screen.findByTestId(
+      `expand-button-${mockMeasure2.id}`
     );
-    expect(
-      screen.getByTestId("1.0_dateShared_TestMeasureId2")
-    ).toHaveTextContent(today.toLocaleDateString());
-    //Subrow 2 of Row 2
-    expect(screen.getByTestId("1.1_userId_TestMeasureId2")).toHaveTextContent(
-      "userId1"
+    fireEvent.click(expandButton);
+
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    expect(checkBoxes.length).toBe(2);
+    expect(checkBoxes[0]).toBeChecked();
+    expect(checkBoxes[1]).toBeChecked();
+
+    fireEvent.click(checkBoxes[0]);
+
+    await waitFor(() => expect(checkBoxes[0]).not.toBeChecked());
+    expect(saveBtn).toBeEnabled();
+
+    fireEvent.click(saveBtn);
+
+    expect(await screen.findByText("Are you sure?")).toBeInTheDocument();
+
+    const acceptBtn = await screen.findByTestId(
+      "share-confirmation-dialog-accept-button"
     );
-    expect(
-      screen.getByTestId("1.1_dateShared_TestMeasureId2")
-    ).toHaveTextContent(yesterday.toLocaleDateString());
-    //Subrow 3 of Row 2
-    expect(screen.getByTestId("1.2_userId_TestMeasureId2")).toHaveTextContent(
-      "userId2"
-    );
-    expect(
-      screen.getByTestId("1.2_dateShared_TestMeasureId2")
-    ).toHaveTextContent(yesterday.toLocaleDateString());
+    expect(acceptBtn).toBeEnabled();
+
+    fireEvent.click(acceptBtn);
+    await waitFor(async () => {
+      expect(mockMeasureServiceApi.unshareMeasures).toBeCalled();
+      expect(mockOnClose).toHaveBeenCalledWith({
+        toastType: "danger",
+        toastMessage: errorMessage,
+        toastOpen: true,
+      });
+    });
   });
 });
