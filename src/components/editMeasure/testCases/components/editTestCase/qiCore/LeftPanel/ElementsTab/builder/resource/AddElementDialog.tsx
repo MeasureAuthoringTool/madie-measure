@@ -21,15 +21,18 @@ const AddElementDialog = (props: AddElementDialogProps) => {
   useEffect(() => {
     setNewValues(value);
   }, [value]);
-  const handleChange = useCallback((event, newValue: ElementDefinition[] | null) => {
-    const filteredValues =
-      newValue?.filter((option) => !value.includes(option)) ?? [];
+  const handleChange = useCallback(
+    (event, newValue: ElementDefinition[] | null) => {
+      const filteredValues =
+        newValue?.filter((option) => !value.includes(option)) ?? [];
       setNewValues((prev) => [...prev, ...filteredValues]);
-  },[value]); 
+    },
+    [value]
+  );
   const handleClose = useCallback(() => {
     setNewValues(value); // Reset to initial values
     onClose();
-  },[onClose, value]);
+  }, [onClose, value]);
   const handleSave = useCallback(() => {
     saveElements(newValues);
     onClose();
