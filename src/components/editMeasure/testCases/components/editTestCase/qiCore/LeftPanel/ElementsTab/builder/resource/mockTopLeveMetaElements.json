@@ -101,5 +101,16 @@
         "code": "string"
       }
     ]
+  },
+  {
+    "id": "ClaimResponse.widget",
+    "path": "ClaimResponse.widget",
+    "min": 0,
+    "max": "*",
+    "type": [
+      {
+        "code": "string"
+      }
+    ]
   }
 ]
