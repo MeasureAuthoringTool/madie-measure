@@ -513,7 +513,10 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
-                  featureFlags={{ QICoreMeasureDefinitions: true }}
+                  featureFlags={{
+                    QICoreMeasureDefinitions: true,
+                    QiCoreMeasureReference: true,
+                  }}
                 />
               }
             />
@@ -542,7 +545,10 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
-                  featureFlags={{ QICoreMeasureDefinitions: false }}
+                  featureFlags={{
+                    QICoreMeasureDefinitions: false,
+                    QICoreMeasureReferences: false,
+                  }}
                 />
               }
             />
