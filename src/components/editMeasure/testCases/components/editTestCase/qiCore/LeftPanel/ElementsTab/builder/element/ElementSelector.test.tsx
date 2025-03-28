@@ -147,15 +147,21 @@ describe("ElementSelector", () => {
     render(<ElementSelector {...props} />);
 
     // Verify both chips are present initially
-    expect(screen.getByTestId("disabled-element-selector-gender-chip")).toBeInTheDocument();
-    expect(screen.getByTestId("element-selector-birthDate-chip")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("disabled-element-selector-gender-chip")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("element-selector-birthDate-chip")
+    ).toBeInTheDocument();
 
     const input = screen.getByPlaceholderText("Attributes");
-    await userEvent.type(input, '{Backspace}');
-    await userEvent.type(input, '{Backspace}');
-    await userEvent.type(input, '{Backspace}');
+    await userEvent.type(input, "{Backspace}");
+    await userEvent.type(input, "{Backspace}");
+    await userEvent.type(input, "{Backspace}");
 
     // Verify disabled chip still exists and hasn't been removed
-    expect(screen.getByTestId("disabled-element-selector-gender-chip")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("disabled-element-selector-gender-chip")
+    ).toBeInTheDocument();
   });
 });
