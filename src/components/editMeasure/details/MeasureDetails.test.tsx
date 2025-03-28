@@ -107,6 +107,7 @@ jest.mock("@madie/madie-util", () => ({
   },
   useFeatureFlags: jest.fn().mockReturnValue({
     QICoreMeasureDefinitions: true,
+    QICoreMeasureReferences: false,
   }),
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
@@ -127,6 +128,10 @@ jest.mock("@madie/madie-util", () => ({
 const MeasureInformationMock = MeasureInformation as jest.Mock<JSX.Element>;
 const MeasureMetadataMock = MeasureMetadata as jest.Mock<JSX.Element>;
 const setErrorMessage = jest.fn();
+const featureFlags = {
+  QICoreMeasureDefinitions: true,
+  QICoreMeasureReferences: false,
+};
 
 MeasureInformationMock.mockImplementation(() => {
   return <div>Mock Measure Info</div>;
@@ -162,6 +167,7 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
+                  featureFlags={featureFlags}
                 />
               }
             />
@@ -185,6 +191,7 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
+                  featureFlags={featureFlags}
                 />
               }
             />
@@ -208,6 +215,7 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
+                  featureFlags={featureFlags}
                 />
               }
             />
@@ -239,6 +247,7 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
+                  featureFlags={featureFlags}
                 />
               }
             />
@@ -272,6 +281,7 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
+                  featureFlags={featureFlags}
                 />
               }
             />
@@ -303,6 +313,7 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
+                  featureFlags={featureFlags}
                 />
               }
             />
@@ -334,6 +345,7 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
+                  featureFlags={featureFlags}
                 />
               }
             />
@@ -368,6 +380,7 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
+                  featureFlags={featureFlags}
                 />
               }
             />
@@ -500,7 +513,10 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
-                  featureFlags={{ QICoreMeasureDefinitions: true }}
+                  featureFlags={{
+                    QICoreMeasureDefinitions: true,
+                    QICoreMeasureReferences: true,
+                  }}
                 />
               }
             />
@@ -529,7 +545,10 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
-                  featureFlags={{ QICoreMeasureDefinitions: false }}
+                  featureFlags={{
+                    QICoreMeasureDefinitions: false,
+                    QICoreMeasureReferences: false,
+                  }}
                 />
               }
             />
@@ -557,6 +576,10 @@ describe("MeasureDetails component", () => {
               element={
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
+                  featureFlags={{
+                    ...featureFlags,
+                    QICoreMeasureReferences: true,
+                  }}
                   isQDM={true}
                 />
               }
