@@ -129,124 +129,125 @@ const ResourceEditor = ({
       id="tc-builder-resource-editor"
       data-testId="tc-builder-resource-editor"
     >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          p: 1,
-        }}
-      >
-        <Typography>{selectedResource.path}</Typography>
-        <Box sx={{ flexGrow: 1 }} />
-        <Typography sx={{ fontSize: "14px" }}>
-          <span style={{ color: "125496", fontWeight: 700 }}>
-            ID:&nbsp;&nbsp;
-          </span>
-          <span style={{ color: "#333333" }}>
-            {selectedResource?.bundleEntry?.resource?.id}
-          </span>
-        </Typography>
-        <IconButton onClick={() => onCancel(selectedResource)}>
-          <CloseIcon sx={{ color: "#D92F2F" }} />
-        </IconButton>
-      </Box>
-      <Divider />
-      <Box
-        sx={{
-          flexGrow: 1,
-          bgcolor: "background.paper",
-          display: "flex",
-          height: "100%",
-        }}
-      >
-        <Box sx={{ display: "flex", flexDirection: "column", width: 150 }}>
-          <Box sx={{ p: 1 }}>
-            <IconButton
-              onClick={() => setAddDialogOpen(true)}
-              sx={{
-                width: "100%",
-                fontSize: "0.875rem",
-                textTransform: "none",
-                fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
-                "&:hover": {
-                  backgroundColor: "transparent",
-                },
-                padding: 0,
-              }}
-              data-testid="add-attribute-dialog-button"
-            >
-              <AddCircleOutlineIcon sx={{ color: "#3171C2" }} />
-              <div>Add Attribute(s)</div>
-            </IconButton>
-          </Box>
-          <Tabs
-            orientation="vertical"
-            variant="scrollable"
-            value={activeTab}
-            onChange={(e, newValue) => {
-              if (dirty) {
-                setPendingTab(newValue);
-                setDialogOpen(true);
-              } else {
-                setActiveTab(newValue);
-              }
-            }}
-            aria-label="Resource element tabs"
+      {selectedResource && (
+        <>
+          <Box
             sx={{
-              borderRight: 1,
-              borderColor: "divider",
-              "&& .MuiTab-root": {
-                alignItems: "baseline",
-              },
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              p: 1,
             }}
           >
-            {displayedElements?.map((element, index) => (
-              <Tab
-                key={index}
-                sx={{ textAlign: "left" }}
-                label={getElementName(element, resourceBasePath)}
-              />
-            ))}
-          </Tabs>
-        </Box>
-        <ElementEditor
-          setInitialFormikValuesStu6={setInitialFormikValuesStu6}
-          setValidationSchema={setValidationSchema}
-          elementDefinition={displayedElements?.[activeTab]}
-          selectedResource={selectedResource}
-          selectedResourceID={selectedResourceID}
-          resource={editingResource}
-          resourcePath={resourceBasePath}
-          displayedElementsTree={displayedElementsTree}
-          onChange={(path, value) => {
-            const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
-            _.set(nextEntry.resource, path, value);
-            setEditingResource(nextEntry.resource);
-            dispatch({
-              type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
-              payload: nextEntry,
-            });
-          }}
-          canEdit={canEdit}
-        />
-      </Box>
+            <Typography>{selectedResource.path}</Typography>
+            <Box sx={{ flexGrow: 1 }} />
+            <Typography sx={{ fontSize: "14px" }}>
+              <span style={{ color: "125496", fontWeight: 700 }}>
+                ID:&nbsp;&nbsp;
+              </span>
+              <span style={{ color: "#333333" }}>
+                {selectedResource?.bundleEntry?.resource?.id}
+              </span>
+            </Typography>
+            <IconButton data-testid="close-resource-editor-button" onClick={() => onCancel(selectedResource)}>
+              <CloseIcon sx={{ color: "#D92F2F" }} />
+            </IconButton>
+          </Box>
+          <Divider />
+          <Box
+            sx={{
+              flexGrow: 1,
+              bgcolor: "background.paper",
+              display: "flex",
+              height: "100%",
+            }}
+          >
+            <Box sx={{ display: "flex", flexDirection: "column", width: 150 }}>
+              <Box sx={{ p: 1 }}>
+                <IconButton
+                  onClick={() => setAddDialogOpen(true)}
+                  sx={{
+                    width: "100%",
+                    fontSize: "0.875rem",
+                    textTransform: "none",
+                    fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
+                    "&:hover": {
+                      backgroundColor: "transparent",
+                    },
+                    padding: 0,
+                  }}
+                  data-testid="add-attribute-dialog-button"
+                >
+                  <AddCircleOutlineIcon sx={{ color: "#3171C2" }} />
+                  <div>Add Attribute(s)</div>
+                </IconButton>
+              </Box>
+              <Tabs
+                orientation="vertical"
+                variant="scrollable"
+                value={activeTab}
+                onChange={(e, newValue) => {
+                  if (dirty) {
+                    setPendingTab(newValue);
+                    setDialogOpen(true);
+                  } else {
+                    setActiveTab(newValue);
+                  }
+                }}
+                aria-label="Resource element tabs"
+                sx={{
+                  borderRight: 1,
+                  borderColor: "divider",
+                  "&& .MuiTab-root": {
+                    alignItems: "baseline",
+                  },
+                }}
+              >
+                {displayedElements?.map((element, index) => (
+                  <Tab
+                    key={index}
+                    sx={{ textAlign: "left" }}
+                    label={getElementName(element, resourceBasePath)}
+                  />
+                ))}
+              </Tabs>
+            </Box>
+            <ElementEditor
+              setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+              setValidationSchema={setValidationSchema}
+              elementDefinition={displayedElements?.[activeTab]}
+              selectedResource={selectedResource}
+              selectedResourceID={selectedResourceID}
+              resource={editingResource}
+              resourcePath={resourceBasePath}
+              displayedElementsTree={displayedElementsTree}
+              onChange={(path, value) => {
+                const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
+                _.set(nextEntry.resource, path, value);
+                setEditingResource(nextEntry.resource);
+                dispatch({
+                  type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
+                  payload: nextEntry,
+                });
+              }}
+              canEdit={canEdit}
+            />
+          </Box>
+        </>
+      )}
+      {/* Keep dialogs outside the conditional render */}
       <AddElementDialog
         open={addDialogOpen}
         basePath={resourceBasePath}
         options={allElements}
         value={displayedElements}
         saveElements={saveElements}
-        onClose={() => {
-          setAddDialogOpen(false);
-        }}
+        onClose={() => setAddDialogOpen(false)}
       />
       <MadieDiscardDialog
         open={dialogOpen}
         onContinue={onContinue}
-        onClose={() => {
-          setDialogOpen(false);
-        }}
+        onClose={() => setDialogOpen(false)}
       />
     </Box>
   );

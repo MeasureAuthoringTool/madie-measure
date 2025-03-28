@@ -237,4 +237,92 @@ describe("ResourceEditor", () => {
       expect(mockDispatch).toHaveBeenCalled();
     });
   });
+
+  it("handles null selectedResource", () => {
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
+    
+    render(
+      <QiCoreResourceContext.Provider
+        value={{ state: mockPatientState, dispatch: jest.fn() }}
+      >
+        <ResourceEditor
+          selectedResourceID="test-id"
+          setValidationSchema={setValidationSchema}
+          setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+          selectedResource={null}
+          onCancel={mockOnCancel}
+          canEdit={true}
+        />
+      </QiCoreResourceContext.Provider>
+    );
+
+    // Verify elements are cleared when selectedResource is null
+    expect(screen.queryByRole("tab")).not.toBeInTheDocument();
+  });
+
+  it("handles changing tab without dirty form", async () => {
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
+    
+    // Mock clean form state
+    const cleanFormMock = {
+      ...mockFormikObj,
+      dirty: false
+    };
+    
+    jest.spyOn(require("formik"), "useFormikContext").mockReturnValue(cleanFormMock);
+
+    render(
+      <QiCoreResourceContext.Provider
+        value={{ state: mockPatientState, dispatch: jest.fn() }}
+      >
+        <ResourceEditor
+          selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
+          setValidationSchema={setValidationSchema}
+          setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+          selectedResource={mockSelectedResource}
+          onCancel={mockOnCancel}
+          canEdit={true}
+        />
+      </QiCoreResourceContext.Provider>
+    );
+
+    // Find and click the disposition tab
+    const dispositionTab = screen.getByRole("tab", { name: "disposition" });
+    userEvent.click(dispositionTab);
+
+    // Verify tab changed without opening dialog
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+  });
+
+  it("handles onCancel button click", async () => {
+    const mockOnCancel = jest.fn();
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
+
+    render(
+      <QiCoreResourceContext.Provider
+        value={{ state: mockPatientState, dispatch: jest.fn() }}
+      >
+        <ResourceEditor
+          selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
+          setValidationSchema={setValidationSchema}
+          setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+          selectedResource={mockSelectedResource}
+          onCancel={mockOnCancel}
+          canEdit={true}
+        />
+      </QiCoreResourceContext.Provider>
+    );
+
+    // Find and click the close button using the new test ID
+    const closeButton = screen.getByTestId("close-resource-editor-button");
+    userEvent.click(closeButton);
+
+    // Verify onCancel was called with the selectedResource
+    expect(mockOnCancel).toHaveBeenCalledWith(mockSelectedResource);
+  });
 });
