@@ -86,7 +86,7 @@ describe("ElementSelector", () => {
 
     render(<ElementSelector {...props} />);
 
-    const chip = screen.getByText("gender");
+    const chip = screen.getAllByText("gender")[0];
     expect(chip).toBeInTheDocument();
   });
 
@@ -99,7 +99,7 @@ describe("ElementSelector", () => {
 
     render(<ElementSelector {...props} />);
 
-    const chip = screen.getByText("gender").closest(".MuiChip-root");
+    const chip = screen.getAllByText("gender")[0].closest(".MuiChip-root");
     expect(chip).toHaveClass("Mui-disabled");
   });
 

@@ -40,6 +40,28 @@ const ElementSelector = ({
   return (
     <>
       <AutoComplete
+        sx={{
+          "& .MuiAutocomplete-option[aria-disabled='true']": {
+            color: "00CC00",
+          },
+        }}
+        slotProps={{
+          paper: {
+            sx: {
+              "& .MuiAutocomplete-option[aria-disabled='true']": {
+                opacity: "1 !important",
+                backgroundColor: "#FFF !important",
+                color: "#767676 !important",
+                "& .MuiCheckbox-root": {
+                  color: "#767676 !important",
+                },
+              },
+              "& .MuiAutocomplete-option[aria-selected='true']": {
+                backgroundColor: "#FFF !important",
+              },
+            },
+          },
+        }}
         disableClearable={true}
         multiple
         open={true}
@@ -56,23 +78,30 @@ const ElementSelector = ({
         ListboxProps={{
           style: { height: "40vh", maxHeight: "700px" },
         }}
-        renderOption={(props, option, { selected }) => (
-          <li {...props}>
-            <Checkbox
-              icon={icon}
-              checkedIcon={checkedIcon}
-              style={{ marginRight: 8 }}
-              checked={selected}
-            />
-            {getOptionLabel(option, basePath)}
-          </li>
-        )}
+        renderOption={(props, option, { selected }) => {
+          return (
+            <li {...props}>
+              <Checkbox
+                icon={icon}
+                checkedIcon={checkedIcon}
+                style={{ marginRight: 8 }}
+                checked={selected}
+              />
+              {getOptionLabel(option, basePath)}
+            </li>
+          );
+        }}
         renderTags={(tagValue, getTagProps) =>
           tagValue.map((option, index) => {
             const { key, onDelete, ...tagProps } = getTagProps({ index });
             const isDisabled = value.includes(option);
             return (
               <Chip
+                sx={
+                  isDisabled
+                    ? { opacity: "1.0 !important" }
+                    : { backgroundColor: "#2a8cdb !important", color: "white" }
+                }
                 key={key}
                 label={getOptionLabel(option, basePath)}
                 {...tagProps}

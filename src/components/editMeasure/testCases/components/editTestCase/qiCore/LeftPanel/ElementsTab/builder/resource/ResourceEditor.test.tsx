@@ -198,9 +198,7 @@ describe("ResourceEditor", () => {
     userEvent.click(addAttributeButton);
 
     // Verify dialog is open
-    expect(
-      screen.getByTestId("add-element-close-dialog-button")
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("close-button")).toBeInTheDocument();
 
     // Verify attribute selector is present
     expect(screen.getByText("Attribute Selector")).toBeInTheDocument();
@@ -218,7 +216,7 @@ describe("ResourceEditor", () => {
     userEvent.click(addAttributeButton);
 
     // Test closing with X button
-    const closeButton = screen.getByTestId("add-element-close-dialog-button");
+    const closeButton = screen.getByTestId("close-button");
     userEvent.click(closeButton);
 
     // Verify dialog is closed

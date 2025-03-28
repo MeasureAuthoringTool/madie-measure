@@ -36,9 +36,7 @@ describe("AddElementDialog", () => {
     render(<AddElementDialog {...defaultProps} />);
 
     expect(screen.getByText("Add Attribute(s)")).toBeInTheDocument();
-    expect(
-      screen.getByTestId("add-element-close-dialog-button")
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("close-button")).toBeInTheDocument();
     expect(screen.getByTestId("cancel-add-element-button")).toBeInTheDocument();
     expect(screen.getByTestId("add-element-button-2")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Attributes")).toBeInTheDocument();
@@ -51,7 +49,7 @@ describe("AddElementDialog", () => {
 
   it("should call onClose when close button is clicked", async () => {
     render(<AddElementDialog {...defaultProps} />);
-    userEvent.click(screen.getByTestId("add-element-close-dialog-button"));
+    userEvent.click(screen.getByTestId("close-button"));
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
