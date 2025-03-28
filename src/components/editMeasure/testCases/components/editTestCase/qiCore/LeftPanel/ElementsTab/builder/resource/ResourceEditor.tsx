@@ -149,7 +149,10 @@ const ResourceEditor = ({
                 {selectedResource?.bundleEntry?.resource?.id}
               </span>
             </Typography>
-            <IconButton data-testid="close-resource-editor-button" onClick={() => onCancel(selectedResource)}>
+            <IconButton
+              data-testid="close-resource-editor-button"
+              onClick={() => onCancel(selectedResource)}
+            >
               <CloseIcon sx={{ color: "#D92F2F" }} />
             </IconButton>
           </Box>

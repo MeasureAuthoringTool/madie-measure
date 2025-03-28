@@ -241,7 +241,7 @@ describe("ResourceEditor", () => {
   it("handles null selectedResource", () => {
     const setInitialFormikValuesStu6 = jest.fn();
     const setValidationSchema = jest.fn();
-    
+
     render(
       <QiCoreResourceContext.Provider
         value={{ state: mockPatientState, dispatch: jest.fn() }}
@@ -264,14 +264,16 @@ describe("ResourceEditor", () => {
   it("handles changing tab without dirty form", async () => {
     const setInitialFormikValuesStu6 = jest.fn();
     const setValidationSchema = jest.fn();
-    
+
     // Mock clean form state
     const cleanFormMock = {
       ...mockFormikObj,
-      dirty: false
+      dirty: false,
     };
-    
-    jest.spyOn(require("formik"), "useFormikContext").mockReturnValue(cleanFormMock);
+
+    jest
+      .spyOn(require("formik"), "useFormikContext")
+      .mockReturnValue(cleanFormMock);
 
     render(
       <QiCoreResourceContext.Provider
