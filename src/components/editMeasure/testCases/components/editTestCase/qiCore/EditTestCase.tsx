@@ -83,6 +83,8 @@ import useFhirCqlParsingService from "../../../api/cqlElmTranslationService/useF
 import checkSpecialCharacters from "../../../util/checkSpecialCharacters";
 import EditorSearch from "./LeftPanel/EditorSearch";
 import useFormikResetOnEvent from "../../../../../common/useFormikResetOnEvent";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 
 const TestCaseForm = tw.form`m-3`;
 const ValidationErrorsButton = tw.button`
@@ -480,11 +482,29 @@ const EditTestCase = (props: EditTestCaseProps) => {
       );
       setEditorVal(savedTestCase.json);
 
-      handleTestCaseResponse(savedTestCase, "create");
+      handleTestCaseResponse(savedTestCase, "create", false);
     } catch (error) {
       showToast("An error occurred while creating the test case.", "danger");
       setErrors([...errors, "An error occurred while creating the test case."]);
     }
+  };
+
+  const convertDatesToUTC = (jsonData) => {
+    let timezoneUpdated = false;
+    dayjs.extend(utc);
+    const regex =
+      /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})/g;
+    const updatedData = JSON.stringify(jsonData, (key, value) => {
+      if (typeof value === "string" && regex.test(value)) {
+        const newValue = dayjs(value).utc().format();
+        if (value != newValue) {
+          timezoneUpdated = true;
+        }
+        return newValue;
+      }
+      return value;
+    });
+    return { json: updatedData, isTimezoneUpdated: timezoneUpdated };
   };
 
   const updateTestCase = async (testCase: TestCase) => {
@@ -493,9 +513,12 @@ const EditTestCase = (props: EditTestCaseProps) => {
       showToast(errorMsg, "danger");
       return;
     }
+    let timezoneUpdated = false;
     try {
       if (editorVal !== testCase.json) {
-        testCase.json = editorVal;
+        const updatedValue = convertDatesToUTC(JSON.parse(editorVal));
+        testCase.json = updatedValue.json;
+        timezoneUpdated = updatedValue.isTimezoneUpdated;
       }
       setValidationErrors(() => []);
       const updatedTestCase = await testCaseService.current.updateTestCase(
@@ -510,7 +533,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
       });
       setTestCase(_.cloneDeep(updatedTc));
       setEditorVal(updatedTc.json);
-      handleTestCaseResponse(updatedTc, "update");
+      handleTestCaseResponse(updatedTc, "update", timezoneUpdated);
     } catch (error) {
       showToast(
         error instanceof MadieError
@@ -606,7 +629,8 @@ const EditTestCase = (props: EditTestCaseProps) => {
 
   function handleTestCaseResponse(
     testCase: TestCase,
-    action: "create" | "update"
+    action: "create" | "update",
+    timezoneUpdated: boolean
   ) {
     if (testCase && testCase.id) {
       const validationErrors =
@@ -623,12 +647,29 @@ const EditTestCase = (props: EditTestCaseProps) => {
               Changes {action}d successfully but the following{" "}
               {severityOfValidationErrors(validationErrors)}(s) were found
             </h3>
+            {timezoneUpdated && (
+              <ul>
+                MADiE only supports a timezone offset of 0. MADiE has
+                overwritten any timezone offsets that are not zero.
+              </ul>
+            )}
             <ul>{valErrors}</ul>
           </div>
         ) : (
-          `Test case updated successfully with ${severityOfValidationErrors(
-            validationErrors
-          )}s in JSON`
+          <div>
+            <h3>
+              Test case updated successfully with{" "}
+              {severityOfValidationErrors(validationErrors)}s in JSON
+            </h3>
+            {timezoneUpdated && (
+              <ul style={{ listStyle: "inside" }}>
+                <li>
+                  MADiE only supports a timezone offset of 0. MADiE has
+                  overwritten any timezone offsets that are not zero.
+                </li>
+              </ul>
+            )}
+          </div>
         );
         let severity = severityOfValidationErrors(validationErrors);
         if (severity === "error") {
