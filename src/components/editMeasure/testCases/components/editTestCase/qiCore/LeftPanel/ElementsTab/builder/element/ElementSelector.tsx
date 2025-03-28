@@ -93,7 +93,7 @@ const ElementSelector = ({
         }}
         renderTags={(tagValue, getTagProps) =>
           tagValue.map((option, index) => {
-            const { key, onDelete, ...tagProps } = getTagProps({ index });
+            const { key, ...tagProps } = getTagProps({ index }); // Remove onDelete from destructuring
             const isDisabled = value.includes(option);
             return (
               <Chip
@@ -106,14 +106,31 @@ const ElementSelector = ({
                 label={getOptionLabel(option, basePath)}
                 {...tagProps}
                 disabled={isDisabled}
-                onDelete={isDisabled ? undefined : onDelete}
+                onDelete={isDisabled ? null : tagProps.onDelete} // Use null instead of undefined
                 deleteIcon={isDisabled ? null : undefined}
+                data-testid={`${isDisabled?"disabled-":""}element-selector-${getOptionLabel(option, basePath)}-chip`}
               />
             );
           })
         }
         renderInput={(params) => (
-          <TextField {...params} placeholder="Attributes" />
+          <TextField 
+            {...params} 
+            placeholder="Attributes"
+            onKeyDown={(e) => {
+              // this is to prevent backspace from removing disabled
+              if (e.key === 'Backspace' && 
+                  e.target instanceof HTMLInputElement && 
+                  e.target.value === '' && 
+                  newValues.length > 0) {
+                const lastChip = newValues[newValues.length - 1];
+                if (value.includes(lastChip)) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }
+              }
+            }}
+          />
         )}
       />
     </>

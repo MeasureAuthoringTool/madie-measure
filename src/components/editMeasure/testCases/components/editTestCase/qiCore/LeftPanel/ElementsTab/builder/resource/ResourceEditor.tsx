@@ -4,7 +4,6 @@ import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import ElementEditor from "../element/ElementEditor";
-import ElementSelector from "../element/ElementSelector";
 import * as _ from "lodash";
 import {
   ResourceActionType,

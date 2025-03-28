@@ -136,4 +136,26 @@ describe("ElementSelector", () => {
     const chips = screen.getAllByRole("button");
     expect(chips.length).toBe(3);
   });
+
+  it("prevents backspace from deleting disabled chips", async () => {
+    const props = {
+      ...defaultProps,
+      value: [mockOptions[0]], // gender is disabled
+      newValues: [mockOptions[0], mockOptions[1]], // has both gender and birthDate
+    };
+
+    render(<ElementSelector {...props} />);
+
+    // Verify both chips are present initially
+    expect(screen.getByTestId("disabled-element-selector-gender-chip")).toBeInTheDocument();
+    expect(screen.getByTestId("element-selector-birthDate-chip")).toBeInTheDocument();
+
+    const input = screen.getByPlaceholderText("Attributes");
+    await userEvent.type(input, '{Backspace}');
+    await userEvent.type(input, '{Backspace}');
+    await userEvent.type(input, '{Backspace}');
+
+    // Verify disabled chip still exists and hasn't been removed
+    expect(screen.getByTestId("disabled-element-selector-gender-chip")).toBeInTheDocument();
+  });
 });
