@@ -23,10 +23,6 @@ const AddElementDialog = (props: AddElementDialogProps) => {
   }, [value]);
   const handleChange = useCallback(
     (event, newValue: ElementDefinition[] | null) => {
-      if (!newValue) {
-        setNewValues([]);
-        return;
-      }
       setNewValues(newValue);
     },
     [value]
