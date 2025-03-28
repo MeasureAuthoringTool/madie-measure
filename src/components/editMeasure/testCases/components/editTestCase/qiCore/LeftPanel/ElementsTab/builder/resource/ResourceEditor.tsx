@@ -59,8 +59,8 @@ const ResourceEditor = ({
   };
 
   const saveElements = (newValue: ElementDefinition[] | null) => {
-    setDisplayedElements(newValue ?? []);
-    setDisplayedElementsTree(getDisplayedElementsTree(newValue ?? []));
+    setDisplayedElements(newValue);
+    setDisplayedElementsTree(getDisplayedElementsTree(newValue));
 
     const { type } = selectedResource?.definition;
     const formikCleanedValues = removeUndefinedAndEmptyObjects(values);
