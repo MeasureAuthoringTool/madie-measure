@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import ResourceEditor from "./ResourceEditor";
 import { QiCoreResourceContext } from "../../../../../../../util/QiCorePatientProvider";
 import mockSelectedResource from "./mockSelectedResource.json";
@@ -326,5 +326,46 @@ describe("ResourceEditor", () => {
 
     // Verify onCancel was called with the selectedResource
     expect(mockOnCancel).toHaveBeenCalledWith(mockSelectedResource);
+  });
+
+  it("changes active tab when form is not dirty", async () => {
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
+
+    // Mock clean form state
+    const cleanFormMock = {
+      ...mockFormikObj,
+      dirty: false,
+    };
+
+    jest
+      .spyOn(require("formik"), "useFormikContext")
+      .mockReturnValue(cleanFormMock);
+
+    render(
+      <QiCoreResourceContext.Provider
+        value={{ state: mockPatientState, dispatch: jest.fn() }}
+      >
+        <ResourceEditor
+          selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
+          setValidationSchema={setValidationSchema}
+          setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+          selectedResource={mockSelectedResource}
+          onCancel={mockOnCancel}
+          canEdit={true}
+        />
+      </QiCoreResourceContext.Provider>
+    );
+
+    // Find all tabs
+    const tabs = screen.getAllByRole("tab");
+    expect(tabs.length).toBeGreaterThan(1);
+
+    // Click the second tab (index 1)
+    userEvent.click(tabs[1]);
+
+    // Verify tab changed by checking aria-selected attribute
+    expect(tabs[1]).toHaveAttribute("aria-selected", "true");
+    expect(tabs[0]).toHaveAttribute("aria-selected", "false");
   });
 });
