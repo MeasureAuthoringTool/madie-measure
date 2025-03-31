@@ -49,7 +49,7 @@ const ResourceEditor = ({
   const [editingResource, setEditingResource] = useState(
     selectedResource?.bundleEntry?.resource
   );
-  const { dispatch } = useQiCoreResource();
+  const { dispatch, state } = useQiCoreResource();
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [addDialogOpen, setAddDialogOpen] = useState<boolean>(false);
   const onContinue = () => {
@@ -90,8 +90,12 @@ const ResourceEditor = ({
     });
   };
   useEffect(() => {
-    if (selectedResource) {
+    if (selectedResource && selectedResourceID && state) {
       // TODO: look at the data that exists on the resource and combine fields from that
+      const statefulSelectedResource = state.bundle.entry.find(
+        (entry) => entry.resource.id === selectedResourceID
+      )?.resource;
+      selectedResource.bundleEntry.resource = statefulSelectedResource;
       const topElements = getTopLevelElements(selectedResource);
       setAllElements(topElements);
       const requiredElements = [...topElements.filter((e) => e.min > 0)];
@@ -117,7 +121,7 @@ const ResourceEditor = ({
       setAllElements([]);
       setDisplayedElements([]);
     }
-  }, [selectedResource]);
+  }, [selectedResourceID, state]);
 
   const resourceBasePath = getBasePath(selectedResource);
   return (
