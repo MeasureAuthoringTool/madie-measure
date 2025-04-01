@@ -1,5 +1,7 @@
 import React from "react";
-import { render, screen, waitFor, within } from "@testing-library/react";
+
+import { act, render, screen, waitFor, within } from "@testing-library/react";
+
 import ResourceEditor from "./ResourceEditor";
 import { QiCoreResourceContext } from "../../../../../../../util/QiCorePatientProvider";
 import mockSelectedResource from "./mockSelectedResource.json";
@@ -26,8 +28,9 @@ jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
 
 const formikValues = {
   ClaimResponse: {
-    id: "test",
-    disposition: "test",
+    id: "test2",
+    disposition: "test3",
+    widget: ["test4", "test5"],
   },
 };
 
@@ -124,7 +127,7 @@ describe("ResourceEditor", () => {
       expect(resetForm).toHaveBeenCalled();
     });
   });
-  it("renders the action center, opens when clicked", async () => {
+  it("renders the action center for a 0-1 cardinality element, opens when clicked", async () => {
     const setInitialFormikValuesStu6 = jest.fn();
     const setValidationSchema = jest.fn();
     render(
@@ -144,6 +147,7 @@ describe("ResourceEditor", () => {
 
     await waitFor(() => {
       expect(screen.getByText("ClaimResponse.id")).toBeInTheDocument();
+
       const stringInput = screen.getByTestId(
         "string-field-input-ClaimResponse.id"
       );
@@ -159,16 +163,75 @@ describe("ResourceEditor", () => {
     const dispositionButton = screen.getByRole("tab", { name: "disposition" });
 
     expect(dispositionButton).toBeInTheDocument();
+    screen.debug();
     const actionCenter = screen.getByTestId(
       "elements-action-center-actual-icon"
     );
     expect(actionCenter).toBeInTheDocument();
     userEvent.click(actionCenter);
     await waitFor(() => {
-      expect(screen.getByTestId("elements-copy")).toBeInTheDocument;
+      expect(screen.queryByTestId("elements-copy")).not.toBeInTheDocument;
+      expect(screen.queryByTestId("elements-add")).not.toBeInTheDocument;
+      expect(screen.getByTestId("elements-delete")).toBeInTheDocument;
     });
     userEvent.click(actionCenter);
-    expect(screen.getByTestId("elements-copy")).not.toBeInTheDocument;
+    expect(screen.getByTestId("elements-delete")).not.toBeInTheDocument;
+  });
+
+  it("renders the action center for a 0-* cardinality element, opens when clicked", async () => {
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
+    render(
+      <QiCoreResourceContext.Provider
+        value={{ state: mockPatientState, dispatch: jest.fn() }}
+      >
+        <ResourceEditor
+          selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
+          setValidationSchema={setValidationSchema}
+          setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+          selectedResource={mockSelectedResource}
+          onCancel={mockOnCancel}
+          canEdit={true}
+        />
+      </QiCoreResourceContext.Provider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("ClaimResponse.id")).toBeInTheDocument();
+
+      const stringInput = screen.getByTestId(
+        "string-field-input-ClaimResponse.id"
+      );
+
+      expect(stringInput).toBeInTheDocument();
+      expect(setValidationSchema).toHaveBeenCalled();
+      expect(setInitialFormikValuesStu6).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("string-field-input-ClaimResponse.id").value
+      ).toBe("6fb9d817-76c5-4b68-ba06-92c7429e6b5c");
+    });
+    // screen.debug();
+    // const widgetButton = screen.queryByRole("tab");
+    // expect(widgetButton).toBeInTheDocument();
+
+    // act(() => {
+    //   userEvent.click(widgetButton);
+    // });
+
+    const actionCenter = screen.getByTestId(
+      "elements-action-center-actual-icon"
+    );
+    expect(actionCenter).toBeInTheDocument();
+    userEvent.click(actionCenter);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("elements-copy")).toBeInTheDocument;
+      expect(screen.queryByTestId("elements-add")).toBeInTheDocument;
+      expect(screen.getByTestId("elements-delete")).toBeInTheDocument;
+    });
   });
 
   it("opens AddElementDialog, interacts with it, and can close it", async () => {
