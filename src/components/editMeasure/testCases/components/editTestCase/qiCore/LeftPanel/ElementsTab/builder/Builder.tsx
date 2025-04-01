@@ -6,7 +6,7 @@ import React, {
   SetStateAction,
 } from "react";
 import { Box, Divider } from "@mui/material";
-import * as _ from "lodash";
+import _ from "lodash";
 import ResourceList from "./resource/ResourceList";
 import TestCaseSummaryGrid from "./grid/TestCaseSummaryGrid";
 import Typography from "@mui/material/Typography";
@@ -44,12 +44,12 @@ const Builder = ({
   const [resources, setResources] = useState<ResourceIdentifier[]>(null);
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   const fhirElmTranslationService = useRef(useFhirElmTranslationServiceApi());
-  const [activeResource, setActiveResource] = useState(null);
-  const [selectedResourceID, setSelectedResourceId] = useState(null); // one single source of truth.
+  const [selectedResourceID, setSelectedResourceId] = useState<string>(null); // one single source of truth.
   const { state, dispatch } = useQiCoreResource();
   const { measureState } = useExecutionContext();
   const [measure] = measureState;
   const addedResources = state?.bundle?.entry.length || 0;
+
   useEffect(() => {
     const resourcesPromise = fhirDefinitionsService.current.getResources();
     const relevantElementsPromise =
@@ -59,6 +59,10 @@ const Builder = ({
         const relevantTypes = sdcs?.map(
           (relevantElement) => relevantElement.type
         );
+
+        console.log("resources", resources);
+
+        console.log("sdcs", sdcs);
         if (!_.isEmpty(resources)) {
           const uniqueResources = _.uniq(resources.sort());
           const filteredResources = _.isEmpty(relevantTypes)
@@ -74,20 +78,6 @@ const Builder = ({
     );
   }, []);
 
-  const handleResourceSelected = async (bundleEntry: any) => {
-    const profile = _.isArray(bundleEntry?.resource?.meta?.profile)
-      ? bundleEntry?.resource?.meta?.profile[0]
-      : bundleEntry?.resource?.meta?.profile;
-    const resourceId = profile
-      ? profile.substring(profile.lastIndexOf("/") + 1)
-      : bundleEntry?.resource?.resourceType;
-    const resourceTree = await fhirDefinitionsService.current.getResourceTree(
-      resourceId
-    );
-    const resource = { ...resourceTree, bundleEntry };
-    setActiveResource(resource);
-    setSelectedResourceId(bundleEntry.resource.id);
-  };
   // track form dirty and an intermediate tab to know what the discard dialog should nav to
   const { dirty, resetForm } = useFormikContext();
   const [activeTab, setActiveTab] = useState<string>("Available");
@@ -164,15 +154,12 @@ const Builder = ({
         )}
         {activeTab === "Added" && (
           <>
-            {activeResource && (
+            {selectedResourceID && (
               <ResourceEditor
                 selectedResourceID={selectedResourceID}
                 setValidationSchema={setValidationSchema}
                 setInitialFormikValuesStu6={setInitialFormikValuesStu6}
-                selectedResource={activeResource}
-                onCancel={(resource) => {
-                  setActiveResource(null);
-                }}
+                onCancel={() => setSelectedResourceId(null)}
                 canEdit={canEdit}
               />
             )}
@@ -182,14 +169,13 @@ const Builder = ({
               <TestCaseSummaryGrid
                 bundle={state?.bundle}
                 onRowEdit={(row) => {
-                  handleResourceSelected(row);
+                  setSelectedResourceId(row?.resource?.id);
                 }}
                 onRowDelete={(row) => {
                   dispatch({
                     type: ResourceActionType.REMOVE_BUNDLE_ENTRY,
                     payload: row,
                   });
-                  setActiveResource(null);
                 }}
               />
             </Box>

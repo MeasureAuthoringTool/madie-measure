@@ -124,7 +124,8 @@ describe("ResourceEditor", () => {
       expect(resetForm).toHaveBeenCalled();
     });
   });
-  it("renders the action center, opens when clicked", async () => {
+
+  it("renders the action center for a 0-1 cardinality element, opens when clicked", async () => {
     const setInitialFormikValuesStu6 = jest.fn();
     const setValidationSchema = jest.fn();
     render(

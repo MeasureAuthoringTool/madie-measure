@@ -41,6 +41,7 @@ const ElementEditorChildren = ({
   fhirDefinitionsService,
   resourcePath,
   handleIndividualElementApplyButtonClick,
+  deleteElement,
 }) => {
   currentDepth = currentDepth + 1;
   const childrenToRender = [];
@@ -65,6 +66,7 @@ const ElementEditorChildren = ({
     const required = +rootDefinition.min > 0;
     const elemPath = stripResourcePath(resourcePath, rootDefinition.path);
     let elementValue = _.get(resource, elemPath);
+
     return (
       <div
         className="test-case-tab-heading"
@@ -78,7 +80,16 @@ const ElementEditorChildren = ({
             {_.startCase(rootDefinition?.id.split(".")[1])}
           </h4>
           <div style={{ position: "relative", top: "-7px" }}>
-            <ElementEditorActionCenter />
+            <ElementEditorActionCenter
+              numElements={
+                Object.prototype.toString.call(elementValue) ===
+                "[object Array]"
+                  ? elementValue.length
+                  : 1
+              }
+              rootDefinition={rootDefinition}
+              handleDelete={deleteElement}
+            />
           </div>
         </div>
         {/* given root definition we do a base level render */}
@@ -105,7 +116,7 @@ const ElementEditorChildren = ({
             canEdit={canEdit}
           />
         ))}
-        {/* item.detail vs item.adjudication are 2 separate trees, we need to split them into separate children trees.  
+        {/* item.detail vs item.adjudication are 2 separate trees, we need to split them into separate children trees.
           how do we do that?
           We group them based on a normalizedPrefix.
         */}
@@ -124,6 +135,7 @@ const ElementEditorChildren = ({
               handleIndividualElementApplyButtonClick={
                 handleIndividualElementApplyButtonClick
               }
+              deleteElement
             />
           ))}
       </div>
@@ -166,6 +178,7 @@ const ElementEditorChildren = ({
                     handleIndividualElementApplyButtonClick={
                       handleIndividualElementApplyButtonClick
                     }
+                    deleteElement
                   />
                 )
               )}
