@@ -1,6 +1,7 @@
 import React from "react";
-import Autocomplete from "@mui/material/Autocomplete";
-import { Checkbox, TextField } from "@mui/material";
+// import Autocomplete from "@mui/material/Autocomplete";
+import { AutoComplete } from "@madie/madie-design-system/dist/react";
+import { Checkbox, TextField, Chip } from "@mui/material";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import { ElementDefinition } from "fhir/r4";
@@ -12,6 +13,7 @@ interface ElementSelectorProps {
   basePath: string;
   options: ElementDefinition[];
   value: ElementDefinition[];
+  newValues: ElementDefinition[];
   onChange: (event, newValue: ElementDefinition[] | null) => void;
 }
 
@@ -32,33 +34,107 @@ const ElementSelector = ({
   basePath,
   options,
   value,
+  newValues,
   onChange,
 }: ElementSelectorProps) => {
   return (
     <>
-      <Autocomplete
+      <AutoComplete
+        sx={{
+          "& .MuiAutocomplete-option[aria-disabled='true']": {
+            color: "00CC00",
+          },
+        }}
+        slotProps={{
+          paper: {
+            sx: {
+              "& .MuiAutocomplete-option[aria-disabled='true']": {
+                opacity: "1 !important",
+                backgroundColor: "#FFF !important",
+                color: "#767676 !important",
+                "& .MuiCheckbox-root": {
+                  color: "#767676 !important",
+                },
+              },
+              "& .MuiAutocomplete-option[aria-selected='true']": {
+                backgroundColor: "#FFF !important",
+              },
+            },
+          },
+        }}
+        disableClearable={true}
         multiple
+        open={true}
+        label="Attribute Selector"
         fullWidth
         limitTags={2}
         id="resource-element-selector-autocomplete"
         options={options}
-        value={value}
+        value={newValues}
         onChange={onChange}
         disableCloseOnSelect
         getOptionLabel={(option) => getOptionLabel(option, basePath)}
-        renderOption={(props, option, { selected }) => (
-          <li {...props}>
-            <Checkbox
-              icon={icon}
-              checkedIcon={checkedIcon}
-              style={{ marginRight: 8 }}
-              checked={selected}
-            />
-            {getOptionLabel(option, basePath)}
-          </li>
-        )}
+        getOptionDisabled={(option) => value.includes(option)}
+        ListboxProps={{
+          style: { height: "40vh", maxHeight: "700px" },
+        }}
+        renderOption={(props, option, { selected }) => {
+          return (
+            <li {...props}>
+              <Checkbox
+                icon={icon}
+                checkedIcon={checkedIcon}
+                style={{ marginRight: 8 }}
+                checked={selected}
+              />
+              {getOptionLabel(option, basePath)}
+            </li>
+          );
+        }}
+        renderTags={(tagValue, getTagProps) =>
+          tagValue.map((option, index) => {
+            const { key, ...tagProps } = getTagProps({ index }); // Remove onDelete from destructuring
+            const isDisabled = value.includes(option);
+            return (
+              <Chip
+                sx={
+                  isDisabled
+                    ? { opacity: "1.0 !important" }
+                    : { backgroundColor: "#2a8cdb !important", color: "white" }
+                }
+                key={key}
+                label={getOptionLabel(option, basePath)}
+                {...tagProps}
+                disabled={isDisabled}
+                onDelete={isDisabled ? null : tagProps.onDelete} // Use null instead of undefined
+                deleteIcon={isDisabled ? null : undefined}
+                data-testid={`${
+                  isDisabled ? "disabled-" : ""
+                }element-selector-${getOptionLabel(option, basePath)}-chip`}
+              />
+            );
+          })
+        }
         renderInput={(params) => (
-          <TextField {...params} label="Elements" placeholder="Elements" />
+          <TextField
+            {...params}
+            placeholder="Attributes"
+            onKeyDown={(e) => {
+              // this is to prevent backspace from removing disabled
+              if (
+                e.key === "Backspace" &&
+                e.target instanceof HTMLInputElement &&
+                e.target.value === "" &&
+                newValues.length > 0
+              ) {
+                const lastChip = newValues[newValues.length - 1];
+                if (value.includes(lastChip)) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }
+              }
+            }}
+          />
         )}
       />
     </>
