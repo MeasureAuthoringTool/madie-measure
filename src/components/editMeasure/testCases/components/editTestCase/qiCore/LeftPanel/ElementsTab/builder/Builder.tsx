@@ -59,10 +59,6 @@ const Builder = ({
         const relevantTypes = sdcs?.map(
           (relevantElement) => relevantElement.type
         );
-
-        console.log("resources", resources);
-
-        console.log("sdcs", sdcs);
         if (!_.isEmpty(resources)) {
           const uniqueResources = _.uniq(resources.sort());
           const filteredResources = _.isEmpty(relevantTypes)

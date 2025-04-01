@@ -1,27 +1,16 @@
-import React from "react";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import * as React from "react";
+import { findByRole, render, screen, waitFor } from "@testing-library/react";
 import ResourceEditor from "./ResourceEditor";
 import { QiCoreResourceContext } from "../../../../../../../util/QiCorePatientProvider";
-import mockSelectedResource from "./mockSelectedResource.json";
-import mockPatientState from "./mockPatientState.json";
+import mockSelectedResourceTree from "./mockSelectedResourceTree.json";
+import mockResourceState from "./mockResourceState.json";
 import userEvent from "@testing-library/user-event";
+import { useFormikContext } from "formik";
 
 jest.mock("../../../../../../../api/useFhirDefinitionsService", () => {
-  return jest.fn(() => ({
-    config: {
-      serviceConfig: "fakeServiceConfig",
-      accessToken: "fakeAccessToken",
-      baseUrl: "fakeurl",
-    },
-  }));
-});
-jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
-  const actualModule = jest.requireActual(
-    "../../../../../../../api/fhirDefinitionServiceUtilities"
-  );
-  return {
-    ...actualModule,
-  };
+  return () => ({
+    getResourceTree: jest.fn().mockResolvedValue(mockSelectedResourceTree),
+  });
 });
 
 const formikValues = {
@@ -56,71 +45,74 @@ const mockFormikObj = {
 };
 
 jest.mock("formik", () => ({
-  useFormikContext: () => {
-    return mockFormikObj;
-  },
-  getIn: (context: Record<string, unknown>, fieldName: string) => {
-    return context[fieldName];
-  },
+  useFormikContext: jest.fn(),
+  getIn: (context: Record<string, unknown>, fieldName: string) =>
+    context[fieldName],
 }));
 
-const { getByText, getByRole } = screen;
 describe("ResourceEditor", () => {
   const mockOnCancel = jest.fn();
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
   it("renders the ResourceEditor correctly, can hit dirty check", async () => {
+    // Mocked formik obj return dirty true
+    (useFormikContext as jest.Mock).mockReturnValue(mockFormikObj);
     const setInitialFormikValuesStu6 = jest.fn();
     const setValidationSchema = jest.fn();
     render(
       <QiCoreResourceContext.Provider
-        value={{ state: mockPatientState, dispatch: jest.fn() }}
+        value={{ state: mockResourceState, dispatch: jest.fn() }}
       >
         <ResourceEditor
           selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
           setValidationSchema={setValidationSchema}
           setInitialFormikValuesStu6={setInitialFormikValuesStu6}
-          selectedResource={mockSelectedResource}
           onCancel={mockOnCancel}
           canEdit={true}
         />
       </QiCoreResourceContext.Provider>
     );
 
-    await waitFor(() => {
-      expect(screen.getByText("ClaimResponse.id")).toBeInTheDocument();
-      const stringInput = screen.getByTestId(
-        "string-field-input-ClaimResponse.id"
-      );
-      expect(stringInput).toBeInTheDocument();
-      expect(setValidationSchema).toHaveBeenCalled();
-      expect(setInitialFormikValuesStu6).toHaveBeenCalled();
-    });
-    await waitFor(() => {
-      expect(
-        screen.getByTestId("string-field-input-ClaimResponse.id").value
-      ).toBe("6fb9d817-76c5-4b68-ba06-92c7429e6b5c");
-    });
-    const dispositionButton = screen.getByRole("tab", { name: "disposition" });
+    const resourceIdInputField = (await screen.findByTestId(
+      "string-field-input-ClaimResponse.id"
+    )) as HTMLInputElement;
+    expect(resourceIdInputField).toBeInTheDocument();
+    expect(screen.getByText("ClaimResponse.id")).toBeInTheDocument();
+    expect(setValidationSchema).toHaveBeenCalled();
+    expect(setInitialFormikValuesStu6).toHaveBeenCalled();
+    expect(resourceIdInputField.value).toBe(
+      "6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
+    );
 
+    const dispositionButton = await screen.findByRole("tab", {
+      name: "disposition",
+    });
     expect(dispositionButton).toBeInTheDocument();
     userEvent.click(dispositionButton);
-    const discardDialog = await getByRole("dialog", {
+
+    // mock formik obj returns dirty = true
+    const discardDialog = await screen.findByRole("dialog", {
       name: "Discard Changes?",
     });
     expect(discardDialog).toBeInTheDocument();
+
     // close
     const closeButton = screen.getByRole("button", { name: /close/i });
     userEvent.click(closeButton);
     await waitFor(() => {
-      expect(closeButton).not.toBeInTheDocument();
+      expect(discardDialog).not.toBeInTheDocument();
     });
     userEvent.click(dispositionButton);
     await waitFor(() => {
-      expect(getByText("Discard Changes?")).toBeInTheDocument();
+      expect(screen.getByText("Discard Changes?")).toBeInTheDocument();
     });
     // on continue
-    userEvent.click(getByText("Yes, Discard All Changes"));
+    userEvent.click(screen.getByText("Yes, Discard All Changes"));
     await waitFor(() => {
-      expect(closeButton).not.toBeInTheDocument();
+      expect(discardDialog).not.toBeInTheDocument();
       expect(resetForm).toHaveBeenCalled();
     });
   });
@@ -130,13 +122,12 @@ describe("ResourceEditor", () => {
     const setValidationSchema = jest.fn();
     render(
       <QiCoreResourceContext.Provider
-        value={{ state: mockPatientState, dispatch: jest.fn() }}
+        value={{ state: mockResourceState, dispatch: jest.fn() }}
       >
         <ResourceEditor
           selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
           setValidationSchema={setValidationSchema}
           setInitialFormikValuesStu6={setInitialFormikValuesStu6}
-          selectedResource={mockSelectedResource}
           onCancel={mockOnCancel}
           canEdit={true}
         />
@@ -153,9 +144,12 @@ describe("ResourceEditor", () => {
       expect(setInitialFormikValuesStu6).toHaveBeenCalled();
     });
     await waitFor(() => {
-      expect(
-        screen.getByTestId("string-field-input-ClaimResponse.id").value
-      ).toBe("6fb9d817-76c5-4b68-ba06-92c7429e6b5c");
+      const resourceIdInputField = screen.getByTestId(
+        "string-field-input-ClaimResponse.id"
+      ) as HTMLInputElement;
+      expect(resourceIdInputField.value).toBe(
+        "6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
+      );
     });
     const dispositionButton = screen.getByRole("tab", { name: "disposition" });
 
@@ -179,13 +173,12 @@ describe("ResourceEditor", () => {
 
     render(
       <QiCoreResourceContext.Provider
-        value={{ state: mockPatientState, dispatch: mockDispatch }}
+        value={{ state: mockResourceState, dispatch: mockDispatch }}
       >
         <ResourceEditor
           selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
           setValidationSchema={mockSetValidationSchema}
           setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
-          selectedResource={mockSelectedResource}
           onCancel={mockOnCancel}
           canEdit={true}
         />
@@ -239,19 +232,18 @@ describe("ResourceEditor", () => {
     });
   });
 
-  it("handles null selectedResource", () => {
+  it("handles invalid selectedResource - this will never happen", () => {
     const setInitialFormikValuesStu6 = jest.fn();
     const setValidationSchema = jest.fn();
 
     render(
       <QiCoreResourceContext.Provider
-        value={{ state: mockPatientState, dispatch: jest.fn() }}
+        value={{ state: mockResourceState, dispatch: jest.fn() }}
       >
         <ResourceEditor
-          selectedResourceID="test-id"
+          selectedResourceID="invalid-resource-id"
           setValidationSchema={setValidationSchema}
           setInitialFormikValuesStu6={setInitialFormikValuesStu6}
-          selectedResource={null}
           onCancel={mockOnCancel}
           canEdit={true}
         />
@@ -278,13 +270,12 @@ describe("ResourceEditor", () => {
 
     render(
       <QiCoreResourceContext.Provider
-        value={{ state: mockPatientState, dispatch: jest.fn() }}
+        value={{ state: mockResourceState, dispatch: jest.fn() }}
       >
         <ResourceEditor
           selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
           setValidationSchema={setValidationSchema}
           setInitialFormikValuesStu6={setInitialFormikValuesStu6}
-          selectedResource={mockSelectedResource}
           onCancel={mockOnCancel}
           canEdit={true}
         />
@@ -308,13 +299,12 @@ describe("ResourceEditor", () => {
 
     render(
       <QiCoreResourceContext.Provider
-        value={{ state: mockPatientState, dispatch: jest.fn() }}
+        value={{ state: mockResourceState, dispatch: jest.fn() }}
       >
         <ResourceEditor
           selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
           setValidationSchema={setValidationSchema}
           setInitialFormikValuesStu6={setInitialFormikValuesStu6}
-          selectedResource={mockSelectedResource}
           onCancel={mockOnCancel}
           canEdit={true}
         />
@@ -326,7 +316,7 @@ describe("ResourceEditor", () => {
     userEvent.click(closeButton);
 
     // Verify onCancel was called with the selectedResource
-    expect(mockOnCancel).toHaveBeenCalledWith(mockSelectedResource);
+    expect(mockOnCancel).toHaveBeenCalledWith(mockSelectedResourceTree);
   });
 
   it("changes active tab when form is not dirty", async () => {
@@ -345,13 +335,12 @@ describe("ResourceEditor", () => {
 
     render(
       <QiCoreResourceContext.Provider
-        value={{ state: mockPatientState, dispatch: jest.fn() }}
+        value={{ state: mockResourceState, dispatch: jest.fn() }}
       >
         <ResourceEditor
           selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
           setValidationSchema={setValidationSchema}
           setInitialFormikValuesStu6={setInitialFormikValuesStu6}
-          selectedResource={mockSelectedResource}
           onCancel={mockOnCancel}
           canEdit={true}
         />

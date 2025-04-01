@@ -1,6 +1,6 @@
 import * as React from "react";
 import Builder from "./Builder";
-import { findByRole, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { Measure, TestCase } from "@madie/madie-models";
 import { QiCoreResourceProvider } from "../../../../../../util/QiCorePatientProvider";
 import { ExecutionContextProvider } from "../../../../../routes/qiCore/ExecutionContext";
@@ -108,9 +108,7 @@ const mockMeasure = {
 } as unknown as Measure;
 
 jest.mock("formik", () => ({
-  useFormikContext: jest.fn(), // Ensure this is always mocked
-  getIn: (context: Record<string, unknown>, fieldName: string) =>
-    context[fieldName],
+  useFormikContext: jest.fn(),
 }));
 
 const renderBuilderComponent = () => {

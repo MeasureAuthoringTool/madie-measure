@@ -44,7 +44,7 @@ const ResourceEditor = ({
   setInitialFormikValuesStu6,
   setValidationSchema,
 }: ResourceEditorProps) => {
-  const { dirty, resetForm, setValues, values } = useFormikContext();
+  const { dirty, resetForm, values } = useFormikContext();
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   const [activeTab, setActiveTab] = useState(0);
   const [pendingTab, setPendingTab] = useState(0);

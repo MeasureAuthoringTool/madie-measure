@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import ElementEditor from "./ElementEditor";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import { QiCoreResourceContext } from "../../../../../../../util/QiCorePatientProvider";
-import mockPatientState from "../resource/mockPatientState.json";
+import mockPatientState from "../resource/mockResourceState.json";
 jest.mock("../../../../../../../api/useFhirDefinitionsService");
 jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
   const actualModule = jest.requireActual(
