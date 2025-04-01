@@ -65,7 +65,7 @@ const keyboardArrowStyles = {
 };
 
 //Convert date string to format of mm/dd/yyyy with no leading zeroes in month
-const convertDate = (date: string) => {
+export const convertDate = (date: string) => {
   if (!date) {
     return "";
   }
