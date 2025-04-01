@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import * as React from "react";
-import ShareDialog, { SharedUser } from "./ShareDialog";
+import ShareDialog, { SharedUser, convertDate } from "./ShareDialog";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../api/useMeasureServiceApi";
@@ -475,7 +475,7 @@ describe("Create Share Dialog component", () => {
     ).toHaveTextContent("userId3");
     expect(
       screen.getByTestId("TestMeasureId1 userId3_dateShared")
-    ).toHaveTextContent(today.toLocaleDateString());
+    ).toHaveTextContent(convertDate(today.toLocaleDateString()));
 
     //Row 2
     expect(screen.getByTestId("TestMeasureId2_measureName")).toHaveTextContent(
@@ -487,21 +487,21 @@ describe("Create Share Dialog component", () => {
     ).toHaveTextContent("userId3");
     expect(
       screen.getByTestId("TestMeasureId2 userId3_dateShared")
-    ).toHaveTextContent(today.toLocaleDateString());
+    ).toHaveTextContent(convertDate(today.toLocaleDateString()));
     //Subrow 2 of Row 2
     expect(
       screen.getByTestId("TestMeasureId2 userId1_userId")
     ).toHaveTextContent("userId1");
     expect(
       screen.getByTestId("TestMeasureId2 userId1_dateShared")
-    ).toHaveTextContent(yesterday.toLocaleDateString());
+    ).toHaveTextContent(convertDate(yesterday.toLocaleDateString()));
     //Subrow 3 of Row 2
     expect(
       screen.getByTestId("TestMeasureId2 userId2_userId")
     ).toHaveTextContent("userId2");
     expect(
       screen.getByTestId("TestMeasureId2 userId2_dateShared")
-    ).toHaveTextContent(yesterday.toLocaleDateString());
+    ).toHaveTextContent(convertDate(yesterday.toLocaleDateString()));
   });
 
   it("should add a user row to the grid for each measure that does not already have that user (after stripping all whitespace in HARP ID field)", async () => {
@@ -560,7 +560,7 @@ describe("Create Share Dialog component", () => {
     ).toHaveTextContent("userId3");
     expect(
       screen.getByTestId("TestMeasureId1 userId3_dateShared")
-    ).toHaveTextContent(today.toLocaleDateString());
+    ).toHaveTextContent(convertDate(today.toLocaleDateString()));
 
     //Row 2
     expect(screen.getByTestId("TestMeasureId2_measureName")).toHaveTextContent(
@@ -572,21 +572,21 @@ describe("Create Share Dialog component", () => {
     ).toHaveTextContent("userId3");
     expect(
       screen.getByTestId("TestMeasureId2 userId3_dateShared")
-    ).toHaveTextContent(today.toLocaleDateString());
+    ).toHaveTextContent(convertDate(today.toLocaleDateString()));
     //Subrow 2 of Row 2
     expect(
       screen.getByTestId("TestMeasureId2 userId1_userId")
     ).toHaveTextContent("userId1");
     expect(
       screen.getByTestId("TestMeasureId2 userId1_dateShared")
-    ).toHaveTextContent(yesterday.toLocaleDateString());
+    ).toHaveTextContent(convertDate(yesterday.toLocaleDateString()));
     //Subrow 3 of Row 2
     expect(
       screen.getByTestId("TestMeasureId2 userId2_userId")
     ).toHaveTextContent("userId2");
     expect(
       screen.getByTestId("TestMeasureId2 userId2_dateShared")
-    ).toHaveTextContent(yesterday.toLocaleDateString());
+    ).toHaveTextContent(convertDate(yesterday.toLocaleDateString()));
   });
 
   it("should add a user row to the grid for each measure that does not already have that user and save successfully after clicking Save button.", async () => {

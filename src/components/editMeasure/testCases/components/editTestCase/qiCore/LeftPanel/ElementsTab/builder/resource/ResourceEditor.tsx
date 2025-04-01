@@ -30,7 +30,7 @@ import AddElementDialog from "./AddElementDialog";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 
 interface ResourceEditorProps {
-  onCancel: (resource: any) => void;
+  onCancel: () => void;
   canEdit: boolean;
   setInitialFormikValuesStu6: Dispatch<SetStateAction<Object>>;
   setValidationSchema: Dispatch<SetStateAction<Object>>;
@@ -185,7 +185,7 @@ const ResourceEditor = ({
             </Typography>
             <IconButton
               data-testid="close-resource-editor-button"
-              onClick={() => onCancel(selectedResource)}
+              onClick={onCancel}
             >
               <CloseIcon sx={{ color: "#D92F2F" }} />
             </IconButton>
@@ -267,7 +267,6 @@ const ResourceEditor = ({
                   payload: nextEntry,
                 });
               }}
-              // Where should the cursor go after deleting ?
               deleteElement={(path) => {
                 const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
                 const strippedPath = path.includes(".")
@@ -276,7 +275,7 @@ const ResourceEditor = ({
                 if (_.has(nextEntry.resource, strippedPath)) {
                   _.unset(nextEntry.resource, strippedPath);
                 } else {
-                  console.log(`Path not found: ${path}`);
+                  console.error(`Path not found: ${path}`);
                 }
                 dispatch({
                   type: ResourceActionType.MODIFY_BUNDLE_ENTRY,

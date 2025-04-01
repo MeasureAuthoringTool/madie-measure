@@ -6,7 +6,7 @@ import ElementSection from "../../../../../../common/ElementSection";
 import { transformArrays } from "./transformArrays";
 import { stripResourcePath } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import { useFormikContext } from "formik";
-import ElementEditorActionCenter from "./ElementEditorActionCenter";
+import ElementEditorActionCenter from "./elementEditorActionCenter/ElementEditorActionCenter";
 
 const Element = ({ element, label, resource, handleChange, canEdit }) => {
   let elementValue = _.get(resource, label);

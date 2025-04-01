@@ -16,12 +16,13 @@ interface Action {
   icon: JSX.Element;
   onClick?: () => void;
 }
+
 const ElementEditorActionCenter = (props: PropTypes) => {
   const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
     useState<boolean>(false);
   const { handleDelete, rootDefinition } = props;
   const [open, setOpen] = useState(false);
-  const [numElements, setNumElements] = useState<number>(props.numElements);
+
   const [actions, setActions] = useState<Array<Action>>([]);
   const addAction = {
     name: "Add",
@@ -44,13 +45,13 @@ const ElementEditorActionCenter = (props: PropTypes) => {
   // 1..* 	                X* 	    X 	    X
   useEffect(() => {
     const localActions: Array<Action> = [];
-    const min: string = rootDefinition.min;
-    const max: string = rootDefinition.max;
+    const min: string = props.rootDefinition.min;
+    const max: string = props.rootDefinition.max;
 
     if (
       (min == "0" && max == "1") ||
       (min == "0" && max == "*") ||
-      (min == "1" && max == "*" && numElements > 1)
+      (min == "1" && max == "*" && props.numElements > 1)
     ) {
       localActions.push(deleteAction);
     }
@@ -59,7 +60,7 @@ const ElementEditorActionCenter = (props: PropTypes) => {
       localActions.push(addAction);
     }
     setActions(localActions);
-  }, [rootDefinition]);
+  }, [props.numElements, props.rootDefinition]);
 
   if (actions.length > 0) {
     return (
