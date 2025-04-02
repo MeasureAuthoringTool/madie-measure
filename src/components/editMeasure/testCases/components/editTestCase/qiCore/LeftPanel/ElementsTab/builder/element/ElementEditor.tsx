@@ -123,13 +123,15 @@ const ElementEditor = ({
       const elemPath = stripResourcePath(resourcePath, child.path);
 
       const value = _.get(resource, elemPath);
+      const label = child.path.split(".").pop();
+
       const builtNode = {
         id: child?.id,
-        label: child.path.split(".").pop(),
+        label,
         value,
         type,
         required,
-        validation: getValidation(type, required),
+        validation: getValidation(type, required, label),
       };
       return nodeList.concat(builtNode);
     }
