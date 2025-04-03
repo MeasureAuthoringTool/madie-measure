@@ -129,27 +129,6 @@ describe("TypeEditor Component", () => {
     expect(inputField.value).toBe("test");
   });
 
-  test("Should render String component", () => {
-    const handleChange = jest.fn();
-    render(
-      <FormikProvider value={mockFormik}>
-        <TypeEditor
-          type={`http://hl7.org/fhirpath/System.String`}
-          required={false}
-          onChange={handleChange}
-          structureDefinition={null}
-          label={"ClaimResponse.id"}
-          value={claimResponseValues.ClaimResponse.id}
-        />
-      </FormikProvider>
-    );
-    const inputField = screen.getByTestId(
-      "string-field-input-ClaimResponse.id"
-    ) as HTMLInputElement;
-    expect(inputField).toBeInTheDocument();
-    expect(inputField.value).toBe("test");
-  });
-
   test("String field should display errors and helper text", () => {
     const touched = {
       ClaimResponse: {
