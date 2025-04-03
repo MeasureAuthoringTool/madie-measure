@@ -313,7 +313,6 @@ const CreateNewTestCaseDialog = ({
               helperText={formikErrorHandler("description")}
               maxLength={250}
             />
-            
           </Box>
 
           <InputLabel

@@ -64,7 +64,9 @@ const TestCaseSeries = ({
                 },
               }}
               {...params}
-              onChange={(e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+              onChange={(
+                e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+              ) => {
                 params.inputProps.onChange(e as ChangeEvent<HTMLInputElement>);
                 onChange(e.target.value);
                 setInputLength(e.target.value.length);
