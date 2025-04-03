@@ -289,6 +289,7 @@ const CreateNewTestCaseDialog = ({
               size="small"
               error={formik.touched.title && Boolean(formik.errors.title)}
               {...formik.getFieldProps("title")}
+              maxLength={250}
             />
           </Box>
 
@@ -310,7 +311,9 @@ const CreateNewTestCaseDialog = ({
                 formik.touched.description && Boolean(formik.errors.description)
               }
               helperText={formikErrorHandler("description")}
+              maxLength={250}
             />
+            
           </Box>
 
           <InputLabel
