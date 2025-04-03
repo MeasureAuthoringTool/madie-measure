@@ -183,6 +183,31 @@ describe("Measure Definitions Component", () => {
     });
   });
 
+  it("Test change page limit works", async () => {
+    measureStore.state.mockImplementation(() => measureWithElevenItems);
+    measureStore.initialState.mockImplementation(() => measureWithElevenItems);
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureDefinitions setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    await checkRows(10);
+
+    // change limit
+    const [combobox] = await screen.findAllByText("10");
+    userEvent.click(combobox);
+    const pageLimit25 = screen.getByRole("option", {
+      name: /25/i,
+    });
+    userEvent.click(pageLimit25);
+    await waitFor(() => {
+      expect(mockedNavigate).toHaveBeenCalled();
+    });
+    await checkRows(11);
+  });
+
   it("test search", async () => {
     measureStore.state.mockImplementation(() => measureWithElevenItems);
     measureStore.initialState.mockImplementation(() => measureWithElevenItems);
