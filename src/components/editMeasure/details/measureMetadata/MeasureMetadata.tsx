@@ -1,9 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useFormik } from "formik";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 import { Typography } from "@mui/material";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import getInitialValues, { setMeasureMetadata } from "./MeasureMetadataHelper";
+import RichTextEditor from "../../RichTextEditor";
+import Gapcursor from '@tiptap/extension-gapcursor'
+import Table from '@tiptap/extension-table'
+import TableCell from '@tiptap/extension-table-cell'
+import TableHeader from '@tiptap/extension-table-header'
+import TableRow from '@tiptap/extension-table-row'
+import { EditorContent, EditorProvider, useEditor } from '@tiptap/react'
 import {
   measureStore,
   routeHandlerStore,
@@ -16,6 +23,7 @@ import {
   TextArea,
 } from "@madie/madie-design-system/dist/react";
 import _ from "lodash";
+import StarterKit from "@tiptap/starter-kit";
 
 export interface MeasureMetadataProps {
   measureMetadataId?: String;
@@ -24,6 +32,48 @@ export interface MeasureMetadataProps {
   setErrorMessage: Function;
   required?: boolean;
 }
+
+const testData =  `<h3 style="text-align:center">
+Test H3
+</h3>
+<p style="text-align:center">
+Sample text for a centered paragraph.<br>
+Another example sentence with a <mark>highlighted section</mark>.<br>
+Additional text to demonstrate line breaks.<br>
+Placeholder content for formatting purposes.
+</p>
+<p style="text-align:center">
+A second paragraph with centered text.<br>
+Another example of a sentence breaking into multiple lines.<br>
+Text styling and formatting for testing.<br>
+More placeholder text for layout purposes.
+</p>
+<p style="text-align:center">
+Short sample text for emphasis.<br>
+Additional placeholder content.<br>
+Example text to visualize structure.<br>
+A final line to complete the section.
+</p>
+
+<script>alert('XSS!')</script>
+<img src="x" onerror="alert('XSS!')">
+
+
+<table>
+   <tbody>
+     <tr>
+       <th>Name</th>
+       <th colspan="3">Description</th>
+     </tr>
+     <tr>
+       <td>Cyndi Lauper</td>
+       <td>Singer</td>
+       <td>Songwriter</td>
+       <td>Actress</td>
+     </tr>
+   </tbody>
+ </table>
+`
 
 export default function MeasureMetadata(props: MeasureMetadataProps) {
   const { setErrorMessage, required } = props;
@@ -65,17 +115,13 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
     enableReinitialize: true,
     initialValues: { genericField: getInitialValues(measure, typeLower) },
     onSubmit: (values) => {
+      console.log('submitting', values.genericField.trim())
+      console.log('values are', values)
       submitForm(values.genericField.trim());
     },
   });
   useFormikResetOnEvent(formik);
 
-  const goBackToNav = (e) => {
-    if (e.shiftKey && e.keyCode == 9) {
-      e.preventDefault();
-      document.getElementById("sideNavMeasure" + measureMetadataId).focus();
-    }
-  };
 
   const { updateRouteHandlerState } = routeHandlerStore;
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
@@ -114,12 +160,22 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
       });
   };
 
+
+  const addTestData = () => {
+    formik.setFieldValue("genericField", testData);
+  }
+  const handleFormikManualChange = (val) => {
+    formik.setFieldValue("genericField", val);
+    formik.setFieldTouched("genericField");
+  }
+
   return (
     <form
       id="measure-details-form"
       onSubmit={formik.handleSubmit}
       data-testid={`measure${measureMetadataType}`}
     >
+      <button type="button" onClick={addTestData}>Add data</button>
       <div className="content">
         <div className="subTitle">
           <h2>{header}</h2>
@@ -140,19 +196,9 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
             <div style={{ height: 15, marginBottom: 6 }} />
           )}
         </div>
-        <TextArea
-          label={measureMetadataType}
-          required={required}
-          readOnly={!canEdit}
-          name={`measure-${typeLower}`}
-          id={`measure-${typeLower}`}
-          autoComplete={`measure-${typeLower}`}
-          onChange={formik.handleChange}
-          value={formik.values.genericField}
-          placeholder={`${measureMetadataType}`}
-          data-testid={`measure${measureMetadataType}Input`}
-          onKeyDown={goBackToNav}
-          {...formik.getFieldProps("genericField")}
+        <RichTextEditor 
+          onChange={handleFormikManualChange}
+          content={formik.initialValues.genericField}
         />
       </div>
       {canEdit && (
