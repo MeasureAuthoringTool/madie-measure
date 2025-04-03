@@ -234,6 +234,30 @@ describe("Measure Definitions Component", () => {
     await checkRows(10);
   });
 
+  it("test search edge case with no definitions", async () => {
+    measureStore.state.mockImplementation(() => []);
+    measureStore.initialState.mockImplementation(() => []);
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureDefinitions setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    const searchInput = getByRole("textbox", { name: "Search" });
+    expect(searchInput).toBeInTheDocument();
+    const searchInputField = getByTestId("measure-definition-search-input");
+    userEvent.type(searchInputField, "www");
+    userEvent.keyboard("{Enter}");
+
+    expect(
+      screen.queryByText(
+        "There are currently no definitions. Click the (Add Term) button above to add one."
+      )
+    ).toBeInTheDocument();
+  });
+
   it("does not do search when there is no search value", async () => {
     measureStore.state.mockImplementation(() => measureWithElevenItems);
     measureStore.initialState.mockImplementation(() => measureWithElevenItems);
