@@ -51,6 +51,10 @@ const measureWithTenItems = {
   ...measure,
   measureMEtaData: { references: referenceHelper(10) },
 };
+const measureWithElevenItems = {
+  ...measure,
+  measureMetaData: { references: referenceHelper(11) },
+};
 
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
@@ -87,12 +91,14 @@ const serviceConfig = {
   terminologyService: { baseUrl: "" },
 } as unknown as ServiceConfig;
 
+const mockedNavigate = jest.fn();
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
-  useNavigate: jest.fn(),
+  // useNavigate: jest.fn(),
+  useNavigate: () => mockedNavigate,
 }));
 
-const { getByTestId, findByTestId, getByLabelText } = screen;
+const { getByTestId, findByTestId, getByRole, findByLabelText } = screen;
 const expectInputValue = (
   element: HTMLTextAreaElement,
   value: string
@@ -154,6 +160,58 @@ describe("Measure References Component", () => {
     );
     const result = getByTestId("empty-references");
     expect(result).toBeInTheDocument();
+  });
+
+  it("test search", async () => {
+    measureStore.state.mockImplementation(() => measureWithNineItems);
+    measureStore.initialState.mockImplementation(() => measureWithNineItems);
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    await checkRows(9);
+
+    const searchInput = getByRole("textbox", { name: "Search" });
+    expect(searchInput).toBeInTheDocument();
+    const searchInputField = getByTestId("measure-reference-search-input");
+    userEvent.type(searchInputField, "type 1");
+    userEvent.keyboard("{Enter}");
+
+    await checkRows(1);
+
+    const clearSearch = getByTestId("ClearIcon");
+    userEvent.click(clearSearch);
+
+    await checkRows(9);
+  });
+
+  it("does not do search when there is no search value", async () => {
+    measureStore.state.mockImplementation(() => measureWithNineItems);
+    measureStore.initialState.mockImplementation(() => measureWithNineItems);
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    await checkRows(9);
+
+    const searchInput = getByRole("textbox", { name: "Search" });
+    expect(searchInput).toBeInTheDocument();
+    const searchInputField = getByTestId("measure-reference-search-input");
+    userEvent.type(searchInputField, "");
+    userEvent.keyboard("{Enter}");
+
+    await checkRows(9);
+
+    const clearSearch = getByTestId("ClearIcon");
+    userEvent.click(clearSearch);
+
+    await checkRows(9);
   });
 
   it("Should allow editing dialog with populated values on clicking Edit and changes are saved.", async () => {
@@ -277,6 +335,41 @@ describe("Measure References Component", () => {
     );
     expect(toastMessage).toHaveTextContent(
       "Measure reference deleted successfully"
+    );
+    expect(screen.queryByTestId("delete-dialog-body")).toBeNull();
+  });
+
+  it("should show error message when delete measure reference page fails", async () => {
+    measureStore.state.mockImplementation(() => measureWithNineItems);
+    measureStore.initialState.mockImplementation(() => measureWithNineItems);
+    serviceApiMock = {
+      updateMeasure: jest.fn().mockRejectedValueOnce({ data: {} }),
+    } as unknown as MeasureServiceApi;
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    await checkRows(9);
+
+    const deleteButton = getByTestId(`delete-measure-reference-id 1`);
+    expect(deleteButton).toBeInTheDocument();
+    fireEvent.click(deleteButton);
+
+    expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("delete-dialog-continue-button")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("delete-dialog-cancel-button")
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("delete-dialog-continue-button"));
+    const toastMessage = await screen.findByTestId("measure-references-error");
+    expect(toastMessage).toHaveTextContent(
+      `Error updating measure "measureName"`
     );
     expect(screen.queryByTestId("delete-dialog-body")).toBeNull();
   });
@@ -449,5 +542,66 @@ describe("Measure References Component", () => {
     await waitFor(() => {
       expect(toastCloseButton).not.toBeInTheDocument();
     });
+  });
+
+  it("Should show error message when measure references are not loaded", async () => {
+    measureStore.state.mockImplementationOnce(() => null);
+    measureStore.initialState.mockImplementationOnce(() => null);
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    const result = getByTestId("empty-references");
+    expect(result).toBeInTheDocument();
+  });
+
+  it("Test change page works", async () => {
+    measureStore.state.mockImplementation(() => measureWithElevenItems);
+    measureStore.initialState.mockImplementation(() => measureWithElevenItems);
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    await checkRows(10);
+
+    // change page
+    const pageButton = await findByLabelText("Go to page 2");
+    act(() => {
+      userEvent.click(pageButton);
+    });
+    await waitFor(() => {
+      expect(mockedNavigate).toHaveBeenCalled();
+    });
+  });
+
+  it("Test change page limit works", async () => {
+    measureStore.state.mockImplementation(() => measureWithElevenItems);
+    measureStore.initialState.mockImplementation(() => measureWithElevenItems);
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    await checkRows(10);
+
+    // change limit
+    const [combobox] = await screen.findAllByText("10");
+    userEvent.click(combobox);
+    const pageLimit25 = screen.getByRole("option", {
+      name: /25/i,
+    });
+    userEvent.click(pageLimit25);
+    await waitFor(() => {
+      expect(mockedNavigate).toHaveBeenCalled();
+    });
+    await checkRows(11);
   });
 });
