@@ -6,7 +6,7 @@ import ElementSection from "../../../../../../common/ElementSection";
 import { transformArrays } from "./transformArrays";
 import { stripResourcePath } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import { useFormikContext } from "formik";
-import ElementEditorActionCenter from "./ElementEditorActionCenter";
+import ElementEditorActionCenter from "./elementEditorActionCenter/ElementEditorActionCenter";
 
 const Element = ({ element, label, resource, handleChange, canEdit }) => {
   let elementValue = _.get(resource, label);
@@ -41,6 +41,7 @@ const ElementEditorChildren = ({
   fhirDefinitionsService,
   resourcePath,
   handleIndividualElementApplyButtonClick,
+  deleteElement,
 }) => {
   currentDepth = currentDepth + 1;
   const childrenToRender = [];
@@ -87,6 +88,7 @@ const ElementEditorChildren = ({
                   : 1
               }
               rootDefinition={rootDefinition}
+              handleDelete={deleteElement}
             />
           </div>
         </div>
@@ -114,7 +116,7 @@ const ElementEditorChildren = ({
             canEdit={canEdit}
           />
         ))}
-        {/* item.detail vs item.adjudication are 2 separate trees, we need to split them into separate children trees.  
+        {/* item.detail vs item.adjudication are 2 separate trees, we need to split them into separate children trees.
           how do we do that?
           We group them based on a normalizedPrefix.
         */}
@@ -133,6 +135,7 @@ const ElementEditorChildren = ({
               handleIndividualElementApplyButtonClick={
                 handleIndividualElementApplyButtonClick
               }
+              deleteElement
             />
           ))}
       </div>
@@ -175,6 +178,7 @@ const ElementEditorChildren = ({
                     handleIndividualElementApplyButtonClick={
                       handleIndividualElementApplyButtonClick
                     }
+                    deleteElement
                   />
                 )
               )}

@@ -10,7 +10,8 @@
     "sourceMap": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   },
   "files": ["src/madie-madie-measure.tsx"],
   "include": ["src/**/*"],
