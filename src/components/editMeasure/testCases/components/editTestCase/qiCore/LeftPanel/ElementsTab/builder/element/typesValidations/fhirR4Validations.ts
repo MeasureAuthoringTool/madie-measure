@@ -138,8 +138,17 @@ export const getDecimalValidator = (required) => {
 };
 
 export const getUriValidator = (required) => {
-  const uriRegex = /\S*/;
-  const baseValidator = Yup.string().matches(uriRegex, "Invalid Uri format");
+  const uriRegex: RegExp = /\S*/;
+  const urnRegex: RegExp = /urn:oid:[0-2](\.(0|[1-9][0-9]*))+/;
+  const baseValidator = Yup.string()
+    .test("urn-specific-test", "This is not a valid OID.", function (value) {
+      if (value && value.startsWith("urn")) {
+        return urnRegex.test(value);
+      } else {
+        return true;
+      }
+    })
+    .matches(uriRegex, "Invalid Uri format");
 
   if (required) {
     return baseValidator.required("This field is required");
