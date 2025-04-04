@@ -1,4 +1,10 @@
-import React, { useEffect, useState, Dispatch, SetStateAction } from "react";
+import React, {
+  useEffect,
+  useState,
+  Dispatch,
+  SetStateAction,
+  useRef,
+} from "react";
 import { Box, Divider, IconButton, Tab, Tabs } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
@@ -21,9 +27,10 @@ import {
 import { useFormikContext } from "formik";
 import { MadieDiscardDialog } from "@madie/madie-design-system/dist/react";
 import AddElementDialog from "./AddElementDialog";
+import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
+
 interface ResourceEditorProps {
-  selectedResource: any;
-  onCancel: (resource: any) => void;
+  onCancel: () => void;
   canEdit: boolean;
   setInitialFormikValuesStu6: Dispatch<SetStateAction<Object>>;
   setValidationSchema: Dispatch<SetStateAction<Object>>;
@@ -32,24 +39,23 @@ interface ResourceEditorProps {
 
 const ResourceEditor = ({
   selectedResourceID,
-  selectedResource,
   onCancel,
   canEdit,
   setInitialFormikValuesStu6,
   setValidationSchema,
 }: ResourceEditorProps) => {
-  const { dirty, resetForm, setValues, values } = useFormikContext();
+  const { dirty, resetForm, values } = useFormikContext();
+  const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   const [activeTab, setActiveTab] = useState(0);
   const [pendingTab, setPendingTab] = useState(0);
   const [allElements, setAllElements] = useState([]);
+  const [selectedResource, setSelectedResource] = useState(null);
   const [displayedElements, setDisplayedElements] = useState<
     ElementDefinition[]
   >([]);
   const [displayedElementsTree, setDisplayedElementsTree] = useState({});
-  const [editingResource, setEditingResource] = useState(
-    selectedResource?.bundleEntry?.resource
-  );
   const { dispatch, state } = useQiCoreResource();
+  const [editingResource, setEditingResource] = useState(); // just the resource object of selectedResource
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [addDialogOpen, setAddDialogOpen] = useState<boolean>(false);
   const onContinue = () => {
@@ -57,6 +63,63 @@ const ResourceEditor = ({
     setActiveTab(pendingTab);
     resetForm();
   };
+
+  // Using selectedResourceID fetches the selected resource from test case bundle json and
+  // also fetches resourceTree aka structure Definition, combines & sets it to SelectedResource state
+  useEffect(() => {
+    if (state && selectedResourceID) {
+      const selectedEntry = state.bundle?.entry?.find(
+        (entry) => entry.resource.id === selectedResourceID
+      );
+      const profile = _.isArray(selectedEntry?.resource?.meta?.profile)
+        ? selectedEntry?.resource?.meta?.profile[0]
+        : selectedEntry?.resource?.meta?.profile;
+      const resourceId = profile
+        ? profile.substring(profile.lastIndexOf("/") + 1)
+        : selectedEntry?.resource?.resourceType;
+      fhirDefinitionsService.current
+        .getResourceTree(resourceId)
+        .then((resourceTree) => {
+          setSelectedResource({ ...resourceTree, bundleEntry: selectedEntry });
+          setEditingResource(selectedEntry?.resource);
+        })
+        .catch((error) =>
+          console.error(
+            `An error occurred while loading definition for resourceId [${resourceId}]: `,
+            error
+          )
+        );
+    }
+  }, [selectedResourceID, state]);
+
+  // Utilizes the selectedResource object to construct All Attributes (topElements) which is used to generate options fpr the Add Attributes multi dropdown select
+  // and displayedElements that needs to be displayed to user on left nav bar ( these will include required attributes along with attributes that has value )
+  useEffect(() => {
+    if (selectedResource) {
+      // TODO: look at the data that exists on the resource and combine fields from that
+      const topElements = getTopLevelElements(selectedResource);
+      setAllElements(topElements);
+      const requiredElements = [...topElements.filter((e) => e.min > 0)];
+      const elementsWithValues = [
+        ...topElements.filter((e) => {
+          const elemPath = stripResourcePath(
+            selectedResource.definition.type,
+            e.path
+          );
+          const elemValue = _.get(
+            selectedResource.bundleEntry.resource,
+            elemPath
+          );
+          return !_.isNil(elemValue);
+        }),
+      ];
+      const uniqueElements = _.uniq(
+        _.concat(requiredElements, elementsWithValues)
+      );
+      setDisplayedElements(uniqueElements);
+      setDisplayedElementsTree(getDisplayedElementsTree(uniqueElements));
+    }
+  }, [selectedResource]);
 
   const saveElements = (newValue: ElementDefinition[] | null) => {
     setDisplayedElements(newValue);
@@ -89,39 +152,6 @@ const ResourceEditor = ({
       payload: nextEntry,
     });
   };
-  useEffect(() => {
-    if (selectedResource && selectedResourceID && state) {
-      // TODO: look at the data that exists on the resource and combine fields from that
-      const statefulSelectedResource = state.bundle.entry.find(
-        (entry) => entry.resource.id === selectedResourceID
-      )?.resource;
-      selectedResource.bundleEntry.resource = statefulSelectedResource;
-      const topElements = getTopLevelElements(selectedResource);
-      setAllElements(topElements);
-      const requiredElements = [...topElements.filter((e) => e.min > 0)];
-      const elementsWithValues = [
-        ...topElements.filter((e) => {
-          const elemPath = stripResourcePath(
-            selectedResource.definition.type,
-            e.path
-          );
-          const elemValue = _.get(
-            selectedResource.bundleEntry.resource,
-            elemPath
-          );
-          return !_.isNil(elemValue);
-        }),
-      ];
-      const uniqueElements = _.uniq(
-        _.concat(requiredElements, elementsWithValues)
-      );
-      setDisplayedElements(uniqueElements);
-      setDisplayedElementsTree(getDisplayedElementsTree(uniqueElements));
-    } else {
-      setAllElements([]);
-      setDisplayedElements([]);
-    }
-  }, [selectedResourceID, state]);
 
   const resourceBasePath = getBasePath(selectedResource);
   return (
@@ -155,7 +185,7 @@ const ResourceEditor = ({
             </Typography>
             <IconButton
               data-testid="close-resource-editor-button"
-              onClick={() => onCancel(selectedResource)}
+              onClick={onCancel}
             >
               <CloseIcon sx={{ color: "#D92F2F" }} />
             </IconButton>
@@ -232,6 +262,21 @@ const ResourceEditor = ({
                 const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
                 _.set(nextEntry.resource, path, value);
                 setEditingResource(nextEntry.resource);
+                dispatch({
+                  type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
+                  payload: nextEntry,
+                });
+              }}
+              deleteElement={(path) => {
+                const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
+                const strippedPath = path.includes(".")
+                  ? path.substring(path.indexOf(".") + 1)
+                  : path;
+                if (_.has(nextEntry.resource, strippedPath)) {
+                  _.unset(nextEntry.resource, strippedPath);
+                } else {
+                  console.error(`Path not found: ${path}`);
+                }
                 dispatch({
                   type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
                   payload: nextEntry,
