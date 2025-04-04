@@ -70,8 +70,9 @@ import {
   MadieSpinner,
   MadieDiscardDialog,
   Toast,
+  TextArea,
 } from "@madie/madie-design-system/dist/react";
-import TextArea from "../../createTestCase/TextArea";
+// import TextArea from "../../createTestCase/TextArea";
 import FileUploader from "../../fileUploader/FileUploader";
 import { ScanValidationDto } from "../../../api/models/ScanValidationDto";
 import { Bundle } from "fhir/r4";
@@ -1186,12 +1187,13 @@ const EditTestCase = (props: EditTestCaseProps) => {
                           formik.touched.title && Boolean(formik.errors.title)
                         }
                         {...formik.getFieldProps("title")}
+                        maxLength={250}
                       />
                       <div tw="mt-4">
                         <TextArea
                           placeholder="Test Case Description"
                           id="test-case-description"
-                          data-testid="edit-test-case-description"
+                          data-testid="test-case-description"
                           disabled={!canEdit}
                           {...formik.getFieldProps("description")}
                           label="Description"
@@ -1207,6 +1209,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                             Boolean(formik.errors.description)
                           }
                           helperText={formikErrorHandler("description")}
+                          maxLength={250}
                         />
                       </div>
 
