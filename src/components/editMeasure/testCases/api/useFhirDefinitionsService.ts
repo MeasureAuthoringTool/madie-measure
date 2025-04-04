@@ -43,8 +43,8 @@ export class FhirDefinitionsServiceApi {
         `An error occurred while loading definition for resourceId [${resourceId}]: `,
         error
       );
+      throw new Error(error);
     }
-    return null;
   }
 
   async getValueSetDefinition(url: string): Promise<ValueSet> {
