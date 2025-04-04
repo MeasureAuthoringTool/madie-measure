@@ -72,7 +72,6 @@ import {
   Toast,
   TextArea,
 } from "@madie/madie-design-system/dist/react";
-// import TextArea from "../../createTestCase/TextArea";
 import FileUploader from "../../fileUploader/FileUploader";
 import { ScanValidationDto } from "../../../api/models/ScanValidationDto";
 import { Bundle } from "fhir/r4";
