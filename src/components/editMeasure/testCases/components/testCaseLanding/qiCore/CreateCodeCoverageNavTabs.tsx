@@ -156,6 +156,15 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
         {((featureFlags.TestCaseListActionCenter && canEdit) ||
           !featureFlags.TestCaseListActionCenter) && (
           <>
+            {featureFlags.OverlappingValueSets && (
+              <LoadingActionButton
+                hasErrors={hasErrors}
+                isExecutionContextReady={executionContextReady}
+                onClick={() => {}} // TODO: MAT-8381
+                dataTestId="report-button"
+                label="Report"
+              />
+            )}
             <Button
               variant="outline"
               onClick={onImportTestCases}
