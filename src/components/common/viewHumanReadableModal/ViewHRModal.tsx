@@ -5,7 +5,6 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 import { DialogContent, Typography, Backdrop } from "@mui/material";
-import { measureStore } from "@madie/madie-util";
 
 interface ModalProps {
   open;
@@ -15,42 +14,40 @@ interface ModalProps {
 }
 
 export default function ViewHRModal(props: ModalProps) {
-  const { open, onClose, exportMeasure } = props;
+  const { open, onClose, exportMeasure, measureId } = props;
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [loading, setLoading] = useState(true);
   const [hr, setHr] = useState<string>();
   const [error, setError] = useState<string>();
-  const [measure, setMeasure] = useState<any>(measureStore.state);
-  useEffect(() => {
-    const subscription = measureStore.subscribe(setMeasure);
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
 
-  const getHumanReadable = useCallback(async (measureId) => {
-    setLoading(true);
-    if (!measureId) {
-      setLoading(false);
-      return null;
-    } else {
-      try {
-        setHr(await measureServiceApi.fetchHumanReadable(measureId));
-        setLoading(false);
-        setError("");
-      } catch (e) {
-        setHr("");
-        setLoading(false);
-        setError(
-          "The human readable file is not available for this measure.  Contact Help Desk for additional information."
-        );
+  const getHumanReadable = useCallback(
+    async (measureId, open) => {
+      if (open) {
+        setLoading(true);
+        if (!measureId) {
+          setLoading(false);
+          return null;
+        } else {
+          try {
+            setHr(await measureServiceApi.fetchHumanReadable(measureId));
+            setLoading(false);
+            setError("");
+          } catch (e) {
+            setHr("");
+            setLoading(false);
+            setError(
+              "The human readable file is not available for this measure.  Contact Help Desk for additional information."
+            );
+          }
+        }
       }
-    }
-  }, []);
+    },
+    [measureId, open]
+  );
 
   useEffect(() => {
-    getHumanReadable(props.measureId);
-  }, [props.measureId, measure]);
+    getHumanReadable(measureId, open);
+  }, [measureId, open]);
 
   return (
     <MadieDialog
