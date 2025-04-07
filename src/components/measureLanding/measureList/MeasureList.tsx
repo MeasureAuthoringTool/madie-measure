@@ -702,36 +702,13 @@ export default function MeasureList(props: {
   // Ref required or value will be lost on all state changes.
   const abortController = useRef(null);
 
-  const downloadZipFile = (
-    exportData,
-    ecqmTitle,
-    model,
-    version,
-    warn = false
-  ) => {
-    const url = window.URL.createObjectURL(exportData);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute(
-      "download",
-      `${_.trim(ecqmTitle)}-v${version}-${getModelFamily(model)}.zip`
-    );
-    document.body.appendChild(link);
-    link.click();
-    setToastOpen(true);
-    setToastType("success");
-    setToastMessage("Measure exported successfully");
-    setDownloadState(warn ? "warning" : "success");
-    document.body.removeChild(link);
-  };
-
   const exportMeasure = async (elmErrorSeverity: string) => {
     setViewHumanReadableModal({
       open: false,
       measureId: "",
     });
     try {
-      const measure = await measureServiceApi.fetchMeasure(
+      const measure: Measure = await measureServiceApi.fetchMeasure(
         targetMeasure.current?.id
       );
       await downloadMeasureExport(

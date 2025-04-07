@@ -6,34 +6,26 @@ import {
 } from "./exportUtil";
 import { Model } from "@madie/madie-models";
 
-describe("exportUtil", () => {
-  let setToastOpen,
-    setToastType,
-    setToastMessage,
-    setDownloadState,
-    setFailureMessage,
-    abortController,
-    measureServiceApi,
-    targetMeasure,
-    elmErrorSeverity;
+const setToastOpen = jest.fn();
+const setToastType = jest.fn();
+const setToastMessage = jest.fn();
+const setDownloadState = jest.fn();
+const setFailureMessage = jest.fn();
+const abortController = { current: { signal: {} } };
+const mockMeasureServiceApi = {
+  getMeasureExport: jest.fn<Promise<{ status: number; data: Blob }>, []>(),
+};
 
+const mockMeasure = {
+  id: "1",
+  ecqmTitle: "Test Measure",
+  model: Model.QICORE,
+  version: "1.0.0",
+};
+const elmErrorSeverity = "Error";
+
+describe("exportUtil", () => {
   beforeEach(() => {
-    setToastOpen = jest.fn();
-    setToastType = jest.fn();
-    setToastMessage = jest.fn();
-    setDownloadState = jest.fn();
-    setFailureMessage = jest.fn();
-    abortController = { current: { signal: {} } };
-    measureServiceApi = { getMeasureExport: jest.fn() };
-    targetMeasure = {
-      current: {
-        id: "1",
-        ecqmTitle: "Test Measure",
-        model: Model.QICORE,
-        version: "1.0.0",
-      },
-    };
-    elmErrorSeverity = "Error";
     jest.clearAllMocks();
   });
 
@@ -103,8 +95,7 @@ describe("exportUtil", () => {
     });
 
     it("should export measure and call downloadZipFile on success", async () => {
-      const measure = targetMeasure.current;
-      measureServiceApi.getMeasureExport.mockResolvedValue({
+      mockMeasureServiceApi.getMeasureExport.mockResolvedValue({
         status: 200,
         data: new Blob(["test data"], { type: "application/zip" }),
       });
@@ -113,8 +104,8 @@ describe("exportUtil", () => {
         setFailureMessage,
         setDownloadState,
         abortController,
-        targetMeasure,
-        measureServiceApi,
+        mockMeasure,
+        mockMeasureServiceApi,
         setToastOpen,
         setToastType,
         setToastMessage,
@@ -122,8 +113,8 @@ describe("exportUtil", () => {
       );
 
       expect(setDownloadState).toHaveBeenCalledWith("downloading");
-      expect(measureServiceApi.getMeasureExport).toHaveBeenCalledWith(
-        measure.id,
+      expect(mockMeasureServiceApi.getMeasureExport).toHaveBeenCalledWith(
+        mockMeasure.id,
         elmErrorSeverity,
         abortController.current.signal
       );
@@ -135,7 +126,7 @@ describe("exportUtil", () => {
     });
 
     it("should handle cancellation", async () => {
-      measureServiceApi.getMeasureExport.mockRejectedValue({
+      mockMeasureServiceApi.getMeasureExport.mockRejectedValue({
         message: "canceled",
       });
 
@@ -143,8 +134,8 @@ describe("exportUtil", () => {
         setFailureMessage,
         setDownloadState,
         abortController,
-        targetMeasure,
-        measureServiceApi,
+        mockMeasure,
+        mockMeasureServiceApi,
         setToastOpen,
         setToastType,
         setToastMessage,
@@ -156,7 +147,7 @@ describe("exportUtil", () => {
     });
 
     it("should display default error message if API call fails", async () => {
-      measureServiceApi.getMeasureExport.mockRejectedValueOnce({
+      mockMeasureServiceApi.getMeasureExport.mockRejectedValueOnce({
         status: 500,
       });
 
@@ -164,8 +155,8 @@ describe("exportUtil", () => {
         setFailureMessage,
         setDownloadState,
         abortController,
-        targetMeasure,
-        measureServiceApi,
+        mockMeasure,
+        mockMeasureServiceApi,
         setToastOpen,
         setToastType,
         setToastMessage,
@@ -195,9 +186,8 @@ describe("exportUtil", () => {
         cqlLibraryName: "invalid library name!",
         baseConfigurationTypes: [],
       };
-      targetMeasure = { current: measure };
 
-      measureServiceApi.getMeasureExport.mockRejectedValue({
+      mockMeasureServiceApi.getMeasureExport.mockRejectedValue({
         response: { status: 409 },
       });
 
@@ -205,8 +195,8 @@ describe("exportUtil", () => {
         setFailureMessage,
         setDownloadState,
         abortController,
-        targetMeasure,
-        measureServiceApi,
+        measure,
+        mockMeasureServiceApi,
         setToastOpen,
         setToastType,
         setToastMessage,
@@ -230,7 +220,6 @@ describe("exportUtil", () => {
     });
 
     it("should display error message to the user when export is not available status 404", async () => {
-      const measure = targetMeasure.current;
       const errorPayload = {
         message:
           'Measure cannot be exported for publishing because it was versioned prior to MADiE version 2.2.0. Please use a newer version or select "Export" for this measure.',
@@ -252,13 +241,13 @@ describe("exportUtil", () => {
           status: 404,
         },
       };
-      measureServiceApi.getMeasureExport.mockRejectedValue(exportNotFound);
+      mockMeasureServiceApi.getMeasureExport.mockRejectedValue(exportNotFound);
       await exportMeasure(
         setFailureMessage,
         setDownloadState,
         abortController,
-        targetMeasure,
-        measureServiceApi,
+        mockMeasure,
+        mockMeasureServiceApi,
         setToastOpen,
         setToastType,
         setToastMessage,
@@ -266,8 +255,8 @@ describe("exportUtil", () => {
       );
 
       expect(setDownloadState).toHaveBeenCalledWith("downloading");
-      expect(measureServiceApi.getMeasureExport).toHaveBeenCalledWith(
-        measure.id,
+      expect(mockMeasureServiceApi.getMeasureExport).toHaveBeenCalledWith(
+        mockMeasure.id,
         elmErrorSeverity,
         abortController.current.signal
       );

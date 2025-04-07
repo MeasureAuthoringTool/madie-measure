@@ -36,7 +36,7 @@ export const exportMeasure = async (
   setFailureMessage,
   setDownloadState,
   abortController,
-  targetMeasure,
+  measure,
   measureServiceApi,
   setToastOpen,
   setToastType,
@@ -45,7 +45,6 @@ export const exportMeasure = async (
 ) => {
   setFailureMessage(null);
   setDownloadState("downloading");
-  const measure = targetMeasure.current ? targetMeasure.current : targetMeasure;
   try {
     // we need to generate an abort controller for this call and bind it in the context of our ref
     abortController.current = new AbortController();
