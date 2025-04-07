@@ -1,5 +1,9 @@
 import { describe, expect, it, jest, beforeEach } from "@jest/globals";
-import { downloadZipFile, exportMeasure } from "./exportUtil";
+import {
+  downloadZipFile,
+  EXPORT_FAILURE_MESSAGE,
+  exportMeasure,
+} from "./exportUtil";
 import { Model } from "@madie/madie-models";
 
 describe("exportUtil", () => {
@@ -130,42 +134,7 @@ describe("exportUtil", () => {
       expect(setDownloadState).toHaveBeenCalledWith("success");
     });
 
-    it("should handle errors and set failure message", async () => {
-      const measure = targetMeasure.current;
-      measureServiceApi.getMeasureExport.mockRejectedValue({
-        response: {
-          status: 400,
-          data: {
-            text: jest.fn().mockResolvedValue('{"message": "Error occurred"}'),
-          },
-        },
-      });
-
-      await exportMeasure(
-        setFailureMessage,
-        setDownloadState,
-        abortController,
-        targetMeasure,
-        measureServiceApi,
-        setToastOpen,
-        setToastType,
-        setToastMessage,
-        elmErrorSeverity
-      );
-
-      expect(setDownloadState).toHaveBeenCalledWith("downloading");
-      expect(measureServiceApi.getMeasureExport).toHaveBeenCalledWith(
-        measure.id,
-        elmErrorSeverity,
-        abortController.current.signal
-      );
-      expect(setToastType).toHaveBeenCalledWith("danger");
-      expect(setDownloadState).toHaveBeenCalledWith("failure");
-      expect(setFailureMessage).toHaveBeenCalledWith("Error occurred");
-    });
-
     it("should handle cancellation", async () => {
-      const measure = targetMeasure.current;
       measureServiceApi.getMeasureExport.mockRejectedValue({
         message: "canceled",
       });
@@ -184,6 +153,128 @@ describe("exportUtil", () => {
 
       expect(setToastOpen).toHaveBeenCalled();
       expect(setDownloadState).toHaveBeenCalledWith(null);
+    });
+
+    it("should display default error message if API call fails", async () => {
+      measureServiceApi.getMeasureExport.mockRejectedValueOnce({
+        status: 500,
+      });
+
+      await exportMeasure(
+        setFailureMessage,
+        setDownloadState,
+        abortController,
+        targetMeasure,
+        measureServiceApi,
+        setToastOpen,
+        setToastType,
+        setToastMessage,
+        elmErrorSeverity
+      );
+
+      expect(setToastType).toHaveBeenCalledWith("danger");
+      expect(setFailureMessage).toHaveBeenCalledWith(EXPORT_FAILURE_MESSAGE);
+    });
+
+    it("should handle 409 error with validation issues and set multiple failure messages", async () => {
+      const measure = {
+        id: "1",
+        ecqmTitle: "Test Measure",
+        model: Model.QICORE,
+        version: "1.0.0",
+        cql: "",
+        cqlErrors: true,
+        errors: ["MISMATCH_CQL_POPULATION_RETURN_TYPES"],
+        groups: [],
+        measureMetaData: {
+          developers: [],
+          steward: "",
+          description: "",
+          draft: true,
+        },
+        cqlLibraryName: "invalid library name!",
+        baseConfigurationTypes: [],
+      };
+      targetMeasure = { current: measure };
+
+      measureServiceApi.getMeasureExport.mockRejectedValue({
+        response: { status: 409 },
+      });
+
+      await exportMeasure(
+        setFailureMessage,
+        setDownloadState,
+        abortController,
+        targetMeasure,
+        measureServiceApi,
+        setToastOpen,
+        setToastType,
+        setToastMessage,
+        elmErrorSeverity
+      );
+
+      expect(setDownloadState).toHaveBeenCalledWith("failure");
+      expect(setToastType).toHaveBeenCalledWith("danger");
+      expect(setFailureMessage).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          "Missing CQL",
+          "CQL Contains Errors",
+          "CQL Populations Return Types are invalid",
+          "Measure CQL Library Name is invalid",
+          "Missing Population Criteria",
+          "Missing Measure Developers",
+          "Missing Steward",
+          "Missing Description",
+        ])
+      );
+    });
+
+    it("should display error message to the user when export is not available status 404", async () => {
+      const measure = targetMeasure.current;
+      const errorPayload = {
+        message:
+          'Measure cannot be exported for publishing because it was versioned prior to MADiE version 2.2.0. Please use a newer version or select "Export" for this measure.',
+        status: 404,
+        error: "Bad Request",
+      };
+
+      const errorBlob = new Blob([JSON.stringify(errorPayload)], {
+        type: "application/json",
+      });
+
+      if (!errorBlob.text) {
+        errorBlob.text = async () => JSON.stringify(errorPayload);
+      }
+
+      const exportNotFound = {
+        response: {
+          data: errorBlob,
+          status: 404,
+        },
+      };
+      measureServiceApi.getMeasureExport.mockRejectedValue(exportNotFound);
+      await exportMeasure(
+        setFailureMessage,
+        setDownloadState,
+        abortController,
+        targetMeasure,
+        measureServiceApi,
+        setToastOpen,
+        setToastType,
+        setToastMessage,
+        elmErrorSeverity
+      );
+
+      expect(setDownloadState).toHaveBeenCalledWith("downloading");
+      expect(measureServiceApi.getMeasureExport).toHaveBeenCalledWith(
+        measure.id,
+        elmErrorSeverity,
+        abortController.current.signal
+      );
+      expect(setDownloadState).toHaveBeenCalledWith("failure");
+      expect(setFailureMessage).toHaveBeenCalledWith(
+        'Measure cannot be exported for publishing because it was versioned prior to MADiE version 2.2.0. Please use a newer version or select "Export" for this measure.'
+      );
     });
   });
 });
