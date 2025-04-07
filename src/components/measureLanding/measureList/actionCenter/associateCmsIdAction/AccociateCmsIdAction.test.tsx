@@ -97,9 +97,29 @@ describe("AssociateCmsIdAction", () => {
     );
   });
 
-  it("Should disable action btn if QICore measure selected is not a draft", async () => {
+  it("Should disable action btn if QICore v4.1.1 measure selected is not a draft", async () => {
     const measure2 = { ...qiCoreMeasure, measureMetaData: { draft: false } };
-    // second measure in the selected measures is QICore
+    // second measure in the selected measures is QICore v4.1.1
+    render(
+      <AssociateCmsIdAction
+        measures={[qdmMeasure, measure2]}
+        onClick={associateCmsId}
+      />
+    );
+    expect(screen.getByTestId("associate-cms-id-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("associate-cms-id-tooltip")).toHaveAttribute(
+      "aria-label",
+      MUST_BE_DRAFT
+    );
+  });
+
+  it("Should disable action btn if QICore v6.0.0 measure selected is not a draft", async () => {
+    const measure2 = {
+      ...qiCoreMeasure,
+      model: Model.QICORE_6_0_0,
+      measureMetaData: { draft: false },
+    };
+    // second measure in the selected measures is QICore v6.0.0
     render(
       <AssociateCmsIdAction
         measures={[qdmMeasure, measure2]}
@@ -131,11 +151,31 @@ describe("AssociateCmsIdAction", () => {
     );
   });
 
-  it("Should disable action btn if QICore measure selected has CMS id", () => {
+  it("Should disable action btn if QICore v4.1.1 measure selected has CMS id", () => {
     const measure2 = {
       ...qiCoreMeasure,
       measureSet: { ...mockMeasureSet, cmsId: 125 },
     };
+    // second measure in the selected measures is QICore v4.1.1
+    render(
+      <AssociateCmsIdAction
+        measures={[qdmMeasure, measure2]}
+        onClick={associateCmsId}
+      />
+    );
+    expect(screen.getByTestId("associate-cms-id-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("associate-cms-id-tooltip")).toHaveAttribute(
+      "aria-label",
+      MUST_NOT_HAVE_CMS_ID
+    );
+  });
+
+  it("Should disable action btn if QICore v6.0.0 measure selected has CMS id", () => {
+    const measure2 = {
+      ...qiCoreMeasure,
+      measureSet: { ...mockMeasureSet, cmsId: 125 },
+    };
+    // second measure in the selected measures is QICore v6.0.0
     render(
       <AssociateCmsIdAction
         measures={[qdmMeasure, measure2]}
