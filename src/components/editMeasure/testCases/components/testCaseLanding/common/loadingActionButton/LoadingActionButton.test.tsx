@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 
 const onRunTests = jest.fn();
 
-describe("RunTestsButton", () => {
+describe("LoadingActionButton", () => {
   it("RunTestsButton should be enabled with undefined shouldDisableRunTestsButton flag", () => {
     render(
       <LoadingActionButton
