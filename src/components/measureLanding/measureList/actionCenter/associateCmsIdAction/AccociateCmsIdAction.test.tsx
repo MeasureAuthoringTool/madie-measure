@@ -173,6 +173,7 @@ describe("AssociateCmsIdAction", () => {
   it("Should disable action btn if QICore v6.0.0 measure selected has CMS id", () => {
     const measure2 = {
       ...qiCoreMeasure,
+      model: Model.QICORE_6_0_0,
       measureSet: { ...mockMeasureSet, cmsId: 125 },
     };
     // second measure in the selected measures is QICore v6.0.0
