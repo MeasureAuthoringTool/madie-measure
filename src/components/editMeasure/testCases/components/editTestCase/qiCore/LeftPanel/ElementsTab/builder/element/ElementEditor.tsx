@@ -41,6 +41,7 @@ interface ElementEditorProps {
   displayedElementsTree: Object;
   setInitialFormikValuesStu6: Dispatch<SetStateAction<Object>>;
   setValidationSchema: Dispatch<SetStateAction<Object>>;
+  deleteElement?: (string) => void;
 }
 /*
   TO DO: We have too many copies of state.
@@ -58,6 +59,7 @@ const ElementEditor = ({
   displayedElementsTree,
   setInitialFormikValuesStu6,
   setValidationSchema,
+  deleteElement,
 }: ElementEditorProps) => {
   const fhirDefinitionsServiceApi = useFhirDefinitionsServiceApi();
   const fhirDefinitionsService = useRef(fhirDefinitionsServiceApi);
@@ -279,6 +281,7 @@ const ElementEditor = ({
           handleIndividualElementApplyButtonClick={
             handleIndividualElementApplyButtonClick
           }
+          deleteElement={deleteElement}
         />
         <div className="element-editor-submission">
           <Button
