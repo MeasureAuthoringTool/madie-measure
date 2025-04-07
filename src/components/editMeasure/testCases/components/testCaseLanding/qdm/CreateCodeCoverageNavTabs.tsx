@@ -18,7 +18,7 @@ import {
 import { TestCasesPassingDetailsProps } from "../common/interfaces";
 import { useFeatureFlags } from "@madie/madie-util";
 import { useQdmExecutionContext } from "../../routes/qdm/QdmExecutionContext";
-import RunTestButton from "../common/runTestsButton/RunTestsButton";
+import LoadingActionButton from "../common/loadingActionButton/LoadingActionButton";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import classNames from "classnames";
@@ -205,6 +205,16 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
               Delete All
             </Button>
           )}
+          {featureFlags.OverlappingValueSets && (
+            <LoadingActionButton
+              hasErrors={hasErrors}
+              isExecutionContextReady={executionContextReady}
+              onClick={() => {}} // TODO: MAT-8381
+              dataTestId="report-button"
+              label="Report"
+            />
+          )}
+
           {((featureFlags.TestCaseListActionCenter && canEdit) ||
             !featureFlags.TestCaseListActionCenter) && (
             <>
@@ -235,10 +245,13 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
               </Button>
             </>
           )}
-          <RunTestButton
+          <LoadingActionButton
             hasErrors={hasErrors}
             isExecutionContextReady={executionContextReady}
-            onRunTests={executeTestCases}
+            onClick={executeTestCases}
+            dataTestId="execute-test-cases-button"
+            primary={true}
+            label="Run Test(s)"
           />
 
           {/* disabled elements do not fire events. we wrap a listener around it to bypass */}

@@ -15,7 +15,7 @@ import { TestCasesPassingDetailsProps } from "../common/interfaces";
 import { useFeatureFlags } from "@madie/madie-util";
 import "twin.macro";
 import "styled-components/macro";
-import RunTestButton from "../common/runTestsButton/RunTestsButton";
+import LoadingActionButton from "../common/loadingActionButton/LoadingActionButton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export interface NavTabProps {
@@ -195,10 +195,13 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
             </Button>
           </>
         )}
-        <RunTestButton
+        <LoadingActionButton
           hasErrors={hasErrors}
           isExecutionContextReady={executionContextReady}
-          onRunTests={executeTestCases}
+          onClick={executeTestCases}
+          dataTestId="execute-test-cases-button"
+          primary={true}
+          label="Run Test(s)"
         />
 
         {!featureFlags.TestCaseListActionCenter && (
