@@ -42,7 +42,7 @@ export default function ViewHRModal(props: ModalProps) {
         }
       }
     },
-    [props.measureId, open]
+    [measureId, open]
   );
 
   useEffect(() => {
