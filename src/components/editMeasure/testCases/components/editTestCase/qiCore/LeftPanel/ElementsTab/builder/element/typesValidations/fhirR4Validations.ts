@@ -228,10 +228,20 @@ export const validationLookup = {
   instant: getInstantValidator,
 };
 
-export const getValidation = (type, required) => {
-  if (validationLookup[type]) {
-    const validation = validationLookup[type];
+export const getValidation = (type, required, label?) => {
+  let validation;
+
+  if (
+    (type === "http://hl7.org/fhirpath/System.String" || type === "string") &&
+    label === "id"
+  ) {
+    validation = validationLookup[label];
+
+    return validation(required);
+  } else if (validationLookup[type]) {
+    validation = validationLookup[type];
     return validation(required);
   }
+
   return Yup.mixed();
 };

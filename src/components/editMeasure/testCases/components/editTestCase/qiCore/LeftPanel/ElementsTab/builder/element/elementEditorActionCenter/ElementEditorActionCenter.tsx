@@ -3,20 +3,26 @@ import { SpeedDial, SpeedDialAction } from "@mui/material";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import { MadieDeleteDialog } from "@madie/madie-design-system/dist/react";
 
 interface PropTypes {
-  //coming soon
   //  ...and it's HERE!  Thanks to GAK & MAT-8338
   rootDefinition: any;
   numElements: number;
+  handleDelete: (string) => void;
 }
 interface Action {
   name: string;
   icon: JSX.Element;
+  onClick?: () => void;
 }
+
 const ElementEditorActionCenter = (props: PropTypes) => {
+  const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
+    useState<boolean>(false);
+  const { handleDelete, rootDefinition } = props;
   const [open, setOpen] = useState(false);
-  const [numElements, setNumElements] = useState<number>(props.numElements);
+
   const [actions, setActions] = useState<Array<Action>>([]);
   const addAction = {
     name: "Add",
@@ -29,6 +35,7 @@ const ElementEditorActionCenter = (props: PropTypes) => {
   const deleteAction = {
     name: "Delete",
     icon: <DeleteOutlinedIcon sx={{ color: "#c83f38" }} />,
+    onClick: () => setDeleteDialogModalOpen(true),
   };
 
   // Attribute Cardinality 	Delete 	Copy 	Add New
@@ -36,7 +43,6 @@ const ElementEditorActionCenter = (props: PropTypes) => {
   // 0..* 	                X 	    X 	    X
   // 1..1
   // 1..* 	                X* 	    X 	    X
-
   useEffect(() => {
     const localActions: Array<Action> = [];
     const min: string = props.rootDefinition.min;
@@ -45,7 +51,7 @@ const ElementEditorActionCenter = (props: PropTypes) => {
     if (
       (min == "0" && max == "1") ||
       (min == "0" && max == "*") ||
-      (min == "1" && max == "*" && numElements > 1)
+      (min == "1" && max == "*" && props.numElements > 1)
     ) {
       localActions.push(deleteAction);
     }
@@ -54,7 +60,8 @@ const ElementEditorActionCenter = (props: PropTypes) => {
       localActions.push(addAction);
     }
     setActions(localActions);
-  }, [props.rootDefinition]);
+  }, [props.numElements, props.rootDefinition]);
+
   if (actions.length > 0) {
     return (
       <div
@@ -112,9 +119,7 @@ const ElementEditorActionCenter = (props: PropTypes) => {
               data-testid={`elements-${action.name
                 .replace(/\s/g, "")
                 .toLowerCase()}`}
-              onClick={() => {
-                setOpen(false);
-              }}
+              onClick={() => action?.onClick()}
               sx={{
                 boxShadow: "none",
                 transition: "opacity 0s, visibility 0s",
@@ -125,6 +130,22 @@ const ElementEditorActionCenter = (props: PropTypes) => {
             />
           ))}
         </SpeedDial>
+        <MadieDeleteDialog
+          open={deleteDialogModalOpen}
+          onContinue={() => {
+            handleDelete(rootDefinition?.path);
+            setDeleteDialogModalOpen(false);
+          }}
+          onClose={() => {
+            setDeleteDialogModalOpen(false);
+          }}
+          dialogTitle="Delete Element"
+          name={
+            rootDefinition?.sliceName
+              ? rootDefinition.sliceName
+              : rootDefinition.path
+          }
+        />
       </div>
     );
   } else {
