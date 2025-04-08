@@ -1666,12 +1666,25 @@ describe("TestCaseList component", () => {
     );
   }
 
-  it("should disable Run QDM test case button, if execution context failed", async () => {
+  it("should enable report button for QDM Tests, if execution context is ready", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      OverlappingValueSets: true,
+    }));
+    renderTestCaseListComponent(setError, [], false);
+    await waitFor(() => {
+      expect(screen.getByTestId("report-button")).toBeEnabled();
+    });
+  });
+
+  it("should disable Run QDM test case & report button, if execution context failed", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      OverlappingValueSets: true,
+    }));
     renderTestCaseListComponent(setError, [], true);
     await waitFor(() => {
-      const executeButton = screen.getByTestId("execute-test-cases-button");
-      expect(executeButton).toHaveProperty("disabled", true);
+      expect(screen.getByTestId("execute-test-cases-button")).toBeDisabled();
     });
+    expect(screen.getByTestId("report-button")).toBeDisabled();
   });
 
   it("should render list of test cases", async () => {
