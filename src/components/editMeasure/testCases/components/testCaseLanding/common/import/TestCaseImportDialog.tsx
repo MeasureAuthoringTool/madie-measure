@@ -21,6 +21,7 @@ import {
   TestCaseExportMetaData,
 } from "@madie/madie-models";
 import validator from "validator";
+import * as path from "path";
 
 const TestCaseImportDialog = ({ dialogOpen, handleClose, onImport }) => {
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -130,10 +131,11 @@ const TestCaseImportDialog = ({ dialogOpen, handleClose, onImport }) => {
         .then((values) => {
           _.forEach(values, (val, i) => {
             let patientId;
-            if (fileNames[i].startsWith(parentFolderName)) {
-              patientId = _.split(fileNames[i], "/")[1];
+            const normalizedFileName = path.normalize(fileNames[i]);
+            if (normalizedFileName.startsWith(parentFolderName)) {
+              patientId = _.split(normalizedFileName, "/")[1];
             } else {
-              patientId = _.split(fileNames[i], "/")[0];
+              patientId = _.split(normalizedFileName, "/")[0];
             }
 
             // check for an existing file in the directory
