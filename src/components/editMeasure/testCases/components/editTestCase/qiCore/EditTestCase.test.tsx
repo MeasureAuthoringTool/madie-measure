@@ -2002,8 +2002,8 @@ describe("EditTestCase component", () => {
       jest.useFakeTimers("modern");
 
       const measure = {
-        ...defaultMeasure, 
-        model: Model.QICORE_6_0_0
+        ...defaultMeasure,
+        model: Model.QICORE_6_0_0,
       } as unknown as Measure;
 
       renderWithRouter(
@@ -2014,7 +2014,7 @@ describe("EditTestCase component", () => {
 
       const mockResponse = {
         data: {
-          id: "testID", 
+          id: "testID",
           hapiOperationOutcome: {
             code: 400,
             outcomeResponse: {
@@ -2022,16 +2022,16 @@ describe("EditTestCase component", () => {
               issue: [
                 {
                   severity: "error",
-                  diagnostics: "Patient.name is a required field"
+                  diagnostics: "Patient.name is a required field",
                 },
                 {
-                  severity: "error", 
-                  diagnostics: "Patient.identifier is a required field"
-                }
-              ]
-            }
-          }
-        }
+                  severity: "error",
+                  diagnostics: "Patient.identifier is a required field",
+                },
+              ],
+            },
+          },
+        },
       };
 
       mockedAxios.post.mockResolvedValue(mockResponse);
@@ -2046,7 +2046,7 @@ describe("EditTestCase component", () => {
 
       // Assertions
       const debugOutput = await screen.findByText(
-        testCaseAlertToast 
+        testCaseAlertToast
           ? "Changes created successfully but the following error(s) were found"
           : "Test case updated successfully with errors in JSON"
       );
@@ -2057,15 +2057,23 @@ describe("EditTestCase component", () => {
       expect(screen.getByTestId("elements-content")).toBeInTheDocument();
 
       const validationErrorsBtn = screen.getByRole("button", {
-        name: "Validation Errors"
+        name: "Validation Errors",
       });
       userEvent.click(validationErrorsBtn);
       jest.advanceTimersByTime(100);
 
-      const errorList = await screen.findByTestId("json-validation-errors-list");
+      const errorList = await screen.findByTestId(
+        "json-validation-errors-list"
+      );
       expect(errorList).toBeInTheDocument();
-      expect(within(errorList).getByText("Error: Patient.name is a required field")).toBeInTheDocument();
-      expect(within(errorList).getByText("Error: Patient.identifier is a required field")).toBeInTheDocument();
+      expect(
+        within(errorList).getByText("Error: Patient.name is a required field")
+      ).toBeInTheDocument();
+      expect(
+        within(errorList).getByText(
+          "Error: Patient.identifier is a required field"
+        )
+      ).toBeInTheDocument();
 
       jest.useRealTimers();
     });
