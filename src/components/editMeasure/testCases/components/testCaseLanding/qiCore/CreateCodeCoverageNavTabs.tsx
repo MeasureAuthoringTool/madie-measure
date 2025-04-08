@@ -33,6 +33,7 @@ export interface NavTabProps {
   validTestCases: TestCase[];
   exportTestCases: (bundleType: string) => void;
   onDeleteAllTestCases: () => void;
+  onGenerateOverlapValueSetReport: () => void;
 }
 
 const defaultStyle = {
@@ -64,6 +65,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
     validTestCases,
     exportTestCases,
     onDeleteAllTestCases,
+    onGenerateOverlapValueSetReport,
   } = props;
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -160,7 +162,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
               <LoadingActionButton
                 hasErrors={hasErrors}
                 isExecutionContextReady={executionContextReady}
-                onClick={() => {}} // TODO: MAT-8381
+                onClick={onGenerateOverlapValueSetReport}
                 dataTestId="report-button"
                 label="Report"
               />

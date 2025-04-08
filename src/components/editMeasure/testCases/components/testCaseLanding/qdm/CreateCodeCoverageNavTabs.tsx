@@ -43,6 +43,7 @@ export interface NavTabProps {
   exportExecuting: boolean;
   optionsOpen: boolean;
   setOptionsOpen: (exportExecuting: boolean) => void;
+  onGenerateValueSetOverlapReport: () => void;
 }
 
 const defaultStyle = {
@@ -79,6 +80,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
     exportExecuting,
     optionsOpen,
     setOptionsOpen,
+    onGenerateValueSetOverlapReport,
   } = props;
   const [activeTip, setActiveTip] = useState<boolean>(false);
   const toolTipClass = classNames("madie-tooltip", {
@@ -209,7 +211,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
             <LoadingActionButton
               hasErrors={hasErrors}
               isExecutionContextReady={executionContextReady}
-              onClick={() => {}} // TODO: MAT-8381
+              onClick={onGenerateValueSetOverlapReport}
               dataTestId="report-button"
               label="Report"
             />
