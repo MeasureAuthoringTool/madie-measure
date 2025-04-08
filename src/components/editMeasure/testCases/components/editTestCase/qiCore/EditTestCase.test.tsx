@@ -1998,7 +1998,6 @@ describe("EditTestCase component", () => {
     }, 50000);
 
     it("should display HAPI validation errors after creating test case", async () => {
-      // Use modern timers but clean them up after
       jest.useFakeTimers("modern");
 
       const measure = {
