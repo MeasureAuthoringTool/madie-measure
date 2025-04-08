@@ -141,13 +141,17 @@ export const getUriValidator = (required) => {
   const uriRegex: RegExp = /\S*/;
   const urnRegex: RegExp = /urn:oid:[0-2](\.(0|[1-9][0-9]*))+/;
   const baseValidator = Yup.string()
-    .test("urn-specific-test", "This is not a valid OID.", function (value) {
-      if (value && value.startsWith("urn:oid")) {
-        return urnRegex.test(value);
-      } else {
-        return true;
+    .test(
+      "urn-specific-test",
+      "Invalid OID Format (ie., urn:oid:1.2.36.146.595.217.0.1 ).",
+      function (value) {
+        if (value && value.startsWith("urn:oid")) {
+          return urnRegex.test(value);
+        } else {
+          return true;
+        }
       }
-    })
+    )
     .matches(uriRegex, "Invalid Uri format");
 
   if (required) {

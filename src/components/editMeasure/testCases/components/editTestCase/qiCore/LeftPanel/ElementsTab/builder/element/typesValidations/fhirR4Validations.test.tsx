@@ -128,10 +128,10 @@ describe("Validation Functions", () => {
     const requiredString = getValidation("uri", true);
     expect(requiredString).toBeInstanceOf(Yup.StringSchema);
     await expect(requiredString.validate("urn:oid:1123")).rejects.toThrow(
-      "This is not a valid OID"
+      "Invalid OID Format (ie., urn:oid:1.2.36.146.595.217.0.1 )."
     );
   });
-  it("succeeds when UUI is present && is not required", () => {
+  it("succeeds when UUID is present && is not required", () => {
     const nonRequiredString = getValidation("uri", false);
     expect(nonRequiredString).toBeInstanceOf(Yup.StringSchema);
     expect(
