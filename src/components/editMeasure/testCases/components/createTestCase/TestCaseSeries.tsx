@@ -56,7 +56,7 @@ const TestCaseSeries = ({
               sx={{
                 "& .MuiInputBase-input": {
                   opacity: 1,
-                  color: "#333",
+                  color: "#717171",
                   "&::placeholder": {
                     opacity: 1,
                     color: "#717171",
@@ -130,9 +130,9 @@ const TestCaseSeries = ({
           style={{
             fontFamily: "Rubik",
             fontSize: 12,
-            color: "#333",
+            color: "#717171",
             position: "absolute",
-            bottom: -20,
+            bottom: -26,
             right: 0,
           }}
         >

@@ -1754,7 +1754,7 @@ describe("EditTestCase component", () => {
       expect(mockedAxios.put).toBeCalledTimes(0);
     });
 
-    it.skip("should limit test case description to 250 characters", async () => {
+    it("should generate field level error for test case description more than 250 characters", async () => {
       const testCase = {
         id: "1234",
         title: "Original Title",
@@ -1796,7 +1796,7 @@ describe("EditTestCase component", () => {
 
       userEvent.click(screen.getByTestId("details-tab"));
       const testCaseDescription =
-        "abcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyz";
+        "abcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyzaaa";
       const descriptionInput = screen.getByTestId("test-case-description");
       userEvent.type(descriptionInput, testCaseDescription);
 
@@ -1806,9 +1806,11 @@ describe("EditTestCase component", () => {
 
       const createBtn = screen.getByRole("button", { name: "Save" });
       await waitFor(() => {
-        expect(createBtn).not.toBeDisabled;
-        expect(descriptionInput).toHaveTextContent(
-          "abcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghij"
+        expect(createBtn).toBeDisabled;
+        expect(
+          screen.getByTestId("test-case-description-helper-text")
+        ).toHaveTextContent(
+          "Test Case Description cannot be more than 250 characters."
         );
       });
     });
@@ -1996,93 +1998,88 @@ describe("EditTestCase component", () => {
     }, 50000);
 
     it("should display HAPI validation errors after creating test case", async () => {
-      // Simplified measure object with only required fields
+      jest.useFakeTimers("modern");
       const measure = {
+        ...defaultMeasure,
         model: Model.QICORE_6_0_0,
-        id: "m1234",
-        measureScoring: MeasureScoring.COHORT,
       } as unknown as Measure;
-
-      // Pre-define all mock responses
-      const mockResponses = {
-        series: ["SeriesA"],
-        measure: {
-          id: "m1234",
-          measureScoring: MeasureScoring.COHORT,
-        },
-        resources: [...resourceIdentifiers],
-        validationErrors: {
-          data: {
-            id: "testID",
-            createdBy: MEASURE_CREATEDBY,
-            description: "Test Description",
-            series: "TestSeries",
-            hapiOperationOutcome: {
-              code: 400,
-              outcomeResponse: {
-                resourceType: "OperationOutcome",
-                issue: [
-                  {
-                    severity: "error",
-                    diagnostics: "Patient.name is a required field",
-                  },
-                  {
-                    severity: "error",
-                    diagnostics: "Patient.identifier is a required field",
-                  },
-                ],
-              },
-            },
-          },
-        },
-      };
-
-      // Single mock implementation for all axios calls
-      mockedAxios.post.mockResolvedValue(mockResponses.validationErrors);
-      mockedAxios.get.mockImplementation((url) => {
-        if (url.includes("series"))
-          return Promise.resolve({ data: mockResponses.series });
-        if (url.includes("resources"))
-          return Promise.resolve({ data: mockResponses.resources });
-        return Promise.resolve({ data: mockResponses.measure });
-      });
-
       renderWithRouter(
         ["/measures/m1234/edit/test-cases"],
         "/measures/:measureId/edit/test-cases",
         measure
       );
 
-      // Combine user interactions
-      userEvent.click(screen.getByTestId("details-tab"));
-      const seriesInput = screen.getByTestId("test-case-series");
-      const title = await screen.findByTestId("test-case-title");
-
-      userEvent.type(seriesInput, "TestSeries");
-      userEvent.type(title, "TC1");
-      userEvent.click(screen.getByRole("button", { name: "Save" }));
-
-      // Verify results with single waitFor
-      await waitFor(() => {
-        const message = screen.getByText(
-          /Test case updated successfully with errors in JSON/i
-        );
-        const validationBtn = screen.getByRole("button", {
-          name: "Validation Errors",
-        });
-        expect(message).toBeInTheDocument();
-        expect(validationBtn).toBeInTheDocument();
+      const testCaseDescription = "Test Description";
+      const testCaseSeries =
+        "{{[[{shift}{ctrl/}a{/shift}~!@#$% ^&*() _-+= }|] \\ :;,. <>?/ '\"";
+      mockedAxios.post.mockResolvedValue({
+        data: {
+          id: "testID",
+          createdBy: MEASURE_CREATEDBY,
+          description: testCaseDescription,
+          series: testCaseSeries,
+          hapiOperationOutcome: {
+            code: 400,
+            outcomeResponse: {
+              resourceType: "OperationOutcome",
+              issue: [
+                {
+                  severity: "error",
+                  diagnostics: "Patient.name is a required field",
+                },
+                {
+                  severity: "error",
+                  diagnostics: "Patient.identifier is a required field",
+                },
+              ],
+            },
+          },
+        },
       });
 
-      // Check validation errors
-      userEvent.click(
-        screen.getByRole("button", { name: "Validation Errors" })
+      userEvent.click(screen.getByTestId("details-tab"));
+      await waitFor(
+        () => {
+          const seriesInput = screen.getByTestId("test-case-series");
+          userEvent.type(seriesInput, testCaseSeries);
+        },
+        { timeout: 1500 }
       );
+      await testTitle("TC1");
 
-      const errors = await screen.findAllByText(
-        /Error: Patient\.(name|identifier) is a required field/
+      const createBtn = screen.getByRole("button", { name: "Save" });
+      userEvent.click(createBtn);
+
+      const debugOutput = await screen.findByText(
+        testCaseAlertToast
+          ? "Changes created successfully but the following error(s) were found"
+          : "Test case updated successfully with errors in JSON"
       );
-      expect(errors).toHaveLength(2);
+      expect(debugOutput).toBeInTheDocument();
+
+      expect(screen.queryByTestId("json-error-alert")).not.toBeInTheDocument(); // do not show JSON alert for valid JSON with HAPI FHIR validation issues
+      expect(screen.queryByText("JSON Failing")).not.toBeInTheDocument(); // do not show JSON alert for valid JSON with HAPI FHIR validation issues
+      expect(screen.getByTestId("elements-content")).toBeInTheDocument();
+
+      const showValidationErrorsBtn = screen.getByRole("button", {
+        name: "Validation Errors",
+      });
+      expect(showValidationErrorsBtn).toBeInTheDocument();
+      userEvent.click(showValidationErrorsBtn);
+      jest.advanceTimersByTime(700);
+
+      const validationErrorsList = await screen.findByTestId(
+        "json-validation-errors-list"
+      );
+      expect(validationErrorsList).toBeInTheDocument();
+      const patientNameError = await within(validationErrorsList).findByText(
+        "Error: Patient.name is a required field"
+      );
+      expect(patientNameError).toBeInTheDocument();
+      const patientIdentifierError = within(validationErrorsList).getByText(
+        "Error: Patient.identifier is a required field"
+      );
+      expect(patientIdentifierError).toBeInTheDocument();
     }, 15000);
 
     it("should display JSON error notification and not display QICore test case builder for invalid JSON", async () => {
