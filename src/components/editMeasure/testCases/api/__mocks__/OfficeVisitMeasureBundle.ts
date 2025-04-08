@@ -10,6 +10,35 @@ export const officeVisitMeasureBundle: fhir4.Bundle = {
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/proportion-measure-cqfm",
           ],
         },
+        contained: [
+          {
+            resourceType: "Library",
+            id: "SimpleFhirMeasureLib",
+            name: "EffectiveDataRequirements",
+            status: "active",
+            type: {
+              coding: [
+                {
+                  system: "http://terminology.hl7.org/CodeSystem/library-type",
+                  code: "module-definition",
+                },
+              ],
+            },
+            relatedArtifact: [
+              {
+                type: "depends-on",
+                display: "Library FHIRHelpers",
+                resource: "https://madie.cms.gov/Library/FHIRHelpers|4.4.000",
+              },
+              {
+                type: "depends-on",
+                display: "Value set Office Visit",
+                resource:
+                  "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001",
+              },
+            ],
+          },
+        ],
         url: "http://ecqi.healthit.gov/ecqms/Measure/SimpleFhirMeasureLib",
         version: "0",
         name: "SimpleFhirMeasureLib",
