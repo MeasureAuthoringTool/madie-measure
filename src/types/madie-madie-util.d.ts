@@ -23,6 +23,7 @@ declare module "@madie/madie-util" {
     QICoreIncludeSDEValues: boolean;
     MeasureSearch: boolean;
     QICoreManifestExpansion: boolean;
+    OverlappingValueSets: boolean;
   }
 
   export interface ServiceConfig {
