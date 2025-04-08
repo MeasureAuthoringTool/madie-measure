@@ -131,7 +131,15 @@ describe("Validation Functions", () => {
       "This is not a valid OID"
     );
   });
-
+  it("succeeds when UUI is present && is not required", () => {
+    const nonRequiredString = getValidation("uri", false);
+    expect(nonRequiredString).toBeInstanceOf(Yup.StringSchema);
+    expect(
+      nonRequiredString.validate(
+        "urn:uuid:c757873d-ec9a-4326-a141-556f43239520"
+      )
+    ).resolves.toBe("urn:uuid:c757873d-ec9a-4326-a141-556f43239520");
+  });
   it("getValidation DecimalValidator", () => {
     const requiredString = getValidation("decimal", true);
     const nonRequiredString = getValidation("decimal", false);
