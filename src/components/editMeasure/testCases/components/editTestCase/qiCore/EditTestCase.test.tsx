@@ -1998,26 +1998,23 @@ describe("EditTestCase component", () => {
     }, 50000);
 
     it("should display HAPI validation errors after creating test case", async () => {
+      // Use modern timers but clean them up after
       jest.useFakeTimers("modern");
+
       const measure = {
-        ...defaultMeasure,
-        model: Model.QICORE_6_0_0,
+        ...defaultMeasure, 
+        model: Model.QICORE_6_0_0
       } as unknown as Measure;
+
       renderWithRouter(
         ["/measures/m1234/edit/test-cases"],
         "/measures/:measureId/edit/test-cases",
         measure
       );
 
-      const testCaseDescription = "Test Description";
-      const testCaseSeries =
-        "{{[[{shift}{ctrl/}a{/shift}~!@#$% ^&*() _-+= }|] \\ :;,. <>?/ '\"";
-      mockedAxios.post.mockResolvedValue({
+      const mockResponse = {
         data: {
-          id: "testID",
-          createdBy: MEASURE_CREATEDBY,
-          description: testCaseDescription,
-          series: testCaseSeries,
+          id: "testID", 
           hapiOperationOutcome: {
             code: 400,
             outcomeResponse: {
@@ -2025,62 +2022,53 @@ describe("EditTestCase component", () => {
               issue: [
                 {
                   severity: "error",
-                  diagnostics: "Patient.name is a required field",
+                  diagnostics: "Patient.name is a required field"
                 },
                 {
-                  severity: "error",
-                  diagnostics: "Patient.identifier is a required field",
-                },
-              ],
-            },
-          },
-        },
+                  severity: "error", 
+                  diagnostics: "Patient.identifier is a required field"
+                }
+              ]
+            }
+          }
+        }
+      };
+
+      mockedAxios.post.mockResolvedValue(mockResponse);
+
+      // Actions
+      await act(async () => {
+        userEvent.click(screen.getByTestId("details-tab"));
+        await testTitle("TC1");
       });
 
-      userEvent.click(screen.getByTestId("details-tab"));
-      await waitFor(
-        () => {
-          const seriesInput = screen.getByTestId("test-case-series");
-          userEvent.type(seriesInput, testCaseSeries);
-        },
-        { timeout: 1500 }
-      );
-      await testTitle("TC1");
+      userEvent.click(screen.getByRole("button", { name: "Save" }));
 
-      const createBtn = screen.getByRole("button", { name: "Save" });
-      userEvent.click(createBtn);
-
+      // Assertions
       const debugOutput = await screen.findByText(
-        testCaseAlertToast
+        testCaseAlertToast 
           ? "Changes created successfully but the following error(s) were found"
           : "Test case updated successfully with errors in JSON"
       );
       expect(debugOutput).toBeInTheDocument();
 
-      expect(screen.queryByTestId("json-error-alert")).not.toBeInTheDocument(); // do not show JSON alert for valid JSON with HAPI FHIR validation issues
-      expect(screen.queryByText("JSON Failing")).not.toBeInTheDocument(); // do not show JSON alert for valid JSON with HAPI FHIR validation issues
+      expect(screen.queryByTestId("json-error-alert")).not.toBeInTheDocument();
+      expect(screen.queryByText("JSON Failing")).not.toBeInTheDocument();
       expect(screen.getByTestId("elements-content")).toBeInTheDocument();
 
-      const showValidationErrorsBtn = screen.getByRole("button", {
-        name: "Validation Errors",
+      const validationErrorsBtn = screen.getByRole("button", {
+        name: "Validation Errors"
       });
-      expect(showValidationErrorsBtn).toBeInTheDocument();
-      userEvent.click(showValidationErrorsBtn);
-      jest.advanceTimersByTime(700);
+      userEvent.click(validationErrorsBtn);
+      jest.advanceTimersByTime(100);
 
-      const validationErrorsList = await screen.findByTestId(
-        "json-validation-errors-list"
-      );
-      expect(validationErrorsList).toBeInTheDocument();
-      const patientNameError = await within(validationErrorsList).findByText(
-        "Error: Patient.name is a required field"
-      );
-      expect(patientNameError).toBeInTheDocument();
-      const patientIdentifierError = within(validationErrorsList).getByText(
-        "Error: Patient.identifier is a required field"
-      );
-      expect(patientIdentifierError).toBeInTheDocument();
-    }, 15000);
+      const errorList = await screen.findByTestId("json-validation-errors-list");
+      expect(errorList).toBeInTheDocument();
+      expect(within(errorList).getByText("Error: Patient.name is a required field")).toBeInTheDocument();
+      expect(within(errorList).getByText("Error: Patient.identifier is a required field")).toBeInTheDocument();
+
+      jest.useRealTimers();
+    });
 
     it("should display JSON error notification and not display QICore test case builder for invalid JSON", async () => {
       jest.useFakeTimers("modern");
