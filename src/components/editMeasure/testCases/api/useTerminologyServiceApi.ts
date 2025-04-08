@@ -154,7 +154,7 @@ export class TerminologyServiceApi {
    * Extract the ValueSet OIDs used in measure & including libraries
    */
   getValueSetsOIdsFromBundle(measureBundle: Bundle): ValueSetSearchParams[] {
-    if (!measureBundle || !measureBundle.entry) {
+    if (!measureBundle?.entry) {
       return [];
     }
     const measureEntry = measureBundle.entry.find(
@@ -165,7 +165,7 @@ export class TerminologyServiceApi {
     }
     const measure = measureEntry.resource as Measure;
     const moduleDefinition = measure.contained as Library[];
-    if (!moduleDefinition || moduleDefinition.length === 0) {
+    if (!moduleDefinition?.length) {
       return [];
     }
 
