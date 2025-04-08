@@ -114,17 +114,35 @@ describe("Validation Functions", () => {
   });
 
   it("getValidation idValidator", () => {
-    const requiredId = getValidation("id", true);
-    const nonRequiredId = getValidation("id", false);
+    const requiredId = getValidation(
+      "http://hl7.org/fhirpath/System.String",
+      true,
+      "id"
+    );
+    const nonRequiredId = getValidation(
+      "http://hl7.org/fhirpath/System.String",
+      false,
+      "id"
+    );
 
     expect(requiredId).toBeInstanceOf(Yup.StringSchema);
+    expect(requiredId.validate(undefined)).rejects.toThrow(
+      "This field is required"
+    );
     expect(requiredId.validate("")).rejects.toThrow("Invalid ID format");
-
+    //id cannot have spaces
     expect(requiredId.validate("id with spaces")).rejects.toThrow(
+      "Invalid ID format"
+    );
+    //only special character allowed is "-"
+    expect(requiredId.validate("!@#")).rejects.toThrow("Invalid ID format");
+    //id must be between 1 and 64 characters
+    expect(requiredId.validate("x".repeat(65))).rejects.toThrow(
       "Invalid ID format"
     );
 
     expect(nonRequiredId.validate("test")).resolves.toBe("test");
+    expect(nonRequiredId.validate("A-z-0")).resolves.toBe("A-z-0");
   });
 
   it("getValidation DateValidator", () => {

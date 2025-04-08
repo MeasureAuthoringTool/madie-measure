@@ -74,6 +74,7 @@ const TypeEditor = ({
         return (
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
             <StringComponent
+              stringOnly={label?.split(".").pop() === "id" ? false : true}
               label={label}
               canEdit={canEdit}
               helperText={formikErrorHandler(label)}

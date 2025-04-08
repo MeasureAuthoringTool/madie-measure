@@ -1,0 +1,44 @@
+{
+  "name": "madie-measure",
+  "description": "MADiE Measure front end",
+  "longDescription": "",
+  "status": "",
+  "permissions": {
+    "license": [
+      {
+        "name": "",
+        "URL": ""
+      }
+    ],
+    "usageType": "",
+    "exemptionText": ""
+  },
+  "organization": "",
+  "repositoryURL": "https://github.com/MeasureAuthoringTool/madie-measure",
+  "vcs": "git",
+  "laborHours": 23781,
+  "platforms": [],
+  "categories": [],
+  "softwareType": "",
+  "languages": ["TypeScript", "SCSS", "JavaScript", "CSS", "Shell"],
+  "maintenance": "",
+  "date": {
+    "created": "2021-11-01T15:16:07Z",
+    "lastModified": "2025-03-11T13:21:37Z",
+    "metaDataLastUpdated": "2025-03-11T16:23:09.724Z"
+  },
+  "tags": [],
+  "contact": {
+    "email": "",
+    "name": ""
+  },
+  "localisation": false,
+  "repositoryType": "",
+  "userInput": false,
+  "fismaLevel": "",
+  "group": "",
+  "subsetInHealthcare": [],
+  "userType": [],
+  "repositoryHost": "github",
+  "maturityModelTier": 0
+}
