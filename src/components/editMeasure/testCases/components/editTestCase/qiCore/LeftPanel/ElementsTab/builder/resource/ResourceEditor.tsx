@@ -44,28 +44,31 @@ const ResourceEditor = ({
   setInitialFormikValuesStu6,
   setValidationSchema,
 }: ResourceEditorProps) => {
-  const { dirty, resetForm, values } = useFormikContext();
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
+  const { dispatch, state } = useQiCoreResource();
+  const { dirty, resetForm, values } = useFormikContext();
   const [activeTab, setActiveTab] = useState(0);
   const [pendingTab, setPendingTab] = useState(0);
-  const [allElements, setAllElements] = useState([]);
-  const [selectedResource, setSelectedResource] = useState(null);
-  const [displayedElements, setDisplayedElements] = useState<
-    ElementDefinition[]
-  >([]);
-  const [displayedElementsTree, setDisplayedElementsTree] = useState({});
-  const { dispatch, state } = useQiCoreResource();
-  const [editingResource, setEditingResource] = useState(); // just the resource object of selectedResource
-  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-  const [addDialogOpen, setAddDialogOpen] = useState<boolean>(false);
   const onContinue = () => {
     setDialogOpen(false);
     setActiveTab(pendingTab);
     resetForm();
   };
 
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const [addDialogOpen, setAddDialogOpen] = useState<boolean>(false);
+  const [displayedElementsTree, setDisplayedElementsTree] = useState({}); // need
+
+  const [allElements, setAllElements] = useState([]); // we don't need this.
+  const [selectedResource, setSelectedResource] = useState(null);
+  const editingResource = selectedResource?.bundleEntry?.resource;
+  const [displayedElements, setDisplayedElements] = useState<
+    ElementDefinition[]
+  >([]);
+
   // Using selectedResourceID fetches the selected resource from test case bundle json and
   // also fetches resourceTree aka structure Definition, combines & sets it to SelectedResource state
+  // moved two dependant useEffects into a single one to prevent multiple updates. Using batch updates to prevent excessive rerenders
   useEffect(() => {
     if (state && selectedResourceID) {
       const selectedEntry = state.bundle?.entry?.find(
@@ -80,8 +83,33 @@ const ResourceEditor = ({
       fhirDefinitionsService.current
         .getResourceTree(resourceId)
         .then((resourceTree) => {
-          setSelectedResource({ ...resourceTree, bundleEntry: selectedEntry });
-          setEditingResource(selectedEntry?.resource);
+          const selectedResource = {
+            ...resourceTree,
+            bundleEntry: selectedEntry,
+          };
+          const topElements = getTopLevelElements(selectedResource);
+          const requiredElements = [...topElements.filter((e) => e.min > 0)];
+          const elementsWithValues = [
+            ...topElements.filter((e) => {
+              const elemPath = stripResourcePath(
+                selectedResource.definition.type,
+                e.path
+              );
+              const elemValue = _.get(
+                selectedResource.bundleEntry.resource,
+                elemPath
+              );
+              return !_.isNil(elemValue);
+            }),
+          ];
+          const uniqueElements = _.uniq(
+            _.concat(requiredElements, elementsWithValues)
+          );
+          // Will batch update in react 18 update.
+          setSelectedResource(selectedResource);
+          setAllElements(topElements);
+          setDisplayedElements(uniqueElements);
+          setDisplayedElementsTree(getDisplayedElementsTree(uniqueElements));
         })
         .catch((error) =>
           console.error(
@@ -92,47 +120,15 @@ const ResourceEditor = ({
     }
   }, [selectedResourceID, state]);
 
-  // Utilizes the selectedResource object to construct All Attributes (topElements) which is used to generate options fpr the Add Attributes multi dropdown select
-  // and displayedElements that needs to be displayed to user on left nav bar ( these will include required attributes along with attributes that has value )
-  useEffect(() => {
-    if (selectedResource) {
-      // TODO: look at the data that exists on the resource and combine fields from that
-      const topElements = getTopLevelElements(selectedResource);
-      setAllElements(topElements);
-      const requiredElements = [...topElements.filter((e) => e.min > 0)];
-      const elementsWithValues = [
-        ...topElements.filter((e) => {
-          const elemPath = stripResourcePath(
-            selectedResource.definition.type,
-            e.path
-          );
-          const elemValue = _.get(
-            selectedResource.bundleEntry.resource,
-            elemPath
-          );
-          return !_.isNil(elemValue);
-        }),
-      ];
-      const uniqueElements = _.uniq(
-        _.concat(requiredElements, elementsWithValues)
-      );
-      setDisplayedElements(uniqueElements);
-      setDisplayedElementsTree(getDisplayedElementsTree(uniqueElements));
-    }
-  }, [selectedResource]);
-
   const saveElements = (newValue: ElementDefinition[] | null) => {
-    setDisplayedElements(newValue);
-    setDisplayedElementsTree(getDisplayedElementsTree(newValue));
-
+    // removed uncessesary reference to modifying displayedElements.
+    // Any updates through dispatch will trickle down child component references accordingly.
     const { type } = selectedResource?.definition;
     const formikCleanedValues = removeUndefinedAndEmptyObjects(values);
     const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
-
     // Update with formik values
     nextEntry.resource = formikCleanedValues[type];
     nextEntry.resource.resourceType = type;
-
     // Add empty values for new elements
     newValue?.forEach((element) => {
       const elemPath = stripResourcePath(
@@ -144,9 +140,7 @@ const ResourceEditor = ({
         _.set(nextEntry.resource, elemPath, "");
       }
     });
-
     // Update resource state
-    setEditingResource(nextEntry.resource);
     dispatch({
       type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
       payload: nextEntry,
@@ -261,7 +255,6 @@ const ResourceEditor = ({
               onChange={(path, value) => {
                 const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
                 _.set(nextEntry.resource, path, value);
-                setEditingResource(nextEntry.resource);
                 dispatch({
                   type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
                   payload: nextEntry,

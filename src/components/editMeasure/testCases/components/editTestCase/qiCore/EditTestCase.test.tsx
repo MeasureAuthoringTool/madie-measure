@@ -2358,7 +2358,6 @@ describe("EditTestCase component", () => {
         "data.hapiOperationOutcome.outcomeResponse.text"
       );
       expect(errorText).not.toBeInTheDocument();
-      expect(mockEditor.resize).toHaveBeenCalledTimes(2);
     });
 
     it("should handle displaying a test case with null groupPopulation data", async () => {
