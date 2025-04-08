@@ -208,7 +208,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
   >([]);
 
   const managePagination = useCallback(() => {
-    if (measureDefinitions?.length > 0) {
+    if (measureDefinitions) {
       if (measureDefinitions?.length < currentLimit) {
         setOffset(0);
         setVisibleDefinitions([...measureDefinitions]);
@@ -436,7 +436,8 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
               </tr>
             </thead>
             <tbody data-testId="measure-definitions-table-body">
-              {measureDefinitions?.length > 0 ? (
+              {visibleDefinitions?.length > 0 ||
+              measure?.measureMetaData?.measureDefinitions?.length > 0 ? (
                 visibleDefinitions.map((definition, index) => (
                   <MeasureMetaDataRow
                     name={definition.term}
