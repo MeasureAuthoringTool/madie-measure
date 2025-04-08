@@ -15,7 +15,7 @@ import { TestCasesPassingDetailsProps } from "../common/interfaces";
 import { useFeatureFlags } from "@madie/madie-util";
 import "twin.macro";
 import "styled-components/macro";
-import RunTestButton from "../common/runTestsButton/RunTestsButton";
+import LoadingActionButton from "../common/loadingActionButton/LoadingActionButton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export interface NavTabProps {
@@ -33,6 +33,7 @@ export interface NavTabProps {
   validTestCases: TestCase[];
   exportTestCases: (bundleType: string) => void;
   onDeleteAllTestCases: () => void;
+  onGenerateOverlapValueSetReport: () => void;
 }
 
 const defaultStyle = {
@@ -64,6 +65,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
     validTestCases,
     exportTestCases,
     onDeleteAllTestCases,
+    onGenerateOverlapValueSetReport,
   } = props;
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -156,6 +158,15 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
         {((featureFlags.TestCaseListActionCenter && canEdit) ||
           !featureFlags.TestCaseListActionCenter) && (
           <>
+            {featureFlags.OverlappingValueSets && (
+              <LoadingActionButton
+                hasErrors={hasErrors}
+                isExecutionContextReady={executionContextReady}
+                onClick={onGenerateOverlapValueSetReport}
+                dataTestId="report-button"
+                label="Report"
+              />
+            )}
             <Button
               variant="outline"
               onClick={onImportTestCases}
@@ -195,10 +206,13 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
             </Button>
           </>
         )}
-        <RunTestButton
+        <LoadingActionButton
           hasErrors={hasErrors}
           isExecutionContextReady={executionContextReady}
-          onRunTests={executeTestCases}
+          onClick={executeTestCases}
+          dataTestId="execute-test-cases-button"
+          primary={true}
+          label="Run Test(s)"
         />
 
         {!featureFlags.TestCaseListActionCenter && (
