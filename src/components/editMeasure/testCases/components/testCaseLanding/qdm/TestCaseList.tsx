@@ -62,6 +62,7 @@ import useTestCaseServiceApi, {
 import useQdmCqlParsingService from "../../../api/cqlElmTranslationService/useQdmCqlParsingService";
 import ActionCenter from "../common/ActionCenter/ActionCenter";
 import CopyTestCaseDialog from "../common/copyTestCases/CopyTestCaseDialog";
+import { OverlappingValueSetReport } from "../../../util/ValueSetOverlapUtils";
 
 export const IMPORT_ERROR =
   "An error occurred while importing your test cases. Please try again, or reach out to the Help Desk.";
@@ -170,6 +171,10 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
   const [openCopyTestCaseDialog, setOpenCopyTestCaseDialog] =
     useState<boolean>(false);
+
+  const [overlappingValueSets, setOverlappingValueSets] = useState<
+    OverlappingValueSetReport[]
+  >([]);
 
   // const [callstackMap, setCallstackMap] = useState<CqlDefinitionCallstack>();
   // callStackMap is used for generating Excel Export
@@ -719,6 +724,11 @@ const TestCaseList = (props: TestCaseListProps) => {
     setExportExecuting(false);
   };
 
+  const handleGenerateValueSetOverlapReport = () => {
+    // TODO: MAT-8381
+    setOverlappingValueSets([]);
+  };
+
   const onTestCaseShiftDates = (testCases: TestCase[], shifted: number) => {
     testCaseService.current
       .shiftQdmTestCaseDates(
@@ -784,6 +794,9 @@ const TestCaseList = (props: TestCaseListProps) => {
                 measure={measure}
                 createNewTestCase={createNewTestCase}
                 executeTestCases={executeTestCases}
+                onGenerateValueSetOverlapReport={
+                  handleGenerateValueSetOverlapReport
+                }
                 onImportTestCases={() => {
                   setImportErrors((prevState) => [
                     ...prevState?.filter((e) => e !== IMPORT_ERROR),
