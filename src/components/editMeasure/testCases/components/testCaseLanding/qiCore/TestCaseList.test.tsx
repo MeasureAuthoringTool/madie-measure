@@ -651,13 +651,29 @@ describe("TestCaseList component", () => {
     );
   }
 
-  it("should disable Run QICore test case button, if execution context failed", async () => {
-    //{people: res}
+  it("should enable report button for QICore tests, if execution context is ready", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      OverlappingValueSets: true,
+    }));
+    renderTestCaseListComponent([], [], false);
+    await waitFor(() => {
+      expect(screen.getByTestId("report-button")).toBeEnabled();
+    });
+    userEvent.click(screen.getByTestId("report-button"));
+    // on click of report button disable the button as it will be in progress
+    // more unit tests to follow after MAT-8382
+    expect(screen.getByTestId("report-button")).toBeDisabled();
+  });
+
+  it("should disable Run QICore test case & report buttons, if execution context failed", async () => {
+    (useFeatureFlags as jest.Mock).mockReturnValue({
+      OverlappingValueSets: true,
+    });
     renderTestCaseListComponent([], undefined, true);
     await waitFor(() => {
-      const executeButton = screen.getByTestId("execute-test-cases-button");
-      expect(executeButton).toHaveProperty("disabled", true);
+      expect(screen.getByTestId("execute-test-cases-button")).toBeDisabled();
     });
+    expect(screen.getByTestId("report-button")).toBeDisabled();
   });
 
   it("should render list of test cases", async () => {
