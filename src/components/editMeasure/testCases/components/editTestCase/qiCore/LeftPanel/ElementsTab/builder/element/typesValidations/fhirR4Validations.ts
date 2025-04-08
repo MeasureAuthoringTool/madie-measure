@@ -138,8 +138,21 @@ export const getDecimalValidator = (required) => {
 };
 
 export const getUriValidator = (required) => {
-  const uriRegex = /\S*/;
-  const baseValidator = Yup.string().matches(uriRegex, "Invalid Uri format");
+  const uriRegex: RegExp = /\S*/;
+  const urnRegex: RegExp = /urn:oid:[0-2](\.(0|[1-9][0-9]*))+/;
+  const baseValidator = Yup.string()
+    .test(
+      "urn-specific-test",
+      "Invalid OID Format (ie., urn:oid:1.2.36.146.595.217.0.1 ).",
+      function (value) {
+        if (value && value.startsWith("urn:oid")) {
+          return urnRegex.test(value);
+        } else {
+          return true;
+        }
+      }
+    )
+    .matches(uriRegex, "Invalid Uri format");
 
   if (required) {
     return baseValidator.required("This field is required");
@@ -228,10 +241,20 @@ export const validationLookup = {
   instant: getInstantValidator,
 };
 
-export const getValidation = (type, required) => {
-  if (validationLookup[type]) {
-    const validation = validationLookup[type];
+export const getValidation = (type, required, label?) => {
+  let validation;
+
+  if (
+    (type === "http://hl7.org/fhirpath/System.String" || type === "string") &&
+    label === "id"
+  ) {
+    validation = validationLookup[label];
+
+    return validation(required);
+  } else if (validationLookup[type]) {
+    validation = validationLookup[type];
     return validation(required);
   }
+
   return Yup.mixed();
 };

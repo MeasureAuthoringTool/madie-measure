@@ -614,12 +614,15 @@ describe("MeasureServiceApi Tests", () => {
 
     mockedAxios.put.mockResolvedValue(resp);
 
-    const sharedMeasures = await measureServiceApi.shareMeasures(
+    const measureIdToAclSpecification = await measureServiceApi.shareMeasures(
       new Map([
         ["measureId1", ["userId1"]],
         ["measureId2", ["userId1"]],
       ])
     );
+
+    expect(mockedAxios.put).toBeCalledTimes(1);
+    expect(measureIdToAclSpecification).toEqual(data);
   });
 
   it("test shareMeasures failure", async () => {
@@ -633,6 +636,53 @@ describe("MeasureServiceApi Tests", () => {
         new Map([
           ["measureId1", ["userId1"]],
           ["measureId2", ["userId1"]],
+        ])
+      )
+    ).rejects.toThrow(errorMessage);
+  });
+
+  it("test unshareMeasures success", async () => {
+    const data = {
+      measureId1: [
+        {
+          userId: "userId1",
+          roles: ["SHARED_WITH"],
+        },
+      ],
+      measureId2: [
+        {
+          userId: "userId1",
+          roles: ["SHARED_WITH"],
+        },
+      ],
+    };
+
+    const resp: any = { status: 200, data };
+
+    mockedAxios.put.mockResolvedValue(resp);
+
+    const measureIdToAclSpecification = await measureServiceApi.unshareMeasures(
+      new Map([
+        ["measureId1", ["userId2"]],
+        ["measureId2", ["userId2"]],
+      ])
+    );
+
+    expect(mockedAxios.put).toBeCalledTimes(1);
+    expect(measureIdToAclSpecification).toEqual(data);
+  });
+
+  it("test unshareMeasures failure", async () => {
+    const errorMessage =
+      "Unable to unshare the selected measure(s) with the users who were unchecked. If the error persists, please contact the help desk.";
+    mockedAxios.put.mockImplementationOnce(() =>
+      Promise.reject(new Error(errorMessage))
+    );
+    await expect(
+      measureServiceApi.unshareMeasures(
+        new Map([
+          ["measureId1", ["userId2"]],
+          ["measureId2", ["userId2"]],
         ])
       )
     ).rejects.toThrow(errorMessage);

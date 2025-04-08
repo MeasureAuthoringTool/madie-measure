@@ -1,12 +1,11 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import * as React from "react";
 import clearAllMocks = jest.clearAllMocks;
 import ViewHRModal from "./ViewHRModal";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../api/useMeasureServiceApi";
-// @ts-ignore
-import { measureStore } from "@madie/madie-util";
+import userEvent from "@testing-library/user-event";
 
 jest.mock("@madie/madie-util", () => ({
   measureStore: {
@@ -81,20 +80,34 @@ describe("View Human Readable Modal component", () => {
     renderComponent();
     expect(screen.getByTestId("view-hr-modal")).toBeInTheDocument();
     act(() => {
-      fireEvent.click(screen.getByTestId("close-button"));
+      userEvent.click(screen.getByTestId("close-button"));
       expect(onCloseFn).toHaveBeenCalled();
     });
   });
 
   it("should call onClose when the cancel button is clicked", async () => {
     renderComponent();
-    fireEvent.click(screen.getByText(/Cancel/i));
+    userEvent.click(screen.getByText(/Cancel/i));
     expect(onCloseFn).toHaveBeenCalled();
+  });
+
+  it("should call exportMeasure for publishing when the export button is clicked", async () => {
+    renderComponent();
+    userEvent.click(screen.getByText(/Export/i));
+    const exportForPublishingButton = await screen.findByRole("button", {
+      name: "Export for Publishing",
+    });
+    userEvent.click(exportForPublishingButton);
+    expect(exportMeasure).toHaveBeenCalledWith("Error");
   });
 
   it("should call exportMeasure when the export button is clicked", async () => {
     renderComponent();
-    fireEvent.click(screen.getByText(/Export/i));
-    expect(exportMeasure).toHaveBeenCalled();
+    userEvent.click(screen.getByText(/Export/i));
+    const exportButton = await screen.findByRole("button", {
+      name: "Export",
+    });
+    userEvent.click(exportButton);
+    expect(exportMeasure).toHaveBeenCalledWith("Info");
   });
 });

@@ -5,7 +5,6 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 import { DialogContent, Typography, Backdrop } from "@mui/material";
-import { measureStore } from "@madie/madie-util";
 
 interface ModalProps {
   open;
@@ -20,37 +19,35 @@ export default function ViewHRModal(props: ModalProps) {
   const [loading, setLoading] = useState(true);
   const [hr, setHr] = useState<string>();
   const [error, setError] = useState<string>();
-  const [measure, setMeasure] = useState<any>(measureStore.state);
-  useEffect(() => {
-    const subscription = measureStore.subscribe(setMeasure);
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
 
-  const getHumanReadable = useCallback(async (measureId) => {
-    setLoading(true);
-    if (!measureId) {
-      setLoading(false);
-      return null;
-    } else {
-      try {
-        setHr(await measureServiceApi.fetchHumanReadable(measureId));
-        setLoading(false);
-        setError("");
-      } catch (e) {
-        setHr("");
-        setLoading(false);
-        setError(
-          "The human readable file is not available for this measure.  Contact Help Desk for additional information."
-        );
+  const getHumanReadable = useCallback(
+    async (measureId, open) => {
+      if (open) {
+        setLoading(true);
+        if (!measureId) {
+          setLoading(false);
+          return null;
+        } else {
+          try {
+            setHr(await measureServiceApi.fetchHumanReadable(measureId));
+            setLoading(false);
+            setError("");
+          } catch (e) {
+            setHr("");
+            setLoading(false);
+            setError(
+              "The human readable file is not available for this measure.  Contact Help Desk for additional information."
+            );
+          }
+        }
       }
-    }
-  }, []);
+    },
+    [measureId, open]
+  );
 
   useEffect(() => {
-    getHumanReadable(props.measureId);
-  }, [props.measureId, measure]);
+    getHumanReadable(measureId, open);
+  }, [measureId, open]);
 
   return (
     <MadieDialog
@@ -69,7 +66,6 @@ export default function ViewHRModal(props: ModalProps) {
         open,
         maxWidth: "lg",
         fullWidth: true,
-        onSubmit: exportMeasure,
       }}
       cancelButtonProps={{
         variant: "secondary",
@@ -78,11 +74,33 @@ export default function ViewHRModal(props: ModalProps) {
       }}
       continueButtonProps={{
         variant: "cyan",
-        type: "submit",
         "data-testid": "human-readable-export-button",
         continueText: "Export",
         hidden: error,
-        onClick: () => window.dispatchEvent(new Event("export-measure")),
+        popoverOptions: [
+          {
+            label: "Export",
+            dataTestId: "export-option",
+            toImplementFunction: () => {
+              const event = new CustomEvent("export-measure", {
+                detail: { elmErrorSeverity: "Info" },
+              });
+              window.dispatchEvent(event);
+              exportMeasure("Info");
+            },
+          },
+          {
+            label: "Export for Publishing",
+            dataTestId: "export-publishing-option",
+            toImplementFunction: () => {
+              const event = new CustomEvent("export-measure", {
+                detail: { elmErrorSeverity: "Error" },
+              });
+              window.dispatchEvent(event);
+              exportMeasure("Error");
+            },
+          },
+        ],
       }}
     >
       <DialogContent>

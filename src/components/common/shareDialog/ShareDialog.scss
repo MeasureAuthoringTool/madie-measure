@@ -16,3 +16,22 @@
 #add-user-btn {
   margin-top: 40px;
 }
+
+.confirmation-dialog-content {
+  margin-top: 3px;
+  font-family: "Rubik";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 19px;
+  color: #222222;
+
+  > .measure-name {
+    font-weight: 600;
+  }
+
+  > ul {
+    list-style: inside;
+    margin-left: 20px;
+  }
+}

@@ -47,6 +47,7 @@ import FileSaver from "file-saver";
 import TestCaseImportDialog from "../common/import/TestCaseImportDialog";
 import ActionCenter from "../common/ActionCenter/ActionCenter";
 import CopyTestCaseDialog from "../common/copyTestCases/CopyTestCaseDialog";
+import { OverlappingValueSetReport } from "../../../util/ValueSetOverlapUtils";
 
 export const IMPORT_ERROR =
   "An error occurred while importing your test cases. Please try again, or reach out to the Help Desk.";
@@ -168,6 +169,10 @@ const TestCaseList = (props: TestCaseListProps) => {
     useState<boolean>(false);
   const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
   const featureFlags = useFeatureFlags();
+
+  const [overlappingValueSets, setOverlappingValueSets] = useState<
+    OverlappingValueSetReport[]
+  >([]);
 
   useEffect(() => {
     if (testCases?.length != measure?.testCases?.length) {
@@ -421,6 +426,11 @@ const TestCaseList = (props: TestCaseListProps) => {
     }
   };
 
+  const handleGenerateValueSetOverlapReport = () => {
+    // TODO: MAT-8381
+    setOverlappingValueSets([]);
+  };
+
   const handleClose = () => {
     setCreateOpen(false);
   };
@@ -621,6 +631,9 @@ const TestCaseList = (props: TestCaseListProps) => {
                 measure={measure}
                 createNewTestCase={createNewTestCase}
                 executeTestCases={executeTestCases}
+                onGenerateOverlapValueSetReport={
+                  handleGenerateValueSetOverlapReport
+                }
                 onImportTestCasesFromBonnie={() => {
                   setErrors((prevState) => [
                     ...prevState?.filter((e) => e !== IMPORT_ERROR),

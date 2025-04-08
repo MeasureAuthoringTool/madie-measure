@@ -109,7 +109,7 @@ export default function DraftAction(props: PropTypes) {
 
   useEffect(() => {
     draftLookup(measures);
-  }, [measures, draftLookup]);
+  }, [measures.length, draftLookup]);
 
   return (
     <Tooltip data-testid="draft-action-tooltip" title={tooltipMessage} arrow>

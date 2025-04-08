@@ -65,7 +65,7 @@ const keyboardArrowStyles = {
 };
 
 //Convert date string to format of mm/dd/yyyy with no leading zeroes in month
-const convertDate = (date: string) => {
+export const convertDate = (date: string) => {
   if (!date) {
     return "";
   }
@@ -85,22 +85,52 @@ const sortSharedMeasures = (a: SharedMeasure, b: SharedMeasure) => {
   return new Date(b.dateShared).getTime() - new Date(a.dateShared).getTime();
 };
 
+const getErrorMessage = (error, baseMessage: string) => {
+  let toastMessage;
+
+  if (error?.response?.data?.message) {
+    toastMessage = error.response.data.message;
+  } else {
+    toastMessage = baseMessage;
+  }
+
+  return toastMessage;
+};
+
 const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
 
-  const [sharedMeasures, setSharedMeasures] = useState<SharedMeasure[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>("");
-  const [sharedWithAllSelectedMeasures, setSharedWithAllSelectedMeasures] =
-    useState<boolean>(false);
   const [saveDisabled, setSaveDisabled] = useState<boolean>(true);
   const [executing, setExecuting] = useState<boolean>(false);
-  const [sharedMeasuresRequest, setSharedMeasuresRequest] = useState(
+  const [errorMessage, setErrorMessage] = useState<string>("");
+
+  const [measureMap, setMeasureMap] = useState(new Map<string, Measure>());
+  const [sharedMeasures, setSharedMeasures] = useState<SharedMeasure[]>([]);
+  const [sharedWithAllSelectedMeasures, setSharedWithAllSelectedMeasures] =
+    useState<boolean>(false);
+  const [shareMeasuresRequest, setShareMeasuresRequest] = useState(
+    new Map<string, string[]>()
+  );
+  const [unshareMeasuresRequest, setUnshareMeasuresRequest] = useState(
     new Map<string, string[]>()
   );
 
-  const updateSharedMeasures = (measureId, harpId) => {
-    setSharedMeasuresRequest((map) => {
+  const [rowSelection, setRowSelection] = useState({});
+  const [initialRowIdsSelected, setInitialRowIdsSelected] = useState([]);
+  const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
+
+  const updateSharedMeasuresRequest = (measureId, harpId) => {
+    setShareMeasuresRequest((map) => {
+      const current = map.get(measureId) || [];
+      current.push(harpId);
+
+      return map.set(measureId, current);
+    });
+  };
+
+  const updateUnsharedMeasuresRequest = (measureId, harpId) => {
+    setUnshareMeasuresRequest((map) => {
       const current = map.get(measureId) || [];
       current.push(harpId);
 
@@ -129,7 +159,7 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
 
     let sharedWithAllSelectedMeasures = true;
 
-    const updatedSharedMeasures = sharedMeasures.map((measure) => {
+    const updateSharedMeasures = sharedMeasures.map((measure) => {
       if (
         measure.subRows.length &&
         measure.subRows.some((subRow) => subRow.userId === harpId)
@@ -138,7 +168,7 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
       } else {
         sharedWithAllSelectedMeasures = false;
 
-        updateSharedMeasures(measure.measureId, harpId);
+        updateSharedMeasuresRequest(measure.measureId, harpId);
 
         return {
           ...measure,
@@ -156,35 +186,12 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
       }
     });
 
-    setSharedMeasures(updatedSharedMeasures);
+    setSharedMeasures(updateSharedMeasures);
+    setSharedWithAllSelectedMeasures(sharedWithAllSelectedMeasures);
 
     if (!sharedWithAllSelectedMeasures) {
       setSaveDisabled(false);
       formik.resetForm();
-    }
-
-    setSharedWithAllSelectedMeasures(sharedWithAllSelectedMeasures);
-  };
-
-  const handleSubmit = async () => {
-    setExecuting(true);
-
-    try {
-      await measureServiceApi.shareMeasures(sharedMeasuresRequest);
-
-      onClose({
-        toastType: "success",
-        toastMessage: "The measure(s) were successfully shared.",
-        toastOpen: true,
-      });
-    } catch (error) {
-      onClose({
-        toastType: "danger",
-        toastMessage: error.message,
-        toastOpen: true,
-      });
-    } finally {
-      setExecuting(false);
     }
   };
 
@@ -206,13 +213,16 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
         uniqueMeasureSets.map((measureSet) => measureSet.measureSetId)
       );
       const measureIds = responses.map((measure) => measure.id);
-      const measureMap = new Map(
+
+      const measureMap = new Map<string, Measure>(
         responses.map((measure) => [measure.id, measure])
       );
+      setMeasureMap(measureMap);
 
       const sharedMeasures = await measureServiceApi.getSharedMeasures(
         measureIds
       );
+
       setSharedMeasures(
         measureIds.map((measureId: string) => ({
           measureId,
@@ -231,12 +241,113 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
             .sort(sortSharedMeasures),
         }))
       );
+
+      table.toggleAllRowsSelected(true);
+      setInitialRowIdsSelected(Object.keys(table.getState().rowSelection));
     } catch (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(
+        getErrorMessage(
+          error,
+          "Unable to retrieve users that the selected measure(s) is shared with. If the error persists, please contact the help desk."
+        )
+      );
     } finally {
       setLoading(false);
     }
   }, [open]);
+
+  const handleSave = async () => {
+    setConfirmationDialogOpen(false);
+    setExecuting(true);
+
+    if (option === "Share With") {
+      try {
+        await measureServiceApi.shareMeasures(shareMeasuresRequest);
+
+        onClose({
+          toastType: "success",
+          toastMessage: "The measure(s) were successfully shared.",
+          toastOpen: true,
+        });
+      } catch (error) {
+        onClose({
+          toastType: "danger",
+          toastMessage: getErrorMessage(
+            error,
+            "Unable to share the selected measure(s) with the added users. If the error persists, please contact the help desk."
+          ),
+          toastOpen: true,
+        });
+      } finally {
+        setExecuting(false);
+      }
+    } else if (option === "Unshare") {
+      try {
+        await measureServiceApi.unshareMeasures(unshareMeasuresRequest);
+
+        onClose({
+          toastType: "success",
+          toastMessage: "The measure(s) were successfully unshared.",
+          toastOpen: true,
+        });
+      } catch (error) {
+        onClose({
+          toastType: "danger",
+          toastMessage: getErrorMessage(
+            error,
+            "Unable to unshare the selected measure(s) with the users who were unchecked. If the error persists, please contact the help desk."
+          ),
+          toastOpen: true,
+        });
+      } finally {
+        setExecuting(false);
+      }
+    }
+  };
+
+  const onRowSelectionChange = useCallback(async () => {
+    if (initialRowIdsSelected.length) {
+      const rowIdsSelected = Object.keys(rowSelection);
+
+      const rowIdsUnselected: string[] = initialRowIdsSelected.filter(
+        (element) => !rowIdsSelected.includes(element)
+      );
+
+      setUnshareMeasuresRequest(new Map<string, string[]>());
+
+      rowIdsUnselected.map((rowId) => {
+        const [measureId, userId] = rowId.split(" ");
+        updateUnsharedMeasuresRequest(measureId, userId);
+      });
+    }
+  }, [rowSelection]);
+
+  const confirmationDialogWarningContent = () => {
+    return (
+      <div>
+        <div className="confirmation-dialog-content">
+          You are about to unshare
+        </div>
+        {Array.from(unshareMeasuresRequest).map(([measureId, userIds]) => (
+          <>
+            <div className="confirmation-dialog-content">
+              <div className="measure-name">
+                {measureMap.get(measureId)
+                  ? measureMap.get(measureId).measureName
+                  : measureId}
+              </div>
+              <div> with the following users:</div>
+              <ul>
+                {userIds.map((userId) => (
+                  <li>{userId}</li>
+                ))}
+              </ul>
+            </div>
+          </>
+        ))}
+      </div>
+    );
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -245,23 +356,8 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
     validationSchema: Yup.object().shape({
       harpId: Yup.string().test(harpIdCheck(sharedWithAllSelectedMeasures)),
     }),
-    onSubmit: handleSubmit,
+    onSubmit: handleSave,
   });
-
-  useEffect(() => {
-    getSharedMeasure();
-  }, [getSharedMeasure]);
-
-  useEffect(() => {
-    formik.validateForm();
-  }, [sharedWithAllSelectedMeasures]);
-
-  useEffect(() => {
-    setSaveDisabled(true);
-    setSharedMeasuresRequest(new Map<string, string[]>());
-    table.resetExpanded();
-    formik.resetForm();
-  }, [onClose]);
 
   const columns = useMemo<ColumnDef<SharedMeasure>[]>(() => {
     let columnDefs = [];
@@ -292,7 +388,8 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
             <Checkbox
               icon={icon}
               checkedIcon={checkedIcon}
-              checked={true}
+              checked={info.row.getIsSelected()}
+              onChange={info.row.getToggleSelectedHandler()}
               data-testid={`unshare-checkbox-${info.row.original.userId}_${info.row.original.measureId}`}
             />
           ),
@@ -349,7 +446,7 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
             ) : null}
           </>
         ),
-        id: "expand-button",
+        id: "expandButton",
       },
     ];
 
@@ -358,6 +455,7 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
 
   const table = useReactTable({
     data: sharedMeasures,
+    getRowId: (row) => `${row.measureId}${row.userId ? ` ${row.userId}` : ""}`,
     columns,
     defaultColumn: {
       size: 200,
@@ -367,7 +465,34 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getSubRows: (row) => row.subRows,
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      rowSelection,
+    },
   });
+
+  useEffect(() => {
+    getSharedMeasure();
+  }, [getSharedMeasure]);
+
+  useEffect(() => {
+    formik.validateForm();
+  }, [sharedWithAllSelectedMeasures]);
+
+  useEffect(() => {
+    onRowSelectionChange();
+  }, [table.getState().rowSelection]);
+
+  useEffect(() => {
+    setSaveDisabled(true);
+    setShareMeasuresRequest(new Map<string, string[]>());
+    setUnshareMeasuresRequest(new Map<string, string[]>());
+    setInitialRowIdsSelected([]);
+    table.resetRowSelection();
+    table.resetExpanded();
+    formik.resetForm();
+  }, [onClose]);
 
   return (
     <>
@@ -378,7 +503,11 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
         dialogProps={{
           onClose,
           open,
-          onSubmit: formik.handleSubmit,
+          onSubmit: () => {
+            option === "Share With"
+              ? formik.handleSubmit()
+              : setConfirmationDialogOpen(true);
+          },
           maxWidth: "lg",
           "data-testid": "share-dialog",
         }}
@@ -393,7 +522,10 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
           type: "submit",
           continueText: "Save",
           "data-testid": "share-save-button",
-          disabled: saveDisabled || !formik.isValid || executing,
+          disabled:
+            option === "Share With"
+              ? saveDisabled || !formik.isValid || executing
+              : table.getIsAllRowsSelected() || executing,
         }}
       >
         <div id="measure-landing" data-testid="measure-landing">
@@ -490,10 +622,7 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
                         }}
                       >
                         {row.getVisibleCells().map((cell) => (
-                          <td
-                            key={cell.id}
-                            data-testid={`${cell.id}_${cell.row.original.measureId}`}
-                          >
+                          <td key={cell.id} data-testid={`${cell.id}`}>
                             {flexRender(
                               cell.column.columnDef.cell,
                               cell.getContext()
@@ -508,13 +637,47 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
             </div>
           </div>
         </div>
+
         <Backdrop
           sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-          open={loading}
+          open={loading || executing}
         >
           <MadieSpinner style={{ height: 50, width: 50 }} />
-          <Typography color="inherit">Loading shared measures...</Typography>
+          {loading && (
+            <Typography color="inherit">Loading shared measures...</Typography>
+          )}
+          {executing && <Typography color="inherit">Saving...</Typography>}
         </Backdrop>
+      </MadieDialog>
+
+      <MadieDialog
+        title="Are you sure?"
+        dialogProps={{
+          open: confirmationDialogOpen,
+          onClose: () => {
+            setConfirmationDialogOpen(false);
+          },
+          "data-testid": "share-confirmation-dialog",
+        }}
+        cancelButtonProps={{
+          onClick: () => {
+            setConfirmationDialogOpen(false);
+          },
+          cancelText: "Cancel",
+          "data-testid": "share-confirmation-dialog-cancel-button",
+        }}
+        continueButtonProps={{
+          type: "submit",
+          continueText: "Accept",
+          onClick: formik.handleSubmit,
+          "data-testid": "share-confirmation-dialog-accept-button",
+        }}
+      >
+        <div id="discard-changes-dialog-body">
+          <section className="dialog-warning-body">
+            {confirmationDialogWarningContent()}
+          </section>
+        </div>
       </MadieDialog>
     </>
   );
