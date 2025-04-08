@@ -659,6 +659,10 @@ describe("TestCaseList component", () => {
     await waitFor(() => {
       expect(screen.getByTestId("report-button")).toBeEnabled();
     });
+    userEvent.click(screen.getByTestId("report-button"));
+    // on click of report button disable the button as it will be in progress
+    // more unit tests to follow after MAT-8382
+    expect(screen.getByTestId("report-button")).toBeDisabled();
   });
 
   it("should disable Run QICore test case & report buttons, if execution context failed", async () => {
