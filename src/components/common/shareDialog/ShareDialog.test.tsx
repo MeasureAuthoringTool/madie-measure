@@ -470,7 +470,13 @@ describe("Create Share Dialog component", () => {
     );
     expect(
       screen.getByTestId("0.0_dateShared_TestMeasureId1")
-    ).toHaveTextContent(today.toLocaleDateString());
+    ).toHaveTextContent(
+      today.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "numeric",
+        day: "2-digit",
+      })
+    );
 
     //Row 2
     expect(
@@ -482,21 +488,39 @@ describe("Create Share Dialog component", () => {
     );
     expect(
       screen.getByTestId("1.0_dateShared_TestMeasureId2")
-    ).toHaveTextContent(today.toLocaleDateString());
+    ).toHaveTextContent(
+      today.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "numeric",
+        day: "2-digit",
+      })
+    );
     //Subrow 2 of Row 2
     expect(screen.getByTestId("1.1_userId_TestMeasureId2")).toHaveTextContent(
       "userId1"
     );
     expect(
       screen.getByTestId("1.1_dateShared_TestMeasureId2")
-    ).toHaveTextContent(yesterday.toLocaleDateString());
+    ).toHaveTextContent(
+      yesterday.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "numeric",
+        day: "2-digit",
+      })
+    );
     //Subrow 3 of Row 2
     expect(screen.getByTestId("1.2_userId_TestMeasureId2")).toHaveTextContent(
       "userId2"
     );
     expect(
       screen.getByTestId("1.2_dateShared_TestMeasureId2")
-    ).toHaveTextContent(yesterday.toLocaleDateString());
+    ).toHaveTextContent(
+      yesterday.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "numeric",
+        day: "2-digit",
+      })
+    );
   });
 
   it("should add a user row to the grid for each measure that does not already have that user (after stripping all whitespace in HARP ID field)", async () => {
@@ -555,7 +579,13 @@ describe("Create Share Dialog component", () => {
     );
     expect(
       screen.getByTestId("0.0_dateShared_TestMeasureId1")
-    ).toHaveTextContent(today.toLocaleDateString());
+    ).toHaveTextContent(
+      today.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "numeric",
+        day: "2-digit",
+      })
+    );
 
     //Row 2
     expect(
@@ -567,21 +597,39 @@ describe("Create Share Dialog component", () => {
     );
     expect(
       screen.getByTestId("1.0_dateShared_TestMeasureId2")
-    ).toHaveTextContent(today.toLocaleDateString());
+    ).toHaveTextContent(
+      today.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "numeric",
+        day: "2-digit",
+      })
+    );
     //Subrow 2 of Row 2
     expect(screen.getByTestId("1.1_userId_TestMeasureId2")).toHaveTextContent(
       "userId1"
     );
     expect(
       screen.getByTestId("1.1_dateShared_TestMeasureId2")
-    ).toHaveTextContent(yesterday.toLocaleDateString());
+    ).toHaveTextContent(
+      yesterday.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "numeric",
+        day: "2-digit",
+      })
+    );
     //Subrow 3 of Row 2
     expect(screen.getByTestId("1.2_userId_TestMeasureId2")).toHaveTextContent(
       "userId2"
     );
     expect(
       screen.getByTestId("1.2_dateShared_TestMeasureId2")
-    ).toHaveTextContent(yesterday.toLocaleDateString());
+    ).toHaveTextContent(
+      yesterday.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "numeric",
+        day: "2-digit",
+      })
+    );
   });
 
   it("should add a user row to the grid for each measure that does not already have that user and save successfully after clicking Save button.", async () => {
@@ -749,7 +797,13 @@ describe("Create Share Dialog component", () => {
     );
     expect(
       screen.getByTestId("0.0_dateShared_TestMeasureId1")
-    ).toHaveTextContent(today.toLocaleDateString());
+    ).toHaveTextContent(
+      today.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "numeric",
+        day: "2-digit",
+      })
+    );
 
     //Row 2
     expect(
@@ -761,20 +815,38 @@ describe("Create Share Dialog component", () => {
     );
     expect(
       screen.getByTestId("1.0_dateShared_TestMeasureId2")
-    ).toHaveTextContent(today.toLocaleDateString());
+    ).toHaveTextContent(
+      today.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "numeric",
+        day: "2-digit",
+      })
+    );
     //Subrow 2 of Row 2
     expect(screen.getByTestId("1.1_userId_TestMeasureId2")).toHaveTextContent(
       "userId1"
     );
     expect(
       screen.getByTestId("1.1_dateShared_TestMeasureId2")
-    ).toHaveTextContent(yesterday.toLocaleDateString());
+    ).toHaveTextContent(
+      yesterday.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "numeric",
+        day: "2-digit",
+      })
+    );
     //Subrow 3 of Row 2
     expect(screen.getByTestId("1.2_userId_TestMeasureId2")).toHaveTextContent(
       "userId2"
     );
     expect(
       screen.getByTestId("1.2_dateShared_TestMeasureId2")
-    ).toHaveTextContent(yesterday.toLocaleDateString());
+    ).toHaveTextContent(
+      yesterday.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "numeric",
+        day: "2-digit",
+      })
+    );
   });
 });

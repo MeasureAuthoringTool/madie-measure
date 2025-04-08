@@ -57,6 +57,7 @@
       line-height: 16px;
       padding-top: 16px !important;
       padding-bottom: 16px !important;
+      max-width: 460px;
 
       div > .activity {
         display: flex;
@@ -119,4 +120,13 @@
       }
     }
   }
+}
+
+.share-unshare-dialog-info-text {
+  color: #515151;
+  font-weight: 400;
+  font-family: "Rubik";
+  margin-left: 32px;
+  margin-right: 32px;
+  padding-bottom: 17px;
 }
