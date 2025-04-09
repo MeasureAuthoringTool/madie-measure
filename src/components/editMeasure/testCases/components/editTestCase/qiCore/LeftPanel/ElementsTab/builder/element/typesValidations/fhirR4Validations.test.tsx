@@ -71,19 +71,75 @@ describe("Validation Functions", () => {
     expect(nonRequiredString.validate("1")).resolves.toBe("1");
   });
 
-  it("getValidation uriValidator", () => {
+  it("succeeds when required URL is present ", () => {
     const requiredString = getValidation("uri", true);
-    const nonRequiredString = getValidation("uri", false);
     expect(requiredString).toBeInstanceOf(Yup.StringSchema);
     expect(
       requiredString.validate("http://hl7.org/fhirpath/System.String")
     ).resolves.toBe("http://hl7.org/fhirpath/System.String");
+  });
+  it("fails when required URL is not present ", () => {
+    const requiredString = getValidation("uri", true);
+    expect(requiredString).toBeInstanceOf(Yup.StringSchema);
     expect(requiredString.validate("")).rejects.toThrow(
       "This field is required"
     );
-    expect(nonRequiredString.validate("false")).resolves.toBe("false");
   });
 
+  it("succeeds when URL is present && not required", () => {
+    const nonRequiredString = getValidation("uri", false);
+    expect(nonRequiredString).toBeInstanceOf(Yup.StringSchema);
+    expect(nonRequiredString.validate("http://google.com")).resolves.toBe(
+      "http://google.com"
+    );
+  });
+
+  it("succeeds when OID is present && is not required", () => {
+    const nonRequiredString = getValidation("uri", false);
+    expect(nonRequiredString).toBeInstanceOf(Yup.StringSchema);
+    expect(
+      nonRequiredString.validate("urn:oid:1.2.36.146.595.217.0.")
+    ).resolves.toBe("urn:oid:1.2.36.146.595.217.0.");
+  });
+
+  it("succeeds when OID is present && is required", () => {
+    const requiredString = getValidation("uri", true);
+    expect(requiredString).toBeInstanceOf(Yup.StringSchema);
+    expect(
+      requiredString.validate("urn:oid:1.2.36.146.595.217.0.1")
+    ).resolves.toBe("urn:oid:1.2.36.146.595.217.0.1");
+  });
+
+  it("fails when OID is required && is not present", () => {
+    const requiredString = getValidation("uri", true);
+    expect(requiredString).toBeInstanceOf(Yup.StringSchema);
+    expect(requiredString.validate("")).rejects.toThrow(
+      "This field is required"
+    );
+  });
+
+  it("succeeds when OID is not present && is not required", () => {
+    const requiredString = getValidation("uri", false);
+    expect(requiredString).toBeInstanceOf(Yup.StringSchema);
+    expect(requiredString.validate("")).resolves.toBe("");
+  });
+
+  it("fails when OID is required && is present but incorrect", async () => {
+    const requiredString = getValidation("uri", true);
+    expect(requiredString).toBeInstanceOf(Yup.StringSchema);
+    await expect(requiredString.validate("urn:oid:1123")).rejects.toThrow(
+      "Invalid OID Format (ie., urn:oid:1.2.36.146.595.217.0.1 )."
+    );
+  });
+  it("succeeds when UUID is present && is not required", () => {
+    const nonRequiredString = getValidation("uri", false);
+    expect(nonRequiredString).toBeInstanceOf(Yup.StringSchema);
+    expect(
+      nonRequiredString.validate(
+        "urn:uuid:c757873d-ec9a-4326-a141-556f43239520"
+      )
+    ).resolves.toBe("urn:uuid:c757873d-ec9a-4326-a141-556f43239520");
+  });
   it("getValidation DecimalValidator", () => {
     const requiredString = getValidation("decimal", true);
     const nonRequiredString = getValidation("decimal", false);
