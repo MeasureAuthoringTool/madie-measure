@@ -12,7 +12,7 @@ import "./TestCaseImportDialog.css";
 import * as _ from "lodash";
 import useTestCaseServiceApi from "../../../../api/useTestCaseServiceApi";
 import { ScanValidationDto } from "../../../../api/models/ScanValidationDto";
-import JSZip, { file } from "jszip";
+import JSZip from "jszip";
 import prettyBytes from "pretty-bytes";
 import CloseIcon from "@mui/icons-material/Close";
 import { CircularProgress } from "@mui/material";
@@ -21,7 +21,6 @@ import {
   TestCaseExportMetaData,
 } from "@madie/madie-models";
 import validator from "validator";
-import * as path from "path";
 
 const TestCaseImportDialog = ({ dialogOpen, handleClose, onImport }) => {
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -87,6 +86,7 @@ const TestCaseImportDialog = ({ dialogOpen, handleClose, onImport }) => {
       let fileNames = [];
       let madieFileMetaData: TestCaseExportMetaData[];
       let madieFilePresent = true;
+      let separator: string = "/";
       const parentFolderName = acceptedFiles[0].name
         .replace(".zip", "")
         .split(" ")[0];
@@ -109,7 +109,13 @@ const TestCaseImportDialog = ({ dialogOpen, handleClose, onImport }) => {
               _.keys(content.files).map((fileName) => {
                 // Zip downloaded from MADiE doesn't have a parentFolderName
                 // Ex: a648e724-ce72-4cac-b0a7-3c4d52784f73/CMS136FHIR-v0.0.000-tcseries-tctitle001.json
-                const folderNameSplit = fileName.split("/");
+                // Windows Zip sometimes does this with the backslash separator
+                //     Ex: a648e724-ce72-4cac-b0a7-3c4d52784f73\\CMS136FHIR-v0.0.000-tcseries-tctitle001.json
+
+                if (fileName.split("\\").length > 1) {
+                  separator = "\\";
+                }
+                const folderNameSplit = fileName.split(separator);
                 if (validator.isUUID(folderNameSplit[0])) {
                   if (fileName.endsWith(".json")) {
                     return fileName;
@@ -131,11 +137,10 @@ const TestCaseImportDialog = ({ dialogOpen, handleClose, onImport }) => {
         .then((values) => {
           _.forEach(values, (val, i) => {
             let patientId;
-            const normalizedFileName = path.normalize(fileNames[i]);
-            if (normalizedFileName.startsWith(parentFolderName)) {
-              patientId = _.split(normalizedFileName, "/")[1];
+            if (fileNames[i].startsWith(parentFolderName)) {
+              patientId = _.split(fileNames[i], separator)[1];
             } else {
-              patientId = _.split(normalizedFileName, "/")[0];
+              patientId = _.split(fileNames[i], separator)[0];
             }
 
             // check for an existing file in the directory
