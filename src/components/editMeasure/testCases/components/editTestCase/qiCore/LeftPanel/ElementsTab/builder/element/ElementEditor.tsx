@@ -223,11 +223,6 @@ const ElementEditor = ({
     );
   };
   useEffect(() => {
-    console.log(
-      "stateful vs Selected",
-      statefulSelectedResource,
-      selectedResource
-    );
     if (statefulSelectedResource && Object.keys(displayedElementsTree).length) {
       triggerFormBuilder();
     }
