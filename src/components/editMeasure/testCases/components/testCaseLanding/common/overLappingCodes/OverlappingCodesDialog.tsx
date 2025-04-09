@@ -184,10 +184,6 @@ const OverlappingCodesReport = ({
         tw="min-w-full"
         data-testid="overlapping-codes-tbl"
         className="ml-table"
-        style={{
-          borderSpacing: "0 2em !important",
-          borderBottom: "1px solid rgb(140, 140, 140)",
-        }}
       >
         <thead tw="bg-slate">
           {table.getHeaderGroups().map((headerGroup) => (
