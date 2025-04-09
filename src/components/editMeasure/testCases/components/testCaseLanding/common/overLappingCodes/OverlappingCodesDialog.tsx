@@ -66,10 +66,10 @@ const OverlappingCodesReport = ({
     } else {
       const start = (currentPage - 1) * currentLimit;
       const end = start + currentLimit;
-      const newVisibleLibraries = overlappingCodes.slice(start, end);
-      setVisibleCodes(newVisibleLibraries);
+      const newVisibleCodes = overlappingCodes.slice(start, end);
+      setVisibleCodes(newVisibleCodes);
       setOffset(start);
-      setVisibleItems(newVisibleLibraries.length);
+      setVisibleItems(newVisibleCodes.length);
       setTotalItems(overlappingCodes.length);
       setTotalPages(Math.ceil(overlappingCodes.length / currentLimit));
     }
