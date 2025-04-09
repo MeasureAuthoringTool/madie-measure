@@ -175,7 +175,7 @@ const OverlappingCodesReport = ({
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     enableRowSelection: true,
-    getSubRows: (row) => row.subRows, // Define how to access sub-rows
+    getSubRows: (row) => row.subRows,
   });
 
   return (
