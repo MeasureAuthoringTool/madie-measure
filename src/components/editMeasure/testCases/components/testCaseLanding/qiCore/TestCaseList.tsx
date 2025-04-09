@@ -47,7 +47,11 @@ import FileSaver from "file-saver";
 import TestCaseImportDialog from "../common/import/TestCaseImportDialog";
 import ActionCenter from "../common/ActionCenter/ActionCenter";
 import CopyTestCaseDialog from "../common/copyTestCases/CopyTestCaseDialog";
-import { OverlappingValueSetReport } from "../../../util/ValueSetOverlapUtils";
+import {
+  OverlappingCode,
+  overlappingCodes as overlappingCodes1,
+} from "../../../util/ValueSetOverlapUtils";
+import OverlappingCodesDialog from "../common/overLappingCodes/OverlappingCodesDialog";
 
 export const IMPORT_ERROR =
   "An error occurred while importing your test cases. Please try again, or reach out to the Help Desk.";
@@ -160,7 +164,6 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [openImportDialog, setOpenImportDialog] = useState<boolean>(false);
   const [openDeleteAllTestCasesDialog, setOpenDeleteAllTestCasesDialog] =
     useState<boolean>(false);
-  const [testCaseShiftWarning, setTestCaseShiftWarning] = useState<any>();
   const abortController = useRef(null);
   const [createOpen, setCreateOpen] = useState<boolean>(false);
   const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
@@ -170,9 +173,11 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
   const featureFlags = useFeatureFlags();
 
-  const [overlappingValueSets, setOverlappingValueSets] = useState<
-    OverlappingValueSetReport[]
-  >([]);
+  const [overlappingCodes, setOverlappingCodes] = useState<OverlappingCode[]>(
+    []
+  );
+  const [openOverlappingCodesDialog, setOpenOverlappingCodesDialog] =
+    useState<boolean>(false);
 
   useEffect(() => {
     if (testCases?.length != measure?.testCases?.length) {
@@ -427,8 +432,8 @@ const TestCaseList = (props: TestCaseListProps) => {
   };
 
   const handleGenerateValueSetOverlapReport = () => {
-    // TODO: MAT-8381
-    setOverlappingValueSets([]);
+    setOverlappingCodes(overlappingCodes1);
+    setOpenOverlappingCodesDialog(true);
   };
 
   const handleClose = () => {
@@ -804,6 +809,11 @@ const TestCaseList = (props: TestCaseListProps) => {
             open: false,
           })
         }
+      />
+      <OverlappingCodesDialog
+        openDialog={openOverlappingCodesDialog}
+        handleClose={() => setOpenOverlappingCodesDialog(false)}
+        overlappingCodes={overlappingCodes}
       />
     </div>
   );

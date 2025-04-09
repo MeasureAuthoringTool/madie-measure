@@ -55,14 +55,18 @@ import useExcelExportService from "../../../api/useExcelExportService";
 import FileSaver from "file-saver";
 import { AxiosError, AxiosResponse } from "axios";
 import ExportModal from "./ExportModal";
-import useTestCaseServiceApi, {
+import {
   QrdaTestCaseDTO,
   QrdaGroupExportDTO,
 } from "../../../api/useTestCaseServiceApi";
 import useQdmCqlParsingService from "../../../api/cqlElmTranslationService/useQdmCqlParsingService";
 import ActionCenter from "../common/ActionCenter/ActionCenter";
 import CopyTestCaseDialog from "../common/copyTestCases/CopyTestCaseDialog";
-import { OverlappingValueSetReport } from "../../../util/ValueSetOverlapUtils";
+import {
+  OverlappingCode,
+  overlappingCodes as overlappingCodes1,
+} from "../../../util/ValueSetOverlapUtils";
+import OverlappingCodesDialog from "../common/overLappingCodes/OverlappingCodesDialog";
 
 export const IMPORT_ERROR =
   "An error occurred while importing your test cases. Please try again, or reach out to the Help Desk.";
@@ -172,9 +176,11 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [openCopyTestCaseDialog, setOpenCopyTestCaseDialog] =
     useState<boolean>(false);
 
-  const [overlappingValueSets, setOverlappingValueSets] = useState<
-    OverlappingValueSetReport[]
-  >([]);
+  const [overlappingCodes, setOverlappingCodes] = useState<OverlappingCode[]>(
+    []
+  );
+  const [openOverlappingCodesDialog, setOpenOverlappingCodesDialog] =
+    useState<boolean>(false);
 
   // const [callstackMap, setCallstackMap] = useState<CqlDefinitionCallstack>();
   // callStackMap is used for generating Excel Export
@@ -725,8 +731,8 @@ const TestCaseList = (props: TestCaseListProps) => {
   };
 
   const handleGenerateValueSetOverlapReport = () => {
-    // TODO: MAT-8381
-    setOverlappingValueSets([]);
+    setOverlappingCodes(overlappingCodes1);
+    setOpenOverlappingCodesDialog(true);
   };
 
   const onTestCaseShiftDates = (testCases: TestCase[], shifted: number) => {
@@ -969,6 +975,11 @@ const TestCaseList = (props: TestCaseListProps) => {
         handleClose={() =>
           setImportDialogState({ ...importDialogState, open: false })
         }
+      />
+      <OverlappingCodesDialog
+        openDialog={openOverlappingCodesDialog}
+        handleClose={() => setOpenOverlappingCodesDialog(false)}
+        overlappingCodes={overlappingCodes}
       />
 
       {exportExecuting && <ExportModal openModal={true}></ExportModal>}
