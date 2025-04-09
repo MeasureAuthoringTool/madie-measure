@@ -469,11 +469,12 @@ export default function MeasureList(props: {
     table.toggleAllRowsSelected(false);
   }, [props.currentLimit, props.currentPage]);
 
-  const parentMeasures = props.measureList?.filter((measure) => {
-    return table
-      .getSelectedRowModel()
-      .rows.find((row) => row.original.id === measure.id);
-  });
+  const parentMeasures =
+    props.measureList?.filter((measure) => {
+      return table
+        .getSelectedRowModel()
+        .rows.find((row) => row.original.id === measure.id);
+    }) || [];
 
   const expandedMeasures = selectedExpandedMeasuresIds?.map(
     (expandedMeasureId) => {
