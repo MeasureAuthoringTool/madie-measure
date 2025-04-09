@@ -28,6 +28,9 @@ import { Simulate } from "react-dom/test-utils";
 // @ts-ignore
 import { useFeatureFlags, checkUserCanEdit } from "@madie/madie-util";
 
+const EXPORT_FAILURE_MESSAGE =
+  "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists.";
+
 // CSSStyleDeclaration
 const mockPush = jest.fn();
 jest.mock("react-router-dom", () => ({
@@ -1347,6 +1350,7 @@ describe("Measure List component", () => {
     });
     unmount();
   });
+
   it("should display a 400 as expected", async () => {
     const error = {
       response: {
@@ -1398,7 +1402,7 @@ describe("Measure List component", () => {
 
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
-        "An error occurred while decoding the response."
+        EXPORT_FAILURE_MESSAGE
       );
     });
     unmount();
@@ -1842,7 +1846,7 @@ describe("Measure List component", () => {
 
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
-        "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists."
+        EXPORT_FAILURE_MESSAGE
       );
     });
     unmount();
@@ -1914,14 +1918,29 @@ describe("Measure List component", () => {
 
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
-        "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists."
+        EXPORT_FAILURE_MESSAGE
       );
     });
     unmount();
   });
 
   it("should  not call the export when clicking cancel button", async () => {
-    const { getByTestId, unmount } = render(
+    const success = {
+      response: {
+        data: {
+          size: 635581,
+          type: "application/octet-stream",
+        },
+      },
+    };
+    useMeasureServiceMock.mockImplementation(() => {
+      return {
+        ...mockMeasureServiceApi,
+        getMeasureExport: jest.fn().mockRejectedValue(success),
+        fetchMeasure: jest.fn().mockResolvedValueOnce(measures[2]),
+      } as unknown as MeasureServiceApi;
+    });
+    render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -1941,9 +1960,6 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
 
-    window.URL.createObjectURL = jest
-      .fn()
-      .mockReturnValueOnce("http://fileurl");
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[1]);
@@ -1956,12 +1972,10 @@ describe("Measure List component", () => {
     });
     userEvent.click(exportForPublishingButton);
 
-    const cancelButton = getByTestId("ds-btn");
+    const cancelButton = await screen.findByRole("button", { name: "Cancel" });
     expect(cancelButton).toBeInTheDocument();
     userEvent.click(cancelButton);
     expect(cancelButton).not.toBeInTheDocument();
-
-    unmount();
   });
 
   // this test has been passing based on side effects. changing the order that it works in breaks all other tests.
@@ -1977,11 +1991,12 @@ describe("Measure List component", () => {
     useMeasureServiceMock.mockImplementation(() => {
       return {
         ...mockMeasureServiceApi,
-        getMeasureExport: jest.fn().mockResolvedValue(success),
+        getMeasureExport: jest.fn().mockResolvedValueOnce(success),
+        fetchMeasure: jest.fn().mockResolvedValueOnce(measures[2]),
       } as unknown as MeasureServiceApi;
     });
 
-    const { getByTestId } = render(
+    render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -2013,12 +2028,79 @@ describe("Measure List component", () => {
     });
     userEvent.click(exportForPublishingButton);
 
-    await waitFor(() => {
-      const continueButton = getByTestId("ds-btn");
-      expect(continueButton).toBeInTheDocument();
-      userEvent.click(continueButton);
-      expect(continueButton).not.toBeInTheDocument();
+    const cancelButton = await screen.findByRole("button", {
+      name: "Cancel",
     });
+    expect(cancelButton).toBeInTheDocument();
+    userEvent.click(cancelButton);
+    expect(cancelButton).not.toBeInTheDocument();
+  });
+
+  it("should call the export api to generate the measure zip file but the response does not contain any data displays error message to the user", async () => {
+    const errorPayload = {
+      timestamp: "2025-04-07T00:30:16.103+00:00",
+      message:
+        'Measure cannot be exported for publishing because it was versioned prior to MADiE version 2.2.0. Please use a newer version or select "Export" for this measure.',
+      status: 404,
+      error: "Bad Request",
+    };
+
+    const errorBlob = new Blob([JSON.stringify(errorPayload)], {
+      type: "application/json",
+    });
+
+    if (!errorBlob.text) {
+      errorBlob.text = async () => JSON.stringify(errorPayload);
+    }
+
+    const exportNotFound = {
+      response: {
+        data: errorBlob,
+        status: 404,
+      },
+    };
+    useMeasureServiceMock.mockImplementation(() => {
+      return {
+        ...mockMeasureServiceApi,
+        fetchMeasure: jest.fn().mockResolvedValueOnce(measures[2]),
+        getMeasureExport: jest.fn().mockRejectedValueOnce(exportNotFound),
+      } as unknown as MeasureServiceApi;
+    });
+
+    render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setInitialLoad={setInitialLoadMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    expect(checkBoxes.length).toBe(6);
+    userEvent.click(checkBoxes[1]);
+    const exportButton = screen.getByTestId("export-action-btn");
+    expect(exportButton).toBeInTheDocument();
+    userEvent.click(exportButton);
+
+    const exportForPublishingButton = await screen.findByRole("button", {
+      name: "Export for Publishing",
+    });
+    userEvent.click(exportForPublishingButton);
+
+    const errorMessage = await screen.findByTestId("error-message");
+    expect(errorMessage).toHaveTextContent(errorPayload?.message);
   });
 
   it("Should be able to version QDM Measure when enableQdmRepeatTransfer is false", async () => {
@@ -2088,6 +2170,7 @@ describe("Measure List component", () => {
     });
     unmount();
   });
+
   it("Should display action center", async () => {
     const { getByTestId, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>

@@ -1,6 +1,9 @@
 import _ from "lodash";
-import { Model } from "@madie/madie-models";
+import { MeasureScoring, Model } from "@madie/madie-models";
 import getModelFamily from "./measureModelHelpers";
+
+export const EXPORT_FAILURE_MESSAGE =
+  "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists.";
 
 export const downloadZipFile = (
   exportData,
@@ -33,7 +36,7 @@ export const exportMeasure = async (
   setFailureMessage,
   setDownloadState,
   abortController,
-  targetMeasure,
+  measure,
   measureServiceApi,
   setToastOpen,
   setToastType,
@@ -42,7 +45,6 @@ export const exportMeasure = async (
 ) => {
   setFailureMessage(null);
   setDownloadState("downloading");
-  const measure = targetMeasure.current ? targetMeasure.current : targetMeasure;
   try {
     // we need to generate an abort controller for this call and bind it in the context of our ref
     abortController.current = new AbortController();
@@ -137,31 +139,42 @@ export const exportMeasure = async (
         if (model === Model.QDM_5_6 && _.isEmpty(baseConfigurationTypes)) {
           missing.push("Measure Type is required");
         }
+        if (
+          (model === Model.QICORE || model === Model.QICORE_6_0_0) &&
+          measureMetaData.draft
+        ) {
+          if (
+            groups?.some(
+              (group) =>
+                _.isEmpty(group.improvementNotation) &&
+                group.scoring !== MeasureScoring.COHORT
+            )
+          ) {
+            missing.push(
+              "At least one Population Criteria is missing Improvement Notation"
+            );
+          }
+        }
         if (missing.length <= 0) {
-          const message =
-            "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists.";
-          setFailureMessage(message);
+          setFailureMessage(EXPORT_FAILURE_MESSAGE);
         } else if (missing.length > 0) {
           setFailureMessage(missing);
         }
         // we send a custom error here. but it's type blob. we decode it here.
-      } else if (errorStatus === 400) {
-        try {
-          const blobFailureError = await err.response.data.text();
-          let parsed;
+      } else if (errorStatus === 400 || errorStatus === 404) {
+        if (err.response?.data instanceof Blob) {
+          const errorText = await err.response.data.text();
           try {
-            parsed = JSON.parse(blobFailureError);
-          } catch (jsonError) {
-            parsed = { message: blobFailureError };
+            const errorJson = JSON.parse(errorText);
+            setFailureMessage(errorJson?.message);
+          } catch (jsonErr) {
+            setFailureMessage(EXPORT_FAILURE_MESSAGE);
           }
-          setFailureMessage(parsed.message || "Unknown error occurred.");
-        } catch (blobError) {
-          setFailureMessage("An error occurred while decoding the response.");
+        } else {
+          setFailureMessage(EXPORT_FAILURE_MESSAGE);
         }
       } else {
-        const message =
-          "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists.";
-        setFailureMessage(message);
+        setFailureMessage(EXPORT_FAILURE_MESSAGE);
       }
     }
   }
