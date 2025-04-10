@@ -493,6 +493,15 @@ const EditTestCase = (props: EditTestCaseProps) => {
     return { json: updatedData, isTimezoneUpdated: timezoneUpdated };
   };
 
+  const updateDatesInJson = () => {
+    try {
+      const parsedValue = JSON.parse(editorVal);
+      return convertDatesToUTC(parsedValue);
+    } catch (error) {
+      console.error("Error parsing or converting dates:", error);
+    }
+  };
+
   const updateTestCase = async (testCase: TestCase) => {
     const errorMsg = checkSpecialCharacters(testCase);
     if (errorMsg) {
@@ -501,11 +510,14 @@ const EditTestCase = (props: EditTestCaseProps) => {
     }
     let timezoneUpdated = false;
     try {
-      if (editorVal !== testCase.json) {
-        const updatedValue = convertDatesToUTC(JSON.parse(editorVal));
+      const updatedValue = updateDatesInJson();
+      if (updatedValue) {
         testCase.json = updatedValue.json;
         timezoneUpdated = updatedValue.isTimezoneUpdated;
+      } else {
+        testCase.json = editorVal;
       }
+
       setValidationErrors(() => []);
       const updatedTestCase = await testCaseService.current.updateTestCase(
         testCase,
