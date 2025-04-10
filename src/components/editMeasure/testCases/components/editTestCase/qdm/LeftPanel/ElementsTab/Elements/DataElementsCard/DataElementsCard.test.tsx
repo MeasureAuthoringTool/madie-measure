@@ -1090,7 +1090,6 @@ describe("applyAttribute function", () => {
       "67f82fe340c6f872779a0f30 - Encounter, Performed: Office Visit ",
       dataElement
     );
-    console.log("updatedelement is", updatedElement.relatedTo);
     expect(updatedElement.relatedTo).toContain("67f82fe340c6f872779a0f30");
   });
 
