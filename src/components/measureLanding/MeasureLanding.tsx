@@ -64,7 +64,7 @@ export default function MeasureLanding() {
   const retrieveMeasures = useCallback(
     async (tab, limit, page, searchCriteria) => {
       abortController.current = new AbortController();
-      setLoading(true); 
+      setLoading(true);
       try {
         if (!searchCriteria) {
           setErrMsg(null);
@@ -90,7 +90,7 @@ export default function MeasureLanding() {
           setErrMsg(error.message);
         }
       } finally {
-        setLoading(false); 
+        setLoading(false);
       }
     },
     [measureServiceApi]
