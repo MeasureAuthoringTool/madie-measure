@@ -29,16 +29,21 @@ type CQLCodeWithCodeSystemOid = {
 export class TerminologyServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
 
-  async getExpansion(valueSetParams: ValueSetSearchParams[]) {
+  async getExpansion(
+    valueSetParams: ValueSetSearchParams[],
+    manifestExpansion?: ManifestExpansion
+  ) {
     if (!valueSetParams?.length) {
       return [];
     }
+
     const searchCriteria = {
       includeDraft: "yes", // always yes for now
-      activeOnly: "false",
-      manifestExpansion: null, // always latest until we support manifest for QICore
+      activeOnly: manifestExpansion ? "true" : "false",
+      manifestExpansion: manifestExpansion,
       valueSetParams: valueSetParams,
     } as ValueSetsSearchCriteria;
+
     try {
       const response = await axios.put(
         `${this.baseUrl}/terminology/value-sets/expansion/fhir`,
@@ -67,13 +72,14 @@ export class TerminologyServiceApi {
   }
 
   async getValueSetsExpansionForBundle(
-    measureBundle: Bundle
+    measureBundle: Bundle,
+    manifestExpansion?: ManifestExpansion
   ): Promise<ValueSet[]> {
     if (!measureBundle) {
       return [];
     }
     const valueSetSearchParams = this.getValueSetsOIdsFromBundle(measureBundle);
-    return this.getExpansion(valueSetSearchParams);
+    return this.getExpansion(valueSetSearchParams, manifestExpansion);
   }
 
   async getValueSetsExpansionForOids(oids: string[]): Promise<ValueSet[]> {

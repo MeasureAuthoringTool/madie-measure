@@ -51,6 +51,60 @@ describe("TerminologyServiceApi Tests", () => {
       });
   });
 
+  it("gives expanded ValueSets for ValueSets in measure bundle when manifestExpansion is not provided (expansion type is Latest)", async () => {
+    axios.put = jest
+      .fn()
+      .mockResolvedValueOnce({ data: [officeVisitValueSet] });
+
+    const result = await terminologyService.getValueSetsExpansionForBundle(
+      officeVisitMeasureBundle
+    );
+
+    expect(axios.put).toBeCalledWith(
+      "test.url/terminology/value-sets/expansion/fhir",
+      {
+        includeDraft: "yes",
+        manifestExpansion: undefined,
+        activeOnly: "false",
+        valueSetParams: [{ oid: "2.16.840.1.113883.3.464.1003.101.12.1001" }],
+      },
+      { headers: { Authorization: "Bearer undefined" } }
+    );
+
+    expect(result.length).toEqual(1);
+    expect(result[0].name).toEqual("Office Visit");
+    expect(result[0].id).toEqual("2.16.840.1.113883.3.464.1003.101.12.1001");
+  });
+
+  it("gives expanded ValueSets for ValueSets in measure bundle when manifestExpansion is provided (expansion type is Manifest)", async () => {
+    axios.put = jest
+      .fn()
+      .mockResolvedValueOnce({ data: [officeVisitValueSet] });
+
+    const result = await terminologyService.getValueSetsExpansionForBundle(
+      officeVisitMeasureBundle,
+      testManifestExpansion
+    );
+
+    expect(axios.put).toBeCalledWith(
+      "test.url/terminology/value-sets/expansion/fhir",
+      {
+        includeDraft: "yes",
+        manifestExpansion: {
+          fullUrl: "https://cts.nlm.nih.gov/fhir/Library/mu2-update-2015-05-01",
+          id: "mu2-update-2015-05-01",
+        },
+        activeOnly: "true",
+        valueSetParams: [{ oid: "2.16.840.1.113883.3.464.1003.101.12.1001" }],
+      },
+      { headers: { Authorization: "Bearer undefined" } }
+    );
+
+    expect(result.length).toEqual(1);
+    expect(result[0].name).toEqual("Office Visit");
+    expect(result[0].id).toEqual("2.16.840.1.113883.3.464.1003.101.12.1001");
+  });
+
   it("gives empty expansion results if no value set found in bundle", () => {
     const bundle = { ...officeVisitMeasureBundle };
     const measure = bundle.entry[0].resource as FHIRMeasure;
