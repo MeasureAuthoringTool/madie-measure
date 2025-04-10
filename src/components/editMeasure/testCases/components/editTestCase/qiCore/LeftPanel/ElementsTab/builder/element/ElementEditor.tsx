@@ -67,9 +67,8 @@ const ElementEditor = ({
   // We want to dispatch an action that contains a payload of our updated selectedResource.entry
   // The resource reducer will in turn update the testcase json string
   const { dispatch, state } = useQiCoreResource();
-  const statefulSelectedResource = state.bundle.entry.find(
-    (entry) => entry.resource.id === selectedResourceID
-  )?.resource;
+  const statefulSelectedResource = selectedResource.bundleEntry.resource; // we're already passing this down.
+
   // The reducer that we use in the provider always returns a new object. This allows us to use that object as a reference object in use effects
   // Whenever a javascript object changes it's memory address, it will be seen as a new object and rerender. Mutating objects do not trigger downstream rerenders.
   // We need this reference instead of the selectedResource prop since it's being preserved in state only on selection.
@@ -227,7 +226,7 @@ const ElementEditor = ({
     if (statefulSelectedResource && Object.keys(displayedElementsTree).length) {
       triggerFormBuilder();
     }
-  }, [displayedElementsTree, state, selectedResourceID]);
+  }, [displayedElementsTree, state, selectedResourceID]); // using selected resource as a render point
   const formik = useFormikContext();
   useFormikResetOnEvent(formik);
   // on individual apply

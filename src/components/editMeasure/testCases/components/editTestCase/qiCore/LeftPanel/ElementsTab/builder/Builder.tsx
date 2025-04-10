@@ -41,13 +41,25 @@ const Builder = ({
   setInitialFormikValuesStu6,
   setValidationSchema,
 }: BuilderProps) => {
-  const [resources, setResources] = useState<ResourceIdentifier[]>(null);
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   const fhirElmTranslationService = useRef(useFhirElmTranslationServiceApi());
-  const [selectedResourceID, setSelectedResourceId] = useState<string>(null); // one single source of truth.
   const { state, dispatch } = useQiCoreResource();
   const { measureState } = useExecutionContext();
   const [measure] = measureState;
+
+  // track form dirty and an intermediate tab to know what the discard dialog should nav to
+  const { dirty, resetForm } = useFormikContext();
+  const [activeTab, setActiveTab] = useState<string>("Available");
+  const [pendingTab, setPendingTab] = useState<string>(activeTab);
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const onContinue = () => {
+    setDialogOpen(false);
+    setActiveTab(pendingTab);
+    resetForm();
+  };
+
+  const [selectedResourceID, setSelectedResourceId] = useState<string>(null); // one single source of truth.
+  const [resources, setResources] = useState<ResourceIdentifier[]>(null);
   const addedResources = state?.bundle?.entry.length || 0;
 
   useEffect(() => {
@@ -74,16 +86,6 @@ const Builder = ({
     );
   }, []);
 
-  // track form dirty and an intermediate tab to know what the discard dialog should nav to
-  const { dirty, resetForm } = useFormikContext();
-  const [activeTab, setActiveTab] = useState<string>("Available");
-  const [pendingTab, setPendingTab] = useState<string>(activeTab);
-  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-  const onContinue = () => {
-    setDialogOpen(false);
-    setActiveTab(pendingTab);
-    resetForm();
-  };
   return (
     <Box
       sx={{ mr: 2 }}
