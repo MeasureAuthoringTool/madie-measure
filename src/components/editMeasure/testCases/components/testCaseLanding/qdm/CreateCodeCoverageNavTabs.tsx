@@ -207,6 +207,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
               Delete All
             </Button>
           )}
+
           {featureFlags.OverlappingValueSets && (
             <LoadingActionButton
               hasErrors={hasErrors}
@@ -216,7 +217,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
               label="Reports"
             />
           )}
-
+          
           {((featureFlags.TestCaseListActionCenter && canEdit) ||
             !featureFlags.TestCaseListActionCenter) && (
             <>
