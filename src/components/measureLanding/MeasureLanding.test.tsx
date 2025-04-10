@@ -278,9 +278,14 @@ describe("Measure Page", () => {
   test("render associate cms id dialog", async () => {
     renderRouter(["/measures"]);
     await waitFor(() => {
+      expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
+        true,
+        10,
+        0,
+        abortController.signal
+      );
       expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument();
     });
-    screen.debug();
     const measure1Checkbox = await within(
       await screen.findByTestId("measure-name-measureId1_select")
     ).findByRole("checkbox");
