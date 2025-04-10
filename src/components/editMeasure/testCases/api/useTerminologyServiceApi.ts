@@ -30,15 +30,15 @@ export class TerminologyServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
 
   async getExpansion(valueSetParams: ValueSetSearchParams[]) {
+    if (!valueSetParams?.length) {
+      return [];
+    }
     const searchCriteria = {
       includeDraft: "yes", // always yes for now
       activeOnly: "false",
       manifestExpansion: null, // always latest until we support manifest for QICore
       valueSetParams: valueSetParams,
     } as ValueSetsSearchCriteria;
-    if (searchCriteria.valueSetParams.length == 0) {
-      return [];
-    }
     try {
       const response = await axios.put(
         `${this.baseUrl}/terminology/value-sets/expansion/fhir`,
@@ -169,7 +169,7 @@ export class TerminologyServiceApi {
       return [];
     }
 
-    return moduleDefinition[0].relatedArtifact.reduce((oids, artifact) => {
+    return moduleDefinition[0].relatedArtifact?.reduce((oids, artifact) => {
       if (artifact.resource?.includes("ValueSet/")) {
         const valueSetOid = artifact.resource.split("/ValueSet/")[1];
         oids.push({ oid: valueSetOid });
