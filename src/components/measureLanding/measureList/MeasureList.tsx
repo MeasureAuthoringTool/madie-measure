@@ -87,7 +87,7 @@ export default function MeasureList(props: {
   setTotalItems;
   setVisibleItems;
   setOffset;
-  setInitialLoad;
+  setLoading;
   activeTab: number;
   searchCriteria: string;
   setSearchCriteria;
@@ -544,6 +544,7 @@ export default function MeasureList(props: {
   };
 
   const handleClearClick = async (event) => {
+    props.setLoading(true);
     abortController.current = new AbortController();
     props.setSearchCriteria("");
     measureServiceApi
@@ -557,7 +558,7 @@ export default function MeasureList(props: {
         setPageProps(data);
       })
       .catch((error: Error) => {
-        props.setInitialLoad(false);
+        props.setLoading(false);
         props.setErrMsg("");
       });
     navigate(`?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`);
@@ -580,7 +581,7 @@ export default function MeasureList(props: {
         setPageProps(data);
       })
       .catch((error: Error) => {
-        props.setInitialLoad(false);
+        props.setLoading(false);
         props.setErrMsg(error.message);
       });
   };
@@ -588,6 +589,7 @@ export default function MeasureList(props: {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (props.searchCriteria) {
+      props.setLoading(true);
       doSearch();
     }
 
@@ -604,7 +606,7 @@ export default function MeasureList(props: {
 
       props.setMeasureList(content);
       props.setOffset(pageable.offset);
-      props.setInitialLoad(false);
+      props.setLoading(false);
     }
   };
 
@@ -750,7 +752,7 @@ export default function MeasureList(props: {
         setPageProps(data);
       })
       .catch((error: Error) => {
-        props.setInitialLoad(false);
+        props.setLoading(false);
         props.setErrMsg(error.message);
       });
   };

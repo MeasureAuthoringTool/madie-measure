@@ -175,18 +175,22 @@ describe("Measure Page", () => {
       userEvent.click(pageButton);
     });
     expect(mockedUsedNavigate).toHaveBeenCalledWith("?tab=0&page=1&limit=10");
-    const measure1 = await screen.findByText("TestMeasure1");
-    expect(measure1).toBeInTheDocument();
+    waitFor(() => {
+      const measure1 = screen.findByText("TestMeasure1");
+      expect(measure1).toBeInTheDocument();
+    });
   });
 
   test("test pagination page limit change", async () => {
     renderRouter(["/measures"]);
-    expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
-      true,
-      10,
-      0,
-      abortController.signal
-    );
+    waitFor(() => {
+      expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
+        true,
+        10,
+        0,
+        abortController.signal
+      );
+    });
 
     const combobox = await screen.findByText("10");
 
@@ -195,8 +199,10 @@ describe("Measure Page", () => {
       name: /25/i,
     });
     userEvent.click(pageLimit25);
-    const measure1 = await screen.findByText("TestMeasure1");
-    expect(measure1).toBeInTheDocument();
+    waitFor(() => {
+      const measure1 = screen.findByText("TestMeasure1");
+      expect(measure1).toBeInTheDocument();
+    });
   });
 
   it("Should display errors when fetching measures is rejected", async () => {

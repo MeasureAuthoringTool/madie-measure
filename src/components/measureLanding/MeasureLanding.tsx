@@ -136,6 +136,7 @@ export default function MeasureLanding() {
   }, []);
 
   const handleTabChange = (event, nextTab) => {
+    setLoading(true);
     abortController.current.abort();
     setMeasureList(null);
     const limit = values?.limit || 10;
@@ -199,7 +200,7 @@ export default function MeasureLanding() {
                 setTotalItems={setTotalItems}
                 setVisibleItems={setVisibleItems}
                 setOffset={setOffset}
-                setInitialLoad={setLoading}
+                setLoading={setLoading}
                 activeTab={activeTab}
                 searchCriteria={searchCriteria}
                 setSearchCriteria={setSearchCriteria}
