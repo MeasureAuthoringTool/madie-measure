@@ -51,6 +51,15 @@ describe("TerminologyServiceApi Tests", () => {
       });
   });
 
+  it("gives empty expansion results if no value set found in bundle", () => {
+    const bundle = { ...officeVisitMeasureBundle };
+    const measure = bundle.entry[0].resource as FHIRMeasure;
+    measure.contained = [{} as fhir4.Library];
+    terminologyService.getValueSetsExpansionForBundle(bundle).then((data) => {
+      expect(data.length).toEqual(0);
+    });
+  });
+
   it("throws an error if ValueSets not found in VSAC", async () => {
     const response = {
       timestamp: "2022-06-02T21:36:46.592+00:00",
