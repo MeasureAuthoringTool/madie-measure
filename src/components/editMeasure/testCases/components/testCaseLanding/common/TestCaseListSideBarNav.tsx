@@ -7,7 +7,6 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import "./TestCaseListSideBarNav.scss";
 import { useFeatureFlags } from "@madie/madie-util";
-import { transform } from "lodash";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-10 bg-slate overflow-y-auto border-r border-slate`;
 const Nav = tw.nav`flex-1 space-y-1 bg-slate`;
@@ -85,12 +84,9 @@ const TestCaseListSideBarNav = ({
             ) : (
               <Tab
                 label="No Population Criteria Exist"
+                disabled
                 type="C"
                 orientation="vertical"
-                sx={{
-                  textTransform: "none",
-                  color: "#717171"
-                }}
               />
             )}
           </Tabs>
