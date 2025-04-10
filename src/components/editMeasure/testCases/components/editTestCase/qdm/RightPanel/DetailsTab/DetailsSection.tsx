@@ -1,8 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import ElementSection from "../../../../common/ElementSection";
 import { useFormikContext } from "formik";
-import { TextField, InputLabel } from "@madie/madie-design-system/dist/react";
-import TextArea from "../../../../createTestCase/TextArea";
+import {
+  TextField,
+  InputLabel,
+  TextArea,
+} from "@madie/madie-design-system/dist/react";
 import TestCaseSeries from "../../../../createTestCase/TestCaseSeries";
 import { useParams } from "react-router-dom";
 import useTestCaseServiceApi from "../../../../../api/useTestCaseServiceApi";
@@ -71,11 +74,12 @@ const DetailsSection = (props: DetailsSectionProps) => {
             size="small"
             error={formik.touched.title && Boolean(formik.errors.title)}
             {...formik.getFieldProps("title")}
+            maxLength={250}
           />
           <TextArea
             placeholder="Test Case Description"
             id="test-case-description"
-            data-testid="edit-test-case-description"
+            data-testid="test-case-description"
             disabled={!canEdit}
             {...formik.getFieldProps("description")}
             label="Description"
@@ -88,6 +92,7 @@ const DetailsSection = (props: DetailsSectionProps) => {
               formik.touched.description && Boolean(formik.errors.description)
             }
             helperText={formikErrorHandler("description")}
+            maxLength={250}
           />
           <div>
             <InputLabel
