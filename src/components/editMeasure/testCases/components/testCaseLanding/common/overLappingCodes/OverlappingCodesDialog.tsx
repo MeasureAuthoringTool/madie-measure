@@ -16,10 +16,10 @@ import { Box, Typography } from "@mui/material";
 
 // Define the data type for rows
 interface RowData {
-  code?: string;
-  codeSystem?: string;
+  code: string;
+  codeSystem: string;
   description: string | JSX.Element;
-  version?: string;
+  version: string;
   subRows?: RowData[]; // Optional subRows for nested data
 }
 const TH = tw.th`p-3 text-left text-sm font-bold`;

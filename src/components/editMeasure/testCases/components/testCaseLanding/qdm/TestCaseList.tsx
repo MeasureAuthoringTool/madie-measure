@@ -730,7 +730,7 @@ const TestCaseList = (props: TestCaseListProps) => {
     setExportExecuting(false);
   };
 
-  const handleGenerateValueSetOverlapReport = () => {
+  const handleGenerateOverlappingCodesReport = () => {
     setOverlappingCodes(overlappingCodes1);
     setOpenOverlappingCodesDialog(true);
   };
@@ -800,8 +800,8 @@ const TestCaseList = (props: TestCaseListProps) => {
                 measure={measure}
                 createNewTestCase={createNewTestCase}
                 executeTestCases={executeTestCases}
-                onGenerateValueSetOverlapReport={
-                  handleGenerateValueSetOverlapReport
+                onGenerateOverlappingCodesReport={
+                  handleGenerateOverlappingCodesReport
                 }
                 onImportTestCases={() => {
                   setImportErrors((prevState) => [
