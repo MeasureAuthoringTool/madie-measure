@@ -189,6 +189,8 @@ describe("Measure Page", () => {
 
   test("test pagination page limit change", async () => {
     renderRouter(["/measures"]);
+
+    // Ensure the initial fetch is called with the default limit
     await waitFor(() => {
       expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
         true,
@@ -198,17 +200,14 @@ describe("Measure Page", () => {
       );
     });
 
+    // Simulate changing the page limit
     const combobox = await screen.findByText("10");
+    expect(combobox).toBeInTheDocument();
 
     userEvent.click(combobox);
-    const pageLimit25 = screen.getByRole("option", {
-      name: /25/i,
-    });
+    const pageLimit25 = screen.getByRole("option", { name: /25/i });
     userEvent.click(pageLimit25);
-    waitFor(() => {
-      const measure1 = screen.findByText("TestMeasure1");
-      expect(measure1).toBeInTheDocument();
-    });
+    expect(mockedUsedNavigate).toHaveBeenCalledWith("?tab=0&page=0&limit=25");
   });
 
   it("Should display errors when fetching measures is rejected", async () => {

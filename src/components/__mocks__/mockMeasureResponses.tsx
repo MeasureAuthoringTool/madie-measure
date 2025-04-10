@@ -163,5 +163,11 @@ const multipleItemsResponse = {
   totalElements: 12,
   pageable: { offset: 0 },
 };
+const twentyFiveItemsResponse = {
+  content: multipleMeasures,
+  numberOfElements: 10,
+  totalElements: 12,
+  pageable: { offset: 0 },
+};
 
-export { oneItemResponse, multipleItemsResponse, mockPaginationResponses };
+export { oneItemResponse, multipleItemsResponse, twentyFiveItemsResponse, mockPaginationResponses };

@@ -53,12 +53,10 @@ export default function MeasureLanding() {
   })();
   const canGoPrev = Number(values?.page) > 1;
   const handlePageChange = (e, v) => {
-    setLoading(true);
     setCurrentPage(v - 1);
     navigate(`?tab=${activeTab}&page=${v}&limit=${values?.limit || 10}`);
   };
   const handleLimitChange = (e) => {
-    setLoading(true);
     setCurrentLimit(e.target.value);
     navigate(`?tab=${activeTab}&page=${0}&limit=${e.target.value}`);
   };
@@ -66,39 +64,33 @@ export default function MeasureLanding() {
   const retrieveMeasures = useCallback(
     async (tab, limit, page, searchCriteria) => {
       abortController.current = new AbortController();
-      if (!searchCriteria) {
-        setErrMsg(null);
-        measureServiceApi
-          .fetchMeasures(tab === 0, limit, page, abortController.current.signal)
-          .then((data) => {
-            setPageProps(data);
-          })
-          .catch((error: Error) => {
-            if (error.message != "canceled") {
-              setErrMsg(error.message);
-            }
-            setLoading(false);
-          });
-      } else {
-        measureServiceApi
-          .searchMeasuresByCriteria(
+      setLoading(true); 
+      try {
+        if (!searchCriteria) {
+          setErrMsg(null);
+          const data = await measureServiceApi.fetchMeasures(
             tab === 0,
             limit,
             page,
-            {
-              searchField: searchCriteria,
-            },
             abortController.current.signal
-          )
-          .then((data) => {
-            setPageProps(data);
-          })
-          .catch((error) => {
-            if (error.message != "canceled") {
-              setErrMsg(error.message);
-            }
-            setLoading(false);
-          });
+          );
+          setPageProps(data);
+        } else {
+          const data = await measureServiceApi.searchMeasuresByCriteria(
+            tab === 0,
+            limit,
+            page,
+            { searchField: searchCriteria },
+            abortController.current.signal
+          );
+          setPageProps(data);
+        }
+      } catch (error) {
+        if (error.message !== "canceled") {
+          setErrMsg(error.message);
+        }
+      } finally {
+        setLoading(false); 
       }
     },
     [measureServiceApi]
@@ -136,7 +128,6 @@ export default function MeasureLanding() {
   }, []);
 
   const handleTabChange = (event, nextTab) => {
-    setLoading(true);
     abortController.current.abort();
     setMeasureList(null);
     const limit = values?.limit || 10;
