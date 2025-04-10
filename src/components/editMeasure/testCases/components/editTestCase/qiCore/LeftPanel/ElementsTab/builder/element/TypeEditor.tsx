@@ -23,12 +23,15 @@ import {
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import CodingComponent from "./types/CodingComponent";
 
+// onChange is being deprecated as no updates to the resource are tracked.
+// Changes directly to the json should be done with a disaptch, this propagates downstream changes in formik.
+// any temporary form state should be done through formik.
 const TypeEditor = ({
   type,
   resource,
   required,
   value,
-  onChange,
+  onChange, // to be deprecated. Early POC implementation logic
   structureDefinition,
   parentStructureDefinition,
   canEdit,
