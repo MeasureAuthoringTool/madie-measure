@@ -78,7 +78,7 @@ export default function ShareAction(props: PropTypes) {
           data-testid="share-action-btn"
           sx={iconStyles}
         >
-          <ShareIcon color={disableShareBtn ? "#8C8C8C" : "#0073C8"} />
+          <ShareIcon />
         </IconButton>
 
         <Menu
