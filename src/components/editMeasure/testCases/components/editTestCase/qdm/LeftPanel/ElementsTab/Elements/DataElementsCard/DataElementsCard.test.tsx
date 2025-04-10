@@ -16,7 +16,6 @@ import { FormikProvider, FormikContextType } from "formik";
 import { QdmPatientProvider } from "../../../../../../../util/QdmPatientContext";
 import userEvent from "@testing-library/user-event";
 import { getDataElementClass } from "../../../../../../../util/DataElementHelper";
-
 const serviceConfig = {
   testCaseService: {
     baseUrl: "base.url",
@@ -1080,6 +1079,19 @@ describe("applyAttribute function", () => {
     );
     expect(updatedElement.result).toEqual(cqlDate);
     expect(dataElement === updatedElement).toBeFalsy();
+  });
+
+  it("should should remove information from Related To displayName to get id", () => {
+    const dataElement = dataEl[1] as any;
+    expect(dataElement.result).toBeFalsy();
+    const updatedElement = applyAttribute(
+      "Related To",
+      "DataElement",
+      "67f82fe340c6f872779a0f30 - Encounter, Performed: Office Visit ",
+      dataElement
+    );
+    console.log("updatedelement is", updatedElement.relatedTo);
+    expect(updatedElement.relatedTo).toContain("67f82fe340c6f872779a0f30");
   });
 
   it("should add an attribute value for array type when array is empty", () => {
