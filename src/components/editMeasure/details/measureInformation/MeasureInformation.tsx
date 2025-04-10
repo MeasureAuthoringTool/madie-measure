@@ -482,6 +482,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             onBlur={() => {
               onBlur("measureName");
             }}
+            maxLength={500}
           />
           <TextField
             onFocus={() => onFocus("cqlLibraryName")}
@@ -502,6 +503,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             onBlur={() => {
               onBlur("cqlLibraryName");
             }}
+            maxLength={64}
           />
         </Box>
         <Box sx={formRowGapped}>
@@ -547,6 +549,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             size="small"
             error={formik.touched.ecqmTitle && Boolean(formik.errors.ecqmTitle)}
             {...formik.getFieldProps("ecqmTitle")}
+            maxLength={32}
           />
 
           <CmsIdentifier

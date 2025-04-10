@@ -581,22 +581,16 @@ export class MeasureServiceApi {
     elmErrorSeverity: string,
     signal
   ): Promise<any> {
-    try {
-      return await axios.get(`${this.baseUrl}/measures/${measureId}/exports`, {
-        params: {
-          elmErrorSeverity,
-        },
-        headers: {
-          Authorization: `Bearer ${this.getAccessToken()}`,
-        },
-        responseType: "blob",
-        signal,
-      });
-    } catch (error) {
-      // need to bubble the error up.
-      console.error("error requesting measure export ", error);
-      throw error;
-    }
+    return await axios.get(`${this.baseUrl}/measures/${measureId}/exports`, {
+      params: {
+        elmErrorSeverity,
+      },
+      headers: {
+        Authorization: `Bearer ${this.getAccessToken()}`,
+      },
+      responseType: "blob",
+      signal,
+    });
   }
 
   async draftMeasure(
