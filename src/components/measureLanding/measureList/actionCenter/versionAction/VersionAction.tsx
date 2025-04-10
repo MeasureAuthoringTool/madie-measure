@@ -5,14 +5,19 @@ import { Measure, Model } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
 import AccountTreeOutlinedIcon from "@mui/icons-material/AccountTreeOutlined";
 
-import { grey, blue } from "@mui/material/colors";
-
 interface PropTypes {
   measures: Measure[];
   onClick: () => void;
   canEdit: boolean;
 }
-
+const iconStyles = {
+  "&.Mui-disabled": {
+    color: "#8C8C8C !important",
+  },
+  "&.MuiIconButton-root": {
+    color: "#0073C8 ",
+  },
+};
 export const NOTHING_SELECTED = "Select measure to version";
 export const VERSION_MEASURE = "Version measure";
 
@@ -52,10 +57,9 @@ export default function VersionAction(props: PropTypes) {
           onClick={props.onClick}
           disabled={disableVersionBtn}
           data-testid="version-action-btn"
+          sx={iconStyles}
         >
-          <AccountTreeOutlinedIcon
-            sx={disableVersionBtn ? { color: grey[500] } : { color: blue[500] }}
-          />
+          <AccountTreeOutlinedIcon />
         </IconButton>
       </span>
     </Tooltip>
