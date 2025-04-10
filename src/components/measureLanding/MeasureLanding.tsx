@@ -32,7 +32,7 @@ export default function MeasureLanding() {
 
   // utilities for pagination
   const values = queryString.parse(search);
-  const [initialLoad, setInitialLoad] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [visibleItems, setVisibleItems] = useState<number>(0);
@@ -53,10 +53,12 @@ export default function MeasureLanding() {
   })();
   const canGoPrev = Number(values?.page) > 1;
   const handlePageChange = (e, v) => {
+    setLoading(true);
     setCurrentPage(v - 1);
     navigate(`?tab=${activeTab}&page=${v}&limit=${values?.limit || 10}`);
   };
   const handleLimitChange = (e) => {
+    setLoading(true);
     setCurrentLimit(e.target.value);
     navigate(`?tab=${activeTab}&page=${0}&limit=${e.target.value}`);
   };
@@ -75,7 +77,7 @@ export default function MeasureLanding() {
             if (error.message != "canceled") {
               setErrMsg(error.message);
             }
-            setInitialLoad(false);
+            setLoading(false);
           });
       } else {
         measureServiceApi
@@ -95,7 +97,7 @@ export default function MeasureLanding() {
             if (error.message != "canceled") {
               setErrMsg(error.message);
             }
-            setInitialLoad(false);
+            setLoading(false);
           });
       }
     },
@@ -110,7 +112,7 @@ export default function MeasureLanding() {
       setVisibleItems(numberOfElements);
       setMeasureList(content);
       setOffset(pageable.offset);
-      setInitialLoad(false);
+      setLoading(false);
     }
   };
 
@@ -177,7 +179,7 @@ export default function MeasureLanding() {
           <span tw="flex-grow" />
         </section>
         <div>
-          {errMsg && !initialLoad && (
+          {errMsg && !loading && (
             <StatusHandler
               error={errMsg}
               errorMessage={errMsg}
@@ -188,7 +190,7 @@ export default function MeasureLanding() {
           )}
 
           {/* spin or display */}
-          {!initialLoad && (
+          {!loading && (
             <div className="table">
               <MeasureList
                 measureList={measureList}
@@ -197,7 +199,7 @@ export default function MeasureLanding() {
                 setTotalItems={setTotalItems}
                 setVisibleItems={setVisibleItems}
                 setOffset={setOffset}
-                setInitialLoad={setInitialLoad}
+                setInitialLoad={setLoading}
                 activeTab={activeTab}
                 searchCriteria={searchCriteria}
                 setSearchCriteria={setSearchCriteria}
@@ -226,7 +228,7 @@ export default function MeasureLanding() {
             </div>
           )}
         </div>
-        {initialLoad && (
+        {loading && (
           <div style={{ display: "flex", justifyContent: "center" }}>
             <MadieSpinner style={{ height: 50, width: 50 }} />
           </div>
