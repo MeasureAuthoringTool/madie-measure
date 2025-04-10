@@ -283,8 +283,10 @@ describe("Measure Page", () => {
         0,
         abortController.signal
       );
-      expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument();
     });
+    const combobox = await screen.findByText("10");
+    expect(combobox).toBeInTheDocument();
+    expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument();
     const measure1Checkbox = await within(
       await screen.findByTestId("measure-name-measureId1_select")
     ).findByRole("checkbox");
