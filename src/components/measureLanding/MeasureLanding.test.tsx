@@ -86,12 +86,14 @@ describe("Measure Page", () => {
     renderRouter(["/measures"]);
     const measure1 = await screen.findByText("TestMeasure1");
     expect(measure1).toBeInTheDocument();
-    expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
-      true,
-      10,
-      0,
-      abortController.signal
-    );
+    await waitFor(() => {
+      expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
+        true,
+        10,
+        0,
+        abortController.signal
+      );
+    });
     const myMeasuresTab = screen.getByRole("tab", { name: "My Measures" });
     expect(myMeasuresTab).toBeInTheDocument();
     expect(myMeasuresTab).toHaveClass("Mui-selected");
@@ -104,12 +106,14 @@ describe("Measure Page", () => {
     renderRouter(["/measures"]);
     const measure1 = await screen.findByText("TestMeasure1");
     expect(measure1).toBeInTheDocument();
-    expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
-      true,
-      10,
-      0,
-      abortController.signal
-    );
+    await waitFor(() => {
+      expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
+        true,
+        10,
+        0,
+        abortController.signal
+      );
+    });
 
     const myMeasuresTab = await screen.findByTestId("my-measures-tab");
     userEvent.click(myMeasuresTab);
@@ -160,12 +164,14 @@ describe("Measure Page", () => {
     renderRouter(["/measures"]);
     const event = new Event("create");
     window.dispatchEvent(event);
-    expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
-      true,
-      10,
-      0,
-      abortController.signal
-    );
+    await waitFor(() => {
+      expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
+        true,
+        10,
+        0,
+        abortController.signal
+      );
+    });
   });
 
   test("test pagination page button", async () => {
@@ -183,7 +189,7 @@ describe("Measure Page", () => {
 
   test("test pagination page limit change", async () => {
     renderRouter(["/measures"]);
-    waitFor(() => {
+    await waitFor(() => {
       expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
         true,
         10,
@@ -292,10 +298,12 @@ describe("Measure Page", () => {
       "associate-cms-id-dialog-tbl"
     );
     expect(dialogTable).toBeInTheDocument();
-    const measure1Name = await within(dialogTable).getByText("TestMeasure1");
-    expect(measure1Name).toBeInTheDocument();
-    const measure2Name = await within(dialogTable).getByText("TestMeasure2");
-    expect(measure2Name).toBeInTheDocument();
+    await waitFor(() => {
+      const measure1Name = within(dialogTable).getByText("TestMeasure1");
+      expect(measure1Name).toBeInTheDocument();
+      const measure2Name = within(dialogTable).getByText("TestMeasure2");
+      expect(measure2Name).toBeInTheDocument();
+    });
     expect(
       screen.getByText("Copy QDM Metadata to QI-Core measure")
     ).toBeInTheDocument();
