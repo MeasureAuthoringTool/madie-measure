@@ -5,7 +5,6 @@ import { officeVisitMeasureBundle } from "./__mocks__/OfficeVisitMeasureBundle";
 import { cqm_measure_basic } from "../mockdata/qdm/CMS108/cqm_measure_basic";
 import { cqm_measure_basic_valueset } from "../mockdata/qdm/CMS108/cqm_measure_basic_valueset";
 import { Measure as CqmMeasure, ValueSet } from "cqm-models";
-import { Measure as FHIRMeasure } from "fhir/r4";
 import * as _ from "lodash";
 import { ManifestExpansion } from "@madie/madie-models";
 
@@ -131,7 +130,10 @@ describe("TerminologyServiceApi Tests", () => {
           id: "mu2-update-2015-05-01",
         },
         activeOnly: "true",
-        valueSetParams: [{ oid: "2.16.840.1.113883.3.464.1003.1170" }],
+        valueSetParams: [
+          { oid: "2.16.840.1.113883.3.666.5.307" },
+          { oid: "2.16.840.1.113883.3.464.1003.103.12.1001" },
+        ],
       },
       { headers: { Authorization: "Bearer undefined" }, signal: true }
     );
@@ -152,7 +154,10 @@ describe("TerminologyServiceApi Tests", () => {
         includeDraft: "yes",
         manifestExpansion: null,
         activeOnly: "false",
-        valueSetParams: [{ oid: "2.16.840.1.113883.3.464.1003.1170" }],
+        valueSetParams: [
+          { oid: "2.16.840.1.113883.3.666.5.307" },
+          { oid: "2.16.840.1.113883.3.464.1003.103.12.1001" },
+        ],
       },
       { headers: { Authorization: "Bearer undefined" }, signal: true }
     );
@@ -176,7 +181,10 @@ describe("TerminologyServiceApi Tests", () => {
               id: "mu2-update-2015-05-01",
             },
             activeOnly: "true",
-            valueSetParams: [{ oid: "2.16.840.1.113883.3.464.1003.1170" }],
+            valueSetParams: [
+              { oid: "2.16.840.1.113883.3.666.5.307" },
+              { oid: "2.16.840.1.113883.3.464.1003.103.12.1001" },
+            ],
           },
           { headers: { Authorization: "Bearer undefined" }, signal: false }
         );
@@ -310,14 +318,6 @@ describe("TerminologyServiceApi Tests", () => {
         } as fhir4.BundleEntry,
       ],
     } as fhir4.Bundle;
-    const result = terminologyService.getValueSetsOIdsFromBundle(bundle);
-    expect(_.isEmpty(result)).toBe(true);
-  });
-
-  it("test getValueSetsOIdsFromBundle if module definition library not found", () => {
-    const bundle = { ...officeVisitMeasureBundle };
-    const measure = bundle.entry[0].resource as FHIRMeasure;
-    measure.contained = [];
     const result = terminologyService.getValueSetsOIdsFromBundle(bundle);
     expect(_.isEmpty(result)).toBe(true);
   });
