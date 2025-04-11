@@ -47,7 +47,10 @@ import FileSaver from "file-saver";
 import TestCaseImportDialog from "../common/import/TestCaseImportDialog";
 import ActionCenter from "../common/ActionCenter/ActionCenter";
 import CopyTestCaseDialog from "../common/copyTestCases/CopyTestCaseDialog";
-import { OverlappingValueSetReport } from "../../../util/ValueSetOverlapUtils";
+import {
+  generateQiCoreReport,
+  OverlappingValueSetReport,
+} from "../../../util/ValueSetOverlapUtils";
 
 export const IMPORT_ERROR =
   "An error occurred while importing your test cases. Please try again, or reach out to the Help Desk.";
@@ -427,8 +430,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   };
 
   const handleGenerateValueSetOverlapReport = () => {
-    // TODO: MAT-8381
-    setOverlappingValueSets([]);
+    setOverlappingValueSets(generateQiCoreReport(valueSets));
   };
 
   const handleClose = () => {
