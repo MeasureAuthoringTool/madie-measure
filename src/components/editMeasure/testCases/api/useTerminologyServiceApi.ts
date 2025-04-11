@@ -1,8 +1,8 @@
 import axios from "../../../../api/axios-instance";
 import useServiceConfig from "../../../../api/useServiceConfig";
 import { ServiceConfig } from "../../../../api/ServiceContext";
-import { useOktaTokens } from "@madie/madie-util";
-import { Bundle, Library, Measure, ValueSet } from "fhir/r4";
+import { getOidFromString, useOktaTokens } from "@madie/madie-util";
+import { Bundle, Library, ValueSet } from "fhir/r4";
 import { CqmMeasure, CQL, ValueSet as QdmValueSet } from "cqm-models";
 import * as _ from "lodash";
 import md5 from "blueimp-md5";
@@ -147,41 +147,61 @@ export class TerminologyServiceApi {
   getValueSetsOIDsFromCqmMeasure(
     cqmMeasure: CqmMeasure
   ): ValueSetSearchParams[] {
-    return cqmMeasure?.source_data_criteria
-      ?.filter((criteria) => !criteria.codeListId.startsWith("drc-"))
-      .map((criteria) => {
-        return {
-          oid: criteria.codeListId,
-        } as ValueSetSearchParams;
-      });
+    const uniqueOids = new Set();
+    cqmMeasure?.cql_libraries?.forEach((library) => {
+      const valueSetDefs = library?.elm?.library?.valueSets?.def;
+      if (!_.isEmpty(valueSetDefs)) {
+        valueSetDefs.forEach((def) => {
+          if (def?.id) {
+            if (def.id.startsWith("urn:oid:")) {
+              const oid = getOidFromString(def.id, "QDM");
+              uniqueOids.add(oid);
+            } else {
+              uniqueOids.add(def?.id);
+            }
+          }
+        });
+      }
+    });
+    return _.map(Array.from(uniqueOids), (id: string) => ({
+      ["oid"]: id,
+    }));
   }
 
   /**
    * Extract the ValueSet OIDs used in measure & including libraries
    */
   getValueSetsOIdsFromBundle(measureBundle: Bundle): ValueSetSearchParams[] {
-    if (!measureBundle?.entry) {
-      return [];
+    if (measureBundle?.entry) {
+      return measureBundle.entry
+        .filter((entry) => entry.resource?.resourceType === "Library")
+        .reduce((allVs, library) => {
+          const libraryResource = library.resource as Library;
+          // TODO: this should be taken from dataRequirements. Using relatedArtifacts temporarily
+          // TODO: release and version not supported
+          const libVs = libraryResource.relatedArtifact?.reduce(
+            (libVs, artifact) => {
+              if (
+                artifact?.resource &&
+                artifact.resource.includes("/ValueSet/")
+              ) {
+                const oid = this.getOidFromString(artifact.resource);
+                if (oid) {
+                  libVs.push({ oid: oid });
+                }
+              }
+              return libVs;
+            },
+            [] as ValueSetSearchParams[]
+          );
+          if (libVs) {
+            return allVs.concat(libVs);
+          } else {
+            return allVs;
+          }
+        }, [] as ValueSetSearchParams[]);
     }
-    const measureEntry = measureBundle.entry.find(
-      (entry) => entry.resource?.resourceType === "Measure"
-    );
-    if (!measureEntry) {
-      return [];
-    }
-    const measure = measureEntry.resource as Measure;
-    const moduleDefinition = measure.contained as Library[];
-    if (!moduleDefinition?.length) {
-      return [];
-    }
-
-    return moduleDefinition[0].relatedArtifact?.reduce((oids, artifact) => {
-      if (artifact.resource?.includes("ValueSet/")) {
-        const valueSetOid = artifact.resource.split("/ValueSet/")[1];
-        oids.push({ oid: valueSetOid });
-      }
-      return oids;
-    }, [] as ValueSetSearchParams[]);
+    return [];
   }
 
   getOidFromString(oidString: string): string {
