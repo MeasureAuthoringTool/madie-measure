@@ -558,9 +558,8 @@ export default function MeasureList(props: {
         setPageProps(data);
       })
       .catch((error: Error) => {
-        props.setLoading(false);
         props.setErrMsg("");
-      });
+      })
     navigate(`?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`);
   };
 
