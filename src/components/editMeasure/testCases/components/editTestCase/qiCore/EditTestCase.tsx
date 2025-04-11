@@ -529,6 +529,8 @@ const EditTestCase = (props: EditTestCaseProps) => {
       if (updatedValue) {
         testCase.json = updatedValue.json;
         timezoneUpdated = updatedValue.isTimezoneUpdated;
+      } else {
+        testCase.json = editorVal;
       }
       setValidationErrors(() => []);
       const updatedTestCase = await testCaseService.current.updateTestCase(
