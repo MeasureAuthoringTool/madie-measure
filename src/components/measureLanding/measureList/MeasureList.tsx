@@ -559,7 +559,7 @@ export default function MeasureList(props: {
       })
       .catch((error: Error) => {
         props.setErrMsg("");
-      })
+      });
     navigate(`?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`);
   };
 
