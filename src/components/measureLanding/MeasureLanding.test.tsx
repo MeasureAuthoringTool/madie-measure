@@ -270,8 +270,10 @@ describe("Measure Page", () => {
     expect(measureInput.value).toBe("test");
     fireEvent.submit(measureInput);
 
-    expect(await screen.queryByTestId("generic-error-text-header")).toBeNull();
-    expect(await screen.queryByText("Unable to fetch measures")).toBeNull();
+    await waitFor(() => {
+      expect(screen.queryByTestId("generic-error-text-header")).toBeNull();
+      expect(screen.queryByText("Unable to fetch measures")).toBeNull();
+    });
   });
 
   test.skip("render associate cms id dialog", async () => {
