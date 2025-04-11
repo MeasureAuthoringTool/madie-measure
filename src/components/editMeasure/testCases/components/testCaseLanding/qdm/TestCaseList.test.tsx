@@ -187,6 +187,8 @@ jest.mock(
     }
 );
 
+jest.mock("../../../util/ValueSetOverlapUtils");
+
 // output from calculationService
 const executionResults = {
   results: [
@@ -1340,6 +1342,8 @@ jest.mock("../../../api/QdmCalculationService");
 const qdmCalculationServiceMock =
   qdmCalculationService as jest.Mock<QdmCalculationService>;
 
+jest.mock("../../../util/ValueSetOverlapUtils");
+
 const mockProcessTestCaseResults = jest.fn().mockImplementation((testCase) => {
   return failingTestCaseResults.find((tc) => tc.id === testCase.id);
 });
@@ -1670,14 +1674,19 @@ describe("TestCaseList component", () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       OverlappingValueSets: true,
     }));
+
     renderTestCaseListComponent(setError, [], false);
     await waitFor(() => {
-      expect(screen.getByTestId("report-button")).toBeEnabled();
+      expect(screen.getByTestId("execute-test-cases-button")).toBeEnabled();
     });
+    expect(await screen.findByTestId("report-button")).toBeEnabled();
     userEvent.click(screen.getByTestId("report-button"));
     // on click of report button disable the button as it will be in progress
     // more unit tests to follow after MAT-8382
-    expect(screen.getByTestId("report-button")).toBeDisabled();
+    expect(await screen.findByTestId("report-button")).toBeDisabled();
+    await waitFor(() => {
+      expect(screen.getByTestId("report-button")).toBeEnabled();
+    });
   });
 
   it("should disable Run QDM test case & report button, if execution context failed", async () => {

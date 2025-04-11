@@ -62,7 +62,10 @@ import useTestCaseServiceApi, {
 import useQdmCqlParsingService from "../../../api/cqlElmTranslationService/useQdmCqlParsingService";
 import ActionCenter from "../common/ActionCenter/ActionCenter";
 import CopyTestCaseDialog from "../common/copyTestCases/CopyTestCaseDialog";
-import { OverlappingValueSetReport } from "../../../util/ValueSetOverlapUtils";
+import {
+  generateQdmReport,
+  OverlappingValueSetReport,
+} from "../../../util/ValueSetOverlapUtils";
 
 export const IMPORT_ERROR =
   "An error occurred while importing your test cases. Please try again, or reach out to the Help Desk.";
@@ -725,8 +728,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   };
 
   const handleGenerateValueSetOverlapReport = () => {
-    // TODO: MAT-8381
-    setOverlappingValueSets([]);
+    setOverlappingValueSets(generateQdmReport(cqmMeasure.value_sets));
   };
 
   const onTestCaseShiftDates = (testCases: TestCase[], shifted: number) => {
