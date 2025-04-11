@@ -104,20 +104,11 @@ export default function MeasureList(props: {
 
   const navigate = useNavigate();
   // Popover utilities
-  const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [selectedMeasure, setSelectedMeasure] = useState<Measure>(null);
   const [canEdit, setCanEdit] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   // if user can edit and it is a version, then draft button
-  const [
-    otherSelectOptionPropsForPopOver,
-    setOtherSelectOptionPropsForPopOver,
-  ] = useState(null);
-  const [additionalSelectOptionProps, setAdditionalSelectOptionProps] =
-    useState(null);
-  const [editViewButtonLabel, setEditViewButtonLabel] = useState<string>(null);
 
   const targetMeasure = useRef<Measure>();
 
@@ -637,67 +628,6 @@ export default function MeasureList(props: {
       updateTargetMeasure(selectedMeasure);
     }
   }, [selectedMeasure]);
-  const handlePopOverOpen = useCallback(
-    async (selected: Measure, event: React.MouseEvent<HTMLButtonElement>) => {
-      setOptionsOpen(true);
-      setSelectedMeasure(selected);
-      setAnchorEl(event.currentTarget);
-
-      const isSelectedMeasureEditable = checkUserCanEdit(
-        selected?.measureSet?.owner,
-        selected?.measureSet?.acls
-      );
-      setCanEdit(isSelectedMeasureEditable);
-      setEditViewButtonLabel(
-        isSelectedMeasureEditable && selected?.measureMetaData.draft
-          ? "Edit"
-          : "View"
-      );
-
-      let options = [];
-      // additional options are outside the edit flag
-      let additionalOptions = [];
-      // always on if feature
-      const exportButton = {
-        label: "Export",
-        toImplementFunction: exportMeasure,
-        dataTestId: `export-measure-${selected?.id}`,
-      };
-      additionalOptions.push(exportButton);
-      // no longer an always on if feature
-      if (selected.measureMetaData.draft) {
-        options.push({
-          label: "Version",
-          toImplementFunction: checkCreateVersion,
-          dataTestId: `create-version-measure-${selected?.id}`,
-        });
-        // draft should only be available if no other measureSet is in draft, by call
-      }
-      if (canDraftRef.current[selected?.measureSetId]) {
-        options.push({
-          label: "Draft",
-          toImplementFunction: () => setDraftMeasureDialog({ open: true }),
-          dataTestId: `draft-measure-${selected?.id}`,
-        });
-      }
-      setAdditionalSelectOptionProps(additionalOptions);
-      setOtherSelectOptionPropsForPopOver(options);
-    },
-    [canDraftLookup]
-  );
-
-  const handleClose = () => {
-    setOtherSelectOptionPropsForPopOver(null);
-    setOptionsOpen(false);
-    setSelectedMeasure(null);
-    setAnchorEl(null);
-    setCanEdit(false);
-  };
-
-  const viewEditRedirect = () => {
-    navigate(`/measures/${selectedMeasure?.id}/edit/details`);
-    setOptionsOpen(false);
-  };
 
   const [downloadState, setDownloadState] = useState(null); // state of dialog
   const [failureMessage, setFailureMessage] = useState(null); // message to pass to dialog
@@ -813,7 +743,6 @@ export default function MeasureList(props: {
         open: true,
         measureId: targetMeasure.current?.id,
       });
-      setOptionsOpen(false);
       setLoading(false);
     } else {
       await measureServiceApi
@@ -871,7 +800,6 @@ export default function MeasureList(props: {
       .draftMeasure(targetMeasure.current?.id, model, measureName)
       .then(async () => {
         setLoading(false);
-        setOptionsOpen(false);
         handleDialogClose();
         setToastOpen(true);
         setToastType("success");
@@ -1100,19 +1028,6 @@ export default function MeasureList(props: {
             </React.Fragment>
           ))}
         </tbody>
-        <Popover
-          optionsOpen={optionsOpen}
-          anchorEl={anchorEl}
-          handleClose={handleClose}
-          canEdit={canEdit}
-          editViewSelectOptionProps={{
-            label: editViewButtonLabel,
-            toImplementFunction: viewEditRedirect,
-            dataTestId: `view-measure-${selectedMeasure?.id}`,
-          }}
-          otherSelectOptionProps={otherSelectOptionPropsForPopOver}
-          additionalSelectOptionProps={additionalSelectOptionProps}
-        />
         <Toast
           toastKey="measure-action-toast"
           aria-live="polite"
