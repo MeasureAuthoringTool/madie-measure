@@ -909,6 +909,84 @@ describe("EditTestCase component", () => {
       );
     });
 
+    it("should save the cql with errros and shouldn't perform datetime conversion when cql cannot be parsed", async () => {
+      const testCase = {
+        id: "1234",
+        description: "Test IPP",
+        series: "SeriesA",
+        createdBy: MEASURE_CREATEDBY,
+        createdAt: "",
+        lastModifiedAt: "",
+        lastModifiedBy: "null",
+        title: "TestIPP",
+        name: "TestIPP",
+        executionStatus: "false",
+        json: null,
+      } as TestCase;
+      mockedAxios.get.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("series")) {
+          return Promise.resolve({ data: [] });
+        } else if (args && args.endsWith("resources")) {
+          return Promise.resolve({
+            data: [...resourceIdentifiers],
+          });
+        }
+        return Promise.resolve({
+          data: testCase,
+        });
+      });
+      renderWithRouter(
+        ["/measures/m1234/edit/test-cases/1234"],
+        "/measures/:measureId/edit/test-cases/:id"
+      );
+
+      const testCaseDescription = "TestCase123";
+      const testCaseTitle = "TestTitle";
+      const testCaseJson = "";
+
+      mockedAxios.put.mockResolvedValue({
+        data: {
+          ...testCase,
+          createdBy: MEASURE_CREATEDBY,
+          description: testCaseDescription,
+          title: testCaseTitle,
+          json: testCaseJson,
+          hapiOperationOutcome: {
+            code: 500,
+            message: "An unknown error occurred with HAPI FHIR",
+            outcomeResponse: {
+              resourceType: "OperationOutcome",
+              text: "Error: Bad things happened",
+              issue: [
+                {
+                  severity: "error",
+                  diagnostics: "Bad things happened",
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      const editor = screen.getByTestId("test-case-json-editor");
+      await waitFor(() => expect(editor).toHaveValue(""));
+      userEvent.paste(editor, testCaseJson);
+      expect(editor).toHaveValue(testCaseJson);
+      userEvent.click(screen.getByTestId("details-tab"));
+
+      await testTitle("TC1", true);
+
+      const createBtn = await screen.findByRole("button", {
+        name: "Save",
+      });
+      userEvent.click(createBtn);
+
+      const debugOutput = await screen.findByTestId("error-toast");
+      expect(debugOutput).toHaveTextContent(
+        "Test case updated successfully with errors in JSON"
+      );
+    });
+
     it("Displaying successful message when Id is not present in the JSON while editing a test case", async () => {
       const testCase = {
         id: "1234",
