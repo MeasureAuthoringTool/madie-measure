@@ -470,33 +470,29 @@ const EditTestCase = (props: EditTestCaseProps) => {
     }
   };
 
-  const convertDatesToUTC = (jsonData) => {
-    let timezoneUpdated = false;
-    dayjs.extend(utc);
-    const regex =
-      /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})/g;
-    const updatedData = JSON.stringify(jsonData, (key, value) => {
-      if (typeof value === "string" && regex.test(value)) {
-        if (!dayjs(value).isValid()) {
-          //Check for any invalid timezones
-          value = value.replace(/([+-]\d{2}:\d{2}|Z)$/, "+00:00");
-          timezoneUpdated = true;
-        }
-        const newValue = dayjs(value).utc().format();
-        if (value != newValue) {
-          timezoneUpdated = true;
-        }
-        return newValue;
-      }
-      return value;
-    });
-    return { json: updatedData, isTimezoneUpdated: timezoneUpdated };
-  };
-
-  const updateDatesInJson = () => {
+  const convertDatesToUTC = () => {
     try {
       const parsedValue = JSON.parse(editorVal);
-      return convertDatesToUTC(parsedValue);
+      let timezoneUpdated = false;
+      dayjs.extend(utc);
+      const regex =
+        /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})/g;
+      const updatedData = JSON.stringify(parsedValue, (key, value) => {
+        if (typeof value === "string" && regex.test(value)) {
+          if (!dayjs(value).isValid()) {
+            //Check for any invalid timezones
+            value = value.replace(/([+-]\d{2}:\d{2}|Z)$/, "+00:00");
+            timezoneUpdated = true;
+          }
+          const newValue = dayjs(value).utc().format();
+          if (value != newValue) {
+            timezoneUpdated = true;
+          }
+          return newValue;
+        }
+        return value;
+      });
+      return { json: updatedData, isTimezoneUpdated: timezoneUpdated };
     } catch (error) {
       console.error("Error parsing or converting dates:", error);
     }
@@ -510,7 +506,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
     }
     let timezoneUpdated = false;
     try {
-      const updatedValue = updateDatesInJson();
+      const updatedValue = convertDatesToUTC();
       if (updatedValue) {
         testCase.json = updatedValue.json;
         timezoneUpdated = updatedValue.isTimezoneUpdated;
