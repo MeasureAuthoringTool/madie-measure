@@ -96,9 +96,12 @@ const TestCaseRoutes = () => {
   }, [measure?.id]);
 
   useEffect(() => {
-    if (measureBundle) {
+    if (measureBundle && measure) {
       terminologyService.current
-        .getValueSetsExpansionForBundle(measureBundle)
+        .getValueSetsExpansionForBundle(
+          measureBundle,
+          measure.testCaseConfiguration?.manifestExpansion
+        )
         .then((vs: ValueSet[]) => {
           setValueSets(vs);
         })
@@ -107,7 +110,7 @@ const TestCaseRoutes = () => {
           setErrors((prevState) => [...prevState, err.message]);
         });
     }
-  }, [measureBundle]);
+  }, [measureBundle, measure]);
 
   useEffect(() => {
     setExecutionContextReady(!!measureBundle && !!valueSets && !!measure);

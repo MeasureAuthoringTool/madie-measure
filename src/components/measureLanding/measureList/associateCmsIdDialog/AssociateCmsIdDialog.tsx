@@ -26,7 +26,8 @@ export default function AssociateCmsIdDialog(props: PropTypes) {
     (measure) => measure.model === Model.QDM_5_6
   );
   const qiCoreMeasure = measures?.find(
-    (measure) => measure.model === Model.QICORE
+    (measure) =>
+      measure.model === Model.QICORE || measure.model === Model.QICORE_6_0_0
   );
   return (
     <>

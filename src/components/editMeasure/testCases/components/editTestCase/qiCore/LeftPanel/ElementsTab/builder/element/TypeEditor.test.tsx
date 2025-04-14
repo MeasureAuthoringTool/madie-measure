@@ -132,6 +132,54 @@ describe("TypeEditor Component", () => {
     expect(inputField.value).toBe("test");
   });
 
+  test("Should render String component, should trigger setFieldValue and setFieldTouched", async () => {
+    const setFieldValue = jest.fn();
+    const setFieldTouched = jest.fn();
+
+    const stringFormik = {
+      ...mockFormik,
+      setFieldTouched: setFieldTouched,
+      setFieldValue: setFieldValue,
+      getFieldProps: () => ({
+        label: "ClaimResponse.id",
+        name: "ClaimResponse.id",
+        value: "1234-abcd-ABCD",
+        onChange: jest.fn(),
+        onBlur: jest.fn(),
+      }),
+    };
+
+    render(
+      <FormikProvider value={stringFormik}>
+        <TypeEditor
+          type={`http://hl7.org/fhirpath/System.String`}
+          required={false}
+          resource={null}
+          value={"1234-abcd-ABCD"}
+          onChange={() => {}}
+          structureDefinition={null}
+          label={"ClaimResponse.id"}
+          canEdit={true}
+          parentStructureDefinition={null}
+        />
+      </FormikProvider>
+    );
+    const inputField = screen.getByTestId(
+      "string-field-input-ClaimResponse.id"
+    ) as HTMLInputElement;
+    expect(inputField).toBeInTheDocument();
+    expect(inputField.value).toBe("1234-abcd-ABCD");
+
+    fireEvent.change(inputField, { target: { value: "1234-abcd-ABCD-5678" } });
+
+    expect(setFieldValue).toHaveBeenCalledWith(
+      "ClaimResponse.id",
+      "1234-abcd-ABCD-5678"
+    );
+
+    expect(setFieldTouched).toHaveBeenCalledWith("ClaimResponse.id");
+  });
+
   test("String field should display errors and helper text", () => {
     const touched = {
       ClaimResponse: {

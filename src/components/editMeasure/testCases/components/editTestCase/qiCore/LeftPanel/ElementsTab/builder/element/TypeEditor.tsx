@@ -84,6 +84,10 @@ const TypeEditor = ({
               error={getNestedProperty(formik.errors, label)}
               fieldRequired={required}
               {...formik.getFieldProps(label)}
+              onChange={({ target }) => {
+                formik.setFieldTouched(label);
+                formik.setFieldValue(label, target.value);
+              }}
             />
           </Box>
         );
