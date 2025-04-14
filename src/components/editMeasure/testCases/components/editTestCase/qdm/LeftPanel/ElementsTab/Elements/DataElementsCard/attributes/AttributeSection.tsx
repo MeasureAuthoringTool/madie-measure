@@ -113,8 +113,11 @@ const AttributeSection = ({
       formik.setFieldValue("type", null);
     }
   };
-  const onInputAdd = (e) => {
-    onAddClicked(formik.values.attribute.displayName, formik.values.type, e);
+
+  // v is attribute saved in local state in child.
+  const onInputAdd = (v: String) => {
+    const { displayName } = formik.values.attribute;
+    onAddClicked(displayName, formik.values.type, v);
     formik.resetForm();
   };
   return (

@@ -649,18 +649,12 @@ describe("TestCaseRoutes", () => {
     measureBundle.entry = [
       {
         resource: {
-          resourceType: "Measure",
-          contained: [
+          resourceType: "Library",
+          relatedArtifact: [
             {
-              resourceType: "Library",
-              relatedArtifact: [
-                {
-                  type: "depends-on",
-                  display: "Value set Office Visit",
-                  resource:
-                    "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001",
-                },
-              ],
+              type: "depends-on",
+              resource:
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1029.213",
             },
           ],
         } as any,
