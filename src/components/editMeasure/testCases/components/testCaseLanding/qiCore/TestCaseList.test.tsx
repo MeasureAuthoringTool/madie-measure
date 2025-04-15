@@ -660,9 +660,21 @@ describe("TestCaseList component", () => {
       expect(screen.getByTestId("reports-button")).toBeEnabled();
     });
     userEvent.click(screen.getByTestId("reports-button"));
-    // on click of report button disable the button as it will be in progress
-    // more unit tests to follow after MAT-8382
-    expect(screen.getByTestId("reports-button")).toBeDisabled();
+    expect(screen.getByTestId("overlapping-codes")).toHaveTextContent(
+      "Overlapping Codes"
+    );
+    userEvent.click(screen.getByTestId("overlapping-codes"));
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("overlapping-codes-dialog")
+      ).toBeInTheDocument();
+    });
+    expect(screen.getByTestId("overlapping-codes-dialog")).toHaveTextContent(
+      "Overlapping Codes"
+    );
+    expect(
+      screen.getByTestId("overlapping-codes-report-contents")
+    ).toHaveTextContent("There are no overlapping codes");
   });
 
   it("should disable Run QICore test case & reports buttons, if execution context failed", async () => {

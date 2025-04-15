@@ -220,7 +220,7 @@ const OverlappingCodesReport = ({
           ) : (
             <tr>
               <td colSpan={columns.length} tw="text-center p-2">
-                No Results were found
+                There are no overlapping codes
               </td>
             </tr>
           )}
@@ -268,6 +268,7 @@ const OverlappingCodesDialog = ({
         open: openDialog,
         maxWidth: "lg",
         fullWidth: true,
+        "data-testid": "overlapping-codes-dialog",
       }}
       cancelButtonProps={{
         variant: "secondary",
