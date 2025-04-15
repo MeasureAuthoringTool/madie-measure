@@ -65,6 +65,8 @@ export function generateQiCoreReport(
   if (!valueSets || valueSets.length === 0) {
     return [];
   }
+  // This is required because we want to show overlapping codes only for the value sets that are used in the measure
+  // used valuesets re part of effectiveDataRequirements
   const usedValueSets = getUsedValueSets(measureBundle);
   if (!usedValueSets?.length) {
     return [];
@@ -125,7 +127,7 @@ export function getUsedValueSets(measureBundle: Bundle): Array<string> {
     return [];
   }
   // relatedArtifact is an array of used artifacts
-  // we need to filter the artifacts that are of type "ValueSet"
+  // we need to collect the artifacts that are of type "ValueSet"
   return moduleDefinition[0].relatedArtifact?.reduce((oids, artifact) => {
     if (artifact.resource?.includes("ValueSet/")) {
       oids.push(artifact.resource);
