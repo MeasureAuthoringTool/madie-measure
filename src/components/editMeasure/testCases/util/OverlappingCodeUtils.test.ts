@@ -3,11 +3,18 @@ import {
   generateQiCoreReport,
 } from "./OverlappingCodesUtils";
 import { ValueSet as CqmValueSet } from "cqm-models";
-import { ValueSet } from "fhir/r4";
+import {
+  Bundle,
+  BundleEntry,
+  FhirResource,
+  Library,
+  Measure,
+  ValueSet,
+} from "fhir/r4";
 
 describe("OverlappingCodesUtils", () => {
   describe("generateQdmReport", () => {
-    it("should return an empty array when no overlapping value sets exist", () => {
+    it("should return an empty array when no overlapping codes exist", () => {
       const valueSets: CqmValueSet[] = [
         {
           oid: "1.2.3",
@@ -54,7 +61,7 @@ describe("OverlappingCodesUtils", () => {
       expect(result).toEqual([]);
     });
 
-    it("should return overlapping value sets", () => {
+    it("should return overlapping codes", () => {
       const valueSets: CqmValueSet[] = [
         {
           oid: "1.2.3",
@@ -110,11 +117,40 @@ describe("OverlappingCodesUtils", () => {
   });
 
   describe("generateQiCoreReport", () => {
-    it("should return an empty array when no overlapping value sets exist", () => {
+    const measureBundle = {
+      entry: [
+        {
+          resource: {
+            resourceType: "Measure",
+            status: "active",
+            contained: [
+              {
+                resourceType: "Library",
+                relatedArtifact: [
+                  {
+                    type: "depends-on",
+                    display: "Value Test ValueSet 1",
+                    resource: "http://example.com/ValueSet/1",
+                  },
+                  {
+                    type: "depends-on",
+                    display: "Value Test ValueSet 2",
+                    resource: "http://example.com/ValueSet/2",
+                  },
+                ],
+              } as FhirResource,
+            ],
+          } as FhirResource,
+        },
+      ] as BundleEntry[],
+    } as Bundle;
+
+    it("should return an empty array when no overlapping codes exist", () => {
       const valueSets: ValueSet[] = [
         {
           id: "1",
           name: "Test ValueSet 1",
+          url: "http://example.com/ValueSet/1",
           expansion: {
             contains: [
               {
@@ -129,6 +165,7 @@ describe("OverlappingCodesUtils", () => {
         {
           id: "2",
           name: "Test ValueSet 2",
+          url: "http://example.com/ValueSet/2",
           expansion: {
             contains: [
               {
@@ -140,9 +177,8 @@ describe("OverlappingCodesUtils", () => {
             ],
           },
         },
-      ];
-
-      const result = generateQiCoreReport(valueSets);
+      ] as ValueSet[];
+      const result = generateQiCoreReport(valueSets, measureBundle);
       expect(result).toEqual([]);
     });
 
@@ -151,7 +187,7 @@ describe("OverlappingCodesUtils", () => {
         {
           id: "1",
           name: "Test ValueSet 1",
-          url: "http://example.com/valueset1",
+          url: "http://example.com/ValueSet/1",
           expansion: {
             contains: [
               {
@@ -166,7 +202,7 @@ describe("OverlappingCodesUtils", () => {
         {
           id: "2",
           name: "Test ValueSet 2",
-          url: "http://example.com/valueset2",
+          url: "http://example.com/ValueSet/2",
           expansion: {
             contains: [
               {
@@ -178,16 +214,47 @@ describe("OverlappingCodesUtils", () => {
             ],
           },
         },
-      ];
+      ] as ValueSet[];
 
-      const result = generateQiCoreReport(valueSets);
+      const result = generateQiCoreReport(valueSets, measureBundle);
       expect(result).toHaveLength(1);
       expect(result[0].valueSets).toHaveLength(2);
     });
 
     it("should return an empty array when no value sets are provided", () => {
       const valueSets: ValueSet[] = [];
-      const result = generateQiCoreReport(valueSets);
+      expect(generateQiCoreReport(valueSets, measureBundle)).toEqual([]);
+      expect(generateQiCoreReport(undefined, measureBundle)).toEqual([]);
+    });
+
+    it("should return an empty array when no used value sets found", () => {
+      const valueSets: ValueSet[] = [];
+      const measureResource = measureBundle.entry[0].resource as Measure;
+      // no value sets in the effectiveDr
+      (measureResource.contained as Library[])[0].relatedArtifact = [];
+      const result = generateQiCoreReport(valueSets, measureBundle);
+      expect(result).toEqual([]);
+    });
+
+    it("should return an empty array when no effectiveDr present", () => {
+      const valueSets: ValueSet[] = [];
+      const measureResource = measureBundle.entry[0].resource as Measure;
+      // no value sets in the effectiveDr
+      measureResource.contained = [];
+      const result = generateQiCoreReport(valueSets, measureBundle);
+      expect(result).toEqual([]);
+    });
+
+    it("should return an empty array when measure entry is not provided", () => {
+      const valueSets: ValueSet[] = [];
+      measureBundle.entry = [];
+      const result = generateQiCoreReport(valueSets, measureBundle);
+      expect(result).toEqual([]);
+    });
+
+    it("should return an empty array when measure bundle is not provided", () => {
+      const valueSets: ValueSet[] = [];
+      const result = generateQiCoreReport(valueSets, undefined);
       expect(result).toEqual([]);
     });
   });

@@ -41,11 +41,7 @@ export function generateQdmReport(valueSets: CqmValueSet[]): OverlappingCode[] {
         };
         codeValueSetMap.push(code);
       }
-      if (
-        !code.valueSets.some(
-          (vs) => vs.oid === valueSet.oid
-        )
-      ) {
+      if (!code.valueSets.some((vs) => vs.oid === valueSet.oid)) {
         code.valueSets.push({
           name: valueSet.display_name,
           oid: valueSet.oid,
@@ -62,11 +58,11 @@ export function generateQiCoreReport(
   measureBundle: Bundle
 ): OverlappingCode[] {
   // Reverse the value set mapping such that the code is the key and value is an array of value sets containing that code.
-  if (!valueSets || valueSets.length === 0) {
+  if (!valueSets?.length) {
     return [];
   }
   // This is required because we want to show overlapping codes only for the value sets that are used in the measure
-  // used valuesets re part of effectiveDataRequirements
+  // used value sets re part of effectiveDataRequirements
   const usedValueSets = getUsedValueSets(measureBundle);
   if (!usedValueSets?.length) {
     return [];
@@ -95,11 +91,7 @@ export function generateQiCoreReport(
         };
         codeValueSetMap.push(code);
       }
-      if (
-        !code.valueSets.some(
-          (vs) => vs.oid === valueSet.id
-        )
-      ) {
+      if (!code.valueSets.some((vs) => vs.oid === valueSet.id)) {
         code.valueSets.push({
           name: valueSet.name,
           oid: valueSet.id,
