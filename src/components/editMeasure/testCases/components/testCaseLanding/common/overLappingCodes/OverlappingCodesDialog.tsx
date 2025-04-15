@@ -181,10 +181,7 @@ const OverlappingCodesReport = ({
 
   return (
     <>
-      <table
-        tw="min-w-full"
-        data-testid="overlapping-codes-tbl"
-      >
+      <table tw="min-w-full" data-testid="overlapping-codes-tbl">
         <thead tw="bg-slate">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
