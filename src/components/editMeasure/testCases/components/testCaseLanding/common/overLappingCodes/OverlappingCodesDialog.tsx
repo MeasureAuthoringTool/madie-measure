@@ -184,7 +184,6 @@ const OverlappingCodesReport = ({
       <table
         tw="min-w-full"
         data-testid="overlapping-codes-tbl"
-        className="ml-table"
       >
         <thead tw="bg-slate">
           {table.getHeaderGroups().map((headerGroup) => (
@@ -200,7 +199,7 @@ const OverlappingCodesReport = ({
             </tr>
           ))}
         </thead>
-        <tbody className="table-body" style={{ padding: 20 }}>
+        <tbody>
           {overlappingCodes?.length ? (
             table.getRowModel().rows.map((row, index) => (
               <tr
@@ -209,7 +208,6 @@ const OverlappingCodesReport = ({
                 data-testid={`row-${index}`}
                 style={{
                   borderTop: "solid 1px #8c8c8c",
-                  borderSpacing: "0 2em !important",
                 }}
               >
                 {row.getVisibleCells().map((cell) => (
@@ -268,7 +266,7 @@ const OverlappingCodesDialog = ({
       dialogProps={{
         onClose: handleClose,
         open: openDialog,
-        maxWidth: "md",
+        maxWidth: "lg",
         fullWidth: true,
       }}
       cancelButtonProps={{

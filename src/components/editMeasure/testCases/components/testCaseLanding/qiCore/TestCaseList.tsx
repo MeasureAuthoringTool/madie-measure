@@ -431,7 +431,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   };
 
   const handleGenerateOverlappingCodesReport = () => {
-    setOverlappingCodes(generateQiCoreReport(valueSets));
+    setOverlappingCodes(generateQiCoreReport(valueSets, measureBundle));
     setOpenOverlappingCodesDialog(true);
   };
 

@@ -1,4 +1,4 @@
-import { ValueSet } from "fhir/r4";
+import { Bundle, Library, Measure, ValueSet } from "fhir/r4";
 import { ValueSet as CqmValueSet } from "cqm-models";
 
 export interface OverlappingValueSet {
@@ -41,23 +41,40 @@ export function generateQdmReport(valueSets: CqmValueSet[]): OverlappingCode[] {
         };
         codeValueSetMap.push(code);
       }
-      code.valueSets.push({
-        name: valueSet.display_name,
-        oid: valueSet.oid,
-        url: "",
-      });
+      if (
+        !code.valueSets.some(
+          (vs) => vs.oid === valueSet.oid
+        )
+      ) {
+        code.valueSets.push({
+          name: valueSet.display_name,
+          oid: valueSet.oid,
+          url: "",
+        });
+      }
     });
   }
   return codeValueSetMap.filter((code) => code.valueSets.length > 1);
 }
 
-export function generateQiCoreReport(valueSets: ValueSet[]): OverlappingCode[] {
+export function generateQiCoreReport(
+  valueSets: ValueSet[],
+  measureBundle: Bundle
+): OverlappingCode[] {
   // Reverse the value set mapping such that the code is the key and value is an array of value sets containing that code.
   if (!valueSets || valueSets.length === 0) {
     return [];
   }
+  const usedValueSets = getUsedValueSets(measureBundle);
+  if (!usedValueSets?.length) {
+    return [];
+  }
   const codeValueSetMap: OverlappingCode[] = [];
   for (const valueSet of valueSets) {
+    // Check if the value set is used in the measure
+    if (!usedValueSets.includes(valueSet.url)) {
+      continue;
+    }
     valueSet.expansion?.contains?.forEach((contained) => {
       let code = codeValueSetMap.find(
         (c) =>
@@ -76,12 +93,43 @@ export function generateQiCoreReport(valueSets: ValueSet[]): OverlappingCode[] {
         };
         codeValueSetMap.push(code);
       }
-      code.valueSets.push({
-        name: valueSet.name,
-        oid: valueSet.id,
-        url: valueSet.url,
-      });
+      if (
+        !code.valueSets.some(
+          (vs) => vs.oid === valueSet.id
+        )
+      ) {
+        code.valueSets.push({
+          name: valueSet.name,
+          oid: valueSet.id,
+          url: valueSet.url,
+        });
+      }
     });
   }
   return codeValueSetMap.filter((code) => code.valueSets.length > 1);
+}
+
+export function getUsedValueSets(measureBundle: Bundle): Array<string> {
+  if (!measureBundle?.entry) {
+    return [];
+  }
+  const measureEntry = measureBundle.entry.find(
+    (entry) => entry.resource?.resourceType === "Measure"
+  );
+  if (!measureEntry) {
+    return [];
+  }
+  const measure = measureEntry.resource as Measure;
+  const moduleDefinition = measure.contained as Library[];
+  if (!moduleDefinition?.length) {
+    return [];
+  }
+  // relatedArtifact is an array of used artifacts
+  // we need to filter the artifacts that are of type "ValueSet"
+  return moduleDefinition[0].relatedArtifact?.reduce((oids, artifact) => {
+    if (artifact.resource?.includes("ValueSet/")) {
+      oids.push(artifact.resource);
+    }
+    return oids;
+  }, [] as string[]);
 }
