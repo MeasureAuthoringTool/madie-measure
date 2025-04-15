@@ -14,6 +14,8 @@ import {
   multipleItemsResponse,
 } from "../__mocks__/mockMeasureResponses";
 import { within } from "@testing-library/dom";
+// @ts-ignore
+import { useFeatureFlags } from "@madie/madie-util";
 
 const serviceConfig = {
   fhirElmTranslationService: { baseUrl: "fhir/services" },
@@ -59,6 +61,9 @@ jest.mock("react-router-dom", () => ({
 const mockMeasureServiceApi = {
   fetchMeasures: jest.fn().mockResolvedValue(multipleItemsResponse),
   searchMeasuresByCriteria: jest.fn().mockResolvedValue(oneItemResponse),
+  getMeasureCounts: jest
+    .fn()
+    .mockResolvedValue({ allMeasures: 12, myMeasures: 12 }),
 } as unknown as MeasureServiceApi;
 
 jest.mock("../../api/useMeasureServiceApi", () =>
@@ -293,5 +298,29 @@ describe("Measure Page", () => {
     expect(
       screen.getByText("Copy QDM Metadata to QI-Core measure")
     ).toBeInTheDocument();
+  });
+
+  test("shows measure counts on page load", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      MeasureSearch: true,
+    }));
+    renderRouter(["/measures"]);
+    const measure1 = await screen.findByText("TestMeasure1");
+    expect(measure1).toBeInTheDocument();
+    expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
+      true,
+      10,
+      0,
+      abortController.signal
+    );
+    expect(mockMeasureServiceApi.getMeasureCounts).toHaveBeenCalled();
+    const myMeasuresTab = screen.getByRole("tab", { name: "My Measures (12)" });
+    expect(myMeasuresTab).toBeInTheDocument();
+    expect(myMeasuresTab).toHaveClass("Mui-selected");
+    const allMeasuresTab = screen.getByRole("tab", {
+      name: "All Measures (12)",
+    });
+    expect(allMeasuresTab).toBeInTheDocument();
+    expect(allMeasuresTab).not.toHaveClass("Mui-selected");
   });
 });
