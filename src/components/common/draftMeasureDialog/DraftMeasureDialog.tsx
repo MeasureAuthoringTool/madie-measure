@@ -114,6 +114,7 @@ const DraftMeasureDialog = ({ open, onClose, onSubmit, measure, loading }) => {
               formik.errors["measureName"] ||
               "Measure Name must contain at least one letter and must not contain '_' (underscores)."
             }
+            maxLength={500}
           />
         </Box>
         <>

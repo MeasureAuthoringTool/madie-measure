@@ -70,8 +70,8 @@ import {
   MadieSpinner,
   MadieDiscardDialog,
   Toast,
+  TextArea,
 } from "@madie/madie-design-system/dist/react";
-import TextArea from "../../createTestCase/TextArea";
 import FileUploader from "../../fileUploader/FileUploader";
 import { ScanValidationDto } from "../../../api/models/ScanValidationDto";
 import { Bundle } from "fhir/r4";
@@ -219,10 +219,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
   const fhirCqlParsingService = useRef(useFhirCqlParsingService());
   const [alert, setAlert] = useState<AlertProps>(null);
   const { errors, setErrors } = props;
-  if (!errors) {
-    setErrors([]);
-  }
-
   // Toast utilities
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<ReactNode>("");
@@ -249,21 +245,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
     loaded: false,
     series: [],
   });
-  const [editor, setEditor] = useState<Ace.Editor>(null);
-
-  function resizeEditor() {
-    // hack to force Ace to resize as it doesn't seem to be responsive
-    setTimeout(() => {
-      editor?.resize(true);
-    }, 500);
-  }
-
-  // we need this to fire on initial load because it doesn't know about allotment's client width
-  useEffect(() => {
-    if (editor) {
-      resizeEditor();
-    }
-  }, [editor]);
   const [showValidationErrors, setShowValidationErrors] = useState(false);
   const [populationGroupResults, setPopulationGroupResults] =
     useState<DetailedPopulationGroupResult[]>();
@@ -290,7 +271,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
   const [valueSets] = valueSetsState;
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
   const { updateMeasure } = measureStore;
-  const load = useRef(0);
+
   const canEdit = checkUserCanEdit(
     measure?.measureSet?.owner,
     measure?.measureSet?.acls,
@@ -489,27 +470,32 @@ const EditTestCase = (props: EditTestCaseProps) => {
     }
   };
 
-  const convertDatesToUTC = (jsonData) => {
-    let timezoneUpdated = false;
-    dayjs.extend(utc);
-    const regex =
-      /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})/g;
-    const updatedData = JSON.stringify(jsonData, (key, value) => {
-      if (typeof value === "string" && regex.test(value)) {
-        if (!dayjs(value).isValid()) {
-          //Check for any invalid timezones
-          value = value.replace(/([+-]\d{2}:\d{2}|Z)$/, "+00:00");
-          timezoneUpdated = true;
+  const convertDatesToUTC = () => {
+    try {
+      const parsedValue = JSON.parse(editorVal);
+      let timezoneUpdated = false;
+      dayjs.extend(utc);
+      const regex =
+        /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})/g;
+      const updatedData = JSON.stringify(parsedValue, (key, value) => {
+        if (typeof value === "string" && regex.test(value)) {
+          if (!dayjs(value).isValid()) {
+            //Check for any invalid timezones
+            value = value.replace(/([+-]\d{2}:\d{2}|Z)$/, "+00:00");
+            timezoneUpdated = true;
+          }
+          const newValue = dayjs(value).utc().format();
+          if (value != newValue) {
+            timezoneUpdated = true;
+          }
+          return newValue;
         }
-        const newValue = dayjs(value).utc().format();
-        if (value != newValue) {
-          timezoneUpdated = true;
-        }
-        return newValue;
-      }
-      return value;
-    });
-    return { json: updatedData, isTimezoneUpdated: timezoneUpdated };
+        return value;
+      });
+      return { json: updatedData, isTimezoneUpdated: timezoneUpdated };
+    } catch (error) {
+      console.error("Error parsing or converting dates:", error);
+    }
   };
 
   const updateTestCase = async (testCase: TestCase) => {
@@ -520,11 +506,14 @@ const EditTestCase = (props: EditTestCaseProps) => {
     }
     let timezoneUpdated = false;
     try {
-      if (editorVal !== testCase.json) {
-        const updatedValue = convertDatesToUTC(JSON.parse(editorVal));
+      const updatedValue = convertDatesToUTC();
+      if (updatedValue) {
         testCase.json = updatedValue.json;
         timezoneUpdated = updatedValue.isTimezoneUpdated;
+      } else {
+        testCase.json = editorVal;
       }
+
       setValidationErrors(() => []);
       const updatedTestCase = await testCaseService.current.updateTestCase(
         testCase,
@@ -936,7 +925,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
             ref={allotmentRef}
             defaultSizes={[200, 200, 10]}
             vertical={false}
-            onDragEnd={resizeEditor}
           >
             <Allotment.Pane>
               <div className="nav-panel">
@@ -1004,7 +992,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         <Editor
                           onChange={(val: string) => setEditorVal(val)}
                           value={editorVal}
-                          setEditor={setEditor}
                           readOnly={!canEdit || _.isNil(testCase)}
                           height="100%"
                         />
@@ -1019,7 +1006,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
                     <Editor
                       onChange={(val: string) => setEditorVal(val)}
                       value={editorVal}
-                      setEditor={setEditor}
                       readOnly={!canEdit || _.isNil(testCase)}
                       height="100%"
                     />
@@ -1186,12 +1172,13 @@ const EditTestCase = (props: EditTestCaseProps) => {
                           formik.touched.title && Boolean(formik.errors.title)
                         }
                         {...formik.getFieldProps("title")}
+                        maxLength={250}
                       />
                       <div tw="mt-4">
                         <TextArea
                           placeholder="Test Case Description"
                           id="test-case-description"
-                          data-testid="edit-test-case-description"
+                          data-testid="test-case-description"
                           disabled={!canEdit}
                           {...formik.getFieldProps("description")}
                           label="Description"
@@ -1207,6 +1194,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                             Boolean(formik.errors.description)
                           }
                           helperText={formikErrorHandler("description")}
+                          maxLength={250}
                         />
                       </div>
 
@@ -1316,7 +1304,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
                       onClick={() =>
                         setShowValidationErrors((prevState) => {
                           allotmentRef.current.resize([200, 200, 50]);
-                          resizeEditor();
                           return !prevState;
                         })
                       }
