@@ -305,17 +305,7 @@ export default function MeasureList(props: {
   const columns = useMemo<ColumnDef<TCRow>[]>(() => {
     const t = [
       {
-        id: "select",
-        accessorKey: "select",
-        header: ({ table }) => (
-          <IndeterminateCheckbox
-            {...{
-              checked: table.getIsAllRowsSelected(),
-              indeterminate: table.getIsSomePageRowsSelected(),
-              onChange: table.getToggleAllPageRowsSelectedHandler(),
-            }}
-          />
-        ),
+        id: "select", // retain ID so we have the column for checkboxes but the header is blank
         cell: ({ row }) => {
           return (
             <div className="px-1">
