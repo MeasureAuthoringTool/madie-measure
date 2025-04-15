@@ -11,7 +11,7 @@ import tw from "twin.macro";
 import "styled-components/macro";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
-import { OverlappingCode } from "../../../../util/ValueSetOverlapUtils";
+import { OverlappingCode } from "../../../../util/OverlappingCodesUtils";
 import { Box, Typography } from "@mui/material";
 
 // Define the data type for rows

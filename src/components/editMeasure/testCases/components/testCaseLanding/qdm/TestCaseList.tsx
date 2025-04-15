@@ -65,7 +65,7 @@ import CopyTestCaseDialog from "../common/copyTestCases/CopyTestCaseDialog";
 import {
   OverlappingCode,
   generateQdmReport,
-} from "../../../util/ValueSetOverlapUtils";
+} from "../../../util/OverlappingCodesUtils";
 import OverlappingCodesDialog from "../common/overLappingCodes/OverlappingCodesDialog";
 
 export const IMPORT_ERROR =
