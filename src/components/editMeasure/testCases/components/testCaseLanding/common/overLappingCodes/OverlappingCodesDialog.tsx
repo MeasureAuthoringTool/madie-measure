@@ -22,7 +22,8 @@ interface RowData {
   version: string;
   subRows?: RowData[]; // Optional subRows for nested data
 }
-const TH = tw.th`p-3 text-left text-sm font-bold`;
+const TH = tw.th`p-3 text-left text-sm`;
+const TD = tw.td`p-3 text-left text-sm`;
 
 const Description = (valueSet) => {
   return (
@@ -212,9 +213,9 @@ const OverlappingCodesReport = ({
                 }}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} data-testid={`${cell.id}`}>
+                  <TD key={cell.id} data-testid={`${cell.id}`}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
+                  </TD>
                 ))}
               </tr>
             ))

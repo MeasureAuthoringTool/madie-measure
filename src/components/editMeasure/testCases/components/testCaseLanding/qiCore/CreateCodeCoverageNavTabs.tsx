@@ -15,7 +15,8 @@ import { TestCasesPassingDetailsProps } from "../common/interfaces";
 import { useFeatureFlags } from "@madie/madie-util";
 import "twin.macro";
 import "styled-components/macro";
-import LoadingActionButton from "../common/loadingActionButton/LoadingActionButton";
+import LoadingButton from "../common/loadingButton/LoadingButton";
+import LoadingButtonWithMenu from "../common/loadingButton/LoadingButtonWithMenu";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export interface NavTabProps {
@@ -156,7 +157,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
           </Button>
         )}
         {featureFlags.OverlappingValueSets && (
-          <LoadingActionButton
+          <LoadingButtonWithMenu
             hasErrors={hasErrors}
             isExecutionContextReady={executionContextReady}
             onClick={onGenerateOverlappingCodesReport}
@@ -206,7 +207,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
             </Button>
           </>
         )}
-        <LoadingActionButton
+        <LoadingButton
           hasErrors={hasErrors}
           isExecutionContextReady={executionContextReady}
           onClick={executeTestCases}

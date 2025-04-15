@@ -18,7 +18,8 @@ import {
 import { TestCasesPassingDetailsProps } from "../common/interfaces";
 import { useFeatureFlags } from "@madie/madie-util";
 import { useQdmExecutionContext } from "../../routes/qdm/QdmExecutionContext";
-import LoadingActionButton from "../common/loadingActionButton/LoadingActionButton";
+import LoadingButtonWithMenu from "../common/loadingButton/LoadingButtonWithMenu";
+import LoadingButton from "../common/loadingButton/LoadingButton";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import classNames from "classnames";
@@ -209,7 +210,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
           )}
 
           {featureFlags.OverlappingValueSets && (
-            <LoadingActionButton
+            <LoadingButtonWithMenu
               hasErrors={hasErrors}
               isExecutionContextReady={executionContextReady}
               onClick={onGenerateOverlappingCodesReport}
@@ -217,7 +218,6 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
               label="Reports"
             />
           )}
-          
           {((featureFlags.TestCaseListActionCenter && canEdit) ||
             !featureFlags.TestCaseListActionCenter) && (
             <>
@@ -248,7 +248,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
               </Button>
             </>
           )}
-          <LoadingActionButton
+          <LoadingButton
             hasErrors={hasErrors}
             isExecutionContextReady={executionContextReady}
             onClick={executeTestCases}
