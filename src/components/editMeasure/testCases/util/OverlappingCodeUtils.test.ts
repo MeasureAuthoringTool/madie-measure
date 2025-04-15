@@ -1,11 +1,11 @@
 import {
   generateQdmReport,
   generateQiCoreReport,
-} from "./ValueSetOverlapUtils";
+} from "./OverlappingCodesUtils";
 import { ValueSet as CqmValueSet } from "cqm-models";
 import { ValueSet } from "fhir/r4";
 
-describe("ValueSetOverlapUtils", () => {
+describe("OverlappingCodesUtils", () => {
   describe("generateQdmReport", () => {
     it("should return an empty array when no overlapping value sets exist", () => {
       const valueSets: CqmValueSet[] = [
