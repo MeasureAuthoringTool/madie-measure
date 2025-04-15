@@ -187,8 +187,6 @@ jest.mock(
     }
 );
 
-jest.mock("../../../util/ValueSetOverlapUtils");
-
 // output from calculationService
 const executionResults = {
   results: [
@@ -1341,8 +1339,6 @@ const calculationServiceMock =
 jest.mock("../../../api/QdmCalculationService");
 const qdmCalculationServiceMock =
   qdmCalculationService as jest.Mock<QdmCalculationService>;
-
-jest.mock("../../../util/ValueSetOverlapUtils");
 
 const mockProcessTestCaseResults = jest.fn().mockImplementation((testCase) => {
   return failingTestCaseResults.find((tc) => tc.id === testCase.id);
