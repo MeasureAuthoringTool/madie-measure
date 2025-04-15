@@ -214,7 +214,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
               hasErrors={hasErrors}
               isExecutionContextReady={executionContextReady}
               onClick={onGenerateOverlappingCodesReport}
-              dataTestId="report-button"
+              dataTestId="reports-button"
               label="Reports"
             />
           )}

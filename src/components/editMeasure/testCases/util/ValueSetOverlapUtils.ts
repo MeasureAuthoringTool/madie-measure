@@ -1,3 +1,6 @@
+import { ValueSet } from "fhir/r4";
+import { ValueSet as CqmValueSet } from "cqm-models";
+
 export interface OverlappingValueSet {
   name: string;
   oid: string;
@@ -13,119 +16,72 @@ export interface OverlappingCode {
   valueSets: Array<OverlappingValueSet>;
 }
 
-export const overlappingCodes = [
-  {
-    code: "123456",
-    codeSystem: "SNOMEDCT",
-    description: "Test Code System",
-    codeSystemName: "Test Code System Name",
-    codeSystemVersion: "1.0",
-    valueSets: [
-      {
-        name: "Test Value Set 1",
-        oid: "2.16.840.1.113883.3.1234",
-        url: "http://example.com/valueset1",
-      },
-      {
-        name: "Test Value Set 2",
-        oid: "2.16.840.1.113883.3.5678",
-        url: "http://example.com/valueset2",
-      },
-    ],
-  },
-  {
-    code: "789012",
-    codeSystem: "LOINC",
-    description: "Another Test Code System",
-    codeSystemName: "Another Test Code System Name",
-    codeSystemVersion: "1.0",
-    valueSets: [
-      {
-        name: "Another Test Value Set 1",
-        oid: "2.16.840.1.113883.3.91011",
-        url: "http://example.com/valueset3",
-      },
-      {
-        name: "Another Test Value Set 2",
-        oid: "2.16.840.1.113883.3.121314",
-        url: "http://example.com/valueset4",
-      },
-    ],
-  },
-  {
-    code: "345678",
-    codeSystem: "RXNORM",
-    description: "Yet Another Test Code System",
-    codeSystemName: "Yet Another Test Code System Name",
-    codeSystemVersion: "1.0",
-    valueSets: [
-      {
-        name: "Yet Another Test Value Set 1",
-        oid: "2.16.840.1.113883.3.151617",
-        url: "http://example.com/valueset5",
-      },
-      {
-        name: "Yet Another Test Value Set 2",
-        oid: "2.16.840.1.113883.3.181920",
-        url: "http://example.com/valueset6",
-      },
-    ],
-  },
-  {
-    code: "901234",
-    codeSystem: "ICD10",
-    description: "Final Test Code System",
-    codeSystemName: "Final Test Code System Name",
-    codeSystemVersion: "1.0",
-    valueSets: [
-      {
-        name: "Final Test Value Set 1",
-        oid: "2.16.840.1.113883.3.212223",
-        url: "http://example.com/valueset7",
-      },
-      {
-        name: "Final Test Value Set 2",
-        oid: "2.16.840.1.113883.3.242526",
-        url: "http://example.com/valueset8",
-      },
-    ],
-  },
-  {
-    code: "567890",
-    codeSystem: "CPT",
-    description: "Test Code System 5",
-    codeSystemName: "Test Code System Name 5",
-    codeSystemVersion: "1.0",
-    valueSets: [
-      {
-        name: "Test Value Set 5",
-        oid: "2.16.840.1.113883.3.272829",
-        url: "http://example.com/valueset9",
-      },
-      {
-        name: "Test Value Set 6",
-        oid: "2.16.840.1.113883.3.303132",
-        url: "http://example.com/valueset10",
-      },
-    ],
-  },
-  {
-    code: "678901",
-    codeSystem: "HCPCS",
-    description: "Test Code System 6",
-    codeSystemName: "Test Code System Name 6",
-    codeSystemVersion: "1.0",
-    valueSets: [
-      {
-        name: "Test Value Set 7",
-        oid: "2.16.840.1.113883.3.333435",
-        url: "http://example.com/valueset11",
-      },
-      {
-        name: "Test Value Set 8",
-        oid: "2.16.840.1.113883.3.363738",
-        url: "http://example.com/valueset12",
-      },
-    ],
-  },
-] as Array<OverlappingCode>;
+export function generateQdmReport(valueSets: CqmValueSet[]): OverlappingCode[] {
+  // Reverse the value set mapping such that the code is the key and value is an array of value sets containing that code.
+  if (!valueSets || valueSets.length === 0) {
+    return [];
+  }
+  const codeValueSetMap: OverlappingCode[] = [];
+  for (const valueSet of valueSets) {
+    valueSet.concepts?.forEach((concept) => {
+      let code = codeValueSetMap.find(
+        (c) =>
+          c.code === concept.code &&
+          c.codeSystem === concept.code_system_oid &&
+          c.codeSystemVersion === concept.code_system_version
+      );
+      if (!code) {
+        code = {
+          code: concept.code,
+          description: concept.display_name || "",
+          codeSystem: concept.code_system_oid,
+          codeSystemVersion: concept.code_system_version,
+          codeSystemName: concept.code_system_name,
+          valueSets: [],
+        };
+        codeValueSetMap.push(code);
+      }
+      code.valueSets.push({
+        name: valueSet.display_name,
+        oid: valueSet.oid,
+        url: "",
+      });
+    });
+  }
+  return codeValueSetMap.filter((code) => code.valueSets.length > 1);
+}
+
+export function generateQiCoreReport(valueSets: ValueSet[]): OverlappingCode[] {
+  // Reverse the value set mapping such that the code is the key and value is an array of value sets containing that code.
+  if (!valueSets || valueSets.length === 0) {
+    return [];
+  }
+  const codeValueSetMap: OverlappingCode[] = [];
+  for (const valueSet of valueSets) {
+    valueSet.expansion?.contains?.forEach((contained) => {
+      let code = codeValueSetMap.find(
+        (c) =>
+          c.code === contained.code &&
+          c.codeSystem === contained.system &&
+          c.codeSystemVersion === contained.version
+      );
+      if (!code) {
+        code = {
+          code: contained.code,
+          description: contained.display || "",
+          codeSystem: contained.system,
+          codeSystemVersion: contained.version,
+          codeSystemName: contained.system,
+          valueSets: [],
+        };
+        codeValueSetMap.push(code);
+      }
+      code.valueSets.push({
+        name: valueSet.name,
+        oid: valueSet.id,
+        url: valueSet.url,
+      });
+    });
+  }
+  return codeValueSetMap.filter((code) => code.valueSets.length > 1);
+}

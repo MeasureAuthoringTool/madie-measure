@@ -64,7 +64,7 @@ import ActionCenter from "../common/ActionCenter/ActionCenter";
 import CopyTestCaseDialog from "../common/copyTestCases/CopyTestCaseDialog";
 import {
   OverlappingCode,
-  overlappingCodes as overlappingCodes1,
+  generateQdmReport,
 } from "../../../util/ValueSetOverlapUtils";
 import OverlappingCodesDialog from "../common/overLappingCodes/OverlappingCodesDialog";
 
@@ -731,7 +731,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   };
 
   const handleGenerateOverlappingCodesReport = () => {
-    setOverlappingCodes(overlappingCodes1);
+    setOverlappingCodes(generateQdmReport(cqmMeasure.value_sets));
     setOpenOverlappingCodesDialog(true);
   };
 

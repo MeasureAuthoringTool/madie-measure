@@ -31,7 +31,6 @@ import {
   MadieSpinner,
   Pagination,
   Toast,
-  MadieAlert,
 } from "@madie/madie-design-system/dist/react";
 import Typography from "@mui/material/Typography";
 import TestCaseImportFromBonnieDialog from "../common/import/TestCaseImportFromBonnieDialog";
@@ -49,7 +48,7 @@ import ActionCenter from "../common/ActionCenter/ActionCenter";
 import CopyTestCaseDialog from "../common/copyTestCases/CopyTestCaseDialog";
 import {
   OverlappingCode,
-  overlappingCodes as overlappingCodes1,
+  generateQiCoreReport,
 } from "../../../util/ValueSetOverlapUtils";
 import OverlappingCodesDialog from "../common/overLappingCodes/OverlappingCodesDialog";
 
@@ -432,7 +431,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   };
 
   const handleGenerateOverlappingCodesReport = () => {
-    setOverlappingCodes(overlappingCodes1);
+    setOverlappingCodes(generateQiCoreReport(valueSets));
     setOpenOverlappingCodesDialog(true);
   };
 
