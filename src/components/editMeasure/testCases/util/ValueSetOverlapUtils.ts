@@ -20,6 +20,9 @@ export function generateQdmReport(
   valueSets: CqmValueSet[]
 ): OverlappingValueSetReport[] {
   // Reverse the value set mapping such that the code is the key and value is an array of value sets containing that code.
+  if (!valueSets || valueSets.length === 0) {
+    return [];
+  }
   const codeValueSetMap: OverlappingValueSetReport[] = [];
   for (const valueSet of valueSets) {
     valueSet.concepts?.forEach((concept) => {
@@ -54,6 +57,9 @@ export function generateQiCoreReport(
   valueSets: ValueSet[]
 ): OverlappingValueSetReport[] {
   // Reverse the value set mapping such that the code is the key and value is an array of value sets containing that code.
+  if (!valueSets || valueSets.length === 0) {
+    return [];
+  }
   const codeValueSetMap: OverlappingValueSetReport[] = [];
   for (const valueSet of valueSets) {
     valueSet.expansion?.contains?.forEach((contained) => {

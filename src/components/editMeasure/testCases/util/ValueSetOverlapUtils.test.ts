@@ -35,6 +35,19 @@ describe("ValueSetOverlapUtils", () => {
             },
           ],
         },
+        {
+          oid: "5.6.7",
+          display_name: "Test ValueSet 3",
+          concepts: [
+            {
+              code: "10000",
+              display_name: "Test Code 10000",
+              code_system_oid: "2.3.4.5",
+              code_system_version: "1",
+              code_system_name: "Another System",
+            },
+          ],
+        },
       ];
 
       const result = generateQdmReport(valueSets);
@@ -69,11 +82,30 @@ describe("ValueSetOverlapUtils", () => {
             },
           ],
         },
+        {
+          oid: "5.6.7",
+          display_name: "Test ValueSet 3",
+          concepts: [
+            {
+              code: "10000",
+              display_name: "Test Code 10000",
+              code_system_oid: "1.2.3.4",
+              code_system_version: "1",
+              code_system_name: "Test System",
+            },
+          ],
+        },
       ];
 
       const result = generateQdmReport(valueSets);
       expect(result).toHaveLength(1);
       expect(result[0].valueSets).toHaveLength(2);
+    });
+
+    it("should return an empty array when no value sets are provided", () => {
+      const valueSets: CqmValueSet[] = [];
+      const result = generateQdmReport(valueSets);
+      expect(result).toEqual([]);
     });
   });
 
@@ -151,6 +183,12 @@ describe("ValueSetOverlapUtils", () => {
       const result = generateQiCoreReport(valueSets);
       expect(result).toHaveLength(1);
       expect(result[0].valueSets).toHaveLength(2);
+    });
+
+    it("should return an empty array when no value sets are provided", () => {
+      const valueSets: ValueSet[] = [];
+      const result = generateQiCoreReport(valueSets);
+      expect(result).toEqual([]);
     });
   });
 });
