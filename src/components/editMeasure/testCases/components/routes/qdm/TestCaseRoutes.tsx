@@ -135,6 +135,17 @@ const TestCaseRoutes = () => {
       }
     }
   }, [measure, aborted]);
+
+  const clearVsacErrors = useCallback(async () => {
+    if (cqmMeasureErrors.length) {
+      setCqmMeasureErrors(
+        cqmMeasureErrors.filter((err) => {
+          !err.includes("VSAC");
+        })
+      );
+    }
+  }, [cqmMeasureErrors]);
+
   //given a converted measure, append valuesets to it using the service
   const getQdmValueSets = async (convertedMeasure: CqmMeasure) => {
     try {
@@ -153,18 +164,13 @@ const TestCaseRoutes = () => {
       setExecutionContextReady(
         !!newCqmMeasure && !_.isEmpty(newCqmMeasure?.value_sets) && !!measure
       );
-      if (cqmMeasureErrors) {
-        setCqmMeasureErrors(
-          cqmMeasureErrors.filter((err) => {
-            !err.includes("VSAC");
-          })
-        );
-      }
+      clearVsacErrors();
     } catch (e) {
       if (e.code === "ERR_CANCELED") {
         handleAbort();
       } else {
         setContextFailure(true);
+        clearVsacErrors();
         setCqmMeasureErrors((prevState) => [...prevState, e.message]);
       }
     }
