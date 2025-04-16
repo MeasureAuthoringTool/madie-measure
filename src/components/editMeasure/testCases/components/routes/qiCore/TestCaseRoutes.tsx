@@ -98,6 +98,8 @@ const TestCaseRoutes = () => {
 
   useEffect(() => {
     if (measureBundle && measure) {
+      setErrors(() => []);
+
       terminologyService.current
         .getValueSetsExpansionForBundle(
           measureBundle,
@@ -105,11 +107,9 @@ const TestCaseRoutes = () => {
         )
         .then((vs: ValueSet[]) => {
           setValueSets(vs);
-          setErrors(() => []);
         })
         .catch((err) => {
           setContextFailure(true);
-          setErrors(() => []);
           setErrors((prevState) => [...prevState, err.message]);
         });
     }

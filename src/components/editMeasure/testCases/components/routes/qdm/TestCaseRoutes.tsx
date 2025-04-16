@@ -139,6 +139,7 @@ const TestCaseRoutes = () => {
   //given a converted measure, append valuesets to it using the service
   const getQdmValueSets = async (convertedMeasure: CqmMeasure) => {
     try {
+      setCqmMeasureErrors(() => []);
       const drcValueSets: ValueSet[] =
         terminologyService.current.getValueSetsForDRCs(convertedMeasure);
       const vs = await terminologyService.current.getQdmValueSetsExpansion(
@@ -154,13 +155,11 @@ const TestCaseRoutes = () => {
       setExecutionContextReady(
         !!newCqmMeasure && !_.isEmpty(newCqmMeasure?.value_sets) && !!measure
       );
-      setCqmMeasureErrors(() => []);
     } catch (e) {
       if (e.code === "ERR_CANCELED") {
         handleAbort();
       } else {
         setContextFailure(true);
-        setCqmMeasureErrors(() => []);
         setCqmMeasureErrors((prevState) => [...prevState, e.message]);
       }
     }

@@ -69,7 +69,7 @@ export class TerminologyServiceApi {
           data.diagnostic
         }\"`;
       } else if (error.response?.data?.message) {
-        message = `${message}: ${error.response?.data?.message}`;
+        message = `${message}: ${error.response.data.message}`;
       }
       throw new Error(message);
     }
@@ -149,7 +149,7 @@ export class TerminologyServiceApi {
           data.diagnostic
         }\"`;
       } else if (error.response?.data?.message) {
-        message = `${message}: ${error.response?.data?.message}`;
+        message = `${message}: ${error.response.data.message}`;
       }
       throw new Error(message);
     }
