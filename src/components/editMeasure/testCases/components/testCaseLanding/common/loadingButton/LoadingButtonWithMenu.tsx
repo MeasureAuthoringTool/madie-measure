@@ -3,21 +3,27 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { Popover } from "@madie/madie-design-system/dist/react";
 
+interface MenuItem {
+  label: string;
+  dataTestId: string;
+  toImplementFunction: () => void;
+}
+
 interface LoadingButtonMenuProps {
   hasErrors: boolean;
   isExecutionContextReady: boolean;
-  onClick: () => void;
   label: string;
   dataTestId?: string;
   primary?: boolean;
+  menuItems: MenuItem[];
 }
 
 export default function LoadingButtonWithMenu({
   hasErrors,
   isExecutionContextReady,
-  onClick,
   dataTestId,
   label,
+  menuItems,
   primary = false,
 }: LoadingButtonMenuProps) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -62,13 +68,7 @@ export default function LoadingButtonWithMenu({
         optionsOpen={showOptions}
         anchorEl={anchorEl}
         handleClose={handleClose}
-        additionalSelectOptionProps={[
-          {
-            label: "Overlapping Codes",
-            dataTestId: `overlapping-codes`,
-            toImplementFunction: onClick,
-          },
-        ]}
+        additionalSelectOptionProps={menuItems}
       />
     </>
   );

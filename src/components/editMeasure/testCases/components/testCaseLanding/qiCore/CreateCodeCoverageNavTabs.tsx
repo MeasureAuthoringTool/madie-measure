@@ -160,9 +160,15 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
           <LoadingButtonWithMenu
             hasErrors={hasErrors}
             isExecutionContextReady={executionContextReady}
-            onClick={onGenerateOverlappingCodesReport}
             dataTestId="reports-button"
             label="Reports"
+            menuItems={[
+              {
+                label: "Overlapping Codes",
+                dataTestId: `overlapping-codes`,
+                toImplementFunction: onGenerateOverlappingCodesReport,
+              },
+            ]}
           />
         )}
         {((featureFlags.TestCaseListActionCenter && canEdit) ||
