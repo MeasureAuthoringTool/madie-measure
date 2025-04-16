@@ -218,7 +218,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
               menuItems={[
                 {
                   label: "Overlapping Codes",
-                  dataTestId: `overlapping-codes`,
+                  dataTestId: "overlapping-codes",
                   toImplementFunction: onGenerateOverlappingCodesReport,
                 },
               ]}
