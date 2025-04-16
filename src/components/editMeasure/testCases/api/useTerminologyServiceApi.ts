@@ -58,14 +58,18 @@ export class TerminologyServiceApi {
     } catch (error) {
       let message =
         "An error occurred, please try again. If the error persists, please contact the help desk. (003)";
-      if (error.response && error.response.status === 404) {
-        const data = error.response.data?.message;
-        console.error(
-          "ValueSet not found in vsac: ",
-          this.getOidFromString(data)
-        );
-        message =
-          "An error exists with the measure CQL, please review the CQL Editor tab.";
+
+      if (error.response?.data?.diagnostic) {
+        const data = error.response.data;
+        message = `Value Set (${
+          data?.valueSetOid
+        }) could not be expanded using ${
+          searchCriteria.manifestExpansion ? "Manifest" : "Latest"
+        } (${data?.manifestExpansionFullUrl}). Per VSAC, \"${
+          data.diagnostic
+        }\"`;
+      } else if (error.response?.data?.message) {
+        message = `${message}: ${error.response.data.message}`;
       }
       throw new Error(message);
     }
@@ -134,11 +138,18 @@ export class TerminologyServiceApi {
       }
       let message =
         "An error occurred, please try again. If the error persists, please contact the help desk. (004)";
+
       if (error.response?.data?.diagnostic) {
         const data = error.response.data;
-        message = `Value Set ${data?.valueSet} could not be expanded using ${
-          data?.manifest === undefined ? "Latest" : "Manifest " + data.manifest
-        }. Per VSAC, \"${data.diagnostic}\"`;
+        message = `Value Set (${
+          data?.valueSetOid
+        }) could not be expanded using ${
+          searchCriteria.manifestExpansion ? "Manifest" : "Latest"
+        } (${data?.manifestExpansionFullUrl}). Per VSAC, \"${
+          data.diagnostic
+        }\"`;
+      } else if (error.response?.data?.message) {
+        message = `${message}: ${error.response.data.message}`;
       }
       throw new Error(message);
     }
