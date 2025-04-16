@@ -11,7 +11,10 @@ import tw from "twin.macro";
 import "styled-components/macro";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
-import { OverlappingCode } from "../../../../util/OverlappingCodesUtils";
+import {
+  OverlappingCode,
+  OverlappingValueSet,
+} from "../../../../util/OverlappingCodesUtils";
 import { Box, Typography } from "@mui/material";
 
 // Define the data type for rows
@@ -25,7 +28,7 @@ interface RowData {
 const TH = tw.th`p-3 text-left text-sm`;
 const TD = tw.td`p-3 text-left text-sm`;
 
-const Description = (valueSet) => {
+const Description = ({ valueSet }: { valueSet: OverlappingValueSet }) => {
   return (
     <>
       <Box display="flex" alignItems="center" gap={1}>
@@ -36,9 +39,11 @@ const Description = (valueSet) => {
       </Box>
       <Box display="flex" alignItems="center" gap={1}>
         <Typography variant="subtitle1" fontWeight="bold">
-          Oid:
+          {valueSet?.url ? "Url" : "Oid"}:
         </Typography>
-        <Typography variant="body1">{valueSet.oid}</Typography>
+        <Typography variant="body1">
+          {valueSet?.url ? valueSet.url : valueSet.oid}
+        </Typography>
       </Box>
     </>
   );
@@ -113,7 +118,7 @@ const OverlappingCodesReport = ({
         subRows: code.valueSets.map((valueSet) => ({
           code: "",
           codeSystem: "",
-          description: <Description {...valueSet} />,
+          description: <Description valueSet={valueSet} />,
           version: "",
           subRows: null,
         })),

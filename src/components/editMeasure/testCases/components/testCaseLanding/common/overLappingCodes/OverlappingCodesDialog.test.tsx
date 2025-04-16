@@ -83,7 +83,38 @@ describe("OverlappingCodesDialog", () => {
     expect(screen.getByText("Overlapping Codes")).toBeInTheDocument();
   });
 
-  it("should display the overlapping codes table", () => {
+  it("should display the overlapping codes table for QDM", () => {
+    const qdmCodes = [
+      {
+        ...mockOverlappingCodes[0],
+        valueSets: [
+          { name: "ValueSet7", oid: "0.1.2.3", url: undefined },
+          { name: "ValueSet2", oid: "5.6.7.8", url: undefined },
+        ],
+      },
+    ];
+    render(
+      <OverlappingCodesDialog
+        openDialog={true}
+        handleClose={mockHandleClose}
+        overlappingCodes={qdmCodes}
+      />
+    );
+
+    expect(screen.getByTestId("overlapping-codes-tbl")).toBeInTheDocument();
+    expect(screen.getByText("12345")).toBeInTheDocument();
+    expect(screen.getByText("ICD-10")).toBeInTheDocument();
+    expect(screen.getByText("Test Description")).toBeInTheDocument();
+    expect(screen.getByText("2023")).toBeInTheDocument();
+    // expand the row to see the value sets
+    userEvent.click(screen.getByTestId("expand-button-12345_2023"));
+    expect(screen.getByText("ValueSet7")).toBeInTheDocument();
+    expect(screen.getByText("0.1.2.3")).toBeInTheDocument();
+    expect(screen.getByText("ValueSet2")).toBeInTheDocument();
+    expect(screen.getByText("5.6.7.8")).toBeInTheDocument();
+  });
+
+  it("should display the overlapping codes table for QICore", () => {
     render(
       <OverlappingCodesDialog
         openDialog={true}
@@ -97,6 +128,12 @@ describe("OverlappingCodesDialog", () => {
     expect(screen.getByText("ICD-10")).toBeInTheDocument();
     expect(screen.getByText("Test Description")).toBeInTheDocument();
     expect(screen.getByText("2023")).toBeInTheDocument();
+    // expand the row to see the value sets
+    userEvent.click(screen.getByTestId("expand-button-12345_2023"));
+    expect(screen.getByText("ValueSet1")).toBeInTheDocument();
+    expect(screen.getByText("http://example.com/1")).toBeInTheDocument();
+    expect(screen.getByText("ValueSet2")).toBeInTheDocument();
+    expect(screen.getByText("http://example.com/2")).toBeInTheDocument();
   });
 
   it("should display a message when there are no overlapping codes", () => {
