@@ -104,30 +104,92 @@ describe("TerminologyServiceApi Tests", () => {
     expect(result[0].id).toEqual("2.16.840.1.113883.3.464.1003.101.12.1001");
   });
 
-  it("throws an error if ValueSets not found in VSAC", async () => {
-    const response = {
-      timestamp: "2022-06-02T21:36:46.592+00:00",
-      status: 404,
-      error: "Not Found",
-      message:
-        "404 Not Found from GET https://vsac.nlm.nih.gov/vsac/svs/RetrieveMultipleValueSets?id=2.16.840.1.113883.3.464.1003.101.12.10011&ticket=ST-106586-7gtyv4fwl3xjfcyy-cas&profile=eCQM%20Update%202022-05-05&includeDraft=yes",
-      validationErrors: {
-        "/api":
-          "404 Not Found from GET https://vsac.nlm.nih.gov/vsac/svs/RetrieveMultipleValueSets?id=2.16.840.1.113883.3.464.1003.101.12.10011&ticket=ST-106586-7gtyv4fwl3xjfcyy-cas&profile=eCQM%20Update%202022-05-05&includeDraft=yes",
-      },
-    };
+  it("throws an error when VSAC returns a NON-OK response when trying to fetch FHIR expansions with manifest", async () => {
+    let message =
+      "An error occurred, please try again. If the error persists, please contact the help desk. (003)";
 
+    const response = {
+      timestamp: "2025-04-15T22:47:15.924+00:00",
+      message: "Failed to fetch batch resources from VSAC",
+      status: 401,
+      error: "Unauthorized",
+    };
     axios.put = jest
       .fn()
       .mockRejectedValue({ response: { status: 404, data: response } });
     try {
       await terminologyService.getValueSetsExpansionForBundle(
+        officeVisitMeasureBundle,
+        testManifestExpansion
+      );
+    } catch (error) {
+      expect(error.message).toContain(message);
+      expect(error.message).toContain(response.message);
+    }
+  });
+
+  test("throws an error when VSAC throws an error while trying to parse FHIR expansions with manifest", async () => {
+    const response = {
+      timestamp: "2025-04-15T22:17:12.205+00:00",
+      message: "Failed to fetch VSAC value set expansions",
+      status: 400,
+      error: "Bad Request",
+      validationErrors: {
+        "/api": "Failed to fetch VSAC value set expansions",
+      },
+      diagnostic:
+        "Content returned as invalid against the specification. Either the specification contains invalid elements, or the server failed to process due to internal errors.",
+      manifestExpansionFullUrl:
+        "http://cts.nlm.nih.gov/fhir/Library/mu2-update-2015-05-01",
+      valueSetOid: "2.16.840.1.113762.1.4.1110.62",
+    };
+
+    axios.put = jest
+      .fn()
+      .mockRejectedValue({ response: { status: 400, data: response } });
+    try {
+      await terminologyService.getValueSetsExpansionForBundle(
+        officeVisitMeasureBundle,
+        testManifestExpansion
+      );
+    } catch (error) {
+      expect(error.message).toContain(response.valueSetOid);
+      expect(error.message).toContain("Manifest");
+      expect(error.message).not.toContain("Latest");
+      expect(error.message).toContain(response.manifestExpansionFullUrl);
+      expect(error.message).toContain(`Per VSAC, \"${response.diagnostic}\"`);
+    }
+  });
+
+  test("throws an error when VSAC throws an error while trying to parse FHIR expansions with no manifest", async () => {
+    const response = {
+      timestamp: "2025-04-15T22:17:12.205+00:00",
+      message: "Failed to fetch VSAC value set expansions",
+      status: 400,
+      error: "Bad Request",
+      validationErrors: {
+        "/api": "Failed to fetch VSAC value set expansions",
+      },
+      diagnostic:
+        "Content returned as invalid against the specification. Either the specification contains invalid elements, or the server failed to process due to internal errors.",
+      manifestExpansionFullUrl:
+        "http://cts.nlm.nih.gov/fhir/Library/mu2-update-2015-05-01",
+      valueSetOid: "2.16.840.1.113762.1.4.1110.62",
+    };
+
+    axios.put = jest
+      .fn()
+      .mockRejectedValue({ response: { status: 400, data: response } });
+    try {
+      await terminologyService.getValueSetsExpansionForBundle(
         officeVisitMeasureBundle
       );
     } catch (error) {
-      expect(error.message).toEqual(
-        "An error exists with the measure CQL, please review the CQL Editor tab."
-      );
+      expect(error.message).toContain(response.valueSetOid);
+      expect(error.message).toContain("Latest");
+      expect(error.message).not.toContain("Manifest");
+      expect(error.message).toContain(response.manifestExpansionFullUrl);
+      expect(error.message).toContain(`Per VSAC, \"${response.diagnostic}\"`);
     }
   });
 
@@ -249,47 +311,9 @@ describe("TerminologyServiceApi Tests", () => {
       });
   });
 
-  it("throws an error if ValueSets not found in VSAC for cqm measure", async () => {
-    const response = {
-      timestamp: "2024-06-13T16:20:58.424+00:00",
-      status: 404,
-      error: "Not Found",
-      message: "No message available",
-      diagnostic:
-        "Requested resource was not found. Either the resource doesn't exist, or you don't have the permission to view it.",
-      valueSet: "2.16.840.1.113762.1.4.1147.82",
-    };
-    axios.put = jest
-      .fn()
-      .mockRejectedValue({ response: { status: 404, data: response } });
-    try {
-      await terminologyService.getQdmValueSetsExpansion(
-        cqm_measure_basic,
-        testManifestExpansion,
-        false
-      );
-    } catch (error) {
-      expect(error.message).toContain(response.valueSet);
-      expect(error.message).toContain("Latest");
-      expect(error.message).not.toContain("Manifest");
-      expect(error.message).toContain(`Per VSAC, \"${response.diagnostic}\"`);
-    }
-  });
-
-  it("throws an error if ValueSets not found in VSAC for cqm measure", async () => {
-    const response = {
-      timestamp: "2024-06-13T16:20:58.424+00:00",
-      status: 404,
-      error: "Not Found",
-      message: "No message available",
-      diagnostic:
-        "Requested resource was not found. Either the resource doesn't exist, or you don't have the permission to view it.",
-      valueSet: "2.16.840.1.113762.1.4.1147.82",
-    };
-
+  it("throws an error if the request was cancelled during QDM expansions with manifest", async () => {
     const error = new Error("Request canceled");
     error.code = "ERR_CANCELED";
-    error.response = { status: 404, data: response };
 
     axios.put = jest.fn().mockRejectedValue(error);
 
@@ -304,17 +328,47 @@ describe("TerminologyServiceApi Tests", () => {
     }
   });
 
-  test("throws an error when VSAC throws an error during expansion with manifest", async () => {
+  it("throws an error when VSAC returns a NON-OK response when trying to fetch QDM expansions with manifest", async () => {
+    let message =
+      "An error occurred, please try again. If the error persists, please contact the help desk. (004)";
+
     const response = {
-      timestamp: "2024-06-13T16:34:55.931+00:00",
+      timestamp: "2025-04-15T22:47:15.924+00:00",
+      message: "Failed to fetch batch resources from VSAC",
+      status: 401,
+      error: "Unauthorized",
+    };
+    axios.put = jest
+      .fn()
+      .mockRejectedValue({ response: { status: 404, data: response } });
+    try {
+      await terminologyService.getQdmValueSetsExpansion(
+        cqm_measure_basic,
+        testManifestExpansion,
+        false
+      );
+    } catch (error) {
+      expect(error.message).toContain(message);
+      expect(error.message).toContain(response.message);
+    }
+  });
+
+  test("throws an error when VSAC throws an error while trying to parse QDM expansions with manifest", async () => {
+    const response = {
+      timestamp: "2025-04-15T22:17:12.205+00:00",
+      message: "Failed to fetch VSAC value set expansions",
       status: 400,
       error: "Bad Request",
-      message: "No message available",
+      validationErrors: {
+        "/api": "Failed to fetch VSAC value set expansions",
+      },
       diagnostic:
         "Content returned as invalid against the specification. Either the specification contains invalid elements, or the server failed to process due to internal errors.",
-      valueSet: "2.16.840.1.114222.4.11.837",
-      manifest: "mu2-update-2015-05-01",
+      manifestExpansionFullUrl:
+        "http://cts.nlm.nih.gov/fhir/Library/mu2-update-2015-05-01",
+      valueSetOid: "2.16.840.1.113762.1.4.1110.62",
     };
+
     axios.put = jest
       .fn()
       .mockRejectedValue({ response: { status: 400, data: response } });
@@ -325,10 +379,44 @@ describe("TerminologyServiceApi Tests", () => {
         true
       );
     } catch (error) {
-      expect(error.message).toContain(response.valueSet);
-      expect(error.message).not.toContain("Latest");
+      expect(error.message).toContain(response.valueSetOid);
       expect(error.message).toContain("Manifest");
-      expect(error.message).toContain(response.manifest);
+      expect(error.message).not.toContain("Latest");
+      expect(error.message).toContain(response.manifestExpansionFullUrl);
+      expect(error.message).toContain(`Per VSAC, \"${response.diagnostic}\"`);
+    }
+  });
+
+  test("throws an error when VSAC throws an error while trying to parse QDM expansions with no manifest", async () => {
+    const response = {
+      timestamp: "2025-04-15T22:17:12.205+00:00",
+      message: "Failed to fetch VSAC value set expansions",
+      status: 400,
+      error: "Bad Request",
+      validationErrors: {
+        "/api": "Failed to fetch VSAC value set expansions",
+      },
+      diagnostic:
+        "Content returned as invalid against the specification. Either the specification contains invalid elements, or the server failed to process due to internal errors.",
+      manifestExpansionFullUrl:
+        "http://cts.nlm.nih.gov/fhir/Library/mu2-update-2015-05-01",
+      valueSetOid: "2.16.840.1.113762.1.4.1110.62",
+    };
+
+    axios.put = jest
+      .fn()
+      .mockRejectedValue({ response: { status: 400, data: response } });
+    try {
+      await terminologyService.getQdmValueSetsExpansion(
+        cqm_measure_basic,
+        null,
+        true
+      );
+    } catch (error) {
+      expect(error.message).toContain(response.valueSetOid);
+      expect(error.message).toContain("Latest");
+      expect(error.message).not.toContain("Manifest");
+      expect(error.message).toContain(response.manifestExpansionFullUrl);
       expect(error.message).toContain(`Per VSAC, \"${response.diagnostic}\"`);
     }
   });

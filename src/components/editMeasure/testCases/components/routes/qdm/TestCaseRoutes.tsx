@@ -135,9 +135,11 @@ const TestCaseRoutes = () => {
       }
     }
   }, [measure, aborted]);
+
   //given a converted measure, append valuesets to it using the service
   const getQdmValueSets = async (convertedMeasure: CqmMeasure) => {
     try {
+      setCqmMeasureErrors(() => []);
       const drcValueSets: ValueSet[] =
         terminologyService.current.getValueSetsForDRCs(convertedMeasure);
       const vs = await terminologyService.current.getQdmValueSetsExpansion(
@@ -153,13 +155,6 @@ const TestCaseRoutes = () => {
       setExecutionContextReady(
         !!newCqmMeasure && !_.isEmpty(newCqmMeasure?.value_sets) && !!measure
       );
-      if (cqmMeasureErrors) {
-        setCqmMeasureErrors(
-          cqmMeasureErrors.filter((err) => {
-            !err.includes("VSAC");
-          })
-        );
-      }
     } catch (e) {
       if (e.code === "ERR_CANCELED") {
         handleAbort();
