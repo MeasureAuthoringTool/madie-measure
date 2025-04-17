@@ -651,21 +651,33 @@ describe("TestCaseList component", () => {
     );
   }
 
-  it("should enable report button for QICore tests, if execution context is ready", async () => {
+  it("should enable reports button for QICore tests, if execution context is ready", async () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       OverlappingValueSets: true,
     }));
     renderTestCaseListComponent([], [], false);
     await waitFor(() => {
-      expect(screen.getByTestId("report-button")).toBeEnabled();
+      expect(screen.getByTestId("reports-button")).toBeEnabled();
     });
-    userEvent.click(screen.getByTestId("report-button"));
-    // on click of report button disable the button as it will be in progress
-    // more unit tests to follow after MAT-8382
-    expect(screen.getByTestId("report-button")).toBeDisabled();
+    userEvent.click(screen.getByTestId("reports-button"));
+    expect(screen.getByTestId("overlapping-codes")).toHaveTextContent(
+      "Overlapping Codes"
+    );
+    userEvent.click(screen.getByTestId("overlapping-codes"));
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("overlapping-codes-dialog")
+      ).toBeInTheDocument();
+    });
+    expect(screen.getByTestId("overlapping-codes-dialog")).toHaveTextContent(
+      "Overlapping Codes"
+    );
+    expect(
+      screen.getByTestId("overlapping-codes-report-contents")
+    ).toHaveTextContent("There are no overlapping codes");
   });
 
-  it("should disable Run QICore test case & report buttons, if execution context failed", async () => {
+  it("should disable Run QICore test case & reports buttons, if execution context failed", async () => {
     (useFeatureFlags as jest.Mock).mockReturnValue({
       OverlappingValueSets: true,
     });
@@ -673,7 +685,7 @@ describe("TestCaseList component", () => {
     await waitFor(() => {
       expect(screen.getByTestId("execute-test-cases-button")).toBeDisabled();
     });
-    expect(screen.getByTestId("report-button")).toBeDisabled();
+    expect(screen.getByTestId("reports-button")).toBeDisabled();
   });
 
   it("should render list of test cases", async () => {
