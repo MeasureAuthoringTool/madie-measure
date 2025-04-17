@@ -29,8 +29,8 @@ export default function MeasureLanding() {
   let navigate = useNavigate();
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [measureList, setMeasureList] = useState<Measure[]>([]);
-  const [myMeasures, setMyMeasures] = useState<number>(0);
-  const [allMeasures, setAllMeasures] = useState<number>(0);
+  const [myMeasuresCount, setMyMeasuresCount] = useState<number>(0);
+  const [allMeasuresCount, setAllMeasuresCount] = useState<number>(0);
 
   // utilities for pagination
   const values = queryString.parse(search);
@@ -113,10 +113,13 @@ export default function MeasureLanding() {
 
   useEffect(() => {
     if (featureFlags?.MeasureSearch) {
-      measureServiceApi.getMeasureCounts().then((data) => {
-        setMyMeasures(data.myMeasures);
-        setAllMeasures(data.allMeasures);
-      });
+      measureServiceApi
+        .getMeasureCounts()
+        .then((data) => {
+          setMyMeasuresCount(data.myMeasures);
+          setAllMeasuresCount(data.allMeasures);
+        })
+        .catch(() => console.log("Unable to retrieve measure counts"));
     }
   }, [
     activeTab,
@@ -169,7 +172,7 @@ export default function MeasureLanding() {
                 type="B"
                 label={
                   featureFlags?.MeasureSearch
-                    ? "My Measures (" + myMeasures + ")"
+                    ? "My Measures (" + myMeasuresCount + ")"
                     : "My Measures"
                 }
                 data-testid="my-measures-tab"
@@ -182,7 +185,7 @@ export default function MeasureLanding() {
                 type="B"
                 label={
                   featureFlags?.MeasureSearch
-                    ? "All Measures (" + allMeasures + ")"
+                    ? "All Measures (" + allMeasuresCount + ")"
                     : "All Measures"
                 }
                 data-testid="all-measures-tab"
