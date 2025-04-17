@@ -6,7 +6,6 @@ import EditCalendarOutlinedIcon from "@mui/icons-material/EditCalendarOutlined";
 import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
 import { Toast } from "@madie/madie-design-system/dist/react";
 
-import { grey, blue } from "@mui/material/colors";
 import _ from "lodash";
 
 interface PropTypes {
@@ -14,7 +13,14 @@ interface PropTypes {
   onClick: () => void;
   canEdit: boolean;
 }
-
+const iconStyles = {
+  "&.Mui-disabled": {
+    color: "#8C8C8C !important",
+  },
+  "&.MuiIconButton-root": {
+    color: "#0073C8 ",
+  },
+};
 export const NOTHING_SELECTED = "Select measure to draft";
 export const DRAFT_MEASURE = "Draft measure";
 export const LOOKUP_ERROR = "There was an error checking draftability. ";
@@ -118,10 +124,9 @@ export default function DraftAction(props: PropTypes) {
           onClick={props.onClick}
           disabled={disableDraftBtn}
           data-testid="draft-action-btn"
+          sx={iconStyles}
         >
-          <EditCalendarOutlinedIcon
-            sx={disableDraftBtn ? { color: grey[500] } : { color: blue[500] }}
-          />
+          <EditCalendarOutlinedIcon />
           <Toast
             toastKey="draft-button-error-toast"
             toastType="danger"
