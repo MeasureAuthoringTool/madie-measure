@@ -1885,12 +1885,13 @@ describe("EditTestCase component", () => {
       const createBtn = screen.getByRole("button", { name: "Save" });
       await waitFor(() => {
         expect(createBtn).toBeDisabled;
-        expect(
-          screen.getByTestId("test-case-description-helper-text")
-        ).toHaveTextContent(
-          "Test Case Description cannot be more than 250 characters."
-        );
+        screen.debug();
       });
+      expect(
+        screen.getByTestId("test-case-description-helper-text")
+      ).toHaveTextContent(
+        "Test Case Description cannot be more than 250 characters."
+      );
     });
 
     it("should allow special characters for test case description", async () => {
