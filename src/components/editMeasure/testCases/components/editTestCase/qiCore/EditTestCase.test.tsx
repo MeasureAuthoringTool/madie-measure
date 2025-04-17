@@ -1885,7 +1885,6 @@ describe("EditTestCase component", () => {
       const createBtn = screen.getByRole("button", { name: "Save" });
       await waitFor(() => {
         expect(createBtn).toBeDisabled;
-        screen.debug();
       });
       expect(
         screen.getByTestId("test-case-description-helper-text")
