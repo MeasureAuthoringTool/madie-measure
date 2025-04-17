@@ -245,7 +245,7 @@ const setTotalPagesMock = jest.fn();
 const setTotalItemsMock = jest.fn();
 const setVisibleItemsMock = jest.fn();
 const setOffsetMock = jest.fn();
-const setInitialLoadMock = jest.fn();
+const setLoadingMock = jest.fn();
 const setSearchCriteriaMock = jest.fn();
 const setErrMsgMock = jest.fn();
 
@@ -275,7 +275,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -301,7 +301,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -330,7 +330,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -359,7 +359,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={"test"}
           setSearchCriteria={setSearchCriteriaMock}
@@ -403,7 +403,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={"test"}
           setSearchCriteria={setSearchCriteriaMock}
@@ -450,7 +450,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -490,7 +490,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={"test"}
           setSearchCriteria={setSearchCriteriaMock}
@@ -537,7 +537,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -553,7 +553,7 @@ describe("Measure List component", () => {
     expect(window.location.href).toBe("http://localhost/");
 
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
 
     const createVersionButton = getByTestId("version-action-btn");
@@ -594,7 +594,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -605,7 +605,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -670,7 +670,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -681,7 +681,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -744,7 +744,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -755,7 +755,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -819,7 +819,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -830,7 +830,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -888,7 +888,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -899,7 +899,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -973,7 +973,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -984,7 +984,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -1040,7 +1040,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1072,7 +1072,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1125,7 +1125,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1184,7 +1184,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1251,7 +1251,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1321,7 +1321,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1332,7 +1332,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1378,7 +1378,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1389,7 +1389,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1433,7 +1433,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1444,7 +1444,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1482,7 +1482,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1493,7 +1493,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1539,7 +1539,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1550,7 +1550,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1593,7 +1593,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1604,7 +1604,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[3]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1647,7 +1647,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1658,7 +1658,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1701,7 +1701,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1712,8 +1712,8 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
-    userEvent.click(checkBoxes[5]);
+    expect(checkBoxes.length).toBe(5);
+    userEvent.click(checkBoxes[4]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
     userEvent.click(exportButton);
@@ -1768,7 +1768,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1779,8 +1779,8 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(2);
-    userEvent.click(checkBoxes[1]);
+    expect(checkBoxes.length).toBe(1);
+    userEvent.click(checkBoxes[0]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
     userEvent.click(exportButton);
@@ -1822,7 +1822,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1833,7 +1833,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1894,7 +1894,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1905,7 +1905,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1949,7 +1949,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1961,7 +1961,7 @@ describe("Measure List component", () => {
     );
 
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -2005,7 +2005,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -2017,7 +2017,7 @@ describe("Measure List component", () => {
     );
 
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -2076,7 +2076,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -2088,7 +2088,7 @@ describe("Measure List component", () => {
     );
 
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -2116,7 +2116,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -2127,7 +2127,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
 
     const createVersionButton = getByTestId("version-action-btn");
@@ -2147,7 +2147,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -2166,7 +2166,7 @@ describe("Measure List component", () => {
     });
     const checkboxes = await within(tableBody).findAllByRole("checkbox");
     await waitFor(() => {
-      expect(checkboxes).toHaveLength(6);
+      expect(checkboxes).toHaveLength(5);
     });
     unmount();
   });
@@ -2181,7 +2181,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -2206,7 +2206,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -2217,7 +2217,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const deleteButton = screen.getByTestId("delete-action-btn");
     expect(deleteButton).toBeInTheDocument();
@@ -2245,7 +2245,7 @@ describe("Measure List component", () => {
             setTotalItems={setTotalItemsMock}
             setVisibleItems={setVisibleItemsMock}
             setOffset={setOffsetMock}
-            setInitialLoad={setInitialLoadMock}
+            setLoading={setLoadingMock}
             activeTab={0}
             searchCriteria={""}
             setSearchCriteria={setSearchCriteriaMock}
@@ -2275,7 +2275,7 @@ describe("Measure List component", () => {
             setTotalItems={setTotalItemsMock}
             setVisibleItems={setVisibleItemsMock}
             setOffset={setOffsetMock}
-            setInitialLoad={setInitialLoadMock}
+            setLoading={setLoadingMock}
             activeTab={0}
             searchCriteria={""}
             setSearchCriteria={setSearchCriteriaMock}
@@ -2303,7 +2303,7 @@ describe("Measure List component", () => {
             setTotalItems={setTotalItemsMock}
             setVisibleItems={setVisibleItemsMock}
             setOffset={setOffsetMock}
-            setInitialLoad={setInitialLoadMock}
+            setLoading={setLoadingMock}
             activeTab={0}
             searchCriteria={""}
             setSearchCriteria={setSearchCriteriaMock}
@@ -2335,7 +2335,7 @@ describe("Measure List component", () => {
             setTotalItems={setTotalItemsMock}
             setVisibleItems={setVisibleItemsMock}
             setOffset={setOffsetMock}
-            setInitialLoad={setInitialLoadMock}
+            setLoading={setLoadingMock}
             activeTab={0}
             searchCriteria={""}
             setSearchCriteria={setSearchCriteriaMock}
@@ -2346,7 +2346,7 @@ describe("Measure List component", () => {
         </ServiceContext.Provider>
       );
       const checkBoxes = await screen.findAllByRole("checkbox");
-      expect(checkBoxes.length).toBe(6);
+      expect(checkBoxes.length).toBe(5);
       userEvent.click(checkBoxes[1]);
       const shareButton = screen.getByTestId("share-action-btn");
       expect(shareButton).toBeInTheDocument();

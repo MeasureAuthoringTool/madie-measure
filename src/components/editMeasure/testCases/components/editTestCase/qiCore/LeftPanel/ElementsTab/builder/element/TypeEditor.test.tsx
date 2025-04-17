@@ -115,10 +115,13 @@ describe("TypeEditor Component", () => {
         <TypeEditor
           type={`http://hl7.org/fhirpath/System.String`}
           required={false}
+          resource={null}
           onChange={handleChange}
           structureDefinition={null}
           label={"ClaimResponse.id"}
           value={claimResponseValues.ClaimResponse.id}
+          canEdit={true}
+          parentStructureDefinition={null}
         />
       </FormikProvider>
     );
@@ -127,6 +130,54 @@ describe("TypeEditor Component", () => {
     ) as HTMLInputElement;
     expect(inputField).toBeInTheDocument();
     expect(inputField.value).toBe("test");
+  });
+
+  test("Should render String component, should trigger setFieldValue and setFieldTouched", async () => {
+    const setFieldValue = jest.fn();
+    const setFieldTouched = jest.fn();
+
+    const stringFormik = {
+      ...mockFormik,
+      setFieldTouched: setFieldTouched,
+      setFieldValue: setFieldValue,
+      getFieldProps: () => ({
+        label: "ClaimResponse.id",
+        name: "ClaimResponse.id",
+        value: "1234-abcd-ABCD",
+        onChange: jest.fn(),
+        onBlur: jest.fn(),
+      }),
+    };
+
+    render(
+      <FormikProvider value={stringFormik}>
+        <TypeEditor
+          type={`http://hl7.org/fhirpath/System.String`}
+          required={false}
+          resource={null}
+          value={"1234-abcd-ABCD"}
+          onChange={() => {}}
+          structureDefinition={null}
+          label={"ClaimResponse.id"}
+          canEdit={true}
+          parentStructureDefinition={null}
+        />
+      </FormikProvider>
+    );
+    const inputField = screen.getByTestId(
+      "string-field-input-ClaimResponse.id"
+    ) as HTMLInputElement;
+    expect(inputField).toBeInTheDocument();
+    expect(inputField.value).toBe("1234-abcd-ABCD");
+
+    fireEvent.change(inputField, { target: { value: "1234-abcd-ABCD-5678" } });
+
+    expect(setFieldValue).toHaveBeenCalledWith(
+      "ClaimResponse.id",
+      "1234-abcd-ABCD-5678"
+    );
+
+    expect(setFieldTouched).toHaveBeenCalledWith("ClaimResponse.id");
   });
 
   test("String field should display errors and helper text", () => {
@@ -147,9 +198,13 @@ describe("TypeEditor Component", () => {
         <TypeEditor
           type={`http://hl7.org/fhirpath/System.String`}
           required={false}
+          resource={null}
+          value={"test"}
           onChange={handleChange}
           structureDefinition={null}
           label={"ClaimResponse.id"}
+          canEdit={true}
+          parentStructureDefinition={null}
         />
       </FormikProvider>
     );
@@ -167,9 +222,13 @@ describe("TypeEditor Component", () => {
       <TypeEditor
         type={`Period`}
         required={false}
+        resource={null}
         value={null}
         onChange={handleChange}
         structureDefinition={null}
+        canEdit={true}
+        label="instantiatesCanonical"
+        parentStructureDefinition={null}
       />
     );
 
@@ -184,10 +243,13 @@ describe("TypeEditor Component", () => {
         <TypeEditor
           type={`http://hl7.org/fhirpath/System.DateTime`}
           required={false}
+          resource={null}
           value={`2024-09-26T08:33:33.000-05:00`}
           onChange={handleChange}
           structureDefinition={null}
           label="ClaimResponse.date"
+          canEdit={true}
+          parentStructureDefinition={null}
         />
       </FormikProvider>
     );
@@ -198,7 +260,7 @@ describe("TypeEditor Component", () => {
     expect(inputDate).toBeInTheDocument();
   });
 
-  test("Should render DateTime component, should trigger onChange", () => {
+  test("Should render DateTime component, should trigger onChange", async () => {
     const onChange = jest.fn();
     const setFieldTouched = jest.fn();
     const updatedMockFormik = {
@@ -217,32 +279,35 @@ describe("TypeEditor Component", () => {
       <FormikProvider value={updatedMockFormik}>
         <TypeEditor
           type={`http://hl7.org/fhirpath/System.DateTime`}
+          resource={null}
           required={false}
           value="1992-01-01T00:00:00-08:00"
-          onChange={() => {}}
+          onChange={() => jest.fn()}
           structureDefinition={null}
+          parentStructureDefinition={null}
+          canEdit={true}
           label="ClaimResponse.date"
         />
       </FormikProvider>
     );
 
-    const inputDate = screen.getByTestId(
-      `date-time-format-selector-field-ClaimResponse.date`
-    );
-    expect(inputDate).toBeInTheDocument();
-    const timeZone = screen.getByTestId(
-      "timezone-input-field-ClaimResponse.date-input"
-    );
-    expect(timeZone.value).toBe("America/Los_Angeles");
-    const guam = "Pacific/Guam";
-    fireEvent.change(timeZone, {
-      target: {
-        value: guam,
-      },
-    });
+    const dateInput = screen.getByTestId(
+      `YYYY-MM-DDTHH:mm:ssZ-field-ClaimResponse.date-input`
+    ) as HTMLInputElement;
+
+    fireEvent.change(dateInput, { target: { value: "09/26/2024" } });
+
     expect(onChange).toHaveBeenCalledWith(
       "ClaimResponse.date",
-      "1992-01-01T18:00:00+10:00"
+      "2024-09-26T08:00:00+00:00"
+    );
+
+    const timeInput = screen.getByPlaceholderText("hh:mm:ss aa");
+    fireEvent.change(timeInput, { target: { value: "02:45:30 PM" } });
+
+    expect(onChange).toHaveBeenCalledWith(
+      "ClaimResponse.date",
+      "2024-09-26T14:45:30+00:00"
     );
   });
 
@@ -266,10 +331,13 @@ describe("TypeEditor Component", () => {
         <TypeEditor
           type={`http://hl7.org/fhirpath/System.DateTime`}
           required={false}
+          resource={null}
           value="2024-09-26asdf332324234"
           onChange={() => {}}
           structureDefinition={null}
           label="ClaimResponse.date"
+          canEdit={true}
+          parentStructureDefinition={null}
         />
       </FormikProvider>
     );
@@ -299,10 +367,13 @@ describe("TypeEditor Component", () => {
         <TypeEditor
           type="date"
           required={false}
+          resource={null}
           value="01-01-1992"
           onChange={() => {}}
           structureDefinition={null}
           label="ClaimResponse.date"
+          canEdit={true}
+          parentStructureDefinition={null}
         />
       </FormikProvider>
     );
@@ -311,8 +382,7 @@ describe("TypeEditor Component", () => {
     expect(dateField).toBeInTheDocument();
     const dateFieldInput = screen.getByTestId(
       "YYYY-MM-DD-field-ClaimResponse.date-input"
-    );
-    expect(dateFieldInput).toBeInTheDocument();
+    ) as HTMLInputElement;
     expect(dateFieldInput.value).toBe("01/01/2019");
 
     const formatSelectorField = screen.getByTestId(
@@ -345,10 +415,13 @@ describe("TypeEditor Component", () => {
         <TypeEditor
           type={`http://hl7.org/fhirpath/System.DateTime`}
           required={false}
+          resource={null}
           value="1992-01-01T00:00:00-08:00"
           onChange={() => {}}
           structureDefinition={null}
           label="ClaimResponse.date"
+          canEdit={true}
+          parentStructureDefinition={null}
         />
       </FormikProvider>
     );
@@ -365,10 +438,13 @@ describe("TypeEditor Component", () => {
         <TypeEditor
           type={`boolean`}
           required={false}
+          resource={null}
           value={`true`}
           onChange={handleChange}
           structureDefinition={null}
           label={"MedicationAbsent.meta"}
+          canEdit={true}
+          parentStructureDefinition={null}
         />
       </FormikProvider>
     );
@@ -384,10 +460,13 @@ describe("TypeEditor Component", () => {
         <TypeEditor
           type={`uri`}
           required={true}
+          resource={null}
           value={`urn:oid:2.16.840.1.113883.6.238`}
           onChange={handleChange}
           structureDefinition={null}
           label={"DiagnosticReport.presentedForm.uri"}
+          canEdit={true}
+          parentStructureDefinition={null}
         />
       </FormikProvider>
     );
@@ -402,12 +481,18 @@ describe("TypeEditor Component", () => {
       <TypeEditor
         type={`url`}
         required={true}
+        resource={null}
         value={`http://hl7.org/fhir/us/core/StructureDefinition/uscdi-requirement`}
         onChange={handleChange}
         structureDefinition={null}
+        canEdit={true}
+        label="instantiatesCanonical"
+        parentStructureDefinition={null}
       />
     );
-    expect(screen.getByTestId("url-input-field-URL")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("url-input-field-instantiatesCanonical")
+    ).toBeInTheDocument();
   });
 
   test("Should render canonical url type attribute", () => {
@@ -417,11 +502,13 @@ describe("TypeEditor Component", () => {
       <TypeEditor
         type="canonical"
         required={true}
+        resource={null}
         value={canonicalUri}
         onChange={handleChange}
         structureDefinition={null}
         canEdit={true}
         label="instantiatesCanonical"
+        parentStructureDefinition={null}
       />
     );
     expect(
@@ -555,11 +642,14 @@ describe("TypeEditor Component", () => {
       <FormikProvider value={mockFormik}>
         <TypeEditor
           type={`date`}
+          resource={null}
           required={false}
           value={`2024-09-26`}
           onChange={handleChange}
           structureDefinition={null}
           label="ClaimResponse.date"
+          parentStructureDefinition={null}
+          canEdit={true}
         />
       </FormikProvider>
     );
@@ -576,16 +666,20 @@ describe("TypeEditor Component", () => {
       <FormikProvider value={mockFormik}>
         <TypeEditor
           type={`http://hl7.org/fhir/R4/datatypes.html#time`}
+          resource={null}
           required={false}
           value={`01:23:45`}
           onChange={handleChange}
           structureDefinition={null}
           label="ClaimResponse.time"
+          parentStructureDefinition={null}
+          canEdit={true}
         />
       </FormikProvider>
     );
-    const inputTime = screen.getByPlaceholderText("hh:mm:ss aa");
-    expect(inputTime).toBeInTheDocument();
+    const inputTime = screen.getByPlaceholderText(
+      "hh:mm:ss aa"
+    ) as HTMLInputElement;
     expect(inputTime.value).toBe("01:23:45 AM");
   });
 
@@ -595,17 +689,20 @@ describe("TypeEditor Component", () => {
       <FormikProvider value={mockFormik}>
         <TypeEditor
           type={`positiveInt`}
+          resource={null}
           required={false}
+          value={`test`}
           onChange={handleChange}
           structureDefinition={null}
           label={"ClaimResponse.order"}
+          parentStructureDefinition={null}
+          canEdit={true}
         />
       </FormikProvider>
     );
     const inputField = screen.getByTestId(
       "integer-field-input-ClaimResponse.order"
-    );
-    expect(inputField).toBeInTheDocument();
+    ) as HTMLInputElement;
     expect(inputField.value).toBe("1234");
   });
 
@@ -615,17 +712,21 @@ describe("TypeEditor Component", () => {
       <FormikProvider value={mockFormik}>
         <TypeEditor
           type={`unsignedInt`}
+          resource={null}
           required={false}
+          value={`test`}
           onChange={handleChange}
           label={"ClaimResponse.order"}
+          structureDefinition={null}
+          parentStructureDefinition={null}
+          canEdit={true}
         />
       </FormikProvider>
     );
 
     const inputField = screen.getByTestId(
       "integer-field-input-ClaimResponse.order"
-    );
-    expect(inputField).toBeInTheDocument();
+    ) as HTMLInputElement;
     expect(inputField.value).toBe("1234");
   });
 
@@ -635,17 +736,21 @@ describe("TypeEditor Component", () => {
       <FormikProvider value={mockFormik}>
         <TypeEditor
           type={`http://hl7.org/fhirpath/System.Integer`}
+          resource={null}
           required={false}
+          value={`test`}
           onChange={handleChange}
+          structureDefinition={null}
           label={"ClaimResponse.order"}
+          parentStructureDefinition={null}
+          canEdit={true}
         />
       </FormikProvider>
     );
 
     const inputField = screen.getByTestId(
       "integer-field-input-ClaimResponse.order"
-    );
-    expect(inputField).toBeInTheDocument();
+    ) as HTMLInputElement;
     expect(inputField.value).toBe("1234");
   });
 
@@ -654,10 +759,14 @@ describe("TypeEditor Component", () => {
     render(
       <TypeEditor
         type={`test`}
+        resource={null}
         required={false}
         value={`test`}
         onChange={handleChange}
         structureDefinition={null}
+        parentStructureDefinition={null}
+        canEdit={true}
+        label={"test-label"}
       />
     );
     expect(screen.getByText(`Unsupported Type [test]`)).toBeInTheDocument();
@@ -677,10 +786,14 @@ describe("TypeEditor Component", () => {
     render(
       <TypeEditor
         type={`test`}
+        resource={null}
         required={false}
         value={`test`}
         onChange={handleChange}
         structureDefinition={null}
+        parentStructureDefinition={null}
+        canEdit={true}
+        label={"test-label"}
       />
     );
     expect(

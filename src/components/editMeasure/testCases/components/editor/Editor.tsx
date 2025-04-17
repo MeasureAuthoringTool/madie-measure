@@ -9,7 +9,6 @@ export interface EditorPropsType {
   onChange?: (value: string) => void;
   parseDebounceTime?: number;
   inboundAnnotations?: Ace.Annotation[];
-  setEditor?: (editor: Ace.Editor) => void;
   readOnly?: boolean;
 }
 
@@ -31,7 +30,6 @@ const Editor = ({
   parseDebounceTime = 1500,
   inboundAnnotations,
   readOnly,
-  setEditor: setOuterEditor,
 }: EditorPropsType) => {
   const [editor, setEditor] = useState<Ace.Editor>();
   const aceRef = useRef<AceEditor>(null);
@@ -107,11 +105,8 @@ const Editor = ({
         }}
         onLoad={(aceEditor: Ace.Editor) => {
           if (setEditor) {
+            aceEditor.resize(true);
             setEditor(aceEditor);
-            // setEditor used to be a passed variable, but somehow became a local one. This seems unintended, but will not be modifying for now.
-            if (setOuterEditor) {
-              setOuterEditor(aceEditor);
-            }
           }
         }}
         mode="json" // Temporary value of mode to prevent a dynamic search request.

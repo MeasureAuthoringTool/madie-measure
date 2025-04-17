@@ -18,20 +18,25 @@ import { useQdmPatient } from "../../../../../../../util/QdmPatientContext";
 import NegationRationale from "./negationRationale/NegationRationale";
 
 export const applyAttribute = (
-  attribute,
+  displayName,
   type,
   attributeValue,
   dataElement
 ) => {
+  // if we're passing in an attribute with related to we need to cut the id out
+  // ex: "67f82fe340c6f872779a0f30 - Encounter, Performed: Office Visit"
+  if (displayName === "Related To") {
+    attributeValue = attributeValue.split(" ")[0];
+  }
   const modelClass = getDataElementClass(dataElement);
   const updatedDataElement = new modelClass(dataElement);
-  const attributePath = _.camelCase(attribute);
+  const attributePath = _.camelCase(displayName);
 
   const pathInfo = updatedDataElement.schema.paths[attributePath];
   if (_.upperCase(pathInfo?.instance) === "ARRAY") {
     updatedDataElement[attributePath].push(attributeValue);
   } else {
-    updatedDataElement[_.camelCase(attribute)] = attributeValue;
+    updatedDataElement[_.camelCase(displayName)] = attributeValue;
   }
   return updatedDataElement;
 };

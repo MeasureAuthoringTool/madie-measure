@@ -1,8 +1,8 @@
 import axios from "../../../../api/axios-instance";
 import useServiceConfig from "../../../../api/useServiceConfig";
 import { ServiceConfig } from "../../../../api/ServiceContext";
-import { useOktaTokens } from "@madie/madie-util";
-import { Bundle, Library, Measure, ValueSet } from "fhir/r4";
+import { getOidFromString, useOktaTokens } from "@madie/madie-util";
+import { Bundle, Library, ValueSet } from "fhir/r4";
 import { CqmMeasure, CQL, ValueSet as QdmValueSet } from "cqm-models";
 import * as _ from "lodash";
 import md5 from "blueimp-md5";
@@ -29,16 +29,21 @@ type CQLCodeWithCodeSystemOid = {
 export class TerminologyServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
 
-  async getExpansion(valueSetParams: ValueSetSearchParams[]) {
-    const searchCriteria = {
-      includeDraft: "yes", // always yes for now
-      activeOnly: "false",
-      manifestExpansion: null, // always latest until we support manifest for QICore
-      valueSetParams: valueSetParams,
-    } as ValueSetsSearchCriteria;
-    if (searchCriteria.valueSetParams.length == 0) {
+  async getExpansion(
+    valueSetParams: ValueSetSearchParams[],
+    manifestExpansion?: ManifestExpansion
+  ) {
+    if (!valueSetParams?.length) {
       return [];
     }
+
+    const searchCriteria = {
+      includeDraft: "yes", // always yes for now
+      activeOnly: manifestExpansion ? "true" : "false",
+      manifestExpansion: manifestExpansion,
+      valueSetParams: valueSetParams,
+    } as ValueSetsSearchCriteria;
+
     try {
       const response = await axios.put(
         `${this.baseUrl}/terminology/value-sets/expansion/fhir`,
@@ -53,27 +58,32 @@ export class TerminologyServiceApi {
     } catch (error) {
       let message =
         "An error occurred, please try again. If the error persists, please contact the help desk. (003)";
-      if (error.response && error.response.status === 404) {
-        const data = error.response.data?.message;
-        console.error(
-          "ValueSet not found in vsac: ",
-          this.getOidFromString(data)
-        );
-        message =
-          "An error exists with the measure CQL, please review the CQL Editor tab.";
+
+      if (error.response?.data?.diagnostic) {
+        const data = error.response.data;
+        message = `Value Set (${
+          data?.valueSetOid
+        }) could not be expanded using ${
+          searchCriteria.manifestExpansion ? "Manifest" : "Latest"
+        } (${data?.manifestExpansionFullUrl}). Per VSAC, \"${
+          data.diagnostic
+        }\"`;
+      } else if (error.response?.data?.message) {
+        message = `${message}: ${error.response.data.message}`;
       }
       throw new Error(message);
     }
   }
 
   async getValueSetsExpansionForBundle(
-    measureBundle: Bundle
+    measureBundle: Bundle,
+    manifestExpansion?: ManifestExpansion
   ): Promise<ValueSet[]> {
     if (!measureBundle) {
       return [];
     }
     const valueSetSearchParams = this.getValueSetsOIdsFromBundle(measureBundle);
-    return this.getExpansion(valueSetSearchParams);
+    return this.getExpansion(valueSetSearchParams, manifestExpansion);
   }
 
   async getValueSetsExpansionForOids(oids: string[]): Promise<ValueSet[]> {
@@ -128,11 +138,18 @@ export class TerminologyServiceApi {
       }
       let message =
         "An error occurred, please try again. If the error persists, please contact the help desk. (004)";
+
       if (error.response?.data?.diagnostic) {
         const data = error.response.data;
-        message = `Value Set ${data?.valueSet} could not be expanded using ${
-          data?.manifest === undefined ? "Latest" : "Manifest " + data.manifest
-        }. Per VSAC, \"${data.diagnostic}\"`;
+        message = `Value Set (${
+          data?.valueSetOid
+        }) could not be expanded using ${
+          searchCriteria.manifestExpansion ? "Manifest" : "Latest"
+        } (${data?.manifestExpansionFullUrl}). Per VSAC, \"${
+          data.diagnostic
+        }\"`;
+      } else if (error.response?.data?.message) {
+        message = `${message}: ${error.response.data.message}`;
       }
       throw new Error(message);
     }
@@ -141,41 +158,61 @@ export class TerminologyServiceApi {
   getValueSetsOIDsFromCqmMeasure(
     cqmMeasure: CqmMeasure
   ): ValueSetSearchParams[] {
-    return cqmMeasure?.source_data_criteria
-      ?.filter((criteria) => !criteria.codeListId.startsWith("drc-"))
-      .map((criteria) => {
-        return {
-          oid: criteria.codeListId,
-        } as ValueSetSearchParams;
-      });
+    const uniqueOids = new Set();
+    cqmMeasure?.cql_libraries?.forEach((library) => {
+      const valueSetDefs = library?.elm?.library?.valueSets?.def;
+      if (!_.isEmpty(valueSetDefs)) {
+        valueSetDefs.forEach((def) => {
+          if (def?.id) {
+            if (def.id.startsWith("urn:oid:")) {
+              const oid = getOidFromString(def.id, "QDM");
+              uniqueOids.add(oid);
+            } else {
+              uniqueOids.add(def?.id);
+            }
+          }
+        });
+      }
+    });
+    return _.map(Array.from(uniqueOids), (id: string) => ({
+      ["oid"]: id,
+    }));
   }
 
   /**
    * Extract the ValueSet OIDs used in measure & including libraries
    */
   getValueSetsOIdsFromBundle(measureBundle: Bundle): ValueSetSearchParams[] {
-    if (!measureBundle?.entry) {
-      return [];
+    if (measureBundle?.entry) {
+      return measureBundle.entry
+        .filter((entry) => entry.resource?.resourceType === "Library")
+        .reduce((allVs, library) => {
+          const libraryResource = library.resource as Library;
+          // TODO: this should be taken from dataRequirements. Using relatedArtifacts temporarily
+          // TODO: release and version not supported
+          const libVs = libraryResource.relatedArtifact?.reduce(
+            (libVs, artifact) => {
+              if (
+                artifact?.resource &&
+                artifact.resource.includes("/ValueSet/")
+              ) {
+                const oid = this.getOidFromString(artifact.resource);
+                if (oid) {
+                  libVs.push({ oid: oid });
+                }
+              }
+              return libVs;
+            },
+            [] as ValueSetSearchParams[]
+          );
+          if (libVs) {
+            return allVs.concat(libVs);
+          } else {
+            return allVs;
+          }
+        }, [] as ValueSetSearchParams[]);
     }
-    const measureEntry = measureBundle.entry.find(
-      (entry) => entry.resource?.resourceType === "Measure"
-    );
-    if (!measureEntry) {
-      return [];
-    }
-    const measure = measureEntry.resource as Measure;
-    const moduleDefinition = measure.contained as Library[];
-    if (!moduleDefinition?.length) {
-      return [];
-    }
-
-    return moduleDefinition[0].relatedArtifact.reduce((oids, artifact) => {
-      if (artifact.resource?.includes("ValueSet/")) {
-        const valueSetOid = artifact.resource.split("/ValueSet/")[1];
-        oids.push({ oid: valueSetOid });
-      }
-      return oids;
-    }, [] as ValueSetSearchParams[]);
+    return [];
   }
 
   getOidFromString(oidString: string): string {

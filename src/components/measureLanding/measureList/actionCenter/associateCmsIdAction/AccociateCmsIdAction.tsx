@@ -47,8 +47,12 @@ export default function AssociateCmsIdAction(props: PropTypes) {
       } else if (measure1.model === measure2.model) {
         setTooltipMessage(MUST_BE_DIFFERENT_MODELS);
       } else if (
-        (measure1.model === Model.QICORE && !measure1.measureMetaData.draft) ||
-        (measure2.model === Model.QICORE && !measure2.measureMetaData.draft)
+        ((measure1.model === Model.QICORE ||
+          measure1.model === Model.QICORE_6_0_0) &&
+          !measure1.measureMetaData.draft) ||
+        ((measure2.model === Model.QICORE ||
+          measure2.model === Model.QICORE_6_0_0) &&
+          !measure2.measureMetaData.draft)
       ) {
         setTooltipMessage(MUST_BE_DRAFT);
       } else if (
@@ -57,8 +61,12 @@ export default function AssociateCmsIdAction(props: PropTypes) {
       ) {
         setTooltipMessage(MUST_HAVE_CMS_ID);
       } else if (
-        (measure1.model === Model.QICORE && measure1.measureSet.cmsId) ||
-        (measure2.model === Model.QICORE && measure2.measureSet.cmsId)
+        ((measure1.model === Model.QICORE ||
+          measure1.model === Model.QICORE_6_0_0) &&
+          measure1.measureSet.cmsId) ||
+        ((measure2.model === Model.QICORE ||
+          measure2.model === Model.QICORE_6_0_0) &&
+          measure2.measureSet.cmsId)
       ) {
         setTooltipMessage(MUST_NOT_HAVE_CMS_ID);
       } else {
