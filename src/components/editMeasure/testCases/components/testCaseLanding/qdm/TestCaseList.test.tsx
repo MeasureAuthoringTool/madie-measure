@@ -1666,18 +1666,26 @@ describe("TestCaseList component", () => {
     );
   }
 
-  it("should enable report button for QDM Tests, if execution context is ready", async () => {
+  it("should enable reports button for QDM Tests, if execution context is ready", async () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       OverlappingValueSets: true,
     }));
+
     renderTestCaseListComponent(setError, [], false);
     await waitFor(() => {
-      expect(screen.getByTestId("report-button")).toBeEnabled();
+      expect(screen.getByTestId("reports-button")).toBeEnabled();
     });
-    userEvent.click(screen.getByTestId("report-button"));
-    // on click of report button disable the button as it will be in progress
-    // more unit tests to follow after MAT-8382
-    expect(screen.getByTestId("report-button")).toBeDisabled();
+    userEvent.click(screen.getByTestId("reports-button"));
+    expect(screen.getByTestId("overlapping-codes")).toHaveTextContent(
+      "Overlapping Codes"
+    );
+    userEvent.click(screen.getByTestId("overlapping-codes"));
+    expect(screen.getByTestId("overlapping-codes-dialog")).toHaveTextContent(
+      "Overlapping Codes"
+    );
+    expect(
+      screen.getByTestId("overlapping-codes-report-contents")
+    ).toHaveTextContent("There are no overlapping codes");
   });
 
   it("should disable Run QDM test case & report button, if execution context failed", async () => {
@@ -1688,7 +1696,7 @@ describe("TestCaseList component", () => {
     await waitFor(() => {
       expect(screen.getByTestId("execute-test-cases-button")).toBeDisabled();
     });
-    expect(screen.getByTestId("report-button")).toBeDisabled();
+    expect(screen.getByTestId("reports-button")).toBeDisabled();
   });
 
   it("should render list of test cases", async () => {
