@@ -119,7 +119,7 @@ export default function MeasureLanding() {
           setMyMeasuresCount(data.myMeasures);
           setAllMeasuresCount(data.allMeasures);
         })
-        .catch(() => console.log("Unable to retrieve measure counts"));
+        .catch(() => console.error("Unable to retrieve measure counts"));
     }
   }, [
     activeTab,
