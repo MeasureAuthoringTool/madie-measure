@@ -69,6 +69,19 @@ const TestCaseRoutes = () => {
         );
       }
 
+      if (
+        measure?.errors?.includes(
+          MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+        )
+      ) {
+        localErrors.push(CQL_RETURN_TYPES_MISMATCH_ERROR);
+        setErrors(localErrors);
+      } else {
+        setErrors(
+          localErrors.filter((s) => s !== CQL_RETURN_TYPES_MISMATCH_ERROR)
+        );
+      }
+
       if (!localErrors.length) {
         measureService.current
           .fetchMeasureBundle(measure)
@@ -80,23 +93,14 @@ const TestCaseRoutes = () => {
             setErrors((prevState) => [...prevState, err.message]);
           });
       }
-
-      if (
-        measure?.errors?.includes(
-          MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
-        )
-      ) {
-        localErrors.push(CQL_RETURN_TYPES_MISMATCH_ERROR);
-        setErrors(localErrors);
-      } else
-        setErrors(
-          localErrors.filter((s) => s !== CQL_RETURN_TYPES_MISMATCH_ERROR)
-        );
     }
   }, [measure?.id]);
 
   useEffect(() => {
     if (measureBundle && measure) {
+      setErrors(() => []);
+      setContextFailure(false);
+
       terminologyService.current
         .getValueSetsExpansionForBundle(
           measureBundle,
