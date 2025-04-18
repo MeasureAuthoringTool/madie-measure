@@ -8,7 +8,8 @@ import {
   stripResourcePath,
   removeLastPathSegment,
   getValueByPath,
-  insertIndexIntoPath
+  insertIndexIntoPath, 
+  getIndexFromPath
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import { useFormikContext } from "formik";
 import ElementEditorActionCenter from "./elementEditorActionCenter/ElementEditorActionCenter";
@@ -19,20 +20,13 @@ const Element = ({
   element,
   label,
   resource,
-  handleChange,
   canEdit,
 }) => {
-  let elementValue = _.get(resource, label);
   return (
     <Box>
       <TypeEditor
         type={element?.type?.[0].code}
         required={element?.min > 0}
-        value={elementValue}
-        onChange={(e) => {
-          elementValue = e;
-          handleChange(element.path, e);
-        }}
         structureDefinition={element}
         canEdit={canEdit}
         label={label}
@@ -74,9 +68,15 @@ const ElementEditorChildren = ({
     heading = path[currentDepth - 2];
   }
   const { values } = useFormikContext();
-  // console.log('values', values)
+  
   // if we're at the top level we want to at minimum make sure we render our current level as opposed to all the sub levels.
   if (rootDefinition) {
+    const label = rootDefinition.id;
+    let numberOfElements = 0;
+    const multipleCardinality = rootDefinition?.max === "*";
+    if (multipleCardinality) {
+      numberOfElements = getValueByPath(values, label)?.length || 1;
+    }
     const type = rootDefinition?.type?.[0];
     const required = +rootDefinition.min > 0;
     const elemPath = stripResourcePath(resourcePath, rootDefinition.path);
@@ -108,25 +108,74 @@ const ElementEditorChildren = ({
           </div>
         </div>
         {/* given root definition we do a base level render */}
-        {/* I think we only want this to render if there is no multiple cardinality? */}
-        {/* This guy we don't want? */}
-        <TypeEditor
-          type={type.code}
-          resource={resource}
-          required={required}
-          value={elementValue}
-          onChange={(e) => {
-            elementValue = e;
-            handleChange(elemPath, e);
-          }}
-          structureDefinition={rootDefinition}
-          parentStructureDefinition={null}
-          canEdit={canEdit}
-          label={rootDefinition?.id}
-        />
+        {/* I think we only want this to render if there is no multiple cardinality && there are no elements that are children in the form */}
+        {/* {
+          !multipleCardinality ? (
+            // Render a base TypeEditor IF formik does not have a collection of values at the current property, that we can check against the element.id
+          // !getValueByPath(values, rootDefinition.id)?.length ? (
+            <TypeEditor
+              type={type.code}
+              resource={resource}
+              required={required}
+              structureDefinition={rootDefinition}
+              parentStructureDefinition={null}
+              canEdit={canEdit}
+              label={rootDefinition?.id}
+            />
+          ) : (
+            (() => {
+              console.log('we get here')
+              return Array.from({ length: numberOfElements }).map((_, i) => (
+                <TypeEditor
+                  key={i}
+                  type={type.code}
+                  resource={resource}
+                  required={required}
+                  structureDefinition={rootDefinition}
+                  parentStructureDefinition={null}
+                  canEdit={canEdit}
+                  label={`${rootDefinition?.id}[${i}]`}
+                />
+              ))
+            })()
+          )
+        } */}
+        {
+          multipleCardinality ? (
+            Array.from({ length: numberOfElements }).map((_, i) => (
+              <TypeEditor
+                key={i}
+                type={type.code}
+                resource={resource}
+                required={required}
+                structureDefinition={rootDefinition}
+                parentStructureDefinition={null}
+                canEdit={canEdit}
+                label={`${rootDefinition?.id}[${i}]`}
+              />
+            ))
+          ) :(
+            <TypeEditor
+              type={type.code}
+              resource={resource}
+              required={required}
+              structureDefinition={rootDefinition}
+              parentStructureDefinition={null}
+              canEdit={canEdit}
+              label={rootDefinition?.id}
+            />
+          )
+        }
 
+
+        {/* childrenToRender in one case will be a collection of nodes that are the the next sequential path
+        given something like Patient.identifier as the rootDefinition, These would be Patient.identifier.id, Patient.identifier.value, Patient.identifier.system, etc
+        Therefore with multiple cardinality, we want to render each list of children once for every Patient.identifier element that exists in formik.values
+        */}
+
+        
         {/* we want to a second map here in instances where we have multiple elements. */}
-        {childrenToRender.map((child) => {
+        {/* {childrenToRender.map((child) => {
           const label = child.id;
           let numberOfElements = 1;
           const pathBefore = removeLastPathSegment(label);
@@ -146,7 +195,6 @@ const ElementEditorChildren = ({
                     element={child}
                     label={labelWithIndex}
                     resource={resource}
-                    handleChange={handleChange}
                     canEdit={canEdit}
                     mappedSnapshotElements={mappedSnapshotElements}
                   />
@@ -154,13 +202,13 @@ const ElementEditorChildren = ({
               })}
             </>
           );
-        })}
+        })} */}
         {/* item.detail vs item.adjudication are 2 separate trees, we need to split them into separate children trees.
           how do we do that?
           We group them based on a normalizedPrefix.
         */}
 
-        {transformArrays(childrenLeftOver, currentDepth).length > 0 &&
+        {/* {transformArrays(childrenLeftOver, currentDepth).length > 0 &&
           transformArrays(childrenLeftOver, currentDepth).map((item, index) => (
             <ElementEditorChildren
               rootDefinition={null}
@@ -177,7 +225,7 @@ const ElementEditorChildren = ({
               deleteElement
               mappedSnapshotElements={mappedSnapshotElements}
             />
-          ))}
+          ))} */}
       </div>
     );
   }
@@ -196,12 +244,11 @@ const ElementEditorChildren = ({
             {/* We want to add a label for path similarity. here it would be ClaimResponse.item */}
             {/* {childrenToRender.map((child) => (
               <Element
+                mappedSnapshotElements={mappedSnapshotElements}
                 element={child}
                 label={child?.id}
                 resource={resource}
-                handleChange={handleChange}
                 canEdit={canEdit}
-                mappedSnapshotElements={mappedSnapshotElements}
                 />
             ))} */}
             {/* {transformArrays(childrenLeftOver, currentDepth).length > 0 &&
@@ -221,6 +268,7 @@ const ElementEditorChildren = ({
                     }
                     deleteElement
                     mappedSnapshotElements={mappedSnapshotElements}
+
                     />
                 )
               )} */}

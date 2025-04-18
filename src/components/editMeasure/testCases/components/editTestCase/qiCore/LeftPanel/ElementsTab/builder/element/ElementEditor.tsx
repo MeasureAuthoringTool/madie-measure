@@ -23,6 +23,7 @@ import {
   getAllPropertyPaths,
   stripArrayIndices,
   mapElementsByPath,
+  buildValidationSchema
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import {
   useQiCoreResource,
@@ -200,21 +201,28 @@ const ElementEditor = ({
     for (const [key, value] of entries) {
       correctInitialValues[resource.resourceType][key] = value;
     }
-    const allPaths = getAllPropertyPaths(correctInitialValues);
+    console.log('formInfo', formInfo)
+    console.log('correct initialValues', correctInitialValues);
 
+
+    const validationSchema = buildValidationSchema(correctInitialValues, formInfo, resource.resourceType)
+    console.log('validationSchema is', validationSchema)
+    // const allPaths = getAllPropertyPaths(correctInitialValues);
+    
     // Now make a validation object 
-    const testValidation = {};
-    testValidation[resource.resourceType] = {};
-    for (const touple of allPaths) {
-      const [path] = touple;
-      const formInfoNode = formInfo[stripArrayIndices(path)];
-      if (formInfoNode && formInfoNode.validation) {
-        testValidation[path] = Yup.object(formInfoNode.validation);
-      }
-    }
-
-    setInitialFormikValuesStu6(correctInitialValues);
-    setValidationSchema(Yup.object().shape(testValidation));
+    // const testValidation = {};
+    // testValidation[resource.resourceType] = {};
+    // for (const touple of allPaths) {
+      //   const [path] = touple;
+      //   const formInfoNode = formInfo[stripArrayIndices(path)];
+      //   if (formInfoNode && formInfoNode.validation) {
+        //     testValidation[path] = Yup.object(formInfoNode.validation);
+        //   }
+        // }
+        
+        setInitialFormikValuesStu6(correctInitialValues);
+        setValidationSchema(Yup.object().shape(validationSchema));
+        // setValidationSchema(Yup.objvalidationSchema);
     setFormInfo(formInfo);
     // need a loading toggle or formikProvider dies violently.
     setLoading(false);
@@ -263,11 +271,10 @@ const ElementEditor = ({
   }
 
   const currentPath = elementDefinition?.path;
-  console.log("currentPath", currentPath);
   const allChildren = getAllChildren(selectedResource, currentPath);
-  console.log("allChildren", allChildren);
   const currentDepth = elementDefinition?.path.split(".").length;
-  console.log("currentDepth", currentDepth);
+  // console.log("currentPath", currentPath);
+  // console.log("allChildren", allChildren);
   // <TypeEditor will either render a node or all top level elements if it's not a root. We need to make that check here
   if (!loading) {
     return (

@@ -20,6 +20,8 @@ import {
   getTopLevelElements,
   updateChildrenPaths,
   isComponentDataType,
+  getIndexFromPath,
+  mergePathWithIndex
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import CodingComponent from "./types/CodingComponent";
 
@@ -30,14 +32,11 @@ const TypeEditor = ({
   type,
   resource,
   required,
-  value,
-  onChange, // to be deprecated. Early POC implementation logic
   structureDefinition,
   parentStructureDefinition,
   canEdit,
   label,
 }) => {
-  // console.log('label is', label)
   const formik = useFormikContext();
   const [childTypeDefs, setChildTypeDefs] = useState([]);
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
@@ -51,7 +50,13 @@ const TypeEditor = ({
               structureDefinition,
               elements
             );
-            setChildTypeDefs(updatedElements);
+            const index = getIndexFromPath(label)
+            const updatedMappedElements = updatedElements.map((el) => {
+              el.id = index ? mergePathWithIndex(label, el.id) : el.id
+              return el
+            })
+            setChildTypeDefs(updatedMappedElements);
+
           }
         });
       }
@@ -71,6 +76,9 @@ const TypeEditor = ({
       return errors;
     }
   };
+
+  // console.log('label is', label, 'childTypeDEfs', childTypeDefs, 'type is', type, 'isComponentDataType', isComponentDataType(type));
+
   if (isComponentDataType(type)) {
     switch (type) {
       case "string":
@@ -144,7 +152,6 @@ const TypeEditor = ({
             label={label}
             helperText={formikErrorHandler(label)}
             error={getNestedProperty(formik.errors, label)}
-            value={value}
             {...formik.getFieldProps(label)}
           />
         );
@@ -197,7 +204,6 @@ const TypeEditor = ({
             label={label}
             helperText={formikErrorHandler(label)}
             error={getNestedProperty(formik.errors, label)}
-            value={value}
             {...formik.getFieldProps(label)}
           />
         );
@@ -221,8 +227,6 @@ const TypeEditor = ({
             structureDefinition={structureDefinition}
             fieldRequired={required}
             label={label}
-            onChange={onChange}
-            value={value}
           />
         );
       case "date":
@@ -252,8 +256,6 @@ const TypeEditor = ({
             label={_.capitalize(
               label?.id?.substring(label?.id?.lastIndexOf(".") + 1)
             )}
-            onChange={onChange}
-            value={value}
             structureDefinition={structureDefinition}
           />
         );
@@ -263,45 +265,53 @@ const TypeEditor = ({
             canEdit={canEdit}
             structureDefinition={structureDefinition}
             fieldRequired={required}
-            onChange={onChange}
           />
         );
-      case "Extension":
-        return _.isEmpty(structureDefinition?.type?.[0]?.profile) ? (
-          <ExtensionComponent
-            canEdit={canEdit}
-            onChange={onChange}
-            fhirResource={resource}
-            elementDefinition={structureDefinition}
-            parentStructureDefinition={parentStructureDefinition}
-          />
-        ) : (
-          <ProfiledExtensionComponent
-            canEdit={canEdit}
-            structureDefinition={structureDefinition}
-            fieldRequired={false}
-            resource={resource}
-          />
-        );
+      // case "Extension":
+      //   return _.isEmpty(structureDefinition?.type?.[0]?.profile) ? (
+      //     <ExtensionComponent
+      //       canEdit={canEdit}
+      //       // onChange={onChange}
+      //       onChange={() =>{}}
+      //       fhirResource={resource}
+      //       elementDefinition={structureDefinition}
+      //       parentStructureDefinition={parentStructureDefinition}
+      //     />
+      //   ) : (
+      //     <ProfiledExtensionComponent
+      //       label={label}
+      //       canEdit={canEdit}
+      //       structureDefinition={structureDefinition}
+      //       fieldRequired={false}
+      //       resource={resource}
+      //     />
+      //   );
       default:
         return <div>Unsupported Type [{type}]</div>;
     }
   } else if (!_.isEmpty(childTypeDefs)) {
+
+
+    //  If we have childTypeDefs, we need to check to make weather or not there's an index supplied so we can attach it to the label
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {childTypeDefs?.map((childTypeDef) => {
           const childType = childTypeDef?.type?.[0];
           const childRequired = +childTypeDef.min > 0;
+          // console.log('child', childTypeDefs)
+          const index = getIndexFromPath(label)
           return (
+            // <div />
             <TypeEditor
               type={childType?.code}
               resource={resource}
-              onChange={(e) => {}}
-              value={null}
               structureDefinition={childTypeDef}
               required={childRequired}
               canEdit={canEdit}
-              label={childTypeDef?.id}
+              // label={childTypeDef.id}
+
+              // label={index ? mergePathWithIndex(label, childTypeDef.id) : childTypeDef.id}
+              label={childTypeDef.id}
               parentStructureDefinition={structureDefinition}
             />
           );

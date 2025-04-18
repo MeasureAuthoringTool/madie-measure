@@ -1,5 +1,5 @@
 import { ElementDefinition } from "fhir/r4";
-
+import * as Yup from 'yup';
 /**
  * Prepares the element name to be displayed for tab labels
  * for sliced elements- it will be sliceName. e.g. Patient.extension:race results into race
@@ -177,6 +177,50 @@ export function mapElementsByPath(structureDefinition) {
     return acc;
   }, {});
 }
+
+
+
+/**
+ * Recursively build Yup validation schema object from initialEntries and formInfo
+ * @param {Object} initialEntries - The initial form values
+ * @param {Object} formInfo - The form metadata with Yup validators
+ * @param {String} resourceType - Top-level resource key (like 'Patient')
+ * @param {String} parentPath - (internal use) current path while traversing
+ * @returns {Object} - Object shaped for Yup.object().shape()
+ */
+export function buildValidationSchema(initialEntries, formInfo, resourceType, parentPath = '') {
+  const schema = {};
+
+  Object.entries(initialEntries).forEach(([key, value]) => {
+    const currentPath = parentPath ? `${parentPath}.${key}` : key;
+
+    if (Array.isArray(value)) {
+      const itemSchema = value.length
+        ? buildValidationSchema(value[0], formInfo, resourceType, `${currentPath}[0]`)
+        : {}; // fallback if empty
+
+      schema[key] = Yup.array().of(Yup.object().shape(itemSchema));
+
+    } else if (typeof value === 'object' && value !== null) {
+      schema[key] = Yup.object().shape(
+        buildValidationSchema(value, formInfo, resourceType, currentPath)
+      );
+
+    } else {
+      // Leaf value
+      const fullPath = `${resourceType}.${currentPath}`;
+      const normalizedPath = fullPath.replace(/\[\d+\]/g, ''); // remove [index] from paths
+
+      const formMeta = formInfo[normalizedPath];
+      if (formMeta?.validation) {
+        schema[key] = formMeta.validation;
+      }
+    }
+  });
+
+  return schema;
+}
+
 /**
  * Inserts an array index into a FHIR path string at the correct position
  * based on the pathBefore (the path of the multiple cardinality element).
@@ -197,6 +241,50 @@ export function insertIndexIntoPath(fullPath, pathBefore, index) {
 
   return pathWithIndex.join(".");
 }
+// given a path, find out if there's a suffix in it that ends in .[somenumber] and return it
+export function getIndexFromPath(path) {
+  const match = path.match(/(\[\d+\])$/);
+  return match ? match[1] : null;
+}
+
+export function mergePathWithIndex(pathWithIndex, pathWithoutIndex) {
+  // Find all index matches in the path
+  const indexMatches = pathWithIndex.match(/\[(\d+)\]/g);
+  
+  if (indexMatches) {
+    // If there's at least one index match, take the last one
+    const lastIndex = indexMatches[indexMatches.length - 1];
+    const basePath = pathWithIndex.replace(lastIndex, ''); // Remove the last index part from the path
+
+    // Merge the last index with the new path
+    if (pathWithoutIndex.startsWith(basePath)) {
+      return `${basePath}${lastIndex}.${pathWithoutIndex.replace(basePath + '.', '')}`;
+    } else {
+      return `${basePath}${lastIndex}.${pathWithoutIndex}`;
+    }
+  }
+  
+  return pathWithIndex + '.' + pathWithoutIndex; // Default fallback if no index
+};
+// function mergePathsWithIndex(pathWithIndex, pathToAppend) {
+//   const partsWithIndex = pathWithIndex.split(".");
+//   const partsToAppend = pathToAppend.split(".");
+
+//   const result = partsToAppend.map((part, i) => {
+//     if (partsWithIndex[i] && partsWithIndex[i].match(/\[\d+\]$/)) {
+//       return partsWithIndex[i];
+//     }
+//     return part;
+//   });
+
+//   // if pathWithIndex was longer (like Patient.name[0].something), preserve extra trailing parts
+//   if (partsWithIndex.length > partsToAppend.length) {
+//     result.push(...partsWithIndex.slice(partsToAppend.length));
+//   }
+
+//   return result.join(".");
+// }
+
 // This switch is a check to see weather we have the means to render an input for a given fhir type. needs to be udpated with all validations.
 export function isComponentDataType(datatype) {
   switch (datatype) {

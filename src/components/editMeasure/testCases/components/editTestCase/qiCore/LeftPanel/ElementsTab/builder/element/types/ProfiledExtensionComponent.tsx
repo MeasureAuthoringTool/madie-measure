@@ -130,8 +130,8 @@ const ProfiledExtensionComponent = ({
                 parentStructureDefinition={extensionProfileDef}
                 type={type.code}
                 required={required}
-                value={elementDefinition?.fixedUri}
-                onChange={handleChange}
+                // value={elementDefinition?.fixedUri}
+                // onChange={handleChange}
                 canEdit={canEdit}
                 label={elemPath}
               />

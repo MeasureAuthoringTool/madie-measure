@@ -42,7 +42,7 @@ const ExtensionComponent = ({
   canEdit,
   elementDefinition,
   parentStructureDefinition,
-  onChange,
+  // onChange,
 }: ExtensionProps) => {
   const [selectedValueType, setSelectedValueType] = useState<string>("");
   const [url, setUrl] = useState<string>();
@@ -63,7 +63,7 @@ const ExtensionComponent = ({
     if ((url || urlElement?.fixedUri) && value) {
       const extension = { url: url ?? urlElement?.fixedUri };
       extension[`value${selectedValueType}`] = value;
-      onChange(extension);
+      // onChange(extension);
     }
   }, [selectedValueType, url, value]);
 
@@ -120,8 +120,8 @@ const ExtensionComponent = ({
             resource={fhirResource}
             type={valueElement?.type[0]?.code}
             required={valueElement.min > 0}
-            value={elementDefinition?.fixedUri}
-            onChange={(value) => setValue(value)} // do nothing for now
+            // value={elementDefinition?.fixedUri}
+            // onChange={(value) => setValue(value)} // do nothing for now
             canEdit={canEdit}
             label={`value${selectedValueType}`}
             parentStructureDefinition={elementDefinition}

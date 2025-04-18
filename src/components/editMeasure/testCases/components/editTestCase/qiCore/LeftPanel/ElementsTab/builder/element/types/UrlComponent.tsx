@@ -8,7 +8,6 @@ const UrlComponent = ({
   value,
   onChange,
   label = "URL",
-  structureDefinition,
 }: TypeComponentProps) => {
   return (
     <TextField
