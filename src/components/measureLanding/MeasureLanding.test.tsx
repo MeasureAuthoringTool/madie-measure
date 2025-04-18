@@ -187,9 +187,7 @@ describe("Measure Page", () => {
     });
     expect(mockedUsedNavigate).toHaveBeenCalledWith("?tab=0&page=1&limit=10");
     const measure1 = await screen.findByText("TestMeasure1");
-    await waitFor(async () => {
-      expect(measure1).toBeInTheDocument();
-    });
+    expect(measure1).toBeInTheDocument();
   });
 
   test("test pagination page limit change", async () => {
