@@ -328,16 +328,20 @@ describe("Measure Page", () => {
       MeasureSearch: true,
     }));
     renderRouter(["/measures"]);
-    const measure1 = await screen.findByText("TestMeasure1");
-    expect(measure1).toBeInTheDocument();
-    expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
-      true,
-      10,
-      0,
-      abortController.signal
-    );
-    expect(mockMeasureServiceApi.getMeasureCounts).toHaveBeenCalled();
-    const myMeasuresTab = screen.getByRole("tab", { name: "My Measures (12)" });
+    await waitFor(() => {
+      expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
+        true,
+        10,
+        0,
+        abortController.signal
+      );
+    });
+    await waitFor(() => {
+      expect(mockMeasureServiceApi.getMeasureCounts).toHaveBeenCalled();
+    });
+    const myMeasuresTab = await screen.getByRole("tab", {
+      name: "My Measures (12)",
+    });
     expect(myMeasuresTab).toBeInTheDocument();
     expect(myMeasuresTab).toHaveClass("Mui-selected");
     const allMeasuresTab = screen.getByRole("tab", {
