@@ -1,5 +1,5 @@
 import { ElementDefinition } from "fhir/r4";
-
+import * as Yup from "yup";
 /**
  * Prepares the element name to be displayed for tab labels
  * for sliced elements- it will be sliceName. e.g. Patient.extension:race results into race
@@ -7,28 +7,129 @@ import { ElementDefinition } from "fhir/r4";
  */
 export function getElementName(element: ElementDefinition, basePath: string) {
   const requiredIndicator = element.min > 0 ? " *" : "";
-  if (element.sliceName) {
-    return `${element.sliceName}${requiredIndicator}`;
+  let index = "";
+  const retrievedIndex = getIndexFromPathWithoutBrackets(element.id);
+  if (retrievedIndex) {
+    if (Number(retrievedIndex) > 0) {
+      index = ` ${Number(retrievedIndex) + 1} `;
+    }
   }
-  return `${element.path.substring(basePath.length + 1)}${requiredIndicator}`;
+  if (element.sliceName) {
+    return `${element.sliceName}${index}${requiredIndicator}`;
+  }
+  return `${stripAllIndexes(
+    element.id.substring(basePath.length + 1)
+  )}${index}${requiredIndicator}`;
 }
 
 // given an object that we want to copy to
 // a path that looks like "Claimresponse.item.something"
 // and a value that can be anything
 // We're going to go and break the apart the paths and then individually add them to the object
+const removeArrayIndexes = (path) => {
+  return (
+    path
+      .split(".")
+      // Remove everything after the '['
+      .map((part) => part.split("[")[0])
+      .join(".")
+  );
+};
+
+/**
+ * Strips all array indexes from a dot/bracket path string.
+ *
+ * @param {string} path - The path with bracket indexes.
+ *   Example: "ClaimResponse.item[0].modifierExtension[23].text[1114].note"
+ *
+ * @returns {string} - Path with all [x] indexes nuked.
+ *   Example: "ClaimResponse.item.modifierExtension.text.note"
+ */
+export function stripAllIndexes(path) {
+  return path.replace(/\[\d+\]/g, "");
+}
+
+export function getRequired(requiredFields, path) {
+  const cleanedPath = removeArrayIndexes(path);
+  return requiredFields[cleanedPath];
+}
+
+// Helper to deeply set a value at a dot/bracket path
 export function setNestedValue(obj, path, value) {
-  const keys = path.split(".");
-  let currentObj = obj;
-  // start nested structure
-  keys.forEach((key, index) => {
-    if (index === keys.length - 1) {
-      currentObj[key] = value;
+  const parts = path.replace(/\[(\d+)\]/g, ".$1").split(".");
+  let current = obj;
+  parts.forEach((part, index) => {
+    if (index === parts.length - 1) {
+      current[part] = value;
     } else {
-      currentObj[key] = currentObj[key] || {};
-      currentObj = currentObj[key];
+      if (!current[part]) {
+        current[part] = isNaN(parts[index + 1]) ? {} : [];
+      }
+      current = current[part];
     }
   });
+}
+// get first children of node
+export const getChildren = (formInfo, parentPath) => {
+  const parentDepth = parentPath.split(".").length;
+  return Object.entries(formInfo).filter(([key]) => {
+    const parts = key.split(".");
+    return key.startsWith(parentPath + ".") && parts.length === parentDepth + 1;
+  });
+};
+
+export function recursiveAddYupObject(schemaObject) {
+  for (const key in schemaObject) {
+    const value = schemaObject[key];
+    if (!Yup.isSchema(value) && typeof value === "object") {
+      recursiveAddYupObject(value);
+      schemaObject[key] = Yup.object().shape(value);
+    }
+  }
+  return schemaObject;
+}
+
+export function buildFullValidationSchema(formInfo) {
+  const validationSchemaObject = {};
+  for (const key in formInfo) {
+    const node = formInfo[key];
+    const { validation, max, id } = node;
+    // this is how we get validations for each "primitive type". we need to handle arrays differently.
+    if (validation) {
+      setNestedValue(validationSchemaObject, key, validation);
+      // we need to make arrays of things that are not the root Patient is root, Patient.name is not
+    } else if (!validation && max === "*" && id.split(".").length > 1) {
+      const children = getChildren(formInfo, key);
+      const childShape = {};
+      for (const [childKey, childNode] of children) {
+        //@ts-ignore
+        if (childNode.validation) {
+          const lastPart = childKey.split(".").pop();
+          //@ts-ignore childNode has a .validation typically
+          childShape[lastPart] = childNode.validation;
+        }
+        setNestedValue(
+          validationSchemaObject,
+          key,
+          Yup.array().of(Yup.object().shape(childShape))
+        );
+      }
+      // Now set it as an array of objects at that path
+      setNestedValue(
+        validationSchemaObject,
+        key,
+        Yup.array().of(Yup.object().shape(childShape))
+      );
+    }
+  }
+
+  return Yup.object().shape(recursiveAddYupObject(validationSchemaObject));
+}
+
+export function getNestedProperty(obj, path) {
+  if (!path) return undefined;
+  const keys = path.match(/([^[.\]]+)/g); // matches words between dots and brackets
+  return keys?.reduce((current, key) => current && current[key], obj);
 }
 
 // we want to get all the displayed elements, and then compare them to formik, to make sure we have the first two paths so we know we should add them to the form
@@ -100,6 +201,7 @@ export function getRequiredElements(resource: any) {
 }
 
 // remove the base path of a string like ClaimResponse.item in order to use it as an accessor key.
+// EX (Patient, Patient.name) => returns name;
 export function stripResourcePath(resourcePath, elementPath) {
   return elementPath.substring(`${resourcePath}.`.length);
 }
@@ -133,6 +235,117 @@ export function updateChildrenPaths(structureDefinition, elements) {
   });
   return updatedElements;
 }
+
+// given a path, access formInfo to get the parent. Patient.name -> Patient
+export function getParentDefinition(path, formInfo) {
+  const lastDotIndex = path.lastIndexOf(".");
+  if (lastDotIndex === -1) return undefined; // No parent, it's a root-level node
+  const parentPath = path.slice(0, lastDotIndex);
+  const found = formInfo.find(([key]) => key === parentPath);
+  return found?.[1];
+}
+
+// given a path, and formInfo, get all property paths one .[property] deep Patient.name -> Patient.name.given, Patient.name.family
+export function getFirstChildren(path, formInfo) {
+  return formInfo
+    .filter((el) => {
+      if (!el[0]?.startsWith(path + ".")) return false;
+      const subPath = el[0].slice(path.length + 1);
+      return !subPath.includes(".");
+    })
+    .map((el) => el[1]);
+}
+// Access from formInfo when array
+export function stripArrayIndices(path) {
+  return path.replace(/\[\d+\]/g, "");
+}
+
+// a way to figure out the parent path for a lookup.
+// Early failed implementation because this created a render nightmare. Should never look up parent from child.
+export function removeLastPathSegment(path) {
+  const parts = path.split(".");
+  parts.pop();
+  return parts.join(".");
+}
+// Use this to access stuff from form info when object
+export function getValueByPath(obj, path) {
+  return path.split(".").reduce((acc, part) => acc && acc[part], obj);
+}
+// function to get map all the property paths to values
+export function mapElementsByPath(structureDefinition) {
+  const elements = structureDefinition?.definition?.snapshot?.element || [];
+
+  return elements.reduce((acc, element) => {
+    acc[element.path] = element;
+    return acc;
+  }, {});
+}
+
+// generate a map of { label: [label] required: true/fales} so we don't need to prop drill poor component into the ground any worse than it is.
+export function mapElementsRequired(structureDefinition) {
+  const elements = structureDefinition?.definition?.snapshot?.element || [];
+
+  return elements.reduce((acc, element) => {
+    acc[element.path] = element.min > 0;
+    return acc;
+  }, {});
+}
+
+// given a path, find out if there's a suffix in it that ends in .[somenumber] and return it.
+// Tool in figuring out cardinality elements and manipulating them.
+// Only gets the index if it's terminated with an index
+// Patient.name[1] -> [1]
+// Patient.name[3].someOtherProperty[4] -> 4
+// Patient.name[3].text[4].somethingElse -> null
+export function getIndexFromPath(path) {
+  const match = path.match(/(\[\d+\])$/);
+  return match ? match[1] : null;
+}
+// same thing but we don't want the brackets.
+export function getIndexFromPathWithoutBrackets(path) {
+  const match = path.match(/\[(\d+)\]$/);
+  return match ? match[1] : null;
+}
+/**
+ * Takes a path with array indexes in it and another path without them,
+ * and smashes the last index from the first one back into the right spot
+ * in the second one.
+ *
+ * @param {string} pathWithIndex - The one that’s got [0], [1], etc. in it.
+ *   Example: "Patient.name[3].text"
+ *
+ * @param {string} pathWithoutIndex - The cleaned one, no indexes.
+ *   Example: "Patient.name.text"
+ *
+ * @returns {string} Path with the last index put back where it belongs.
+ *   Example: "Patient.name[3].text"
+ *
+ * If there’s no index in the first one, it just concats the two together with a dot.
+ */
+export function mergePathWithIndex(pathWithIndex, pathWithoutIndex) {
+  // Find all index matches in the path
+  const indexMatches = pathWithIndex.match(/\[(\d+)\]/g);
+
+  if (indexMatches) {
+    // If there's at least one index match, take the last one
+    const lastIndex = indexMatches[indexMatches.length - 1];
+    const basePath = pathWithIndex.replace(lastIndex, ""); // Remove the last index part from the path
+
+    // Merge the last index with the new path
+    if (pathWithoutIndex.startsWith(basePath)) {
+      return `${basePath}${lastIndex}.${pathWithoutIndex.replace(
+        basePath + ".",
+        ""
+      )}`;
+    } else {
+      return `${basePath}${lastIndex}.${pathWithoutIndex}`;
+    }
+  }
+
+  return pathWithIndex + "." + pathWithoutIndex; // Default fallback if no index
+}
+
+// We need to update labels based weather or not the parent has multiple cardinality as well as if the child is multiple cardinality
 
 // This switch is a check to see weather we have the means to render an input for a given fhir type. needs to be udpated with all validations.
 export function isComponentDataType(datatype) {
