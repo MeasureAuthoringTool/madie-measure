@@ -37,6 +37,7 @@ const TypeEditor = ({
   canEdit,
   label,
 }) => {
+  // console.log('label is', label)
   const formik = useFormikContext();
   const [childTypeDefs, setChildTypeDefs] = useState([]);
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());

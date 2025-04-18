@@ -134,6 +134,69 @@ export function updateChildrenPaths(structureDefinition, elements) {
   return updatedElements;
 }
 
+export function getAllPropertyPaths(obj, parentPath = "") {
+  const entries = [];
+
+  if (typeof obj === "object" && obj !== null) {
+    if (Array.isArray(obj)) {
+      obj.forEach((value, index) => {
+        const currentPath = `${parentPath}[${index}]`;
+        entries.push(...getAllPropertyPaths(value, currentPath));
+      });
+    } else {
+      Object.entries(obj).forEach(([key, value]) => {
+        const currentPath = parentPath ? `${parentPath}.${key}` : key;
+        entries.push(...getAllPropertyPaths(value, currentPath));
+      });
+    }
+  } else {
+    entries.push([parentPath, obj]);
+  }
+
+  return entries;
+}
+// Access from formInfo when array
+export function stripArrayIndices(path) {
+  return path.replace(/\[\d+\]/g, "");
+}
+
+export function removeLastPathSegment(path) {
+  const parts = path.split(".");
+  parts.pop();
+  return parts.join(".");
+}
+// Use this to access stuff from form info when object
+export function getValueByPath(obj, path) {
+  return path.split(".").reduce((acc, part) => acc && acc[part], obj);
+}
+export function mapElementsByPath(structureDefinition) {
+  const elements = structureDefinition?.definition?.snapshot?.element || [];
+
+  return elements.reduce((acc, element) => {
+    acc[element.path] = element;
+    return acc;
+  }, {});
+}
+/**
+ * Inserts an array index into a FHIR path string at the correct position
+ * based on the pathBefore (the path of the multiple cardinality element).
+ *
+ * @param {string} fullPath - The complete path to the property (e.g. "Patient.name.suffix")
+ * @param {string} pathBefore - The path to the multiple cardinality property (e.g. "Patient.name")
+ * @param {number} index - The index to insert (e.g. 0)
+ * @returns {string} The updated path with the index inserted (e.g. "Patient.name[0].suffix")
+ */
+export function insertIndexIntoPath(fullPath, pathBefore, index) {
+  const fullPathSegments = fullPath.split(".");
+  const pathBeforeSegments = pathBefore.split(".");
+
+  const insertIndexAt = pathBeforeSegments.length - 1;
+
+  const pathWithIndex = [...fullPathSegments];
+  pathWithIndex[insertIndexAt] = `${pathWithIndex[insertIndexAt]}[${index}]`;
+
+  return pathWithIndex.join(".");
+}
 // This switch is a check to see weather we have the means to render an input for a given fhir type. needs to be udpated with all validations.
 export function isComponentDataType(datatype) {
   switch (datatype) {

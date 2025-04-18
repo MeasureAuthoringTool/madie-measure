@@ -4,11 +4,24 @@ import { Box } from "@mui/material";
 import TypeEditor from "./TypeEditor";
 import ElementSection from "../../../../../../common/ElementSection";
 import { transformArrays } from "./transformArrays";
-import { stripResourcePath } from "../../../../../../../api/fhirDefinitionServiceUtilities";
+import {
+  stripResourcePath,
+  removeLastPathSegment,
+  getValueByPath,
+  insertIndexIntoPath
+} from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import { useFormikContext } from "formik";
 import ElementEditorActionCenter from "./elementEditorActionCenter/ElementEditorActionCenter";
 
-const Element = ({ element, label, resource, handleChange, canEdit }) => {
+// multiple cardinality check
+const Element = ({
+  mappedSnapshotElements,
+  element,
+  label,
+  resource,
+  handleChange,
+  canEdit,
+}) => {
   let elementValue = _.get(resource, label);
   return (
     <Box>
@@ -32,6 +45,7 @@ const Element = ({ element, label, resource, handleChange, canEdit }) => {
 
 // apply button needs to only be put at the bottom of the form
 const ElementEditorChildren = ({
+  mappedSnapshotElements,
   rootDefinition = null, // are we at the root of the tree? if so render it as such
   allChildren,
   currentDepth,
@@ -59,7 +73,8 @@ const ElementEditorChildren = ({
     const path = childrenToRender[0].path.split(".");
     heading = path[currentDepth - 2];
   }
-  const formikContext = useFormikContext();
+  const { values } = useFormikContext();
+  // console.log('values', values)
   // if we're at the top level we want to at minimum make sure we render our current level as opposed to all the sub levels.
   if (rootDefinition) {
     const type = rootDefinition?.type?.[0];
@@ -93,6 +108,8 @@ const ElementEditorChildren = ({
           </div>
         </div>
         {/* given root definition we do a base level render */}
+        {/* I think we only want this to render if there is no multiple cardinality? */}
+        {/* This guy we don't want? */}
         <TypeEditor
           type={type.code}
           resource={resource}
@@ -107,15 +124,37 @@ const ElementEditorChildren = ({
           canEdit={canEdit}
           label={rootDefinition?.id}
         />
-        {childrenToRender.map((child) => (
-          <Element
-            element={child}
-            label={child?.id}
-            resource={resource}
-            handleChange={handleChange}
-            canEdit={canEdit}
-          />
-        ))}
+
+        {/* we want to a second map here in instances where we have multiple elements. */}
+        {childrenToRender.map((child) => {
+          const label = child.id;
+          let numberOfElements = 1;
+          const pathBefore = removeLastPathSegment(label);
+          const elBefore = mappedSnapshotElements[pathBefore];
+          const multipleCardinality = elBefore?.max === "*";
+          if (multipleCardinality) {
+            numberOfElements = getValueByPath(values, pathBefore)?.length || 1;
+          }
+          return (
+            <>
+              {Array.from({ length: numberOfElements }).map((_, index) => {
+                const pathBefore = removeLastPathSegment(label);
+                const labelWithIndex = insertIndexIntoPath(label, pathBefore, index);
+                console.log("labelWithIndex", labelWithIndex);
+                return (
+                  <Element
+                    element={child}
+                    label={labelWithIndex}
+                    resource={resource}
+                    handleChange={handleChange}
+                    canEdit={canEdit}
+                    mappedSnapshotElements={mappedSnapshotElements}
+                  />
+                );
+              })}
+            </>
+          );
+        })}
         {/* item.detail vs item.adjudication are 2 separate trees, we need to split them into separate children trees.
           how do we do that?
           We group them based on a normalizedPrefix.
@@ -136,6 +175,7 @@ const ElementEditorChildren = ({
                 handleIndividualElementApplyButtonClick
               }
               deleteElement
+              mappedSnapshotElements={mappedSnapshotElements}
             />
           ))}
       </div>
@@ -154,16 +194,17 @@ const ElementEditorChildren = ({
             }}
           >
             {/* We want to add a label for path similarity. here it would be ClaimResponse.item */}
-            {childrenToRender.map((child) => (
+            {/* {childrenToRender.map((child) => (
               <Element
                 element={child}
                 label={child?.id}
                 resource={resource}
                 handleChange={handleChange}
                 canEdit={canEdit}
-              />
-            ))}
-            {transformArrays(childrenLeftOver, currentDepth).length > 0 &&
+                mappedSnapshotElements={mappedSnapshotElements}
+                />
+            ))} */}
+            {/* {transformArrays(childrenLeftOver, currentDepth).length > 0 &&
               transformArrays(childrenLeftOver, currentDepth).map(
                 (item, index) => (
                   <ElementEditorChildren
@@ -179,9 +220,10 @@ const ElementEditorChildren = ({
                       handleIndividualElementApplyButtonClick
                     }
                     deleteElement
-                  />
+                    mappedSnapshotElements={mappedSnapshotElements}
+                    />
                 )
-              )}
+              )} */}
           </Box>
         }
       />

@@ -294,7 +294,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
   const formikStu6Context = useFormik({
     initialValues: initialFormikValuesStu6,
     enableReinitialize: true,
-    validationSchema,
+    // validationSchema,
     onSubmit: () => {},
   });
   useFormikResetOnEvent(formikStu6Context);

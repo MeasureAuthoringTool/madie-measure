@@ -20,6 +20,9 @@ import {
   isComponentDataType,
   setNestedValue,
   removeUndefinedAndEmptyObjects,
+  getAllPropertyPaths,
+  stripArrayIndices,
+  mapElementsByPath,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import {
   useQiCoreResource,
@@ -64,16 +67,19 @@ const ElementEditor = ({
   const fhirDefinitionsServiceApi = useFhirDefinitionsServiceApi();
   const fhirDefinitionsService = useRef(fhirDefinitionsServiceApi);
   const [loading, setLoading] = useState(true);
+  const [formInfo, setFormInfo] = useState(null);
   // We want to dispatch an action that contains a payload of our updated selectedResource.entry
   // The resource reducer will in turn update the testcase json string
   const { dispatch, state } = useQiCoreResource();
-  const statefulSelectedResource = selectedResource.bundleEntry.resource; // we're already passing this down.
-
+  // const statefulSelectedResource = selectedResource.bundleEntry.resource;
+  const selectedResourceOnBundleEntry = selectedResource.bundleEntry.resource;
   // The reducer that we use in the provider always returns a new object. This allows us to use that object as a reference object in use effects
   // Whenever a javascript object changes it's memory address, it will be seen as a new object and rerender. Mutating objects do not trigger downstream rerenders.
   // We need this reference instead of the selectedResource prop since it's being preserved in state only on selection.
   // This means that when we hit apply, the form appears to revert to it's last saved state, since that was the only time it was retrieved
   // Need to simplify this workflow with less copies of state. Will be too heavy later.
+
+  const mappedSnapshotElements = mapElementsByPath(selectedResource); // this includes stuff like name.
 
   const buildNode = async (
     child,
@@ -108,7 +114,8 @@ const ElementEditor = ({
       // This is the edge case for when we're providing the root of the structure like ClaimResponse as it's not a componentDataType and there is no type
       const required = +child?.min > 0;
       const elemPath = child?.path;
-      const value = _.get(resource, elemPath);
+      const value = _.get(resource, elemPath); // we need to update this getter.
+      const canBeMultipleCardinality = child?.max === "*";
       const builtNode = {
         id: child?.id,
         label: child?.path.split(".").pop(),
@@ -116,12 +123,14 @@ const ElementEditor = ({
         type,
         required,
         validation: null,
+        canBeMultipleCardinality,
       };
       return nodeList.concat(builtNode);
     } else {
       // It's a single node. Add it to the node list
       const required = +child.min > 0;
       const elemPath = stripResourcePath(resourcePath, child.path);
+      const canBeMultipleCardinality = child?.max === "*";
 
       const value = _.get(resource, elemPath);
       const label = child.path.split(".").pop();
@@ -133,6 +142,7 @@ const ElementEditor = ({
         type,
         required,
         validation: getValidation(type, required, label),
+        canBeMultipleCardinality,
       };
       return nodeList.concat(builtNode);
     }
@@ -161,7 +171,7 @@ const ElementEditor = ({
       // associate id with form
       results[builtNode.id] = builtNode;
     }
-    buildSchemaAndInitialValues(results);
+    buildSchemaAndInitialValues(results, resource);
   };
   const recursiveAddYupObject = (validationSchema) => {
     // Iterate over each key in the object
@@ -181,49 +191,51 @@ const ElementEditor = ({
     }
     return validationSchema;
   };
-  // given form info, we're going to make an object of schemas and save it to state for formik.
-  const buildSchemaAndInitialValues = (formInfo) => {
-    const initialValuesObject = {};
-    const validationSchemaObject = {};
-    // we need to only set the nested value here if
-    for (const key in formInfo) {
-      const { value, type, validation } = formInfo[key];
-      // we need to check and see if the key has a basepath that exists within the displayed elements tree.
-      const splitPath: Array<string> = key.split(".");
-      //it's a base path, we want it
-      if (splitPath.length === 1) {
-        setNestedValue(initialValuesObject, key, value);
-        setNestedValue(validationSchemaObject, key, validation);
-      } else {
-        // it's not a base path we need to compare the first two path entries.
-        const firstKey = splitPath[0];
-        const secondKey = splitPath[1];
-        if (displayedElementsTree?.[firstKey]?.[secondKey]) {
-          setNestedValue(initialValuesObject, key, value);
-          setNestedValue(validationSchemaObject, key, validation);
-        }
+
+  const buildSchemaAndInitialValues = (formInfo, resource) => {
+    // Get the correct initial values more simply.
+    const correctInitialValues = {}; // set a root
+    correctInitialValues[resource.resourceType] = {}; // establish root property
+    const entries = Object.entries(resource);
+    for (const [key, value] of entries) {
+      correctInitialValues[resource.resourceType][key] = value;
+    }
+    const allPaths = getAllPropertyPaths(correctInitialValues);
+
+    // Now make a validation object 
+    const testValidation = {};
+    testValidation[resource.resourceType] = {};
+    for (const touple of allPaths) {
+      const [path] = touple;
+      const formInfoNode = formInfo[stripArrayIndices(path)];
+      if (formInfoNode && formInfoNode.validation) {
+        testValidation[path] = Yup.object(formInfoNode.validation);
       }
     }
-    setInitialFormikValuesStu6(initialValuesObject);
-    setValidationSchema(
-      Yup.object().shape(recursiveAddYupObject(validationSchemaObject))
-    );
+
+    setInitialFormikValuesStu6(correctInitialValues);
+    setValidationSchema(Yup.object().shape(testValidation));
+    setFormInfo(formInfo);
     // need a loading toggle or formikProvider dies violently.
     setLoading(false);
   };
   const triggerFormBuilder = async () => {
     const currentPath = selectedResource.definition.type;
     const allChildren = getAllChildren(selectedResource, currentPath);
+    // console.log("snapshot", selectedResource?.definition?.snapshot);
     await buildForm(
       selectedResource?.definition?.snapshot?.element?.[0],
       allChildren,
       fhirDefinitionsService,
       resourcePath,
-      statefulSelectedResource
+      selectedResourceOnBundleEntry
     );
   };
   useEffect(() => {
-    if (statefulSelectedResource && Object.keys(displayedElementsTree).length) {
+    if (
+      selectedResourceOnBundleEntry &&
+      Object.keys(displayedElementsTree).length
+    ) {
       triggerFormBuilder();
     }
   }, [displayedElementsTree, state, selectedResourceID]); // using selected resource as a render point
@@ -251,8 +263,11 @@ const ElementEditor = ({
   }
 
   const currentPath = elementDefinition?.path;
+  console.log("currentPath", currentPath);
   const allChildren = getAllChildren(selectedResource, currentPath);
+  console.log("allChildren", allChildren);
   const currentDepth = elementDefinition?.path.split(".").length;
+  console.log("currentDepth", currentDepth);
   // <TypeEditor will either render a node or all top level elements if it's not a root. We need to make that check here
   if (!loading) {
     return (
@@ -268,6 +283,7 @@ const ElementEditor = ({
         {/* we need to render not only the current item, but all children */}
         <ElementEditorChildren //recursive render control
           // stuff we need only at the init root
+          mappedSnapshotElements={mappedSnapshotElements}
           resourcePath={resourcePath}
           fhirDefinitionsService={fhirDefinitionsService}
           rootDefinition={elementDefinition}
