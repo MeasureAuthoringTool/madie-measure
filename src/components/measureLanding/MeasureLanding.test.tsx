@@ -186,8 +186,8 @@ describe("Measure Page", () => {
       userEvent.click(pageButton);
     });
     expect(mockedUsedNavigate).toHaveBeenCalledWith("?tab=0&page=1&limit=10");
-    waitFor(() => {
-      const measure1 = screen.findByText("TestMeasure1");
+    const measure1 = await screen.findByText("TestMeasure1");
+    await waitFor(async () => {
       expect(measure1).toBeInTheDocument();
     });
   });
@@ -323,7 +323,7 @@ describe("Measure Page", () => {
     ).toBeInTheDocument();
   });
 
-  test.skip("shows measure counts on page load", async () => {
+  test("shows measure counts on page load", async () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       MeasureSearch: true,
     }));
