@@ -91,6 +91,24 @@ const TypeEditor = ({
             />
           </Box>
         );
+      case "base64Binary":
+        return (
+          <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
+            <StringComponent
+              stringOnly={false}
+              label={label}
+              canEdit={canEdit}
+              helperText={formikErrorHandler(label)}
+              error={getNestedProperty(formik.errors, label)}
+              fieldRequired={required}
+              {...formik.getFieldProps(label)}
+              onChange={({ target }) => {
+                formik.setFieldTouched(label);
+                formik.setFieldValue(label, target.value);
+              }}
+            />
+          </Box>
+        );
       case "markdown":
         return (
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
