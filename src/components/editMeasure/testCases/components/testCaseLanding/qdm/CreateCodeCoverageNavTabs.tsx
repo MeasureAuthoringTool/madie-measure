@@ -18,7 +18,8 @@ import {
 import { TestCasesPassingDetailsProps } from "../common/interfaces";
 import { useFeatureFlags } from "@madie/madie-util";
 import { useQdmExecutionContext } from "../../routes/qdm/QdmExecutionContext";
-import LoadingActionButton from "../common/loadingActionButton/LoadingActionButton";
+import LoadingButtonWithMenu from "../common/loadingButton/LoadingButtonWithMenu";
+import LoadingButton from "../common/loadingButton/LoadingButton";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import classNames from "classnames";
@@ -43,7 +44,7 @@ export interface NavTabProps {
   exportExecuting: boolean;
   optionsOpen: boolean;
   setOptionsOpen: (exportExecuting: boolean) => void;
-  onGenerateValueSetOverlapReport: () => void;
+  onGenerateOverlappingCodesReport: () => void;
 }
 
 const defaultStyle = {
@@ -80,7 +81,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
     exportExecuting,
     optionsOpen,
     setOptionsOpen,
-    onGenerateValueSetOverlapReport,
+    onGenerateOverlappingCodesReport,
   } = props;
   const [activeTip, setActiveTip] = useState<boolean>(false);
   const toolTipClass = classNames("madie-tooltip", {
@@ -207,16 +208,22 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
               Delete All
             </Button>
           )}
+
           {featureFlags.OverlappingValueSets && (
-            <LoadingActionButton
+            <LoadingButtonWithMenu
               hasErrors={hasErrors}
               isExecutionContextReady={executionContextReady}
-              onClick={onGenerateValueSetOverlapReport}
-              dataTestId="report-button"
-              label="Report"
+              dataTestId="reports-button"
+              label="Reports"
+              menuItems={[
+                {
+                  label: "Overlapping Codes",
+                  dataTestId: "overlapping-codes",
+                  toImplementFunction: onGenerateOverlappingCodesReport,
+                },
+              ]}
             />
           )}
-
           {((featureFlags.TestCaseListActionCenter && canEdit) ||
             !featureFlags.TestCaseListActionCenter) && (
             <>
@@ -247,7 +254,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
               </Button>
             </>
           )}
-          <LoadingActionButton
+          <LoadingButton
             hasErrors={hasErrors}
             isExecutionContextReady={executionContextReady}
             onClick={executeTestCases}

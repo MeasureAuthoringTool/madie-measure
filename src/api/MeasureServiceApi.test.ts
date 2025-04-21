@@ -687,4 +687,30 @@ describe("MeasureServiceApi Tests", () => {
       )
     ).rejects.toThrow(errorMessage);
   });
+
+  it("test getMeasureCounts success", async () => {
+    const data = {
+      allMeasures: 500,
+      myMeasures: 5,
+    };
+
+    const resp: any = { status: 200, data };
+
+    mockedAxios.get.mockResolvedValue(resp);
+
+    const result = await measureServiceApi.getMeasureCounts();
+
+    expect(mockedAxios.get).toBeCalledTimes(1);
+    expect(result).toEqual(data);
+  });
+
+  it("test getMeasureCounts failure", async () => {
+    const errorMessage = "Unable to get measure counts";
+    mockedAxios.get.mockImplementationOnce(() =>
+      Promise.reject(new Error(errorMessage))
+    );
+    await expect(measureServiceApi.getMeasureCounts()).rejects.toThrow(
+      errorMessage
+    );
+  });
 });

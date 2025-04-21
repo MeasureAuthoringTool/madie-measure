@@ -626,6 +626,24 @@ export class MeasureServiceApi {
       throw error;
     }
   }
+
+  async getMeasureCounts(): Promise<any> {
+    try {
+      const response = await axios.get<String>(
+        `${this.baseUrl}/measures/count`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      const message = `Unable to get measure counts`;
+      console.error(message, error);
+      throw error;
+    }
+  }
 }
 
 export default function useMeasureServiceApi(): MeasureServiceApi {
