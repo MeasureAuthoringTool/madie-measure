@@ -1,8 +1,8 @@
 import React, { useCallback, useState } from "react";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import LoadingButton from "@mui/lab/LoadingButton";
+import MuiLoadingButton from "@mui/lab/LoadingButton";
 
-interface RunTestButtonProps {
+interface LoadingButtonProps {
   hasErrors: boolean;
   isExecutionContextReady: boolean;
   onClick: () => void;
@@ -11,19 +11,15 @@ interface RunTestButtonProps {
   dataTestId?: string;
 }
 
-export default function LoadingActionButton({
+export default function LoadingButton({
   hasErrors,
   isExecutionContextReady,
   onClick,
   dataTestId,
   primary = false,
   label,
-}: RunTestButtonProps) {
-  //TODO: because calculation is a heavy process, react blocks all the re-renders
-  // during test case execution. this is to overcome that.
-  // remove this once we move calculation to backend`
+}: LoadingButtonProps) {
   const [loading, setLoading] = useState(false);
-
   const handleClick = useCallback(() => {
     setLoading(true);
     setTimeout(async () => {
@@ -33,7 +29,7 @@ export default function LoadingActionButton({
   }, [onClick]);
 
   return (
-    <LoadingButton
+    <MuiLoadingButton
       sx={{
         textTransform: "none",
         color: primary ? "white" : "#0073c8",
@@ -55,6 +51,6 @@ export default function LoadingActionButton({
       }}
     >
       {label}
-    </LoadingButton>
+    </MuiLoadingButton>
   );
 }

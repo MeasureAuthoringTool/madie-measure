@@ -9,7 +9,14 @@ interface PropTypes {
   measures: Measure[];
   onClick: () => void;
 }
-
+const iconStyles = {
+  "&.Mui-disabled": {
+    color: "#8C8C8C !important",
+  },
+  "&.MuiIconButton-root": {
+    color: "#0073C8 ",
+  },
+};
 export const MUST_BE_OWNER = "Must own both selected measures";
 export const MUST_BE_DIFFERENT_MODELS = "Measures must be different models";
 export const MUST_BE_DRAFT = "QI-Core measure must be in a draft status";
@@ -87,10 +94,9 @@ export default function AssociateCmsIdAction(props: PropTypes) {
           onClick={props.onClick}
           disabled={disableAssociateCmsIdBtn}
           data-testid="associate-cms-id-action-btn"
+          sx={iconStyles}
         >
-          <IconLink
-            fillColor={disableAssociateCmsIdBtn ? "#9e9e9e" : "#2196f3"}
-          />
+          <IconLink />
         </IconButton>
       </span>
     </Tooltip>

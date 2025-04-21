@@ -20,7 +20,7 @@ import {
   Tab,
 } from "@madie/madie-design-system/dist/react";
 import "./MeasureLanding.scss";
-import { useDocumentTitle } from "@madie/madie-util";
+import { useDocumentTitle, useFeatureFlags } from "@madie/madie-util";
 import StatusHandler from "../editMeasure/editor/StatusHandler";
 
 export default function MeasureLanding() {
@@ -29,6 +29,8 @@ export default function MeasureLanding() {
   let navigate = useNavigate();
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [measureList, setMeasureList] = useState<Measure[]>([]);
+  const [myMeasuresCount, setMyMeasuresCount] = useState<number>(0);
+  const [allMeasuresCount, setAllMeasuresCount] = useState<number>(0);
 
   // utilities for pagination
   const values = queryString.parse(search);
@@ -43,6 +45,7 @@ export default function MeasureLanding() {
   const [currentPage, setCurrentPage] = useState(0);
   const [errMsg, setErrMsg] = useState(undefined);
   const abortController = useRef(null);
+  const featureFlags = useFeatureFlags();
 
   // pull info from some query url
   const curLimit = values.limit && Number(values.limit);
@@ -109,6 +112,22 @@ export default function MeasureLanding() {
   };
 
   useEffect(() => {
+    if (featureFlags?.MeasureSearch) {
+      measureServiceApi
+        .getMeasureCounts()
+        .then((data) => {
+          setMyMeasuresCount(data.myMeasures);
+          setAllMeasuresCount(data.allMeasures);
+        })
+        .catch(() => console.error("Unable to retrieve measure counts"));
+    }
+  }, [
+    activeTab,
+    featureFlags?.MeasureSearch,
+    measureServiceApi.getMeasureCounts,
+  ]);
+
+  useEffect(() => {
     retrieveMeasures(
       activeTab,
       curLimit === undefined ? 10 : curLimit,
@@ -151,7 +170,11 @@ export default function MeasureLanding() {
             <Tabs value={activeTab} onChange={handleTabChange} type="B">
               <Tab
                 type="B"
-                label={`My Measures`}
+                label={
+                  featureFlags?.MeasureSearch
+                    ? "My Measures (" + myMeasuresCount + ")"
+                    : "My Measures"
+                }
                 data-testid="my-measures-tab"
                 onClick={() => {
                   setCurrentPage(0);
@@ -160,7 +183,11 @@ export default function MeasureLanding() {
               <Tab
                 tabIndex={0}
                 type="B"
-                label="All Measures"
+                label={
+                  featureFlags?.MeasureSearch
+                    ? "All Measures (" + allMeasuresCount + ")"
+                    : "All Measures"
+                }
                 data-testid="all-measures-tab"
                 onClick={() => {
                   setCurrentPage(0);

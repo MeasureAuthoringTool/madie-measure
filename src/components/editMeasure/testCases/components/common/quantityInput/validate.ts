@@ -22,6 +22,8 @@ export const ADDITIONAL_UCUM_UNIT_SUPPORT = {
   minute: true,
   seconds: true,
   second: true,
+  milliseconds: true,
+  millisecond: true,
 };
 
 export const validate = (code): ValidationResult => {
