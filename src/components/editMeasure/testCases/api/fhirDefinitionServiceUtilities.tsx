@@ -138,6 +138,7 @@ export function updateChildrenPaths(structureDefinition, elements) {
 export function isComponentDataType(datatype) {
   switch (datatype) {
     case "boolean":
+    case "base64Binary":
     case "date":
     case "dateTime":
     case "http://hl7.org/fhirpath/System.DateTime":

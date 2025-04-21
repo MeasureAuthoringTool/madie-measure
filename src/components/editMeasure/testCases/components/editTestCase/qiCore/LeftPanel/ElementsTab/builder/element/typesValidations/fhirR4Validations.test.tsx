@@ -1,5 +1,9 @@
 import * as Yup from "yup";
-import { getInstantValidator, getValidation } from "./fhirR4Validations";
+import {
+  getInstantValidator,
+  getValidation,
+  getBinaryValidator,
+} from "./fhirR4Validations";
 
 describe("Validation Functions", () => {
   it("getValidation StringValidator", () => {
@@ -259,5 +263,27 @@ describe("Validation Functions", () => {
     expect(
       schema.validate("2025-02-04T00:00:00.000+00:00")
     ).resolves.not.toThrow();
+  });
+
+  it("should validate a valid binary string", async () => {
+    const validator = getBinaryValidator(false);
+    const validBinary = "dGVzdA=="; // Base64 encoded string for "test"
+
+    await expect(validator.validate(validBinary)).resolves.toBe(validBinary);
+  });
+
+  it("should validate a valid number string", async () => {
+    const validator = getBinaryValidator(false);
+    const validBinary = "1234";
+
+    await expect(validator.validate(validBinary)).resolves.toBe(validBinary);
+  });
+
+  it("should invalidate a invalid binary string", async () => {
+    const validator = getBinaryValidator(true);
+
+    await expect(validator.validate("")).rejects.toThrow(
+      "Invalid Binary format"
+    );
   });
 });
