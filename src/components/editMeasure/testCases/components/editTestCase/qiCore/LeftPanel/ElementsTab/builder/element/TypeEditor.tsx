@@ -21,9 +21,11 @@ import {
   updateChildrenPaths,
   isComponentDataType,
   getIndexFromPath,
-  mergePathWithIndex
+  mergePathWithIndex,
+  getRequired,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import CodingComponent from "./types/CodingComponent";
+import {  useRequiredFields } from "./RequiredFieldsContext";
 
 // onChange is being deprecated as no updates to the resource are tracked.
 // Changes directly to the json should be done with a disaptch, this propagates downstream changes in formik.
@@ -38,8 +40,11 @@ const TypeEditor = ({
   label,
 }) => {
   const formik = useFormikContext();
+  const requiredFields = useRequiredFields();
   const [childTypeDefs, setChildTypeDefs] = useState([]);
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
+  required = getRequired(requiredFields, label);
+
   useEffect(() => {
     if (!isComponentDataType(type)) {
       if (type) {
@@ -50,23 +55,25 @@ const TypeEditor = ({
               structureDefinition,
               elements
             );
-            const index = getIndexFromPath(label)
+            const index = getIndexFromPath(label);
             const updatedMappedElements = updatedElements.map((el) => {
-              el.id = index ? mergePathWithIndex(label, el.id) : el.id
-              return el
-            })
+              if (index){
+                console.log('label', label, mergePathWithIndex(label, el.id))
+              }
+              el.id = index ? mergePathWithIndex(label, el.id) : el.id;
+              return el;
+            });
             setChildTypeDefs(updatedMappedElements);
-
           }
         });
       }
     }
   }, [type]);
-  // helper needed for nested structures. cannot access with a string alone.
+
   const getNestedProperty = (obj, path) => {
-    return path
-      .split(".")
-      .reduce((current, key) => current && current[key], obj);
+    if (!path) return undefined;
+    const keys = path.match(/([^[.\]]+)/g); // matches words between dots and brackets
+    return keys?.reduce((current, key) => current && current[key], obj);
   };
 
   const formikErrorHandler = (name: string) => {
@@ -76,9 +83,6 @@ const TypeEditor = ({
       return errors;
     }
   };
-
-  // console.log('label is', label, 'childTypeDEfs', childTypeDefs, 'type is', type, 'isComponentDataType', isComponentDataType(type));
-
   if (isComponentDataType(type)) {
     switch (type) {
       case "string":
@@ -93,11 +97,7 @@ const TypeEditor = ({
               error={getNestedProperty(formik.errors, label)}
               fieldRequired={required}
               {...formik.getFieldProps(label)}
-              onChange={({ target }) => {
-                formik.setFieldTouched(label);
-                formik.setFieldValue(label, target.value);
-              }}
-            />
+              />
           </Box>
         );
       case "markdown":
@@ -290,18 +290,13 @@ const TypeEditor = ({
         return <div>Unsupported Type [{type}]</div>;
     }
   } else if (!_.isEmpty(childTypeDefs)) {
-
-
     //  If we have childTypeDefs, we need to check to make weather or not there's an index supplied so we can attach it to the label
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {childTypeDefs?.map((childTypeDef) => {
           const childType = childTypeDef?.type?.[0];
           const childRequired = +childTypeDef.min > 0;
-          // console.log('child', childTypeDefs)
-          const index = getIndexFromPath(label)
           return (
-            // <div />
             <TypeEditor
               type={childType?.code}
               resource={resource}
@@ -309,7 +304,6 @@ const TypeEditor = ({
               required={childRequired}
               canEdit={canEdit}
               // label={childTypeDef.id}
-
               // label={index ? mergePathWithIndex(label, childTypeDef.id) : childTypeDef.id}
               label={childTypeDef.id}
               parentStructureDefinition={structureDefinition}

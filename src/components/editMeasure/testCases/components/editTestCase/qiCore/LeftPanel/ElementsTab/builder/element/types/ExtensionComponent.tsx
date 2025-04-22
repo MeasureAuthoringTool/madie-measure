@@ -42,8 +42,8 @@ const ExtensionComponent = ({
   canEdit,
   elementDefinition,
   parentStructureDefinition,
-  // onChange,
-}: ExtensionProps) => {
+}: // onChange,
+ExtensionProps) => {
   const [selectedValueType, setSelectedValueType] = useState<string>("");
   const [url, setUrl] = useState<string>();
   const [value, setValue] = useState();

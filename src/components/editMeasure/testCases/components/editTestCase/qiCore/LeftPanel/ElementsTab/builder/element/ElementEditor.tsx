@@ -20,10 +20,11 @@ import {
   isComponentDataType,
   setNestedValue,
   removeUndefinedAndEmptyObjects,
-  getAllPropertyPaths,
-  stripArrayIndices,
-  mapElementsByPath,
-  buildValidationSchema
+  mapElementsRequired,
+  // getAllPropertyPaths,
+  // stripArrayIndices,
+  // mapElementsByPath,
+  // buildValidationSchema,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import {
   useQiCoreResource,
@@ -32,6 +33,7 @@ import {
 import { useFormikContext } from "formik";
 import { Button } from "@madie/madie-design-system/dist/react";
 import useFormikResetOnEvent from "../../../../../../../../../common/useFormikResetOnEvent";
+import { RequiredFieldsProvider } from "./RequiredFieldsContext";
 
 interface ElementEditorProps {
   resource?: any;
@@ -68,7 +70,6 @@ const ElementEditor = ({
   const fhirDefinitionsServiceApi = useFhirDefinitionsServiceApi();
   const fhirDefinitionsService = useRef(fhirDefinitionsServiceApi);
   const [loading, setLoading] = useState(true);
-  const [formInfo, setFormInfo] = useState(null);
   // We want to dispatch an action that contains a payload of our updated selectedResource.entry
   // The resource reducer will in turn update the testcase json string
   const { dispatch, state } = useQiCoreResource();
@@ -80,7 +81,8 @@ const ElementEditor = ({
   // This means that when we hit apply, the form appears to revert to it's last saved state, since that was the only time it was retrieved
   // Need to simplify this workflow with less copies of state. Will be too heavy later.
 
-  const mappedSnapshotElements = mapElementsByPath(selectedResource); // this includes stuff like name.
+  // A collection of all labels with without array indeces to serve as constant time lookup in type editor for weather it's required
+  const requiredFields = mapElementsRequired(selectedResource); // this includes stuff like name.
 
   const buildNode = async (
     child,
@@ -109,7 +111,13 @@ const ElementEditor = ({
               );
             }
           }
-          return nodeList; // Return the aggregated node list
+          const { max, min, type, id } = child;
+          return nodeList.concat({
+            id,
+            type: type[0].code,
+            max,
+            required: min > 0,
+          });
         }
       }
       // This is the edge case for when we're providing the root of the structure like ClaimResponse as it's not a componentDataType and there is no type
@@ -155,9 +163,10 @@ const ElementEditor = ({
     resourcePath,
     resource
   ) => {
-    const results = {};
+    const formInfo = {};
     const nodeList = [];
     const allNodes = [rootDefinition, ...allChildren];
+
     for (const node of allNodes) {
       nodeList.push(
         ...(await buildNode(
@@ -170,67 +179,92 @@ const ElementEditor = ({
     }
     for (const builtNode of nodeList) {
       // associate id with form
-      results[builtNode.id] = builtNode;
+      formInfo[builtNode.id] = builtNode;
     }
-    buildSchemaAndInitialValues(results, resource);
+    buildSchemaAndInitialValues(formInfo, resource);
   };
-  const recursiveAddYupObject = (validationSchema) => {
-    // Iterate over each key in the object
-    for (const key in validationSchema) {
-      const value = validationSchema[key];
+
+  const recursiveAddYupObject = (schemaObject) => {
+    for (const key in schemaObject) {
+      const value = schemaObject[key];
       if (!Yup.isSchema(value) && typeof value === "object") {
-        // we need to convert this key to a yup object, but we also need to check deeper.
-        if (
-          validationSchema[key] &&
-          typeof validationSchema[key] === "object" &&
-          !Array.isArray(validationSchema[key])
-        ) {
-          recursiveAddYupObject(validationSchema[key]);
-        }
-        validationSchema[key] = Yup.object(value);
+        recursiveAddYupObject(value);
+        schemaObject[key] = Yup.object().shape(value);
       }
     }
-    return validationSchema;
+    return schemaObject;
+  };
+
+  // get first children of node
+  const getChildren = (formInfo, parentPath) => {
+    const parentDepth = parentPath.split(".").length;
+    return Object.entries(formInfo).filter(([key]) => {
+      const parts = key.split(".");
+      return (
+        key.startsWith(parentPath + ".") && parts.length === parentDepth + 1
+      );
+    });
+  };
+
+  // we need to know not only the properties that have values, 
+  // but also the ones that don't since a user can enter values into those fields
+  const buildFullValidationSchema = (formInfo) => {
+    const validationSchemaObject = {};
+    console.log('formInfo', formInfo)
+    for (const key in formInfo) {
+      const node = formInfo[key];
+      const { validation, max, id } = node;
+      // this is how we get validations for each "primitive type". we need to handle arrays differently.
+      if (validation) {
+        setNestedValue(validationSchemaObject, key, validation);
+        // we need to make arrays of things that are not the root Patient is root, Patient.name is not
+      } else if (!validation && max === "*" && id.split(".").length > 1) {
+        const children = getChildren(formInfo, key);
+        const childShape = {};
+        for (const [childKey, childNode] of children) {
+          //@ts-ignore
+          if (childNode.validation) {
+            const lastPart = childKey.split(".").pop();
+            //@ts-ignore childNode has a .validation typically
+            childShape[lastPart] = childNode.validation;
+          }
+          setNestedValue(
+            validationSchemaObject,
+            key,
+            Yup.array().of(Yup.object().shape(childShape))
+          );
+        }
+        // Now set it as an array of objects at that path
+        setNestedValue(
+          validationSchemaObject,
+          key,
+          Yup.array().of(Yup.object().shape(childShape))
+        );
+      }
+    }
+
+    return Yup.object().shape(recursiveAddYupObject(validationSchemaObject));
   };
 
   const buildSchemaAndInitialValues = (formInfo, resource) => {
+    console.log('formInfo', formInfo)
     // Get the correct initial values more simply.
     const correctInitialValues = {}; // set a root
-    correctInitialValues[resource.resourceType] = {}; // establish root property
+    correctInitialValues[resource.resourceType] = {}; // establish root property so we can add more properties to it
     const entries = Object.entries(resource);
     for (const [key, value] of entries) {
       correctInitialValues[resource.resourceType][key] = value;
     }
-    console.log('formInfo', formInfo)
-    console.log('correct initialValues', correctInitialValues);
-
-
-    const validationSchema = buildValidationSchema(correctInitialValues, formInfo, resource.resourceType)
-    console.log('validationSchema is', validationSchema)
-    // const allPaths = getAllPropertyPaths(correctInitialValues);
-    
-    // Now make a validation object 
-    // const testValidation = {};
-    // testValidation[resource.resourceType] = {};
-    // for (const touple of allPaths) {
-      //   const [path] = touple;
-      //   const formInfoNode = formInfo[stripArrayIndices(path)];
-      //   if (formInfoNode && formInfoNode.validation) {
-        //     testValidation[path] = Yup.object(formInfoNode.validation);
-        //   }
-        // }
-        
-        setInitialFormikValuesStu6(correctInitialValues);
-        setValidationSchema(Yup.object().shape(validationSchema));
-        // setValidationSchema(Yup.objvalidationSchema);
-    setFormInfo(formInfo);
+    const validationSchemaObject = buildFullValidationSchema(formInfo);
+    setInitialFormikValuesStu6(correctInitialValues);
+    setValidationSchema(validationSchemaObject);
     // need a loading toggle or formikProvider dies violently.
     setLoading(false);
   };
   const triggerFormBuilder = async () => {
     const currentPath = selectedResource.definition.type;
     const allChildren = getAllChildren(selectedResource, currentPath);
-    // console.log("snapshot", selectedResource?.definition?.snapshot);
+    console.log('selectedResource?.definition?.snapshot?.element', selectedResource?.definition?.snapshot?.element)
     await buildForm(
       selectedResource?.definition?.snapshot?.element?.[0],
       allChildren,
@@ -273,11 +307,10 @@ const ElementEditor = ({
   const currentPath = elementDefinition?.path;
   const allChildren = getAllChildren(selectedResource, currentPath);
   const currentDepth = elementDefinition?.path.split(".").length;
-  // console.log("currentPath", currentPath);
-  // console.log("allChildren", allChildren);
   // <TypeEditor will either render a node or all top level elements if it's not a root. We need to make that check here
-  if (!loading) {
+  if (!loading) { // prevent render from happening with no provider values
     return (
+      <RequiredFieldsProvider requiredFields={requiredFields}>
       <Box
         sx={{
           padding: "0 24px 24px",
@@ -290,10 +323,10 @@ const ElementEditor = ({
         {/* we need to render not only the current item, but all children */}
         <ElementEditorChildren //recursive render control
           // stuff we need only at the init root
-          mappedSnapshotElements={mappedSnapshotElements}
+          // requiredFields={mappedSnaprequiredFieldsshotElements}
           resourcePath={resourcePath}
           fhirDefinitionsService={fhirDefinitionsService}
-          rootDefinition={elementDefinition}
+          rootDefinition={elementDefinition} // only provided at root for a different render
           // stuff we need everywhere
           allChildren={allChildren}
           currentDepth={currentDepth}
@@ -326,6 +359,7 @@ const ElementEditor = ({
           </Button>
         </div>
       </Box>
+      </RequiredFieldsProvider>
     );
   }
   return <div />;

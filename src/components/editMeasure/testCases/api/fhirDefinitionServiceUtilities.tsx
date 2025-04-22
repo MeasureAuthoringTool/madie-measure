@@ -1,5 +1,5 @@
 import { ElementDefinition } from "fhir/r4";
-import * as Yup from 'yup';
+import * as Yup from "yup";
 /**
  * Prepares the element name to be displayed for tab labels
  * for sliced elements- it will be sliceName. e.g. Patient.extension:race results into race
@@ -17,16 +17,31 @@ export function getElementName(element: ElementDefinition, basePath: string) {
 // a path that looks like "Claimresponse.item.something"
 // and a value that can be anything
 // We're going to go and break the apart the paths and then individually add them to the object
+const removeArrayIndexes = (path) => {
+  return path
+    .split(".")
+    // Remove everything after the '['
+    .map(part => part.split("[")[0]) 
+    .join(".");
+};
+
+export function getRequired(requiredFields, path) {
+  const cleanedPath = removeArrayIndexes(path);
+  return requiredFields[cleanedPath]
+}
+
+// Helper to deeply set a value at a dot/bracket path
 export function setNestedValue(obj, path, value) {
-  const keys = path.split(".");
-  let currentObj = obj;
-  // start nested structure
-  keys.forEach((key, index) => {
-    if (index === keys.length - 1) {
-      currentObj[key] = value;
+  const parts = path.replace(/\[(\d+)\]/g, ".$1").split(".");
+  let current = obj;
+  parts.forEach((part, index) => {
+    if (index === parts.length - 1) {
+      current[part] = value;
     } else {
-      currentObj[key] = currentObj[key] || {};
-      currentObj = currentObj[key];
+      if (!current[part]) {
+        current[part] = isNaN(parts[index + 1]) ? {} : [];
+      }
+      current = current[part];
     }
   });
 }
@@ -134,32 +149,35 @@ export function updateChildrenPaths(structureDefinition, elements) {
   return updatedElements;
 }
 
-export function getAllPropertyPaths(obj, parentPath = "") {
-  const entries = [];
+// old helper function to map all property paths at a root. I can't remember why this didn't work. Probably a skill issue.
+// export function getAllPropertyPaths(obj, parentPath = "") {
+//   const entries = [];
 
-  if (typeof obj === "object" && obj !== null) {
-    if (Array.isArray(obj)) {
-      obj.forEach((value, index) => {
-        const currentPath = `${parentPath}[${index}]`;
-        entries.push(...getAllPropertyPaths(value, currentPath));
-      });
-    } else {
-      Object.entries(obj).forEach(([key, value]) => {
-        const currentPath = parentPath ? `${parentPath}.${key}` : key;
-        entries.push(...getAllPropertyPaths(value, currentPath));
-      });
-    }
-  } else {
-    entries.push([parentPath, obj]);
-  }
+//   if (typeof obj === "object" && obj !== null) {
+//     if (Array.isArray(obj)) {
+//       obj.forEach((value, index) => {
+//         const currentPath = `${parentPath}[${index}]`;
+//         entries.push(...getAllPropertyPaths(value, currentPath));
+//       });
+//     } else {
+//       Object.entries(obj).forEach(([key, value]) => {
+//         const currentPath = parentPath ? `${parentPath}.${key}` : key;
+//         entries.push(...getAllPropertyPaths(value, currentPath));
+//       });
+//     }
+//   } else {
+//     entries.push([parentPath, obj]);
+//   }
 
-  return entries;
-}
+//   return entries;
+// }
 // Access from formInfo when array
 export function stripArrayIndices(path) {
   return path.replace(/\[\d+\]/g, "");
 }
 
+// a way to figure out the parent path for a lookup.
+// Early failed implementation because this created a render nightmare. Should never look up parent from child.
 export function removeLastPathSegment(path) {
   const parts = path.split(".");
   parts.pop();
@@ -169,57 +187,76 @@ export function removeLastPathSegment(path) {
 export function getValueByPath(obj, path) {
   return path.split(".").reduce((acc, part) => acc && acc[part], obj);
 }
-export function mapElementsByPath(structureDefinition) {
+// function to get map all the property paths to values
+// export function mapElementsByPath(structureDefinition) {
+//   const elements = structureDefinition?.definition?.snapshot?.element || [];
+
+//   return elements.reduce((acc, element) => {
+//     acc[element.path] = element;
+//     return acc;
+//   }, {});
+// }
+
+
+// generate a map of { label: [label] required: true/fales} so we don't need to prop drill poor component into the ground any worse than it is.
+export function mapElementsRequired(structureDefinition) {
   const elements = structureDefinition?.definition?.snapshot?.element || [];
 
   return elements.reduce((acc, element) => {
-    acc[element.path] = element;
+    acc[element.path] = element.min > 0;
     return acc;
   }, {});
 }
 
-
-
 /**
  * Recursively build Yup validation schema object from initialEntries and formInfo
+ * Early implementation. This failed to work right.
  * @param {Object} initialEntries - The initial form values
  * @param {Object} formInfo - The form metadata with Yup validators
  * @param {String} resourceType - Top-level resource key (like 'Patient')
- * @param {String} parentPath - (internal use) current path while traversing
+ * @param {String} parentPath - current path while traversing
  * @returns {Object} - Object shaped for Yup.object().shape()
  */
-export function buildValidationSchema(initialEntries, formInfo, resourceType, parentPath = '') {
-  const schema = {};
+// export function buildValidationSchema(
+//   initialEntries,
+//   formInfo,
+//   resourceType,
+//   parentPath = ""
+// ) {
+//   const schema = {};
 
-  Object.entries(initialEntries).forEach(([key, value]) => {
-    const currentPath = parentPath ? `${parentPath}.${key}` : key;
+//   Object.entries(initialEntries).forEach(([key, value]) => {
+//     const currentPath = parentPath ? `${parentPath}.${key}` : key;
 
-    if (Array.isArray(value)) {
-      const itemSchema = value.length
-        ? buildValidationSchema(value[0], formInfo, resourceType, `${currentPath}[0]`)
-        : {}; // fallback if empty
+//     if (Array.isArray(value)) {
+//       const itemSchema = value.length
+//         ? buildValidationSchema(
+//             value[0],
+//             formInfo,
+//             resourceType,
+//             `${currentPath}[0]`
+//           )
+//         : {}; // fallback if empty
 
-      schema[key] = Yup.array().of(Yup.object().shape(itemSchema));
+//       schema[key] = Yup.array().of(Yup.object().shape(itemSchema));
+//     } else if (typeof value === "object" && value !== null) {
+//       schema[key] = Yup.object().shape(
+//         buildValidationSchema(value, formInfo, resourceType, currentPath)
+//       );
+//     } else {
+//       // Leaf value
+//       const fullPath = `${resourceType}.${currentPath}`;
+//       const normalizedPath = fullPath.replace(/\[\d+\]/g, ""); // remove [index] from paths so we can do a lookup
 
-    } else if (typeof value === 'object' && value !== null) {
-      schema[key] = Yup.object().shape(
-        buildValidationSchema(value, formInfo, resourceType, currentPath)
-      );
+//       const formMeta = formInfo[normalizedPath];
+//       if (formMeta?.validation) {
+//         schema[key] = formMeta.validation;
+//       }
+//     }
+//   });
 
-    } else {
-      // Leaf value
-      const fullPath = `${resourceType}.${currentPath}`;
-      const normalizedPath = fullPath.replace(/\[\d+\]/g, ''); // remove [index] from paths
-
-      const formMeta = formInfo[normalizedPath];
-      if (formMeta?.validation) {
-        schema[key] = formMeta.validation;
-      }
-    }
-  });
-
-  return schema;
-}
+//   return schema;
+// }
 
 /**
  * Inserts an array index into a FHIR path string at the correct position
@@ -241,31 +278,55 @@ export function insertIndexIntoPath(fullPath, pathBefore, index) {
 
   return pathWithIndex.join(".");
 }
-// given a path, find out if there's a suffix in it that ends in .[somenumber] and return it
+// given a path, find out if there's a suffix in it that ends in .[somenumber] and return it. 
+// Tool in figuring out cardinality elements and manipulating them.
+// Only gets the index if it's terminated with an index 
+// Patient.name[1] -> [1]
+// Patient.name[3].someOtherProperty[4] -> 4
+// Patient.name[3].text[4].somethingElse -> null
 export function getIndexFromPath(path) {
   const match = path.match(/(\[\d+\])$/);
   return match ? match[1] : null;
 }
 
+/**
+ * Takes a path with array indexes in it and another path without them,
+ * and smashes the last index from the first one back into the right spot
+ * in the second one.
+ *
+ * @param {string} pathWithIndex - The one that’s got [0], [1], etc. in it.
+ *   Example: "Patient.name[3].text"
+ *
+ * @param {string} pathWithoutIndex - The cleaned one, no indexes.
+ *   Example: "Patient.name.text"
+ *
+ * @returns {string} Path with the last index put back where it belongs.
+ *   Example: "Patient.name[3].text"
+ *
+ * If there’s no index in the first one, it just concats the two together with a dot.
+ */
 export function mergePathWithIndex(pathWithIndex, pathWithoutIndex) {
   // Find all index matches in the path
   const indexMatches = pathWithIndex.match(/\[(\d+)\]/g);
-  
+
   if (indexMatches) {
     // If there's at least one index match, take the last one
     const lastIndex = indexMatches[indexMatches.length - 1];
-    const basePath = pathWithIndex.replace(lastIndex, ''); // Remove the last index part from the path
+    const basePath = pathWithIndex.replace(lastIndex, ""); // Remove the last index part from the path
 
     // Merge the last index with the new path
     if (pathWithoutIndex.startsWith(basePath)) {
-      return `${basePath}${lastIndex}.${pathWithoutIndex.replace(basePath + '.', '')}`;
+      return `${basePath}${lastIndex}.${pathWithoutIndex.replace(
+        basePath + ".",
+        ""
+      )}`;
     } else {
       return `${basePath}${lastIndex}.${pathWithoutIndex}`;
     }
   }
-  
-  return pathWithIndex + '.' + pathWithoutIndex; // Default fallback if no index
-};
+
+  return pathWithIndex + "." + pathWithoutIndex; // Default fallback if no index
+}
 // function mergePathsWithIndex(pathWithIndex, pathToAppend) {
 //   const partsWithIndex = pathWithIndex.split(".");
 //   const partsToAppend = pathToAppend.split(".");
