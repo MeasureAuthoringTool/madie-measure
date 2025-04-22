@@ -228,6 +228,10 @@ const TypeEditor = ({
             helperText={formikErrorHandler(label)}
             error={getNestedProperty(formik.errors, label)}
             {...formik.getFieldProps(label)}
+            onChange={({ target }) => {
+              formik.setFieldTouched(label);
+              formik.setFieldValue(label, target.value);
+            }}
           />
         );
       case "url":
