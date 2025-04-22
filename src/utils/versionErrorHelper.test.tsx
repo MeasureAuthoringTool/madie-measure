@@ -28,6 +28,13 @@ describe("Versioning error helper", () => {
       "Please include valid test cases to version before versioning this measure."
     );
   });
+  it("should return expected output for no Population Criteria error", () => {
+    expect(
+      versionErrorHelper("does not have at least one Population Criteria")
+    ).toBe(
+      "Please set up at least one Population Criteria before versioning this measure."
+    );
+  });
   it("should return expected output for non caught cases", () => {
     expect(versionErrorHelper("test")).toBe(
       "An unexpected error has occurred. Please contact the help desk."
