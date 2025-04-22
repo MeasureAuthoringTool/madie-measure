@@ -26,7 +26,7 @@ interface RowData {
   subRows?: RowData[]; // Optional subRows for nested data
 }
 const TH = tw.th`p-3 text-left text-sm`;
-const TD = tw.td`p-3 text-left text-sm`;
+const TD = tw.td`p-3 text-left text-sm break-keep`;
 
 const Description = ({ valueSet }: { valueSet: OverlappingValueSet }) => {
   return (
@@ -41,7 +41,7 @@ const Description = ({ valueSet }: { valueSet: OverlappingValueSet }) => {
         <Typography variant="subtitle1" fontWeight="bold">
           {valueSet?.url ? "Url" : "Oid"}:
         </Typography>
-        <Typography variant="body1">
+        <Typography variant="body1" tw="break-all">
           {valueSet?.url ? valueSet.url : valueSet.oid}
         </Typography>
       </Box>
