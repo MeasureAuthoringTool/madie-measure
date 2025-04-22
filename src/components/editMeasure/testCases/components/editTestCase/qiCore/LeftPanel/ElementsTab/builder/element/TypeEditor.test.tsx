@@ -1,5 +1,7 @@
 import * as React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, act } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+
 import TypeEditor from "./TypeEditor";
 import useFhirDefinitionsServiceApi, {
   FhirDefinitionsServiceApi,
@@ -26,6 +28,7 @@ const claimResponseValues = {
     },
   },
 };
+const mockSetFieldValue = jest.fn();
 
 //@ts-ignore
 const mockFormik: FormikContextType<any> = {
@@ -43,7 +46,7 @@ const mockFormik: FormikContextType<any> = {
     };
   },
   handleChange: () => {},
-  setFieldValue: jest.fn(),
+  setFieldValue: mockSetFieldValue,
   setFieldTouched: jest.fn(),
 };
 
@@ -473,6 +476,34 @@ describe("TypeEditor Component", () => {
     expect(
       screen.getByTestId("uri-input-field-DiagnosticReport.presentedForm.uri")
     ).toBeInTheDocument();
+  });
+  it("Should render URI component ( invalid input validation)", async () => {
+    const handleChange = jest.fn();
+
+    render(
+      <FormikProvider value={mockFormik}>
+        <TypeEditor
+          type={`uri`}
+          required={true}
+          resource={null}
+          value={`urn:oid:2.16.840.1.113883.6.238`}
+          onChange={handleChange}
+          structureDefinition={null}
+          label={"DiagnosticReport.presentedForm.uri"}
+          canEdit={true}
+          parentStructureDefinition={null}
+        />
+      </FormikProvider>
+    );
+    const inputField = screen.getByTestId(
+      "uri-input-field-DiagnosticReport.presentedForm.uri"
+    );
+    expect(inputField).toBeInTheDocument();
+    await act(async () => {
+      userEvent.type(inputField, "urn:oid:AA");
+    });
+    expect(handleChange).not.toHaveBeenCalled();
+    expect(mockSetFieldValue).toHaveBeenCalled();
   });
 
   test("Should render URL component", () => {

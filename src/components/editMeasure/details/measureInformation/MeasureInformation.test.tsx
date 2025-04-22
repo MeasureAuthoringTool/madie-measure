@@ -5,8 +5,9 @@ import {
   waitFor,
   screen,
   within,
+  act,
 } from "@testing-library/react";
-import { act } from "react-dom/test-utils";
+
 import MeasureInformation from "./MeasureInformation";
 import useMeasureServiceApi, {
   MeasureServiceApi,
