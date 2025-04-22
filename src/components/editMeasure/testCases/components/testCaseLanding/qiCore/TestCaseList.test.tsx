@@ -775,7 +775,9 @@ describe("TestCaseList component", () => {
     const deleteButton = getByTestId(`delete-test-case-btn-${testCases[0].id}`);
     fireEvent.click(deleteButton);
 
-    expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    });
     expect(
       screen.getByTestId("delete-dialog-continue-button")
     ).toBeInTheDocument();
@@ -814,7 +816,9 @@ describe("TestCaseList component", () => {
     const deleteButton = getByTestId(`delete-test-case-btn-${testCases[0].id}`);
     fireEvent.click(deleteButton);
 
-    expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    });
     const confirmDeleteBtn = screen.getByTestId(
       "delete-dialog-continue-button"
     );
@@ -1289,11 +1293,13 @@ describe("TestCaseList component", () => {
     });
     expect(importBtn).toBeInTheDocument();
     userEvent.click(importBtn);
-    const removedImportDialog = await screen.queryByTestId(
-      "test-case-import-dialog"
-    );
-    expect(removedImportDialog).not.toBeInTheDocument();
-    expect(nextState).toEqual([]);
+    await waitFor(() => {
+      const removedImportDialog = screen.queryByTestId(
+        "test-case-import-dialog"
+      );
+      expect(removedImportDialog).not.toBeInTheDocument();
+      expect(nextState).toEqual([]);
+    });
   });
 
   it("should display import error when createTestCases call fails", async () => {
