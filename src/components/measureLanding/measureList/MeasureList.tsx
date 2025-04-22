@@ -50,6 +50,7 @@ import {
   ExpandIcon,
   CollapseIcon,
 } from "../../../icons/MeasureListTableRightArrowIcons";
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { exportMeasure as downloadMeasureExport } from "../../../utils/exportUtil";
 
 const searchInputStyle = {
@@ -250,6 +251,7 @@ export default function MeasureList(props: {
       header: "Version",
       cell: (info) => (
         <>
+        {console.log(info)}
           <TruncateText
             text={info.row.original.version}
             maxLength={60}
@@ -301,6 +303,115 @@ export default function MeasureList(props: {
       enableSorting: false,
     },
   ];
+  const columnsBehindFlag = [
+    {
+      header: "Measure",
+      cell: (info) => (
+        <TruncateText
+          text={info.row.original.measureName}
+          maxLength={120}
+          dataTestId={`measure-name-${info.row.original.id}`}
+        />
+      ),
+      accessorKey: "measureName",
+      sortingFn: (rowA, rowB) =>
+        customSort(rowA.original.measureName, rowB.original.measureName),
+    },
+    {
+      header: "Version",
+      cell: (info) => (
+        <TruncateText
+          text={info.row.original.version}
+          maxLength={60}
+          dataTestId={`measure-version-${info.row.original.id}`}
+        />
+      ),
+      accessorKey: "version",
+      sortingFn: (rowA, rowB) =>
+        customSort(rowA.original.version, rowB.original.version),
+    },
+    {
+      header: "Status",
+      cell: (info) => (
+        <>
+          {`${info.row.original.actions.measureMetaData?.draft}` === "true" && (
+            <Chip tw="ml-6" className="chip-draft" label="Draft" />
+          )}
+        </>
+      ),
+      accessorKey: "status",
+    },
+    {
+      header: "Model",
+      cell: (info) => (
+        <TruncateText
+          text={info.row.original.model}
+          maxLength={120}
+          dataTestId={`measure-model-${info.row.original.id}`}
+        />
+      ),
+      accessorKey: "model",
+      sortingFn: (rowA, rowB) =>
+        customSort(rowA.original.model, rowB.original.model),
+    },
+    {
+      header: "Shared",
+      cell: (info) => (
+        <div>
+          {info.row.original.actions?.measureSet?.acls?.length > 0 && (
+            <CheckCircleOutlineIcon sx={{ color: '#4CAF50' }} />
+          )}
+        </div>
+      ),
+      accessorKey: "shared",
+    },
+    {
+      header: "CMS ID",
+      cell: (info) => (
+        <TruncateText
+          text={info.row.original.actions?.measureSet?.cmsId || ""}
+          maxLength={60}
+          dataTestId={`measure-cmsId-${info.row.original.id}`}
+        />
+      ),
+      accessorKey: "cmsId",
+    },
+    {
+      header: "Updated",
+      cell: (info) => (
+        <span>
+          {new Date(info.row.original.actions.lastModifiedAt).toLocaleDateString()}
+        </span>
+      ),
+      accessorKey: "lastModifiedAt",
+      sortingFn: (rowA, rowB) =>
+        new Date(rowA.original.actions.lastModifiedAt).getTime() -
+        new Date(rowB.original.actions.lastModifiedAt).getTime(),
+    },
+    {
+      header: "",
+      cell: (info) => (
+        <Button
+          variant="outline-filled"
+          data-testid={`measure-action-${info.row.original.id}`}
+          aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
+          onClick={() =>
+            navigate(`/measures/${info.row.original.id}/edit/details`)
+          }
+          role="button"
+        >
+          {checkUserCanEdit(
+            info.row.original.actions?.measureSet?.owner,
+            info.row.original.actions?.measureSet?.acls
+          ) && info.row.original.actions.measureMetaData?.draft
+            ? "Edit"
+            : "View"}
+        </Button>
+      ),
+      accessorKey: "actions",
+      enableSorting: false,
+    },
+  ];
 
   const columns = useMemo<ColumnDef<TCRow>[]>(() => {
     const t = [
@@ -322,7 +433,7 @@ export default function MeasureList(props: {
           );
         },
       },
-      ...columnsToBeAdded,
+      ...(featureFlags?.MeasureSearch ? columnsBehindFlag : columnsToBeAdded),
     ];
     if (featureFlags?.MeasureSearch) {
       t.push({
@@ -402,7 +513,7 @@ export default function MeasureList(props: {
           );
         },
       },
-      ...columnsToBeAdded,
+      ...(featureFlags?.MeasureSearch ? columnsBehindFlag : columnsToBeAdded),
       {
         header: "",
         cell: (info) => <></>,
@@ -915,7 +1026,6 @@ export default function MeasureList(props: {
           />
         </div>
       </div>
-
       <table
         tw="min-w-full"
         data-testid="measure-list-tbl"
@@ -1018,6 +1128,7 @@ export default function MeasureList(props: {
             </React.Fragment>
           ))}
         </tbody>
+        </table>
         <Toast
           toastKey="measure-action-toast"
           aria-live="polite"
@@ -1092,7 +1203,7 @@ export default function MeasureList(props: {
           measureId={targetMeasure?.current?.id}
           exportMeasure={exportMeasure}
         />
-      </table>
+      
     </div>
   );
 }
