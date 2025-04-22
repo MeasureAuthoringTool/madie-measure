@@ -27,6 +27,7 @@ import ServiceContext, { ServiceConfig } from "../../../api/ServiceContext";
 import { Simulate } from "react-dom/test-utils";
 // @ts-ignore
 import { useFeatureFlags, checkUserCanEdit } from "@madie/madie-util";
+import { AxiosError, AxiosResponse } from "axios";
 
 const EXPORT_FAILURE_MESSAGE =
   "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists.";
@@ -564,19 +565,7 @@ describe("Measure List component", () => {
   });
 
   it("Should display invalid Cql library name dialog and close on cancel.", async () => {
-    const error = {
-      response: {
-        status: 403,
-        request: {
-          responseText: JSON.stringify({
-            message: "User is unauthorized to create a version",
-          }),
-        },
-      },
-    };
     const useMeasureServiceMockRejected = {
-      createVersion: jest.fn().mockRejectedValue(error),
-      checkValidVersion: jest.fn().mockRejectedValue(error),
       checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
       fetchMeasure: jest.fn().mockResolvedValueOnce(badCqlLibraryName),
     } as unknown as MeasureServiceApi;
@@ -640,19 +629,22 @@ describe("Measure List component", () => {
   });
 
   it("should display unauthorized error while creating a version of a measure", async () => {
-    const error = {
+    const axiosError: AxiosError = {
       response: {
         status: 403,
-        request: {
-          responseText: JSON.stringify({
-            message: "User is unauthorized to create a version",
-          }),
+        data: {
+          timestamp: "2025-04-18T18:06:17.711+00:00",
+          message:
+            "User userId is not authorized for Measure with ID 680278565a582d3542b71eba",
+          status: 403,
+          error: "Forbidden",
         },
-      },
-    };
+      } as AxiosResponse,
+    } as AxiosError;
+
     const useMeasureServiceMockRejected = {
-      createVersion: jest.fn().mockRejectedValue(error),
-      checkValidVersion: jest.fn().mockRejectedValue(error),
+      createVersion: jest.fn().mockRejectedValue(axiosError),
+      checkValidVersion: jest.fn().mockRejectedValue(axiosError),
       checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
       fetchMeasure: jest.fn().mockResolvedValueOnce(measures[0]),
     } as unknown as MeasureServiceApi;
@@ -709,25 +701,32 @@ describe("Measure List component", () => {
       expect(getByTestId("error-toast")).toHaveTextContent(
         "User is unauthorized to create a version"
       );
+
+      expect(screen.getByTestId("version-helper-text")).toHaveTextContent(
+        "An unexpected error has occurred. Please contact the help desk."
+      );
     });
     unmount();
   });
 
-  it("should display bad request while creating a version of a measure", async () => {
-    const error = {
+  it("should display bad request error while creating a version of a measure in draft state", async () => {
+    const axiosError: AxiosError = {
       response: {
         status: 400,
-        request: {
-          responseText: JSON.stringify({
-            message: "Requested measure cannot be versioned",
-          }),
+        data: {
+          timestamp: "2025-04-18T18:06:17.711+00:00",
+          message:
+            "User userId cannot version Measure with ID 680278565a582d3542b71eba. Measure is not in a draft state.",
+          status: 400,
+          error: "Bad Request",
         },
-      },
-    };
+      } as AxiosResponse,
+    } as AxiosError;
+
     const useMeasureServiceMockRejected = {
-      createVersion: jest.fn().mockRejectedValue(error),
+      createVersion: jest.fn().mockRejectedValue(axiosError),
       checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
-      checkValidVersion: jest.fn().mockRejectedValue(error),
+      checkValidVersion: jest.fn().mockRejectedValue(axiosError),
       fetchMeasure: jest.fn().mockResolvedValueOnce(measures[0]),
     } as unknown as MeasureServiceApi;
 
@@ -783,26 +782,275 @@ describe("Measure List component", () => {
       expect(getByTestId("error-toast")).toHaveTextContent(
         "Requested measure cannot be versioned"
       );
+
+      expect(screen.getByTestId("version-helper-text")).toHaveTextContent(
+        "Please ensure the measure is first in draft state before versioning this measure."
+      );
     });
     unmount();
   });
 
-  it("should display other error while creating a version of a measure", async () => {
-    const error = {
+  it("should display bad request error while creating a version of a measure with no CQL", async () => {
+    const axiosError: AxiosError = {
+      response: {
+        status: 400,
+        data: {
+          timestamp: "2025-04-18T18:06:17.711+00:00",
+          message:
+            "User userId cannot version Measure with ID 680278565a582d3542b71eba. Measure has no CQL.",
+          status: 400,
+          error: "Bad Request",
+        },
+      } as AxiosResponse,
+    } as AxiosError;
+
+    const useMeasureServiceMockRejected = {
+      createVersion: jest.fn().mockRejectedValue(axiosError),
+      checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
+      checkValidVersion: jest.fn().mockRejectedValue(axiosError),
+      fetchMeasure: jest.fn().mockResolvedValueOnce(measures[0]),
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockRejected;
+    });
+
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    expect(checkBoxes.length).toBe(5);
+    userEvent.click(checkBoxes[1]);
+    const createVersionButton = getByTestId("version-action-btn");
+    expect(createVersionButton).toBeInTheDocument();
+    userEvent.click(createVersionButton);
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+
+    const typeInput = screen.getByTestId(
+      "version-type-input"
+    ) as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = getByTestId(
+      "confirm-version-input"
+    ) as HTMLInputElement;
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
+
+    await waitFor(() => {
+      userEvent.click(getByTestId("create-version-continue-button"));
+      expect(getByTestId("error-toast")).toHaveTextContent(
+        "Requested measure cannot be versioned"
+      );
+
+      expect(screen.getByTestId("version-helper-text")).toHaveTextContent(
+        "Please include valid CQL in the CQL editor to version before versioning this measure."
+      );
+    });
+    unmount();
+  });
+
+  it("should display bad request error while creating a version of a measure with CQL with errors", async () => {
+    const axiosError: AxiosError = {
+      response: {
+        status: 400,
+        data: {
+          timestamp: "2025-04-18T18:06:17.711+00:00",
+          message:
+            "User userId cannot version Measure with ID 680278565a582d3542b71eba. Measure has CQL errors.",
+          status: 400,
+          error: "Bad Request",
+        },
+      } as AxiosResponse,
+    } as AxiosError;
+
+    const useMeasureServiceMockRejected = {
+      createVersion: jest.fn().mockRejectedValue(axiosError),
+      checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
+      checkValidVersion: jest.fn().mockRejectedValue(axiosError),
+      fetchMeasure: jest.fn().mockResolvedValueOnce(measures[0]),
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockRejected;
+    });
+
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    expect(checkBoxes.length).toBe(5);
+    userEvent.click(checkBoxes[1]);
+    const createVersionButton = getByTestId("version-action-btn");
+    expect(createVersionButton).toBeInTheDocument();
+    userEvent.click(createVersionButton);
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+
+    const typeInput = screen.getByTestId(
+      "version-type-input"
+    ) as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = getByTestId(
+      "confirm-version-input"
+    ) as HTMLInputElement;
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
+
+    await waitFor(() => {
+      userEvent.click(getByTestId("create-version-continue-button"));
+      expect(getByTestId("error-toast")).toHaveTextContent(
+        "Requested measure cannot be versioned"
+      );
+
+      expect(screen.getByTestId("version-helper-text")).toHaveTextContent(
+        "Please include valid CQL in the CQL editor to version before versioning this measure."
+      );
+    });
+    unmount();
+  });
+
+  it("should display bad request error while creating a version of a measure with no population criteria", async () => {
+    const axiosError: AxiosError = {
+      response: {
+        status: 400,
+        data: {
+          timestamp: "2025-04-18T18:06:17.711+00:00",
+          message:
+            "User userId cannot version Measure with ID 680278565a582d3542b71eba. Measure does not have at least one Population Criteria.",
+          status: 400,
+          error: "Bad Request",
+        },
+      } as AxiosResponse,
+    } as AxiosError;
+
+    const useMeasureServiceMockRejected = {
+      createVersion: jest.fn().mockRejectedValue(axiosError),
+      checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
+      checkValidVersion: jest.fn().mockRejectedValue(axiosError),
+      fetchMeasure: jest.fn().mockResolvedValueOnce(measures[0]),
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockRejected;
+    });
+
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    expect(checkBoxes.length).toBe(5);
+    userEvent.click(checkBoxes[1]);
+    const createVersionButton = getByTestId("version-action-btn");
+    expect(createVersionButton).toBeInTheDocument();
+    userEvent.click(createVersionButton);
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+
+    const typeInput = screen.getByTestId(
+      "version-type-input"
+    ) as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = getByTestId(
+      "confirm-version-input"
+    ) as HTMLInputElement;
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
+
+    await waitFor(() => {
+      userEvent.click(getByTestId("create-version-continue-button"));
+      expect(getByTestId("error-toast")).toHaveTextContent(
+        "Requested measure cannot be versioned"
+      );
+
+      expect(screen.getByTestId("version-helper-text")).toHaveTextContent(
+        "Please set up at least one Population Criteria before versioning this measure."
+      );
+    });
+    unmount();
+  });
+
+  it("should display server error message if returned while creating a version of a measure", async () => {
+    const axiosError: AxiosError = {
       response: {
         status: 500,
-        message: "server error",
-        request: {
-          responseText: JSON.stringify({
-            message: "Requested measure cannot be versioned",
-          }),
+        data: {
+          timestamp: "2025-04-18T18:06:17.711+00:00",
+          message:
+            "User userId cannot version Measure with ID 680278565a582d3542b71eba. A server related error occurred.",
+          status: 500,
+          error: "Internal Server Error",
         },
-      },
-    };
+      } as AxiosResponse,
+    } as AxiosError;
+
     const useMeasureServiceMockRejected = {
-      createVersion: jest.fn().mockRejectedValue(error),
+      createVersion: jest.fn().mockRejectedValue(axiosError),
       checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
-      checkValidVersion: jest.fn().mockRejectedValue(error),
+      checkValidVersion: jest.fn().mockRejectedValue(axiosError),
       fetchMeasure: jest.fn().mockResolvedValueOnce(measures[0]),
     } as unknown as MeasureServiceApi;
 
@@ -854,7 +1102,13 @@ describe("Measure List component", () => {
     expect(confirmVersionNode.value).toBe("1.0.000");
     await waitFor(() => {
       userEvent.click(getByTestId("create-version-continue-button"));
-      expect(getByTestId("error-toast")).toHaveTextContent("server error");
+      expect(getByTestId("error-toast")).toHaveTextContent(
+        "User userId cannot version Measure with ID 680278565a582d3542b71eba. A server related error occurred."
+      );
+
+      expect(screen.getByTestId("version-helper-text")).toHaveTextContent(
+        "An unexpected error has occurred. Please contact the help desk."
+      );
     });
     unmount();
   });
