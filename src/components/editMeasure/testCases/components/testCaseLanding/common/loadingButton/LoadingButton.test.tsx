@@ -1,5 +1,5 @@
 import * as React from "react";
-import LoadingActionButton from "./LoadingActionButton";
+import LoadingButton from "./LoadingButton";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -8,7 +8,7 @@ const onRunTests = jest.fn();
 describe("LoadingActionButton", () => {
   it("RunTestsButton should be enabled with undefined shouldDisableRunTestsButton flag", () => {
     render(
-      <LoadingActionButton
+      <LoadingButton
         hasErrors={false}
         isExecutionContextReady={true}
         onClick={onRunTests}
@@ -22,7 +22,7 @@ describe("LoadingActionButton", () => {
 
   it("RunTestsButton should be enabled with no error, and shouldDisableRunTestsButton flag is false", () => {
     render(
-      <LoadingActionButton
+      <LoadingButton
         hasErrors={false}
         isExecutionContextReady={true}
         onClick={onRunTests}
@@ -37,7 +37,7 @@ describe("LoadingActionButton", () => {
 
   it("RunTestsButton should be disabled with error", () => {
     render(
-      <LoadingActionButton
+      <LoadingButton
         hasErrors={true}
         isExecutionContextReady={true}
         onClick={onRunTests}
@@ -52,7 +52,7 @@ describe("LoadingActionButton", () => {
 
   it("test click RunTestsButton execution is loading", () => {
     render(
-      <LoadingActionButton
+      <LoadingButton
         hasErrors={false}
         isExecutionContextReady={true}
         onClick={onRunTests}

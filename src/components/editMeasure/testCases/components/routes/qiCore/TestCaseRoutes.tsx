@@ -99,6 +99,7 @@ const TestCaseRoutes = () => {
   useEffect(() => {
     if (measureBundle && measure) {
       setErrors(() => []);
+      setContextFailure(false);
 
       terminologyService.current
         .getValueSetsExpansionForBundle(

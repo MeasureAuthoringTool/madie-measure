@@ -13,7 +13,14 @@ interface PropTypes {
   onClick: () => void;
   canEdit: boolean;
 }
-
+const iconStyles = {
+  "&.Mui-disabled": {
+    color: "#8C8C8C !important",
+  },
+  "&.MuiIconButton-root": {
+    color: red[700],
+  },
+};
 export const NOTHING_SELECTED = "Select measure to delete";
 export const DEL_MEASURE = "Delete measure";
 
@@ -53,10 +60,9 @@ export default function DeleteAction(props: PropTypes) {
           onClick={() => props.onClick()}
           disabled={disableDeleteBtn}
           data-testid="delete-action-btn"
+          sx={iconStyles}
         >
-          <DeleteOutlinedIcon
-            sx={disableDeleteBtn ? { color: grey[500] } : { color: red[500] }}
-          />
+          <DeleteOutlinedIcon />
         </IconButton>
       </span>
     </Tooltip>
