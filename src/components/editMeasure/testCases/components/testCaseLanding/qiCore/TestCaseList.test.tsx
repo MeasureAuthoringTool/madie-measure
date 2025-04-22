@@ -2176,8 +2176,8 @@ describe("TestCaseList component", () => {
         screen.getByTestId("delete-dialog-cancel-button")
       ).toBeInTheDocument();
 
-      console.log("Maybe this is causing the error"); //eslint-disable-line
       userEvent.click(confirmDelete);
+      console.log("Maybe this is causing the error"); //eslint-disable-line
       const toastMessage = await screen.findByTestId("test-case-list-success");
       expect(toastMessage).toHaveTextContent("Test cases successfully deleted");
       expect(screen.queryByTestId("delete-dialog-body")).toBeNull();
