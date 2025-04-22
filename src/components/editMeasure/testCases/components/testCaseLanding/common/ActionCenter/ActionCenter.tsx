@@ -40,6 +40,24 @@ interface ActionCenterProps {
   executeAllTestCases?: boolean;
 }
 
+const deleteStyles = {
+  "&.Mui-disabled": {
+    color: "#8C8C8C !important",
+  },
+  "&.MuiIconButton-root": {
+    color: red[700],
+  },
+};
+
+const normalStyles = {
+  "&.Mui-disabled": {
+    color: "#8C8C8C !important",
+  },
+  "&.MuiIconButton-root": {
+    color: "#0073C8 ",
+  },
+};
+
 const filterByOptions = ["Case #", "Status", "Group", "Title", "Description"];
 
 export default function ActionCenter(props: ActionCenterProps) {
@@ -285,15 +303,9 @@ export default function ActionCenter(props: ActionCenterProps) {
                       }}
                       disabled={disableDeleteBtn}
                       data-testid="delete-action-btn"
+                      sx={deleteStyles}
                     >
-                      <DeleteOutlinedIcon
-                        data-testid={`delete-action-icon`}
-                        sx={
-                          disableDeleteBtn
-                            ? { color: grey[500] }
-                            : { color: red[500] }
-                        }
-                      />
+                      <DeleteOutlinedIcon data-testid={`delete-action-icon`} />
                     </IconButton>
                   </span>
                 </Tooltip>
@@ -315,14 +327,10 @@ export default function ActionCenter(props: ActionCenterProps) {
                       }}
                       disabled={disableShiftDatesBtn}
                       data-testid="shift-test-case-dates-action-btn"
+                      sx={normalStyles}
                     >
                       <EditCalendarOutlinedIcon
                         data-testid={`shift-test-case-dates-action-icon`}
-                        sx={
-                          disableShiftDatesBtn
-                            ? { color: grey[500] }
-                            : { color: blue[700] }
-                        }
                       />
                     </IconButton>
                   </span>
@@ -345,14 +353,11 @@ export default function ActionCenter(props: ActionCenterProps) {
                       }}
                       disabled={disableCloneBtn}
                       data-testid="clone-action-btn"
+                      sx={normalStyles}
                     >
                       <LibraryAddIcon
                         data-testid={`clone-action-icon`}
-                        sx={
-                          disableCloneBtn
-                            ? { color: grey[500] }
-                            : { color: blue[700] }
-                        }
+                        sx={normalStyles}
                       />
                     </IconButton>
                   </span>
@@ -378,16 +383,12 @@ export default function ActionCenter(props: ActionCenterProps) {
                     }}
                     disabled={disableCopyBtn}
                     data-testid="copy-action-btn"
+                    sx={normalStyles}
                   >
                     <Icon
                       icon="fluent:share-screen-start-24-regular"
                       data-testid={`copy-action-icon`}
                       rotate={45}
-                      style={
-                        disableCopyBtn
-                          ? { color: grey[500] }
-                          : { color: blue[700] }
-                      }
                     />
                   </IconButton>
                 </span>
@@ -412,6 +413,7 @@ export default function ActionCenter(props: ActionCenterProps) {
                 <IconButton
                   disabled={disableExportBtn}
                   data-testid="export-action-btn"
+                  sx={normalStyles}
                 >
                   <FileUploadOutlinedIcon
                     data-testid={`export-action-icon`}
@@ -420,11 +422,6 @@ export default function ActionCenter(props: ActionCenterProps) {
                       setAnchorEl(event.currentTarget);
                       setExportOptionsOpen(true);
                     }}
-                    sx={
-                      disableExportBtn
-                        ? { color: grey[500] }
-                        : { color: blue[700] }
-                    }
                   />
                   {!isQDM && (
                     <Popover
