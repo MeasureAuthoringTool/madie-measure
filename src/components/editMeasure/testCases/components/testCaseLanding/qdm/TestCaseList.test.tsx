@@ -3226,7 +3226,9 @@ describe("TestCaseList component", () => {
     expect(importBtn).toBeInTheDocument();
     userEvent.click(importBtn);
     await waitFor(() => {
-      const removedImportDialog = screen.queryByTestId("test-case-import-dialog");
+      const removedImportDialog = screen.queryByTestId(
+        "test-case-import-dialog"
+      );
       expect(removedImportDialog).not.toBeInTheDocument();
       expect(nextState).toEqual([]);
     });
