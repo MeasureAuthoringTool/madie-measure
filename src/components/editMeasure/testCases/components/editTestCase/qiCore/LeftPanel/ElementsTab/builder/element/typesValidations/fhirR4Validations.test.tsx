@@ -267,7 +267,7 @@ describe("OID & UUID Validation Functions", () => {
   });
 
   it("succeeds when OID is not present && is not required", () => {
-    const requiredString = getValidation("uri", false);
+    const nonRequiredString = getValidation("uri", false);
     expect(requiredString).toBeInstanceOf(Yup.StringSchema);
     expect(requiredString.validate("")).resolves.toBe("");
   });
