@@ -551,6 +551,11 @@ describe("TestCaseList component", () => {
       .fn()
       .mockResolvedValue(buildMeasureBundle(mockMeasure)),
   } as unknown as MeasureServiceApi;
+
+  beforeAll(() => {
+    jest.clearAllMocks();
+  });
+
   beforeEach(() => {
     calculationServiceMock.mockImplementation(() => {
       return calculationServiceMockResolved;
@@ -2143,9 +2148,6 @@ describe("TestCaseList component", () => {
   });
 
   describe("TestCaseList component with deleteMultipleTestCases", () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
     it("should delete selected test cases if the flag is true", async () => {
       useTestCaseServiceMock.mockImplementation(() => {
         return {
