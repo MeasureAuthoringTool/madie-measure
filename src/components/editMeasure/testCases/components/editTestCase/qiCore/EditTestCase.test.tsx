@@ -1,6 +1,7 @@
 import * as React from "react";
 import { ChangeEvent } from "react";
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -31,7 +32,6 @@ import {
   TestCase,
 } from "@madie/madie-models";
 import TestCaseRoutes from "../../routes/qiCore/TestCaseRoutes";
-import { act } from "react-dom/test-utils";
 import { PopulationEpisodeResult } from "../../../api/CalculationService";
 import { simpleMeasureFixture } from "../../createTestCase/__mocks__/simpleMeasureFixture";
 import { testCaseFixture } from "../../createTestCase/__mocks__/testCaseFixture";
