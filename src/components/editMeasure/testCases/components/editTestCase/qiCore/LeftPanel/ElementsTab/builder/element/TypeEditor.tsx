@@ -25,7 +25,7 @@ import {
   getRequired,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import CodingComponent from "./types/CodingComponent";
-import {  useRequiredFields } from "./RequiredFieldsContext";
+import { useRequiredFields } from "./RequiredFieldsContext";
 
 // onChange is being deprecated as no updates to the resource are tracked.
 // Changes directly to the json should be done with a disaptch, this propagates downstream changes in formik.
@@ -44,26 +44,60 @@ const TypeEditor = ({
   const [childTypeDefs, setChildTypeDefs] = useState([]);
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   required = getRequired(requiredFields, label);
-
+  // console.log('~typeeditorlabel', label)
   useEffect(() => {
+    // Its not a dataType that is a primitive
     if (!isComponentDataType(type)) {
       if (type) {
+        // we look up it's children by type
         fhirDefinitionsService.current.getResourceTree(type).then((def) => {
+          // console.log('~type', type)
           if (def) {
+            console.log('~label', label, '~type', type, '~def', def)
+            // get the first set of children from the definition
             const elements = getTopLevelElements(def);
-            const updatedElements = updateChildrenPaths(
-              structureDefinition,
-              elements
-            );
+            // console.log('~elements', elements)
+            // takes all first children, splices their path like .name to the end of structure definition.id to make a full path
             const index = getIndexFromPath(label);
-            const updatedMappedElements = updatedElements.map((el) => {
-              if (index){
-                console.log('label', label, mergePathWithIndex(label, el.id))
-              }
+            // console.log('~index', index)
+            let updatedElements = updateChildrenPaths(structureDefinition, elements);
+            // console.log('~updated elements', updatedElements)
+            if (index){
+              // console.log('~index', index, label, structureDefinition, elements, def)
+              updatedElements = updatedElements.map((el) => {
               el.id = index ? mergePathWithIndex(label, el.id) : el.id;
+              el.id = mergePathWithIndex(label, el.id)
               return el;
             });
-            setChildTypeDefs(updatedMappedElements);
+            }
+            // let updatedElements;
+            // if (index){
+            //   console.log('~index', index, label, structureDefinition, elements, def)
+            //   updatedElements = elements.map((el) => {
+            //   el.id = index ? mergePathWithIndex(label, el.id) : el.id;
+            //   el.id = mergePathWithIndex(label, el.id)
+            //   return el;
+            // });
+            // }
+            // if (!index){
+            //   updatedElements = updateChildrenPaths(
+            //     structureDefinition,
+            //     elements,
+            //   );
+            // }
+            // console.log('~updatedChildrenPaths', label, updatedElements);
+            // let updatedMappedElements = [];
+            // is it a multiple cardinality attribute?
+            // it's not use our normal splicing
+            
+
+            // if (label === "ClaimResponse.addItem.detail") {
+            //   console.log("updatedMappedElements", updatedMappedElements);
+            // }
+            // console.log('~mappedChildElements', updatedMappedElements)
+            setChildTypeDefs(updatedElements);
+            // setChildTypeDefs(updatedElements);
+
           }
         });
       }
@@ -97,7 +131,7 @@ const TypeEditor = ({
               error={getNestedProperty(formik.errors, label)}
               fieldRequired={required}
               {...formik.getFieldProps(label)}
-              />
+            />
           </Box>
         );
       case "markdown":
@@ -267,29 +301,30 @@ const TypeEditor = ({
             fieldRequired={required}
           />
         );
-      // case "Extension":
-      //   return _.isEmpty(structureDefinition?.type?.[0]?.profile) ? (
-      //     <ExtensionComponent
-      //       canEdit={canEdit}
-      //       // onChange={onChange}
-      //       onChange={() =>{}}
-      //       fhirResource={resource}
-      //       elementDefinition={structureDefinition}
-      //       parentStructureDefinition={parentStructureDefinition}
-      //     />
-      //   ) : (
-      //     <ProfiledExtensionComponent
-      //       label={label}
-      //       canEdit={canEdit}
-      //       structureDefinition={structureDefinition}
-      //       fieldRequired={false}
-      //       resource={resource}
-      //     />
-      //   );
+      case "Extension":
+      // return _.isEmpty(structureDefinition?.type?.[0]?.profile) ? (
+      //   <ExtensionComponent
+      //     canEdit={canEdit}
+      //     // onChange={onChange}
+      //     onChange={() =>{}}
+      //     fhirResource={resource}
+      //     elementDefinition={structureDefinition}
+      //     parentStructureDefinition={parentStructureDefinition}
+      //   />
+      // ) : (
+      //   <ProfiledExtensionComponent
+      //     label={label}
+      //     canEdit={canEdit}
+      //     structureDefinition={structureDefinition}
+      //     fieldRequired={false}
+      //     resource={resource}
+      //   />
+      // );
       default:
         return <div>Unsupported Type [{type}]</div>;
     }
   } else if (!_.isEmpty(childTypeDefs)) {
+    console.log('childTypdEfs', childTypeDefs)
     //  If we have childTypeDefs, we need to check to make weather or not there's an index supplied so we can attach it to the label
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>

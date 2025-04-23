@@ -10,18 +10,14 @@ import {
   getValueByPath,
   insertIndexIntoPath,
   getIndexFromPath,
+  mapElementsByPath,
+  getAllChildren,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import { useFormikContext } from "formik";
 import ElementEditorActionCenter from "./elementEditorActionCenter/ElementEditorActionCenter";
+// import RenderTypeEditors from "./RenderTypeEditors";
 
-// multiple cardinality check
-const Element = ({
-  requiredFields,
-  element,
-  label,
-  resource,
-  canEdit,
-}) => {
+const Element = ({ element, label, resource, canEdit }) => {
   return (
     <Box>
       <TypeEditor
@@ -39,20 +35,22 @@ const Element = ({
 
 // apply button needs to only be put at the bottom of the form
 const ElementEditorChildren = ({
-  // requiredFields,
+  mappedSnapshotElements = null,
   rootDefinition = null, // are we at the root of the tree? if so render it as such
-  allChildren,
+  selectedResource,
   currentDepth,
   resource,
   handleChange, // we don't want to use this anymore since it's going to be detached from state.
   canEdit,
-  fhirDefinitionsService, // We probably shouldn't prop drill this. since it's going to be heavy. This might be my problem.
   resourcePath,
   handleIndividualElementApplyButtonClick,
   deleteElement,
+  passedLabel = null
 }) => {
   currentDepth = currentDepth + 1;
   const childrenToRender = [];
+  const currentPath = rootDefinition?.path;
+  const allChildren = getAllChildren(selectedResource, currentPath);
   const childrenLeftOver = [];
 
   allChildren.forEach((child) => {
@@ -67,22 +65,28 @@ const ElementEditorChildren = ({
     const path = childrenToRender[0].path.split(".");
     heading = path[currentDepth - 2];
   }
+  const newAllChildren = childrenToRender.filter(
+    (child) => child.type?.[0]?.code === "BackboneElement"
+  );
   const { values } = useFormikContext();
-
-  // if we're at the top level we want to at minimum make sure we render our current level as opposed to all the sub levels.
-  if (rootDefinition) {
+  let numberOfElements = 0;
+  const multipleCardinality = rootDefinition?.max === "*";
+  const type = rootDefinition?.type?.[0];
+  const required = +rootDefinition.min > 0;
+  const elemPath = stripResourcePath(resourcePath, rootDefinition.path);
+  let elementValue = _.get(resource, elemPath);
+  if (multipleCardinality) {
     const label = rootDefinition.id;
-    let numberOfElements = 0;
-    const multipleCardinality = rootDefinition?.max === "*";
-    if (multipleCardinality) {
-      numberOfElements = getValueByPath(values, label)?.length || 1;
-    }
-    const type = rootDefinition?.type?.[0];
-    const required = +rootDefinition.min > 0;
-    const elemPath = stripResourcePath(resourcePath, rootDefinition.path);
-    let elementValue = _.get(resource, elemPath);
-    // 
-    console.log('children to render', childrenToRender)
+    numberOfElements = getValueByPath(values, label)?.length || 1;
+  }
+  console.log("rootDefinition", rootDefinition);
+  // console.log("mappedSnapshotElements", mappedSnapshotElements);
+  function getLastPathPart(path) {
+    const parts = path.split('.');
+    return parts[parts.length - 1];
+  }
+  if (currentDepth === 3) {
+    // const updatedPath = 
     return (
       <div
         className="test-case-tab-heading"
@@ -108,105 +112,91 @@ const ElementEditorChildren = ({
             />
           </div>
         </div>
-        {/* given root definition we do a base level render */}
-        {/* Render the root attribute, or list of attributes located at the root*/}
-        {/* This seems to remove the need for children to render Type Editor is smart enough to get the children on it's own if we give it a root. */}
+        {/* only worked at root */}
         {multipleCardinality ? (
           Array.from({ length: numberOfElements }).map((_, i) => (
             <>
+              {/*we hit the root, and if there's children we render under it*/}
+              <TypeEditor
+                key={i}
+                type={type.code}
+                resource={resource}
+                required={required}
+                structureDefinition={rootDefinition}
+                parentStructureDefinition={null}
+                canEdit={canEdit}
+                // label={`${rootDefinition?.id}[${i}]`}
+                label={passedLabel ? `${passedLabel}[${i}]` : `${rootDefinition?.id}[${i}]`}
+
+                // label={}
+              />
+              {/* {console.log('newAllChildren', newAllChildren, passedLabel, rootDefinition)} */}
+              
+              {/* item = "ClaimResponse.addItem.detail" */}
+              {/* needs to be ClaimResponse[0].addItem.detail[0] */}
+              {/* {console.log(newAllChildren)} */}
+              {/* here we need to manipulate the path coming in For rootDefinition.id = ClaimResponse.addItem.detail
+              child -> ClaimResponse.addItem[index].detail[anotherIndex]  */}
+              {/* full path and index would be -> ClaimResponse.addItem[index] + detail (last part) index[] */}
+              {newAllChildren &&
+                newAllChildren.map((item, index) => (
+                  <ElementEditorChildren
+                    selectedResource={selectedResource}
+                    rootDefinition={item}
+                    resourcePath={resourcePath}
+                    currentDepth={currentDepth}
+                    resource={resource}
+                    handleChange={handleChange}
+                    canEdit={canEdit}
+                    handleIndividualElementApplyButtonClick={
+                      handleIndividualElementApplyButtonClick
+                    }
+                    deleteElement
+                    passedLabel={`${rootDefinition?.id}[${i}].${getLastPathPart(item.id)}[${index}]`}
+                    // passedLabel={`${item?.id}[${i}]`}
+                    // passedLabel={`${rootDefinition?.id}[${i}]${getLastPathPart(item.id)}[${index}]`}
+                  />
+                ))}
+            </>
+          ))
+        ) : (
+          <>
+          {console.log('~~~', rootDefinition.id, passedLabel)}
+            {/*no multiple cardinality, just render a root typeEditor*/}
             <TypeEditor
-              key={i}
               type={type.code}
               resource={resource}
               required={required}
               structureDefinition={rootDefinition}
               parentStructureDefinition={null}
               canEdit={canEdit}
-              label={`${rootDefinition?.id}[${i}]`}
+              label={passedLabel ? passedLabel : rootDefinition.id}
             />
-            end of mutliple cardinality typeEditorARray
-            </>
-          ))
-        ) : (
-          <>
-          <TypeEditor
-            type={type.code}
-            resource={resource}
-            required={required}
-            structureDefinition={rootDefinition}
-            parentStructureDefinition={null}
-            canEdit={canEdit}
-            label={rootDefinition?.id}
-          />
-            Endof a single typeEditorARray at root
           </>
         )}
-
-        {/* childrenToRender in one case will be a collection of nodes that are the the next sequential path
-        given something like Patient.identifier as the rootDefinition, These would be Patient.identifier.id, Patient.identifier.value, Patient.identifier.system, etc
-        Therefore with multiple cardinality, we want to render each list of children once for every Patient.identifier element that exists in formik.values
-        */}
-
-        {/* we want to a second map here in instances where we have multiple elements. */}
-        {/* {childrenToRender.map((child) => {
-          const label = child.id;
-          const multipleCardinality = rootDefinition?.max === "*";
-          if (multipleCardinality) {
-            numberOfElements = getValueByPath(values, label)?.length || 1;
-          }
-          const type = rootDefinition?.type?.[0];
-          const required = +rootDefinition.min > 0;
-          const elemPath = stripResourcePath(resourcePath, rootDefinition.path);
-          let elementValue = _.get(resource, elemPath); 
-          console.log('children to render', childrenToRender)
-          return (
-            <>
-              {Array.from({ length: numberOfElements }).map((_, index) => {
-                const pathBefore = removeLastPathSegment(label);
-                const labelWithIndex = insertIndexIntoPath(label, pathBefore, index);
-                console.log("labelWithIndex", labelWithIndex);
-                return (
-                  <Element
-                    element={child}
-                    label={labelWithIndex}
-                    resource={resource}
-                    canEdit={canEdit}
-                    mappedSnapshotElements={mappedSnapshotElements}
-                  />
-                );
-              })}
-            </>
-          );
-        })} */}
-        {/* item.detail vs item.adjudication are 2 separate trees, we need to split them into separate children trees.
-          how do we do that?
-          We group them based on a normalizedPrefix.
-        */}
-        {console.log('chidlrenLEftOVer', childrenLeftOver)}
-        {/* I think this was done very wrong initially and coded with hate. */}
-        {/* {transformArrays(childrenLeftOver, currentDepth).length > 0 &&
-          transformArrays(childrenLeftOver, currentDepth).map((item, index) => (
-            <ElementEditorChildren
-              rootDefinition={null}
-              fhirDefinitionsService={fhirDefinitionsService}
-              resourcePath={resourcePath}
-              allChildren={item}
-              currentDepth={currentDepth}
-              resource={resource}
-              handleChange={handleChange}
-              canEdit={canEdit}
-              handleIndividualElementApplyButtonClick={
-                handleIndividualElementApplyButtonClick
-              }
-              deleteElement
-              mappedSnapshotElements={mappedSnapshotElements}
-            />
-          ))} */}
       </div>
     );
   }
-  // should we not be at the top root
-  else if (childrenToRender.length > 0) {
+
+  // should we not be at the top root, we need to know weather the parent was a multiple cardinality element to append tot he label.
+  else if (rootDefinition) {
+    console.log('base case? ', rootDefinition, passedLabel)
+    function mergePathWithLabel(passedLabel, label) {
+      const passedLabelParts = passedLabel.split('.');
+      const labelParts = label.split('.');
+    
+      // Replace the parts of label up to the same length as passedLabelParts
+      const mergedParts = [...passedLabelParts, ...labelParts.slice(passedLabelParts.length)];
+    
+      return mergedParts.join('.');
+    }
+    let label = rootDefinition.id
+    // if (passedLabel){
+    //   // const resultLabel = appendSubPath(passedLabel, rootDefinition.id);
+    //   // console.log(' label =', label, ' passedLabel = ', passedLabel, ' result=', mergePathWithLabel(passedLabel, rootDefinition.id));
+    //   label = mergePathWithLabel(passedLabel, rootDefinition.id);
+    //   console.log('appended label', label)
+    // }
     return (
       <ElementSection
         title={_.startCase(heading)}
@@ -217,24 +207,25 @@ const ElementEditorChildren = ({
               paddingLeft: "16px",
             }}
           >
-            {/* We want to add a label for path similarity. here it would be ClaimResponse.item */}
-            {/* {childrenToRender.map((child) => (
-              <Element
-                mappedSnapshotElements={mappedSnapshotElements}
-                element={child}
-                label={child?.id}
+              {multipleCardinality ? (
+          Array.from({ length: numberOfElements }).map((_, i) => (
+            <>
+              <TypeEditor
+                key={i}
+                type={type.code}
                 resource={resource}
+                required={required}
+                structureDefinition={rootDefinition}
+                parentStructureDefinition={null}
                 canEdit={canEdit}
-                />
-            ))} */}
-            {/* {transformArrays(childrenLeftOver, currentDepth).length > 0 &&
-              transformArrays(childrenLeftOver, currentDepth).map(
-                (item, index) => (
+                label={passedLabel ? passedLabel : label}
+              />
+              {newAllChildren &&
+                newAllChildren.map((item, index) => (
                   <ElementEditorChildren
-                    rootDefinition={null}
-                    fhirDefinitionsService={fhirDefinitionsService}
+                    selectedResource={selectedResource}
+                    rootDefinition={item}
                     resourcePath={resourcePath}
-                    allChildren={item}
                     currentDepth={currentDepth}
                     resource={resource}
                     handleChange={handleChange}
@@ -243,11 +234,26 @@ const ElementEditorChildren = ({
                       handleIndividualElementApplyButtonClick
                     }
                     deleteElement
-                    mappedSnapshotElements={mappedSnapshotElements}
-
-                    />
-                )
-              )} */}
+                    passedLabel={`${label}[${i}]`}
+                  />
+                ))}
+            </>
+          ))
+        ) : (
+          <>
+            <br></br>
+            <TypeEditor
+              type={type.code}
+              resource={resource}
+              required={required}
+              structureDefinition={rootDefinition}
+              parentStructureDefinition={null}
+              canEdit={canEdit}
+              label={passedLabel ? passedLabel : label}
+            />
+            <br></br>
+          </>
+        )}
           </Box>
         }
       />

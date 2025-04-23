@@ -297,7 +297,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
     validationSchema,
     validateOnChange: true,
     validateOnBlur: true,
-    onSubmit: () => {},
+    onSubmit: () => {
+      console.log("test");
+    },
   });
   useFormikResetOnEvent(formikStu6Context);
   //needs to be added to feature flag config once the feature flags are moved to Util

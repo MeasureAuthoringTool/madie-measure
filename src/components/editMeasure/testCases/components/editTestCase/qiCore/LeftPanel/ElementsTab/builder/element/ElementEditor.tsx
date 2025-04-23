@@ -21,6 +21,7 @@ import {
   setNestedValue,
   removeUndefinedAndEmptyObjects,
   mapElementsRequired,
+  mapElementsByPath
   // getAllPropertyPaths,
   // stripArrayIndices,
   // mapElementsByPath,
@@ -206,11 +207,11 @@ const ElementEditor = ({
     });
   };
 
-  // we need to know not only the properties that have values, 
+  // we need to know not only the properties that have values,
   // but also the ones that don't since a user can enter values into those fields
   const buildFullValidationSchema = (formInfo) => {
     const validationSchemaObject = {};
-    console.log('formInfo', formInfo)
+    // console.log("formInfo", formInfo);
     for (const key in formInfo) {
       const node = formInfo[key];
       const { validation, max, id } = node;
@@ -247,7 +248,7 @@ const ElementEditor = ({
   };
 
   const buildSchemaAndInitialValues = (formInfo, resource) => {
-    console.log('formInfo', formInfo)
+    console.log("formInfo", formInfo);
     // Get the correct initial values more simply.
     const correctInitialValues = {}; // set a root
     correctInitialValues[resource.resourceType] = {}; // establish root property so we can add more properties to it
@@ -264,7 +265,6 @@ const ElementEditor = ({
   const triggerFormBuilder = async () => {
     const currentPath = selectedResource.definition.type;
     const allChildren = getAllChildren(selectedResource, currentPath);
-    console.log('selectedResource?.definition?.snapshot?.element', selectedResource?.definition?.snapshot?.element)
     await buildForm(
       selectedResource?.definition?.snapshot?.element?.[0],
       allChildren,
@@ -305,60 +305,65 @@ const ElementEditor = ({
   }
 
   const currentPath = elementDefinition?.path;
-  const allChildren = getAllChildren(selectedResource, currentPath);
+  // const allChildren = getAllChildren(selectedResource, currentPath);
   const currentDepth = elementDefinition?.path.split(".").length;
+  const mappedSnapshotElements = mapElementsByPath(selectedResource); // this includes stuff like name.
+  
   // <TypeEditor will either render a node or all top level elements if it's not a root. We need to make that check here
-  if (!loading) { // prevent render from happening with no provider values
+  if (!loading) {
+    // prevent render from happening with no provider values
     return (
       <RequiredFieldsProvider requiredFields={requiredFields}>
-      <Box
-        sx={{
-          padding: "0 24px 24px",
-          display: "flex",
-          flexDirection: "column",
-          width: "100%",
-        }}
-        id="element-editor"
-      >
-        {/* we need to render not only the current item, but all children */}
-        <ElementEditorChildren //recursive render control
-          // stuff we need only at the init root
-          // requiredFields={mappedSnaprequiredFieldsshotElements}
-          resourcePath={resourcePath}
-          fhirDefinitionsService={fhirDefinitionsService}
-          rootDefinition={elementDefinition} // only provided at root for a different render
-          // stuff we need everywhere
-          allChildren={allChildren}
-          currentDepth={currentDepth}
-          resource={resource}
-          handleChange={onChange}
-          canEdit={canEdit}
-          handleIndividualElementApplyButtonClick={
-            handleIndividualElementApplyButtonClick
-          }
-          deleteElement={deleteElement}
-        />
-        <div className="element-editor-submission">
-          <Button
-            variant="outline"
-            id="element-editor-undo-button"
-            data-testId="element-editor-undo-button"
-            disabled={!formik.dirty}
-            onClick={formik.resetForm}
-          >
-            Undo
-          </Button>
-          <Button
-            variant="submit"
-            id="element-editor-submit-button"
-            data-testId="element-editor-submit-button"
-            disabled={!formik.dirty}
-            onClick={handleIndividualElementApplyButtonClick}
-          >
-            Apply
-          </Button>
-        </div>
-      </Box>
+        <Box
+          sx={{
+            padding: "0 24px 24px",
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+          }}
+          id="element-editor"
+        >
+          {/* we need to render not only the current item, but all children */}
+          <ElementEditorChildren //recursive render control
+            // stuff we need only at the init root
+            // requiredFields={mappedSnaprequiredFieldsshotElements}
+            mappedSnapshotElements={mappedSnapshotElements}
+            resourcePath={resourcePath}
+            selectedResource={selectedResource}
+            // fhirDefinitionsService={fhirDefinitionsService}
+            rootDefinition={elementDefinition} // only provided at root for a different render
+            // stuff we need everywhere
+            // allChildren={allChildren}
+            currentDepth={currentDepth}
+            resource={resource}
+            handleChange={onChange}
+            canEdit={canEdit}
+            handleIndividualElementApplyButtonClick={
+              handleIndividualElementApplyButtonClick
+            }
+            deleteElement={deleteElement}
+          />
+          <div className="element-editor-submission">
+            <Button
+              variant="outline"
+              id="element-editor-undo-button"
+              data-testId="element-editor-undo-button"
+              disabled={!formik.dirty}
+              onClick={formik.resetForm}
+            >
+              Undo
+            </Button>
+            <Button
+              variant="submit"
+              id="element-editor-submit-button"
+              data-testId="element-editor-submit-button"
+              disabled={!formik.dirty}
+              onClick={handleIndividualElementApplyButtonClick}
+            >
+              Apply
+            </Button>
+          </div>
+        </Box>
       </RequiredFieldsProvider>
     );
   }

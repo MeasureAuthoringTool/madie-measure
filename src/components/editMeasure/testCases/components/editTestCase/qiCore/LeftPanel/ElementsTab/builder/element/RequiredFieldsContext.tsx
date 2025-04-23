@@ -7,7 +7,9 @@ const RequiredFieldsContext = createContext(null);
 export const useRequiredFields = () => {
   const context = useContext(RequiredFieldsContext);
   if (!context) {
-    throw new Error("useRequiredFields must be used within a RequiredFieldsProvider");
+    throw new Error(
+      "useRequiredFields must be used within a RequiredFieldsProvider"
+    );
   }
   return context;
 };

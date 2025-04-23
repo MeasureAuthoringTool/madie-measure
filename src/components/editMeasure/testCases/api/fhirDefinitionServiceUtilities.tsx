@@ -18,16 +18,18 @@ export function getElementName(element: ElementDefinition, basePath: string) {
 // and a value that can be anything
 // We're going to go and break the apart the paths and then individually add them to the object
 const removeArrayIndexes = (path) => {
-  return path
-    .split(".")
-    // Remove everything after the '['
-    .map(part => part.split("[")[0]) 
-    .join(".");
+  return (
+    path
+      .split(".")
+      // Remove everything after the '['
+      .map((part) => part.split("[")[0])
+      .join(".")
+  );
 };
 
 export function getRequired(requiredFields, path) {
   const cleanedPath = removeArrayIndexes(path);
-  return requiredFields[cleanedPath]
+  return requiredFields[cleanedPath];
 }
 
 // Helper to deeply set a value at a dot/bracket path
@@ -188,15 +190,14 @@ export function getValueByPath(obj, path) {
   return path.split(".").reduce((acc, part) => acc && acc[part], obj);
 }
 // function to get map all the property paths to values
-// export function mapElementsByPath(structureDefinition) {
-//   const elements = structureDefinition?.definition?.snapshot?.element || [];
+export function mapElementsByPath(structureDefinition) {
+  const elements = structureDefinition?.definition?.snapshot?.element || [];
 
-//   return elements.reduce((acc, element) => {
-//     acc[element.path] = element;
-//     return acc;
-//   }, {});
-// }
-
+  return elements.reduce((acc, element) => {
+    acc[element.path] = element;
+    return acc;
+  }, {});
+}
 
 // generate a map of { label: [label] required: true/fales} so we don't need to prop drill poor component into the ground any worse than it is.
 export function mapElementsRequired(structureDefinition) {
@@ -278,9 +279,9 @@ export function insertIndexIntoPath(fullPath, pathBefore, index) {
 
   return pathWithIndex.join(".");
 }
-// given a path, find out if there's a suffix in it that ends in .[somenumber] and return it. 
+// given a path, find out if there's a suffix in it that ends in .[somenumber] and return it.
 // Tool in figuring out cardinality elements and manipulating them.
-// Only gets the index if it's terminated with an index 
+// Only gets the index if it's terminated with an index
 // Patient.name[1] -> [1]
 // Patient.name[3].someOtherProperty[4] -> 4
 // Patient.name[3].text[4].somethingElse -> null
@@ -345,6 +346,13 @@ export function mergePathWithIndex(pathWithIndex, pathWithoutIndex) {
 
 //   return result.join(".");
 // }
+
+// We need to update labels based weather or not the parent has multiple cardinality as well as if the child is multiple cardinality
+export function getChildLabelForCardinality(rootDefinition, i, itemId, index){
+
+  // if ()
+
+}
 
 // This switch is a check to see weather we have the means to render an input for a given fhir type. needs to be udpated with all validations.
 export function isComponentDataType(datatype) {
