@@ -1,6 +1,7 @@
 import {
   generateQdmReport,
   generateQiCoreReport,
+  extractVersionNumber,
 } from "./OverlappingCodesUtils";
 import { ValueSet as CqmValueSet } from "cqm-models";
 import {
