@@ -28,7 +28,6 @@ export class FhirDefinitionsServiceApi {
   }
 
   async getResourceTree(resourceId): Promise<StructureDefinitionDto> {
-    console.log('~resourceIDis', resourceId)
     try {
       const response = await axios.get<any>(
         `${this.baseUrl}/qicore/resources/structure-definitions/${resourceId}`,
@@ -38,7 +37,6 @@ export class FhirDefinitionsServiceApi {
           },
         }
       );
-      console.log( 'resourceid', resourceId, 'response', response.data,)
       return response.data;
     } catch (error) {
       console.error(

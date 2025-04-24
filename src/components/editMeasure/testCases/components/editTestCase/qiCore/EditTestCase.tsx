@@ -304,7 +304,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
   useFormikResetOnEvent(formikStu6Context);
   //needs to be added to feature flag config once the feature flags are moved to Util
   const testCaseAlertToast = false;
-
+  console.log("formikvalues", formikStu6Context);
   useEffect(() => {
     if (_.isNil(populationGroupResults) || _.isEmpty(populationGroupResults)) {
       setGroupPopulations(_.cloneDeep(formik.values.groupPopulations));

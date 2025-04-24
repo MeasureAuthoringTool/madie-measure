@@ -16,6 +16,7 @@ interface ExtensionProps {
   onChange: (value) => void;
   elementDefinition: ElementDefinition;
   parentStructureDefinition: StructureDefinitionDto;
+  // label?: S
 }
 
 const getUrlAndValueElement = (
@@ -42,6 +43,7 @@ const ExtensionComponent = ({
   canEdit,
   elementDefinition,
   parentStructureDefinition,
+  // label
 }: // onChange,
 ExtensionProps) => {
   const [selectedValueType, setSelectedValueType] = useState<string>("");
@@ -86,7 +88,8 @@ ExtensionProps) => {
         <UriComponent
           canEdit={!urlElement?.fixedUri} // disable if this is fixed value
           fieldRequired={urlElement?.min > 0}
-          label="url"
+          // label="url"
+          // label={label}
           value={urlElement?.fixedUri}
           structureDefinition={null}
           onChange={(value) => setUrl(value)}
@@ -119,7 +122,7 @@ ExtensionProps) => {
             structureDefinition={valueElement}
             resource={fhirResource}
             type={valueElement?.type[0]?.code}
-            required={valueElement.min > 0}
+            // required={valueElement.min > 0}
             // value={elementDefinition?.fixedUri}
             // onChange={(value) => setValue(value)} // do nothing for now
             canEdit={canEdit}

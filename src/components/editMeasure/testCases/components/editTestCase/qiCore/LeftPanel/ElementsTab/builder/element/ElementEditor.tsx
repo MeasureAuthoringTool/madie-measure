@@ -21,11 +21,7 @@ import {
   setNestedValue,
   removeUndefinedAndEmptyObjects,
   mapElementsRequired,
-  mapElementsByPath
-  // getAllPropertyPaths,
-  // stripArrayIndices,
-  // mapElementsByPath,
-  // buildValidationSchema,
+  mapElementsByPath,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import {
   useQiCoreResource,
@@ -55,6 +51,20 @@ interface ElementEditorProps {
   Need to do away with either resource or selected resource, or both and just pass in definition. We know what resource we have already from the provider.
   Currently working on dateTime and date validations, and only fixing stale state because it will affect the capacity to test it.
 */
+
+export function simplifySnapshotElements(data) {
+  console.log("data is", data);
+  return data.map(([path, details]) => [
+    path,
+    {
+      id: details.id,
+      label: details.label,
+      type: details.type,
+      required: details.required,
+      canBeMultipleCardinality: details.max === "*",
+    },
+  ]);
+}
 const ElementEditor = ({
   selectedResource, // this will always be a stale reference because we set it one time. we need the id and to look at the provider
   selectedResourceID,
@@ -84,7 +94,7 @@ const ElementEditor = ({
 
   // A collection of all labels with without array indeces to serve as constant time lookup in type editor for weather it's required
   const requiredFields = mapElementsRequired(selectedResource); // this includes stuff like name.
-
+  const [formInfo, setFormInfo] = useState(null);
   const buildNode = async (
     child,
     resourcePath,
@@ -93,6 +103,7 @@ const ElementEditor = ({
     nodeList = []
   ) => {
     const type = child?.type?.[0]?.code;
+    // const type = child?.type
     if (!isComponentDataType(type)) {
       // Fetch the resource tree asynchronously
       // nesting these ifs to avoid a crash in deeply nested Claimresponse.item. Might cause issue elsewhere.
@@ -112,7 +123,7 @@ const ElementEditor = ({
               );
             }
           }
-          const { max, min, type, id } = child;
+          const { max, min, type, id, binding, extension } = child;
           return nodeList.concat({
             id,
             type: type[0].code,
@@ -152,11 +163,13 @@ const ElementEditor = ({
         type,
         required,
         validation: getValidation(type, required, label),
+        // validation: getValidation(type?.[0]?.code, required, label),
         canBeMultipleCardinality,
       };
       return nodeList.concat(builtNode);
     }
   };
+
   const buildForm = async (
     rootDefinition,
     allChildren,
@@ -211,7 +224,7 @@ const ElementEditor = ({
   // but also the ones that don't since a user can enter values into those fields
   const buildFullValidationSchema = (formInfo) => {
     const validationSchemaObject = {};
-    // console.log("formInfo", formInfo);
+    // console.log("~formInfo", formInfo);
     for (const key in formInfo) {
       const node = formInfo[key];
       const { validation, max, id } = node;
@@ -223,6 +236,7 @@ const ElementEditor = ({
         const children = getChildren(formInfo, key);
         const childShape = {};
         for (const [childKey, childNode] of children) {
+          // console.log("~childKey", childKey, childNode);
           //@ts-ignore
           if (childNode.validation) {
             const lastPart = childKey.split(".").pop();
@@ -248,7 +262,8 @@ const ElementEditor = ({
   };
 
   const buildSchemaAndInitialValues = (formInfo, resource) => {
-    console.log("formInfo", formInfo);
+    // console.log('formInfoBefore', formInfo)
+    setFormInfo(simplifySnapshotElements(Object.entries(formInfo)));
     // Get the correct initial values more simply.
     const correctInitialValues = {}; // set a root
     correctInitialValues[resource.resourceType] = {}; // establish root property so we can add more properties to it
@@ -259,6 +274,7 @@ const ElementEditor = ({
     const validationSchemaObject = buildFullValidationSchema(formInfo);
     setInitialFormikValuesStu6(correctInitialValues);
     setValidationSchema(validationSchemaObject);
+    console.log('validationschemaobject', validationSchemaObject)
     // need a loading toggle or formikProvider dies violently.
     setLoading(false);
   };
@@ -308,12 +324,15 @@ const ElementEditor = ({
   // const allChildren = getAllChildren(selectedResource, currentPath);
   const currentDepth = elementDefinition?.path.split(".").length;
   const mappedSnapshotElements = mapElementsByPath(selectedResource); // this includes stuff like name.
-  
+
   // <TypeEditor will either render a node or all top level elements if it's not a root. We need to make that check here
   if (!loading) {
     // prevent render from happening with no provider values
     return (
-      <RequiredFieldsProvider requiredFields={requiredFields}>
+      <RequiredFieldsProvider
+        requiredFields={requiredFields}
+        formInfo={formInfo}
+      >
         <Box
           sx={{
             padding: "0 24px 24px",
@@ -326,21 +345,11 @@ const ElementEditor = ({
           {/* we need to render not only the current item, but all children */}
           <ElementEditorChildren //recursive render control
             // stuff we need only at the init root
-            // requiredFields={mappedSnaprequiredFieldsshotElements}
-            mappedSnapshotElements={mappedSnapshotElements}
             resourcePath={resourcePath}
-            selectedResource={selectedResource}
-            // fhirDefinitionsService={fhirDefinitionsService}
             rootDefinition={elementDefinition} // only provided at root for a different render
-            // stuff we need everywhere
-            // allChildren={allChildren}
             currentDepth={currentDepth}
             resource={resource}
-            handleChange={onChange}
             canEdit={canEdit}
-            handleIndividualElementApplyButtonClick={
-              handleIndividualElementApplyButtonClick
-            }
             deleteElement={deleteElement}
           />
           <div className="element-editor-submission">

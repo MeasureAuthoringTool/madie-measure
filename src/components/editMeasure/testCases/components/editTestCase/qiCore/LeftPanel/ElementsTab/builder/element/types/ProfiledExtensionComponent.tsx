@@ -27,7 +27,7 @@ const ProfiledExtensionComponent = ({
     if (structureDefinition) {
       (async () => {
         const type = structureDefinition.type[0];
-        if (type.code === "Extension" && !_.isEmpty(type.profile)) {
+        if (type.code === "Extension" && !_.isEmpty(type.profile)) { // need entire type touple
           const loadProfiles = type.profile?.map((profile: string) => {
             const resourceId = profile.split("/").pop();
             return fhirDefinitionsService.current.getResourceTree(resourceId);
@@ -103,6 +103,7 @@ const ProfiledExtensionComponent = ({
       }
     }
     formik.setFieldValue("Patient.extension", extensions);
+    "patient.name[0].index"
   };
 
   return extensionProfileDef ? (
@@ -129,7 +130,7 @@ const ProfiledExtensionComponent = ({
                 structureDefinition={elementDefinition}
                 parentStructureDefinition={extensionProfileDef}
                 type={type.code}
-                required={required}
+                // required={required}
                 // value={elementDefinition?.fixedUri}
                 // onChange={handleChange}
                 canEdit={canEdit}

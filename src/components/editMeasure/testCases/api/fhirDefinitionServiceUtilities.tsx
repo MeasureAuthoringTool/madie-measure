@@ -27,6 +27,19 @@ const removeArrayIndexes = (path) => {
   );
 };
 
+/**
+ * Strips all array indexes from a dot/bracket path string.
+ *
+ * @param {string} path - The path with bracket indexes.
+ *   Example: "ClaimResponse.item[0].modifierExtension[23].text[1114].note"
+ *
+ * @returns {string} - Path with all [x] indexes nuked.
+ *   Example: "ClaimResponse.item.modifierExtension.text.note"
+ */
+export function stripAllIndexes(path) {
+  return path.replace(/\[\d+\]/g, "");
+}
+
 export function getRequired(requiredFields, path) {
   const cleanedPath = removeArrayIndexes(path);
   return requiredFields[cleanedPath];
@@ -348,10 +361,8 @@ export function mergePathWithIndex(pathWithIndex, pathWithoutIndex) {
 // }
 
 // We need to update labels based weather or not the parent has multiple cardinality as well as if the child is multiple cardinality
-export function getChildLabelForCardinality(rootDefinition, i, itemId, index){
-
+export function getChildLabelForCardinality(rootDefinition, i, itemId, index) {
   // if ()
-
 }
 
 // This switch is a check to see weather we have the means to render an input for a given fhir type. needs to be udpated with all validations.

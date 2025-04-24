@@ -1,7 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import * as _ from "lodash";
 import Box from "@mui/material/Box";
-import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import StringComponent from "./types/StringComponent";
 import PeriodComponent from "./types/PeriodComponent";
 import DateTimeComponent from "./types/DateTimeComponent";
@@ -17,93 +16,55 @@ import { useFormikContext } from "formik";
 import ExtensionComponent from "./types/ExtensionComponent";
 import ProfiledExtensionComponent from "./types/ProfiledExtensionComponent";
 import {
-  getTopLevelElements,
-  updateChildrenPaths,
   isComponentDataType,
-  getIndexFromPath,
-  mergePathWithIndex,
+  stripAllIndexes,
   getRequired,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import CodingComponent from "./types/CodingComponent";
 import { useRequiredFields } from "./RequiredFieldsContext";
-
+import ElementSection from "../../../../../../common/ElementSection";
 // onChange is being deprecated as no updates to the resource are tracked.
 // Changes directly to the json should be done with a disaptch, this propagates downstream changes in formik.
 // any temporary form state should be done through formik.
 const TypeEditor = ({
   type,
   resource,
-  required,
   structureDefinition,
   parentStructureDefinition,
   canEdit,
   label,
 }) => {
   const formik = useFormikContext();
-  const requiredFields = useRequiredFields();
-  const [childTypeDefs, setChildTypeDefs] = useState([]);
-  const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
-  required = getRequired(requiredFields, label);
-  // console.log('~typeeditorlabel', label)
-  useEffect(() => {
-    // Its not a dataType that is a primitive
-    if (!isComponentDataType(type)) {
-      if (type) {
-        // we look up it's children by type
-        fhirDefinitionsService.current.getResourceTree(type).then((def) => {
-          // console.log('~type', type)
-          if (def) {
-            console.log('~label', label, '~type', type, '~def', def)
-            // get the first set of children from the definition
-            const elements = getTopLevelElements(def);
-            // console.log('~elements', elements)
-            // takes all first children, splices their path like .name to the end of structure definition.id to make a full path
-            const index = getIndexFromPath(label);
-            // console.log('~index', index)
-            let updatedElements = updateChildrenPaths(structureDefinition, elements);
-            // console.log('~updated elements', updatedElements)
-            if (index){
-              // console.log('~index', index, label, structureDefinition, elements, def)
-              updatedElements = updatedElements.map((el) => {
-              el.id = index ? mergePathWithIndex(label, el.id) : el.id;
-              el.id = mergePathWithIndex(label, el.id)
-              return el;
-            });
-            }
-            // let updatedElements;
-            // if (index){
-            //   console.log('~index', index, label, structureDefinition, elements, def)
-            //   updatedElements = elements.map((el) => {
-            //   el.id = index ? mergePathWithIndex(label, el.id) : el.id;
-            //   el.id = mergePathWithIndex(label, el.id)
-            //   return el;
-            // });
-            // }
-            // if (!index){
-            //   updatedElements = updateChildrenPaths(
-            //     structureDefinition,
-            //     elements,
-            //   );
-            // }
-            // console.log('~updatedChildrenPaths', label, updatedElements);
-            // let updatedMappedElements = [];
-            // is it a multiple cardinality attribute?
-            // it's not use our normal splicing
-            
+  const { requiredFields, formInfo, getFirstChildren, getParentDefinition } = useRequiredFields();
+  let required = getRequired(requiredFields, stripAllIndexes(label));
+  const getString = (string) => {
+    return JSON.stringify(string, null, 2);
+  }
 
-            // if (label === "ClaimResponse.addItem.detail") {
-            //   console.log("updatedMappedElements", updatedMappedElements);
-            // }
-            // console.log('~mappedChildElements', updatedMappedElements)
-            setChildTypeDefs(updatedElements);
-            // setChildTypeDefs(updatedElements);
-
-          }
+  // Needs to be a memo instead of a useEffect that resets state. This caused a bunch of rerenders, and got stale values from mapping
+  // like passing in an incrementing label like name[0], the result would always end up name[maxNumOfElements] because it was an unstable var
+  // don't use useEffects unless you absolutely have to. There is almost certainly always another way.
+  const childDefs = useMemo(() => {
+    if (!isComponentDataType(type) && type) {
+      const elements = getFirstChildren(stripAllIndexes(label));
+      if (elements?.length) {
+        const updatedElements = elements.map((el) => {
+          const lastPart = el.id.split(".").pop();
+          const updatedId = `${label}.${lastPart}`;
+          return { ...el, id: updatedId };
         });
+          // .filter((el) => el.type !== "BackboneElement"); // was doing this earlier. don't think we need now.
+
+        console.log("updatedElements", getString(updatedElements));
+        return updatedElements;
       }
     }
-  }, [type]);
-
+    return [];
+  }, [type, label, getFirstChildren]);
+  const testParentDefinition = getParentDefinition(stripAllIndexes(label));
+  console.log('testPArent',label,  testParentDefinition);
+  console.log('formInfo', formInfo)
+  // console.log('childTypedefs', childTypeDefs, label)
   const getNestedProperty = (obj, path) => {
     if (!path) return undefined;
     const keys = path.match(/([^[.\]]+)/g); // matches words between dots and brackets
@@ -117,6 +78,7 @@ const TypeEditor = ({
       return errors;
     }
   };
+  // console.log('isComponentDataType', getString(label), type)
   if (isComponentDataType(type)) {
     switch (type) {
       case "string":
@@ -290,6 +252,7 @@ const TypeEditor = ({
             label={_.capitalize(
               label?.id?.substring(label?.id?.lastIndexOf(".") + 1)
             )}
+            // label={label}
             structureDefinition={structureDefinition}
           />
         );
@@ -302,48 +265,78 @@ const TypeEditor = ({
           />
         );
       case "Extension":
-      // return _.isEmpty(structureDefinition?.type?.[0]?.profile) ? (
-      //   <ExtensionComponent
-      //     canEdit={canEdit}
-      //     // onChange={onChange}
-      //     onChange={() =>{}}
-      //     fhirResource={resource}
-      //     elementDefinition={structureDefinition}
-      //     parentStructureDefinition={parentStructureDefinition}
-      //   />
-      // ) : (
-      //   <ProfiledExtensionComponent
-      //     label={label}
-      //     canEdit={canEdit}
-      //     structureDefinition={structureDefinition}
-      //     fieldRequired={false}
-      //     resource={resource}
-      //   />
-      // );
+        // // return <div/>
+        // return _.isEmpty(structureDefinition?.type?.[0]?.profile) ? (
+        //   <ExtensionComponent
+        //     canEdit={canEdit}
+        //     // onChange={onChange}
+        //     label={label}
+        //     onChange={() => {}}
+        //     fhirResource={resource}
+        //     elementDefinition={structureDefinition}
+        //     parentStructureDefinition={parentStructureDefinition}
+        //   />
+        // ) : (
+        //   <ProfiledExtensionComponent
+        //     label={label}
+        //     canEdit={canEdit}
+        //     structureDefinition={structureDefinition}
+        //     parentStructureDefinition={parentStructureDefinition}
+
+        //     fieldRequired={false}
+        //     resource={resource}
+        //   />
+        // );
       default:
         return <div>Unsupported Type [{type}]</div>;
     }
-  } else if (!_.isEmpty(childTypeDefs)) {
-    console.log('childTypdEfs', childTypeDefs)
+  } else if (!_.isEmpty(childDefs)) {
+    // console.log('~childDefs', childDefs)
     //  If we have childTypeDefs, we need to check to make weather or not there's an index supplied so we can attach it to the label
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        {childTypeDefs?.map((childTypeDef) => {
-          const childType = childTypeDef?.type?.[0];
-          const childRequired = +childTypeDef.min > 0;
-          return (
-            <TypeEditor
-              type={childType?.code}
-              resource={resource}
-              structureDefinition={childTypeDef}
-              required={childRequired}
-              canEdit={canEdit}
-              // label={childTypeDef.id}
-              // label={index ? mergePathWithIndex(label, childTypeDef.id) : childTypeDef.id}
-              label={childTypeDef.id}
-              parentStructureDefinition={structureDefinition}
-            />
-          );
+        {childDefs?.map((childDef) => {
+          required = getRequired(requiredFields, stripAllIndexes(childDef.id));
+          // if it's not a component dataType, we should render a header since it will have it's own property paths
+          if (!isComponentDataType(childDef?.type && childDef.type)) {
+            // add additional check for if the type exists because I have no idea what ClaimResponse.item.detail.adjudication is but it has no type.
+            // TODO Figure out whats up with ClaimResponse.item.detail.adjudication. stupid thing
+            // console.log("!not", childDef, structureDefinition);
+            // TODO probably have to map these multiple cardinality elements against the length of the formik.values[propertyPath] if multiple and add index like done in elementEditorChildren
+            return (
+              <ElementSection
+                title={childDef.id}
+                startOpen={false}
+                children={
+                  <Box
+                    style={{
+                      paddingLeft: "16px",
+                    }}
+                  >
+                    <TypeEditor
+                      resource={resource}
+                      type={childDef?.type}
+                      parentStructureDefinition={structureDefinition}
+                      structureDefinition={childDef}
+                      canEdit={canEdit}
+                      label={childDef.id}
+                    />
+                  </Box>
+                }
+              />
+            );
+          } else {
+            return (
+              <TypeEditor
+                resource={resource}
+                type={childDef?.type}
+                parentStructureDefinition={structureDefinition}
+                structureDefinition={childDef}
+                canEdit={canEdit}
+                label={childDef.id}
+              />
+            );
+          }
         })}
       </Box>
     );
