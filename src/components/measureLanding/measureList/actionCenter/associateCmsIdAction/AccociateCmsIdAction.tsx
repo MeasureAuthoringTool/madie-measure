@@ -51,8 +51,10 @@ export default function AssociateCmsIdAction(props: PropTypes) {
         setDisableAssociateCmsIdBtn(true);
 
         if (
-          qdmMeasure.measureSet.owner !== userName ||
-          qiCoreMeasure.measureSet.owner !== userName
+          qdmMeasure.measureSet.owner.toLowerCase() !==
+            userName.toLowerCase() ||
+          qiCoreMeasure.measureSet.owner.toLowerCase() !==
+            userName.toLowerCase()
         ) {
           setTooltipMessage(MUST_BE_OWNER);
         } else if (!qiCoreMeasure.measureMetaData.draft) {
