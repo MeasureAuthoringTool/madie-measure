@@ -1759,7 +1759,9 @@ describe("TestCaseList component", () => {
     const deleteButton = getByTestId(`delete-test-case-btn-${testCases[0].id}`);
     fireEvent.click(deleteButton);
 
-    expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    });
     expect(
       screen.getByTestId("delete-dialog-continue-button")
     ).toBeInTheDocument();
@@ -1797,7 +1799,9 @@ describe("TestCaseList component", () => {
     );
     userEvent.click(deleteButton);
 
-    expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    });
     const confirmDeleteBtn = screen.getByRole("button", {
       name: "Yes, Delete",
     });
@@ -1806,9 +1810,11 @@ describe("TestCaseList component", () => {
     ).toBeInTheDocument();
 
     userEvent.click(confirmDeleteBtn);
-    expect(await screen.findByTestId("test-case-list-error")).toHaveTextContent(
-      `Unable to Delete test Case with ID ${testCases[0].id}. Please try again. If the issue continues, please contact helpdesk.`
-    );
+    await waitFor(() => {
+      expect(screen.getByTestId("test-case-list-error")).toHaveTextContent(
+        `Unable to Delete test Case with ID ${testCases[0].id}. Please try again. If the issue continues, please contact helpdesk.`
+      );
+    });
   });
 
   it("Should delete all existing test cases", async () => {
@@ -2420,7 +2426,6 @@ describe("TestCaseList component", () => {
       expect(qrdaExportButton).toBeEnabled();
     });
     userEvent.click(qrdaExportButton);
-    //popover opens
     const popoverButton = screen.getByTestId("export-qrda-1");
     userEvent.click(popoverButton);
     await waitFor(() => {
@@ -2435,9 +2440,11 @@ describe("TestCaseList component", () => {
       charCode: 27,
     });
 
-    expect(
-      screen.queryByText("QRDA exported successfully")
-    ).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.queryByText("QRDA exported successfully")
+      ).not.toBeInTheDocument();
+    });
   });
 
   it("should display error message when QRDA Export failed", async () => {
@@ -2488,9 +2495,11 @@ describe("TestCaseList component", () => {
       const popoverButton = screen.getByTestId("export-qrda-1"); // fail
       userEvent.click(popoverButton);
     });
-    expect(await screen.findByTestId("test-case-list-error")).toHaveTextContent(
-      "Unable to Export QRDA. Please try again. If the issue continues, please contact helpdesk."
-    );
+    await waitFor(() => {
+      expect(screen.getByTestId("test-case-list-error")).toHaveTextContent(
+        "Unable to Export QRDA. Please try again. If the issue continues, please contact helpdesk."
+      );
+    });
   });
 
   it("should display Excel Export button", async () => {
@@ -2542,7 +2551,9 @@ describe("TestCaseList component", () => {
       charCode: 27,
     });
 
-    expect(screen.queryByTestId("export-excel-1")).not.toBeVisible();
+    await waitFor(() => {
+      expect(screen.queryByTestId("export-excel-1")).not.toBeVisible();
+    });
   });
 
   it("should display success message when Excel Export button clicked", async () => {
@@ -2607,9 +2618,11 @@ describe("TestCaseList component", () => {
       charCode: 27,
     });
 
-    expect(
-      screen.queryByText("Excel exported successfully")
-    ).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.queryByText("Excel exported successfully")
+      ).not.toBeInTheDocument();
+    });
   });
 
   it("should display failed message when Excel Export failed", async () => {
@@ -2677,7 +2690,9 @@ describe("TestCaseList component", () => {
       charCode: 27,
     });
 
-    expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
+    });
   });
 
   it("should display failed message when getDefinitionCallstacks failed", async () => {
@@ -2746,7 +2761,9 @@ describe("TestCaseList component", () => {
       charCode: 27,
     });
 
-    expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
+    });
   });
 
   it("Should display errors on test cases with special characters", async () => {
@@ -3208,9 +3225,13 @@ describe("TestCaseList component", () => {
     });
     expect(importBtn).toBeInTheDocument();
     userEvent.click(importBtn);
-    const removedImportDialog = screen.queryByTestId("test-case-import-dialog");
-    expect(removedImportDialog).not.toBeInTheDocument();
-    expect(nextState).toEqual([]);
+    await waitFor(() => {
+      const removedImportDialog = screen.queryByTestId(
+        "test-case-import-dialog"
+      );
+      expect(removedImportDialog).not.toBeInTheDocument();
+      expect(nextState).toEqual([]);
+    });
   });
 
   it("should display import error when importTestCasesQDM call fails", async () => {
@@ -3244,9 +3265,11 @@ describe("TestCaseList component", () => {
     userEvent.click(importBtn);
     const removedImportDialog = screen.queryByTestId("test-case-import-dialog");
     expect(removedImportDialog).not.toBeInTheDocument();
-    expect(await screen.findByTestId("test-case-list-error")).toHaveTextContent(
-      IMPORT_ERROR
-    );
+    await waitFor(() => {
+      expect(screen.getByTestId("test-case-list-error")).toHaveTextContent(
+        IMPORT_ERROR
+      );
+    });
   });
 
   it("should display warning messages when importTestCasesQDM call succeeds with warnings", async () => {
