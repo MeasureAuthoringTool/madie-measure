@@ -337,7 +337,7 @@ export default function MeasureList(props: {
       cell: (info) => (
         <>
           {`${info.row.original.actions.measureMetaData?.draft}` === "true" && (
-            <Chip tw="ml-6" className="chip-draft" label="Draft" />
+            <Chip className="chip-draft" label="Draft" />
           )}
         </>
       ),
