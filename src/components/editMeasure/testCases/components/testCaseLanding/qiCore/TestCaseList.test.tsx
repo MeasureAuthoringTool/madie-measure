@@ -543,9 +543,11 @@ const mockScanResult: ScanValidationDto = {
 
 const patientId1 = "8cdd6a96-732f-41da-9902-d680ca68157c";
 const patientId2 = "a648e724-ce72-4cac-b0a7-3c4d52784f73";
+
 beforeAll(() => {
   global.URL.revokeObjectURL = jest.fn();
 });
+
 describe("TestCaseList component", () => {
   const useMeasureServiceMockResolved = {
     fetchMeasure: jest.fn().mockResolvedValue(mockMeasure),
@@ -777,7 +779,9 @@ describe("TestCaseList component", () => {
     const deleteButton = getByTestId(`delete-test-case-btn-${testCases[0].id}`);
     fireEvent.click(deleteButton);
 
-    expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    });
     expect(
       screen.getByTestId("delete-dialog-continue-button")
     ).toBeInTheDocument();
@@ -816,7 +820,9 @@ describe("TestCaseList component", () => {
     const deleteButton = getByTestId(`delete-test-case-btn-${testCases[0].id}`);
     fireEvent.click(deleteButton);
 
-    expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    });
     const confirmDeleteBtn = screen.getByTestId(
       "delete-dialog-continue-button"
     );
@@ -1291,11 +1297,13 @@ describe("TestCaseList component", () => {
     });
     expect(importBtn).toBeInTheDocument();
     userEvent.click(importBtn);
-    const removedImportDialog = await screen.queryByTestId(
-      "test-case-import-dialog"
-    );
-    expect(removedImportDialog).not.toBeInTheDocument();
-    expect(nextState).toEqual([]);
+    await waitFor(() => {
+      const removedImportDialog = screen.queryByTestId(
+        "test-case-import-dialog"
+      );
+      expect(removedImportDialog).not.toBeInTheDocument();
+      expect(nextState).toEqual([]);
+    });
   });
 
   it("should display import error when createTestCases call fails", async () => {
