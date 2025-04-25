@@ -54,6 +54,7 @@ import {
   useDocumentTitle,
   checkUserCanEdit,
   useFeatureFlags,
+  useOktaTokens,
 } from "@madie/madie-util";
 import useExecutionContext from "../../routes/qiCore/useExecutionContext";
 import { MadieEditor } from "@madie/madie-editor";
@@ -85,6 +86,7 @@ import EditorSearch from "./LeftPanel/EditorSearch";
 import useFormikResetOnEvent from "../../../../../common/useFormikResetOnEvent";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import useValidationWebSocketService, { ValidationResult } from "../../../../../../api/useValidationWebSocket";
 
 const TestCaseForm = tw.form`m-3`;
 const ValidationErrorsButton = tw.button`
@@ -215,6 +217,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
   >() as navigationParams;
   // Avoid infinite dependency render. May require additional error handling for timeouts.
   const testCaseService = useRef(useTestCaseServiceApi());
+  const wsService = useRef(useValidationWebSocketService());
   const calculation = useRef(calculationService());
   const fhirCqlParsingService = useRef(useFhirCqlParsingService());
   const [alert, setAlert] = useState<AlertProps>(null);
@@ -519,7 +522,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
         testCase,
         measureId
       );
-
+      console.log("updatedTestCase", updatedTestCase);
       const updatedTc = _.cloneDeep(updatedTestCase);
       updatedTc.json = standardizeJson(updatedTc);
       resetForm({
@@ -527,8 +530,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
       });
       setTestCase(_.cloneDeep(updatedTc));
       setEditorVal(updatedTc.json);
-      handleTestCaseResponse(updatedTc, "update", timezoneUpdated);
+      // handleTestCaseResponse(updatedTc, "update", timezoneUpdated);
     } catch (error) {
+      console.log("error", error);
       showToast(
         error instanceof MadieError
           ? error.message
@@ -621,6 +625,26 @@ const EditTestCase = (props: EditTestCaseProps) => {
     setDiscardDialogOpen(false);
   };
 
+  // WebSocket connection
+  const [messages, setMessages] = useState([]);
+
+  const onMessage = useCallback((msg: ValidationResult) => {
+    console.log("Received validation result:", msg);
+    setMessages((prev) => [msg, ...prev]);
+  }, []);
+
+  useEffect(() => {
+    if (!id) return;
+
+    wsService.current.connect(id, onMessage);
+
+    return () => {
+      wsService.current.disconnect();
+    };
+  }, [id, onMessage]);
+
+  console.log("messages", messages);
+
   function handleTestCaseResponse(
     testCase: TestCase,
     action: "create" | "update",
@@ -632,7 +656,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
       if (hasValidHapiOutcome(testCase)) {
         showToast(`Test case ${action}d successfully!`, "success");
       } else {
-        const valErrors = validationErrors.map((error) => (
+        const valErrors = validationErrors?.map((error) => (
           <li>{error.diagnostics}</li>
         ));
         const message: ReactNode = testCaseAlertToast ? (
