@@ -367,6 +367,10 @@ const EditTestCase = (props: EditTestCaseProps) => {
         return JSON.stringify(JSON.parse(testCase.json), null, 2);
       }
     } catch (e) {
+      setErrors([
+        ...errors,
+        "Test Case JSON contains a syntax error. Test case can be saved, but not run.",
+      ]);
       return testCase?.json;
     }
   };
