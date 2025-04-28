@@ -74,18 +74,19 @@ export function generateQiCoreReport(
       continue;
     }
     valueSet.expansion?.contains?.forEach((contained) => {
+      const codeSystemVersion = extractVersionNumber(contained.version);
       let code = codeValueSetMap.find(
         (c) =>
           c.code === contained.code &&
           c.codeSystem === contained.system &&
-          c.codeSystemVersion === contained.version
+          c.codeSystemVersion === codeSystemVersion
       );
       if (!code) {
         code = {
           code: contained.code,
           description: contained.display || "",
           codeSystem: contained.system,
-          codeSystemVersion: contained.version,
+          codeSystemVersion: codeSystemVersion,
           codeSystemName: contained.system,
           valueSets: [],
         };
@@ -101,6 +102,15 @@ export function generateQiCoreReport(
     });
   }
   return codeValueSetMap.filter((code) => code.valueSets.length > 1);
+}
+
+// Utility function to extract the last part of a URL or return the string itself if no slashes are present
+export function extractVersionNumber(version: string): string {
+  if (!version) {
+    return "";
+  }
+  const parts = version.split("/");
+  return parts.length > 1 ? parts[parts.length - 1] : version;
 }
 
 export function getUsedValueSets(measureBundle: Bundle): Array<string> {
