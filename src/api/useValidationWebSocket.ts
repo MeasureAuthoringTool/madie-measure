@@ -1,9 +1,7 @@
-import { Client } from "@stomp/stompjs";
-import SockJS from "sockjs-client";
 import useServiceConfig from "./useServiceConfig";
 import { useOktaTokens } from "@madie/madie-util";
-import useTestCaseServiceApi from "../components/editMeasure/testCases/api/useTestCaseServiceApi";
-import {ServiceConfig} from "./ServiceContext";
+import { ServiceConfig } from "./ServiceContext";
+import { test } from "@jest/globals";
 
 export interface ValidationResult {
   testCaseId: string;
@@ -13,62 +11,60 @@ export interface ValidationResult {
   };
 }
 
-export class ValidationWebSocketClient {
-  private client: Client | null = null;
+export class ValidationSseClient {
+  private eventSource: EventSource | null = null;
 
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
 
   connect(testCaseId: string, onMessage: (msg: ValidationResult) => void) {
-    if (this.client?.connected) return;
+    if (this.eventSource) {
+      return;
+    }
 
-    // transport restricts to the use of websockets only, a fallback to other protocols such as jsonp-polling will not work,
-    // We need fallback if any old browser doesn't support websockets.
-    // Had to restrict as jsonp-polling doesn't support CORS ?
-    const socket = new SockJS(
-      `${this.baseUrl}/ws?access_token=Bearer ${this.getAccessToken()}`,
-      null,
-      {
-        transports: ["websocket"],
+    // Setup EventSource with Authorization token as query param (simplest way for now)
+    const url = `${
+      this.baseUrl
+    }/sse/validation-results/${testCaseId}?access_token=${encodeURIComponent(
+      "Bearer " + this.getAccessToken()
+    )}`;
+    this.eventSource = new EventSource(url);
+
+    this.eventSource.addEventListener(
+      `validation-result/${testCaseId}`,
+      (event) => {
+        try {
+          console.log("Got a new validation result message", event);
+          const data: ValidationResult = JSON.parse(event.data);
+          onMessage(data);
+        } catch (error) {
+          console.error("Failed to parse SSE message:", error);
+        }
       }
     );
 
-    this.client = new Client({
-      webSocketFactory: () => socket,
-      reconnectDelay: 5000,
-      onConnect: () => {
-        console.log("WebSocket connected", testCaseId);
-        this.client?.subscribe(
-          `/topic/validation-results/${testCaseId}`,
-          (message) => {
-            const payload: ValidationResult = JSON.parse(message.body);
-            onMessage(payload);
-          }
-        );
-      },
-      onStompError: (frame) => {
-        console.error("STOMP error:", frame);
-      },
-    });
-
-    this.client.activate();
+    this.eventSource.onerror = (error) => {
+      console.error("SSE connection error:", error);
+      this.disconnect();
+    };
   }
 
   disconnect() {
-    if (this.client) {
-      this.client.deactivate();
-      this.client = null;
+    if (this.eventSource) {
+      console.log("connection is closed");
+      this.eventSource.close();
+      this.eventSource = null;
     }
   }
 }
 
-const useValidationWebSocketService = (): ValidationWebSocketClient => {
+const useValidationSseService = (): ValidationSseClient => {
   const serviceConfig: ServiceConfig = useServiceConfig();
   const { getAccessToken } = useOktaTokens();
 
-  return new ValidationWebSocketClient(
+  return new ValidationSseClient(
     serviceConfig?.testCaseService.baseUrl,
     getAccessToken
   );
 };
 
-export default useValidationWebSocketService;
+export default useValidationSseService;

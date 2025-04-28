@@ -15,6 +15,7 @@ import EditTestCaseBreadCrumbs from "../EditTestCaseBreadCrumbs";
 import tw, { styled } from "twin.macro";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faBell,
   faExclamationCircle,
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
@@ -86,7 +87,9 @@ import EditorSearch from "./LeftPanel/EditorSearch";
 import useFormikResetOnEvent from "../../../../../common/useFormikResetOnEvent";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import useValidationWebSocketService, { ValidationResult } from "../../../../../../api/useValidationWebSocket";
+import useValidationWebSocketService, {
+  ValidationResult,
+} from "../../../../../../api/useValidationWebSocket";
 
 const TestCaseForm = tw.form`m-3`;
 const ValidationErrorsButton = tw.button`
@@ -140,12 +143,19 @@ const ValidationAlertCard = styled.p<AlertProps>(({ status = "default" }) => [
 ]);
 
 const StyledIcon = styled(FontAwesomeIcon)(
-  ({ errorSeverity }: { errorSeverity: string }) => [
+  ({
+    errorSeverity,
+    isNotification,
+  }: {
+    errorSeverity?: string;
+    isNotification?: boolean;
+  }) => [
     errorSeverity !== "default"
       ? errorSeverity === "error"
         ? tw`text-red-700`
         : tw`text-yellow-700`
       : "",
+    isNotification && tw`text-red-500 cursor-pointer`, // Add custom style for notification icon
   ]
 );
 
@@ -522,7 +532,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
         testCase,
         measureId
       );
-      console.log("updatedTestCase", updatedTestCase);
       const updatedTc = _.cloneDeep(updatedTestCase);
       updatedTc.json = standardizeJson(updatedTc);
       resetForm({
@@ -626,11 +635,13 @@ const EditTestCase = (props: EditTestCaseProps) => {
   };
 
   // WebSocket connection
-  const [messages, setMessages] = useState([]);
+  const [newValidationErrors, setNewValidationErrors] = useState([]);
+  const [isNewNotification, setIsNewNotification] = useState(false);
 
   const onMessage = useCallback((msg: ValidationResult) => {
     console.log("Received validation result:", msg);
-    setMessages((prev) => [msg, ...prev]);
+    setNewValidationErrors((prev) => [msg, ...prev]);
+    setIsNewNotification(true);
   }, []);
 
   useEffect(() => {
@@ -643,7 +654,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
     };
   }, [id, onMessage]);
 
-  console.log("messages", messages);
+  console.log("newValidationErrors", newValidationErrors);
 
   function handleTestCaseResponse(
     testCase: TestCase,
@@ -1256,6 +1267,16 @@ const EditTestCase = (props: EditTestCaseProps) => {
             </Allotment.Pane>
             <Allotment.Pane>
               <div className="validation-panel">
+                {/* Show notification icon when there are new validation errors */}
+                {isNewNotification && (
+                  <div className="notification-icon">
+                    <StyledIcon
+                      icon={faBell}
+                      isNotification={true}
+                      onClick={() => setIsNewNotification(false)}
+                    />
+                  </div>
+                )}
                 {showValidationErrors ? (
                   <aside
                     tw="w-full h-full flex flex-col"
