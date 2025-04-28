@@ -3,14 +3,13 @@ import SockJS from "sockjs-client";
 import useServiceConfig from "./useServiceConfig";
 import { useOktaTokens } from "@madie/madie-util";
 import useTestCaseServiceApi from "../components/editMeasure/testCases/api/useTestCaseServiceApi";
-import {ServiceConfig} from "./ServiceContext";
+import { ServiceConfig } from "./ServiceContext";
+import { HapiOperationOutcome } from "@madie/madie-models";
 
 export interface ValidationResult {
   testCaseId: string;
   validResource: boolean;
-  operationOutcome: {
-    message: string;
-  };
+  operationOutcome: HapiOperationOutcome;
 }
 
 export class ValidationWebSocketClient {
