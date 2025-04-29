@@ -181,6 +181,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   );
   const [openOverlappingCodesDialog, setOpenOverlappingCodesDialog] =
     useState<boolean>(false);
+  const [showReportOptions, setShowReportOptions] = useState(false);
 
   // const [callstackMap, setCallstackMap] = useState<CqlDefinitionCallstack>();
   // callStackMap is used for generating Excel Export
@@ -733,6 +734,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   const handleGenerateOverlappingCodesReport = () => {
     setOverlappingCodes(generateQdmReport(cqmMeasure.value_sets));
     setOpenOverlappingCodesDialog(true);
+    setShowReportOptions(false);
   };
 
   const onTestCaseShiftDates = (testCases: TestCase[], shifted: number) => {
@@ -821,6 +823,8 @@ const TestCaseList = (props: TestCaseListProps) => {
                 exportExecuting={exportExecuting}
                 optionsOpen={optionsOpen}
                 setOptionsOpen={setOptionsOpen}
+                showReportOptions={showReportOptions}
+                setShowReportOptions={setShowReportOptions}
               />
             </div>
             <CreateNewTestCaseDialog
@@ -978,8 +982,10 @@ const TestCaseList = (props: TestCaseListProps) => {
       />
       <OverlappingCodesDialog
         openDialog={openOverlappingCodesDialog}
+        setOpenDialog={setOpenOverlappingCodesDialog}
         handleClose={() => setOpenOverlappingCodesDialog(false)}
         overlappingCodes={overlappingCodes}
+        measure={measure}
       />
 
       {exportExecuting && <ExportModal openModal={true}></ExportModal>}

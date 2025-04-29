@@ -71,4 +71,22 @@ describe("MeasureServiceApi", () => {
     );
     expect(mockedAxios.get).toHaveBeenCalled();
   });
+
+  it("should succeed getOverlappingValueSets", async () => {
+    mockedAxios.put.mockResolvedValueOnce({ data: {} });
+    const abortController = new AbortController();
+    await measureServiceApi.getOverlappingValueSets("id", [], abortController);
+    expect(mockedAxios.put).toHaveBeenCalled();
+  });
+
+  it("should fail getOverlappingValueSets", async () => {
+    mockedAxios.put.mockRejectedValueOnce(new Error("failure"));
+    const abortController = new AbortController();
+    await expect(
+      measureServiceApi.getOverlappingValueSets("id", [], abortController)
+    ).rejects.toThrow(
+      "An error occurred, please try again. If the error persists, please contact the help desk."
+    );
+    expect(mockedAxios.put).toHaveBeenCalled();
+  });
 });

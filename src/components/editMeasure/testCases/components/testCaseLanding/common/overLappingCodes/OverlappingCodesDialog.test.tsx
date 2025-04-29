@@ -4,6 +4,27 @@ import OverlappingCodesDialog from "./OverlappingCodesDialog";
 import { OverlappingCode } from "../../../../util/OverlappingCodesUtils";
 import { within } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
+import { Measure, Model } from "@madie/madie-models";
+import {
+  ApiContextProvider,
+  ServiceConfig,
+} from "../../../../../../../api/ServiceContext";
+import useMeasureServiceApi, {
+  MeasureServiceApi,
+} from "../../../../api/useMeasureServiceApi";
+import { MemoryRouter } from "react-router-dom";
+
+const serviceConfig = {
+  measureService: {
+    baseUrl: "base.url",
+  },
+} as unknown as ServiceConfig;
+
+jest.mock("../../../../api/useMeasureServiceApi");
+const useMeasureServiceMock =
+  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
+
+window.URL.createObjectURL = jest.fn().mockImplementation(() => "url");
 
 describe("OverlappingCodesDialog", () => {
   const mockHandleClose = jest.fn();
@@ -69,14 +90,29 @@ describe("OverlappingCodesDialog", () => {
       ],
     },
   ] as OverlappingCode[];
+  const measure: Measure = {
+    id: "123",
+    name: "Test Measure",
+    version: "1.0.0",
+    description: "Test Measure Description",
+    ecqmTitle: "Test ECQM Title",
+    model: Model.QDM_5_6,
+  } as unknown as Measure;
+  const setOpenDialog = jest.fn();
 
   it("should render the dialog with the correct title", () => {
     render(
-      <OverlappingCodesDialog
-        openDialog={true}
-        handleClose={mockHandleClose}
-        overlappingCodes={mockOverlappingCodes}
-      />
+      <MemoryRouter>
+        <ApiContextProvider value={serviceConfig}>
+          <OverlappingCodesDialog
+            openDialog={true}
+            handleClose={mockHandleClose}
+            overlappingCodes={mockOverlappingCodes}
+            setOpenDialog={setOpenDialog}
+            measure={measure}
+          />
+        </ApiContextProvider>
+      </MemoryRouter>
     );
 
     expect(screen.getByTestId("overlapping-codes-dialog")).toBeInTheDocument();
@@ -94,11 +130,17 @@ describe("OverlappingCodesDialog", () => {
       },
     ];
     render(
-      <OverlappingCodesDialog
-        openDialog={true}
-        handleClose={mockHandleClose}
-        overlappingCodes={qdmCodes}
-      />
+      <MemoryRouter>
+        <ApiContextProvider value={serviceConfig}>
+          <OverlappingCodesDialog
+            openDialog={true}
+            handleClose={mockHandleClose}
+            overlappingCodes={qdmCodes}
+            setOpenDialog={setOpenDialog}
+            measure={measure}
+          />
+        </ApiContextProvider>
+      </MemoryRouter>
     );
 
     expect(screen.getByTestId("overlapping-codes-tbl")).toBeInTheDocument();
@@ -116,11 +158,17 @@ describe("OverlappingCodesDialog", () => {
 
   it("should display the overlapping codes table for QICore", () => {
     render(
-      <OverlappingCodesDialog
-        openDialog={true}
-        handleClose={mockHandleClose}
-        overlappingCodes={[mockOverlappingCodes[0]]}
-      />
+      <MemoryRouter>
+        <ApiContextProvider value={serviceConfig}>
+          <OverlappingCodesDialog
+            openDialog={true}
+            handleClose={mockHandleClose}
+            overlappingCodes={[mockOverlappingCodes[0]]}
+            setOpenDialog={setOpenDialog}
+            measure={measure}
+          />
+        </ApiContextProvider>
+      </MemoryRouter>
     );
 
     expect(screen.getByTestId("overlapping-codes-tbl")).toBeInTheDocument();
@@ -138,11 +186,17 @@ describe("OverlappingCodesDialog", () => {
 
   it("should display a message when there are no overlapping codes", () => {
     render(
-      <OverlappingCodesDialog
-        openDialog={true}
-        handleClose={mockHandleClose}
-        overlappingCodes={[]}
-      />
+      <MemoryRouter>
+        <ApiContextProvider value={serviceConfig}>
+          <OverlappingCodesDialog
+            openDialog={true}
+            handleClose={mockHandleClose}
+            overlappingCodes={[]}
+            setOpenDialog={setOpenDialog}
+            measure={measure}
+          />
+        </ApiContextProvider>
+      </MemoryRouter>
     );
 
     expect(
@@ -152,11 +206,17 @@ describe("OverlappingCodesDialog", () => {
 
   it("should call handleClose when the close button is clicked", () => {
     render(
-      <OverlappingCodesDialog
-        openDialog={true}
-        handleClose={mockHandleClose}
-        overlappingCodes={mockOverlappingCodes}
-      />
+      <MemoryRouter>
+        <ApiContextProvider value={serviceConfig}>
+          <OverlappingCodesDialog
+            openDialog={true}
+            handleClose={mockHandleClose}
+            overlappingCodes={mockOverlappingCodes}
+            setOpenDialog={setOpenDialog}
+            measure={measure}
+          />
+        </ApiContextProvider>
+      </MemoryRouter>
     );
 
     const closeButton = screen.getByTestId(
@@ -169,11 +229,17 @@ describe("OverlappingCodesDialog", () => {
 
   it("should disable the export button", () => {
     render(
-      <OverlappingCodesDialog
-        openDialog={true}
-        handleClose={mockHandleClose}
-        overlappingCodes={mockOverlappingCodes}
-      />
+      <MemoryRouter>
+        <ApiContextProvider value={serviceConfig}>
+          <OverlappingCodesDialog
+            openDialog={true}
+            handleClose={mockHandleClose}
+            overlappingCodes={[]}
+            setOpenDialog={setOpenDialog}
+            measure={measure}
+          />
+        </ApiContextProvider>
+      </MemoryRouter>
     );
 
     const exportButton = screen.getByTestId(
@@ -184,11 +250,17 @@ describe("OverlappingCodesDialog", () => {
 
   it("should render pagination when there are overlapping codes", () => {
     render(
-      <OverlappingCodesDialog
-        openDialog={true}
-        handleClose={mockHandleClose}
-        overlappingCodes={mockOverlappingCodes}
-      />
+      <MemoryRouter>
+        <ApiContextProvider value={serviceConfig}>
+          <OverlappingCodesDialog
+            openDialog={true}
+            handleClose={mockHandleClose}
+            overlappingCodes={mockOverlappingCodes}
+            setOpenDialog={setOpenDialog}
+            measure={measure}
+          />
+        </ApiContextProvider>
+      </MemoryRouter>
     );
     const reportsContainer = screen.getByTestId(
       "overlapping-codes-report-contents"
@@ -199,11 +271,17 @@ describe("OverlappingCodesDialog", () => {
 
   it("handles limit change as expected", async () => {
     render(
-      <OverlappingCodesDialog
-        openDialog={true}
-        handleClose={mockHandleClose}
-        overlappingCodes={mockOverlappingCodes}
-      />
+      <MemoryRouter>
+        <ApiContextProvider value={serviceConfig}>
+          <OverlappingCodesDialog
+            openDialog={true}
+            handleClose={mockHandleClose}
+            overlappingCodes={mockOverlappingCodes}
+            setOpenDialog={setOpenDialog}
+            measure={measure}
+          />
+        </ApiContextProvider>
+      </MemoryRouter>
     );
     const limitChangeButton = await screen.findByRole("combobox", {
       expanded: false,
@@ -221,11 +299,17 @@ describe("OverlappingCodesDialog", () => {
 
   it("handles page change by next and prev", async () => {
     render(
-      <OverlappingCodesDialog
-        openDialog={true}
-        handleClose={mockHandleClose}
-        overlappingCodes={mockOverlappingCodes}
-      />
+      <MemoryRouter>
+        <ApiContextProvider value={serviceConfig}>
+          <OverlappingCodesDialog
+            openDialog={true}
+            handleClose={mockHandleClose}
+            overlappingCodes={mockOverlappingCodes}
+            setOpenDialog={setOpenDialog}
+            measure={measure}
+          />
+        </ApiContextProvider>
+      </MemoryRouter>
     );
     const nextButton = await screen.findByLabelText("Go to next page");
     userEvent.click(nextButton);
@@ -235,11 +319,17 @@ describe("OverlappingCodesDialog", () => {
 
   it("handles page change by pagination number click", async () => {
     render(
-      <OverlappingCodesDialog
-        openDialog={true}
-        handleClose={mockHandleClose}
-        overlappingCodes={mockOverlappingCodes}
-      />
+      <MemoryRouter>
+        <ApiContextProvider value={serviceConfig}>
+          <OverlappingCodesDialog
+            openDialog={true}
+            handleClose={mockHandleClose}
+            overlappingCodes={mockOverlappingCodes}
+            setOpenDialog={setOpenDialog}
+            measure={measure}
+          />
+        </ApiContextProvider>
+      </MemoryRouter>
     );
     // select second nav item
     const page2 = await screen.findByLabelText("Go to page 2");
@@ -248,6 +338,86 @@ describe("OverlappingCodesDialog", () => {
     const tableBody = screen.getByTestId("overlapping-codes-tbl");
     await waitFor(() => {
       expect(tableBody?.querySelectorAll("tbody tr")).toHaveLength(1);
+    });
+  });
+
+  it("should handle Export button click", async () => {
+    const useMeasureServiceMockResolved = {
+      getOverlappingValueSets: jest.fn().mockResolvedValue({
+        data: new Blob(["test"], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        }),
+        headers: {
+          "content-disposition":
+            "attachment; filename=overlapping-codes-report.xlsx",
+        },
+        status: 200,
+        statusText: "OK",
+      }),
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockResolved;
+    });
+    render(
+      <MemoryRouter>
+        <ApiContextProvider value={serviceConfig}>
+          <OverlappingCodesDialog
+            openDialog={true}
+            handleClose={mockHandleClose}
+            overlappingCodes={mockOverlappingCodes}
+            setOpenDialog={setOpenDialog}
+            measure={measure}
+          />
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+    const exportButton = screen.getByTestId(
+      "overlapping-codes-report-export-btn"
+    );
+    expect(exportButton).not.toBeDisabled();
+
+    userEvent.click(exportButton);
+    await waitFor(() => {
+      expect(
+        useMeasureServiceMockResolved.getOverlappingValueSets
+      ).toHaveBeenCalled();
+    });
+  });
+
+  it("should handle Export button click failure", async () => {
+    const useMeasureServiceMockRejected = {
+      getOverlappingValueSets: jest
+        .fn()
+        .mockRejectedValue(new Error("Network error")),
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockRejected;
+    });
+    render(
+      <MemoryRouter>
+        <ApiContextProvider value={serviceConfig}>
+          <OverlappingCodesDialog
+            openDialog={true}
+            handleClose={mockHandleClose}
+            overlappingCodes={mockOverlappingCodes}
+            setOpenDialog={setOpenDialog}
+            measure={measure}
+          />
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+    const exportButton = screen.getByTestId(
+      "overlapping-codes-report-export-btn"
+    );
+    expect(exportButton).not.toBeDisabled();
+
+    userEvent.click(exportButton);
+    await waitFor(() => {
+      expect(
+        useMeasureServiceMockRejected.getOverlappingValueSets
+      ).toHaveBeenCalled();
     });
   });
 });

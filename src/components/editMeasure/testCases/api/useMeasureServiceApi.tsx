@@ -4,6 +4,7 @@ import { ServiceConfig } from "../../../../api/ServiceContext";
 import { Measure } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
 import { Bundle } from "fhir/r4";
+import { OverlappingCode } from "../util/OverlappingCodesUtils";
 
 export class MeasureServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
@@ -53,6 +54,33 @@ export class MeasureServiceApi {
       const message = `Unable to retrieve CqmMeasure`;
       console.warn(message);
       throw err;
+    }
+  }
+
+  async getOverlappingValueSets(
+    measureId: string,
+    overlappingCodes: OverlappingCode[],
+    abortController: AbortController
+  ): Promise<any> {
+    try {
+      const response = await axios.put(
+        `${this.baseUrl}/measures/${measureId}/test-cases/exportOverlappingValueSets`,
+        overlappingCodes,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+            "Accept-Encoding": "application/vnd.ms-excel",
+          },
+          signal: abortController.signal,
+          responseType: "blob",
+        }
+      );
+      return response;
+    } catch (err) {
+      console.error("getOverlappingValueSets error", err);
+      throw new Error(
+        "An error occurred, please try again. If the error persists, please contact the help desk."
+      );
     }
   }
 }
