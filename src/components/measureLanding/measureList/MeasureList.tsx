@@ -616,6 +616,9 @@ export default function MeasureList(props: {
     toastMessage = "",
     toastOpen = false,
   } = {}) => {
+    if (toastType === "success") {
+      doUpdateList();
+    }
     setShareDialog({
       open: false,
       option: "",
