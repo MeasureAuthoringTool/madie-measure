@@ -1128,4 +1128,34 @@ describe("TypeEditor Component", () => {
       screen.queryByText(`Unsupported Type [test]`)
     ).not.toBeInTheDocument();
   });
+  test("Should handle render of !isComponentDataType", async () => {
+    const fhirDefinitionsServiceApiMock = {
+      getResourceTree: jest.fn().mockResolvedValue(codingDef),
+      getAllChildren: jest.fn().mockReturnValue(codingTopLevelElements),
+    } as unknown as FhirDefinitionsServiceApi;
+    useFhirDefinitionsServiceApiMock.mockImplementation(
+      () => fhirDefinitionsServiceApiMock
+    );
+
+    render(
+      <RequiredFieldsProvider
+        requiredFields={mockRequiredFields}
+        formInfo={mockFormInfo}
+      >
+        <TypeEditor
+          resource={null}
+          structureDefinition={{
+            type: [
+              {
+                code: "Meta",
+              },
+            ],
+          }}
+          parentStructureDefinition={{}}
+          canEdit={true}
+          label={"ClaimResponse.meta"}
+        />
+      </RequiredFieldsProvider>
+    );
+  });
 });

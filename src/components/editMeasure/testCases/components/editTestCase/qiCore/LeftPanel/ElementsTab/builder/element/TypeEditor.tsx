@@ -32,7 +32,7 @@ import { Divider } from "@mui/material";
 // Changes directly to the json should be done with a disaptch, this propagates downstream changes in formik.
 // any temporary form state should be done through formik.
 const TypeEditor = ({
-  resource,
+  resource, // should probably deprecate
   structureDefinition,
   parentStructureDefinition,
   canEdit,
