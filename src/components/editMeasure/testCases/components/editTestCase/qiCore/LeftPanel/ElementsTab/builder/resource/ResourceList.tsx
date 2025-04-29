@@ -18,10 +18,10 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import InputAdornment from "@material-ui/core/InputAdornment";
+
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import SearchIcon from "@mui/icons-material/Search";
-import { IconButton } from "@mui/material";
+import { IconButton, InputAdornment } from "@mui/material";
 // Add in later for sorting icons
 // import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 // import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";

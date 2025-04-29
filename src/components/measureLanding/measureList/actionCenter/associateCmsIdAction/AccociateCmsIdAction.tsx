@@ -9,14 +9,7 @@ interface PropTypes {
   measures: Measure[];
   onClick: () => void;
 }
-const iconStyles = {
-  "&.Mui-disabled": {
-    color: "#8C8C8C !important",
-  },
-  "&.MuiIconButton-root": {
-    color: "#0073C8 ",
-  },
-};
+
 export const MUST_BE_OWNER = "Must own both selected measures";
 export const MUST_SELECT_ONE_QDM_AND_ONE_QI_CORE_MEASURE =
   "Must select one QDM and one QI-Core measure";
@@ -91,7 +84,6 @@ export default function AssociateCmsIdAction(props: PropTypes) {
           onClick={props.onClick}
           disabled={disableAssociateCmsIdBtn}
           data-testid="associate-cms-id-action-btn"
-          sx={iconStyles}
         >
           <IconLink />
         </IconButton>

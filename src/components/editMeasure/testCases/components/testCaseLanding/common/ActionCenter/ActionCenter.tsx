@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
-import { IconButton, MenuItem, Tooltip } from "@mui/material";
+import { IconButton, MenuItem, Tooltip, InputAdornment } from "@mui/material";
 import {
   Select,
   TextField,
   Popover,
 } from "@madie/madie-design-system/dist/react";
 import SearchIcon from "@mui/icons-material/Search";
-import InputAdornment from "@material-ui/core/InputAdornment";
+
 import ClearIcon from "@mui/icons-material/Clear";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditCalendarOutlinedIcon from "@mui/icons-material/EditCalendarOutlined";
@@ -39,24 +39,6 @@ interface ActionCenterProps {
   displayTestCaseCopyDialog?: Function;
   executeAllTestCases?: boolean;
 }
-
-const deleteStyles = {
-  "&.Mui-disabled": {
-    color: "#8C8C8C !important",
-  },
-  "&.MuiIconButton-root": {
-    color: red[700],
-  },
-};
-
-const normalStyles = {
-  "&.Mui-disabled": {
-    color: "#8C8C8C !important",
-  },
-  "&.MuiIconButton-root": {
-    color: "#0073C8 ",
-  },
-};
 
 const filterByOptions = ["Case #", "Status", "Group", "Title", "Description"];
 
@@ -303,7 +285,6 @@ export default function ActionCenter(props: ActionCenterProps) {
                       }}
                       disabled={disableDeleteBtn}
                       data-testid="delete-action-btn"
-                      sx={deleteStyles}
                     >
                       <DeleteOutlinedIcon data-testid={`delete-action-icon`} />
                     </IconButton>
@@ -327,7 +308,6 @@ export default function ActionCenter(props: ActionCenterProps) {
                       }}
                       disabled={disableShiftDatesBtn}
                       data-testid="shift-test-case-dates-action-btn"
-                      sx={normalStyles}
                     >
                       <EditCalendarOutlinedIcon
                         data-testid={`shift-test-case-dates-action-icon`}
@@ -353,12 +333,8 @@ export default function ActionCenter(props: ActionCenterProps) {
                       }}
                       disabled={disableCloneBtn}
                       data-testid="clone-action-btn"
-                      sx={normalStyles}
                     >
-                      <LibraryAddIcon
-                        data-testid={`clone-action-icon`}
-                        sx={normalStyles}
-                      />
+                      <LibraryAddIcon data-testid={`clone-action-icon`} />
                     </IconButton>
                   </span>
                 </Tooltip>
@@ -383,7 +359,6 @@ export default function ActionCenter(props: ActionCenterProps) {
                     }}
                     disabled={disableCopyBtn}
                     data-testid="copy-action-btn"
-                    sx={normalStyles}
                   >
                     <Icon
                       icon="fluent:share-screen-start-24-regular"
@@ -413,7 +388,6 @@ export default function ActionCenter(props: ActionCenterProps) {
                 <IconButton
                   disabled={disableExportBtn}
                   data-testid="export-action-btn"
-                  sx={normalStyles}
                 >
                   <FileUploadOutlinedIcon
                     data-testid={`export-action-icon`}
