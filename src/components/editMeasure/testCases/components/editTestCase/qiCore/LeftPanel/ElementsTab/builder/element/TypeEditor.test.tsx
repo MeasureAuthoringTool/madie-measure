@@ -1157,5 +1157,89 @@ describe("TypeEditor Component", () => {
         />
       </RequiredFieldsProvider>
     );
+    expect(
+      screen.queryByText(`Unsupported Type [test]`)
+    ).not.toBeInTheDocument();
+  });
+
+  test("Should handle render of !isComponentDataType with a profile extension", async () => {
+    const fhirDefinitionsServiceApiMock = {
+      getResourceTree: jest.fn().mockResolvedValue(codingDef),
+      getAllChildren: jest.fn().mockReturnValue(codingTopLevelElements),
+    } as unknown as FhirDefinitionsServiceApi;
+    useFhirDefinitionsServiceApiMock.mockImplementation(
+      () => fhirDefinitionsServiceApiMock
+    );
+    render(
+      <RequiredFieldsProvider
+        requiredFields={mockRequiredFields}
+        formInfo={mockFormInfo}
+      >
+        <TypeEditor
+          resource={null}
+          structureDefinition={{
+            id: "Patient.extension:race",
+            extension: [
+              {
+                url: "http://hl7.org/fhir/us/core/StructureDefinition/uscdi-requirement",
+                valueBoolean: true,
+              },
+              {
+                url: "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-keyelement",
+                valueBoolean: true,
+              },
+            ],
+            path: "Patient.extension",
+            sliceName: "race",
+            short: "(QI-Core)(USCDI) US Core Race Extension",
+            definition:
+              "Concepts classifying the person into a named category of humans sharing common history, traits, geographical origin or nationality.  The race codes used to represent these concepts are based upon the [CDC Race and Ethnicity Code Set Version 1.0](http://www.cdc.gov/phin/resources/vocabulary/index.html) which includes over 900 concepts for representing race and ethnicity of which 921 reference race.  The race concepts are grouped by and pre-mapped to the 5 OMB race categories:\n\n   - American Indian or Alaska Native\n   - Asian\n   - Black or African American\n   - Native Hawaiian or Other Pacific Islander\n   - White.",
+            min: 0,
+            max: "1",
+            base: {
+              path: "DomainResource.extension",
+              min: 0,
+              max: "*",
+            },
+            type: [
+              {
+                code: "Extension",
+                profile: [
+                  "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+                ],
+              },
+            ],
+            condition: ["ele-1"],
+            constraint: [
+              {
+                key: "ele-1",
+                severity: "error",
+                human: "All FHIR elements must have a @value or children",
+                expression: "hasValue() or (children().count() > id.count())",
+                xpath: "@value|f:*|h:div",
+                source: "http://hl7.org/fhir/StructureDefinition/Element",
+              },
+              {
+                key: "ext-1",
+                severity: "error",
+                human: "Must have either extensions or value[x], not both",
+                expression: "extension.exists() != value.exists()",
+                xpath:
+                  "exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])",
+                source: "http://hl7.org/fhir/StructureDefinition/Extension",
+              },
+            ],
+            mustSupport: false,
+            isModifier: false,
+          }}
+          parentStructureDefinition={{}}
+          canEdit={true}
+          label={"ClaimResponse.meta"}
+        />
+      </RequiredFieldsProvider>
+    );
+    expect(
+      screen.queryByText(`Unsupported Type [test]`)
+    ).not.toBeInTheDocument();
   });
 });
