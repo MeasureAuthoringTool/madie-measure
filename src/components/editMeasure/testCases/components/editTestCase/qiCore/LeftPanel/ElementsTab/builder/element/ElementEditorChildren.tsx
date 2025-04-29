@@ -75,7 +75,6 @@ const ElementEditorChildren = ({
       </Box>
     </div>
   );
-  return null;
 };
 
 export default ElementEditorChildren;

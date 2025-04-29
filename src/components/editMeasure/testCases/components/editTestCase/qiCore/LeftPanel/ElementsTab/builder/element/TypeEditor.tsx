@@ -83,6 +83,7 @@ const TypeEditor = ({
             setExtensionProfileDef(null);
           }
         } catch (e) {
+          // eslint-disable-next-line no-console
           console.log("retrieve profileDefinitions failure", e);
           setExtensionProfileDef(null);
         }
