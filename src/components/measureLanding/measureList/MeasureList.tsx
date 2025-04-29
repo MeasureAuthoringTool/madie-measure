@@ -50,6 +50,7 @@ import {
   ExpandIcon,
   CollapseIcon,
 } from "../../../icons/MeasureListTableRightArrowIcons";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { exportMeasure as downloadMeasureExport } from "../../../utils/exportUtil";
 
 const searchInputStyle = {
@@ -255,6 +256,7 @@ export default function MeasureList(props: {
             maxLength={60}
             dataTestId={`measure-version-${info.row.original.id}`}
           />
+
           {`${info.row.original.actions.measureMetaData?.draft}` === "true" && (
             <Chip tw="ml-6" className="chip-draft" label="Draft" />
           )}
@@ -301,6 +303,119 @@ export default function MeasureList(props: {
       enableSorting: false,
     },
   ];
+  const columnsBehindFlag = [
+    {
+      header: "Measure",
+      cell: (info) => (
+        <>
+          <TruncateText
+            text={info.row.original.measureName}
+            maxLength={120}
+            dataTestId={`measure-name-${info.row.original.id}`}
+          />
+        </>
+      ),
+      accessorKey: "measureName",
+      sortingFn: (rowA, rowB) =>
+        customSort(rowA.original.measureName, rowB.original.measureName),
+    },
+    {
+      header: "Version",
+      cell: (info) => (
+        <TruncateText
+          text={info.row.original.version}
+          maxLength={60}
+          dataTestId={`measure-version-${info.row.original.id}`}
+        />
+      ),
+      accessorKey: "version",
+      sortingFn: (rowA, rowB) =>
+        customSort(rowA.original.version, rowB.original.version),
+    },
+    {
+      header: "Status",
+      cell: (info) => (
+        <>
+          {`${info.row.original.actions.measureMetaData?.draft}` === "true" && (
+            <Chip className="chip-draft" label="Draft" />
+          )}
+        </>
+      ),
+      accessorKey: "status",
+    },
+    {
+      header: "Model",
+      cell: (info) => (
+        <TruncateText
+          text={info.row.original.model}
+          maxLength={120}
+          dataTestId={`measure-model-${info.row.original.id}`}
+        />
+      ),
+      accessorKey: "model",
+      sortingFn: (rowA, rowB) =>
+        customSort(rowA.original.model, rowB.original.model),
+    },
+    {
+      header: "Shared",
+      cell: (info) => (
+        <div>
+          {info.row.original.actions?.measureSet?.acls?.length > 0 && (
+            <CheckCircleOutlineIcon sx={{ color: "#4CAF50" }} />
+          )}
+        </div>
+      ),
+      accessorKey: "shared",
+    },
+    {
+      header: "CMS ID",
+      cell: (info) => (
+        <TruncateText
+          text={info.row.original.actions?.measureSet?.cmsId?.toString() || ""}
+          maxLength={60}
+          dataTestId={`measure-cmsId-${info.row.original.id}`}
+        />
+      ),
+      accessorKey: "cmsId",
+    },
+    {
+      header: "Updated",
+      cell: (info) => (
+        <span>
+          {new Date(
+            info.row.original.actions.lastModifiedAt
+          ).toLocaleDateString()}
+        </span>
+      ),
+      accessorKey: "lastModifiedAt",
+      sortingFn: (rowA, rowB) =>
+        new Date(rowA.original.actions.lastModifiedAt).getTime() -
+        new Date(rowB.original.actions.lastModifiedAt).getTime(),
+    },
+    {
+      header: "",
+      cell: (info) => (
+        <Button
+          variant="outline-filled"
+          data-testid={`measure-action-${info.row.original.id}`}
+          aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
+          onClick={() =>
+            navigate(`/measures/${info.row.original.id}/edit/details`)
+          }
+          role="button"
+        >
+          {checkUserCanEdit(
+            info.row.original.actions?.measureSet?.owner,
+            info.row.original.actions?.measureSet?.acls
+          ) && info.row.original.actions.measureMetaData?.draft
+            ? "Edit"
+            : "View"}
+        </Button>
+      ),
+      accessorKey: "actions",
+      enableSorting: false,
+    },
+  ];
 
   const columns = useMemo<ColumnDef<TCRow>[]>(() => {
     const t = [
@@ -322,7 +437,7 @@ export default function MeasureList(props: {
           );
         },
       },
-      ...columnsToBeAdded,
+      ...(featureFlags?.MeasureSearch ? columnsBehindFlag : columnsToBeAdded),
     ];
     if (featureFlags?.MeasureSearch) {
       t.push({
@@ -402,7 +517,7 @@ export default function MeasureList(props: {
           );
         },
       },
-      ...columnsToBeAdded,
+      ...(featureFlags?.MeasureSearch ? columnsBehindFlag : columnsToBeAdded),
       {
         header: "",
         cell: (info) => <></>,
@@ -914,7 +1029,6 @@ export default function MeasureList(props: {
           />
         </div>
       </div>
-
       <table
         tw="min-w-full"
         data-testid="measure-list-tbl"
@@ -1017,81 +1131,81 @@ export default function MeasureList(props: {
             </React.Fragment>
           ))}
         </tbody>
-        <Toast
-          toastKey="measure-action-toast"
-          aria-live="polite"
-          toastType={toastType}
-          testId={toastType === "danger" ? "error-toast" : "success-toast"}
-          closeButtonProps={{
-            "data-testid": "close-toast-button",
-          }}
-          open={toastOpen}
-          message={toastMessage}
-          onClose={onToastClose}
-          autoHideDuration={6000}
-        />
-        <CreatVersionDialog
-          currentVersion={targetMeasure?.current?.version}
-          open={createVersionDialog.open}
-          onClose={handleDialogClose}
-          onSubmit={checkValidCqlLibraryName}
-          versionHelperText={versionHelperText}
-          loading={loading}
-          measureId={targetMeasure?.current?.id}
-        />
-        <InvalidMeasureNameDialog
-          invalidLibraryDialogOpen={invalidLibraryDialogOpen}
-          onInvalidLibraryNameDialogClose={handleDialogClose}
-          measureName={targetMeasure?.current?.measureName}
-          invalidLibraryErrors={invalidLibraryErrors}
-        />
-        <InvalidTestCaseDialog
-          open={invalidTestCaseOpen}
-          onContinue={createVersion}
-          onClose={handleDialogClose}
-          versionType={versionType}
-          loading={loading}
-        />
-        <DraftMeasureDialog
-          open={draftMeasureDialog.open}
-          onClose={handleDialogClose}
-          onSubmit={draftMeasure}
-          loading={loading}
-          measure={targetMeasure.current}
-        />
-        <ExportDialog
-          failureMessage={failureMessage}
-          measureName={targetMeasure?.current?.measureName}
-          downloadState={downloadState}
-          open={Boolean(downloadState)}
-          handleContinueDialog={handleContinueDialog}
-          handleCancelDialog={handleCancelDialog}
-        />
-        <ShareDialog
-          measures={selectedMeasures}
-          open={shareDialog.open}
-          option={shareDialog.option}
-          onClose={handleShareDialogClose}
-        />
-        <DeleteDialog
-          open={deleteMeasureDialog}
-          onClose={handleDialogClose}
-          measureName={targetMeasure?.current?.measureName}
-          deleteMeasure={deleteMeasure}
-        />
-        <AssociateCmsIdDialog
-          measures={selectedMeasures}
-          onClose={handleDialogClose}
-          open={openAssociateCmsIdDialog}
-          handleCmsIdAssociationContinueDialog={handleCmsIdAssociation}
-        />
-        <ViewHRModal
-          open={viewHumanReadableModal.open}
-          onClose={handleDialogClose}
-          measureId={targetMeasure?.current?.id}
-          exportMeasure={exportMeasure}
-        />
       </table>
+      <Toast
+        toastKey="measure-action-toast"
+        aria-live="polite"
+        toastType={toastType}
+        testId={toastType === "danger" ? "error-toast" : "success-toast"}
+        closeButtonProps={{
+          "data-testid": "close-toast-button",
+        }}
+        open={toastOpen}
+        message={toastMessage}
+        onClose={onToastClose}
+        autoHideDuration={6000}
+      />
+      <CreatVersionDialog
+        currentVersion={targetMeasure?.current?.version}
+        open={createVersionDialog.open}
+        onClose={handleDialogClose}
+        onSubmit={checkValidCqlLibraryName}
+        versionHelperText={versionHelperText}
+        loading={loading}
+        measureId={targetMeasure?.current?.id}
+      />
+      <InvalidMeasureNameDialog
+        invalidLibraryDialogOpen={invalidLibraryDialogOpen}
+        onInvalidLibraryNameDialogClose={handleDialogClose}
+        measureName={targetMeasure?.current?.measureName}
+        invalidLibraryErrors={invalidLibraryErrors}
+      />
+      <InvalidTestCaseDialog
+        open={invalidTestCaseOpen}
+        onContinue={createVersion}
+        onClose={handleDialogClose}
+        versionType={versionType}
+        loading={loading}
+      />
+      <DraftMeasureDialog
+        open={draftMeasureDialog.open}
+        onClose={handleDialogClose}
+        onSubmit={draftMeasure}
+        loading={loading}
+        measure={targetMeasure.current}
+      />
+      <ExportDialog
+        failureMessage={failureMessage}
+        measureName={targetMeasure?.current?.measureName}
+        downloadState={downloadState}
+        open={Boolean(downloadState)}
+        handleContinueDialog={handleContinueDialog}
+        handleCancelDialog={handleCancelDialog}
+      />
+      <ShareDialog
+        measures={selectedMeasures}
+        open={shareDialog.open}
+        option={shareDialog.option}
+        onClose={handleShareDialogClose}
+      />
+      <DeleteDialog
+        open={deleteMeasureDialog}
+        onClose={handleDialogClose}
+        measureName={targetMeasure?.current?.measureName}
+        deleteMeasure={deleteMeasure}
+      />
+      <AssociateCmsIdDialog
+        measures={selectedMeasures}
+        onClose={handleDialogClose}
+        open={openAssociateCmsIdDialog}
+        handleCmsIdAssociationContinueDialog={handleCmsIdAssociation}
+      />
+      <ViewHRModal
+        open={viewHumanReadableModal.open}
+        onClose={handleDialogClose}
+        measureId={targetMeasure?.current?.id}
+        exportMeasure={exportMeasure}
+      />
     </div>
   );
 }
