@@ -623,21 +623,30 @@ describe("TypeEditor Component", () => {
     ).toBeInTheDocument();
   });
   it("Should render URI component ( invalid input validation)", async () => {
-    const handleChange = jest.fn();
-
     render(
       <FormikProvider value={mockFormik}>
-        <TypeEditor
-          type={`uri`}
-          required={true}
-          resource={null}
-          value={`urn:oid:2.16.840.1.113883.6.238`}
-          onChange={handleChange}
-          structureDefinition={null}
-          label={"DiagnosticReport.presentedForm.uri"}
-          canEdit={true}
-          parentStructureDefinition={null}
-        />
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "Observation.uri",
+              path: "Observation.uri",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  code: "uri",
+                },
+              ],
+            }}
+            label={"DiagnosticReport.presentedForm.uri"}
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
       </FormikProvider>
     );
     const inputField = screen.getByTestId(
@@ -647,7 +656,6 @@ describe("TypeEditor Component", () => {
     await act(async () => {
       userEvent.type(inputField, "urn:oid:AA");
     });
-    expect(handleChange).not.toHaveBeenCalled();
     expect(mockSetFieldValue).toHaveBeenCalled();
   });
 
