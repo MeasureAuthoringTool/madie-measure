@@ -270,7 +270,7 @@ describe("UseFetchTestCases", () => {
     expect(initialRenderedCases[4]).toHaveTextContent("zebra");
 
     fireEvent.click(screen.getByTestId("sort-btn"));
-    
+
     await waitFor(() => {
       const sortedCases = screen.getAllByText(/Test Case|apple|cat|zebra/);
       expect(sortedCases[0]).toHaveTextContent("Test Case 1");
