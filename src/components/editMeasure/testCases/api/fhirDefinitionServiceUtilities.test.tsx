@@ -1,3 +1,4 @@
+import * as Yup from "yup";
 import {
   getBasePath,
   getTopLevelElements,
@@ -19,6 +20,7 @@ import {
   mapElementsByPath,
   getIndexFromPath,
   mergePathWithIndex,
+  buildFullValidationSchema,
 } from "./fhirDefinitionServiceUtilities";
 
 describe("FhirDefinitionServiceUtilities", () => {
@@ -208,6 +210,17 @@ describe("getElementName", () => {
     expect(getElementName(element, "some")).toBe("testSlice");
   });
 
+  it("should handle retrievedIndex and Number(retrievedIndex) > 0 to add correct index", () => {
+    const element = {
+      id: "Patient.name[1]",
+      sliceName: "nameSlice",
+      min: 1,
+    } as any;
+    const basePath = "Patient";
+    const result = getElementName(element, basePath);
+    expect(result).toBe("nameSlice 2  *");
+  });
+
   it("returns path minus base", () => {
     const element = { id: "some.path", min: 0, path: "some.path" };
     expect(getElementName(element, "some")).toBe("path");
@@ -227,9 +240,6 @@ describe("getElementName", () => {
     };
     expect(getElementName(element, "some")).toBe("testSlice *");
   });
-});
-
-describe("getElementName", () => {
   it("returns sliceName with index and requiredIndicator if sliceName exists", () => {
     const element = {
       id: "Patient.name[0].given",
@@ -273,6 +283,62 @@ describe("getChildren", () => {
   it("returns empty array if no children", () => {
     const formInfo = { "Patient.address": {} };
     expect(getChildren(formInfo, "Patient.name")).toEqual([]);
+  });
+});
+
+describe("buildFullValidationSchema", () => {
+  it("should build validation schema including primitive validations and arrays", () => {
+    const formInfo = {
+      "Patient.name": {
+        id: "Patient.name",
+        max: "*",
+        validation: undefined,
+      },
+      "Patient.name.given": {
+        id: "Patient.name.given",
+        validation: Yup.string().required("Given name is required"),
+      },
+      "Patient.name.family": {
+        id: "Patient.name.family",
+        validation: Yup.string().required("Family name is required"),
+      },
+      "Patient.birthDate": {
+        id: "Patient.birthDate",
+        validation: Yup.string().required("Birthdate is required"),
+      },
+    };
+
+    const schema = buildFullValidationSchema(formInfo);
+
+    expect(schema).toBeInstanceOf(Yup.ObjectSchema);
+
+    const validData = {
+      Patient: {
+        birthDate: "2000-01-01",
+        name: [
+          { given: "bolwin", family: "pw" },
+          { given: "theo", family: "smith" },
+        ],
+      },
+    };
+
+    expect(() => schema.validateSync(validData)).not.toThrow();
+
+    const invalidData = {
+      Patient: {
+        name: [{ family: "invalid" }],
+        birthDate: "",
+      },
+    };
+
+    try {
+      schema.validateSync(invalidData, { abortEarly: false });
+    } catch (e) {
+      expect(e.inner.map((err) => err.path)).toEqual([
+        "Patient.name[0].given",
+        "Patient.birthDate",
+      ]);
+    }
   });
 });
 
