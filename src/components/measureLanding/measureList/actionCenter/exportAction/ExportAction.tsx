@@ -10,14 +10,7 @@ interface PropTypes {
   measures: Measure[];
   onClick: (exportType: string) => void;
 }
-const iconStyles = {
-  "&.Mui-disabled": {
-    color: "#8C8C8C !important",
-  },
-  "&.MuiIconButton-root": {
-    color: "#0073C8 ",
-  },
-};
+
 export const NOTHING_SELECTED = "Select measure to export";
 export const EXPORT_MEASURE = "Export measure";
 
@@ -72,7 +65,6 @@ export default function ExportAction(props: PropTypes) {
             onClick={handleClick}
             disabled={disableExportBtn}
             data-testid="export-action-btn"
-            sx={iconStyles}
           >
             <FileUploadOutlinedIcon />
           </IconButton>

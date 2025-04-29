@@ -1,6 +1,7 @@
 import {
   generateQdmReport,
   generateQiCoreReport,
+  extractVersionNumber,
 } from "./OverlappingCodesUtils";
 import { ValueSet as CqmValueSet } from "cqm-models";
 import {
@@ -256,6 +257,23 @@ describe("OverlappingCodesUtils", () => {
       const valueSets: ValueSet[] = [];
       const result = generateQiCoreReport(valueSets, undefined);
       expect(result).toEqual([]);
+    });
+  });
+
+  describe("extractVersionNumber", () => {
+    it("should return the version number from a URL", () => {
+      const result = extractVersionNumber("http://example.com/version/1");
+      expect(result).toBe("1");
+    });
+
+    it("should return the input string if no slashes are present", () => {
+      const result = extractVersionNumber("1");
+      expect(result).toBe("1");
+    });
+
+    it("should return an empty string if input is undefined", () => {
+      const result = extractVersionNumber(undefined);
+      expect(result).toBe("");
     });
   });
 });

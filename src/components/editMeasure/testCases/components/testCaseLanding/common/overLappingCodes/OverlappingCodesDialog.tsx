@@ -33,7 +33,7 @@ const Description = ({ valueSet }: { valueSet: OverlappingValueSet }) => {
     <>
       <Box display="flex" alignItems="center" gap={1}>
         <Typography variant="subtitle1" fontWeight="bold">
-          Name:
+          Value Set:
         </Typography>
         <Typography variant="body1">{valueSet.name}</Typography>
       </Box>
