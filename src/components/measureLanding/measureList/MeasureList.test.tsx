@@ -2618,4 +2618,111 @@ describe("Measure List component", () => {
       unmount();
     });
   });
+
+  describe("Measure List with MeasureSearch enabled", () => {
+    beforeEach(() => {
+      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+        MeasureSearch: true,
+      }));
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should display all columns when MeasureSearch is enabled", async () => {
+      const { getByText } = render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={measures}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setLoading={setLoadingMock}
+            activeTab={0}
+            searchCriteria={""}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            setErrMsg={setErrMsgMock}
+          />
+        </ServiceContext.Provider>
+      );
+
+      // Verify all columns are present
+      expect(getByText("Measure")).toBeInTheDocument();
+      expect(getByText("Version")).toBeInTheDocument();
+      expect(getByText("Status")).toBeInTheDocument();
+      expect(getByText("Model")).toBeInTheDocument();
+      expect(getByText("Shared")).toBeInTheDocument();
+      expect(getByText("CMS ID")).toBeInTheDocument();
+      expect(getByText("Updated")).toBeInTheDocument();
+    });
+
+    it("should display shared icon when measure has ACLs", async () => {
+      const measureWithAcls = {
+        ...measures[0],
+        measureSet: {
+          ...measures[0].measureSet,
+          acls: [{ userId: "test-user", roles: ["SHARED_WITH"] }],
+        },
+      };
+
+      const { getByTestId } = render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={[measureWithAcls]}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setLoading={setLoadingMock}
+            activeTab={0}
+            searchCriteria={""}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            setErrMsg={setErrMsgMock}
+          />
+        </ServiceContext.Provider>
+      );
+
+      const checkIcon = screen.getByTestId("CheckCircleOutlineIcon");
+      expect(checkIcon).toBeInTheDocument();
+      expect(checkIcon).toHaveStyle({ color: "#4CAF50" });
+    });
+
+    it("should format the last modified date correctly", () => {
+      const measureWithDate = {
+        ...measures[0],
+        lastModifiedAt: "2023-12-25T12:00:00.000Z",
+      };
+
+      render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={[measureWithDate]}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setLoading={setLoadingMock}
+            activeTab={0}
+            searchCriteria={""}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            setErrMsg={setErrMsgMock}
+          />
+        </ServiceContext.Provider>
+      );
+
+      // Date format will depend on the local system settings, so we'll check for the presence of the date
+      expect(screen.getByText("12/25/2023")).toBeInTheDocument();
+    });
+  });
 });
