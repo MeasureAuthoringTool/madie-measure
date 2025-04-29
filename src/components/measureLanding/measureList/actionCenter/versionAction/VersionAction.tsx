@@ -10,15 +10,7 @@ interface PropTypes {
   onClick: () => void;
   canEdit: boolean;
 }
-const iconStyles = {
-  "&.Mui-disabled": {
-    color: "#8C8C8C !important",
-  },
-  "&.MuiIconButton-root": {
-    color: "#0073C8 ",
-  },
-};
-export const NOTHING_SELECTED = "Select measure to version";
+const NOTHING_SELECTED = "Select measure to version";
 export const VERSION_MEASURE = "Version measure";
 
 export default function VersionAction(props: PropTypes) {
@@ -57,7 +49,6 @@ export default function VersionAction(props: PropTypes) {
           onClick={props.onClick}
           disabled={disableVersionBtn}
           data-testid="version-action-btn"
-          sx={iconStyles}
         >
           <AccountTreeOutlinedIcon />
         </IconButton>

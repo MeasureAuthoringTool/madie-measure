@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "../api/axios-instance";
 import MeasureRoutes from "./measureRoutes/MeasureRoutes";
 import { ApiContextProvider, ServiceConfig } from "../api/ServiceContext";
-
+import { ThemeProvider } from "@mui/material/styles";
+import { theme } from "@madie/madie-design-system/dist/react";
 export default function Home() {
   const [configError, setConfigError] = useState<boolean>(false);
   const [serviceConfig, setServiceConfig] = useState<ServiceConfig | null>(
@@ -33,7 +34,9 @@ export default function Home() {
 
   const loadedState = (
     <ApiContextProvider value={serviceConfig}>
-      <MeasureRoutes />
+      <ThemeProvider theme={theme}>
+        <MeasureRoutes />
+      </ThemeProvider>
     </ApiContextProvider>
   );
 
