@@ -9,14 +9,6 @@ interface PropTypes {
   measures: Measure[];
   onClick: () => void;
 }
-const iconStyles = {
-  "&.Mui-disabled": {
-    color: "#8C8C8C !important",
-  },
-  "&.MuiIconButton-root": {
-    color: "#0073C8 ",
-  },
-};
 export const NOTHING_SELECTED = "Select measure to view human readable";
 export const VIEW_HUMANREADABLE = "View human readable";
 
@@ -51,7 +43,6 @@ export default function ViewHRAction(props: PropTypes) {
           onClick={onClick}
           disabled={disableViewHRBtn}
           data-testid="view-hr-action-btn"
-          sx={iconStyles}
         >
           <HrIcon />
         </IconButton>

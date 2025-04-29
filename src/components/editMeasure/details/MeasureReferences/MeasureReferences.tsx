@@ -12,7 +12,12 @@ import {
   MadieDeleteDialog,
   TextField,
 } from "@madie/madie-design-system/dist/react";
-import { Typography, MenuItem, IconButton } from "@mui/material";
+import {
+  Typography,
+  MenuItem,
+  IconButton,
+  InputAdornment,
+} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { measureStore, checkUserCanEdit } from "@madie/madie-util";
 import { useFormik } from "formik";
@@ -21,7 +26,7 @@ import MeasureMetaDataRow from "../MeasureMetaDataRow";
 import { MeasureReferencesValidator } from "./MeasureReferencesValidator";
 import { Measure, Reference } from "@madie/madie-models";
 import SearchIcon from "@mui/icons-material/Search";
-import InputAdornment from "@material-ui/core/InputAdornment";
+
 import ClearIcon from "@mui/icons-material/Clear";
 
 import "../MeasureMetaDataTable.scss";

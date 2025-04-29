@@ -9,14 +9,7 @@ interface PropTypes {
   onClick: (option: string) => void;
   isOwner: boolean;
 }
-const iconStyles = {
-  "&.Mui-disabled": {
-    color: "#8C8C8C !important",
-  },
-  "&.MuiIconButton-root": {
-    color: "#0073C8 ",
-  },
-};
+
 export const NOTHING_SELECTED = "Select a measure to share/unshare";
 export const INVALID_SHARE_MEASURE =
   "You cannot share/unshare a measure you do not own";
@@ -76,7 +69,6 @@ export default function ShareAction(props: PropTypes) {
           onClick={handleClick}
           disabled={disableShareBtn}
           data-testid="share-action-btn"
-          sx={iconStyles}
         >
           <ShareIcon />
         </IconButton>
