@@ -13,7 +13,7 @@ const ElementEditorChildren = ({
   setLastAddedElemPath,
   selectedResourceID,
   parentStructureDefinition, // Patient, or ClaimResponse
-  rootDefinition = null, // Patient.name or something not top level
+  rootDefinition, // Patient.name or something not top level
   currentDepth,
   resource,
   canEdit,
