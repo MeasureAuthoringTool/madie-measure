@@ -13,9 +13,9 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import "twin.macro";
 import SearchIcon from "@mui/icons-material/Search";
-import InputAdornment from "@material-ui/core/InputAdornment";
+
 import ClearIcon from "@mui/icons-material/Clear";
-import { Typography, IconButton } from "@mui/material";
+import { Typography, IconButton, InputAdornment } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { measureStore, checkUserCanEdit } from "@madie/madie-util";
 import { useFormik } from "formik";
