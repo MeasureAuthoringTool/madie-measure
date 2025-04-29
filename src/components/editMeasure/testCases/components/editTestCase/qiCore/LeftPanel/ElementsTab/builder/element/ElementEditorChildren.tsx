@@ -1,24 +1,19 @@
 import React from "react";
 import * as _ from "lodash";
-import { Box } from "@mui/material";
 import TypeEditor from "./TypeEditor";
-import ElementSection from "../../../../../../common/ElementSection";
-import { transformArrays } from "./transformArrays";
-import {
-  stripResourcePath,
-  removeLastPathSegment,
-  getValueByPath,
-  insertIndexIntoPath,
-  getIndexFromPath,
-  mapElementsByPath,
-  getAllChildren,
-} from "../../../../../../../api/fhirDefinitionServiceUtilities";
-import { useFormikContext } from "formik";
+import { stripResourcePath } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import ElementEditorActionCenter from "./elementEditorActionCenter/ElementEditorActionCenter";
-
+import {
+  ResourceActionType,
+  useQiCoreResource,
+} from "../../../../../../../util/QiCorePatientProvider";
+import Box from "@mui/material/Box";
 
 const ElementEditorChildren = ({
-  rootDefinition = null, // are we at the root of the tree? if so render it as such
+  setLastAddedElemPath,
+  selectedResourceID,
+  parentStructureDefinition, // Patient, or ClaimResponse
+  rootDefinition = null, // Patient.name or something not top level
   currentDepth,
   resource,
   canEdit,
@@ -26,21 +21,24 @@ const ElementEditorChildren = ({
   deleteElement,
 }) => {
   currentDepth = currentDepth + 1;
-  const { values } = useFormikContext();
-  let numberOfElements = 1;
-  const multipleCardinality = rootDefinition?.max === "*";
-  const type = rootDefinition?.type?.[0];
-  // const type= rootDefinition?.type
-  // console.log('type is',type)
   const elemPath = stripResourcePath(resourcePath, rootDefinition.path);
   let elementValue = _.get(resource, elemPath);
+  const { dispatch, state } = useQiCoreResource();
+  const addElementOfMultipleCardinality = () => {
+    const nextEntry = _.cloneDeep(
+      state.bundle?.entry?.find(
+        (entry) => entry.resource.id === selectedResourceID
+      )
+    );
+    // This may be a problem for more simple types.
+    nextEntry.resource[elemPath] = nextEntry.resource[elemPath].concat({});
+    dispatch({
+      type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
+      payload: nextEntry,
+    });
+    setLastAddedElemPath(rootDefinition.path);
+  };
 
-  // console.log('resourcePath', resourcePath, rootDefinition.path, elemPath)
-  if (multipleCardinality) {
-    const label = rootDefinition.id;
-    numberOfElements = getValueByPath(values, label)?.length || 1;
-  }
-  // console.log('structureDefinition', rootDefinition)
   return (
     <div
       className="test-case-tab-heading"
@@ -60,38 +58,21 @@ const ElementEditorChildren = ({
                 ? elementValue.length
                 : 1
             }
+            addElementOfMultipleCardinality={addElementOfMultipleCardinality}
             rootDefinition={rootDefinition}
             handleDelete={deleteElement}
           />
         </div>
       </div>
-      {multipleCardinality ? (
-        Array.from({ length: Number(numberOfElements) }).map((_, ii) => {
-          return (
-            <div key={`${rootDefinition.id}[${ii}]`}>
-              <h4>{`${rootDefinition.id}[${ii}]`}</h4>
-            <TypeEditor
-              key={`${rootDefinition.id}[${ii}]`}              
-              type={type}
-              resource={resource}
-              structureDefinition={rootDefinition}
-              parentStructureDefinition={null}
-              canEdit={canEdit}
-              label={`${rootDefinition?.id}[${ii}]`}
-            />
-            </div>
-          );
-        })
-      ) : (
+      <Box>
         <TypeEditor
-          type={type}
           resource={resource}
           structureDefinition={rootDefinition}
-          parentStructureDefinition={null}
+          parentStructureDefinition={parentStructureDefinition}
           canEdit={canEdit}
           label={rootDefinition?.id}
         />
-      )}
+      </Box>
     </div>
   );
   return null;

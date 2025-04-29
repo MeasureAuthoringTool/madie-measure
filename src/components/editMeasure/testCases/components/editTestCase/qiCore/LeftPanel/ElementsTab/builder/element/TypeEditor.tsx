@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import * as _ from "lodash";
 import Box from "@mui/material/Box";
 import StringComponent from "./types/StringComponent";
@@ -14,20 +14,24 @@ import InstantComponent from "./types/InstantComponent";
 import TimeComponent from "./types/TimeComponent";
 import { useFormikContext } from "formik";
 import ExtensionComponent from "./types/ExtensionComponent";
-import ProfiledExtensionComponent from "./types/ProfiledExtensionComponent";
+import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import {
   isComponentDataType,
   stripAllIndexes,
   getRequired,
+  getTopLevelElements,
+  stripResourcePath,
+  getFirstChildren,
+  getNestedProperty,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import CodingComponent from "./types/CodingComponent";
 import { useRequiredFields } from "./RequiredFieldsContext";
 import ElementSection from "../../../../../../common/ElementSection";
+import { Divider } from "@mui/material";
 // onChange is being deprecated as no updates to the resource are tracked.
 // Changes directly to the json should be done with a disaptch, this propagates downstream changes in formik.
 // any temporary form state should be done through formik.
 const TypeEditor = ({
-  type,
   resource,
   structureDefinition,
   parentStructureDefinition,
@@ -35,41 +39,59 @@ const TypeEditor = ({
   label,
 }) => {
   const formik = useFormikContext();
-  const { requiredFields, formInfo, getFirstChildren, getParentDefinition } = useRequiredFields();
+  const { requiredFields, formInfo } = useRequiredFields();
   let required = getRequired(requiredFields, stripAllIndexes(label));
-  const getString = (string) => {
-    return JSON.stringify(string, null, 2);
-  }
-
+  const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
+  const type = structureDefinition?.type?.[0]?.code;
   // Needs to be a memo instead of a useEffect that resets state. This caused a bunch of rerenders, and got stale values from mapping
   // like passing in an incrementing label like name[0], the result would always end up name[maxNumOfElements] because it was an unstable var
   // don't use useEffects unless you absolutely have to. There is almost certainly always another way.
+
   const childDefs = useMemo(() => {
-    if (!isComponentDataType(type) && type) {
-      const elements = getFirstChildren(stripAllIndexes(label));
+    if (!isComponentDataType(type)) {
+      const elements = getFirstChildren(stripAllIndexes(label), formInfo);
       if (elements?.length) {
         const updatedElements = elements.map((el) => {
           const lastPart = el.id.split(".").pop();
           const updatedId = `${label}.${lastPart}`;
           return { ...el, id: updatedId };
         });
-          // .filter((el) => el.type !== "BackboneElement"); // was doing this earlier. don't think we need now.
-
-        console.log("updatedElements", getString(updatedElements));
-        return updatedElements;
+        return updatedElements; //previously filtered out type === BackboneElement
       }
     }
     return [];
   }, [type, label, getFirstChildren]);
-  const testParentDefinition = getParentDefinition(stripAllIndexes(label));
-  console.log('testPArent',label,  testParentDefinition);
-  console.log('formInfo', formInfo)
-  // console.log('childTypedefs', childTypeDefs, label)
-  const getNestedProperty = (obj, path) => {
-    if (!path) return undefined;
-    const keys = path.match(/([^[.\]]+)/g); // matches words between dots and brackets
-    return keys?.reduce((current, key) => current && current[key], obj);
-  };
+
+  // Given structureDefinition.type[{ code: "sometype", profiles: ["strings", "of", "profiles"]}]
+  // we need to look at the get use the profile list to get resource trees so we can render all the children in case Extension.
+  // Removed POC ProfiledExtension component.
+  const [extensionProfileDef, setExtensionProfileDef] = useState<any[]>(null);
+  useEffect(() => {
+    // can't be a memo since it's async.
+    const fetchProfiles = async () => {
+      const type = structureDefinition?.type?.[0];
+      if (!_.isEmpty(type?.profile)) {
+        const loadProfiles = type.profile.map((profile: string) => {
+          const resourceId = profile.split("/").pop();
+          return fhirDefinitionsService.current.getResourceTree(resourceId);
+        });
+        try {
+          const profileDefinitions = await Promise.all(loadProfiles);
+          if (profileDefinitions) {
+            setExtensionProfileDef(profileDefinitions[0]);
+          } else {
+            setExtensionProfileDef(null);
+          }
+        } catch (e) {
+          console.log("retrieve profileDefinitions failure", e);
+          setExtensionProfileDef(null);
+        }
+      } else {
+        setExtensionProfileDef(null);
+      }
+    };
+    fetchProfiles();
+  }, [structureDefinition?.type?.[0], label, fhirDefinitionsService]);
 
   const formikErrorHandler = (name: string) => {
     const touched = getNestedProperty(formik.touched, name);
@@ -78,7 +100,6 @@ const TypeEditor = ({
       return errors;
     }
   };
-  // console.log('isComponentDataType', getString(label), type)
   if (isComponentDataType(type)) {
     switch (type) {
       case "string":
@@ -223,6 +244,7 @@ const TypeEditor = ({
             structureDefinition={structureDefinition}
             fieldRequired={required}
             label={label}
+            {...formik.getFieldProps(label)}
           />
         );
       case "date":
@@ -252,7 +274,6 @@ const TypeEditor = ({
             label={_.capitalize(
               label?.id?.substring(label?.id?.lastIndexOf(".") + 1)
             )}
-            // label={label}
             structureDefinition={structureDefinition}
           />
         );
@@ -265,44 +286,73 @@ const TypeEditor = ({
           />
         );
       case "Extension":
-        // // return <div/>
-        // return _.isEmpty(structureDefinition?.type?.[0]?.profile) ? (
-        //   <ExtensionComponent
-        //     canEdit={canEdit}
-        //     // onChange={onChange}
-        //     label={label}
-        //     onChange={() => {}}
-        //     fhirResource={resource}
-        //     elementDefinition={structureDefinition}
-        //     parentStructureDefinition={parentStructureDefinition}
-        //   />
-        // ) : (
-        //   <ProfiledExtensionComponent
-        //     label={label}
-        //     canEdit={canEdit}
-        //     structureDefinition={structureDefinition}
-        //     parentStructureDefinition={parentStructureDefinition}
-
-        //     fieldRequired={false}
-        //     resource={resource}
-        //   />
-        // );
+        // map when profiles are there
+        if (extensionProfileDef) {
+          const topLevelElements = extensionProfileDef
+            ? getTopLevelElements(extensionProfileDef)
+            : null;
+          return extensionProfileDef ? (
+            <Box sx={{ display: "flex", flexDirection: "column" }}>
+              <Box>{structureDefinition.short}</Box>
+              <Box sx={{ display: "flex", flexDirection: "column" }}>
+                {topLevelElements.map((elementDefinition, index) => {
+                  const elemPath = stripResourcePath(
+                    "Extension",
+                    elementDefinition.path
+                  );
+                  return (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        marginTop: "10px",
+                      }}
+                    >
+                      <TypeEditor
+                        resource={resource}
+                        structureDefinition={elementDefinition}
+                        // parent structure definition should be structureDefinition, since these are the children
+                        parentStructureDefinition={extensionProfileDef} // parent structureDefinition needs snapshot.element
+                        canEdit={canEdit}
+                        label={elemPath} //this is wrong, TODO: figure out what this should be
+                        // label={}
+                      />
+                      <Divider />
+                    </Box>
+                  );
+                })}
+              </Box>
+            </Box>
+          ) : (
+            <>Loading Extension...</>
+          );
+        }
+        // baes case for extensions. returns [URL, Value] || [FIXEDUri , value]
+        // TODO figure out when NOT to render these components because they can live on anything. Patient.name does not need extensions.
+        return (
+          <ExtensionComponent
+            canEdit={canEdit}
+            onChange={() => {}}
+            // Being depcreated for a formik handleChange
+            // label={label} // label will be needed later to hook up to formik.
+            fhirResource={resource}
+            elementDefinition={structureDefinition}
+            parentStructureDefinition={parentStructureDefinition}
+          />
+        );
       default:
         return <div>Unsupported Type [{type}]</div>;
     }
   } else if (!_.isEmpty(childDefs)) {
-    // console.log('~childDefs', childDefs)
     //  If we have childTypeDefs, we need to check to make weather or not there's an index supplied so we can attach it to the label
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {childDefs?.map((childDef) => {
-          required = getRequired(requiredFields, stripAllIndexes(childDef.id));
           // if it's not a component dataType, we should render a header since it will have it's own property paths
-          if (!isComponentDataType(childDef?.type && childDef.type)) {
+          if (!isComponentDataType(childDef?.type?.[0]?.code)) {
             // add additional check for if the type exists because I have no idea what ClaimResponse.item.detail.adjudication is but it has no type.
-            // TODO Figure out whats up with ClaimResponse.item.detail.adjudication. stupid thing
-            // console.log("!not", childDef, structureDefinition);
-            // TODO probably have to map these multiple cardinality elements against the length of the formik.values[propertyPath] if multiple and add index like done in elementEditorChildren
+            // TODO Figure out whats up with ClaimResponse.item.detail.adjudication. Doesn't appear to have children, but a backbone el
+            // TODO probably have to map these multiple cardinality elements against the length of the formik.values[propertyPath] if multiple and add index like done in elementEditorChildren.
             return (
               <ElementSection
                 title={childDef.id}
@@ -315,7 +365,6 @@ const TypeEditor = ({
                   >
                     <TypeEditor
                       resource={resource}
-                      type={childDef?.type}
                       parentStructureDefinition={structureDefinition}
                       structureDefinition={childDef}
                       canEdit={canEdit}
@@ -329,7 +378,6 @@ const TypeEditor = ({
             return (
               <TypeEditor
                 resource={resource}
-                type={childDef?.type}
                 parentStructureDefinition={structureDefinition}
                 structureDefinition={childDef}
                 canEdit={canEdit}

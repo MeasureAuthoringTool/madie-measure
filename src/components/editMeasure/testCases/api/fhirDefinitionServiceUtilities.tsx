@@ -7,10 +7,19 @@ import * as Yup from "yup";
  */
 export function getElementName(element: ElementDefinition, basePath: string) {
   const requiredIndicator = element.min > 0 ? " *" : "";
-  if (element.sliceName) {
-    return `${element.sliceName}${requiredIndicator}`;
+  let index = "";
+  const retrievedIndex = getIndexFromPathWithoutBrackets(element.id);
+  if (retrievedIndex) {
+    if (Number(retrievedIndex) > 0) {
+      index = ` ${Number(retrievedIndex) + 1} `;
+    }
   }
-  return `${element.path.substring(basePath.length + 1)}${requiredIndicator}`;
+  if (element.sliceName) {
+    return `${element.sliceName}${index}${requiredIndicator}`;
+  }
+  return `${stripAllIndexes(
+    element.id.substring(basePath.length + 1)
+  )}${index}${requiredIndicator}`;
 }
 
 // given an object that we want to copy to
@@ -59,6 +68,68 @@ export function setNestedValue(obj, path, value) {
       current = current[part];
     }
   });
+}
+// get first children of node
+export const getChildren = (formInfo, parentPath) => {
+  const parentDepth = parentPath.split(".").length;
+  return Object.entries(formInfo).filter(([key]) => {
+    const parts = key.split(".");
+    return key.startsWith(parentPath + ".") && parts.length === parentDepth + 1;
+  });
+};
+
+export function recursiveAddYupObject(schemaObject) {
+  for (const key in schemaObject) {
+    const value = schemaObject[key];
+    if (!Yup.isSchema(value) && typeof value === "object") {
+      recursiveAddYupObject(value);
+      schemaObject[key] = Yup.object().shape(value);
+    }
+  }
+  return schemaObject;
+}
+
+export function buildFullValidationSchema(formInfo) {
+  const validationSchemaObject = {};
+  for (const key in formInfo) {
+    const node = formInfo[key];
+    const { validation, max, id } = node;
+    // this is how we get validations for each "primitive type". we need to handle arrays differently.
+    if (validation) {
+      setNestedValue(validationSchemaObject, key, validation);
+      // we need to make arrays of things that are not the root Patient is root, Patient.name is not
+    } else if (!validation && max === "*" && id.split(".").length > 1) {
+      const children = getChildren(formInfo, key);
+      const childShape = {};
+      for (const [childKey, childNode] of children) {
+        //@ts-ignore
+        if (childNode.validation) {
+          const lastPart = childKey.split(".").pop();
+          //@ts-ignore childNode has a .validation typically
+          childShape[lastPart] = childNode.validation;
+        }
+        setNestedValue(
+          validationSchemaObject,
+          key,
+          Yup.array().of(Yup.object().shape(childShape))
+        );
+      }
+      // Now set it as an array of objects at that path
+      setNestedValue(
+        validationSchemaObject,
+        key,
+        Yup.array().of(Yup.object().shape(childShape))
+      );
+    }
+  }
+
+  return Yup.object().shape(recursiveAddYupObject(validationSchemaObject));
+}
+
+export function getNestedProperty(obj, path) {
+  if (!path) return undefined;
+  const keys = path.match(/([^[.\]]+)/g); // matches words between dots and brackets
+  return keys?.reduce((current, key) => current && current[key], obj);
 }
 
 // we want to get all the displayed elements, and then compare them to formik, to make sure we have the first two paths so we know we should add them to the form
@@ -130,6 +201,7 @@ export function getRequiredElements(resource: any) {
 }
 
 // remove the base path of a string like ClaimResponse.item in order to use it as an accessor key.
+// EX (Patient, Patient.name) => returns name;
 export function stripResourcePath(resourcePath, elementPath) {
   return elementPath.substring(`${resourcePath}.`.length);
 }
@@ -164,28 +236,25 @@ export function updateChildrenPaths(structureDefinition, elements) {
   return updatedElements;
 }
 
-// old helper function to map all property paths at a root. I can't remember why this didn't work. Probably a skill issue.
-// export function getAllPropertyPaths(obj, parentPath = "") {
-//   const entries = [];
+// given a path, access formInfo to get the parent. Patient.name -> Patient
+export function getParentDefinition(path, formInfo) {
+  const lastDotIndex = path.lastIndexOf(".");
+  if (lastDotIndex === -1) return undefined; // No parent, it's a root-level node
+  const parentPath = path.slice(0, lastDotIndex);
+  const found = formInfo.find(([key]) => key === parentPath);
+  return found?.[1];
+}
 
-//   if (typeof obj === "object" && obj !== null) {
-//     if (Array.isArray(obj)) {
-//       obj.forEach((value, index) => {
-//         const currentPath = `${parentPath}[${index}]`;
-//         entries.push(...getAllPropertyPaths(value, currentPath));
-//       });
-//     } else {
-//       Object.entries(obj).forEach(([key, value]) => {
-//         const currentPath = parentPath ? `${parentPath}.${key}` : key;
-//         entries.push(...getAllPropertyPaths(value, currentPath));
-//       });
-//     }
-//   } else {
-//     entries.push([parentPath, obj]);
-//   }
-
-//   return entries;
-// }
+// given a path, and formInfo, get all property paths one .[property] deep Patient.name -> Patient.name.given, Patient.name.family
+export function getFirstChildren(path, formInfo) {
+  return formInfo
+    .filter((el) => {
+      if (!el[0]?.startsWith(path + ".")) return false;
+      const subPath = el[0].slice(path.length + 1);
+      return !subPath.includes(".");
+    })
+    .map((el) => el[1]);
+}
 // Access from formInfo when array
 export function stripArrayIndices(path) {
   return path.replace(/\[\d+\]/g, "");
@@ -222,76 +291,6 @@ export function mapElementsRequired(structureDefinition) {
   }, {});
 }
 
-/**
- * Recursively build Yup validation schema object from initialEntries and formInfo
- * Early implementation. This failed to work right.
- * @param {Object} initialEntries - The initial form values
- * @param {Object} formInfo - The form metadata with Yup validators
- * @param {String} resourceType - Top-level resource key (like 'Patient')
- * @param {String} parentPath - current path while traversing
- * @returns {Object} - Object shaped for Yup.object().shape()
- */
-// export function buildValidationSchema(
-//   initialEntries,
-//   formInfo,
-//   resourceType,
-//   parentPath = ""
-// ) {
-//   const schema = {};
-
-//   Object.entries(initialEntries).forEach(([key, value]) => {
-//     const currentPath = parentPath ? `${parentPath}.${key}` : key;
-
-//     if (Array.isArray(value)) {
-//       const itemSchema = value.length
-//         ? buildValidationSchema(
-//             value[0],
-//             formInfo,
-//             resourceType,
-//             `${currentPath}[0]`
-//           )
-//         : {}; // fallback if empty
-
-//       schema[key] = Yup.array().of(Yup.object().shape(itemSchema));
-//     } else if (typeof value === "object" && value !== null) {
-//       schema[key] = Yup.object().shape(
-//         buildValidationSchema(value, formInfo, resourceType, currentPath)
-//       );
-//     } else {
-//       // Leaf value
-//       const fullPath = `${resourceType}.${currentPath}`;
-//       const normalizedPath = fullPath.replace(/\[\d+\]/g, ""); // remove [index] from paths so we can do a lookup
-
-//       const formMeta = formInfo[normalizedPath];
-//       if (formMeta?.validation) {
-//         schema[key] = formMeta.validation;
-//       }
-//     }
-//   });
-
-//   return schema;
-// }
-
-/**
- * Inserts an array index into a FHIR path string at the correct position
- * based on the pathBefore (the path of the multiple cardinality element).
- *
- * @param {string} fullPath - The complete path to the property (e.g. "Patient.name.suffix")
- * @param {string} pathBefore - The path to the multiple cardinality property (e.g. "Patient.name")
- * @param {number} index - The index to insert (e.g. 0)
- * @returns {string} The updated path with the index inserted (e.g. "Patient.name[0].suffix")
- */
-export function insertIndexIntoPath(fullPath, pathBefore, index) {
-  const fullPathSegments = fullPath.split(".");
-  const pathBeforeSegments = pathBefore.split(".");
-
-  const insertIndexAt = pathBeforeSegments.length - 1;
-
-  const pathWithIndex = [...fullPathSegments];
-  pathWithIndex[insertIndexAt] = `${pathWithIndex[insertIndexAt]}[${index}]`;
-
-  return pathWithIndex.join(".");
-}
 // given a path, find out if there's a suffix in it that ends in .[somenumber] and return it.
 // Tool in figuring out cardinality elements and manipulating them.
 // Only gets the index if it's terminated with an index
@@ -302,7 +301,11 @@ export function getIndexFromPath(path) {
   const match = path.match(/(\[\d+\])$/);
   return match ? match[1] : null;
 }
-
+// same thing but we don't want the brackets.
+export function getIndexFromPathWithoutBrackets(path) {
+  const match = path.match(/\[(\d+)\]$/);
+  return match ? match[1] : null;
+}
 /**
  * Takes a path with array indexes in it and another path without them,
  * and smashes the last index from the first one back into the right spot
@@ -341,29 +344,8 @@ export function mergePathWithIndex(pathWithIndex, pathWithoutIndex) {
 
   return pathWithIndex + "." + pathWithoutIndex; // Default fallback if no index
 }
-// function mergePathsWithIndex(pathWithIndex, pathToAppend) {
-//   const partsWithIndex = pathWithIndex.split(".");
-//   const partsToAppend = pathToAppend.split(".");
-
-//   const result = partsToAppend.map((part, i) => {
-//     if (partsWithIndex[i] && partsWithIndex[i].match(/\[\d+\]$/)) {
-//       return partsWithIndex[i];
-//     }
-//     return part;
-//   });
-
-//   // if pathWithIndex was longer (like Patient.name[0].something), preserve extra trailing parts
-//   if (partsWithIndex.length > partsToAppend.length) {
-//     result.push(...partsWithIndex.slice(partsToAppend.length));
-//   }
-
-//   return result.join(".");
-// }
 
 // We need to update labels based weather or not the parent has multiple cardinality as well as if the child is multiple cardinality
-export function getChildLabelForCardinality(rootDefinition, i, itemId, index) {
-  // if ()
-}
 
 // This switch is a check to see weather we have the means to render an input for a given fhir type. needs to be udpated with all validations.
 export function isComponentDataType(datatype) {

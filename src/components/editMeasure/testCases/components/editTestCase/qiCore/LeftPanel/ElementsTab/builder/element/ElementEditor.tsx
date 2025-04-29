@@ -10,7 +10,6 @@ import * as _ from "lodash";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import ElementEditorChildren from "./ElementEditorChildren";
 import "./ElementEditor.scss";
-import * as Yup from "yup";
 import { getValidation } from "./typesValidations/fhirR4Validations";
 import {
   getTopLevelElements,
@@ -18,10 +17,9 @@ import {
   getAllChildren,
   stripResourcePath,
   isComponentDataType,
-  setNestedValue,
   removeUndefinedAndEmptyObjects,
   mapElementsRequired,
-  mapElementsByPath,
+  buildFullValidationSchema,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import {
   useQiCoreResource,
@@ -45,6 +43,7 @@ interface ElementEditorProps {
   setInitialFormikValuesStu6: Dispatch<SetStateAction<Object>>;
   setValidationSchema: Dispatch<SetStateAction<Object>>;
   deleteElement?: (string) => void;
+  setLastAddedElemPath: (string) => void;
 }
 /*
   TO DO: We have too many copies of state.
@@ -53,7 +52,6 @@ interface ElementEditorProps {
 */
 
 export function simplifySnapshotElements(data) {
-  console.log("data is", data);
   return data.map(([path, details]) => [
     path,
     {
@@ -66,12 +64,12 @@ export function simplifySnapshotElements(data) {
   ]);
 }
 const ElementEditor = ({
+  setLastAddedElemPath,
   selectedResource, // this will always be a stale reference because we set it one time. we need the id and to look at the provider
   selectedResourceID,
   resource,
   elementDefinition,
   resourcePath,
-  onChange,
   canEdit,
   displayedElementsTree,
   setInitialFormikValuesStu6,
@@ -103,7 +101,6 @@ const ElementEditor = ({
     nodeList = []
   ) => {
     const type = child?.type?.[0]?.code;
-    // const type = child?.type
     if (!isComponentDataType(type)) {
       // Fetch the resource tree asynchronously
       // nesting these ifs to avoid a crash in deeply nested Claimresponse.item. Might cause issue elsewhere.
@@ -123,12 +120,26 @@ const ElementEditor = ({
               );
             }
           }
-          const { max, min, type, id, binding, extension } = child;
+          const {
+            max,
+            min,
+            type,
+            id,
+            // need binding for extensions
+            binding,
+            // need for extension valueElement. Should probably be depreicated
+            definition,
+            // neex for profiledExtension to map Extension children.
+            snapshot,
+          } = child;
           return nodeList.concat({
             id,
-            type: type[0].code,
+            type: type,
             max,
             required: min > 0,
+            binding,
+            definition,
+            snapshot,
           });
         }
       }
@@ -139,9 +150,8 @@ const ElementEditor = ({
       const canBeMultipleCardinality = child?.max === "*";
       const builtNode = {
         id: child?.id,
-        label: child?.path.split(".").pop(),
         value,
-        type,
+        type: child?.type,
         required,
         validation: null,
         canBeMultipleCardinality,
@@ -154,17 +164,16 @@ const ElementEditor = ({
       const canBeMultipleCardinality = child?.max === "*";
 
       const value = _.get(resource, elemPath);
-      const label = child.path.split(".").pop();
+      const label = child.path.split(".").pop(); // should only be used for validation. dont pass
 
       const builtNode = {
         id: child?.id,
-        label,
         value,
-        type,
+        type: child?.type,
         required,
         validation: getValidation(type, required, label),
-        // validation: getValidation(type?.[0]?.code, required, label),
         canBeMultipleCardinality,
+        snapshot: child.snapshot,
       };
       return nodeList.concat(builtNode);
     }
@@ -198,71 +207,10 @@ const ElementEditor = ({
     buildSchemaAndInitialValues(formInfo, resource);
   };
 
-  const recursiveAddYupObject = (schemaObject) => {
-    for (const key in schemaObject) {
-      const value = schemaObject[key];
-      if (!Yup.isSchema(value) && typeof value === "object") {
-        recursiveAddYupObject(value);
-        schemaObject[key] = Yup.object().shape(value);
-      }
-    }
-    return schemaObject;
-  };
-
-  // get first children of node
-  const getChildren = (formInfo, parentPath) => {
-    const parentDepth = parentPath.split(".").length;
-    return Object.entries(formInfo).filter(([key]) => {
-      const parts = key.split(".");
-      return (
-        key.startsWith(parentPath + ".") && parts.length === parentDepth + 1
-      );
-    });
-  };
-
   // we need to know not only the properties that have values,
   // but also the ones that don't since a user can enter values into those fields
-  const buildFullValidationSchema = (formInfo) => {
-    const validationSchemaObject = {};
-    // console.log("~formInfo", formInfo);
-    for (const key in formInfo) {
-      const node = formInfo[key];
-      const { validation, max, id } = node;
-      // this is how we get validations for each "primitive type". we need to handle arrays differently.
-      if (validation) {
-        setNestedValue(validationSchemaObject, key, validation);
-        // we need to make arrays of things that are not the root Patient is root, Patient.name is not
-      } else if (!validation && max === "*" && id.split(".").length > 1) {
-        const children = getChildren(formInfo, key);
-        const childShape = {};
-        for (const [childKey, childNode] of children) {
-          // console.log("~childKey", childKey, childNode);
-          //@ts-ignore
-          if (childNode.validation) {
-            const lastPart = childKey.split(".").pop();
-            //@ts-ignore childNode has a .validation typically
-            childShape[lastPart] = childNode.validation;
-          }
-          setNestedValue(
-            validationSchemaObject,
-            key,
-            Yup.array().of(Yup.object().shape(childShape))
-          );
-        }
-        // Now set it as an array of objects at that path
-        setNestedValue(
-          validationSchemaObject,
-          key,
-          Yup.array().of(Yup.object().shape(childShape))
-        );
-      }
-    }
-
-    return Yup.object().shape(recursiveAddYupObject(validationSchemaObject));
-  };
 
   const buildSchemaAndInitialValues = (formInfo, resource) => {
-    // console.log('formInfoBefore', formInfo)
     setFormInfo(simplifySnapshotElements(Object.entries(formInfo)));
     // Get the correct initial values more simply.
     const correctInitialValues = {}; // set a root
@@ -274,7 +222,6 @@ const ElementEditor = ({
     const validationSchemaObject = buildFullValidationSchema(formInfo);
     setInitialFormikValuesStu6(correctInitialValues);
     setValidationSchema(validationSchemaObject);
-    console.log('validationschemaobject', validationSchemaObject)
     // need a loading toggle or formikProvider dies violently.
     setLoading(false);
   };
@@ -320,11 +267,7 @@ const ElementEditor = ({
     return <span>No element selected</span>;
   }
 
-  const currentPath = elementDefinition?.path;
-  // const allChildren = getAllChildren(selectedResource, currentPath);
   const currentDepth = elementDefinition?.path.split(".").length;
-  const mappedSnapshotElements = mapElementsByPath(selectedResource); // this includes stuff like name.
-
   // <TypeEditor will either render a node or all top level elements if it's not a root. We need to make that check here
   if (!loading) {
     // prevent render from happening with no provider values
@@ -346,6 +289,11 @@ const ElementEditor = ({
           <ElementEditorChildren //recursive render control
             // stuff we need only at the init root
             resourcePath={resourcePath}
+            parentStructureDefinition={
+              selectedResource?.definition?.snapshot?.element[0]
+            }
+            setLastAddedElemPath={setLastAddedElemPath}
+            selectedResourceID={selectedResourceID}
             rootDefinition={elementDefinition} // only provided at root for a different render
             currentDepth={currentDepth}
             resource={resource}

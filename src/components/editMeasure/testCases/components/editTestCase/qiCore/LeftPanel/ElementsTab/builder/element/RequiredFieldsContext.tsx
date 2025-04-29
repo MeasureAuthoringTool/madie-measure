@@ -34,22 +34,6 @@ export const RequiredFieldsProvider = ({
       formInfo,
       // path can be ClaimResponse.item
       // I want everything that's ClaimResponse.item.id, ClaimResponse.item.text, but not ClaimResponse.item.nothing.else
-      getFirstChildren: (path) => {
-        return formInfo
-          .filter((el) => {
-            if (!el[0]?.startsWith(path + ".")) return false;
-            const subPath = el[0].slice(path.length + 1);
-            return !subPath.includes(".");
-          })
-          .map((el) => el[1]);
-      },
-      getParentDefinition: (path) => {
-        const lastDotIndex = path.lastIndexOf(".");
-          if (lastDotIndex === -1) return undefined; // No parent, it's a root-level node
-          const parentPath = path.slice(0, lastDotIndex);
-          const found = formInfo.find(([key]) => key === parentPath);
-          return found?.[1];
-      }
     };
   }, [requiredFields, formInfo]);
 
