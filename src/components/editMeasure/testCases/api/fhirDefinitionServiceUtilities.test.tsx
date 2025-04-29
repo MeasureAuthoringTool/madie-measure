@@ -10,6 +10,15 @@ import {
   getDisplayedElementsTree,
   removeUndefinedAndEmptyObjects,
   getElementName,
+  getChildren,
+  getParentDefinition,
+  getFirstChildren,
+  stripArrayIndices,
+  removeLastPathSegment,
+  getValueByPath,
+  mapElementsByPath,
+  getIndexFromPath,
+  mergePathWithIndex,
 } from "./fhirDefinitionServiceUtilities";
 
 describe("FhirDefinitionServiceUtilities", () => {
@@ -217,5 +226,182 @@ describe("getElementName", () => {
       path: "some.path",
     };
     expect(getElementName(element, "some")).toBe("testSlice *");
+  });
+});
+
+describe("getElementName", () => {
+  it("returns sliceName with index and requiredIndicator if sliceName exists", () => {
+    const element = {
+      id: "Patient.name[0].given",
+      min: 1,
+      sliceName: "givenName",
+    };
+    expect(getElementName(element as any, "Patient")).toBe("givenName *");
+  });
+
+  it("returns path without basePath and indexes if no sliceName", () => {
+    const element = { id: "Patient.name[0].family", min: 0 };
+    expect(getElementName(element as any, "Patient")).toBe("name.family");
+  });
+
+  it("handles no index correctly", () => {
+    const element = { id: "Patient.birthDate", min: 0 };
+    expect(getElementName(element as any, "Patient")).toBe("birthDate");
+  });
+
+  it("adds required indicator if min > 0", () => {
+    const element = { id: "Patient.gender", min: 1 };
+    expect(getElementName(element as any, "Patient")).toBe("gender *");
+  });
+});
+
+describe("getChildren", () => {
+  it("returns immediate children under parentPath", () => {
+    const formInfo = {
+      "Patient.name": {},
+      "Patient.name.given": {},
+      "Patient.name.family": {},
+      "Patient.address": {},
+    };
+    const result = getChildren(formInfo, "Patient.name");
+    expect(result.map(([key]) => key)).toEqual([
+      "Patient.name.given",
+      "Patient.name.family",
+    ]);
+  });
+
+  it("returns empty array if no children", () => {
+    const formInfo = { "Patient.address": {} };
+    expect(getChildren(formInfo, "Patient.name")).toEqual([]);
+  });
+});
+
+describe("getParentDefinition", () => {
+  it("finds the parent definition", () => {
+    const formInfo = [
+      ["Patient.name", { label: "Name" }],
+      ["Patient.name.given", { label: "Given" }],
+    ];
+    const result = getParentDefinition("Patient.name.given", formInfo);
+    expect(result).toEqual({ label: "Name" });
+  });
+
+  it("returns undefined if no parent found", () => {
+    const formInfo = [["Patient.name", { label: "Name" }]];
+    expect(getParentDefinition("Patient.gender", formInfo)).toBeUndefined();
+  });
+
+  it("returns undefined if root node", () => {
+    const formInfo = [["Patient", { label: "Patient" }]];
+    expect(getParentDefinition("Patient", formInfo)).toBeUndefined();
+  });
+});
+
+describe("getFirstChildren", () => {
+  it("returns first children correctly", () => {
+    const formInfo = [
+      ["Patient.name", {}],
+      ["Patient.name.given", {}],
+      ["Patient.name.given.family", {}],
+      ["Patient.gender", {}],
+    ];
+    const result = getFirstChildren("Patient.name", formInfo);
+    expect(result.length).toBe(1);
+  });
+
+  it("returns empty array if no children", () => {
+    const formInfo = [["Patient.gender", {}]];
+    expect(getFirstChildren("Patient.name", formInfo)).toEqual([]);
+  });
+});
+
+describe("stripArrayIndices", () => {
+  it("removes array indices from path", () => {
+    expect(stripArrayIndices("Patient.name[0].given[1]")).toBe(
+      "Patient.name.given"
+    );
+  });
+
+  it("returns path unchanged if no indices", () => {
+    expect(stripArrayIndices("Patient.gender")).toBe("Patient.gender");
+  });
+});
+
+describe("removeLastPathSegment", () => {
+  it("removes last segment from path", () => {
+    expect(removeLastPathSegment("Patient.name.given")).toBe("Patient.name");
+  });
+
+  it("returns empty string if single segment", () => {
+    expect(removeLastPathSegment("Patient")).toBe("");
+  });
+});
+
+describe("getValueByPath", () => {
+  it("retrieves nested value", () => {
+    const obj = { Patient: { name: { given: "john" } } };
+    expect(getValueByPath(obj, "Patient.name.given")).toBe("john");
+  });
+
+  it("returns undefined if path does not exist", () => {
+    const obj = { Patient: { name: {} } };
+    expect(getValueByPath(obj, "Patient.address.street")).toBeUndefined();
+  });
+});
+
+describe("mapElementsByPath", () => {
+  it("maps elements by their path", () => {
+    const structureDefinition = {
+      definition: {
+        snapshot: {
+          element: [{ path: "Patient.name" }, { path: "Patient.name.given" }],
+        },
+      },
+    };
+    const result = mapElementsByPath(structureDefinition);
+    expect(result["Patient.name"]).toEqual({ path: "Patient.name" });
+    expect(result["Patient.name.given"]).toEqual({
+      path: "Patient.name.given",
+    });
+  });
+
+  it("returns empty object if no elements", () => {
+    expect(mapElementsByPath({})).toEqual({});
+  });
+});
+
+describe("getIndexFromPath", () => {
+  it("returns the index from path", () => {
+    expect(getIndexFromPath("Patient.name[2]")).toBe("[2]");
+  });
+
+  it("returns null if no index", () => {
+    expect(getIndexFromPath("Patient.gender")).toBeNull();
+  });
+});
+
+describe("mergePathWithIndex", () => {
+  it("merges paths correctly with existing index", () => {
+    const pathWithIndex = "Patient.name[1]";
+    const pathWithoutIndex = "Patient.name.given";
+    expect(mergePathWithIndex(pathWithIndex, pathWithoutIndex)).toBe(
+      "Patient.name[1].given"
+    );
+  });
+
+  it("merges paths correctly when base differs", () => {
+    const pathWithIndex = "Patient.address[0]";
+    const pathWithoutIndex = "Patient.contact.name";
+    expect(mergePathWithIndex(pathWithIndex, pathWithoutIndex)).toBe(
+      "Patient.address[0].Patient.contact.name"
+    );
+  });
+
+  it("fallbacks to joining paths if no index", () => {
+    const pathWithIndex = "Patient.name";
+    const pathWithoutIndex = "Patient.name.given";
+    expect(mergePathWithIndex(pathWithIndex, pathWithoutIndex)).toBe(
+      "Patient.name.Patient.name.given"
+    );
   });
 });
