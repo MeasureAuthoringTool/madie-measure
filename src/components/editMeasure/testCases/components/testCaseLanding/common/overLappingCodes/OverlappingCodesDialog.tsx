@@ -23,7 +23,7 @@ import {
 } from "../../../../util/OverlappingCodesUtils";
 import { Box, Typography } from "@mui/material";
 import { Measure } from "@madie/madie-models";
-import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
+import useExcelExportService from "../../../../api/useExcelExportService";
 import getModelFamily from "../../../../util/measureModelHelpers";
 import UseToast from "../../common/Hooks/UseToast";
 import ExportDialog from "../../../../../../measureLanding/measureList/exportDialog/ExportDialog";
@@ -279,7 +279,7 @@ const OverlappingCodesDialog = ({
 }: OverlappingCodesDialogProps) => {
   const { setToastOpen, setToastMessage, setToastType } = UseToast();
   const abortController = useRef(null);
-  const measureServiceApi = useRef(useMeasureServiceApi()).current;
+  const excelExportService = useRef(useExcelExportService());
   const [failureMessage, setFailureMessage] = useState(null);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
 
@@ -296,8 +296,7 @@ const OverlappingCodesDialog = ({
     setExportDialogOpen(true);
     try {
       abortController.current = new AbortController();
-      const response = await measureServiceApi.getOverlappingValueSets(
-        measure?.id,
+      const response = await excelExportService.current.getOverlappingValueSets(
         overlappingCodes,
         abortController.current.signal
       );

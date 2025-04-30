@@ -9,9 +9,9 @@ import {
   ApiContextProvider,
   ServiceConfig,
 } from "../../../../../../../api/ServiceContext";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../../api/useMeasureServiceApi";
+import useExcelExportService, {
+  ExcelExportService,
+} from "../../../../api/useExcelExportService";
 import { MemoryRouter } from "react-router-dom";
 
 const serviceConfig = {
@@ -20,9 +20,9 @@ const serviceConfig = {
   },
 } as unknown as ServiceConfig;
 
-jest.mock("../../../../api/useMeasureServiceApi");
-const useMeasureServiceMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
+jest.mock("../../../../api/useExcelExportService");
+const useExcelExportMock =
+  useExcelExportService as jest.Mock<ExcelExportService>;
 
 window.URL.createObjectURL = jest.fn().mockImplementation(() => "url");
 
@@ -342,7 +342,7 @@ describe("OverlappingCodesDialog", () => {
   });
 
   it("should handle Export button click", async () => {
-    const useMeasureServiceMockResolved = {
+    const useMExcelExportServiceMockResolved = {
       getOverlappingValueSets: jest.fn().mockResolvedValue({
         data: new Blob(["test"], {
           type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -354,10 +354,10 @@ describe("OverlappingCodesDialog", () => {
         status: 200,
         statusText: "OK",
       }),
-    } as unknown as MeasureServiceApi;
+    } as unknown as ExcelExportService;
 
-    useMeasureServiceMock.mockImplementation(() => {
-      return useMeasureServiceMockResolved;
+    useExcelExportMock.mockImplementation(() => {
+      return useMExcelExportServiceMockResolved;
     });
     render(
       <MemoryRouter>
@@ -380,20 +380,20 @@ describe("OverlappingCodesDialog", () => {
     userEvent.click(exportButton);
     await waitFor(() => {
       expect(
-        useMeasureServiceMockResolved.getOverlappingValueSets
+        useMExcelExportServiceMockResolved.getOverlappingValueSets
       ).toHaveBeenCalled();
     });
   });
 
   it("should handle Export button click failure", async () => {
-    const useMeasureServiceMockRejected = {
+    const useExcelExportServiceMockRejected = {
       getOverlappingValueSets: jest
         .fn()
         .mockRejectedValue(new Error("Network error")),
-    } as unknown as MeasureServiceApi;
+    } as unknown as ExcelExportService;
 
-    useMeasureServiceMock.mockImplementation(() => {
-      return useMeasureServiceMockRejected;
+    useExcelExportMock.mockImplementation(() => {
+      return useExcelExportServiceMockRejected;
     });
     render(
       <MemoryRouter>
@@ -414,9 +414,10 @@ describe("OverlappingCodesDialog", () => {
     expect(exportButton).not.toBeDisabled();
 
     userEvent.click(exportButton);
+
     await waitFor(() => {
       expect(
-        useMeasureServiceMockRejected.getOverlappingValueSets
+        useExcelExportServiceMockRejected.getOverlappingValueSets
       ).toHaveBeenCalled();
     });
   });

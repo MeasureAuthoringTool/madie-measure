@@ -56,33 +56,6 @@ export class MeasureServiceApi {
       throw err;
     }
   }
-
-  async getOverlappingValueSets(
-    measureId: string,
-    overlappingCodes: OverlappingCode[],
-    abortController: AbortController
-  ): Promise<any> {
-    try {
-      const response = await axios.put(
-        `${this.baseUrl}/measures/${measureId}/test-cases/exportOverlappingValueSets`,
-        overlappingCodes,
-        {
-          headers: {
-            Authorization: `Bearer ${this.getAccessToken()}`,
-            "Accept-Encoding": "application/vnd.ms-excel",
-          },
-          signal: abortController.signal,
-          responseType: "blob",
-        }
-      );
-      return response;
-    } catch (err) {
-      console.error("getOverlappingValueSets error", err);
-      throw new Error(
-        "An error occurred, please try again. If the error persists, please contact the help desk."
-      );
-    }
-  }
 }
 
 export default function useMeasureServiceApi(): MeasureServiceApi {
