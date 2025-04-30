@@ -11,7 +11,8 @@ interface PropTypes {
 }
 
 export const MUST_BE_OWNER = "Must own both selected measures";
-export const MUST_BE_DIFFERENT_MODELS = "Measures must be different models";
+export const MUST_SELECT_ONE_QDM_AND_ONE_QI_CORE_MEASURE =
+  "Must select one QDM and one QI-Core measure";
 export const MUST_BE_DRAFT = "QI-Core measure must be in a draft status";
 export const MUST_HAVE_CMS_ID = "QDM measure must contain a CMS ID";
 export const MUST_NOT_HAVE_CMS_ID = "QI-Core measure must NOT contain a CMS ID";
@@ -28,43 +29,39 @@ export default function AssociateCmsIdAction(props: PropTypes) {
   const userName = getUserName();
 
   const validateAssociateCmsIdActionState = useCallback(() => {
-    // set button state to disabled by default
-    setDisableAssociateCmsIdBtn(true);
     if (measures?.length === 2) {
-      const [measure1, measure2] = measures;
-      if (
-        measure1.measureSet.owner !== userName ||
-        measure2.measureSet.owner !== userName
-      ) {
-        setTooltipMessage(MUST_BE_OWNER);
-      } else if (measure1.model === measure2.model) {
-        setTooltipMessage(MUST_BE_DIFFERENT_MODELS);
-      } else if (
-        ((measure1.model === Model.QICORE ||
-          measure1.model === Model.QICORE_6_0_0) &&
-          !measure1.measureMetaData.draft) ||
-        ((measure2.model === Model.QICORE ||
-          measure2.model === Model.QICORE_6_0_0) &&
-          !measure2.measureMetaData.draft)
-      ) {
-        setTooltipMessage(MUST_BE_DRAFT);
-      } else if (
-        (measure1.model === Model.QDM_5_6 && !measure1.measureSet.cmsId) ||
-        (measure2.model === Model.QDM_5_6 && !measure2.measureSet.cmsId)
-      ) {
-        setTooltipMessage(MUST_HAVE_CMS_ID);
-      } else if (
-        ((measure1.model === Model.QICORE ||
-          measure1.model === Model.QICORE_6_0_0) &&
-          measure1.measureSet.cmsId) ||
-        ((measure2.model === Model.QICORE ||
-          measure2.model === Model.QICORE_6_0_0) &&
-          measure2.measureSet.cmsId)
-      ) {
-        setTooltipMessage(MUST_NOT_HAVE_CMS_ID);
+      const qdmMeasure = measures.find(
+        (measure) => measure.model === Model.QDM_5_6
+      );
+
+      const qiCoreMeasure = measures.find(
+        (measure) =>
+          measure.model === Model.QICORE || measure.model === Model.QICORE_6_0_0
+      );
+
+      if (qdmMeasure && qiCoreMeasure) {
+        // set button state to disabled by default
+        setDisableAssociateCmsIdBtn(true);
+
+        if (
+          qdmMeasure.measureSet.owner.toLowerCase() !==
+            userName.toLowerCase() ||
+          qiCoreMeasure.measureSet.owner.toLowerCase() !==
+            userName.toLowerCase()
+        ) {
+          setTooltipMessage(MUST_BE_OWNER);
+        } else if (!qiCoreMeasure.measureMetaData.draft) {
+          setTooltipMessage(MUST_BE_DRAFT);
+        } else if (!qdmMeasure.measureSet.cmsId) {
+          setTooltipMessage(MUST_HAVE_CMS_ID);
+        } else if (qiCoreMeasure.measureSet.cmsId) {
+          setTooltipMessage(MUST_NOT_HAVE_CMS_ID);
+        } else {
+          setTooltipMessage(ASSOCIATE_CMS_ID);
+          setDisableAssociateCmsIdBtn(false);
+        }
       } else {
-        setTooltipMessage(ASSOCIATE_CMS_ID);
-        setDisableAssociateCmsIdBtn(false);
+        setTooltipMessage(MUST_SELECT_ONE_QDM_AND_ONE_QI_CORE_MEASURE);
       }
     } else {
       setTooltipMessage(SELECT_TWO_MEASURES);
