@@ -256,15 +256,7 @@ const ElementEditor = ({
   // <TypeEditor will either render a node or all top level elements if it's not a root. We need to make that check here
   if (!loading) {
     return (
-      <Box
-        sx={{
-          padding: "0 24px 24px",
-          display: "flex",
-          flexDirection: "column",
-          width: "100%",
-        }}
-        id="element-editor"
-      >
+      <Box id="element-editor">
         {/* we need to render not only the current item, but all children */}
         <ElementEditorChildren //recursive render control
           // stuff we need only at the init root

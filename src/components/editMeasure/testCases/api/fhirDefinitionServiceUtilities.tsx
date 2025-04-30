@@ -10,7 +10,7 @@ export function getElementName(element: ElementDefinition, basePath: string) {
   if (element.sliceName) {
     return `${element.sliceName}${requiredIndicator}`;
   }
-  return `${element.path.substring(basePath.length + 1)}${requiredIndicator}`;
+  return `${requiredIndicator}${element.path.substring(basePath.length + 1)}`;
 }
 
 // given an object that we want to copy to
