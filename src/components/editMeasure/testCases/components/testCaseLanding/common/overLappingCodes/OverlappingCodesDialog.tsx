@@ -12,7 +12,11 @@ import {
   ColumnDef,
   flexRender,
 } from "@tanstack/react-table";
-import { MadieDialog, Pagination } from "@madie/madie-design-system/dist/react";
+import {
+  MadieDialog,
+  Pagination,
+  Toast,
+} from "@madie/madie-design-system/dist/react";
 import tw from "twin.macro";
 import "styled-components/macro";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -277,15 +281,21 @@ const OverlappingCodesDialog = ({
   measure,
   setOpenDialog,
 }: OverlappingCodesDialogProps) => {
-  const { setToastOpen, setToastMessage, setToastType } = UseToast();
+  const {
+    toastOpen,
+    setToastOpen,
+    toastMessage,
+    setToastMessage,
+    toastType,
+    setToastType,
+    onToastClose,
+  } = UseToast();
   const abortController = useRef(null);
   const excelExportService = useRef(useExcelExportService());
-  const [failureMessage, setFailureMessage] = useState(null);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
 
   const handleContinueDialog = () => {
     setExportDialogOpen(false);
-    setFailureMessage(null);
   };
   const handleCancelDialog = () => {
     abortController.current && abortController.current.abort();
@@ -318,7 +328,7 @@ const OverlappingCodesDialog = ({
       link.click();
       document.body.removeChild(link);
 
-      setExportDialogOpen(false);
+      //setExportDialogOpen(false);
       setToastOpen(true);
       setToastType("success");
       setToastMessage("Overlapping Codes report exported successfully");
@@ -327,9 +337,6 @@ const OverlappingCodesDialog = ({
       setToastOpen(true);
       setToastType("danger");
       setToastMessage(
-        `Unable to export Overlapping Codes for ${measure?.measureName}. Please try again and contact the Help Desk if the problem persists.`
-      );
-      setFailureMessage(
         `Unable to export Overlapping Codes for ${measure?.measureName}. Please try again and contact the Help Desk if the problem persists.`
       );
     }
@@ -370,11 +377,28 @@ const OverlappingCodesDialog = ({
       </MadieDialog>
 
       <ExportDialog
-        failureMessage={failureMessage}
-        measureName={measure?.measureName}
+        failureMessage={""}
+        measureName={"Overlapping Codes"}
         open={exportDialogOpen}
         handleContinueDialog={handleContinueDialog}
         handleCancelDialog={handleCancelDialog}
+      />
+      <Toast
+        toastKey="overlapping-codes-toast"
+        aria-live="polite"
+        toastType={toastType}
+        testId={
+          toastType === "danger"
+            ? "overlapping-codes-generic-error-text"
+            : "overlapping-codes-success-text"
+        }
+        closeButtonProps={{
+          "data-testid": "close-overlapping-codes-error-button",
+        }}
+        open={toastOpen}
+        message={toastMessage}
+        onClose={onToastClose}
+        autoHideDuration={6000}
       />
     </>
   );
