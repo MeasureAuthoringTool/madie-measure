@@ -262,6 +262,7 @@ describe("UseFetchTestCases", () => {
     const initialRenderedCases = screen.getAllByText(
       /Test Case|apple|cat|zebra/
     );
+
     expect(initialRenderedCases[0]).toHaveTextContent("Test Case 1");
     expect(initialRenderedCases[1]).toHaveTextContent("Test Case 2");
     expect(initialRenderedCases[2]).toHaveTextContent("cat");
@@ -269,12 +270,14 @@ describe("UseFetchTestCases", () => {
     expect(initialRenderedCases[4]).toHaveTextContent("zebra");
 
     fireEvent.click(screen.getByTestId("sort-btn"));
-    // just passing time to see if code coverage triggers.
-    const foo = true;
-    await new Promise((r) => setTimeout(r, 2000));
-    expect(foo).toBeDefined();
+
+    await waitFor(() => {
+      const sortedCases = screen.getAllByText(/Test Case|apple|cat|zebra/);
+      expect(sortedCases[0]).toHaveTextContent("Test Case 1");
+      expect(sortedCases[1]).toHaveTextContent(/Test Case 2|cat/);
+    });
   });
-  // forget it. exporting the lines this doesn't reach.
+
   it("should sort test cases based on sorting state", () => {
     const testCaseList = [
       { title: "apple", validResource: true, lastModifiedAt: new Date() },
