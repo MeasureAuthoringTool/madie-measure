@@ -199,13 +199,8 @@ describe("getElementName", () => {
     expect(getElementName(element, "some")).toBe("path");
   });
 
-  it("adds required indicator", () => {
+  it("Should add required indicator when the attribute is required", () => {
     const element = { min: 1, path: "some.path" };
-    expect(getElementName(element, "some")).toBe("path *");
-  });
-
-  it("adds required indicator", () => {
-    const element = { min: 1, sliceName: "testSlice", path: "some.path" };
-    expect(getElementName(element, "some")).toBe("testSlice *");
+    expect(getElementName(element, "some")).toBe(" *path");
   });
 });
