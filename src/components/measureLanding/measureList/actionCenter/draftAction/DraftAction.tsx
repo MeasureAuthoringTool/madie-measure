@@ -13,14 +13,7 @@ interface PropTypes {
   onClick: () => void;
   canEdit: boolean;
 }
-const iconStyles = {
-  "&.Mui-disabled": {
-    color: "#8C8C8C !important",
-  },
-  "&.MuiIconButton-root": {
-    color: "#0073C8 ",
-  },
-};
+
 export const NOTHING_SELECTED = "Select measure to draft";
 export const DRAFT_MEASURE = "Draft measure";
 export const LOOKUP_ERROR = "There was an error checking draftability. ";
@@ -124,7 +117,6 @@ export default function DraftAction(props: PropTypes) {
           onClick={props.onClick}
           disabled={disableDraftBtn}
           data-testid="draft-action-btn"
-          sx={iconStyles}
         >
           <EditCalendarOutlinedIcon />
           <Toast

@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import tw from "twin.macro";
 import "styled-components/macro";
-import { IconButton, MenuItem, Chip } from "@mui/material";
+import { IconButton, MenuItem, Chip, InputAdornment } from "@mui/material";
 import {
   MadieDialog,
   MadieSpinner,
@@ -16,7 +16,7 @@ import {
   Select,
   TextField,
 } from "@madie/madie-design-system/dist/react";
-import InputAdornment from "@material-ui/core/InputAdornment";
+
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import * as _ from "lodash";
