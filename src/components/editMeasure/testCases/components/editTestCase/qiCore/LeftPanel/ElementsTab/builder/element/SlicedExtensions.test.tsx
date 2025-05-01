@@ -9,7 +9,9 @@ import {
   ApiContextProvider,
   ServiceConfig,
 } from "../../../../../../../../../../api/ServiceContext";
-
+import { RequiredFieldsProvider } from "./RequiredFieldsContext";
+import mockRequiredFields from "./mockRequiredFields";
+import mockFormInfo from "./mockFormInfo";
 jest.mock("../../../../../../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
@@ -158,17 +160,22 @@ describe("TypeEditor for profiled extensions/slices ", () => {
     render(
       <ApiContextProvider value={mockServiceConfig}>
         <FormikProvider value={mockFormik}>
-          <TypeEditor
-            type="Extension"
-            resource={resource}
-            required={false}
-            value={undefined}
-            onChange={handleChange}
-            structureDefinition={qiCoreEthnicityStructureDefinition}
-            parentStructureDefinition={null}
-            label={label}
-            canEdit={true}
-          />
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              type="Extension"
+              resource={resource}
+              required={false}
+              value={undefined}
+              onChange={handleChange}
+              structureDefinition={qiCoreEthnicityStructureDefinition}
+              parentStructureDefinition={null}
+              label={label}
+              canEdit={true}
+            />
+          </RequiredFieldsProvider>
         </FormikProvider>
       </ApiContextProvider>
     );
