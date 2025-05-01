@@ -328,7 +328,7 @@ const OverlappingCodesDialog = ({
       link.click();
       document.body.removeChild(link);
 
-      //setExportDialogOpen(false);
+      setExportDialogOpen(false);
       setToastOpen(true);
       setToastType("success");
       setToastMessage("Overlapping Codes report exported successfully");
