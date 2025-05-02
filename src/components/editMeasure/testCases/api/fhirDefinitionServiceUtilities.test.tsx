@@ -471,3 +471,38 @@ describe("mergePathWithIndex", () => {
     );
   });
 });
+
+describe("buildFullValidationSchema", () => {
+  it("handles array of objects with children", () => {
+    const formInfo = {
+      Patient: { id: "Patient" },
+      "Patient.address": { id: "Patient.address", max: "*" },
+      "Patient.address.line": {
+        id: "Patient.address.line",
+      },
+      "Patient.address.city": {
+        id: "Patient.address.city",
+        validation: Yup.string().required("City is required"),
+      },
+    };
+
+    const schema = buildFullValidationSchema(formInfo, "Patient");
+    expect(() =>
+      schema.validateSync(
+        {
+          Patient: {
+            address: [{ line: "", city: "" }],
+          },
+        },
+        { abortEarly: false }
+      )
+    ).toThrowError(
+      expect.objectContaining({
+        name: "ValidationError",
+        inner: expect.arrayContaining([
+          expect.objectContaining({ path: "Patient.address[0].city" }),
+        ]),
+      })
+    );
+  });
+});

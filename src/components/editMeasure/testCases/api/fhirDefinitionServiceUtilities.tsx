@@ -131,7 +131,6 @@ export function buildSchemaRecursive(formInfo, path) {
 
 // we want to build out every end of the tree before making yup object shapes since they're immutable.
 export function buildFullValidationSchema(formInfo, rootPath) {
-  // beginning of rework.
   const validationSchemaObject = buildSchemaRecursive(formInfo, rootPath);
   return Yup.object().shape({
     [rootPath]: validationSchemaObject,
