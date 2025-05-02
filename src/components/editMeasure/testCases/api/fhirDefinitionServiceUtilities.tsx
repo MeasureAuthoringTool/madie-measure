@@ -42,7 +42,7 @@ const removeArrayIndexes = (path) => {
  * @param {string} path - The path with bracket indexes.
  *   Example: "ClaimResponse.item[0].modifierExtension[23].text[1114].note"
  *
- * @returns {string} - Path with all [x] indexes nuked.
+ * @returns {string} - Path with all [x] indexes removed.
  *   Example: "ClaimResponse.item.modifierExtension.text.note"
  */
 export function stripAllIndexes(path) {
@@ -88,42 +88,54 @@ export function recursiveAddYupObject(schemaObject) {
   }
   return schemaObject;
 }
+// had to remake schema builder again.
+export function buildSchemaRecursive(formInfo, path) {
+  // it previously failed when running into a case where a schema was already at object property for Encounter
+  const node = formInfo[path];
 
-export function buildFullValidationSchema(formInfo) {
-  const validationSchemaObject = {};
-  for (const key in formInfo) {
-    const node = formInfo[key];
-    const { validation, max, id } = node;
-    // this is how we get validations for each "primitive type". we need to handle arrays differently.
-    if (validation) {
-      setNestedValue(validationSchemaObject, key, validation);
-      // we need to make arrays of things that are not the root Patient is root, Patient.name is not
-    } else if (!validation && max === "*" && id.split(".").length > 1) {
-      const children = getChildren(formInfo, key);
-      const childShape = {};
-      for (const [childKey, childNode] of children) {
-        //@ts-ignore
-        if (childNode.validation) {
-          const lastPart = childKey.split(".").pop();
-          //@ts-ignore childNode has a .validation typically
-          childShape[lastPart] = childNode.validation;
-        }
-        setNestedValue(
-          validationSchemaObject,
-          key,
-          Yup.array().of(Yup.object().shape(childShape))
-        );
-      }
-      // Now set it as an array of objects at that path
-      setNestedValue(
-        validationSchemaObject,
-        key,
-        Yup.array().of(Yup.object().shape(childShape))
-      );
-    }
+  if (!node) return Yup.mixed();
+
+  const children = getChildren(formInfo, path);
+  // assume this returns an array of paths like "Patient.name[0].given" , {}
+
+  // Case has a validation
+  if (node.validation && children.length === 0) {
+    return node.validation;
   }
 
-  return Yup.object().shape(recursiveAddYupObject(validationSchemaObject));
+  // Array case
+  if (node.max === "*" && children.length > 0) {
+    const shape = {};
+    children.forEach(([id]) => {
+      const lastKey = id.split(".").pop();
+      shape[lastKey] = buildSchemaRecursive(formInfo, id);
+    });
+
+    return Yup.array().of(Yup.object().shape(shape));
+  }
+
+  // objects with children
+  if (children.length > 0) {
+    const shape = {};
+    children.forEach(([id]) => {
+      const lastKey = id.split(".").pop();
+      shape[lastKey] = buildSchemaRecursive(formInfo, id);
+    });
+
+    return Yup.object().shape(shape);
+  }
+
+  // Fallback
+  return Yup.mixed();
+}
+
+// we want to build out every end of the tree before making yup object shapes since they're immutable.
+export function buildFullValidationSchema(formInfo, rootPath) {
+  // beginning of rework.
+  const validationSchemaObject = buildSchemaRecursive(formInfo, rootPath);
+  return Yup.object().shape({
+    [rootPath]: validationSchemaObject,
+  });
 }
 
 export function getNestedProperty(obj, path) {

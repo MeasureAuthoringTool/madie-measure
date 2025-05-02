@@ -93,13 +93,7 @@ const ElementEditor = ({
   // A collection of all labels with without array indeces to serve as constant time lookup in type editor for weather it's required
   const requiredFields = mapElementsRequired(selectedResource); // this includes stuff like name.
   const [formInfo, setFormInfo] = useState(null);
-  const buildNode = async (
-    child,
-    resourcePath,
-    fhirDefinitionsService,
-    resource,
-    nodeList = []
-  ) => {
+  const buildNode = async (child, resourcePath, resource, nodeList = []) => {
     const type = child?.type?.[0]?.code;
     if (!isComponentDataType(type)) {
       // Fetch the resource tree asynchronously
@@ -114,7 +108,6 @@ const ElementEditor = ({
               nodeList = await buildNode(
                 element,
                 resourcePath,
-                fhirDefinitionsService,
                 resource,
                 nodeList
               );
@@ -129,7 +122,7 @@ const ElementEditor = ({
             binding,
             // need for extension valueElement. Should probably be depreicated
             definition,
-            // neex for profiledExtension to map Extension children.
+            // need for profiledExtension to map Extension children.
             snapshot,
           } = child;
           return nodeList.concat({
@@ -182,7 +175,6 @@ const ElementEditor = ({
   const buildForm = async (
     rootDefinition,
     allChildren,
-    fhirDefinitionsService,
     resourcePath,
     resource
   ) => {
@@ -191,14 +183,7 @@ const ElementEditor = ({
     const allNodes = [rootDefinition, ...allChildren];
 
     for (const node of allNodes) {
-      nodeList.push(
-        ...(await buildNode(
-          node,
-          resourcePath,
-          fhirDefinitionsService,
-          resource
-        ))
-      );
+      nodeList.push(...(await buildNode(node, resourcePath, resource)));
     }
     for (const builtNode of nodeList) {
       // associate id with form
@@ -219,7 +204,10 @@ const ElementEditor = ({
     for (const [key, value] of entries) {
       correctInitialValues[resource.resourceType][key] = value;
     }
-    const validationSchemaObject = buildFullValidationSchema(formInfo);
+    const validationSchemaObject = buildFullValidationSchema(
+      formInfo,
+      resource.resourceType
+    );
     setInitialFormikValuesStu6(correctInitialValues);
     setValidationSchema(validationSchemaObject);
     // need a loading toggle or formikProvider dies violently.
@@ -231,7 +219,6 @@ const ElementEditor = ({
     await buildForm(
       selectedResource?.definition?.snapshot?.element?.[0],
       allChildren,
-      fhirDefinitionsService,
       resourcePath,
       selectedResourceOnBundleEntry
     );
