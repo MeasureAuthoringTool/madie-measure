@@ -72,19 +72,18 @@ export const getPositiveIntegerValidator = (required) => {
 
 // Any non-negative integer in the range 0..2,147,483,647
 export const getUnsignedIntegerValidator = (required) => {
-  const integerReg = /^(0|[1-9][0-9]*)$/; // Matches 0 or any positive integer without leading zeros
+  const integerReg = /^(0|[1-9][0-9]*)$/;
   const baseValidator = Yup.string()
-    .matches(integerReg, "Invalid Unsigned Integer format") // Validate the format first
+    .matches(integerReg, "Invalid Unsigned Integer format")
     .test(
       "range",
       `Unsigned integer range is [0 to ${INTEGER_MAXIMUM}]`,
       (val) => {
         if (val && integerReg.test(val)) {
-          // Only check range if the format is valid
           const num = Number(val);
           return num >= 0 && num <= INTEGER_MAXIMUM;
         }
-        return true; // Skip range validation if the format is invalid
+        return true;
       }
     );
   if (required) {
