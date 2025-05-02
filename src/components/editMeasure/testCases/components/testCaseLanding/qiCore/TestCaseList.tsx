@@ -31,7 +31,6 @@ import {
   MadieSpinner,
   Pagination,
   Toast,
-  MadieAlert,
 } from "@madie/madie-design-system/dist/react";
 import Typography from "@mui/material/Typography";
 import TestCaseImportFromBonnieDialog from "../common/import/TestCaseImportFromBonnieDialog";
@@ -47,6 +46,11 @@ import FileSaver from "file-saver";
 import TestCaseImportDialog from "../common/import/TestCaseImportDialog";
 import ActionCenter from "../common/ActionCenter/ActionCenter";
 import CopyTestCaseDialog from "../common/copyTestCases/CopyTestCaseDialog";
+import {
+  OverlappingCode,
+  generateQiCoreReport,
+} from "../../../util/OverlappingCodesUtils";
+import OverlappingCodesDialog from "../common/overLappingCodes/OverlappingCodesDialog";
 
 export const IMPORT_ERROR =
   "An error occurred while importing your test cases. Please try again, or reach out to the Help Desk.";
@@ -159,7 +163,6 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [openImportDialog, setOpenImportDialog] = useState<boolean>(false);
   const [openDeleteAllTestCasesDialog, setOpenDeleteAllTestCasesDialog] =
     useState<boolean>(false);
-  const [testCaseShiftWarning, setTestCaseShiftWarning] = useState<any>();
   const abortController = useRef(null);
   const [createOpen, setCreateOpen] = useState<boolean>(false);
   const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
@@ -168,6 +171,12 @@ const TestCaseList = (props: TestCaseListProps) => {
     useState<boolean>(false);
   const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
   const featureFlags = useFeatureFlags();
+
+  const [overlappingCodes, setOverlappingCodes] = useState<OverlappingCode[]>(
+    []
+  );
+  const [openOverlappingCodesDialog, setOpenOverlappingCodesDialog] =
+    useState<boolean>(false);
 
   useEffect(() => {
     if (testCases?.length != measure?.testCases?.length) {
@@ -421,6 +430,11 @@ const TestCaseList = (props: TestCaseListProps) => {
     }
   };
 
+  const handleGenerateOverlappingCodesReport = () => {
+    setOverlappingCodes(generateQiCoreReport(valueSets, measureBundle));
+    setOpenOverlappingCodesDialog(true);
+  };
+
   const handleClose = () => {
     setCreateOpen(false);
   };
@@ -621,6 +635,9 @@ const TestCaseList = (props: TestCaseListProps) => {
                 measure={measure}
                 createNewTestCase={createNewTestCase}
                 executeTestCases={executeTestCases}
+                onGenerateOverlappingCodesReport={
+                  handleGenerateOverlappingCodesReport
+                }
                 onImportTestCasesFromBonnie={() => {
                   setErrors((prevState) => [
                     ...prevState?.filter((e) => e !== IMPORT_ERROR),
@@ -791,6 +808,11 @@ const TestCaseList = (props: TestCaseListProps) => {
             open: false,
           })
         }
+      />
+      <OverlappingCodesDialog
+        openDialog={openOverlappingCodesDialog}
+        handleClose={() => setOpenOverlappingCodesDialog(false)}
+        overlappingCodes={overlappingCodes}
       />
     </div>
   );

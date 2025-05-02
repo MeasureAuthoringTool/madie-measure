@@ -66,11 +66,7 @@ export default function ExportAction(props: PropTypes) {
             disabled={disableExportBtn}
             data-testid="export-action-btn"
           >
-            <FileUploadOutlinedIcon
-              sx={
-                disableExportBtn ? { color: grey[500] } : { color: blue[500] }
-              }
-            />
+            <FileUploadOutlinedIcon />
           </IconButton>
         </span>
       </Tooltip>

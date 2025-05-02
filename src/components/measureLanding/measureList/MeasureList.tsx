@@ -8,9 +8,9 @@ import React, {
 } from "react";
 import tw from "twin.macro";
 import "styled-components/macro";
-import { Measure, Model, MeasureScoring } from "@madie/madie-models";
+import { Measure, Model } from "@madie/madie-models";
 import { useNavigate } from "react-router-dom";
-import { Chip, IconButton } from "@mui/material";
+import { Chip, IconButton, InputAdornment } from "@mui/material";
 import {
   Button,
   Popover,
@@ -28,7 +28,7 @@ import {
 } from "@tanstack/react-table";
 
 import InvalidTestCaseDialog from "../../common/invalidTestCaseDialog/InvalidTestCaseDialog";
-import InputAdornment from "@material-ui/core/InputAdornment";
+
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
@@ -50,6 +50,8 @@ import {
   ExpandIcon,
   CollapseIcon,
 } from "../../../icons/MeasureListTableRightArrowIcons";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import { exportMeasure as downloadMeasureExport } from "../../../utils/exportUtil";
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -86,7 +88,7 @@ export default function MeasureList(props: {
   setTotalItems;
   setVisibleItems;
   setOffset;
-  setInitialLoad;
+  setLoading;
   activeTab: number;
   searchCriteria: string;
   setSearchCriteria;
@@ -103,20 +105,11 @@ export default function MeasureList(props: {
 
   const navigate = useNavigate();
   // Popover utilities
-  const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [selectedMeasure, setSelectedMeasure] = useState<Measure>(null);
   const [canEdit, setCanEdit] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   // if user can edit and it is a version, then draft button
-  const [
-    otherSelectOptionPropsForPopOver,
-    setOtherSelectOptionPropsForPopOver,
-  ] = useState(null);
-  const [additionalSelectOptionProps, setAdditionalSelectOptionProps] =
-    useState(null);
-  const [editViewButtonLabel, setEditViewButtonLabel] = useState<string>(null);
 
   const targetMeasure = useRef<Measure>();
 
@@ -263,6 +256,7 @@ export default function MeasureList(props: {
             maxLength={60}
             dataTestId={`measure-version-${info.row.original.id}`}
           />
+
           {`${info.row.original.actions.measureMetaData?.draft}` === "true" && (
             <Chip tw="ml-6" className="chip-draft" label="Draft" />
           )}
@@ -309,21 +303,124 @@ export default function MeasureList(props: {
       enableSorting: false,
     },
   ];
+  const columnsBehindFlag = [
+    {
+      header: "Measure",
+      cell: (info) => (
+        <>
+          <TruncateText
+            text={info.row.original.measureName}
+            maxLength={120}
+            dataTestId={`measure-name-${info.row.original.id}`}
+          />
+        </>
+      ),
+      accessorKey: "measureName",
+      sortingFn: (rowA, rowB) =>
+        customSort(rowA.original.measureName, rowB.original.measureName),
+    },
+    {
+      header: "Version",
+      cell: (info) => (
+        <TruncateText
+          text={info.row.original.version}
+          maxLength={60}
+          dataTestId={`measure-version-${info.row.original.id}`}
+        />
+      ),
+      accessorKey: "version",
+      sortingFn: (rowA, rowB) =>
+        customSort(rowA.original.version, rowB.original.version),
+    },
+    {
+      header: "Status",
+      cell: (info) => (
+        <>
+          {`${info.row.original.actions.measureMetaData?.draft}` === "true" && (
+            <Chip className="chip-draft" label="Draft" />
+          )}
+        </>
+      ),
+      accessorKey: "status",
+    },
+    {
+      header: "Model",
+      cell: (info) => (
+        <TruncateText
+          text={info.row.original.model}
+          maxLength={120}
+          dataTestId={`measure-model-${info.row.original.id}`}
+        />
+      ),
+      accessorKey: "model",
+      sortingFn: (rowA, rowB) =>
+        customSort(rowA.original.model, rowB.original.model),
+    },
+    {
+      header: "Shared",
+      cell: (info) => (
+        <div>
+          {info.row.original.actions?.measureSet?.acls?.length > 0 && (
+            <CheckCircleOutlineIcon sx={{ color: "#4CAF50" }} />
+          )}
+        </div>
+      ),
+      accessorKey: "shared",
+    },
+    {
+      header: "CMS ID",
+      cell: (info) => (
+        <TruncateText
+          text={info.row.original.actions?.measureSet?.cmsId?.toString() || ""}
+          maxLength={60}
+          dataTestId={`measure-cmsId-${info.row.original.id}`}
+        />
+      ),
+      accessorKey: "cmsId",
+    },
+    {
+      header: "Updated",
+      cell: (info) => (
+        <span>
+          {new Date(
+            info.row.original.actions.lastModifiedAt
+          ).toLocaleDateString()}
+        </span>
+      ),
+      accessorKey: "lastModifiedAt",
+      sortingFn: (rowA, rowB) =>
+        new Date(rowA.original.actions.lastModifiedAt).getTime() -
+        new Date(rowB.original.actions.lastModifiedAt).getTime(),
+    },
+    {
+      header: "",
+      cell: (info) => (
+        <Button
+          variant="outline-filled"
+          data-testid={`measure-action-${info.row.original.id}`}
+          aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
+          onClick={() =>
+            navigate(`/measures/${info.row.original.id}/edit/details`)
+          }
+          role="button"
+        >
+          {checkUserCanEdit(
+            info.row.original.actions?.measureSet?.owner,
+            info.row.original.actions?.measureSet?.acls
+          ) && info.row.original.actions.measureMetaData?.draft
+            ? "Edit"
+            : "View"}
+        </Button>
+      ),
+      accessorKey: "actions",
+      enableSorting: false,
+    },
+  ];
 
   const columns = useMemo<ColumnDef<TCRow>[]>(() => {
     const t = [
       {
-        id: "select",
-        accessorKey: "select",
-        header: ({ table }) => (
-          <IndeterminateCheckbox
-            {...{
-              checked: table.getIsAllRowsSelected(),
-              indeterminate: table.getIsSomePageRowsSelected(),
-              onChange: table.getToggleAllPageRowsSelectedHandler(),
-            }}
-          />
-        ),
+        id: "select", // retain ID so we have the column for checkboxes but the header is blank
         cell: ({ row }) => {
           return (
             <div className="px-1">
@@ -340,7 +437,7 @@ export default function MeasureList(props: {
           );
         },
       },
-      ...columnsToBeAdded,
+      ...(featureFlags?.MeasureSearch ? columnsBehindFlag : columnsToBeAdded),
     ];
     if (featureFlags?.MeasureSearch) {
       t.push({
@@ -420,7 +517,7 @@ export default function MeasureList(props: {
           );
         },
       },
-      ...columnsToBeAdded,
+      ...(featureFlags?.MeasureSearch ? columnsBehindFlag : columnsToBeAdded),
       {
         header: "",
         cell: (info) => <></>,
@@ -469,11 +566,12 @@ export default function MeasureList(props: {
     table.toggleAllRowsSelected(false);
   }, [props.currentLimit, props.currentPage]);
 
-  const parentMeasures = props.measureList?.filter((measure) => {
-    return table
-      .getSelectedRowModel()
-      .rows.find((row) => row.original.id === measure.id);
-  });
+  const parentMeasures =
+    props.measureList?.filter((measure) => {
+      return table
+        .getSelectedRowModel()
+        .rows.find((row) => row.original.id === measure.id);
+    }) || [];
 
   const expandedMeasures = selectedExpandedMeasuresIds?.map(
     (expandedMeasureId) => {
@@ -518,6 +616,9 @@ export default function MeasureList(props: {
     toastMessage = "",
     toastOpen = false,
   } = {}) => {
+    if (toastType === "success") {
+      doUpdateList();
+    }
     setShareDialog({
       open: false,
       option: "",
@@ -542,6 +643,7 @@ export default function MeasureList(props: {
   };
 
   const handleClearClick = async (event) => {
+    props.setLoading(true);
     abortController.current = new AbortController();
     props.setSearchCriteria("");
     measureServiceApi
@@ -555,7 +657,6 @@ export default function MeasureList(props: {
         setPageProps(data);
       })
       .catch((error: Error) => {
-        props.setInitialLoad(false);
         props.setErrMsg("");
       });
     navigate(`?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`);
@@ -578,7 +679,7 @@ export default function MeasureList(props: {
         setPageProps(data);
       })
       .catch((error: Error) => {
-        props.setInitialLoad(false);
+        props.setLoading(false);
         props.setErrMsg(error.message);
       });
   };
@@ -586,6 +687,7 @@ export default function MeasureList(props: {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (props.searchCriteria) {
+      props.setLoading(true);
       doSearch();
     }
 
@@ -602,7 +704,7 @@ export default function MeasureList(props: {
 
       props.setMeasureList(content);
       props.setOffset(pageable.offset);
-      props.setInitialLoad(false);
+      props.setLoading(false);
     }
   };
 
@@ -634,231 +736,35 @@ export default function MeasureList(props: {
       updateTargetMeasure(selectedMeasure);
     }
   }, [selectedMeasure]);
-  const handlePopOverOpen = useCallback(
-    async (selected: Measure, event: React.MouseEvent<HTMLButtonElement>) => {
-      setOptionsOpen(true);
-      setSelectedMeasure(selected);
-      setAnchorEl(event.currentTarget);
-
-      const isSelectedMeasureEditable = checkUserCanEdit(
-        selected?.measureSet?.owner,
-        selected?.measureSet?.acls
-      );
-      setCanEdit(isSelectedMeasureEditable);
-      setEditViewButtonLabel(
-        isSelectedMeasureEditable && selected?.measureMetaData.draft
-          ? "Edit"
-          : "View"
-      );
-
-      let options = [];
-      // additional options are outside the edit flag
-      let additionalOptions = [];
-      // always on if feature
-      const exportButton = {
-        label: "Export",
-        toImplementFunction: exportMeasure,
-        dataTestId: `export-measure-${selected?.id}`,
-      };
-      additionalOptions.push(exportButton);
-      // no longer an always on if feature
-      if (selected.measureMetaData.draft) {
-        options.push({
-          label: "Version",
-          toImplementFunction: checkCreateVersion,
-          dataTestId: `create-version-measure-${selected?.id}`,
-        });
-        // draft should only be available if no other measureSet is in draft, by call
-      }
-      if (canDraftRef.current[selected?.measureSetId]) {
-        options.push({
-          label: "Draft",
-          toImplementFunction: () => setDraftMeasureDialog({ open: true }),
-          dataTestId: `draft-measure-${selected?.id}`,
-        });
-      }
-      setAdditionalSelectOptionProps(additionalOptions);
-      setOtherSelectOptionPropsForPopOver(options);
-    },
-    [canDraftLookup]
-  );
-
-  const handleClose = () => {
-    setOtherSelectOptionPropsForPopOver(null);
-    setOptionsOpen(false);
-    setSelectedMeasure(null);
-    setAnchorEl(null);
-    setCanEdit(false);
-  };
-
-  const viewEditRedirect = () => {
-    navigate(`/measures/${selectedMeasure?.id}/edit/details`);
-    setOptionsOpen(false);
-  };
 
   const [downloadState, setDownloadState] = useState(null); // state of dialog
   const [failureMessage, setFailureMessage] = useState(null); // message to pass to dialog
   // Ref required or value will be lost on all state changes.
   const abortController = useRef(null);
 
-  const downloadZipFile = (
-    exportData,
-    ecqmTitle,
-    model,
-    version,
-    warn = false
-  ) => {
-    const url = window.URL.createObjectURL(exportData);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute(
-      "download",
-      `${_.trim(ecqmTitle)}-v${version}-${getModelFamily(model)}.zip`
-    );
-    document.body.appendChild(link);
-    link.click();
-    setToastOpen(true);
-    setToastType("success");
-    setToastMessage("Measure exported successfully");
-    setDownloadState(warn ? "warning" : "success");
-    document.body.removeChild(link);
-  };
-
   const exportMeasure = async (elmErrorSeverity: string) => {
     setViewHumanReadableModal({
       open: false,
       measureId: "",
     });
-    setFailureMessage(null);
-    setDownloadState("downloading");
     try {
-      // we need to generate an abort controller for this call and bind it in the context of our ref
-      abortController.current = new AbortController();
-      const { ecqmTitle, model, version } = targetMeasure?.current ?? {};
-      const { status, data } = await measureServiceApi?.getMeasureExport(
-        targetMeasure.current?.id,
-        elmErrorSeverity,
-        abortController.current.signal
+      const measure: Measure = await measureServiceApi.fetchMeasure(
+        targetMeasure.current?.id
       );
-      const warn =
-        status === 201 && !targetMeasure?.current?.measureMetaData?.draft;
-      downloadZipFile(data, ecqmTitle, model, version, warn);
-    } catch (err) {
-      const errorStatus = err.response?.status;
-      if (err.message === "canceled") {
-        setToastOpen(false);
-        setDownloadState(null);
-      } else {
-        setToastType("danger");
-        setDownloadState("failure");
-        if (errorStatus === 409) {
-          const {
-            cql,
-            cqlErrors,
-            errors,
-            groups,
-            measureMetaData,
-            cqlLibraryName,
-            model,
-            baseConfigurationTypes,
-          } = await measureServiceApi?.fetchMeasure(targetMeasure.current?.id);
-          const missing = [];
-          if (_.isEmpty(cql)) {
-            missing.push("Missing CQL");
-          }
-          if (cqlErrors) {
-            missing.push("CQL Contains Errors");
-          }
-          if (!_.isEmpty(errors)) {
-            errors.forEach((error) => {
-              if (error.startsWith("MISMATCH_CQL_POPULATION_RETURN_TYPES")) {
-                missing.push("CQL Populations Return Types are invalid");
-              } else if (error.startsWith("MISMATCH_CQL_RISK_ADJUSTMENT")) {
-                missing.push("CQL Risk Adjustment are invalid");
-              } else if (error.startsWith("MISMATCH_CQL_SUPPLEMENTAL_DATA")) {
-                missing.push("CQL Supplemental Data Elements are invalid");
-              }
-            });
-          }
-          if (
-            (model.startsWith("QI-Core") &&
-              !/^(^[A-Z][a-zA-Z0-9]*$)/.test(cqlLibraryName)) ||
-            (model.startsWith("QDM") &&
-              !/^(^[A-Z][a-zA-Z0-9_]*$)/.test(cqlLibraryName)) ||
-            cqlLibraryName == null ||
-            cqlLibraryName.length > 64
-          ) {
-            missing.push("Measure CQL Library Name is invalid");
-          }
-          if (_.isEmpty(groups)) {
-            missing.push("Missing Population Criteria");
-          }
-          if (_.isEmpty(measureMetaData.developers)) {
-            missing.push("Missing Measure Developers");
-          }
-          if (_.isEmpty(measureMetaData.steward)) {
-            missing.push("Missing Steward");
-          }
-          if (_.isEmpty(measureMetaData.description)) {
-            missing.push("Missing Description");
-          }
-          if (
-            model === Model.QICORE &&
-            groups &&
-            groups.filter(
-              (group) =>
-                group.measureGroupTypes === null ||
-                _.isEmpty(group.measureGroupTypes)
-            ).length > 0
-          ) {
-            missing.push("At least one Population Criteria is missing Type");
-          }
-          if (model === Model.QDM_5_6 && _.isEmpty(baseConfigurationTypes)) {
-            missing.push("Measure Type is required");
-          }
-          if (
-            (model === Model.QICORE || model === Model.QICORE_6_0_0) &&
-            measureMetaData.draft
-          ) {
-            if (
-              groups?.some(
-                (group) =>
-                  _.isEmpty(group.improvementNotation) &&
-                  group.scoring !== MeasureScoring.COHORT
-              )
-            ) {
-              missing.push(
-                "At least one Population Criteria is missing Improvement Notation"
-              );
-            }
-          }
-          if (missing.length <= 0) {
-            const message =
-              "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists.";
-            setFailureMessage(message);
-          } else if (missing.length > 0) {
-            setFailureMessage(missing);
-          }
-          // we send a custom error here. but it's type blob. we decode it here.
-        } else if (errorStatus === 400) {
-          try {
-            const blobFailureError = await err.response.data.text();
-            let parsed;
-            try {
-              parsed = JSON.parse(blobFailureError);
-            } catch (jsonError) {
-              parsed = { message: blobFailureError };
-            }
-            setFailureMessage(parsed.message || "Unknown error occurred.");
-          } catch (blobError) {
-            setFailureMessage("An error occurred while decoding the response.");
-          }
-        } else {
-          const message =
-            "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists.";
-          setFailureMessage(message);
-        }
-      }
+      await downloadMeasureExport(
+        setFailureMessage,
+        setDownloadState,
+        abortController,
+        measure,
+        measureServiceApi,
+        setToastOpen,
+        setToastType,
+        setToastMessage,
+        elmErrorSeverity
+      );
+    } catch (error) {
+      console.error("Error fetching measure:", error);
+      setFailureMessage("Failed to fetch measure");
     }
   };
   const handleContinueDialog = () => {
@@ -883,7 +789,7 @@ export default function MeasureList(props: {
         setPageProps(data);
       })
       .catch((error: Error) => {
-        props.setInitialLoad(false);
+        props.setLoading(false);
         props.setErrMsg(error.message);
       });
   };
@@ -895,22 +801,21 @@ export default function MeasureList(props: {
 
   const handleCreateError = (error) => {
     const errorData = error?.response;
+    const message = errorData?.data?.message;
+
     setToastOpen(true);
     setLoading(false);
     if (errorData?.status === 400) {
       setToastMessage("Requested measure cannot be versioned");
     } else if (errorData?.status === 403) {
       setToastMessage("User is unauthorized to create a version");
-    } else if (errorData?.status === 409) {
-      setToastMessage(
-        errorData?.data?.message
-          ? errorData.data.message
-          : "Requested operation could not be completed. Please contact the Help Desk."
-      );
     } else {
-      setToastMessage(errorData?.message ? errorData.message : "Server error!");
+      setToastMessage(
+        message ||
+          "Requested operation could not be completed. Please contact the Help Desk."
+      );
     }
-    const message = JSON.parse(errorData?.request?.responseText)?.message;
+
     if (message) {
       setVersionHelperText(versionErrorHelper(message));
     }
@@ -945,7 +850,6 @@ export default function MeasureList(props: {
         open: true,
         measureId: targetMeasure.current?.id,
       });
-      setOptionsOpen(false);
       setLoading(false);
     } else {
       await measureServiceApi
@@ -1003,7 +907,6 @@ export default function MeasureList(props: {
       .draftMeasure(targetMeasure.current?.id, model, measureName)
       .then(async () => {
         setLoading(false);
-        setOptionsOpen(false);
         handleDialogClose();
         setToastOpen(true);
         setToastType("success");
@@ -1129,7 +1032,6 @@ export default function MeasureList(props: {
           />
         </div>
       </div>
-
       <table
         tw="min-w-full"
         data-testid="measure-list-tbl"
@@ -1232,94 +1134,81 @@ export default function MeasureList(props: {
             </React.Fragment>
           ))}
         </tbody>
-        <Popover
-          optionsOpen={optionsOpen}
-          anchorEl={anchorEl}
-          handleClose={handleClose}
-          canEdit={canEdit}
-          editViewSelectOptionProps={{
-            label: editViewButtonLabel,
-            toImplementFunction: viewEditRedirect,
-            dataTestId: `view-measure-${selectedMeasure?.id}`,
-          }}
-          otherSelectOptionProps={otherSelectOptionPropsForPopOver}
-          additionalSelectOptionProps={additionalSelectOptionProps}
-        />
-        <Toast
-          toastKey="measure-action-toast"
-          aria-live="polite"
-          toastType={toastType}
-          testId={toastType === "danger" ? "error-toast" : "success-toast"}
-          closeButtonProps={{
-            "data-testid": "close-toast-button",
-          }}
-          open={toastOpen}
-          message={toastMessage}
-          onClose={onToastClose}
-          autoHideDuration={6000}
-        />
-        <CreatVersionDialog
-          currentVersion={targetMeasure?.current?.version}
-          open={createVersionDialog.open}
-          onClose={handleDialogClose}
-          onSubmit={checkValidCqlLibraryName}
-          versionHelperText={versionHelperText}
-          loading={loading}
-          measureId={targetMeasure?.current?.id}
-        />
-        <InvalidMeasureNameDialog
-          invalidLibraryDialogOpen={invalidLibraryDialogOpen}
-          onInvalidLibraryNameDialogClose={handleDialogClose}
-          measureName={targetMeasure?.current?.measureName}
-          invalidLibraryErrors={invalidLibraryErrors}
-        />
-        <InvalidTestCaseDialog
-          open={invalidTestCaseOpen}
-          onContinue={createVersion}
-          onClose={handleDialogClose}
-          versionType={versionType}
-          loading={loading}
-        />
-        <DraftMeasureDialog
-          open={draftMeasureDialog.open}
-          onClose={handleDialogClose}
-          onSubmit={draftMeasure}
-          loading={loading}
-          measure={targetMeasure.current}
-        />
-        <ExportDialog
-          failureMessage={failureMessage}
-          measureName={targetMeasure?.current?.measureName}
-          downloadState={downloadState}
-          open={Boolean(downloadState)}
-          handleContinueDialog={handleContinueDialog}
-          handleCancelDialog={handleCancelDialog}
-        />
-        <ShareDialog
-          measures={selectedMeasures}
-          open={shareDialog.open}
-          option={shareDialog.option}
-          onClose={handleShareDialogClose}
-        />
-        <DeleteDialog
-          open={deleteMeasureDialog}
-          onClose={handleDialogClose}
-          measureName={targetMeasure?.current?.measureName}
-          deleteMeasure={deleteMeasure}
-        />
-        <AssociateCmsIdDialog
-          measures={selectedMeasures}
-          onClose={handleDialogClose}
-          open={openAssociateCmsIdDialog}
-          handleCmsIdAssociationContinueDialog={handleCmsIdAssociation}
-        />
-        <ViewHRModal
-          open={viewHumanReadableModal.open}
-          onClose={handleDialogClose}
-          measureId={targetMeasure?.current?.id}
-          exportMeasure={exportMeasure}
-        />
       </table>
+      <Toast
+        toastKey="measure-action-toast"
+        aria-live="polite"
+        toastType={toastType}
+        testId={toastType === "danger" ? "error-toast" : "success-toast"}
+        closeButtonProps={{
+          "data-testid": "close-toast-button",
+        }}
+        open={toastOpen}
+        message={toastMessage}
+        onClose={onToastClose}
+        autoHideDuration={6000}
+      />
+      <CreatVersionDialog
+        currentVersion={targetMeasure?.current?.version}
+        open={createVersionDialog.open}
+        onClose={handleDialogClose}
+        onSubmit={checkValidCqlLibraryName}
+        versionHelperText={versionHelperText}
+        loading={loading}
+        measureId={targetMeasure?.current?.id}
+      />
+      <InvalidMeasureNameDialog
+        invalidLibraryDialogOpen={invalidLibraryDialogOpen}
+        onInvalidLibraryNameDialogClose={handleDialogClose}
+        measureName={targetMeasure?.current?.measureName}
+        invalidLibraryErrors={invalidLibraryErrors}
+      />
+      <InvalidTestCaseDialog
+        open={invalidTestCaseOpen}
+        onContinue={createVersion}
+        onClose={handleDialogClose}
+        versionType={versionType}
+        loading={loading}
+      />
+      <DraftMeasureDialog
+        open={draftMeasureDialog.open}
+        onClose={handleDialogClose}
+        onSubmit={draftMeasure}
+        loading={loading}
+        measure={targetMeasure.current}
+      />
+      <ExportDialog
+        failureMessage={failureMessage}
+        measureName={targetMeasure?.current?.measureName}
+        downloadState={downloadState}
+        open={Boolean(downloadState)}
+        handleContinueDialog={handleContinueDialog}
+        handleCancelDialog={handleCancelDialog}
+      />
+      <ShareDialog
+        measures={selectedMeasures}
+        open={shareDialog.open}
+        option={shareDialog.option}
+        onClose={handleShareDialogClose}
+      />
+      <DeleteDialog
+        open={deleteMeasureDialog}
+        onClose={handleDialogClose}
+        measureName={targetMeasure?.current?.measureName}
+        deleteMeasure={deleteMeasure}
+      />
+      <AssociateCmsIdDialog
+        measures={selectedMeasures}
+        onClose={handleDialogClose}
+        open={openAssociateCmsIdDialog}
+        handleCmsIdAssociationContinueDialog={handleCmsIdAssociation}
+      />
+      <ViewHRModal
+        open={viewHumanReadableModal.open}
+        onClose={handleDialogClose}
+        measureId={targetMeasure?.current?.id}
+        exportMeasure={exportMeasure}
+      />
     </div>
   );
 }

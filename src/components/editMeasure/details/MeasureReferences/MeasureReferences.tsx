@@ -10,8 +10,14 @@ import {
   TextArea,
   Toast,
   MadieDeleteDialog,
+  TextField,
 } from "@madie/madie-design-system/dist/react";
-import { Typography, MenuItem } from "@mui/material";
+import {
+  Typography,
+  MenuItem,
+  IconButton,
+  InputAdornment,
+} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { measureStore, checkUserCanEdit } from "@madie/madie-util";
 import { useFormik } from "formik";
@@ -19,6 +25,9 @@ import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 import MeasureMetaDataRow from "../MeasureMetaDataRow";
 import { MeasureReferencesValidator } from "./MeasureReferencesValidator";
 import { Measure, Reference } from "@madie/madie-models";
+import SearchIcon from "@mui/icons-material/Search";
+
+import ClearIcon from "@mui/icons-material/Clear";
 
 import "../MeasureMetaDataTable.scss";
 
@@ -83,8 +92,8 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
   // we ideally will always make a new copy of the measure. Lets just listen for that update and then write our definitions to local state.
   useEffect(() => {
     if (measure?.measureMetaData?.references) {
-      const copiedDefinitions = [...measure?.measureMetaData?.references];
-      setMeasureReferences(copiedDefinitions);
+      const copiedReferences = [...measure?.measureMetaData?.references];
+      setMeasureReferences(copiedReferences);
     }
   }, [setMeasureReferences, measure]);
 
@@ -177,10 +186,10 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
   // };
 
   const formik = useFormik({
-    initialValues: { ...INITIAL_VALUES },
+    initialValues: { ...INITIAL_VALUES, searchValue: "" },
     enableReinitialize: true,
     validationSchema: MeasureReferencesValidator,
-    onSubmit: async (values: Reference) => await handleSubmit(values),
+    onSubmit: async (values: any) => await handleSubmit(values),
   });
   useFormikResetOnEvent(formik);
 
@@ -212,21 +221,23 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
   const [visibleReferences, setVisibleReferences] = useState<Reference[]>([]);
 
   const managePagination = useCallback(() => {
-    if (measureReferences.length < currentLimit) {
-      setOffset(0);
-      setVisibleReferences([...measureReferences]);
-      setVisibleItems(measureReferences.length);
-      setTotalItems(measureReferences.length);
-      setTotalPages(1);
-    } else {
-      const start = (currentPage - 1) * currentLimit;
-      const end = start + currentLimit;
-      const newVisibleReferences = [...measureReferences].slice(start, end);
-      setOffset(start);
-      setVisibleReferences(newVisibleReferences);
-      setVisibleItems(newVisibleReferences.length);
-      setTotalItems(measureReferences.length);
-      setTotalPages(Math.ceil(measureReferences.length / currentLimit));
+    if (measureReferences) {
+      if (measureReferences.length < currentLimit) {
+        setOffset(0);
+        setVisibleReferences([...measureReferences]);
+        setVisibleItems(measureReferences.length);
+        setTotalItems(measureReferences.length);
+        setTotalPages(1);
+      } else {
+        const start = (currentPage - 1) * currentLimit;
+        const end = start + currentLimit;
+        const newVisibleReferences = [...measureReferences].slice(start, end);
+        setOffset(start);
+        setVisibleReferences(newVisibleReferences);
+        setVisibleItems(newVisibleReferences.length);
+        setTotalItems(measureReferences.length);
+        setTotalPages(Math.ceil(measureReferences.length / currentLimit));
+      }
     }
   }, [
     currentLimit,
@@ -268,6 +279,26 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
         return id === reference.id;
       })
     );
+  };
+
+  const handleSearch = () => {
+    const filtered = measure?.measureMetaData?.references?.filter(
+      (ref) =>
+        ref.referenceType
+          .toLowerCase()
+          .includes(formik.values.searchValue.toLowerCase()) ||
+        ref.referenceText
+          .toLowerCase()
+          .includes(formik.values.searchValue.toLowerCase())
+    );
+    setMeasureReferences(filtered);
+  };
+  const handleClearSearch = () => {
+    if (formik.values.searchValue) {
+      formik.resetForm();
+      setCurrentPage(1);
+      setMeasureReferences(measure?.measureMetaData?.references);
+    }
   };
 
   const deleteMeasureReference = (id) => {
@@ -323,20 +354,82 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
             </Typography>
           </div>
         </div>
+
+        <table>
+          <tbody>
+            <tr>
+              <td>
+                <TextField
+                  id="search"
+                  style={{ width: "280px", paddingBottom: "32px" }}
+                  label="Search"
+                  placeholder="Search"
+                  inputProps={{
+                    "data-testid": "measure-reference-search-input",
+                  }}
+                  data-testid="measure-reference-list-search"
+                  name="searchValue"
+                  value={formik.values.searchValue}
+                  onChange={formik.handleChange}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      handleSearch();
+                    }
+                  }}
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment
+                          position="start"
+                          data-testid="measure-reference-search"
+                          onClick={handleSearch}
+                          style={{ cursor: "pointer" }}
+                        >
+                          <SearchIcon />
+                        </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <InputAdornment
+                          data-testid="measure-reference-clear-search"
+                          position="end"
+                          style={{ cursor: "pointer" }}
+                          onClick={handleClearSearch}
+                        >
+                          <IconButton>
+                            <ClearIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                />
+              </td>
+              <td>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "row-reverse",
+                    paddingBottom: "15px",
+                  }}
+                >
+                  <Button
+                    id="create-reference"
+                    disabled={!canEdit}
+                    variant="outline-filled"
+                    className="page-header-action-button"
+                    data-testid="create-reference-button"
+                    onClick={toggleOpen}
+                  >
+                    <AddIcon className="page-header-action-icon" />
+                    Add Reference
+                  </Button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
         <div id="measure-meta-data-table">
-          <div className="top-row">
-            <Button
-              id="create-reference"
-              disabled={!canEdit}
-              variant="outline-filled"
-              className="page-header-action-button"
-              data-testid="create-reference-button"
-              onClick={toggleOpen}
-            >
-              <AddIcon className="page-header-action-icon" />
-              Add Reference
-            </Button>
-          </div>
           <table className="meta-data-table">
             <thead>
               <tr>
@@ -350,7 +443,8 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
               </tr>
             </thead>
             <tbody data-testId="measure-references-table-body">
-              {visibleReferences?.length > 0 ? (
+              {visibleReferences?.length > 0 ||
+              measure?.measureMetaData?.references?.length > 0 ? (
                 visibleReferences.map((reference, index) => (
                   <MeasureMetaDataRow
                     name={reference.referenceType}

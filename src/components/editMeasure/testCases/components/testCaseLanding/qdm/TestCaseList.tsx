@@ -55,13 +55,18 @@ import useExcelExportService from "../../../api/useExcelExportService";
 import FileSaver from "file-saver";
 import { AxiosError, AxiosResponse } from "axios";
 import ExportModal from "./ExportModal";
-import useTestCaseServiceApi, {
+import {
   QrdaTestCaseDTO,
   QrdaGroupExportDTO,
 } from "../../../api/useTestCaseServiceApi";
 import useQdmCqlParsingService from "../../../api/cqlElmTranslationService/useQdmCqlParsingService";
 import ActionCenter from "../common/ActionCenter/ActionCenter";
 import CopyTestCaseDialog from "../common/copyTestCases/CopyTestCaseDialog";
+import {
+  OverlappingCode,
+  generateQdmReport,
+} from "../../../util/OverlappingCodesUtils";
+import OverlappingCodesDialog from "../common/overLappingCodes/OverlappingCodesDialog";
 
 export const IMPORT_ERROR =
   "An error occurred while importing your test cases. Please try again, or reach out to the Help Desk.";
@@ -169,6 +174,12 @@ const TestCaseList = (props: TestCaseListProps) => {
   const qdmCqlParsingService = useRef(useQdmCqlParsingService());
   const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
   const [openCopyTestCaseDialog, setOpenCopyTestCaseDialog] =
+    useState<boolean>(false);
+
+  const [overlappingCodes, setOverlappingCodes] = useState<OverlappingCode[]>(
+    []
+  );
+  const [openOverlappingCodesDialog, setOpenOverlappingCodesDialog] =
     useState<boolean>(false);
 
   // const [callstackMap, setCallstackMap] = useState<CqlDefinitionCallstack>();
@@ -719,6 +730,11 @@ const TestCaseList = (props: TestCaseListProps) => {
     setExportExecuting(false);
   };
 
+  const handleGenerateOverlappingCodesReport = () => {
+    setOverlappingCodes(generateQdmReport(cqmMeasure.value_sets));
+    setOpenOverlappingCodesDialog(true);
+  };
+
   const onTestCaseShiftDates = (testCases: TestCase[], shifted: number) => {
     testCaseService.current
       .shiftQdmTestCaseDates(
@@ -784,6 +800,9 @@ const TestCaseList = (props: TestCaseListProps) => {
                 measure={measure}
                 createNewTestCase={createNewTestCase}
                 executeTestCases={executeTestCases}
+                onGenerateOverlappingCodesReport={
+                  handleGenerateOverlappingCodesReport
+                }
                 onImportTestCases={() => {
                   setImportErrors((prevState) => [
                     ...prevState?.filter((e) => e !== IMPORT_ERROR),
@@ -956,6 +975,11 @@ const TestCaseList = (props: TestCaseListProps) => {
         handleClose={() =>
           setImportDialogState({ ...importDialogState, open: false })
         }
+      />
+      <OverlappingCodesDialog
+        openDialog={openOverlappingCodesDialog}
+        handleClose={() => setOpenOverlappingCodesDialog(false)}
+        overlappingCodes={overlappingCodes}
       />
 
       {exportExecuting && <ExportModal openModal={true}></ExportModal>}

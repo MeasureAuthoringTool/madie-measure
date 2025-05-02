@@ -15,7 +15,8 @@ import { TestCasesPassingDetailsProps } from "../common/interfaces";
 import { useFeatureFlags } from "@madie/madie-util";
 import "twin.macro";
 import "styled-components/macro";
-import RunTestButton from "../common/runTestsButton/RunTestsButton";
+import LoadingButton from "../common/loadingButton/LoadingButton";
+import LoadingButtonWithMenu from "../common/loadingButton/LoadingButtonWithMenu";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export interface NavTabProps {
@@ -33,6 +34,7 @@ export interface NavTabProps {
   validTestCases: TestCase[];
   exportTestCases: (bundleType: string) => void;
   onDeleteAllTestCases: () => void;
+  onGenerateOverlappingCodesReport: () => void;
 }
 
 const defaultStyle = {
@@ -64,6 +66,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
     validTestCases,
     exportTestCases,
     onDeleteAllTestCases,
+    onGenerateOverlappingCodesReport,
   } = props;
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -153,6 +156,21 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
             Delete All
           </Button>
         )}
+        {featureFlags.OverlappingValueSets && (
+          <LoadingButtonWithMenu
+            hasErrors={hasErrors}
+            isExecutionContextReady={executionContextReady}
+            dataTestId="reports-button"
+            label="Reports"
+            menuItems={[
+              {
+                label: "Overlapping Codes",
+                dataTestId: "overlapping-codes",
+                toImplementFunction: onGenerateOverlappingCodesReport,
+              },
+            ]}
+          />
+        )}
         {((featureFlags.TestCaseListActionCenter && canEdit) ||
           !featureFlags.TestCaseListActionCenter) && (
           <>
@@ -195,10 +213,13 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
             </Button>
           </>
         )}
-        <RunTestButton
+        <LoadingButton
           hasErrors={hasErrors}
           isExecutionContextReady={executionContextReady}
-          onRunTests={executeTestCases}
+          onClick={executeTestCases}
+          dataTestId="execute-test-cases-button"
+          primary={true}
+          label="Run Test(s)"
         />
 
         {!featureFlags.TestCaseListActionCenter && (

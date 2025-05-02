@@ -581,22 +581,16 @@ export class MeasureServiceApi {
     elmErrorSeverity: string,
     signal
   ): Promise<any> {
-    try {
-      return await axios.get(`${this.baseUrl}/measures/${measureId}/exports`, {
-        params: {
-          elmErrorSeverity,
-        },
-        headers: {
-          Authorization: `Bearer ${this.getAccessToken()}`,
-        },
-        responseType: "blob",
-        signal,
-      });
-    } catch (error) {
-      // need to bubble the error up.
-      console.error("error requesting measure export ", error);
-      throw error;
-    }
+    return await axios.get(`${this.baseUrl}/measures/${measureId}/exports`, {
+      params: {
+        elmErrorSeverity,
+      },
+      headers: {
+        Authorization: `Bearer ${this.getAccessToken()}`,
+      },
+      responseType: "blob",
+      signal,
+    });
   }
 
   async draftMeasure(
@@ -628,6 +622,24 @@ export class MeasureServiceApi {
       return response.data;
     } catch (error) {
       const message = `Unable to fetch human readable for ${id}`;
+      console.error(message, error);
+      throw error;
+    }
+  }
+
+  async getMeasureCounts(): Promise<any> {
+    try {
+      const response = await axios.get<String>(
+        `${this.baseUrl}/measures/count`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      const message = `Unable to get measure counts`;
       console.error(message, error);
       throw error;
     }

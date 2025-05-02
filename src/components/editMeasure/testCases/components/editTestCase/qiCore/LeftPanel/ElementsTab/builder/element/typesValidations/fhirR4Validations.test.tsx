@@ -1,5 +1,9 @@
 import * as Yup from "yup";
-import { getInstantValidator, getValidation } from "./fhirR4Validations";
+import {
+  getInstantValidator,
+  getValidation,
+  getBinaryValidator,
+} from "./fhirR4Validations";
 
 describe("Validation Functions", () => {
   it("getValidation StringValidator", () => {
@@ -71,17 +75,27 @@ describe("Validation Functions", () => {
     expect(nonRequiredString.validate("1")).resolves.toBe("1");
   });
 
-  it("getValidation uriValidator", () => {
+  it("succeeds when required URL is present ", () => {
     const requiredString = getValidation("uri", true);
-    const nonRequiredString = getValidation("uri", false);
     expect(requiredString).toBeInstanceOf(Yup.StringSchema);
     expect(
       requiredString.validate("http://hl7.org/fhirpath/System.String")
     ).resolves.toBe("http://hl7.org/fhirpath/System.String");
+  });
+  it("fails when required URL is not present ", () => {
+    const requiredString = getValidation("uri", true);
+    expect(requiredString).toBeInstanceOf(Yup.StringSchema);
     expect(requiredString.validate("")).rejects.toThrow(
       "This field is required"
     );
-    expect(nonRequiredString.validate("false")).resolves.toBe("false");
+  });
+
+  it("succeeds when URL is present && not required", () => {
+    const nonRequiredString = getValidation("uri", false);
+    expect(nonRequiredString).toBeInstanceOf(Yup.StringSchema);
+    expect(nonRequiredString.validate("http://google.com")).resolves.toBe(
+      "http://google.com"
+    );
   });
 
   it("getValidation DecimalValidator", () => {
@@ -114,17 +128,35 @@ describe("Validation Functions", () => {
   });
 
   it("getValidation idValidator", () => {
-    const requiredId = getValidation("id", true);
-    const nonRequiredId = getValidation("id", false);
+    const requiredId = getValidation(
+      "http://hl7.org/fhirpath/System.String",
+      true,
+      "id"
+    );
+    const nonRequiredId = getValidation(
+      "http://hl7.org/fhirpath/System.String",
+      false,
+      "id"
+    );
 
     expect(requiredId).toBeInstanceOf(Yup.StringSchema);
+    expect(requiredId.validate(undefined)).rejects.toThrow(
+      "This field is required"
+    );
     expect(requiredId.validate("")).rejects.toThrow("Invalid ID format");
-
+    //id cannot have spaces
     expect(requiredId.validate("id with spaces")).rejects.toThrow(
+      "Invalid ID format"
+    );
+    //only special character allowed is "-"
+    expect(requiredId.validate("!@#")).rejects.toThrow("Invalid ID format");
+    //id must be between 1 and 64 characters
+    expect(requiredId.validate("x".repeat(65))).rejects.toThrow(
       "Invalid ID format"
     );
 
     expect(nonRequiredId.validate("test")).resolves.toBe("test");
+    expect(nonRequiredId.validate("A-z-0")).resolves.toBe("A-z-0");
   });
 
   it("getValidation DateValidator", () => {
@@ -185,5 +217,83 @@ describe("Validation Functions", () => {
     expect(
       schema.validate("2025-02-04T00:00:00.000+00:00")
     ).resolves.not.toThrow();
+  });
+
+  it("should validate a valid binary string", async () => {
+    const validator = getBinaryValidator(false);
+    const validBinary = "dGVzdA=="; // Base64 encoded string for "test"
+
+    await expect(validator.validate(validBinary)).resolves.toBe(validBinary);
+  });
+
+  it("should validate a valid number string", async () => {
+    const validator = getBinaryValidator(false);
+    const validBinary = "1234";
+
+    await expect(validator.validate(validBinary)).resolves.toBe(validBinary);
+  });
+
+  it("should invalidate a invalid binary string", async () => {
+    const validator = getBinaryValidator(true);
+
+    await expect(validator.validate("")).rejects.toThrow(
+      "Invalid Binary format"
+    );
+  });
+});
+describe("OID & UUID Validation Functions", () => {
+  it("succeeds when OID is present && is not required", () => {
+    const nonRequiredString = getValidation("uri", false);
+    expect(nonRequiredString).toBeInstanceOf(Yup.StringSchema);
+    expect(
+      nonRequiredString.validate("urn:oid:1.2.36.146.595.217.0")
+    ).resolves.toBe("urn:oid:1.2.36.146.595.217.0");
+  });
+
+  it("succeeds when OID is present && is required", () => {
+    const requiredString = getValidation("uri", true);
+    expect(requiredString).toBeInstanceOf(Yup.StringSchema);
+    expect(
+      requiredString.validate("urn:oid:1.2.36.146.595.217.0.1")
+    ).resolves.toBe("urn:oid:1.2.36.146.595.217.0.1");
+  });
+
+  it("fails when OID is required && is not present", () => {
+    const requiredString = getValidation("uri", true);
+    expect(requiredString).toBeInstanceOf(Yup.StringSchema);
+    expect(requiredString.validate("")).rejects.toThrow(
+      "This field is required"
+    );
+  });
+
+  it("succeeds when OID is not present && is not required", () => {
+    const nonRequiredString = getValidation("uri", false);
+    expect(nonRequiredString).toBeInstanceOf(Yup.StringSchema);
+    expect(nonRequiredString.validate("")).resolves.toBe("");
+  });
+
+  it("fails when OID is required && is present but incorrect", async () => {
+    const requiredString = getValidation("uri", true);
+    expect(requiredString).toBeInstanceOf(Yup.StringSchema);
+    await expect(requiredString.validate("urn:oid:1123")).rejects.toThrow(
+      "Invalid OID Format (example format: urn:oid:1.2.36.146.595.217.0.1 )."
+    );
+  });
+
+  it("fails when OID is required && is present but incorrect 2", async () => {
+    const requiredString = getValidation("uri", true);
+    expect(requiredString).toBeInstanceOf(Yup.StringSchema);
+    await expect(requiredString.validate("urn:oid:1.2.^(&(&")).rejects.toThrow(
+      "Invalid OID Format (example format: urn:oid:1.2.36.146.595.217.0.1 )."
+    );
+  });
+  it("succeeds when UUID is present && is not required", () => {
+    const nonRequiredString = getValidation("uri", false);
+    expect(nonRequiredString).toBeInstanceOf(Yup.StringSchema);
+    expect(
+      nonRequiredString.validate(
+        "urn:uuid:c757873d-ec9a-4326-a141-556f43239520"
+      )
+    ).resolves.toBe("urn:uuid:c757873d-ec9a-4326-a141-556f43239520");
   });
 });

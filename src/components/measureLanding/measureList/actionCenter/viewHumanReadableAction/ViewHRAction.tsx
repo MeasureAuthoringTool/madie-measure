@@ -2,15 +2,13 @@ import React, { useCallback, useEffect, useState } from "react";
 import { IconButton } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import { Measure } from "@madie/madie-models";
-import { Icon } from "@iconify-icon/react";
 
-import { grey, blue } from "@mui/material/colors";
+import HrIcon from "../../../../common/HrIcon";
 
 interface PropTypes {
   measures: Measure[];
   onClick: () => void;
 }
-
 export const NOTHING_SELECTED = "Select measure to view human readable";
 export const VIEW_HUMANREADABLE = "View human readable";
 
@@ -46,13 +44,7 @@ export default function ViewHRAction(props: PropTypes) {
           disabled={disableViewHRBtn}
           data-testid="view-hr-action-btn"
         >
-          <Icon
-            icon="lucide:file-text"
-            data-testid={`view-hr-action-iconify-btn`}
-            style={
-              disableViewHRBtn ? { color: grey[500] } : { color: blue[700] }
-            }
-          />
+          <HrIcon />
         </IconButton>
       </span>
     </Tooltip>

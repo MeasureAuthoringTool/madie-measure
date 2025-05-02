@@ -65,7 +65,7 @@ const keyboardArrowStyles = {
 };
 
 //Convert date string to format of mm/dd/yyyy with no leading zeroes in month
-const convertDate = (date: string) => {
+export const convertDate = (date: string) => {
   if (!date) {
     return "";
   }
@@ -559,9 +559,16 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
               </div>
             </div>
           )}
-          <div style={{ marginLeft: 32, marginRight: 32 }}>
-            When sharing a measure, all versions and drafts are shared, so only
-            the most recent measure name appears here.
+          <div className="share-unshare-dialog-info-text">
+            <div>
+              When sharing a measure, all versions and drafts are shared, so
+              only the most recent measure name appears here.
+            </div>
+            {option === "Unshare" && (
+              <div>
+                Deselect the users with whom you want to unshare the measure(s).
+              </div>
+            )}
           </div>
           <div className="measure-table no-margin-top">
             <div className="table" style={{ overflow: "auto" }}>

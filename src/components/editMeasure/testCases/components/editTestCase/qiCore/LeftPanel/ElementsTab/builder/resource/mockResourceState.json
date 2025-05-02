@@ -9,11 +9,13 @@
         "resource": {
           "id": "6fb9d817-76c5-4b68-ba06-92c7429e6b5c",
           "resourceType": "ClaimResponse",
+          "disposition": "Claim response disposition",
           "meta": {
             "profile": [
               "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-claimresponse"
             ]
-          }
+          },
+          "name": []
         }
       }
     ]

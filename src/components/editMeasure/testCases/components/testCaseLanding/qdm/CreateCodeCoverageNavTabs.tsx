@@ -18,7 +18,8 @@ import {
 import { TestCasesPassingDetailsProps } from "../common/interfaces";
 import { useFeatureFlags } from "@madie/madie-util";
 import { useQdmExecutionContext } from "../../routes/qdm/QdmExecutionContext";
-import RunTestButton from "../common/runTestsButton/RunTestsButton";
+import LoadingButtonWithMenu from "../common/loadingButton/LoadingButtonWithMenu";
+import LoadingButton from "../common/loadingButton/LoadingButton";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import classNames from "classnames";
@@ -43,6 +44,7 @@ export interface NavTabProps {
   exportExecuting: boolean;
   optionsOpen: boolean;
   setOptionsOpen: (exportExecuting: boolean) => void;
+  onGenerateOverlappingCodesReport: () => void;
 }
 
 const defaultStyle = {
@@ -79,6 +81,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
     exportExecuting,
     optionsOpen,
     setOptionsOpen,
+    onGenerateOverlappingCodesReport,
   } = props;
   const [activeTip, setActiveTip] = useState<boolean>(false);
   const toolTipClass = classNames("madie-tooltip", {
@@ -205,6 +208,22 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
               Delete All
             </Button>
           )}
+
+          {featureFlags.OverlappingValueSets && (
+            <LoadingButtonWithMenu
+              hasErrors={hasErrors}
+              isExecutionContextReady={executionContextReady}
+              dataTestId="reports-button"
+              label="Reports"
+              menuItems={[
+                {
+                  label: "Overlapping Codes",
+                  dataTestId: "overlapping-codes",
+                  toImplementFunction: onGenerateOverlappingCodesReport,
+                },
+              ]}
+            />
+          )}
           {((featureFlags.TestCaseListActionCenter && canEdit) ||
             !featureFlags.TestCaseListActionCenter) && (
             <>
@@ -235,10 +254,13 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
               </Button>
             </>
           )}
-          <RunTestButton
+          <LoadingButton
             hasErrors={hasErrors}
             isExecutionContextReady={executionContextReady}
-            onRunTests={executeTestCases}
+            onClick={executeTestCases}
+            dataTestId="execute-test-cases-button"
+            primary={true}
+            label="Run Test(s)"
           />
 
           {/* disabled elements do not fire events. we wrap a listener around it to bypass */}

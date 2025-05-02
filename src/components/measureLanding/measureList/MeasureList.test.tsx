@@ -27,6 +27,10 @@ import ServiceContext, { ServiceConfig } from "../../../api/ServiceContext";
 import { Simulate } from "react-dom/test-utils";
 // @ts-ignore
 import { useFeatureFlags, checkUserCanEdit } from "@madie/madie-util";
+import { AxiosError, AxiosResponse } from "axios";
+
+const EXPORT_FAILURE_MESSAGE =
+  "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists.";
 
 // CSSStyleDeclaration
 const mockPush = jest.fn();
@@ -242,7 +246,7 @@ const setTotalPagesMock = jest.fn();
 const setTotalItemsMock = jest.fn();
 const setVisibleItemsMock = jest.fn();
 const setOffsetMock = jest.fn();
-const setInitialLoadMock = jest.fn();
+const setLoadingMock = jest.fn();
 const setSearchCriteriaMock = jest.fn();
 const setErrMsgMock = jest.fn();
 
@@ -272,7 +276,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -298,7 +302,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -327,7 +331,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -356,7 +360,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={"test"}
           setSearchCriteria={setSearchCriteriaMock}
@@ -400,7 +404,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={"test"}
           setSearchCriteria={setSearchCriteriaMock}
@@ -447,7 +451,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -487,7 +491,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={"test"}
           setSearchCriteria={setSearchCriteriaMock}
@@ -534,7 +538,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -550,7 +554,7 @@ describe("Measure List component", () => {
     expect(window.location.href).toBe("http://localhost/");
 
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
 
     const createVersionButton = getByTestId("version-action-btn");
@@ -561,19 +565,7 @@ describe("Measure List component", () => {
   });
 
   it("Should display invalid Cql library name dialog and close on cancel.", async () => {
-    const error = {
-      response: {
-        status: 403,
-        request: {
-          responseText: JSON.stringify({
-            message: "User is unauthorized to create a version",
-          }),
-        },
-      },
-    };
     const useMeasureServiceMockRejected = {
-      createVersion: jest.fn().mockRejectedValue(error),
-      checkValidVersion: jest.fn().mockRejectedValue(error),
       checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
       fetchMeasure: jest.fn().mockResolvedValueOnce(badCqlLibraryName),
     } as unknown as MeasureServiceApi;
@@ -591,7 +583,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -602,7 +594,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -637,19 +629,22 @@ describe("Measure List component", () => {
   });
 
   it("should display unauthorized error while creating a version of a measure", async () => {
-    const error = {
+    const axiosError: AxiosError = {
       response: {
         status: 403,
-        request: {
-          responseText: JSON.stringify({
-            message: "User is unauthorized to create a version",
-          }),
+        data: {
+          timestamp: "2025-04-18T18:06:17.711+00:00",
+          message:
+            "User userId is not authorized for Measure with ID 680278565a582d3542b71eba",
+          status: 403,
+          error: "Forbidden",
         },
-      },
-    };
+      } as AxiosResponse,
+    } as AxiosError;
+
     const useMeasureServiceMockRejected = {
-      createVersion: jest.fn().mockRejectedValue(error),
-      checkValidVersion: jest.fn().mockRejectedValue(error),
+      createVersion: jest.fn().mockRejectedValue(axiosError),
+      checkValidVersion: jest.fn().mockRejectedValue(axiosError),
       checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
       fetchMeasure: jest.fn().mockResolvedValueOnce(measures[0]),
     } as unknown as MeasureServiceApi;
@@ -667,7 +662,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -678,7 +673,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -706,25 +701,32 @@ describe("Measure List component", () => {
       expect(getByTestId("error-toast")).toHaveTextContent(
         "User is unauthorized to create a version"
       );
+
+      expect(screen.getByTestId("version-helper-text")).toHaveTextContent(
+        "An unexpected error has occurred. Please contact the help desk."
+      );
     });
     unmount();
   });
 
-  it("should display bad request while creating a version of a measure", async () => {
-    const error = {
+  it("should display bad request error while creating a version of a measure in draft state", async () => {
+    const axiosError: AxiosError = {
       response: {
         status: 400,
-        request: {
-          responseText: JSON.stringify({
-            message: "Requested measure cannot be versioned",
-          }),
+        data: {
+          timestamp: "2025-04-18T18:06:17.711+00:00",
+          message:
+            "User userId cannot version Measure with ID 680278565a582d3542b71eba. Measure is not in a draft state.",
+          status: 400,
+          error: "Bad Request",
         },
-      },
-    };
+      } as AxiosResponse,
+    } as AxiosError;
+
     const useMeasureServiceMockRejected = {
-      createVersion: jest.fn().mockRejectedValue(error),
+      createVersion: jest.fn().mockRejectedValue(axiosError),
       checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
-      checkValidVersion: jest.fn().mockRejectedValue(error),
+      checkValidVersion: jest.fn().mockRejectedValue(axiosError),
       fetchMeasure: jest.fn().mockResolvedValueOnce(measures[0]),
     } as unknown as MeasureServiceApi;
 
@@ -741,7 +743,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -752,7 +754,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -780,26 +782,32 @@ describe("Measure List component", () => {
       expect(getByTestId("error-toast")).toHaveTextContent(
         "Requested measure cannot be versioned"
       );
+
+      expect(screen.getByTestId("version-helper-text")).toHaveTextContent(
+        "Please ensure the measure is first in draft state before versioning this measure."
+      );
     });
     unmount();
   });
 
-  it("should display other error while creating a version of a measure", async () => {
-    const error = {
+  it("should display bad request error while creating a version of a measure with no CQL", async () => {
+    const axiosError: AxiosError = {
       response: {
-        status: 500,
-        message: "server error",
-        request: {
-          responseText: JSON.stringify({
-            message: "Requested measure cannot be versioned",
-          }),
+        status: 400,
+        data: {
+          timestamp: "2025-04-18T18:06:17.711+00:00",
+          message:
+            "User userId cannot version Measure with ID 680278565a582d3542b71eba. Measure has no CQL.",
+          status: 400,
+          error: "Bad Request",
         },
-      },
-    };
+      } as AxiosResponse,
+    } as AxiosError;
+
     const useMeasureServiceMockRejected = {
-      createVersion: jest.fn().mockRejectedValue(error),
+      createVersion: jest.fn().mockRejectedValue(axiosError),
       checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
-      checkValidVersion: jest.fn().mockRejectedValue(error),
+      checkValidVersion: jest.fn().mockRejectedValue(axiosError),
       fetchMeasure: jest.fn().mockResolvedValueOnce(measures[0]),
     } as unknown as MeasureServiceApi;
 
@@ -816,7 +824,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -827,7 +835,250 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
+    userEvent.click(checkBoxes[1]);
+    const createVersionButton = getByTestId("version-action-btn");
+    expect(createVersionButton).toBeInTheDocument();
+    userEvent.click(createVersionButton);
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+
+    const typeInput = screen.getByTestId(
+      "version-type-input"
+    ) as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = getByTestId(
+      "confirm-version-input"
+    ) as HTMLInputElement;
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
+
+    await waitFor(() => {
+      userEvent.click(getByTestId("create-version-continue-button"));
+      expect(getByTestId("error-toast")).toHaveTextContent(
+        "Requested measure cannot be versioned"
+      );
+
+      expect(screen.getByTestId("version-helper-text")).toHaveTextContent(
+        "Please include valid CQL in the CQL editor to version before versioning this measure."
+      );
+    });
+    unmount();
+  });
+
+  it("should display bad request error while creating a version of a measure with CQL with errors", async () => {
+    const axiosError: AxiosError = {
+      response: {
+        status: 400,
+        data: {
+          timestamp: "2025-04-18T18:06:17.711+00:00",
+          message:
+            "User userId cannot version Measure with ID 680278565a582d3542b71eba. Measure has CQL errors.",
+          status: 400,
+          error: "Bad Request",
+        },
+      } as AxiosResponse,
+    } as AxiosError;
+
+    const useMeasureServiceMockRejected = {
+      createVersion: jest.fn().mockRejectedValue(axiosError),
+      checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
+      checkValidVersion: jest.fn().mockRejectedValue(axiosError),
+      fetchMeasure: jest.fn().mockResolvedValueOnce(measures[0]),
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockRejected;
+    });
+
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    expect(checkBoxes.length).toBe(5);
+    userEvent.click(checkBoxes[1]);
+    const createVersionButton = getByTestId("version-action-btn");
+    expect(createVersionButton).toBeInTheDocument();
+    userEvent.click(createVersionButton);
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+
+    const typeInput = screen.getByTestId(
+      "version-type-input"
+    ) as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = getByTestId(
+      "confirm-version-input"
+    ) as HTMLInputElement;
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
+
+    await waitFor(() => {
+      userEvent.click(getByTestId("create-version-continue-button"));
+      expect(getByTestId("error-toast")).toHaveTextContent(
+        "Requested measure cannot be versioned"
+      );
+
+      expect(screen.getByTestId("version-helper-text")).toHaveTextContent(
+        "Please include valid CQL in the CQL editor to version before versioning this measure."
+      );
+    });
+    unmount();
+  });
+
+  it("should display bad request error while creating a version of a measure with no population criteria", async () => {
+    const axiosError: AxiosError = {
+      response: {
+        status: 400,
+        data: {
+          timestamp: "2025-04-18T18:06:17.711+00:00",
+          message:
+            "User userId cannot version Measure with ID 680278565a582d3542b71eba. Measure does not have at least one Population Criteria.",
+          status: 400,
+          error: "Bad Request",
+        },
+      } as AxiosResponse,
+    } as AxiosError;
+
+    const useMeasureServiceMockRejected = {
+      createVersion: jest.fn().mockRejectedValue(axiosError),
+      checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
+      checkValidVersion: jest.fn().mockRejectedValue(axiosError),
+      fetchMeasure: jest.fn().mockResolvedValueOnce(measures[0]),
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockRejected;
+    });
+
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    expect(checkBoxes.length).toBe(5);
+    userEvent.click(checkBoxes[1]);
+    const createVersionButton = getByTestId("version-action-btn");
+    expect(createVersionButton).toBeInTheDocument();
+    userEvent.click(createVersionButton);
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+
+    const typeInput = screen.getByTestId(
+      "version-type-input"
+    ) as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = getByTestId(
+      "confirm-version-input"
+    ) as HTMLInputElement;
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
+
+    await waitFor(() => {
+      userEvent.click(getByTestId("create-version-continue-button"));
+      expect(getByTestId("error-toast")).toHaveTextContent(
+        "Requested measure cannot be versioned"
+      );
+
+      expect(screen.getByTestId("version-helper-text")).toHaveTextContent(
+        "Please set up at least one Population Criteria before versioning this measure."
+      );
+    });
+    unmount();
+  });
+
+  it("should display server error message if returned while creating a version of a measure", async () => {
+    const axiosError: AxiosError = {
+      response: {
+        status: 500,
+        data: {
+          timestamp: "2025-04-18T18:06:17.711+00:00",
+          message:
+            "User userId cannot version Measure with ID 680278565a582d3542b71eba. A server related error occurred.",
+          status: 500,
+          error: "Internal Server Error",
+        },
+      } as AxiosResponse,
+    } as AxiosError;
+
+    const useMeasureServiceMockRejected = {
+      createVersion: jest.fn().mockRejectedValue(axiosError),
+      checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
+      checkValidVersion: jest.fn().mockRejectedValue(axiosError),
+      fetchMeasure: jest.fn().mockResolvedValueOnce(measures[0]),
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockRejected;
+    });
+
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -851,7 +1102,13 @@ describe("Measure List component", () => {
     expect(confirmVersionNode.value).toBe("1.0.000");
     await waitFor(() => {
       userEvent.click(getByTestId("create-version-continue-button"));
-      expect(getByTestId("error-toast")).toHaveTextContent("server error");
+      expect(getByTestId("error-toast")).toHaveTextContent(
+        "User userId cannot version Measure with ID 680278565a582d3542b71eba. A server related error occurred."
+      );
+
+      expect(screen.getByTestId("version-helper-text")).toHaveTextContent(
+        "An unexpected error has occurred. Please contact the help desk."
+      );
     });
     unmount();
   });
@@ -885,7 +1142,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -896,7 +1153,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -970,7 +1227,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -981,7 +1238,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -1037,7 +1294,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1069,7 +1326,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1122,7 +1379,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1181,7 +1438,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1248,7 +1505,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1318,7 +1575,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1329,7 +1586,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1347,6 +1604,7 @@ describe("Measure List component", () => {
     });
     unmount();
   });
+
   it("should display a 400 as expected", async () => {
     const error = {
       response: {
@@ -1374,7 +1632,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1385,7 +1643,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1398,7 +1656,7 @@ describe("Measure List component", () => {
 
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
-        "An error occurred while decoding the response."
+        EXPORT_FAILURE_MESSAGE
       );
     });
     unmount();
@@ -1429,7 +1687,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1440,7 +1698,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1478,7 +1736,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1489,7 +1747,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1535,7 +1793,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1546,7 +1804,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1589,7 +1847,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1600,7 +1858,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[3]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1643,7 +1901,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1654,7 +1912,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1697,7 +1955,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1708,8 +1966,8 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
-    userEvent.click(checkBoxes[5]);
+    expect(checkBoxes.length).toBe(5);
+    userEvent.click(checkBoxes[4]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
     userEvent.click(exportButton);
@@ -1764,7 +2022,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1775,8 +2033,8 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(2);
-    userEvent.click(checkBoxes[1]);
+    expect(checkBoxes.length).toBe(1);
+    userEvent.click(checkBoxes[0]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
     userEvent.click(exportButton);
@@ -1818,7 +2076,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1829,7 +2087,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1842,7 +2100,7 @@ describe("Measure List component", () => {
 
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
-        "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists."
+        EXPORT_FAILURE_MESSAGE
       );
     });
     unmount();
@@ -1890,7 +2148,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1901,7 +2159,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1914,14 +2172,29 @@ describe("Measure List component", () => {
 
     await waitFor(() => {
       expect(getByTestId("error-message")).toHaveTextContent(
-        "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists."
+        EXPORT_FAILURE_MESSAGE
       );
     });
     unmount();
   });
 
   it("should  not call the export when clicking cancel button", async () => {
-    const { getByTestId, unmount } = render(
+    const success = {
+      response: {
+        data: {
+          size: 635581,
+          type: "application/octet-stream",
+        },
+      },
+    };
+    useMeasureServiceMock.mockImplementation(() => {
+      return {
+        ...mockMeasureServiceApi,
+        getMeasureExport: jest.fn().mockRejectedValue(success),
+        fetchMeasure: jest.fn().mockResolvedValueOnce(measures[2]),
+      } as unknown as MeasureServiceApi;
+    });
+    render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -1930,7 +2203,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -1941,11 +2214,8 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
 
-    window.URL.createObjectURL = jest
-      .fn()
-      .mockReturnValueOnce("http://fileurl");
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1956,12 +2226,10 @@ describe("Measure List component", () => {
     });
     userEvent.click(exportForPublishingButton);
 
-    const cancelButton = getByTestId("ds-btn");
+    const cancelButton = await screen.findByRole("button", { name: "Cancel" });
     expect(cancelButton).toBeInTheDocument();
     userEvent.click(cancelButton);
     expect(cancelButton).not.toBeInTheDocument();
-
-    unmount();
   });
 
   // this test has been passing based on side effects. changing the order that it works in breaks all other tests.
@@ -1977,11 +2245,12 @@ describe("Measure List component", () => {
     useMeasureServiceMock.mockImplementation(() => {
       return {
         ...mockMeasureServiceApi,
-        getMeasureExport: jest.fn().mockResolvedValue(success),
+        getMeasureExport: jest.fn().mockResolvedValueOnce(success),
+        fetchMeasure: jest.fn().mockResolvedValueOnce(measures[2]),
       } as unknown as MeasureServiceApi;
     });
 
-    const { getByTestId } = render(
+    render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -1990,7 +2259,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -2002,7 +2271,7 @@ describe("Measure List component", () => {
     );
 
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -2013,12 +2282,79 @@ describe("Measure List component", () => {
     });
     userEvent.click(exportForPublishingButton);
 
-    await waitFor(() => {
-      const continueButton = getByTestId("ds-btn");
-      expect(continueButton).toBeInTheDocument();
-      userEvent.click(continueButton);
-      expect(continueButton).not.toBeInTheDocument();
+    const cancelButton = await screen.findByRole("button", {
+      name: "Cancel",
     });
+    expect(cancelButton).toBeInTheDocument();
+    userEvent.click(cancelButton);
+    expect(cancelButton).not.toBeInTheDocument();
+  });
+
+  it("should call the export api to generate the measure zip file but the response does not contain any data displays error message to the user", async () => {
+    const errorPayload = {
+      timestamp: "2025-04-07T00:30:16.103+00:00",
+      message:
+        'Measure cannot be exported for publishing because it was versioned prior to MADiE version 2.2.0. Please use a newer version or select "Export" for this measure.',
+      status: 404,
+      error: "Bad Request",
+    };
+
+    const errorBlob = new Blob([JSON.stringify(errorPayload)], {
+      type: "application/json",
+    });
+
+    if (!errorBlob.text) {
+      errorBlob.text = async () => JSON.stringify(errorPayload);
+    }
+
+    const exportNotFound = {
+      response: {
+        data: errorBlob,
+        status: 404,
+      },
+    };
+    useMeasureServiceMock.mockImplementation(() => {
+      return {
+        ...mockMeasureServiceApi,
+        fetchMeasure: jest.fn().mockResolvedValueOnce(measures[2]),
+        getMeasureExport: jest.fn().mockRejectedValueOnce(exportNotFound),
+      } as unknown as MeasureServiceApi;
+    });
+
+    render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={""}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    expect(checkBoxes.length).toBe(5);
+    userEvent.click(checkBoxes[1]);
+    const exportButton = screen.getByTestId("export-action-btn");
+    expect(exportButton).toBeInTheDocument();
+    userEvent.click(exportButton);
+
+    const exportForPublishingButton = await screen.findByRole("button", {
+      name: "Export for Publishing",
+    });
+    userEvent.click(exportForPublishingButton);
+
+    const errorMessage = await screen.findByTestId("error-message");
+    expect(errorMessage).toHaveTextContent(errorPayload?.message);
   });
 
   it("Should be able to version QDM Measure when enableQdmRepeatTransfer is false", async () => {
@@ -2034,7 +2370,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -2045,7 +2381,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
 
     const createVersionButton = getByTestId("version-action-btn");
@@ -2065,7 +2401,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -2084,10 +2420,11 @@ describe("Measure List component", () => {
     });
     const checkboxes = await within(tableBody).findAllByRole("checkbox");
     await waitFor(() => {
-      expect(checkboxes).toHaveLength(6);
+      expect(checkboxes).toHaveLength(5);
     });
     unmount();
   });
+
   it("Should display action center", async () => {
     const { getByTestId, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
@@ -2098,7 +2435,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -2123,7 +2460,7 @@ describe("Measure List component", () => {
           setTotalItems={setTotalItemsMock}
           setVisibleItems={setVisibleItemsMock}
           setOffset={setOffsetMock}
-          setInitialLoad={setInitialLoadMock}
+          setLoading={setLoadingMock}
           activeTab={0}
           searchCriteria={""}
           setSearchCriteria={setSearchCriteriaMock}
@@ -2134,7 +2471,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
+    expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
     const deleteButton = screen.getByTestId("delete-action-btn");
     expect(deleteButton).toBeInTheDocument();
@@ -2162,7 +2499,7 @@ describe("Measure List component", () => {
             setTotalItems={setTotalItemsMock}
             setVisibleItems={setVisibleItemsMock}
             setOffset={setOffsetMock}
-            setInitialLoad={setInitialLoadMock}
+            setLoading={setLoadingMock}
             activeTab={0}
             searchCriteria={""}
             setSearchCriteria={setSearchCriteriaMock}
@@ -2192,7 +2529,7 @@ describe("Measure List component", () => {
             setTotalItems={setTotalItemsMock}
             setVisibleItems={setVisibleItemsMock}
             setOffset={setOffsetMock}
-            setInitialLoad={setInitialLoadMock}
+            setLoading={setLoadingMock}
             activeTab={0}
             searchCriteria={""}
             setSearchCriteria={setSearchCriteriaMock}
@@ -2220,7 +2557,7 @@ describe("Measure List component", () => {
             setTotalItems={setTotalItemsMock}
             setVisibleItems={setVisibleItemsMock}
             setOffset={setOffsetMock}
-            setInitialLoad={setInitialLoadMock}
+            setLoading={setLoadingMock}
             activeTab={0}
             searchCriteria={""}
             setSearchCriteria={setSearchCriteriaMock}
@@ -2252,7 +2589,7 @@ describe("Measure List component", () => {
             setTotalItems={setTotalItemsMock}
             setVisibleItems={setVisibleItemsMock}
             setOffset={setOffsetMock}
-            setInitialLoad={setInitialLoadMock}
+            setLoading={setLoadingMock}
             activeTab={0}
             searchCriteria={""}
             setSearchCriteria={setSearchCriteriaMock}
@@ -2263,7 +2600,7 @@ describe("Measure List component", () => {
         </ServiceContext.Provider>
       );
       const checkBoxes = await screen.findAllByRole("checkbox");
-      expect(checkBoxes.length).toBe(6);
+      expect(checkBoxes.length).toBe(5);
       userEvent.click(checkBoxes[1]);
       const shareButton = screen.getByTestId("share-action-btn");
       expect(shareButton).toBeInTheDocument();
@@ -2279,6 +2616,113 @@ describe("Measure List component", () => {
       });
 
       unmount();
+    });
+  });
+
+  describe("Measure List with MeasureSearch enabled", () => {
+    beforeEach(() => {
+      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+        MeasureSearch: true,
+      }));
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should display all columns when MeasureSearch is enabled", async () => {
+      const { getByText } = render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={measures}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setLoading={setLoadingMock}
+            activeTab={0}
+            searchCriteria={""}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            setErrMsg={setErrMsgMock}
+          />
+        </ServiceContext.Provider>
+      );
+
+      // Verify all columns are present
+      expect(getByText("Measure")).toBeInTheDocument();
+      expect(getByText("Version")).toBeInTheDocument();
+      expect(getByText("Status")).toBeInTheDocument();
+      expect(getByText("Model")).toBeInTheDocument();
+      expect(getByText("Shared")).toBeInTheDocument();
+      expect(getByText("CMS ID")).toBeInTheDocument();
+      expect(getByText("Updated")).toBeInTheDocument();
+    });
+
+    it("should display shared icon when measure has ACLs", async () => {
+      const measureWithAcls = {
+        ...measures[0],
+        measureSet: {
+          ...measures[0].measureSet,
+          acls: [{ userId: "test-user", roles: ["SHARED_WITH"] }],
+        },
+      };
+
+      const { getByTestId } = render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={[measureWithAcls]}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setLoading={setLoadingMock}
+            activeTab={0}
+            searchCriteria={""}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            setErrMsg={setErrMsgMock}
+          />
+        </ServiceContext.Provider>
+      );
+
+      const checkIcon = screen.getByTestId("CheckCircleOutlineIcon");
+      expect(checkIcon).toBeInTheDocument();
+      expect(checkIcon).toHaveStyle({ color: "#4CAF50" });
+    });
+
+    it("should format the last modified date correctly", () => {
+      const measureWithDate = {
+        ...measures[0],
+        lastModifiedAt: "2023-12-25T12:00:00.000Z",
+      };
+
+      render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={[measureWithDate]}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setLoading={setLoadingMock}
+            activeTab={0}
+            searchCriteria={""}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            setErrMsg={setErrMsgMock}
+          />
+        </ServiceContext.Provider>
+      );
+
+      // Date format will depend on the local system settings, so we'll check for the presence of the date
+      expect(screen.getByText("12/25/2023")).toBeInTheDocument();
     });
   });
 });

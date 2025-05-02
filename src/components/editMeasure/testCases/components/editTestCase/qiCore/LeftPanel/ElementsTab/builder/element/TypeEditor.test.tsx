@@ -1,11 +1,15 @@
 import * as React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, act } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+
 import TypeEditor from "./TypeEditor";
 import useFhirDefinitionsServiceApi, {
   FhirDefinitionsServiceApi,
 } from "../../../../../../../api/useFhirDefinitionsService";
 import { FormikProvider, FormikContextType } from "formik";
-
+import { RequiredFieldsProvider } from "./RequiredFieldsContext";
+import mockRequiredFields from "./mockRequiredFields";
+import mockFormInfo from "./mockFormInfo";
 const getNestedProperty = (obj, path) => {
   return path.split(".").reduce((current, key) => current && current[key], obj);
 };
@@ -26,6 +30,7 @@ const claimResponseValues = {
     },
   },
 };
+const mockSetFieldValue = jest.fn();
 
 //@ts-ignore
 const mockFormik: FormikContextType<any> = {
@@ -43,7 +48,7 @@ const mockFormik: FormikContextType<any> = {
     };
   },
   handleChange: () => {},
-  setFieldValue: jest.fn(),
+  setFieldValue: mockSetFieldValue,
   setFieldTouched: jest.fn(),
 };
 
@@ -109,17 +114,37 @@ useFhirDefinitionsServiceApiMock.mockImplementation(
 
 describe("TypeEditor Component", () => {
   test("Should render String component", () => {
-    const handleChange = jest.fn();
+    // const handleChange = jest.fn();
     render(
       <FormikProvider value={mockFormik}>
-        <TypeEditor
-          type={`http://hl7.org/fhirpath/System.String`}
-          required={false}
-          onChange={handleChange}
-          structureDefinition={null}
-          label={"ClaimResponse.id"}
-          value={claimResponseValues.ClaimResponse.id}
-        />
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "ClaimResponse.id",
+              path: "ClaimResponse.id",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  extension: [
+                    {
+                      url: "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+                      valueUrl: "id",
+                    },
+                  ],
+                  code: "http://hl7.org/fhirpath/System.String",
+                },
+              ],
+            }}
+            label={"ClaimResponse.id"}
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
       </FormikProvider>
     );
     const inputField = screen.getByTestId(
@@ -129,25 +154,64 @@ describe("TypeEditor Component", () => {
     expect(inputField.value).toBe("test");
   });
 
-  test("Should render String component", () => {
-    const handleChange = jest.fn();
+  // can't update root id, going to fake a text
+  test("Should render String component, should trigger setFieldValue and setFieldTouched", async () => {
+    const setFieldValue = jest.fn();
+    const setFieldTouched = jest.fn();
+    const onChange = jest.fn();
+    const stringFormik = {
+      ...mockFormik,
+      setFieldTouched: setFieldTouched,
+      setFieldValue: setFieldValue,
+      getFieldProps: () => ({
+        label: "ClaimResponse.test",
+        name: "ClaimResponse.test",
+        value: "1234-abcd-ABCD",
+        onChange,
+        onBlur: jest.fn(),
+      }),
+    };
+
     render(
-      <FormikProvider value={mockFormik}>
-        <TypeEditor
-          type={`http://hl7.org/fhirpath/System.String`}
-          required={false}
-          onChange={handleChange}
-          structureDefinition={null}
-          label={"ClaimResponse.id"}
-          value={claimResponseValues.ClaimResponse.id}
-        />
+      <FormikProvider value={stringFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "ClaimResponse.test",
+              path: "ClaimResponse.test",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  extension: [
+                    {
+                      url: "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+                      valueUrl: "test",
+                    },
+                  ],
+                  code: "http://hl7.org/fhirpath/System.String",
+                },
+              ],
+            }}
+            label={"ClaimResponse.test"}
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
       </FormikProvider>
     );
     const inputField = screen.getByTestId(
-      "string-field-input-ClaimResponse.id"
+      "string-field-input-ClaimResponse.test"
     ) as HTMLInputElement;
     expect(inputField).toBeInTheDocument();
-    expect(inputField.value).toBe("test");
+    expect(inputField.value).toBe("1234-abcd-ABCD");
+
+    fireEvent.change(inputField, { target: { value: "1234-abcd-ABCD-5678" } });
+    expect(onChange).toHaveBeenCalled();
   });
 
   test("String field should display errors and helper text", () => {
@@ -161,17 +225,31 @@ describe("TypeEditor Component", () => {
         id: "This field is required",
       },
     };
-    const handleChange = jest.fn();
     const errorFormik = { ...mockFormik, errors, touched };
     render(
       <FormikProvider value={errorFormik}>
-        <TypeEditor
-          type={`http://hl7.org/fhirpath/System.String`}
-          required={false}
-          onChange={handleChange}
-          structureDefinition={null}
-          label={"ClaimResponse.id"}
-        />
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            structureDefinition={{
+              id: "ClaimResponse.id",
+              path: "ClaimResponse.id",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  code: "http://hl7.org/fhirpath/System.String",
+                },
+              ],
+            }}
+            resource={null}
+            label={"ClaimResponse.id"}
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
       </FormikProvider>
     );
     const inputField = screen.getByTestId(
@@ -183,15 +261,29 @@ describe("TypeEditor Component", () => {
   });
 
   test("Should render Period component", () => {
-    const handleChange = jest.fn();
     render(
-      <TypeEditor
-        type={`Period`}
-        required={false}
-        value={null}
-        onChange={handleChange}
-        structureDefinition={null}
-      />
+      <RequiredFieldsProvider
+        requiredFields={mockRequiredFields}
+        formInfo={mockFormInfo}
+      >
+        <TypeEditor
+          resource={null}
+          structureDefinition={{
+            id: "ClaimResponse.instantiatesCanonical",
+            path: "ClaimResponse.instantiatesCanonical",
+            min: 0,
+            max: "1",
+            type: [
+              {
+                code: "Period",
+              },
+            ],
+          }}
+          canEdit={true}
+          label="instantiatesCanonical"
+          parentStructureDefinition={null}
+        />
+      </RequiredFieldsProvider>
     );
 
     expect(screen.getByText("start")).toBeInTheDocument();
@@ -199,17 +291,30 @@ describe("TypeEditor Component", () => {
   });
 
   test("Should render DateTime component", () => {
-    const handleChange = jest.fn();
     render(
       <FormikProvider value={mockFormik}>
-        <TypeEditor
-          type={`http://hl7.org/fhirpath/System.DateTime`}
-          required={false}
-          value={`2024-09-26T08:33:33.000-05:00`}
-          onChange={handleChange}
-          structureDefinition={null}
-          label="ClaimResponse.date"
-        />
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            structureDefinition={{
+              id: "ClaimResponse.date",
+              path: "ClaimResponse.date",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  code: "http://hl7.org/fhirpath/System.DateTime",
+                },
+              ],
+            }}
+            resource={null}
+            label="ClaimResponse.date"
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
       </FormikProvider>
     );
 
@@ -219,7 +324,7 @@ describe("TypeEditor Component", () => {
     expect(inputDate).toBeInTheDocument();
   });
 
-  test("Should render DateTime component, should trigger onChange", () => {
+  test("Should render DateTime component, should trigger onChange", async () => {
     const onChange = jest.fn();
     const setFieldTouched = jest.fn();
     const updatedMockFormik = {
@@ -236,34 +341,48 @@ describe("TypeEditor Component", () => {
     // need to figure out how to check this mock
     render(
       <FormikProvider value={updatedMockFormik}>
-        <TypeEditor
-          type={`http://hl7.org/fhirpath/System.DateTime`}
-          required={false}
-          value="1992-01-01T00:00:00-08:00"
-          onChange={() => {}}
-          structureDefinition={null}
-          label="ClaimResponse.date"
-        />
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            structureDefinition={{
+              id: "ClaimResponse.date",
+              path: "ClaimResponse.date",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  code: "http://hl7.org/fhirpath/System.DateTime",
+                },
+              ],
+            }}
+            resource={null}
+            parentStructureDefinition={null}
+            canEdit={true}
+            label="ClaimResponse.date"
+          />
+        </RequiredFieldsProvider>
       </FormikProvider>
     );
 
-    const inputDate = screen.getByTestId(
-      `date-time-format-selector-field-ClaimResponse.date`
-    );
-    expect(inputDate).toBeInTheDocument();
-    const timeZone = screen.getByTestId(
-      "timezone-input-field-ClaimResponse.date-input"
-    );
-    expect(timeZone.value).toBe("America/Los_Angeles");
-    const guam = "Pacific/Guam";
-    fireEvent.change(timeZone, {
-      target: {
-        value: guam,
-      },
-    });
+    const dateInput = screen.getByTestId(
+      `YYYY-MM-DDTHH:mm:ssZ-field-ClaimResponse.date-input`
+    ) as HTMLInputElement;
+
+    fireEvent.change(dateInput, { target: { value: "09/26/2024" } });
+
     expect(onChange).toHaveBeenCalledWith(
       "ClaimResponse.date",
-      "1992-01-01T18:00:00+10:00"
+      "2024-09-26T08:00:00+00:00"
+    );
+
+    const timeInput = screen.getByPlaceholderText("hh:mm:ss aa");
+    fireEvent.change(timeInput, { target: { value: "02:45:30 PM" } });
+
+    expect(onChange).toHaveBeenCalledWith(
+      "ClaimResponse.date",
+      "2024-09-26T14:45:30+00:00"
     );
   });
 
@@ -284,14 +403,28 @@ describe("TypeEditor Component", () => {
     // need to figure out how to check this mock
     render(
       <FormikProvider value={updatedMockFormik}>
-        <TypeEditor
-          type={`http://hl7.org/fhirpath/System.DateTime`}
-          required={false}
-          value="2024-09-26asdf332324234"
-          onChange={() => {}}
-          structureDefinition={null}
-          label="ClaimResponse.date"
-        />
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            structureDefinition={{
+              id: "ClaimResponse.date",
+              path: "ClaimResponse.date",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  code: "http://hl7.org/fhirpath/System.DateTime",
+                },
+              ],
+            }}
+            resource={null}
+            label="ClaimResponse.date"
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
       </FormikProvider>
     );
 
@@ -317,14 +450,28 @@ describe("TypeEditor Component", () => {
     // need to figure out how to check this mock
     render(
       <FormikProvider value={dateFormik}>
-        <TypeEditor
-          type="date"
-          required={false}
-          value="01-01-1992"
-          onChange={() => {}}
-          structureDefinition={null}
-          label="ClaimResponse.date"
-        />
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "ClaimResponse.date",
+              path: "ClaimResponse.date",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  code: "date",
+                },
+              ],
+            }}
+            label="ClaimResponse.date"
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
       </FormikProvider>
     );
 
@@ -332,8 +479,7 @@ describe("TypeEditor Component", () => {
     expect(dateField).toBeInTheDocument();
     const dateFieldInput = screen.getByTestId(
       "YYYY-MM-DD-field-ClaimResponse.date-input"
-    );
-    expect(dateFieldInput).toBeInTheDocument();
+    ) as HTMLInputElement;
     expect(dateFieldInput.value).toBe("01/01/2019");
 
     const formatSelectorField = screen.getByTestId(
@@ -363,14 +509,28 @@ describe("TypeEditor Component", () => {
     // need to figure out how to check this mock
     render(
       <FormikProvider value={updatedMockFormik}>
-        <TypeEditor
-          type={`http://hl7.org/fhirpath/System.DateTime`}
-          required={false}
-          value="1992-01-01T00:00:00-08:00"
-          onChange={() => {}}
-          structureDefinition={null}
-          label="ClaimResponse.date"
-        />
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            structureDefinition={{
+              id: "ClaimResponse.date",
+              path: "ClaimResponse.date",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  code: "http://hl7.org/fhirpath/System.DateTime",
+                },
+              ],
+            }}
+            resource={null}
+            label="ClaimResponse.date"
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
       </FormikProvider>
     );
 
@@ -380,17 +540,40 @@ describe("TypeEditor Component", () => {
   });
 
   test("Should render Boolean component", () => {
-    const handleChange = jest.fn();
+    const updatedMockFormik = {
+      ...mockFormik,
+      getFieldProps: () => ({
+        label: "MedicationAbsent.meta",
+        name: "MedicationAbsent.meta",
+        value: `true`,
+        setFieldTouched: jest.fn(),
+        setFieldValue: jest.fn(),
+      }),
+    };
     render(
-      <FormikProvider value={mockFormik}>
-        <TypeEditor
-          type={`boolean`}
-          required={false}
-          value={`true`}
-          onChange={handleChange}
-          structureDefinition={null}
-          label={"MedicationAbsent.meta"}
-        />
+      <FormikProvider value={updatedMockFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            structureDefinition={{
+              id: "MedicationAbsent.meta",
+              path: "MedicationAbsent.meta",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  code: "boolean",
+                },
+              ],
+            }}
+            label={"MedicationAbsent.meta"}
+            resource={null}
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
       </FormikProvider>
     );
     expect(
@@ -399,54 +582,165 @@ describe("TypeEditor Component", () => {
   });
 
   test("Should render URI component", () => {
-    const handleChange = jest.fn();
+    const updatedMockFormik = {
+      ...mockFormik,
+      getFieldProps: () => ({
+        label: "DiagnosticReport.presentedForm.uri",
+        name: "DiagnosticReport.presentedForm.uri",
+        value: `urn:oid:2.16.840.1.113883.6.238`,
+        setFieldTouched: jest.fn(),
+        setFieldValue: jest.fn(),
+      }),
+    };
     render(
-      <FormikProvider value={mockFormik}>
-        <TypeEditor
-          type={`uri`}
-          required={true}
-          value={`urn:oid:2.16.840.1.113883.6.238`}
-          onChange={handleChange}
-          structureDefinition={null}
-          label={"DiagnosticReport.presentedForm.uri"}
-        />
+      <FormikProvider value={updatedMockFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "Observation.uri",
+              path: "Observation.uri",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  code: "uri",
+                },
+              ],
+            }}
+            label={"DiagnosticReport.presentedForm.uri"}
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
       </FormikProvider>
     );
     expect(
       screen.getByTestId("uri-input-field-DiagnosticReport.presentedForm.uri")
     ).toBeInTheDocument();
   });
+  it("Should render URI component ( invalid input validation)", async () => {
+    render(
+      <FormikProvider value={mockFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "Observation.uri",
+              path: "Observation.uri",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  code: "uri",
+                },
+              ],
+            }}
+            label={"DiagnosticReport.presentedForm.uri"}
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+    const inputField = screen.getByTestId(
+      "uri-input-field-DiagnosticReport.presentedForm.uri"
+    );
+    expect(inputField).toBeInTheDocument();
+    await act(async () => {
+      userEvent.type(inputField, "urn:oid:AA");
+    });
+    expect(mockSetFieldValue).toHaveBeenCalled();
+  });
 
   test("Should render URL component", () => {
-    const handleChange = jest.fn();
+    const updatedMockFormik = {
+      ...mockFormik,
+      getFieldProps: () => ({
+        label: "Observation.url",
+        name: "Observation.url",
+        value: `http://hl7.org/fhir/us/core/StructureDefinition/uscdi-requirement`,
+        setFieldTouched: jest.fn(),
+        setFieldValue: jest.fn(),
+      }),
+    };
     render(
-      <TypeEditor
-        type={`url`}
-        required={true}
-        value={`http://hl7.org/fhir/us/core/StructureDefinition/uscdi-requirement`}
-        onChange={handleChange}
-        structureDefinition={null}
-      />
+      <FormikProvider value={updatedMockFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "Observation.url",
+              path: "Observation.url",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  code: "url",
+                },
+              ],
+            }}
+            canEdit={true}
+            label="Observation.url"
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
     );
-    expect(screen.getByTestId("url-input-field-URL")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("url-input-field-Observation.url")
+    ).toBeInTheDocument();
   });
 
   test("Should render canonical url type attribute", () => {
-    const handleChange = jest.fn();
     const canonicalUri = "https://example.com/blog";
+    const updatedMockFormik = {
+      ...mockFormik,
+      getFieldProps: () => ({
+        label: "Observation.issued",
+        name: "Observation.issued",
+        value: canonicalUri,
+        setFieldTouched: jest.fn(),
+        setFieldValue: jest.fn(),
+      }),
+    };
     render(
-      <TypeEditor
-        type="canonical"
-        required={true}
-        value={canonicalUri}
-        onChange={handleChange}
-        structureDefinition={null}
-        canEdit={true}
-        label="instantiatesCanonical"
-      />
+      <FormikProvider value={updatedMockFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            structureDefinition={{
+              id: "Observation.issued",
+              path: "Observation.issued",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  code: "canonical",
+                },
+              ],
+            }}
+            resource={undefined}
+            canEdit={true}
+            label="Observation.issued"
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
     );
     expect(
-      screen.getByTestId("url-input-field-instantiatesCanonical")
+      screen.getByTestId("url-input-field-Observation.issued")
     ).toHaveValue(canonicalUri);
   });
 
@@ -469,17 +763,28 @@ describe("TypeEditor Component", () => {
 
     render(
       <FormikProvider value={updatedMockFormik}>
-        <TypeEditor
-          type="instant"
-          required={true}
-          value="2025-02-04T00:00:00.000+00:00"
-          onChange={handleChange}
-          structureDefinition={null}
-          resource={undefined}
-          parentStructureDefinition={undefined}
-          canEdit={true}
-          label="Observation.issued"
-        />
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            structureDefinition={{
+              id: "Observation.issued",
+              path: "Observation.issued",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  code: "instant",
+                },
+              ],
+            }}
+            resource={undefined}
+            parentStructureDefinition={undefined}
+            canEdit={true}
+            label="Observation.issued"
+          />
+        </RequiredFieldsProvider>
       </FormikProvider>
     );
     const dateInput = screen.getByTestId("Observation.issued_instant-input");
@@ -493,7 +798,6 @@ describe("TypeEditor Component", () => {
         issued: "Invalid instant format",
       },
     };
-    const handleChange = jest.fn();
     const onChange = jest.fn();
     const setFieldTouched = jest.fn();
     const updatedMockFormik = {
@@ -512,17 +816,28 @@ describe("TypeEditor Component", () => {
 
     render(
       <FormikProvider value={updatedMockFormik}>
-        <TypeEditor
-          type="instant"
-          required={true}
-          value="2025-02-04T00:00:00.000+00:00"
-          onChange={handleChange}
-          structureDefinition={null}
-          resource={undefined}
-          parentStructureDefinition={undefined}
-          canEdit={true}
-          label="Observation.issued"
-        />
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            structureDefinition={{
+              id: "Observation.issued",
+              path: "Observation.issued",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  code: "instant",
+                },
+              ],
+            }}
+            resource={undefined}
+            parentStructureDefinition={undefined}
+            canEdit={true}
+            label="Observation.issued"
+          />
+        </RequiredFieldsProvider>
       </FormikProvider>
     );
     const dateInput = screen.getByTestId("Observation.issued_instant-input");
@@ -543,21 +858,31 @@ describe("TypeEditor Component", () => {
         issued: "This field is required",
       },
     };
-    const handleChange = jest.fn();
     const formik = { ...mockFormik, errors, touched };
     render(
       <FormikProvider value={formik}>
-        <TypeEditor
-          type="instant"
-          required={true}
-          value="2025-02-04T00:00:00.000+00:00"
-          onChange={handleChange}
-          structureDefinition={null}
-          resource={undefined}
-          parentStructureDefinition={undefined}
-          canEdit={true}
-          label="Observation.issued"
-        />
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            structureDefinition={{
+              id: "Observation.issued",
+              path: "Observation.issued",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  code: "instant",
+                },
+              ],
+            }}
+            resource={undefined}
+            parentStructureDefinition={undefined}
+            canEdit={true}
+            label="Observation.issued"
+          />
+        </RequiredFieldsProvider>
       </FormikProvider>
     );
     const inputField = screen.getByTestId("Observation.issued_instant-input");
@@ -571,17 +896,30 @@ describe("TypeEditor Component", () => {
   });
 
   test("Should render Date component", () => {
-    const handleChange = jest.fn();
     render(
       <FormikProvider value={mockFormik}>
-        <TypeEditor
-          type={`date`}
-          required={false}
-          value={`2024-09-26`}
-          onChange={handleChange}
-          structureDefinition={null}
-          label="ClaimResponse.date"
-        />
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "ClaimResponse.date",
+              path: "ClaimResponse.date",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  code: "date",
+                },
+              ],
+            }}
+            label="ClaimResponse.date"
+            parentStructureDefinition={null}
+            canEdit={true}
+          />
+        </RequiredFieldsProvider>
       </FormikProvider>
     );
 
@@ -592,94 +930,167 @@ describe("TypeEditor Component", () => {
   });
 
   test("Should render Time component", () => {
-    const handleChange = jest.fn();
     render(
       <FormikProvider value={mockFormik}>
-        <TypeEditor
-          type={`http://hl7.org/fhir/R4/datatypes.html#time`}
-          required={false}
-          value={`01:23:45`}
-          onChange={handleChange}
-          structureDefinition={null}
-          label="ClaimResponse.time"
-        />
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "ClaimResponse.time",
+              path: "ClaimResponse.time",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  extension: [
+                    {
+                      url: "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+                      valueUrl: "id",
+                    },
+                  ],
+                  code: `http://hl7.org/fhir/R4/datatypes.html#time`,
+                },
+              ],
+            }}
+            label="ClaimResponse.time"
+            parentStructureDefinition={null}
+            canEdit={true}
+          />
+        </RequiredFieldsProvider>
       </FormikProvider>
     );
-    const inputTime = screen.getByPlaceholderText("hh:mm:ss aa");
-    expect(inputTime).toBeInTheDocument();
+    const inputTime = screen.getByPlaceholderText(
+      "hh:mm:ss aa"
+    ) as HTMLInputElement;
     expect(inputTime.value).toBe("01:23:45 AM");
   });
 
   test("Should render PositiveInt component", () => {
-    const handleChange = jest.fn();
     render(
       <FormikProvider value={mockFormik}>
-        <TypeEditor
-          type={`positiveInt`}
-          required={false}
-          onChange={handleChange}
-          structureDefinition={null}
-          label={"ClaimResponse.order"}
-        />
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "ClaimResponse.order",
+              path: "ClaimResponse.order",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  code: "positiveInt",
+                },
+              ],
+            }}
+            label={"ClaimResponse.order"}
+            parentStructureDefinition={null}
+            canEdit={true}
+          />
+        </RequiredFieldsProvider>
       </FormikProvider>
     );
     const inputField = screen.getByTestId(
       "integer-field-input-ClaimResponse.order"
-    );
-    expect(inputField).toBeInTheDocument();
+    ) as HTMLInputElement;
     expect(inputField.value).toBe("1234");
   });
 
   test("Should render unsignedInt component", () => {
-    const handleChange = jest.fn();
     render(
       <FormikProvider value={mockFormik}>
-        <TypeEditor
-          type={`unsignedInt`}
-          required={false}
-          onChange={handleChange}
-          label={"ClaimResponse.order"}
-        />
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            structureDefinition={{
+              id: "ClaimResponse.order",
+              path: "ClaimResponse.order",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  code: `unsignedInt`,
+                },
+              ],
+            }}
+            resource={null}
+            label={"ClaimResponse.order"}
+            parentStructureDefinition={null}
+            canEdit={true}
+          />
+        </RequiredFieldsProvider>
       </FormikProvider>
     );
 
     const inputField = screen.getByTestId(
       "integer-field-input-ClaimResponse.order"
-    );
-    expect(inputField).toBeInTheDocument();
+    ) as HTMLInputElement;
     expect(inputField.value).toBe("1234");
   });
 
   test("Should render unsignedInt component", () => {
-    const handleChange = jest.fn();
     render(
       <FormikProvider value={mockFormik}>
-        <TypeEditor
-          type={`http://hl7.org/fhirpath/System.Integer`}
-          required={false}
-          onChange={handleChange}
-          label={"ClaimResponse.order"}
-        />
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            structureDefinition={{
+              id: "ClaimResponse.order",
+              path: "ClaimResponse.order",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  code: `http://hl7.org/fhirpath/System.Integer`,
+                },
+              ],
+            }}
+            resource={null}
+            label={"ClaimResponse.order"}
+            parentStructureDefinition={null}
+            canEdit={true}
+          />
+        </RequiredFieldsProvider>
       </FormikProvider>
     );
 
     const inputField = screen.getByTestId(
       "integer-field-input-ClaimResponse.order"
-    );
-    expect(inputField).toBeInTheDocument();
+    ) as HTMLInputElement;
     expect(inputField.value).toBe("1234");
   });
 
   test("Should display unsupported", () => {
-    const handleChange = jest.fn();
     render(
-      <TypeEditor
-        type={`test`}
-        required={false}
-        value={`test`}
-        onChange={handleChange}
-        structureDefinition={null}
-      />
+      <FormikProvider value={mockFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              type: [
+                {
+                  code: "test",
+                },
+              ],
+            }}
+            parentStructureDefinition={null}
+            canEdit={true}
+            label={"test-label"}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
     );
     expect(screen.getByText(`Unsupported Type [test]`)).toBeInTheDocument();
     jest.resetAllMocks();
@@ -696,13 +1107,136 @@ describe("TypeEditor Component", () => {
     const handleChange = jest.fn();
 
     render(
-      <TypeEditor
-        type={`test`}
-        required={false}
-        value={`test`}
-        onChange={handleChange}
-        structureDefinition={null}
-      />
+      <RequiredFieldsProvider
+        requiredFields={mockRequiredFields}
+        formInfo={mockFormInfo}
+      >
+        <TypeEditor
+          type={`test`}
+          resource={null}
+          required={false}
+          value={`test`}
+          onChange={handleChange}
+          structureDefinition={null}
+          parentStructureDefinition={null}
+          canEdit={true}
+          label={"test-label"}
+        />
+      </RequiredFieldsProvider>
+    );
+    expect(
+      screen.queryByText(`Unsupported Type [test]`)
+    ).not.toBeInTheDocument();
+  });
+  test("Should handle render of !isComponentDataType", async () => {
+    const fhirDefinitionsServiceApiMock = {
+      getResourceTree: jest.fn().mockResolvedValue(codingDef),
+      getAllChildren: jest.fn().mockReturnValue(codingTopLevelElements),
+    } as unknown as FhirDefinitionsServiceApi;
+    useFhirDefinitionsServiceApiMock.mockImplementation(
+      () => fhirDefinitionsServiceApiMock
+    );
+
+    render(
+      <RequiredFieldsProvider
+        requiredFields={mockRequiredFields}
+        formInfo={mockFormInfo}
+      >
+        <TypeEditor
+          resource={null}
+          structureDefinition={{
+            type: [
+              {
+                code: "Meta",
+              },
+            ],
+          }}
+          parentStructureDefinition={{}}
+          canEdit={true}
+          label={"ClaimResponse.meta"}
+        />
+      </RequiredFieldsProvider>
+    );
+    expect(
+      screen.queryByText(`Unsupported Type [test]`)
+    ).not.toBeInTheDocument();
+  });
+
+  test("Should handle render of !isComponentDataType with a profile extension", async () => {
+    const fhirDefinitionsServiceApiMock = {
+      getResourceTree: jest.fn().mockResolvedValue(codingDef),
+      getAllChildren: jest.fn().mockReturnValue(codingTopLevelElements),
+    } as unknown as FhirDefinitionsServiceApi;
+    useFhirDefinitionsServiceApiMock.mockImplementation(
+      () => fhirDefinitionsServiceApiMock
+    );
+    render(
+      <RequiredFieldsProvider
+        requiredFields={mockRequiredFields}
+        formInfo={mockFormInfo}
+      >
+        <TypeEditor
+          resource={null}
+          structureDefinition={{
+            id: "Patient.extension:race",
+            extension: [
+              {
+                url: "http://hl7.org/fhir/us/core/StructureDefinition/uscdi-requirement",
+                valueBoolean: true,
+              },
+              {
+                url: "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-keyelement",
+                valueBoolean: true,
+              },
+            ],
+            path: "Patient.extension",
+            sliceName: "race",
+            short: "(QI-Core)(USCDI) US Core Race Extension",
+            definition:
+              "Concepts classifying the person into a named category of humans sharing common history, traits, geographical origin or nationality.  The race codes used to represent these concepts are based upon the [CDC Race and Ethnicity Code Set Version 1.0](http://www.cdc.gov/phin/resources/vocabulary/index.html) which includes over 900 concepts for representing race and ethnicity of which 921 reference race.  The race concepts are grouped by and pre-mapped to the 5 OMB race categories:\n\n   - American Indian or Alaska Native\n   - Asian\n   - Black or African American\n   - Native Hawaiian or Other Pacific Islander\n   - White.",
+            min: 0,
+            max: "1",
+            base: {
+              path: "DomainResource.extension",
+              min: 0,
+              max: "*",
+            },
+            type: [
+              {
+                code: "Extension",
+                profile: [
+                  "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+                ],
+              },
+            ],
+            condition: ["ele-1"],
+            constraint: [
+              {
+                key: "ele-1",
+                severity: "error",
+                human: "All FHIR elements must have a @value or children",
+                expression: "hasValue() or (children().count() > id.count())",
+                xpath: "@value|f:*|h:div",
+                source: "http://hl7.org/fhir/StructureDefinition/Element",
+              },
+              {
+                key: "ext-1",
+                severity: "error",
+                human: "Must have either extensions or value[x], not both",
+                expression: "extension.exists() != value.exists()",
+                xpath:
+                  "exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])",
+                source: "http://hl7.org/fhir/StructureDefinition/Extension",
+              },
+            ],
+            mustSupport: false,
+            isModifier: false,
+          }}
+          parentStructureDefinition={{}}
+          canEdit={true}
+          label={"ClaimResponse.meta"}
+        />
+      </RequiredFieldsProvider>
     );
     expect(
       screen.queryByText(`Unsupported Type [test]`)

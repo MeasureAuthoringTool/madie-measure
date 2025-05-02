@@ -13,9 +13,9 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import "twin.macro";
 import SearchIcon from "@mui/icons-material/Search";
-import InputAdornment from "@material-ui/core/InputAdornment";
+
 import ClearIcon from "@mui/icons-material/Clear";
-import { Typography, IconButton } from "@mui/material";
+import { Typography, IconButton, InputAdornment } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { measureStore, checkUserCanEdit } from "@madie/madie-util";
 import { useFormik } from "formik";
@@ -208,7 +208,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
   >([]);
 
   const managePagination = useCallback(() => {
-    if (measureDefinitions?.length > 0) {
+    if (measureDefinitions) {
       if (measureDefinitions?.length < currentLimit) {
         setOffset(0);
         setVisibleDefinitions([...measureDefinitions]);
@@ -436,7 +436,8 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
               </tr>
             </thead>
             <tbody data-testId="measure-definitions-table-body">
-              {measureDefinitions?.length > 0 ? (
+              {visibleDefinitions?.length > 0 ||
+              measure?.measureMetaData?.measureDefinitions?.length > 0 ? (
                 visibleDefinitions.map((definition, index) => (
                   <MeasureMetaDataRow
                     name={definition.term}

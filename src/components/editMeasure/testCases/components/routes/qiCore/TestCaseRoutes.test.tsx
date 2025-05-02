@@ -646,7 +646,6 @@ describe("TestCaseRoutes", () => {
   });
 
   it("should display value sets error", async () => {
-    //entry.resource?.resourceType === "Library"
     measureBundle.entry = [
       {
         resource: {

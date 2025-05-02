@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
-import { IconButton, MenuItem, Tooltip } from "@mui/material";
+import { IconButton, MenuItem, Tooltip, InputAdornment } from "@mui/material";
 import {
   Select,
   TextField,
   Popover,
 } from "@madie/madie-design-system/dist/react";
 import SearchIcon from "@mui/icons-material/Search";
-import InputAdornment from "@material-ui/core/InputAdornment";
+
 import ClearIcon from "@mui/icons-material/Clear";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditCalendarOutlinedIcon from "@mui/icons-material/EditCalendarOutlined";
@@ -286,14 +286,7 @@ export default function ActionCenter(props: ActionCenterProps) {
                       disabled={disableDeleteBtn}
                       data-testid="delete-action-btn"
                     >
-                      <DeleteOutlinedIcon
-                        data-testid={`delete-action-icon`}
-                        sx={
-                          disableDeleteBtn
-                            ? { color: grey[500] }
-                            : { color: red[500] }
-                        }
-                      />
+                      <DeleteOutlinedIcon data-testid={`delete-action-icon`} />
                     </IconButton>
                   </span>
                 </Tooltip>
@@ -318,11 +311,6 @@ export default function ActionCenter(props: ActionCenterProps) {
                     >
                       <EditCalendarOutlinedIcon
                         data-testid={`shift-test-case-dates-action-icon`}
-                        sx={
-                          disableShiftDatesBtn
-                            ? { color: grey[500] }
-                            : { color: blue[700] }
-                        }
                       />
                     </IconButton>
                   </span>
@@ -346,14 +334,7 @@ export default function ActionCenter(props: ActionCenterProps) {
                       disabled={disableCloneBtn}
                       data-testid="clone-action-btn"
                     >
-                      <LibraryAddIcon
-                        data-testid={`clone-action-icon`}
-                        sx={
-                          disableCloneBtn
-                            ? { color: grey[500] }
-                            : { color: blue[700] }
-                        }
-                      />
+                      <LibraryAddIcon data-testid={`clone-action-icon`} />
                     </IconButton>
                   </span>
                 </Tooltip>
@@ -383,11 +364,6 @@ export default function ActionCenter(props: ActionCenterProps) {
                       icon="fluent:share-screen-start-24-regular"
                       data-testid={`copy-action-icon`}
                       rotate={45}
-                      style={
-                        disableCopyBtn
-                          ? { color: grey[500] }
-                          : { color: blue[700] }
-                      }
                     />
                   </IconButton>
                 </span>
@@ -420,11 +396,6 @@ export default function ActionCenter(props: ActionCenterProps) {
                       setAnchorEl(event.currentTarget);
                       setExportOptionsOpen(true);
                     }}
-                    sx={
-                      disableExportBtn
-                        ? { color: grey[500] }
-                        : { color: blue[700] }
-                    }
                   />
                   {!isQDM && (
                     <Popover

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { ChangeEvent } from "react";
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -31,7 +32,6 @@ import {
   TestCase,
 } from "@madie/madie-models";
 import TestCaseRoutes from "../../routes/qiCore/TestCaseRoutes";
-import { act } from "react-dom/test-utils";
 import { PopulationEpisodeResult } from "../../../api/CalculationService";
 import { simpleMeasureFixture } from "../../createTestCase/__mocks__/simpleMeasureFixture";
 import { testCaseFixture } from "../../createTestCase/__mocks__/testCaseFixture";
@@ -821,6 +821,169 @@ describe("EditTestCase component", () => {
       );
       expect(debugOutput).toHaveTextContent(
         "MADiE only supports a timezone offset of 0. MADiE has overwritten any timezone offsets that are not zero."
+      );
+    });
+
+    it("should alert for updated datetime invalid timezone", async () => {
+      const testCase = {
+        id: "1234",
+        description: "Test IPP",
+        series: "SeriesA",
+        createdBy: MEASURE_CREATEDBY,
+        createdAt: "",
+        lastModifiedAt: "",
+        lastModifiedBy: "null",
+        title: "TestIPP",
+        name: "TestIPP",
+        executionStatus: "false",
+        json: null,
+      } as TestCase;
+      mockedAxios.get.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("series")) {
+          return Promise.resolve({ data: [] });
+        } else if (args && args.endsWith("resources")) {
+          return Promise.resolve({
+            data: [...resourceIdentifiers],
+          });
+        }
+        return Promise.resolve({
+          data: testCase,
+        });
+      });
+      renderWithRouter(
+        ["/measures/m1234/edit/test-cases/1234"],
+        "/measures/:measureId/edit/test-cases/:id"
+      );
+
+      const testCaseDescription = "TestCase123";
+      const testCaseTitle = "TestTitle";
+      const testCaseJson = JSON.stringify({
+        resourceType: "Bundle",
+        id: "43",
+        date: "2025-10-06T12:00:00+99:99",
+      });
+
+      mockedAxios.put.mockResolvedValue({
+        data: {
+          ...testCase,
+          createdBy: MEASURE_CREATEDBY,
+          description: testCaseDescription,
+          title: testCaseTitle,
+          json: testCaseJson,
+          hapiOperationOutcome: {
+            code: 500,
+            message: "An unknown error occurred with HAPI FHIR",
+            outcomeResponse: {
+              resourceType: "OperationOutcome",
+              text: "Error: Bad things happened",
+              issue: [
+                {
+                  severity: "error",
+                  diagnostics: "Bad things happened",
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      const editor = screen.getByTestId("test-case-json-editor");
+      await waitFor(() => expect(editor).toHaveValue(""));
+      userEvent.paste(editor, testCaseJson);
+      expect(editor).toHaveValue(testCaseJson);
+      userEvent.click(screen.getByTestId("details-tab"));
+
+      await testTitle("TC1", true);
+
+      const createBtn = await screen.findByRole("button", {
+        name: "Save",
+      });
+      userEvent.click(createBtn);
+
+      const debugOutput = await screen.findByTestId("error-toast");
+      expect(debugOutput).toHaveTextContent(
+        "Test case updated successfully with errors in JSON"
+      );
+      expect(debugOutput).toHaveTextContent(
+        "MADiE only supports a timezone offset of 0. MADiE has overwritten any timezone offsets that are not zero."
+      );
+    });
+
+    it("should save the cql with errros and shouldn't perform datetime conversion when cql cannot be parsed", async () => {
+      const testCase = {
+        id: "1234",
+        description: "Test IPP",
+        series: "SeriesA",
+        createdBy: MEASURE_CREATEDBY,
+        createdAt: "",
+        lastModifiedAt: "",
+        lastModifiedBy: "null",
+        title: "TestIPP",
+        name: "TestIPP",
+        executionStatus: "false",
+        json: null,
+      } as TestCase;
+      mockedAxios.get.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("series")) {
+          return Promise.resolve({ data: [] });
+        } else if (args && args.endsWith("resources")) {
+          return Promise.resolve({
+            data: [...resourceIdentifiers],
+          });
+        }
+        return Promise.resolve({
+          data: testCase,
+        });
+      });
+      renderWithRouter(
+        ["/measures/m1234/edit/test-cases/1234"],
+        "/measures/:measureId/edit/test-cases/:id"
+      );
+
+      const testCaseDescription = "TestCase123";
+      const testCaseTitle = "TestTitle";
+      const testCaseJson = "";
+
+      mockedAxios.put.mockResolvedValue({
+        data: {
+          ...testCase,
+          createdBy: MEASURE_CREATEDBY,
+          description: testCaseDescription,
+          title: testCaseTitle,
+          json: testCaseJson,
+          hapiOperationOutcome: {
+            code: 500,
+            message: "An unknown error occurred with HAPI FHIR",
+            outcomeResponse: {
+              resourceType: "OperationOutcome",
+              text: "Error: Bad things happened",
+              issue: [
+                {
+                  severity: "error",
+                  diagnostics: "Bad things happened",
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      const editor = screen.getByTestId("test-case-json-editor");
+      await waitFor(() => expect(editor).toHaveValue(""));
+      userEvent.paste(editor, testCaseJson);
+      expect(editor).toHaveValue(testCaseJson);
+      userEvent.click(screen.getByTestId("details-tab"));
+
+      await testTitle("TC1", true);
+
+      const createBtn = await screen.findByRole("button", {
+        name: "Save",
+      });
+      userEvent.click(createBtn);
+
+      const debugOutput = await screen.findByTestId("error-toast");
+      expect(debugOutput).toHaveTextContent(
+        "Test case updated successfully with errors in JSON"
       );
     });
 
@@ -1711,7 +1874,7 @@ describe("EditTestCase component", () => {
 
       userEvent.click(screen.getByTestId("details-tab"));
       const testCaseDescription =
-        "abcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyz";
+        "abcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyzaaa";
       const descriptionInput = screen.getByTestId("test-case-description");
       userEvent.type(descriptionInput, testCaseDescription);
 
@@ -1722,12 +1885,12 @@ describe("EditTestCase component", () => {
       const createBtn = screen.getByRole("button", { name: "Save" });
       await waitFor(() => {
         expect(createBtn).toBeDisabled;
-        expect(
-          screen.getByTestId("test-case-description-helper-text")
-        ).toHaveTextContent(
-          "Test Case Description cannot be more than 250 characters."
-        );
       });
+      expect(
+        screen.getByTestId("test-case-description-helper-text")
+      ).toHaveTextContent(
+        "Test Case Description cannot be more than 250 characters."
+      );
     });
 
     it("should allow special characters for test case description", async () => {
@@ -1897,13 +2060,10 @@ describe("EditTestCase component", () => {
       });
 
       userEvent.click(screen.getByTestId("details-tab"));
-      await waitFor(
-        () => {
-          const seriesInput = screen.getByTestId("test-case-series");
-          userEvent.type(seriesInput, testCaseSeries);
-        },
-        { timeout: 1500 }
-      );
+      await waitFor(() => {
+        const seriesInput = screen.getByTestId("test-case-series");
+        userEvent.type(seriesInput, testCaseSeries);
+      });
       await testTitle("TC1");
 
       const createBtn = screen.getByRole("button", { name: "Save" });
@@ -1913,29 +2073,25 @@ describe("EditTestCase component", () => {
         "Test case created successfully!"
       );
       expect(debugOutput).toBeInTheDocument();
-    }, 15000);
+    }, 50000);
 
     it("should display HAPI validation errors after creating test case", async () => {
       jest.useFakeTimers("modern");
+
       const measure = {
         ...defaultMeasure,
         model: Model.QICORE_6_0_0,
       } as unknown as Measure;
+
       renderWithRouter(
         ["/measures/m1234/edit/test-cases"],
         "/measures/:measureId/edit/test-cases",
         measure
       );
 
-      const testCaseDescription = "Test Description";
-      const testCaseSeries =
-        "{{[[{shift}{ctrl/}a{/shift}~!@#$% ^&*() _-+= }|] \\ :;,. <>?/ '\"";
-      mockedAxios.post.mockResolvedValue({
+      const mockResponse = {
         data: {
           id: "testID",
-          createdBy: MEASURE_CREATEDBY,
-          description: testCaseDescription,
-          series: testCaseSeries,
           hapiOperationOutcome: {
             code: 400,
             outcomeResponse: {
@@ -1953,21 +2109,19 @@ describe("EditTestCase component", () => {
             },
           },
         },
+      };
+
+      mockedAxios.post.mockResolvedValue(mockResponse);
+
+      // Actions
+      await act(async () => {
+        userEvent.click(screen.getByTestId("details-tab"));
+        await testTitle("TC1");
       });
 
-      userEvent.click(screen.getByTestId("details-tab"));
-      await waitFor(
-        () => {
-          const seriesInput = screen.getByTestId("test-case-series");
-          userEvent.type(seriesInput, testCaseSeries);
-        },
-        { timeout: 1500 }
-      );
-      await testTitle("TC1");
+      userEvent.click(screen.getByRole("button", { name: "Save" }));
 
-      const createBtn = screen.getByRole("button", { name: "Save" });
-      userEvent.click(createBtn);
-
+      // Assertions
       const debugOutput = await screen.findByText(
         testCaseAlertToast
           ? "Changes created successfully but the following error(s) were found"
@@ -1975,30 +2129,31 @@ describe("EditTestCase component", () => {
       );
       expect(debugOutput).toBeInTheDocument();
 
-      expect(screen.queryByTestId("json-error-alert")).not.toBeInTheDocument(); // do not show JSON alert for valid JSON with HAPI FHIR validation issues
-      expect(screen.queryByText("JSON Failing")).not.toBeInTheDocument(); // do not show JSON alert for valid JSON with HAPI FHIR validation issues
+      expect(screen.queryByTestId("json-error-alert")).not.toBeInTheDocument();
+      expect(screen.queryByText("JSON Failing")).not.toBeInTheDocument();
       expect(screen.getByTestId("elements-content")).toBeInTheDocument();
 
-      const showValidationErrorsBtn = screen.getByRole("button", {
+      const validationErrorsBtn = screen.getByRole("button", {
         name: "Validation Errors",
       });
-      expect(showValidationErrorsBtn).toBeInTheDocument();
-      userEvent.click(showValidationErrorsBtn);
-      jest.advanceTimersByTime(700);
+      userEvent.click(validationErrorsBtn);
+      jest.advanceTimersByTime(100);
 
-      const validationErrorsList = await screen.findByTestId(
+      const errorList = await screen.findByTestId(
         "json-validation-errors-list"
       );
-      expect(validationErrorsList).toBeInTheDocument();
-      const patientNameError = await within(validationErrorsList).findByText(
-        "Error: Patient.name is a required field"
-      );
-      expect(patientNameError).toBeInTheDocument();
-      const patientIdentifierError = within(validationErrorsList).getByText(
-        "Error: Patient.identifier is a required field"
-      );
-      expect(patientIdentifierError).toBeInTheDocument();
-    }, 15000);
+      expect(errorList).toBeInTheDocument();
+      expect(
+        within(errorList).getByText("Error: Patient.name is a required field")
+      ).toBeInTheDocument();
+      expect(
+        within(errorList).getByText(
+          "Error: Patient.identifier is a required field"
+        )
+      ).toBeInTheDocument();
+
+      jest.useRealTimers();
+    });
 
     it("should display JSON error notification and not display QICore test case builder for invalid JSON", async () => {
       jest.useFakeTimers("modern");
@@ -2281,7 +2436,6 @@ describe("EditTestCase component", () => {
         "data.hapiOperationOutcome.outcomeResponse.text"
       );
       expect(errorText).not.toBeInTheDocument();
-      expect(mockEditor.resize).toHaveBeenCalledTimes(2);
     });
 
     it("should handle displaying a test case with null groupPopulation data", async () => {

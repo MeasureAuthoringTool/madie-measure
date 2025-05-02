@@ -20,7 +20,7 @@ import {
   Tab,
 } from "@madie/madie-design-system/dist/react";
 import "./MeasureLanding.scss";
-import { useDocumentTitle } from "@madie/madie-util";
+import { useDocumentTitle, useFeatureFlags } from "@madie/madie-util";
 import StatusHandler from "../editMeasure/editor/StatusHandler";
 
 export default function MeasureLanding() {
@@ -29,10 +29,12 @@ export default function MeasureLanding() {
   let navigate = useNavigate();
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [measureList, setMeasureList] = useState<Measure[]>([]);
+  const [myMeasuresCount, setMyMeasuresCount] = useState<number>(0);
+  const [allMeasuresCount, setAllMeasuresCount] = useState<number>(0);
 
   // utilities for pagination
   const values = queryString.parse(search);
-  const [initialLoad, setInitialLoad] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [visibleItems, setVisibleItems] = useState<number>(0);
@@ -43,6 +45,7 @@ export default function MeasureLanding() {
   const [currentPage, setCurrentPage] = useState(0);
   const [errMsg, setErrMsg] = useState(undefined);
   const abortController = useRef(null);
+  const featureFlags = useFeatureFlags();
 
   // pull info from some query url
   const curLimit = values.limit && Number(values.limit);
@@ -64,39 +67,33 @@ export default function MeasureLanding() {
   const retrieveMeasures = useCallback(
     async (tab, limit, page, searchCriteria) => {
       abortController.current = new AbortController();
-      if (!searchCriteria) {
-        setErrMsg(null);
-        measureServiceApi
-          .fetchMeasures(tab === 0, limit, page, abortController.current.signal)
-          .then((data) => {
-            setPageProps(data);
-          })
-          .catch((error: Error) => {
-            if (error.message != "canceled") {
-              setErrMsg(error.message);
-            }
-            setInitialLoad(false);
-          });
-      } else {
-        measureServiceApi
-          .searchMeasuresByCriteria(
+      setLoading(true);
+      try {
+        if (!searchCriteria) {
+          setErrMsg(null);
+          const data = await measureServiceApi.fetchMeasures(
             tab === 0,
             limit,
             page,
-            {
-              searchField: searchCriteria,
-            },
             abortController.current.signal
-          )
-          .then((data) => {
-            setPageProps(data);
-          })
-          .catch((error) => {
-            if (error.message != "canceled") {
-              setErrMsg(error.message);
-            }
-            setInitialLoad(false);
-          });
+          );
+          setPageProps(data);
+        } else {
+          const data = await measureServiceApi.searchMeasuresByCriteria(
+            tab === 0,
+            limit,
+            page,
+            { searchField: searchCriteria },
+            abortController.current.signal
+          );
+          setPageProps(data);
+        }
+      } catch (error) {
+        if (error.message !== "canceled") {
+          setErrMsg(error.message);
+        }
+      } finally {
+        setLoading(false);
       }
     },
     [measureServiceApi]
@@ -110,9 +107,25 @@ export default function MeasureLanding() {
       setVisibleItems(numberOfElements);
       setMeasureList(content);
       setOffset(pageable.offset);
-      setInitialLoad(false);
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (featureFlags?.MeasureSearch) {
+      measureServiceApi
+        .getMeasureCounts()
+        .then((data) => {
+          setMyMeasuresCount(data.myMeasures);
+          setAllMeasuresCount(data.allMeasures);
+        })
+        .catch(() => console.error("Unable to retrieve measure counts"));
+    }
+  }, [
+    activeTab,
+    featureFlags?.MeasureSearch,
+    measureServiceApi.getMeasureCounts,
+  ]);
 
   useEffect(() => {
     retrieveMeasures(
@@ -157,7 +170,11 @@ export default function MeasureLanding() {
             <Tabs value={activeTab} onChange={handleTabChange} type="B">
               <Tab
                 type="B"
-                label={`My Measures`}
+                label={
+                  featureFlags?.MeasureSearch
+                    ? "My Measures (" + myMeasuresCount + ")"
+                    : "My Measures"
+                }
                 data-testid="my-measures-tab"
                 onClick={() => {
                   setCurrentPage(0);
@@ -166,7 +183,11 @@ export default function MeasureLanding() {
               <Tab
                 tabIndex={0}
                 type="B"
-                label="All Measures"
+                label={
+                  featureFlags?.MeasureSearch
+                    ? "All Measures (" + allMeasuresCount + ")"
+                    : "All Measures"
+                }
                 data-testid="all-measures-tab"
                 onClick={() => {
                   setCurrentPage(0);
@@ -177,7 +198,7 @@ export default function MeasureLanding() {
           <span tw="flex-grow" />
         </section>
         <div>
-          {errMsg && !initialLoad && (
+          {errMsg && !loading && (
             <StatusHandler
               error={errMsg}
               errorMessage={errMsg}
@@ -188,7 +209,7 @@ export default function MeasureLanding() {
           )}
 
           {/* spin or display */}
-          {!initialLoad && (
+          {!loading && (
             <div className="table">
               <MeasureList
                 measureList={measureList}
@@ -197,7 +218,7 @@ export default function MeasureLanding() {
                 setTotalItems={setTotalItems}
                 setVisibleItems={setVisibleItems}
                 setOffset={setOffset}
-                setInitialLoad={setInitialLoad}
+                setLoading={setLoading}
                 activeTab={activeTab}
                 searchCriteria={searchCriteria}
                 setSearchCriteria={setSearchCriteria}
@@ -226,7 +247,7 @@ export default function MeasureLanding() {
             </div>
           )}
         </div>
-        {initialLoad && (
+        {loading && (
           <div style={{ display: "flex", justifyContent: "center" }}>
             <MadieSpinner style={{ height: 50, width: 50 }} />
           </div>

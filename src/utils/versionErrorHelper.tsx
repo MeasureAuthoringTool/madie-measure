@@ -21,5 +21,11 @@ export default function versionErrorHelper(errorMessage: string): string {
     humanReadbleOutput =
       "Please include valid test cases to version before versioning this measure.";
   }
+  // "User [{}] attempted to version measure with id [{}] which does not have at least one Population Criteria"
+  if (errorMessage.includes("does not have at least one Population Criteria")) {
+    humanReadbleOutput =
+      "Please set up at least one Population Criteria before versioning this measure.";
+  }
+
   return humanReadbleOutput;
 }

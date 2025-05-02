@@ -1,18 +1,19 @@
 import * as React from "react";
-import RunTestsButton from "./RunTestsButton";
+import LoadingButton from "./LoadingButton";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const onRunTests = jest.fn();
 
-describe("RunTestsButton", () => {
+describe("LoadingActionButton", () => {
   it("RunTestsButton should be enabled with undefined shouldDisableRunTestsButton flag", () => {
     render(
-      <RunTestsButton
+      <LoadingButton
         hasErrors={false}
         isExecutionContextReady={true}
-        onRunTests={onRunTests}
-        shouldDisableRunTestsButton={undefined}
+        onClick={onRunTests}
+        label="Run Test(s)"
+        dataTestId="execute-test-cases-button"
       />
     );
     const executeButton = screen.getByTestId("execute-test-cases-button");
@@ -21,11 +22,12 @@ describe("RunTestsButton", () => {
 
   it("RunTestsButton should be enabled with no error, and shouldDisableRunTestsButton flag is false", () => {
     render(
-      <RunTestsButton
+      <LoadingButton
         hasErrors={false}
         isExecutionContextReady={true}
-        onRunTests={onRunTests}
-        shouldDisableRunTestsButton={false}
+        onClick={onRunTests}
+        label="Run Test(s)"
+        dataTestId="execute-test-cases-button"
       />
     );
 
@@ -35,11 +37,12 @@ describe("RunTestsButton", () => {
 
   it("RunTestsButton should be disabled with error", () => {
     render(
-      <RunTestsButton
+      <LoadingButton
         hasErrors={true}
         isExecutionContextReady={true}
-        onRunTests={onRunTests}
-        shouldDisableRunTestsButton={false}
+        onClick={onRunTests}
+        label="Run Test(s)"
+        dataTestId="execute-test-cases-button"
       />
     );
 
@@ -49,11 +52,12 @@ describe("RunTestsButton", () => {
 
   it("test click RunTestsButton execution is loading", () => {
     render(
-      <RunTestsButton
+      <LoadingButton
         hasErrors={false}
         isExecutionContextReady={true}
-        onRunTests={onRunTests}
-        shouldDisableRunTestsButton={false}
+        onClick={onRunTests}
+        label="Run Test(s)"
+        dataTestId="execute-test-cases-button"
       />
     );
 

@@ -1,4 +1,10 @@
-import React, { useEffect, useState, Dispatch, SetStateAction } from "react";
+import React, {
+  useEffect,
+  useState,
+  Dispatch,
+  SetStateAction,
+  useRef,
+} from "react";
 import { Box, Divider, IconButton, Tab, Tabs } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
@@ -21,9 +27,10 @@ import {
 import { useFormikContext } from "formik";
 import { MadieDiscardDialog } from "@madie/madie-design-system/dist/react";
 import AddElementDialog from "./AddElementDialog";
+import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
+
 interface ResourceEditorProps {
-  selectedResource: any;
-  onCancel: (resource: any) => void;
+  onCancel: () => void;
   canEdit: boolean;
   setInitialFormikValuesStu6: Dispatch<SetStateAction<Object>>;
   setValidationSchema: Dispatch<SetStateAction<Object>>;
@@ -32,44 +39,130 @@ interface ResourceEditorProps {
 
 const ResourceEditor = ({
   selectedResourceID,
-  selectedResource,
   onCancel,
   canEdit,
   setInitialFormikValuesStu6,
   setValidationSchema,
 }: ResourceEditorProps) => {
-  const { dirty, resetForm, setValues, values } = useFormikContext();
+  const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
+  const { dispatch, state } = useQiCoreResource();
+  const { dirty, resetForm, values } = useFormikContext();
   const [activeTab, setActiveTab] = useState(0);
   const [pendingTab, setPendingTab] = useState(0);
-  const [allElements, setAllElements] = useState([]);
-  const [displayedElements, setDisplayedElements] = useState<
-    ElementDefinition[]
-  >([]);
-  const [displayedElementsTree, setDisplayedElementsTree] = useState({});
-  const [editingResource, setEditingResource] = useState(
-    selectedResource?.bundleEntry?.resource
-  );
-  const { dispatch } = useQiCoreResource();
-  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-  const [addDialogOpen, setAddDialogOpen] = useState<boolean>(false);
   const onContinue = () => {
     setDialogOpen(false);
     setActiveTab(pendingTab);
     resetForm();
   };
 
-  const saveElements = (newValue: ElementDefinition[] | null) => {
-    setDisplayedElements(newValue);
-    setDisplayedElementsTree(getDisplayedElementsTree(newValue));
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const [addDialogOpen, setAddDialogOpen] = useState<boolean>(false);
+  const [displayedElementsTree, setDisplayedElementsTree] = useState({});
 
+  const [allElements, setAllElements] = useState([]); // we don't need this.
+  const [selectedResource, setSelectedResource] = useState(null);
+  const editingResource = selectedResource?.bundleEntry?.resource;
+  const [displayedElements, setDisplayedElements] = useState<
+    ElementDefinition[]
+  >([]);
+  const [lastAddedElemPath, setLastAddedElemPath] = useState(null);
+  // Using selectedResourceID fetches the selected resource from test case bundle json and
+  // also fetches resourceTree aka structure Definition, combines & sets it to SelectedResource state
+  // moved two dependant useEffects into a single one to prevent multiple updates. Using batch updates to prevent excessive rerenders
+  useEffect(() => {
+    // we need to update activePath here instead.
+    if (state && selectedResourceID) {
+      const selectedEntry = state.bundle?.entry?.find(
+        (entry) => entry.resource.id === selectedResourceID
+      );
+      const profile = _.isArray(selectedEntry?.resource?.meta?.profile)
+        ? selectedEntry?.resource?.meta?.profile[0]
+        : selectedEntry?.resource?.meta?.profile;
+      const resourceId = profile
+        ? profile.substring(profile.lastIndexOf("/") + 1)
+        : selectedEntry?.resource?.resourceType;
+      fhirDefinitionsService.current
+        .getResourceTree(resourceId)
+        .then((resourceTree) => {
+          const selectedResource = {
+            ...resourceTree,
+            bundleEntry: selectedEntry,
+          };
+          const topElements = getTopLevelElements(selectedResource);
+          const requiredElements = [...topElements.filter((e) => e.min > 0)];
+          const elementsWithValues = [
+            ...topElements.filter((e) => {
+              const elemPath = stripResourcePath(
+                selectedResource.definition.type,
+                e.path
+              );
+              const elemValue = _.get(
+                selectedResource.bundleEntry.resource,
+                elemPath
+              );
+              return !_.isNil(elemValue);
+            }),
+          ];
+          const uniqueElements = _.uniq(
+            _.concat(requiredElements, elementsWithValues)
+          );
+          const elementsModifiedForCardinality = uniqueElements.flatMap(
+            (el) => {
+              const path = stripResourcePath(
+                selectedEntry.resource.resourceType,
+                el.id
+              );
+              const jsonValuesAtPath = selectedEntry.resource[path];
+              if (
+                jsonValuesAtPath &&
+                Array.isArray(jsonValuesAtPath) &&
+                jsonValuesAtPath.length
+              ) {
+                // Return a *new* object for each item, with the id modified to include the index
+                return jsonValuesAtPath.map((_, index) => ({
+                  ...el,
+                  id: `${el.id}[${index}]`,
+                }));
+              } else {
+                //  return the original element
+                return [el];
+              }
+            }
+          );
+
+          setSelectedResource(selectedResource);
+          setAllElements(topElements);
+          setDisplayedElements(elementsModifiedForCardinality);
+          setDisplayedElementsTree(getDisplayedElementsTree(uniqueElements));
+          // this is not the best way to do this, but I'm unsure of a better way without a lot more overhead.
+          const index = _.findLastIndex(
+            elementsModifiedForCardinality,
+            (el) => el.path === lastAddedElemPath
+          );
+          if (index !== -1) {
+            // This is for navigating to most recently added multiple cardinality el
+            setActiveTab(index);
+            setLastAddedElemPath(null);
+          }
+        })
+        .catch((error) =>
+          console.error(
+            `An error occurred while loading definition for resourceId [${resourceId}]: `,
+            error
+          )
+        );
+    }
+  }, [selectedResourceID, state, setActiveTab, setLastAddedElemPath]);
+
+  const saveElements = (newValue: ElementDefinition[] | null) => {
+    // removed uncessesary reference to modifying displayedElements.
+    // Any updates through dispatch will trickle down child component references accordingly.
     const { type } = selectedResource?.definition;
     const formikCleanedValues = removeUndefinedAndEmptyObjects(values);
     const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
-
     // Update with formik values
     nextEntry.resource = formikCleanedValues[type];
     nextEntry.resource.resourceType = type;
-
     // Add empty values for new elements
     newValue?.forEach((element) => {
       const elemPath = stripResourcePath(
@@ -81,45 +174,15 @@ const ResourceEditor = ({
         _.set(nextEntry.resource, elemPath, "");
       }
     });
-
     // Update resource state
-    setEditingResource(nextEntry.resource);
     dispatch({
       type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
       payload: nextEntry,
     });
   };
-  useEffect(() => {
-    if (selectedResource) {
-      // TODO: look at the data that exists on the resource and combine fields from that
-      const topElements = getTopLevelElements(selectedResource);
-      setAllElements(topElements);
-      const requiredElements = [...topElements.filter((e) => e.min > 0)];
-      const elementsWithValues = [
-        ...topElements.filter((e) => {
-          const elemPath = stripResourcePath(
-            selectedResource.definition.type,
-            e.path
-          );
-          const elemValue = _.get(
-            selectedResource.bundleEntry.resource,
-            elemPath
-          );
-          return !_.isNil(elemValue);
-        }),
-      ];
-      const uniqueElements = _.uniq(
-        _.concat(requiredElements, elementsWithValues)
-      );
-      setDisplayedElements(uniqueElements);
-      setDisplayedElementsTree(getDisplayedElementsTree(uniqueElements));
-    } else {
-      setAllElements([]);
-      setDisplayedElements([]);
-    }
-  }, [selectedResource]);
 
   const resourceBasePath = getBasePath(selectedResource);
+
   return (
     <Box
       sx={{
@@ -151,7 +214,7 @@ const ResourceEditor = ({
             </Typography>
             <IconButton
               data-testid="close-resource-editor-button"
-              onClick={() => onCancel(selectedResource)}
+              onClick={onCancel}
             >
               <CloseIcon sx={{ color: "#D92F2F" }} />
             </IconButton>
@@ -216,6 +279,7 @@ const ResourceEditor = ({
               </Tabs>
             </Box>
             <ElementEditor
+              setLastAddedElemPath={setLastAddedElemPath}
               setInitialFormikValuesStu6={setInitialFormikValuesStu6}
               setValidationSchema={setValidationSchema}
               elementDefinition={displayedElements?.[activeTab]}
@@ -227,7 +291,21 @@ const ResourceEditor = ({
               onChange={(path, value) => {
                 const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
                 _.set(nextEntry.resource, path, value);
-                setEditingResource(nextEntry.resource);
+                dispatch({
+                  type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
+                  payload: nextEntry,
+                });
+              }}
+              deleteElement={(path) => {
+                const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
+                const strippedPath = path.includes(".")
+                  ? path.substring(path.indexOf(".") + 1)
+                  : path;
+                if (_.has(nextEntry.resource, strippedPath)) {
+                  _.unset(nextEntry.resource, strippedPath);
+                } else {
+                  console.error(`Path not found: ${path}`);
+                }
                 dispatch({
                   type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
                   payload: nextEntry,

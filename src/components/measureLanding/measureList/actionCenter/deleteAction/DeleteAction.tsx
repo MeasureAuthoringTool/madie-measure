@@ -53,10 +53,9 @@ export default function DeleteAction(props: PropTypes) {
           onClick={() => props.onClick()}
           disabled={disableDeleteBtn}
           data-testid="delete-action-btn"
+          className="DeleteClass"
         >
-          <DeleteOutlinedIcon
-            sx={disableDeleteBtn ? { color: grey[500] } : { color: red[500] }}
-          />
+          <DeleteOutlinedIcon />
         </IconButton>
       </span>
     </Tooltip>
