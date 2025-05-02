@@ -125,7 +125,7 @@ describe("Validation Functions", () => {
     const validator = getPositiveIntegerValidator(true);
 
     await expect(validator.validate("2147483648")).rejects.toThrow(
-      "Unsigned integer range is [0 to 2147483647]"
+      "Positive integer range is [1 to 2147483647]"
     );
   });
 
