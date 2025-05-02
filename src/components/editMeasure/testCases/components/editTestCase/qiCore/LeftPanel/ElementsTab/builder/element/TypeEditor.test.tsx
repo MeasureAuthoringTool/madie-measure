@@ -1069,6 +1069,65 @@ describe("TypeEditor Component", () => {
     expect(inputField.value).toBe("1234");
   });
 
+  test("Should render unsignedInt component with and without [0] already added", () => {
+    render(
+      <FormikProvider value={mockFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            structureDefinition={{
+              id: "ClaimResponse.order",
+              path: "ClaimResponse.order",
+              min: 0,
+              max: "*",
+              type: [
+                {
+                  code: `http://hl7.org/fhirpath/System.Integer`,
+                },
+              ],
+            }}
+            resource={null}
+            label={"ClaimResponse.order"}
+            parentStructureDefinition={null}
+            canEdit={true}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+    expect(screen.getByText("ClaimResponse.order[0]")).toBeInTheDocument();
+  });
+  test("Should render unsignedInt component with [0]", () => {
+    render(
+      <FormikProvider value={mockFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            structureDefinition={{
+              id: "ClaimResponse.order[0]",
+              path: "ClaimResponse.order",
+              min: 0,
+              max: "*",
+              type: [
+                {
+                  code: `http://hl7.org/fhirpath/System.Integer`,
+                },
+              ],
+            }}
+            resource={null}
+            label={"ClaimResponse.order[0]"}
+            parentStructureDefinition={null}
+            canEdit={true}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+    expect(screen.getByText("ClaimResponse.order[0]")).toBeInTheDocument();
+  });
+
   test("Should display unsupported", () => {
     render(
       <FormikProvider value={mockFormik}>

@@ -47,7 +47,7 @@ const TypeEditor = ({
   // is multiple cardinality?
   if (structureDefinition?.max === "*") {
     // is it not already terminated with an index?
-    if (!getIndexFromPath(structureDefinition.id)) {
+    if (!getIndexFromPath(label)) {
       // we Just going to add a zero for now. could be smarter later
       // TO DO: We will eventually need to map inner elements of multiple cardinality based on how many elements are in the form
       // something like Array.From(numOfElementsInForm, _index) =>) had a previous rendition of this guy working in 8500 pr commits
