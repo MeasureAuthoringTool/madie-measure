@@ -1,3 +1,4 @@
+import * as Yup from "yup";
 import {
   getBasePath,
   getTopLevelElements,
@@ -10,6 +11,16 @@ import {
   getDisplayedElementsTree,
   removeUndefinedAndEmptyObjects,
   getElementName,
+  getChildren,
+  getParentDefinition,
+  getFirstChildren,
+  stripArrayIndices,
+  removeLastPathSegment,
+  getValueByPath,
+  mapElementsByPath,
+  getIndexFromPath,
+  mergePathWithIndex,
+  buildFullValidationSchema,
 } from "./fhirDefinitionServiceUtilities";
 
 describe("FhirDefinitionServiceUtilities", () => {
@@ -190,22 +201,273 @@ describe("FhirDefinitionServiceUtilities", () => {
 
 describe("getElementName", () => {
   it("returns the slice if exists", () => {
-    const element = { min: 0, sliceName: "testSlice", path: "some.path" };
+    const element = {
+      id: "testSlice",
+      min: 0,
+      sliceName: "testSlice",
+      path: "some.path",
+    };
     expect(getElementName(element, "some")).toBe("testSlice");
   });
 
+  it("should handle retrievedIndex and Number(retrievedIndex) > 0 to add correct index", () => {
+    const element = {
+      id: "Patient.name[1]",
+      sliceName: "nameSlice",
+      min: 1,
+    } as any;
+    const basePath = "Patient";
+    const result = getElementName(element, basePath);
+    expect(result).toBe("nameSlice 2  *");
+  });
+
   it("returns path minus base", () => {
-    const element = { min: 0, path: "some.path" };
+    const element = { id: "some.path", min: 0, path: "some.path" };
     expect(getElementName(element, "some")).toBe("path");
   });
 
   it("adds required indicator", () => {
-    const element = { min: 1, path: "some.path" };
+    const element = { id: "some.path", min: 1, path: "some.path" };
     expect(getElementName(element, "some")).toBe("path *");
   });
 
   it("adds required indicator", () => {
-    const element = { min: 1, sliceName: "testSlice", path: "some.path" };
+    const element = {
+      id: "some.path",
+      min: 1,
+      sliceName: "testSlice",
+      path: "some.path",
+    };
     expect(getElementName(element, "some")).toBe("testSlice *");
+  });
+  it("returns sliceName with index and requiredIndicator if sliceName exists", () => {
+    const element = {
+      id: "Patient.name[0].given",
+      min: 1,
+      sliceName: "givenName",
+    };
+    expect(getElementName(element as any, "Patient")).toBe("givenName *");
+  });
+
+  it("returns path without basePath and indexes if no sliceName", () => {
+    const element = { id: "Patient.name[0].family", min: 0 };
+    expect(getElementName(element as any, "Patient")).toBe("name.family");
+  });
+
+  it("handles no index correctly", () => {
+    const element = { id: "Patient.birthDate", min: 0 };
+    expect(getElementName(element as any, "Patient")).toBe("birthDate");
+  });
+
+  it("adds required indicator if min > 0", () => {
+    const element = { id: "Patient.gender", min: 1 };
+    expect(getElementName(element as any, "Patient")).toBe("gender *");
+  });
+});
+
+describe("getChildren", () => {
+  it("returns immediate children under parentPath", () => {
+    const formInfo = {
+      "Patient.name": {},
+      "Patient.name.given": {},
+      "Patient.name.family": {},
+      "Patient.address": {},
+    };
+    const result = getChildren(formInfo, "Patient.name");
+    expect(result.map(([key]) => key)).toEqual([
+      "Patient.name.given",
+      "Patient.name.family",
+    ]);
+  });
+
+  it("returns empty array if no children", () => {
+    const formInfo = { "Patient.address": {} };
+    expect(getChildren(formInfo, "Patient.name")).toEqual([]);
+  });
+});
+
+describe("buildFullValidationSchema", () => {
+  it("should build validation schema including primitive validations and arrays", () => {
+    const formInfo = {
+      "Patient.name": {
+        id: "Patient.name",
+        max: "*",
+        validation: undefined,
+      },
+      "Patient.name.given": {
+        id: "Patient.name.given",
+        validation: Yup.string().required("Given name is required"),
+      },
+      "Patient.name.family": {
+        id: "Patient.name.family",
+        validation: Yup.string().required("Family name is required"),
+      },
+      "Patient.birthDate": {
+        id: "Patient.birthDate",
+        validation: Yup.string().required("Birthdate is required"),
+      },
+    };
+
+    const schema = buildFullValidationSchema(formInfo);
+
+    expect(schema).toBeInstanceOf(Yup.ObjectSchema);
+
+    const validData = {
+      Patient: {
+        birthDate: "2000-01-01",
+        name: [
+          { given: "bolwin", family: "pw" },
+          { given: "theo", family: "smith" },
+        ],
+      },
+    };
+
+    expect(() => schema.validateSync(validData)).not.toThrow();
+
+    const invalidData = {
+      Patient: {
+        name: [{ family: "invalid" }],
+        birthDate: "",
+      },
+    };
+
+    try {
+      schema.validateSync(invalidData, { abortEarly: false });
+    } catch (e) {
+      expect(e.inner.map((err) => err.path)).toEqual([
+        "Patient.name[0].given",
+        "Patient.birthDate",
+      ]);
+    }
+  });
+});
+
+describe("getParentDefinition", () => {
+  it("finds the parent definition", () => {
+    const formInfo = [
+      ["Patient.name", { label: "Name" }],
+      ["Patient.name.given", { label: "Given" }],
+    ];
+    const result = getParentDefinition("Patient.name.given", formInfo);
+    expect(result).toEqual({ label: "Name" });
+  });
+
+  it("returns undefined if no parent found", () => {
+    const formInfo = [["Patient.name", { label: "Name" }]];
+    expect(getParentDefinition("Patient.gender", formInfo)).toBeUndefined();
+  });
+
+  it("returns undefined if root node", () => {
+    const formInfo = [["Patient", { label: "Patient" }]];
+    expect(getParentDefinition("Patient", formInfo)).toBeUndefined();
+  });
+});
+
+describe("getFirstChildren", () => {
+  it("returns first children correctly", () => {
+    const formInfo = [
+      ["Patient.name", {}],
+      ["Patient.name.given", {}],
+      ["Patient.name.given.family", {}],
+      ["Patient.gender", {}],
+    ];
+    const result = getFirstChildren("Patient.name", formInfo);
+    expect(result.length).toBe(1);
+  });
+
+  it("returns empty array if no children", () => {
+    const formInfo = [["Patient.gender", {}]];
+    expect(getFirstChildren("Patient.name", formInfo)).toEqual([]);
+  });
+});
+
+describe("stripArrayIndices", () => {
+  it("removes array indices from path", () => {
+    expect(stripArrayIndices("Patient.name[0].given[1]")).toBe(
+      "Patient.name.given"
+    );
+  });
+
+  it("returns path unchanged if no indices", () => {
+    expect(stripArrayIndices("Patient.gender")).toBe("Patient.gender");
+  });
+});
+
+describe("removeLastPathSegment", () => {
+  it("removes last segment from path", () => {
+    expect(removeLastPathSegment("Patient.name.given")).toBe("Patient.name");
+  });
+
+  it("returns empty string if single segment", () => {
+    expect(removeLastPathSegment("Patient")).toBe("");
+  });
+});
+
+describe("getValueByPath", () => {
+  it("retrieves nested value", () => {
+    const obj = { Patient: { name: { given: "john" } } };
+    expect(getValueByPath(obj, "Patient.name.given")).toBe("john");
+  });
+
+  it("returns undefined if path does not exist", () => {
+    const obj = { Patient: { name: {} } };
+    expect(getValueByPath(obj, "Patient.address.street")).toBeUndefined();
+  });
+});
+
+describe("mapElementsByPath", () => {
+  it("maps elements by their path", () => {
+    const structureDefinition = {
+      definition: {
+        snapshot: {
+          element: [{ path: "Patient.name" }, { path: "Patient.name.given" }],
+        },
+      },
+    };
+    const result = mapElementsByPath(structureDefinition);
+    expect(result["Patient.name"]).toEqual({ path: "Patient.name" });
+    expect(result["Patient.name.given"]).toEqual({
+      path: "Patient.name.given",
+    });
+  });
+
+  it("returns empty object if no elements", () => {
+    expect(mapElementsByPath({})).toEqual({});
+  });
+});
+
+describe("getIndexFromPath", () => {
+  it("returns the index from path", () => {
+    expect(getIndexFromPath("Patient.name[2]")).toBe("[2]");
+  });
+
+  it("returns null if no index", () => {
+    expect(getIndexFromPath("Patient.gender")).toBeNull();
+  });
+});
+
+describe("mergePathWithIndex", () => {
+  it("merges paths correctly with existing index", () => {
+    const pathWithIndex = "Patient.name[1]";
+    const pathWithoutIndex = "Patient.name.given";
+    expect(mergePathWithIndex(pathWithIndex, pathWithoutIndex)).toBe(
+      "Patient.name[1].given"
+    );
+  });
+
+  it("merges paths correctly when base differs", () => {
+    const pathWithIndex = "Patient.address[0]";
+    const pathWithoutIndex = "Patient.contact.name";
+    expect(mergePathWithIndex(pathWithIndex, pathWithoutIndex)).toBe(
+      "Patient.address[0].Patient.contact.name"
+    );
+  });
+
+  it("fallbacks to joining paths if no index", () => {
+    const pathWithIndex = "Patient.name";
+    const pathWithoutIndex = "Patient.name.given";
+    expect(mergePathWithIndex(pathWithIndex, pathWithoutIndex)).toBe(
+      "Patient.name.Patient.name.given"
+    );
   });
 });

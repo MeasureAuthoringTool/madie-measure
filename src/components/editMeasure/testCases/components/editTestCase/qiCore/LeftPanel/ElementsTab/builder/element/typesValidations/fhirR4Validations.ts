@@ -257,7 +257,6 @@ export const validationLookup = {
 
 export const getValidation = (type, required, label?) => {
   let validation;
-
   if (
     (type === "http://hl7.org/fhirpath/System.String" || type === "string") &&
     label === "id"
