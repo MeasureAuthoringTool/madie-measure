@@ -5,10 +5,8 @@ import { TextField } from "@madie/madie-design-system/dist/react/";
 const UrlComponent = ({
   canEdit,
   fieldRequired,
-  value,
-  onChange,
   label = "URL",
-  structureDefinition,
+  ...rest
 }: TypeComponentProps) => {
   return (
     <TextField
@@ -26,8 +24,7 @@ const UrlComponent = ({
       data-testid={`url-field-${label}`}
       size="small"
       fullWidth
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
+      {...rest}
     />
   );
 };

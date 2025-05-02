@@ -10,6 +10,7 @@ interface PropTypes {
   rootDefinition: any;
   numElements: number;
   handleDelete: (string) => void;
+  addElementOfMultipleCardinality: () => void;
 }
 interface Action {
   name: string;
@@ -27,6 +28,9 @@ const ElementEditorActionCenter = (props: PropTypes) => {
   const addAction = {
     name: "Add",
     icon: <AddCircleOutlineIcon sx={{ color: "#3171C2" }} />,
+    onClick: () => {
+      props.addElementOfMultipleCardinality();
+    },
   };
   const copyAction = {
     name: "Copy",
@@ -61,7 +65,6 @@ const ElementEditorActionCenter = (props: PropTypes) => {
     }
     setActions(localActions);
   }, [props.numElements, props.rootDefinition]);
-
   if (actions.length > 0) {
     return (
       <div

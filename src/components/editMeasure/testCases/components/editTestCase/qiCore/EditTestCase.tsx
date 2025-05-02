@@ -295,12 +295,13 @@ const EditTestCase = (props: EditTestCaseProps) => {
     initialValues: initialFormikValuesStu6,
     enableReinitialize: true,
     validationSchema,
+    validateOnChange: true,
+    validateOnBlur: true,
     onSubmit: () => {},
   });
   useFormikResetOnEvent(formikStu6Context);
   //needs to be added to feature flag config once the feature flags are moved to Util
   const testCaseAlertToast = false;
-
   useEffect(() => {
     if (_.isNil(populationGroupResults) || _.isEmpty(populationGroupResults)) {
       setGroupPopulations(_.cloneDeep(formik.values.groupPopulations));
