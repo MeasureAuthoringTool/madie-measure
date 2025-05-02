@@ -23,6 +23,7 @@ import {
   stripResourcePath,
   getFirstChildren,
   getNestedProperty,
+  getIndexFromPath,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import CodingComponent from "./types/CodingComponent";
 import { useRequiredFields } from "./RequiredFieldsContext";
@@ -43,10 +44,22 @@ const TypeEditor = ({
   let required = getRequired(requiredFields, stripAllIndexes(label));
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   const type = structureDefinition?.type?.[0]?.code;
+  // is multiple cardinality?
+  if (structureDefinition?.max === "*") {
+    // is it not already terminated with an index?
+    if (!getIndexFromPath(label)) {
+      // we Just going to add a zero for now. could be smarter later
+      // TO DO: We will eventually need to map inner elements of multiple cardinality based on how many elements are in the form
+      // something like Array.From(numOfElementsInForm, _index) =>) had a previous rendition of this guy working in 8500 pr commits
+      // https://github.com/MeasureAuthoringTool/madie-measure/pull/901
+      label = `${structureDefinition.id}[0]`;
+    }
+  }
   // Needs to be a memo instead of a useEffect that resets state. This caused a bunch of rerenders, and got stale values from mapping
   // like passing in an incrementing label like name[0], the result would always end up name[maxNumOfElements] because it was an unstable var
   // don't use useEffects unless you absolutely have to. There is almost certainly always another way.
 
+  // DiagnosticReport.presentedForm comes in without the index. We need to map it for multiple cardinality to test stuff.
   const childDefs = useMemo(() => {
     if (!isComponentDataType(type)) {
       const elements = getFirstChildren(stripAllIndexes(label), formInfo);
