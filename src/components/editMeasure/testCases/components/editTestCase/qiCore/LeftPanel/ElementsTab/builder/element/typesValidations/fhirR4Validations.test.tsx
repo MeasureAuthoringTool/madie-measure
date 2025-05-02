@@ -4,6 +4,7 @@ import {
   getValidation,
   getBinaryValidator,
   getUnsignedIntegerValidator,
+  getPositiveIntegerValidator,
 } from "./fhirR4Validations";
 
 describe("Validation Functions", () => {
@@ -64,7 +65,7 @@ describe("Validation Functions", () => {
     );
   });
 
-  it("should invalidate an unsigned integer with leading zeros", async () => {
+  it("should invalidate an unsigned integer which is out of range", async () => {
     const validator = getUnsignedIntegerValidator(true);
 
     await expect(validator.validate("2147483648")).rejects.toThrow(
@@ -117,6 +118,14 @@ describe("Validation Functions", () => {
     expect(requiredString).toBeInstanceOf(Yup.StringSchema);
     expect(requiredString.validate("")).rejects.toThrow(
       "This field is required"
+    );
+  });
+
+  it("should invalidate an psitive integer which is out of range", async () => {
+    const validator = getPositiveIntegerValidator(true);
+
+    await expect(validator.validate("2147483648")).rejects.toThrow(
+      "Unsigned integer range is [0 to 2147483647]"
     );
   });
 
