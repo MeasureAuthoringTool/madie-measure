@@ -48,40 +48,18 @@ export const getBooleanValidator = (required) => {
   return baseValidator;
 };
 
+// Any positive integer in the range 1..2,147,483,647
 export const getPositiveIntegerValidator = (required) => {
-  const integerReg = /[0]|[-+]?[1-9][0-9]*/;
+  const integerReg = /^[0-9]+$/;
   const baseValidator = Yup.string()
     .matches(integerReg, "Invalid Integer format")
     .test(
-      "len",
+      "range",
       `Positive integer range is [${POSITIVEINT_MINIMUM} to ${INTEGER_MAXIMUM}]`,
       (val) => {
         if (val && val.length > 0) {
-          return (
-            Number(val) >= POSITIVEINT_MINIMUM && Number(val) <= INTEGER_MAXIMUM
-          );
-        } else {
-          return true;
-        }
-      }
-    );
-  if (required) {
-    return baseValidator.required("This field is required");
-  }
-  return baseValidator;
-};
-export const getUnsignedIntegerValidator = (required) => {
-  const integerReg = /[0]|[-+]?[1-9][0-9]*/;
-  const baseValidator = Yup.string()
-    .matches(integerReg, "Invalid Integer format")
-    .test(
-      "len",
-      `Unsigned integer range is [${UNSIGNED_MINIMUM} to ${INTEGER_MAXIMUM}]`,
-      (val) => {
-        if (val && val.length) {
-          return (
-            val.length >= UNSIGNED_MINIMUM && val.length <= INTEGER_MAXIMUM
-          );
+          const num = Number(val);
+          return num >= POSITIVEINT_MINIMUM && num <= INTEGER_MAXIMUM;
         }
         return true;
       }
@@ -92,6 +70,28 @@ export const getUnsignedIntegerValidator = (required) => {
   return baseValidator;
 };
 
+// Any non-negative integer in the range 0..2,147,483,647
+export const getUnsignedIntegerValidator = (required) => {
+  const integerReg = /^(0|[1-9][0-9]*)$/; // Matches 0 or any positive integer without leading zeros
+  const baseValidator = Yup.string()
+    .matches(integerReg, "Invalid Unsigned Integer format") // Validate the format first
+    .test(
+      "range",
+      `Unsigned integer range is [0 to ${INTEGER_MAXIMUM}]`,
+      (val) => {
+        if (val && integerReg.test(val)) {
+          // Only check range if the format is valid
+          const num = Number(val);
+          return num >= 0 && num <= INTEGER_MAXIMUM;
+        }
+        return true; // Skip range validation if the format is invalid
+      }
+    );
+  if (required) {
+    return baseValidator.required("This field is required");
+  }
+  return baseValidator;
+};
 export const getSignedIntegerValidator = (required) => {
   const integerReg = /[0]|[-+]?[1-9][0-9]*/;
   const baseValidator = Yup.string()

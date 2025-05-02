@@ -3,6 +3,7 @@ import {
   getInstantValidator,
   getValidation,
   getBinaryValidator,
+  getUnsignedIntegerValidator,
 } from "./fhirR4Validations";
 
 describe("Validation Functions", () => {
@@ -47,15 +48,44 @@ describe("Validation Functions", () => {
     expect(nonRequiredString.validate("1")).resolves.toBe("1");
   });
 
-  it("getValidation IntegerValidator unsignedInt", () => {
-    const requiredString = getValidation("unsignedInt", true);
-    const nonRequiredString = getValidation("unsignedInt", false);
-    expect(requiredString).toBeInstanceOf(Yup.StringSchema);
-    expect(requiredString.validate("1")).resolves.toBe("1");
-    expect(requiredString.validate("abc")).rejects.toThrow(
-      "Invalid Integer format"
+  it("should validate a valid unsigned integer", async () => {
+    const validator = getUnsignedIntegerValidator(true);
+
+    await expect(validator.validate("0")).resolves.toBe("0");
+    await expect(validator.validate("123")).resolves.toBe("123");
+    await expect(validator.validate("2147483647")).resolves.toBe("2147483647");
+  });
+
+  it("should invalidate an unsigned integer with leading zeros", async () => {
+    const validator = getUnsignedIntegerValidator(true);
+
+    await expect(validator.validate("0123")).rejects.toThrow(
+      "Invalid Unsigned Integer format"
     );
-    expect(nonRequiredString.validate("1")).resolves.toBe("1");
+  });
+
+  it("should invalidate an unsigned integer with leading zeros", async () => {
+    const validator = getUnsignedIntegerValidator(true);
+
+    await expect(validator.validate("2147483648")).rejects.toThrow(
+      "Unsigned integer range is [0 to 2147483647]"
+    );
+  });
+
+  it("should invalidate a negative number", async () => {
+    const validator = getUnsignedIntegerValidator(true);
+
+    await expect(validator.validate("-123")).rejects.toThrow(
+      "Invalid Unsigned Integer format"
+    );
+  });
+
+  it("should invalidate a non-numeric value", async () => {
+    const validator = getUnsignedIntegerValidator(true);
+
+    await expect(validator.validate("abc")).rejects.toThrow(
+      "Invalid Unsigned Integer format"
+    );
   });
 
   it("getValidation IntegerValidator System.Integer", () => {
