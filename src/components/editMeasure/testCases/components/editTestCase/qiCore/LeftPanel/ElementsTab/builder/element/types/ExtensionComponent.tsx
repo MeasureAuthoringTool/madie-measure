@@ -42,12 +42,10 @@ const ExtensionComponent = ({
   canEdit,
   elementDefinition,
   parentStructureDefinition,
-  onChange,
 }: ExtensionProps) => {
   const [selectedValueType, setSelectedValueType] = useState<string>("");
   const [url, setUrl] = useState<string>();
   const [value, setValue] = useState();
-
   const [urlElement, valueElement] = getUrlAndValueElement(
     parentStructureDefinition?.definition,
     elementDefinition?.id
@@ -63,11 +61,12 @@ const ExtensionComponent = ({
     if ((url || urlElement?.fixedUri) && value) {
       const extension = { url: url ?? urlElement?.fixedUri };
       extension[`value${selectedValueType}`] = value;
-      onChange(extension);
+      // onChange(extension);
     }
   }, [selectedValueType, url, value]);
 
   const idPrefix = elementDefinition?.id?.split("Extension.").pop();
+  // if there's a fixeduri element, we render a readOnly field with the value select dropdown for it
   if (urlElement?.fixedUri) {
     return (
       <>
@@ -78,6 +77,29 @@ const ExtensionComponent = ({
           <br />
           <span style={{ color: "#333333" }}>{urlElement?.fixedUri}</span>
         </Typography>
+        <Select
+          label="Value[x]"
+          inputProps={{
+            "data-testid": `${idPrefix}-type-selector-input`,
+          }}
+          data-testid={`${idPrefix}-type-selector`}
+          SelectDisplayProps={{
+            "aria-required": "true",
+          }}
+          disabled={false}
+          required={valueElement?.min > 0}
+          options={[
+            <MenuItem
+              key={selectedValueType}
+              value={selectedValueType}
+              data-testid={`type-option-${selectedValueType}`}
+            >
+              {selectedValueType}
+            </MenuItem>,
+          ]}
+          value={selectedValueType}
+          onChange={(e) => setSelectedValueType(e.target.value)}
+        />
       </>
     );
   } else
@@ -86,13 +108,13 @@ const ExtensionComponent = ({
         <UriComponent
           canEdit={!urlElement?.fixedUri} // disable if this is fixed value
           fieldRequired={urlElement?.min > 0}
-          label="url"
-          value={urlElement?.fixedUri}
+          label={`${elementDefinition.id}.url`}
           structureDefinition={null}
           onChange={(value) => setUrl(value)}
         />
+
         <Select
-          label="Value[x]"
+          label={`${elementDefinition.id}.value[x]`}
           inputProps={{
             "data-testid": `${idPrefix}-type-selector-input`,
           }}
@@ -118,10 +140,6 @@ const ExtensionComponent = ({
           <TypeEditor
             structureDefinition={valueElement}
             resource={fhirResource}
-            type={valueElement?.type[0]?.code}
-            required={valueElement.min > 0}
-            value={elementDefinition?.fixedUri}
-            onChange={(value) => setValue(value)} // do nothing for now
             canEdit={canEdit}
             label={`value${selectedValueType}`}
             parentStructureDefinition={elementDefinition}

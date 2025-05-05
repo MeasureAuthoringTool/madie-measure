@@ -81,15 +81,17 @@ describe("ElementEditorActionCenter Component", () => {
     ).toBeInTheDocument();
   });
 
-  it("should render Action Center for one to many elements and there is only 1 element in the resource", async () => {
+  it("should render Action Center for one to many elements and there is only 1 element in the resource, trigger onAdd", async () => {
     const mockRootDefinition = {
       sliceName: "test-sliceName",
       path: "test-observation",
       min: 1,
       max: "*",
     };
+    const addElementOfMultipleCardinality = jest.fn();
     render(
       <ElementEditorActionCenter
+        addElementOfMultipleCardinality={addElementOfMultipleCardinality}
         rootDefinition={mockRootDefinition}
         numElements={1}
         handleDelete={mockHandleDelete}
@@ -100,11 +102,12 @@ describe("ElementEditorActionCenter Component", () => {
     );
     userEvent.click(actionCenterButton);
 
-    expect(
-      await screen.findByRole("menuitem", {
-        name: "Add",
-      })
-    ).toBeInTheDocument();
+    const addButton = await screen.findByRole("menuitem", {
+      name: "Add",
+    });
+    expect(addButton).toBeInTheDocument();
+    userEvent.click(addButton);
+    expect(addElementOfMultipleCardinality).toHaveBeenCalled();
     expect(
       await screen.findByRole("menuitem", {
         name: "Copy",

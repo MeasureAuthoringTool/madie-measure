@@ -147,7 +147,6 @@ describe("ElementEditor Component", () => {
       <QiCoreResourceContext.Provider
         value={{ state: mockPatientState, dispatch }}
       >
-        {" "}
         <ElementEditor
           selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
           setValidationSchema={setValidationSchema}

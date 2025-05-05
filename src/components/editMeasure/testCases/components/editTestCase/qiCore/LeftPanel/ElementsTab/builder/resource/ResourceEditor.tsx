@@ -65,10 +65,9 @@ const ResourceEditor = ({
     setActiveTab(pendingTab);
     resetForm();
   };
-
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [addDialogOpen, setAddDialogOpen] = useState<boolean>(false);
-  const [displayedElementsTree, setDisplayedElementsTree] = useState({}); // need
+  const [displayedElementsTree, setDisplayedElementsTree] = useState({});
 
   const [allElements, setAllElements] = useState([]); // we don't need this.
   const [selectedResource, setSelectedResource] = useState(null);
@@ -76,11 +75,12 @@ const ResourceEditor = ({
   const [displayedElements, setDisplayedElements] = useState<
     ElementDefinition[]
   >([]);
-
+  const [lastAddedElemPath, setLastAddedElemPath] = useState(null);
   // Using selectedResourceID fetches the selected resource from test case bundle json and
   // also fetches resourceTree aka structure Definition, combines & sets it to SelectedResource state
   // moved two dependant useEffects into a single one to prevent multiple updates. Using batch updates to prevent excessive rerenders
   useEffect(() => {
+    // we need to update activePath here instead.
     if (state && selectedResourceID) {
       const selectedEntry = state.bundle?.entry?.find(
         (entry) => entry.resource.id === selectedResourceID
@@ -116,11 +116,44 @@ const ResourceEditor = ({
           const uniqueElements = _.uniq(
             _.concat(requiredElements, elementsWithValues)
           );
-          // Will batch update in react 18 update.
+          const elementsModifiedForCardinality = uniqueElements.flatMap(
+            (el) => {
+              const path = stripResourcePath(
+                selectedEntry.resource.resourceType,
+                el.id
+              );
+              const jsonValuesAtPath = selectedEntry.resource[path];
+              if (
+                jsonValuesAtPath &&
+                Array.isArray(jsonValuesAtPath) &&
+                jsonValuesAtPath.length
+              ) {
+                // Return a *new* object for each item, with the id modified to include the index
+                return jsonValuesAtPath.map((_, index) => ({
+                  ...el,
+                  id: `${el.id}[${index}]`,
+                }));
+              } else {
+                //  return the original element
+                return [el];
+              }
+            }
+          );
+
           setSelectedResource(selectedResource);
           setAllElements(topElements);
-          setDisplayedElements(uniqueElements);
+          setDisplayedElements(elementsModifiedForCardinality);
           setDisplayedElementsTree(getDisplayedElementsTree(uniqueElements));
+          // this is not the best way to do this, but I'm unsure of a better way without a lot more overhead.
+          const index = _.findLastIndex(
+            elementsModifiedForCardinality,
+            (el) => el.path === lastAddedElemPath
+          );
+          if (index !== -1) {
+            // This is for navigating to most recently added multiple cardinality el
+            setActiveTab(index);
+            setLastAddedElemPath(null);
+          }
         })
         .catch((error) =>
           console.error(
@@ -129,7 +162,7 @@ const ResourceEditor = ({
           )
         );
     }
-  }, [selectedResourceID, state]);
+  }, [selectedResourceID, state, setActiveTab, setLastAddedElemPath]);
 
   const saveElements = (newValue: ElementDefinition[] | null) => {
     // removed uncessesary reference to modifying displayedElements.
@@ -159,6 +192,7 @@ const ResourceEditor = ({
   };
 
   const resourceBasePath = getBasePath(selectedResource);
+
   return (
     <Box
       className="resource-container"
@@ -248,6 +282,7 @@ const ResourceEditor = ({
               </OuterWrapper>
             </div>
             <ElementEditor
+              setLastAddedElemPath={setLastAddedElemPath}
               setInitialFormikValuesStu6={setInitialFormikValuesStu6}
               setValidationSchema={setValidationSchema}
               elementDefinition={displayedElements?.[activeTab]}
