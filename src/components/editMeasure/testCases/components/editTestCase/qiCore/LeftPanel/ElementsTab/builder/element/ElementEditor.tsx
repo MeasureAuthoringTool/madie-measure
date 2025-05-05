@@ -263,15 +263,7 @@ const ElementEditor = ({
         requiredFields={requiredFields}
         formInfo={formInfo}
       >
-        <Box
-          sx={{
-            padding: "0 24px 24px",
-            display: "flex",
-            flexDirection: "column",
-            width: "100%",
-          }}
-          id="element-editor"
-        >
+        <Box id="element-editor">
           {/* we need to render not only the current item, but all children */}
           <ElementEditorChildren //recursive render control
             // stuff we need only at the init root
