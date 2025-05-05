@@ -21,6 +21,7 @@ import {
   getIndexFromPath,
   mergePathWithIndex,
   buildFullValidationSchema,
+  recursiveAddYupObject,
 } from "./fhirDefinitionServiceUtilities";
 
 describe("FhirDefinitionServiceUtilities", () => {
@@ -469,5 +470,81 @@ describe("mergePathWithIndex", () => {
     expect(mergePathWithIndex(pathWithIndex, pathWithoutIndex)).toBe(
       "Patient.name.Patient.name.given"
     );
+  });
+});
+
+describe("buildFullValidationSchema", () => {
+  it("handles array of objects with children", () => {
+    const formInfo = {
+      Patient: { id: "Patient" },
+      "Patient.address": { id: "Patient.address", max: "*" },
+      "Patient.address.line": {
+        id: "Patient.address.line",
+      },
+      "Patient.address.city": {
+        id: "Patient.address.city",
+        validation: Yup.string().required("City is required"),
+      },
+    };
+
+    const schema = buildFullValidationSchema(formInfo, "Patient");
+    expect(() =>
+      schema.validateSync(
+        {
+          Patient: {
+            address: [{ line: "", city: "" }],
+          },
+        },
+        { abortEarly: false }
+      )
+    ).toThrowError(
+      expect.objectContaining({
+        name: "ValidationError",
+        inner: expect.arrayContaining([
+          expect.objectContaining({ path: "Patient.address[0].city" }),
+        ]),
+      })
+    );
+  });
+});
+
+describe("recursiveAddYupObject", () => {
+  it("wraps all nested objects with with shape, and skips objects that are already schemas", () => {
+    const schemaObject = {
+      patient: {
+        name: {
+          first: Yup.string().required(),
+          last: Yup.string().required(),
+        },
+        age: Yup.number().min(0),
+      },
+      meta: Yup.object().shape({
+        version: Yup.string().required(),
+      }),
+      flag: true,
+    };
+
+    const result = recursiveAddYupObject(schemaObject);
+
+    expect(Yup.object().isType(result.patient)).toBe(true);
+    expect(Yup.object().isType(result.meta)).toBe(true);
+    expect(result.flag).toBe(true);
+
+    const patientSchema = result.patient as Yup.ObjectSchema<any>;
+    expect(Yup.object().isType(patientSchema.fields.name)).toBe(true);
+    expect(patientSchema.fields.age).toBeInstanceOf(Yup.NumberSchema);
+  });
+
+  it("returns the original object mutated", () => {
+    const input = {
+      group: {
+        a: Yup.string(),
+        b: Yup.number(),
+      },
+    };
+    const yupObj = recursiveAddYupObject(input);
+
+    expect(yupObj).toBe(input);
+    expect(Yup.object().isType(yupObj.group)).toBe(true);
   });
 });

@@ -54,7 +54,6 @@ const ResourceEditor = ({
     setActiveTab(pendingTab);
     resetForm();
   };
-
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [addDialogOpen, setAddDialogOpen] = useState<boolean>(false);
   const [displayedElementsTree, setDisplayedElementsTree] = useState({});
