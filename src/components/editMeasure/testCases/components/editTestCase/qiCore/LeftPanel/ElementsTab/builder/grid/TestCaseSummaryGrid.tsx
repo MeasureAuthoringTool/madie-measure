@@ -3,18 +3,110 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import GridItemMenu from "./GridItemMenu";
 
 interface TestCaseSummaryGridProps {
-  // selectedResources: any[];
   onRowEdit: (row: any) => void;
   onRowDelete: (row: any) => void;
   bundle: any;
 }
+interface RecursionProps {
+  value: any;
+  keyPrefix?: string;
+}
 
+const WeOnlyDoRecursionNowIguess: React.FC<RecursionProps> = ({
+  value,
+  keyPrefix = "",
+}) => {
+  if (typeof value === "string") {
+    return (
+      <div key={keyPrefix}>
+        <b>{keyPrefix}:</b> {value}
+      </div>
+    );
+  } else if (typeof value === "object" && value !== null) {
+    if (Array.isArray(value)) {
+      return (
+        <>
+          {value.map((item, index) => (
+            <WeOnlyDoRecursionNowIguess
+              key={`${keyPrefix}[${index}]`}
+              value={item}
+              keyPrefix={`${keyPrefix}[${index}]`}
+            />
+          ))}
+        </>
+      );
+    } else {
+      return (
+        <>
+          {Object.entries(value).map(([childKey, childValue]) => (
+            <WeOnlyDoRecursionNowIguess
+              key={`${keyPrefix}.${childKey}`}
+              value={childValue}
+              keyPrefix={keyPrefix ? `${keyPrefix}.${childKey}` : childKey}
+            />
+          ))}
+        </>
+      );
+    }
+  }
+
+  return null;
+};
+
+// Given a bundle, we need to know the max number of attributes in order to make a column for each one, regardless of the minimum
 const TestCaseSummaryGrid = ({
-  // selectedResources,
   bundle,
   onRowEdit,
   onRowDelete,
 }: TestCaseSummaryGridProps) => {
+  console.log("bundle is", bundle.entry);
+  let addedAttributeCount = 0;
+
+  bundle.entry.forEach((entry) => {
+    const { resource } = entry;
+    // probably filter this out since we dont care about it.
+    const currentAttributeCount = Object.keys(resource).filter(
+      (attr) => attr !== "resourceType" && attr !== "id"
+    ).length;
+    if (addedAttributeCount < currentAttributeCount) {
+      addedAttributeCount = currentAttributeCount;
+    }
+  });
+
+  const attributeColumns: GridColDef[] = Array.from(
+    { length: addedAttributeCount },
+    (_, index) => ({
+      field: `attribute_${index + 1}`,
+      headerName: `Attribute ${index + 1}`,
+      width: 200,
+      valueGetter: (_value, row) => {
+        const attributeKeys =
+          Object.keys(row.resource).filter(
+            (key) => key !== "resourceType" && key !== "id"
+          ) || null;
+        const attributeKey = attributeKeys[index];
+        const value = row.resource[attributeKey]; // Practitioner, Condition, Observation etc
+        console.log("key", attributeKey, "value", value);
+        if (value) {
+          return { attributeKey, value };
+        }
+        return null;
+      },
+      renderCell: (params) => {
+        const cellData = params.value;
+
+        if (!cellData) return null;
+
+        return (
+          <WeOnlyDoRecursionNowIguess
+            value={cellData.value}
+            keyPrefix={cellData.attributeKey}
+          />
+        );
+      },
+    })
+  );
+
   const columns: GridColDef[] = [
     {
       field: "resourceType",
@@ -24,13 +116,13 @@ const TestCaseSummaryGrid = ({
         return row.resource.resourceType;
       },
     },
-    // { field: "path", headerName: "Resource & Value Set", width: 250 },
     {
       field: "id",
       headerName: "ID",
       width: 300,
       valueGetter: (_value, row) => row.resource.id,
     },
+    ...attributeColumns,
     // eslint-disable-next-line no-console
     {
       field: "",
