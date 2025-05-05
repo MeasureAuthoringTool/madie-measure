@@ -33,7 +33,7 @@ export class ExcelExportService {
   ): Promise<any> {
     try {
       const response = await axios.put(
-        `${this.baseUrl}/excel/exportOverlappingValueSets`,
+        `${this.baseUrl}/excel/overlapping-codes`,
         overlappingCodes,
         {
           headers: {
