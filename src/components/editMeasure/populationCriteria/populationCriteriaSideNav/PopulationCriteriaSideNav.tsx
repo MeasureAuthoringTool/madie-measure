@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import "../../details/EditMeasureSideBarNav.scss";
+import "../../../../styles/VerticalSideBarNav.scss";
 import "../../../common/madie-link.scss";
 import { DSLink, Tabs, Tab } from "@madie/madie-design-system/dist/react";
 import { INCOMPLETE, NONE } from "../PopulationCriteriaHome";
@@ -152,7 +152,7 @@ export default function PopulationCriteriaSideNav(
 
   return (
     <OuterWrapper>
-      <InnerWrapper className="edit-measure-side-nav">
+      <InnerWrapper className="vertical-side-nav">
         <Nav aria-label="Sidebar">
           {isQDM && (
             <Tabs
