@@ -1,10 +1,9 @@
 import * as React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import OverlappingCodesDialog from "./OverlappingCodesDialog";
-import { OverlappingCode } from "../../../../util/OverlappingCodesUtils";
 import { within } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
-import { Measure, Model } from "@madie/madie-models";
+import { Measure, Model, OverlappingCodeDto } from "@madie/madie-models";
 import {
   ApiContextProvider,
   ServiceConfig,
@@ -89,7 +88,7 @@ describe("OverlappingCodesDialog", () => {
         { name: "ValueSet2", oid: "5.6.7.8", url: "http://example.com/2" },
       ],
     },
-  ] as OverlappingCode[];
+  ] as OverlappingCodeDto[];
   const measure: Measure = {
     id: "123",
     name: "Test Measure",

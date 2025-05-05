@@ -2,9 +2,11 @@ import { AxiosResponse } from "axios";
 import axios from "../../../../api/axios-instance";
 import useServiceConfig from "../../../../api/useServiceConfig";
 import { ServiceConfig } from "../../../../api/ServiceContext";
-import { TestCaseExcelExportDto } from "@madie/madie-models";
+import {
+  TestCaseExcelExportDto,
+  OverlappingCodeDto,
+} from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
-import { OverlappingCode } from "../util/OverlappingCodesUtils";
 
 export class ExcelExportService {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
@@ -26,7 +28,7 @@ export class ExcelExportService {
   }
 
   async getOverlappingValueSets(
-    overlappingCodes: OverlappingCode[],
+    overlappingCodes: OverlappingCodeDto[],
     abortController: AbortController
   ): Promise<any> {
     try {

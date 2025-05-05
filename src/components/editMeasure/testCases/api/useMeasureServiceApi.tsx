@@ -4,7 +4,6 @@ import { ServiceConfig } from "../../../../api/ServiceContext";
 import { Measure } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
 import { Bundle } from "fhir/r4";
-import { OverlappingCode } from "../util/OverlappingCodesUtils";
 
 export class MeasureServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}

@@ -1,27 +1,15 @@
 import { Bundle, Library, Measure, ValueSet } from "fhir/r4";
 import { ValueSet as CqmValueSet } from "cqm-models";
+import { OverlappingCodeDto } from "@madie/madie-models";
 
-export interface OverlappingValueSet {
-  name: string;
-  oid: string;
-  url: string;
-}
-
-export interface OverlappingCode {
-  code: string;
-  codeSystem: string;
-  description: string;
-  codeSystemName: string;
-  codeSystemVersion: string;
-  valueSets: Array<OverlappingValueSet>;
-}
-
-export function generateQdmReport(valueSets: CqmValueSet[]): OverlappingCode[] {
+export function generateQdmReport(
+  valueSets: CqmValueSet[]
+): OverlappingCodeDto[] {
   // Reverse the value set mapping such that the code is the key and value is an array of value sets containing that code.
   if (!valueSets || valueSets.length === 0) {
     return [];
   }
-  const codeValueSetMap: OverlappingCode[] = [];
+  const codeValueSetMap: OverlappingCodeDto[] = [];
   for (const valueSet of valueSets) {
     valueSet.concepts?.forEach((concept) => {
       let code = codeValueSetMap.find(
@@ -56,7 +44,7 @@ export function generateQdmReport(valueSets: CqmValueSet[]): OverlappingCode[] {
 export function generateQiCoreReport(
   valueSets: ValueSet[],
   measureBundle: Bundle
-): OverlappingCode[] {
+): OverlappingCodeDto[] {
   // Reverse the value set mapping such that the code is the key and value is an array of value sets containing that code.
   if (!valueSets?.length) {
     return [];
@@ -67,7 +55,7 @@ export function generateQiCoreReport(
   if (!usedValueSets?.length) {
     return [];
   }
-  const codeValueSetMap: OverlappingCode[] = [];
+  const codeValueSetMap: OverlappingCodeDto[] = [];
   for (const valueSet of valueSets) {
     // Check if the value set is used in the measure
     if (!usedValueSets.includes(valueSet.url)) {

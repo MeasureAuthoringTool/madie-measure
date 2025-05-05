@@ -21,12 +21,12 @@ import tw from "twin.macro";
 import "styled-components/macro";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
-import {
-  OverlappingCode,
-  OverlappingValueSet,
-} from "../../../../util/OverlappingCodesUtils";
 import { Box, Typography } from "@mui/material";
-import { Measure } from "@madie/madie-models";
+import {
+  Measure,
+  OverlappingCodeDto,
+  OverlappingValueSetDto,
+} from "@madie/madie-models";
 import useExcelExportService from "../../../../api/useExcelExportService";
 import getModelFamily from "../../../../util/measureModelHelpers";
 import UseToast from "../../common/Hooks/UseToast";
@@ -43,7 +43,7 @@ interface RowData {
 const TH = tw.th`p-3 text-left text-sm`;
 const TD = tw.td`p-3 text-left text-sm break-keep`;
 
-const Description = ({ valueSet }: { valueSet: OverlappingValueSet }) => {
+const Description = ({ valueSet }: { valueSet: OverlappingValueSetDto }) => {
   return (
     <>
       <Box display="flex" alignItems="center" gap={1}>
@@ -66,9 +66,9 @@ const Description = ({ valueSet }: { valueSet: OverlappingValueSet }) => {
 const OverlappingCodesReport = ({
   overlappingCodes,
 }: {
-  overlappingCodes: OverlappingCode[];
+  overlappingCodes: OverlappingCodeDto[];
 }) => {
-  const [visibleCodes, setVisibleCodes] = useState<OverlappingCode[]>([]);
+  const [visibleCodes, setVisibleCodes] = useState<OverlappingCodeDto[]>([]);
   // pagination utilities
   const [totalPages, setTotalPages] = useState<number>(0);
   const [totalItems, setTotalItems] = useState<number>(0);
@@ -270,7 +270,7 @@ interface OverlappingCodesDialogProps {
   openDialog: boolean;
   setOpenDialog: (open: boolean) => void;
   handleClose: () => void;
-  overlappingCodes: OverlappingCode[];
+  overlappingCodes: OverlappingCodeDto[];
   measure: Measure;
 }
 
