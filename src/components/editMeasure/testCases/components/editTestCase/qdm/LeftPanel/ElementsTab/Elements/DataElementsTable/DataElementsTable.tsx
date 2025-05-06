@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import DataTypeCell from "./DataTypeCell";
 import { DataElement } from "cqm-models";
 import * as _ from "lodash";
-import "./DataElementsTable.scss";
+import "../../../../../styles/DataElementsTable.scss";
 import {
   createColumnHelper,
   flexRender,

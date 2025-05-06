@@ -5,11 +5,10 @@ import React, {
   Dispatch,
   SetStateAction,
 } from "react";
-import { Box, Divider } from "@mui/material";
+import { Box } from "@mui/material";
 import _ from "lodash";
 import ResourceList from "./resource/ResourceList";
 import TestCaseSummaryGrid from "./grid/TestCaseSummaryGrid";
-import Typography from "@mui/material/Typography";
 import { v4 as uuidv4 } from "uuid";
 import ResourceEditor from "./resource/ResourceEditor";
 import { TestCase } from "@madie/madie-models";
@@ -161,22 +160,18 @@ const Builder = ({
                 canEdit={canEdit}
               />
             )}
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="h5">Resources</Typography>
-              <Divider sx={{ mb: 1 }} />
-              <TestCaseSummaryGrid
-                bundle={state?.bundle}
-                onRowEdit={(row) => {
-                  setSelectedResourceId(row?.resource?.id);
-                }}
-                onRowDelete={(row) => {
-                  dispatch({
-                    type: ResourceActionType.REMOVE_BUNDLE_ENTRY,
-                    payload: row,
-                  });
-                }}
-              />
-            </Box>
+            <TestCaseSummaryGrid
+              bundle={state?.bundle}
+              onRowEdit={(row) => {
+                setSelectedResourceId(row?.resource?.id);
+              }}
+              onRowDelete={(row) => {
+                dispatch({
+                  type: ResourceActionType.REMOVE_BUNDLE_ENTRY,
+                  payload: row,
+                });
+              }}
+            />
           </>
         )}
       </div>
