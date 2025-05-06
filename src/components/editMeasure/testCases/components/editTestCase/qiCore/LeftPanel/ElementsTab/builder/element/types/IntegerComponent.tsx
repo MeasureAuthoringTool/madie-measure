@@ -44,42 +44,22 @@ const IntegerComponent = ({
       fullWidth
       onKeyPress={(e) => {
         const inputValue = e.target.value;
-        if (
-          integerType !== IntegerType.SIGNED &&
-          !Number(e.key) &&
-          e.key != "0"
-        ) {
-          //when input . after 12, or - for unsigned integer
-          e.preventDefault();
-        } else if (integerType === IntegerType.SIGNED) {
-          if (!inputValue && !Number(e.key) && e.key != "0" && e.key != "-") {
-            e.preventDefault();
-          } else if (
-            inputValue?.includes("-") &&
-            !Number(inputValue + e.key) &&
-            !Number(e.key) &&
-            e.key != "0"
-          ) {
-            //when inputting the last - after a negative number: -12-
-            e.preventDefault();
-          } else if (Number(inputValue) && !Number(e.key) && e.key !== "0") {
-            //when inputting the last - after a positive number: 12-
-            e.preventDefault();
-          } else if (
+
+        // Allow all characters, but validate the input later
+        if (integerType === IntegerType.SIGNED) {
+          if (
             Number(inputValue + e.key) < SIGNED_MINIMUM ||
             Number(inputValue + e.key) > INTEGER_MAXIMUM
           ) {
             e.preventDefault();
           }
-        } else {
-          if (integerType === IntegerType.UNSIGNED) {
-            if (Number(inputValue + e.key) > INTEGER_MAXIMUM) {
-              e.preventDefault();
-            }
-          } else {
-            if (Number(inputValue + e.key) > INTEGER_MAXIMUM) {
-              e.preventDefault();
-            }
+        } else if (integerType === IntegerType.UNSIGNED) {
+          if (Number(inputValue + e.key) > INTEGER_MAXIMUM) {
+            e.preventDefault();
+          }
+        } else if (integerType === IntegerType.POSITIVE_INT) {
+          if (Number(inputValue + e.key) > INTEGER_MAXIMUM) {
+            e.preventDefault();
           }
         }
       }}
