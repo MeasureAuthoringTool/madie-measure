@@ -258,7 +258,7 @@ const ElementEditor = ({
       });
       setToastType("success");
       setToastMessage(
-        `${type} has successfully been applied to the test case. To save your changes please click 'Save'`
+        `${type} has successfully been applied to the test case. To save your changes please click 'Save'.`
       );
       setToastOpen(true);
     }
