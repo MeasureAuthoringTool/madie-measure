@@ -1,7 +1,10 @@
 import React from "react";
 import * as _ from "lodash";
 import TypeEditor from "./TypeEditor";
-import { stripResourcePath } from "../../../../../../../api/fhirDefinitionServiceUtilities";
+import {
+  stripResourcePath,
+  removeIndicesFromPath,
+} from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import ElementEditorActionCenter from "./elementEditorActionCenter/ElementEditorActionCenter";
 import {
   ResourceActionType,
@@ -38,7 +41,6 @@ const ElementEditorChildren = ({
     });
     setLastAddedElemPath(rootDefinition.path);
   };
-
   return (
     <div
       className="test-case-tab-heading"
@@ -49,7 +51,7 @@ const ElementEditorChildren = ({
         style={{ cursor: "default", border: "none", marginBottom: 24 }}
       >
         <h4 className="header">
-          {_.startCase(rootDefinition?.id.split(".")[1])}
+          {_.startCase(removeIndicesFromPath(rootDefinition?.id.split(".")[1]))}
         </h4>
         <div style={{ position: "relative", top: "-7px" }}>
           <ElementEditorActionCenter
