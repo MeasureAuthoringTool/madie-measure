@@ -78,7 +78,7 @@ export const getUnsignedIntegerValidator = (required) => {
       "range",
       `Unsigned integer range is [0 to ${INTEGER_MAXIMUM}]`,
       (val) => {
-        if (val && integerReg.test(val)) {
+        if (val && val.length > 0) {
           const num = Number(val);
           return num >= 0 && num <= INTEGER_MAXIMUM;
         }
