@@ -15,11 +15,11 @@ export function getElementName(element: ElementDefinition, basePath: string) {
     }
   }
   if (element.sliceName) {
-    return `${element.sliceName}${index}${requiredIndicator}`;
+    return `${requiredIndicator}${element.sliceName}${index}`;
   }
-  return `${stripAllIndexes(
+  return `${requiredIndicator}${stripAllIndexes(
     element.id.substring(basePath.length + 1)
-  )}${index}${requiredIndicator}`;
+  )}${index}`;
 }
 
 // given an object that we want to copy to
