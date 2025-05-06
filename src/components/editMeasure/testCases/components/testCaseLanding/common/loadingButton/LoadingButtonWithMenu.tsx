@@ -16,6 +16,8 @@ interface LoadingButtonMenuProps {
   dataTestId?: string;
   primary?: boolean;
   menuItems: MenuItem[];
+  showOptions: boolean;
+  setShowOptions: (show: boolean) => void;
 }
 
 export default function LoadingButtonWithMenu({
@@ -25,9 +27,10 @@ export default function LoadingButtonWithMenu({
   label,
   menuItems,
   primary = false,
+  setShowOptions,
+  showOptions,
 }: LoadingButtonMenuProps) {
   const [anchorEl, setAnchorEl] = useState(null);
-  const [showOptions, setShowOptions] = useState(false);
 
   const handleShowOptions = useCallback((event) => {
     setAnchorEl(event.currentTarget);
@@ -69,6 +72,8 @@ export default function LoadingButtonWithMenu({
         anchorEl={anchorEl}
         handleClose={handleClose}
         additionalSelectOptionProps={menuItems}
+        onClick={handleClose}
+        dataTestId="overlapping-codes-popover"
       />
     </>
   );

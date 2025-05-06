@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+} from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -6,16 +12,25 @@ import {
   ColumnDef,
   flexRender,
 } from "@tanstack/react-table";
-import { MadieDialog, Pagination } from "@madie/madie-design-system/dist/react";
+import {
+  MadieDialog,
+  Pagination,
+  Toast,
+} from "@madie/madie-design-system/dist/react";
 import tw from "twin.macro";
 import "styled-components/macro";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
-import {
-  OverlappingCode,
-  OverlappingValueSet,
-} from "../../../../util/OverlappingCodesUtils";
 import { Box, Typography } from "@mui/material";
+import {
+  Measure,
+  OverlappingCodeDto,
+  OverlappingValueSetDto,
+} from "@madie/madie-models";
+import useExcelExportService from "../../../../api/useExcelExportService";
+import getModelFamily from "../../../../util/measureModelHelpers";
+import UseToast from "../../common/Hooks/UseToast";
+import ExportDialog from "../../../../../../measureLanding/measureList/exportDialog/ExportDialog";
 
 // Define the data type for rows
 interface RowData {
@@ -28,7 +43,7 @@ interface RowData {
 const TH = tw.th`p-3 text-left text-sm`;
 const TD = tw.td`p-3 text-left text-sm break-keep`;
 
-const Description = ({ valueSet }: { valueSet: OverlappingValueSet }) => {
+const Description = ({ valueSet }: { valueSet: OverlappingValueSetDto }) => {
   return (
     <>
       <Box display="flex" alignItems="center" gap={1}>
@@ -51,9 +66,9 @@ const Description = ({ valueSet }: { valueSet: OverlappingValueSet }) => {
 const OverlappingCodesReport = ({
   overlappingCodes,
 }: {
-  overlappingCodes: OverlappingCode[];
+  overlappingCodes: OverlappingCodeDto[];
 }) => {
-  const [visibleCodes, setVisibleCodes] = useState<OverlappingCode[]>([]);
+  const [visibleCodes, setVisibleCodes] = useState<OverlappingCodeDto[]>([]);
   // pagination utilities
   const [totalPages, setTotalPages] = useState<number>(0);
   const [totalItems, setTotalItems] = useState<number>(0);
@@ -253,43 +268,139 @@ const OverlappingCodesReport = ({
 
 interface OverlappingCodesDialogProps {
   openDialog: boolean;
+  setOpenDialog: (open: boolean) => void;
   handleClose: () => void;
-  overlappingCodes: OverlappingCode[];
+  overlappingCodes: OverlappingCodeDto[];
+  measure: Measure;
 }
 
 const OverlappingCodesDialog = ({
   openDialog,
   handleClose,
   overlappingCodes,
+  measure,
+  setOpenDialog,
 }: OverlappingCodesDialogProps) => {
+  const {
+    toastOpen,
+    setToastOpen,
+    toastMessage,
+    setToastMessage,
+    toastType,
+    setToastType,
+    onToastClose,
+  } = UseToast();
+  const abortController = useRef(null);
+  const excelExportService = useRef(useExcelExportService());
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+
+  const handleContinueDialog = () => {
+    setExportDialogOpen(false);
+  };
+  const handleCancelDialog = () => {
+    abortController.current && abortController.current.abort();
+    handleContinueDialog();
+  };
+
+  const exportOverlappingCodes = async () => {
+    setExportDialogOpen(true);
+    try {
+      abortController.current = new AbortController();
+      const response = await excelExportService.current.getOverlappingValueSets(
+        overlappingCodes,
+        abortController.current.signal
+      );
+
+      const excelData: Blob = response.data;
+      var exportBlob = new Blob([excelData], {
+        type: "application/vnd.ms-excel",
+      });
+      const url = window.URL.createObjectURL(exportBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `${measure.ecqmTitle}-v${measure.version}-${getModelFamily(
+          measure.model
+        )}-OverlappingCodes.xlsx`
+      );
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setExportDialogOpen(false);
+      setToastOpen(true);
+      setToastType("success");
+      setToastMessage("Overlapping Codes report exported successfully");
+    } catch (err) {
+      setExportDialogOpen(false);
+      setToastOpen(true);
+      setToastType("danger");
+      setToastMessage(
+        `Unable to export Overlapping Codes for ${measure?.measureName}. Please try again and contact the Help Desk if the problem persists.`
+      );
+    }
+    setOpenDialog(false);
+  };
+
   return (
-    <MadieDialog
-      title="Overlapping Codes"
-      dialogProps={{
-        onClose: handleClose,
-        open: openDialog,
-        maxWidth: "lg",
-        fullWidth: true,
-        "data-testid": "overlapping-codes-dialog",
-      }}
-      cancelButtonProps={{
-        variant: "secondary",
-        cancelText: "Close",
-        "data-testid": "overlapping-codes-report-cancel-btn",
-      }}
-      continueButtonProps={{
-        variant: "cyan",
-        type: "submit",
-        "data-testid": "overlapping-codes-report-export-btn",
-        disabled: true,
-        continueText: "Export",
-        onClick: () => {},
-      }}
-    >
-      <div data-testid="overlapping-codes-report-contents">
-        <OverlappingCodesReport overlappingCodes={overlappingCodes} />
-      </div>
-    </MadieDialog>
+    <>
+      <MadieDialog
+        title="Overlapping Codes"
+        dialogProps={{
+          onClose: handleClose,
+          open: openDialog,
+          maxWidth: "lg",
+          fullWidth: true,
+          "data-testid": "overlapping-codes-dialog",
+        }}
+        cancelButtonProps={{
+          variant: "secondary",
+          cancelText: "Close",
+          "data-testid": "overlapping-codes-report-cancel-btn",
+        }}
+        continueButtonProps={{
+          variant: "cyan",
+          type: "submit",
+          "data-testid": "overlapping-codes-report-export-btn",
+          disabled: overlappingCodes?.length === 0 ? true : false,
+          continueText: "Export",
+          tooltipText: "This measure contains no overlapping codes",
+          onClick: () => {
+            exportOverlappingCodes();
+          },
+        }}
+      >
+        <div data-testid="overlapping-codes-report-contents">
+          <OverlappingCodesReport overlappingCodes={overlappingCodes} />
+        </div>
+      </MadieDialog>
+
+      <ExportDialog
+        failureMessage={""}
+        measureName={"Overlapping Codes"}
+        open={exportDialogOpen}
+        handleContinueDialog={handleContinueDialog}
+        handleCancelDialog={handleCancelDialog}
+      />
+      <Toast
+        toastKey="overlapping-codes-toast"
+        aria-live="polite"
+        toastType={toastType}
+        testId={
+          toastType === "danger"
+            ? "overlapping-codes-generic-error-text"
+            : "overlapping-codes-success-text"
+        }
+        closeButtonProps={{
+          "data-testid": "close-overlapping-codes-error-button",
+        }}
+        open={toastOpen}
+        message={toastMessage}
+        onClose={onToastClose}
+        autoHideDuration={6000}
+      />
+    </>
   );
 };
 
