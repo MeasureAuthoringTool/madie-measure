@@ -20,6 +20,7 @@ import {
   mapElementsByPath,
   getIndexFromPath,
   mergePathWithIndex,
+  removeIndicesFromPath,
   buildFullValidationSchema,
   recursiveAddYupObject,
 } from "./fhirDefinitionServiceUtilities";
@@ -42,6 +43,11 @@ describe("FhirDefinitionServiceUtilities", () => {
     it("should return the base path from the first element", () => {
       const result = getBasePath(mockResource);
       expect(result).toBe("Patient");
+    });
+
+    it("Should remove indeces from path", () => {
+      const result = removeIndicesFromPath("Patient.name[0]");
+      expect(result).toBe("Patient.name");
     });
 
     it("should return undefined if no elements are present", () => {
