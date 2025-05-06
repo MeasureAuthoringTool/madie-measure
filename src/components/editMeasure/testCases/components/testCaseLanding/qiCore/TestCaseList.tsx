@@ -8,6 +8,7 @@ import {
   MeasureErrorType,
   TestCaseImportRequest,
   TestCaseImportOutcome,
+  OverlappingCodeDto,
 } from "@madie/madie-models";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import queryString from "query-string";
@@ -46,10 +47,7 @@ import FileSaver from "file-saver";
 import TestCaseImportDialog from "../common/import/TestCaseImportDialog";
 import ActionCenter from "../common/ActionCenter/ActionCenter";
 import CopyTestCaseDialog from "../common/copyTestCases/CopyTestCaseDialog";
-import {
-  OverlappingCode,
-  generateQiCoreReport,
-} from "../../../util/OverlappingCodesUtils";
+import { generateQiCoreReport } from "../../../util/OverlappingCodesUtils";
 import OverlappingCodesDialog from "../common/overLappingCodes/OverlappingCodesDialog";
 
 export const IMPORT_ERROR =
@@ -172,11 +170,12 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
   const featureFlags = useFeatureFlags();
 
-  const [overlappingCodes, setOverlappingCodes] = useState<OverlappingCode[]>(
-    []
-  );
+  const [overlappingCodes, setOverlappingCodes] = useState<
+    OverlappingCodeDto[]
+  >([]);
   const [openOverlappingCodesDialog, setOpenOverlappingCodesDialog] =
     useState<boolean>(false);
+  const [showReportOptions, setShowReportOptions] = useState(false);
 
   useEffect(() => {
     if (testCases?.length != measure?.testCases?.length) {
@@ -433,6 +432,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   const handleGenerateOverlappingCodesReport = () => {
     setOverlappingCodes(generateQiCoreReport(valueSets, measureBundle));
     setOpenOverlappingCodesDialog(true);
+    setShowReportOptions(false);
   };
 
   const handleClose = () => {
@@ -660,6 +660,8 @@ const TestCaseList = (props: TestCaseListProps) => {
                 onDeleteAllTestCases={() =>
                   setOpenDeleteAllTestCasesDialog(true)
                 }
+                showReportOptions={showReportOptions}
+                setShowReportOptions={setShowReportOptions}
               />
             </div>
             <CreateNewTestCaseDialog open={createOpen} onClose={handleClose} />
@@ -811,8 +813,10 @@ const TestCaseList = (props: TestCaseListProps) => {
       />
       <OverlappingCodesDialog
         openDialog={openOverlappingCodesDialog}
+        setOpenDialog={setOpenOverlappingCodesDialog}
         handleClose={() => setOpenOverlappingCodesDialog(false)}
         overlappingCodes={overlappingCodes}
+        measure={measure}
       />
     </div>
   );

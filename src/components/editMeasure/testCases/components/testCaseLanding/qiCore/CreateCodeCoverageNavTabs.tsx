@@ -35,6 +35,8 @@ export interface NavTabProps {
   exportTestCases: (bundleType: string) => void;
   onDeleteAllTestCases: () => void;
   onGenerateOverlappingCodesReport: () => void;
+  showReportOptions: boolean;
+  setShowReportOptions: (show: boolean) => void;
 }
 
 const defaultStyle = {
@@ -169,6 +171,8 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
                 toImplementFunction: onGenerateOverlappingCodesReport,
               },
             ]}
+            showOptions={props.showReportOptions}
+            setShowOptions={props.setShowReportOptions}
           />
         )}
         {((featureFlags.TestCaseListActionCenter && canEdit) ||
