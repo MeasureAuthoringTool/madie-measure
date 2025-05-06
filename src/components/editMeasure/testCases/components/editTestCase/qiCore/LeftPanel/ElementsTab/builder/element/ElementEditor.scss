@@ -1,4 +1,10 @@
 #element-editor {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 0 24px 24px;
+  border-top: 1px solid gray;
+
   .test-case-tab-heading {
     margin-top: 24px;
   }

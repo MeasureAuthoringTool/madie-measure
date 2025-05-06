@@ -1,0 +1,31 @@
+.resource-container {
+  border: 1px solid gray;
+  height: 100%;
+
+  .resource-editor {
+    padding: 16px;
+
+    .resource-header {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 8px;
+      .spacer {
+        flex-grow: 1;
+      }
+    }
+
+    .resource-body {
+      flex-grow: 1;
+      background-color: var(--mui-background-paper);
+      display: flex;
+      height: 100%;
+
+      .side-bar {
+        display: flex;
+        flex-direction: column;
+        min-width: 150px;
+      }
+    }
+  }
+}

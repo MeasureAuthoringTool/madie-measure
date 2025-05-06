@@ -11,6 +11,7 @@ import {
   TestCaseExcelExportDto,
   TestCaseImportOutcome,
   TestCaseImportRequest,
+  OverlappingCodeDto,
 } from "@madie/madie-models";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import queryString from "query-string";
@@ -62,10 +63,7 @@ import {
 import useQdmCqlParsingService from "../../../api/cqlElmTranslationService/useQdmCqlParsingService";
 import ActionCenter from "../common/ActionCenter/ActionCenter";
 import CopyTestCaseDialog from "../common/copyTestCases/CopyTestCaseDialog";
-import {
-  OverlappingCode,
-  generateQdmReport,
-} from "../../../util/OverlappingCodesUtils";
+import { generateQdmReport } from "../../../util/OverlappingCodesUtils";
 import OverlappingCodesDialog from "../common/overLappingCodes/OverlappingCodesDialog";
 
 export const IMPORT_ERROR =
@@ -176,11 +174,12 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [openCopyTestCaseDialog, setOpenCopyTestCaseDialog] =
     useState<boolean>(false);
 
-  const [overlappingCodes, setOverlappingCodes] = useState<OverlappingCode[]>(
-    []
-  );
+  const [overlappingCodes, setOverlappingCodes] = useState<
+    OverlappingCodeDto[]
+  >([]);
   const [openOverlappingCodesDialog, setOpenOverlappingCodesDialog] =
     useState<boolean>(false);
+  const [showReportOptions, setShowReportOptions] = useState(false);
 
   // const [callstackMap, setCallstackMap] = useState<CqlDefinitionCallstack>();
   // callStackMap is used for generating Excel Export
@@ -733,6 +732,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   const handleGenerateOverlappingCodesReport = () => {
     setOverlappingCodes(generateQdmReport(cqmMeasure.value_sets));
     setOpenOverlappingCodesDialog(true);
+    setShowReportOptions(false);
   };
 
   const onTestCaseShiftDates = (testCases: TestCase[], shifted: number) => {
@@ -821,6 +821,8 @@ const TestCaseList = (props: TestCaseListProps) => {
                 exportExecuting={exportExecuting}
                 optionsOpen={optionsOpen}
                 setOptionsOpen={setOptionsOpen}
+                showReportOptions={showReportOptions}
+                setShowReportOptions={setShowReportOptions}
               />
             </div>
             <CreateNewTestCaseDialog
@@ -978,8 +980,10 @@ const TestCaseList = (props: TestCaseListProps) => {
       />
       <OverlappingCodesDialog
         openDialog={openOverlappingCodesDialog}
+        setOpenDialog={setOpenOverlappingCodesDialog}
         handleClose={() => setOpenOverlappingCodesDialog(false)}
         overlappingCodes={overlappingCodes}
+        measure={measure}
       />
 
       {exportExecuting && <ExportModal openModal={true}></ExportModal>}

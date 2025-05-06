@@ -5,7 +5,7 @@ import React, {
   SetStateAction,
   useRef,
 } from "react";
-import { Box, Divider, IconButton, Tab, Tabs } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -25,9 +25,20 @@ import {
   removeUndefinedAndEmptyObjects,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import { useFormikContext } from "formik";
-import { MadieDiscardDialog } from "@madie/madie-design-system/dist/react";
+import {
+  MadieDiscardDialog,
+  Tab,
+  Tabs,
+} from "@madie/madie-design-system/dist/react";
 import AddElementDialog from "./AddElementDialog";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
+import tw from "twin.macro";
+import "../../../../../../../../../../styles/VerticalSideBarNav.scss";
+import "./ResourceEditor.scss";
+
+const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
+const InnerWrapper = tw.div`flex-grow flex flex-col`;
+const Nav = tw.nav`flex-1 space-y-1 bg-slate`;
 
 interface ResourceEditorProps {
   onCancel: () => void;
@@ -184,25 +195,15 @@ const ResourceEditor = ({
 
   return (
     <Box
-      sx={{
-        border: "2px solid gray",
-        height: "100%",
-      }}
+      className="resource-container"
       id="tc-builder-resource-editor"
       data-testId="tc-builder-resource-editor"
     >
       {selectedResource && (
-        <>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              p: 1,
-            }}
-          >
-            <Typography>{selectedResource.path}</Typography>
-            <Box sx={{ flexGrow: 1 }} />
+        <div className="resource-editor">
+          <div className="resource-header">
+            <Typography>{resourceBasePath}</Typography>
+            <div className="spacer" />
             <Typography sx={{ fontSize: "14px" }}>
               <span style={{ color: "125496", fontWeight: 700 }}>
                 ID:&nbsp;&nbsp;
@@ -217,17 +218,9 @@ const ResourceEditor = ({
             >
               <CloseIcon sx={{ color: "#D92F2F" }} />
             </IconButton>
-          </Box>
-          <Divider />
-          <Box
-            sx={{
-              flexGrow: 1,
-              bgcolor: "background.paper",
-              display: "flex",
-              height: "100%",
-            }}
-          >
-            <Box sx={{ display: "flex", flexDirection: "column", width: 150 }}>
+          </div>
+          <div className="resource-body">
+            <div className="side-bar">
               <Box sx={{ p: 1 }}>
                 <IconButton
                   onClick={() => setAddDialogOpen(true)}
@@ -240,43 +233,54 @@ const ResourceEditor = ({
                       backgroundColor: "transparent",
                     },
                     padding: 0,
+                    color: "#3171C2",
                   }}
                   data-testid="add-attribute-dialog-button"
                 >
-                  <AddCircleOutlineIcon sx={{ color: "#3171C2" }} />
+                  <AddCircleOutlineIcon sx={{ marginRight: 1 }} />
                   <div>Add Attribute(s)</div>
                 </IconButton>
               </Box>
-              <Tabs
-                orientation="vertical"
-                variant="scrollable"
-                value={activeTab}
-                onChange={(e, newValue) => {
-                  if (dirty) {
-                    setPendingTab(newValue);
-                    setDialogOpen(true);
-                  } else {
-                    setActiveTab(newValue);
-                  }
-                }}
-                aria-label="Resource element tabs"
-                sx={{
-                  borderRight: 1,
-                  borderColor: "divider",
-                  "&& .MuiTab-root": {
-                    alignItems: "baseline",
-                  },
-                }}
-              >
-                {displayedElements?.map((element, index) => (
-                  <Tab
-                    key={index}
-                    sx={{ textAlign: "left" }}
-                    label={getElementName(element, resourceBasePath)}
-                  />
-                ))}
-              </Tabs>
-            </Box>
+              <OuterWrapper>
+                <InnerWrapper
+                  className="vertical-side-nav"
+                  id="resource-editor-side-nav"
+                >
+                  <Nav aria-label="Sidebar">
+                    <Tabs
+                      type="C"
+                      orientation="vertical"
+                      value={activeTab}
+                      onChange={(e, newValue) => {
+                        if (dirty) {
+                          setPendingTab(newValue);
+                          setDialogOpen(true);
+                        } else {
+                          setActiveTab(newValue);
+                        }
+                      }}
+                      aria-label="Resource element tabs"
+                    >
+                      {displayedElements.map((element, index) => {
+                        const elementName = getElementName(
+                          element,
+                          resourceBasePath
+                        );
+                        return (
+                          <Tab
+                            key={index}
+                            label={elementName}
+                            type="C"
+                            id={elementName}
+                            data-testid={elementName}
+                          />
+                        );
+                      })}
+                    </Tabs>
+                  </Nav>
+                </InnerWrapper>
+              </OuterWrapper>
+            </div>
             <ElementEditor
               setLastAddedElemPath={setLastAddedElemPath}
               setInitialFormikValuesStu6={setInitialFormikValuesStu6}
@@ -312,8 +316,8 @@ const ResourceEditor = ({
               }}
               canEdit={canEdit}
             />
-          </Box>
-        </>
+          </div>
+        </div>
       )}
       {/* Keep dialogs outside the conditional render */}
       <AddElementDialog
