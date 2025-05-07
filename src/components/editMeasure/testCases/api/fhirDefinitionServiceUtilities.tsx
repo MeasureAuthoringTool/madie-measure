@@ -377,6 +377,20 @@ export function mergePathWithIndex(pathWithIndex, pathWithoutIndex) {
   return pathWithIndex + "." + pathWithoutIndex; // Default fallback if no index
 }
 
+export function addCardinalityToElement(nextEntry, elemPath) {
+  if (!nextEntry.resource[elemPath]) {
+    // make it accessible to avoid a null
+    nextEntry.resource[elemPath] = {};
+  }
+  // is it an array already?
+  if (!Array.isArray(nextEntry.resource[elemPath])) {
+    // make it one
+    nextEntry.resource[elemPath] = [nextEntry.resource[elemPath]];
+  }
+  // add a new element;
+  nextEntry.resource[elemPath] = nextEntry.resource[elemPath].concat({}); // add an empty object.
+  return nextEntry;
+}
 // We need to update labels based weather or not the parent has multiple cardinality as well as if the child is multiple cardinality
 
 // This switch is a check to see weather we have the means to render an input for a given fhir type. needs to be udpated with all validations.

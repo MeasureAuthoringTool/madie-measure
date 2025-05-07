@@ -23,6 +23,7 @@ import {
   removeIndicesFromPath,
   buildFullValidationSchema,
   recursiveAddYupObject,
+  addCardinalityToElement,
 } from "./fhirDefinitionServiceUtilities";
 
 describe("FhirDefinitionServiceUtilities", () => {
@@ -552,5 +553,42 @@ describe("recursiveAddYupObject", () => {
 
     expect(yupObj).toBe(input);
     expect(Yup.object().isType(yupObj.group)).toBe(true);
+  });
+});
+
+describe("addCardinalityToElement", () => {
+  it("should add a new element when the path is missing", () => {
+    const nextEntry = { resource: {} };
+    const elemPath = "name";
+    const result = addCardinalityToElement(nextEntry, elemPath);
+    expect(result.resource[elemPath]).toEqual([{}, {}]);
+  });
+
+  it("should wrap a non-array element in an array and add a new element", () => {
+    const nextEntry = { resource: { name: { given: "John" } } };
+    const elemPath = "name";
+    const result = addCardinalityToElement(nextEntry, elemPath);
+    expect(result.resource[elemPath]).toEqual([{ given: "John" }, {}]);
+  });
+
+  it("should append a el to existing array", () => {
+    const nextEntry = { resource: { name: [{ given: "John" }] } };
+    const elemPath = "name";
+    const result = addCardinalityToElement(nextEntry, elemPath);
+    expect(result.resource[elemPath]).toEqual([{ given: "John" }, {}]);
+  });
+
+  it("should handle by converting to array", () => {
+    const nextEntry = { resource: { name: {} } };
+    const elemPath = "name";
+    const result = addCardinalityToElement(nextEntry, elemPath);
+    expect(result.resource[elemPath]).toEqual([{}, {}]);
+  });
+
+  it("should handle undefined paths by converting to array", () => {
+    const nextEntry = { resource: { name: undefined } };
+    const elemPath = "name";
+    const result = addCardinalityToElement(nextEntry, elemPath);
+    expect(result.resource[elemPath]).toEqual([{}, {}]);
   });
 });

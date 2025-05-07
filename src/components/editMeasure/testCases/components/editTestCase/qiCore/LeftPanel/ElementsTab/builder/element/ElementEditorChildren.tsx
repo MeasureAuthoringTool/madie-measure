@@ -6,6 +6,7 @@ import {
   getElementName,
   getNestedProperty,
   stripAllIndexes,
+  addCardinalityToElement,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import ElementEditorActionCenter from "./elementEditorActionCenter/ElementEditorActionCenter";
 import {
@@ -37,22 +38,10 @@ const ElementEditorChildren = ({
         (entry) => entry.resource.id === selectedResourceID
       )
     );
-    // 3 cases -> Nothing there, 1but nav is showing, 2something there not an array, 3an array
-    // There's nothing here. But our left nav is showing it.
-    if (!nextEntry.resource[elemPath]) {
-      // make it accessible to avoid a null
-      nextEntry.resource[elemPath] = {};
-    }
-    // is it an array already?
-    if (!Array.isArray(nextEntry.resource[elemPath])) {
-      // make it one
-      nextEntry.resource[elemPath] = [nextEntry.resource[elemPath]];
-    }
-    // add a new element;
-    nextEntry.resource[elemPath] = nextEntry.resource[elemPath].concat({}); // add an empty object.
+    const updatedEntry = addCardinalityToElement(nextEntry, elemPath);
     dispatch({
       type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
-      payload: nextEntry,
+      payload: updatedEntry,
     });
     setLastAddedElemPath(rootDefinition.path);
   };
