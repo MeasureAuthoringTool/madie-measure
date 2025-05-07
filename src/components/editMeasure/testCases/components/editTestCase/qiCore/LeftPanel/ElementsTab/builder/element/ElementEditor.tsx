@@ -26,7 +26,7 @@ import {
   ResourceActionType,
 } from "../../../../../../../util/QiCorePatientProvider";
 import { useFormikContext } from "formik";
-import { Button } from "@madie/madie-design-system/dist/react";
+import { Button, Toast } from "@madie/madie-design-system/dist/react";
 import useFormikResetOnEvent from "../../../../../../../../../common/useFormikResetOnEvent";
 import { RequiredFieldsProvider } from "./RequiredFieldsContext";
 
@@ -76,6 +76,14 @@ const ElementEditor = ({
   setValidationSchema,
   deleteElement,
 }: ElementEditorProps) => {
+  const [toastOpen, setToastOpen] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string>("");
+  const [toastType, setToastType] = useState<string>("danger");
+  const onToastClose = () => {
+    setToastType("danger");
+    setToastMessage("");
+    setToastOpen(false);
+  };
   const fhirDefinitionsServiceApi = useFhirDefinitionsServiceApi();
   const fhirDefinitionsService = useRef(fhirDefinitionsServiceApi);
   const [loading, setLoading] = useState(true);
@@ -248,6 +256,11 @@ const ElementEditor = ({
         type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
         payload: bundleEntry,
       });
+      setToastType("success");
+      setToastMessage(
+        `${type} has successfully been applied to the test case. To save your changes please click 'Save'.`
+      );
+      setToastOpen(true);
     }
   };
   if (_.isNil(elementDefinition)) {
@@ -300,6 +313,23 @@ const ElementEditor = ({
             </Button>
           </div>
         </Box>
+        <Toast
+          toastKey="testcase-attribute-toast"
+          aria-live="polite"
+          toastType={toastType}
+          testId={
+            toastType === "danger"
+              ? "edit-attribute-generic-error-text"
+              : "edit-attribute-success-text"
+          }
+          closeButtonProps={{
+            "data-testid": "close-toast-button",
+          }}
+          open={toastOpen}
+          message={toastMessage}
+          onClose={onToastClose}
+          autoHideDuration={6000}
+        />
       </RequiredFieldsProvider>
     );
   }
