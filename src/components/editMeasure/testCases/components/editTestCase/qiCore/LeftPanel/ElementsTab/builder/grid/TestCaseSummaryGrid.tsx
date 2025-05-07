@@ -56,6 +56,16 @@ const TestCaseSummaryGrid = ({
         id: "id",
       },
       {
+        header: "ID 2",
+        accessorFn: (row) => row.resource.id,
+        id: "id 2",
+      },
+      {
+        header: "ID3",
+        accessorFn: (row) => row.resource.id,
+        id: "id3",
+      },
+      {
         header: "",
         id: "actions",
         cell: ({ row }) => (
@@ -137,7 +147,9 @@ const TestCaseSummaryGrid = ({
                   {/*) : (*/}
                   {/*  flexRender(cell.column.columnDef.cell, cell.getContext())*/}
                   {/*)}*/}
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  <div>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </div>
                 </td>
               ))}
             </tr>

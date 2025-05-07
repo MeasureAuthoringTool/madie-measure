@@ -179,24 +179,25 @@ const DataElementTable = ({
     return <div data-testid="empty-table" />;
   }
   return (
-    <table className="data-elements-table">
-      <thead>
-        {table.getHeaderGroups().map((headerGroup) => (
-          <tr key={headerGroup.id}>
-            {headerGroup.headers.map((header) => (
-              <th
-                key={header.id}
-                colSpan={header.colSpan}
-                style={{ position: "relative", width: header.getSize() }}
-              >
-                {header.isPlaceholder
-                  ? null
-                  : flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-                {/* add following in if we want to manually resize columns on drag. */}
-                {/* {header.column.getCanResize() && (
+    <div className="table-scroll-container">
+      <table className="data-elements-table">
+        <thead>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <th
+                  key={header.id}
+                  colSpan={header.colSpan}
+                  style={{ position: "relative", width: header.getSize() }}
+                >
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                  {/* add following in if we want to manually resize columns on drag. */}
+                  {/* {header.column.getCanResize() && (
                   <div
                     onMouseDown={header.getResizeHandler()}
                     onTouchStart={header.getResizeHandler()}
@@ -205,25 +206,26 @@ const DataElementTable = ({
                     }`}
                   ></div>
                 )} */}
-              </th>
-            ))}
-          </tr>
-        ))}
-      </thead>
-      <tbody>
-        {table.getRowModel().rows.map((row, index) => (
-          <tr key={row.id}>
-            {row.getVisibleCells().map((cell, index) => {
-              return (
-                <td key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              );
-            })}
-          </tr>
-        ))}
-      </tbody>
-    </table>
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+        <tbody>
+          {table.getRowModel().rows.map((row, index) => (
+            <tr key={row.id}>
+              {row.getVisibleCells().map((cell, index) => {
+                return (
+                  <td key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
 
