@@ -44,7 +44,7 @@ describe("Validation Functions", () => {
     expect(requiredString).toBeInstanceOf(Yup.StringSchema);
     expect(requiredString.validate("1")).resolves.toBe("1");
     expect(requiredString.validate("abc")).rejects.toThrow(
-      "Invalid Integer format"
+      "Only the following numerical range of values are allowed: [1 to 2147483647]"
     );
     expect(nonRequiredString.validate("1")).resolves.toBe("1");
   });
@@ -61,7 +61,7 @@ describe("Validation Functions", () => {
     const validator = getUnsignedIntegerValidator(true);
 
     await expect(validator.validate("0123")).rejects.toThrow(
-      "Invalid Unsigned Integer format"
+      "Only the following numerical range of values are allowed: [0 to 2147483647]"
     );
   });
 
@@ -69,7 +69,7 @@ describe("Validation Functions", () => {
     const validator = getUnsignedIntegerValidator(true);
 
     await expect(validator.validate("2147483648")).rejects.toThrow(
-      "Unsigned integer range is [0 to 2147483647]"
+      "Only the following numerical range of values are allowed: [0 to 2147483647]"
     );
   });
 
@@ -77,7 +77,7 @@ describe("Validation Functions", () => {
     const validator = getUnsignedIntegerValidator(true);
 
     await expect(validator.validate("-123")).rejects.toThrow(
-      "Invalid Unsigned Integer format"
+      "Only the following numerical range of values are allowed: [0 to 2147483647]"
     );
   });
 
@@ -85,7 +85,7 @@ describe("Validation Functions", () => {
     const validator = getUnsignedIntegerValidator(true);
 
     await expect(validator.validate("abc")).rejects.toThrow(
-      "Invalid Unsigned Integer format"
+      "Only the following numerical range of values are allowed: [0 to 2147483647"
     );
   });
 
@@ -125,7 +125,7 @@ describe("Validation Functions", () => {
     const validator = getPositiveIntegerValidator(true);
 
     await expect(validator.validate("2147483648")).rejects.toThrow(
-      "Positive integer range is [1 to 2147483647]"
+      "Only the following numerical range of values are allowed: [1 to 2147483647]"
     );
   });
 
