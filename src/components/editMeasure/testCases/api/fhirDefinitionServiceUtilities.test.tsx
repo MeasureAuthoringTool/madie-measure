@@ -214,7 +214,7 @@ describe("getElementName", () => {
       sliceName: "testSlice",
       path: "some.path",
     };
-    expect(getElementName(element, "some")).toBe("testSlice");
+    expect(getElementName(element, "some", [])).toBe("testSlice");
   });
 
   it("should handle retrievedIndex and Number(retrievedIndex) > 0 to add correct index", () => {
@@ -224,18 +224,18 @@ describe("getElementName", () => {
       min: 1,
     } as any;
     const basePath = "Patient";
-    const result = getElementName(element, basePath);
+    const result = getElementName(element, basePath, [{}, {}]);
     expect(result).toBe(" *nameSlice 2 ");
   });
 
   it("returns path minus base", () => {
     const element = { id: "some.path", min: 0, path: "some.path" };
-    expect(getElementName(element, "some")).toBe("path");
+    expect(getElementName(element, "some", [])).toBe("path");
   });
 
   it("Should add required indicator when the attribute is required", () => {
     const element = { id: "some.path", min: 1, path: "some.path" };
-    expect(getElementName(element, "some")).toBe(" *path");
+    expect(getElementName(element, "some", null)).toBe(" *path");
   });
 
   it("adds required indicator", () => {
@@ -245,7 +245,7 @@ describe("getElementName", () => {
       sliceName: "testSlice",
       path: "some.path",
     };
-    expect(getElementName(element, "some")).toBe(" *testSlice");
+    expect(getElementName(element, "some", {})).toBe(" *testSlice");
   });
   it("returns sliceName with index and requiredIndicator if sliceName exists", () => {
     const element = {
@@ -253,22 +253,22 @@ describe("getElementName", () => {
       min: 1,
       sliceName: "givenName",
     };
-    expect(getElementName(element as any, "Patient")).toBe(" *givenName");
+    expect(getElementName(element as any, "Patient", [])).toBe(" *givenName");
   });
 
   it("returns path without basePath and indexes if no sliceName", () => {
     const element = { id: "Patient.name[0].family", min: 0 };
-    expect(getElementName(element as any, "Patient")).toBe("name.family");
+    expect(getElementName(element as any, "Patient", [])).toBe("name.family");
   });
 
   it("handles no index correctly", () => {
     const element = { id: "Patient.birthDate", min: 0 };
-    expect(getElementName(element as any, "Patient")).toBe("birthDate");
+    expect(getElementName(element as any, "Patient", [])).toBe("birthDate");
   });
 
   it("adds required indicator if min > 0", () => {
     const element = { id: "Patient.gender", min: 1 };
-    expect(getElementName(element as any, "Patient")).toBe(" *gender");
+    expect(getElementName(element as any, "Patient", [])).toBe(" *gender");
   });
 });
 
