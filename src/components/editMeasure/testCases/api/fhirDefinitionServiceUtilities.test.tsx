@@ -229,6 +229,17 @@ describe("getElementName", () => {
     expect(result).toBe(" *nameSlice 2 ");
   });
 
+  it("handles index 0 correctly", () => {
+    const element = {
+      id: "Patient.name[0]",
+      min: 0,
+      sliceName: "nameSlice",
+    } as any;
+    const basePath = "Patient";
+    const result = getElementName(element, basePath, [{}, {}]);
+    expect(result).toBe("nameSlice 1 ");
+  });
+
   it("returns path minus base", () => {
     const element = { id: "some.path", min: 0, path: "some.path" };
     expect(getElementName(element, "some", [])).toBe("path");
