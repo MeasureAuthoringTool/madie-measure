@@ -56,16 +56,6 @@ const TestCaseSummaryGrid = ({
         id: "id",
       },
       {
-        header: "ID 2",
-        accessorFn: (row) => row.resource.id,
-        id: "id 2",
-      },
-      {
-        header: "ID3",
-        accessorFn: (row) => row.resource.id,
-        id: "id3",
-      },
-      {
         header: "",
         id: "actions",
         cell: ({ row }) => (
