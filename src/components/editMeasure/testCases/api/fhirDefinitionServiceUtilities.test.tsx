@@ -218,6 +218,17 @@ describe("getElementName", () => {
     expect(getElementName(element, "some", [])).toBe("testSlice");
   });
 
+  it("should handles not a number index", () => {
+    const element = {
+      id: "Patient.name[asdf]",
+      sliceName: "nameSlice",
+      min: 1,
+    } as any;
+    const basePath = "Patient";
+    const result = getElementName(element, basePath, [{}, {}]);
+    expect(result).toBe(" *nameSlice");
+  });
+
   it("should handle retrievedIndex and Number(retrievedIndex) > 0 to add correct index", () => {
     const element = {
       id: "Patient.name[1]",
