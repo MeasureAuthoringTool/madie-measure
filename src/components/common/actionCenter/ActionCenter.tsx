@@ -3,7 +3,7 @@ import { SpeedDial, SpeedDialAction, Tooltip } from "@mui/material";
 
 export interface PropTypes {
   actions?: ActionItemDef[];
-  idSuffix?: string;
+  testId: string;
   target: any;
 }
 
@@ -13,26 +13,14 @@ export interface ActionItemDef {
   onClick: (target: any) => void;
 }
 
-const ActionCenter = ({ actions, idSuffix, target }: PropTypes) => {
+const ActionCenter = ({ actions, testId, target }: PropTypes) => {
   const [open, setOpen] = useState(false);
-  const suffix = idSuffix ? `-${idSuffix}` : "";
 
   return (
-    <div
-      data-testid={`action-center${suffix}`}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "flex-end",
-        gap: 1,
-        position: "relative",
-        minWidth: "fit-content",
-        paddingRight: 1,
-      }}
-    >
+    <div data-testid={`action-center-${testId}`}>
       <SpeedDial
-        ariaLabel="Measure action center"
-        data-testid={`action-center-button${suffix}`}
+        ariaLabel="Action center"
+        data-testid={`action-center-button-${testId}`}
         sx={{
           pointerEvents: "all",
           "& .MuiSpeedDial-fab": {
@@ -49,13 +37,12 @@ const ActionCenter = ({ actions, idSuffix, target }: PropTypes) => {
         }}
         icon={
           <Tooltip
-            data-testid={`delete-tooltip${suffix}`}
+            data-testid={`action-center-tooltip-${testId}`}
             title={open ? "Close" : "More"}
             placement="top"
             arrow
           >
             <div
-              data-testid="action-center-actual-icon"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -84,7 +71,7 @@ const ActionCenter = ({ actions, idSuffix, target }: PropTypes) => {
                   title: action.name,
                 },
               }}
-              data-testid={`action-center${suffix}_${action.name.replace(
+              data-testid={`action-center-${testId}_${action.name.replace(
                 /\s/g,
                 ""
               )}`}

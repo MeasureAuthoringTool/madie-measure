@@ -8,20 +8,21 @@ $header-weight: 500;
   max-width: 100%;
   position: relative;
   scroll-behavior: smooth;
+  padding-top: 4px;
+  padding-bottom: 4px;
 
-  // Force scroll bar to be visible
+  // Force horizontal scroll bar to be visible
   &::-webkit-scrollbar {
     height: 6px;
   }
 
   &::-webkit-scrollbar-thumb {
     background-color: #aaa;
-    border-radius: 6px;
+    border-radius: 8px;
   }
 }
 
 .data-elements-table {
-  min-width: 750px;
   width: 100%;
   font-family: Rubik, sans-serif;
   margin-top: 32px;
@@ -54,69 +55,60 @@ $header-weight: 500;
     }
   }
 
+  // makes the first and last column sticky
+  > thead > tr > th:first-child,
+  > tbody > tr > td:first-child {
+    position: sticky !important;
+    left: 0;
+    z-index: 5;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2) !important; // Todo Make drop shadow visible
+    min-width: 150px;
+  }
+
+  > thead > tr > th:last-child,
+  > tbody > tr > td:last-child {
+    position: sticky !important;
+    right: 0;
+    z-index: 5;
+    min-width: 100px;
+  }
+
   > thead {
-    background-color: #ededed;
     border-bottom: solid 1px #8c8c8c;
 
-    > tr {
-      > th {
-        font-size: $header-size;
-        font-style: $header-style;
-        font-weight: $header-weight;
-        padding: 16px;
-        text-align: left;
-        background-color: #ededed;
-      }
-
-      > th:first-child {
-        position: sticky !important;
-        left: 0;
-        z-index: 5;
-        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2) !important;
-      }
-
-       > th:last-child {
-        position: sticky !important;
-        right: 0;
-        z-index: 5;
-      }
+    > tr > th {
+      font-size: $header-size;
+      font-style: $header-style;
+      font-weight: $header-weight;
+      padding: 16px;
+      text-align: left;
+      background-color: #ededed;
+      min-width: 360px;
     }
   }
 
   > tbody {
-    tr > td:first-child {
-      position: sticky;
-      left: 0;
-      background-color: #fff;
-      z-index: 5;
-      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2) !important;
-    }
-
-    tr > td:last-child {
-      position: sticky;
-      right: 0;
-      background-color: #fff;
-      z-index: 5;
-    }
-
-    tr > td {
+    > tr > td {
       padding: 16px;
       border-bottom: 1px solid #8c8c8c;
+      background-color: #ffffff;
+      min-width: 360px;
 
-      > .first-column-with-icons {
-        display: flex;
-        > .icons {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
-        > .cell-body {
-          color: #125496;
-          display: flex;
-          align-items: center;
-          padding-left: 16px;
-        }
-      }
+      // Styling for the draggable icons on 1st column
+      //> .first-column-with-icons {
+      //  display: flex;
+      //  > .icons {
+      //    display: flex;
+      //    flex-direction: column;
+      //    align-items: center;
+      //  }
+      //  > .cell-body {
+      //    color: #125496;
+      //    display: flex;
+      //    align-items: center;
+      //    padding-left: 16px;
+      //  }
+      //}
 
       > .timing-cell-container {
         display: flex;

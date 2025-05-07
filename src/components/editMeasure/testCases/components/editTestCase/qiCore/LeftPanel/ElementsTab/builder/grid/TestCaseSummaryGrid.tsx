@@ -56,20 +56,14 @@ const TestCaseSummaryGrid = ({
         id: "id",
       },
       {
-        header: "ID 2",
-        accessorFn: (row) => row.resource.id,
-        id: "id1 2",
-      },
-      {
-        header: "ID 3",
-        accessorFn: (row) => row.resource.id,
-        id: "id1 3",
-      },
-      {
         header: "",
         id: "actions",
         cell: ({ row }) => (
-          <ActionCenter actions={actions} target={row.original} />
+          <ActionCenter
+            actions={actions}
+            testId={row.id}
+            target={row.original}
+          />
         ),
       },
     ],
@@ -80,9 +74,6 @@ const TestCaseSummaryGrid = ({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    defaultColumn: {
-      size: 100,
-    },
     initialState: {
       columnPinning: {
         left: ["resourceType"],
@@ -117,32 +108,36 @@ const TestCaseSummaryGrid = ({
             <tr key={row.id}>
               {row.getVisibleCells().map((cell, idx) => (
                 <td key={cell.id}>
-                  {idx === 0 ? (
-                    <div className="first-column-with-icons">
-                      <div className="icons">
-                        <ArrowDropUpIcon
-                          style={{
-                            color: "#125496",
-                            fontSize: "large",
-                          }}
-                        />
-                        <ArrowDropDownIcon
-                          style={{
-                            color: "#8C8C8C",
-                            fontSize: "large",
-                          }}
-                        />
-                      </div>
-                      <div className="cell-body">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    flexRender(cell.column.columnDef.cell, cell.getContext())
-                  )}
+                  {/* the arrows are for the functionality to move the rows around and that we will implement it in the future*/}
+                  {/*{idx === 0 ? (*/}
+                  {/*  <div className="first-column-with-icons">*/}
+                  {/*    <div className="icons">*/}
+                  {/*      <ArrowDropUpIcon*/}
+                  {/*        style={{*/}
+                  {/*          color: "#125496",*/}
+                  {/*          fontSize: "xxx-large",*/}
+                  {/*          margin: "-16px",*/}
+                  {/*        }}*/}
+                  {/*      />*/}
+                  {/*      <ArrowDropDownIcon*/}
+                  {/*        style={{*/}
+                  {/*          color: "#8C8C8C",*/}
+                  {/*          fontSize: "xxx-large",*/}
+                  {/*          margin: "-16px",*/}
+                  {/*        }}*/}
+                  {/*      />*/}
+                  {/*    </div>*/}
+                  {/*    <div className="cell-body">*/}
+                  {/*      {flexRender(*/}
+                  {/*        cell.column.columnDef.cell,*/}
+                  {/*        cell.getContext()*/}
+                  {/*      )}*/}
+                  {/*    </div>*/}
+                  {/*  </div>*/}
+                  {/*) : (*/}
+                  {/*  flexRender(cell.column.columnDef.cell, cell.getContext())*/}
+                  {/*)}*/}
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
             </tr>
