@@ -51,40 +51,44 @@ export const getBooleanValidator = (required) => {
 // Any positive integer in the range 1..2,147,483,647
 export const getPositiveIntegerValidator = (required) => {
   const integerReg = /^[0-9]+$/;
-  const baseValidator = Yup.string()
-    .matches(integerReg, "Invalid Integer format")
-    .test(
-      "range",
-      `Positive integer range is [${POSITIVEINT_MINIMUM} to ${INTEGER_MAXIMUM}]`,
-      (val) => {
-        if (val && val.length > 0) {
-          const num = Number(val);
-          return num >= POSITIVEINT_MINIMUM && num <= INTEGER_MAXIMUM;
+  const baseValidator = Yup.string().test(
+    "range",
+    `Only Positive integer values are allowed: range is [${POSITIVEINT_MINIMUM} to ${INTEGER_MAXIMUM}]`,
+    (val) => {
+      if (val && val.length > 0) {
+        if (!integerReg.test(val)) {
+          return false;
         }
-        return true;
+        const num = Number(val);
+        return num >= POSITIVEINT_MINIMUM && num <= INTEGER_MAXIMUM;
       }
-    );
+      return true;
+    }
+  );
+
   if (required) {
     return baseValidator.required("This field is required");
   }
   return baseValidator;
 };
+
 // Any non-negative integer in the range 0..2,147,483,647
 export const getUnsignedIntegerValidator = (required) => {
   const integerReg = /^(0|[1-9][0-9]*)$/;
-  const baseValidator = Yup.string()
-    .matches(integerReg, "Invalid Unsigned Integer format")
-    .test(
-      "range",
-      `Unsigned integer range is [0 to ${INTEGER_MAXIMUM}]`,
-      (val) => {
-        if (val && val.length > 0) {
-          const num = Number(val);
-          return num >= 0 && num <= INTEGER_MAXIMUM;
+  const baseValidator = Yup.string().test(
+    "range",
+    `Only Positive integer values are allowed: range is [0 to ${INTEGER_MAXIMUM}]`,
+    (val) => {
+      if (val && val.length > 0) {
+        if (!integerReg.test(val)) {
+          return false;
         }
-        return true;
+        const num = Number(val);
+        return num >= 0 && num <= INTEGER_MAXIMUM;
       }
-    );
+      return true;
+    }
+  );
   if (required) {
     return baseValidator.required("This field is required");
   }
