@@ -3,7 +3,9 @@ import * as _ from "lodash";
 import TypeEditor from "./TypeEditor";
 import {
   stripResourcePath,
-  removeIndicesFromPath,
+  getElementName,
+  getNestedProperty,
+  stripAllIndexes,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import ElementEditorActionCenter from "./elementEditorActionCenter/ElementEditorActionCenter";
 import {
@@ -11,6 +13,7 @@ import {
   useQiCoreResource,
 } from "../../../../../../../util/QiCorePatientProvider";
 import Box from "@mui/material/Box";
+import { useFormikContext } from "formik";
 
 const ElementEditorChildren = ({
   setLastAddedElemPath,
@@ -25,6 +28,7 @@ const ElementEditorChildren = ({
 }) => {
   currentDepth = currentDepth + 1;
   const elemPath = stripResourcePath(resourcePath, rootDefinition.path);
+  const { values } = useFormikContext();
   let elementValue = _.get(resource, elemPath);
   const { dispatch, state } = useQiCoreResource();
   const addElementOfMultipleCardinality = () => {
@@ -33,8 +37,19 @@ const ElementEditorChildren = ({
         (entry) => entry.resource.id === selectedResourceID
       )
     );
-    // This may be a problem for more simple types.
-    nextEntry.resource[elemPath] = nextEntry.resource[elemPath].concat({});
+    // 3 cases -> Nothing there, 1but nav is showing, 2something there not an array, 3an array
+    // There's nothing here. But our left nav is showing it.
+    if (!nextEntry.resource[elemPath]) {
+      // make it accessible to avoid a null
+      nextEntry.resource[elemPath] = {};
+    }
+    // is it an array already?
+    if (!Array.isArray(nextEntry.resource[elemPath])) {
+      // make it one
+      nextEntry.resource[elemPath] = [nextEntry.resource[elemPath]];
+    }
+    // add a new element;
+    nextEntry.resource[elemPath] = nextEntry.resource[elemPath].concat({}); // add an empty object.
     dispatch({
       type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
       payload: nextEntry,
@@ -51,7 +66,11 @@ const ElementEditorChildren = ({
         style={{ cursor: "default", border: "none", marginBottom: 24 }}
       >
         <h4 className="header">
-          {_.startCase(removeIndicesFromPath(rootDefinition?.id.split(".")[1]))}
+          {getElementName(
+            rootDefinition,
+            resourcePath,
+            getNestedProperty(values, stripAllIndexes(rootDefinition.id))
+          )}
         </h4>
         <div style={{ position: "relative", top: "-7px" }}>
           <ElementEditorActionCenter

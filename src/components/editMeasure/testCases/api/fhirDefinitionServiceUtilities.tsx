@@ -4,16 +4,32 @@ import * as Yup from "yup";
  * Prepares the element name to be displayed for tab labels
  * for sliced elements- it will be sliceName. e.g. Patient.extension:race results into race
  * for regular element- it will be the path of an element. e.g. Patient.gender results gender
+ * Needs to also consider the formik values at that point.
+ * formik.values cases
+ * Patient.name = falsey: -> Name
+ * Patient.name[0] = values at name: [name, name]: -> Name 1
+ * Patient.name[1] = values at name: [name, name]: -> Name 2
+ *  Need to check cardinality, then check if array and Up the index and display.
  */
-export function getElementName(element: ElementDefinition, basePath: string) {
+
+export function getElementName(
+  element: ElementDefinition,
+  basePath: string,
+  formikValue: any
+) {
   const requiredIndicator = element.min > 0 ? " *" : "";
   let index = "";
   const retrievedIndex = getIndexFromPathWithoutBrackets(element.id);
-  if (retrievedIndex) {
-    if (Number(retrievedIndex) > 0) {
-      index = ` ${Number(retrievedIndex) + 1} `;
+  if (Array.isArray(formikValue)) {
+    if (formikValue.length > 1) {
+      if (retrievedIndex) {
+        if (Number(retrievedIndex) > -1) {
+          index = ` ${Number(retrievedIndex) + 1} `;
+        }
+      }
     }
   }
+
   if (element.sliceName) {
     return `${requiredIndicator}${element.sliceName}${index}`;
   }
