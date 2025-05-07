@@ -53,7 +53,7 @@ export const getPositiveIntegerValidator = (required) => {
   const integerReg = /^[0-9]+$/;
   const baseValidator = Yup.string().test(
     "range",
-    `Only Positive integer values are allowed: range is [${POSITIVEINT_MINIMUM} to ${INTEGER_MAXIMUM}]`,
+    `Only the following numerical range of values are allowed: [${POSITIVEINT_MINIMUM} to ${INTEGER_MAXIMUM}]`,
     (val) => {
       if (val && val.length > 0) {
         if (!integerReg.test(val)) {
@@ -77,7 +77,7 @@ export const getUnsignedIntegerValidator = (required) => {
   const integerReg = /^(0|[1-9][0-9]*)$/;
   const baseValidator = Yup.string().test(
     "range",
-    `Only Positive integer values are allowed: range is [0 to ${INTEGER_MAXIMUM}]`,
+    `Only the following numerical range of values are allowed: [0 to ${INTEGER_MAXIMUM}]`,
     (val) => {
       if (val && val.length > 0) {
         if (!integerReg.test(val)) {
