@@ -7,9 +7,9 @@ import {
   QiCoreResourceContext,
 } from "../../../../../../../util/QiCorePatientProvider";
 import mockPatientState from "../resource/mockResourceState.json";
+import { FormikProvider } from "formik";
 
 jest.mock("./TypeEditor", () => () => <div data-testid="type-editor" />);
-
 describe("ElementEditorChildren", () => {
   const defaultProps = {
     setLastAddedElemPath: jest.fn(),
@@ -32,15 +32,18 @@ describe("ElementEditorChildren", () => {
 
   it("renders header and calls addElementOfMultipleCardinality when add button clicked", async () => {
     const dispatch = jest.fn();
+
     render(
-      <QiCoreResourceContext.Provider
-        value={{ state: mockPatientState, dispatch }}
-      >
-        <ElementEditorChildren {...defaultProps} />
-      </QiCoreResourceContext.Provider>
+      <FormikProvider value={{}}>
+        <QiCoreResourceContext.Provider
+          value={{ state: mockPatientState, dispatch }}
+        >
+          <ElementEditorChildren {...defaultProps} />
+        </QiCoreResourceContext.Provider>
+      </FormikProvider>
     );
 
-    expect(screen.getByText("Name")).toBeInTheDocument(); // header from rootDefinition.id
+    expect(screen.getByText("*name")).toBeInTheDocument(); // header from rootDefinition.id
     expect(screen.getByTestId("type-editor")).toBeInTheDocument();
     userEvent.click(screen.getByTestId("elements-action-center-actual-icon"));
 
