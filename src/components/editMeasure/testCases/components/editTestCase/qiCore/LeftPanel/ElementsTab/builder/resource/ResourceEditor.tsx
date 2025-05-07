@@ -23,6 +23,8 @@ import {
   getDisplayedElementsTree,
   getElementName,
   removeUndefinedAndEmptyObjects,
+  getNestedProperty,
+  stripAllIndexes,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import { useFormikContext } from "formik";
 import {
@@ -264,7 +266,8 @@ const ResourceEditor = ({
                       {displayedElements.map((element, index) => {
                         const elementName = getElementName(
                           element,
-                          resourceBasePath
+                          resourceBasePath,
+                          getNestedProperty(values, stripAllIndexes(element.id))
                         );
                         return (
                           <Tab

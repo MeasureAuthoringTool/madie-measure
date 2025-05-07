@@ -23,6 +23,7 @@ import {
   removeIndicesFromPath,
   buildFullValidationSchema,
   recursiveAddYupObject,
+  addCardinalityToElement,
 } from "./fhirDefinitionServiceUtilities";
 
 describe("FhirDefinitionServiceUtilities", () => {
@@ -214,7 +215,18 @@ describe("getElementName", () => {
       sliceName: "testSlice",
       path: "some.path",
     };
-    expect(getElementName(element, "some")).toBe("testSlice");
+    expect(getElementName(element, "some", [])).toBe("testSlice");
+  });
+
+  it("should handles not a number index", () => {
+    const element = {
+      id: "Patient.name[asdf]",
+      sliceName: "nameSlice",
+      min: 1,
+    } as any;
+    const basePath = "Patient";
+    const result = getElementName(element, basePath, [{}, {}]);
+    expect(result).toBe(" *nameSlice");
   });
 
   it("should handle retrievedIndex and Number(retrievedIndex) > 0 to add correct index", () => {
@@ -224,18 +236,29 @@ describe("getElementName", () => {
       min: 1,
     } as any;
     const basePath = "Patient";
-    const result = getElementName(element, basePath);
+    const result = getElementName(element, basePath, [{}, {}]);
     expect(result).toBe(" *nameSlice 2 ");
+  });
+
+  it("handles index 0 correctly", () => {
+    const element = {
+      id: "Patient.name[0]",
+      min: 0,
+      sliceName: "nameSlice",
+    } as any;
+    const basePath = "Patient";
+    const result = getElementName(element, basePath, [{}, {}]);
+    expect(result).toBe("nameSlice 1 ");
   });
 
   it("returns path minus base", () => {
     const element = { id: "some.path", min: 0, path: "some.path" };
-    expect(getElementName(element, "some")).toBe("path");
+    expect(getElementName(element, "some", [])).toBe("path");
   });
 
   it("Should add required indicator when the attribute is required", () => {
     const element = { id: "some.path", min: 1, path: "some.path" };
-    expect(getElementName(element, "some")).toBe(" *path");
+    expect(getElementName(element, "some", null)).toBe(" *path");
   });
 
   it("adds required indicator", () => {
@@ -245,7 +268,7 @@ describe("getElementName", () => {
       sliceName: "testSlice",
       path: "some.path",
     };
-    expect(getElementName(element, "some")).toBe(" *testSlice");
+    expect(getElementName(element, "some", {})).toBe(" *testSlice");
   });
   it("returns sliceName with index and requiredIndicator if sliceName exists", () => {
     const element = {
@@ -253,22 +276,22 @@ describe("getElementName", () => {
       min: 1,
       sliceName: "givenName",
     };
-    expect(getElementName(element as any, "Patient")).toBe(" *givenName");
+    expect(getElementName(element as any, "Patient", [])).toBe(" *givenName");
   });
 
   it("returns path without basePath and indexes if no sliceName", () => {
     const element = { id: "Patient.name[0].family", min: 0 };
-    expect(getElementName(element as any, "Patient")).toBe("name.family");
+    expect(getElementName(element as any, "Patient", [])).toBe("name.family");
   });
 
   it("handles no index correctly", () => {
     const element = { id: "Patient.birthDate", min: 0 };
-    expect(getElementName(element as any, "Patient")).toBe("birthDate");
+    expect(getElementName(element as any, "Patient", [])).toBe("birthDate");
   });
 
   it("adds required indicator if min > 0", () => {
     const element = { id: "Patient.gender", min: 1 };
-    expect(getElementName(element as any, "Patient")).toBe(" *gender");
+    expect(getElementName(element as any, "Patient", [])).toBe(" *gender");
   });
 });
 
@@ -552,5 +575,42 @@ describe("recursiveAddYupObject", () => {
 
     expect(yupObj).toBe(input);
     expect(Yup.object().isType(yupObj.group)).toBe(true);
+  });
+});
+
+describe("addCardinalityToElement", () => {
+  it("should add a new element when the path is missing", () => {
+    const nextEntry = { resource: {} };
+    const elemPath = "name";
+    const result = addCardinalityToElement(nextEntry, elemPath);
+    expect(result.resource[elemPath]).toEqual([{}, {}]);
+  });
+
+  it("should wrap a non-array element in an array and add a new element", () => {
+    const nextEntry = { resource: { name: { given: "John" } } };
+    const elemPath = "name";
+    const result = addCardinalityToElement(nextEntry, elemPath);
+    expect(result.resource[elemPath]).toEqual([{ given: "John" }, {}]);
+  });
+
+  it("should append a el to existing array", () => {
+    const nextEntry = { resource: { name: [{ given: "John" }] } };
+    const elemPath = "name";
+    const result = addCardinalityToElement(nextEntry, elemPath);
+    expect(result.resource[elemPath]).toEqual([{ given: "John" }, {}]);
+  });
+
+  it("should handle by converting to array", () => {
+    const nextEntry = { resource: { name: {} } };
+    const elemPath = "name";
+    const result = addCardinalityToElement(nextEntry, elemPath);
+    expect(result.resource[elemPath]).toEqual([{}, {}]);
+  });
+
+  it("should handle undefined paths by converting to array", () => {
+    const nextEntry = { resource: { name: undefined } };
+    const elemPath = "name";
+    const result = addCardinalityToElement(nextEntry, elemPath);
+    expect(result.resource[elemPath]).toEqual([{}, {}]);
   });
 });

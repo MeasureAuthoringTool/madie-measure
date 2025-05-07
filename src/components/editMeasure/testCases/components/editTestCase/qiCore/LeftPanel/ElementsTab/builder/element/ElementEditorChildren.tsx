@@ -3,7 +3,10 @@ import * as _ from "lodash";
 import TypeEditor from "./TypeEditor";
 import {
   stripResourcePath,
-  removeIndicesFromPath,
+  getElementName,
+  getNestedProperty,
+  stripAllIndexes,
+  addCardinalityToElement,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import ElementEditorActionCenter from "./elementEditorActionCenter/ElementEditorActionCenter";
 import {
@@ -11,6 +14,7 @@ import {
   useQiCoreResource,
 } from "../../../../../../../util/QiCorePatientProvider";
 import Box from "@mui/material/Box";
+import { useFormikContext } from "formik";
 
 const ElementEditorChildren = ({
   setLastAddedElemPath,
@@ -25,6 +29,7 @@ const ElementEditorChildren = ({
 }) => {
   currentDepth = currentDepth + 1;
   const elemPath = stripResourcePath(resourcePath, rootDefinition.path);
+  const { values } = useFormikContext();
   let elementValue = _.get(resource, elemPath);
   const { dispatch, state } = useQiCoreResource();
   const addElementOfMultipleCardinality = () => {
@@ -33,11 +38,10 @@ const ElementEditorChildren = ({
         (entry) => entry.resource.id === selectedResourceID
       )
     );
-    // This may be a problem for more simple types.
-    nextEntry.resource[elemPath] = nextEntry.resource[elemPath].concat({});
+    const updatedEntry = addCardinalityToElement(nextEntry, elemPath);
     dispatch({
       type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
-      payload: nextEntry,
+      payload: updatedEntry,
     });
     setLastAddedElemPath(rootDefinition.path);
   };
@@ -51,7 +55,11 @@ const ElementEditorChildren = ({
         style={{ cursor: "default", border: "none", marginBottom: 24 }}
       >
         <h4 className="header">
-          {_.startCase(removeIndicesFromPath(rootDefinition?.id.split(".")[1]))}
+          {getElementName(
+            rootDefinition,
+            resourcePath,
+            getNestedProperty(values, stripAllIndexes(rootDefinition.id))
+          )}
         </h4>
         <div style={{ position: "relative", top: "-7px" }}>
           <ElementEditorActionCenter

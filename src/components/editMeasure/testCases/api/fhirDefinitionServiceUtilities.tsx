@@ -4,16 +4,32 @@ import * as Yup from "yup";
  * Prepares the element name to be displayed for tab labels
  * for sliced elements- it will be sliceName. e.g. Patient.extension:race results into race
  * for regular element- it will be the path of an element. e.g. Patient.gender results gender
+ * Needs to also consider the formik values at that point.
+ * formik.values cases
+ * Patient.name = falsey: -> Name
+ * Patient.name[0] = values at name: [name, name]: -> Name 1
+ * Patient.name[1] = values at name: [name, name]: -> Name 2
+ *  Need to check cardinality, then check if array and Up the index and display.
  */
-export function getElementName(element: ElementDefinition, basePath: string) {
+
+export function getElementName(
+  element: ElementDefinition,
+  basePath: string,
+  formikValue: any
+) {
   const requiredIndicator = element.min > 0 ? " *" : "";
   let index = "";
   const retrievedIndex = getIndexFromPathWithoutBrackets(element.id);
-  if (retrievedIndex) {
-    if (Number(retrievedIndex) > 0) {
-      index = ` ${Number(retrievedIndex) + 1} `;
+  if (Array.isArray(formikValue)) {
+    if (formikValue.length > 1) {
+      if (retrievedIndex) {
+        if (Number(retrievedIndex) > -1) {
+          index = ` ${Number(retrievedIndex) + 1} `;
+        }
+      }
     }
   }
+
   if (element.sliceName) {
     return `${requiredIndicator}${element.sliceName}${index}`;
   }
@@ -361,6 +377,20 @@ export function mergePathWithIndex(pathWithIndex, pathWithoutIndex) {
   return pathWithIndex + "." + pathWithoutIndex; // Default fallback if no index
 }
 
+export function addCardinalityToElement(nextEntry, elemPath) {
+  if (!nextEntry.resource[elemPath]) {
+    // make it accessible to avoid a null
+    nextEntry.resource[elemPath] = {};
+  }
+  // is it an array already?
+  if (!Array.isArray(nextEntry.resource[elemPath])) {
+    // make it one
+    nextEntry.resource[elemPath] = [nextEntry.resource[elemPath]];
+  }
+  // add a new element;
+  nextEntry.resource[elemPath] = nextEntry.resource[elemPath].concat({}); // add an empty object.
+  return nextEntry;
+}
 // We need to update labels based weather or not the parent has multiple cardinality as well as if the child is multiple cardinality
 
 // This switch is a check to see weather we have the means to render an input for a given fhir type. needs to be udpated with all validations.
