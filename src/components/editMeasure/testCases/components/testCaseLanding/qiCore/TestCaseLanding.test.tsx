@@ -22,6 +22,9 @@ const serviceConfig = {
   terminologyService: {
     baseUrl: "http.com",
   },
+  excelExportService: {
+    baseUrl: "excelexport.com",
+  },
 } as ServiceConfig;
 
 const MEASURE_CREATEDBY = "testuser";

@@ -102,6 +102,7 @@ const Builder = ({
               setActiveTab(v);
             }
           }}
+          className="horizontal-nav-tabs"
           type="B"
           orientation="horizontal"
         >

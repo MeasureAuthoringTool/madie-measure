@@ -20,6 +20,7 @@ import {
   mapElementsByPath,
   getIndexFromPath,
   mergePathWithIndex,
+  removeIndicesFromPath,
   buildFullValidationSchema,
   recursiveAddYupObject,
 } from "./fhirDefinitionServiceUtilities";
@@ -42,6 +43,11 @@ describe("FhirDefinitionServiceUtilities", () => {
     it("should return the base path from the first element", () => {
       const result = getBasePath(mockResource);
       expect(result).toBe("Patient");
+    });
+
+    it("Should remove indeces from path", () => {
+      const result = removeIndicesFromPath("Patient.name[0]");
+      expect(result).toBe("Patient.name");
     });
 
     it("should return undefined if no elements are present", () => {
@@ -219,7 +225,7 @@ describe("getElementName", () => {
     } as any;
     const basePath = "Patient";
     const result = getElementName(element, basePath);
-    expect(result).toBe("nameSlice 2  *");
+    expect(result).toBe(" *nameSlice 2 ");
   });
 
   it("returns path minus base", () => {
@@ -227,9 +233,9 @@ describe("getElementName", () => {
     expect(getElementName(element, "some")).toBe("path");
   });
 
-  it("adds required indicator", () => {
+  it("Should add required indicator when the attribute is required", () => {
     const element = { id: "some.path", min: 1, path: "some.path" };
-    expect(getElementName(element, "some")).toBe("path *");
+    expect(getElementName(element, "some")).toBe(" *path");
   });
 
   it("adds required indicator", () => {
@@ -239,7 +245,7 @@ describe("getElementName", () => {
       sliceName: "testSlice",
       path: "some.path",
     };
-    expect(getElementName(element, "some")).toBe("testSlice *");
+    expect(getElementName(element, "some")).toBe(" *testSlice");
   });
   it("returns sliceName with index and requiredIndicator if sliceName exists", () => {
     const element = {
@@ -247,7 +253,7 @@ describe("getElementName", () => {
       min: 1,
       sliceName: "givenName",
     };
-    expect(getElementName(element as any, "Patient")).toBe("givenName *");
+    expect(getElementName(element as any, "Patient")).toBe(" *givenName");
   });
 
   it("returns path without basePath and indexes if no sliceName", () => {
@@ -262,7 +268,7 @@ describe("getElementName", () => {
 
   it("adds required indicator if min > 0", () => {
     const element = { id: "Patient.gender", min: 1 };
-    expect(getElementName(element as any, "Patient")).toBe("gender *");
+    expect(getElementName(element as any, "Patient")).toBe(" *gender");
   });
 });
 

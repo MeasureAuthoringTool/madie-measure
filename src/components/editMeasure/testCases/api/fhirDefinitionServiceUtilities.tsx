@@ -15,11 +15,11 @@ export function getElementName(element: ElementDefinition, basePath: string) {
     }
   }
   if (element.sliceName) {
-    return `${element.sliceName}${index}${requiredIndicator}`;
+    return `${requiredIndicator}${element.sliceName}${index}`;
   }
-  return `${stripAllIndexes(
+  return `${requiredIndicator}${stripAllIndexes(
     element.id.substring(basePath.length + 1)
-  )}${index}${requiredIndicator}`;
+  )}${index}`;
 }
 
 // given an object that we want to copy to
@@ -312,6 +312,11 @@ export function getIndexFromPath(path) {
   const match = path.match(/(\[\d+\])$/);
   return match ? match[1] : null;
 }
+// removes all indexes from path
+export function removeIndicesFromPath(path) {
+  return path.replace(/\[\d+\]/g, "");
+}
+
 // same thing but we don't want the brackets.
 export function getIndexFromPathWithoutBrackets(path) {
   const match = path.match(/\[(\d+)\]$/);

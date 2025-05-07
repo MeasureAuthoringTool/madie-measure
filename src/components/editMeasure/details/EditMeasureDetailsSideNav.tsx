@@ -2,7 +2,7 @@ import React from "react";
 import tw from "twin.macro";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Tab, Tabs } from "@madie/madie-design-system/dist/react";
-import "./EditMeasureSideBarNav.scss";
+import "../../../styles/VerticalSideBarNav.scss";
 import { Link } from "./MeasureDetails";
 import CompletionIndicator from "../populationCriteria/groups/CompletionIndicator";
 
@@ -64,7 +64,7 @@ export default function EditMeasureDetailsSideNav(
   return (
     <OuterWrapper>
       <InnerWrapper
-        className="edit-measure-side-nav"
+        className="vertical-side-nav"
         id="edit-measure-details-side-nav"
       >
         <Nav aria-label="Sidebar">
