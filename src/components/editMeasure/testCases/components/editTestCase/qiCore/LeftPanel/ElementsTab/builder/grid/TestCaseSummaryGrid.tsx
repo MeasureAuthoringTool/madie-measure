@@ -12,42 +12,47 @@ interface RecursionProps {
   keyPrefix?: string;
 }
 
+
+
 const WeOnlyDoRecursionNowIguess: React.FC<RecursionProps> = ({
   value,
   keyPrefix = "",
 }) => {
-  if (typeof value === "string") {
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
     return (
-      <div key={keyPrefix}>
-        <b>{keyPrefix}:</b> {value}
+      <div key={keyPrefix} style={{ marginLeft: "20px" }}>
+        <b>{keyPrefix}:</b> {value.toString()}
+      </div>
+    );
+  } else if (Array.isArray(value)) {
+    return (
+      <div key={keyPrefix} style={{ marginLeft: "20px" }}>
+        <b>{keyPrefix}:</b> [
+        {value.map((item, index) => (
+          <WeOnlyDoRecursionNowIguess
+            key={`${keyPrefix}[${index}]`}
+            value={item}
+            keyPrefix={`${keyPrefix}[${index}]`}
+          />
+        ))}
+        ]
       </div>
     );
   } else if (typeof value === "object" && value !== null) {
-    if (Array.isArray(value)) {
-      return (
-        <>
-          {value.map((item, index) => (
-            <WeOnlyDoRecursionNowIguess
-              key={`${keyPrefix}[${index}]`}
-              value={item}
-              keyPrefix={`${keyPrefix}[${index}]`}
-            />
-          ))}
-        </>
-      );
-    } else {
-      return (
-        <>
-          {Object.entries(value).map(([childKey, childValue]) => (
-            <WeOnlyDoRecursionNowIguess
-              key={`${keyPrefix}.${childKey}`}
-              value={childValue}
-              keyPrefix={keyPrefix ? `${keyPrefix}.${childKey}` : childKey}
-            />
-          ))}
-        </>
-      );
-    }
+    const entries = Object.entries(value);
+
+    return (
+      <div key={keyPrefix} style={{ marginLeft: "20px" }}>
+        {keyPrefix && <b>{keyPrefix}:</b>}
+        {entries.map(([childKey, childValue]) => (
+          <WeOnlyDoRecursionNowIguess
+            key={keyPrefix ? `${keyPrefix}.${childKey}` : childKey}
+            value={childValue}
+            keyPrefix={keyPrefix ? `${keyPrefix}.${childKey}` : childKey}
+          />
+        ))}
+      </div>
+    );
   }
 
   return null;
@@ -98,10 +103,12 @@ const TestCaseSummaryGrid = ({
         if (!cellData) return null;
 
         return (
+          <div style={{ whiteSpace: "pre-wrap" }}>
           <WeOnlyDoRecursionNowIguess
             value={cellData.value}
             keyPrefix={cellData.attributeKey}
-          />
+            />
+            </div>
         );
       },
     })
