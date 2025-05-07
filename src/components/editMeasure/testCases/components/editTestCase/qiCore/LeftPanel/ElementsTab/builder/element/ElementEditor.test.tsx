@@ -241,7 +241,14 @@ describe("ElementEditor Component", () => {
     userEvent.click(submitButton);
     await waitFor(() => {
       expect(dispatch).toHaveBeenCalled();
+      expect(
+        screen.getByTestId("edit-attribute-success-text")
+      ).toBeInTheDocument();
     });
+    userEvent.click(screen.getByTestId("close-toast-button"));
+    expect(
+      screen.queryByTestId("edit-attribute-success-text")
+    ).not.toBeInTheDocument();
   });
 
   test("renders a fallback when no elementDefinition is provided", () => {
