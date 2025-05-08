@@ -16,7 +16,7 @@ import MeasureMetadataForm from "./MeasureMetadata";
 import { checkUserCanEdit } from "@madie/madie-util";
 
 jest.mock("../../../../api/useMeasureServiceApi");
-const setErrorMessage = jest.fn();
+const setErrorMessages = jest.fn();
 const testUser = "john doe";
 const mockMetaData = {
   steward: "Test Steward",
@@ -99,7 +99,7 @@ describe("MeasureRationale component", () => {
     render(
       <MeasureMetadataForm
         measureMetadataType=""
-        setErrorMessage={setErrorMessage}
+        setErrorMessages={setErrorMessages}
       />
     );
     expect(queryByText("Description")).toBeNull();
@@ -113,7 +113,7 @@ describe("MeasureRationale component", () => {
     render(
       <MeasureMetadataForm
         measureMetadataType="Rationale"
-        setErrorMessage={setErrorMessage}
+        setErrorMessages={setErrorMessages}
       />
     );
 
@@ -136,7 +136,7 @@ describe("MeasureRationale component", () => {
     render(
       <MeasureMetadataForm
         measureMetadataType="Rationale"
-        setErrorMessage={setErrorMessage}
+        setErrorMessages={setErrorMessages}
       />
     );
 
@@ -158,7 +158,7 @@ describe("MeasureRationale component", () => {
     render(
       <MeasureMetadataForm
         measureMetadataType="Description"
-        setErrorMessage={setErrorMessage}
+        setErrorMessages={setErrorMessages}
       />
     );
 
@@ -183,7 +183,7 @@ describe("MeasureRationale component", () => {
     render(
       <MeasureMetadataForm
         measureMetadataType="Copyright"
-        setErrorMessage={setErrorMessage}
+        setErrorMessages={setErrorMessages}
       />
     );
 
@@ -219,7 +219,7 @@ describe("MeasureRationale component", () => {
     render(
       <MeasureMetadataForm
         measureMetadataType="Rationale"
-        setErrorMessage={setErrorMessage}
+        setErrorMessages={setErrorMessages}
       />
     );
 
@@ -236,7 +236,7 @@ describe("MeasureRationale component", () => {
     render(
       <MeasureMetadataForm
         measureMetadataType="Rationale"
-        setErrorMessage={setErrorMessage}
+        setErrorMessages={setErrorMessages}
       />
     );
     const input = getByTestId("measureRationaleInput");
@@ -270,7 +270,7 @@ describe("MeasureRationale component", () => {
     render(
       <MeasureMetadataForm
         measureMetadataType="Rationale"
-        setErrorMessage={setErrorMessage}
+        setErrorMessages={setErrorMessages}
       />
     );
     const input = getByTestId("measureRationaleInput");
@@ -280,7 +280,9 @@ describe("MeasureRationale component", () => {
     const save = getByTestId("measureRationaleSave");
     fireEvent.click(save);
 
-    expect(setErrorMessage).toHaveBeenCalled;
+    await waitFor(() => {
+      expect(setErrorMessages).toHaveBeenCalled();
+    });
   });
 
   it("should reset form on discard changes", async () => {
@@ -288,7 +290,7 @@ describe("MeasureRationale component", () => {
       <MeasureMetadataForm
         measureMetadataType="Clinical Recommendation Statement"
         header="Clinical Recommendation"
-        setErrorMessage={setErrorMessage}
+        setErrorMessages={setErrorMessages}
       />
     );
 
@@ -329,7 +331,7 @@ describe("MeasureRationale component", () => {
       <MeasureMetadataForm
         measureMetadataType="Clinical Recommendation Statement"
         header="Clinical Recommendation"
-        setErrorMessage={setErrorMessage}
+        setErrorMessages={setErrorMessages}
       />
     );
 
@@ -373,7 +375,7 @@ describe("MeasureRationale component", () => {
     render(
       <MeasureMetadataForm
         measureMetadataType="Rationale"
-        setErrorMessage={setErrorMessage}
+        setErrorMessages={setErrorMessages}
       />
     );
 
@@ -388,7 +390,7 @@ describe("MeasureRationale component", () => {
     render(
       <MeasureMetadataForm
         measureMetadataType="Rationale"
-        setErrorMessage={setErrorMessage}
+        setErrorMessages={setErrorMessages}
       />
     );
 
@@ -403,7 +405,7 @@ describe("MeasureRationale component", () => {
     render(
       <MeasureMetadataForm
         measureMetadataType="Rationale"
-        setErrorMessage={setErrorMessage}
+        setErrorMessages={setErrorMessages}
       />
     );
 
@@ -418,7 +420,7 @@ describe("MeasureRationale component", () => {
     render(
       <MeasureMetadataForm
         measureMetadataType="Rationale"
-        setErrorMessage={setErrorMessage}
+        setErrorMessages={setErrorMessages}
       />
     );
 
@@ -434,7 +436,7 @@ describe("MeasureRationale component", () => {
       <MeasureMetadataForm
         required
         measureMetadataType="Description"
-        setErrorMessage={setErrorMessage}
+        setErrorMessages={setErrorMessages}
       />
     );
 

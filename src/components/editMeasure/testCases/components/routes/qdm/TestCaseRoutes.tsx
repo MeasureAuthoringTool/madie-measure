@@ -176,6 +176,7 @@ const TestCaseRoutes = () => {
         contextFailure,
       }}
     >
+      {/* Status handler for Test Cases tab */}
       {cqmMeasureErrors && cqmMeasureErrors.length > 0 && (
         <StatusHandler
           error={true}

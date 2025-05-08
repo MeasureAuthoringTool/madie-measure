@@ -287,7 +287,7 @@ describe("MeasureServiceApi Tests", () => {
       await measureServiceApi.getAllPopulationBasisOptions();
       expect(mockedAxios.get).toBeCalledTimes(1);
     } catch (error) {
-      expect(error.message).toBe("Unable to fetch population basis options");
+      expect(error.message).toBe("Error populating Population Basis dropdown");
     }
   });
 

@@ -127,7 +127,7 @@ jest.mock("@madie/madie-util", () => ({
 }));
 const MeasureInformationMock = MeasureInformation as jest.Mock<JSX.Element>;
 const MeasureMetadataMock = MeasureMetadata as jest.Mock<JSX.Element>;
-const setErrorMessage = jest.fn();
+const setErrorMessages = jest.fn();
 const featureFlags = {
   QICoreMeasureDefinitions: true,
   QICoreMeasureReferences: false,
@@ -165,7 +165,8 @@ describe("MeasureDetails component", () => {
               path="/foo"
               element={
                 <MeasureDetails
-                  setErrorMessage={setErrorMessage}
+                  errorMessages={[]}
+                  setErrorMessages={setErrorMessages}
                   isQDM={false}
                   featureFlags={featureFlags}
                 />
@@ -189,7 +190,8 @@ describe("MeasureDetails component", () => {
               path="/foo/*"
               element={
                 <MeasureDetails
-                  setErrorMessage={setErrorMessage}
+                  errorMessages={[]}
+                  setErrorMessages={setErrorMessages}
                   isQDM={false}
                   featureFlags={featureFlags}
                 />
@@ -213,7 +215,8 @@ describe("MeasureDetails component", () => {
               path="/foo/*"
               element={
                 <MeasureDetails
-                  setErrorMessage={setErrorMessage}
+                  errorMessages={[]}
+                  setErrorMessages={setErrorMessages}
                   isQDM={false}
                   featureFlags={featureFlags}
                 />
@@ -245,7 +248,8 @@ describe("MeasureDetails component", () => {
               path="/foo/*"
               element={
                 <MeasureDetails
-                  setErrorMessage={setErrorMessage}
+                  errorMessages={[]}
+                  setErrorMessages={setErrorMessages}
                   isQDM={false}
                   featureFlags={featureFlags}
                 />
@@ -279,7 +283,8 @@ describe("MeasureDetails component", () => {
               path="/foo/*"
               element={
                 <MeasureDetails
-                  setErrorMessage={setErrorMessage}
+                  errorMessages={[]}
+                  setErrorMessages={setErrorMessages}
                   isQDM={false}
                   featureFlags={featureFlags}
                 />
@@ -311,7 +316,8 @@ describe("MeasureDetails component", () => {
               path="/foo/*"
               element={
                 <MeasureDetails
-                  setErrorMessage={setErrorMessage}
+                  errorMessages={[]}
+                  setErrorMessages={setErrorMessages}
                   isQDM={false}
                   featureFlags={featureFlags}
                 />
@@ -343,7 +349,8 @@ describe("MeasureDetails component", () => {
               path="/foo/*"
               element={
                 <MeasureDetails
-                  setErrorMessage={setErrorMessage}
+                  errorMessages={[]}
+                  setErrorMessages={setErrorMessages}
                   isQDM={false}
                   featureFlags={featureFlags}
                 />
@@ -378,7 +385,8 @@ describe("MeasureDetails component", () => {
               path="/foo/*"
               element={
                 <MeasureDetails
-                  setErrorMessage={setErrorMessage}
+                  errorMessages={[]}
+                  setErrorMessages={setErrorMessages}
                   isQDM={false}
                   featureFlags={featureFlags}
                 />
@@ -412,7 +420,8 @@ describe("MeasureDetails component", () => {
               path="/foo/*"
               element={
                 <MeasureDetails
-                  setErrorMessage={setErrorMessage}
+                  errorMessages={[]}
+                  setErrorMessages={setErrorMessages}
                   isQDM={true}
                 />
               }
@@ -436,7 +445,8 @@ describe("MeasureDetails component", () => {
               path="/foo/*"
               element={
                 <MeasureDetails
-                  setErrorMessage={setErrorMessage}
+                  errorMessages={[]}
+                  setErrorMessages={setErrorMessages}
                   isQDM={true}
                 />
               }
@@ -460,7 +470,8 @@ describe("MeasureDetails component", () => {
               path="/foo/*"
               element={
                 <MeasureDetails
-                  setErrorMessage={setErrorMessage}
+                  errorMessages={[]}
+                  setErrorMessages={setErrorMessages}
                   isQDM={true}
                 />
               }
@@ -488,7 +499,8 @@ describe("MeasureDetails component", () => {
               path="/foo/*"
               element={
                 <MeasureDetails
-                  setErrorMessage={setErrorMessage}
+                  errorMessages={[]}
+                  setErrorMessages={setErrorMessages}
                   isQDM={true}
                 />
               }
@@ -511,7 +523,8 @@ describe("MeasureDetails component", () => {
               path="/foo/*"
               element={
                 <MeasureDetails
-                  setErrorMessage={setErrorMessage}
+                  errorMessages={[]}
+                  setErrorMessages={setErrorMessages}
                   isQDM={false}
                   featureFlags={{
                     QICoreMeasureDefinitions: true,
@@ -543,7 +556,8 @@ describe("MeasureDetails component", () => {
               path="/foo/*"
               element={
                 <MeasureDetails
-                  setErrorMessage={setErrorMessage}
+                  errorMessages={[]}
+                  setErrorMessages={setErrorMessages}
                   isQDM={false}
                   featureFlags={{
                     QICoreMeasureDefinitions: false,
@@ -575,7 +589,8 @@ describe("MeasureDetails component", () => {
               path="/foo"
               element={
                 <MeasureDetails
-                  setErrorMessage={setErrorMessage}
+                  errorMessages={[]}
+                  setErrorMessages={setErrorMessages}
                   featureFlags={{
                     ...featureFlags,
                     QICoreMeasureReferences: true,
@@ -642,7 +657,8 @@ describe("MeasureDetails component", () => {
               path="/foo"
               element={
                 <MeasureDetails
-                  setErrorMessage={setErrorMessage}
+                  errorMessages={[]}
+                  setErrorMessages={setErrorMessages}
                   isQDM={true}
                 />
               }

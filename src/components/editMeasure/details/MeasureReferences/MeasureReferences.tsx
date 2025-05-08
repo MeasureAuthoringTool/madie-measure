@@ -44,16 +44,19 @@ const REFERENCE_OPTIONS = REFERENCE_TYPES.map((ref, i) => (
 ));
 
 interface MeasureReferencesProps {
-  setErrorMessage: Function;
+  setErrorMessages: Function;
 }
 
 const MeasureReferences = (props: MeasureReferencesProps) => {
-  const { setErrorMessage } = props;
+  const { setErrorMessages } = props;
   const { search } = useLocation();
   let navigate = useNavigate();
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
+
+  const updatingMeasureError = `Error updating measure "${measure?.measureName}"`;
+
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
     return () => {
@@ -156,14 +159,18 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
         //@ts-ignore
         const { status, data } = res;
         if (status === 200) {
-          setErrorMessage("");
           handleToast("success", `Measure Reference Saved Successfully`, true);
           updateMeasure(data);
           toggleOpen();
           formik.resetForm();
+          setErrorMessages((errorMessages) =>
+            errorMessages.filter(
+              (errorMessages) => errorMessages !== updatingMeasureError
+            )
+          );
         }
       })
-      .catch((reason) => {
+      .catch(() => {
         let message = `Error updating measure "${measure.measureName}"`;
         measureReferences.map((reference) => {
           if (!reference.referenceType && message.slice(-1) != ".")
@@ -171,9 +178,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
         });
 
         handleToast("danger", message, true);
-        // to do: some sort of error handling
-        // console.warn(`Error updating measure : ${reason}`);
-        setErrorMessage(message);
+        setErrorMessages((errorMessages) => [...errorMessages, message]);
       });
   };
 
@@ -327,12 +332,19 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
           updateMeasure(data);
           setDeleteDialogModalOpen(false);
           formik.resetForm();
+          setErrorMessages((errorMessages) =>
+            errorMessages.filter(
+              (errorMessages) => errorMessages !== updatingMeasureError
+            )
+          );
         }
       })
       .catch((reason) => {
-        const message = `Error updating measure "${measure.measureName}"`;
-        handleToast("danger", message, true);
-        setErrorMessage(message);
+        handleToast("danger", updatingMeasureError, true);
+        setErrorMessages((errorMessages) => [
+          ...errorMessages,
+          updatingMeasureError,
+        ]);
       });
   };
 

@@ -21,17 +21,20 @@ export interface MeasureMetadataProps {
   measureMetadataId?: String;
   measureMetadataType?: String;
   header?: String;
-  setErrorMessage: Function;
+  setErrorMessages: Function;
   required?: boolean;
 }
 
 export default function MeasureMetadata(props: MeasureMetadataProps) {
-  const { setErrorMessage, required } = props;
+  const { setErrorMessages, required } = props;
   const { measureMetadataId, measureMetadataType, header } = props;
   const typeLower = _.kebabCase(measureMetadataType.toLowerCase());
 
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
+
+  const updatingMeasureError = `Error updating measure "${measure?.measureName}"`;
+
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
     return () => {
@@ -107,10 +110,17 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
           true
         );
         updateMeasure(measure);
+        setErrorMessages((errorMessages) =>
+          errorMessages.filter(
+            (errorMessages) => errorMessages !== updatingMeasureError
+          )
+        );
       })
-      .catch((reason) => {
-        const message = `Error updating measure "${measure.measureName}"`;
-        setErrorMessage(message);
+      .catch(() => {
+        setErrorMessages((errorMessages) => [
+          ...errorMessages,
+          updatingMeasureError,
+        ]);
       });
   };
 

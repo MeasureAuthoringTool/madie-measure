@@ -56,11 +56,11 @@ interface measureInformationForm {
 }
 
 interface MeasureInformationProps {
-  setErrorMessage: Function;
+  setErrorMessages: Function;
 }
 
 export default function MeasureInformation(props: MeasureInformationProps) {
-  const { setErrorMessage } = props;
+  const { setErrorMessages } = props;
   const measureServiceApi = useMeasureServiceApi();
   const qdmElmTranslationService = useQdmElmTranslationServiceApi();
   const fhirElmTranslationService = useFhirElmTranslationServiceApi();
@@ -71,11 +71,22 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   const [measure, setMeasure] = useState<any>(measureStore.state);
   const [translatorVersion, setTranslatorVersion] = useState("");
 
+  const getEndorsingOrganizationError = `Error populating Endorsing Organization dropdown`;
+  const updatingMeasureError = `Error updating measure "${measure?.measureName}"`;
+
   const getTranslatorVersion = async (model, draft) => {
     if (model.includes("QDM")) {
-      qdmElmTranslationService.fetchTranslatorVersion(draft).then((data) => {
-        setTranslatorVersion(data);
-      });
+      qdmElmTranslationService
+        .fetchTranslatorVersion(draft)
+        .then((data) => {
+          setTranslatorVersion(data);
+        })
+        .catch(() => {
+          setErrorMessages((errorMessages) => [
+            ...errorMessages,
+            getEndorsingOrganizationError,
+          ]);
+        });
     } else {
       fhirElmTranslationService.fetchTranslatorVersion(draft).then((data) => {
         setTranslatorVersion(data);
@@ -251,8 +262,10 @@ export default function MeasureInformation(props: MeasureInformationProps) {
         formik.validateForm();
       })
       .catch(() => {
-        const message = `Error fetching endorsers`;
-        setErrorMessage(message);
+        setErrorMessages((errorMessages) => [
+          ...errorMessages,
+          getEndorsingOrganizationError,
+        ]);
       });
   }, []);
 
@@ -392,10 +405,17 @@ export default function MeasureInformation(props: MeasureInformationProps) {
           );
           // updating measure will propagate update state site wide.
           updateMeasure(newMeasure);
+          setErrorMessages((errorMessages) =>
+            errorMessages.filter(
+              (errorMessages) => errorMessages !== updatingMeasureError
+            )
+          );
         })
-        // update to alert
-        .catch((err) => {
-          setErrorMessage(err?.response?.data?.message?.toString());
+        .catch(() => {
+          setErrorMessages((errorMessages) => [
+            ...errorMessages,
+            updatingMeasureError,
+          ]);
         });
     }
   };

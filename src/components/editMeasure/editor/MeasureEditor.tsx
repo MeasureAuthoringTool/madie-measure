@@ -822,6 +822,7 @@ const MeasureEditor = () => {
   return (
     <>
       <div id="status-handler">
+        {/* Status handler for CQL Editor tab */}
         <StatusHandler
           error={error}
           errorMessage={errorMessage}

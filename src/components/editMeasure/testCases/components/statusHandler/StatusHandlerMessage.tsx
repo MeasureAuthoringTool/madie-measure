@@ -15,7 +15,6 @@ export function createWarningMessage(
       <MadieAlert
         data-testid={testDataId}
         type="warning"
-        copyButton="true"
         content={
           <div aria-live="polite" role="alert" data-testid={testDataId}>
             <div data-testid="warn-title">
@@ -30,6 +29,7 @@ export function createWarningMessage(
           </div>
         }
         canClose={false}
+        copyButton={true}
       />
     </div>
   );
@@ -43,7 +43,6 @@ export function createImportMessage(
   return (
     <div id="status-handler">
       <MadieAlert
-        copyButton="true"
         type="warning"
         content={
           <div aria-live="polite" role="alert" data-testid={testDataId}>
@@ -102,6 +101,7 @@ export function createImportMessage(
           </div>
         }
         canClose={false}
+        copyButton="true"
       />
     </div>
   );

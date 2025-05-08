@@ -70,7 +70,6 @@ export default function MeasureLanding() {
       setLoading(true);
       try {
         if (!searchCriteria) {
-          setErrMsg(null);
           const data = await measureServiceApi.fetchMeasures(
             tab === 0,
             limit,
@@ -88,6 +87,7 @@ export default function MeasureLanding() {
           );
           setPageProps(data);
         }
+        setErrMsg(null);
       } catch (error) {
         if (error.message !== "canceled") {
           setErrMsg(error.message);

@@ -89,7 +89,7 @@ describe("Transmission Format page", () => {
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
-          <TransmissionFormat setErrorMessage={jest.fn()} />
+          <TransmissionFormat setErrorMessages={jest.fn()} />
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -124,7 +124,7 @@ describe("Transmission Format page", () => {
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
-          <TransmissionFormat setErrorMessage={jest.fn()} />
+          <TransmissionFormat setErrorMessages={jest.fn()} />
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -181,7 +181,7 @@ describe("Transmission Format page", () => {
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
-          <TransmissionFormat setErrorMessage={jest.fn()} />
+          <TransmissionFormat setErrorMessages={jest.fn()} />
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -201,7 +201,7 @@ describe("Transmission Format page", () => {
     fireEvent.click(submitButton);
     expect(
       await findByTestId("measure-transmission-format-error")
-    ).toHaveTextContent(`Error updating Transmission Format for "measureName"`);
+    ).toHaveTextContent(`Error updating measure "measureName"`);
     const toastCloseButton = await findByTestId("close-error-button");
     expect(toastCloseButton).toBeInTheDocument();
     fireEvent.click(toastCloseButton);

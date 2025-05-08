@@ -26,16 +26,19 @@ import { MeasureDefinitionValidator } from "./MeasureDefinitionValidator";
 import "../MeasureMetaDataTable.scss";
 
 interface MeasureDefinitionsProps {
-  setErrorMessage: Function;
+  setErrorMessages: Function;
 }
 
 const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
-  const { setErrorMessage } = props;
+  const { setErrorMessages } = props;
   const { search } = useLocation();
   let navigate = useNavigate();
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
+
+  const updatingMeasureError = `Error updating measure "${measure?.measureName}"`;
+
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
     return () => {
@@ -167,21 +170,29 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
         //@ts-ignore
         const { status, data } = res;
         if (status === 200) {
-          setErrorMessage("");
           handleToast("success", "Measure Definition saved Successfully", true);
           updateMeasure(data);
           toggleOpen();
           formik.resetForm();
+          setErrorMessages((errorMessages) =>
+            errorMessages.filter(
+              (errorMessages) => errorMessages !== updatingMeasureError
+            )
+          );
         } else {
-          let message = `Error updating measure ${measure.measureName}`;
-          handleToast("danger", message, true);
-          setErrorMessage(message);
+          handleToast("danger", updatingMeasureError, true);
+          setErrorMessages((errorMessages) => [
+            ...errorMessages,
+            updatingMeasureError,
+          ]);
         }
       })
-      .catch((reason) => {
-        let message = `Error updating measure "${measure.measureName}"`;
-        handleToast("danger", message, true);
-        setErrorMessage(message);
+      .catch(() => {
+        handleToast("danger", updatingMeasureError, true);
+        setErrorMessages((errorMessages) => [
+          ...errorMessages,
+          updatingMeasureError,
+        ]);
       });
   };
 
@@ -316,12 +327,19 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
             updateMeasure(data);
             setDeleteDialogModalOpen(false);
             formik.resetForm();
+            setErrorMessages((errorMessages) =>
+              errorMessages.filter(
+                (errorMessages) => errorMessages !== updatingMeasureError
+              )
+            );
           }
         })
-        .catch((reason) => {
-          const message = `Error updating measure "${measure.measureName}"`;
-          handleToast("danger", message, true);
-          setErrorMessage(message);
+        .catch(() => {
+          handleToast("danger", updatingMeasureError, true);
+          setErrorMessages((errorMessages) => [
+            ...errorMessages,
+            updatingMeasureError,
+          ]);
         });
     },
     [measure?.measureMetaData?.measureDefinitions, measureServiceApi]

@@ -367,7 +367,7 @@ describe("EditMeasure Component", () => {
   it("delete fails", async () => {
     serviceApiMock.updateMeasure = jest.fn().mockRejectedValueOnce({
       status: 500,
-      response: { data: { message: "update failed" } },
+      response: { data: { message: "Update failed" } },
     });
     renderRouter();
 
@@ -385,7 +385,12 @@ describe("EditMeasure Component", () => {
     const continueButton = await findByTestId("delete-measure-button-2");
     fireEvent.click(continueButton);
     await waitFor(() => {
-      expect(getByTestId("edit-measure-alert")).toBeInTheDocument();
+      expect(
+        getByTestId("edit-measure-information-generic-error-text")
+      ).toBeInTheDocument();
+      expect(
+        getByTestId("edit-measure-information-generic-error-text")
+      ).toHaveTextContent("Failed to delete measure. Update failed");
     });
   });
 
@@ -409,8 +414,12 @@ describe("EditMeasure Component", () => {
     const continueButton = await findByTestId("delete-measure-button-2");
     fireEvent.click(continueButton);
     await waitFor(() => {
-      expect(queryByText("Are you sure you want to delete")).not.toBeVisible();
-      expect(getByTestId("edit-measure-alert")).toBeInTheDocument();
+      expect(
+        getByTestId("edit-measure-information-generic-error-text")
+      ).toBeInTheDocument();
+      expect(
+        getByTestId("edit-measure-information-generic-error-text")
+      ).toHaveTextContent("Failed to delete measure.");
     });
   });
 

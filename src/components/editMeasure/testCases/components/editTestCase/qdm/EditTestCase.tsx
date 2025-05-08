@@ -277,6 +277,7 @@ const EditTestCase = () => {
   };
   return (
     <>
+      {/* Status handler for Test Cases tab */}
       {qdmExecutionErrors && qdmExecutionErrors.length > 0 && (
         <StatusHandler
           error={true}

@@ -34,15 +34,18 @@ interface modelAndMeasurementPeriod {
 }
 
 interface ModelAndMeasurementPeriodProps {
-  setErrorMessage: Function;
+  setErrorMessages: Function;
 }
 const DATE_FORMAT = "YYYY-MM-DDTHH:mm:ss";
 
 const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
-  const { setErrorMessage } = props;
+  const { setErrorMessages } = props;
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
+
+  const updatingMeasureError = `Error updating measure "${measure?.measureName}"`;
+
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
     return () => {
@@ -136,10 +139,17 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
         );
         // updating measure will propagate update state site wide.
         updateMeasure(newMeasure);
+        setErrorMessages((errorMessages) =>
+          errorMessages.filter(
+            (errorMessages) => errorMessages !== updatingMeasureError
+          )
+        );
       })
-      .catch((err) => {
-        // alert here.
-        setErrorMessage(err?.response?.data?.message.toString());
+      .catch(() => {
+        setErrorMessages((errorMessages) => [
+          ...errorMessages,
+          updatingMeasureError,
+        ]);
       });
   };
 

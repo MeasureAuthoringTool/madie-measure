@@ -11,6 +11,7 @@ import EditMeasureDetailsSideNav from "./EditMeasureDetailsSideNav";
 import MeasureReferences from "./MeasureReferences/MeasureReferences";
 import TransmissionFormat from "./TransmissionFormat/TransmissionFormat";
 import MeasureDefinitions from "./MeasureDefinitions/MeasureDefinitions";
+import StatusHandler from "./statusHandler/StatusHandler";
 const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
 export interface RouteHandlerState {
   canTravel: boolean;
@@ -18,9 +19,10 @@ export interface RouteHandlerState {
 }
 
 export interface MeasureDetailsProps {
-  setErrorMessage: Function;
   isQDM: boolean;
   featureFlags;
+  errorMessages: Array<string>;
+  setErrorMessages: Function;
 }
 
 export interface LinkItem {
@@ -38,7 +40,7 @@ export interface Link {
 }
 
 export default function MeasureDetails(props: MeasureDetailsProps) {
-  const { setErrorMessage, isQDM, featureFlags } = props;
+  const { isQDM, featureFlags, errorMessages, setErrorMessages } = props;
   useDocumentTitle("MADiE Edit Measure Details");
   const location = useLocation();
   const { pathname } = location;
@@ -235,27 +237,31 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
     }
   }
   useEffect(() => {
-    setErrorMessage("");
-  }, [pathname, setErrorMessage]);
+    setErrorMessages([]);
+  }, [pathname, setErrorMessages]);
 
   return (
     <>
+      {/* Status handler for Details tab  */}
+      <StatusHandler errorMessages={errorMessages} />
       <Grid>
         <EditMeasureDetailsSideNav links={links} />
         <Routes>
           <Route
             path={detailsLink}
-            element={<MeasureInformation setErrorMessage={setErrorMessage} />}
+            element={<MeasureInformation setErrorMessages={setErrorMessages} />}
           />
           <Route
             path={modelPeriodLink}
             element={
-              <ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />
+              <ModelAndMeasurementPeriod setErrorMessages={setErrorMessages} />
             }
           />
           <Route
             path={stewardLink}
-            element={<StewardAndDevelopers setErrorMessage={setErrorMessage} />}
+            element={
+              <StewardAndDevelopers setErrorMessages={setErrorMessages} />
+            }
           />
           <Route
             path={descriptionLink}
@@ -265,10 +271,11 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                 measureMetadataId="Description"
                 measureMetadataType="Description"
                 header="Description"
-                setErrorMessage={setErrorMessage}
+                setErrorMessages={setErrorMessages}
               />
             }
           />
+
           <Route
             path={copyrightLink}
             element={
@@ -276,7 +283,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                 measureMetadataId="Copyright"
                 measureMetadataType="Copyright"
                 header="Copyright"
-                setErrorMessage={setErrorMessage}
+                setErrorMessages={setErrorMessages}
               />
             }
           />
@@ -287,7 +294,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                 measureMetadataId="Disclaimer"
                 measureMetadataType="Disclaimer"
                 header="Disclaimer"
-                setErrorMessage={setErrorMessage}
+                setErrorMessages={setErrorMessages}
               />
             }
           />
@@ -298,7 +305,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                 measureMetadataId="Rationale"
                 measureMetadataType="Rationale"
                 header="Rationale"
-                setErrorMessage={setErrorMessage}
+                setErrorMessages={setErrorMessages}
               />
             }
           />
@@ -310,7 +317,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                   measureMetadataId="Purpose"
                   measureMetadataType="Purpose"
                   header="Purpose"
-                  setErrorMessage={setErrorMessage}
+                  setErrorMessages={setErrorMessages}
                 />
               }
             />
@@ -322,7 +329,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                 measureMetadataId="Guidance"
                 measureMetadataType="Guidance (Usage)"
                 header="Guidance (Usage)"
-                setErrorMessage={setErrorMessage}
+                setErrorMessages={setErrorMessages}
               />
             }
           />
@@ -333,7 +340,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                 measureMetadataId="ClinicalRecommendation"
                 measureMetadataType="Clinical Recommendation Statement"
                 header="Clinical Recommendation"
-                setErrorMessage={setErrorMessage}
+                setErrorMessages={setErrorMessages}
               />
             }
           />
@@ -342,7 +349,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               <Route
                 path={transmissionFormat}
                 element={
-                  <TransmissionFormat setErrorMessage={setErrorMessage} />
+                  <TransmissionFormat setErrorMessages={setErrorMessages} />
                 }
               />
               <Route
@@ -352,14 +359,14 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                     measureMetadataId="MeasureSet"
                     measureMetadataType="Measure Set"
                     header="Measure Set"
-                    setErrorMessage={setErrorMessage}
+                    setErrorMessages={setErrorMessages}
                   />
                 }
               />
               <Route
                 path={referencesLink}
                 element={
-                  <MeasureReferences setErrorMessage={setErrorMessage} />
+                  <MeasureReferences setErrorMessages={setErrorMessages} />
                 }
               />
 
@@ -370,7 +377,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                     measureMetadataId="Definition"
                     measureMetadataType="Definition"
                     header="Definition"
-                    setErrorMessage={setErrorMessage}
+                    setErrorMessages={setErrorMessages}
                   />
                 }
               />
@@ -381,7 +388,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               <Route
                 path={measureDefinitionLink}
                 element={
-                  <MeasureDefinitions setErrorMessage={setErrorMessage} />
+                  <MeasureDefinitions setErrorMessages={setErrorMessages} />
                 }
               />
             </>
@@ -391,7 +398,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               <Route
                 path={measureReferencesLink}
                 element={
-                  <MeasureReferences setErrorMessage={setErrorMessage} />
+                  <MeasureReferences setErrorMessages={setErrorMessages} />
                 }
               />
             </>

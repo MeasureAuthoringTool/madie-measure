@@ -17,14 +17,17 @@ import * as Yup from "yup";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 
 interface TransmissionFormatProps {
-  setErrorMessage: Function;
+  setErrorMessages: Function;
 }
 
 const TransmissionFormat = (props: TransmissionFormatProps) => {
-  const { setErrorMessage } = props;
+  const { setErrorMessages } = props;
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
+
+  const updatingMeasureError = `Error updating measure "${measure?.measureName}"`;
+
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
     return () => {
@@ -73,12 +76,20 @@ const TransmissionFormat = (props: TransmissionFormatProps) => {
             true
           );
           updateMeasure(data);
+
+          setErrorMessages((errorMessages) =>
+            errorMessages.filter(
+              (errorMessages) => errorMessages !== updatingMeasureError
+            )
+          );
         }
       })
       .catch(() => {
-        const message = `Error updating Transmission Format for "${measure.measureName}"`;
-        handleToast("danger", message, true);
-        setErrorMessage(message);
+        handleToast("danger", updatingMeasureError, true);
+        setErrorMessages((errorMessages) => [
+          ...errorMessages,
+          updatingMeasureError,
+        ]);
       });
   };
   const formik = useFormik({

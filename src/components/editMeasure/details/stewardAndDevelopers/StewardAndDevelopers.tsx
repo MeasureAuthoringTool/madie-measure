@@ -29,14 +29,17 @@ const checkedIcon = <CheckBoxIcon fontSize="small" />;
 // Need to have a "-" as placeholder if nothing is selected, but it doesn't have to be an option
 // Need to have 2 diff sizes of buttons
 interface StewardAndDevelopersProps {
-  setErrorMessage: Function;
+  setErrorMessages: Function;
 }
 export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
-  const { setErrorMessage } = props;
+  const { setErrorMessages } = props;
   const measureServiceApi = useMeasureServiceApi();
   const [organizations, setOrganizations] = useState<Organization[]>();
   const [measure, setMeasure] = useState<any>(measureStore.state);
   const { updateMeasure } = measureStore;
+
+  const getOrganizationError = `Error populating Steward and Developers dropdown`;
+  const updatingMeasureError = `Error updating measure "${measure?.measureName}"`;
 
   // toast utilities
   const [toastOpen, setToastOpen] = useState<boolean>(false);
@@ -99,10 +102,17 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
           true
         );
         updateMeasure(submitMeasure);
+        setErrorMessages((errorMessages) =>
+          errorMessages.filter(
+            (errorMessages) => errorMessages !== updatingMeasureError
+          )
+        );
       })
       .catch(() => {
-        const message = `Error updating measure "${measure.measureName}"`;
-        setErrorMessage(message);
+        setErrorMessages((errorMessages) => [
+          ...errorMessages,
+          updatingMeasureError,
+        ]);
       });
   };
 
@@ -143,8 +153,10 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
         setOrganizations(organizationsList);
       })
       .catch(() => {
-        const message = `Error fetching organizations`;
-        setErrorMessage(message);
+        setErrorMessages((errorMessages) => [
+          ...errorMessages,
+          getOrganizationError,
+        ]);
       });
   }, []);
 

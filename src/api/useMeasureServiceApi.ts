@@ -284,13 +284,13 @@ export class MeasureServiceApi {
         }
       );
       if (response?.data.length < 1) {
-        throw new Error("Unable to fetch population basis options");
+        throw new Error("Error populating Population Basis dropdown");
       }
       return response?.data;
     } catch (err) {
       const message = this.buildErrorMessage(
         err,
-        "Unable to fetch population basis options"
+        "Error populating Population Basis dropdown"
       );
       throw new Error(message);
     }

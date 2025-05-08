@@ -141,6 +141,7 @@ const StatusHandler = ({
                 </div>
               }
               canClose={false}
+              copyButton={true}
             />
           );
         } else {

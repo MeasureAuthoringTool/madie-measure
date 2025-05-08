@@ -15,7 +15,7 @@ import { Measure } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 
 const mockHistoryPush = jest.fn();
-const setErrorMessage = jest.fn();
+const setErrorMessages = jest.fn();
 
 jest.mock("react-router-dom", () => ({
   ...(jest.requireActual("react-router-dom") as any),
@@ -73,7 +73,7 @@ describe("Model and Measurement Period component", () => {
   const { getByTestId, queryByText } = screen;
 
   it("should render the component with measure's information populated", async () => {
-    render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
+    render(<ModelAndMeasurementPeriod setErrorMessages={setErrorMessages} />);
 
     const result: HTMLElement = getByTestId("model-measurement-form");
     expect(result).toBeInTheDocument();
@@ -105,7 +105,7 @@ describe("Model and Measurement Period component", () => {
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
     measure.measurementPeriodEnd = null;
     measure.measurementPeriodStart = null;
-    render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
+    render(<ModelAndMeasurementPeriod setErrorMessages={setErrorMessages} />);
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
       measurementPeriodStartNode
@@ -152,7 +152,7 @@ describe("Model and Measurement Period component", () => {
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
     measure.measurementPeriodEnd = null;
     measure.measurementPeriodStart = null;
-    render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
+    render(<ModelAndMeasurementPeriod setErrorMessages={setErrorMessages} />);
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
       measurementPeriodStartNode
@@ -178,14 +178,14 @@ describe("Model and Measurement Period component", () => {
     act(() => {
       fireEvent.click(createBtn);
     });
-    await waitFor(() => expect(setErrorMessage).toHaveBeenCalled(), {
+    await waitFor(() => expect(setErrorMessages).toHaveBeenCalled(), {
       timeout: 5000,
     });
   });
 
   it("should render the component with a blank measure name", async () => {
     measure.measureName = "";
-    render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
+    render(<ModelAndMeasurementPeriod setErrorMessages={setErrorMessages} />);
     const result: HTMLElement = getByTestId("model-measurement-form");
     expect(result).toBeInTheDocument();
     await act(async () => {
@@ -195,7 +195,7 @@ describe("Model and Measurement Period component", () => {
   });
 
   it("Check if the measurement information save button is present", () => {
-    render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
+    render(<ModelAndMeasurementPeriod setErrorMessages={setErrorMessages} />);
     const result: HTMLElement = getByTestId(
       "model-and-measurement-save-button"
     );
@@ -203,7 +203,7 @@ describe("Model and Measurement Period component", () => {
   });
 
   it("Check if measurement start field is present in the form", async () => {
-    render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
+    render(<ModelAndMeasurementPeriod setErrorMessages={setErrorMessages} />);
     const result = getByTestId("model-measurement-form");
     expect(result).toBeInTheDocument();
     await act(async () => {
@@ -216,7 +216,7 @@ describe("Model and Measurement Period component", () => {
 
   it("Check if measurement start date field updates input as expected", async () => {
     measure.measurementPeriodStart = null;
-    render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
+    render(<ModelAndMeasurementPeriod setErrorMessages={setErrorMessages} />);
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
       measurementPeriodStartNode
@@ -234,7 +234,7 @@ describe("Model and Measurement Period component", () => {
 
   it("Check if measurement end date field has expected value", async () => {
     measure.measurementPeriodEnd = null;
-    render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
+    render(<ModelAndMeasurementPeriod setErrorMessages={setErrorMessages} />);
     const measurementPeriodEndNode = getByTestId("measurement-period-end");
     const measurementPeriodEndInput = within(
       measurementPeriodEndNode
@@ -248,7 +248,7 @@ describe("Model and Measurement Period component", () => {
   it("Check if measurement period save button is disabled when measurement period start and end date have same values", async () => {
     measure.measurementPeriodEnd = null;
     measure.measurementPeriodStart = null;
-    render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
+    render(<ModelAndMeasurementPeriod setErrorMessages={setErrorMessages} />);
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
       measurementPeriodStartNode
@@ -283,7 +283,7 @@ describe("Model and Measurement Period component", () => {
   it("Check if measurement period save button is disabled when measurement period end date is less than start date", async () => {
     measure.measurementPeriodEnd = null;
     measure.measurementPeriodStart = null;
-    render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
+    render(<ModelAndMeasurementPeriod setErrorMessages={setErrorMessages} />);
     await act(async () => {
       const text = getByTestId("model-id-input") as HTMLInputElement;
       expect(text.value).toBe("QI-Core v4.1.1");
@@ -322,7 +322,7 @@ describe("Model and Measurement Period component", () => {
   it("Check if measurement period save button is disabled when measurement period end date or state date is not valid", async () => {
     measure.measurementPeriodEnd = null;
     measure.measurementPeriodStart = null;
-    render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
+    render(<ModelAndMeasurementPeriod setErrorMessages={setErrorMessages} />);
     await act(async () => {
       const text = getByTestId("model-id-input") as HTMLInputElement;
       expect(text.value).toBe("QI-Core v4.1.1");
@@ -355,7 +355,7 @@ describe("Model and Measurement Period component", () => {
   it("Check if measurement period save button is enabled when measurement period start and end dates pass all date checks", async () => {
     measure.measurementPeriodEnd = null;
     measure.measurementPeriodStart = null;
-    render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
+    render(<ModelAndMeasurementPeriod setErrorMessages={setErrorMessages} />);
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
       measurementPeriodStartNode
@@ -379,7 +379,7 @@ describe("Model and Measurement Period component", () => {
   it("Check if measurement period save button is enabled when measurement period start and end dates pass all date checks, and success works", async () => {
     measure.measurementPeriodEnd = null;
     measure.measurementPeriodStart = null;
-    render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
+    render(<ModelAndMeasurementPeriod setErrorMessages={setErrorMessages} />);
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
       measurementPeriodStartNode
@@ -418,7 +418,7 @@ describe("Model and Measurement Period component", () => {
   it("Check if measurement period save button is enabled when measurement period start and end dates pass all date checks, and failure works", async () => {
     measure.measurementPeriodEnd = new Date(0);
     measure.measurementPeriodStart = new Date(0);
-    render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
+    render(<ModelAndMeasurementPeriod setErrorMessages={setErrorMessages} />);
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
       measurementPeriodStartNode
@@ -461,7 +461,7 @@ describe("Model and Measurement Period component", () => {
   it("Check that discarding changes works", async () => {
     measure.measurementPeriodEnd = new Date(0);
     measure.measurementPeriodStart = new Date(0);
-    render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
+    render(<ModelAndMeasurementPeriod setErrorMessages={setErrorMessages} />);
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
       measurementPeriodStartNode
@@ -496,7 +496,7 @@ describe("Model and Measurement Period component", () => {
   it("Check that canceling changes in discard works", async () => {
     measure.measurementPeriodEnd = new Date(0);
     measure.measurementPeriodStart = new Date(0);
-    render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
+    render(<ModelAndMeasurementPeriod setErrorMessages={setErrorMessages} />);
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
     const measurementPeriodStartInput = within(
       measurementPeriodStartNode

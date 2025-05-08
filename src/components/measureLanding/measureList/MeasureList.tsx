@@ -657,7 +657,8 @@ export default function MeasureList(props: {
         setPageProps(data);
       })
       .catch((error: Error) => {
-        props.setErrMsg("");
+        props.setLoading(false);
+        props.setErrMsg(error.message);
       });
     navigate(`?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`);
   };

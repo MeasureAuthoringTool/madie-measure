@@ -14,6 +14,7 @@ import TestCaseLandingWrapper from "../../testCaseLanding/common/TestCaseLanding
 import {
   Measure,
   MeasureErrorType,
+  Model,
   TestCaseImportOutcome,
 } from "@madie/madie-models";
 import TestCaseData from "../../testCaseConfiguration/testCaseData/TestCaseData";
@@ -23,11 +24,27 @@ import Expansion from "../../testCaseConfiguration/expansion/Expansion";
 export const CQL_RETURN_TYPES_MISMATCH_ERROR =
   "One or more Population Criteria has a mismatch with CQL return types. Test Cases cannot be executed until this is resolved.";
 
+const stu6TestCaseValidationDisabledMessage = (
+  <span>
+    Validations for QI-Core STU6 are Disabled. No validations will be displayed.
+    Validation of your Test Case JSON can be performed using an alternative
+    tool, such as the{" "}
+    <a
+      href={"https://validator.fhir.org/"}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      HL7 FHIR Validator
+    </a>
+    with the US-Core and QI-Core IGs selected.
+  </span>
+);
+
 const TestCaseRoutes = () => {
   const [measureBundle, setMeasureBundle] = useState<Bundle>();
   const [valueSets, setValueSets] = useState<ValueSet[]>();
   const [errors, setErrors] = useState<Array<string>>([]);
-  const [warnings, setWarnings] = useState<Array<string>>([]);
+  const [warnings, setWarnings] = useState<Array<any>>([]);
   const [importWarnings, setImportWarnings] = useState<TestCaseImportOutcome[]>(
     []
   );
@@ -51,6 +68,16 @@ const TestCaseRoutes = () => {
   useEffect(() => {
     const localErrors: Array<string> = [...errors];
     if (measure) {
+      if (
+        measure.model === Model.QICORE_6_0_0 &&
+        !featureFlags?.stu6TestCaseValidation
+      ) {
+        setWarnings((warnings) => [
+          ...warnings,
+          stu6TestCaseValidationDisabledMessage,
+        ]);
+      }
+
       const compareTo = _.cloneDeep(measure);
       compareTo.testCases = null;
       if (measureBundle && lastMeasure && _.isEqual(lastMeasure, compareTo)) {
@@ -132,6 +159,7 @@ const TestCaseRoutes = () => {
         contextFailure,
       }}
     >
+      {/* Status handler for Test Cases tab*/}
       {errors && errors.length > 0 && (
         <StatusHandler
           error={true}

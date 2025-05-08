@@ -465,15 +465,18 @@ export default function EditMeasure() {
         }, 3000);
       }
     } catch (e) {
-      if (e?.response?.data) {
-        const { error, status, message } = e.response.data;
-        const errorMessage = `${status}: ${error} ${message}`;
-        setErrorMessage(errorMessage);
-        setDeleteOpen(false);
+      setToastOpen(true);
+      const baseErrorMessage = "Failed to delete measure.";
+
+      if (e?.response?.data?.message) {
+        const message = e.response.data.message;
+        const errorMessage = `${baseErrorMessage} ${message}`;
+        setToastMessage(errorMessage);
       } else {
-        setErrorMessage(e.toString());
-        setDeleteOpen(false);
+        setToastMessage(baseErrorMessage);
       }
+
+      setDeleteOpen(false);
     }
   };
   const onToastClose = () => {
@@ -500,8 +503,7 @@ export default function EditMeasure() {
     abortController.current && abortController.current.abort();
     handleContinueDialog();
   };
-  // At this time it appears only possible to have a single error at a time because of the way state is updated.
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [errorMessages, setErrorMessages] = useState<Array<string>>([]);
   const isQDM = measure?.model?.includes("QDM");
   return (
     <div data-testid="editMeasure">
@@ -528,27 +530,15 @@ export default function EditMeasure() {
                 marginRight: "2rem",
                 marginTop: 16,
               }}
-            >
-              {errorMessage && (
-                <MadieAlert
-                  type="error"
-                  content={
-                    <>
-                      <h5 tw="py-1">Error found</h5>
-                      <p data-testid="edit-measure-alert">{errorMessage}</p>
-                    </>
-                  }
-                  canClose={false}
-                />
-              )}
-            </div>
+            ></div>
             <Routes>
               {/* root nav links with wild card operators. We always want these displayed regardless of deeper navigation */}
               <Route
                 path="/details/*"
                 element={
                   <MeasureDetails
-                    setErrorMessage={setErrorMessage}
+                    errorMessages={errorMessages}
+                    setErrorMessages={setErrorMessages}
                     isQDM={isQDM}
                     featureFlags={featureFlags}
                   />
