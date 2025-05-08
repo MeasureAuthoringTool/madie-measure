@@ -198,6 +198,7 @@ export default function MeasureLanding() {
           <span tw="flex-grow" />
         </section>
         <div>
+          {/* Status handler for measures list page */}
           {errMsg && !loading && (
             <StatusHandler
               error={errMsg}

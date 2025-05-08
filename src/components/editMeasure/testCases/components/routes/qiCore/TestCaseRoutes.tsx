@@ -159,7 +159,7 @@ const TestCaseRoutes = () => {
         contextFailure,
       }}
     >
-      {/* Status handler for Test Cases tab*/}
+      {/* Status handler for Test Cases tab */}
       {errors && errors.length > 0 && (
         <StatusHandler
           error={true}
@@ -167,6 +167,7 @@ const TestCaseRoutes = () => {
           testDataId="execution_context_loading_errors"
         />
       )}
+      {/* Status handler for Test Cases tab */}
       {warnings?.length > 0 && (
         <>
           <StatusHandler
@@ -176,6 +177,7 @@ const TestCaseRoutes = () => {
           />
         </>
       )}
+      {/* Status handler for Test Cases tab */}
       {importWarnings && importWarnings.length > 0 && (
         <StatusHandler importWarnings={importWarnings} />
       )}
