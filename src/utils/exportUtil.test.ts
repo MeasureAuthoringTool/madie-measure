@@ -219,6 +219,77 @@ describe("exportUtil", () => {
       );
     });
 
+    it("should handle 409 error and parse validation issues from Blob", async () => {
+      const measure = {
+        id: "1",
+        ecqmTitle: "Test Measure",
+        model: Model.QICORE,
+        version: "1.0.0",
+        cql: "",
+        cqlErrors: true,
+        errors: [],
+        groups: [],
+        measureMetaData: {
+          developers: [],
+          steward: "",
+          description: "",
+          draft: true,
+        },
+        cqlLibraryName: "invalid library name!",
+        baseConfigurationTypes: [],
+      };
+
+      const errorPayload = {
+        message:
+          "Validation failed, MISMATCH_CQL_POPULATION_RETURN_TYPES, MISMATCH_CQL_SUPPLEMENTAL_DATA",
+      };
+
+      const errorBlob = new Blob([JSON.stringify(errorPayload)], {
+        type: "application/json",
+      });
+
+      if (!errorBlob.text) {
+        errorBlob.text = async () => JSON.stringify(errorPayload);
+      }
+
+      const exportConflict = {
+        response: {
+          data: errorBlob,
+          status: 409,
+        },
+      };
+
+      mockMeasureServiceApi.getMeasureExport.mockRejectedValue(exportConflict);
+
+      await exportMeasure(
+        setFailureMessage,
+        setDownloadState,
+        abortController,
+        measure,
+        mockMeasureServiceApi,
+        setToastOpen,
+        setToastType,
+        setToastMessage,
+        elmErrorSeverity
+      );
+
+      expect(setDownloadState).toHaveBeenCalledWith("failure");
+      expect(setToastType).toHaveBeenCalledWith("danger");
+      expect(setFailureMessage).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          "Missing CQL",
+          "CQL Contains Errors",
+          "CQL Populations Return Types are invalid",
+          "CQL Supplemental Data Elements are invalid",
+          "Measure CQL Library Name is invalid",
+          "Missing Population Criteria",
+          "Missing Measure Developers",
+          "Missing Steward",
+          "Missing Description",
+        ])
+      );
+    });
+
     it("should display error message to the user when export is not available status 404", async () => {
       const errorPayload = {
         message:
@@ -242,6 +313,7 @@ describe("exportUtil", () => {
         },
       };
       mockMeasureServiceApi.getMeasureExport.mockRejectedValue(exportNotFound);
+
       await exportMeasure(
         setFailureMessage,
         setDownloadState,

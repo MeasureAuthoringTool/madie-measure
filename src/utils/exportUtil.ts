@@ -32,6 +32,17 @@ export const downloadZipFile = (
   document.body.removeChild(link);
 };
 
+const parseErrorMessageFromBlob = async (blob) => {
+  try {
+    const errorText = await blob.text(); // Parse Blob to text
+    const errorJson = JSON.parse(errorText); // Parse text to JSON
+    return errorJson?.message || null; // Return the message or null
+  } catch (e) {
+    console.error("Error parsing response:", e);
+    return null;
+  }
+};
+
 export const exportMeasure = async (
   setFailureMessage,
   setDownloadState,
@@ -46,7 +57,6 @@ export const exportMeasure = async (
   setFailureMessage(null);
   setDownloadState("downloading");
   try {
-    // we need to generate an abort controller for this call and bind it in the context of our ref
     abortController.current = new AbortController();
     const { ecqmTitle, model, version } = measure ?? {};
     const { status, data } = await measureServiceApi?.getMeasureExport(
@@ -67,13 +77,24 @@ export const exportMeasure = async (
       setDownloadState
     );
   } catch (err) {
+    let responseMessage = EXPORT_FAILURE_MESSAGE;
     const errorStatus = err.response?.status;
+
     if (err.message === "canceled") {
       setToastOpen(false);
       setDownloadState(null);
     } else {
       setToastType("danger");
       setDownloadState("failure");
+
+      // Parse blob response for any error status
+      if (err.response?.data instanceof Blob) {
+        const errorMessage = await parseErrorMessageFromBlob(err.response.data);
+        if (errorMessage) {
+          responseMessage = errorMessage;
+        }
+      }
+
       if (errorStatus === 409) {
         const {
           cql,
@@ -85,6 +106,15 @@ export const exportMeasure = async (
           model,
           baseConfigurationTypes,
         } = measure;
+        let responseErrors = [];
+        if (err.response?.data instanceof Blob) {
+          const errorMessage = await parseErrorMessageFromBlob(
+            err.response.data
+          );
+          if (errorMessage) {
+            responseErrors = errorMessage.split(", ").slice(1);
+          }
+        }
         const missing = [];
         if (_.isEmpty(cql)) {
           missing.push("Missing CQL");
@@ -92,8 +122,9 @@ export const exportMeasure = async (
         if (cqlErrors) {
           missing.push("CQL Contains Errors");
         }
-        if (!_.isEmpty(errors)) {
-          errors.forEach((error) => {
+        const errorList = responseErrors.length > 0 ? responseErrors : errors;
+        if (!_.isEmpty(errorList)) {
+          errorList.forEach((error) => {
             if (error.startsWith("MISMATCH_CQL_POPULATION_RETURN_TYPES")) {
               missing.push("CQL Populations Return Types are invalid");
             } else if (error.startsWith("MISMATCH_CQL_RISK_ADJUSTMENT")) {
@@ -156,23 +187,12 @@ export const exportMeasure = async (
           }
         }
         if (missing.length <= 0) {
-          setFailureMessage(EXPORT_FAILURE_MESSAGE);
+          setFailureMessage(responseMessage);
         } else if (missing.length > 0) {
           setFailureMessage(missing);
         }
-        // we send a custom error here. but it's type blob. we decode it here.
       } else if (errorStatus === 400 || errorStatus === 404) {
-        if (err.response?.data instanceof Blob) {
-          const errorText = await err.response.data.text();
-          try {
-            const errorJson = JSON.parse(errorText);
-            setFailureMessage(errorJson?.message);
-          } catch (jsonErr) {
-            setFailureMessage(EXPORT_FAILURE_MESSAGE);
-          }
-        } else {
-          setFailureMessage(EXPORT_FAILURE_MESSAGE);
-        }
+        setFailureMessage(responseMessage);
       } else {
         setFailureMessage(EXPORT_FAILURE_MESSAGE);
       }
