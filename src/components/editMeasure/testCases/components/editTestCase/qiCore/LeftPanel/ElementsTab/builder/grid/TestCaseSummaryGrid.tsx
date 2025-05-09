@@ -1,70 +1,152 @@
 import React from "react";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import GridItemMenu from "./GridItemMenu";
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  ColumnDef,
+} from "@tanstack/react-table";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import EditIcon from "../../../../../../../../../common/EditIcon";
+import ActionCenter, {
+  ActionItemDef,
+} from "../../../../../../../../../common/actionCenter/ActionCenter";
+import "../../../../../styles/DataElementsTable.scss";
+import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
 interface TestCaseSummaryGridProps {
-  // selectedResources: any[];
   onRowEdit: (row: any) => void;
   onRowDelete: (row: any) => void;
   bundle: any;
 }
 
 const TestCaseSummaryGrid = ({
-  // selectedResources,
   bundle,
   onRowEdit,
   onRowDelete,
 }: TestCaseSummaryGridProps) => {
-  const columns: GridColDef[] = [
-    {
-      field: "resourceType",
-      headerName: "Resource & Value Set",
-      width: 250,
-      valueGetter: (_value, row) => {
-        return row.resource.resourceType;
+  const data = React.useMemo(() => bundle?.entry ?? [], [bundle]);
+
+  const actions = React.useMemo<ActionItemDef[]>(
+    () => [
+      {
+        name: "Edit",
+        icon: <EditIcon color="#0073C8" />,
+        onClick: (targetContext: any) => onRowEdit(targetContext),
       },
-    },
-    // { field: "path", headerName: "Resource & Value Set", width: 250 },
-    {
-      field: "id",
-      headerName: "ID",
-      width: 300,
-      valueGetter: (_value, row) => row.resource.id,
-    },
-    // eslint-disable-next-line no-console
-    {
-      field: "",
-      headerName: "Actions",
-      width: 150,
-      renderCell: (params) => {
-        return (
-          <GridItemMenu
-            onRowEdit={onRowEdit}
-            onRowDelete={onRowDelete}
-            row={params.row}
+      {
+        name: "Delete",
+        icon: <DeleteOutlinedIcon sx={{ color: "#D92F2F" }} />,
+        onClick: (targetContext: any) => onRowDelete(targetContext),
+      },
+    ],
+    [onRowEdit, onRowDelete]
+  );
+
+  const columns = React.useMemo<ColumnDef<any>[]>(
+    () => [
+      {
+        header: "Resource & Value Set",
+        accessorFn: (row) => row.resource.resourceType,
+        id: "resourceType",
+      },
+      {
+        header: "ID",
+        accessorFn: (row) => row.resource.id,
+        id: "id",
+      },
+      {
+        header: "",
+        id: "actions",
+        cell: ({ row }) => (
+          <ActionCenter
+            actions={actions}
+            testId={row.id}
+            target={row.original}
           />
-        );
+        ),
+      },
+    ],
+    [actions]
+  );
+
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    initialState: {
+      columnPinning: {
+        left: ["resourceType"],
+        right: ["actions"],
       },
     },
-  ];
+  });
 
   return (
-    <DataGrid
-      rows={bundle?.entry ?? []}
-      columns={columns}
-      initialState={{
-        pagination: {
-          paginationModel: { page: 0, pageSize: 10 },
-        },
-      }}
-      getRowId={(data) => data.resource.id}
-      pageSizeOptions={[10, 20, 50]}
-      checkboxSelection
-      sx={{
-        width: "100%",
-        height: 450,
-      }}
-    />
+    <div className="table-scroll-container">
+      <table className="data-elements-table">
+        <thead>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header, idx) => (
+                <th
+                  key={header.id}
+                  colSpan={header.colSpan}
+                  style={{ position: "relative", width: header.getSize() }}
+                >
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+        <tbody>
+          {table.getRowModel().rows.map((row) => (
+            <tr key={row.id}>
+              {row.getVisibleCells().map((cell, idx) => (
+                <td key={cell.id}>
+                  {/* the arrows are for the functionality to move the rows around and that we will implement it in the future*/}
+                  {/*{idx === 0 ? (*/}
+                  {/*  <div className="first-column-with-icons">*/}
+                  {/*    <div className="icons">*/}
+                  {/*      <ArrowDropUpIcon*/}
+                  {/*        style={{*/}
+                  {/*          color: "#125496",*/}
+                  {/*          fontSize: "xxx-large",*/}
+                  {/*          margin: "-16px",*/}
+                  {/*        }}*/}
+                  {/*      />*/}
+                  {/*      <ArrowDropDownIcon*/}
+                  {/*        style={{*/}
+                  {/*          color: "#8C8C8C",*/}
+                  {/*          fontSize: "xxx-large",*/}
+                  {/*          margin: "-16px",*/}
+                  {/*        }}*/}
+                  {/*      />*/}
+                  {/*    </div>*/}
+                  {/*    <div className="cell-body">*/}
+                  {/*      {flexRender(*/}
+                  {/*        cell.column.columnDef.cell,*/}
+                  {/*        cell.getContext()*/}
+                  {/*      )}*/}
+                  {/*    </div>*/}
+                  {/*  </div>*/}
+                  {/*) : (*/}
+                  {/*  flexRender(cell.column.columnDef.cell, cell.getContext())*/}
+                  {/*)}*/}
+                  <div>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </div>
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
 
