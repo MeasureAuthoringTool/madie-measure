@@ -109,6 +109,7 @@ const props: MeasureGroupProps = {
   setMeasureGroupNumber: jest.fn,
   setIsFormDirty: jest.fn,
   measureId: "testMeasureId",
+  setAlertMessage: jest.fn,
 };
 
 describe("Measure Groups Page", () => {
@@ -269,18 +270,13 @@ describe("Measure Groups Page", () => {
   test("On change of group scoring the field definitions are cleared", async () => {
     group.id = "";
     measure.groups = [group];
-    measure.cqlErrors = true;
+
     await waitFor(() => renderMeasureGroupComponent());
     // verifies if the scoring value is population from group object
     const scoringSelectInput = screen.getByTestId(
       "scoring-select-input"
     ) as HTMLInputElement;
     expect(scoringSelectInput.value).toBe(group.scoring);
-
-    const cqlHasErrorsMessage = screen.getByTestId(
-      "error-alerts"
-    ) as HTMLInputElement;
-    expect(cqlHasErrorsMessage).toBeInTheDocument();
 
     // verifies if the population has a selected option from group object
     const groupPopulationInput = screen.getByTestId(
@@ -514,33 +510,6 @@ describe("Measure Groups Page", () => {
     expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
   });
 
-  test("should display error for CQL return type mismatch on load", async () => {
-    group.id = "7p03-5r29-7O0I";
-    group.groupDescription = "Description Text";
-    group.rateAggregation = "Rate Aggregation Text";
-    group.improvementNotation = "Increased score indicates improvement";
-    measure.groups = [group];
-    measure.errors = [MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES];
-    renderMeasureGroupComponent();
-
-    expect(await screen.findByTestId("populations-tab")).toBeInTheDocument();
-
-    expect(
-      screen.getByTestId("measure-group-type-dropdown")
-    ).toBeInTheDocument();
-    expect(screen.getByTestId("title").textContent).toBe(
-      "Population Criteria 1"
-    );
-
-    userEvent.click(screen.getByTestId("reporting-tab"));
-
-    expect(
-      await screen.findByText(
-        "One or more Population Criteria has a mismatch with CQL return types. Test Cases cannot be executed until this is resolved."
-      )
-    ).toBeInTheDocument();
-  });
-
   test("Should be able to save multiple groups  ", async () => {
     const populationBasis = "Encounter";
     const { rerender } = renderMeasureGroupComponent();
@@ -633,6 +602,7 @@ describe("Measure Groups Page", () => {
                   setIsFormDirty={jest.fn}
                   measureGroupNumber={1}
                   setMeasureGroupNumber={jest.fn}
+                  setAlertMessage={jest.fn}
                 />
               }
             ></Route>
@@ -1097,7 +1067,7 @@ describe("Measure Groups Page", () => {
     expect(await screen.getByTestId("group-form-discard-btn")).toBeDisabled();
   });
 
-  test("Should report an error if server fails to create population Group", async () => {
+  test("Should not display a success toast if server fails to create population Group", async () => {
     renderMeasureGroupComponent();
     await changePopulationBasis("Encounter");
     // select a scoring
@@ -1145,11 +1115,10 @@ describe("Measure Groups Page", () => {
 
     // submit the form
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
-    const alert = await screen.findByTestId("error-alerts");
-    expect(alert).toHaveTextContent("Failed to create the group.");
+    expect(screen.queryByTestId("population-criteria-success")).toBeNull();
   });
 
-  test("Should report an error if the update population Group fails", async () => {
+  test("Should not display a success toast if the update population Group fails", async () => {
     group.id = "7p03-5r29-7O0I";
     group.measureGroupTypes = [MeasureGroupTypes.PROCESS];
     group.populationBasis = "MedicationAdministration";
@@ -1188,12 +1157,10 @@ describe("Measure Groups Page", () => {
 
     // submit the form
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
-    const alert = await screen.findByTestId("error-alerts");
-    expect(alert).toBeInTheDocument();
-    expect(alert).toHaveTextContent("Failed to update the group.");
+    expect(screen.queryByTestId("population-criteria-success")).toBeNull();
   });
 
-  test("Should report an error if the update population Group fails due to group validation error", async () => {
+  test("Should not display a success toast if the update population Group fails due to group validation error", async () => {
     group.id = "7p03-5r29-7O0I";
     group.measureGroupTypes = [MeasureGroupTypes.PROCESS];
     group.populationBasis = "MedicationAdministration";
@@ -1238,10 +1205,7 @@ describe("Measure Groups Page", () => {
 
     // submit the form
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
-    const alert = await screen.findByTestId("error-alerts");
-    expect(alert).toHaveTextContent(
-      "Missing required populations for selected scoring type."
-    );
+    expect(screen.queryByTestId("population-criteria-success")).toBeNull();
   });
 
   test("Form displays message next to save button about required populations", async () => {
@@ -1478,7 +1442,7 @@ describe("Measure Groups Page", () => {
     expect(scoringUnitLabel).toBeInTheDocument();
   });
 
-  test("Should display error message when updating group", async () => {
+  test("Should not display a success toast when updating group and response returns back no group", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "testDescription";
     group.populationBasis = "Encounter";
@@ -1512,12 +1476,10 @@ describe("Measure Groups Page", () => {
     await act(async () => {
       userEvent.click(screen.getByTestId("group-form-submit-btn"));
     });
-    await waitFor(() =>
-      expect(screen.getByText("Error updating group")).toBeInTheDocument()
-    );
+    expect(screen.queryByTestId("population-criteria-success")).toBeNull();
   });
 
-  test("Should display error message when adding group", async () => {
+  test("Should not display a success toast when adding group and response returns back no group", async () => {
     measure.groups = [];
     renderMeasureGroupComponent();
     await changePopulationBasis("Encounter");
@@ -1563,11 +1525,7 @@ describe("Measure Groups Page", () => {
     await act(async () => {
       userEvent.click(screen.getByTestId("group-form-submit-btn"));
     });
-    await waitFor(() =>
-      expect(
-        screen.getByText("Failed to create the group.")
-      ).toBeInTheDocument()
-    );
+    expect(screen.queryByTestId("population-criteria-success")).toBeNull();
   });
 
   test("Add/remove second IP for ratio group", async () => {
