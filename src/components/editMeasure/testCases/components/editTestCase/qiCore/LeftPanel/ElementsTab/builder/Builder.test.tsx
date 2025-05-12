@@ -191,6 +191,6 @@ describe("Builder Component", () => {
 
     userEvent.click(addedTab);
     expect(addedTab).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByText("Resources")).toBeInTheDocument();
+    expect(screen.getByText("Resource & Value Set")).toBeInTheDocument();
   });
 });
