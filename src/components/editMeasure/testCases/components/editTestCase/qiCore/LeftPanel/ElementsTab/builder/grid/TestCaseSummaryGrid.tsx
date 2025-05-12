@@ -11,8 +11,11 @@ import ActionCenter, {
   ActionItemDef,
 } from "../../../../../../../../../common/actionCenter/ActionCenter";
 import "../../../../../styles/DataElementsTable.scss";
-import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import {
+  getLastPart,
+  getIndexFromPathWithoutBrackets,
+  stripArrayIndices,
+} from "../../../../../../../api/fhirDefinitionServiceUtilities";
 
 interface TestCaseSummaryGridProps {
   onRowEdit: (row: any) => void;
@@ -20,12 +23,111 @@ interface TestCaseSummaryGridProps {
   bundle: any;
 }
 
+interface GenerateAttributeHTMLProps {
+  value: any;
+  keyPrefix?: string;
+  root?: boolean;
+}
+
+const GenerateAttributeHTML: React.FC<GenerateAttributeHTMLProps> = ({
+  value,
+  keyPrefix = "",
+}) => {
+  let lastPart = stripArrayIndices(getLastPart(keyPrefix));
+  const index = getIndexFromPathWithoutBrackets(getLastPart(keyPrefix));
+  if (index !== undefined && index !== null) {
+    lastPart = `${lastPart} ${Number(index) + 1}`;
+  }
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
+    return (
+      <div key={keyPrefix} style={{ marginLeft: "20px" }}>
+        <b>{lastPart}:</b> {value.toString()}
+      </div>
+    );
+    // It's an array
+  } else if (Array.isArray(value)) {
+    return (
+      <div key={keyPrefix} style={{ marginLeft: "20px" }}>
+        {/* this must know how the number of elements at the key */}
+        <b>{lastPart}:</b>
+        {value.map((item, index) => (
+          <GenerateAttributeHTML
+            key={`${keyPrefix}[${index}]`}
+            value={item}
+            keyPrefix={`${keyPrefix}[${index}]`}
+          />
+        ))}
+      </div>
+    );
+  } else if (typeof value === "object" && value !== null) {
+    const entries = Object.entries(value);
+    return (
+      <div key={keyPrefix} style={{ marginLeft: "20px", lineClamp: 3 }}>
+        <b>{lastPart}:</b>
+        {entries.map(([childKey, childValue]) => (
+          <GenerateAttributeHTML
+            key={keyPrefix ? `${keyPrefix}.${childKey}` : childKey}
+            value={childValue}
+            keyPrefix={keyPrefix ? `${keyPrefix}.${childKey}` : childKey}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  return null;
+};
+
 const TestCaseSummaryGrid = ({
   bundle,
   onRowEdit,
   onRowDelete,
 }: TestCaseSummaryGridProps) => {
-  const data = bundle?.entry ?? [];
+  const data = React.useMemo(() => bundle?.entry ?? [], [bundle]);
+  const maxAttributes = Math.max(
+    ...data.map(
+      (entry) =>
+        Object.keys(entry.resource || {}).filter(
+          (attr) => attr !== "resourceType" && attr !== "id"
+        ).length
+    )
+  );
+
+  const attributeColumns: ColumnDef<any>[] = Array.from(
+    { length: maxAttributes },
+    (_, index) => ({
+      header: `Attribute ${index + 1}`,
+      accessorFn: (row) => {
+        const attributes = Object.keys(row.resource || {}).filter(
+          (key) => key !== "resourceType" && key !== "id"
+        );
+        const attributeKey = attributes[index];
+        const value = row.resource[attributeKey];
+        return { attributeKey, value };
+      },
+      cell: (params) => {
+        //@ts-ignore
+        const { value, attributeKey } = params.getValue();
+        return value ? (
+          <td>
+            <GenerateAttributeHTML
+              value={value}
+              keyPrefix={attributeKey}
+              root={true}
+            />
+          </td>
+        ) : (
+          <td>
+            <div>-</div>
+          </td>
+        );
+      },
+    })
+  );
 
   const actions = React.useMemo<ActionItemDef[]>(
     () => [
@@ -55,6 +157,7 @@ const TestCaseSummaryGrid = ({
         accessorFn: (row) => row.resource.id,
         id: "id",
       },
+      ...attributeColumns,
       {
         header: "",
         id: "actions",
@@ -67,19 +170,13 @@ const TestCaseSummaryGrid = ({
         ),
       },
     ],
-    [actions]
+    [actions, attributeColumns]
   );
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    initialState: {
-      columnPinning: {
-        left: ["resourceType"],
-        right: ["actions"],
-      },
-    },
   });
 
   return (
@@ -106,40 +203,9 @@ const TestCaseSummaryGrid = ({
         <tbody>
           {table.getRowModel().rows.map((row) => (
             <tr key={row.id}>
-              {row.getVisibleCells().map((cell, idx) => (
+              {row.getVisibleCells().map((cell) => (
                 <td key={cell.id}>
-                  {/* the arrows are for the functionality to move the rows around and that we will implement it in the future*/}
-                  {/*{idx === 0 ? (*/}
-                  {/*  <div className="first-column-with-icons">*/}
-                  {/*    <div className="icons">*/}
-                  {/*      <ArrowDropUpIcon*/}
-                  {/*        style={{*/}
-                  {/*          color: "#125496",*/}
-                  {/*          fontSize: "xxx-large",*/}
-                  {/*          margin: "-16px",*/}
-                  {/*        }}*/}
-                  {/*      />*/}
-                  {/*      <ArrowDropDownIcon*/}
-                  {/*        style={{*/}
-                  {/*          color: "#8C8C8C",*/}
-                  {/*          fontSize: "xxx-large",*/}
-                  {/*          margin: "-16px",*/}
-                  {/*        }}*/}
-                  {/*      />*/}
-                  {/*    </div>*/}
-                  {/*    <div className="cell-body">*/}
-                  {/*      {flexRender(*/}
-                  {/*        cell.column.columnDef.cell,*/}
-                  {/*        cell.getContext()*/}
-                  {/*      )}*/}
-                  {/*    </div>*/}
-                  {/*  </div>*/}
-                  {/*) : (*/}
-                  {/*  flexRender(cell.column.columnDef.cell, cell.getContext())*/}
-                  {/*)}*/}
-                  <div>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </div>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
             </tr>
