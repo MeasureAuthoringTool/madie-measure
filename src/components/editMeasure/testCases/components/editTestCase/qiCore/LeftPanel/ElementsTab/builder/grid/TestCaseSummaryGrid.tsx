@@ -25,7 +25,7 @@ const TestCaseSummaryGrid = ({
   onRowEdit,
   onRowDelete,
 }: TestCaseSummaryGridProps) => {
-  const data = React.useMemo(() => bundle?.entry ?? [], [bundle]);
+  const data = bundle?.entry ?? [];
 
   const actions = React.useMemo<ActionItemDef[]>(
     () => [
@@ -37,7 +37,9 @@ const TestCaseSummaryGrid = ({
       {
         name: "Delete",
         icon: <DeleteOutlinedIcon sx={{ color: "#D92F2F" }} />,
-        onClick: (targetContext: any) => onRowDelete(targetContext),
+        onClick: (targetContext: any) => {
+          onRowDelete(targetContext);
+        },
       },
     ],
     [onRowEdit, onRowDelete]
