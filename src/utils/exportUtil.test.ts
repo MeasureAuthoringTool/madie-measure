@@ -3,6 +3,7 @@ import {
   downloadZipFile,
   EXPORT_FAILURE_MESSAGE,
   exportMeasure,
+  parseErrorMessageFromBlob,
 } from "./exportUtil";
 import { Model } from "@madie/madie-models";
 
@@ -241,7 +242,7 @@ describe("exportUtil", () => {
 
       const errorPayload = {
         message:
-          "Validation failed, MISMATCH_CQL_POPULATION_RETURN_TYPES, MISMATCH_CQL_SUPPLEMENTAL_DATA",
+          "Validation failed, MISMATCH_CQL_POPULATION_RETURN_TYPES, MISMATCH_CQL_RISK_ADJUSTMENT, MISMATCH_CQL_SUPPLEMENTAL_DATA",
       };
 
       const errorBlob = new Blob([JSON.stringify(errorPayload)], {
@@ -280,6 +281,7 @@ describe("exportUtil", () => {
           "Missing CQL",
           "CQL Contains Errors",
           "CQL Populations Return Types are invalid",
+          "CQL Risk Adjustment are invalid",
           "CQL Supplemental Data Elements are invalid",
           "Measure CQL Library Name is invalid",
           "Missing Population Criteria",
@@ -337,5 +339,28 @@ describe("exportUtil", () => {
         'Measure cannot be exported for publishing because it was versioned prior to MADiE version 2.2.0. Please use a newer version or select "Export" for this measure.'
       );
     });
+  });
+  it("should return null and log error when parsing fails", async () => {
+    // Mock console.error
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    // Create a Blob that will throw an error when parsed
+    const invalidBlob = new Blob(["not valid json"], { type: "text/plain" });
+
+    const result = await parseErrorMessageFromBlob(invalidBlob);
+
+    // Verify null is returned
+    expect(result).toBeNull();
+
+    // Verify error was logged
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Error parsing response:",
+      expect.any(Error)
+    );
+
+    // Clean up
+    consoleErrorSpy.mockRestore();
   });
 });

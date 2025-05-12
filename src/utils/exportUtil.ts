@@ -32,7 +32,7 @@ export const downloadZipFile = (
   document.body.removeChild(link);
 };
 
-const parseErrorMessageFromBlob = async (blob) => {
+export const parseErrorMessageFromBlob = async (blob) => {
   try {
     const errorText = await blob.text(); // Parse Blob to text
     const errorJson = JSON.parse(errorText); // Parse text to JSON
