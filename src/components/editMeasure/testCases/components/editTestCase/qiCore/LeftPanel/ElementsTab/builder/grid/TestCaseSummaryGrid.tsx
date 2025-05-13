@@ -11,11 +11,8 @@ import ActionCenter, {
   ActionItemDef,
 } from "../../../../../../../../../common/actionCenter/ActionCenter";
 import "../../../../../styles/DataElementsTable.scss";
-import {
-  getLastPart,
-  getIndexFromPathWithoutBrackets,
-  stripArrayIndices,
-} from "../../../../../../../api/fhirDefinitionServiceUtilities";
+import GenerateAttributeHTML from "./GenerateAttributeHTML";
+import { getAttributes, getMaxAttributes } from "./TestCaseSummaryGridUtils";
 
 interface TestCaseSummaryGridProps {
   onRowEdit: (row: any) => void;
@@ -23,98 +20,19 @@ interface TestCaseSummaryGridProps {
   bundle: any;
 }
 
-interface GenerateAttributeHTMLProps {
-  value: any;
-  keyPrefix?: string;
-  root?: boolean;
-}
-
-const GenerateAttributeHTML: React.FC<GenerateAttributeHTMLProps> = ({
-  value,
-  keyPrefix = "",
-}) => {
-  let lastPart = stripArrayIndices(getLastPart(keyPrefix));
-  const index = getIndexFromPathWithoutBrackets(getLastPart(keyPrefix));
-  if (index !== undefined && index !== null) {
-    lastPart = `${lastPart} ${Number(index) + 1}`;
-  }
-  if (
-    typeof value === "string" ||
-    typeof value === "number" ||
-    typeof value === "boolean"
-  ) {
-    return (
-      <div key={keyPrefix} className="recursive-attribute-container">
-        <b>{lastPart}:</b> {value.toString()}
-      </div>
-    );
-    // It's an array
-  } else if (Array.isArray(value)) {
-    return (
-      <div key={keyPrefix} className="recursive-attribute-container">
-        {/* this must know how the number of elements at the key */}
-        <b>{lastPart}:</b>
-        {value.map((item, index) => (
-          <GenerateAttributeHTML
-            key={`${keyPrefix}[${index}]`}
-            value={item}
-            keyPrefix={`${keyPrefix}[${index}]`}
-          />
-        ))}
-      </div>
-    );
-  } else if (typeof value === "object" && value !== null) {
-    const entries = Object.entries(value);
-    return (
-      <div key={keyPrefix} className="recursive-attribute-container">
-        <b>{lastPart}:</b>
-        {entries.map(([childKey, childValue]) => (
-          <GenerateAttributeHTML
-            key={keyPrefix ? `${keyPrefix}.${childKey}` : childKey}
-            value={childValue}
-            keyPrefix={keyPrefix ? `${keyPrefix}.${childKey}` : childKey}
-          />
-        ))}
-      </div>
-    );
-  }
-
-  return null;
-};
-
 const TestCaseSummaryGrid = ({
   bundle,
   onRowEdit,
   onRowDelete,
 }: TestCaseSummaryGridProps) => {
   const data = React.useMemo(() => bundle?.entry ?? [], [bundle]);
-  const maxAttributes = Math.max(
-    ...data.map(
-      (entry) =>
-        Object.entries(entry.resource || {}).filter(
-          ([key, value]) =>
-            key !== "resourceType" &&
-            key !== "id" &&
-            value != null &&
-            value !== ""
-        ).length
-    )
-  );
-
+  const maxAttributes = getMaxAttributes(data);
   const attributeColumns: ColumnDef<any>[] = Array.from(
     { length: maxAttributes },
     (_, index) => ({
       header: `Attribute ${index + 1}`,
       accessorFn: (row) => {
-        const attributes = Object.entries(row.resource || {})
-          .filter(
-            ([key, value]) =>
-              key !== "resourceType" &&
-              key !== "id" &&
-              value != null &&
-              value !== ""
-          )
-          .map(([key]) => key);
+        const attributes = getAttributes(row);
         const attributeKey = attributes[index];
         const value = row.resource[attributeKey];
         return { attributeKey, value };
