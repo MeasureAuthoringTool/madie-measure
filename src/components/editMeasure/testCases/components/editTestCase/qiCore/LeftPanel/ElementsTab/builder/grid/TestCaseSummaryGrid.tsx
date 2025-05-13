@@ -43,16 +43,16 @@ const GenerateAttributeHTML: React.FC<GenerateAttributeHTMLProps> = ({
     typeof value === "number" ||
     typeof value === "boolean"
   ) {
+    // Base case, just printing whatever it is.
     return (
-      <div key={keyPrefix} style={{ marginLeft: "20px" }}>
+      <div key={keyPrefix} className="recursive-attribute-container">
         <b>{lastPart}:</b> {value.toString()}
       </div>
     );
     // It's an array
   } else if (Array.isArray(value)) {
     return (
-      <div key={keyPrefix} style={{ marginLeft: "20px" }}>
-        {/* this must know how the number of elements at the key */}
+      <div key={keyPrefix} className="recursive-attribute-container">
         <b>{lastPart}:</b>
         {value.map((item, index) => (
           <GenerateAttributeHTML
@@ -63,10 +63,11 @@ const GenerateAttributeHTML: React.FC<GenerateAttributeHTMLProps> = ({
         ))}
       </div>
     );
+    // It's an object with it's own properties that we need to recurse over
   } else if (typeof value === "object" && value !== null) {
     const entries = Object.entries(value);
     return (
-      <div key={keyPrefix} style={{ marginLeft: "20px", lineClamp: 3 }}>
+      <div key={keyPrefix} className="recursive-attribute-container">
         <b>{lastPart}:</b>
         {entries.map(([childKey, childValue]) => (
           <GenerateAttributeHTML
@@ -113,17 +114,13 @@ const TestCaseSummaryGrid = ({
         //@ts-ignore
         const { value, attributeKey } = params.getValue();
         return value ? (
-          <td>
-            <GenerateAttributeHTML
-              value={value}
-              keyPrefix={attributeKey}
-              root={true}
-            />
-          </td>
+          <GenerateAttributeHTML
+            value={value}
+            keyPrefix={attributeKey}
+            root={true}
+          />
         ) : (
-          <td>
-            <div>-</div>
-          </td>
+          <div>-</div>
         );
       },
     })
@@ -151,11 +148,17 @@ const TestCaseSummaryGrid = ({
         header: "Resource & Value Set",
         accessorFn: (row) => row.resource.resourceType,
         id: "resourceType",
+        cell: ({ row }) => {
+          return <div>{row.original.resource.resourceType}</div>;
+        },
       },
       {
         header: "ID",
         accessorFn: (row) => row.resource.id,
         id: "id",
+        cell: ({ row }) => {
+          return <div>{row.original.resource.id}</div>;
+        },
       },
       ...attributeColumns,
       {
