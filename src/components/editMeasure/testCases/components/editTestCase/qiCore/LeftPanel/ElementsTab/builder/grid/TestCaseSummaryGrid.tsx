@@ -92,8 +92,12 @@ const TestCaseSummaryGrid = ({
   const maxAttributes = Math.max(
     ...data.map(
       (entry) =>
-        Object.keys(entry.resource || {}).filter(
-          (attr) => attr !== "resourceType" && attr !== "id"
+        Object.entries(entry.resource || {}).filter(
+          ([key, value]) =>
+            key !== "resourceType" &&
+            key !== "id" &&
+            value != null &&
+            value !== ""
         ).length
     )
   );
