@@ -43,7 +43,6 @@ const GenerateAttributeHTML: React.FC<GenerateAttributeHTMLProps> = ({
     typeof value === "number" ||
     typeof value === "boolean"
   ) {
-    // Base case, just printing whatever it is.
     return (
       <div key={keyPrefix} className="recursive-attribute-container">
         <b>{lastPart}:</b> {value.toString()}
@@ -53,6 +52,7 @@ const GenerateAttributeHTML: React.FC<GenerateAttributeHTMLProps> = ({
   } else if (Array.isArray(value)) {
     return (
       <div key={keyPrefix} className="recursive-attribute-container">
+        {/* this must know how the number of elements at the key */}
         <b>{lastPart}:</b>
         {value.map((item, index) => (
           <GenerateAttributeHTML
@@ -63,7 +63,6 @@ const GenerateAttributeHTML: React.FC<GenerateAttributeHTMLProps> = ({
         ))}
       </div>
     );
-    // It's an object with it's own properties that we need to recurse over
   } else if (typeof value === "object" && value !== null) {
     const entries = Object.entries(value);
     return (
@@ -107,9 +106,15 @@ const TestCaseSummaryGrid = ({
     (_, index) => ({
       header: `Attribute ${index + 1}`,
       accessorFn: (row) => {
-        const attributes = Object.keys(row.resource || {}).filter(
-          (key) => key !== "resourceType" && key !== "id"
-        );
+        const attributes = Object.entries(row.resource || {})
+          .filter(
+            ([key, value]) =>
+              key !== "resourceType" &&
+              key !== "id" &&
+              value != null &&
+              value !== ""
+          )
+          .map(([key]) => key);
         const attributeKey = attributes[index];
         const value = row.resource[attributeKey];
         return { attributeKey, value };
@@ -118,11 +123,7 @@ const TestCaseSummaryGrid = ({
         //@ts-ignore
         const { value, attributeKey } = params.getValue();
         return value ? (
-          <GenerateAttributeHTML
-            value={value}
-            keyPrefix={attributeKey}
-            root={true}
-          />
+          <GenerateAttributeHTML value={value} keyPrefix={attributeKey} />
         ) : (
           <div>-</div>
         );
@@ -152,17 +153,13 @@ const TestCaseSummaryGrid = ({
         header: "Resource & Value Set",
         accessorFn: (row) => row.resource.resourceType,
         id: "resourceType",
-        cell: ({ row }) => {
-          return <div>{row.original.resource.resourceType}</div>;
-        },
+        cell: ({ row }) => <div>{row.original.resource.resourceType}</div>,
       },
       {
         header: "ID",
         accessorFn: (row) => row.resource.id,
         id: "id",
-        cell: ({ row }) => {
-          return <div>{row.original.resource.id}</div>;
-        },
+        cell: ({ row }) => <div>{row.original.resource.id}</div>,
       },
       ...attributeColumns,
       {
