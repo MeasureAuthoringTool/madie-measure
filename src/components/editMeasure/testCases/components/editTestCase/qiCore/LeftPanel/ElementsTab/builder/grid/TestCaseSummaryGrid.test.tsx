@@ -11,6 +11,9 @@ describe("TestCaseSummaryGrid", () => {
         resource: {
           resourceType: "Encounter",
           id: "ec-1",
+          meta: {
+            profile: ["www.wwww.www.com"],
+          },
         },
       },
       {
