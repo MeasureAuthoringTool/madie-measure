@@ -12,7 +12,14 @@ describe("TestCaseSummaryGrid", () => {
           resourceType: "Encounter",
           id: "ec-1",
           meta: {
-            profile: ["www.wwww.www.com"],
+            profile: ["www.wwww.www.com"], // Partially covered case
+            extensions: {
+              nested: {
+                deeper: {
+                  key: "value",
+                },
+              },
+            },
           },
         },
       },
