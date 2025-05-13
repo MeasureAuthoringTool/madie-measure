@@ -66,4 +66,19 @@ describe("GenerateAttributeHTML", () => {
     render(<GenerateAttributeHTML value={() => {}} keyPrefix="function" />);
     expect(container.firstChild).toBeNull();
   });
+
+  it("handles empty prefixes correctly", () => {
+    const emptyPrefixData = {
+      level1: {
+        level2: {
+          level3: "deep",
+        },
+      },
+    };
+    render(<GenerateAttributeHTML value={emptyPrefixData} keyPrefix="" />);
+    expect(screen.getByText("level1:")).toBeInTheDocument();
+    expect(screen.getByText("level2:")).toBeInTheDocument();
+    expect(screen.getByText("level3:")).toBeInTheDocument();
+    expect(screen.getByText("deep")).toBeInTheDocument();
+  });
 });

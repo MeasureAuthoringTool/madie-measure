@@ -51,13 +51,16 @@ const GenerateAttributeHTML: React.FC<GenerateAttributeHTMLProps> = ({
     return (
       <div key={keyPrefix} className="recursive-attribute-container">
         <b>{lastPart}:</b>
-        {entries.map(([childKey, childValue]) => (
-          <GenerateAttributeHTML
-            key={keyPrefix ? `${keyPrefix}.${childKey}` : childKey}
-            value={childValue}
-            keyPrefix={keyPrefix ? `${keyPrefix}.${childKey}` : childKey}
-          />
-        ))}
+        {entries.map(([childKey, childValue]) => {
+          const key = keyPrefix ? `${keyPrefix}.${childKey}` : childKey;
+          return (
+            <GenerateAttributeHTML
+              key={key}
+              value={childValue}
+              keyPrefix={key}
+            />
+          );
+        })}
       </div>
     );
   }
