@@ -7,6 +7,7 @@ import {
   GroupPopulation,
   PopulationType,
   SupplementalData,
+  Group,
 } from "@madie/madie-models";
 import { Select } from "@madie/madie-design-system/dist/react";
 import GroupCoverageNav, {
@@ -24,6 +25,7 @@ import {
   isPopulation,
 } from "../../../util/GroupCoverageHelpers";
 import "./QiCoreGroupCoverage.scss";
+import { findMeasureGroupPopulationDisplayId } from "../../../api/CalculationService";
 
 export interface CqlDefinitionCallstack {
   [key: string]: Array<CqlDefinitionExpression>;
@@ -36,6 +38,7 @@ interface Props {
   mainCqlLibraryName: string;
   includeSDE: boolean;
   supplementalData: SupplementalData[];
+  groups: Group[];
 }
 
 interface Statement {
@@ -68,6 +71,7 @@ const QiCoreGroupCoverage = ({
   mainCqlLibraryName,
   includeSDE,
   supplementalData,
+  groups,
 }: Props) => {
   // selected group/criteria
   const [selectedCriteria, setSelectedCriteria] = useState<string>("");
@@ -139,19 +143,35 @@ const QiCoreGroupCoverage = ({
 
   const changeCriteria = (criteriaId: string) => {
     setSelectedCriteria(criteriaId);
-    const populationResults = getPopulationResults(criteriaId);
+    const displayId = getGroupDisplayId(criteriaId);
+    const populationResults = getPopulationResults(displayId);
     setPopulationResults(populationResults);
     const group = groupPopulations.find((gp) => gp.groupId === criteriaId);
     setSelectedHighlightingTab(getFirstPopulation(group));
   };
 
+  const getGroupDisplayId = (criteriaId: string) => {
+    const group = groups?.find((gp) => gp.id === criteriaId);
+    return group?.displayId;
+  };
+
   const changePopulation = (population: Population) => {
     setSelectedHighlightingTab(population);
     setSelectedAllDefinitions(undefined);
+    const populationDisplayId = getGroupPopulationDisplayId(population.id);
     const result =
       populationResults &&
-      populationResults.find((result) => result.id === population.id);
+      populationResults.find((result) => result.id === populationDisplayId);
     setSelectedPopulationDefinitionResults(result);
+  };
+
+  const getGroupPopulationDisplayId = (populationId: string) => {
+    const group = groups?.find(
+      (gp) =>
+        gp.id ===
+        (selectedCriteria ? selectedCriteria : groupPopulations[0].groupId)
+    );
+    return findMeasureGroupPopulationDisplayId(group, populationId);
   };
 
   const getCriteriaLabel = (index) => {
@@ -179,7 +199,9 @@ const QiCoreGroupCoverage = ({
 
     if (mappedCalculationResults) {
       const statementResults =
-        mappedCalculationResults[selectedCriteria]["statementResults"];
+        mappedCalculationResults[getGroupDisplayId(selectedCriteria)][
+          "statementResults"
+        ];
       let filteredDefinitions;
 
       if (population.name === "Functions") {
@@ -236,7 +258,9 @@ const QiCoreGroupCoverage = ({
     setSelectedHighlightingTab(population);
     if (mappedCalculationResults) {
       const statementResults =
-        mappedCalculationResults[selectedCriteria]["statementResults"];
+        mappedCalculationResults[getGroupDisplayId(selectedCriteria)][
+          "statementResults"
+        ];
       const filteredSDEDefinitions = supplementalData?.reduce((acc, item) => {
         if (statementResults[item?.definition]) {
           acc[item?.definition] = statementResults[item?.definition];
@@ -263,15 +287,22 @@ const QiCoreGroupCoverage = ({
     let text = "";
     cqlDefinitionCallstack[selectedDefinition.name]?.forEach(
       (calledDefinition) => {
+        const groupDisplayId = getGroupDisplayId(selectedCriteria);
+        let mappedCalculationResultsByGroup =
+          mappedCalculationResults[groupDisplayId];
+        if (!mappedCalculationResultsByGroup) {
+          mappedCalculationResultsByGroup =
+            mappedCalculationResults[selectedCriteria];
+        }
         // Get Highlighted HTML from execution results
         text +=
-          mappedCalculationResults[selectedCriteria]["statementResults"][
+          mappedCalculationResultsByGroup["statementResults"][
             getCalledDefinitionName(calledDefinition)
           ]?.statementLevelHTML;
         // Get the callstack for each definition called by the parent statement
         getCallstack(calledDefinition.id).forEach((name) => {
           text +=
-            mappedCalculationResults[selectedCriteria]["statementResults"][name]
+            mappedCalculationResultsByGroup["statementResults"][name]
               ?.statementLevelHTML;
         });
       }

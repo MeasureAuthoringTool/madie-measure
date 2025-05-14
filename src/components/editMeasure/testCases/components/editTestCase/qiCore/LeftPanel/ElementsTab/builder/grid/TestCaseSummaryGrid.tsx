@@ -25,7 +25,7 @@ const TestCaseSummaryGrid = ({
   onRowEdit,
   onRowDelete,
 }: TestCaseSummaryGridProps) => {
-  const data = React.useMemo(() => bundle?.entry ?? [], [bundle]);
+  const data = bundle?.entry ?? [];
 
   const actions = React.useMemo<ActionItemDef[]>(
     () => [
