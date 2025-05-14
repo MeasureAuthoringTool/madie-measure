@@ -24,6 +24,7 @@ declare module "@madie/madie-util" {
     MeasureSearch: boolean;
     QICoreManifestExpansion: boolean;
     OverlappingValueSets: boolean;
+    EditTestsOnVersionedMeasures: boolean;
   }
 
   export interface ServiceConfig {
@@ -91,7 +92,8 @@ declare module "@madie/madie-util" {
   export function checkUserCanEdit(
     createdBy: string,
     acls: Array<Acl>,
-    draft?: boolean
+    draft?: boolean,
+    EditTestsOnVersionedMeasures?: boolean //this is a feature flag
   ): boolean;
 
   export function checkUserCanDelete(

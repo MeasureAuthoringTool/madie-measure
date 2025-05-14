@@ -231,7 +231,8 @@ const TestCaseList = (props: TestCaseListProps) => {
       checkUserCanEdit(
         measure?.measureSet?.owner,
         measure?.measureSet?.acls,
-        measure?.measureMetaData?.draft
+        measure?.measureMetaData?.draft,
+        featureFlags?.EditTestsOnVersionedMeasures
       )
     );
   }, [measure]);
