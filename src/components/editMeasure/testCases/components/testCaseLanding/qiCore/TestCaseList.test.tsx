@@ -2199,7 +2199,24 @@ describe("retrieve coverage value from HTML coverage", () => {
     const coverageHtml: Record<string, string> = {
       a345sda45: `<div><h2> a345sda45 Clause Coverage: 50.0%</h2></div>`,
     };
-    const coverageValue = getCoverageValueFromHtml(coverageHtml, "a345sda45");
+    const coverageValue = getCoverageValueFromHtml(
+      coverageHtml,
+      "a345sda45",
+      "displayId"
+    );
+    expect(coverageValue).toEqual(expect.any(Number));
+    expect(coverageValue).toEqual(50);
+  });
+
+  it("should retrieve by display id", () => {
+    const coverageHtml: Record<string, string> = {
+      Group_1: `<div><h2> Group_1 Clause Coverage: 50.0%</h2></div>`,
+    };
+    const coverageValue = getCoverageValueFromHtml(
+      coverageHtml,
+      "a345sda45",
+      "Group_1"
+    );
     expect(coverageValue).toEqual(expect.any(Number));
     expect(coverageValue).toEqual(50);
   });
@@ -2208,7 +2225,11 @@ describe("retrieve coverage value from HTML coverage", () => {
     const coverageHtml: Record<string, string> = {
       a345sda45: `<div><h2> a345sda45 Clause Coverage: 100%</h2></div>`,
     };
-    const coverageValue = getCoverageValueFromHtml(coverageHtml, "a345sda45");
+    const coverageValue = getCoverageValueFromHtml(
+      coverageHtml,
+      "a345sda45",
+      "displayId"
+    );
     expect(coverageValue).toEqual(100);
   });
 
@@ -2216,7 +2237,11 @@ describe("retrieve coverage value from HTML coverage", () => {
     const coverageHtml: Record<string, string> = {
       a345sda45: `<div><h2> a345sda45 Clause Coverage: NaN%</h2></div>`,
     };
-    const coverageValue = getCoverageValueFromHtml(coverageHtml, "a345sda45");
+    const coverageValue = getCoverageValueFromHtml(
+      coverageHtml,
+      "a345sda45",
+      "displayId"
+    );
     expect(coverageValue).toEqual(0);
   });
 
@@ -2224,7 +2249,11 @@ describe("retrieve coverage value from HTML coverage", () => {
     const coverageHtml: Record<string, string> = {
       a345sda45: `<div><h2> a345sda45 Clause Coverage: %</h2></div>`,
     };
-    const coverageValue = getCoverageValueFromHtml(coverageHtml, "a345sda45");
+    const coverageValue = getCoverageValueFromHtml(
+      coverageHtml,
+      "a345sda45",
+      "displayId"
+    );
     expect(coverageValue).toEqual(0);
   });
 });

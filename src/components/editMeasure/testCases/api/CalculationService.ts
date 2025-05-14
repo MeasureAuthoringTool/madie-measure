@@ -53,6 +53,33 @@ export interface ProcessedResultType {
   observations: any;
 }
 
+export const findMeasureGroupPopulationDisplayId = (
+  measureGroup: Group,
+  id: string
+): string => {
+  const population = measureGroup?.populations?.find(
+    (population) => population.id === id
+  );
+  if (population) {
+    return population.displayId;
+  } else {
+    const observations = measureGroup?.measureObservations?.find(
+      (observation) => observation.id === id
+    );
+    if (observations) {
+      return observations.displayId;
+    } else {
+      const stratifications = measureGroup?.stratifications?.find(
+        (stratification) => stratification.id === id
+      );
+      if (stratifications) {
+        return stratifications.displayId;
+      }
+    }
+  }
+  return id;
+};
+
 // TODO consider converting into a context.
 // OR a re-usable hook.
 export class CalculationService {
@@ -180,7 +207,7 @@ export class CalculationService {
   mapMeasureGroup(group: Group): GroupPopulation {
     const calculateEpisodes = "boolean" === _.lowerCase(group.populationBasis);
     return {
-      groupId: group.id,
+      groupId: group.displayId ? group.displayId : group.id,
       scoring: group.scoring,
       populationBasis: group.populationBasis,
       stratificationValues: group?.stratifications?.map(
@@ -190,7 +217,9 @@ export class CalculationService {
           )}`,
           expected: calculateEpisodes ? false : null,
           actual: calculateEpisodes ? false : null,
-          id: stratification.id,
+          id: stratification.displayId
+            ? stratification.displayId
+            : stratification.id,
           criteriaReference: "",
         })
       ),
@@ -319,6 +348,10 @@ export class CalculationService {
         let validStratPopValues = [];
         groupPopulation.stratificationValues.forEach(
           (stratValues: StratificationExpectedValue) => {
+            stratValues.id = findMeasureGroupPopulationDisplayId(
+              measureGroup,
+              stratValues.id
+            );
             stratValues.populationValues?.forEach((popValue) => {
               const validPopValues = this.getValidStratPopulationValues(
                 measureGroup,
@@ -373,6 +406,11 @@ export class CalculationService {
       return testCase;
     }
 
+    let updatedpopulationGroupResults = populationGroupResults;
+    if (!populationGroupResults[0].groupId?.includes("Group_")) {
+      this.replaceWithDisplayId(updatedpopulationGroupResults, measureGroups);
+    }
+
     const updatedTestCase = _.cloneDeep(testCase);
     let allGroupsPass = true;
     if (_.isNil(testCase?.groupPopulations)) {
@@ -391,8 +429,8 @@ export class CalculationService {
       }
 
       const populationGroupResult: DetailedPopulationGroupResult =
-        populationGroupResults?.find(
-          (popGroupResult) => popGroupResult.groupId === groupId
+        updatedpopulationGroupResults?.find(
+          (popGroupResult) => popGroupResult.groupId === measureGroup.displayId
         );
 
       const tcPopTypeCount = {};
@@ -434,7 +472,8 @@ export class CalculationService {
           const measureGroupPopulation: Population =
             this.findMeasureGroupPopulation(measureGroup, tcPopVal);
           const result =
-            processedResults?.populations[measureGroupPopulation.id]?.result;
+            processedResults?.populations[measureGroupPopulation.displayId]
+              ?.result;
           tcPopVal.actual = _.isNil(result) && !patientBased ? 0 : result;
         }
       });
@@ -443,18 +482,28 @@ export class CalculationService {
         stratifiedPopulation: PopulationExpectedValue,
         strataResult: boolean
       ) => {
+        stratifiedPopulation.id = findMeasureGroupPopulationDisplayId(
+          measureGroup,
+          stratifiedPopulation.id
+        );
+
         // get the actual result for population
         const associatedPopulation = tcGroupPopulation.populationValues.find(
           (p) => p.id === stratifiedPopulation.id
         );
         // adjust the stratified results for strata & associated population
-        return associatedPopulation.actual && strataResult;
+        return associatedPopulation?.actual && strataResult;
       };
 
       const getEpisodeBasedActualResultForAssociatedPopulation = (
         stratifiedPopulation: PopulationExpectedValue,
         strataResult: StratifierResult
       ) => {
+        stratifiedPopulation.id = findMeasureGroupPopulationDisplayId(
+          measureGroup,
+          stratifiedPopulation.id
+        );
+
         if (!populationGroupResult?.episodeResults) {
           return 0;
         }
@@ -467,9 +516,8 @@ export class CalculationService {
             let stratification = episode.stratifierResults.find(
               (strata) =>
                 // TODO: workaround because fqm execution doesn't provide IDs for all cases
-                (strata.strataCode &&
-                  strata.strataCode === strataResult?.strataCode) ||
-                (strata.strataId && strata.strataId === strataResult?.strataId)
+                strata.strataCode &&
+                strata.strataCode === strataResult?.strataId
             );
             return population?.result && stratification?.result;
           }
@@ -480,12 +528,14 @@ export class CalculationService {
 
       const stratifierResults = populationGroupResult?.stratifierResults;
       tcGroupPopulation?.stratificationValues?.forEach((stratification) => {
+        const displayId = findMeasureGroupPopulationDisplayId(
+          measureGroup,
+          stratification.id
+        );
         const appliedStrataResult = stratifierResults?.find(
           (stratifierResult) =>
             // TODO: workaround because fqm execution doesn't provide IDs for all cases. so if present compare with id or compare with code
-            stratifierResult.strataId === stratification.id ||
-            _.toLower(stratifierResult.strataCode) ===
-              _.kebabCase(stratification.name)
+            stratifierResult.strataId === displayId
         );
         stratification.populationValues?.forEach((population) => {
           population.actual = patientBased
@@ -521,6 +571,52 @@ export class CalculationService {
         (_.isNil(populationValue.id) &&
           populationValue.name === population.name)
     );
+  }
+
+  replaceWithDisplayId(
+    populationGroupResults: DetailedPopulationGroupResult[],
+    measureGroups: Group[]
+  ) {
+    populationGroupResults.forEach((populationGroupResult) => {
+      const measureGroup: Group = measureGroups.find(
+        (group) => group.id === populationGroupResult.groupId
+      );
+      if (measureGroup) {
+        populationGroupResult.groupId = measureGroup.displayId;
+        populationGroupResult.populationResults?.forEach((populationResult) => {
+          populationResult.populationId = findMeasureGroupPopulationDisplayId(
+            measureGroup,
+            populationResult.populationId
+          );
+        });
+        populationGroupResult.episodeResults?.forEach((episodeResult) => {
+          episodeResult.populationResults?.forEach((populationResult) => {
+            populationResult.populationId = findMeasureGroupPopulationDisplayId(
+              measureGroup,
+              populationResult.populationId
+            );
+          });
+          episodeResult.stratifierResults?.forEach((stratifierResult) => {
+            stratifierResult.strataCode = findMeasureGroupPopulationDisplayId(
+              measureGroup,
+              stratifierResult.strataCode
+            );
+          });
+        });
+        populationGroupResult.stratifierResults?.forEach((stratifierResult) => {
+          stratifierResult.strataId = findMeasureGroupPopulationDisplayId(
+            measureGroup,
+            stratifierResult.strataCode
+          );
+        });
+        populationGroupResult.populationRelevance?.forEach((popRelevance) => {
+          popRelevance.populationId = findMeasureGroupPopulationDisplayId(
+            measureGroup,
+            popRelevance.populationId
+          );
+        });
+      }
+    });
   }
 }
 
