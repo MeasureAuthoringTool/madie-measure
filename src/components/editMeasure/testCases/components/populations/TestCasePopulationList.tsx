@@ -8,6 +8,7 @@ import {
   DisplayPopulationValue,
   DisplayStratificationValue,
   PopulationType,
+  Group,
 } from "@madie/madie-models";
 import classNames from "classnames";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -38,6 +39,7 @@ export interface TestCasePopulationListProps {
   ) => void;
   errors?: any;
   groupsStratificationAssociationMap?: any;
+  group?: Group;
 }
 const StyledIcon = styled(FontAwesomeIcon)(
   ({ errors }: { errors: boolean }) => [
@@ -119,6 +121,7 @@ const TestCasePopulationList = ({
   onStratificationChange,
   errors,
   groupsStratificationAssociationMap,
+  group,
 }: TestCasePopulationListProps) => {
   let measureObservations = [];
   let numeratorObservations = [];
@@ -301,6 +304,7 @@ const TestCasePopulationList = ({
               groupsStratificationAssociationMap={
                 groupsStratificationAssociationMap
               }
+              group={group}
               strataCode={stratification.name}
               isTestCaseExecuted={isTestCaseExecuted}
               setIsTestCaseExecuted={setIsTestCaseExecuted}

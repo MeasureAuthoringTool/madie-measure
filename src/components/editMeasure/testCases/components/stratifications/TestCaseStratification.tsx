@@ -1,6 +1,6 @@
 import React from "react";
 import "styled-components/macro";
-import { DisplayStratificationValue } from "@madie/madie-models";
+import { DisplayStratificationValue, Group } from "@madie/madie-models";
 import TestCaseStratificationRow from "./TestCaseStratificationRow";
 
 export interface TestCaseStratificationProps {
@@ -16,6 +16,7 @@ export interface TestCaseStratificationProps {
     stratId: string
   ) => void;
   groupsStratificationAssociationMap?: any;
+  group?: Group;
 }
 
 const TestCaseStratification = ({
@@ -27,10 +28,20 @@ const TestCaseStratification = ({
   disableExpected = false,
   onStratificationChange,
   groupsStratificationAssociationMap,
+  group,
 }: TestCaseStratificationProps) => {
-  const associations = groupsStratificationAssociationMap
+  let associations = groupsStratificationAssociationMap
     ? groupsStratificationAssociationMap[stratification?.id]
     : [];
+  if (!associations && stratification?.id.includes("Stratification_")) {
+    const stratObjectId = group?.stratifications?.find(
+      (strat) => strat.displayId === stratification?.id
+    )?.id;
+    associations = groupsStratificationAssociationMap
+      ? groupsStratificationAssociationMap[stratObjectId]
+      : [];
+  }
+
   const associatedPopulationValues = stratification?.populationValues?.filter(
     (pop) => associations?.includes(pop.name)
   );
