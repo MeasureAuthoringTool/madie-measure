@@ -4,7 +4,7 @@ import CalculationResults, {
   mapCalculationResults,
 } from "./CalculationResults";
 import { DetailedPopulationGroupResult } from "fqm-execution/build/types/Calculator";
-import { GroupPopulation, SupplementalData } from "@madie/madie-models";
+import { GroupPopulation, SupplementalData, Group } from "@madie/madie-models";
 import { FinalResult, PopulationType, Relevance } from "fqm-execution";
 import userEvent from "@testing-library/user-event";
 
@@ -68,6 +68,56 @@ const groups = [
   },
 ] as Array<GroupPopulation>;
 
+const measureGroups = [
+  {
+    id: "64ef",
+    displayId: "64ef",
+    populations: [
+      {
+        id: "914d",
+        displayId: "914d",
+        name: "initialPopulation",
+      },
+      {
+        id: "19c0",
+        displayId: "19c0",
+        name: "denominator",
+      },
+      {
+        id: "3fdd",
+        displayId: "3fdd",
+        name: "numerator",
+      },
+    ],
+  },
+  {
+    id: "64ec",
+    displayId: "64ec",
+    populations: [
+      {
+        id: "914a",
+        displayId: "914a",
+        name: "initialPopulation",
+      },
+      {
+        id: "915a",
+        displayId: "915a",
+        name: "initialPopulation",
+      },
+      {
+        id: "19cb",
+        displayId: "19cb",
+        name: "denominator",
+      },
+      {
+        id: "3fdc",
+        displayId: "3fdc",
+        name: "numerator",
+      },
+    ],
+  },
+] as Array<Group>;
+
 const renderCoverageComponent = (
   calculationResults = undefined,
   calculationErrors = undefined,
@@ -81,6 +131,7 @@ const renderCoverageComponent = (
       mainCqlLibraryName={mainCqlLibraryName}
       includeSDE={true}
       supplementalData={supplementalData}
+      groups={measureGroups}
     />
   );
 };

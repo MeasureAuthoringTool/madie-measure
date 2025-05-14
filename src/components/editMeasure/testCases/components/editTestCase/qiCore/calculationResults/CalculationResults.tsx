@@ -7,6 +7,7 @@ import {
   GroupPopulation,
   PopulationType,
   SupplementalData,
+  Group,
 } from "@madie/madie-models";
 import { useFeatureFlags } from "@madie/madie-util";
 import { Relevance } from "fqm-execution";
@@ -27,6 +28,7 @@ type CalculationResultType = {
   mainCqlLibraryName: string;
   includeSDE: boolean;
   supplementalData: SupplementalData[];
+  groups: Group[];
 };
 
 export interface MappedCalculationResults {
@@ -120,6 +122,7 @@ const CalculationResults = ({
   mainCqlLibraryName,
   includeSDE,
   supplementalData,
+  groups,
 }: CalculationResultType) => {
   // template for group name coming from execution engine
   const originalGroupName = (name) => {
@@ -171,6 +174,7 @@ const CalculationResults = ({
           mainCqlLibraryName={mainCqlLibraryName}
           includeSDE={includeSDE}
           supplementalData={supplementalData}
+          groups={groups}
         />
       )}
     </div>

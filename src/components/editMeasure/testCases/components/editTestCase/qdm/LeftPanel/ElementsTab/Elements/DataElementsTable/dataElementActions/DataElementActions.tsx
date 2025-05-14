@@ -1,5 +1,5 @@
 import React from "react";
-import "../DataElementsTable.scss";
+import "../../../../../../styles/DataElementsTable.scss";
 import { Button } from "@madie/madie-design-system/dist/react";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import MadieSpeedDial from "./MadieSpeedDial";

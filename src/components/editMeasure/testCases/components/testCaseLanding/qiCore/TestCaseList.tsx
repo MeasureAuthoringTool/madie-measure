@@ -71,10 +71,15 @@ export const removeHtmlCoverageHeader = (
 
 export const getCoverageValueFromHtml = (
   coverageHtml: Record<string, string>,
-  groupId: string
+  groupId: string,
+  displayId: string
 ): number => {
+  let coverageHtmlByGroup = coverageHtml[groupId];
+  if (!coverageHtmlByGroup) {
+    coverageHtmlByGroup = coverageHtml[displayId];
+  }
   const coverageValue = parseInt(
-    coverageHtml[groupId]?.match(coverageHeaderRegex)[1]
+    coverageHtmlByGroup?.match(coverageHeaderRegex)[1]
   );
   return isNaN(coverageValue) ? 0 : coverageValue;
 };
@@ -257,7 +262,8 @@ const TestCaseList = (props: TestCaseListProps) => {
       setCoveragePercentage(
         getCoverageValueFromHtml(
           calculationOutput["groupClauseCoverageHTML"],
-          selectedPopCriteria.id
+          selectedPopCriteria.id,
+          selectedPopCriteria.displayId
         )
       );
       setCoverageHTML(
@@ -758,7 +764,11 @@ const TestCaseList = (props: TestCaseListProps) => {
 
             {activeTab === "coverage" && coverageHTML && (
               <CodeCoverageHighlighting
-                coverageHTML={coverageHTML[selectedPopCriteria.id]}
+                coverageHTML={
+                  coverageHTML[selectedPopCriteria.displayId]
+                    ? coverageHTML[selectedPopCriteria.displayId]
+                    : coverageHTML[selectedPopCriteria.id]
+                }
               />
             )}
           </div>
