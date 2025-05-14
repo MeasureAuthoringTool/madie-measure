@@ -1,4 +1,8 @@
-import { CalculationService, ExecutionStatusType } from "./CalculationService";
+import {
+  CalculationService,
+  ExecutionStatusType,
+  findMeasureGroupPopulationDisplayId,
+} from "./CalculationService";
 import { officeVisitMeasure } from "./__mocks__/OfficeVisitMeasure";
 import { officeVisitValueSet } from "./__mocks__/OfficeVisitValueSet";
 import { officeVisitMeasureBundle } from "./__mocks__/OfficeVisitMeasureBundle";
@@ -32,9 +36,35 @@ import {
 
 describe("CalculationService Tests", () => {
   let calculationService: CalculationService;
+  const localStorageMock = (function () {
+    let store = { madieDebug: "true" };
+
+    return {
+      getItem(key) {
+        return store[key];
+      },
+
+      setItem(key, value) {
+        store[key] = value;
+      },
+
+      clear() {
+        store = {};
+      },
+
+      removeItem(key) {
+        delete store[key];
+      },
+
+      getAll() {
+        return store;
+      },
+    };
+  })();
 
   beforeEach(() => {
     calculationService = new CalculationService();
+    Object.defineProperty(window, "localStorage", { value: localStorageMock });
   });
 
   const testCases: TestCase[] = [
@@ -84,6 +114,24 @@ describe("CalculationService Tests", () => {
       },
       { criteriaExpression: "num", populationType: "numerator", result: true },
     ]);
+  });
+
+  it("test calculate to handle error", async () => {
+    const measure = {};
+    const measureBundle = JSON.parse(JSON.stringify(measure));
+    try {
+      const calculationResults = await calculationService.calculate(
+        measureBundle,
+        [],
+        [],
+        null,
+        null,
+        true
+      );
+    } catch (e) {
+      expect(e).toBeTruthy();
+      expect(e.name).toEqual("UnexpectedResource");
+    }
   });
 
   it("should handle null raw results", () => {
@@ -1037,16 +1085,18 @@ describe("CalculationService Tests", () => {
         executionStatus: "NA",
         series: undefined,
         hapiOperationOutcome: undefined,
-      } as TestCase;
+      } as unknown as TestCase;
 
       const groups: Group[] = [
         {
           id: "groupID",
+          displayId: "groupID",
           scoring: MeasureScoring.COHORT,
           populationBasis: "Encounter",
           populations: [
             {
               id: "1",
+              displayId: "1",
               name: PopulationType.INITIAL_POPULATION,
               definition: "Initial Population",
             },
@@ -1054,6 +1104,7 @@ describe("CalculationService Tests", () => {
           stratifications: [
             {
               id: "strata-1",
+              displayId: "strata-1",
               cqlDefinition: "Stratification 1",
               association: PopulationType.INITIAL_POPULATION,
             },
@@ -1242,7 +1293,7 @@ describe("CalculationService Tests", () => {
         executionStatus: "NA",
         series: undefined,
         hapiOperationOutcome: undefined,
-      } as TestCase;
+      } as unknown as TestCase;
 
       const groups: Group[] = [
         {
@@ -1316,16 +1367,18 @@ describe("CalculationService Tests", () => {
         executionStatus: "NA",
         series: undefined,
         hapiOperationOutcome: undefined,
-      } as TestCase;
+      } as unknown as TestCase;
 
       const groups: Group[] = [
         {
           id: "groupID999",
+          displayId: "groupID888",
           scoring: MeasureScoring.COHORT,
           populationBasis: "boolean",
           populations: [
             {
               id: "pop1ID",
+              displayId: "pop1ID",
               name: PopulationType.INITIAL_POPULATION,
               definition: "boolIpp",
             },
@@ -1416,7 +1469,7 @@ describe("CalculationService Tests", () => {
         executionStatus: "NA",
         series: undefined,
         hapiOperationOutcome: undefined,
-      } as TestCase;
+      } as unknown as TestCase;
       const groups: Group[] = [
         {
           id: "groupID",
@@ -1495,7 +1548,7 @@ describe("CalculationService Tests", () => {
         executionStatus: "NA",
         series: undefined,
         hapiOperationOutcome: undefined,
-      } as TestCase;
+      } as unknown as TestCase;
       const groups: Group[] = [
         {
           id: "groupID",
@@ -1561,13 +1614,13 @@ describe("CalculationService Tests", () => {
           ],
           stratifierResults: [
             {
-              strataCode: "stratcode1",
+              strataCode: "strata1",
               result: true,
               appliesResult: true,
               strataId: "strata1",
             },
             {
-              strataCode: "stratcode2",
+              strataCode: "strata2",
               result: true,
               appliesResult: false,
               strataId: "strata2",
@@ -1630,16 +1683,18 @@ describe("CalculationService Tests", () => {
         executionStatus: "NA",
         series: undefined,
         hapiOperationOutcome: undefined,
-      } as TestCase;
+      } as unknown as TestCase;
 
       const groups: Group[] = [
         {
           id: "groupID",
+          displayId: "groupID",
           scoring: MeasureScoring.COHORT,
           populationBasis: "boolean",
           populations: [
             {
               id: "pop1",
+              displayId: "pop1",
               name: PopulationType.INITIAL_POPULATION,
               definition: "boolIpp",
             },
@@ -1647,11 +1702,13 @@ describe("CalculationService Tests", () => {
           stratifications: [
             {
               id: "strata1",
+              displayId: "strata1",
               cqlDefinition: "strat1Def",
               association: PopulationType.INITIAL_POPULATION,
             },
             {
               id: "strata2",
+              displayId: "strata2",
               cqlDefinition: "strat2Def",
               association: PopulationType.INITIAL_POPULATION,
             },
@@ -1780,6 +1837,75 @@ describe("CalculationService Tests", () => {
         PopulationType.MEASURE_POPULATION_OBSERVATION
       );
       expect(popVals[4].actual).toEqual(null);
+    });
+  });
+
+  describe("CalculationService.findMeasureGroupPopulationDisplayId", () => {
+    const group = {
+      id: "626be4370ca8110d3b22404b",
+      displayId: "Group_1",
+      scoring: "Proportion",
+      populations: [
+        {
+          id: "id-1",
+          displayId: "InitialPopulation_1",
+          name: PopulationType.INITIAL_POPULATION,
+          definition: "ipp",
+        },
+        {
+          id: "id-2",
+          displayId: "Denominator_1",
+          name: PopulationType.DENOMINATOR,
+          definition: "denom",
+        },
+        {
+          id: "id-3",
+          displayId: "Numerator_1",
+          name: PopulationType.NUMERATOR,
+          definition: "num",
+        },
+      ],
+      measureObservations: [
+        {
+          id: "id-4",
+          definition: "MyFunc1",
+          aggregateMethod: "Count",
+          criteriaReference: "id-2",
+          displayId: "MeasureObservation_1",
+        },
+      ],
+      stratifications: [
+        {
+          id: "id-5",
+          cqlDefinition: "",
+          description: "description",
+          association: undefined,
+          displayId: "Stratification_1",
+        },
+      ],
+
+      measureGroupTypes: [MeasureGroupTypes.OUTCOME],
+      groupDescription: null,
+    } as unknown as Group;
+
+    it("should return observation displayId", () => {
+      const result = findMeasureGroupPopulationDisplayId(group, "id-4");
+      expect(result).toEqual("MeasureObservation_1");
+    });
+
+    it("should return stratification displayId", () => {
+      const result = findMeasureGroupPopulationDisplayId(group, "id-5");
+      expect(result).toEqual("Stratification_1");
+    });
+
+    it("should return population displayId", () => {
+      const result = findMeasureGroupPopulationDisplayId(group, "id-1");
+      expect(result).toEqual("InitialPopulation_1");
+    });
+
+    it("should return original id if not found", () => {
+      const result = findMeasureGroupPopulationDisplayId(group, "original-id");
+      expect(result).toEqual("original-id");
     });
   });
 });
