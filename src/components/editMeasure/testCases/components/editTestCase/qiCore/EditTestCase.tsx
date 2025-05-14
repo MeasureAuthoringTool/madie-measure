@@ -1065,6 +1065,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         cqlDefinitionCallstack={callstackMap}
                         includeSDE={measure?.testCaseConfiguration?.sdeIncluded}
                         supplementalData={measure?.supplementalData}
+                        groups={measure?.groups}
                       />
                     )}
                   </div>
