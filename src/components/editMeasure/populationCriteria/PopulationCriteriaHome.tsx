@@ -7,6 +7,7 @@ import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
 import BaseConfiguration from "./baseConfiguration/BaseConfiguration";
 import QDMReporting from "./QDMReporting/QDMReporting";
+import MeasureGroupAlerts from "./groups/MeasureGroupAlerts";
 
 export const COMPLETE = "complete";
 export const INCOMPLETE = "incomplete";
@@ -32,6 +33,7 @@ export function PopulationCriteriaHome() {
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(null);
   const [sideNavLinks, setSideNavLinks] = useState<Array<any>>();
   const [isFormDirty, setIsFormDirty] = useState<boolean>(false);
+  const [alertMessage, setAlertMessage] = useState(null);
 
   const groupsBaseUrl = "/measures/" + measure?.id + "/edit/groups";
 
@@ -192,47 +194,54 @@ export function PopulationCriteriaHome() {
   };
 
   return (
-    <div
-      tw="grid lg:grid-cols-6 gap-4 mx-8 shadow-lg rounded-md border bg-white"
-      style={{
-        borderColor: "#8c8c8c",
-        borderRadius: "4px",
-      }}
-    >
-      <PopulationCriteriaSideNav
-        canEdit={canEdit}
-        sideNavLinks={sideNavLinks}
-        setSideNavLinks={setSideNavLinks}
-        measureGroupNumber={measureGroupNumber}
-        setMeasureGroupNumber={setMeasureGroupNumber}
-        measureId={measure?.id}
-        isFormDirty={isFormDirty}
-        isQDM={isQDM}
-        baseConfigPopulated={checkBaseConfigPopulated()}
-        reportingStatus={checkReporting()}
-        supplementalDataStatus={checkSupplementalData()}
-        riskAdjustmentStatus={checkRiskAdjustment()}
-      />
-      {/* path can be independent of nav */}
-      {pathname.includes("/base-configuration") && <BaseConfiguration />}
-
-      {/* we will load A measureGroups component*/}
-      {pathname.includes("/groups") && (
-        <MeasureGroupsComponent
-          setIsFormDirty={setIsFormDirty}
+    <>
+      {/* Status handler for Population Criteria tab */}
+      <MeasureGroupAlerts {...alertMessage} />
+      <div
+        tw="grid lg:grid-cols-6 gap-4 mx-8 shadow-lg rounded-md border bg-white"
+        style={{
+          borderColor: "#8c8c8c",
+          borderRadius: "4px",
+        }}
+      >
+        <PopulationCriteriaSideNav
+          canEdit={canEdit}
+          sideNavLinks={sideNavLinks}
+          setSideNavLinks={setSideNavLinks}
           measureGroupNumber={measureGroupNumber}
           setMeasureGroupNumber={setMeasureGroupNumber}
           measureId={measure?.id}
+          isFormDirty={isFormDirty}
+          isQDM={isQDM}
+          baseConfigPopulated={checkBaseConfigPopulated()}
+          reportingStatus={checkReporting()}
+          supplementalDataStatus={checkSupplementalData()}
+          riskAdjustmentStatus={checkRiskAdjustment()}
         />
-      )}
-      {/* what's a better way to say if QDM or QICore?
+        {/* path can be independent of nav */}
+        {pathname.includes("/base-configuration") && <BaseConfiguration />}
+
+        {/* we will load A measureGroups component*/}
+        {pathname.includes("/groups") && (
+          <MeasureGroupsComponent
+            setIsFormDirty={setIsFormDirty}
+            measureGroupNumber={measureGroupNumber}
+            setMeasureGroupNumber={setMeasureGroupNumber}
+            measureId={measure?.id}
+            setAlertMessage={setAlertMessage}
+          />
+        )}
+        {/* what's a better way to say if QDM or QICore?
           To do: Find a more elegant solution for future when we have more than two models to avoid if else if else. */}
-      {pathname.includes("reporting") && <QDMReporting />}
+        {pathname.includes("reporting") && <QDMReporting />}
 
-      {pathname.includes("/supplemental-data") && <SupplementalDataComponent />}
+        {pathname.includes("/supplemental-data") && (
+          <SupplementalDataComponent />
+        )}
 
-      {pathname.includes("/risk-adjustment") && <RiskAdjustmentComponent />}
-    </div>
+        {pathname.includes("/risk-adjustment") && <RiskAdjustmentComponent />}
+      </div>
+    </>
   );
 }
 
