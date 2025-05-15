@@ -58,7 +58,6 @@ import GroupPopulation from "../groupPopulations/GroupPopulation";
 import MeasureGroupObservation from "../observation/MeasureGroupObservation";
 import MeasureGroupScoringUnit from "../scoringUnit/MeasureGroupScoringUnit";
 import * as _ from "lodash";
-import MeasureGroupAlerts from "../MeasureGroupAlerts";
 import AddRemovePopulation from "../groupPopulations/AddRemovePopulation";
 import GroupsDescription from "../GroupsDescription";
 import MultipleSelectDropDown from "../../MultipleSelectDropDown";
@@ -183,6 +182,7 @@ export interface MeasureGroupProps {
   setMeasureGroupNumber?: (value: number) => void;
   setIsFormDirty?: (value: boolean) => void;
   measureId?: string;
+  setAlertMessage: Function;
 }
 
 const INITIAL_ALERT_MESSAGE = {
@@ -219,9 +219,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   let location = useLocation();
   const { pathname } = location;
 
-  const [alertMessage, setAlertMessage] = useState({
-    ...INITIAL_ALERT_MESSAGE,
-  });
   const row = {
     display: "flex",
     flexDirection: "row",
@@ -495,7 +492,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       .getAllPopulationBasisOptions()
       .then((response) => setPopulationBasisValues(response))
       .catch((err) =>
-        setAlertMessage({
+        props.setAlertMessage({
           type: "error",
           message: err.message,
           canClose: false,
@@ -576,7 +573,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           setActiveTab("populations");
         })
         .catch((error) => {
-          setAlertMessage({
+          props.setAlertMessage({
             type: "error",
             message: error.message,
             canClose: false,
@@ -602,7 +599,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           navigate(groupsBaseUrl + "/" + updatedMeasure?.groups.length);
         })
         .catch((error) => {
-          setAlertMessage({
+          props.setAlertMessage({
             type: "error",
             message: error.message,
             canClose: false,
@@ -683,14 +680,14 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   }, [formik.values.populations]);
   // sets alert message when CQL has any errors
   useEffect(() => {
-    setAlertMessage(() => ({ ...INITIAL_ALERT_MESSAGE }));
+    props.setAlertMessage(() => ({ ...INITIAL_ALERT_MESSAGE }));
     if (measure?.cql) {
       const definitions = new CqlAntlr(measure.cql).parse()
         .expressionDefinitions;
       setExpressionDefinitions(definitions);
     }
     if (measure && (measure.cqlErrors || !measure?.cql)) {
-      setAlertMessage(() => ({
+      props.setAlertMessage(() => ({
         type: "error",
         message: "Please complete the CQL Editor process before continuing",
         canClose: false,
@@ -701,7 +698,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
         MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
       )
     ) {
-      setAlertMessage(() => ({
+      props.setAlertMessage(() => ({
         type: "error",
         message:
           "One or more Population Criteria has a mismatch with CQL return types. Test Cases cannot be executed until this is resolved.",
@@ -762,7 +759,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   return (
     <div tw="lg:col-span-5 pl-2 pr-2" data-testid="qi-core-groups">
       <FormikProvider value={formik}>
-        <MeasureGroupAlerts {...alertMessage} />
         <Toast
           toastKey="population-criteria-toast"
           toastType={toastType}
