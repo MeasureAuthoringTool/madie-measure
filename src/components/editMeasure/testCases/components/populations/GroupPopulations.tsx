@@ -7,6 +7,7 @@ import {
   GroupPopulation,
   DisplayPopulationValue,
   DisplayStratificationValue,
+  Group,
 } from "@madie/madie-models";
 import * as _ from "lodash";
 
@@ -28,6 +29,7 @@ export interface PopulationsProps {
   ) => void;
   groupsStratificationAssociationMap?: any;
   errors?: any[];
+  groups: Group[];
 }
 
 const GroupPopulations = ({
@@ -40,6 +42,7 @@ const GroupPopulations = ({
   onChange,
   onStratificationChange,
   errors,
+  groups,
 }: PopulationsProps) => (
   <>
     {groupPopulations && groupPopulations.length > 0 ? (
@@ -82,6 +85,7 @@ const GroupPopulations = ({
                 groupsStratificationAssociationMap={
                   groupsStratificationAssociationMap
                 }
+                group={groups?.find((group) => group.id === gp?.groupId)}
                 scoring={gp.scoring}
                 disableExpected={disableExpected}
                 isTestCaseExecuted={isTestCaseExecuted}

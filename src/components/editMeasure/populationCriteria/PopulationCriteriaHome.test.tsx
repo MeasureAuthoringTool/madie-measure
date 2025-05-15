@@ -1,5 +1,12 @@
 import * as React from "react";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  getByRole,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
@@ -7,8 +14,16 @@ import PopulationCriteriaWrapper from "./PopulationCriteriaWrapper";
 // @ts-ignore
 import { measureStore } from "@madie/madie-util";
 import { QdmMeasureCQL } from "../../common/QdmMeasureCQL";
-import { Measure } from "@madie/madie-models";
-import { MeasureCQL } from "../../common/MeasureCQL";
+import {
+  Measure,
+  MeasureErrorType,
+  Model,
+  PopulationType,
+} from "@madie/madie-models";
+import { ELM_JSON, MeasureCQL } from "../../common/MeasureCQL";
+import useMeasureServiceApi, {
+  MeasureServiceApi,
+} from "../../../api/useMeasureServiceApi";
 
 const serviceConfig = {
   measureService: {
@@ -120,6 +135,10 @@ jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: () => ({}),
 }));
 
+jest.mock("../../../api/useMeasureServiceApi");
+const useMeasuremeasureServiceApiMock =
+  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
+
 const renderPopulationCriteriaHomeComponent = async (
   routePath: string,
   browserUrlPath: string
@@ -142,10 +161,43 @@ const renderPopulationCriteriaHomeComponent = async (
   );
 };
 
+const populationBasisValues: string[] = [
+  "boolean",
+  "Encounter",
+  "Medication Administration",
+  "test-data-1",
+  "test-data-2",
+];
+
+let measureServiceApiMock: MeasureServiceApi;
+
 describe("PopulationCriteriaHome", () => {
   const { findByTestId } = screen;
 
   beforeEach(() => {
+    measureServiceApiMock = {
+      getAllPopulationBasisOptions: jest
+        .fn()
+        .mockResolvedValue({ data: populationBasisValues }),
+      getReturnTypesForAllCqlFunctions: jest
+        .fn()
+        .mockReturnValue({ fun: "Encounter" }),
+      getReturnTypesForAllCqlDefinitions: jest.fn().mockReturnValue({
+        patient: "NA",
+        sdeEthnicity: "Coding",
+        sdePayer: "NA",
+        sdeRace: "Coding",
+        sdeSex: "Code",
+        vteProphylaxisByMedicationAdministeredOrDeviceApplied:
+          "MedicationAdministration",
+        boolIpp: "boolean",
+      }),
+      updateGroup: jest.fn().mockResolvedValue({ status: 200 }),
+    } as unknown as MeasureServiceApi;
+    useMeasuremeasureServiceApiMock.mockImplementation(
+      () => measureServiceApiMock
+    );
+
     QiCoreMeasure.cql = MeasureCQL;
   });
 
@@ -277,6 +329,110 @@ describe("PopulationCriteriaHome", () => {
     await findByTestId("leftPanelMeasureInformation-MeasureGroup1");
     const QICorePage = await findByTestId("qi-core-groups");
     expect(QICorePage).toBeInTheDocument();
+  });
+
+  it("should display error if there are CQL errors in the measure", async () => {
+    const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
+    mockedMeasureState.state = { ...QiCoreMeasure, cqlErrors: true };
+
+    await renderPopulationCriteriaHomeComponent(
+      "groups/:groupNumber",
+      "groups/1"
+    );
+    await findByTestId("leftPanelMeasureInformation-MeasureGroup1");
+    const QICorePage = await findByTestId("qi-core-groups");
+    expect(QICorePage).toBeInTheDocument();
+
+    const cqlHasErrorsMessage = screen.getByTestId(
+      "error-alerts"
+    ) as HTMLInputElement;
+    expect(cqlHasErrorsMessage).toBeInTheDocument();
+    expect(cqlHasErrorsMessage).toHaveTextContent(
+      "Please complete the CQL Editor process before continuing"
+    );
+  });
+
+  test("should display error for CQL return type mismatch on load", async () => {
+    const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
+    mockedMeasureState.state = {
+      ...QiCoreMeasure,
+      errors: [MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES],
+    };
+
+    await renderPopulationCriteriaHomeComponent(
+      "groups/:groupNumber",
+      "groups/1"
+    );
+    await findByTestId("leftPanelMeasureInformation-MeasureGroup1");
+    const QICorePage = await findByTestId("qi-core-groups");
+    expect(QICorePage).toBeInTheDocument();
+
+    const cqlHasErrorsMessage = screen.getByTestId(
+      "error-alerts"
+    ) as HTMLInputElement;
+    expect(cqlHasErrorsMessage).toBeInTheDocument();
+    expect(cqlHasErrorsMessage).toHaveTextContent(
+      "One or more Population Criteria has a mismatch with CQL return types. Test Cases cannot be executed until this is resolved."
+    );
+  });
+
+  test("should display error if server fails to update population group", async () => {
+    const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
+    mockedMeasureState.state = QiCoreMeasure;
+
+    measureServiceApiMock.updateGroup = jest.fn().mockRejectedValueOnce({
+      status: 500,
+      message: "Failed to update the group.",
+    });
+
+    await renderPopulationCriteriaHomeComponent(
+      "groups/:groupNumber",
+      "groups/1"
+    );
+
+    await findByTestId("leftPanelMeasureInformation-MeasureGroup1");
+    const QICorePage = await findByTestId("qi-core-groups");
+    expect(QICorePage).toBeInTheDocument();
+
+    // select Initial Population from dropdown
+    const groupPopulationInput = screen.getByTestId(
+      "select-measure-group-population-input"
+    ) as HTMLInputElement;
+    fireEvent.change(groupPopulationInput, {
+      target: { value: "Initial Population" },
+    });
+    expect(groupPopulationInput.value).toBe("Initial Population");
+
+    // select a measure group type
+    const measureGroupTypeSelect = screen.getByTestId(
+      "measure-group-type-dropdown"
+    );
+    userEvent.click(getByRole(measureGroupTypeSelect, "combobox"));
+    await waitFor(() => {
+      userEvent.click(screen.getByText("Patient Reported Outcome"));
+    });
+
+    userEvent.click(screen.getByTestId("reporting-tab"));
+
+    const improvementNotationSelect = screen.getByTestId(
+      "improvement-notation-select"
+    ) as HTMLInputElement;
+
+    userEvent.click(await getByRole(improvementNotationSelect, "combobox"));
+    await waitFor(() => {
+      userEvent.click(
+        screen.getByText("Increased score indicates improvement")
+      );
+    });
+
+    // submit the form
+    await waitFor(() => {
+      expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+      userEvent.click(screen.getByTestId("group-form-submit-btn"));
+    });
+
+    const alert = await screen.findByTestId("error-alerts");
+    expect(alert).toHaveTextContent("Failed to update the group.");
   });
 
   it("should not render Reporting component for non-QDM measures", () => {

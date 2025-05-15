@@ -23,21 +23,25 @@ export const simpleMeasureFixture: Measure = {
   groups: [
     {
       id: "population-group-1",
+      displayId: "Group_1",
       scoring: "Proportion",
       populationBasis: "boolean",
       populations: [
         {
           id: "id-1",
+          displayId: "InitialPopulation_1",
           name: PopulationType.INITIAL_POPULATION,
           definition: "first",
         },
         {
           id: "id-2",
+          displayId: "Denominator_1",
           name: PopulationType.DENOMINATOR,
           definition: "second",
         },
         {
           id: "id-3",
+          displayId: "Numerator_1",
           name: PopulationType.NUMERATOR,
           definition: "third",
         },
@@ -45,6 +49,7 @@ export const simpleMeasureFixture: Measure = {
       stratifications: [
         {
           id: "id-4",
+          displayId: "Stratification_1",
           association: PopulationType.INITIAL_POPULATION,
           cqlDefinition: "cql definition",
           associations: [PopulationType.INITIAL_POPULATION],

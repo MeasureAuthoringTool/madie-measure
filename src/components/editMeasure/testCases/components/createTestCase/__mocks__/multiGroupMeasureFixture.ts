@@ -24,34 +24,40 @@ export const multiGroupMeasureFixture: Measure = {
   groups: [
     {
       id: "6329ce9d1368254f5c078c11",
+      displayId: "population-group-1",
       scoring: "Ratio",
       populations: [
         {
           id: "20b107a1-ba80-4bab-a95e-7b8834e294fb",
+          displayId: "InitialPopulation_1",
           name: PopulationType.INITIAL_POPULATION,
           definition: "ipp",
           associationType: null,
         },
         {
           id: "977925da-974e-4bd1-9b68-1fa7a53c8380",
+          displayId: "Denominator_1",
           name: PopulationType.DENOMINATOR,
           definition: "denom",
           associationType: null,
         },
         {
           id: "8b6bb54d-5308-4e14-9923-1441e47b87cc",
+          displayId: "DenominatorExclusion_1",
           name: PopulationType.DENOMINATOR_EXCLUSION,
           definition: "",
           associationType: null,
         },
         {
           id: "515975e7-4043-4dec-8eab-9a4abb0b542a",
+          displayId: "Numberator_1",
           name: PopulationType.NUMERATOR,
           definition: "num",
           associationType: null,
         },
         {
           id: "f8ddb4fd-5b25-4721-b5db-3bf4a3b05f62",
+          displayId: "NumeratorExclusion_1",
           name: PopulationType.NUMERATOR_EXCLUSION,
           definition: "",
           associationType: null,

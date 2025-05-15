@@ -5,12 +5,14 @@ import {
   GroupPopulation,
   PopulationType,
   MeasureScoring,
+  Group,
 } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 
 describe("Group Populations", () => {
   let testCaseGroups: GroupPopulation[];
   let groupStratificationsMap = {};
+  let groups: Group[];
   beforeEach(() => {
     groupStratificationsMap = {
       "321": [PopulationType.INITIAL_POPULATION],
@@ -45,6 +47,39 @@ describe("Group Populations", () => {
           },
         ],
       },
+    ];
+    groups = [
+      {
+        id: "Group1_ID",
+        displayId: "Group_1",
+        scoring: MeasureScoring.COHORT,
+        populationBasis: "boolean",
+        populations: [
+          {
+            id: "1",
+            name: PopulationType.INITIAL_POPULATION,
+            displayId: "InitialPopulation_1",
+          },
+          {
+            id: "2",
+            name: PopulationType.MEASURE_POPULATION,
+            displayId: "MeasurePopulation_1",
+          },
+          {
+            id: "3",
+            name: PopulationType.MEASURE_POPULATION_EXCLUSION,
+            displayId: "MeasurePopulationExclusion_1",
+          },
+        ],
+        stratifications: [
+          {
+            id: "321",
+            displayId: "Stratification_1",
+            name: "Strata 1",
+            associations: ["InitialPopulation_1"],
+          },
+        ],
+      } as unknown as Group,
     ];
   });
   it("should render the populations", () => {
@@ -85,6 +120,7 @@ describe("Group Populations", () => {
         isTestCaseExecuted={true}
         groupPopulations={groupPopulations}
         onChange={handleChange}
+        groups={groups}
       />
     );
     const g1MeasureName = screen.getByTestId("measure-group-1");
@@ -146,6 +182,7 @@ describe("Group Populations", () => {
         onChange={jest.fn()}
         isTestCaseExecuted
         setIsTestCaseExecuted={mockExecute}
+        groups={groups}
       />
     );
     expect(
@@ -176,6 +213,7 @@ describe("Group Populations", () => {
         groupPopulations={[]}
         onChange={jest.fn()}
         executionRun
+        groups={groups}
       />
     );
     expect(
@@ -194,6 +232,7 @@ describe("Group Populations", () => {
         groupPopulations={testCaseGroups}
         onChange={handleChange}
         groupsStratificationAssociationMap={groupStratificationsMap}
+        groups={groups}
       />
     );
 
@@ -218,6 +257,7 @@ describe("Group Populations", () => {
         onChange={handleChange}
         onStratificationChange={handleStratificationChange}
         groupsStratificationAssociationMap={groupStratificationsMap}
+        groups={groups}
       />
     );
 
@@ -262,6 +302,7 @@ describe("Group Populations", () => {
         groupPopulations={testCaseGroups}
         onChange={handleChange}
         groupsStratificationAssociationMap={groupStratificationsMap}
+        groups={groups}
       />
     );
     const actualColumn = screen.getByTestId(

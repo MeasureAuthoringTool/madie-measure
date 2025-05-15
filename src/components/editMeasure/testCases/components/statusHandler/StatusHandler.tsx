@@ -68,6 +68,7 @@ const StatusHandler = ({
               </div>
             }
             canClose={false}
+            copyButton={true}
           />
         </div>
       );
@@ -90,6 +91,7 @@ const StatusHandler = ({
               </div>
             }
             canClose={false}
+            copyButton={true}
           />
         </div>
       );
