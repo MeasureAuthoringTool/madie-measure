@@ -22,6 +22,7 @@ const MeasureGroupAlerts = (props: MeasureGroupAlertsTypes) => {
             </p>
           }
           canClose={props.canClose}
+          copyButton={true}
         />
       )}
     </div>
