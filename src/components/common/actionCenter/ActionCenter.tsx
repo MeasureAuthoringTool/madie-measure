@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { SpeedDial, SpeedDialAction, Tooltip } from "@mui/material";
+import { MadieDeleteDialog } from "@madie/madie-design-system/dist/react";
 
 export interface PropTypes {
   actions?: ActionItemDef[];
@@ -15,6 +16,8 @@ export interface ActionItemDef {
 
 const ActionCenter = ({ actions, testId, target }: PropTypes) => {
   const [open, setOpen] = useState(false);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const [deleteAction, setDeleteAction] = useState<ActionItemDef>();
 
   return (
     <div data-testid={`action-center-${testId}`}>
@@ -77,7 +80,12 @@ const ActionCenter = ({ actions, testId, target }: PropTypes) => {
               )}`}
               onClick={() => {
                 setOpen(false);
-                action.onClick(target);
+                if (action.name === "Delete") {
+                  setOpenConfirmDialog(true);
+                  setDeleteAction(action);
+                } else {
+                  action.onClick(target);
+                }
               }}
               sx={{
                 boxShadow: "none",
@@ -89,6 +97,19 @@ const ActionCenter = ({ actions, testId, target }: PropTypes) => {
             />
           ))}
       </SpeedDial>
+      <MadieDeleteDialog
+        open={openConfirmDialog}
+        onContinue={() => {
+          deleteAction.onClick(target);
+          setOpenConfirmDialog(false);
+        }}
+        onClose={() => {
+          setOpenConfirmDialog(false);
+        }}
+        dialogTitle="Delete Element"
+        name={target.resource?.resourceType}
+        hideWarning={true}
+      />
     </div>
   );
 };
