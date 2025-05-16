@@ -23,6 +23,7 @@ const groups: Group[] = [
 jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: jest.fn().mockReturnValue({
     QICoreIncludeSDEValues: true,
+    QDMIncludeRAVValues: true,
     QICoreManifestExpansion: true,
   }),
 }));
@@ -121,6 +122,32 @@ describe("TestCase component", () => {
 
     expect(screen.getByRole("navigation")).toBeInTheDocument();
     expect(screen.getAllByRole("tab").length).toEqual(5);
+  });
+
+  it("shouldn't render RAV tab for QDM measures when QDMIncludeRAVValues flag is false", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => {
+      return {
+        QDMIncludeRAVValues: false,
+      };
+    });
+
+    render(
+      <MemoryRouter>
+        <TestCaseListSideBarNav allPopulationCriteria={groups} qdm={true} />
+      </MemoryRouter>
+    );
+
+    expect(screen.queryByRole("tab", { name: "RAV" })).not.toBeInTheDocument();
+  });
+
+  it("should render RAV tab for QDM measures when QDMIncludeRAVValues flag is true", async () => {
+    render(
+      <MemoryRouter>
+        <TestCaseListSideBarNav allPopulationCriteria={groups} qdm={true} />
+      </MemoryRouter>
+    );
+
+    expect(screen.queryByRole("tab", { name: "RAV" })).toBeInTheDocument();
   });
 
   it("shouldn't render Expansion tab for QI Core measures when QICoreManifestExpansion flag is false", async () => {

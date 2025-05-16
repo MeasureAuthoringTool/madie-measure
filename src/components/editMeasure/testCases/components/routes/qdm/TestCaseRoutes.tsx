@@ -15,6 +15,7 @@ import _ from "lodash";
 import SDEPage from "../../testCaseConfiguration/sde/SDEPage";
 import Expansion from "../../testCaseConfiguration/expansion/Expansion";
 import TestCaseData from "../../testCaseConfiguration/testCaseData/TestCaseData";
+import RAVPage from "../../testCaseConfiguration/rav/RAVPage";
 
 const TestCaseRoutes = () => {
   const [cqmMeasureErrors, setCqmMeasureErrors] = useState<Array<string>>([]);
@@ -247,6 +248,19 @@ const TestCaseRoutes = () => {
                 qdm
                 children={
                   <SDEPage
+                    setExecutionContextReady={setExecutionContextReady}
+                  />
+                }
+              />
+            }
+          />
+          <Route
+            path="/list-page/rav"
+            element={
+              <TestCaseLandingWrapper
+                qdm
+                children={
+                  <RAVPage
                     setExecutionContextReady={setExecutionContextReady}
                   />
                 }
