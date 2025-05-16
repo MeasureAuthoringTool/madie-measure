@@ -93,7 +93,7 @@ declare module "@madie/madie-util" {
     createdBy: string,
     acls: Array<Acl>,
     draft?: boolean,
-    EditTestsOnVersionedMeasures?: boolean //this is a feature flag
+    editTestsOnVersionedMeasures?: boolean
   ): boolean;
 
   export function checkUserCanDelete(

@@ -123,6 +123,7 @@ export default function ActionCenter(props: ActionCenterProps) {
   };
 
   const deleteButtonCheck = () => {
+    console.log(selectedTestCases?.createdBeforeVersioning);
     if (canEdit && selectedTestCases?.length >= 1) {
       setDisableDeleteBtn(false);
     } else {
