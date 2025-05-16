@@ -17,7 +17,7 @@ import {
   TestCase,
   TestCaseValidationStatus,
 } from "@madie/madie-models";
-import {ExecutionStatusType} from "./CalculationService";
+import { ExecutionStatusType } from "./CalculationService";
 import {
   CV_EPISODE_WITH_STRAT_OBS_RESULTS,
   CV_PATIENT_WITH_OBS_RESULTS,

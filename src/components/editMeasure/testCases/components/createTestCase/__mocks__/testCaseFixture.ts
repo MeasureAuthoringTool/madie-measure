@@ -1,4 +1,9 @@
-import {MeasureScoring, PopulationType, TestCase, TestCaseValidationStatus} from "@madie/madie-models";
+import {
+  MeasureScoring,
+  PopulationType,
+  TestCase,
+  TestCaseValidationStatus,
+} from "@madie/madie-models";
 
 export const testCaseFixture: TestCase = {
   patientId: "",

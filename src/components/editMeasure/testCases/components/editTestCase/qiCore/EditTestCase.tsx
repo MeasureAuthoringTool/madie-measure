@@ -85,7 +85,10 @@ import EditorSearch from "./LeftPanel/EditorSearch";
 import useFormikResetOnEvent from "../../../../../common/useFormikResetOnEvent";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import {extractValidationErrorsFromOutcome, isHapiOutcomeIssueCodeInformational} from "./EditTestCaseUtil";
+import {
+  extractValidationErrorsFromOutcome,
+  isHapiOutcomeIssueCodeInformational,
+} from "./EditTestCaseUtil";
 
 const TestCaseForm = tw.form`m-3`;
 const ValidationErrorsButton = tw.button`
