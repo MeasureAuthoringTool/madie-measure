@@ -168,7 +168,7 @@ const RAVPage = ({ setExecutionContextReady }) => {
         onClose={onToastClose}
         autoHideDuration={10000}
         closeButtonProps={{
-          "data-testid": "close-error-button",
+          "data-testid": "close-toast-button",
         }}
       />
       <MadieDiscardDialog

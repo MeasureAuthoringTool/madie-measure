@@ -61,7 +61,7 @@ describe("RAVPage component", () => {
     jest.clearAllMocks();
   });
 
-  test("Changes to Test Case Configuration enables Save button and saving successfully displays success message", async () => {
+  test("Changes to Test Case Configuration enables Save button and saving successfully displays success toast", async () => {
     serviceApiMock = {
       updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
     } as unknown as MeasureServiceApi;
@@ -92,11 +92,59 @@ describe("RAVPage component", () => {
       })
     );
 
-    expect(
-      getByText("Test Case Configuration Updated Successfully")
-    ).toBeInTheDocument();
+    const successToast = getByTestId("edit-rav-success-text");
+    expect(successToast.textContent).toEqual(
+      "Test Case Configuration Updated Successfully"
+    );
 
-    const toastCloseButton = await findByTestId("close-error-button");
+    const toastCloseButton = await findByTestId("close-toast-button");
+    expect(toastCloseButton).toBeInTheDocument();
+    userEvent.click(toastCloseButton);
+    await waitFor(() => {
+      expect(toastCloseButton).not.toBeInTheDocument();
+    });
+  });
+
+  test("Changes to Test Case Configuration enables Save button but fails to save successfully and displays error toast", async () => {
+    serviceApiMock = {
+      updateMeasure: jest.fn().mockRejectedValueOnce({
+        status: 500,
+        response: { data: { message: "failed to update measure" } },
+      }),
+    } as unknown as MeasureServiceApi;
+    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+
+    renderRavPageComponent();
+
+    const ravOptionYes = screen.getByRole("radio", { name: "Yes" });
+    const ravOptionNo = screen.getByRole("radio", { name: "No" });
+
+    userEvent.click(getByLabelText("Yes"));
+
+    await waitFor(() => {
+      expect(ravOptionYes).toBeChecked();
+      expect(ravOptionNo).not.toBeChecked();
+    });
+
+    const saveButton = getByTestId("rav-save");
+    expect(saveButton).toBeInTheDocument();
+    await waitFor(() => expect(saveButton).toBeEnabled());
+    userEvent.click(saveButton);
+    await waitFor(() =>
+      expect(serviceApiMock.updateMeasure).toBeCalledWith({
+        ...measure,
+        testCaseConfiguration: {
+          ravIncluded: true,
+        },
+      })
+    );
+
+    const errorToast = getByTestId("edit-rav-generic-error-text");
+    expect(errorToast.textContent).toEqual(
+      "Error updating Test Case Configuration: failed to update measure"
+    );
+
+    const toastCloseButton = await findByTestId("close-toast-button");
     expect(toastCloseButton).toBeInTheDocument();
     userEvent.click(toastCloseButton);
     await waitFor(() => {
