@@ -1,14 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { TypeComponentProps } from "./TypeComponentProps";
-import useTerminologyServiceApi from "../../../../../../../../api/useTerminologyServiceApi";
 import Box from "@mui/system/Box";
 import { MenuItem } from "@mui/material";
 import { Select } from "@madie/madie-design-system/dist/react";
 import * as _ from "lodash";
-
-function getValueSetUrl(url: string) {
-  return url.split("|").shift();
-}
+import useFhirDefinitionsServiceApi from "../../../../../../../../api/useFhirDefinitionsService";
+import { getValueSetUrl } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
 
 const CodesComponent = ({
   canEdit,
@@ -18,22 +15,19 @@ const CodesComponent = ({
   onChange,
 }: TypeComponentProps) => {
   const [codes, setCodes] = useState([]);
-  const terminologyServiceApi = useRef(useTerminologyServiceApi());
+  const fhirDefinitionServiceApi = useRef(useFhirDefinitionsServiceApi());
 
   useEffect(() => {
     if (structureDefinition) {
       const valueSetVal = structureDefinition.binding?.valueSet;
       if (_.isEmpty(valueSetVal)) {
-        console.warn(
-          "No valuset binding found on structure definition: ",
-          structureDefinition
-        );
+        setCodes([]);
       } else {
         const valueSetUrl = getValueSetUrl(valueSetVal);
-        terminologyServiceApi.current
-          .getInternalValueSetExpansion(valueSetUrl)
-          .then((expansion) => {
-            setCodes(expansion?.expansion?.contains);
+        fhirDefinitionServiceApi.current
+          .getValueSetDefinition(valueSetUrl)
+          .then((valueSet) => {
+            setCodes(valueSet?.expansion?.contains);
           })
           .catch((error) => {
             console.error(
@@ -44,6 +38,10 @@ const CodesComponent = ({
       }
     }
   }, [structureDefinition]);
+
+  const placeHolder = (label) => (
+    <span style={{ color: "#717171" }}>{label}</span>
+  );
 
   return (
     <Box>
@@ -72,6 +70,9 @@ const CodesComponent = ({
             : []
         }
         value={value}
+        renderValue={(value) =>
+          codes?.find((concept) => concept.code === value)?.display || value
+        }
         onChange={(e) => onChange(e.target.value)}
       />
     </Box>

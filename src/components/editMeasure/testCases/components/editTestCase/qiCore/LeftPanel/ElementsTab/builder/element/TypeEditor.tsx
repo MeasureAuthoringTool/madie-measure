@@ -311,14 +311,25 @@ const TypeEditor = ({
               label?.id?.substring(label?.id?.lastIndexOf(".") + 1)
             )}
             structureDefinition={structureDefinition}
+            {...formik.getFieldProps(label)}
+            onChange={(value) => {
+              formik.setFieldTouched(label);
+              formik.setFieldValue(label, value);
+            }}
           />
         );
       case "Coding":
+      case "CodeableConcept":
         return (
           <CodingComponent
             canEdit={canEdit}
             structureDefinition={structureDefinition}
             fieldRequired={required}
+            {...formik.getFieldProps(label)}
+            onChange={(value) => {
+              formik.setFieldTouched(label);
+              formik.setFieldValue(label, value);
+            }}
           />
         );
       case "Extension":

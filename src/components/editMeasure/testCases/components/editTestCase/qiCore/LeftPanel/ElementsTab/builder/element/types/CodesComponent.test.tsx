@@ -60,7 +60,7 @@ describe("Codes Component", () => {
   });
   beforeEach(() => {
     mockedAxios.get.mockImplementation((url) => {
-      if (url.endsWith("/expand?url=" + valueSetUrl)) {
+      if (url.endsWith("/value-set-definition?url=" + valueSetUrl)) {
         return Promise.resolve({ data: mockExpansionResponse });
       }
     });
@@ -79,7 +79,7 @@ describe("Codes Component", () => {
       </ApiContextProvider>
     );
     expect(axios.get).toHaveBeenCalledWith(
-      "terminology-service.com/internal-terminology/ValueSet/expand?url=" +
+      "fhirService.com/qicore/resources/value-set-definition?url=" +
         valueSetUrl,
       { headers: { Authorization: "Bearer test.jwt" } }
     );
@@ -113,7 +113,7 @@ describe("Codes Component", () => {
       </ApiContextProvider>
     );
     expect(axios.get).toHaveBeenCalledWith(
-      "terminology-service.com/internal-terminology/ValueSet/expand?url=" +
+      "fhirService.com/qicore/resources/value-set-definition?url=" +
         valueSetUrl,
       { headers: { Authorization: "Bearer test.jwt" } }
     );
@@ -143,7 +143,7 @@ describe("Codes Component", () => {
       </ApiContextProvider>
     );
     expect(axios.get).toHaveBeenCalledWith(
-      "terminology-service.com/internal-terminology/ValueSet/expand?url=" +
+      "fhirService.com/qicore/resources/value-set-definition?url=" +
         valueSetUrl,
       { headers: { Authorization: "Bearer test.jwt" } }
     );

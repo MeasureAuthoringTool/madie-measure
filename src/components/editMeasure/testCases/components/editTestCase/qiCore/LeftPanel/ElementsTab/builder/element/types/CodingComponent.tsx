@@ -1,9 +1,23 @@
 import React, { useEffect, useRef, useState } from "react";
+import "twin.macro";
+import "styled-components/macro";
 import { TypeComponentProps } from "./TypeComponentProps";
-import useTerminologyServiceApi from "../../../../../../../../api/useTerminologyServiceApi";
-import { Select } from "@madie/madie-design-system/dist/react";
+import { Select, TextField } from "@madie/madie-design-system/dist/react";
 import { MenuItem } from "@mui/material";
 import useFhirDefinitionsServiceApi from "../../../../../../../../api/useFhirDefinitionsService";
+import useExecutionContext from "../../../../../../../routes/qiCore/useExecutionContext";
+import { ValueSet } from "fhir/r4";
+import { getValueSetUrl } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
+
+interface Concept {
+  code: string;
+  display: string;
+  system: string;
+}
+
+const placeHolder = (label: string) => (
+  <span style={{ color: "#717171" }}>{label}</span>
+);
 
 const CodingComponent = ({
   canEdit,
@@ -12,45 +26,42 @@ const CodingComponent = ({
   value,
   onChange,
 }: TypeComponentProps) => {
-  const [codes, setCodes] = useState([]);
-  const terminologyServiceApi = useRef(useTerminologyServiceApi());
+  // binding value set
+  const [bindingValueSet, setBindingValueSet] = useState<ValueSet>();
+  const [selectedValueSet, setSelectedValueSet] = useState<ValueSet>();
+  const [selectedConcepts, setSelectedConcepts] = useState<Concept[]>();
+  const [selectedConcept, setSelectedConcept] = useState<Concept>();
+
   const fhirDefinitionService = useRef(useFhirDefinitionsServiceApi());
+  const { valueSetsState, executionContextReady } = useExecutionContext();
+
+  const isBindingRequired =
+    structureDefinition.binding?.strength === "required";
+  const allValueSets = [];
+  // collect binding value set if present
+  if (bindingValueSet) {
+    allValueSets.push(bindingValueSet);
+  }
+  // if binding is not required, add all the value sets used in CQL
+  if (executionContextReady && !isBindingRequired) {
+    // value sets that are used in measure CQL
+    const [valueSets] = valueSetsState;
+    allValueSets.push(...valueSets);
+  }
+  console.log("structureDefinition", structureDefinition);
   useEffect(() => {
+    // reset selection on structure definition change
+    // setSelectedValueSet(undefined);
     if (structureDefinition) {
       // fetch expansion for binding if present
       if (structureDefinition.binding) {
-        const valueSetUrl = structureDefinition.binding.valueSet;
-        // 1. fetch expansion from internal HAPI
-        terminologyServiceApi.current
-          .getInternalValueSetExpansion(valueSetUrl)
-          .then((expansion) => {
-            if (expansion) {
-              setCodes(expansion?.expansion?.contains);
-            } else {
-              // 2. if expansion doesn't present in HAPI, get the value set definition & search in VSAC
-              fhirDefinitionService.current
-                .getValueSetDefinition(valueSetUrl)
-                .then((valueSet) => {
-                  if (valueSet) {
-                    const valueSetOIDs = valueSet.compose.include
-                      .flatMap((include) => include.valueSet)
-                      // filter out hl7 value sets. the one that doesn't have standard OIDs
-                      .filter((url) => url?.match(/[0-2](\.(0|[1-9][0-9]*))+/))
-                      .map((url) => url?.split("/").pop());
-                    terminologyServiceApi.current
-                      .getValueSetsExpansionForOids(valueSetOIDs)
-                      .then((valueSets) => {
-                        const expandedCodes = valueSets.flatMap(
-                          (valueSet) => valueSet.expansion.contains
-                        );
-                        setCodes(expandedCodes);
-                      })
-                      .catch((err) => {
-                        console.error(err.message);
-                      });
-                  }
-                });
-            }
+        const valueSetUrl = getValueSetUrl(
+          structureDefinition.binding.valueSet
+        );
+        fhirDefinitionService.current
+          .getValueSetDefinition(valueSetUrl)
+          .then((valueSet) => {
+            setBindingValueSet(valueSet);
           })
           .catch((error) => {
             console.error(
@@ -62,36 +73,250 @@ const CodingComponent = ({
     }
   }, [structureDefinition]);
 
-  const handleChange = (code) => {
-    const selectedCode = codes.find((c) => c.code === code);
-    onChange({
-      system: selectedCode.system,
-      code: selectedCode.code,
-      display: selectedCode.display,
-    });
+  useEffect(() => {
+    if (selectedConcept?.code && selectedConcept?.system) {
+      onChange(selectedConcept);
+    }
+  }, [selectedConcept]);
+
+  // Change handlers
+  const handleValueSetChange = (value: string) => {
+    // clear code system and code
+    setSelectedConcepts([]);
+    setSelectedConcept(undefined);
+    if (value === "Custom Code") {
+      setSelectedValueSet({
+        title: "Custom Code",
+        name: "Custom Code",
+      } as unknown as ValueSet);
+    } else {
+      const valueSet = allValueSets.find((vs) => vs.name === value);
+      setSelectedValueSet(valueSet);
+    }
   };
 
-  return (
-    <Select
-      placeHolder={{ name: "- Select -", value: undefined }}
-      id={`code-selector-${label}`}
-      inputProps={{
-        "data-testid": `code-selector-input-${label}`,
-      }}
-      data-testid={`code-selector-${label}`}
-      disabled={!canEdit}
-      options={codes?.map((concept) => (
+  const handleCodeSystemChange = (codeSystem: string) => {
+    setSelectedConcept({
+      system: codeSystem,
+      code: "",
+      display: "",
+    });
+    if (selectedValueSet.title !== "Custom Code") {
+      const concepts = selectedValueSet.expansion?.contains.filter(
+        (concept) => concept.system === codeSystem
+      );
+      setSelectedConcepts(concepts as Concept[]);
+    }
+  };
+
+  const handleCodeChange = (code: string) => {
+    if (selectedValueSet.title === "Custom Code") {
+      setSelectedConcept((prevState) => ({
+        ...prevState,
+        code: code,
+        display: code,
+      }));
+    } else {
+      const concept = selectedConcepts.find((concept) => concept.code === code);
+      setSelectedConcept({
+        system: concept.system,
+        code: concept.code,
+        display: concept.display,
+      });
+    }
+  };
+
+  // Menu options
+  const getValueSetMenuOptions = () => {
+    const menuOptions =
+      allValueSets?.map((valueSet) => {
+        return (
+          <MenuItem
+            key={valueSet?.name}
+            value={valueSet?.name}
+            data-testid={`value-set-option-${valueSet?.name}`}
+          >
+            {valueSet?.title}
+          </MenuItem>
+        );
+      }) || [];
+
+    // for required bindings, show only the binding value set
+    if (isBindingRequired && menuOptions.length > 0) {
+      return menuOptions;
+      // for non-required bindings, allow custom coding, binding value set and value sets used in CQL
+    } else if (executionContextReady && !isBindingRequired) {
+      return [
+        <MenuItem
+          key="custom-code"
+          value="Custom Code"
+          data-testid="value-set-option-custom-code"
+        >
+          Custom Code
+        </MenuItem>,
+        ...allValueSets.map((valueSet) => {
+          return (
+            <MenuItem
+              key={valueSet?.name}
+              value={valueSet?.name}
+              data-testid={`value-set-option-${valueSet?.name}`}
+            >
+              {valueSet?.title}
+            </MenuItem>
+          );
+        }),
+      ];
+    } else {
+      return [<MenuItem value="">Loading...</MenuItem>];
+    }
+  };
+
+  const getCodeSystemMenuOptions = () => {
+    const codeSystems = selectedValueSet?.expansion?.contains?.map(
+      (concept) => concept.system
+    );
+    if (codeSystems) {
+      return [...new Set(codeSystems)].map((codeSystem) => {
+        return (
+          <MenuItem
+            key={codeSystem}
+            value={codeSystem}
+            data-testid={`code-system-option-${codeSystem}`}
+          >
+            {codeSystem}
+          </MenuItem>
+        );
+      });
+    }
+    return [];
+  };
+
+  const getCodeMenuOptions = () => {
+    return selectedConcepts.map((concept) => {
+      return (
         <MenuItem
           key={concept.code}
           value={concept.code}
           data-testid={`code-option-${concept.code}`}
         >
-          {concept.display}
+          {`${concept.code} - ${concept.display}`}
         </MenuItem>
-      ))}
-      value={value}
-      onChange={(e) => handleChange(e.target.value)}
-    />
+      );
+    });
+  };
+
+  return (
+    <>
+      <Select
+        label="Value Set / Direct Reference Code"
+        id={`value-set-selector-${label}`}
+        inputProps={{
+          "data-testid": `value-set-selector-input-${label}`,
+        }}
+        data-testid={`value-set-${label}`}
+        disabled={!canEdit}
+        options={getValueSetMenuOptions()}
+        value={selectedValueSet ? selectedValueSet?.name : ""}
+        renderValue={(value) => {
+          if (value === "") {
+            return placeHolder("- Select -");
+          }
+          return selectedValueSet?.title;
+        }}
+        onChange={(e) => handleValueSetChange(e.target.value)}
+      />
+      {selectedValueSet && (
+        <div tw="flex mt-3">
+          {selectedValueSet.title == "Custom Code" ? (
+            <>
+              <div tw="w-1/2">
+                <TextField
+                  id="custom-code-system"
+                  tw="w-full"
+                  label="Custom Code System"
+                  placeholder="Custom Code System"
+                  required={true}
+                  disabled={!canEdit}
+                  inputProps={{
+                    "data-testid": "custom-code-system-input",
+                  }}
+                  data-testid="custom-code-system"
+                  onChange={(event) =>
+                    handleCodeSystemChange(event.target.value)
+                  }
+                />
+              </div>
+              <div tw="w-1/2 pl-3">
+                <TextField
+                  id="custom-code"
+                  tw="w-full"
+                  label="Custom Code"
+                  placeholder="Custom Code"
+                  required={true}
+                  disabled={!canEdit}
+                  inputProps={{
+                    "data-testid": "custom-code-input",
+                  }}
+                  data-testid="custom-code"
+                  onChange={(event) => handleCodeChange(event.target.value)}
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <div tw="w-1/2">
+                <Select
+                  placeHolder={{
+                    name: "Select Code System",
+                    value: "",
+                  }}
+                  label="Code System"
+                  id="code-system-selector"
+                  inputProps={{
+                    "data-testid": "code-system-selector-input",
+                  }}
+                  data-testid="code-system-selector"
+                  disabled={!canEdit}
+                  required="true"
+                  SelectDisplayProps={{
+                    "aria-required": "true",
+                  }}
+                  options={getCodeSystemMenuOptions()}
+                  value={selectedConcept?.system ? selectedConcept.system : ""}
+                  onChange={(event) =>
+                    handleCodeSystemChange(event.target.value)
+                  }
+                />
+              </div>
+              <div tw="w-1/2 pl-3">
+                <Select
+                  label="Code"
+                  id="code-selector"
+                  inputProps={{
+                    "data-testid": "code-selector-input",
+                  }}
+                  data-testid="code-selector"
+                  disabled={!canEdit}
+                  required={true}
+                  SelectDisplayProps={{
+                    "aria-required": "true",
+                  }}
+                  options={getCodeMenuOptions()}
+                  value={selectedConcept?.code ? selectedConcept.code : ""}
+                  renderValue={(value) => {
+                    if (value === "") {
+                      return placeHolder("Select Code");
+                    }
+                    return `${selectedConcept?.code} - ${selectedConcept?.display}`;
+                  }}
+                  onChange={(event) => handleCodeChange(event.target.value)}
+                />
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </>
   );
 };
 
