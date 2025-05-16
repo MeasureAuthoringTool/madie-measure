@@ -1,12 +1,12 @@
 import * as React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import ActionCenter from "./ActionCenter";
 import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import userEvent from "@testing-library/user-event";
 
 const mockActions = [
-  { name: "Add Item", icon: <AddIcon />, onClick: jest.fn() },
-  { name: "Delete Item", icon: <DeleteIcon />, onClick: jest.fn() },
+  { name: "Add", icon: <AddIcon />, onClick: jest.fn() },
+  { name: "Delete", icon: <DeleteIcon />, onClick: jest.fn() },
 ];
 
 const mockTarget = { id: "test-target" };
@@ -48,7 +48,99 @@ describe("ActionCenter", () => {
         `action-center-${testId}_${action.name.replace(/\s/g, "")}`
       );
       userEvent.click(actionButton);
-      expect(action.onClick).toHaveBeenCalledWith(mockTarget);
+      if (action.name !== "Delete") {
+        expect(action.onClick).toHaveBeenCalledWith(mockTarget);
+      }
+    });
+  });
+
+  it("MadieDeleteDialog opens when delect action is clicked", async () => {
+    render(
+      <ActionCenter actions={mockActions} testId={testId} target={mockTarget} />
+    );
+    const button = screen.getByTestId(`action-center-button-${testId}`);
+    userEvent.click(button);
+
+    const deleteBtn = screen.getByTestId("action-center-test-component_Delete");
+    expect(deleteBtn).toBeInTheDocument();
+    userEvent.click(deleteBtn);
+
+    const deleteDialog = screen.getByTestId("delete-dialog");
+    expect(deleteDialog).toBeInTheDocument();
+    expect(screen.getByText("Delete Element")).toBeInTheDocument();
+
+    const closeBtn = screen.getByTestId("close-button");
+    expect(closeBtn).toBeInTheDocument();
+    expect(
+      screen.getByTestId("delete-dialog-cancel-button")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("delete-dialog-continue-button")
+    ).toBeInTheDocument();
+
+    userEvent.click(closeBtn);
+    await waitFor(() => {
+      expect(deleteDialog).not.toBeInTheDocument();
+      expect(mockActions[1].onClick).not.toHaveBeenCalledWith(mockTarget);
+    });
+  });
+
+  it("Clicks Cancel on MadieDeleteDialog cancels delete action", async () => {
+    render(
+      <ActionCenter actions={mockActions} testId={testId} target={mockTarget} />
+    );
+    const button = screen.getByTestId(`action-center-button-${testId}`);
+    userEvent.click(button);
+
+    const deleteBtn = screen.getByTestId("action-center-test-component_Delete");
+    expect(deleteBtn).toBeInTheDocument();
+    userEvent.click(deleteBtn);
+
+    const deleteDialog = screen.getByTestId("delete-dialog");
+    expect(deleteDialog).toBeInTheDocument();
+    expect(screen.getByText("Delete Element")).toBeInTheDocument();
+
+    expect(screen.getByTestId("close-button")).toBeInTheDocument();
+    const cancelBtn = screen.getByTestId("delete-dialog-cancel-button");
+    expect(cancelBtn).toBeInTheDocument();
+    expect(
+      screen.getByTestId("delete-dialog-continue-button")
+    ).toBeInTheDocument();
+
+    userEvent.click(cancelBtn);
+    await waitFor(() => {
+      expect(deleteDialog).not.toBeInTheDocument();
+      expect(mockActions[1].onClick).not.toHaveBeenCalledWith(mockTarget);
+    });
+  });
+
+  it("Clicks Continue on MadieDeleteDialog continues delete action", async () => {
+    render(
+      <ActionCenter actions={mockActions} testId={testId} target={mockTarget} />
+    );
+    const button = screen.getByTestId(`action-center-button-${testId}`);
+    userEvent.click(button);
+
+    const deleteBtn = screen.getByTestId("action-center-test-component_Delete");
+    expect(deleteBtn).toBeInTheDocument();
+    userEvent.click(deleteBtn);
+
+    const deleteDialog = screen.getByTestId("delete-dialog");
+    expect(deleteDialog).toBeInTheDocument();
+    expect(screen.getByText("Delete Element")).toBeInTheDocument();
+
+    expect(screen.getByTestId("close-button")).toBeInTheDocument();
+
+    expect(
+      screen.getByTestId("delete-dialog-cancel-button")
+    ).toBeInTheDocument();
+    const continueBtn = screen.getByTestId("delete-dialog-continue-button");
+    expect(continueBtn).toBeInTheDocument();
+
+    userEvent.click(continueBtn);
+    await waitFor(() => {
+      expect(deleteDialog).not.toBeInTheDocument();
+      expect(mockActions[1].onClick).toHaveBeenCalledWith(mockTarget);
     });
   });
 });
