@@ -1659,10 +1659,12 @@ export const ContinuousVariable_Encounter_Pass: TestCaseProcessingScenario = {
   measureGroups: [
     {
       id: "638e14401b05491a43ce8a18",
+      displayId: "Group_1",
       scoring: "Continuous Variable",
       populations: [
         {
           id: "77b6063f-f7c8-45db-8d84-1f0d8e7993b5",
+          displayId: "InitialPopulation_1",
           name: PopulationType.INITIAL_POPULATION,
           definition: "ipp",
           associationType: null,
@@ -1670,6 +1672,7 @@ export const ContinuousVariable_Encounter_Pass: TestCaseProcessingScenario = {
         },
         {
           id: "797c4d66-cfd3-4ced-a482-1d55d5cad85c",
+          displayId: "MeasurePopulation_1",
           name: PopulationType.MEASURE_POPULATION,
           definition: "mPop",
           associationType: null,
@@ -1677,6 +1680,7 @@ export const ContinuousVariable_Encounter_Pass: TestCaseProcessingScenario = {
         },
         {
           id: "5edeebba-b888-4d92-a8b2-8568d78ceb86",
+          displayId: "MeasurePopulationExclusion_1",
           name: PopulationType.MEASURE_POPULATION_EXCLUSION,
           definition: "",
           associationType: null,
@@ -1686,6 +1690,7 @@ export const ContinuousVariable_Encounter_Pass: TestCaseProcessingScenario = {
       measureObservations: [
         {
           id: "ff17cb94-c66e-4f70-a66d-52ace013d054",
+          displayId: "MeasureObservation_1",
           definition: "daysObs",
           criteriaReference: "797c4d66-cfd3-4ced-a482-1d55d5cad85c",
           aggregateMethod: AggregateFunctionType.COUNT,
@@ -2508,10 +2513,12 @@ export const ContinuousVariable_Encounter_Fail: TestCaseProcessingScenario = {
   measureGroups: [
     {
       id: "638e14401b05491a43ce8a18",
+      displayId: "638e14401b05491a43ce8a18",
       scoring: "Continuous Variable",
       populations: [
         {
           id: "77b6063f-f7c8-45db-8d84-1f0d8e7993b5",
+          displayId: "77b6063f-f7c8-45db-8d84-1f0d8e7993b5",
           name: PopulationType.INITIAL_POPULATION,
           definition: "ipp",
           associationType: null,
@@ -2519,6 +2526,7 @@ export const ContinuousVariable_Encounter_Fail: TestCaseProcessingScenario = {
         },
         {
           id: "797c4d66-cfd3-4ced-a482-1d55d5cad85c",
+          displayId: "797c4d66-cfd3-4ced-a482-1d55d5cad85c",
           name: PopulationType.MEASURE_POPULATION,
           definition: "mPop",
           associationType: null,
@@ -2526,6 +2534,7 @@ export const ContinuousVariable_Encounter_Fail: TestCaseProcessingScenario = {
         },
         {
           id: "5edeebba-b888-4d92-a8b2-8568d78ceb86",
+          displayId: "5edeebba-b888-4d92-a8b2-8568d78ceb86",
           name: PopulationType.MEASURE_POPULATION_EXCLUSION,
           definition: "",
           associationType: null,
@@ -2535,6 +2544,7 @@ export const ContinuousVariable_Encounter_Fail: TestCaseProcessingScenario = {
       measureObservations: [
         {
           id: "ff17cb94-c66e-4f70-a66d-52ace013d054",
+          displayId: "ff17cb94-c66e-4f70-a66d-52ace013d054",
           definition: "daysObs",
           criteriaReference: "797c4d66-cfd3-4ced-a482-1d55d5cad85c",
           aggregateMethod: AggregateFunctionType.COUNT,

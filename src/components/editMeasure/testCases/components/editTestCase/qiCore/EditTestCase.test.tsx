@@ -166,17 +166,20 @@ const defaultMeasure = {
   groups: [
     {
       groupId: "Group1_ID",
+      displayId: "Group1_ID",
       scoring: "Cohort",
       populations: [
         {
           id: "id-1",
+          displayId: "id-1",
           name: PopulationType.INITIAL_POPULATION,
           definition: "Pop1",
         },
       ],
       stratifications: [
         {
-          id: "strat-id-1",
+          id: "id-2",
+          displayId: "strat-id-1",
           description: "strat1 description",
           cqlDefinition: "cql definition",
           associations: [PopulationType.INITIAL_POPULATION],

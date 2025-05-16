@@ -1037,6 +1037,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         cqlDefinitionCallstack={callstackMap}
                         includeSDE={measure?.testCaseConfiguration?.sdeIncluded}
                         supplementalData={measure?.supplementalData}
+                        groups={measure?.groups}
                       />
                     )}
                   </div>
@@ -1052,6 +1053,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                       }}
                       errors={formik.errors.groupPopulations}
                       groupsStratificationAssociationMap={stratificationsMap}
+                      groups={measure.groups}
                       onChange={(
                         groupPopulations,
                         changedGroupId,
@@ -1330,8 +1332,8 @@ const EditTestCase = (props: EditTestCaseProps) => {
                       ) ||
                       _.isNil(measure?.groups) ||
                       measure?.groups.length === 0 ||
-                      (!isJsonModified() &&
-                        hasErrorSeverity(validationErrors)) ||
+                      // (!isJsonModified() &&
+                      //   hasErrorSeverity(validationErrors)) ||
                       isEmptyTestCaseJsonString(editorVal) ||
                       !executionContextReady ||
                       executing
