@@ -44,6 +44,8 @@ export default function MeasureLanding() {
   const [currentLimit, setCurrentLimit] = useState(10);
   const [currentPage, setCurrentPage] = useState(0);
   const [errMsg, setErrMsg] = useState(undefined);
+  const [currentSort, setCurrentSort] = useState("");
+  const [currentDirection, setCurrentDirection] = useState("");
   const abortController = useRef(null);
   const featureFlags = useFeatureFlags();
 
@@ -65,7 +67,7 @@ export default function MeasureLanding() {
   };
 
   const retrieveMeasures = useCallback(
-    async (tab, limit, page, searchCriteria) => {
+    async (tab, limit, page, searchCriteria, sort, direction) => {
       abortController.current = new AbortController();
       setLoading(true);
       try {
@@ -75,6 +77,8 @@ export default function MeasureLanding() {
             tab === 0,
             limit,
             page,
+            sort,
+            direction,
             abortController.current.signal
           );
           setPageProps(data);
@@ -132,13 +136,22 @@ export default function MeasureLanding() {
       activeTab,
       curLimit === undefined ? 10 : curLimit,
       curPage - 1,
-      searchCriteria
+      searchCriteria,
+      currentSort,
+      currentDirection
     );
   }, [retrieveMeasures, activeTab, curLimit, curPage, measureServiceApi]);
   // create is in a different app, so we need to listen for it.
   useEffect(() => {
     const createListener = () => {
-      retrieveMeasures(0, curLimit === undefined ? 10 : curLimit, 0, undefined);
+      retrieveMeasures(
+        0,
+        curLimit === undefined ? 10 : curLimit,
+        0,
+        undefined,
+        currentSort,
+        currentDirection
+      );
     };
     window.addEventListener("create", createListener, false);
     return () => {
@@ -224,6 +237,10 @@ export default function MeasureLanding() {
                 setSearchCriteria={setSearchCriteria}
                 currentLimit={currentLimit}
                 currentPage={currentPage}
+                currentSort={currentSort}
+                setCurrentSort={setCurrentSort}
+                currentDirection={currentDirection}
+                setCurrentDirection={setCurrentDirection}
                 setErrMsg={setErrMsg}
               />
               <div className="pagination-container">

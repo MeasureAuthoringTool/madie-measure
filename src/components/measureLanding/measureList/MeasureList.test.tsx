@@ -249,6 +249,8 @@ const setOffsetMock = jest.fn();
 const setLoadingMock = jest.fn();
 const setSearchCriteriaMock = jest.fn();
 const setErrMsgMock = jest.fn();
+const setCurrentSortMock = jest.fn();
+const setCurrentDirectionMock = jest.fn();
 
 describe("Measure List component", () => {
   beforeEach(() => {
@@ -436,6 +438,8 @@ describe("Measure List component", () => {
       true,
       10,
       0,
+      "",
+      "",
       abortController.signal
     );
     unmount();
@@ -522,6 +526,8 @@ describe("Measure List component", () => {
       true,
       10,
       0,
+      "",
+      "",
       abortController.signal
     );
     expect(mockPush).toHaveBeenCalledWith("?tab=0&page=1&limit=10");
@@ -2659,6 +2665,176 @@ describe("Measure List component", () => {
       expect(getByText("Shared")).toBeInTheDocument();
       expect(getByText("CMS ID")).toBeInTheDocument();
       expect(getByText("Updated")).toBeInTheDocument();
+    });
+
+    it("should enable sortable columns when MeasureSearch is enabled", async () => {
+      const { getByText } = render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={measures}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setLoading={setLoadingMock}
+            activeTab={0}
+            searchCriteria={""}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            setErrMsg={setErrMsgMock}
+          />
+        </ServiceContext.Provider>
+      );
+
+      // Verify all columns are present
+      expect(getByText("Measure")).toBeInTheDocument();
+      const measureButton = screen.getByRole("button", {
+        name: "Measure",
+      });
+      expect(measureButton).toBeEnabled();
+      expect(getByText("Version")).toBeInTheDocument();
+      const versionButton = screen.getByRole("button", {
+        name: "Version",
+      });
+      expect(versionButton).toBeEnabled();
+      expect(getByText("Status")).toBeInTheDocument();
+      const statusButton = screen.getByRole("button", {
+        name: "Status",
+      });
+      expect(statusButton).toBeEnabled();
+      expect(getByText("Model")).toBeInTheDocument();
+      const modelButton = screen.getByRole("button", {
+        name: "Model",
+      });
+      expect(modelButton).toBeEnabled();
+      expect(getByText("Shared")).toBeInTheDocument();
+      const sharedButton = screen.getByRole("button", {
+        name: "Shared",
+      });
+      expect(sharedButton).toBeEnabled();
+      expect(getByText("CMS ID")).toBeInTheDocument();
+      const cmsIdButton = screen.getByRole("button", {
+        name: "CMS ID",
+      });
+      expect(cmsIdButton).toBeEnabled();
+      expect(getByText("Updated")).toBeInTheDocument();
+      const updatedButton = screen.getByRole("button", {
+        name: "Updated",
+      });
+      expect(updatedButton).toBeEnabled();
+    });
+
+    it("should sort in order when column is clicked first", async () => {
+      const { getByText } = render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={measures}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setLoading={setLoadingMock}
+            activeTab={0}
+            searchCriteria={""}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            currentSort={""}
+            setCurrentSort={setCurrentSortMock}
+            currentDirection={""}
+            setCurrentDirection={setCurrentDirectionMock}
+            setErrMsg={setErrMsgMock}
+          />
+        </ServiceContext.Provider>
+      );
+
+      expect(getByText("Version")).toBeInTheDocument();
+      const versionButton = screen.getByRole("button", {
+        name: "Version",
+      });
+      expect(versionButton).toBeEnabled();
+
+      fireEvent.click(versionButton);
+      expect(setCurrentSortMock).toHaveBeenCalledWith("version");
+      expect(setCurrentDirectionMock).toHaveBeenCalledWith("ASC");
+      expect(mockPush).toHaveBeenCalledWith("?tab=0&page=1&limit=10");
+    });
+
+    it("should sort in order when column is clicked second", async () => {
+      const { getByText } = render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={measures}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setLoading={setLoadingMock}
+            activeTab={0}
+            searchCriteria={""}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            currentSort={"version"}
+            setCurrentSort={setCurrentSortMock}
+            currentDirection={"ASC"}
+            setCurrentDirection={setCurrentDirectionMock}
+            setErrMsg={setErrMsgMock}
+          />
+        </ServiceContext.Provider>
+      );
+
+      expect(getByText("Version")).toBeInTheDocument();
+      const versionButton = screen.getByRole("button", {
+        name: "Version",
+      });
+      expect(versionButton).toBeEnabled();
+
+      fireEvent.click(versionButton);
+      expect(setCurrentSortMock).toHaveBeenCalledWith("version");
+      expect(setCurrentDirectionMock).toHaveBeenCalledWith("DESC");
+      expect(mockPush).toHaveBeenCalledWith("?tab=0&page=1&limit=10");
+    });
+
+    it("should sort in order when column is clicked third", async () => {
+      const { getByText } = render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={measures}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setLoading={setLoadingMock}
+            activeTab={0}
+            searchCriteria={""}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            currentSort={"version"}
+            setCurrentSort={setCurrentSortMock}
+            currentDirection={"DESC"}
+            setCurrentDirection={setCurrentDirectionMock}
+            setErrMsg={setErrMsgMock}
+          />
+        </ServiceContext.Provider>
+      );
+
+      expect(getByText("Version")).toBeInTheDocument();
+      const versionButton = screen.getByRole("button", {
+        name: "Version",
+      });
+      expect(versionButton).toBeEnabled();
+
+      fireEvent.click(versionButton);
+      expect(setCurrentSortMock).toHaveBeenCalledWith("");
+      expect(setCurrentDirectionMock).toHaveBeenCalledWith("");
+      expect(mockPush).toHaveBeenCalledWith("?tab=0&page=1&limit=10");
     });
 
     it("should display shared icon when measure has ACLs", async () => {
