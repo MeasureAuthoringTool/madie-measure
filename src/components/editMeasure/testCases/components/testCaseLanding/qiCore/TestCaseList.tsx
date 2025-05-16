@@ -711,6 +711,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                         displayTestCaseCopyDialog={() =>
                           setOpenCopyTestCaseDialog(true)
                         }
+                        isDraft={measure?.measureMetaData?.draft}
                       />
                       <TestCaseTable
                         sorting={sorting}
