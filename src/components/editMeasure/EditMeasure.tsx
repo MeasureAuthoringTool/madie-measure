@@ -539,6 +539,7 @@ export default function EditMeasure() {
                     </>
                   }
                   canClose={false}
+                  copyButton={true}
                 />
               )}
             </div>
