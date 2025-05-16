@@ -15,8 +15,9 @@ import {
   PopulationType,
   Stratification,
   TestCase,
+  TestCaseValidationStatus,
 } from "@madie/madie-models";
-import { ExecutionStatusType } from "./CalculationService";
+import {ExecutionStatusType} from "./CalculationService";
 import {
   CV_EPISODE_WITH_STRAT_OBS_RESULTS,
   CV_PATIENT_WITH_OBS_RESULTS,
@@ -614,6 +615,7 @@ describe("QDM CalculationService Tests", () => {
         series: "IPP_Pass",
         validResource: true,
         hapiOperationOutcome: null,
+        testCaseValidationStatus: TestCaseValidationStatus.NOT_COMPLETE,
         json: "{}",
         executionStatus: null,
         patientId: "patient-1a",
@@ -664,6 +666,7 @@ describe("QDM CalculationService Tests", () => {
         series: "IPP_Pass",
         validResource: true,
         hapiOperationOutcome: null,
+        testCaseValidationStatus: null,
         json: "{}",
         executionStatus: null,
         patientId: "patient-1a",
@@ -782,6 +785,7 @@ describe("QDM CalculationService Tests", () => {
         series: "IPP_Pass",
         validResource: true,
         hapiOperationOutcome: null,
+        testCaseValidationStatus: null,
         json: "{}",
         executionStatus: null,
         patientId: "patient-1a",
@@ -856,6 +860,7 @@ describe("QDM CalculationService Tests", () => {
         series: "IPP_Pass",
         validResource: true,
         hapiOperationOutcome: null,
+        testCaseValidationStatus: null,
         json: "{}",
         executionStatus: null,
         patientId: "patient-1a",
@@ -954,6 +959,7 @@ describe("QDM CalculationService Tests", () => {
         series: "IPP_Pass",
         validResource: true,
         hapiOperationOutcome: null,
+        testCaseValidationStatus: null,
         json: "{}",
         executionStatus: null,
         patientId: "patient-1a",
@@ -1028,6 +1034,7 @@ describe("QDM CalculationService Tests", () => {
         series: "IPP_Pass",
         validResource: true,
         hapiOperationOutcome: null,
+        testCaseValidationStatus: null,
         json: "{}",
         executionStatus: null,
         patientId: "patient-1a",
