@@ -113,6 +113,7 @@ const mockMeasure = {
   ],
   model: Model.QDM_5_6,
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
+  measureMetaData: { draft: true },
   cql: measureCql,
 } as unknown as Measure;
 jest.mock("@madie/madie-util", () => ({

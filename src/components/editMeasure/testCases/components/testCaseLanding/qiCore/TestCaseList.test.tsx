@@ -126,6 +126,7 @@ const mockMeasure = {
     },
   ],
   model: Model.QICORE,
+  measureMetaData: { draft: true },
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }], //#nosec
 } as Measure;
 jest.mock("@madie/madie-util", () => ({

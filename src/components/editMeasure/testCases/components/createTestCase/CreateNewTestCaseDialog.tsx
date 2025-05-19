@@ -139,6 +139,7 @@ const CreateNewTestCaseDialog = ({
     testCase.title = sanitizeUserInput(testCase.title);
     testCase.description = sanitizeUserInput(testCase.description);
     testCase.series = sanitizeUserInput(testCase.series);
+    //testCase.createdBeforeVersioning = test
 
     if (measure?.model?.includes("QDM")) {
       testCase = defaultTestCaseJson(testCase);
