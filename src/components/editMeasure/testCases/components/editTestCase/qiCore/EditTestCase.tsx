@@ -85,6 +85,10 @@ import EditorSearch from "./LeftPanel/EditorSearch";
 import useFormikResetOnEvent from "../../../../../common/useFormikResetOnEvent";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import {
+  extractValidationErrorsFromOutcome,
+  isHapiOutcomeIssueCodeInformational,
+} from "./EditTestCaseUtil";
 
 const TestCaseForm = tw.form`m-3`;
 const ValidationErrorsButton = tw.button`
@@ -275,7 +279,8 @@ const EditTestCase = (props: EditTestCaseProps) => {
   const canEdit = checkUserCanEdit(
     measure?.measureSet?.owner,
     measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
+    measure?.measureMetaData?.draft,
+    featureFlags?.EditTestsOnVersionedMeasures
   );
 
   const formik = useFormik({
@@ -377,8 +382,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
   };
 
   const loadTestCase = () => {
+    const isQiCoreV6 = measure?.model === "QI-Core v6.0.0";
     testCaseService.current
-      .getTestCase(id, measureId, true)
+      .getTestCase(id, measureId, !isQiCoreV6)
       .then((tc: TestCase) => {
         const nextTc = _.cloneDeep(tc);
         nextTc.json = standardizeJson(nextTc);
@@ -524,7 +530,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
         testCase,
         measureId
       );
-
       const updatedTc = _.cloneDeep(updatedTestCase);
       updatedTc.json = standardizeJson(updatedTc);
       resetForm({
@@ -634,7 +639,12 @@ const EditTestCase = (props: EditTestCaseProps) => {
     if (testCase && testCase.id) {
       const validationErrors =
         testCase?.hapiOperationOutcome?.outcomeResponse?.issue;
-      if (hasValidHapiOutcome(testCase)) {
+      if (testCase.testCaseValidationStatus === "Pending") {
+        showToast(
+          `Test case ${action}d successfully! Test case validation has started running, please continue working in MADiE.`,
+          "success"
+        );
+      } else if (hasValidHapiOutcome(testCase)) {
         showToast(`Test case ${action}d successfully!`, "success");
       } else {
         const valErrors = validationErrors.map((error) => (
@@ -711,15 +721,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
     updateMeasure(measureCopy);
   }
 
-  function isHapiOutcomeIssueCodeInformational(outcome: HapiOperationOutcome) {
-    if (_.isNil(outcome?.outcomeResponse?.issue)) return true; // no issues, valid.
-    return (
-      outcome?.outcomeResponse?.issue?.filter(
-        (issue) => /^information/.exec(issue.severity) === null
-      ).length <= 0
-    );
-  }
-
   // TODO: What's the diff between this function and "handleHapiOutcome"?
   // do we need both?
   function hasValidHapiOutcome(testCase: TestCase) {
@@ -733,34 +734,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
   }
 
   function handleHapiOutcome(outcome: HapiOperationOutcome) {
-    if (
-      _.isNil(outcome) ||
-      (outcome.successful !== false &&
-        (outcome.code === 200 || outcome.code === 201) &&
-        isHapiOutcomeIssueCodeInformational(outcome))
-    ) {
-      setValidationErrors(() => []);
-      return [];
-    }
-    if (
-      outcome.outcomeResponse?.issue?.length > 0 &&
-      !isHapiOutcomeIssueCodeInformational(outcome)
-    ) {
-      const ves = outcome.outcomeResponse.issue.map((issue, index) => ({
-        ...issue,
-        key: index,
-      }));
-      setValidationErrors(() => ves);
-      return ves;
-    } else {
-      const error =
-        outcome.outcomeResponse?.text ||
-        outcome.message ||
-        `HAPI FHIR returned error code ${outcome.code} but no discernible error message`;
-      const ves = [{ key: 0, diagnostics: error }];
-      setValidationErrors(ves);
-      return ves;
-    }
+    const errors = extractValidationErrorsFromOutcome(outcome);
+    setValidationErrors(errors);
+    return errors;
   }
 
   function formikErrorHandler(name: string) {
