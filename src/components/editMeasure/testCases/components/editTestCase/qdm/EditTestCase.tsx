@@ -4,6 +4,7 @@ import {
   measureStore,
   checkUserCanEdit,
   routeHandlerStore,
+  useFeatureFlags,
 } from "@madie/madie-util";
 import { TestCase, MeasureErrorType } from "@madie/madie-models";
 import "../qiCore/EditTestCase.scss";
@@ -46,6 +47,7 @@ import { GroupPopulation } from "@madie/madie-models/dist/TestCase";
 
 const EditTestCase = () => {
   useDocumentTitle("MADiE Edit Measure Edit Test Case");
+  const featureFlags = useFeatureFlags();
   /* For formik, we could simplify our patterns in some places
 
   Establish a single source of truth and preserve it in state
@@ -65,7 +67,8 @@ const EditTestCase = () => {
   const canEdit = checkUserCanEdit(
     measure?.measureSet?.owner,
     measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
+    measure?.measureMetaData?.draft,
+    featureFlags?.EditTestsOnVersionedMeasures
   );
 
   // Toast utilities
