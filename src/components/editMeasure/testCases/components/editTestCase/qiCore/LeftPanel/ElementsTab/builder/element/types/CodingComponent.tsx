@@ -48,10 +48,7 @@ const CodingComponent = ({
     const [valueSets] = valueSetsState;
     allValueSets.push(...valueSets);
   }
-  console.log("structureDefinition", structureDefinition);
   useEffect(() => {
-    // reset selection on structure definition change
-    // setSelectedValueSet(undefined);
     if (structureDefinition) {
       // fetch expansion for binding if present
       if (structureDefinition.binding) {
@@ -167,7 +164,11 @@ const CodingComponent = ({
         }),
       ];
     } else {
-      return [<MenuItem value="">Loading...</MenuItem>];
+      return [
+        <MenuItem value="" data-testid="value-set-option-loading">
+          Loading...
+        </MenuItem>,
+      ];
     }
   };
 

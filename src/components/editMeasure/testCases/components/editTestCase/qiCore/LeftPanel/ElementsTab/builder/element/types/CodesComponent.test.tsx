@@ -7,6 +7,7 @@ import {
   ApiContextProvider,
   ServiceConfig,
 } from "../../../../../../../../../../../api/ServiceContext";
+import { ElementDefinition } from "fhir/r4";
 
 const mockConfig = {
   fhirService: {
@@ -19,20 +20,11 @@ const mockConfig = {
 
 const valueSetUrl = "http://hl7.org/fhir/ValueSet/administrative-gender";
 const structureDefinition = {
-  id: "Patient.gender",
-  path: "Patient.gender",
-  min: 1,
-  max: "1",
-  type: [
-    {
-      code: "code",
-    },
-  ],
   binding: {
     strength: "required",
     valueSet: valueSetUrl,
   },
-};
+} as ElementDefinition;
 
 const mockExpansionResponse = {
   expansion: {
