@@ -111,7 +111,7 @@ export default function MeasureLanding() {
     }
   };
 
-  useEffect(() => {
+  const setMeasureCounts = () => {
     if (featureFlags?.MeasureSearch) {
       measureServiceApi
         .getMeasureCounts()
@@ -120,6 +120,12 @@ export default function MeasureLanding() {
           setAllMeasuresCount(data.allMeasures);
         })
         .catch(() => console.error("Unable to retrieve measure counts"));
+    }
+  };
+
+  useEffect(() => {
+    if (featureFlags?.MeasureSearch) {
+      setMeasureCounts();
     }
   }, [
     activeTab,
@@ -224,6 +230,7 @@ export default function MeasureLanding() {
                 setSearchCriteria={setSearchCriteria}
                 currentLimit={currentLimit}
                 currentPage={currentPage}
+                setMeasureCounts={setMeasureCounts}
                 setErrMsg={setErrMsg}
               />
               <div className="pagination-container">
