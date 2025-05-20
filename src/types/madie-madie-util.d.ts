@@ -21,9 +21,11 @@ declare module "@madie/madie-util" {
     QICoreMeasureDefinitions: boolean;
     ShareMeasure: boolean;
     QICoreIncludeSDEValues: boolean;
+    QDMIncludeRAVValues: boolean;
     MeasureSearch: boolean;
     QICoreManifestExpansion: boolean;
     OverlappingValueSets: boolean;
+    EditTestsOnVersionedMeasures: boolean;
   }
 
   export interface ServiceConfig {
@@ -91,7 +93,8 @@ declare module "@madie/madie-util" {
   export function checkUserCanEdit(
     createdBy: string,
     acls: Array<Acl>,
-    draft?: boolean
+    draft?: boolean,
+    editTestsOnVersionedMeasures?: boolean
   ): boolean;
 
   export function checkUserCanDelete(
