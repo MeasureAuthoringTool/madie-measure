@@ -6,8 +6,7 @@ import "../../../styles/VerticalSideBarNav.scss";
 import { Link } from "./MeasureDetails";
 import CompletionIndicator from "../populationCriteria/groups/CompletionIndicator";
 
-const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
-const InnerWrapper = tw.div`flex-grow flex flex-col`;
+const InnerWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
 const Nav = tw.nav`flex-1 space-y-1 bg-slate`;
 
 export interface EditMeasureDetailsSideNavProps {
@@ -62,7 +61,7 @@ export default function EditMeasureDetailsSideNav(
   }
 
   return (
-    <OuterWrapper>
+    <div className="outer-wrapper">
       <InnerWrapper
         className="vertical-side-nav"
         id="edit-measure-details-side-nav"
@@ -93,6 +92,6 @@ export default function EditMeasureDetailsSideNav(
           ))}
         </Nav>
       </InnerWrapper>
-    </OuterWrapper>
+    </div>
   );
 }

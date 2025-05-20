@@ -1,4 +1,9 @@
+.outer-wrapper * {
+  overflow: visible !important;
+}
+
 .vertical-side-nav {
+  border-right: solid 1px #333;
   .link-container,
   nav {
     display: flex;
@@ -20,23 +25,6 @@
       font-size: 12px;
       line-height: 24px;
       color: #242424;
-    }
-
-    > .nav-link {
-      text-decoration: none;
-      display: flex;
-      color: #333;
-      font-weight: 400;
-      font-size: 16px;
-      line-height: 24px;
-      padding: 5px 0 5px 16px;
-
-      &.active {
-        font-weight: 500;
-        background-color: #fff;
-        padding-left: 10px;
-        border-left: solid 6px #209fa6;
-      }
     }
   }
 
