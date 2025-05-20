@@ -100,7 +100,9 @@ describe("CodingComponent Tests", () => {
       </ApiContextProvider>
     );
 
-    const valueSetSelector = screen.getByTestId("value-set-test-label");
+    const valueSetSelector = screen.getByRole("combobox", {
+      name: "Value Set / Direct Reference Code",
+    });
     expect(valueSetSelector).toHaveTextContent("- Select -");
   });
 
@@ -229,7 +231,7 @@ describe("CodingComponent Tests", () => {
     });
     userEvent.click(screen.getAllByRole("option")[0]);
 
-    // select system select
+    // select code system
     const codeSystemSelect = screen.getByRole("combobox", {
       name: "Code System",
     });
