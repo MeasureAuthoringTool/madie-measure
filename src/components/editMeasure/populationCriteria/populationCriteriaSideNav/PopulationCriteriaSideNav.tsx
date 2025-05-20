@@ -13,9 +13,7 @@ import CompletionIndicator from "../groups/CompletionIndicator";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 
-const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
-const InnerWrapper = tw.div`flex-grow flex flex-col`;
-const Nav = tw.nav`flex-1 space-y-1 bg-slate`;
+const InnerWrapper = tw.div`flex flex-grow flex-col`;
 
 export interface PopulationCriteriaSideNavProp {
   canEdit?: Boolean;
@@ -151,9 +149,9 @@ export default function PopulationCriteriaSideNav(
   };
 
   return (
-    <OuterWrapper>
+    <div className="outer-wrapper">
       <InnerWrapper className="vertical-side-nav">
-        <Nav aria-label="Sidebar">
+        <nav aria-label="Sidebar">
           {isQDM && (
             <Tabs
               type="C"
@@ -291,17 +289,15 @@ export default function PopulationCriteriaSideNav(
                           ? true
                           : l.label === "Risk Adjustment" &&
                             riskAdjustmentStatus === INCOMPLETE
-                          ? true
-                          : false
                       }
                       displayIcon={
                         l.label === "Supplemental Data" &&
                         supplementalDataStatus === NONE
                           ? false
-                          : l.label === "Risk Adjustment" &&
-                            riskAdjustmentStatus === NONE
-                          ? false
-                          : true
+                          : !(
+                              l.label === "Risk Adjustment" &&
+                              riskAdjustmentStatus === NONE
+                            )
                       }
                     />
                   }
@@ -309,8 +305,8 @@ export default function PopulationCriteriaSideNav(
               );
             })}
           </Tabs>
-        </Nav>
+        </nav>
       </InnerWrapper>
-    </OuterWrapper>
+    </div>
   );
 }
