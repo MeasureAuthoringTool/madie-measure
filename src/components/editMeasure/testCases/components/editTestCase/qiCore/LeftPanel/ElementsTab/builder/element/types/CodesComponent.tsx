@@ -39,10 +39,6 @@ const CodesComponent = ({
     }
   }, [structureDefinition]);
 
-  const placeHolder = (label) => (
-    <span style={{ color: "#717171" }}>{label}</span>
-  );
-
   return (
     <Box>
       <Select
