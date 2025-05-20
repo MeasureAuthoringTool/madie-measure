@@ -94,6 +94,7 @@ export default function MeasureList(props: {
   setSearchCriteria;
   currentLimit: number;
   currentPage: number;
+  setMeasureCounts;
   setErrMsg;
 }) {
   const measureServiceApi = useRef(useMeasureServiceApi()).current; //needs to be ref or triggers jest. throws warn
@@ -786,6 +787,7 @@ export default function MeasureList(props: {
         abortController.current.signal
       )
       .then((data) => {
+        props.setMeasureCounts();
         setPageProps(data);
       })
       .catch((error: Error) => {
