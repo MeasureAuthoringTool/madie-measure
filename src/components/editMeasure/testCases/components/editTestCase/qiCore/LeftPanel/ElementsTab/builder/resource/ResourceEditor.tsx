@@ -221,7 +221,7 @@ const ResourceEditor = ({
           </div>
           <div className="resource-body">
             <div className="side-bar">
-              <Box sx={{ p: 1, borderRight: "1px solid #333" }}>
+              <Box sx={{ p: 1, borderRight: "1px solid #8C8C8C" }}>
                 <IconButton
                   onClick={() => setAddDialogOpen(true)}
                   sx={{
