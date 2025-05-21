@@ -24,6 +24,7 @@ const mockBindingValueSet = {
   resourceType: "ValueSet",
   name: "Binding ValueSet",
   title: "Binding ValueSet",
+  url: "http://example.com/v1",
   expansion: {
     contains: [
       {
@@ -94,7 +95,6 @@ describe("CodingComponent Tests", () => {
             label="test-label"
             value={null}
             onChange={mockOnChange}
-            fieldRequired={false}
           />
         </ExecutionContextProvider>
       </ApiContextProvider>
@@ -127,7 +127,6 @@ describe("CodingComponent Tests", () => {
             label="actuality"
             value={null}
             onChange={mockOnChange}
-            fieldRequired={false}
           />
         </ExecutionContextProvider>
       </ApiContextProvider>
@@ -175,7 +174,6 @@ describe("CodingComponent Tests", () => {
             label="test-label"
             value={null}
             onChange={mockOnChange}
-            fieldRequired={false}
           />
         </ExecutionContextProvider>
       </ApiContextProvider>
@@ -188,7 +186,7 @@ describe("CodingComponent Tests", () => {
     expect(emptyOption).not.toBeInTheDocument();
   });
 
-  it("Applies selected code from value set for any type of binding", async () => {
+  it("applies selected code from value set for any type of binding", async () => {
     mockedAxios.get.mockResolvedValue({
       data: mockBindingValueSet,
     });
@@ -212,7 +210,6 @@ describe("CodingComponent Tests", () => {
             label="test-label"
             value={null}
             onChange={mockOnChange}
-            fieldRequired={false}
           />
         </ExecutionContextProvider>
       </ApiContextProvider>
@@ -229,7 +226,10 @@ describe("CodingComponent Tests", () => {
         mockBindingValueSet.title
       );
     });
-    userEvent.click(screen.getAllByRole("option")[0]);
+    userEvent.click(screen.getByRole("option"));
+    await waitFor(() => {
+      expect(valueSetSelect).toHaveTextContent(mockBindingValueSet.title);
+    });
 
     // select code system
     const codeSystemSelect = screen.getByRole("combobox", {
@@ -254,14 +254,20 @@ describe("CodingComponent Tests", () => {
     userEvent.click(codeOptions[0]);
     await waitFor(() => {
       expect(mockOnChange).toHaveBeenCalledWith({
-        code: "B1",
-        system: "http://example.com/system1",
-        display: "B1 Code",
+        code: mockBindingValueSet.expansion?.contains[0].code,
+        system: mockBindingValueSet.expansion?.contains[0].system,
+        display: mockBindingValueSet.expansion?.contains[0].display,
+        extension: [
+          {
+            url: "http://hl7.org/fhir/StructureDefinition/valueset-reference",
+            valueUrl: mockBindingValueSet.url,
+          },
+        ],
       });
     });
   });
 
-  it("Applies custom code if user select it for non-required binding", async () => {
+  it("applies custom code if user select it for non-required binding", async () => {
     mockStructureDefinition.binding.strength = "extensible";
     mockedAxios.get.mockResolvedValue({
       data: mockBindingValueSet,
@@ -285,7 +291,6 @@ describe("CodingComponent Tests", () => {
             label="test-label"
             value={null}
             onChange={mockOnChange}
-            fieldRequired={false}
           />
         </ExecutionContextProvider>
       </ApiContextProvider>
@@ -320,6 +325,100 @@ describe("CodingComponent Tests", () => {
       code: "C1",
       system: "http://example.com/custom-system",
       display: "C1",
+    });
+  });
+
+  it("updates existing code from a value set", async () => {
+    const value = {
+      ...mockBindingValueSet.expansion?.contains[0],
+      extension: [
+        {
+          url: "http://hl7.org/fhir/StructureDefinition/valueset-reference",
+          valueUrl: mockBindingValueSet.url,
+        },
+      ],
+    };
+    mockedAxios.get.mockResolvedValue({
+      data: mockBindingValueSet,
+    });
+
+    render(
+      <ApiContextProvider value={mockConfig}>
+        <ExecutionContextProvider
+          value={{
+            measureState: [null, jest.fn()],
+            bundleState: [null, jest.fn()],
+            valueSetsState: [null, jest.fn()],
+            executionContextReady: true,
+            executing: false,
+            setExecuting: jest.fn(),
+            contextFailure: false,
+          }}
+        >
+          <CodingComponent
+            canEdit={true}
+            structureDefinition={mockStructureDefinition}
+            label="test-label"
+            value={value}
+            onChange={mockOnChange}
+          />
+        </ExecutionContextProvider>
+      </ApiContextProvider>
+    );
+
+    // verify value set
+    const valueSetSelect = screen.getByRole("combobox", {
+      name: "Value Set / Direct Reference Code",
+    });
+    await waitFor(() => {
+      expect(valueSetSelect).toHaveTextContent(mockBindingValueSet.title);
+    });
+
+    // verify code system
+    const codeSystemSelect = screen.getByRole("combobox", {
+      name: "Code System",
+    });
+    await waitFor(() => {
+      expect(codeSystemSelect).toHaveTextContent(
+        mockBindingValueSet.expansion?.contains[0].system
+      );
+    });
+
+    // verify code
+    const codeSelect = screen.getByRole("combobox", {
+      name: "Code",
+    });
+    expect(codeSelect).toHaveTextContent(
+      mockBindingValueSet.expansion?.contains[0].code
+    );
+
+    // select new code system
+    userEvent.click(codeSystemSelect);
+    const codeSystemOptions = screen.getAllByRole("option");
+    expect(codeSystemOptions).toHaveLength(2);
+    userEvent.click(codeSystemOptions[1]);
+    await waitFor(() => {
+      expect(codeSystemSelect).toHaveTextContent(
+        mockBindingValueSet.expansion?.contains[1].system
+      );
+    });
+
+    // select code
+    userEvent.click(codeSelect);
+    const codeOptions = screen.getAllByRole("option");
+    userEvent.click(codeOptions[0]);
+    await waitFor(() => {
+      expect(mockOnChange).toHaveBeenCalledWith({
+        code: mockBindingValueSet.expansion?.contains[1].code,
+        system: mockBindingValueSet.expansion?.contains[1].system,
+        display: mockBindingValueSet.expansion?.contains[1].display,
+        extension: [
+          {
+            url: "http://hl7.org/fhir/StructureDefinition/valueset-reference",
+            valueUrl: mockBindingValueSet.url,
+          },
+        ],
+      });
     });
   });
 });

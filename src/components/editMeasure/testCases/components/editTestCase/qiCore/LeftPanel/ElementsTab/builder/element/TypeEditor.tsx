@@ -29,8 +29,10 @@ import CodingComponent from "./types/CodingComponent";
 import { useRequiredFields } from "./RequiredFieldsContext";
 import ElementSection from "../../../../../../common/ElementSection";
 import { Divider } from "@mui/material";
+import CodeableConceptComponent from "./types/CodeableConceptComponent";
+
 // onChange is being deprecated as no updates to the resource are tracked.
-// Changes directly to the json should be done with a disaptch, this propagates downstream changes in formik.
+// Changes directly to the json should be done with a dispatch, this propagates downstream changes in formik.
 // any temporary form state should be done through formik.
 const TypeEditor = ({
   resource, // should probably deprecate
@@ -319,12 +321,24 @@ const TypeEditor = ({
           />
         );
       case "Coding":
-      case "CodeableConcept":
         return (
           <CodingComponent
+            label={label}
             canEdit={canEdit}
             structureDefinition={structureDefinition}
-            fieldRequired={required}
+            {...formik.getFieldProps(label)}
+            onChange={(value) => {
+              formik.setFieldTouched(label);
+              formik.setFieldValue(label, value);
+            }}
+          />
+        );
+      case "CodeableConcept":
+        return (
+          <CodeableConceptComponent
+            label={label}
+            canEdit={canEdit}
+            structureDefinition={structureDefinition}
             {...formik.getFieldProps(label)}
             onChange={(value) => {
               formik.setFieldTouched(label);
