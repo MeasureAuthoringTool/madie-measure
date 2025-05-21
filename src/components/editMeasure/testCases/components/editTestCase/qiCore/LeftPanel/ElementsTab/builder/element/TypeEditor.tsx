@@ -309,9 +309,7 @@ const TypeEditor = ({
           <CodesComponent
             canEdit={canEdit}
             fieldRequired={required}
-            label={_.capitalize(
-              label?.id?.substring(label?.id?.lastIndexOf(".") + 1)
-            )}
+            label={label}
             structureDefinition={structureDefinition}
             {...formik.getFieldProps(label)}
             onChange={(value) => {

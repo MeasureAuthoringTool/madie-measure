@@ -1,6 +1,5 @@
 import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
-import CodingComponent from "./CodingComponent";
 import { ElementDefinition, ValueSet } from "fhir/r4";
 import userEvent from "@testing-library/user-event";
 import { ExecutionContextProvider } from "../../../../../../../routes/qiCore/ExecutionContext";

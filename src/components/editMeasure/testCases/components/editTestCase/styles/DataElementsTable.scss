@@ -95,9 +95,22 @@ $header-weight: 500;
       > td {
         background-color: #ffffff;
         min-width: 360px;
+
         > div {
+          overflow-y: scroll;
+          overflow-x: hidden;
+          max-height: 250px;
           height: 100%;
           padding: 16px;
+        }
+
+        .recursive-attribute-container {
+          margin-left: 20px;
+          overflow-x: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          max-width: 100ch;
+          height: -webkit-fill-available;
         }
         // Styling for the draggable icons on 1st column
         //> .first-column-with-icons {
