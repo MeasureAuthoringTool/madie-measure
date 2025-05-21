@@ -95,6 +95,7 @@ describe("ActionCenter Component", () => {
             selectedTestCases={[{ id: "1", validResource: true }]}
             canEdit={true}
             isQDM={false}
+            isDraft={true}
           />
         </MemoryRouter>
       );
@@ -107,6 +108,26 @@ describe("ActionCenter Component", () => {
       expect(screen.getByTestId("export-action-btn")).toBeInTheDocument();
     });
 
+    it("shouldn't display shift test cases button when measure is versioned and EditTestsOnVersionedMeasures feature flag is true", () => {
+      render(
+        <MemoryRouter>
+          <ActionCenter
+            selectedTestCases={[{ id: "1", validResource: true }]}
+            canEdit={true}
+            isQDM={false}
+            isDraft={false}
+          />
+        </MemoryRouter>
+      );
+
+      expect(screen.getByTestId("delete-action-btn")).toBeInTheDocument();
+      expect(
+        screen.queryByTestId("shift-test-case-dates-action-btn")
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId("clone-action-btn")).toBeInTheDocument();
+      expect(screen.getByTestId("export-action-btn")).toBeInTheDocument();
+    });
+
     it("should display action buttons based on selected valid test cases", () => {
       const selectedTestCase = [{ id: "1", validResource: true }];
       render(
@@ -115,6 +136,7 @@ describe("ActionCenter Component", () => {
             selectedTestCases={selectedTestCase}
             canEdit={true}
             isQDM={false}
+            isDraft={true}
           />
         </MemoryRouter>
       );
@@ -135,6 +157,7 @@ describe("ActionCenter Component", () => {
             selectedTestCases={selectedTestCaseInvalid}
             canEdit={true}
             isQDM={false}
+            isDraft={true}
           />
         </MemoryRouter>
       );
@@ -155,6 +178,7 @@ describe("ActionCenter Component", () => {
             selectedTestCases={selectedTestCase}
             canEdit={true}
             isQDM={false}
+            isDraft={true}
           />
         </MemoryRouter>
       );

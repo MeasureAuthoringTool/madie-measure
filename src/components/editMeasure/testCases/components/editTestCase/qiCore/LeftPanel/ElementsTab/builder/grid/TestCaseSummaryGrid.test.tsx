@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import TestCaseSummaryGrid from "./TestCaseSummaryGrid";
 import { within } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
@@ -126,6 +126,24 @@ describe("TestCaseSummaryGrid", () => {
     });
     expect(deleteButton).toBeInTheDocument();
     userEvent.click(deleteButton);
-    expect(mockOnRowDelete).toHaveBeenCalledWith(mockBundle.entry[0]);
+    expect(mockOnRowDelete).not.toHaveBeenCalledWith(mockBundle.entry[0]);
+
+    const deleteDialog = screen.getByTestId("delete-dialog");
+    expect(deleteDialog).toBeInTheDocument();
+    expect(screen.getByText("Delete Element")).toBeInTheDocument();
+
+    expect(screen.getByTestId("close-button")).toBeInTheDocument();
+
+    expect(
+      screen.getByTestId("delete-dialog-cancel-button")
+    ).toBeInTheDocument();
+    const continueBtn = screen.getByTestId("delete-dialog-continue-button");
+    expect(continueBtn).toBeInTheDocument();
+
+    userEvent.click(continueBtn);
+    await waitFor(() => {
+      expect(deleteDialog).not.toBeInTheDocument();
+      expect(mockOnRowDelete).toHaveBeenCalledWith(mockBundle.entry[0]);
+    });
   });
 });

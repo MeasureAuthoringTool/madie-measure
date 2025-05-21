@@ -148,6 +148,7 @@ const ElementEditorActionCenter = (props: PropTypes) => {
               ? rootDefinition.sliceName
               : rootDefinition.path
           }
+          hideWarning={true}
         />
       </div>
     );
