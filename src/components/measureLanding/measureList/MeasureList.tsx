@@ -97,6 +97,7 @@ export default function MeasureList(props: {
   setSearchCriteria;
   currentLimit: number;
   currentPage: number;
+  setMeasureCounts;
   currentSort;
   setCurrentSort;
   currentDirection;
@@ -835,6 +836,7 @@ export default function MeasureList(props: {
         abortController.current.signal
       )
       .then((data) => {
+        props.setMeasureCounts();
         setPageProps(data);
       })
       .catch((error: Error) => {
