@@ -73,6 +73,7 @@ const CodingComponent = ({
 
   return (
     <Select
+      label={label}
       placeHolder={{ name: "- Select -", value: undefined }}
       id={`code-selector-${label}`}
       inputProps={{
