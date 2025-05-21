@@ -48,7 +48,7 @@ const mockStructureDefinition = {
   },
 } as ElementDefinition;
 
-describe("CodingComponent Tests", () => {
+describe("CodeableConceptComponent Tests", () => {
   it("render and update codeable concept", async () => {
     const value = {
       coding: {
