@@ -25,16 +25,21 @@ import {
   recursiveAddYupObject,
   addCardinalityToElement,
 } from "./fhirDefinitionServiceUtilities";
+import _ from "lodash";
 
 describe("FhirDefinitionServiceUtilities", () => {
   const mockResource = {
     definition: {
       snapshot: {
         element: [
-          { path: "Patient", min: 1 },
-          { path: "Patient.name", min: 0 },
-          { path: "Patient.age", min: 1 },
-          { path: "Patient.address.street", min: 0 },
+          { path: "Patient", min: 1, type: [{ code: "Resource" }] },
+          { path: "Patient.name", min: 0, type: [{ code: "HumanName" }] },
+          { path: "Patient.age", min: 1, type: [{ code: "integer" }] },
+          {
+            path: "Patient.address.street",
+            min: 0,
+            type: [{ code: "string" }],
+          },
         ],
       },
     },
@@ -59,10 +64,26 @@ describe("FhirDefinitionServiceUtilities", () => {
 
   describe("getTopLevelElements", () => {
     it("should return elements with a path length of 2", () => {
-      const result = getTopLevelElements(mockResource);
+      const mutableResource = _.cloneDeep(mockResource);
+      mutableResource.definition.snapshot.element.push({
+        path: "Patient.multipleBirth[x]",
+        min: 1,
+        type: [{ code: "boolean" }, { code: "integer" }],
+      });
+      const result = getTopLevelElements(mutableResource);
       expect(result).toEqual([
-        { path: "Patient.name", min: 0 },
-        { path: "Patient.age", min: 1 },
+        { path: "Patient.name", min: 0, type: [{ code: "HumanName" }] },
+        { path: "Patient.age", min: 1, type: [{ code: "integer" }] },
+        {
+          path: "Patient.multipleBirth[x]",
+          min: 1,
+          type: [{ code: "boolean" }],
+        },
+        {
+          path: "Patient.multipleBirth[x]",
+          min: 1,
+          type: [{ code: "integer" }],
+        },
       ]);
     });
   });
@@ -70,7 +91,9 @@ describe("FhirDefinitionServiceUtilities", () => {
   describe("getRequiredElements", () => {
     it("should return elements with min > 0 and path length of 2", () => {
       const result = getRequiredElements(mockResource);
-      expect(result).toEqual([{ path: "Patient.age", min: 1 }]);
+      expect(result).toEqual([
+        { path: "Patient.age", min: 1, type: [{ code: "integer" }] },
+      ]);
     });
   });
 
@@ -90,9 +113,9 @@ describe("FhirDefinitionServiceUtilities", () => {
     it("should return all child elements of a given path", () => {
       const result = getAllChildren(mockResource, "Patient");
       expect(result).toEqual([
-        { path: "Patient.name", min: 0 },
-        { path: "Patient.age", min: 1 },
-        { path: "Patient.address.street", min: 0 },
+        { path: "Patient.name", min: 0, type: [{ code: "HumanName" }] },
+        { path: "Patient.age", min: 1, type: [{ code: "integer" }] },
+        { path: "Patient.address.street", min: 0, type: [{ code: "string" }] },
       ]);
     });
 
@@ -281,7 +304,8 @@ describe("getElementName", () => {
 
   it("returns path without basePath and indexes if no sliceName", () => {
     const element = { id: "Patient.name[0].family", min: 0 };
-    expect(getElementName(element as any, "Patient", [])).toBe("name.family");
+    const nameFamily = getElementName(element as any, "Patient", []);
+    expect(nameFamily).toBe("name.family");
   });
 
   it("handles no index correctly", () => {

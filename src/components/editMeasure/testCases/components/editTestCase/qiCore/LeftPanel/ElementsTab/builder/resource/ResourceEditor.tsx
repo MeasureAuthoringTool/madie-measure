@@ -37,6 +37,7 @@ import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefini
 import tw from "twin.macro";
 import "../../../../../../../../../../styles/VerticalSideBarNav.scss";
 import "./ResourceEditor.scss";
+import { LensSharp } from "@mui/icons-material";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
 const InnerWrapper = tw.div`flex-grow flex flex-col`;
@@ -87,6 +88,7 @@ const ResourceEditor = ({
       const selectedEntry = state.bundle?.entry?.find(
         (entry) => entry.resource.id === selectedResourceID
       );
+      // at this point we have a selectedEntry that has the correct attribute, but it's formed incorrectly
       const profile = _.isArray(selectedEntry?.resource?.meta?.profile)
         ? selectedEntry?.resource?.meta?.profile[0]
         : selectedEntry?.resource?.meta?.profile;
@@ -100,7 +102,10 @@ const ResourceEditor = ({
             ...resourceTree,
             bundleEntry: selectedEntry,
           };
+
           const topElements = getTopLevelElements(selectedResource);
+          //the topElements from the selectedResource contains elements from resource.definition.snapshot.element
+
           const requiredElements = [...topElements.filter((e) => e.min > 0)];
           const elementsWithValues = [
             ...topElements.filter((e) => {
@@ -108,13 +113,47 @@ const ResourceEditor = ({
                 selectedResource.definition.type,
                 e.path
               );
-              const elemValue = _.get(
-                selectedResource.bundleEntry.resource,
-                elemPath
-              );
-              return !_.isNil(elemValue);
+              //let's look at e.path and see if it is a choice type
+              //if e.path ends with [x] then we need to check if the resource has a value for that type
+              if (elemPath.endsWith("[x]")) {
+                //if it does, then we need to check if the resource has a value for that type
+                const type = elemPath.substring(
+                  elemPath.lastIndexOf("[") + 1,
+                  elemPath.lastIndexOf("]")
+                );
+                const elemPathWithoutType = elemPath.substring(
+                  0,
+                  elemPath.lastIndexOf("[")
+                );
+
+                //let's appent e.type[0].code to the end of the elemPathWithoutType
+                const elemPathType = _.camelCase(
+                  elemPathWithoutType + _.startCase(e.type[0].code)
+                );
+
+                //we're going to have to find elementX if type == e.type[0]
+
+                const elemValue = _.get(
+                  selectedResource.bundleEntry.resource,
+                  elemPathType
+                );
+                if (!_.isNil(elemValue)) {
+                  return true;
+                }
+              } else {
+                const elemValue = _.get(
+                  selectedResource.bundleEntry.resource,
+                  elemPath
+                );
+                return !_.isNil(elemValue);
+              }
             }),
           ];
+
+          //somewhere in here we need to match attribute[x] with attribute[type]
+          //el.path = attribute[x] and then x will equal the type
+          // so if there are multiple types, then an attribute becomes a multiple cardinality (ie., attribute[x] with type=[boolean,integer] results in attribute[boolean] and attribute[integer])
+
           const uniqueElements = _.uniq(
             _.concat(requiredElements, elementsWithValues)
           );
@@ -141,7 +180,6 @@ const ResourceEditor = ({
               }
             }
           );
-
           setSelectedResource(selectedResource);
           setAllElements(topElements);
           setDisplayedElements(elementsModifiedForCardinality);
@@ -177,16 +215,31 @@ const ResourceEditor = ({
     nextEntry.resource.resourceType = type;
     // Add empty values for new elements
     newValue?.forEach((element) => {
-      const elemPath = stripResourcePath(
+      let elemPath = stripResourcePath(
         selectedResource.definition.type,
         element.path
       );
+      // if elemPath ends with ], then we're going to have to find the resource element that has a correct matching type
       const currentValue = _.get(nextEntry.resource, elemPath);
+      if (elemPath.endsWith("]")) {
+        //type = the value between the last [ and ]
+        const type = elemPath.substring(
+          elemPath.lastIndexOf("[") + 1,
+          elemPath.lastIndexOf("]")
+        );
+        const elemPathWithoutType = elemPath.substring(
+          0,
+          elemPath.lastIndexOf("[")
+        );
+        // turn elemPath path[type] into pathType
+        elemPath = _.camelCase(elemPathWithoutType + _.startCase(type));
+      }
       if (_.isNil(currentValue)) {
         _.set(nextEntry.resource, elemPath, "");
       }
     });
     // Update resource state
+
     dispatch({
       type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
       payload: nextEntry,

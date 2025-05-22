@@ -18,6 +18,8 @@ export function getElementName(
   formikValue: any
 ) {
   const requiredIndicator = element.min > 0 ? " *" : "";
+  element.type = element.type || [];
+
   let index = "";
   const retrievedIndex = getIndexFromPathWithoutBrackets(element.id);
   if (Array.isArray(formikValue)) {
@@ -29,13 +31,20 @@ export function getElementName(
       }
     }
   }
-
   if (element.sliceName) {
     return `${requiredIndicator}${element.sliceName}${index}`;
   }
-  return `${requiredIndicator}${stripAllIndexes(
+  if (element.path?.endsWith("[x]")) {
+    // if the path ends with [x], we need to get the type code
+    const typeCode = element.type[0].code;
+    return `${requiredIndicator}${stripAllIndexes(
+      element.id.substring(basePath.length + 1, element.path.indexOf("[x]"))
+    )}${typeCode}`;
+  }
+  const result = `${requiredIndicator}${stripAllIndexes(
     element.id.substring(basePath.length + 1)
   )}${index}`;
+  return result;
 }
 
 // given an object that we want to copy to
@@ -214,12 +223,26 @@ export function getBasePath(resource: any): string {
 // we want to get only the elements at the top of the tree for the render
 export function getTopLevelElements(resource: any) {
   const elements = [...resource?.definition?.snapshot?.element];
-  return elements?.filter(
+  const elementsFiltered = elements?.filter(
     (e) =>
       e.path.split(".")?.length === 2 &&
       e.id !== "Extension.extension" &&
       e.max !== "0"
   );
+  //for each elementsFiltered, if type contains more than one type, duplicate the element and restrict the type to only that type
+
+  elementsFiltered.forEach((element) => {
+    if (element?.type?.length > 1) {
+      element?.type?.forEach((type, index) => {
+        const newElement = { ...element };
+        newElement.type = [type];
+        elementsFiltered.push(newElement);
+        //remove the original element
+      });
+      elementsFiltered.splice(elementsFiltered.indexOf(element), 1);
+    }
+  });
+  return elementsFiltered;
 }
 // find out who needs to be required on formik validation
 export function getRequiredElements(resource: any) {
@@ -229,8 +252,27 @@ export function getRequiredElements(resource: any) {
 
 // remove the base path of a string like ClaimResponse.item in order to use it as an accessor key.
 // EX (Patient, Patient.name) => returns name;
-export function stripResourcePath(resourcePath, elementPath) {
+export function stripResourcePath(resourcePath, elementPath: string): string {
   return elementPath.substring(`${resourcePath}.`.length);
+  // let result:string = "";
+  // // return x.y if elementPath is x[y]
+  // if (elementPath?.includes("[")) {
+
+  //   result = elementPath.substring(
+  //     elementPath.indexOf(".") + 1,
+  //     elementPath.indexOf("[")
+  //   )  + "." + elementPath.substring(
+  //     elementPath.indexOf("[") + 1,
+  //     elementPath.indexOf("]")) ;
+
+  // } else if (elementPath.includes(".")) {
+  //     result =  elementPath.substring(elementPath.indexOf(".") + 1);
+
+  // } else {
+  //   result =  elementPath.substring(`${resourcePath}.`.length);
+  // }
+
+  // return result ;
 }
 
 /**
