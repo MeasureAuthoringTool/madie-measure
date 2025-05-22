@@ -98,6 +98,17 @@ const useFhirDefinitionsServiceApiMock =
 const fhirDefinitionsServiceApiMock = {
   getResourceTree: jest.fn().mockResolvedValue(codingDef),
 } as unknown as FhirDefinitionsServiceApi;
+jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
+  return {
+    ...jest.requireActual(
+      "../../../../../../../api/fhirDefinitionServiceUtilities"
+    ),
+    isComponentDataType: (type: string) => true,
+    getAllChildren: jest.fn().mockReturnValue(codingTopLevelElements),
+    getTopLevelElements: jest.fn().mockReturnValue(codingTopLevelElements),
+    updateChildrenPaths: jest.fn().mockReturnValue(codingTopLevelElements),
+  };
+});
 useFhirDefinitionsServiceApiMock.mockImplementation(
   () => fhirDefinitionsServiceApiMock
 );
