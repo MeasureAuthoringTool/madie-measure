@@ -80,6 +80,16 @@ export const findMeasureGroupPopulationDisplayId = (
   return id;
 };
 
+export const findMeasureObservationDisplayIdByReferenceId = (
+  measureGroup: Group,
+  id: string
+): string => {
+  const observations = measureGroup?.measureObservations?.find(
+    (observation) => observation.criteriaReference === id
+  );
+  return observations?.displayId;
+};
+
 // TODO consider converting into a context.
 // OR a re-usable hook.
 export class CalculationService {
@@ -256,7 +266,7 @@ export class CalculationService {
           populationResult.populationType === FqmPopulationType.OBSERV &&
           populationResult.observations
         ) {
-          const id = populationResult.criteriaReferenceId;
+          const id = populationResult.populationId;
           results.observations[id] = {
             ...populationResult,
             result: true,
@@ -290,7 +300,7 @@ export class CalculationService {
               populationResult.populationType === FqmPopulationType.OBSERV &&
               populationResult.observations
             ) {
-              const id = populationResult.criteriaReferenceId;
+              const id = populationResult.populationId;
               if (results.observations[id]) {
                 results.observations[id].observations = _.concat(
                   results.observations[id].observations,
@@ -446,12 +456,20 @@ export class CalculationService {
           if (patientBased) {
             tcPopVal.actual =
               processedResults.observations[
-                tcPopVal.criteriaReference
+                findMeasureObservationDisplayIdByReferenceId(
+                  measureGroup,
+                  tcPopVal.criteriaReference
+                )
               ]?.observations?.[0];
           } else {
             let currentTCObserv = tcPopTypeCount[tcPopVal.name] ?? 0;
             const allObsResults =
-              processedResults?.observations[tcPopVal.criteriaReference];
+              processedResults?.observations[
+                findMeasureObservationDisplayIdByReferenceId(
+                  measureGroup,
+                  tcPopVal.criteriaReference
+                )
+              ];
             if (
               allObsResults &&
               currentTCObserv < allObsResults.observations?.length

@@ -1,4 +1,9 @@
-import { MeasureScoring, PopulationType, TestCase } from "@madie/madie-models";
+import {
+  MeasureScoring,
+  PopulationType,
+  TestCase,
+  TestCaseValidationStatus,
+} from "@madie/madie-models";
 
 export const testCaseOfficeVisit: TestCase = {
   patientId: "",
@@ -20,6 +25,7 @@ export const testCaseOfficeVisit: TestCase = {
     successful: true,
     outcomeResponse: null,
   },
+  testCaseValidationStatus: TestCaseValidationStatus.VALID,
   groupPopulations: [
     {
       groupId: "1",

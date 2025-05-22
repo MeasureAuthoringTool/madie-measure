@@ -370,6 +370,13 @@ export function getIndexFromPath(path) {
   const match = path.match(/(\[\d+\])$/);
   return match ? match[1] : null;
 }
+
+// gets everything after the last . in a path.
+export function getLastPart(path: string): string {
+  const parts = path.split(".");
+  return parts[parts.length - 1];
+}
+
 // removes all indexes from path
 export function removeIndicesFromPath(path) {
   return path.replace(/\[\d+\]/g, "");

@@ -38,6 +38,7 @@ interface ActionCenterProps {
   setExportOptionsOpen?: Function;
   displayTestCaseCopyDialog?: Function;
   executeAllTestCases?: boolean;
+  isDraft?;
 }
 
 const filterByOptions = ["Case #", "Status", "Group", "Title", "Description"];
@@ -58,6 +59,7 @@ export default function ActionCenter(props: ActionCenterProps) {
     setExportOptionsOpen,
     displayTestCaseCopyDialog,
     executeAllTestCases,
+    isDraft,
   } = props;
 
   const [disableDeleteBtn, setDisableDeleteBtn] = useState<boolean>(true);
@@ -291,30 +293,32 @@ export default function ActionCenter(props: ActionCenterProps) {
                   </span>
                 </Tooltip>
 
-                <Tooltip
-                  data-testid="shift-test-case-dates-tooltip"
-                  title={
-                    disableShiftDatesBtn
-                      ? "Select test cases to shift test case dates"
-                      : "Shift test case dates"
-                  }
-                  placement="top"
-                  arrow
-                >
-                  <span>
-                    <IconButton
-                      onClick={() => {
-                        setShiftDatesDialogModalOpen(true);
-                      }}
-                      disabled={disableShiftDatesBtn}
-                      data-testid="shift-test-case-dates-action-btn"
-                    >
-                      <EditCalendarOutlinedIcon
-                        data-testid={`shift-test-case-dates-action-icon`}
-                      />
-                    </IconButton>
-                  </span>
-                </Tooltip>
+                {isDraft && (
+                  <Tooltip
+                    data-testid="shift-test-case-dates-tooltip"
+                    title={
+                      disableShiftDatesBtn
+                        ? "Select test cases to shift test case dates"
+                        : "Shift test case dates"
+                    }
+                    placement="top"
+                    arrow
+                  >
+                    <span>
+                      <IconButton
+                        onClick={() => {
+                          setShiftDatesDialogModalOpen(true);
+                        }}
+                        disabled={disableShiftDatesBtn}
+                        data-testid="shift-test-case-dates-action-btn"
+                      >
+                        <EditCalendarOutlinedIcon
+                          data-testid={`shift-test-case-dates-action-icon`}
+                        />
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                )}
 
                 <Tooltip
                   data-testid="clone-tooltip"

@@ -96,6 +96,7 @@ const props: MeasureGroupProps = {
   setMeasureGroupNumber: jest.fn,
   setIsFormDirty: jest.fn,
   measureId: "testMeasureId",
+  setAlertMessage: jest.fn,
 };
 
 jest.mock(".../../../../../api/useMeasureServiceApi");

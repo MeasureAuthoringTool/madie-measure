@@ -4,6 +4,7 @@ import {
   MeasureGroupTypes,
   PopulationType,
   TestCase,
+  TestCaseValidationStatus,
 } from "@madie/madie-models";
 import {
   DetailedPopulationGroupResult,
@@ -76,6 +77,7 @@ export const ContinuousVariableBoolean: TestCaseProcessingScenario = {
     validResource: true,
     json: null,
     hapiOperationOutcome: null,
+    testCaseValidationStatus: null,
     executionStatus: null,
     groupPopulations: [
       {
@@ -804,7 +806,7 @@ export const ContinuousVariableBoolean: TestCaseProcessingScenario = {
           populationType: FqmPopulationType.OBSERV,
           criteriaExpression: "boolFunc",
           result: true,
-          populationId: "7e20f14a-3659-4a87-9692-5ec35391e8f6",
+          populationId: "79349c30-791c-41c7-9463-81872a0dbed1",
           criteriaReferenceId: "79349c30-791c-41c7-9463-81872a0dbed1",
           observations: [1],
         },
@@ -895,6 +897,7 @@ export const ContinuousVariableBooleanFail: TestCaseProcessingScenario = {
     validResource: true,
     json: null,
     hapiOperationOutcome: null,
+    testCaseValidationStatus: null,
     executionStatus: null,
     groupPopulations: [
       {
@@ -1726,6 +1729,7 @@ export const ContinuousVariable_Encounter_Pass: TestCaseProcessingScenario = {
         text: null,
       },
     },
+    testCaseValidationStatus: TestCaseValidationStatus.VALID,
     groupPopulations: [
       {
         groupId: "638e14401b05491a43ce8a18",
@@ -2468,7 +2472,7 @@ export const ContinuousVariable_Encounter_Pass: TestCaseProcessingScenario = {
           populationType: FqmPopulationType.OBSERV,
           criteriaExpression: "daysObs",
           result: true,
-          populationId: "ff17cb94-c66e-4f70-a66d-52ace013d054",
+          populationId: "797c4d66-cfd3-4ced-a482-1d55d5cad85c",
           criteriaReferenceId: "797c4d66-cfd3-4ced-a482-1d55d5cad85c",
           observations: [5, 1],
         },
@@ -2579,6 +2583,7 @@ export const ContinuousVariable_Encounter_Fail: TestCaseProcessingScenario = {
         text: null,
       },
     },
+    testCaseValidationStatus: TestCaseValidationStatus.VALID,
     groupPopulations: [
       {
         groupId: "638e14401b05491a43ce8a18",
@@ -3444,6 +3449,7 @@ export const Ratio_Boolean_SingleIP_DenObs_NumObs_Pass: TestCaseProcessingScenar
       executionStatus: null,
       json: '{\n  "resourceType": "Bundle",\n  "id": "2106",\n  "meta": {\n    "versionId": "1",\n    "lastUpdated": "2022-09-06T20:47:21.183+00:00"\n  },\n  "type": "collection",\n  "entry": [ {\n    "fullUrl": "http://local/Encounter/2",\n    "resource": { \n      "id": "2", \n      "resourceType": "Encounter",\n      "meta": {\n        "versionId": "1",\n        "lastUpdated": "2021-10-13T03:34:10.160+00:00",\n        "source": "#nEcAkGd8PRwPP5fA"\n      },\n      "text": {\n        "status": "generated",\n        "div": "<div xmlns=\\"http://www.w3.org/1999/xhtml\\">Sep 9th 2021 for Asthma<a name=\\"mm\\"/></div>"\n      },\n      "class": {\n        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",\n        "code": "IMP",\n        "display": "inpatient encounter"\n      },\n      "status": "planned",\n      "type": [ {\n        "text": "OutPatient"\n      } ],\n      "subject": {\n        "reference": "Patient/1"\n      },\n      "participant": [ {\n        "individual": {\n          "reference": "Practitioner/30164",\n          "display": "Dr John Doe"\n        }\n      } ],\n      "period": {\n        "start": "2023-08-10T03:34:10.054Z",\n        "end": "2023-08-15T03:34:10.054Z"\n      }\n    }\n  }, {\n    "fullUrl": "http://local/Encounter/3",\n    "resource": {\n      "id": "3",\n      "resourceType": "Encounter",\n      "meta": {\n        "versionId": "1",\n        "lastUpdated": "2021-10-13T03:34:10.160+00:00",\n        "source": "#nEcAkGd8PRwPP5fA"\n      },\n      "text": { \n        "status": "generated",\n        "div": "<div xmlns=\\"http://www.w3.org/1999/xhtml\\">Sep 9th 2021 for Asthma<a name=\\"mm\\"/></div>"\n      },\n      "class": {\n        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",\n        "code": "IMP",\n        "display": "inpatient encounter"\n      },\n      "status": "finished",\n      "type": [ {\n        "text": "OutPatient"\n      } ],\n      "subject": {\n        "reference": "Patient/1"\n      },\n      "participant": [ {\n        "individual": {\n          "reference": "Practitioner/30164",\n          "display": "Dr John Doe"\n        }\n      } ],\n      "period": {\n        "start": "2023-09-12T03:34:10.054Z",\n        "end": "2023-09-13T09:34:10.054Z"\n      }\n    }\n  }, {\n    "fullUrl": "http://local/Patient/1",\n    "resource": {\n      "id": "1",\n      "resourceType": "Patient",\n      "text": {\n        "status": "generated",\n        "div": "<div xmlns=\\"http://www.w3.org/1999/xhtml\\">Lizzy Health</div>"\n      },\n      "meta": {\n        "profile": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"\n      },\n      "identifier": [ {\n        "system": "http://clinfhir.com/fhir/NamingSystem/identifier",\n        "value": "20181011LizzyHealth"\n      } ],\n      "name": [ {\n        "use": "official",\n        "text": "Lizzy Health",\n        "family": "Health",\n        "given": [ "Lizzy" ]\n      } ],\n      "gender": "female",\n      "birthDate": "2000-10-11"\n    }\n  } ]\n\n}\n',
       hapiOperationOutcome: null,
+      testCaseValidationStatus: null,
       groupPopulations: [
         {
           groupId: "63879ae21b05491a43ce8a12",
@@ -4238,7 +4244,7 @@ export const Ratio_Boolean_SingleIP_DenObs_NumObs_Pass: TestCaseProcessingScenar
             populationType: FqmPopulationType.OBSERV,
             criteriaExpression: "boolFunc2",
             result: true,
-            populationId: "536dbb4e-9032-414c-b7e7-048f5c8fb4ab",
+            populationId: "77e217d6-03dd-41ca-a1c3-f679933f9dd7",
             criteriaReferenceId: "77e217d6-03dd-41ca-a1c3-f679933f9dd7",
             observations: [14],
           },
@@ -4246,7 +4252,7 @@ export const Ratio_Boolean_SingleIP_DenObs_NumObs_Pass: TestCaseProcessingScenar
             populationType: FqmPopulationType.OBSERV,
             criteriaExpression: "boolFunc",
             result: true,
-            populationId: "7cfae29e-e9cc-4958-89de-a9dde443186f",
+            populationId: "760758ae-009f-49b2-b7a3-c9997ac3931d",
             criteriaReferenceId: "760758ae-009f-49b2-b7a3-c9997ac3931d",
             observations: [1],
           },
@@ -4371,6 +4377,7 @@ export const Ratio_Encounter_SingleIP_DenObs_NumObs_Pass: TestCaseProcessingScen
       executionStatus: null,
       json: '{\n  "resourceType": "Bundle",\n  "id": "2106",\n  "meta": {\n    "versionId": "1",\n    "lastUpdated": "2022-09-06T20:47:21.183+00:00"\n  },\n  "type": "collection",\n  "entry": [ {\n    "fullUrl": "http://local/Encounter/2",\n    "resource": { \n      "id": "2", \n      "resourceType": "Encounter",\n      "meta": {\n        "versionId": "1",\n        "lastUpdated": "2021-10-13T03:34:10.160+00:00",\n        "source": "#nEcAkGd8PRwPP5fA"\n      },\n      "text": {\n        "status": "generated",\n        "div": "<div xmlns=\\"http://www.w3.org/1999/xhtml\\">Sep 9th 2021 for Asthma<a name=\\"mm\\"/></div>"\n      },\n      "class": {\n        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",\n        "code": "IMP",\n        "display": "inpatient encounter"\n      },\n      "status": "planned",\n      "type": [ {\n        "text": "OutPatient"\n      } ],\n      "subject": {\n        "reference": "Patient/1"\n      },\n      "participant": [ {\n        "individual": {\n          "reference": "Practitioner/30164",\n          "display": "Dr John Doe"\n        }\n      } ],\n      "period": {\n        "start": "2023-08-10T03:34:10.054Z",\n        "end": "2023-08-15T03:34:10.054Z"\n      }\n    }\n  }, {\n    "fullUrl": "http://local/Encounter/3",\n    "resource": {\n      "id": "3",\n      "resourceType": "Encounter",\n      "meta": {\n        "versionId": "1",\n        "lastUpdated": "2021-10-13T03:34:10.160+00:00",\n        "source": "#nEcAkGd8PRwPP5fA"\n      },\n      "text": { \n        "status": "generated",\n        "div": "<div xmlns=\\"http://www.w3.org/1999/xhtml\\">Sep 9th 2021 for Asthma<a name=\\"mm\\"/></div>"\n      },\n      "class": {\n        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",\n        "code": "IMP",\n        "display": "inpatient encounter"\n      },\n      "status": "finished",\n      "type": [ {\n        "text": "OutPatient"\n      } ],\n      "subject": {\n        "reference": "Patient/1"\n      },\n      "participant": [ {\n        "individual": {\n          "reference": "Practitioner/30164",\n          "display": "Dr John Doe"\n        }\n      } ],\n      "period": {\n        "start": "2023-09-12T03:34:10.054Z",\n        "end": "2023-09-13T09:34:10.054Z"\n      }\n    }\n  }, {\n    "fullUrl": "http://local/Patient/1",\n    "resource": {\n      "id": "1",\n      "resourceType": "Patient",\n      "text": {\n        "status": "generated",\n        "div": "<div xmlns=\\"http://www.w3.org/1999/xhtml\\">Lizzy Health</div>"\n      },\n      "meta": {\n        "profile": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"\n      },\n      "identifier": [ {\n        "system": "http://clinfhir.com/fhir/NamingSystem/identifier",\n        "value": "20181011LizzyHealth"\n      } ],\n      "name": [ {\n        "use": "official",\n        "text": "Lizzy Health",\n        "family": "Health",\n        "given": [ "Lizzy" ]\n      } ],\n      "gender": "female",\n      "birthDate": "2000-10-11"\n    }\n  } ]\n\n}\n',
       hapiOperationOutcome: null,
+      testCaseValidationStatus: null,
       groupPopulations: [
         {
           groupId: "63879a071b05491a43ce8a10",
@@ -4457,7 +4464,7 @@ export const Ratio_Encounter_SingleIP_DenObs_NumObs_Pass: TestCaseProcessingScen
                 populationType: FqmPopulationType.OBSERV,
                 criteriaExpression: "daysObs",
                 result: false,
-                populationId: "c6a2203f-ab34-4f0f-899d-a73467440bbd",
+                populationId: "abce9253-30f1-438c-b370-30a264791b21",
                 criteriaReferenceId: "abce9253-30f1-438c-b370-30a264791b21",
                 observations: null,
               },
@@ -4465,7 +4472,7 @@ export const Ratio_Encounter_SingleIP_DenObs_NumObs_Pass: TestCaseProcessingScen
                 populationType: FqmPopulationType.OBSERV,
                 criteriaExpression: "daysObs",
                 result: false,
-                populationId: "8dcfe0df-d386-43c1-a8c8-d8f84f13c6d1",
+                populationId: "51122f75-851f-428c-938c-1d512da1fe7f",
                 criteriaReferenceId: "51122f75-851f-428c-938c-1d512da1fe7f",
               },
             ],
@@ -4505,7 +4512,7 @@ export const Ratio_Encounter_SingleIP_DenObs_NumObs_Pass: TestCaseProcessingScen
                 populationType: FqmPopulationType.OBSERV,
                 criteriaExpression: "daysObs",
                 result: true,
-                populationId: "c6a2203f-ab34-4f0f-899d-a73467440bbd",
+                populationId: "abce9253-30f1-438c-b370-30a264791b21",
                 criteriaReferenceId: "abce9253-30f1-438c-b370-30a264791b21",
                 observations: [1, 1],
               },
@@ -4513,7 +4520,7 @@ export const Ratio_Encounter_SingleIP_DenObs_NumObs_Pass: TestCaseProcessingScen
                 populationType: FqmPopulationType.OBSERV,
                 criteriaExpression: "daysObs",
                 result: false,
-                populationId: "8dcfe0df-d386-43c1-a8c8-d8f84f13c6d1",
+                populationId: "51122f75-851f-428c-938c-1d512da1fe7f",
                 criteriaReferenceId: "51122f75-851f-428c-938c-1d512da1fe7f",
               },
             ],
@@ -4596,7 +4603,7 @@ export const Ratio_Encounter_SingleIP_DenObs_NumObs_Pass: TestCaseProcessingScen
             populationType: FqmPopulationType.OBSERV,
             criteriaExpression: "daysObs",
             result: false,
-            populationId: "c6a2203f-ab34-4f0f-899d-a73467440bbd",
+            populationId: "abce9253-30f1-438c-b370-30a264791b21",
             criteriaReferenceId: "abce9253-30f1-438c-b370-30a264791b21",
             observations: [1, 1],
           },
