@@ -35,11 +35,16 @@ const CodingComponent = ({
 
   useEffect(() => {
     if (value && allValueSets && selectedValueSet?.name !== "Custom Code") {
-      setSelectedValueSet(
-        allValueSets?.find((vs) => vs.url === value?.extension?.[0]?.valueUrl)
+      const valueSet = allValueSets?.find(
+        (vs) => vs.url === value?.extension?.[0]?.valueUrl
       );
+      if (valueSet?.name !== selectedValueSet?.name) {
+        setSelectedValueSet(
+          allValueSets?.find((vs) => vs.url === value?.extension?.[0]?.valueUrl)
+        );
+      }
     }
-  }, [allValueSets, selectedValueSet?.name, value]);
+  }, [structureDefinition, allValueSets, value]);
 
   useEffect(() => {
     const [valueSets] = valueSetsState;
