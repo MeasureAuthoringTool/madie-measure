@@ -35,12 +35,12 @@ const CodingComponent = ({
 
   useEffect(() => {
     if (value && allValueSets && selectedValueSet?.name !== "Custom Code") {
-      const valueSet = allValueSets?.find(
+      const valueSet = allValueSets.find(
         (vs) => vs.url === value?.extension?.[0]?.valueUrl
       );
       if (valueSet?.name !== selectedValueSet?.name) {
         setSelectedValueSet(
-          allValueSets?.find((vs) => vs.url === value?.extension?.[0]?.valueUrl)
+          allValueSets.find((vs) => vs.url === value?.extension?.[0]?.valueUrl)
         );
       }
     }
