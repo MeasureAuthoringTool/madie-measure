@@ -78,7 +78,7 @@ const CodingComponent = ({
           })
           .catch((error) => {
             console.error(
-              `An error occurred while fetching valueSet expansion for valueSet [${valueSetUrl}]`,
+              `An error occurred while fetching binding valueSet: [${valueSetUrl}]`,
               error
             );
           });
