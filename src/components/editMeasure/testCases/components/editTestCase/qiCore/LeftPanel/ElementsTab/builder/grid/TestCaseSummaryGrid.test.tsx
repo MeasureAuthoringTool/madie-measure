@@ -11,6 +11,16 @@ describe("TestCaseSummaryGrid", () => {
         resource: {
           resourceType: "Encounter",
           id: "ec-1",
+          meta: {
+            profile: ["www.wwww.www.com"], // Partially covered case
+            extensions: {
+              nested: {
+                deeper: {
+                  key: "value",
+                },
+              },
+            },
+          },
         },
       },
       {
@@ -41,12 +51,21 @@ describe("TestCaseSummaryGrid", () => {
     expect(within(columnHeaders[1]).getByText("ID")).toBeInTheDocument();
 
     const rows = screen.getAllByRole("row");
+    expect(
+      within(rows[1].querySelector("td:nth-child(1)")).getByText("Encounter")
+    ).toBeInTheDocument();
 
-    expect(within(rows[1]).getByText("Encounter")).toBeInTheDocument();
-    expect(within(rows[1]).getByText("ec-1")).toBeInTheDocument();
+    expect(
+      within(rows[1].querySelector("td:nth-child(2)")).getByText("ec-1")
+    ).toBeInTheDocument();
 
-    expect(within(rows[2]).getByText("Procedure")).toBeInTheDocument();
-    expect(within(rows[2]).getByText("pd-1")).toBeInTheDocument();
+    expect(
+      within(rows[2].querySelector("td:nth-child(1)")).getByText("Procedure")
+    ).toBeInTheDocument();
+
+    expect(
+      within(rows[2].querySelector("td:nth-child(2)")).getByText("pd-1")
+    ).toBeInTheDocument();
   });
 
   it("should render ActionCenter with correct actions", async () => {

@@ -11,8 +11,8 @@ import ActionCenter, {
   ActionItemDef,
 } from "../../../../../../../../../common/actionCenter/ActionCenter";
 import "../../../../../styles/DataElementsTable.scss";
-import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import GenerateAttributeHTML from "./GenerateAttributeHTML";
+import { getAttributes, getMaxAttributes } from "./TestCaseSummaryGridUtils";
 
 interface TestCaseSummaryGridProps {
   onRowEdit: (row: any) => void;
@@ -25,7 +25,29 @@ const TestCaseSummaryGrid = ({
   onRowEdit,
   onRowDelete,
 }: TestCaseSummaryGridProps) => {
-  const data = bundle?.entry ?? [];
+  const data = React.useMemo(() => bundle?.entry ?? [], [bundle]);
+  const maxAttributes = getMaxAttributes(data);
+  const attributeColumns: ColumnDef<any>[] = Array.from(
+    { length: maxAttributes },
+    (_, index) => ({
+      header: `Attribute ${index + 1}`,
+      accessorFn: (row) => {
+        const attributes = getAttributes(row);
+        const attributeKey = attributes[index];
+        const value = row.resource[attributeKey];
+        return { attributeKey, value };
+      },
+      cell: (params) => {
+        //@ts-ignore
+        const { value, attributeKey } = params.getValue();
+        return value ? (
+          <GenerateAttributeHTML value={value} keyPrefix={attributeKey} />
+        ) : (
+          <div>-</div>
+        );
+      },
+    })
+  );
 
   const actions = React.useMemo<ActionItemDef[]>(
     () => [
@@ -47,14 +69,15 @@ const TestCaseSummaryGrid = ({
     () => [
       {
         header: "Resource & Value Set",
-        accessorFn: (row) => row.resource.resourceType,
         id: "resourceType",
+        cell: ({ row }) => <div>{row.original.resource.resourceType}</div>,
       },
       {
         header: "ID",
-        accessorFn: (row) => row.resource.id,
         id: "id",
+        cell: ({ row }) => <div>{row.original.resource.id}</div>,
       },
+      ...attributeColumns,
       {
         header: "",
         id: "actions",
@@ -67,19 +90,13 @@ const TestCaseSummaryGrid = ({
         ),
       },
     ],
-    [actions]
+    [actions, attributeColumns]
   );
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    initialState: {
-      columnPinning: {
-        left: ["resourceType"],
-        right: ["actions"],
-      },
-    },
   });
 
   return (
@@ -106,40 +123,9 @@ const TestCaseSummaryGrid = ({
         <tbody>
           {table.getRowModel().rows.map((row) => (
             <tr key={row.id}>
-              {row.getVisibleCells().map((cell, idx) => (
+              {row.getVisibleCells().map((cell) => (
                 <td key={cell.id}>
-                  {/* the arrows are for the functionality to move the rows around and that we will implement it in the future*/}
-                  {/*{idx === 0 ? (*/}
-                  {/*  <div className="first-column-with-icons">*/}
-                  {/*    <div className="icons">*/}
-                  {/*      <ArrowDropUpIcon*/}
-                  {/*        style={{*/}
-                  {/*          color: "#125496",*/}
-                  {/*          fontSize: "xxx-large",*/}
-                  {/*          margin: "-16px",*/}
-                  {/*        }}*/}
-                  {/*      />*/}
-                  {/*      <ArrowDropDownIcon*/}
-                  {/*        style={{*/}
-                  {/*          color: "#8C8C8C",*/}
-                  {/*          fontSize: "xxx-large",*/}
-                  {/*          margin: "-16px",*/}
-                  {/*        }}*/}
-                  {/*      />*/}
-                  {/*    </div>*/}
-                  {/*    <div className="cell-body">*/}
-                  {/*      {flexRender(*/}
-                  {/*        cell.column.columnDef.cell,*/}
-                  {/*        cell.getContext()*/}
-                  {/*      )}*/}
-                  {/*    </div>*/}
-                  {/*  </div>*/}
-                  {/*) : (*/}
-                  {/*  flexRender(cell.column.columnDef.cell, cell.getContext())*/}
-                  {/*)}*/}
-                  <div>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </div>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
             </tr>
