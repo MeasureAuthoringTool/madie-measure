@@ -394,5 +394,48 @@ describe("ActionCenter Component", () => {
         "Test cases must be executed prior to exporting."
       );
     });
+
+    it("should disable delete icon when test case is created before versioning on versioned measures", async () => {
+      const selectedTestCase = [
+        { id: "1", validResource: true, createdBeforeVersioning: true },
+      ];
+      render(
+        <MemoryRouter>
+          <ActionCenter
+            selectedTestCases={selectedTestCase}
+            canEdit={true}
+            isQDM={false}
+            isDraft={false}
+          />
+        </MemoryRouter>
+      );
+
+      const deleteTooltip = await screen.findByTestId("delete-tooltip");
+      expect(deleteTooltip).toHaveAttribute(
+        "aria-label",
+        "Test cases added prior to versioning cannot be deleted"
+      );
+      expect(screen.getByTestId("delete-action-btn")).toBeDisabled();
+    });
+
+    it("should disable delete icon when no test case is selected", async () => {
+      render(
+        <MemoryRouter>
+          <ActionCenter
+            selectedTestCases={[]}
+            canEdit={true}
+            isQDM={false}
+            isDraft={false}
+          />
+        </MemoryRouter>
+      );
+
+      const deleteTooltip = await screen.findByTestId("delete-tooltip");
+      expect(deleteTooltip).toHaveAttribute(
+        "aria-label",
+        "Select test case to delete"
+      );
+      expect(screen.getByTestId("delete-action-btn")).toBeDisabled();
+    });
   });
 });
