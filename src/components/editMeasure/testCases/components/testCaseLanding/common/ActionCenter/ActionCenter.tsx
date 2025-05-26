@@ -68,6 +68,7 @@ export default function ActionCenter(props: ActionCenterProps) {
   const [disableCloneBtn, setDisableCloneBtn] = useState<boolean>(true);
   const [disableExportBtn, setDisableExportBtn] = useState<boolean>(true);
   const [disableCopyBtn, setDisableCopyBtn] = useState<boolean>(true);
+  const [disableMessage, setDisableMessage] = useState<string | undefined>();
 
   useEffect(() => {
     deleteButtonCheck();
@@ -129,10 +130,14 @@ export default function ActionCenter(props: ActionCenterProps) {
           (testCase) => testCase.createdBeforeVersioning === true
         );
         setDisableDeleteBtn(hasCreatedBeforeVersioning);
+        setDisableMessage(
+          "Test cases added prior to versioning cannot be deleted"
+        );
       } else {
         setDisableDeleteBtn(false);
       }
     } else {
+      setDisableMessage("Select test case to delete");
       setDisableDeleteBtn(true);
     }
   };
@@ -279,11 +284,7 @@ export default function ActionCenter(props: ActionCenterProps) {
               <div tw="flex items-center">
                 <Tooltip
                   data-testid="delete-tooltip"
-                  title={
-                    disableDeleteBtn
-                      ? "Select test case to delete"
-                      : "Delete test case"
-                  }
+                  title={disableDeleteBtn ? disableMessage : "Delete test case"}
                   placement="top"
                   arrow
                 >
