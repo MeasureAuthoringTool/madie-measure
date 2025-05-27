@@ -110,6 +110,8 @@ export class MeasureServiceApi {
     filterByCurrentUser: boolean,
     limit: number = 25,
     page: number = 0,
+    sort: string = "lastModifiedAt",
+    direction: string = "DESC",
     signal
   ): Promise<any> {
     try {
@@ -121,6 +123,8 @@ export class MeasureServiceApi {
           currentUser: filterByCurrentUser,
           limit,
           page,
+          sort,
+          direction,
         },
         signal,
       });
