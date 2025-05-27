@@ -485,10 +485,16 @@ export function isComponentDataType(datatype) {
     case "http://hl7.org/fhirpath/System.String":
     case "code":
     case "Coding":
+    case "CodeableConcept":
     case "Extension":
     case "Reference":
       return true;
     default:
       return false;
   }
+}
+
+export function getValueSetUrl(url: string) {
+  if (!url) return "";
+  return url.split("|").shift();
 }
