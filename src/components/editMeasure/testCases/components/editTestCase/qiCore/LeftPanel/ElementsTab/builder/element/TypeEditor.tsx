@@ -307,9 +307,7 @@ const TypeEditor = ({
           <CodesComponent
             canEdit={canEdit}
             fieldRequired={required}
-            label={_.capitalize(
-              label?.id?.substring(label?.id?.lastIndexOf(".") + 1)
-            )}
+            label={label}
             structureDefinition={structureDefinition}
           />
         );
@@ -319,6 +317,7 @@ const TypeEditor = ({
             canEdit={canEdit}
             structureDefinition={structureDefinition}
             fieldRequired={required}
+            label={label}
           />
         );
       case "Extension":
