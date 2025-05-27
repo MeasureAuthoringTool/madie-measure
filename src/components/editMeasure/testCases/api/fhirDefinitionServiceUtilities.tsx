@@ -1,5 +1,7 @@
 import { ElementDefinition } from "fhir/r4";
 import * as Yup from "yup";
+import * as _ from "lodash";
+
 /**
  * Prepares the element name to be displayed for tab labels
  * for sliced elements- it will be sliceName. e.g. Patient.extension:race results into race
@@ -11,6 +13,20 @@ import * as Yup from "yup";
  * Patient.name[1] = values at name: [name, name]: -> Name 2
  *  Need to check cardinality, then check if array and Up the index and display.
  */
+export const formatChoiceType = (
+  element: ElementDefinition,
+  basePath: string = "",
+  required: string = ""
+) => {
+  if (_.includes(element.id, "[x]")) {
+    return `${extractNameWithoutIndex(
+      element,
+      basePath,
+      required
+    )}${_.upperFirst(element.type[0].code)}`;
+  }
+  return element.id;
+};
 
 export function getElementName(
   element: ElementDefinition,
@@ -22,6 +38,7 @@ export function getElementName(
 
   let index = "";
   const retrievedIndex = getIndexFromPathWithoutBrackets(element.id);
+
   if (Array.isArray(formikValue)) {
     if (formikValue.length > 1) {
       if (retrievedIndex) {
@@ -35,11 +52,12 @@ export function getElementName(
     return `${requiredIndicator}${element.sliceName}${index}`;
   }
   if (element.path?.endsWith("[x]")) {
-    // if the path ends with [x], we need to get the type code
-    const typeCode = element.type[0].code;
-    return `${requiredIndicator}${stripAllIndexes(
-      element.id.substring(basePath.length + 1, element.path.indexOf("[x]"))
-    )}${typeCode}`;
+    // if the path ends with [x], we need to get the type code (which in the values we have here is the only type on the element even though it's a choiceType because we handled that with the naming convention in testcase editor JSON as choice[x] == choiceType where x = Type )
+    return `${extractNameWithoutIndex(
+      element,
+      requiredIndicator,
+      basePath
+    )}${_.upperFirst(element.type[0].code)}`;
   }
   const result = `${requiredIndicator}${stripAllIndexes(
     element.id.substring(basePath.length + 1)
@@ -60,6 +78,22 @@ const removeArrayIndexes = (path) => {
       .join(".")
   );
 };
+
+export function extractNameWithoutIndex(
+  element: ElementDefinition,
+  requiredIndicator: string,
+  basePath: string
+) {
+  if (basePath) {
+    return `${requiredIndicator}${stripAllIndexes(
+      element.id.substring(basePath.length + 1, element.id?.indexOf("[x]"))
+    )}`;
+  } else {
+    return `${requiredIndicator}${stripAllIndexes(
+      element.id.substring(0, element.id?.indexOf("[x]"))
+    )}`;
+  }
+}
 
 /**
  * Strips all array indexes from a dot/bracket path string.
@@ -155,7 +189,7 @@ export function buildSchemaRecursive(formInfo, path) {
 }
 
 // we want to build out every end of the tree before making yup object shapes since they're immutable.
-export function buildFullValidationSchema(formInfo, rootPath) {
+export function buildFullValidationSchema(formInfo, rootPath: string = "") {
   const validationSchemaObject = buildSchemaRecursive(formInfo, rootPath);
   return Yup.object().shape({
     [rootPath]: validationSchemaObject,
@@ -197,9 +231,11 @@ export function removeUndefinedAndEmptyObjects(obj) {
   if (typeof obj !== "object" || obj === null) {
     return obj;
   }
+
   for (let key in obj) {
-    if (obj.hasOwnProperty(key)) {
+    if (obj.hasOwnProperty(key) && key !== "x") {
       const value = obj[key];
+
       // Remove the key if the value is undefined
       if (value === undefined) {
         delete obj[key];
@@ -254,25 +290,6 @@ export function getRequiredElements(resource: any) {
 // EX (Patient, Patient.name) => returns name;
 export function stripResourcePath(resourcePath, elementPath: string): string {
   return elementPath.substring(`${resourcePath}.`.length);
-  // let result:string = "";
-  // // return x.y if elementPath is x[y]
-  // if (elementPath?.includes("[")) {
-
-  //   result = elementPath.substring(
-  //     elementPath.indexOf(".") + 1,
-  //     elementPath.indexOf("[")
-  //   )  + "." + elementPath.substring(
-  //     elementPath.indexOf("[") + 1,
-  //     elementPath.indexOf("]")) ;
-
-  // } else if (elementPath.includes(".")) {
-  //     result =  elementPath.substring(elementPath.indexOf(".") + 1);
-
-  // } else {
-  //   result =  elementPath.substring(`${resourcePath}.`.length);
-  // }
-
-  // return result ;
 }
 
 /**
@@ -368,7 +385,8 @@ export function mapElementsRequired(structureDefinition) {
 // Patient.name[3].text[4].somethingElse -> null
 export function getIndexFromPath(path) {
   const match = path.match(/(\[\d+\])$/);
-  return match ? match[1] : null;
+  const result = match ? match[1] : null;
+  return result;
 }
 
 // gets everything after the last . in a path.

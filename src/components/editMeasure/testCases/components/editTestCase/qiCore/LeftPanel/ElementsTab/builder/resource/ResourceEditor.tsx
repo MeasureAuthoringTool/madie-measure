@@ -37,7 +37,6 @@ import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefini
 import tw from "twin.macro";
 import "../../../../../../../../../../styles/VerticalSideBarNav.scss";
 import "./ResourceEditor.scss";
-import { LensSharp } from "@mui/icons-material";
 
 const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
 const InnerWrapper = tw.div`flex-grow flex flex-col`;
@@ -128,9 +127,8 @@ const ResourceEditor = ({
 
                 //let's appent e.type[0].code to the end of the elemPathWithoutType
                 const elemPathType = _.camelCase(
-                  elemPathWithoutType + _.startCase(e.type[0].code)
+                  elemPathWithoutType + _.upperFirst(e.type[0].code)
                 );
-
                 //we're going to have to find elementX if type == e.type[0]
 
                 const elemValue = _.get(
@@ -207,7 +205,9 @@ const ResourceEditor = ({
   const saveElements = (newValue: ElementDefinition[] | null) => {
     // removed uncessesary reference to modifying displayedElements.
     // Any updates through dispatch will trickle down child component references accordingly.
+
     const { type } = selectedResource?.definition;
+
     const formikCleanedValues = removeUndefinedAndEmptyObjects(values);
     const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
     // Update with formik values
@@ -221,6 +221,7 @@ const ResourceEditor = ({
       );
       // if elemPath ends with ], then we're going to have to find the resource element that has a correct matching type
       const currentValue = _.get(nextEntry.resource, elemPath);
+
       if (elemPath.endsWith("]")) {
         //type = the value between the last [ and ]
         const type = elemPath.substring(
@@ -232,13 +233,15 @@ const ResourceEditor = ({
           elemPath.lastIndexOf("[")
         );
         // turn elemPath path[type] into pathType
-        elemPath = _.camelCase(elemPathWithoutType + _.startCase(type));
+        elemPath = _.camelCase(elemPathWithoutType + _.upperFirst(type));
       }
+
       if (_.isNil(currentValue)) {
         _.set(nextEntry.resource, elemPath, "");
       }
     });
     // Update resource state
+    // There are matching values choice[x] and choiceX  choice.x has the value.  That value needs moved to choiceX and choice.x has to be removed
 
     dispatch({
       type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
@@ -322,6 +325,7 @@ const ResourceEditor = ({
                           resourceBasePath,
                           getNestedProperty(values, stripAllIndexes(element.id))
                         );
+
                         return (
                           <Tab
                             key={index}
