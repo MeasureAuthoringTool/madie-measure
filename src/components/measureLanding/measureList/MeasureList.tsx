@@ -52,6 +52,9 @@ import {
 } from "../../../icons/MeasureListTableRightArrowIcons";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { exportMeasure as downloadMeasureExport } from "../../../utils/exportUtil";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 
 const searchInputStyle = {
   borderRadius: "3px",
@@ -95,6 +98,10 @@ export default function MeasureList(props: {
   currentLimit: number;
   currentPage: number;
   setMeasureCounts;
+  currentSort;
+  setCurrentSort;
+  currentDirection;
+  setCurrentDirection;
   setErrMsg;
 }) {
   const measureServiceApi = useRef(useMeasureServiceApi()).current; //needs to be ref or triggers jest. throws warn
@@ -342,7 +349,7 @@ export default function MeasureList(props: {
           )}
         </>
       ),
-      accessorKey: "status",
+      accessorKey: "measureMetaData.draft",
     },
     {
       header: "Model",
@@ -366,7 +373,7 @@ export default function MeasureList(props: {
           )}
         </div>
       ),
-      accessorKey: "shared",
+      accessorKey: "measureSet.acls",
     },
     {
       header: "CMS ID",
@@ -377,7 +384,7 @@ export default function MeasureList(props: {
           dataTestId={`measure-cmsId-${info.row.original.id}`}
         />
       ),
-      accessorKey: "cmsId",
+      accessorKey: "measureSet.cmsId",
     },
     {
       header: "Updated",
@@ -652,6 +659,8 @@ export default function MeasureList(props: {
         props.activeTab === 0,
         props.currentLimit,
         0,
+        "",
+        "",
         abortController.current.signal
       )
       .then((data) => {
@@ -683,6 +692,44 @@ export default function MeasureList(props: {
         props.setLoading(false);
         props.setErrMsg(error.message);
       });
+  };
+
+  const handleSort = async (sort: string) => {
+    props.setLoading(true);
+    abortController.current = new AbortController();
+    props.setSearchCriteria("");
+    let sortChange = "lastModifiedAt";
+    let directionChange = "DESC";
+    if (sort === props.currentSort) {
+      if (props.currentDirection === "ASC") {
+        sortChange = sort;
+        directionChange = "DESC";
+      } else if (props.currentDirection === "DESC") {
+        sortChange = "";
+        directionChange = "";
+      }
+    } else {
+      sortChange = sort;
+      directionChange = "ASC";
+    }
+    props.setCurrentSort(sortChange);
+    props.setCurrentDirection(directionChange);
+    measureServiceApi
+      .fetchMeasures(
+        props.activeTab === 0,
+        props.currentLimit,
+        0,
+        sortChange,
+        directionChange,
+        abortController.current.signal
+      )
+      .then((data) => {
+        setPageProps(data);
+      })
+      .catch((error: Error) => {
+        props.setErrMsg("");
+      });
+    navigate(`?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`);
   };
 
   const handleSubmit = async (event) => {
@@ -784,6 +831,8 @@ export default function MeasureList(props: {
         props.activeTab === 0,
         props.currentLimit,
         props.currentPage,
+        "",
+        "",
         abortController.current.signal
       )
       .then((data) => {
@@ -1052,7 +1101,7 @@ export default function MeasureList(props: {
                   <TH
                     key={header.id}
                     scope="col"
-                    // onClick={header.column.getToggleSortingHandler()}
+                    onClick={() => header.column.getToggleSortingHandler()}
                     onMouseEnter={() => setHoveredHeader(header.id)}
                     onMouseLeave={() => setHoveredHeader(null)}
                     className="header-cell"
@@ -1064,6 +1113,11 @@ export default function MeasureList(props: {
                             ? "cursor-pointer select-none header-button"
                             : "header-button"
                         }
+                        disabled={
+                          !featureFlags?.MeasureSearch ||
+                          !header.column.getCanSort()
+                        }
+                        onClick={() => handleSort(header.id.replace("_", "."))}
                         title={
                           header.column.getCanSort()
                             ? header.column.getNextSortingOrder() === "asc"
