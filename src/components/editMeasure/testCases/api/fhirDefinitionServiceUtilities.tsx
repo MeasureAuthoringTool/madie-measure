@@ -38,7 +38,6 @@ export function getElementName(
 
   let index = "";
   const retrievedIndex = getIndexFromPathWithoutBrackets(element.id);
-
   if (Array.isArray(formikValue)) {
     if (formikValue.length > 1) {
       if (retrievedIndex) {
@@ -273,7 +272,6 @@ export function getTopLevelElements(resource: any) {
         const newElement = { ...element };
         newElement.type = [type];
         elementsFiltered.push(newElement);
-        //remove the original element
       });
       elementsFiltered.splice(elementsFiltered.indexOf(element), 1);
     }
