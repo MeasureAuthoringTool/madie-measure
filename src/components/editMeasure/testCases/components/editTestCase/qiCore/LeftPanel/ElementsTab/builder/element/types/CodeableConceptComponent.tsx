@@ -23,7 +23,7 @@ const CodeableConceptComponent = ({
       label={label}
       canEdit={canEdit}
       structureDefinition={structureDefinition}
-      onChange={(value) => handleChange(value)}
+      onChange={handleChange}
       value={value?.coding}
     />
   );
