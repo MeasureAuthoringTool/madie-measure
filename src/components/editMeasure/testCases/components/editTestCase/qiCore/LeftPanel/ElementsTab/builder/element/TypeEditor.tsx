@@ -228,6 +228,7 @@ const TypeEditor = ({
           />
         );
       case "http://hl7.org/fhirpath/System.Integer":
+      case "integer":
       case "positiveInt":
       case "unsignedInt":
         return (

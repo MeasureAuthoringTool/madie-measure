@@ -232,6 +232,17 @@ describe("FhirDefinitionServiceUtilities", () => {
 });
 
 describe("getElementName", () => {
+  it("returns the choiceType if exists", () => {
+    const element = {
+      id: "some.path[x]",
+      min: 0,
+      max: "1",
+      path: "some.path[x]",
+      type: [{ code: "boolean" }],
+    };
+    expect(getElementName(element, "some", [])).toBe("pathBoolean");
+  });
+
   it("returns the slice if exists", () => {
     const element = {
       id: "testSlice",
@@ -241,7 +252,6 @@ describe("getElementName", () => {
     };
     expect(getElementName(element, "some", [])).toBe("testSlice");
   });
-
   it("should handles not a number index", () => {
     const element = {
       id: "Patient.name[asdf]",
@@ -267,6 +277,7 @@ describe("getElementName", () => {
   it("should format for ChoiceType elements correctly", () => {
     const element = {
       id: "Patient.effective[x]",
+      path: "Patient.effective[x]",
       min: 0,
       max: 1,
       type: [{ code: "dateTime" }],

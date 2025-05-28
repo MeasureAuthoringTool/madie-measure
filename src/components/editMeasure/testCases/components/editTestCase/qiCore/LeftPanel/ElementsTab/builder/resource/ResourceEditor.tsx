@@ -222,7 +222,7 @@ const ResourceEditor = ({
       // if elemPath ends with ], then we're going to have to find the resource element that has a correct matching type
       const currentValue = _.get(nextEntry.resource, elemPath);
 
-      if (elemPath.endsWith("]")) {
+      if (elemPath.endsWith("]") && !elemPath.endsWith("[x]")) {
         //type = the value between the last [ and ]
         const type = elemPath.substring(
           elemPath.lastIndexOf("[") + 1,

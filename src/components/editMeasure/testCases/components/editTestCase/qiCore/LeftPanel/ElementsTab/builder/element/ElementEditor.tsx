@@ -197,16 +197,6 @@ const ElementEditor = ({
     for (const builtNode of nodeList) {
       // associate id with form
 
-      if (builtNode.type) {
-        const id = extractNameWithoutIndex(builtNode, "", resourcePath);
-
-        const type = builtNode.id.replace(id, "");
-        builtNode.id = id; // remove the [x] from the id
-        // remove the type that doesn't match?
-        builtNode.type = builtNode.type.filter((type) => {
-          return type.code === type;
-        });
-      }
       formInfo[builtNode.id] = builtNode;
     }
     buildSchemaAndInitialValues(formInfo, resource);
