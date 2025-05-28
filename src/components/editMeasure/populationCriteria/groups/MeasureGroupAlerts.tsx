@@ -2,6 +2,7 @@ import React from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { MadieAlert } from "@madie/madie-design-system/dist/react";
+import { useFeatureFlags } from "@madie/madie-util";
 
 interface MeasureGroupAlertsTypes {
   type?: string;
@@ -11,10 +12,12 @@ interface MeasureGroupAlertsTypes {
 
 const MeasureGroupAlerts = (props: MeasureGroupAlertsTypes) => {
   const dataTestId = props.type === "error" ? "error-alerts" : "success-alerts";
+  const featureFlags = useFeatureFlags();
   return (
     <div tw="mx-8 my-4">
       {props.message && (
         <MadieAlert
+          minimizeAlerts={featureFlags?.MinimizeAlerts}
           type={props.type}
           content={
             <p aria-live="polite" data-testid={dataTestId}>

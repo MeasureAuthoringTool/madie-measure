@@ -7,9 +7,10 @@ import "twin.macro";
 import "styled-components/macro";
 import { EXPORT_ERROR_CHARACTERS_MESSAGE } from "../../util/checkSpecialCharacters";
 import {
-  createImportMessage,
-  createWarningMessage,
+  createImportAlerts,
+  createWarningAlerts,
 } from "./StatusHandlerMessage";
+import { useFeatureFlags } from "@madie/madie-util";
 
 interface StatusHandlerProps {
   error?: boolean;
@@ -28,8 +29,11 @@ const StatusHandler = ({
   testDataId,
   importWarnings,
 }: StatusHandlerProps) => {
+  const featureFlags = useFeatureFlags();
+  const allAlerts = [];
+
   if (error && errorMessages) {
-    // we need to separate export errors from regular errors since they need to be grouped together under a single heading
+    // We need to separate export errors from regular errors since they need to be grouped together under a single heading
     const withoutDuplicates = [...new Set(errorMessages)];
     const exportErrors = withoutDuplicates.filter((e) =>
       e.includes(EXPORT_ERROR_CHARACTERS_MESSAGE)
@@ -55,55 +59,48 @@ const StatusHandler = ({
         </>
       );
     }
+
     if (nonExportErrors.length + exportErrors.length === 1) {
-      return (
-        <div id="status-handler">
-          <MadieAlert
-            data-testid="generic-error-text-header"
-            type="error"
-            content={
-              <div aria-live="polite" role="alert" data-testid={testDataId}>
-                {exportErrorContent}
-                <h3>{nonExportErrors}</h3>
-              </div>
-            }
-            canClose={false}
-            copyButton={true}
-          />
-        </div>
-      );
+      allAlerts.push({
+        type: "error",
+        content: (
+          <div aria-live="polite" role="alert" data-testid={testDataId}>
+            {exportErrorContent}
+            <h3>{nonExportErrors}</h3>
+          </div>
+        ),
+        canClose: false,
+        copyButton: true,
+      });
     } else if (nonExportErrors.length + exportErrors.length > 1) {
       const mappedMessages = nonExportErrors.map(
         (em: string, index: number) => <li key={index}>{em}</li>
       );
-      return (
-        <div id="status-handler">
-          <MadieAlert
-            type="error"
-            content={
-              <div aria-live="polite" role="alert" data-testid={testDataId}>
-                <h3>
-                  {nonExportErrors.length + exportErrors.length} errors were
-                  found
-                </h3>
-                {exportErrorContent}
-                <ul data-testid="generic-fail-text-list">{mappedMessages}</ul>
-              </div>
-            }
-            canClose={false}
-            copyButton={true}
-          />
-        </div>
-      );
+      allAlerts.push({
+        type: "error",
+        content: (
+          <div aria-live="polite" role="alert" data-testid={testDataId}>
+            <h3>
+              {nonExportErrors.length + exportErrors.length} errors were found
+            </h3>
+            {exportErrorContent}
+            <ul data-testid="generic-fail-text-list">{mappedMessages}</ul>
+          </div>
+        ),
+        canClose: false,
+        copyButton: true,
+      });
     }
   }
+
   if (warning && warningMessages) {
     const withoutDuplicates = [...new Set(warningMessages)];
-
     if (withoutDuplicates.length > 0) {
-      return createWarningMessage(withoutDuplicates, testDataId);
+      const warningAlerts = createWarningAlerts(withoutDuplicates, testDataId);
+      allAlerts.push(...warningAlerts);
     }
   }
+
   if (importWarnings && importWarnings.length > 0) {
     const failedImports = importWarnings.filter((warnings) => {
       if (!warnings.successful) return warnings;
@@ -113,14 +110,28 @@ const StatusHandler = ({
     const successfulImportsWithWarnings = importWarnings.filter((warnings) => {
       if (warnings.successful && warnings.message) return warnings;
     });
-    return createImportMessage(
+
+    const importAlerts = createImportAlerts(
       failedImports,
       successfulImports,
       successfulImportsWithWarnings,
       testDataId
     );
+    allAlerts.push(...importAlerts);
   }
-  return <div />;
+
+  if (allAlerts.length === 0) {
+    return <div />;
+  }
+
+  return (
+    <div id="status-handler">
+      <MadieAlert
+        minimizeAlerts={featureFlags?.MinimizeAlerts}
+        alerts={allAlerts}
+      />
+    </div>
+  );
 };
 
 export default StatusHandler;

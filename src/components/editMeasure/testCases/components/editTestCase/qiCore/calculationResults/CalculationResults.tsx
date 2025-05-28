@@ -145,6 +145,7 @@ const CalculationResults = ({
     <div style={{ paddingRight: ".25rem" }}>
       {!calculationResults && !calculationErrors && (
         <MadieAlert
+          minimizeAlerts={false}
           type="info"
           content="To see the logic highlights, click 'Run Test'"
           canClose={false}
@@ -155,6 +156,7 @@ const CalculationResults = ({
       )}
       {calculationErrors && (
         <MadieAlert
+          minimizeAlerts={featureFlags?.MinimizeAlerts}
           type={calculationErrors.status}
           content={calculationErrors.message}
           canClose={false}

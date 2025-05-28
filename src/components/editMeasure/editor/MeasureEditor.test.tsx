@@ -16,7 +16,11 @@ import {
   isUsingEmpty,
   validateContent,
 } from "@madie/madie-editor";
-import { checkUserCanEdit, measureStore } from "@madie/madie-util";
+import {
+  checkUserCanEdit,
+  measureStore,
+  featureFlagsStore,
+} from "@madie/madie-util";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 const measure = {
@@ -47,7 +51,23 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn(() => {
     return true;
   }),
-
+  useFeatureFlags: jest.fn().mockReturnValue({
+    qiCoreEnabled: true,
+    qiCore6Enabled: true,
+    qdmExport: true,
+    enableCustomMeasureScoring: true,
+  }),
+  featureFlagsStore: {
+    state: {
+      qiCoreEnabled: true,
+      qiCore6Enabled: true,
+      qdmExport: true,
+      enableCustomMeasureScoring: true,
+    },
+    subscribe: jest.fn().mockImplementation((set) => {
+      return { unsubscribe: () => null };
+    }),
+  },
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => measure),
@@ -160,6 +180,12 @@ const serviceConfig = {
 
 const renderEditor = (measure) => {
   measureStore.state.mockImplementationOnce(() => measure);
+  featureFlagsStore.state = {
+    qiCoreEnabled: true,
+    qiCore6Enabled: true,
+    qdmExport: true,
+    enableCustomMeasureScoring: true,
+  };
   return render(
     <ApiContextProvider value={serviceConfig}>
       <MemoryRouter initialEntries={[{ pathname: "/cql-editor" }]}>

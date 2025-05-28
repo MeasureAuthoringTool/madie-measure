@@ -22,8 +22,8 @@ export function createWarningMessage(
               The following Test Case dates could not be shifted. Please try
               again. If the issue continues, please contact helpdesk.
               <ul>
-                {withoutDuplicates.map((tc) => (
-                  <li>{tc}</li>
+                {withoutDuplicates.map((tc, index) => (
+                  <li key={index}>{tc}</li>
                 ))}
               </ul>
             </div>
@@ -34,6 +34,33 @@ export function createWarningMessage(
     </div>
   );
 }
+
+export function createWarningAlerts(
+  withoutDuplicates: string[],
+  testDataId: string
+) {
+  return [
+    {
+      type: "warning",
+      copyButton: true,
+      content: (
+        <div aria-live="polite" role="alert" data-testid={testDataId}>
+          <div data-testid="warn-title">
+            The following Test Case dates could not be shifted. Please try
+            again. If the issue continues, please contact helpdesk.
+            <ul>
+              {withoutDuplicates.map((tc, index) => (
+                <li key={index}>{tc}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ),
+      canClose: false,
+    },
+  ];
+}
+
 export function createImportMessage(
   failedImports: TestCaseImportOutcome[],
   successfulImports: number,
@@ -105,4 +132,77 @@ export function createImportMessage(
       />
     </div>
   );
+}
+
+export function createImportAlerts(
+  failedImports: TestCaseImportOutcome[],
+  successfulImports: number,
+  successfulImportsWithWarnings: TestCaseImportOutcome[],
+  testDataId: string
+) {
+  return [
+    {
+      type: "warning",
+      copyButton: true,
+      content: (
+        <div aria-live="polite" role="alert" data-testid={testDataId}>
+          {failedImports.length > 0 && (
+            <div>
+              <div tw="font-medium">
+                ({successfulImports}) test case(s) were imported. The following
+                ({failedImports.length}) test case(s) could not be imported.
+                Please ensure that your formatting is correct and try again.
+              </div>
+              <ul>
+                {failedImports.map((failedImport, index) => {
+                  const family = failedImport?.familyName;
+                  const given = failedImport?.givenNames?.toString();
+                  const names =
+                    family && given
+                      ? `${family} ${given}`
+                      : failedImport?.patientId;
+                  return (
+                    <li key={index} data-testid="failed-test-cases">
+                      {names} <br />
+                      <span tw="ml-4">Reason: {failedImport.message}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+          {successfulImportsWithWarnings?.length > 0 && (
+            <div>
+              <div tw="font-medium">
+                Following test case(s) were imported successfully, but{" "}
+                {successfulImportsWithWarnings[0].message}
+              </div>
+              <ul>
+                {successfulImportsWithWarnings.map(
+                  (successfulImportsWithWarning, index) => {
+                    const family = successfulImportsWithWarning?.familyName;
+                    const given =
+                      successfulImportsWithWarning?.givenNames?.toString();
+                    const names =
+                      family && given
+                        ? `${family} ${given}`
+                        : successfulImportsWithWarning?.patientId;
+                    return (
+                      <li
+                        key={index}
+                        data-testid="success-imports-with-warnings"
+                      >
+                        {names}{" "}
+                      </li>
+                    );
+                  }
+                )}
+              </ul>
+            </div>
+          )}
+        </div>
+      ),
+      canClose: false,
+    },
+  ];
 }

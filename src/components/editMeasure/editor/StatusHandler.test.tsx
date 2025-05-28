@@ -1,6 +1,12 @@
 import * as React from "react";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import StatusHandler, { transformAnnotation } from "./StatusHandler";
+import { useFeatureFlags } from "@madie/madie-util";
+
+// Mock the useFeatureFlags hook
+jest.mock("@madie/madie-util", () => ({
+  useFeatureFlags: jest.fn(),
+}));
 
 describe("StatusHandler Component", () => {
   const { getByTestId, queryByTestId } = screen;
@@ -24,6 +30,11 @@ describe("StatusHandler Component", () => {
     primaryMessage: "CQL updated successfully",
     secondaryMessages: ["Library statement can not be updated"],
   };
+
+  beforeEach(() => {
+    // Set up the mock to return a default value
+    (useFeatureFlags as jest.Mock).mockReturnValue({ MinimizeAlerts: false });
+  });
 
   it("Should display success message, an errorMessage and outbound annotations", () => {
     const warningMessage =
@@ -311,6 +322,25 @@ describe("StatusHandler Component", () => {
     expect(warningsList).toBeInTheDocument();
     expect(warningsList).toHaveTextContent(
       transformAnnotation(annotationsObject[1])
+    );
+  });
+
+  it("Should handle minimize alerts feature flag", () => {
+    // Set the feature flag to true for this test
+    (useFeatureFlags as jest.Mock).mockReturnValue({ MinimizeAlerts: true });
+
+    render(
+      <StatusHandler
+        success={success}
+        error={false}
+        errorMessage={false}
+        outboundAnnotations={[]}
+        hasSubTitle={false}
+      />
+    );
+
+    expect(getByTestId("generic-success-text-header")).toHaveTextContent(
+      success.primaryMessage
     );
   });
 });

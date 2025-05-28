@@ -25,6 +25,7 @@ declare module "@madie/madie-util" {
     QICoreManifestExpansion: boolean;
     OverlappingValueSets: boolean;
     EditTestsOnVersionedMeasures: boolean;
+    MinimizeAlerts: boolean;
   }
 
   export interface ServiceConfig {

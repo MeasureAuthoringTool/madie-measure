@@ -106,6 +106,7 @@ const ValidationErrorsButton = tw.button`
 interface AlertProps {
   status?: "success" | "warning" | "error" | "info" | "meta" | null;
   message?: any;
+  id?: string; // Add id for identifying specific alerts
 }
 
 interface navigationParams {
@@ -221,8 +222,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
   const testCaseService = useRef(useTestCaseServiceApi());
   const calculation = useRef(calculationService());
   const fhirCqlParsingService = useRef(useFhirCqlParsingService());
-  const [alert, setAlert] = useState<AlertProps>(null);
+  const [alerts, setAlerts] = useState<AlertProps[]>([]);
   const { errors, setErrors } = props;
+
   // Toast utilities
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<ReactNode>("");
@@ -252,7 +254,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
   const [showValidationErrors, setShowValidationErrors] = useState(false);
   const [populationGroupResults, setPopulationGroupResults] =
     useState<DetailedPopulationGroupResult[]>();
-  const [calculationErrors, setCalculationErrors] = useState<AlertProps>();
+  const [calculationErrorId, setCalculationErrorId] = useState<string | null>(
+    null
+  );
   const [rightPanelActiveTab, setRightPanelActiveTab] =
     useState<string>("measurecql");
   const [leftPanelActiveTab, setLeftPanelActiveTab] =
@@ -454,7 +458,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
   ]);
 
   const handleSubmit = async (testCase: TestCase) => {
-    setAlert(null);
+    clearAllAlerts(); // Clear all alerts before submission
     testCase.title = sanitizeUserInput(testCase.title);
     testCase.description = sanitizeUserInput(testCase.description);
     testCase.series = sanitizeUserInput(testCase.series);
@@ -553,17 +557,22 @@ const EditTestCase = (props: EditTestCaseProps) => {
     e.preventDefault();
     setExecuting(true);
     setErrors([]);
+    clearAllAlerts(); // Clear alerts before calculation
     setPopulationGroupResults(() => undefined);
+
     if (measure && measure.cqlErrors) {
-      setCalculationErrors({
+      addCalculationError({
         status: "warning",
         message:
           "Cannot execute test case while errors exist in the measure CQL.",
       });
+      setExecuting(false);
       return;
     }
+
     setValidationErrors(() => []);
     let modifiedTestCase = { ...testCase };
+
     if (isJsonModified()) {
       modifiedTestCase.json = editorVal;
       try {
@@ -575,22 +584,22 @@ const EditTestCase = (props: EditTestCaseProps) => {
           );
         const errors = handleHapiOutcome(validationResult);
         if (!_.isNil(errors) && errors.length > 0 && hasErrorSeverity(errors)) {
-          setCalculationErrors({
+          addCalculationError({
             status: "warning",
             message:
               "Test case execution was aborted due to errors with the test case JSON.",
           });
+          setExecuting(false);
           return;
         }
       } catch (error) {
-        setCalculationErrors({
+        addCalculationError({
           status: "error",
           message:
             "Test case execution was aborted because JSON could not be validated. If this error persists, please contact the help desk.",
         });
-        return;
-      } finally {
         setExecuting(false);
+        return;
       }
     }
 
@@ -610,12 +619,18 @@ const EditTestCase = (props: EditTestCaseProps) => {
           measure.model
         );
       handleHapiOutcome(validationResult);
-      setCalculationErrors(undefined);
+
+      // Clear any calculation errors if successful
+      if (calculationErrorId) {
+        removeAlert(calculationErrorId);
+        setCalculationErrorId(null);
+      }
+
       setPopulationGroupResults(
         executionResults[0].detailedResults as DetailedPopulationGroupResult[]
       );
     } catch (error) {
-      setCalculationErrors({
+      addCalculationError({
         status: "error",
         message: error.message,
       });
@@ -629,6 +644,55 @@ const EditTestCase = (props: EditTestCaseProps) => {
     //To DO: need to optimize it as it is calling the backend
     loadTestCase();
     setDiscardDialogOpen(false);
+  };
+
+  // Add utility functions to manage alerts
+  const addAlert = (alert: AlertProps) => {
+    // Generate a unique ID if one wasn't provided
+    const alertWithId = {
+      ...alert,
+      id:
+        alert.id ||
+        `alert-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    };
+
+    setAlerts((prevAlerts) => [...prevAlerts, alertWithId]);
+    return alertWithId.id;
+  };
+
+  const removeAlert = (id: string) => {
+    setAlerts((prevAlerts) => prevAlerts.filter((alert) => alert.id !== id));
+  };
+
+  const clearAllAlerts = () => {
+    setAlerts([]);
+    setCalculationErrorId(null);
+  };
+
+  // Function to add a calculation error alert
+  const addCalculationError = (error: AlertProps) => {
+    // Remove any existing calculation error
+    if (calculationErrorId) {
+      removeAlert(calculationErrorId);
+    }
+
+    // Add the new error and track its ID
+    const newId = addAlert(error);
+    setCalculationErrorId(newId);
+    return newId;
+  };
+
+  // Function to get calculation error for display
+  const getCalculationErrorForDisplay = () => {
+    if (calculationErrorId) {
+      const errorAlert = alerts.find(
+        (alert) => alert.id === calculationErrorId
+      );
+      if (errorAlert) {
+        return errorAlert;
+      }
+    }
+    return undefined;
   };
 
   function handleTestCaseResponse(
@@ -650,11 +714,32 @@ const EditTestCase = (props: EditTestCaseProps) => {
         const valErrors = validationErrors.map((error) => (
           <li>{error.diagnostics}</li>
         ));
+
+        // Add an appropriate alert for validation errors
+        const severity = severityOfValidationErrors(validationErrors);
+        addAlert({
+          status: severity,
+          message: (
+            <div>
+              <h3>Test case updated successfully with {severity}s in JSON</h3>
+              {timezoneUpdated && (
+                <ul style={{ listStyle: "inside" }}>
+                  <li>
+                    MADiE only supports a timezone offset of 0. MADiE has
+                    overwritten any timezone offsets that are not zero.
+                  </li>
+                </ul>
+              )}
+              <ul>{valErrors}</ul>
+            </div>
+          ),
+        });
+
         const message: ReactNode = testCaseAlertToast ? (
           <div>
             <h3>
-              Changes {action}d successfully but the following{" "}
-              {severityOfValidationErrors(validationErrors)}(s) were found
+              Changes {action}d successfully but the following {severity}(s)
+              were found
             </h3>
             {timezoneUpdated && (
               <ul>
@@ -666,10 +751,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
           </div>
         ) : (
           <div>
-            <h3>
-              Test case updated successfully with{" "}
-              {severityOfValidationErrors(validationErrors)}s in JSON
-            </h3>
+            <h3>Test case updated successfully with {severity}s in JSON</h3>
             {timezoneUpdated && (
               <ul style={{ listStyle: "inside" }}>
                 <li>
@@ -680,24 +762,24 @@ const EditTestCase = (props: EditTestCaseProps) => {
             )}
           </div>
         );
-        let severity = severityOfValidationErrors(validationErrors);
-        if (severity === "error") {
-          severity = "danger";
+
+        let toastSeverity = severity;
+        if (toastSeverity === "error") {
+          toastSeverity = "danger";
         }
         //@ts-ignore
-        showToast(message, severity);
+        showToast(message, toastSeverity);
         handleHapiOutcome(testCase.hapiOperationOutcome);
       }
       updateMeasureStore(action, testCase);
     } else {
-      showToast(
-        `An error occurred - ${action} did not return the expected successful result.`,
-        "danger"
-      );
-      setErrors([
-        ...errors,
-        `An error occurred - ${action} did not return the expected successful result.`,
-      ]);
+      const errorMessage = `An error occurred - ${action} did not return the expected successful result.`;
+      addAlert({
+        status: "error",
+        message: errorMessage,
+      });
+      showToast(errorMessage, "danger");
+      setErrors([...errors, errorMessage]);
     }
   }
 
@@ -734,9 +816,32 @@ const EditTestCase = (props: EditTestCaseProps) => {
   }
 
   function handleHapiOutcome(outcome: HapiOperationOutcome) {
-    const errors = extractValidationErrorsFromOutcome(outcome);
-    setValidationErrors(errors);
-    return errors;
+    const validationIssues = extractValidationErrorsFromOutcome(outcome);
+    setValidationErrors(validationIssues);
+
+    // Add validation issues to alerts if there are any non-informational issues
+    const nonInformationalIssues = validationIssues?.filter(
+      (error) => /^information/.exec(error?.severity) === null
+    );
+
+    if (nonInformationalIssues && nonInformationalIssues.length > 0) {
+      const severity = severityOfValidationErrors(validationIssues);
+      const issueListItems = nonInformationalIssues.map((error) => (
+        <li key={error.key}>{error.diagnostics}</li>
+      ));
+
+      addAlert({
+        status: severity,
+        message: (
+          <div>
+            <h3>Validation issues found in JSON</h3>
+            <ul>{issueListItems}</ul>
+          </div>
+        ),
+      });
+    }
+
+    return validationIssues;
   }
 
   function formikErrorHandler(name: string) {
@@ -869,6 +974,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
       {isQICore6 && !featureFlags?.stu6TestCaseValidation && (
         <div id="status-handler">
           <MadieAlert
+            minimizeAlerts={featureFlags?.MinimizeAlerts}
             type="warning"
             content={
               <div
@@ -946,6 +1052,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         !isValidJson(editorVal) && (
                           <div style={{ width: "98%" }}>
                             <MadieAlert
+                              minimizeAlerts={featureFlags?.MinimizeAlerts}
                               type="error"
                               content={
                                 <div
@@ -1036,7 +1143,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                       <CalculationResults
                         mainCqlLibraryName={measure?.cqlLibraryName}
                         calculationResults={populationGroupResults}
-                        calculationErrors={calculationErrors}
+                        calculationErrors={getCalculationErrorForDisplay()}
                         groupPopulations={groupPopulations}
                         cqlDefinitionCallstack={callstackMap}
                         includeSDE={measure?.testCaseConfiguration?.sdeIncluded}
@@ -1100,38 +1207,22 @@ const EditTestCase = (props: EditTestCaseProps) => {
 
                 {rightPanelActiveTab === "details" && (
                   <div className="panel-content">
-                    {alert &&
-                      (testCaseAlertToast ? (
+                    {alerts && alerts.length > 0 && (
+                      <div id="alert-container">
                         <MadieAlert
-                          type={alert?.status}
-                          content={alert?.message}
+                          minimizeAlerts={featureFlags?.MinimizeAlerts}
+                          alerts={alerts.map((alert) => ({
+                            type: alert?.status,
+                            content: alert?.message,
+                            canClose: true,
+                            copyButton: false,
+                          }))}
                           alertProps={{
-                            "data-testid": "create-test-case-alert",
-                          }}
-                          closeButtonProps={{
-                            "data-testid": "close-create-test-case-alert",
+                            "data-testid": "create-test-case-alerts",
                           }}
                         />
-                      ) : (
-                        <Alert
-                          status={alert?.status}
-                          role="alert"
-                          aria-label="Create Alert"
-                          data-testid="create-test-case-alert"
-                        >
-                          {alert?.message}
-                          <button
-                            data-testid="close-create-test-case-alert"
-                            type="button"
-                            tw="box-content h-4 p-1 ml-3 mb-1.5"
-                            data-bs-dismiss="alert"
-                            aria-label="Close Alert"
-                            onClick={() => setAlert(null)}
-                          >
-                            <FontAwesomeIcon icon={faTimes} />
-                          </button>
-                        </Alert>
-                      ))}
+                      </div>
+                    )}
 
                     {/* TODO Replace with re-usable form component
                label, input, and error => single input control component */}
@@ -1213,6 +1304,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 )}
               </div>
             </Allotment.Pane>
+
             <Allotment.Pane>
               <div className="validation-panel">
                 {showValidationErrors ? (

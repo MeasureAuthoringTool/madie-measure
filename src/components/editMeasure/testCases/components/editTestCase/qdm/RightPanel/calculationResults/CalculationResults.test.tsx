@@ -8,10 +8,17 @@ import useQdmCqlParsingService, {
   QdmCqlParsingService,
 } from "../../../../../api/cqlElmTranslationService/useQdmCqlParsingService";
 import { qdmCallStack } from "../../../groupCoverage/_mocks_/QdmCallStack";
+import { useFeatureFlags } from "@madie/madie-util";
 
 jest.mock(
   "../../../../../api/cqlElmTranslationService/useQdmCqlParsingService"
 );
+jest.mock("@madie/madie-util", () => ({
+  useFeatureFlags: jest.fn().mockReturnValue({
+    qdmHighlightingTab: true, // Default to enabled
+  }),
+}));
+
 const useCqlParsingServiceMock =
   useQdmCqlParsingService as jest.Mock<QdmCqlParsingService>;
 
@@ -186,10 +193,14 @@ const renderCoverageComponent = (
 
 describe("CalculationResults with tabbed highlighting layout off", () => {
   beforeEach(() => {
+    (useFeatureFlags as jest.Mock).mockReturnValue({
+      qdmHighlightingTab: false,
+    });
     useCqlParsingServiceMock.mockImplementation(() => {
       return useCqlParsingServiceMockResolved;
     });
   });
+
   test("display info message when test case has not been ran yet", () => {
     render(
       <CalculationResults
@@ -211,6 +222,9 @@ describe("CalculationResults with tabbed highlighting layout off", () => {
 
 describe("CalculationResults with new tabbed highlighting layout on", () => {
   beforeEach(() => {
+    (useFeatureFlags as jest.Mock).mockReturnValue({
+      qdmHighlightingTab: true,
+    });
     useCqlParsingServiceMock.mockImplementation(() => {
       return useCqlParsingServiceMockResolved;
     });

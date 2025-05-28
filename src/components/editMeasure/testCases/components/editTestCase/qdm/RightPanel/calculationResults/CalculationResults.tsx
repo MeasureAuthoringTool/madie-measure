@@ -6,6 +6,7 @@ import "twin.macro";
 import "styled-components/macro";
 import { CqlDefinitionCallstack } from "../../../groupCoverage/QiCoreGroupCoverage";
 import useQdmCqlParsingService from "../../../../../api/cqlElmTranslationService/useQdmCqlParsingService";
+import { useFeatureFlags } from "@madie/madie-util";
 
 const CalculationResults = ({
   groupCoverageResult,
@@ -16,6 +17,7 @@ const CalculationResults = ({
   includeSDE,
   supplementalData,
 }) => {
+  const featureFlags = useFeatureFlags();
   const qdmCqlParsingService = useRef(useQdmCqlParsingService());
   const [callstackMap, setCallstackMap] = useState<CqlDefinitionCallstack>();
 
@@ -35,6 +37,7 @@ const CalculationResults = ({
     <div tw="p-5" style={{ paddingRight: ".25rem" }}>
       {!groupCoverageResult && isEmpty(calculationErrors) && (
         <MadieAlert
+          minimizeAlerts={false}
           type="info"
           content="To see the logic highlights, click 'Run Test'"
           canClose={false}
