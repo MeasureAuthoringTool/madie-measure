@@ -6,10 +6,11 @@ import TypeEditor from "./TypeEditor";
 import useFhirDefinitionsServiceApi, {
   FhirDefinitionsServiceApi,
 } from "../../../../../../../api/useFhirDefinitionsService";
-import { FormikProvider, FormikContextType } from "formik";
+import { FormikProvider, FormikContextType, FormikProps } from "formik";
 import { RequiredFieldsProvider } from "./RequiredFieldsContext";
 import mockRequiredFields from "./mockRequiredFields";
 import mockFormInfo from "./mockFormInfo";
+import { ExecutionContextProvider } from "../../../../../../routes/qiCore/ExecutionContext";
 const getNestedProperty = (obj, path) => {
   return path.split(".").reduce((current, key) => current && current[key], obj);
 };
@@ -102,7 +103,7 @@ jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
     ...jest.requireActual(
       "../../../../../../../api/fhirDefinitionServiceUtilities"
     ),
-    isComponentDataType: jest.fn().mockReturnValue(true),
+    isComponentDataType: (type: string) => true,
     getAllChildren: jest.fn().mockReturnValue(codingTopLevelElements),
     getTopLevelElements: jest.fn().mockReturnValue(codingTopLevelElements),
     updateChildrenPaths: jest.fn().mockReturnValue(codingTopLevelElements),
@@ -1300,5 +1301,139 @@ describe("TypeEditor Component", () => {
     expect(
       screen.queryByText(`Unsupported Type [test]`)
     ).not.toBeInTheDocument();
+  });
+
+  test("Should render Coding component", async () => {
+    const onChange = jest.fn();
+    const setFieldTouched = jest.fn();
+    const mockFormik = {
+      setFieldTouched: setFieldTouched,
+      setFieldValue: onChange,
+      getFieldProps: () => ({
+        label: "coding",
+        name: "coding",
+        value: undefined,
+        setFieldTouched: jest.fn(),
+        setFieldValue: jest.fn(),
+      }),
+    } as unknown as FormikProps<any>;
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [null, jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <FormikProvider value={mockFormik}>
+          <RequiredFieldsProvider
+            requiredFields={{ coding: true }}
+            formInfo={[
+              "coding",
+              {
+                id: "coding",
+                required: true,
+                canBeMultipleCardinality: false,
+              },
+            ]}
+          >
+            <TypeEditor
+              structureDefinition={{
+                id: "coding",
+                path: "coding",
+                min: 1,
+                max: "1",
+                type: [
+                  {
+                    code: "Coding",
+                  },
+                ],
+              }}
+              resource={null}
+              label="coding"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      </ExecutionContextProvider>
+    );
+
+    const valueSetSelector = screen.getByRole("combobox", {
+      name: "Value Set / Direct Reference Code",
+    });
+    expect(valueSetSelector).toHaveTextContent("- Select -");
+  });
+
+  test("Should render CodeableConcept component", async () => {
+    const onChange = jest.fn();
+    const setFieldTouched = jest.fn();
+    const mockFormik = {
+      setFieldTouched: setFieldTouched,
+      setFieldValue: onChange,
+      getFieldProps: () => ({
+        label: "Observation.code",
+        name: "Observation.code",
+        value: undefined,
+        setFieldTouched: jest.fn(),
+        setFieldValue: jest.fn(),
+      }),
+    } as unknown as FormikProps<any>;
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [null, jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <FormikProvider value={mockFormik}>
+          <RequiredFieldsProvider
+            requiredFields={{ "Observation.code": true }}
+            formInfo={[
+              "Observation.code",
+              {
+                id: "Observation.code",
+                required: true,
+                canBeMultipleCardinality: false,
+              },
+            ]}
+          >
+            <TypeEditor
+              structureDefinition={{
+                id: "Observation.code",
+                path: "Observation.code",
+                min: 1,
+                max: "1",
+                type: [
+                  {
+                    code: "CodeableConcept",
+                  },
+                ],
+              }}
+              resource={null}
+              label="Observation.code"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      </ExecutionContextProvider>
+    );
+
+    const valueSetSelector = screen.getByRole("combobox", {
+      name: "Value Set / Direct Reference Code",
+    });
+    expect(valueSetSelector).toHaveTextContent("- Select -");
   });
 });

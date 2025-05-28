@@ -96,6 +96,8 @@ describe("Measure Page", () => {
         true,
         10,
         0,
+        "",
+        "",
         abortController.signal
       );
     });
@@ -116,6 +118,8 @@ describe("Measure Page", () => {
         true,
         10,
         0,
+        "",
+        "",
         abortController.signal
       );
     });
@@ -141,6 +145,8 @@ describe("Measure Page", () => {
         false,
         10,
         0,
+        "",
+        "",
         abortController.signal
       )
     );
@@ -174,6 +180,8 @@ describe("Measure Page", () => {
         true,
         10,
         0,
+        "",
+        "",
         abortController.signal
       );
     });
@@ -199,6 +207,8 @@ describe("Measure Page", () => {
         true,
         10,
         0,
+        "",
+        "",
         abortController.signal
       );
     });
@@ -331,6 +341,8 @@ describe("Measure Page", () => {
         true,
         10,
         0,
+        "",
+        "",
         abortController.signal
       );
     });

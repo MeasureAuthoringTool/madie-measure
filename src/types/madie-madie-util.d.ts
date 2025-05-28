@@ -21,6 +21,7 @@ declare module "@madie/madie-util" {
     QICoreMeasureDefinitions: boolean;
     ShareMeasure: boolean;
     QICoreIncludeSDEValues: boolean;
+    QDMIncludeRAVValues: boolean;
     MeasureSearch: boolean;
     QICoreManifestExpansion: boolean;
     OverlappingValueSets: boolean;
