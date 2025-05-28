@@ -20,7 +20,7 @@ describe("StatusHandler Messages", () => {
       render(<div>{alerts[0].content}</div>);
       expect(screen.getByTestId("warning-test")).toBeInTheDocument();
       expect(screen.getByTestId("warn-title")).toBeInTheDocument();
-      
+
       // Check that both warnings are in the document
       expect(screen.getByText("Warning 1")).toBeInTheDocument();
       expect(screen.getByText("Warning 2")).toBeInTheDocument();
@@ -29,9 +29,11 @@ describe("StatusHandler Messages", () => {
     it("correctly displays the warning message text", () => {
       const warnings = ["Date shift failed"];
       const alerts = createWarningAlerts(warnings, "warning-test");
-      
+
       render(<div>{alerts[0].content}</div>);
-      expect(screen.getByText(/The following Test Case dates could not be shifted/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/The following Test Case dates could not be shifted/)
+      ).toBeInTheDocument();
       expect(screen.getByText("Date shift failed")).toBeInTheDocument();
     });
   });
@@ -57,8 +59,12 @@ describe("StatusHandler Messages", () => {
       render(<div>{alerts[0].content}</div>);
       expect(screen.getByTestId("test")).toBeInTheDocument();
       expect(screen.getByTestId("failed-test-cases")).toBeInTheDocument();
-      expect(screen.getByText(/\(2\) test case\(s\) were imported/)).toBeInTheDocument();
-      expect(screen.getByText(/\(1\) test case\(s\) could not be imported/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/\(2\) test case\(s\) were imported/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/\(1\) test case\(s\) could not be imported/)
+      ).toBeInTheDocument();
     });
 
     it("displays patient information correctly for failed imports", () => {
@@ -74,7 +80,7 @@ describe("StatusHandler Messages", () => {
 
       const alerts = createImportAlerts(testOutcomes, 0, [], "test");
       render(<div>{alerts[0].content}</div>);
-      
+
       expect(screen.getByText(/Judith Raoul,Beth/)).toBeInTheDocument();
       expect(screen.getByText(/Reason: Invalid format/)).toBeInTheDocument();
     });
@@ -92,10 +98,16 @@ describe("StatusHandler Messages", () => {
 
       const alerts = createImportAlerts([], 1, testOutcomes, "test");
       render(<div>{alerts[0].content}</div>);
-      
-      expect(screen.getByTestId("success-imports-with-warnings")).toBeInTheDocument();
-      expect(screen.getByText(/Following test case\(s\) were imported successfully/)).toBeInTheDocument();
-      expect(screen.getByText(/missing some optional fields/)).toBeInTheDocument();
+
+      expect(
+        screen.getByTestId("success-imports-with-warnings")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Following test case\(s\) were imported successfully/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/missing some optional fields/)
+      ).toBeInTheDocument();
       expect(screen.getByText(/Smith John/)).toBeInTheDocument();
     });
 
@@ -110,7 +122,7 @@ describe("StatusHandler Messages", () => {
 
       const alerts = createImportAlerts(testOutcomes, 0, [], "test");
       render(<div>{alerts[0].content}</div>);
-      
+
       // Should use patientId when name is missing
       expect(screen.getByText(/999/)).toBeInTheDocument();
     });
@@ -125,7 +137,7 @@ describe("StatusHandler Messages", () => {
           successful: false,
         } as unknown as TestCaseImportOutcome,
       ];
-      
+
       const successfulWithWarnings: TestCaseImportOutcome[] = [
         {
           familyName: "Smith",
@@ -136,17 +148,28 @@ describe("StatusHandler Messages", () => {
         } as unknown as TestCaseImportOutcome,
       ];
 
-      const alerts = createImportAlerts(failedImports, 2, successfulWithWarnings, "test");
+      const alerts = createImportAlerts(
+        failedImports,
+        2,
+        successfulWithWarnings,
+        "test"
+      );
       render(<div>{alerts[0].content}</div>);
-      
+
       // Check for failed imports section
-      expect(screen.getByText(/\(2\) test case\(s\) were imported/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/\(2\) test case\(s\) were imported/)
+      ).toBeInTheDocument();
       expect(screen.getByText(/Doe Jane/)).toBeInTheDocument();
       expect(screen.getByText(/Reason: Invalid data/)).toBeInTheDocument();
-      
+
       // Check for successful with warnings section
-      expect(screen.getByText(/Following test case\(s\) were imported successfully/)).toBeInTheDocument();
-      expect(screen.getByText(/Some fields could not be imported/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Following test case\(s\) were imported successfully/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Some fields could not be imported/)
+      ).toBeInTheDocument();
       expect(screen.getByText(/Smith John/)).toBeInTheDocument();
     });
   });
