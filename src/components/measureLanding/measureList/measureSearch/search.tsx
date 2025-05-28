@@ -37,7 +37,7 @@ const Search = (props: {
     onSubmit: async (values) => {
       setSearchCriteria({
         searchField: values?.searchField,
-        optionalSearchProperties: [_.camelCase(_.trim(values?.filterBy))],
+        optionalSearchProperties: [values?.filterBy],
       });
     },
   });

@@ -95,7 +95,12 @@ export default function MeasureLanding() {
           page,
           sort,
           direction,
-          searchCriteria,
+          {
+            ...searchCriteria,
+            optionalSearchProperties: [
+              _.camelCase(_.trim(searchCriteria?.optionalSearchProperties[0])),
+            ],
+          },
           abortController.current.signal
         );
         setPageProps(data);
