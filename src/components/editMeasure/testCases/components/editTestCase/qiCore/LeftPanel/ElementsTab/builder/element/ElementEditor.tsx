@@ -20,6 +20,7 @@ import {
   removeUndefinedAndEmptyObjects,
   mapElementsRequired,
   buildFullValidationSchema,
+  extractNameWithoutIndex,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import {
   useQiCoreResource,
@@ -195,6 +196,7 @@ const ElementEditor = ({
     }
     for (const builtNode of nodeList) {
       // associate id with form
+
       formInfo[builtNode.id] = builtNode;
     }
     buildSchemaAndInitialValues(formInfo, resource);
@@ -245,10 +247,11 @@ const ElementEditor = ({
   const handleIndividualElementApplyButtonClick = (e) => {
     // this is wrapped in a form and we need to prevent submit on click with e.prevent
     e.preventDefault();
+
     if (formik.values && formik.dirty) {
       const { type } = selectedResource?.definition;
-      const formikCleanedValues = removeUndefinedAndEmptyObjects(formik.values);
       const { bundleEntry } = selectedResource;
+      const formikCleanedValues = removeUndefinedAndEmptyObjects(formik.values);
       // need type to access formik values, as well as append to to the resource object so it is not lost.
       bundleEntry.resource = formikCleanedValues[type];
       bundleEntry.resource.resourceType = type;

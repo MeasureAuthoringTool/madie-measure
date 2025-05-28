@@ -170,6 +170,48 @@
               "map": "Event.note"
             }
           ]
+        },
+        {
+          "id": "ClaimResponse.effective[x]",
+          "path": "ClaimResponse.effective[x]",
+          "requirements": "Provided for user display.",
+          "min": 0,
+          "max": "*",
+          "base": {
+            "path": "ClaimResponse.effective[x]",
+            "min": 0,
+            "max": 1
+          },
+          "type": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-keyelement",
+                  "valueBoolean": true
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-type-must-support",
+                  "valueBoolean": true
+                }
+              ],
+              "code": "dateTime"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-keyelement",
+                  "valueBoolean": true
+                }
+              ],
+              "code": "Period"
+            }
+          ],
+          "mapping": [
+            {
+              "identity": "workflow",
+              "map": "Event.note"
+            }
+          ]
         }
       ]
     }
