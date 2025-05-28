@@ -38,9 +38,7 @@ import tw from "twin.macro";
 import "../../../../../../../../../../styles/VerticalSideBarNav.scss";
 import "./ResourceEditor.scss";
 
-const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
 const InnerWrapper = tw.div`flex-grow flex flex-col`;
-const Nav = tw.nav`flex-1 space-y-1 bg-slate`;
 
 interface ResourceEditorProps {
   onCancel: () => void;
@@ -87,6 +85,7 @@ const ResourceEditor = ({
       const selectedEntry = state.bundle?.entry?.find(
         (entry) => entry.resource.id === selectedResourceID
       );
+      // at this point we have a selectedEntry that has the correct attribute, but it's formed incorrectly
       const profile = _.isArray(selectedEntry?.resource?.meta?.profile)
         ? selectedEntry?.resource?.meta?.profile[0]
         : selectedEntry?.resource?.meta?.profile;
@@ -100,7 +99,10 @@ const ResourceEditor = ({
             ...resourceTree,
             bundleEntry: selectedEntry,
           };
+
           const topElements = getTopLevelElements(selectedResource);
+          //the topElements from the selectedResource contains elements from resource.definition.snapshot.element
+
           const requiredElements = [...topElements.filter((e) => e.min > 0)];
           const elementsWithValues = [
             ...topElements.filter((e) => {
@@ -108,13 +110,46 @@ const ResourceEditor = ({
                 selectedResource.definition.type,
                 e.path
               );
-              const elemValue = _.get(
-                selectedResource.bundleEntry.resource,
-                elemPath
-              );
-              return !_.isNil(elemValue);
+              //let's look at e.path and see if it is a choice type
+              //if e.path ends with [x] then we need to check if the resource has a value for that type
+              if (elemPath.endsWith("[x]")) {
+                //if it does, then we need to check if the resource has a value for that type
+                const type = elemPath.substring(
+                  elemPath.lastIndexOf("[") + 1,
+                  elemPath.lastIndexOf("]")
+                );
+                const elemPathWithoutType = elemPath.substring(
+                  0,
+                  elemPath.lastIndexOf("[")
+                );
+
+                //let's appent e.type[0].code to the end of the elemPathWithoutType
+                const elemPathType = _.camelCase(
+                  elemPathWithoutType + _.upperFirst(e.type[0].code)
+                );
+                //we're going to have to find elementX if type == e.type[0]
+
+                const elemValue = _.get(
+                  selectedResource.bundleEntry.resource,
+                  elemPathType
+                );
+                if (!_.isNil(elemValue)) {
+                  return true;
+                }
+              } else {
+                const elemValue = _.get(
+                  selectedResource.bundleEntry.resource,
+                  elemPath
+                );
+                return !_.isNil(elemValue);
+              }
             }),
           ];
+
+          //somewhere in here we need to match attribute[x] with attribute[type]
+          //el.path = attribute[x] and then x will equal the type
+          // so if there are multiple types, then an attribute becomes a multiple cardinality (ie., attribute[x] with type=[boolean,integer] results in attribute[boolean] and attribute[integer])
+
           const uniqueElements = _.uniq(
             _.concat(requiredElements, elementsWithValues)
           );
@@ -141,7 +176,6 @@ const ResourceEditor = ({
               }
             }
           );
-
           setSelectedResource(selectedResource);
           setAllElements(topElements);
           setDisplayedElements(elementsModifiedForCardinality);
@@ -169,7 +203,9 @@ const ResourceEditor = ({
   const saveElements = (newValue: ElementDefinition[] | null) => {
     // removed uncessesary reference to modifying displayedElements.
     // Any updates through dispatch will trickle down child component references accordingly.
+
     const { type } = selectedResource?.definition;
+
     const formikCleanedValues = removeUndefinedAndEmptyObjects(values);
     const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
     // Update with formik values
@@ -177,16 +213,34 @@ const ResourceEditor = ({
     nextEntry.resource.resourceType = type;
     // Add empty values for new elements
     newValue?.forEach((element) => {
-      const elemPath = stripResourcePath(
+      let elemPath = stripResourcePath(
         selectedResource.definition.type,
         element.path
       );
+      // if elemPath ends with ], then we're going to have to find the resource element that has a correct matching type
       const currentValue = _.get(nextEntry.resource, elemPath);
+
+      if (elemPath.endsWith("]") && !elemPath.endsWith("[x]")) {
+        //type = the value between the last [ and ]
+        const type = elemPath.substring(
+          elemPath.lastIndexOf("[") + 1,
+          elemPath.lastIndexOf("]")
+        );
+        const elemPathWithoutType = elemPath.substring(
+          0,
+          elemPath.lastIndexOf("[")
+        );
+        // turn elemPath path[type] into pathType
+        elemPath = _.camelCase(elemPathWithoutType + _.upperFirst(type));
+      }
+
       if (_.isNil(currentValue)) {
         _.set(nextEntry.resource, elemPath, "");
       }
     });
     // Update resource state
+    // There are matching values choice[x] and choiceX  choice.x has the value.  That value needs moved to choiceX and choice.x has to be removed
+
     dispatch({
       type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
       payload: nextEntry,
@@ -223,7 +277,7 @@ const ResourceEditor = ({
           </div>
           <div className="resource-body">
             <div className="side-bar">
-              <Box sx={{ p: 1 }}>
+              <Box sx={{ p: 1, borderRight: "1px solid #8C8C8C" }}>
                 <IconButton
                   onClick={() => setAddDialogOpen(true)}
                   sx={{
@@ -243,12 +297,12 @@ const ResourceEditor = ({
                   <div>Add Attribute(s)</div>
                 </IconButton>
               </Box>
-              <OuterWrapper>
+              <div className={"outer-wrapper"}>
                 <InnerWrapper
                   className="vertical-side-nav"
                   id="resource-editor-side-nav"
                 >
-                  <Nav aria-label="Sidebar">
+                  <nav aria-label="Sidebar">
                     <Tabs
                       type="C"
                       orientation="vertical"
@@ -269,6 +323,7 @@ const ResourceEditor = ({
                           resourceBasePath,
                           getNestedProperty(values, stripAllIndexes(element.id))
                         );
+
                         return (
                           <Tab
                             key={index}
@@ -280,9 +335,9 @@ const ResourceEditor = ({
                         );
                       })}
                     </Tabs>
-                  </Nav>
+                  </nav>
                 </InnerWrapper>
-              </OuterWrapper>
+              </div>
             </div>
             <ElementEditor
               setLastAddedElemPath={setLastAddedElemPath}

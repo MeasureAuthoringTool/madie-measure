@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton, DialogActions, Divider } from "@mui/material";
-import ElementSelector from "../element/ElementSelector";
+import ElementSelector, { getOptionLabel } from "../element/ElementSelector";
 import { ElementDefinition } from "fhir/r4";
 import { MadieDialog as Dialog } from "@madie/madie-design-system/dist/react";
 
@@ -23,6 +23,10 @@ const AddElementDialog = (props: AddElementDialogProps) => {
   }, [value]);
   const handleChange = useCallback(
     (event, newValue: ElementDefinition[] | null) => {
+      newValue[newValue.length - 1].path =
+        basePath +
+        "." +
+        getOptionLabel(newValue[newValue.length - 1], basePath);
       setNewValues(newValue);
     },
     [value]

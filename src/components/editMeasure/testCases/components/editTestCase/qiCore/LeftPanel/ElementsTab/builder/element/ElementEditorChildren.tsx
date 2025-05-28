@@ -7,6 +7,7 @@ import {
   getNestedProperty,
   stripAllIndexes,
   addCardinalityToElement,
+  formatChoiceType,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import ElementEditorActionCenter from "./elementEditorActionCenter/ElementEditorActionCenter";
 import {
@@ -15,6 +16,7 @@ import {
 } from "../../../../../../../util/QiCorePatientProvider";
 import Box from "@mui/material/Box";
 import { useFormikContext } from "formik";
+import { root } from "postcss";
 
 const ElementEditorChildren = ({
   setLastAddedElemPath,
@@ -80,7 +82,7 @@ const ElementEditorChildren = ({
           structureDefinition={rootDefinition}
           parentStructureDefinition={parentStructureDefinition}
           canEdit={canEdit}
-          label={rootDefinition?.id}
+          label={formatChoiceType(rootDefinition)}
         />
       </Box>
     </div>
