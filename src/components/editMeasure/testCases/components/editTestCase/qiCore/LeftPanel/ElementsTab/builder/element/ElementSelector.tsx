@@ -1,11 +1,10 @@
 import React from "react";
-// import Autocomplete from "@mui/material/Autocomplete";
 import { AutoComplete } from "@madie/madie-design-system/dist/react";
 import { Checkbox, TextField, Chip } from "@mui/material";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import { ElementDefinition } from "fhir/r4";
-
+import * as _ from "lodash";
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
@@ -22,10 +21,15 @@ interface ElementSelectorProps {
  * for slice- it will be slice:sliceName. e.g. Patient.extension:race results into extension:race
  * for regular element- it will be the path of an element. e.g. Patient.gender results into gender
  */
-const getOptionLabel = (option: ElementDefinition, basePath: string) => {
+export const getOptionLabel = (option: ElementDefinition, basePath: string) => {
   const label = option.path?.substring(basePath.length + 1);
   if (option.sliceName) {
     return `${label}:${option.sliceName}`;
+  }
+  if (label.endsWith("[x]")) {
+    return `${label.substring(0, label.length - 3)}${_.upperFirst(
+      option.type[0].code
+    )}`;
   }
   return label;
 };

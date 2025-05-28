@@ -116,6 +116,7 @@ const TypeEditor = ({
       return errors;
     }
   };
+
   if (isComponentDataType(type)) {
     switch (type) {
       case "string":
@@ -170,8 +171,8 @@ const TypeEditor = ({
           <PeriodComponent
             label={label}
             canEdit={canEdit}
-            structureDefinition={null}
-            fieldRequired={false}
+            structureDefinition={structureDefinition}
+            fieldRequired={required}
           />
         );
       case "dateTime":
@@ -227,6 +228,7 @@ const TypeEditor = ({
           />
         );
       case "http://hl7.org/fhirpath/System.Integer":
+      case "integer":
       case "positiveInt":
       case "unsignedInt":
         return (
