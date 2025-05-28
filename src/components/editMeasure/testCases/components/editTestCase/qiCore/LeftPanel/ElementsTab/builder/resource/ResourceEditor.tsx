@@ -38,9 +38,7 @@ import tw from "twin.macro";
 import "../../../../../../../../../../styles/VerticalSideBarNav.scss";
 import "./ResourceEditor.scss";
 
-const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
 const InnerWrapper = tw.div`flex-grow flex flex-col`;
-const Nav = tw.nav`flex-1 space-y-1 bg-slate`;
 
 interface ResourceEditorProps {
   onCancel: () => void;
@@ -279,7 +277,7 @@ const ResourceEditor = ({
           </div>
           <div className="resource-body">
             <div className="side-bar">
-              <Box sx={{ p: 1 }}>
+              <Box sx={{ p: 1, borderRight: "1px solid #8C8C8C" }}>
                 <IconButton
                   onClick={() => setAddDialogOpen(true)}
                   sx={{
@@ -299,12 +297,12 @@ const ResourceEditor = ({
                   <div>Add Attribute(s)</div>
                 </IconButton>
               </Box>
-              <OuterWrapper>
+              <div className={"outer-wrapper"}>
                 <InnerWrapper
                   className="vertical-side-nav"
                   id="resource-editor-side-nav"
                 >
-                  <Nav aria-label="Sidebar">
+                  <nav aria-label="Sidebar">
                     <Tabs
                       type="C"
                       orientation="vertical"
@@ -337,9 +335,9 @@ const ResourceEditor = ({
                         );
                       })}
                     </Tabs>
-                  </Nav>
+                  </nav>
                 </InnerWrapper>
-              </OuterWrapper>
+              </div>
             </div>
             <ElementEditor
               setLastAddedElemPath={setLastAddedElemPath}
