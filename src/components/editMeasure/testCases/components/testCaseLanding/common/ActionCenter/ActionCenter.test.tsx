@@ -433,7 +433,7 @@ describe("ActionCenter Component", () => {
       const deleteTooltip = await screen.findByTestId("delete-tooltip");
       expect(deleteTooltip).toHaveAttribute(
         "aria-label",
-        "Select test case to delete"
+        "Select a test case to delete"
       );
       expect(screen.getByTestId("delete-action-btn")).toBeDisabled();
     });

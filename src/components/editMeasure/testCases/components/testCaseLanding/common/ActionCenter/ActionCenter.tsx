@@ -139,7 +139,7 @@ export default function ActionCenter(props: ActionCenterProps) {
         setDisableDeleteBtn(false);
       }
     } else {
-      setDisabledDeleteBtnMessage("Select test case to delete");
+      setDisabledDeleteBtnMessage("Select a test case to delete");
       setDisableDeleteBtn(true);
     }
   };
