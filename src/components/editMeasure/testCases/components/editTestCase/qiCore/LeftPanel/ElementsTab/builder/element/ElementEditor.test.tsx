@@ -30,6 +30,11 @@ jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
         path: "ClaimResponse.extension",
         type: [{ code: "Extension" }],
       },
+      {
+        id: "ClaimResponse.effective[x]",
+        path: "ClaimResponse.effective[x]",
+        type: [{ code: "dateTime" }],
+      },
     ]),
     isComponentDataType: jest.fn().mockReturnValue(false),
     getTopLevelElements: jest.fn().mockReturnValue([]),
