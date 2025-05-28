@@ -89,27 +89,16 @@ export default function MeasureLanding() {
       abortController.current = new AbortController();
       setLoading(true);
       try {
-        if (_.isEmpty(searchCriteria?.searchField)) {
-          setErrMsg(null);
-          const data = await measureServiceApi.fetchMeasures(
-            tab === 0,
-            limit,
-            page,
-            sort,
-            direction,
-            abortController.current.signal
-          );
-          setPageProps(data);
-        } else {
-          const data = await measureServiceApi.searchMeasuresByCriteria(
-            tab === 0,
-            limit,
-            page,
-            searchCriteria,
-            abortController.current.signal
-          );
-          setPageProps(data);
-        }
+        const data = await measureServiceApi.searchMeasuresByCriteria(
+          tab === 0,
+          limit,
+          page,
+          sort,
+          direction,
+          searchCriteria,
+          abortController.current.signal
+        );
+        setPageProps(data);
       } catch (error) {
         if (error.message !== "canceled") {
           setErrMsg(error.message);
@@ -270,6 +259,8 @@ export default function MeasureLanding() {
                 setSearchCriteria={setSearchCriteria}
                 currentLimit={currentLimit}
                 currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                handlePageChange={handlePageChange}
                 setMeasureCounts={setMeasureCounts}
                 currentSort={currentSort}
                 setCurrentSort={setCurrentSort}

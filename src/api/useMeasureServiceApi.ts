@@ -435,6 +435,8 @@ export class MeasureServiceApi {
     filterByCurrentUser: boolean,
     limit: number = 25,
     page: number = 0,
+    sort: string = "lastModifiedAt",
+    direction: string = "DESC",
     searchCriteria: MeasureSearchCriteria,
     abortController: AbortController
   ): Promise<any> {
@@ -451,6 +453,8 @@ export class MeasureServiceApi {
             currentUser: filterByCurrentUser,
             limit,
             page,
+            sort,
+            direction,
           },
           signal: abortController.signal,
         }

@@ -49,37 +49,6 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { exportMeasure as downloadMeasureExport } from "../../../utils/exportUtil";
 import { MeasureSearchCriteria } from "../MeasureLanding";
 import Search from "./measureSearch/search";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
-
-const searchInputStyle = {
-  borderRadius: "3px",
-  height: 40,
-  "& .MuiOutlinedInput-notchedOutline": {
-    borderRadius: "3px",
-    borderColor: "#8C8C8C",
-    "& legend": {
-      width: 0,
-    },
-  },
-  "& .MuiOutlinedInput-root": {
-    "&&": {
-      borderRadius: "3px",
-    },
-  },
-  "& .MuiInputBase-input": {
-    height: 40,
-    fontFamily: "Rubik",
-    fontSize: 14,
-    borderRadius: "3px",
-    padding: "9px 14px",
-    "&::placeholder": {
-      opacity: 1,
-      color: "#717171",
-    },
-  },
-};
 
 export default function MeasureList(props: {
   measureList: Measure[];
@@ -94,6 +63,8 @@ export default function MeasureList(props: {
   setSearchCriteria: Dispatch<SetStateAction<MeasureSearchCriteria>>;
   currentLimit: number;
   currentPage: number;
+  setCurrentPage: Dispatch<SetStateAction<number>>;
+  handlePageChange: any;
   setMeasureCounts;
   currentSort;
   setCurrentSort;
@@ -648,54 +619,9 @@ export default function MeasureList(props: {
     setToastOpen(open);
   };
 
-  // const handleClearClick = async (event) => {
-  //   props.setLoading(true);
-  //   abortController.current = new AbortController();
-  //   props.setSearchCriteria("");
-  //   measureServiceApi
-  //     .fetchMeasures(
-  //       props.activeTab === 0,
-  //       props.currentLimit,
-  //       0,
-  //       "",
-  //       "",
-  //       abortController.current.signal
-  //     )
-  //     .then((data) => {
-  //       setPageProps(data);
-  //     })
-  //     .catch((error: Error) => {
-  //       props.setErrMsg("");
-  //     });
-  //   navigate(`?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`);
-  // };
-
-  // const doSearch = () => {
-  //   abortController.current = new AbortController();
-  //   props.setErrMsg();
-  //   measureServiceApi
-  //     .searchMeasuresByCriteria(
-  //       props.activeTab === 0,
-  //       props.currentLimit,
-  //       0,
-  //       {
-  //         searchField: props.searchCriteria,
-  //       },
-  //       abortController.current.signal
-  //     )
-  //     .then((data) => {
-  //       setPageProps(data);
-  //     })
-  //     .catch((error: Error) => {
-  //       props.setLoading(false);
-  //       props.setErrMsg(error.message);
-  //     });
-  // };
-
   const handleSort = async (sort: string) => {
     props.setLoading(true);
     abortController.current = new AbortController();
-    // props.setSearchCriteria(null);
     let sortChange = "lastModifiedAt";
     let directionChange = "DESC";
     if (sort === props.currentSort) {
@@ -712,33 +638,9 @@ export default function MeasureList(props: {
     }
     props.setCurrentSort(sortChange);
     props.setCurrentDirection(directionChange);
-    // measureServiceApi
-    //   .fetchMeasures(
-    //     props.activeTab === 0,
-    //     props.currentLimit,
-    //     0,
-    //     sortChange,
-    //     directionChange,
-    //     abortController.current.signal
-    //   )
-    //   .then((data) => {
-    //     setPageProps(data);
-    //   })
-    //   .catch((error: Error) => {
-    //     props.setErrMsg("");
-    //   });
-    // navigate(`?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`);
+    props.handlePageChange(null, 1);
   };
 
-  // const handleSubmit = async (event) => {
-  //   event.preventDefault();
-  //   if (props.searchCriteria) {
-  //     props.setLoading(true);
-  //     doSearch();
-  //   }
-  //
-  //   navigate(`?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`);
-  // };
   const setPageProps = (data) => {
     if (data) {
       const { content, totalPages, totalElements, numberOfElements, pageable } =
