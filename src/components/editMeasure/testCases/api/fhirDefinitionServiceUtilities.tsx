@@ -21,8 +21,8 @@ export const formatChoiceType = (
   if (_.includes(element.id, "[x]")) {
     return `${extractNameWithoutIndex(
       element,
-      basePath,
-      required
+      required,
+      basePath
     )}${_.upperFirst(element.type[0].code)}`;
   }
   return element.id;

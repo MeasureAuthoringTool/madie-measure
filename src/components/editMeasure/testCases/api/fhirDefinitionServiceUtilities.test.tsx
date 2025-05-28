@@ -24,6 +24,7 @@ import {
   buildFullValidationSchema,
   recursiveAddYupObject,
   addCardinalityToElement,
+  formatChoiceType,
 } from "./fhirDefinitionServiceUtilities";
 import _ from "lodash";
 
@@ -261,6 +262,18 @@ describe("getElementName", () => {
     const basePath = "Patient";
     const result = getElementName(element, basePath, [{}, {}]);
     expect(result).toBe(" *nameSlice 2 ");
+  });
+
+  it("should format for ChoiceType elements correctly", () => {
+    const element = {
+      id: "Patient.effective[x]",
+      min: 0,
+      max: 1,
+      type: [{ code: "dateTime" }],
+    } as any;
+    const basePath = "Patient";
+    const result = formatChoiceType(element, basePath);
+    expect(result).toBe("effectiveDateTime");
   });
 
   it("handles index 0 correctly", () => {
