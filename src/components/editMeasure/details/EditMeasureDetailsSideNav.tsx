@@ -1,15 +1,12 @@
 import React from "react";
-import tw from "twin.macro";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Tab, Tabs } from "@madie/madie-design-system/dist/react";
 import "../../../styles/VerticalSideBarNav.scss";
 import { Link } from "./MeasureDetails";
 import CompletionIndicator from "../populationCriteria/groups/CompletionIndicator";
+import tw from "twin.macro";
 
-const OuterWrapper = tw.div`flex flex-col flex-grow py-6 bg-slate overflow-y-auto border-r border-slate`;
-const InnerWrapper = tw.div`flex-grow flex flex-col`;
-const Nav = tw.nav`flex-1 space-y-1 bg-slate`;
-
+const InnerWrapper = tw.div`flex flex-grow flex-col`;
 export interface EditMeasureDetailsSideNavProps {
   links: Array<Link>;
 }
@@ -62,15 +59,15 @@ export default function EditMeasureDetailsSideNav(
   }
 
   return (
-    <OuterWrapper>
+    <div className="outer-wrapper">
       <InnerWrapper
         className="vertical-side-nav"
         id="edit-measure-details-side-nav"
       >
-        <Nav aria-label="Sidebar">
+        <nav aria-label="Sidebar">
           {links.map((link) => (
             <div className="link-container">
-              <h4 className="link-heading">{link.title}</h4>
+              <span className="link-heading">{link.title}</span>
               <Tabs
                 type="C"
                 orientation="vertical"
@@ -91,8 +88,8 @@ export default function EditMeasureDetailsSideNav(
               </Tabs>
             </div>
           ))}
-        </Nav>
+        </nav>
       </InnerWrapper>
-    </OuterWrapper>
+    </div>
   );
 }
