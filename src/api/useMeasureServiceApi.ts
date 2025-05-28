@@ -10,6 +10,7 @@ import {
 } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
 import _ from "lodash";
+import { MeasureSearchCriteria } from "../components/measureLanding/MeasureLanding";
 
 export class MeasureServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
@@ -434,7 +435,7 @@ export class MeasureServiceApi {
     filterByCurrentUser: boolean,
     limit: number = 25,
     page: number = 0,
-    searchCriteria: any,
+    searchCriteria: MeasureSearchCriteria,
     abortController: AbortController
   ): Promise<any> {
     try {

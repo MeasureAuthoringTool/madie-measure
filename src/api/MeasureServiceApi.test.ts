@@ -233,7 +233,7 @@ describe("MeasureServiceApi Tests", () => {
       25,
       0,
       { searchField: "test" },
-      new AbortController().signal
+      new AbortController()
     );
     expect(mockedAxios.put).toBeCalledTimes(1);
     expect(measuresList).toEqual(measures);
@@ -249,7 +249,7 @@ describe("MeasureServiceApi Tests", () => {
         25,
         0,
         { searchField: "test" },
-        new AbortController().signal
+        new AbortController()
       );
       expect(mockedAxios.put).toBeCalledTimes(1);
     } catch (error) {
@@ -271,7 +271,7 @@ describe("MeasureServiceApi Tests", () => {
         25,
         0,
         { searchField: "test" },
-        new AbortController().signal
+        new AbortController()
       );
       expect(mockedAxios.put).toBeCalledTimes(1);
     } catch (error) {
@@ -385,6 +385,7 @@ describe("MeasureServiceApi Tests", () => {
 
     const measureExportData = await measureServiceApi.getMeasureExport(
       "IDIDID1",
+      "Info",
       new AbortController().signal
     );
     expect(mockedAxios.get).toBeCalledTimes(1);
@@ -400,6 +401,7 @@ describe("MeasureServiceApi Tests", () => {
     try {
       await measureServiceApi.getMeasureExport(
         "1",
+        "Info",
         new AbortController().signal
       );
       expect(mockedAxios.get).toBeCalledTimes(1);

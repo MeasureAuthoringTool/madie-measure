@@ -1,5 +1,7 @@
 import React, {
+  Dispatch,
   HTMLProps,
+  SetStateAction,
   useCallback,
   useEffect,
   useMemo,
@@ -10,11 +12,9 @@ import tw from "twin.macro";
 import "styled-components/macro";
 import { Measure, Model } from "@madie/madie-models";
 import { useNavigate } from "react-router-dom";
-import { Chip, IconButton, InputAdornment } from "@mui/material";
+import { Chip } from "@mui/material";
 import {
   Button,
-  Popover,
-  TextField,
   Toast,
   TruncateText,
 } from "@madie/madie-design-system/dist/react";
@@ -28,16 +28,11 @@ import {
 } from "@tanstack/react-table";
 
 import InvalidTestCaseDialog from "../../common/invalidTestCaseDialog/InvalidTestCaseDialog";
-
-import ClearIcon from "@mui/icons-material/Clear";
-import SearchIcon from "@mui/icons-material/Search";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
 import CreatVersionDialog from "../../common/createVersionDialog/CreateVersionDialog";
 import DraftMeasureDialog from "../../common/draftMeasureDialog/DraftMeasureDialog";
 import versionErrorHelper from "../../../utils/versionErrorHelper";
-import getModelFamily from "../../../utils/measureModelHelpers";
-import _ from "lodash";
 import ExportDialog from "./exportDialog/ExportDialog";
 import InvalidMeasureNameDialog from "./InvalidMeasureNameDialog/InvalidMeasureNameDialog";
 import getLibraryNameErrors from "./InvalidMeasureNameDialog/getLibraryNameErrors";
@@ -52,6 +47,8 @@ import {
 } from "../../../icons/MeasureListTableRightArrowIcons";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { exportMeasure as downloadMeasureExport } from "../../../utils/exportUtil";
+import { MeasureSearchCriteria } from "../MeasureLanding";
+import Search from "./measureSearch/search";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
@@ -93,8 +90,8 @@ export default function MeasureList(props: {
   setOffset;
   setLoading;
   activeTab: number;
-  searchCriteria: string;
-  setSearchCriteria;
+  searchCriteria: MeasureSearchCriteria;
+  setSearchCriteria: Dispatch<SetStateAction<MeasureSearchCriteria>>;
   currentLimit: number;
   currentPage: number;
   setMeasureCounts;
@@ -104,6 +101,7 @@ export default function MeasureList(props: {
   setCurrentDirection;
   setErrMsg;
 }) {
+  const { searchCriteria, setSearchCriteria } = { ...props };
   const measureServiceApi = useRef(useMeasureServiceApi()).current; //needs to be ref or triggers jest. throws warn
   // CanDraftLookup will be an object who's keys are measureSetIds, to check weather we can draft M
   const [canDraftLookup, setCanDraftLookup] = useState<object>({});
@@ -650,54 +648,54 @@ export default function MeasureList(props: {
     setToastOpen(open);
   };
 
-  const handleClearClick = async (event) => {
-    props.setLoading(true);
-    abortController.current = new AbortController();
-    props.setSearchCriteria("");
-    measureServiceApi
-      .fetchMeasures(
-        props.activeTab === 0,
-        props.currentLimit,
-        0,
-        "",
-        "",
-        abortController.current.signal
-      )
-      .then((data) => {
-        setPageProps(data);
-      })
-      .catch((error: Error) => {
-        props.setErrMsg("");
-      });
-    navigate(`?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`);
-  };
+  // const handleClearClick = async (event) => {
+  //   props.setLoading(true);
+  //   abortController.current = new AbortController();
+  //   props.setSearchCriteria("");
+  //   measureServiceApi
+  //     .fetchMeasures(
+  //       props.activeTab === 0,
+  //       props.currentLimit,
+  //       0,
+  //       "",
+  //       "",
+  //       abortController.current.signal
+  //     )
+  //     .then((data) => {
+  //       setPageProps(data);
+  //     })
+  //     .catch((error: Error) => {
+  //       props.setErrMsg("");
+  //     });
+  //   navigate(`?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`);
+  // };
 
-  const doSearch = () => {
-    abortController.current = new AbortController();
-    props.setErrMsg();
-    measureServiceApi
-      .searchMeasuresByCriteria(
-        props.activeTab === 0,
-        props.currentLimit,
-        0,
-        {
-          searchField: props.searchCriteria,
-        },
-        abortController.current.signal
-      )
-      .then((data) => {
-        setPageProps(data);
-      })
-      .catch((error: Error) => {
-        props.setLoading(false);
-        props.setErrMsg(error.message);
-      });
-  };
+  // const doSearch = () => {
+  //   abortController.current = new AbortController();
+  //   props.setErrMsg();
+  //   measureServiceApi
+  //     .searchMeasuresByCriteria(
+  //       props.activeTab === 0,
+  //       props.currentLimit,
+  //       0,
+  //       {
+  //         searchField: props.searchCriteria,
+  //       },
+  //       abortController.current.signal
+  //     )
+  //     .then((data) => {
+  //       setPageProps(data);
+  //     })
+  //     .catch((error: Error) => {
+  //       props.setLoading(false);
+  //       props.setErrMsg(error.message);
+  //     });
+  // };
 
   const handleSort = async (sort: string) => {
     props.setLoading(true);
     abortController.current = new AbortController();
-    props.setSearchCriteria("");
+    // props.setSearchCriteria(null);
     let sortChange = "lastModifiedAt";
     let directionChange = "DESC";
     if (sort === props.currentSort) {
@@ -714,33 +712,33 @@ export default function MeasureList(props: {
     }
     props.setCurrentSort(sortChange);
     props.setCurrentDirection(directionChange);
-    measureServiceApi
-      .fetchMeasures(
-        props.activeTab === 0,
-        props.currentLimit,
-        0,
-        sortChange,
-        directionChange,
-        abortController.current.signal
-      )
-      .then((data) => {
-        setPageProps(data);
-      })
-      .catch((error: Error) => {
-        props.setErrMsg("");
-      });
-    navigate(`?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`);
+    // measureServiceApi
+    //   .fetchMeasures(
+    //     props.activeTab === 0,
+    //     props.currentLimit,
+    //     0,
+    //     sortChange,
+    //     directionChange,
+    //     abortController.current.signal
+    //   )
+    //   .then((data) => {
+    //     setPageProps(data);
+    //   })
+    //   .catch((error: Error) => {
+    //     props.setErrMsg("");
+    //   });
+    // navigate(`?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`);
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (props.searchCriteria) {
-      props.setLoading(true);
-      doSearch();
-    }
-
-    navigate(`?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`);
-  };
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+  //   if (props.searchCriteria) {
+  //     props.setLoading(true);
+  //     doSearch();
+  //   }
+  //
+  //   navigate(`?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`);
+  // };
   const setPageProps = (data) => {
     if (data) {
       const { content, totalPages, totalElements, numberOfElements, pageable } =
@@ -754,25 +752,6 @@ export default function MeasureList(props: {
       props.setOffset(pageable.offset);
       props.setLoading(false);
     }
-  };
-
-  const searchInputProps = {
-    startAdornment: (
-      <InputAdornment position="start">
-        <SearchIcon />
-      </InputAdornment>
-    ),
-    endAdornment: (
-      <IconButton
-        aria-label="Clear-Search"
-        sx={{
-          visibility: props.searchCriteria ? "visible" : "hidden",
-        }}
-        onClick={handleClearClick}
-      >
-        <ClearIcon />
-      </IconButton>
-    ),
   };
 
   const updateTargetMeasure = (newValue) => {
@@ -1042,33 +1021,12 @@ export default function MeasureList(props: {
 
   return (
     <div style={{ overflow: "auto" }}>
-      <div tw="grid grid-cols-3 gap-4 m-4">
-        <div tw="col-span-2">
-          <form onSubmit={handleSubmit} tw="w-1/4">
-            <TextField
-              onChange={(newValue) => {
-                props.setSearchCriteria(newValue.target.value);
-              }}
-              id="searchMeasure"
-              name="searchMeasure"
-              placeholder="Search Measure"
-              type="search"
-              fullWidth
-              data-testid="measure-search-input"
-              label="Filter Measures"
-              variant="outlined"
-              defaultValue={props.searchCriteria}
-              value={props.searchCriteria}
-              inputProps={{
-                "data-testid": "searchMeasure-input",
-                "aria-required": "false",
-              }}
-              InputProps={searchInputProps}
-              sx={searchInputStyle}
-            />
-          </form>
-        </div>
-        <div tw="justify-self-end p-3">
+      <div tw="grid grid-cols-4 gap-4 m-4">
+        <Search
+          searchCriteria={searchCriteria}
+          setSearchCriteria={setSearchCriteria}
+        />
+        <div tw="col-start-4 justify-self-end p-3">
           <ActionCenter
             updateTargetMeasure={updateTargetMeasure}
             exportMeasure={exportMeasure}

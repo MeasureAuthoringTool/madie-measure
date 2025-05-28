@@ -155,20 +155,25 @@ describe("Measure Page", () => {
   test("Search measure should call search api with search criteria", async () => {
     renderRouter(["/measures"]);
 
-    const measureInput = (await screen.findByTestId(
-      "searchMeasure-input"
+    const searchField = (await screen.findByTestId(
+      "measure-search-input"
     )) as HTMLInputElement;
-    expect(measureInput).toBeInTheDocument();
-    userEvent.type(measureInput, "test");
-    expect(measureInput.value).toBe("test");
-    fireEvent.submit(measureInput);
-    expect(mockMeasureServiceApi.searchMeasuresByCriteria).toHaveBeenCalledWith(
-      true,
-      10,
-      0,
-      { searchField: "test" },
-      abortController.signal
-    );
+    expect(searchField).toBeInTheDocument();
+
+    userEvent.type(searchField, "test");
+    expect(searchField).toHaveValue("test");
+    fireEvent.submit(searchField);
+    await waitFor(() => {
+      expect(
+        mockMeasureServiceApi.searchMeasuresByCriteria
+      ).toHaveBeenCalledWith(
+        true,
+        10,
+        0,
+        { searchField: "test", optionalSearchProperties: [undefined] },
+        abortController.signal
+      );
+    });
   });
 
   test("Create event triggers the event listener", async () => {
@@ -253,17 +258,20 @@ describe("Measure Page", () => {
       .mockRejectedValueOnce(new Error("Unable to fetch measures"));
     renderRouter(["/measures"]);
 
-    const measureInput = (await screen.findByTestId(
-      "searchMeasure-input"
+    const searchField = (await screen.findByTestId(
+      "measure-search-input"
     )) as HTMLInputElement;
-    expect(measureInput).toBeInTheDocument();
-    userEvent.type(measureInput, "test");
-    expect(measureInput.value).toBe("test");
-    fireEvent.submit(measureInput);
-    const error = await screen.findByTestId("generic-error-text-header");
-    expect(error).toBeInTheDocument();
-    const errorText = await screen.findByText("Unable to fetch measures");
-    expect(errorText).toBeInTheDocument();
+    expect(searchField).toBeInTheDocument();
+
+    userEvent.type(searchField, "test");
+    expect(searchField).toHaveValue("test");
+    fireEvent.submit(searchField);
+    await waitFor(() => {
+      const error = screen.getByTestId("generic-error-text-header");
+      expect(error).toBeInTheDocument();
+      const errorText = screen.getByText("Unable to fetch measures");
+      expect(errorText).toBeInTheDocument();
+    });
   });
 
   test("Search measure should not display errors when searching measures is canceled", async () => {
@@ -275,13 +283,14 @@ describe("Measure Page", () => {
       .mockRejectedValueOnce(new Error("canceled"));
     renderRouter(["/measures"]);
 
-    const measureInput = (await screen.findByTestId(
-      "searchMeasure-input"
+    const searchField = (await screen.findByTestId(
+      "measure-search-input"
     )) as HTMLInputElement;
-    expect(measureInput).toBeInTheDocument();
-    userEvent.type(measureInput, "test");
-    expect(measureInput.value).toBe("test");
-    fireEvent.submit(measureInput);
+    expect(searchField).toBeInTheDocument();
+
+    userEvent.type(searchField, "test");
+    expect(searchField).toHaveValue("test");
+    fireEvent.submit(searchField);
 
     await waitFor(() => {
       expect(screen.queryByTestId("generic-error-text-header")).toBeNull();
