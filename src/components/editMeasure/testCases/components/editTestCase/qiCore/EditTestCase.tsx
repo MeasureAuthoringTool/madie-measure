@@ -491,9 +491,14 @@ const EditTestCase = (props: EditTestCaseProps) => {
       const updatedData = JSON.stringify(parsedValue, (key, value) => {
         if (typeof value === "string" && regex.test(value)) {
           //overwrite timezones
-          value = value.replace(/([+-]\d{2}:\d{2}|Z)$/, "+00:00");
-          timezoneUpdated = true;
-          const newValue = dayjs(value).utc().format();
+          const newValue = dayjs(
+            value.replace(/([+-]\d{2}:\d{2}|Z)$/, "+00:00")
+          )
+            .utc()
+            .format();
+          if (value != newValue) {
+            timezoneUpdated = true;
+          }
           return newValue;
         }
         return value;
