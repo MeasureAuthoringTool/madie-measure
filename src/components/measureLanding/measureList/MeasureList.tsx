@@ -826,6 +826,7 @@ export default function MeasureList(props: {
 
   const doUpdateList = () => {
     abortController.current = new AbortController();
+    props.setMeasureCounts();
     measureServiceApi
       .fetchMeasures(
         props.activeTab === 0,
@@ -836,7 +837,6 @@ export default function MeasureList(props: {
         abortController.current.signal
       )
       .then((data) => {
-        props.setMeasureCounts();
         setPageProps(data);
       })
       .catch((error: Error) => {
