@@ -1239,6 +1239,7 @@ describe("Measure List component", () => {
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
+          setMeasureCounts={jest.fn()}
           setErrMsg={setErrMsgMock}
         />
       </ServiceContext.Provider>
