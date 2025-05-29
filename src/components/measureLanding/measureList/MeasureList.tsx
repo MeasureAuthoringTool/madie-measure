@@ -63,13 +63,13 @@ export default function MeasureList(props: {
   setSearchCriteria: Dispatch<SetStateAction<MeasureSearchCriteria>>;
   currentLimit: number;
   currentPage: number;
-  setCurrentPage: Dispatch<SetStateAction<number>>;
-  handlePageChange: any;
-  setMeasureCounts;
-  currentSort;
-  setCurrentSort;
-  currentDirection;
-  setCurrentDirection;
+  setCurrentPage?: Dispatch<SetStateAction<number>>;
+  handlePageChange?: any;
+  setMeasureCounts?;
+  currentSort?;
+  setCurrentSort?;
+  currentDirection?;
+  setCurrentDirection?;
   setErrMsg;
 }) {
   const { searchCriteria, setSearchCriteria } = { ...props };
@@ -84,7 +84,6 @@ export default function MeasureList(props: {
   // Popover utilities
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [selectedMeasure, setSelectedMeasure] = useState<Measure>(null);
-  const [canEdit, setCanEdit] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   // if user can edit and it is a version, then draft button
 
@@ -927,6 +926,7 @@ export default function MeasureList(props: {
         <Search
           searchCriteria={searchCriteria}
           setSearchCriteria={setSearchCriteria}
+          handlePageChange={props.handlePageChange}
         />
         <div tw="col-start-4 justify-self-end p-3">
           <ActionCenter

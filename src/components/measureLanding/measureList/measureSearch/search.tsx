@@ -26,19 +26,23 @@ const renderMenuItemsForFilter = (options: string[]) => {
 const Search = (props: {
   searchCriteria: MeasureSearchCriteria;
   setSearchCriteria: Dispatch<SetStateAction<MeasureSearchCriteria>>;
+  handlePageChange: (e, v) => void;
 }) => {
-  const { searchCriteria, setSearchCriteria } = { ...props };
+  const { searchCriteria, setSearchCriteria, handlePageChange } = { ...props };
   const formik = useFormik({
     initialValues: {
       searchField: searchCriteria?.searchField,
-      filterBy: searchCriteria?.optionalSearchProperties[0],
+      filterBy: searchCriteria?.optionalSearchProperties?.[0],
     },
     enableReinitialize: true,
     onSubmit: async (values) => {
       setSearchCriteria({
         searchField: values?.searchField,
-        optionalSearchProperties: [values?.filterBy],
+        optionalSearchProperties: [
+          values?.filterBy !== "-" ? values.filterBy : "",
+        ],
       });
+      handlePageChange(null, 1);
     },
   });
 
@@ -59,6 +63,7 @@ const Search = (props: {
         }}
         {...formik.getFieldProps("filterBy")}
         options={renderMenuItemsForFilter([
+          "-",
           "Measure",
           "Version",
           "Model",

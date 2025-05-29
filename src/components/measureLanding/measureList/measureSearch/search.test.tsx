@@ -70,7 +70,7 @@ describe("Search Component", () => {
     await waitFor(() => {
       expect(mockSetSearchCriteria).toHaveBeenCalledWith({
         searchField: "Diabetes",
-        optionalSearchProperties: ["measure"],
+        optionalSearchProperties: ["Measure"],
       });
     });
   });

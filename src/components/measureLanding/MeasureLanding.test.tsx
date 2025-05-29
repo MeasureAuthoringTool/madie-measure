@@ -95,7 +95,7 @@ describe("Measure Page", () => {
         "",
         "",
         {
-          optionalSearchProperties: [],
+          optionalSearchProperties: [""],
           searchField: "",
         },
         abortController.signal
@@ -123,7 +123,7 @@ describe("Measure Page", () => {
         "",
         "",
         {
-          optionalSearchProperties: [],
+          optionalSearchProperties: [""],
           searchField: "",
         },
         abortController.signal
@@ -154,7 +154,7 @@ describe("Measure Page", () => {
         "",
         "",
         {
-          optionalSearchProperties: [],
+          optionalSearchProperties: [""],
           searchField: "",
         },
         abortController.signal
@@ -202,7 +202,7 @@ describe("Measure Page", () => {
         "",
         "",
         {
-          optionalSearchProperties: [],
+          optionalSearchProperties: [""],
           searchField: "",
         },
         abortController.signal
@@ -233,7 +233,7 @@ describe("Measure Page", () => {
         "",
         "",
         {
-          optionalSearchProperties: [],
+          optionalSearchProperties: [""],
           searchField: "",
         },
         abortController.signal
@@ -371,7 +371,7 @@ describe("Measure Page", () => {
         "",
         "",
         {
-          optionalSearchProperties: [],
+          optionalSearchProperties: [""],
           searchField: "",
         },
         abortController.signal
