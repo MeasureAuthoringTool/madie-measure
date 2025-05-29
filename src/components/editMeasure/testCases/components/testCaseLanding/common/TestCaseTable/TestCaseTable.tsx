@@ -53,7 +53,10 @@ export const convertDate = (date: string) => {
   const year = dateObj.getUTCFullYear().toString();
   const month = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
   const day = String(dateObj.getUTCDate()).padStart(2, "0");
-  return `${month}/${day}/${year}`;
+  const hours = String(dateObj.getUTCHours()).padStart(2, "0");
+  const minutes = String(dateObj.getUTCMinutes()).padStart(2, "0");
+  const seconds = String(dateObj.getUTCSeconds()).padStart(2, "0");
+  return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
 };
 
 const IndeterminateCheckbox = ({ indeterminate, checked, ...rest }: any) => {
