@@ -95,7 +95,7 @@ describe("Measure Page", () => {
         "",
         "",
         {
-          optionalSearchProperties: [""],
+          optionalSearchProperties: [],
           searchField: "",
         },
         abortController.signal
@@ -123,7 +123,7 @@ describe("Measure Page", () => {
         "",
         "",
         {
-          optionalSearchProperties: [""],
+          optionalSearchProperties: [],
           searchField: "",
         },
         abortController.signal
@@ -143,8 +143,6 @@ describe("Measure Page", () => {
     const allMeasuresTab = await screen.findByTestId("all-measures-tab");
     await waitFor(() => {
       expect(allMeasuresTab).toHaveClass("Mui-selected");
-    });
-    await waitFor(() =>
       expect(
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
@@ -154,12 +152,12 @@ describe("Measure Page", () => {
         "",
         "",
         {
-          optionalSearchProperties: [""],
+          optionalSearchProperties: [],
           searchField: "",
         },
         abortController.signal
-      )
-    );
+      );
+    });
   });
 
   test("Search measure should call search api with search criteria", async () => {
@@ -182,7 +180,7 @@ describe("Measure Page", () => {
         0,
         "",
         "",
-        { searchField: "test", optionalSearchProperties: [""] },
+        { searchField: "test", optionalSearchProperties: [] },
         abortController.signal
       );
     });
@@ -202,7 +200,7 @@ describe("Measure Page", () => {
         "",
         "",
         {
-          optionalSearchProperties: [""],
+          optionalSearchProperties: [],
           searchField: "",
         },
         abortController.signal
@@ -233,7 +231,7 @@ describe("Measure Page", () => {
         "",
         "",
         {
-          optionalSearchProperties: [""],
+          optionalSearchProperties: [],
           searchField: "",
         },
         abortController.signal
@@ -371,7 +369,7 @@ describe("Measure Page", () => {
         "",
         "",
         {
-          optionalSearchProperties: [""],
+          optionalSearchProperties: [],
           searchField: "",
         },
         abortController.signal

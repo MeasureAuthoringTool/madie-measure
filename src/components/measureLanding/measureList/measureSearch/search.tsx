@@ -38,9 +38,7 @@ const Search = (props: {
     onSubmit: async (values) => {
       setSearchCriteria({
         searchField: values?.searchField,
-        optionalSearchProperties: [
-          values?.filterBy !== "-" ? values.filterBy : "",
-        ],
+        optionalSearchProperties: [values?.filterBy],
       });
       handlePageChange(null, 1);
     },

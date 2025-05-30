@@ -51,6 +51,14 @@ import { MeasureSearchCriteria } from "../MeasureLanding";
 import Search from "./measureSearch/search";
 
 export default function MeasureList(props: {
+  retrieveMeasures?: (
+    tab: number,
+    limit: number,
+    page: number,
+    searchCriteria: MeasureSearchCriteria,
+    sort: string,
+    direction: string
+  ) => void;
   measureList: Measure[];
   setMeasureList;
   setTotalPages;
@@ -72,7 +80,7 @@ export default function MeasureList(props: {
   setCurrentDirection?;
   setErrMsg;
 }) {
-  const { searchCriteria, setSearchCriteria } = { ...props };
+  const { searchCriteria, setSearchCriteria, retrieveMeasures } = { ...props };
   const measureServiceApi = useRef(useMeasureServiceApi()).current; //needs to be ref or triggers jest. throws warn
   // CanDraftLookup will be an object who's keys are measureSetIds, to check weather we can draft M
   const [canDraftLookup, setCanDraftLookup] = useState<object>({});
@@ -705,24 +713,14 @@ export default function MeasureList(props: {
   };
 
   const doUpdateList = () => {
-    abortController.current = new AbortController();
-    measureServiceApi
-      .fetchMeasures(
-        props.activeTab === 0,
-        props.currentLimit,
-        props.currentPage,
-        "",
-        "",
-        abortController.current.signal
-      )
-      .then((data) => {
-        props.setMeasureCounts();
-        setPageProps(data);
-      })
-      .catch((error: Error) => {
-        props.setLoading(false);
-        props.setErrMsg(error.message);
-      });
+    retrieveMeasures(
+      props.activeTab,
+      props.currentLimit,
+      props.currentPage,
+      searchCriteria,
+      props.currentSort,
+      props.currentDirection
+    );
   };
 
   const [invalidTestCaseOpen, setInvalidTestCaseOpen] =

@@ -6,6 +6,7 @@ import { within } from "@testing-library/dom";
 
 describe("Search Component", () => {
   const mockSetSearchCriteria = jest.fn();
+  const mockHandlePageChange = jest.fn();
   const defaultCriteria = {
     searchField: "",
     optionalSearchProperties: [],
@@ -16,6 +17,7 @@ describe("Search Component", () => {
       <Search
         searchCriteria={searchCriteria}
         setSearchCriteria={mockSetSearchCriteria}
+        handlePageChange={mockHandlePageChange}
       />
     );
   };
@@ -37,11 +39,12 @@ describe("Search Component", () => {
     userEvent.click(filterByDropDown);
 
     const optionsList = await screen.findAllByRole("option");
-    expect(optionsList).toHaveLength(4);
-    expect(optionsList[0]).toHaveTextContent("Measure");
-    expect(optionsList[1]).toHaveTextContent("Version");
-    expect(optionsList[2]).toHaveTextContent("Model");
-    expect(optionsList[3]).toHaveTextContent("CMS ID");
+    expect(optionsList).toHaveLength(5);
+    expect(optionsList[0]).toHaveTextContent("-");
+    expect(optionsList[1]).toHaveTextContent("Measure");
+    expect(optionsList[2]).toHaveTextContent("Version");
+    expect(optionsList[3]).toHaveTextContent("Model");
+    expect(optionsList[4]).toHaveTextContent("CMS ID");
   });
 
   it("should submit the form with appropriate values", async () => {
@@ -54,9 +57,9 @@ describe("Search Component", () => {
     userEvent.click(filterByDropDown);
 
     const optionsList = await screen.findAllByRole("option");
-    expect(optionsList).toHaveLength(4);
-    expect(optionsList[0]).toHaveTextContent("Measure");
-    userEvent.click(optionsList[0]);
+    expect(optionsList).toHaveLength(5);
+    expect(optionsList[1]).toHaveTextContent("Measure");
+    userEvent.click(optionsList[1]);
 
     const input = screen.getByTestId("measure-search-input");
 

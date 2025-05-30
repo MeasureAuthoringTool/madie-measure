@@ -89,18 +89,21 @@ export default function MeasureLanding() {
       abortController.current = new AbortController();
       setLoading(true);
       try {
+        const optionalParams = searchCriteria?.optionalSearchProperties ?? [];
+        const firstParam = _.trim(optionalParams[0]);
+
+        const modifiedSearchCriteria = {
+          ...searchCriteria,
+          optionalSearchProperties:
+            firstParam && firstParam !== "-" ? [_.camelCase(firstParam)] : [],
+        };
         const data = await measureServiceApi.searchMeasuresByCriteria(
           tab === 0,
           limit,
           page,
           sort,
           direction,
-          {
-            ...searchCriteria,
-            optionalSearchProperties: [
-              _.camelCase(_.trim(searchCriteria?.optionalSearchProperties[0])),
-            ],
-          },
+          modifiedSearchCriteria,
           abortController.current.signal
         );
         setPageProps(data);
@@ -252,6 +255,7 @@ export default function MeasureLanding() {
           {!loading && (
             <div className="table">
               <MeasureList
+                retrieveMeasures={retrieveMeasures}
                 measureList={measureList}
                 setMeasureList={setMeasureList}
                 setTotalPages={setTotalPages}
