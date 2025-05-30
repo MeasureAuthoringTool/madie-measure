@@ -48,7 +48,7 @@ import {
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { exportMeasure as downloadMeasureExport } from "../../../utils/exportUtil";
 import { MeasureSearchCriteria } from "../MeasureLanding";
-import Search from "./measureSearch/search";
+import Search from "./measureSearch/Search";
 
 export default function MeasureList(props: {
   retrieveMeasures?: (
