@@ -22,7 +22,15 @@ import {
 import "./MeasureLanding.scss";
 import { useDocumentTitle, useFeatureFlags } from "@madie/madie-util";
 import StatusHandler from "../editMeasure/editor/StatusHandler";
+import _ from "lodash";
 
+export interface MeasureSearchCriteria {
+  searchField?: string;
+  optionalSearchProperties?: string[]; // can be ["measureName", "version", "cmsId"] ..etc
+  model?: string;
+  draft?: boolean;
+  excludeByMeasureIds?: string[];
+}
 export default function MeasureLanding() {
   useDocumentTitle("MADiE Measures");
   const { search } = useLocation();
@@ -40,7 +48,10 @@ export default function MeasureLanding() {
   const [visibleItems, setVisibleItems] = useState<number>(0);
   const activeTab: number = values.tab ? Number(values.tab) : 0;
   const [offset, setOffset] = useState<number>(0);
-  const [searchCriteria, setSearchCriteria] = useState("");
+  const [searchCriteria, setSearchCriteria] = useState<MeasureSearchCriteria>({
+    searchField: "",
+    optionalSearchProperties: [],
+  });
   const [currentLimit, setCurrentLimit] = useState(10);
   const [currentPage, setCurrentPage] = useState(0);
   const [errMsg, setErrMsg] = useState(undefined);
@@ -67,31 +78,36 @@ export default function MeasureLanding() {
   };
 
   const retrieveMeasures = useCallback(
-    async (tab, limit, page, searchCriteria, sort, direction) => {
+    async (
+      tab,
+      limit,
+      page,
+      searchCriteria: MeasureSearchCriteria,
+      sort,
+      direction
+    ) => {
       abortController.current = new AbortController();
       setLoading(true);
       try {
-        if (!searchCriteria) {
-          setErrMsg(null);
-          const data = await measureServiceApi.fetchMeasures(
-            tab === 0,
-            limit,
-            page,
-            sort,
-            direction,
-            abortController.current.signal
-          );
-          setPageProps(data);
-        } else {
-          const data = await measureServiceApi.searchMeasuresByCriteria(
-            tab === 0,
-            limit,
-            page,
-            { searchField: searchCriteria },
-            abortController.current.signal
-          );
-          setPageProps(data);
-        }
+        const optionalParams = searchCriteria?.optionalSearchProperties ?? [];
+        const firstParam = _.trim(optionalParams[0]);
+
+        const modifiedSearchCriteria = {
+          ...searchCriteria,
+          optionalSearchProperties:
+            firstParam && firstParam !== "-" ? [_.camelCase(firstParam)] : [],
+        };
+        const data = await measureServiceApi.searchMeasuresByCriteria(
+          tab === 0,
+          limit,
+          page,
+          sort,
+          direction,
+          modifiedSearchCriteria,
+          abortController.current.signal
+        );
+        setPageProps(data);
+        setMeasureCounts();
       } catch (error) {
         if (error.message !== "canceled") {
           setErrMsg(error.message);
@@ -146,7 +162,16 @@ export default function MeasureLanding() {
       currentSort,
       currentDirection
     );
-  }, [retrieveMeasures, activeTab, curLimit, curPage, measureServiceApi]);
+  }, [
+    retrieveMeasures,
+    activeTab,
+    curLimit,
+    curPage,
+    measureServiceApi,
+    searchCriteria,
+    currentSort,
+    currentDirection,
+  ]);
   // create is in a different app, so we need to listen for it.
   useEffect(() => {
     const createListener = () => {
@@ -154,7 +179,7 @@ export default function MeasureLanding() {
         0,
         curLimit === undefined ? 10 : curLimit,
         0,
-        undefined,
+        searchCriteria,
         currentSort,
         currentDirection
       );
@@ -232,6 +257,7 @@ export default function MeasureLanding() {
           {!loading && (
             <div className="table">
               <MeasureList
+                retrieveMeasures={retrieveMeasures}
                 measureList={measureList}
                 setMeasureList={setMeasureList}
                 setTotalPages={setTotalPages}
@@ -244,7 +270,8 @@ export default function MeasureLanding() {
                 setSearchCriteria={setSearchCriteria}
                 currentLimit={currentLimit}
                 currentPage={currentPage}
-                setMeasureCounts={setMeasureCounts}
+                setCurrentPage={setCurrentPage}
+                handlePageChange={handlePageChange}
                 currentSort={currentSort}
                 setCurrentSort={setCurrentSort}
                 currentDirection={currentDirection}
