@@ -73,7 +73,6 @@ export default function MeasureList(props: {
   currentPage: number;
   setCurrentPage?: Dispatch<SetStateAction<number>>;
   handlePageChange?: any;
-  setMeasureCounts?;
   currentSort?;
   setCurrentSort?;
   currentDirection?;
@@ -646,21 +645,6 @@ export default function MeasureList(props: {
     props.setCurrentSort(sortChange);
     props.setCurrentDirection(directionChange);
     props.handlePageChange(null, 1);
-  };
-
-  const setPageProps = (data) => {
-    if (data) {
-      const { content, totalPages, totalElements, numberOfElements, pageable } =
-        data;
-      table.toggleAllRowsSelected(false);
-      props.setTotalPages(totalPages);
-      props.setTotalItems(totalElements);
-      props.setVisibleItems(numberOfElements);
-
-      props.setMeasureList(content);
-      props.setOffset(pageable.offset);
-      props.setLoading(false);
-    }
   };
 
   const updateTargetMeasure = (newValue) => {

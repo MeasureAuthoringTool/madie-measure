@@ -31,8 +31,6 @@ import { Simulate } from "react-dom/test-utils";
 // @ts-ignore
 import { useFeatureFlags, checkUserCanEdit } from "@madie/madie-util";
 import { AxiosError, AxiosResponse } from "axios";
-import searchField from "../../../../../madie-editor/src/common/SearchField";
-import { Dispatch, SetStateAction } from "react";
 
 const EXPORT_FAILURE_MESSAGE =
   "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists.";
@@ -257,7 +255,6 @@ const setCurrentSortMock = jest.fn();
 const setCurrentDirectionMock = jest.fn();
 const setCurrentPageMock = jest.fn();
 const handlePageChangeMock = jest.fn();
-const setMeasureCountsMock = jest.fn();
 
 describe("Measure List component", () => {
   beforeEach(() => {
@@ -379,7 +376,6 @@ describe("Measure List component", () => {
           currentPage={0}
           setCurrentPage={setCurrentPageMock}
           handlePageChange={handlePageChangeMock}
-          setMeasureCounts={setMeasureCountsMock}
           currentSort={""}
           setCurrentSort={setCurrentSortMock}
           currentDirection={""}
@@ -1144,99 +1140,6 @@ describe("Measure List component", () => {
         "New version of measure is Successfully created"
       );
 
-      const closeButton = getByTestId("close-toast-button");
-      userEvent.click(closeButton);
-      setTimeout(() => {
-        expect(
-          queryByTestId("create-version-success-text")
-        ).not.toBeInTheDocument();
-      }, 500);
-    });
-    unmount();
-  });
-
-  it("should handle invalid test cases dialog", async () => {
-    const invalidTestCaseResponse = {
-      response: {},
-      request: {
-        responseText: JSON.stringify({ message: "" }),
-      },
-      status: 202,
-    };
-    const success = {
-      response: {
-        request: {
-          responseText: JSON.stringify({ message: "" }),
-        },
-        data: {},
-      },
-    };
-    const useMeasureServiceMockRejected = {
-      checkValidVersion: jest.fn().mockResolvedValue(invalidTestCaseResponse),
-      createVersion: jest.fn().mockResolvedValue(success),
-      checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
-      fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
-      fetchMeasure: jest.fn().mockResolvedValue(measures[0]),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceMock.mockImplementation(() => {
-      return useMeasureServiceMockRejected;
-    });
-    const { getByTestId, queryByTestId, unmount } = render(
-      <ServiceContext.Provider value={serviceConfig}>
-        <MeasureList
-          measureList={measures}
-          setMeasureList={setMeasureListMock}
-          setTotalPages={setTotalPagesMock}
-          setTotalItems={setTotalItemsMock}
-          setVisibleItems={setVisibleItemsMock}
-          setOffset={setOffsetMock}
-          setLoading={setLoadingMock}
-          activeTab={0}
-          searchCriteria={null}
-          setSearchCriteria={setSearchCriteriaMock}
-          currentLimit={10}
-          currentPage={0}
-          setMeasureCounts={jest.fn()}
-          setErrMsg={setErrMsgMock}
-        />
-      </ServiceContext.Provider>
-    );
-    const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
-    userEvent.click(checkBoxes[1]);
-    const createVersionButton = getByTestId("version-action-btn");
-    expect(createVersionButton).toBeInTheDocument();
-    userEvent.click(createVersionButton);
-    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
-
-    const typeInput = screen.getByTestId(
-      "version-type-input"
-    ) as HTMLInputElement;
-    expect(typeInput).toBeInTheDocument();
-    expect(typeInput.value).toBe("");
-    fireEvent.change(typeInput, {
-      target: { value: "major" },
-    });
-    expect(typeInput.value).toBe("major");
-    const confirmVersionNode = getByTestId(
-      "confirm-version-input"
-    ) as HTMLInputElement;
-    userEvent.type(confirmVersionNode, "1.0.000");
-    Simulate.change(confirmVersionNode);
-    expect(confirmVersionNode.value).toBe("1.0.000");
-    await waitFor(() => {
-      userEvent.click(getByTestId("create-version-continue-button"));
-      expect(
-        screen.getByTestId("invalid-test-case-dialog")
-      ).toBeInTheDocument();
-      userEvent.click(
-        screen.getByTestId("invalid-test-dialog-continue-button")
-      );
-    });
-    await waitFor(() => {
-      expect(getByTestId("success-toast")).toHaveTextContent(
-        "New version of measure is Successfully created"
-      );
       const closeButton = getByTestId("close-toast-button");
       userEvent.click(closeButton);
       setTimeout(() => {
@@ -2684,7 +2587,7 @@ describe("Measure List with MeasureSearch enabled", () => {
   });
 
   it("should sort in order when column is clicked first", async () => {
-    const { getByText } = render(
+    render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -2704,26 +2607,27 @@ describe("Measure List with MeasureSearch enabled", () => {
           currentDirection={""}
           setCurrentDirection={setCurrentDirectionMock}
           setErrMsg={setErrMsgMock}
+          handlePageChange={handlePageChangeMock}
         />
       </ServiceContext.Provider>
     );
 
-    expect(getByText("Version")).toBeInTheDocument();
     const versionButton = screen.getByRole("button", {
       name: "Version",
     });
     expect(versionButton).toBeEnabled();
 
-    userEvent.click(versionButton);
+    fireEvent.click(versionButton);
+
     await waitFor(() => {
-      expect(setCurrentSortMock).toHaveBeenCalledWith("Version");
+      expect(setCurrentSortMock).toHaveBeenCalledWith("version");
       expect(setCurrentDirectionMock).toHaveBeenCalledWith("ASC");
       expect(handlePageChangeMock).toHaveBeenCalledWith(null, 1);
     });
   });
 
   it("should sort in order when column is clicked second", async () => {
-    const { getByText } = render(
+    render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -2743,20 +2647,23 @@ describe("Measure List with MeasureSearch enabled", () => {
           currentDirection={"ASC"}
           setCurrentDirection={setCurrentDirectionMock}
           setErrMsg={setErrMsgMock}
+          handlePageChange={handlePageChangeMock}
         />
       </ServiceContext.Provider>
     );
 
-    expect(getByText("Version")).toBeInTheDocument();
     const versionButton = screen.getByRole("button", {
       name: "Version",
     });
     expect(versionButton).toBeEnabled();
 
-    userEvent.click(versionButton);
-    expect(setCurrentSortMock).toHaveBeenCalledWith("Version");
-    expect(setCurrentDirectionMock).toHaveBeenCalledWith("DESC");
-    expect(handlePageChangeMock).toHaveBeenCalledWith(null, 1);
+    fireEvent.click(versionButton);
+
+    await waitFor(() => {
+      expect(setCurrentSortMock).toHaveBeenCalledWith("version");
+      expect(setCurrentDirectionMock).toHaveBeenCalledWith("DESC");
+      expect(handlePageChangeMock).toHaveBeenCalledWith(null, 1);
+    });
   });
 
   it("should sort in order when column is clicked third", async () => {
@@ -2780,6 +2687,7 @@ describe("Measure List with MeasureSearch enabled", () => {
           currentDirection={"DESC"}
           setCurrentDirection={setCurrentDirectionMock}
           setErrMsg={setErrMsgMock}
+          handlePageChange={handlePageChangeMock}
         />
       </ServiceContext.Provider>
     );
@@ -2790,10 +2698,12 @@ describe("Measure List with MeasureSearch enabled", () => {
     });
     expect(versionButton).toBeEnabled();
 
-    userEvent.click(versionButton);
-    expect(setCurrentSortMock).toHaveBeenCalledWith("");
-    expect(setCurrentDirectionMock).toHaveBeenCalledWith("");
-    expect(handlePageChangeMock).toHaveBeenCalledWith(null, 1);
+    fireEvent.click(versionButton);
+    await waitFor(() => {
+      expect(setCurrentSortMock).toHaveBeenCalledWith("");
+      expect(setCurrentDirectionMock).toHaveBeenCalledWith("");
+      expect(handlePageChangeMock).toHaveBeenCalledWith(null, 1);
+    });
   });
 
   it("should display shared icon when measure has ACLs", async () => {

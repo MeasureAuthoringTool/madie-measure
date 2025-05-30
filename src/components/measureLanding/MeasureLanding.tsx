@@ -107,6 +107,7 @@ export default function MeasureLanding() {
           abortController.current.signal
         );
         setPageProps(data);
+        setMeasureCounts();
       } catch (error) {
         if (error.message !== "canceled") {
           setErrMsg(error.message);
@@ -271,7 +272,6 @@ export default function MeasureLanding() {
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
                 handlePageChange={handlePageChange}
-                setMeasureCounts={setMeasureCounts}
                 currentSort={currentSort}
                 setCurrentSort={setCurrentSort}
                 currentDirection={currentDirection}
