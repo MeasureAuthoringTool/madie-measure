@@ -182,12 +182,13 @@ export default function MeasureLanding() {
         currentSort,
         currentDirection
       );
+      setMeasureCounts();
     };
     window.addEventListener("create", createListener, false);
     return () => {
       window.removeEventListener("create", createListener, false);
     };
-  }, []);
+  }, [featureFlags?.MeasureSearch]);
 
   const handleTabChange = (event, nextTab) => {
     abortController.current.abort();
