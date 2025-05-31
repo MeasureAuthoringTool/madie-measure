@@ -661,7 +661,21 @@ const EditTestCase = (props: EditTestCaseProps) => {
           );
         }
       } else if (hasValidHapiOutcome(testCase)) {
-        showToast(`Test case ${action}d successfully!`, "success");
+        // This if-check can be removed once the stu6TestCaseValidation flag is set
+        if (timezoneUpdated) {
+          showToast(
+            <div>
+              <h3>Test case {action}d successfully!</h3>
+              <ul>
+                MADiE only supports a timezone offset of 0. MADiE has
+                overwritten any timezone offsets that are not zero.
+              </ul>
+            </div>,
+            "warning"
+          );
+        } else {
+          showToast(`Test case ${action}d successfully!`, "success");
+        }
       } else {
         const valErrors = validationErrors.map((error) => (
           <li>{error.diagnostics}</li>
