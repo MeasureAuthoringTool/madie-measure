@@ -661,7 +661,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
           );
         }
       } else if (hasValidHapiOutcome(testCase)) {
-        // This if-check can be removed once the stu6TestCaseValidation flag is set
+        // TODO: Remove if-check once the stu6TestCaseValidation flag is removed
         if (timezoneUpdated) {
           showToast(
             <div>
