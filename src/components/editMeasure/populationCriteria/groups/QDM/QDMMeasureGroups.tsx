@@ -45,7 +45,7 @@ import { getPopulationsForScoring } from "../../PopulationHelper";
 import GroupPopulation from "../groupPopulations/GroupPopulation";
 import MeasureGroupObservation from "../observation/MeasureGroupObservation";
 import * as _ from "lodash";
-import GroupsDescription from "../GroupsDescription";
+import Description from "../Description";
 import MeasureGroupScoringUnit from "../scoringUnit/MeasureGroupScoringUnit";
 
 // import Add
@@ -56,7 +56,6 @@ import "../MeasureGroups.scss";
 import {
   ButtonSpacer,
   FormFieldInner,
-  FieldLabel,
   FieldSeparator,
   MenuItemContainer,
 } from "../../../../../styles/editMeasure/populationCriteria/groups/index";
@@ -744,21 +743,14 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                 <div>
                   <FormFieldInner>
                     <FieldSeparator>
-                      <TextArea
+                      <Description
                         label={`Population Criteria ${
                           measureGroupNumber + 1
                         } Description`}
-                        value={formik.values.groupDescription}
-                        name="group-description"
-                        id="group-description"
-                        autoComplete="group-description"
-                        disabled={!canEdit}
-                        placeholder="Description"
-                        data-testid="groupDescriptionInput"
-                        onKeyDown={goBackToNav}
+                        setFieldValue={formik.setFieldValue}
+                        canEdit={canEdit}
                         {...formik.getFieldProps("groupDescription")}
                       />
-                      {!canEdit && formik.values.groupDescription}
                     </FieldSeparator>
                   </FormFieldInner>
                 </div>
@@ -893,8 +885,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                     replaceCallback={arrayHelpers.replace}
                                   />
                                   {/* PopulationDescription */}
-                                  <GroupsDescription
-                                    name={descriptionName}
+                                  <Description
                                     canEdit={canEdit}
                                     label={
                                       population?.name
@@ -904,10 +895,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                         : undefined
                                     }
                                     setFieldValue={formik.setFieldValue}
-                                    value={
-                                      formik.values.populations[index]
-                                        .description
-                                    }
+                                    {...formik.getFieldProps(
+                                      `populations[${index}].description`
+                                    )}
                                   />
                                 </div>
                                 {/* add or remove logic must live here */}
@@ -1017,18 +1007,12 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                       </div>
                                     </div>
                                     <div tw="lg:col-span-2">
-                                      <TextArea
-                                        disabled={!canEdit}
-                                        data-testid={`stratification-${
-                                          i + 1
-                                        }-description`}
-                                        id={`Stratification-Description-${
-                                          i + 1
-                                        }`}
+                                      <Description
                                         label={`Stratification ${
                                           i + 1
                                         } Description`}
-                                        placeHolder="Description"
+                                        setFieldValue={formik.setFieldValue}
+                                        canEdit={canEdit}
                                         {...formik.getFieldProps(
                                           `stratifications[${i}].description`
                                         )}

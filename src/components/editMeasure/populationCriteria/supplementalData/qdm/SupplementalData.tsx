@@ -4,8 +4,6 @@ import "styled-components/macro";
 import {
   MadieDiscardDialog,
   Toast,
-  InputLabel,
-  TextArea,
 } from "@madie/madie-design-system/dist/react";
 import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
 import {
@@ -20,6 +18,7 @@ import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import { Measure } from "@madie/madie-models";
 import MetaDataWrapper from "../../../details/MetaDataWrapper";
 import MultipleSelectDropDown from "../../MultipleSelectDropDown";
+import Description from "../../groups/Description";
 
 const SupplementalData = () => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
@@ -135,15 +134,11 @@ const SupplementalData = () => {
       onCancel={onCancel}
     >
       <div tw="flex flex-col">
-        <TextArea
-          {...formik.getFieldProps("supplementalDataDescription")}
-          name="supplementalDataDescription"
-          id="supplementalDataDescription"
-          disabled={!canEdit}
-          placeholder="Description"
-          data-testid="supplementalDataDescription"
-          className="supplemental-data-description"
+        <Description
           label="Description"
+          setFieldValue={formik.setFieldValue}
+          canEdit={canEdit}
+          {...formik.getFieldProps("supplementalDataDescription")}
         />
       </div>
       <div tw="flex mt-6 w-2/4">

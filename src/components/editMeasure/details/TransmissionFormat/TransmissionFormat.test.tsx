@@ -10,8 +10,9 @@ import TransmissionFormat from "./TransmissionFormat";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../api/useMeasureServiceApi";
-import { measureStore } from "@madie/madie-util";
+import { measureStore, useFeatureFlags } from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
+import userEvent from "@testing-library/user-event";
 
 jest.mock("../../../../api/useMeasureServiceApi");
 const useMeasureServiceApiMock =
@@ -37,7 +38,6 @@ jest.mock("@madie/madie-util", () => ({
     getAccessToken: () => "test.jwt",
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
-  useFeatureFlags: () => ({}),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => measure),
@@ -54,16 +54,21 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
   },
+  useFeatureFlags: jest.fn(() => {
+    return {
+      EnhancedTextFormatting: false,
+    };
+  }),
 }));
 
-const serviceConfig: ServiceConfig = {
+const serviceConfig = {
   fhirElmTranslationService: { baseUrl: "fhir/services" },
   qdmElmTranslationService: { baseUrl: "qdm/services" },
   measureService: {
     baseUrl: "base.url",
   },
   terminologyService: { baseUrl: "" },
-};
+} as ServiceConfig;
 
 // mocking useHistory
 const mockPush = jest.fn();
@@ -189,10 +194,8 @@ describe("Transmission Format page", () => {
       "measure-transmission-format"
     ) as HTMLTextAreaElement;
     expectInputValue(textAreaInput, "");
-    act(() => {
-      fireEvent.change(textAreaInput, {
-        target: { value: "transmission format example" },
-      });
+    fireEvent.change(textAreaInput, {
+      target: { value: "transmission format example" },
     });
     fireEvent.blur(textAreaInput);
     expectInputValue(textAreaInput, "transmission format example");
@@ -205,6 +208,45 @@ describe("Transmission Format page", () => {
     const toastCloseButton = await findByTestId("close-error-button");
     expect(toastCloseButton).toBeInTheDocument();
     fireEvent.click(toastCloseButton);
+    await waitFor(() => {
+      expect(toastCloseButton).not.toBeInTheDocument();
+    });
+  });
+
+  it("should handle successful save of transmission format entered in rich text editor", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EnhancedTextFormatting: true,
+    }));
+    let serviceApiMock = {
+      updateMeasure: jest
+        .fn()
+        .mockResolvedValue({ status: 200, data: measure }),
+    } as unknown as MeasureServiceApi;
+    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <TransmissionFormat setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    const editor = screen.getByRole("textbox");
+    expect(editor).toHaveTextContent("");
+    fireEvent.change(editor, {
+      target: { innerHTML: "transmission format example" },
+    });
+    expect(editor).toHaveTextContent("transmission format example");
+    const submitButton = getByTestId("save-button");
+    await waitFor(() => {
+      expect(submitButton).toBeEnabled();
+    });
+    userEvent.click(submitButton);
+    expect(
+      await screen.findByText("Measure Transmission Format Saved Successfully")
+    ).toBeInTheDocument();
+    const toastCloseButton = await screen.findByTestId("close-error-button");
+    expect(toastCloseButton).toBeInTheDocument();
+    userEvent.click(toastCloseButton);
     await waitFor(() => {
       expect(toastCloseButton).not.toBeInTheDocument();
     });

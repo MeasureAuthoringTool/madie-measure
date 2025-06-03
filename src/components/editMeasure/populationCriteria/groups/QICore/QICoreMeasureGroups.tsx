@@ -59,7 +59,7 @@ import MeasureGroupObservation from "../observation/MeasureGroupObservation";
 import MeasureGroupScoringUnit from "../scoringUnit/MeasureGroupScoringUnit";
 import * as _ from "lodash";
 import AddRemovePopulation from "../groupPopulations/AddRemovePopulation";
-import GroupsDescription from "../GroupsDescription";
+import Description from "../Description";
 import MultipleSelectDropDown from "../../MultipleSelectDropDown";
 import camelCaseConverter from "../../../../../utils/camelCaseConverter";
 
@@ -824,18 +824,12 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                 <div>
                   <FormFieldInner>
                     <FieldSeparator>
-                      <TextArea
+                      <Description
                         label={`Population Criteria ${
                           measureGroupNumber + 1
                         } Description`}
-                        value={formik.values.groupDescription}
-                        name="group-description"
-                        id="group-description"
-                        autoComplete="group-description"
-                        disabled={!canEdit}
-                        placeholder="Description"
-                        data-testid="groupDescriptionInput"
-                        onKeyDown={goBackToNav}
+                        setFieldValue={formik.setFieldValue}
+                        canEdit={canEdit}
                         {...formik.getFieldProps("groupDescription")}
                       />
                     </FieldSeparator>
@@ -1107,8 +1101,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                     }
                                   />
                                   {/* PopulationDescription */}
-                                  <GroupsDescription
-                                    name={descriptionName}
+                                  <Description
                                     canEdit={canEdit}
                                     label={
                                       population?.name
@@ -1118,10 +1111,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                         : undefined
                                     }
                                     setFieldValue={formik.setFieldValue}
-                                    value={
-                                      formik.values.populations[index]
-                                        .description
-                                    }
+                                    {...formik.getFieldProps(descriptionName)}
                                   />
                                 </div>
                                 {/* Single component for add and remove */}
@@ -1361,30 +1351,16 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                       </div>
                                     </div>
                                     <div tw="lg:col-span-2">
-                                      <FieldLabel
-                                        htmlFor={`stratification-${i}-description`}
-                                      >
-                                        Stratification {i + 1} Description
-                                      </FieldLabel>
-                                      <FieldSeparator>
-                                        <TextArea
-                                          tw="disabled:bg-slate h-full w-full"
-                                          value={
-                                            formik.values.stratifications[i]
-                                              .description
-                                          }
-                                          disabled={!canEdit}
-                                          name={`stratifications[${i}].description`}
-                                          id={`stratification-${i}-description`}
-                                          autoComplete="stratification-description"
-                                          placeholder="Enter Description"
-                                          data-testid="stratificationDescriptionText"
-                                          maxLength={5000}
-                                          {...formik.getFieldProps(
-                                            `stratifications[${i}].description`
-                                          )}
-                                        />
-                                      </FieldSeparator>
+                                      <Description
+                                        canEdit={canEdit}
+                                        label={`Stratification ${
+                                          i + 1
+                                        } Description`}
+                                        setFieldValue={formik.setFieldValue}
+                                        {...formik.getFieldProps(
+                                          `stratifications[${i}].description`
+                                        )}
+                                      />
                                     </div>
                                   </div>
                                 </div>
@@ -1420,27 +1396,12 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                 {activeTab === "reporting" && (
                   <div tw="grid grid-cols-4 mt-6">
                     <div tw="lg:col-span-3">
-                      <FieldLabel
-                        htmlFor="rate-aggregation"
-                        id="rate-aggregation-label"
-                      >
-                        Rate Aggregation
-                      </FieldLabel>
-                      <FieldSeparator>
-                        <FieldInput
-                          style={{ border: "solid 1px #8c8c8c" }}
-                          value={formik.values.rateAggregation}
-                          aria-labelledby="rate-aggregation-label"
-                          type="text"
-                          disabled={!canEdit}
-                          name="rate-aggregation"
-                          id="rate-aggregation"
-                          autoComplete="rate-aggregation"
-                          placeholder="Rate Aggregation"
-                          data-testid="rateAggregationText"
-                          {...formik.getFieldProps("rateAggregation")}
-                        />
-                      </FieldSeparator>
+                      <Description
+                        label="Rate Aggregation"
+                        setFieldValue={formik.setFieldValue}
+                        canEdit={canEdit}
+                        {...formik.getFieldProps("rateAggregation")}
+                      />
                     </div>
                     <div tw="pt-6 pb-6 grid grid-cols-2 gap-4 col-start-1 col-end-4">
                       <Select
@@ -1468,12 +1429,10 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                           )
                         )}
                       />
-                      <TextArea
+                      <Description
                         label="Improvement Notation Description"
-                        data-testid="improvement-notation-description"
-                        id="improvement-notation-description"
-                        disabled={!canEdit}
-                        placeHolder="Addition Information for Improvement Notation"
+                        setFieldValue={formik.setFieldValue}
+                        canEdit={canEdit}
                         {...formik.getFieldProps(
                           "improvementNotationDescription"
                         )}

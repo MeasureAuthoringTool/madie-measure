@@ -25,6 +25,7 @@ import {
 } from "@madie/madie-models";
 import * as Yup from "yup";
 import * as _ from "lodash";
+import Description from "../../groups/Description";
 
 const measureReportTypeOptions = [];
 for (let t in MeasureReportType) {
@@ -164,15 +165,11 @@ const RiskAdjustment = () => {
       onCancel={onCancel}
     >
       <div tw="flex flex-col" data-testid="risk-adjustment">
-        <TextArea
-          {...formik.getFieldProps("riskAdjustmentDescription")}
-          name="riskAdjustmentDescription"
-          id="riskAdjustmentDescription"
-          disabled={!canEdit}
-          placeholder="Description"
-          data-testid="riskAdjustmentDescription"
-          className="risk-description"
+        <Description
           label="Description"
+          setFieldValue={formik.setFieldValue}
+          canEdit={canEdit}
+          {...formik.getFieldProps("riskAdjustmentDescription")}
         />
       </div>
       <div tw="flex mt-6 gap-x-3 w-full">
