@@ -31,12 +31,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 
 import "../MeasureMetaDataTable.scss";
 
-const REFERENCE_TYPES = [
-  "Citation",
-  "Documentation",
-  "Justification",
-  "Unknown",
-];
+const REFERENCE_TYPES = ["Citation", "Documentation", "Justification"];
 const REFERENCE_OPTIONS = REFERENCE_TYPES.map((ref, i) => (
   <MenuItem key={`${ref}-${i}`} data-testid={`${ref}-option`} value={ref}>
     {ref}
