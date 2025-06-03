@@ -167,12 +167,6 @@ const DataElementTable = ({
     defaultColumn: {
       size: 100,
     },
-    initialState: {
-      columnPinning: {
-        right: ["actions"],
-        left: ["category"],
-      },
-    },
   });
 
   if (!dataElements) {

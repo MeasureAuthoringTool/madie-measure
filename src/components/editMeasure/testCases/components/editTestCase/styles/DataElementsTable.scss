@@ -112,21 +112,6 @@ $header-weight: 500;
           max-width: 100ch;
           height: -webkit-fill-available;
         }
-        // Styling for the draggable icons on 1st column
-        //> .first-column-with-icons {
-        //  display: flex;
-        //  > .icons {
-        //    display: flex;
-        //    flex-direction: column;
-        //    align-items: center;
-        //  }
-        //  > .cell-body {
-        //    color: #125496;
-        //    display: flex;
-        //    align-items: center;
-        //    padding-left: 16px;
-        //  }
-        //}
 
         > .timing-cell-container {
           display: flex;
@@ -146,7 +131,13 @@ $header-weight: 500;
           }
         }
 
+        // only for QDM Data Elements
         > .data-type-container {
+          // Removing these properties added previous to the div ( for Qi-Core )
+          overflow-y: visible;
+          overflow-x: visible;
+          max-height: none;
+
           display: flex;
           flex-direction: column;
           flex-grow: 1;
