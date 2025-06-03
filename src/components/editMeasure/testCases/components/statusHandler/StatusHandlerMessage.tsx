@@ -3,7 +3,7 @@ import { TestCaseImportOutcome } from "@madie/madie-models";
 import "twin.macro";
 import "styled-components/macro";
 
-export function createWarningMessageConfig(
+export function createWarningMessage(
   withoutDuplicates: string[],
   testDataId: string
 ) {
@@ -28,7 +28,7 @@ export function createWarningMessageConfig(
   };
 }
 
-export function createImportMessageConfig(
+export function createImportMessage(
   failedImports: TestCaseImportOutcome[],
   successfulImports: number,
   successfulImportsWithWarnings: TestCaseImportOutcome[],

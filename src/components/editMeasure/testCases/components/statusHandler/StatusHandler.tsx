@@ -7,8 +7,8 @@ import "twin.macro";
 import "styled-components/macro";
 import { EXPORT_ERROR_CHARACTERS_MESSAGE } from "../../util/checkSpecialCharacters";
 import {
-  createImportMessageConfig,
-  createWarningMessageConfig,
+  createImportMessage,
+  createWarningMessage,
 } from "./StatusHandlerMessage";
 import { useFeatureFlags } from "@madie/madie-util";
 
@@ -96,7 +96,7 @@ const StatusHandler = ({
   if (warning && warningMessages) {
     const withoutDuplicates = [...new Set(warningMessages)];
     if (withoutDuplicates.length > 0) {
-      alerts.push(createWarningMessageConfig(withoutDuplicates, testDataId));
+      alerts.push(createWarningMessage(withoutDuplicates, testDataId));
     }
   }
 
@@ -111,7 +111,7 @@ const StatusHandler = ({
     });
 
     alerts.push(
-      createImportMessageConfig(
+      createImportMessage(
         failedImports,
         successfulImports,
         successfulImportsWithWarnings,
