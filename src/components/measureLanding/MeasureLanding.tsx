@@ -216,7 +216,7 @@ export default function MeasureLanding() {
     abortController.current.abort();
     setMeasureList(null);
     const limit = values?.limit || 10;
-    navigate(`?tab=${nextTab}&page=0&limit=${limit}`);
+    navigate(`?tab=${nextTab}&page=1&limit=${limit}`);
   };
 
   // we need to tell our layout page that we've loaded to prevent strange tab order
@@ -302,7 +302,12 @@ export default function MeasureLanding() {
                   <Pagination
                     totalItems={totalItems}
                     visibleItems={visibleItems}
-                    limitOptions={[10, 25, 50, "All"]}
+                    limitOptions={[
+                      10,
+                      25,
+                      50,
+                      ...(totalItems > 50 ? ["All"] : []),
+                    ]}
                     offset={offset}
                     handlePageChange={handlePageChange}
                     handleLimitChange={handleLimitChange}

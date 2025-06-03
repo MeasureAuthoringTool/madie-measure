@@ -135,7 +135,7 @@ describe("Measure Page", () => {
     act(() => {
       userEvent.click(allMeasuresTab);
     });
-    expect(mockedUsedNavigate).toHaveBeenCalledWith("?tab=1&page=0&limit=10");
+    expect(mockedUsedNavigate).toHaveBeenCalledWith("?tab=1&page=1&limit=10");
   });
   test("loading in with props for all measures page, triggers a fetch", async () => {
     renderRouter(["/measures?tab=1&page=1&limit=10"]); // Use 1-based page in the query string
