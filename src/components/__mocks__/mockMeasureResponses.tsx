@@ -22,6 +22,8 @@ const singleMeasure = [
 
 const oneItemResponse = {
   content: singleMeasure,
+  totalPages: 1,
+  totalElements: 1,
   numberOfElements: 1,
   pageable: { offset: 0 },
 };

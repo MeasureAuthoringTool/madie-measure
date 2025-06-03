@@ -490,12 +490,12 @@ const EditTestCase = (props: EditTestCaseProps) => {
         /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})/;
       const updatedData = JSON.stringify(parsedValue, (key, value) => {
         if (typeof value === "string" && regex.test(value)) {
-          if (!dayjs(value).isValid()) {
-            //Check for any invalid timezones
-            value = value.replace(/([+-]\d{2}:\d{2}|Z)$/, "+00:00");
-            timezoneUpdated = true;
-          }
-          const newValue = dayjs(value).utc().format();
+          //overwrite timezones
+          const newValue = dayjs(
+            value.replace(/([+-]\d{2}:\d{2}|Z)$/, "+00:00")
+          )
+            .utc()
+            .format();
           if (value != newValue) {
             timezoneUpdated = true;
           }
@@ -640,12 +640,42 @@ const EditTestCase = (props: EditTestCaseProps) => {
       const validationErrors =
         testCase?.hapiOperationOutcome?.outcomeResponse?.issue;
       if (testCase.testCaseValidationStatus === "Pending") {
-        showToast(
-          `Test case ${action}d successfully! Test case validation has started running, please continue working in MADiE.`,
-          "success"
-        );
+        if (timezoneUpdated) {
+          showToast(
+            <div>
+              <h3>
+                Test case {action}d successfully! Test case validation has
+                started running, please continue working in MADiE.
+              </h3>
+              <ul>
+                MADiE only supports a timezone offset of 0. MADiE has
+                overwritten any timezone offsets that are not zero.
+              </ul>
+            </div>,
+            "warning"
+          );
+        } else {
+          showToast(
+            `Test case ${action}d successfully! Test case validation has started running, please continue working in MADiE.`,
+            "success"
+          );
+        }
       } else if (hasValidHapiOutcome(testCase)) {
-        showToast(`Test case ${action}d successfully!`, "success");
+        // TODO: Remove if-check once the stu6TestCaseValidation flag is removed
+        if (timezoneUpdated) {
+          showToast(
+            <div>
+              <h3>Test case {action}d successfully!</h3>
+              <ul>
+                MADiE only supports a timezone offset of 0. MADiE has
+                overwritten any timezone offsets that are not zero.
+              </ul>
+            </div>,
+            "warning"
+          );
+        } else {
+          showToast(`Test case ${action}d successfully!`, "success");
+        }
       } else {
         const valErrors = validationErrors.map((error) => (
           <li>{error.diagnostics}</li>
