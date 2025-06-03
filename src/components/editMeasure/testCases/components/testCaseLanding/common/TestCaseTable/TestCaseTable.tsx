@@ -47,7 +47,7 @@ interface TestCaseTableProps {
 
 export const convertDate = (date: string) => {
   if (!date) {
-    return "";
+    return { date: "", time: "" };
   }
   const dateObj = new Date(date);
   const year = dateObj.getUTCFullYear().toString();
@@ -56,7 +56,10 @@ export const convertDate = (date: string) => {
   const hours = String(dateObj.getUTCHours()).padStart(2, "0");
   const minutes = String(dateObj.getUTCMinutes()).padStart(2, "0");
   const seconds = String(dateObj.getUTCSeconds()).padStart(2, "0");
-  return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
+  return {
+    date: `${month}/${day}/${year}`,
+    time: `${hours}:${minutes}:${seconds} (UTC)`,
+  };
 };
 
 const IndeterminateCheckbox = ({ indeterminate, checked, ...rest }: any) => {
@@ -240,15 +243,17 @@ const TestCaseTable = (props: TestCaseTableProps) => {
       },
       {
         header: "Last Saved",
-        cell: (info) => (
-          <TruncateText
-            text={convertDate(info.row.original.lastSaved)}
-            maxLength={23}
-            dataTestId={`test-case-lastSaved-${
-              info.row.original.lastSaved ? info.row.original.lastSaved : ""
-            }`}
-          />
-        ),
+        cell: (info) => {
+          const converted = convertDate(info.row.original.lastSaved);
+          const { date, time } = converted;
+          return (
+            <span>
+              {date}
+              <br />
+              {time}
+            </span>
+          );
+        },
         accessorKey: "lastModifiedAt",
       },
       {
