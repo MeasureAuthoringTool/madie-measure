@@ -301,6 +301,8 @@ describe("Copy Test Case Dialog Component", () => {
       true,
       5,
       0,
+      "lastModifiedAt",
+      "DESC",
       {
         draft: true,
         excludeByMeasureIds: ["1"],
@@ -319,6 +321,8 @@ describe("Copy Test Case Dialog Component", () => {
       true,
       5,
       0,
+      "lastModifiedAt",
+      "DESC",
       {
         draft: true,
         excludeByMeasureIds: ["1"],
@@ -336,6 +340,8 @@ describe("Copy Test Case Dialog Component", () => {
       true,
       5,
       0,
+      "lastModifiedAt",
+      "DESC",
       {
         draft: true,
         excludeByMeasureIds: ["1"],

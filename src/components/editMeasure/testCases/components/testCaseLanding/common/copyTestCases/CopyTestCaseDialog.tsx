@@ -111,6 +111,8 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
         true,
         limit,
         page,
+        "lastModifiedAt",
+        "DESC",
         {
           searchField: finalSearchField,
           model: measure.model,

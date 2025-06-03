@@ -1,16 +1,21 @@
 import "@testing-library/jest-dom";
 // NOTE: jest-dom adds handy assertions to Jest and is recommended, but not required
-
 import * as React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { routesConfig } from "./MeasureRoutes";
 import { createMemoryRouter, RouterProvider } from "react-router";
-import { ServiceConfig } from "../../api/ServiceContext";
-import { describe, expect, test } from "@jest/globals";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../api/useMeasureServiceApi";
 import { Measure } from "@madie/madie-models";
+
+jest.mock("@madie/madie-util", () => ({
+  useDocumentTitle: jest.fn(),
+  useOktaTokens: () => ({
+    getAccessToken: () => "test.jwt",
+    getUserName: () => "test user",
+  }),
+}));
 
 jest.mock("../../api/useMeasureServiceApi");
 jest.mock("react-router-dom", () => ({
@@ -52,28 +57,33 @@ useMeasureServiceApiMock.mockImplementation(() => {
   return serviceApiMock;
 });
 
+const mockUser = "TestUser1";
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
+    getUserName: () => mockUser,
+  }),
+  useFeatureFlags: () => {
+    return {
+      MeasureListCheckboxes: false,
+    };
+  }, // Values of flags do not matter for these tests
+  checkUserCanEdit: jest.fn(() => {
+    return true;
+  }),
+  checkUserCanDelete: jest.fn(() => {
+    return true;
   }),
   measureStore: {
-    state: null,
-    initialState: null,
-    updateMeasure: (measure) => measure,
+    updateMeasure: jest.fn((measure) => measure),
+    state: jest.fn().mockImplementation(() => null),
+    initialState: jest.fn().mockImplementation(() => null),
+    subscribe: () => {
+      return { unsubscribe: () => null };
+    },
   },
-  useFeatureFlags: () => null,
 }));
-
-const serviceConfig: ServiceConfig = {
-  terminologyService: { baseUrl: "example-service-url" },
-  measureService: {
-    baseUrl: "example-service-url",
-  },
-  elmTranslationService: {
-    baseUrl: "test-elm-service",
-  },
-};
 
 jest.mock("../notfound/NotFound", () => () => {
   return (
@@ -83,8 +93,6 @@ jest.mock("../notfound/NotFound", () => () => {
 jest.mock("../editMeasure/EditMeasure", () => () => {
   return <div data-testid="editMeasure">EditMeasure</div>;
 });
-
-const { findByTestId } = screen;
 // react no op error is caused by two awaits in one it call. ignorable.
 
 const renderRouter = (initialEntries) => {
@@ -105,8 +113,10 @@ describe("Measure Router", () => {
         key: "1fewtg",
       },
     ]);
-    const notFound = await findByTestId("notfound-component-mocked");
-    expect(notFound).toBeInTheDocument();
+    await waitFor(() => {
+      const notFound = screen.getByTestId("notfound-component-mocked");
+      expect(notFound).toBeInTheDocument();
+    });
   });
 
   test("Router routes to measureLanding", async () => {
@@ -119,8 +129,10 @@ describe("Measure Router", () => {
         key: "1fewtg",
       },
     ]);
-    const measureLanding = screen.getByTestId("measure-landing");
-    expect(measureLanding).toBeInTheDocument();
+    await waitFor(() => {
+      const measureLanding = screen.getByTestId("measure-landing");
+      expect(measureLanding).toBeInTheDocument();
+    });
   });
 
   test("Router routes to EditMeasure", async () => {
@@ -133,7 +145,7 @@ describe("Measure Router", () => {
         key: "1fewtg",
       },
     ]);
-    const EditMeasure = await findByTestId("editMeasure");
+    const EditMeasure = await screen.findByTestId("editMeasure");
     expect(EditMeasure).toBeInTheDocument();
   });
 });
