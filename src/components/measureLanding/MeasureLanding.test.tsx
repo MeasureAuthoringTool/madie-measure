@@ -75,6 +75,9 @@ describe("Measure Page", () => {
     mockedUsedNavigate.mockReset();
     jest.clearAllMocks();
   });
+  beforeEach(() => {
+    localStorage.clear();
+  });
   const renderRouter = (initialEntries) => {
     const router = createMemoryRouter(routesConfig, {
       initialEntries: initialEntries,
@@ -135,16 +138,21 @@ describe("Measure Page", () => {
     expect(mockedUsedNavigate).toHaveBeenCalledWith("?tab=1&page=0&limit=10");
   });
   test("loading in with props for all measures page, triggers a fetch", async () => {
-    renderRouter(["/measures?tab=1&page=0&limit=10"]);
+    renderRouter(["/measures?tab=1&page=1&limit=10"]); // Use 1-based page in the query string
+
     const allMeasuresTab = await screen.findByTestId("all-measures-tab");
+
+    // Ensure the "All Measures" tab is selected
     await waitFor(() => {
       expect(allMeasuresTab).toHaveClass("Mui-selected");
     });
+
+    // Ensure the fetchMeasures function is called with the correct arguments
     await waitFor(() =>
       expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
-        false,
-        10,
-        0,
+        false, // Indicates "All Measures" tab
+        "10", // Limit as a number
+        0, // Page converted to 0-based for backend
         "",
         "",
         abortController.signal
@@ -220,7 +228,7 @@ describe("Measure Page", () => {
     userEvent.click(combobox);
     const pageLimit25 = screen.getByRole("option", { name: /25/i });
     userEvent.click(pageLimit25);
-    expect(mockedUsedNavigate).toHaveBeenCalledWith("?tab=0&page=0&limit=25");
+    expect(mockedUsedNavigate).toHaveBeenCalledWith("?tab=0&page=1&limit=25");
   });
 
   it("Should display errors when fetching measures is rejected", async () => {
@@ -338,9 +346,9 @@ describe("Measure Page", () => {
     renderRouter(["/measures"]);
     await waitFor(() => {
       expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
-        true,
-        10,
-        0,
+        true, // Indicates "My Measures" tab
+        10, // Default limit
+        0, // Default page
         "",
         "",
         abortController.signal
