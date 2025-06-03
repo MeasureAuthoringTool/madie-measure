@@ -47,7 +47,6 @@ interface TestCaseTableProps {
 
 export const convertDate = (date: string) => {
   if (!date) {
-    // return "";
     return { date: "", time: "" };
   }
   const dateObj = new Date(date);
