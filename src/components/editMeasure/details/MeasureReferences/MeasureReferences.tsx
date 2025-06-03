@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import queryString from "query-string";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
@@ -24,19 +24,12 @@ import { useFormik } from "formik";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 import MeasureMetaDataRow from "../MeasureMetaDataRow";
 import { MeasureReferencesValidator } from "./MeasureReferencesValidator";
-import { Measure, Reference } from "@madie/madie-models";
+import { Measure, Model, Reference } from "@madie/madie-models";
 import SearchIcon from "@mui/icons-material/Search";
 
 import ClearIcon from "@mui/icons-material/Clear";
 
 import "../MeasureMetaDataTable.scss";
-
-const REFERENCE_TYPES = ["Citation", "Documentation", "Justification"];
-const REFERENCE_OPTIONS = REFERENCE_TYPES.map((ref, i) => (
-  <MenuItem key={`${ref}-${i}`} data-testid={`${ref}-option`} value={ref}>
-    {ref}
-  </MenuItem>
-));
 
 interface MeasureReferencesProps {
   setErrorMessage: Function;
@@ -48,7 +41,31 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
   let navigate = useNavigate();
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
-  const [measure, setMeasure] = useState<any>(measureStore.state);
+  const [measure, setMeasure] = useState<Measure>(measureStore.state);
+
+  const REFERENCE_TYPES = useMemo(
+    () => [
+      "Citation",
+      "Documentation",
+      "Justification",
+      ...(measure?.model === Model.QICORE ||
+      measure?.model === Model.QICORE_6_0_0
+        ? []
+        : ["Unknown"]),
+    ],
+    [measure?.model]
+  );
+
+  const REFERENCE_OPTIONS = useMemo(
+    () =>
+      REFERENCE_TYPES.map((ref) => (
+        <MenuItem key={ref} data-testid={`${ref}-option`} value={ref}>
+          {ref}
+        </MenuItem>
+      )),
+    [REFERENCE_TYPES]
+  );
+
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
     return () => {
