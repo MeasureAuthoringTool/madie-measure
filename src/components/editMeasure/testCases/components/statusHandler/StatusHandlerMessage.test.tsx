@@ -35,12 +35,10 @@ describe("StatusHandler Messages", () => {
       "test-id"
     );
 
-    // Verify configuration properties
     expect(config.type).toBe("warning");
     expect(config.copyButton).toBe(true);
     expect(config.canClose).toBe(false);
 
-    // Render the content to test its structure
     const { getByTestId } = render(<div>{config.content}</div>);
     expect(getByTestId("test-id")).toBeInTheDocument();
     expect(getByTestId("failed-test-cases")).toBeInTheDocument();
@@ -50,19 +48,14 @@ describe("StatusHandler Messages", () => {
   it("Creates a warning message configuration object", () => {
     const warningMessages = ["Warning 1", "Warning 2"];
     const config = createWarningMessage(warningMessages, "warning-test-id");
-
-    // Verify configuration properties
     expect(config.type).toBe("warning");
     expect(config.copyButton).toBe(true);
     expect(config.canClose).toBe(false);
     expect(config.alertProps).toEqual({ "data-testid": "warning-test-id" });
-
-    // Render the content to test its structure
     const { getByTestId } = render(<div>{config.content}</div>);
     expect(getByTestId("warning-test-id")).toBeInTheDocument();
     expect(getByTestId("warn-title")).toBeInTheDocument();
 
-    // Verify list items are rendered
     const listItems = getByTestId("warn-title").querySelectorAll("li");
     expect(listItems.length).toBe(2);
     expect(listItems[0]).toHaveTextContent("Warning 1");

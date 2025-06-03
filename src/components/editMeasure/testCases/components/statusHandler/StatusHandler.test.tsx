@@ -5,7 +5,6 @@ import { EXPORT_ERROR_CHARACTERS_MESSAGE } from "../../util/checkSpecialCharacte
 import { TestCaseImportOutcome } from "@madie/madie-models";
 import { MadieAlert } from "@madie/madie-design-system/dist/react";
 
-// Mock MadieAlert to inspect props passed to it
 jest.mock("@madie/madie-design-system/dist/react", () => ({
   MadieAlert: jest.fn(({ alerts, minimizeAlerts }) => (
     <div data-testid="madie-alert-mock">
@@ -72,8 +71,6 @@ describe("StatusHandler Component", () => {
     expect(screen.getByTestId("alert-content-0")).toHaveTextContent(
       "test error"
     );
-
-    // Check MadieAlert was called with correct props
     expect(MadieAlert).toHaveBeenCalledWith(
       expect.objectContaining({
         alerts: expect.arrayContaining([
@@ -121,7 +118,6 @@ describe("StatusHandler Component", () => {
     );
     expect(screen.getByTestId("warn-title")).toBeInTheDocument();
 
-    // Check MadieAlert was called with correct props
     expect(MadieAlert).toHaveBeenCalledWith(
       expect.objectContaining({
         alerts: expect.arrayContaining([
@@ -171,8 +167,6 @@ describe("StatusHandler Component", () => {
       "data-type",
       "warning"
     );
-
-    // Check that MadieAlert was called with array of 2 alerts
     expect(MadieAlert).toHaveBeenCalledWith(
       expect.objectContaining({
         alerts: expect.arrayContaining([
@@ -228,7 +222,6 @@ describe("StatusHandler Component", () => {
     );
     expect(screen.getAllByTestId("failed-test-cases")).toHaveLength(2);
 
-    // Check MadieAlert was called with correct props
     expect(MadieAlert).toHaveBeenCalledWith(
       expect.objectContaining({
         alerts: expect.arrayContaining([
