@@ -26,7 +26,7 @@ const renderMenuItemsForFilter = (options: string[]) => {
 const Search = (props: {
   searchCriteria: MeasureSearchCriteria;
   setSearchCriteria: Dispatch<SetStateAction<MeasureSearchCriteria>>;
-  handlePageChange: (e, v) => void;
+  handlePageChange: (e, v, searchCiteria) => void;
 }) => {
   const { searchCriteria, setSearchCriteria, handlePageChange } = { ...props };
   const formik = useFormik({
@@ -40,7 +40,8 @@ const Search = (props: {
         searchField: values?.searchField,
         optionalSearchProperties: [values?.filterBy],
       });
-      handlePageChange(null, 1);
+      // here true is to indicate that handlePageChange is being called from the search form
+      handlePageChange(null, 1, true);
     },
   });
 

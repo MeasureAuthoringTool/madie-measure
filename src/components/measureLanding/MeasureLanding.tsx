@@ -82,9 +82,14 @@ export default function MeasureLanding() {
     return curPage < totalPages;
   })();
   const canGoPrev = Number(values?.page) > 1;
-  const handlePageChange = (e, v) => {
+  const handlePageChange = (e, v, isFromSearchComponent) => {
     const updatedPage = v;
-    const updatedLimit = values?.limit || curLimit;
+    let updatedLimit = values?.limit || curLimit;
+    if (isFromSearchComponent) {
+      if (updatedLimit === "All" && totalItems < 50) {
+        updatedLimit = 50;
+      }
+    }
     // Save to local storage
     localStorage.setItem(
       "measurePageOptions",
@@ -251,6 +256,8 @@ export default function MeasureLanding() {
     window.dispatchEvent(event);
   }, []);
 
+  console.log(searchCriteria, "search criteria");
+
   return (
     <div id="measure-landing" data-testid="measure-landing">
       <div className="measure-table">
@@ -334,7 +341,7 @@ export default function MeasureLanding() {
                       10,
                       25,
                       50,
-                      ...(totalItems > 50 ? ["All"] : []),
+                      ...(totalItems > 30 ? ["All"] : []),
                     ]}
                     offset={offset}
                     handlePageChange={handlePageChange}
