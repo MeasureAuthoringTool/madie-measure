@@ -147,7 +147,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
             label={measureMetadataType}
             required={required}
             id={`measure-${typeLower}`}
-            canEdit={canEdit}
+            disabled={!canEdit}
             content={formik.values.genericField}
             onChange={(value: string) => {
               formik.setFieldValue("genericField", value);

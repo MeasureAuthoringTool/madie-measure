@@ -128,7 +128,7 @@ const TransmissionFormat = (props: TransmissionFormatProps) => {
                 label="Description"
                 required={false}
                 id="measure-transmission-format"
-                canEdit={canEdit}
+                disabled={!canEdit}
                 content={formik.values.transmissionFormat}
                 error={
                   formik.touched.transmissionFormat &&

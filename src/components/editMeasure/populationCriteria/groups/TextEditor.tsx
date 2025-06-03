@@ -53,7 +53,7 @@ const TextEditor = (props: Props) => {
           label={label}
           required={false}
           id={`${name}`}
-          canEdit={canEdit}
+          disabled={!canEdit}
           content={localText}
           onChange={(value: string) => {
             setLocalText(value);
