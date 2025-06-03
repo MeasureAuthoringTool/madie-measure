@@ -234,7 +234,7 @@ describe("TestCase component", () => {
     expect(columns[2]).toHaveTextContent(testCase.series);
     expect(columns[3]).toHaveTextContent(testCase.title);
     expect(columns[4]).toHaveTextContent(testCase.description);
-    expect(columns[5]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
+    expect(columns[5]).toHaveTextContent("09/06/202415:15:14 (UTC)");
 
     const buttons = await screen.findAllByRole("button");
     expect(buttons).toHaveLength(11);
@@ -273,7 +273,7 @@ describe("TestCase component", () => {
     expect(columns[2]).toHaveTextContent(testCase.series);
     expect(columns[3]).toHaveTextContent(testCase.title);
     expect(columns[4]).toHaveTextContent(testCase.description);
-    expect(columns[5]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
+    expect(columns[5]).toHaveTextContent("09/06/202415:15:14 (UTC)");
 
     const buttons = await screen.findAllByRole("button");
     expect(buttons).toHaveLength(11);
@@ -338,7 +338,7 @@ describe("TestCase component", () => {
     expect(columns[2]).toHaveTextContent(testCase.series);
     expect(columns[3]).toHaveTextContent(testCase.title);
     expect(columns[4]).toHaveTextContent(testCase.description);
-    expect(columns[5]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
+    expect(columns[5]).toHaveTextContent("09/06/202415:15:14 (UTC)");
 
     const buttons = await screen.findAllByRole("button");
     expect(buttons).toHaveLength(11);
