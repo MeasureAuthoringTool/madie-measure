@@ -256,8 +256,6 @@ export default function MeasureLanding() {
     window.dispatchEvent(event);
   }, []);
 
-  console.log(searchCriteria, "search criteria");
-
   return (
     <div id="measure-landing" data-testid="measure-landing">
       <div className="measure-table">
