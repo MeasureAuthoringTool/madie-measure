@@ -1,8 +1,8 @@
 import * as React from "react";
 import { render, screen } from "@testing-library/react";
 import {
-  createImportMessageConfig,
-  createWarningMessageConfig,
+  createImportMessage,
+  createWarningMessage,
 } from "./StatusHandlerMessage";
 import { TestCaseImportOutcome } from "@madie/madie-models";
 
@@ -28,7 +28,7 @@ describe("StatusHandler Messages", () => {
       } as unknown as TestCaseImportOutcome,
     ];
 
-    const config = createImportMessageConfig(
+    const config = createImportMessage(
       testOutcomes,
       1,
       successImportsWithWarnings,
@@ -49,10 +49,7 @@ describe("StatusHandler Messages", () => {
 
   it("Creates a warning message configuration object", () => {
     const warningMessages = ["Warning 1", "Warning 2"];
-    const config = createWarningMessageConfig(
-      warningMessages,
-      "warning-test-id"
-    );
+    const config = createWarningMessage(warningMessages, "warning-test-id");
 
     // Verify configuration properties
     expect(config.type).toBe("warning");

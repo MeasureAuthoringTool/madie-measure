@@ -47,7 +47,7 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn(() => {
     return true;
   }),
-
+  useFeatureFlags: () => mockUseFeatureFlags(),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => measure),
@@ -171,9 +171,12 @@ const renderEditor = (measure) => {
   );
 };
 
+const mockUseFeatureFlags = jest.fn(() => ({ MinimizeAlerts: false }));
+
 describe("MeasureEditor component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseFeatureFlags.mockReturnValue({ MinimizeAlerts: false });
   });
 
   it("should mount measure editor component with measure cql", async () => {
