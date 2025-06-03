@@ -19,7 +19,7 @@ import { MenuItem as MuiMenuItem } from "@mui/material";
 import { QDMReportingValidator } from "./QDMReportingValidator";
 import _ from "lodash";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
-import Description from "../groups/Description";
+import TextEditor from "../groups/TextEditor";
 const Grid = tw.div`grid grid-cols-2 gap-4   overflow-hidden w-full`;
 const improvementNotationOptions = [
   {
@@ -163,7 +163,7 @@ const QDMReporting = () => {
       >
         <div id="reporting" data-testid="reporting">
           <Grid>
-            <Description
+            <TextEditor
               label="Rate Aggregation"
               name="rateAggregation"
               setFieldValue={formik.setFieldValue}
@@ -195,7 +195,7 @@ const QDMReporting = () => {
               />
             </div>
             <div>
-              <Description
+              <TextEditor
                 label="Improvement Notation Description"
                 setFieldValue={formik.setFieldValue}
                 canEdit={

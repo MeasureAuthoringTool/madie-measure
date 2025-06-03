@@ -242,7 +242,9 @@ describe("MeasureRationale component", () => {
         />
       );
 
-      const input = getByTestId("measure-rationale-input") as HTMLTextAreaElement;
+      const input = getByTestId(
+        "measure-rationale-input"
+      ) as HTMLTextAreaElement;
       await waitFor(() => expectInputValue(input, RATIONALE));
 
       fireEvent.change(input, {

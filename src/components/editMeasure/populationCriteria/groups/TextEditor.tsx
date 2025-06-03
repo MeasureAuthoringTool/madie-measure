@@ -18,7 +18,7 @@ type Props = {
   required?: boolean;
 };
 
-const Description = (props: Props) => {
+const TextEditor = (props: Props) => {
   const {
     name,
     value,
@@ -34,7 +34,6 @@ const Description = (props: Props) => {
   const [localText, setLocalText] = useState(value);
   const featureFlags = useFeatureFlags();
   // debounce the callback to update state
-  debugger
   const debounced = useDebouncedCallback(
     (field, value) => setFieldValue(field, value),
     250
@@ -84,4 +83,4 @@ const Description = (props: Props) => {
   );
 };
 
-export default Description;
+export default TextEditor;

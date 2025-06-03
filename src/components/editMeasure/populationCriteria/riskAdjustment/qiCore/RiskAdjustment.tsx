@@ -13,10 +13,8 @@ import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import MetaDataWrapper from "../../../details/MetaDataWrapper";
 import MultipleSelectDropDown from "../../MultipleSelectDropDown";
 import {
-  InputLabel,
   MadieDiscardDialog,
   Toast,
-  TextArea,
 } from "@madie/madie-design-system/dist/react";
 import {
   Measure,
@@ -25,7 +23,7 @@ import {
 } from "@madie/madie-models";
 import * as Yup from "yup";
 import * as _ from "lodash";
-import Description from "../../groups/Description";
+import TextEditor from "../../groups/TextEditor";
 
 const measureReportTypeOptions = [];
 for (let t in MeasureReportType) {
@@ -165,7 +163,7 @@ const RiskAdjustment = () => {
       onCancel={onCancel}
     >
       <div tw="flex flex-col" data-testid="risk-adjustment">
-        <Description
+        <TextEditor
           label="Description"
           setFieldValue={formik.setFieldValue}
           canEdit={canEdit}

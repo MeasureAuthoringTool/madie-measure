@@ -17,7 +17,7 @@ import {
   Toast,
 } from "@madie/madie-design-system/dist/react";
 import { Measure } from "@madie/madie-models";
-import Description from "../../groups/Description";
+import TextEditor from "../../groups/TextEditor";
 
 const RiskAdjustment = () => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
@@ -133,7 +133,7 @@ const RiskAdjustment = () => {
       onCancel={onCancel}
     >
       <div tw="flex flex-col" data-testid="risk-adjustment">
-        <Description
+        <TextEditor
           label="Description"
           setFieldValue={formik.setFieldValue}
           canEdit={canEdit}

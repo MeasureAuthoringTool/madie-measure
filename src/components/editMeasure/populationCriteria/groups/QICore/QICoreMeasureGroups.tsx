@@ -31,7 +31,6 @@ import {
   Toast,
   Tab,
   Tabs,
-  TextArea,
 } from "@madie/madie-design-system/dist/react";
 import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
 import useFormikResetOnEvent from "../../../../common/useFormikResetOnEvent";
@@ -59,7 +58,7 @@ import MeasureGroupObservation from "../observation/MeasureGroupObservation";
 import MeasureGroupScoringUnit from "../scoringUnit/MeasureGroupScoringUnit";
 import * as _ from "lodash";
 import AddRemovePopulation from "../groupPopulations/AddRemovePopulation";
-import Description from "../Description";
+import TextEditor from "../TextEditor";
 import MultipleSelectDropDown from "../../MultipleSelectDropDown";
 import camelCaseConverter from "../../../../../utils/camelCaseConverter";
 
@@ -68,8 +67,6 @@ import "../MeasureGroups.scss"; //247-249,387,400,430,438,476,903-907,1003-1008
 import {
   ButtonSpacer,
   FormFieldInner,
-  FieldInput,
-  FieldLabel,
   FieldSeparator,
   MenuItemContainer,
 } from "../../../../../styles/editMeasure/populationCriteria/groups/index";
@@ -824,7 +821,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                 <div>
                   <FormFieldInner>
                     <FieldSeparator>
-                      <Description
+                      <TextEditor
                         label={`Population Criteria ${
                           measureGroupNumber + 1
                         } Description`}
@@ -1101,7 +1098,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                     }
                                   />
                                   {/* PopulationDescription */}
-                                  <Description
+                                  <TextEditor
                                     canEdit={canEdit}
                                     label={
                                       population?.name
@@ -1351,7 +1348,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                       </div>
                                     </div>
                                     <div tw="lg:col-span-2">
-                                      <Description
+                                      <TextEditor
                                         canEdit={canEdit}
                                         label={`Stratification ${
                                           i + 1
@@ -1396,7 +1393,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                 {activeTab === "reporting" && (
                   <div tw="grid grid-cols-4 mt-6">
                     <div tw="lg:col-span-3">
-                      <Description
+                      <TextEditor
                         label="Rate Aggregation"
                         setFieldValue={formik.setFieldValue}
                         canEdit={canEdit}
@@ -1429,7 +1426,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                           )
                         )}
                       />
-                      <Description
+                      <TextEditor
                         label="Improvement Notation Description"
                         setFieldValue={formik.setFieldValue}
                         canEdit={canEdit}

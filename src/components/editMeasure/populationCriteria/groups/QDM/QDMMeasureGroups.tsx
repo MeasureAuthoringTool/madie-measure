@@ -23,7 +23,6 @@ import {
   Toast,
   Tab,
   Tabs,
-  TextArea,
 } from "@madie/madie-design-system/dist/react";
 import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
 import useFormikResetOnEvent from "../../../../common/useFormikResetOnEvent";
@@ -45,7 +44,7 @@ import { getPopulationsForScoring } from "../../PopulationHelper";
 import GroupPopulation from "../groupPopulations/GroupPopulation";
 import MeasureGroupObservation from "../observation/MeasureGroupObservation";
 import * as _ from "lodash";
-import Description from "../Description";
+import TextEditor from "../TextEditor";
 import MeasureGroupScoringUnit from "../scoringUnit/MeasureGroupScoringUnit";
 
 // import Add
@@ -743,7 +742,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                 <div>
                   <FormFieldInner>
                     <FieldSeparator>
-                      <Description
+                      <TextEditor
                         label={`Population Criteria ${
                           measureGroupNumber + 1
                         } Description`}
@@ -885,7 +884,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                     replaceCallback={arrayHelpers.replace}
                                   />
                                   {/* PopulationDescription */}
-                                  <Description
+                                  <TextEditor
                                     canEdit={canEdit}
                                     label={
                                       population?.name
@@ -1007,7 +1006,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                       </div>
                                     </div>
                                     <div tw="lg:col-span-2">
-                                      <Description
+                                      <TextEditor
                                         label={`Stratification ${
                                           i + 1
                                         } Description`}

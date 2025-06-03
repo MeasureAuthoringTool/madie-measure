@@ -18,7 +18,7 @@ import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import { Measure } from "@madie/madie-models";
 import MetaDataWrapper from "../../../details/MetaDataWrapper";
 import MultipleSelectDropDown from "../../MultipleSelectDropDown";
-import Description from "../../groups/Description";
+import TextEditor from "../../groups/TextEditor";
 
 const SupplementalData = () => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
@@ -134,7 +134,7 @@ const SupplementalData = () => {
       onCancel={onCancel}
     >
       <div tw="flex flex-col">
-        <Description
+        <TextEditor
           label="Description"
           setFieldValue={formik.setFieldValue}
           canEdit={canEdit}

@@ -4,8 +4,6 @@ import "styled-components/macro";
 import {
   MadieDiscardDialog,
   Toast,
-  InputLabel,
-  TextArea,
 } from "@madie/madie-design-system/dist/react";
 import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
 import {
@@ -26,7 +24,7 @@ import MetaDataWrapper from "../../../details/MetaDataWrapper";
 import MultipleSelectDropDown from "../../MultipleSelectDropDown";
 import * as Yup from "yup";
 import * as _ from "lodash";
-import Description from "../../groups/Description";
+import TextEditor from "../../groups/TextEditor";
 
 const measureReportTypeOptions = [];
 for (let t in MeasureReportType) {
@@ -172,7 +170,7 @@ const SupplementalData = () => {
         tw="flex flex-col"
         data-testid="supplementalDataDescriptionContainer"
       >
-        <Description
+        <TextEditor
           label="Description"
           setFieldValue={formik.setFieldValue}
           canEdit={canEdit}
