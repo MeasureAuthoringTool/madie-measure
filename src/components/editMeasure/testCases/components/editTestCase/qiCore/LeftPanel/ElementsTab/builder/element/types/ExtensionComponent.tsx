@@ -111,6 +111,15 @@ const ExtensionComponent = ({
           value={selectedValueType}
           onChange={(e) => setSelectedValueType(e.target.value)}
         />
+        {selectedValueType && valueElement && (
+          <TypeEditor
+            structureDefinition={valueElement}
+            resource={fhirResource}
+            canEdit={canEdit}
+            label={`${label}.value${_.startCase(selectedValueType)}`}
+            parentStructureDefinition={elementDefinition}
+          />
+        )}
       </>
     );
   } else
