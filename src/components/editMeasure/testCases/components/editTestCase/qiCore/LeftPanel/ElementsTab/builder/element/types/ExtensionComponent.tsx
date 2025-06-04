@@ -9,8 +9,11 @@ import { Select } from "@madie/madie-design-system/dist/react";
 import { MenuItem, Typography } from "@mui/material";
 import TypeEditor from "../TypeEditor";
 import { StructureDefinitionDto } from "../../../../../../../../api/models/StructureDefinitionDto";
+import _ from "lodash";
 
 interface ExtensionProps {
+  label: string;
+  formikHandleChange: Function;
   fhirResource: DomainResource;
   canEdit: boolean;
   onChange: (value) => void;
@@ -18,9 +21,10 @@ interface ExtensionProps {
   parentStructureDefinition: StructureDefinitionDto;
 }
 
+//this relies on snapshot.
 const getUrlAndValueElement = (
-  parentStructureDefinition: StructureDefinition,
-  id: string
+  parentStructureDefinition: StructureDefinition, //parentStructureDefinition.definition
+  id: string // childDefinition.id
 ): Array<ElementDefinition> => {
   if (!parentStructureDefinition?.snapshot || !id) {
     return [];
@@ -37,20 +41,28 @@ const getUrlAndValueElement = (
   return [urlElement, valueElement];
 };
 
+// parent.url = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+// child.id =  "Extension.extension:text"
+// child.id =  "Extension.extension:ombCategory
 const ExtensionComponent = ({
+  label,
   fhirResource,
   canEdit,
   elementDefinition,
   parentStructureDefinition,
+  ...rest
 }: ExtensionProps) => {
+  //@ts-ignore
+  const v = rest?.value; // passed in from getFieldProps.
   const [selectedValueType, setSelectedValueType] = useState<string>("");
   const [url, setUrl] = useState<string>();
   const [value, setValue] = useState();
   const [urlElement, valueElement] = getUrlAndValueElement(
     parentStructureDefinition?.definition,
     elementDefinition?.id
-  );
+  ); // get reference from SD.snap
 
+  // TODO: modify this from a use effect later. Currently we haven't found and multiple cohice choicetypes to test the change.
   useEffect(() => {
     if (valueElement) {
       setSelectedValueType(valueElement.type[0].code);
@@ -66,7 +78,6 @@ const ExtensionComponent = ({
   }, [selectedValueType, url, value]);
 
   const idPrefix = elementDefinition?.id?.split("Extension.").pop();
-  // if there's a fixeduri element, we render a readOnly field with the value select dropdown for it
   if (urlElement?.fixedUri) {
     return (
       <>
@@ -111,8 +122,8 @@ const ExtensionComponent = ({
           label={`${elementDefinition.id}.url`}
           structureDefinition={null}
           onChange={(value) => setUrl(value)}
+          //needed for multiple choice types.. Doesn't seem to be found at this time.
         />
-
         <Select
           label={`${elementDefinition.id}.value[x]`}
           inputProps={{
