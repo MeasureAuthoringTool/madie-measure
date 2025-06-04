@@ -3,19 +3,17 @@ import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import {
   Button,
   MadieDiscardDialog,
-  TextArea,
   Toast,
-  RichTextEditor,
 } from "@madie/madie-design-system/dist/react";
 import { Typography } from "@mui/material";
 import {
   measureStore,
   routeHandlerStore,
   checkUserCanEdit,
-  useFeatureFlags,
 } from "@madie/madie-util";
 import { useFormik } from "formik";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
+import TextEditor from "../../populationCriteria/groups/TextEditor";
 
 interface TransmissionFormatProps {
   setErrorMessage: Function;
@@ -24,7 +22,6 @@ interface TransmissionFormatProps {
 const TransmissionFormat = (props: TransmissionFormatProps) => {
   const { setErrorMessage } = props;
   const measureServiceApi = useMeasureServiceApi();
-  const featureFlags = useFeatureFlags();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
   useEffect(() => {
@@ -123,41 +120,17 @@ const TransmissionFormat = (props: TransmissionFormatProps) => {
         </div>
         <div>
           <div className="top-row">
-            {featureFlags.EnhancedTextFormatting ? (
-              <RichTextEditor
-                label="Description"
-                required={false}
-                id="measure-transmission-format"
-                disabled={!canEdit}
-                content={formik.values.transmissionFormat}
-                error={
-                  formik.touched.transmissionFormat &&
-                  Boolean(formik.errors.transmissionFormat)
-                }
-                onChange={(value: string) => {
-                  formik.setFieldValue("transmissionFormat", value);
-                }}
-              />
-            ) : (
-              <TextArea
-                disabled={!canEdit}
-                label="Description"
-                placeholder="Enter"
-                readOnly={!canEdit}
-                id="measure-transmission-format"
-                data-testid="measure-transmission-format"
-                inputProps={{
-                  "data-testid": "measure-transmission-format-input",
-                  "aria-describedby": "measure-transmission-format-helper-text",
-                }}
-                error={
-                  formik.touched.transmissionFormat &&
-                  Boolean(formik.errors.transmissionFormat)
-                }
-                helperText={formikErrorHandler("transmissionFormat", true)}
-                {...formik.getFieldProps("transmissionFormat")}
-              />
-            )}
+            <TextEditor
+              label="Description"
+              setFieldValue={formik.setFieldValue}
+              canEdit={canEdit}
+              error={
+                formik.touched.transmissionFormat &&
+                Boolean(formik.errors.transmissionFormat)
+              }
+              helperText={formikErrorHandler("transmissionFormat", true)}
+              {...formik.getFieldProps("transmissionFormat")}
+            />
           </div>
         </div>
         <div className="form-actions">

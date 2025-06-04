@@ -14,7 +14,7 @@ type Props = {
   label?: string;
   canEdit: boolean;
   helperText?: string;
-  error?: string;
+  error?: boolean;
   required?: boolean;
 };
 

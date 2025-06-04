@@ -208,7 +208,7 @@ const QDMReporting = () => {
                 }
                 error={
                   formik.touched.improvementNotationDescription &&
-                  formik.errors.improvementNotationDescription
+                  Boolean(formik.errors.improvementNotationDescription)
                 }
                 required={
                   formik.getFieldProps("improvementNotation").value == "Other"

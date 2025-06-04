@@ -8,16 +8,14 @@ import {
   measureStore,
   routeHandlerStore,
   checkUserCanEdit,
-  useFeatureFlags,
 } from "@madie/madie-util";
 import {
   Button,
   MadieDiscardDialog,
   Toast,
-  TextArea,
-  RichTextEditor,
 } from "@madie/madie-design-system/dist/react";
 import _ from "lodash";
+import TextEditor from "../../populationCriteria/groups/TextEditor";
 
 export interface MeasureMetadataProps {
   measureMetadataId?: string;
@@ -31,7 +29,6 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
   const { setErrorMessage, required } = props;
   const { measureMetadataId, measureMetadataType, header } = props;
   const typeLower = _.kebabCase(measureMetadataType.toLowerCase());
-  const featureFlags = useFeatureFlags();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
   useEffect(() => {
@@ -142,33 +139,14 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
             <div style={{ height: 15, marginBottom: 6 }} />
           )}
         </div>
-        {featureFlags.EnhancedTextFormatting ? (
-          <RichTextEditor
-            label={measureMetadataType}
-            required={required}
-            id={`measure-${typeLower}`}
-            disabled={!canEdit}
-            content={formik.values.genericField}
-            onChange={(value: string) => {
-              formik.setFieldValue("genericField", value);
-            }}
-          />
-        ) : (
-          <TextArea
-            label={measureMetadataType}
-            required={required}
-            readOnly={!canEdit}
-            name={`measure-${typeLower}`}
-            id={`measure-${typeLower}`}
-            autoComplete={`measure-${typeLower}`}
-            onChange={formik.handleChange}
-            value={formik.values.genericField}
-            placeholder={`${measureMetadataType}`}
-            data-testid={`measure-${_.kebabCase(measureMetadataType)}-input`}
-            onKeyDown={goBackToNav}
-            {...formik.getFieldProps("genericField")}
-          />
-        )}
+        <TextEditor
+          label={measureMetadataType}
+          setFieldValue={formik.setFieldValue}
+          required={required}
+          canEdit={canEdit}
+          data-testid={`measure-${_.kebabCase(measureMetadataType)}-input`}
+          {...formik.getFieldProps("genericField")}
+        />
       </div>
       {canEdit && (
         <div className="form-actions">

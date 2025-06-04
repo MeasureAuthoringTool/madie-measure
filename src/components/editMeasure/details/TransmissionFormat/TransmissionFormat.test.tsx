@@ -99,7 +99,7 @@ describe("Transmission Format page", () => {
       </ApiContextProvider>
     );
     const textAreaInput = getByTestId(
-      "measure-transmission-format"
+      "transmission-format-text"
     ) as HTMLTextAreaElement;
     expectInputValue(textAreaInput, "");
     act(() => {
@@ -134,7 +134,7 @@ describe("Transmission Format page", () => {
       </ApiContextProvider>
     );
     const textAreaInput = getByTestId(
-      "measure-transmission-format"
+      "transmission-format-text"
     ) as HTMLTextAreaElement;
     expectInputValue(textAreaInput, "");
     act(() => {
@@ -191,7 +191,7 @@ describe("Transmission Format page", () => {
       </ApiContextProvider>
     );
     const textAreaInput = getByTestId(
-      "measure-transmission-format"
+      "transmission-format-text"
     ) as HTMLTextAreaElement;
     expectInputValue(textAreaInput, "");
     fireEvent.change(textAreaInput, {
