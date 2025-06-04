@@ -79,6 +79,9 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
   },
+  useFeatureFlags: jest.fn(() => ({
+    EnhancedTextFormatting: false,
+  })),
 }));
 
 jest.mock("../../../../../api/useMeasureServiceApi");
@@ -95,6 +98,9 @@ const RenderRiskAdjustment = () => {
 };
 
 describe("QiCore RiskAdjustment Component", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
   it("Should render risk Adjustment component with the values saved in DB", async () => {
     RenderRiskAdjustment();
     const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
@@ -103,7 +109,7 @@ describe("QiCore RiskAdjustment Component", () => {
       screen.getByRole("button", { name: "Initial Population" })
     ).toBeInTheDocument();
 
-    const description = screen.getByTestId("riskAdjustmentDescription");
+    const description = screen.getByTestId("risk-adjustment-description-text");
     expect(description).toHaveTextContent("test description");
   });
 
@@ -121,7 +127,7 @@ describe("QiCore RiskAdjustment Component", () => {
       expect(comboBoxInput).toBeDisabled();
     }
 
-    const description = screen.getByTestId("riskAdjustmentDescription");
+    const description = screen.getByTestId("risk-adjustment-description-text");
     expect(description).toHaveTextContent("test description");
     expect(description).toBeDisabled();
   });
@@ -211,7 +217,7 @@ describe("QiCore RiskAdjustment Component", () => {
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByTestId("riskAdjustmentDescription");
+    const description = screen.getByTestId("risk-adjustment-description-text");
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
       target: { value: "Updated test description" },
@@ -223,14 +229,8 @@ describe("QiCore RiskAdjustment Component", () => {
     userEvent.click(saveButton);
 
     // verifies if success toast message is displayed
-    await waitFor(
-      () =>
-        expect(
-          screen.getByTestId("risk-adjustment-success")
-        ).toBeInTheDocument(),
-      {
-        timeout: 5000,
-      }
+    await waitFor(() =>
+      expect(screen.getByTestId("risk-adjustment-success")).toBeInTheDocument()
     );
     const toastCloseButton = await screen.findByTestId("close-error-button");
     expect(toastCloseButton).toBeInTheDocument();
@@ -298,7 +298,7 @@ describe("QiCore RiskAdjustment Component", () => {
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByTestId("riskAdjustmentDescription");
+    const description = screen.getByTestId("risk-adjustment-description-text");
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
       target: { value: "Updated test description" },
@@ -310,18 +310,12 @@ describe("QiCore RiskAdjustment Component", () => {
     userEvent.click(saveButton);
 
     // verifies if success toast message is displayed
-    await waitFor(
-      () =>
-        expect(
-          screen.getByTestId("risk-adjustment-success")
-        ).toBeInTheDocument(),
-      {
-        timeout: 5000,
-      }
+    await waitFor(() =>
+      expect(screen.getByTestId("risk-adjustment-success")).toBeInTheDocument()
     );
     const toastCloseButton = await screen.findByTestId("close-error-button");
     expect(toastCloseButton).toBeInTheDocument();
-    fireEvent.click(toastCloseButton);
+    userEvent.click(toastCloseButton);
     await waitFor(() => {
       expect(toastCloseButton).not.toBeInTheDocument();
     });
@@ -342,7 +336,7 @@ describe("QiCore RiskAdjustment Component", () => {
     RenderRiskAdjustment();
 
     // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByTestId("riskAdjustmentDescription");
+    const description = screen.getByTestId("risk-adjustment-description-text");
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
       target: { value: "Updated test description" },
@@ -362,12 +356,8 @@ describe("QiCore RiskAdjustment Component", () => {
     );
 
     // verifies if error toast message is displayed because of service failure
-    await waitFor(
-      () =>
-        expect(screen.getByTestId("risk-adjustment-error")).toBeInTheDocument(),
-      {
-        timeout: 5000,
-      }
+    await waitFor(() =>
+      expect(screen.getByTestId("risk-adjustment-error")).toBeInTheDocument()
     );
     const toastCloseButton = await screen.findByTestId("close-error-button");
     expect(toastCloseButton).toBeInTheDocument();
@@ -399,7 +389,7 @@ describe("QiCore RiskAdjustment Component", () => {
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByTestId("riskAdjustmentDescription");
+    const description = screen.getByTestId("risk-adjustment-description-text");
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
       target: { value: "Updated test description" },
@@ -452,7 +442,7 @@ describe("QiCore RiskAdjustment Component", () => {
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByTestId("riskAdjustmentDescription");
+    const description = screen.getByTestId("risk-adjustment-description-text");
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
       target: { value: "Updated test description" },

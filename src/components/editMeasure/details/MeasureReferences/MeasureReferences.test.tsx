@@ -13,7 +13,7 @@ import useMeasureServiceApi, {
 } from "../../../../api/useMeasureServiceApi";
 // @ts-ignore
 import { measureStore } from "@madie/madie-util";
-import { Measure, Reference } from "@madie/madie-models";
+import { Measure, Model, Reference } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 
 jest.mock("../../../../api/useMeasureServiceApi");
@@ -98,7 +98,13 @@ jest.mock("react-router-dom", () => ({
   useNavigate: () => mockedNavigate,
 }));
 
-const { getByTestId, findByTestId, getByRole, findByLabelText } = screen;
+const {
+  getByTestId,
+  findByTestId,
+  findAllByTestId,
+  getByRole,
+  findByLabelText,
+} = screen;
 const expectInputValue = (
   element: HTMLTextAreaElement,
   value: string
@@ -541,6 +547,119 @@ describe("Measure References Component", () => {
     fireEvent.click(toastCloseButton);
     await waitFor(() => {
       expect(toastCloseButton).not.toBeInTheDocument();
+    });
+  });
+
+  it("Should open the Type dropdown with expected options for QDM v5.6 measure", async () => {
+    const expectedOptions = [
+      "Citation",
+      "Documentation",
+      "Justification",
+      "Unknown",
+    ];
+
+    measureStore.state.mockImplementation(() => {
+      return {
+        ...measureWithNineItems,
+        model: Model.QDM_5_6,
+      };
+    });
+
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    const createButton = await findByTestId("create-reference-button");
+    expect(createButton).toBeInTheDocument();
+    await checkDialogExists();
+
+    const referenceTypeSelect = screen.getByTestId("measure-referenceType");
+    const referenceTypeSelectDropdown = within(referenceTypeSelect).getByRole(
+      "combobox"
+    ) as HTMLInputElement;
+    userEvent.click(referenceTypeSelectDropdown);
+
+    const referenceTypeOptionsList = await findAllByTestId(/-option/i);
+    expect(referenceTypeOptionsList).toHaveLength(4);
+
+    referenceTypeOptionsList.forEach((option, index) => {
+      expect(option).toHaveTextContent(expectedOptions[index]);
+    });
+  });
+
+  it("Should open the Type dropdown with expected options for QI-Core v4.1.1 measure", async () => {
+    const expectedOptions = ["Citation", "Documentation", "Justification"];
+
+    measureStore.state.mockImplementation(() => {
+      return {
+        ...measureWithNineItems,
+        model: Model.QICORE,
+      };
+    });
+
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    const createButton = await findByTestId("create-reference-button");
+    expect(createButton).toBeInTheDocument();
+    await checkDialogExists();
+
+    const referenceTypeSelect = screen.getByTestId("measure-referenceType");
+    const referenceTypeSelectDropdown = within(referenceTypeSelect).getByRole(
+      "combobox"
+    ) as HTMLInputElement;
+    userEvent.click(referenceTypeSelectDropdown);
+
+    const referenceTypeOptionsList = await findAllByTestId(/-option/i);
+    expect(referenceTypeOptionsList).toHaveLength(3);
+
+    referenceTypeOptionsList.forEach((option, index) => {
+      expect(option).toHaveTextContent(expectedOptions[index]);
+    });
+  });
+
+  it("Should open the Type dropdown with expected options for QI-Core v6.0.0 measure", async () => {
+    const expectedOptions = ["Citation", "Documentation", "Justification"];
+
+    measureStore.state.mockImplementation(() => {
+      return {
+        ...measureWithNineItems,
+        model: Model.QICORE_6_0_0,
+      };
+    });
+
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    const createButton = await findByTestId("create-reference-button");
+    expect(createButton).toBeInTheDocument();
+    await checkDialogExists();
+
+    const referenceTypeSelect = screen.getByTestId("measure-referenceType");
+    const referenceTypeSelectDropdown = within(referenceTypeSelect).getByRole(
+      "combobox"
+    ) as HTMLInputElement;
+    userEvent.click(referenceTypeSelectDropdown);
+
+    const referenceTypeOptionsList = await findAllByTestId(/-option/i);
+    expect(referenceTypeOptionsList).toHaveLength(3);
+
+    referenceTypeOptionsList.forEach((option, index) => {
+      expect(option).toHaveTextContent(expectedOptions[index]);
     });
   });
 

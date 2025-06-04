@@ -15,7 +15,6 @@ import {
   Group,
   GroupScoring,
   Measure,
-  MeasureErrorType,
   MeasureGroupTypes,
   PopulationType,
 } from "@madie/madie-models";
@@ -41,7 +40,7 @@ jest.mock("uuid", () => ({
 
 jest.setTimeout(40000);
 
-const serviceConfig: ServiceConfig = {
+const serviceConfig = {
   measureService: {
     baseUrl: "example-service-url",
   },
@@ -54,7 +53,7 @@ const serviceConfig: ServiceConfig = {
   terminologyService: {
     baseUrl: "terminology-service.com",
   },
-};
+} as ServiceConfig;
 
 const getEmptyStrat = () => ({
   cqlDefinition: "",
@@ -299,7 +298,7 @@ describe("Measure Groups Page", () => {
     await waitFor(() => renderMeasureGroupComponent());
     await changePopulationBasis(populationBasis);
 
-    const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
+    const groupDescriptionInput = screen.getByTestId("group-description-text");
     fireEvent.change(groupDescriptionInput, {
       target: { value: "new description" },
     });
@@ -321,7 +320,7 @@ describe("Measure Groups Page", () => {
 
     // Update the definition
     const initialPopulationDescription = screen.getByTestId(
-      "populations[0].description-description"
+      "populations-0-description-text"
     );
     expect(initialPopulationDescription).toBeInTheDocument();
     act(() => {
@@ -402,7 +401,7 @@ describe("Measure Groups Page", () => {
     userEvent.click(
       screen.getByTestId("delete-measure-group-modal-cancel-btn")
     );
-    expect(screen.getByTestId("groupDescriptionInput")).toHaveValue(
+    expect(screen.getByTestId("group-description-text")).toHaveValue(
       "testDescription"
     );
   });
@@ -467,9 +466,9 @@ describe("Measure Groups Page", () => {
       </MemoryRouter>
     );
     await waitFor(() => {
-      expect(screen.getByTestId("groupDescriptionInput")).toHaveValue("");
+      expect(screen.getByTestId("group-description-text")).toHaveValue("");
       userEvent.click(screen.getByTestId("reporting-tab"));
-      expect(screen.getByTestId("rateAggregationText")).toHaveValue("");
+      expect(screen.getByTestId("rate-aggregation-text")).toHaveValue("");
       expect(screen.getByTestId("group-form-delete-btn")).toBeDisabled();
     });
   });
@@ -494,7 +493,7 @@ describe("Measure Groups Page", () => {
 
     userEvent.click(screen.getByTestId("reporting-tab"));
 
-    expect(screen.getByTestId("rateAggregationText")).toHaveValue(
+    expect(screen.getByTestId("rate-aggregation-text")).toHaveValue(
       "Rate Aggregation Text"
     );
     const improvementNotationInput = screen.getByTestId(
@@ -504,7 +503,7 @@ describe("Measure Groups Page", () => {
       "Increased score indicates improvement"
     );
     const improvementNotationDescriptionInput = screen.getByTestId(
-      "improvement-notation-description"
+      "improvement-notation-description-text"
     ) as HTMLInputElement;
     expect(improvementNotationDescriptionInput.value).toBe("Large");
     expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
@@ -531,7 +530,7 @@ describe("Measure Groups Page", () => {
     });
     expect(groupPopulationInput.value).toBe("Initial Population");
 
-    const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
+    const groupDescriptionInput = screen.getByTestId("group-description-text");
     fireEvent.change(groupDescriptionInput, {
       target: { value: "new description" },
     });
@@ -628,7 +627,7 @@ describe("Measure Groups Page", () => {
     });
     expect(groupPopulationInput2.value).toBe("Initial Population");
 
-    const groupDescriptionInput2 = screen.getByTestId("groupDescriptionInput");
+    const groupDescriptionInput2 = screen.getByTestId("group-description-text");
     fireEvent.change(groupDescriptionInput2, {
       target: { value: "new description for group 2" },
     });
@@ -2199,7 +2198,7 @@ describe("Measure Groups Page", () => {
     const { queryByTestId } = await waitFor(() =>
       renderMeasureGroupComponent()
     );
-    const inputField = queryByTestId("groupDescriptionInput");
+    const inputField = queryByTestId("group-description-text");
     expect(inputField).toBeDisabled();
   });
 
