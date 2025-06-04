@@ -1,6 +1,5 @@
 import * as React from "react";
 import { render, getByRole, screen } from "@testing-library/react";
-import { Simulate } from "react-dom/test-utils";
 import userEvent from "@testing-library/user-event";
 import {
   MeasureObservation,
@@ -8,6 +7,12 @@ import {
   AggregateFunctionType,
 } from "@madie/madie-models";
 import MeasureObservationDetails from "./MeasureObservationDetails";
+
+jest.mock("@madie/madie-util", () => ({
+  useFeatureFlags: jest.fn(() => ({
+    EnhancedTextFormatting: false,
+  })),
+}));
 
 const AGGREGATE_FUNCTIONS = Array.from(AGGREGATE_FUNCTION_KEYS.keys()).sort();
 
@@ -355,11 +360,12 @@ describe("Measure Observation Details", () => {
     const measureObservation: MeasureObservation = {
       id: "1234",
       definition: null,
+      description: null,
     };
     const handleChange = jest.fn();
     render(
       <MeasureObservationDetails
-        name={"obs1"}
+        name="denominator"
         required={false}
         elmJson={elmJson}
         measureObservation={measureObservation}
@@ -368,7 +374,9 @@ describe("Measure Observation Details", () => {
       />
     );
 
-    const observationDescription = screen.getByTestId("obs1-description");
+    const observationDescription = screen.getByTestId(
+      "denominator-observation-description"
+    );
     expect(observationDescription).toBeInTheDocument();
 
     userEvent.paste(observationDescription, "newVal");
