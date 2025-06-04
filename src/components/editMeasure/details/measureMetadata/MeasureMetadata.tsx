@@ -13,14 +13,14 @@ import {
   Button,
   MadieDiscardDialog,
   Toast,
-  TextArea,
 } from "@madie/madie-design-system/dist/react";
 import _ from "lodash";
+import TextEditor from "../../populationCriteria/groups/TextEditor";
 
 export interface MeasureMetadataProps {
-  measureMetadataId?: String;
-  measureMetadataType?: String;
-  header?: String;
+  measureMetadataId?: string;
+  measureMetadataType?: string;
+  header?: string;
   setErrorMessage: Function;
   required?: boolean;
 }
@@ -29,7 +29,6 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
   const { setErrorMessage, required } = props;
   const { measureMetadataId, measureMetadataType, header } = props;
   const typeLower = _.kebabCase(measureMetadataType.toLowerCase());
-
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
   useEffect(() => {
@@ -118,7 +117,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
     <form
       id="measure-details-form"
       onSubmit={formik.handleSubmit}
-      data-testid={`measure${measureMetadataType}`}
+      data-testid={`measure-${_.kebabCase(measureMetadataType)}`}
     >
       <div className="content">
         <div className="subTitle">
@@ -136,22 +135,16 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
               Indicates required field
             </Typography>
           ) : (
-            // spacing element to prevent discrepency.
+            // spacing element to prevent discrepancy.
             <div style={{ height: 15, marginBottom: 6 }} />
           )}
         </div>
-        <TextArea
+        <TextEditor
           label={measureMetadataType}
+          setFieldValue={formik.setFieldValue}
           required={required}
-          readOnly={!canEdit}
-          name={`measure-${typeLower}`}
-          id={`measure-${typeLower}`}
-          autoComplete={`measure-${typeLower}`}
-          onChange={formik.handleChange}
-          value={formik.values.genericField}
-          placeholder={`${measureMetadataType}`}
-          data-testid={`measure${measureMetadataType}Input`}
-          onKeyDown={goBackToNav}
+          canEdit={canEdit}
+          data-testid={`measure-${_.kebabCase(measureMetadataType)}-input`}
           {...formik.getFieldProps("genericField")}
         />
       </div>
@@ -160,7 +153,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
           <Button
             variant="outline"
             disabled={!formik.dirty}
-            data-testid="cancel-button"
+            data-testid="discard-button"
             onClick={() => setDiscardDialogOpen(true)}
             style={{ marginTop: 20, float: "right", marginRight: 32 }}
           >
@@ -170,7 +163,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
             disabled={!(formik.isValid && formik.dirty)}
             type="submit"
             variant="cyan"
-            data-testid={`measure${measureMetadataType}Save`}
+            data-testid={`measure-${_.kebabCase(measureMetadataType)}-save`}
             style={{ marginTop: 20, float: "right" }}
           >
             Save
