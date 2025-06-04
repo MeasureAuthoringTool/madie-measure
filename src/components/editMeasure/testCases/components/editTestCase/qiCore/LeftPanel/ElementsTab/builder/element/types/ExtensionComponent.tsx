@@ -112,6 +112,7 @@ const ExtensionComponent = ({
           onChange={(e) => setSelectedValueType(e.target.value)}
         />
         {selectedValueType && valueElement && (
+          // handle change will have to be passed here to test for Coding element. Currently does not work because of missed valueSets
           <TypeEditor
             structureDefinition={valueElement}
             resource={fhirResource}
