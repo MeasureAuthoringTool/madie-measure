@@ -84,7 +84,7 @@ export default function MeasureLanding() {
   const canGoPrev = Number(values?.page) > 1;
   const handlePageChange = (e, v) => {
     const updatedPage = v;
-    let updatedLimit = values?.limit || curLimit;
+    const updatedLimit = curLimit === "All" ? 50 : curLimit;
     // Save to local storage
     localStorage.setItem(
       "measurePageOptions",
@@ -241,8 +241,8 @@ export default function MeasureLanding() {
   const handleTabChange = (event, nextTab) => {
     abortController.current.abort();
     setMeasureList(null);
-    const limit = values?.limit || 10;
-    const updatedLimit = nextTab === 1 && limit === "All" ? 50 : limit;
+    const updatedLimit =
+      nextTab === 1 && values?.limit === "All" ? 50 : values?.limit;
     // Save updated limit to local storage
     localStorage.setItem(
       "measurePageOptions",
