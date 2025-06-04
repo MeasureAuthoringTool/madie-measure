@@ -51,7 +51,7 @@ const TextEditor = (props: Props) => {
       {featureFlags.EnhancedTextFormatting ? (
         <RichTextEditor
           label={label}
-          required={false}
+          required={required}
           id={`${name}`}
           disabled={!canEdit}
           content={localText}
