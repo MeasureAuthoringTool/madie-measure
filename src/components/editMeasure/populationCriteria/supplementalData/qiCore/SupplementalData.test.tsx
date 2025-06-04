@@ -19,7 +19,7 @@ import useMeasureServiceApi, {
 import { checkUserCanEdit } from "@madie/madie-util";
 import SupplementalData from "./SupplementalData";
 
-const serviceConfig: ServiceConfig = {
+const serviceConfig = {
   measureService: {
     baseUrl: "example-service-url",
   },
@@ -32,7 +32,7 @@ const serviceConfig: ServiceConfig = {
   terminologyService: {
     baseUrl: "terminology-service.com",
   },
-};
+} as ServiceConfig;
 
 const mockTestMeasure = {
   id: "test measure",
@@ -78,6 +78,9 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
   },
+  useFeatureFlags: jest.fn(() => ({
+    EnhancedTextFormatting: false,
+  })),
 }));
 
 jest.mock("../../../../../api/useMeasureServiceApi");
@@ -104,7 +107,9 @@ describe("SupplementalData Component QI-Core", () => {
       screen.getByRole("button", { name: "Initial Population" })
     ).toBeInTheDocument();
 
-    const description = screen.getByTestId("supplementalDataDescription");
+    const description = screen.getByTestId(
+      "supplemental-data-description-text"
+    );
     expect(description).toHaveTextContent("test description");
   });
 
@@ -124,7 +129,9 @@ describe("SupplementalData Component QI-Core", () => {
       expect(comboBoxInput).toBeDisabled();
     }
 
-    const description = screen.getByTestId("supplementalDataDescription");
+    const description = screen.getByTestId(
+      "supplemental-data-description-text"
+    );
     expect(description).toHaveTextContent("test description");
     expect(description).toBeDisabled();
   });
@@ -248,7 +255,9 @@ describe("SupplementalData Component QI-Core", () => {
     userEvent.click(sdeEthnicityDropdown);
 
     // Verifies if SD description already loads values from store and able to update
-    const description = screen.getByTestId("supplementalDataDescription");
+    const description = screen.getByTestId(
+      "supplemental-data-description-text"
+    );
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
       target: { value: "Updated test description" },
@@ -292,7 +301,9 @@ describe("SupplementalData Component QI-Core", () => {
     RenderSupplementalElements();
 
     // Verifies if SD description already loads values from store and able to update
-    const description = screen.getByTestId("supplementalDataDescription");
+    const description = screen.getByTestId(
+      "supplemental-data-description-text"
+    );
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
       target: { value: "Updated test description" },
@@ -354,7 +365,9 @@ describe("SupplementalData Component QI-Core", () => {
     ).toBeInTheDocument();
 
     // Verifies if SD description already loads values from store and able to update
-    const description = screen.getByTestId("supplementalDataDescription");
+    const description = screen.getByTestId(
+      "supplemental-data-description-text"
+    );
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
       target: { value: "Updated test description" },
@@ -423,7 +436,9 @@ describe("SupplementalData Component QI-Core", () => {
     ).toBeInTheDocument();
 
     // Verifies if SD description already loads values from store and able to update
-    const description = screen.getByTestId("supplementalDataDescription");
+    const description = screen.getByTestId(
+      "supplemental-data-description-text"
+    );
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
       target: { value: "Updated test description" },

@@ -27,6 +27,7 @@ declare module "@madie/madie-util" {
     OverlappingValueSets: boolean;
     EditTestsOnVersionedMeasures: boolean;
     MinimizeAlerts: boolean;
+    EnhancedTextFormatting: boolean;
   }
 
   export interface ServiceConfig {

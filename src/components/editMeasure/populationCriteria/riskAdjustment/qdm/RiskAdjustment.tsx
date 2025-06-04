@@ -13,12 +13,11 @@ import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import MetaDataWrapper from "../../../details/MetaDataWrapper";
 import MultipleSelectDropDown from "../../MultipleSelectDropDown";
 import {
-  InputLabel,
   MadieDiscardDialog,
   Toast,
-  TextArea,
 } from "@madie/madie-design-system/dist/react";
 import { Measure } from "@madie/madie-models";
+import TextEditor from "../../groups/TextEditor";
 
 const RiskAdjustment = () => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
@@ -134,15 +133,11 @@ const RiskAdjustment = () => {
       onCancel={onCancel}
     >
       <div tw="flex flex-col" data-testid="risk-adjustment">
-        <TextArea
-          {...formik.getFieldProps("riskAdjustmentDescription")}
-          name="riskAdjustmentDescription"
-          id="riskAdjustmentDescription"
-          disabled={!canEdit}
-          placeholder="Description"
-          data-testid="riskAdjustmentDescription"
-          className="risk-description"
+        <TextEditor
           label="Description"
+          setFieldValue={formik.setFieldValue}
+          canEdit={canEdit}
+          {...formik.getFieldProps("riskAdjustmentDescription")}
         />
       </div>
       <div tw="flex mt-6 w-1/4">
