@@ -339,7 +339,7 @@ export default function MeasureLanding() {
                       10,
                       25,
                       50,
-                      ...(totalItems > 50 ? ["All"] : []),
+                      ...(totalItems > 50 && activeTab === 0 ? ["All"] : []),
                     ]}
                     offset={offset}
                     handlePageChange={handlePageChange}
