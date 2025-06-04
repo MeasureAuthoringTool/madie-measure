@@ -82,14 +82,9 @@ export default function MeasureLanding() {
     return curPage < totalPages;
   })();
   const canGoPrev = Number(values?.page) > 1;
-  const handlePageChange = (e, v, isFromSearchComponent) => {
+  const handlePageChange = (e, v) => {
     const updatedPage = v;
     let updatedLimit = values?.limit || curLimit;
-    if (isFromSearchComponent) {
-      if (updatedLimit === "All" && totalItems < 50) {
-        updatedLimit = 50;
-      }
-    }
     // Save to local storage
     localStorage.setItem(
       "measurePageOptions",
@@ -247,7 +242,17 @@ export default function MeasureLanding() {
     abortController.current.abort();
     setMeasureList(null);
     const limit = values?.limit || 10;
-    navigate(`?tab=${nextTab}&page=1&limit=${limit}`);
+    const updatedLimit = nextTab === 1 && limit === "All" ? 50 : limit;
+    // Save updated limit to local storage
+    localStorage.setItem(
+      "measurePageOptions",
+      JSON.stringify({
+        page: 1, // Reset to the first page
+        limit: updatedLimit,
+      })
+    );
+
+    navigate(`?tab=${nextTab}&page=1&limit=${updatedLimit}`);
   };
 
   // we need to tell our layout page that we've loaded to prevent strange tab order
@@ -345,7 +350,9 @@ export default function MeasureLanding() {
                     handlePageChange={handlePageChange}
                     handleLimitChange={handleLimitChange}
                     page={curPage}
-                    limit={curLimit}
+                    limit={
+                      curLimit === "All" && totalItems < 51 ? 50 : curLimit
+                    }
                     count={totalPages}
                     shape="rounded"
                     hideNextButton={!canGoNext}
