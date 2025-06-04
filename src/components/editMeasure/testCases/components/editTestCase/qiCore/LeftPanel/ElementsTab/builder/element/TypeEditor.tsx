@@ -386,13 +386,6 @@ const TypeEditor = ({
               <Box>{structureDefinition.short}</Box>
               <Box sx={{ display: "flex", flexDirection: "column" }}>
                 {topLevelElements.map((elementDefinition, index) => {
-                  // const elemPath = stripResourcePath(
-                  //   "Extension",
-                  //   elementDefinition.path
-                  // );
-
-                  // We need to do a find for the extension..
-
                   // given updatedLabel = Patient.extension[1],
                   /*
                   and our json string looks like this.., we need to do a find on each one of the elements. to get the name
