@@ -318,10 +318,15 @@ const ResourceEditor = ({
                       aria-label="Resource element tabs"
                     >
                       {displayedElements.map((element, index) => {
+                        const strippedIndices = stripAllIndexes(element.id);
+                        const property = getNestedProperty(
+                          values,
+                          strippedIndices
+                        );
                         const elementName = getElementName(
                           element,
                           resourceBasePath,
-                          getNestedProperty(values, stripAllIndexes(element.id))
+                          property
                         );
 
                         return (
@@ -357,20 +362,42 @@ const ResourceEditor = ({
                   payload: nextEntry,
                 });
               }}
-              deleteElement={(path) => {
-                const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
-                const strippedPath = path.includes(".")
-                  ? path.substring(path.indexOf(".") + 1)
-                  : path;
-                if (_.has(nextEntry.resource, strippedPath)) {
-                  _.unset(nextEntry.resource, strippedPath);
+              deleteElement={(
+                path: string,
+                element: any,
+                elementName: string
+              ) => {
+                //So.. if element is an array, we can remove the element at the index of elementName
+
+                if (Array.isArray(element)) {
+                  //This is because the name seems to be " *name 2 ".. got a getter way to get the index?
+                  //index is 1-based while array is 0-based,
+                  deleteMultipleCardinalityElement(
+                    elementName,
+                    element,
+                    selectedResource,
+                    path,
+                    dispatch
+                  );
                 } else {
-                  console.error(`Path not found: ${path}`);
+                  const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
+
+                  const strippedPath = path.includes(".")
+                    ? path.substring(path.indexOf(".") + 1)
+                    : path;
+                  //here resource.path refers to an array, where we should be deleting a selected element, instead we should be deleting a single, selected element
+                  //  Need to pass the selected element instead of just the path.
+
+                  if (_.has(nextEntry.resource, strippedPath)) {
+                    _.unset(nextEntry.resource, strippedPath);
+                  } else {
+                    console.error(`Path not found: ${path}`);
+                  }
+                  dispatch({
+                    type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
+                    payload: nextEntry,
+                  });
                 }
-                dispatch({
-                  type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
-                  payload: nextEntry,
-                });
               }}
               canEdit={canEdit}
             />
@@ -394,5 +421,25 @@ const ResourceEditor = ({
     </Box>
   );
 };
+export function deleteMultipleCardinalityElement(
+  elementName: string,
+  element: any[],
+  selectedResource: any,
+  path: string,
+  dispatch: React.Dispatch<any>
+) {
+  const idx: number = parseInt(elementName.split(" ")[2]) - 1;
 
+  if (!isNaN(idx) && idx >= 0 && idx < element.length) {
+    // Remove the element at the index
+    element.splice(idx, 1);
+    // Update the resource with the modified array
+    const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
+    _.set(nextEntry.resource, path, element);
+    dispatch({
+      type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
+      payload: nextEntry,
+    });
+  }
+}
 export default ResourceEditor;
