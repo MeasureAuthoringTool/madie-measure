@@ -1,6 +1,7 @@
 import React from "react";
 import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
 import { PopulationType } from "@madie/madie-models";
+import { useFeatureFlags } from "@madie/madie-util";
 
 export interface Population {
   abbreviation: string;
@@ -20,6 +21,7 @@ interface Props {
   selectedHighlightingTab: Population;
   onClick: Function;
   includeSDE?: boolean;
+  includeRAV?: boolean;
 }
 
 const GroupCoverageNav = ({
@@ -29,7 +31,10 @@ const GroupCoverageNav = ({
   selectedHighlightingTab,
   onClick,
   includeSDE,
+  includeRAV,
 }: Props) => {
+  const featureFlags = useFeatureFlags();
+
   return (
     <>
       <Tabs
@@ -63,6 +68,20 @@ const GroupCoverageNav = ({
             data-testid="sde-tab"
             onClick={() => {
               onClick({ name: "SDE", id: "SDE" });
+            }}
+          />
+        )}
+        {featureFlags?.QDMIncludeRAVValues && includeRAV && (
+          <Tab
+            type="C"
+            label="RAV"
+            key="RAV"
+            value="RAV"
+            aria-label="RAV-tab"
+            orientation="vertical"
+            data-testid="rav-tab"
+            onClick={() => {
+              onClick({ name: "RAV", id: "RAV" });
             }}
           />
         )}

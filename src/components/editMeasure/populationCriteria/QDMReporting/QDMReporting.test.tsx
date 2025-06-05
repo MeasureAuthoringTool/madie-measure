@@ -4,11 +4,8 @@ import {
   fireEvent,
   waitFor,
   screen,
-  getByRole,
-  getByLabelText,
   within,
 } from "@testing-library/react";
-import { act } from "react-dom/test-utils";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../api/useMeasureServiceApi";
@@ -29,6 +26,7 @@ const measure = {
   createdBy: "john doe",
   measureSetId: "testMeasureId",
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }], //#nosec
+  rateAggregation: "",
 } as unknown as Measure;
 
 jest.mock("@madie/madie-util", () => ({
@@ -53,7 +51,9 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: true, pendingPath: "" },
     initialState: { canTravel: true, pendingPath: "" },
   },
-
+  useFeatureFlags: jest.fn(() => ({
+    EnhancedTextFormatting: false,
+  })),
   checkUserCanEdit: jest.fn(() => {
     return true;
   }),
@@ -157,9 +157,8 @@ describe("QDMReporting component", () => {
       name: "Rate Aggregation",
     }) as HTMLInputElement;
 
-    fireEvent.change(rateAggregation, {
-      target: { value: "Test" },
-    });
+    expect(rateAggregation.value).toBe("");
+    userEvent.type(rateAggregation, "Test");
     expect(rateAggregation.value).toBe("Test");
 
     await selectAnOptionForImprovementNotation(decreasedNotation);
@@ -169,25 +168,22 @@ describe("QDMReporting component", () => {
     });
     expect(cancelButton).toBeInTheDocument();
     await waitFor(() => expect(cancelButton).toBeEnabled());
-    act(() => {
-      fireEvent.click(cancelButton);
-    });
-
-    const discardDialog = await getByRole("dialog", {
+    userEvent.click(cancelButton);
+    const discardDialog = getByRole("dialog", {
       name: "Discard Changes?",
     });
     expect(discardDialog).toBeInTheDocument();
 
-    const discardCancelButton = await getByRole("button", {
+    const discardCancelButton = getByRole("button", {
       name: "Yes, Discard All Changes",
     });
     fireEvent.click(discardCancelButton);
     await waitFor(() => {
       expect(rateAggregation.value).toBe("");
-      expect(getByLabelText("Improvement Notation")).toHaveTextContent(
-        "Select Improvement Notation"
-      );
     });
+    expect(getByLabelText("Improvement Notation")).toHaveTextContent(
+      "Select Improvement Notation"
+    );
   });
 
   test("Changes enables Save button and saving successfully displays success message", async () => {
@@ -291,7 +287,7 @@ describe("QDMReporting component", () => {
   test("Improvement Notation description is mandatory for 'Other' Improvement Notation", async () => {
     render(<QDMReporting />);
     const description = screen.getByTestId(
-      "improvement-notation-description-input"
+      "improvement-notation-description-text"
     ) as HTMLInputElement;
     // if no notation is selected
     expect(description).toBeDisabled();
@@ -314,7 +310,7 @@ describe("QDMReporting component", () => {
     // for increased notation
     await selectAnOptionForImprovementNotation(increasedNotation);
     let description = screen.getByTestId(
-      "improvement-notation-description-input"
+      "improvement-notation-description-text"
     ) as HTMLInputElement;
     expect(description.value).toBe("");
     // save btn should not be disabled
@@ -343,5 +339,5 @@ const selectAnOptionForImprovementNotation = async (notationValue) => {
       name: notationValue,
     })
   );
-  expect(await improvementNotation).toHaveTextContent(notationValue);
+  expect(improvementNotation).toHaveTextContent(notationValue);
 };

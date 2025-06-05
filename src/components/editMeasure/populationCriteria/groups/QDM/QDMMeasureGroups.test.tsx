@@ -30,7 +30,6 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { ELM_JSON, MeasureCQL } from "../../../../common/MeasureCQL";
 import userEvent from "@testing-library/user-event";
 import axios from "../../../../../api/axios-instance";
-import * as uuid from "uuid";
 import { measureStore, checkUserCanEdit } from "@madie/madie-util";
 import { InitialPopulationAssociationType } from "../groupPopulations/GroupPopulation";
 // fix error about window.scrollto
@@ -42,17 +41,17 @@ jest.mock("uuid", () => ({
 
 jest.setTimeout(40000);
 
-const serviceConfig: ServiceConfig = {
+const serviceConfig = {
   measureService: {
     baseUrl: "example-service-url",
   },
-  elmTranslationService: {
+  qdmElmTranslationService: {
     baseUrl: "test-elm-service",
   },
   terminologyService: {
     baseUrl: "terminology-service.com",
   },
-};
+} as ServiceConfig;
 
 const getEmptyStrat = () => ({
   cqlDefinition: "",
@@ -89,6 +88,9 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
   },
+  useFeatureFlags: jest.fn(() => ({
+    EnhancedTextFormatting: false,
+  })),
 }));
 
 const props: MeasureGroupProps = {
@@ -201,7 +203,9 @@ describe("Measure Groups Page", () => {
 
       await waitFor(() => renderMeasureGroupComponent());
 
-      const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
+      const groupDescriptionInput = screen.getByTestId(
+        "group-description-text"
+      );
       fireEvent.change(groupDescriptionInput, {
         target: { value: "new description" },
       });
@@ -218,7 +222,7 @@ describe("Measure Groups Page", () => {
 
       // Update the definition
       const initialPopulationDescription = screen.getByTestId(
-        "populations[0].description-description"
+        "populations-0-description-text"
       ) as HTMLInputElement;
       expect(initialPopulationDescription).toBeInTheDocument();
       act(() => {
@@ -248,7 +252,9 @@ describe("Measure Groups Page", () => {
 
       await waitFor(() => renderMeasureGroupComponent());
 
-      const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
+      const groupDescriptionInput = screen.getByTestId(
+        "group-description-text"
+      );
       fireEvent.change(groupDescriptionInput, {
         target: { value: "new description" },
       });
@@ -265,7 +271,7 @@ describe("Measure Groups Page", () => {
 
       // Update the definition
       const initialPopulationDescription = screen.getByTestId(
-        "populations[0].description-description"
+        "populations-0-description-text"
       ) as HTMLInputElement;
       expect(initialPopulationDescription).toBeInTheDocument();
       act(() => {
@@ -330,7 +336,9 @@ describe("Measure Groups Page", () => {
       measure.scoring = MeasureScoring.COHORT;
       measure.groups = [];
       await waitFor(() => renderMeasureGroupComponent());
-      const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
+      const groupDescriptionInput = screen.getByTestId(
+        "group-description-text"
+      );
       fireEvent.change(groupDescriptionInput, {
         target: { value: "new description" },
       });
@@ -344,7 +352,7 @@ describe("Measure Groups Page", () => {
         });
       });
       const initialPopulationDescription = screen.getByTestId(
-        "populations[0].description-description"
+        "populations-0-description-text"
       );
       expect(initialPopulationDescription).toBeInTheDocument();
       act(() => {
@@ -389,7 +397,9 @@ describe("Measure Groups Page", () => {
       measure.groups = [];
       await waitFor(() => renderMeasureGroupComponent());
 
-      const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
+      const groupDescriptionInput = screen.getByTestId(
+        "group-description-text"
+      );
       fireEvent.change(groupDescriptionInput, {
         target: { value: "new description" },
       });
@@ -402,7 +412,7 @@ describe("Measure Groups Page", () => {
       });
 
       const initialPopulationDescription = screen.getByTestId(
-        "populations[0].description-description"
+        "populations-0-description-text"
       );
       expect(initialPopulationDescription).toBeInTheDocument();
       act(() => {
@@ -1352,7 +1362,7 @@ describe("Delete Tests", () => {
     userEvent.click(
       screen.getByTestId("delete-measure-group-modal-cancel-btn")
     );
-    expect(screen.getByTestId("groupDescriptionInput")).toHaveValue(
+    expect(screen.getByTestId("group-description-text")).toHaveValue(
       "testDescription"
     );
   });
@@ -1406,7 +1416,7 @@ describe("Delete Tests", () => {
 
     renderMeasureGroupComponent();
     await waitFor(() => {
-      expect(screen.getByTestId("groupDescriptionInput")).toHaveValue("");
+      expect(screen.getByTestId("group-description-text")).toHaveValue("");
     });
   });
 });
@@ -1515,7 +1525,7 @@ describe("Tests where serviceApi is mocked, instead of Axios", () => {
     cohortMeasure.groups = [cohortGroup];
     await waitFor(() => renderMeasureGroupComponent());
 
-    const groupDescriptionInput = screen.getByTestId("groupDescriptionInput");
+    const groupDescriptionInput = screen.getByTestId("group-description-text");
     fireEvent.change(groupDescriptionInput, {
       target: { value: "new description" },
     });
@@ -1530,7 +1540,7 @@ describe("Tests where serviceApi is mocked, instead of Axios", () => {
 
     // Update the definition
     const initialPopulationDescription = screen.getByTestId(
-      "populations[0].description-description"
+      "populations-0-description-text"
     ) as HTMLInputElement;
     expect(initialPopulationDescription).toBeInTheDocument();
     act(() => {

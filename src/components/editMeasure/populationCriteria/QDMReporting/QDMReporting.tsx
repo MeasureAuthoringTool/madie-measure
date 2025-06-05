@@ -13,14 +13,13 @@ import {
   Select,
   MadieDiscardDialog,
   Toast,
-  TextArea,
-  TextField,
 } from "@madie/madie-design-system/dist/react";
 import "./QDMReporting.scss";
 import { MenuItem as MuiMenuItem } from "@mui/material";
 import { QDMReportingValidator } from "./QDMReportingValidator";
 import _ from "lodash";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
+import TextEditor from "../groups/TextEditor";
 const Grid = tw.div`grid grid-cols-2 gap-4   overflow-hidden w-full`;
 const improvementNotationOptions = [
   {
@@ -164,18 +163,13 @@ const QDMReporting = () => {
       >
         <div id="reporting" data-testid="reporting">
           <Grid>
-            <div>
-              <TextArea
-                disabled={!canEdit}
-                label="Rate Aggregation"
-                name="rate-aggregation"
-                id="rate-aggregation"
-                autoComplete="rate-aggregation"
-                placeholder="Rate Aggregation"
-                data-testid="rateAggregationText"
-                {...formik.getFieldProps("rateAggregation")}
-              />
-            </div>
+            <TextEditor
+              label="Rate Aggregation"
+              name="rateAggregation"
+              setFieldValue={formik.setFieldValue}
+              canEdit={canEdit}
+              {...formik.getFieldProps("rateAggregation")}
+            />
             <div />
             <div>
               <Select
@@ -201,28 +195,24 @@ const QDMReporting = () => {
               />
             </div>
             <div>
-              <TextField
+              <TextEditor
                 label="Improvement Notation Description"
+                setFieldValue={formik.setFieldValue}
+                canEdit={
+                  canEdit &&
+                  !_.isEmpty(formik.getFieldProps("improvementNotation").value)
+                }
                 helperText={
                   formik.touched.improvementNotationDescription &&
                   formik.errors.improvementNotationDescription
                 }
                 error={
                   formik.touched.improvementNotationDescription &&
-                  formik.errors.improvementNotationDescription
-                }
-                disabled={
-                  !canEdit ||
-                  _.isEmpty(formik.getFieldProps("improvementNotation").value)
+                  Boolean(formik.errors.improvementNotationDescription)
                 }
                 required={
                   formik.getFieldProps("improvementNotation").value == "Other"
                 }
-                name="improvement-notation-description"
-                id="improvement-notation-description"
-                autoComplete="improvement-notation-description"
-                placeholder="Description"
-                data-testid="improvement-notation-description"
                 {...formik.getFieldProps("improvementNotationDescription")}
               />
             </div>
