@@ -106,7 +106,6 @@ jest.mock("@madie/madie-util", () => ({
     },
   },
   useFeatureFlags: jest.fn().mockReturnValue({
-    QICoreMeasureDefinitions: true,
     QICoreMeasureReferences: false,
   }),
   useOktaTokens: () => ({
@@ -129,7 +128,6 @@ const MeasureInformationMock = MeasureInformation as jest.Mock<JSX.Element>;
 const MeasureMetadataMock = MeasureMetadata as jest.Mock<JSX.Element>;
 const setErrorMessage = jest.fn();
 const featureFlags = {
-  QICoreMeasureDefinitions: true,
   QICoreMeasureReferences: false,
 };
 
@@ -514,7 +512,6 @@ describe("MeasureDetails component", () => {
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
                   featureFlags={{
-                    QICoreMeasureDefinitions: true,
                     QICoreMeasureReferences: true,
                   }}
                 />
@@ -530,38 +527,6 @@ describe("MeasureDetails component", () => {
       "leftPanelQiCoreMeasureDefinition"
     );
     expect(leftPanelQiCoreMeasureDefinitions).not.toBeNull();
-    const measureDefinitionTerms = queryByTestId("measure-definitions");
-    expect(measureDefinitionTerms).toBeNull();
-  });
-
-  it("should not render qi-core measure definitions if feature flag is not on", () => {
-    const { getByTestId, queryByTestId } = render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
-          <Routes>
-            <Route
-              path="/foo/*"
-              element={
-                <MeasureDetails
-                  setErrorMessage={setErrorMessage}
-                  isQDM={false}
-                  featureFlags={{
-                    QICoreMeasureDefinitions: false,
-                    QICoreMeasureReferences: false,
-                  }}
-                />
-              }
-            />
-          </Routes>
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
-
-    expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
-    const leftPanelQiCoreMeasureDefinitions = queryByTestId(
-      "leftPanelQiCoreMeasureDefinition"
-    );
-    expect(leftPanelQiCoreMeasureDefinitions).toBeNull();
     const measureDefinitionTerms = queryByTestId("measure-definitions");
     expect(measureDefinitionTerms).toBeNull();
   });

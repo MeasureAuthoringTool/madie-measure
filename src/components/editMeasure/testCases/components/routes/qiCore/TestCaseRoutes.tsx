@@ -187,7 +187,6 @@ const TestCaseRoutes = () => {
               />
             }
           />
-          {featureFlags?.QICoreIncludeSDEValues && (
             <Route
               path="/list-page/sde"
               element={
@@ -201,16 +200,13 @@ const TestCaseRoutes = () => {
                 />
               }
             />
-          )}
 
-          {featureFlags?.QICoreManifestExpansion && (
             <Route
               path="/list-page/expansion"
               element={
                 <TestCaseLandingWrapper qdm={false} children={<Expansion />} />
               }
             />
-          )}
 
           <Route
             path="/list-page/test-case-data"

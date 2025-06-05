@@ -22,10 +22,6 @@ describe("ActionCenter Component", () => {
   beforeEach(() => {
     mockNavigate = jest.fn();
     (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
-    (useFeatureFlags as jest.Mock).mockReturnValue({
-      TestCaseListActionCenter: true,
-      CopyTestCases: true,
-    });
   });
 
   it("should render filter by with appropriate options and also a search input field, and call navigate on enter", () => {
@@ -69,26 +65,7 @@ describe("ActionCenter Component", () => {
   });
 
   describe("Action Buttons", () => {
-    it("should not display action buttons when the TestCaseListActionCenter feature flag is false", () => {
-      (useFeatureFlags as jest.Mock).mockReturnValue({
-        TestCaseListActionCenter: false,
-      });
-
-      render(
-        <MemoryRouter>
-          <ActionCenter selectedTestCases={[]} canEdit={false} isQDM={false} />
-        </MemoryRouter>
-      );
-
-      expect(screen.queryByTestId("delete-action-btn")).not.toBeInTheDocument();
-      expect(
-        screen.queryByTestId("shift-test-case-dates-action-btn")
-      ).not.toBeInTheDocument();
-      expect(screen.queryByTestId("clone-action-btn")).not.toBeInTheDocument();
-      expect(screen.queryByTestId("export-action-btn")).not.toBeInTheDocument();
-    });
-
-    it("should display action buttons when the TestCaseListActionCenter feature flag is true", () => {
+    it("should display action buttons", () => {
       render(
         <MemoryRouter>
           <ActionCenter
@@ -225,28 +202,6 @@ describe("ActionCenter Component", () => {
       expect(cloneBtn).toBeEnabled();
       userEvent.click(cloneBtn);
       expect(onCloneTestCase).toBeCalled();
-    });
-
-    it("should not show copy test cases tooltips when feature flag is not on", async () => {
-      (useFeatureFlags as jest.Mock).mockReturnValue({
-        TestCaseListActionCenter: true,
-        CopyTestCases: false,
-      });
-      const selectedTestCase = [{ id: "1", validResource: true }];
-      const onCloneTestCase = jest.fn();
-      render(
-        <MemoryRouter>
-          <ActionCenter
-            selectedTestCases={selectedTestCase}
-            canEdit={true}
-            isQDM={true}
-            onCloneTestCase={onCloneTestCase}
-          />
-        </MemoryRouter>
-      );
-
-      const copyTooltip = screen.queryByTestId("copy-tooltip");
-      expect(copyTooltip).not.toBeInTheDocument();
     });
 
     it("should export transaction bundle for QI-Core", () => {

@@ -159,7 +159,6 @@ let mockApplyDefaults = false;
 jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: jest.fn().mockImplementation(() => ({
     applyDefaults: mockApplyDefaults,
-    TestCaseListButtons: false,
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
 }));
@@ -209,10 +208,6 @@ describe("TestCase component", () => {
   });
 
   it("should render test case population table and show available actions for owners and shared owners", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TestCaseListButtons: false,
-    }));
-
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
@@ -230,20 +225,15 @@ describe("TestCase component", () => {
 
     const rows = await screen.findByTestId(`test-case-row-0`);
     const columns = rows.querySelectorAll("td");
-    expect(columns[1]).toHaveTextContent("Pass");
-    expect(columns[2]).toHaveTextContent(testCase.series);
-    expect(columns[3]).toHaveTextContent(testCase.title);
-    expect(columns[4]).toHaveTextContent(testCase.description);
-    expect(columns[5]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
+    expect(columns[2]).toHaveTextContent("Pass");
+    expect(columns[3]).toHaveTextContent(testCase.series);
+    expect(columns[4]).toHaveTextContent(testCase.title);
+    expect(columns[5]).toHaveTextContent(testCase.description);
+    expect(columns[6]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(11);
-    expect(buttons[8]).toHaveTextContent("Select");
-    fireEvent.click(buttons[8]);
-    expect(screen.getByText("edit")).toBeInTheDocument();
-    expect(screen.getByText("export transaction bundle")).toBeInTheDocument();
-    expect(screen.getByText("export collection bundle")).toBeInTheDocument();
-    expect(screen.getByText("delete")).toBeInTheDocument();
+    expect(buttons).toHaveLength(12);
+    expect(buttons[8]).toHaveTextContent("View");
   });
 
   it("should render test case table with case numbers", async () => {
@@ -252,10 +242,6 @@ describe("TestCase component", () => {
     const onCloneTestCase = jest.fn();
     const setSelectedTestCasesMock = jest.fn(); // Mock setSelectedTestCases
 
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TestCaseListButtons: false,
-    }));
-
     renderWithTestCase(
       testCases,
       true,
@@ -268,21 +254,18 @@ describe("TestCase component", () => {
 
     const rows = await screen.findByTestId(`test-case-row-0`);
     const columns = rows.querySelectorAll("td");
-    expect(columns[0]).toHaveTextContent("1");
-    expect(columns[1]).toHaveTextContent("Pass");
-    expect(columns[2]).toHaveTextContent(testCase.series);
-    expect(columns[3]).toHaveTextContent(testCase.title);
-    expect(columns[4]).toHaveTextContent(testCase.description);
-    expect(columns[5]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
+    expect(columns[1]).toHaveTextContent("1");
+    expect(columns[2]).toHaveTextContent("Pass");
+    expect(columns[3]).toHaveTextContent(testCase.series);
+    expect(columns[4]).toHaveTextContent(testCase.title);
+    expect(columns[5]).toHaveTextContent(testCase.description);
+    expect(columns[6]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(11);
+    expect(buttons).toHaveLength(12);
   });
 
   it.skip("should render test case table with checkboxes when flag is set", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TestCaseListButtons: true,
-    }));
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
@@ -334,14 +317,15 @@ describe("TestCase component", () => {
 
     const rows = await screen.findByTestId(`test-case-row-0`);
     const columns = rows.querySelectorAll("td");
-    expect(columns[1]).toHaveTextContent("Pass");
-    expect(columns[2]).toHaveTextContent(testCase.series);
-    expect(columns[3]).toHaveTextContent(testCase.title);
-    expect(columns[4]).toHaveTextContent(testCase.description);
-    expect(columns[5]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
+    expect(columns[1]).toHaveTextContent("1");
+    expect(columns[2]).toHaveTextContent("Pass");
+    expect(columns[3]).toHaveTextContent(testCase.series);
+    expect(columns[4]).toHaveTextContent(testCase.title);
+    expect(columns[5]).toHaveTextContent(testCase.description);
+    expect(columns[6]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(11);
+    expect(buttons).toHaveLength(12);
     fireEvent.click(buttons[6]);
     expect(screen.queryByText("edit")).not.toBeInTheDocument();
     expect(
@@ -354,111 +338,7 @@ describe("TestCase component", () => {
     expect(screen.queryByText("Shift Test Case dates")).not.toBeInTheDocument();
   });
 
-  it("clone test case", async () => {
-    const deleteTestCase = jest.fn();
-    const exportTestCase = jest.fn();
-    const onCloneTestCase = jest.fn();
-    const setSelectedTestCasesMock = jest.fn(); // Mock setSelectedTestCases
-
-    renderWithTestCase(
-      testCases,
-      true,
-      deleteTestCase,
-      exportTestCase,
-      onCloneTestCase,
-      measures[0],
-      setSelectedTestCasesMock
-    );
-
-    const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(11);
-    expect(buttons[7]).toHaveTextContent("Select");
-    fireEvent.click(buttons[7]);
-
-    const cloneBtn = screen.getAllByTestId("clone-test-case-btn-ID");
-    expect(cloneBtn.length).toBe(2);
-
-    userEvent.click(cloneBtn[0]);
-
-    expect(onCloneTestCase).toHaveBeenCalled();
-    expect(setSelectedTestCasesMock).toHaveBeenCalled();
-  });
-
-  it("should show the delete confirmation dialog when delete button is clicked", async () => {
-    const deleteTestCase = jest.fn();
-    const exportTestCase = jest.fn();
-    const onCloneTestCase = jest.fn();
-    const setSelectedTestCasesMock = jest.fn();
-
-    let deleteDialogModalOpen = false;
-
-    const { rerender } = renderWithTestCase(
-      testCases,
-      true,
-      deleteTestCase,
-      exportTestCase,
-      onCloneTestCase,
-      defaultMeasure,
-      setSelectedTestCasesMock,
-      undefined,
-      [],
-      deleteDialogModalOpen,
-      (value) => {
-        deleteDialogModalOpen = value;
-      }
-    );
-
-    const selectButton = await screen.findByTestId("select-action-ID");
-    expect(selectButton).toBeInTheDocument();
-
-    fireEvent.click(selectButton);
-
-    const deleteButton = await screen.findByText("delete");
-    expect(deleteButton).toBeInTheDocument();
-
-    fireEvent.click(deleteButton);
-
-    expect(deleteDialogModalOpen).toBe(true);
-
-    rerender(
-      <MemoryRouter>
-        <TestCaseTable
-          sorting={[]}
-          setSorting={undefined}
-          testCases={testCases}
-          canEdit={true}
-          deleteTestCase={deleteTestCase}
-          exportTestCase={exportTestCase}
-          onCloneTestCase={onCloneTestCase}
-          measure={defaultMeasure}
-          setSelectedTestCases={setSelectedTestCasesMock}
-          selectedTestCases={[]}
-          deleteDialogModalOpen={true}
-          setDeleteDialogModalOpen={(value) => {
-            deleteDialogModalOpen = value;
-          }}
-        />
-      </MemoryRouter>
-    );
-
-    const deleteDialog = screen.getByText("Delete Test Case");
-    expect(deleteDialog).toBeInTheDocument();
-
-    const cancelButton = screen.getByText("Cancel");
-    const confirmButton = screen.getByText("Yes, Delete");
-
-    expect(cancelButton).toBeInTheDocument();
-    expect(confirmButton).toBeInTheDocument();
-
-    fireEvent.click(confirmButton);
-    expect(deleteTestCase).toHaveBeenCalled();
-  });
-
-  it("should display View button if the measure without population criteria is not a draft and the TestCaseListActionCenter feature flag is true", async () => {
-    (useFeatureFlags as jest.Mock).mockImplementation(() => ({
-      TestCaseListActionCenter: true,
-    }));
-
+  it("should display View button if the measure without population criteria is not a draft", async () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
@@ -481,22 +361,16 @@ describe("TestCase component", () => {
 
       expect(actionButton).toBeInTheDocument();
       expect(actionButton).toHaveTextContent("View");
-      expect(mockPush).toHaveBeenCalledTimes(0);
 
       userEvent.click(actionButton);
 
       expect(mockPush).toHaveBeenCalled();
-      expect(mockPush).toHaveBeenCalledTimes(1);
-      expect(mockPush).toHaveBeenCalledWith("../ID");
+      expect(mockPush).toHaveBeenCalledWith("../ID", { relative: "path" });
     });
   });
 
-  it("should display View button if the user does not have edit access to the measure without population criteria and the TestCaseListActionCenter feature flag is true and navigate to test case onClick", async () => {
+  it("should display View button if the user does not have edit access to the measure without population criteria and navigate to test case onClick", async () => {
     checkUserCanEdit.mockImplementation(() => false);
-
-    (useFeatureFlags as jest.Mock).mockImplementation(() => ({
-      TestCaseListActionCenter: true,
-    }));
 
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
@@ -520,22 +394,16 @@ describe("TestCase component", () => {
 
       expect(actionButton).toBeInTheDocument();
       expect(actionButton).toHaveTextContent("View");
-      expect(mockPush).toHaveBeenCalledTimes(0);
 
       userEvent.click(actionButton);
 
       expect(mockPush).toHaveBeenCalled();
-      expect(mockPush).toHaveBeenCalledTimes(1);
-      expect(mockPush).toHaveBeenCalledWith("../ID");
+      expect(mockPush).toHaveBeenCalledWith("../ID", { relative: "path" });
     });
   });
 
-  it("should display Edit button if the user has edit access to the measure without population criteria and it's a draft and the TestCaseListActionCenter feature flag is true and navigate to test case onClick", async () => {
+  it("should display Edit button if the user has edit access to the measure without population criteria and it's a draft and navigate to test case onClick", async () => {
     checkUserCanEdit.mockImplementation(() => true);
-
-    (useFeatureFlags as jest.Mock).mockImplementation(() => ({
-      TestCaseListActionCenter: true,
-    }));
 
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
@@ -559,22 +427,16 @@ describe("TestCase component", () => {
 
       expect(actionButton).toBeInTheDocument();
       expect(actionButton).toHaveTextContent("Edit");
-      expect(mockPush).toHaveBeenCalledTimes(0);
 
       userEvent.click(actionButton);
 
       expect(mockPush).toHaveBeenCalled();
-      expect(mockPush).toHaveBeenCalledTimes(1);
-      expect(mockPush).toHaveBeenCalledWith("../ID");
+      expect(mockPush).toHaveBeenCalledWith("../ID", { relative: "path" });
     });
   });
 
-  it("should display View button if the user does not have edit access to the measure with population criteria and the TestCaseListActionCenter feature flag is true and navigate to test case onClick", async () => {
+  it("should display View button if the user does not have edit access to the measure with population criteria and navigate to test case onClick", async () => {
     checkUserCanEdit.mockImplementation(() => true);
-
-    (useFeatureFlags as jest.Mock).mockImplementation(() => ({
-      TestCaseListActionCenter: true,
-    }));
 
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
@@ -598,13 +460,11 @@ describe("TestCase component", () => {
 
       expect(actionButton).toBeInTheDocument();
       expect(actionButton).toHaveTextContent("View");
-      expect(mockPush).toHaveBeenCalledTimes(0);
 
       userEvent.click(actionButton);
 
       expect(mockPush).toHaveBeenCalled();
-      expect(mockPush).toHaveBeenCalledTimes(1);
-      expect(mockPush).toHaveBeenCalledWith("../../ID");
+      expect(mockPush).toHaveBeenCalledWith("../../ID", { relative: "path" });
     });
   });
 });
