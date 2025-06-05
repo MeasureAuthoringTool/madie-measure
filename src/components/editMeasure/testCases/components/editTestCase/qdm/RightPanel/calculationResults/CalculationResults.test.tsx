@@ -8,6 +8,8 @@ import useQdmCqlParsingService, {
   QdmCqlParsingService,
 } from "../../../../../api/cqlElmTranslationService/useQdmCqlParsingService";
 import { qdmCallStack } from "../../../groupCoverage/_mocks_/QdmCallStack";
+// @ts-ignore
+import { useFeatureFlags } from "@madie/madie-util";
 
 jest.mock(
   "../../../../../api/cqlElmTranslationService/useQdmCqlParsingService"
@@ -19,6 +21,12 @@ const useCqlParsingServiceMockResolved = {
   getDefinitionCallstacks: jest.fn().mockResolvedValue(qdmCallStack),
 } as unknown as QdmCqlParsingService;
 import { calculationResults } from "../../../groupCoverage/_mocks_/QdmCalculationResults";
+
+jest.mock("@madie/madie-util", () => ({
+  useFeatureFlags: jest.fn(() => ({
+    QDMIncludeRAVValues: true,
+  })),
+}));
 
 const groups = [
   {
@@ -141,6 +149,14 @@ const supplementalData = [
   },
 ];
 
+const riskAdjustments = [
+  {
+    definition: "Denominator",
+    description: "",
+    includeInReportType: null,
+  },
+];
+
 const getTab = (name) => screen.findByRole("tab", { name: name });
 const getCriteriaOptions = () => {
   const criteriaSelector = screen.getByTestId("population-criterion-selector");
@@ -179,7 +195,9 @@ const renderCoverageComponent = (
       calculationErrors={calculationErrors}
       measureCql={measureCql}
       includeSDE={true}
+      includeRAV={true}
       supplementalData={supplementalData}
+      riskAdjustments={riskAdjustments}
     />
   );
 };
@@ -199,7 +217,9 @@ describe("CalculationResults with tabbed highlighting layout off", () => {
         calculationErrors={null}
         measureCql={measureCql}
         includeSDE={false}
+        includeRAV={false}
         supplementalData={supplementalData}
+        riskAdjustments={riskAdjustments}
       />
     );
     expect(
@@ -224,7 +244,9 @@ describe("CalculationResults with new tabbed highlighting layout on", () => {
         calculationErrors={null}
         measureCql={measureCql}
         includeSDE={false}
+        includeRAV={false}
         supplementalData={supplementalData}
+        riskAdjustments={riskAdjustments}
       />
     );
     expect(
@@ -337,7 +359,9 @@ describe("CalculationResults with new tabbed highlighting layout on", () => {
         calculationErrors={calculationErrors}
         measureCql={measureCql}
         includeSDE={true}
+        includeRAV={false}
         supplementalData={supplementalData}
+        riskAdjustments={riskAdjustments}
       />
     );
     await assertPopulationTabs();
@@ -392,5 +416,76 @@ describe("CalculationResults with new tabbed highlighting layout on", () => {
     expect(
       screen.queryByText("[PatientCharacteristicEthnicity CODE: CDCREC 2135-2]")
     ).not.toBeInTheDocument();
+  });
+
+  it("should render RAV tab if QDMIncludeRAVValues feature flag is true and includeRAV is true", async () => {
+    renderCoverageComponent();
+    // Ensure we're on the Initial Population tab
+    await assertPopulationTabs();
+
+    // Check for 'Results' button on IP population tab
+    const results = await screen.findByRole("button", { name: "Results" });
+    await waitFor(() => {
+      expect(results).toBeInTheDocument();
+    });
+
+    // Move to Definitions tab
+    const definitions = await getTab("Definitions");
+    userEvent.click(definitions);
+
+    // Check how many 'Results' are present
+    const definitionResults = await screen.findAllByRole("button", {
+      name: "Results",
+    });
+    expect(definitionResults).toHaveLength(5);
+
+    const rav = await screen.findByTestId("rav-tab");
+    expect(rav).toBeInTheDocument();
+    userEvent.click(rav);
+
+    // Check how many 'Results' are present
+    const ravResults = await screen.findAllByRole("button", {
+      name: "Results",
+    });
+    expect(ravResults).toHaveLength(1);
+
+    // Check for RAV result value
+    const ravResultsSection = await screen.findByTestId("results-section");
+    expect(ravResultsSection).toHaveTextContent(
+      "[Encounter, Performed: Encounter Inpatient START: 01/09/2020 12:00 AM STOP: 01/10/2020 12:00 AM CODE: SNOMEDCT 183452005]"
+    );
+
+    expect(screen.getByTestId("cql-highlighting")).toHaveTextContent(
+      `define "Denominator": "Initial Population" Results[Encounter, Performed: Encounter Inpatient START: 01/09/2020 12:00 AM STOP: 01/10/2020 12:00 AM CODE: SNOMEDCT 183452005]`
+    );
+  });
+
+  it("should not render RAV tab if QDMIncludeRAVValues feature flag is false and includeRAV is true", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      QDMIncludeRAVValues: false,
+    }));
+
+    renderCoverageComponent();
+    // Ensures we're on the Initial Population tab
+    await assertPopulationTabs();
+
+    // Check for 'Results' button on IP population tab
+    const results = await screen.findByRole("button", { name: "Results" });
+    await waitFor(() => {
+      expect(results).toBeInTheDocument();
+    });
+
+    // Move to Definitions tab
+    const definitions = await getTab("Definitions");
+    userEvent.click(definitions);
+
+    // Check how many 'Results' are present
+    const definitionResults = await screen.findAllByRole("button", {
+      name: "Results",
+    });
+    expect(definitionResults).toHaveLength(5);
+
+    const rav = screen.queryByTestId("rav-tab");
+    expect(rav).toBeNull();
   });
 });
