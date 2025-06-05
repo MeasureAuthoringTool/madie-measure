@@ -2315,9 +2315,7 @@ describe("TestCaseList component", () => {
     expect(exportButton).toBeEnabled();
     fireEvent.click(exportButton);
 
-    const exportQrda = screen.getByTestId(
-      `export-qrda-${mockMeasure.id}`
-    );
+    const exportQrda = screen.getByTestId(`export-qrda-${mockMeasure.id}`);
     expect(exportQrda).toBeInTheDocument();
     fireEvent.click(exportQrda);
     await waitFor(() => {
@@ -2371,9 +2369,7 @@ describe("TestCaseList component", () => {
     expect(exportButton).toBeEnabled();
     fireEvent.click(exportButton);
 
-    const exportExcel = screen.getByTestId(
-      `export-excel-${mockMeasure.id}`
-    );
+    const exportExcel = screen.getByTestId(`export-excel-${mockMeasure.id}`);
     expect(exportExcel).toBeInTheDocument();
     fireEvent.click(exportExcel);
 
@@ -2516,9 +2512,7 @@ describe("TestCaseList component", () => {
     expect(exportButton).toBeEnabled();
     fireEvent.click(exportButton);
 
-    const exportExcel = screen.getByTestId(
-      `export-excel-${mockMeasure.id}`
-    );
+    const exportExcel = screen.getByTestId(`export-excel-${mockMeasure.id}`);
     expect(exportExcel).toBeInTheDocument();
     fireEvent.click(exportExcel);
 
@@ -2585,9 +2579,7 @@ describe("TestCaseList component", () => {
     expect(exportButton).toBeEnabled();
     fireEvent.click(exportButton);
 
-    const exportExcel = screen.getByTestId(
-      `export-excel-${mockMeasure.id}`
-    );
+    const exportExcel = screen.getByTestId(`export-excel-${mockMeasure.id}`);
     expect(exportExcel).toBeInTheDocument();
     fireEvent.click(exportExcel);
     await waitFor(() => {
@@ -2652,9 +2644,7 @@ describe("TestCaseList component", () => {
     expect(exportButton).toBeEnabled();
     fireEvent.click(exportButton);
 
-    const exportQrda = screen.getByTestId(
-      `export-qrda-${mockMeasure.id}`
-    );
+    const exportQrda = screen.getByTestId(`export-qrda-${mockMeasure.id}`);
     expect(exportQrda).toBeInTheDocument();
     fireEvent.click(exportQrda);
     await waitFor(() => expect(setErrorMock2).toHaveBeenCalled());

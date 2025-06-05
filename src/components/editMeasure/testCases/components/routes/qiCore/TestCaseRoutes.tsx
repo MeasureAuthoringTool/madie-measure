@@ -187,26 +187,26 @@ const TestCaseRoutes = () => {
               />
             }
           />
-            <Route
-              path="/list-page/sde"
-              element={
-                <TestCaseLandingWrapper
-                  qdm={false}
-                  children={
-                    <SDEPage
-                      setExecutionContextReady={setExecutionContextReady}
-                    />
-                  }
-                />
-              }
-            />
+          <Route
+            path="/list-page/sde"
+            element={
+              <TestCaseLandingWrapper
+                qdm={false}
+                children={
+                  <SDEPage
+                    setExecutionContextReady={setExecutionContextReady}
+                  />
+                }
+              />
+            }
+          />
 
-            <Route
-              path="/list-page/expansion"
-              element={
-                <TestCaseLandingWrapper qdm={false} children={<Expansion />} />
-              }
-            />
+          <Route
+            path="/list-page/expansion"
+            element={
+              <TestCaseLandingWrapper qdm={false} children={<Expansion />} />
+            }
+          />
 
           <Route
             path="/list-page/test-case-data"

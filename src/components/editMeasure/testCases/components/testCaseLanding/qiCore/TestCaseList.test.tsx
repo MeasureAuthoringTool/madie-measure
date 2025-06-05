@@ -802,9 +802,7 @@ describe("TestCaseList component", () => {
     useTestCaseServiceMock.mockImplementation(() => {
       return {
         ...useTestCaseServiceMockResolved,
-        deleteTestCases: jest
-          .fn()
-          .mockRejectedValue(new Error("BAD THINGS")),
+        deleteTestCases: jest.fn().mockRejectedValue(new Error("BAD THINGS")),
       } as unknown as TestCaseServiceApi;
     });
 
@@ -1497,8 +1495,6 @@ describe("TestCaseList component", () => {
       ).toBeInTheDocument();
     });
   });
-
-
 
   it("should display import test case button", async () => {
     renderTestCaseListComponent();
