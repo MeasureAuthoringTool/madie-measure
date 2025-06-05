@@ -156,6 +156,16 @@ export default function MeasureLanding() {
         );
         setPageProps(data);
         setMeasureCounts();
+        const updatedLimit =
+          limit === "All" && data?.totalElements <= 50 ? 50 : limit;
+        localStorage.setItem(
+          "measurePageOptions",
+          JSON.stringify({
+            page: page + 1, // Convert 0-based page to 1-based for UI
+            limit: updatedLimit,
+          })
+        );
+        navigate(`?tab=${tab}&page=${page + 1}&limit=${updatedLimit}`);
       } catch (error) {
         if (error.message !== "canceled") {
           setErrMsg(error.message);
@@ -319,6 +329,7 @@ export default function MeasureLanding() {
           {!loading && (
             <div className="table">
               <MeasureList
+                measurePageOptionsLimit={measurePageOptions?.limit}
                 retrieveMeasures={retrieveMeasures}
                 measureList={measureList}
                 setMeasureList={setMeasureList}
@@ -356,7 +367,7 @@ export default function MeasureLanding() {
                     handleLimitChange={handleLimitChange}
                     page={curPage}
                     limit={
-                      curLimit === "All" && totalItems < 51 ? 50 : curLimit
+                      curLimit === "All" && totalItems <= 50 ? 50 : curLimit
                     }
                     count={totalPages}
                     shape="rounded"

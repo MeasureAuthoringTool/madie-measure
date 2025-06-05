@@ -78,6 +78,7 @@ export default function MeasureList(props: {
   currentDirection?;
   setCurrentDirection?;
   setErrMsg;
+  measurePageOptionsLimit: any;
 }) {
   const { searchCriteria, setSearchCriteria, retrieveMeasures } = { ...props };
   const measureServiceApi = useRef(useMeasureServiceApi()).current; //needs to be ref or triggers jest. throws warn
@@ -699,7 +700,7 @@ export default function MeasureList(props: {
   const doUpdateList = () => {
     retrieveMeasures(
       props.activeTab,
-      props.currentLimit,
+      props.measurePageOptionsLimit || 10,
       props.currentPage,
       searchCriteria,
       props.currentSort,
