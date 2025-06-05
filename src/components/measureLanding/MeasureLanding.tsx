@@ -83,34 +83,15 @@ export default function MeasureLanding() {
   })();
   const canGoPrev = Number(values?.page) > 1;
   const handlePageChange = (e, v) => {
-    const updatedPage = v;
     const updatedLimit =
       curLimit !== undefined ? (curLimit === "All" ? 50 : curLimit) : 10;
-    // Save to local storage
-    localStorage.setItem(
-      "measurePageOptions",
-      JSON.stringify({
-        page: updatedPage,
-        limit: updatedLimit,
-      })
-    );
 
-    setCurrentPage(updatedPage - 1);
-    navigate(`?tab=${activeTab}&page=${updatedPage}&limit=${updatedLimit}`);
+    setCurrentPage(v - 1);
+    navigate(`?tab=${activeTab}&page=${v}&limit=${updatedLimit}`);
   };
   const handleLimitChange = (e) => {
-    const updatedLimit = e.target.value;
-    // Save to local storage
-    localStorage.setItem(
-      "measurePageOptions",
-      JSON.stringify({
-        page: 1, // Reset to the first page when limit changes
-        limit: updatedLimit,
-      })
-    );
-
-    setCurrentLimit(updatedLimit);
-    navigate(`?tab=${activeTab}&page=1&limit=${updatedLimit}`);
+    setCurrentLimit(e.target.value);
+    navigate(`?tab=${activeTab}&page=1&limit=${e.target.value}`);
   };
 
   useEffect(() => {
@@ -156,16 +137,6 @@ export default function MeasureLanding() {
         );
         setPageProps(data);
         setMeasureCounts();
-        const updatedLimit =
-          limit === "All" && data?.totalElements <= 50 ? 50 : limit;
-        localStorage.setItem(
-          "measurePageOptions",
-          JSON.stringify({
-            page: page + 1, // Convert 0-based page to 1-based for UI
-            limit: updatedLimit,
-          })
-        );
-        navigate(`?tab=${tab}&page=${page + 1}&limit=${updatedLimit}`);
       } catch (error) {
         if (error.message !== "canceled") {
           setErrMsg(error.message);
@@ -212,15 +183,28 @@ export default function MeasureLanding() {
   ]);
 
   useEffect(() => {
+    const values = queryString.parse(search);
+    const updatedPage = values.page ? Number(values.page) : curPage;
+    const updatedLimit = values.limit || curLimit;
+
+    localStorage.setItem(
+      "measurePageOptions",
+      JSON.stringify({
+        page: updatedPage,
+        limit: updatedLimit,
+      })
+    );
+
     retrieveMeasures(
       activeTab,
-      curLimit === undefined ? 10 : curLimit,
-      curPage - 1,
+      updatedLimit,
+      updatedPage - 1,
       searchCriteria,
       currentSort,
       currentDirection
     );
   }, [
+    search,
     retrieveMeasures,
     activeTab,
     curLimit,
