@@ -281,7 +281,7 @@ export default function MeasureList(props: {
               : "View"
           } Measure ${info.row.original.measureName} Version ${
             info.row.original.version
-          } Draft status ${info.row.original.actions.measureMetaData?.draft}`}
+          }${info.row.original.actions.measureMetaData?.draft ? " Draft" : ""}`}
           onClick={() =>
             navigate(`/measures/${info.row.original.id}/edit/details`)
           }
