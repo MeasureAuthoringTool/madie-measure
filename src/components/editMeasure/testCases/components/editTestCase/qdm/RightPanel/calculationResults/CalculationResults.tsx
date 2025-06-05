@@ -14,7 +14,9 @@ const CalculationResults = ({
   calculationErrors,
   measureCql,
   includeSDE,
+  includeRAV,
   supplementalData,
+  riskAdjustments,
 }) => {
   const qdmCqlParsingService = useRef(useQdmCqlParsingService());
   const [callstackMap, setCallstackMap] = useState<CqlDefinitionCallstack>();
@@ -50,7 +52,9 @@ const CalculationResults = ({
           groupCoverageResult={groupCoverageResult}
           cqlDefinitionCallstack={callstackMap}
           includeSDE={includeSDE}
+          includeRAV={includeRAV}
           supplementalData={supplementalData}
+          riskAdjustments={riskAdjustments}
         />
       )}
     </div>

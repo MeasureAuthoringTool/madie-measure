@@ -27,7 +27,9 @@ interface Props {
   groupCoverageResult: GroupCoverageResult;
   cqlDefinitionCallstack;
   includeSDE: boolean;
+  includeRAV: boolean;
   supplementalData: SupplementalData[];
+  riskAdjustments: SupplementalData[];
 }
 
 const allDefinitions = [
@@ -50,7 +52,9 @@ const QdmGroupCoverage = ({
   groupCoverageResult,
   cqlDefinitionCallstack,
   includeSDE,
+  includeRAV,
   supplementalData,
+  riskAdjustments,
 }: Props) => {
   const [selectedTab, setSelectedTab] = useState<any>(
     getFirstPopulation(testCaseGroups[0])
@@ -149,17 +153,36 @@ const QdmGroupCoverage = ({
     [groupCoverageResult, selectedCriteria]
   );
 
+  const changeRAV = useMemo(
+    () => () => {
+      if (groupCoverageResult) {
+        let result: StatementCoverageResult[];
+        const statementResults = groupCoverageResult[selectedCriteria];
+        if (statementResults) {
+          result = statementResults
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .filter((statementResult) =>
+              riskAdjustments.some(
+                (rav) => rav?.definition === statementResult?.name
+              )
+            );
+        }
+        setSelectedDefinitionResults(result);
+      }
+    },
+    [groupCoverageResult, selectedCriteria]
+  );
+
   useEffect(() => {
     // if we conditionally run changePopulation only when it's a population and nothing after, everything breaks.
     if (isPopulation(selectedTab.name)) {
       changePopulation(selectedTab);
+    } else if (selectedTab.name === "SDE") {
+      changeSDE();
+    } else if (selectedTab.name === "RAV") {
+      changeRAV();
     } else {
-      if (selectedTab.name !== "SDE") {
-        changeDefinitions(selectedTab);
-      }
-      if (selectedTab.name === "SDE") {
-        changeSDE();
-      }
+      changeDefinitions(selectedTab);
     }
   }, [
     selectedTab,
@@ -167,6 +190,7 @@ const QdmGroupCoverage = ({
     changePopulation,
     changeDefinitions,
     changeSDE,
+    changeRAV,
     groupCoverageResult,
   ]);
 
@@ -286,6 +310,7 @@ const QdmGroupCoverage = ({
             selectedHighlightingTab={selectedTab}
             onClick={onHighlightingNavTabClick}
             includeSDE={includeSDE}
+            includeRAV={includeRAV}
           />
         </div>
         <div
