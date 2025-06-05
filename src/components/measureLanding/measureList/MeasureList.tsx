@@ -49,6 +49,7 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { exportMeasure as downloadMeasureExport } from "../../../utils/exportUtil";
 import { MeasureSearchCriteria } from "../MeasureLanding";
 import Search from "./measureSearch/Search";
+import queryString from "query-string";
 
 export default function MeasureList(props: {
   retrieveMeasures?: (
@@ -78,6 +79,8 @@ export default function MeasureList(props: {
   currentDirection?;
   setCurrentDirection?;
   setErrMsg;
+  measurePageOptionsLimit: any;
+  search: any;
 }) {
   const { searchCriteria, setSearchCriteria, retrieveMeasures } = { ...props };
   const measureServiceApi = useRef(useMeasureServiceApi()).current; //needs to be ref or triggers jest. throws warn
@@ -699,7 +702,7 @@ export default function MeasureList(props: {
   const doUpdateList = () => {
     retrieveMeasures(
       props.activeTab,
-      props.currentLimit,
+      props.measurePageOptionsLimit || 10,
       props.currentPage,
       searchCriteria,
       props.currentSort,
@@ -851,6 +854,22 @@ export default function MeasureList(props: {
         setToastOpen(true);
         doUpdateList();
         handleDialogClose();
+
+        const values = queryString.parse(props.search);
+        const currentLimit = values.limit === "All" ? 50 : values.limit;
+
+        localStorage.setItem(
+          "cqlLibraryPageOptions",
+          JSON.stringify({
+            page: values.page || 1,
+            limit: currentLimit,
+          })
+        );
+        navigate(
+          `?tab=${props.activeTab}&page=${
+            values.page || 1
+          }&limit=${currentLimit}`
+        );
       }
     } catch (e) {
       if (e?.response?.data) {

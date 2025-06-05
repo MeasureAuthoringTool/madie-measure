@@ -345,7 +345,9 @@ const EditTestCase = () => {
                   measureCql={measure?.cql}
                   cqlErrors={measure?.cqlErrors}
                   includeSDE={measure?.testCaseConfiguration?.sdeIncluded}
+                  includeRAV={measure?.testCaseConfiguration?.ravIncluded}
                   supplementalData={measure?.supplementalData}
+                  riskAdjustments={measure?.riskAdjustments}
                 />
               </Allotment.Pane>
             </Allotment>

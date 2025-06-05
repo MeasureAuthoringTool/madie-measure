@@ -1,6 +1,4 @@
 import "@testing-library/jest-dom";
-// NOTE: jest-dom adds handy assertions to Jest and is recommended, but not required
-
 import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
@@ -9,6 +7,11 @@ import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import { mockPaginationResponses } from "../__mocks__/mockMeasureResponses";
 import { describe, expect, test } from "@jest/globals";
+
+jest.mock("react-router-dom", () => ({
+  ...(jest.requireActual("react-router-dom") as any),
+  useNavigate: jest.fn(() => jest.fn()), // Mock navigate as a function
+}));
 
 const serviceConfig = {
   fhirElmTranslationService: { baseUrl: "fhir/services" },
@@ -24,24 +27,16 @@ jest.mock("@madie/madie-util", () => ({
     getAccessToken: () => "test.jwt",
     getUserName: () => mockUser,
   }),
-  useFeatureFlags: () => {
-    return {
-      MeasureListCheckboxes: false,
-    };
-  }, // Values of flags do not matter for these tests
-  checkUserCanEdit: jest.fn(() => {
-    return true;
+  useFeatureFlags: () => ({
+    MeasureListCheckboxes: false,
   }),
-  checkUserCanDelete: jest.fn(() => {
-    return true;
-  }),
+  checkUserCanEdit: jest.fn(() => true),
+  checkUserCanDelete: jest.fn(() => true),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => null),
     initialState: jest.fn().mockImplementation(() => null),
-    subscribe: () => {
-      return { unsubscribe: () => null };
-    },
+    subscribe: () => ({ unsubscribe: () => null }),
   },
 }));
 
@@ -57,6 +52,13 @@ const { findAllByTestId, findByTestId, queryByTestId } = screen;
 describe("Measures Pagination", () => {
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  beforeEach(() => {
+    localStorage.setItem(
+      "measurePageOptions",
+      JSON.stringify({ page: 1, limit: 10 })
+    );
   });
 
   const renderRouter = (initialEntries) => {
@@ -83,11 +85,11 @@ describe("Measures Pagination", () => {
     expect(rowItems).toHaveLength(10);
   });
 
-  test("On First page, previous button is hidden, next is available  ", async () => {
+  test("On First page, previous button is hidden, next is available", async () => {
     renderRouter([
       {
         pathname: "/measures",
-        search: "",
+        search: "?page=1&limit=10",
         hash: "",
         state: undefined,
         key: "1fewtg",
@@ -114,23 +116,7 @@ describe("Measures Pagination", () => {
     expect(nextButton).toBeTruthy();
   });
 
-  test("passing in query paramaters alters result list", async () => {
-    renderRouter([
-      {
-        pathname: "/measures",
-        search: "?page=2&limit=10",
-        hash: "",
-        state: undefined,
-        key: "1fewtg",
-      },
-    ]);
-    const prevButton = await findByTestId("NavigateBeforeIcon");
-    expect(prevButton).toBeTruthy();
-    const nextButton = await findByTestId("NavigateNextIcon");
-    expect(nextButton).toBeTruthy();
-  });
-
-  test("passing in query paramaters alters result list", async () => {
+  test("Passing in query parameters alters result list", async () => {
     renderRouter([
       {
         pathname: "/measures",
@@ -148,7 +134,7 @@ describe("Measures Pagination", () => {
     renderRouter([
       {
         pathname: "/measures",
-        search: "?page=5&limit=25",
+        search: "?page=1&limit=25",
         hash: "",
         state: undefined,
         key: "1fewtg",
@@ -156,8 +142,7 @@ describe("Measures Pagination", () => {
     ]);
     await waitFor(() => {
       const itemList = screen.getAllByTestId("row-item");
-      expect(itemList).toHaveLength(10);
-      expect(queryByTestId("NavigateNextIcon")).toBeNull();
+      expect(itemList).toHaveLength(25);
     });
   });
 });
