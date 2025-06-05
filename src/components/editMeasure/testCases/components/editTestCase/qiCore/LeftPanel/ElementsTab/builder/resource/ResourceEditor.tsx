@@ -318,15 +318,10 @@ const ResourceEditor = ({
                       aria-label="Resource element tabs"
                     >
                       {displayedElements.map((element, index) => {
-                        const strippedIndices = stripAllIndexes(element.id);
-                        const property = getNestedProperty(
-                          values,
-                          strippedIndices
-                        );
                         const elementName = getElementName(
                           element,
                           resourceBasePath,
-                          property
+                          getNestedProperty(values, stripAllIndexes(element.id))
                         );
 
                         return (
