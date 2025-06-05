@@ -279,7 +279,7 @@ export default function MeasureList(props: {
             ) && info.row.original.actions.measureMetaData?.draft
               ? "Edit"
               : "View"
-          } Measure ${info.row.original.measureName} Version ${
+          } Measure ${info.row.original.measureName} ${
             info.row.original.version
           }${info.row.original.actions.measureMetaData?.draft ? " Draft" : ""}`}
           onClick={() =>
@@ -395,7 +395,7 @@ export default function MeasureList(props: {
         <Button
           variant="outline-filled"
           data-testid={`measure-action-${info.row.original.id}`}
-          aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
+          aria-label={`Measure ${info.row.original.measureName} ${info.row.original.version}  ${info.row.original.actions.measureMetaData?.draft} Select`}
           onClick={() =>
             navigate(`/measures/${info.row.original.id}/edit/details`)
           }
