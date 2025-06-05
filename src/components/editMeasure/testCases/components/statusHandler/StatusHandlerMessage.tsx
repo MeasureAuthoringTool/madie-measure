@@ -3,10 +3,19 @@ import { TestCaseImportOutcome } from "@madie/madie-models";
 import "twin.macro";
 import "styled-components/macro";
 
+// Define the StatusAlert interface here
+interface StatusAlert {
+  type: "error" | "warning" | "info" | "success";
+  content: React.ReactNode;
+  canClose?: boolean;
+  copyButton?: boolean;
+  alertProps?: Record<string, any>;
+}
+
 export function createWarningMessage(
   withoutDuplicates: string[],
   testDataId: string
-) {
+): StatusAlert {
   return {
     type: "warning",
     copyButton: true,
@@ -33,7 +42,7 @@ export function createImportMessage(
   successfulImports: number,
   successfulImportsWithWarnings: TestCaseImportOutcome[],
   testDataId: string
-) {
+): StatusAlert {
   return {
     type: "warning",
     copyButton: true,

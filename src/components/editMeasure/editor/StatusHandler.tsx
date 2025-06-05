@@ -137,7 +137,7 @@ const StatusHandler = ({
           alerts.push(generateAlertConfig("error", errorMessage, null, null));
         }
       }
-    } else if (outboundAnnotations && outboundAnnotations.length > 0) {
+    } else if (outboundAnnotations?.length > 0) {
       alerts.push(
         generateAlertConfig(
           "error",
@@ -156,7 +156,7 @@ const StatusHandler = ({
         )
       );
     }
-  } else if (outboundAnnotations && outboundAnnotations.length > 0) {
+  } else if (outboundAnnotations?.length > 0) {
     alerts.push(
       generateAlertConfig(
         "error",
