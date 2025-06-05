@@ -123,7 +123,7 @@ describe("Measure Router", () => {
     renderRouter([
       {
         pathname: "/measures",
-        search: "",
+        search: "?page=1&limit=10",
         hash: "",
         state: undefined,
         key: "1fewtg",

@@ -127,7 +127,7 @@ describe("Measures Pagination", () => {
       },
     ]);
     const itemList = await findAllByTestId("row-item");
-    expect(itemList).toHaveLength(10);
+    expect(itemList).toHaveLength(25);
   });
 
   test("Pagination handles the boundaries clean", async () => {
@@ -142,7 +142,7 @@ describe("Measures Pagination", () => {
     ]);
     await waitFor(() => {
       const itemList = screen.getAllByTestId("row-item");
-      expect(itemList).toHaveLength(10);
+      expect(itemList).toHaveLength(25);
     });
   });
 });

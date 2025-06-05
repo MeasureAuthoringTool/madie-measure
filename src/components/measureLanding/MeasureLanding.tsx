@@ -334,6 +334,7 @@ export default function MeasureLanding() {
                 currentDirection={currentDirection}
                 setCurrentDirection={setCurrentDirection}
                 setErrMsg={setErrMsg}
+                search={search}
               />
               <div className="pagination-container">
                 {totalItems > 0 && (
