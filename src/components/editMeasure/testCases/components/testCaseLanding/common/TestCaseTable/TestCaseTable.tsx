@@ -259,7 +259,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
       {
         header: featureFlags.TestCaseListActionCenter ? "" : "Action",
         cell: (info) => {
-          return !featureFlags.TestCaseListActionCenter ? (
+          return featureFlags.TestCaseListActionCenter ? (
             <Button
               variant="outline-filled"
               data-testid={`view-edit-test-case-button-${info.row.original.id}`}
