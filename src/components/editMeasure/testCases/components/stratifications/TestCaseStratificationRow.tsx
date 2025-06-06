@@ -9,6 +9,7 @@ export interface TestCaseStratificationRowProps {
   isTestCaseExecuted: boolean;
   setIsTestCaseExecuted: (isTestCaseExecuted: boolean) => void;
   stratification: DisplayStratificationValue;
+  stratificationCount: number;
   populationBasis: string;
   showExpected?: boolean;
   disableExpected?: boolean;
@@ -25,6 +26,7 @@ const TestCaseStratificationRow = ({
   isTestCaseExecuted,
   setIsTestCaseExecuted,
   stratification,
+  stratificationCount,
   populationBasis,
   disableExpected = false,
   onStratificationChange,
@@ -43,6 +45,8 @@ const TestCaseStratificationRow = ({
       <td role="cell">
         <ExpectActualInput
           id={`${stratification.name}-expected-cb`}
+          aria-labelledby={`stratification${stratificationCount}-${stratification.name}-expected`}
+          name={`stratification${stratificationCount}-${stratification.name}-expected`}
           expectedValue={stratification.expected}
           disabled={disableExpected}
           onChange={(expectedValue) => {
@@ -64,6 +68,8 @@ const TestCaseStratificationRow = ({
         {isTestCaseExecuted ? (
           <ExpectActualInput
             id={`${stratification.name}-actual-cb`}
+            aria-labelledby={`stratification${stratificationCount}-${stratification.name}-actual`}
+            name={`stratification${stratificationCount}-${stratification.name}-actual`}
             expectedValue={stratification.actual}
             onChange={(expectedValue) => {
               setIsTestCaseExecuted(false);

@@ -6,6 +6,7 @@ import ExpectActualInput from "../populations/ExpectActualInput";
 export interface TestCaseStratificationProps {
   strataCode: string;
   stratification: DisplayStratificationValue;
+  stratificationCount: number;
   stratResult?: any;
   populationBasis: string;
   showExpected?: boolean;
@@ -20,6 +21,7 @@ export interface TestCaseStratificationProps {
 const TestCaseStratification = ({
   strataCode,
   stratification,
+  stratificationCount,
   stratResult,
   populationBasis,
   disableExpected = false,
@@ -42,6 +44,8 @@ const TestCaseStratification = ({
         <td role="cell">
           <ExpectActualInput
             id={`${stratification.name}-expected-cb`}
+            aria-labelledby={`stratification${stratificationCount}-expected`}
+            name={`stratification${stratificationCount}-expected`}
             expectedValue={stratification.expected}
             onChange={(expectedValue) => {
               setIsTestCaseExecuted(false);
@@ -64,6 +68,8 @@ const TestCaseStratification = ({
           {isTestCaseExecuted ? (
             <ExpectActualInput
               id={`${stratResult.name}-actual-cb`}
+              aria-labelledby={`stratification${stratificationCount}-actual`}
+              name={`stratification${stratificationCount}-actual`}
               expectedValue={stratResult.actual}
               onChange={() => {}}
               populationBasis={populationBasis}
