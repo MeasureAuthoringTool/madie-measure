@@ -35,16 +35,13 @@ export class MeasureServiceApi {
   }
 
   async fetchMeasureDraftStatuses(measureSetIds: string[]): Promise<any> {
-    const idsParam = measureSetIds.join(",");
     try {
-      const response = await axios.get<any>(
+      const response = await axios.post<any>(
         `${this.baseUrl}/measures/draftstatus`,
+        measureSetIds,
         {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
-          },
-          params: {
-            measureSetIds: idsParam,
           },
         }
       );
