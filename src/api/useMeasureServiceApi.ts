@@ -443,7 +443,7 @@ export class MeasureServiceApi {
   ): Promise<any> {
     try {
       limit = limit === "All" ? 1000 : limit; // if limit is "All", set it to a high number to fetch all results
-      const response = await axios.put<any>(
+      const response = await axios.post<any>(
         `${this.baseUrl}/measures/searches`,
         searchCriteria,
         {

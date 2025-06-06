@@ -51,6 +51,197 @@ describe("MeasureServiceApi Tests", () => {
     expect(measuresList).toEqual(measures);
   });
 
+  it("test createVersion success", async () => {
+    const measure: Measure = {
+      id: "testId",
+      measureName: "measure - A",
+      version: "1.001",
+      revisionNumber: 1,
+    } as unknown as Measure;
+
+    const resp: any = { status: 200, data: measure };
+    mockedAxios.put.mockResolvedValue(resp);
+
+    await measureServiceApi.createVersion("testId", "MAJOR");
+    expect(mockedAxios.put).toBeCalledTimes(1);
+    expect(resp.data).toEqual(measure);
+  });
+
+  it("test createCmsId success", async () => {
+    const resp: any = { status: 200, data: 2 };
+    mockedAxios.put.mockResolvedValue(resp);
+
+    await measureServiceApi.createCmsId("testMeasureSetId");
+    expect(mockedAxios.put).toBeCalledTimes(1);
+    expect(resp.data).toEqual(2);
+  });
+
+  it("test associate cms id failure", async () => {
+    const resp = {
+      status: 400,
+      message: "CMS ID could not be associated. Please try again.",
+    };
+    mockedAxios.put.mockRejectedValueOnce(resp);
+
+    try {
+      await measureServiceApi.associateCmdId(
+        "qiCoreMeasureId",
+        "qdmMeasureId",
+        false
+      );
+      expect(mockedAxios.put).toBeCalledTimes(1);
+    } catch (error) {
+      expect(error.message).toBe(
+        "CMS ID could not be associated. Please try again."
+      );
+    }
+  });
+
+  it("successfully associate cms id", async () => {
+    const measureSet = {
+      id: "1",
+      cmsId: 6,
+      measureSetId: "testMesureSetId",
+      owner: "owner",
+      acls: null,
+    } as unknown as MeasureSet;
+
+    const resp: any = { status: 200, data: measureSet };
+    mockedAxios.put.mockResolvedValue(resp);
+
+    await measureServiceApi.associateCmdId(
+      "qiCoreMeasureId",
+      "qdmMeasureId",
+      true
+    );
+    expect(mockedAxios.put).toBeCalledTimes(1);
+    expect(resp.data).toEqual(measureSet);
+  });
+
+  it("test shareMeasures success", async () => {
+    const data = {
+      measureId1: [
+        {
+          userId: "userId1",
+          roles: ["SHARED_WITH"],
+        },
+        {
+          userId: "userId2",
+          roles: ["SHARED_WITH"],
+        },
+      ],
+      measureId2: [
+        {
+          userId: "userId1",
+          roles: ["SHARED_WITH"],
+        },
+      ],
+    };
+
+    const resp: any = { status: 200, data };
+
+    mockedAxios.put.mockResolvedValue(resp);
+
+    const measureIdToAclSpecification = await measureServiceApi.shareMeasures(
+      new Map([
+        ["measureId1", ["userId1"]],
+        ["measureId2", ["userId1"]],
+      ])
+    );
+
+    expect(mockedAxios.put).toBeCalledTimes(1);
+    expect(measureIdToAclSpecification).toEqual(data);
+  });
+
+  it("test shareMeasures failure", async () => {
+    const errorMessage =
+      "Unable to share the selected measure(s) with the added users. If the error persists, please contact the help desk.";
+    mockedAxios.put.mockImplementationOnce(() =>
+      Promise.reject(new Error(errorMessage))
+    );
+    await expect(
+      measureServiceApi.shareMeasures(
+        new Map([
+          ["measureId1", ["userId1"]],
+          ["measureId2", ["userId1"]],
+        ])
+      )
+    ).rejects.toThrow(errorMessage);
+  });
+
+  it("test unshareMeasures success", async () => {
+    const data = {
+      measureId1: [
+        {
+          userId: "userId1",
+          roles: ["SHARED_WITH"],
+        },
+      ],
+      measureId2: [
+        {
+          userId: "userId1",
+          roles: ["SHARED_WITH"],
+        },
+      ],
+    };
+
+    const resp: any = { status: 200, data };
+
+    mockedAxios.put.mockResolvedValue(resp);
+
+    const measureIdToAclSpecification = await measureServiceApi.unshareMeasures(
+      new Map([
+        ["measureId1", ["userId2"]],
+        ["measureId2", ["userId2"]],
+      ])
+    );
+
+    expect(mockedAxios.put).toBeCalledTimes(1);
+    expect(measureIdToAclSpecification).toEqual(data);
+  });
+
+  it("test unshareMeasures failure", async () => {
+    const errorMessage =
+      "Unable to unshare the selected measure(s) with the users who were unchecked. If the error persists, please contact the help desk.";
+    mockedAxios.put.mockImplementationOnce(() =>
+      Promise.reject(new Error(errorMessage))
+    );
+    await expect(
+      measureServiceApi.unshareMeasures(
+        new Map([
+          ["measureId1", ["userId2"]],
+          ["measureId2", ["userId2"]],
+        ])
+      )
+    ).rejects.toThrow(errorMessage);
+  });
+
+  it("test getMeasureCounts success", async () => {
+    const data = {
+      allMeasures: 500,
+      myMeasures: 5,
+    };
+
+    const resp: any = { status: 200, data };
+
+    mockedAxios.get.mockResolvedValue(resp);
+
+    const result = await measureServiceApi.getMeasureCounts();
+
+    expect(mockedAxios.get).toBeCalledTimes(1);
+    expect(result).toEqual(data);
+  });
+
+  it("test getMeasureCounts failure", async () => {
+    const errorMessage = "Unable to get measure counts";
+    mockedAxios.get.mockImplementationOnce(() =>
+      Promise.reject(new Error(errorMessage))
+    );
+    await expect(measureServiceApi.getMeasureCounts()).rejects.toThrow(
+      errorMessage
+    );
+  });
+
   it("test fetchMeasures fail", async () => {
     const resp = { status: 500, data: "failure", error: { message: "error" } };
     mockedAxios.get.mockRejectedValueOnce(resp);
@@ -237,7 +428,7 @@ describe("MeasureServiceApi Tests", () => {
       } as Measure,
     ];
     const resp: any = { status: 200, data: measures };
-    mockedAxios.put.mockResolvedValue(resp);
+    mockedAxios.post.mockResolvedValue(resp);
 
     const measuresList = await measureServiceApi.searchMeasuresByCriteria(
       true,
@@ -248,7 +439,7 @@ describe("MeasureServiceApi Tests", () => {
       { searchField: "test", optionalSearchProperties: [] },
       new AbortController()
     );
-    expect(mockedAxios.put).toBeCalledTimes(1);
+    expect(mockedAxios.post).toBeCalledTimes(1);
     expect(measuresList).toEqual(measures);
   });
 
@@ -266,7 +457,7 @@ describe("MeasureServiceApi Tests", () => {
         { searchField: "test", optionalSearchProperties: [] },
         new AbortController()
       );
-      expect(mockedAxios.put).toBeCalledTimes(1);
+      expect(mockedAxios.post).toBeCalledTimes(1);
     } catch (error) {
       expect(error.message).toBe("Unable to search measures");
     }
@@ -278,7 +469,7 @@ describe("MeasureServiceApi Tests", () => {
       data: "failure",
       message: "canceled",
     };
-    mockedAxios.put.mockRejectedValueOnce(resp);
+    mockedAxios.post.mockRejectedValueOnce(resp);
 
     try {
       await measureServiceApi.searchMeasuresByCriteria(
@@ -290,7 +481,7 @@ describe("MeasureServiceApi Tests", () => {
         { searchField: "test", optionalSearchProperties: [] },
         new AbortController()
       );
-      expect(mockedAxios.put).toBeCalledTimes(1);
+      expect(mockedAxios.post).toBeCalledTimes(1);
     } catch (error) {
       expect(error.message).toBe("canceled");
     }
@@ -356,22 +547,6 @@ describe("MeasureServiceApi Tests", () => {
     await measureServiceApi.checkValidVersion("testId", "MAJOR");
     expect(mockedAxios.get).toBeCalledTimes(1);
     expect(resp.status).toEqual(200);
-  });
-
-  it("test createVersion success", async () => {
-    const measure: Measure = {
-      id: "testId",
-      measureName: "measure - A",
-      version: "1.001",
-      revisionNumber: 1,
-    } as unknown as Measure;
-
-    const resp: any = { status: 200, data: measure };
-    mockedAxios.put.mockResolvedValue(resp);
-
-    await measureServiceApi.createVersion("testId", "MAJOR");
-    expect(mockedAxios.put).toBeCalledTimes(1);
-    expect(resp.data).toEqual(measure);
   });
 
   it("creates a draft for a measure", async () => {
@@ -467,15 +642,6 @@ describe("MeasureServiceApi Tests", () => {
     }
   });
 
-  it("test createCmsId success", async () => {
-    const resp: any = { status: 200, data: 2 };
-    mockedAxios.put.mockResolvedValue(resp);
-
-    await measureServiceApi.createCmsId("testMeasureSetId");
-    expect(mockedAxios.put).toBeCalledTimes(1);
-    expect(resp.data).toEqual(2);
-  });
-
   it("test createCmsId failure", async () => {
     const resp = {
       status: 400,
@@ -489,48 +655,6 @@ describe("MeasureServiceApi Tests", () => {
     } catch (error) {
       expect(error.message).toBe("Failed to create cms id.");
     }
-  });
-
-  it("test associate cms id failure", async () => {
-    const resp = {
-      status: 400,
-      message: "CMS ID could not be associated. Please try again.",
-    };
-    mockedAxios.put.mockRejectedValueOnce(resp);
-
-    try {
-      await measureServiceApi.associateCmdId(
-        "qiCoreMeasureId",
-        "qdmMeasureId",
-        false
-      );
-      expect(mockedAxios.put).toBeCalledTimes(1);
-    } catch (error) {
-      expect(error.message).toBe(
-        "CMS ID could not be associated. Please try again."
-      );
-    }
-  });
-
-  it("successfully associate cms id", async () => {
-    const measureSet = {
-      id: "1",
-      cmsId: 6,
-      measureSetId: "testMesureSetId",
-      owner: "owner",
-      acls: null,
-    } as unknown as MeasureSet;
-
-    const resp: any = { status: 200, data: measureSet };
-    mockedAxios.put.mockResolvedValue(resp);
-
-    await measureServiceApi.associateCmdId(
-      "qiCoreMeasureId",
-      "qdmMeasureId",
-      true
-    );
-    expect(mockedAxios.put).toBeCalledTimes(1);
-    expect(resp.data).toEqual(measureSet);
   });
 
   it("test fetch human readable success", async () => {
@@ -608,128 +732,5 @@ describe("MeasureServiceApi Tests", () => {
     await expect(
       measureServiceApi.getMeasuresByMeasureSetId(measures[0].id)
     ).rejects.toThrow(errorMessage);
-  });
-  it("test shareMeasures success", async () => {
-    const data = {
-      measureId1: [
-        {
-          userId: "userId1",
-          roles: ["SHARED_WITH"],
-        },
-        {
-          userId: "userId2",
-          roles: ["SHARED_WITH"],
-        },
-      ],
-      measureId2: [
-        {
-          userId: "userId1",
-          roles: ["SHARED_WITH"],
-        },
-      ],
-    };
-
-    const resp: any = { status: 200, data };
-
-    mockedAxios.put.mockResolvedValue(resp);
-
-    const measureIdToAclSpecification = await measureServiceApi.shareMeasures(
-      new Map([
-        ["measureId1", ["userId1"]],
-        ["measureId2", ["userId1"]],
-      ])
-    );
-
-    expect(mockedAxios.put).toBeCalledTimes(1);
-    expect(measureIdToAclSpecification).toEqual(data);
-  });
-
-  it("test shareMeasures failure", async () => {
-    const errorMessage =
-      "Unable to share the selected measure(s) with the added users. If the error persists, please contact the help desk.";
-    mockedAxios.put.mockImplementationOnce(() =>
-      Promise.reject(new Error(errorMessage))
-    );
-    await expect(
-      measureServiceApi.shareMeasures(
-        new Map([
-          ["measureId1", ["userId1"]],
-          ["measureId2", ["userId1"]],
-        ])
-      )
-    ).rejects.toThrow(errorMessage);
-  });
-
-  it("test unshareMeasures success", async () => {
-    const data = {
-      measureId1: [
-        {
-          userId: "userId1",
-          roles: ["SHARED_WITH"],
-        },
-      ],
-      measureId2: [
-        {
-          userId: "userId1",
-          roles: ["SHARED_WITH"],
-        },
-      ],
-    };
-
-    const resp: any = { status: 200, data };
-
-    mockedAxios.put.mockResolvedValue(resp);
-
-    const measureIdToAclSpecification = await measureServiceApi.unshareMeasures(
-      new Map([
-        ["measureId1", ["userId2"]],
-        ["measureId2", ["userId2"]],
-      ])
-    );
-
-    expect(mockedAxios.put).toBeCalledTimes(1);
-    expect(measureIdToAclSpecification).toEqual(data);
-  });
-
-  it("test unshareMeasures failure", async () => {
-    const errorMessage =
-      "Unable to unshare the selected measure(s) with the users who were unchecked. If the error persists, please contact the help desk.";
-    mockedAxios.put.mockImplementationOnce(() =>
-      Promise.reject(new Error(errorMessage))
-    );
-    await expect(
-      measureServiceApi.unshareMeasures(
-        new Map([
-          ["measureId1", ["userId2"]],
-          ["measureId2", ["userId2"]],
-        ])
-      )
-    ).rejects.toThrow(errorMessage);
-  });
-
-  it("test getMeasureCounts success", async () => {
-    const data = {
-      allMeasures: 500,
-      myMeasures: 5,
-    };
-
-    const resp: any = { status: 200, data };
-
-    mockedAxios.get.mockResolvedValue(resp);
-
-    const result = await measureServiceApi.getMeasureCounts();
-
-    expect(mockedAxios.get).toBeCalledTimes(1);
-    expect(result).toEqual(data);
-  });
-
-  it("test getMeasureCounts failure", async () => {
-    const errorMessage = "Unable to get measure counts";
-    mockedAxios.get.mockImplementationOnce(() =>
-      Promise.reject(new Error(errorMessage))
-    );
-    await expect(measureServiceApi.getMeasureCounts()).rejects.toThrow(
-      errorMessage
-    );
   });
 });
