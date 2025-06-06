@@ -69,6 +69,9 @@ describe("Measure Page", () => {
     mockedUsedNavigate.mockReset();
     jest.clearAllMocks();
   });
+  beforeEach(() => {
+    localStorage.clear();
+  });
   const renderRouter = (initialEntries) => {
     const router = createMemoryRouter(routesConfig, {
       initialEntries: initialEntries,
@@ -136,18 +139,21 @@ describe("Measure Page", () => {
 
     const allMeasuresTab = await screen.findByTestId("all-measures-tab");
     userEvent.click(allMeasuresTab);
-    expect(mockedUsedNavigate).toHaveBeenCalledWith("?tab=1&page=0&limit=10");
+    expect(mockedUsedNavigate).toHaveBeenCalledWith("?tab=1&page=1&limit=10");
   });
   test("loading in with props for all measures page, triggers a fetch", async () => {
-    renderRouter(["/measures?tab=1&page=0&limit=10"]);
+    renderRouter(["/measures?tab=1&page=1&limit=10"]); // Use 1-based page in the query string
+
     const allMeasuresTab = await screen.findByTestId("all-measures-tab");
+
+    // Ensure the "All Measures" tab is selected
     await waitFor(() => {
       expect(allMeasuresTab).toHaveClass("Mui-selected");
       expect(
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
         false,
-        10,
+        "10",
         0,
         "",
         "",
@@ -248,7 +254,7 @@ describe("Measure Page", () => {
     // Simulate changing the page limit
     const pageLimit25 = screen.getByRole("option", { name: /25/i });
     userEvent.click(pageLimit25);
-    expect(mockedUsedNavigate).toHaveBeenCalledWith("?tab=0&page=0&limit=25");
+    expect(mockedUsedNavigate).toHaveBeenCalledWith("?tab=0&page=1&limit=25");
   });
 
   it("Should display errors when fetching measures is rejected", async () => {

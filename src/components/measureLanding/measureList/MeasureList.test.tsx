@@ -1172,7 +1172,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const selectButton0 = await findByRole("button", {
-      name: "Measure new measure - A version 0.0.000 draft status true Select",
+      name: "Edit Measure new measure - A 0.0.000 Draft",
     });
 
     // first measure should have Version action as this is a draft measure

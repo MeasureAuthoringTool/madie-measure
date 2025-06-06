@@ -260,7 +260,15 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           <Button
             variant="outline-filled"
             data-testid={`view-edit-test-case-button-${info.row.original.id}`}
-            aria-label={`Test Case ${info.row.original.title}; Case Number ${info.row.original.caseNumber}`}
+            aria-live="polite"
+            aria-label={`${
+              checkUserCanEdit(
+                measure.measureSet?.owner,
+                measure.measureSet?.acls
+              ) && measure.measureMetaData?.draft
+                ? "Edit"
+                : "View"
+            } Test Case ${info.row.original.group} ${info.row.original.title}`}
             onClick={() => {
               const editTestCaseUrl = _.isEmpty(measure?.groups)
                 ? `../${info.row.original.id}`
@@ -268,6 +276,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
               navigate(editTestCaseUrl, { relative: "path" });
             }}
             role="button"
+            tabIndex={0}
           >
             {checkUserCanEdit(
               measure.measureSet?.owner,

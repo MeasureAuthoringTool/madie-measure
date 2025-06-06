@@ -35,16 +35,13 @@ export class MeasureServiceApi {
   }
 
   async fetchMeasureDraftStatuses(measureSetIds: string[]): Promise<any> {
-    const idsParam = measureSetIds.join(",");
     try {
-      const response = await axios.get<any>(
+      const response = await axios.post<any>(
         `${this.baseUrl}/measures/draftstatus`,
+        measureSetIds,
         {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
-          },
-          params: {
-            measureSetIds: idsParam,
           },
         }
       );
@@ -109,13 +106,14 @@ export class MeasureServiceApi {
 
   async fetchMeasures(
     filterByCurrentUser: boolean,
-    limit: number = 25,
+    limit: string | number = 25,
     page: number = 0,
     sort: string = "lastModifiedAt",
     direction: string = "DESC",
     signal
   ): Promise<any> {
     try {
+      limit = limit === "All" ? 1000 : limit; // if limit is "All", set it to a high number to fetch all results
       const response = await axios.get<any>(`${this.baseUrl}/measures`, {
         headers: {
           Authorization: `Bearer ${this.getAccessToken()}`,
@@ -433,7 +431,7 @@ export class MeasureServiceApi {
 
   async searchMeasuresByCriteria(
     filterByCurrentUser: boolean,
-    limit: number = 25,
+    limit: string | number = 25,
     page: number = 0,
     sort: string = "lastModifiedAt",
     direction: string = "DESC",
@@ -441,6 +439,7 @@ export class MeasureServiceApi {
     abortController: AbortController
   ): Promise<any> {
     try {
+      limit = limit === "All" ? 1000 : limit; // if limit is "All", set it to a high number to fetch all results
       const response = await axios.put<any>(
         `${this.baseUrl}/measures/searches`,
         searchCriteria,
