@@ -382,7 +382,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               />
             </>
           )}
-          {!isQDM && featureFlags.QICoreMeasureReferences && (
+          {!isQDM && (
             <>
               <Route
                 path={measureReferencesLink}
