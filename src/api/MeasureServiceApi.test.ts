@@ -14,6 +14,7 @@ import {
 describe("MeasureServiceApi Tests", () => {
   afterEach(() => {
     jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   const baseUrl = "madie.com";
@@ -68,6 +69,23 @@ describe("MeasureServiceApi Tests", () => {
     } catch (error) {
       expect(error.message).toBe("Unable to fetch measures");
     }
+  });
+
+  it("test getAllOrganizations success", async () => {
+    const organizations: Organization[] = [
+      {
+        id: "testId1",
+        name: "test organization 1",
+        oid: "testOid1",
+      },
+    ];
+    const resp: any = { status: 200, data: organizations };
+    mockedAxios.get.mockResolvedValueOnce(resp);
+
+    const returnedOrgList = measureServiceApi.getAllOrganizations();
+
+    expect(mockedAxios.get).toBeCalledTimes(1);
+    expect((await returnedOrgList).length).toEqual(1);
   });
 
   it("test fetchMeasures cancels", async () => {
@@ -306,23 +324,6 @@ describe("MeasureServiceApi Tests", () => {
     } catch (error) {
       expect(error.message).toBe("Unable to fetch population basis options");
     }
-  });
-
-  it("test getAllOrganizations success", async () => {
-    const organizations: Organization[] = [
-      {
-        id: "testId1",
-        name: "test organization 1",
-        oid: "testOid1",
-      },
-    ];
-    const resp: any = { status: 200, data: organizations };
-    mockedAxios.get.mockResolvedValueOnce(resp);
-
-    const returnedOrgList = measureServiceApi.getAllOrganizations();
-
-    expect(mockedAxios.get).toBeCalledTimes(1);
-    expect((await returnedOrgList).length).toEqual(1);
   });
 
   it("test getAllOrganizations error", async () => {
