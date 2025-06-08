@@ -61,21 +61,50 @@ export default function MeasureLanding() {
   const featureFlags = useFeatureFlags();
 
   // pull info from some query url
-  const curLimit = values.limit && Number(values.limit);
-  const curPage = (values.page && Number(values.page)) || 1;
+  const measurePageOptions = JSON.parse(
+    window.localStorage.getItem("measurePageOptions")
+  );
+
+  const curLimit = measurePageOptions?.limit
+    ? measurePageOptions.limit
+    : values.limit
+    ? values.limit
+    : 10;
+
+  const curPage = measurePageOptions?.page
+    ? measurePageOptions.page
+    : values.page
+    ? Number(values.page)
+    : 1;
+
   // can we do stuff
   const canGoNext = (() => {
     return curPage < totalPages;
   })();
   const canGoPrev = Number(values?.page) > 1;
   const handlePageChange = (e, v) => {
+    const updatedLimit =
+      curLimit !== undefined ? (curLimit === "All" ? 50 : curLimit) : 10;
+
     setCurrentPage(v - 1);
-    navigate(`?tab=${activeTab}&page=${v}&limit=${values?.limit || 10}`);
+    navigate(`?tab=${activeTab}&page=${v}&limit=${updatedLimit}`);
   };
   const handleLimitChange = (e) => {
     setCurrentLimit(e.target.value);
-    navigate(`?tab=${activeTab}&page=${0}&limit=${e.target.value}`);
+    navigate(`?tab=${activeTab}&page=1&limit=${e.target.value}`);
   };
+
+  useEffect(() => {
+    if (measurePageOptions) {
+      if (
+        !Object.keys(values).length &&
+        Object.keys(measurePageOptions).length
+      ) {
+        const { page, limit } = measurePageOptions;
+        navigate(`?tab=${activeTab}&page=${page}&limit=${limit}`);
+      }
+    }
+  }, [measurePageOptions, values]);
 
   const retrieveMeasures = useCallback(
     async (
@@ -154,15 +183,28 @@ export default function MeasureLanding() {
   ]);
 
   useEffect(() => {
+    const values = queryString.parse(search);
+    const updatedPage = values.page ? Number(values.page) : curPage;
+    const updatedLimit = values.limit || curLimit;
+
+    localStorage.setItem(
+      "measurePageOptions",
+      JSON.stringify({
+        page: updatedPage,
+        limit: updatedLimit,
+      })
+    );
+
     retrieveMeasures(
       activeTab,
-      curLimit === undefined ? 10 : curLimit,
-      curPage - 1,
+      updatedLimit,
+      updatedPage - 1,
       searchCriteria,
       currentSort,
       currentDirection
     );
   }, [
+    search,
     retrieveMeasures,
     activeTab,
     curLimit,
@@ -194,8 +236,22 @@ export default function MeasureLanding() {
   const handleTabChange = (event, nextTab) => {
     abortController.current.abort();
     setMeasureList(null);
-    const limit = values?.limit || 10;
-    navigate(`?tab=${nextTab}&page=0&limit=${limit}`);
+    const updatedLimit =
+      values?.limit !== undefined
+        ? nextTab === 1 && values?.limit === "All"
+          ? 50
+          : values?.limit
+        : 10;
+    // Save updated limit to local storage
+    localStorage.setItem(
+      "measurePageOptions",
+      JSON.stringify({
+        page: 1, // Reset to the first page
+        limit: updatedLimit,
+      })
+    );
+
+    navigate(`?tab=${nextTab}&page=1&limit=${updatedLimit}`);
   };
 
   // we need to tell our layout page that we've loaded to prevent strange tab order
@@ -257,6 +313,7 @@ export default function MeasureLanding() {
           {!loading && (
             <div className="table">
               <MeasureList
+                measurePageOptionsLimit={measurePageOptions?.limit}
                 retrieveMeasures={retrieveMeasures}
                 measureList={measureList}
                 setMeasureList={setMeasureList}
@@ -277,18 +334,26 @@ export default function MeasureLanding() {
                 currentDirection={currentDirection}
                 setCurrentDirection={setCurrentDirection}
                 setErrMsg={setErrMsg}
+                search={search}
               />
               <div className="pagination-container">
                 {totalItems > 0 && (
                   <Pagination
                     totalItems={totalItems}
                     visibleItems={visibleItems}
-                    limitOptions={[10, 25, 50]}
+                    limitOptions={[
+                      10,
+                      25,
+                      50,
+                      ...(totalItems > 50 && activeTab === 0 ? ["All"] : []),
+                    ]}
                     offset={offset}
                     handlePageChange={handlePageChange}
                     handleLimitChange={handleLimitChange}
-                    page={Number(values?.page) || 1}
-                    limit={Number(values?.limit) || 10}
+                    page={curPage}
+                    limit={
+                      curLimit === "All" && totalItems <= 50 ? 50 : curLimit
+                    }
                     count={totalPages}
                     shape="rounded"
                     hideNextButton={!canGoNext}
