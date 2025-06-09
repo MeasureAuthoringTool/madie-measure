@@ -84,10 +84,6 @@ export default function MeasureList(props: {
 }) {
   const { searchCriteria, setSearchCriteria, retrieveMeasures } = { ...props };
   const measureServiceApi = useRef(useMeasureServiceApi()).current; //needs to be ref or triggers jest. throws warn
-  // CanDraftLookup will be an object who's keys are measureSetIds, to check weather we can draft M
-  const [canDraftLookup, setCanDraftLookup] = useState<object>({});
-  const canDraftRef = useRef<object>();
-  canDraftRef.current = canDraftLookup;
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
 
   const navigate = useNavigate();
@@ -131,22 +127,6 @@ export default function MeasureList(props: {
     useState([]);
   const featureFlags = useFeatureFlags();
 
-  const buildLookup = useCallback(
-    async (measureList) => {
-      const measureSetList = measureList.map((m) => m.measureSetId);
-      try {
-        const results = await measureServiceApi.fetchMeasureDraftStatuses(
-          measureSetList
-        );
-        if (results) {
-          setCanDraftLookup(results);
-        }
-      } catch (e) {
-        console.warn("Error fetching draft statuses: ", e);
-      }
-    },
-    [measureServiceApi]
-  );
   const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
   const transFormData = (measureList): TCRow[] => {
     return measureList.map((measure) => ({
@@ -186,7 +166,6 @@ export default function MeasureList(props: {
   const [expandedSectionData, setExpandedSectionData] = useState<TCRow[]>([]);
   useEffect(() => {
     if (props.measureList && measureServiceApi) {
-      buildLookup(props.measureList);
       setData(transFormData(props.measureList));
     }
   }, [props.measureList, measureServiceApi]);
@@ -271,11 +250,22 @@ export default function MeasureList(props: {
         <Button
           variant="outline-filled"
           data-testid={`measure-action-${info.row.original.id}`}
-          aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
+          aria-live="polite"
+          aria-label={`${
+            checkUserCanEdit(
+              info.row.original.actions?.measureSet?.owner,
+              info.row.original.actions?.measureSet?.acls
+            ) && info.row.original.actions.measureMetaData?.draft
+              ? "Edit"
+              : "View"
+          } Measure ${info.row.original.measureName} ${
+            info.row.original.version
+          }${info.row.original.actions.measureMetaData?.draft ? " Draft" : ""}`}
           onClick={() =>
             navigate(`/measures/${info.row.original.id}/edit/details`)
           }
           role="button"
+          tabIndex={0}
         >
           {checkUserCanEdit(
             info.row.original.actions?.measureSet?.owner,
@@ -384,7 +374,7 @@ export default function MeasureList(props: {
         <Button
           variant="outline-filled"
           data-testid={`measure-action-${info.row.original.id}`}
-          aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
+          aria-label={`Measure ${info.row.original.measureName} ${info.row.original.version}  ${info.row.original.actions.measureMetaData?.draft} Select`}
           onClick={() =>
             navigate(`/measures/${info.row.original.id}/edit/details`)
           }
