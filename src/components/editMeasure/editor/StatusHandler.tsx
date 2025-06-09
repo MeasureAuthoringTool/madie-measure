@@ -13,12 +13,6 @@ const generateAlertConfig = (
   const errors = errorAnnotation?.map((el, index) => (
     <li key={index}>{transformAnnotation(el)}</li>
   ));
-  const warningAnnotation = _.filter(outboundAnnotations, {
-    type: "warning",
-  });
-  const warnings = warningAnnotation?.map((el, index) => {
-    return <li key={index}>{transformAnnotation(el)}</li>;
-  });
   if (type === "success" && errorAnnotation && errorAnnotation.length > 0) {
     type = "warning";
   }
@@ -50,14 +44,6 @@ const generateAlertConfig = (
               ({errors.length}) Error{errors.length > 1 ? "s" : ""}:
             </h6>
             <ul data-testid={`generic-errors-text-list`}>{errors}</ul>
-          </>
-        )}
-        {warnings?.length > 0 && (
-          <>
-            <h6>
-              ({warnings.length}) Warning{warnings.length > 1 ? "s" : ""}:
-            </h6>
-            <ul data-testid={`generic-warnings-text-list`}>{warnings}</ul>
           </>
         )}
       </div>
@@ -156,15 +142,6 @@ const StatusHandler = ({
         )
       );
     }
-  } else if (outboundAnnotations && outboundAnnotations.length > 0) {
-    alerts.push(
-      generateAlertConfig(
-        "error",
-        "Following issues were found within the CQL",
-        null,
-        outboundAnnotations
-      )
-    );
   }
 
   if (alerts.length === 0) {
