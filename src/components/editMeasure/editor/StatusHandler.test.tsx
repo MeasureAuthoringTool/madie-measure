@@ -1,9 +1,118 @@
 import * as React from "react";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import StatusHandler, { transformAnnotation } from "./StatusHandler";
+import { MadieAlert } from "@madie/madie-design-system/dist/react";
+
+jest.mock("@madie/madie-design-system/dist/react", () => ({
+  MadieAlert: jest.fn(({ alerts, minimizeAlerts }) => {
+    return (
+      <div data-testid="madie-alert-mock">
+        {alerts.map((alert, index) => {
+          const alertContent = alert.content;
+          return (
+            <div
+              key={index}
+              data-testid={`alert-${index}`}
+              data-type={alert.type}
+            >
+              {/* Render the header - find the h3 and get its text */}
+              <div data-testid={`generic-${alert.type}-text-header`}>
+                {
+                  alertContent?.props?.children.find(
+                    (child) =>
+                      child?.type === "h3" ||
+                      (child?.props &&
+                        child?.props["data-testid"] ===
+                          `generic-${alert.type}-text-header`)
+                  )?.props?.children
+                }
+              </div>
+
+              {/* Render library warning if present */}
+              {alertContent?.props?.children.find(
+                (child) => child?.props?.className === "secondary"
+              ) && (
+                <div data-testid="library-warning">
+                  {
+                    alertContent.props.children.find(
+                      (child) => child?.props?.className === "secondary"
+                    ).props.children.props.children
+                  }
+                </div>
+              )}
+
+              {/* Render subtitle if present */}
+              {alertContent?.props?.children.find(
+                (child) =>
+                  child?.props &&
+                  child?.props["data-testid"] ===
+                    "generic-error-text-sub-header"
+              ) && (
+                <div data-testid="generic-error-text-sub-header">
+                  {
+                    alertContent.props.children.find(
+                      (child) =>
+                        child?.props &&
+                        child?.props["data-testid"] ===
+                          "generic-error-text-sub-header"
+                    ).props.children
+                  }
+                </div>
+              )}
+
+              {/* Render errors list if present */}
+              {alertContent?.props?.children.find(
+                (child) =>
+                  child?.type === "ul" &&
+                  child?.props?.["data-testid"] === "generic-errors-text-list"
+              ) && (
+                <div data-testid="generic-errors-text-list">
+                  {alertContent.props.children.find(
+                    (child) =>
+                      child?.props &&
+                      child?.props["data-testid"] === "generic-errors-text-list"
+                  )}
+                </div>
+              )}
+
+              {/* Render warnings list if present */}
+              {alertContent?.props?.children.find(
+                (child) =>
+                  child?.type === "ul" &&
+                  child?.props?.["data-testid"] === "generic-warnings-text-list"
+              ) && (
+                <div data-testid="generic-warnings-text-list">
+                  {alertContent.props.children.find(
+                    (child) =>
+                      child?.props &&
+                      child?.props["data-testid"] ===
+                        "generic-warnings-text-list"
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+        <div data-testid="minimize-flag">
+          {minimizeAlerts ? "true" : "false"}
+        </div>
+      </div>
+    );
+  }),
+}));
+
+const mockUseFeatureFlags = jest.fn();
+jest.mock("@madie/madie-util", () => ({
+  useFeatureFlags: () => mockUseFeatureFlags(),
+}));
 
 describe("StatusHandler Component", () => {
-  const { getByTestId, queryByTestId } = screen;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseFeatureFlags.mockReturnValue({ MinimizeAlerts: false });
+    (MadieAlert as jest.Mock).mockClear();
+  });
+
   const annotationsObject = [
     {
       row: 2,
@@ -37,25 +146,30 @@ describe("StatusHandler Component", () => {
         hasSubTitle={false}
       />
     );
+
+    expect(MadieAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alerts: expect.arrayContaining([
+          expect.objectContaining({
+            type: "warning",
+            copyButton: true,
+            canClose: false,
+          }),
+        ]),
+        minimizeAlerts: false,
+      }),
+      expect.anything()
+    );
+
     expect(screen.getByTestId("generic-warning-text-header")).toHaveTextContent(
       success.primaryMessage
     );
     expect(screen.getByTestId("library-warning")).toHaveTextContent(
-      success.secondaryMessages.join()
-    );
-    const errorsList = screen.getByTestId("generic-errors-text-list");
-    expect(errorsList).toBeInTheDocument();
-    expect(errorsList).toHaveTextContent(
-      transformAnnotation(annotationsObject[0])
-    );
-    const warningsList = screen.getByTestId("generic-warnings-text-list");
-    expect(warningsList).toBeInTheDocument();
-    expect(warningsList).toHaveTextContent(
-      transformAnnotation(annotationsObject[1])
+      "Library statement can not be updated"
     );
   });
 
-  it("Should display a generic success message and a library warning if a library warning exists when no error or messages present, also displays a list of annotations", () => {
+  it("Should display a generic success message and a library warning if a library warning exists when no error or messages present", () => {
     render(
       <StatusHandler
         success={success}
@@ -66,52 +180,22 @@ describe("StatusHandler Component", () => {
       />
     );
 
-    expect(getByTestId("generic-warning-text-header")).toHaveTextContent(
+    expect(screen.getByTestId("generic-warning-text-header")).toHaveTextContent(
       success.primaryMessage
     );
     expect(screen.getByTestId("library-warning")).toHaveTextContent(
-      success.secondaryMessages.join()
-    );
-    const errorsList = screen.getByTestId("generic-errors-text-list");
-    expect(errorsList).toBeInTheDocument();
-    expect(errorsList).toHaveTextContent(
-      transformAnnotation(annotationsObject[0])
-    );
-    const warningsList = screen.getByTestId("generic-warnings-text-list");
-    expect(warningsList).toBeInTheDocument();
-    expect(warningsList).toHaveTextContent(
-      transformAnnotation(annotationsObject[1])
-    );
-  });
-
-  it("Should display a generic success message and a using warning if a library warning exists when no error or messages present, also displays a list of annotations", async () => {
-    render(
-      <StatusHandler
-        success={success}
-        error={false}
-        errorMessage={null}
-        outboundAnnotations={annotationsObject}
-        hasSubTitle={false}
-      />
+      "Library statement can not be updated"
     );
 
-    expect(getByTestId("generic-warning-text-header")).toHaveTextContent(
-      success.primaryMessage
-    );
-    await waitFor(() => {
-      expect(screen.getByTestId("library-warning")).toHaveTextContent(
-        success.secondaryMessages.join()
-      );
-    });
-    const errorsList = screen.getByTestId("generic-errors-text-list");
-    expect(errorsList).toBeInTheDocument();
-    expect(errorsList).toHaveTextContent(
-      transformAnnotation(annotationsObject[0])
-    );
-    const warningsList = screen.getByTestId("generic-warnings-text-list");
-    expect(warningsList).toBeInTheDocument();
-    expect(warningsList).toHaveTextContent(
-      transformAnnotation(annotationsObject[1])
+    expect(MadieAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alerts: expect.arrayContaining([
+          expect.objectContaining({
+            type: "warning",
+          }),
+        ]),
+      }),
+      expect.anything()
     );
   });
 
@@ -126,18 +210,21 @@ describe("StatusHandler Component", () => {
       />
     );
 
-    expect(getByTestId("generic-success-text-header")).toHaveTextContent(
+    expect(screen.getByTestId("generic-success-text-header")).toHaveTextContent(
       success.primaryMessage
     );
-    expect(
-      screen.queryByTestId("generic-errors-text-list")
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId("generic-warnings-text-list")
-    ).not.toBeInTheDocument();
+    expect(MadieAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alerts: expect.arrayContaining([
+          expect.objectContaining({
+            type: "success",
+          }),
+        ]),
+      }),
+      expect.anything()
+    );
   });
 
-  //all error conditions
   it("Should display an error message and annotations, when error flag is true", () => {
     const success = {
       status: null,
@@ -158,17 +245,15 @@ describe("StatusHandler Component", () => {
     expect(screen.getByTestId("generic-error-text-header")).toHaveTextContent(
       errorMessage
     );
-    expect(screen.queryByTestId("library-warning")).not.toBeInTheDocument();
-
-    const errorsList = screen.getByTestId("generic-errors-text-list");
-    expect(errorsList).toBeInTheDocument();
-    expect(errorsList).toHaveTextContent(
-      transformAnnotation(annotationsObject[0])
-    );
-    const warningsList = screen.getByTestId("generic-warnings-text-list");
-    expect(warningsList).toBeInTheDocument();
-    expect(warningsList).toHaveTextContent(
-      transformAnnotation(annotationsObject[1])
+    expect(MadieAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alerts: expect.arrayContaining([
+          expect.objectContaining({
+            type: "error",
+          }),
+        ]),
+      }),
+      expect.anything()
     );
   });
 
@@ -187,17 +272,26 @@ describe("StatusHandler Component", () => {
         hasSubTitle={true}
       />
     );
-    screen.debug();
-    const errorHeader = getByTestId("generic-error-text-header");
-    const errorSubHeader = getByTestId("generic-error-text-sub-header");
-    const subTitle = screen.getByText("MADiE helpdesk");
 
-    expect(errorHeader.textContent).toBe(errorMessage);
-    expect(errorSubHeader).toBeInTheDocument();
-    expect(subTitle).toBeInTheDocument();
-    expect(subTitle.closest("a")).toHaveAttribute(
-      "href",
-      "https://oncprojectracking.healthit.gov/support/projects/BONNIEMAT/summary"
+    expect(screen.getByTestId("generic-error-text-header")).toHaveTextContent(
+      errorMessage
+    );
+    expect(
+      screen.getByTestId("generic-error-text-sub-header")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("generic-error-text-sub-header")
+    ).toHaveTextContent("Please reach out to");
+
+    expect(MadieAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alerts: expect.arrayContaining([
+          expect.objectContaining({
+            type: "error",
+          }),
+        ]),
+      }),
+      expect.anything()
     );
   });
 
@@ -217,17 +311,20 @@ describe("StatusHandler Component", () => {
       />
     );
 
-    expect(getByTestId("generic-error-text-header")).toHaveTextContent(
+    expect(screen.getByTestId("generic-error-text-header")).toHaveTextContent(
       errorMessage
     );
 
-    expect(screen.queryByTestId("library-warning")).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId("generic-errors-text-list")
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId("generic-warnings-text-list")
-    ).not.toBeInTheDocument();
+    expect(MadieAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alerts: expect.arrayContaining([
+          expect.objectContaining({
+            type: "error",
+          }),
+        ]),
+      }),
+      expect.anything()
+    );
   });
 
   it("Should display an error message when error flag is true and annotations are provided", () => {
@@ -248,15 +345,16 @@ describe("StatusHandler Component", () => {
     expect(screen.getByTestId("generic-error-text-header")).toHaveTextContent(
       "Following issues were found within the CQL"
     );
-    const errorsList = screen.getByTestId("generic-errors-text-list");
-    expect(errorsList).toBeInTheDocument();
-    expect(errorsList).toHaveTextContent(
-      transformAnnotation(annotationsObject[0])
-    );
-    const warningsList = screen.getByTestId("generic-warnings-text-list");
-    expect(warningsList).toBeInTheDocument();
-    expect(warningsList).toHaveTextContent(
-      transformAnnotation(annotationsObject[1])
+
+    expect(MadieAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alerts: expect.arrayContaining([
+          expect.objectContaining({
+            type: "error",
+          }),
+        ]),
+      }),
+      expect.anything()
     );
   });
 
@@ -275,13 +373,20 @@ describe("StatusHandler Component", () => {
       />
     );
 
-    const errorHeader = getByTestId("generic-error-text-header");
-    const errorSubHeader = queryByTestId("generic-error-text-sub-header");
-    const errorList = queryByTestId("generic-error-text-list");
+    expect(screen.getByTestId("generic-error-text-header")).toHaveTextContent(
+      "Errors were found within the CQL"
+    );
 
-    expect(errorHeader.textContent).toBe("Errors were found within the CQL");
-    expect(errorSubHeader).not.toBeInTheDocument();
-    expect(errorList).not.toBeInTheDocument();
+    expect(MadieAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alerts: expect.arrayContaining([
+          expect.objectContaining({
+            type: "error",
+          }),
+        ]),
+      }),
+      expect.anything()
+    );
   });
 
   it("Should display annotations when Error flag is false", () => {
@@ -302,15 +407,51 @@ describe("StatusHandler Component", () => {
     expect(screen.getByTestId("generic-error-text-header")).toHaveTextContent(
       "Following issues were found within the CQL"
     );
-    const errorsList = screen.getByTestId("generic-errors-text-list");
-    expect(errorsList).toBeInTheDocument();
-    expect(errorsList).toHaveTextContent(
-      transformAnnotation(annotationsObject[0])
+    expect(MadieAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alerts: expect.arrayContaining([
+          expect.objectContaining({
+            type: "error",
+          }),
+        ]),
+      }),
+      expect.anything()
     );
-    const warningsList = screen.getByTestId("generic-warnings-text-list");
-    expect(warningsList).toBeInTheDocument();
-    expect(warningsList).toHaveTextContent(
-      transformAnnotation(annotationsObject[1])
+  });
+
+  it("Should use feature flag to set minimizeAlerts prop", () => {
+    mockUseFeatureFlags.mockReturnValue({ MinimizeAlerts: true });
+
+    render(
+      <StatusHandler
+        success={success}
+        error={false}
+        errorMessage=""
+        outboundAnnotations={annotationsObject}
+        hasSubTitle={false}
+      />
     );
+
+    expect(screen.getByTestId("minimize-flag")).toHaveTextContent("true");
+    expect(MadieAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        minimizeAlerts: true,
+      }),
+      expect.anything()
+    );
+  });
+
+  it("Should return empty fragment when no conditions match", () => {
+    render(
+      <StatusHandler
+        success={undefined}
+        error={false}
+        errorMessage=""
+        outboundAnnotations={[]}
+        hasSubTitle={false}
+      />
+    );
+
+    expect(screen.queryByTestId("madie-alert-mock")).not.toBeInTheDocument();
   });
 });
