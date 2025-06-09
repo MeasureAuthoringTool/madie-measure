@@ -39,6 +39,8 @@ const measure = {
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
 } as unknown as Measure;
 
+const mockUseFeatureFlags = jest.fn(() => ({ MinimizeAlerts: false }));
+
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
@@ -47,7 +49,7 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn(() => {
     return true;
   }),
-
+  useFeatureFlags: () => mockUseFeatureFlags(),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => measure),
@@ -58,7 +60,6 @@ jest.mock("@madie/madie-util", () => ({
   },
   routeHandlerStore: {
     subscribe: (set) => {
-      // set(measure)
       return { unsubscribe: () => null };
     },
     updateRouteHandlerState: () => null,
@@ -174,6 +175,7 @@ const renderEditor = (measure) => {
 describe("MeasureEditor component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseFeatureFlags.mockReturnValue({ MinimizeAlerts: false });
   });
 
   it("should mount measure editor component with measure cql", async () => {
@@ -525,13 +527,11 @@ describe("MeasureEditor component", () => {
     const { getByTestId } = renderEditor(measure);
     const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
     expect(measure.cql).toEqual(editorContainer.value);
-    // set new value to editor
     fireEvent.change(getByTestId("measure-editor"), {
       target: {
         value: "library testCql version '2.0.000'",
       },
     });
-    // click on cancel button
     fireEvent.click(getByTestId("reset-cql-btn"));
     const discardDialog = screen.getByTestId("discard-dialog");
     expect(discardDialog).toBeInTheDocument();
@@ -539,7 +539,6 @@ describe("MeasureEditor component", () => {
     expect(continueButton).toBeInTheDocument();
     fireEvent.click(continueButton);
     await waitFor(() => {
-      // check for old value
       expect(measure.cql).toEqual(editorContainer.value);
     });
   });
@@ -563,13 +562,11 @@ describe("MeasureEditor component", () => {
     const { getByTestId, queryByText } = renderEditor(measure);
     const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
     expect(measure.cql).toEqual(editorContainer.value);
-    // set new value to editor
     fireEvent.change(getByTestId("measure-editor"), {
       target: {
         value: "library testCql version '2.0.000'",
       },
     });
-    // click on cancel button
     fireEvent.click(getByTestId("reset-cql-btn"));
     const discardDialog = screen.getByTestId("discard-dialog");
     expect(discardDialog).toBeInTheDocument();
@@ -583,7 +580,6 @@ describe("MeasureEditor component", () => {
   });
 
   it("reports an error when save cql fails", async () => {
-    // mock put call for errors
     mockedAxios.put.mockImplementation((args) => {
       if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
         return Promise.reject("server error");
@@ -592,13 +588,11 @@ describe("MeasureEditor component", () => {
     const { getByTestId } = renderEditor(measure);
     const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
     expect(measure.cql).toEqual(editorContainer.value);
-    // set new value to editor
     fireEvent.change(getByTestId("measure-editor"), {
       target: {
         value: "test cql",
       },
     });
-    // click on save button
     fireEvent.click(getByTestId("save-cql-btn"));
     await waitFor(() => {
       const error = getByTestId("generic-error-text-header");
@@ -713,7 +707,6 @@ describe("MeasureEditor component", () => {
     });
     const { getByTestId } = renderEditor(measureWithCqlCodes);
 
-    // set new value to editor
     fireEvent.change(getByTestId("measure-editor"), {
       target: {
         value:
@@ -729,7 +722,6 @@ describe("MeasureEditor component", () => {
           "} display 'Type B viral hepatitis'\n",
       },
     });
-    // click on save button
     fireEvent.click(getByTestId("save-cql-btn"));
     await waitFor(() => {
       const success = getByTestId("generic-success-text-header");
@@ -1006,7 +998,6 @@ describe("EditorWithTerminology", () => {
       "using QDM version '5.6'\n" +
       "include TestHelpers version '1.0.000' called Helpers\n";
     renderEditor(measureWithCql);
-    // click on apply library
     const applyLibraryBtn = screen.getByTestId("apply-library");
     userEvent.click(applyLibraryBtn);
     await waitFor(() => {
@@ -1057,7 +1048,6 @@ describe("EditorWithTerminology", () => {
       Promise.resolve({ data: measureWithNoIncludes })
     );
     renderEditor(measureWithIncludes);
-    // click on delete included library button
     const deleteIncludeBtn = screen.getByTestId("delete-included-library");
     userEvent.click(deleteIncludeBtn);
     await waitFor(() => {

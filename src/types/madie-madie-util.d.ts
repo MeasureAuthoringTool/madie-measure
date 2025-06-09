@@ -19,6 +19,7 @@ declare module "@madie/madie-util" {
     MeasureSearch: boolean;
     OverlappingValueSets: boolean;
     EditTestsOnVersionedMeasures: boolean;
+    MinimizeAlerts: boolean;
     EnhancedTextFormatting: boolean;
   }
 
