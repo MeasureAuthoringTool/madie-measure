@@ -29,6 +29,10 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
+import {
+  ExpandIcon,
+  CollapseIcon,
+} from "../../../../../../../icons/MeasureListTableRightArrowIcons";
 import { customSort } from "../Hooks/UseTestCases";
 import { Measure, TestCase } from "@madie/madie-models";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
@@ -38,6 +42,7 @@ import useMeasureServiceApi from "../../../../../../../api/useMeasureServiceApi"
 import "./tcPagination.scss";
 import useTestCaseServiceApi from "../../../../api/useTestCaseServiceApi";
 import Typography from "@mui/material/Typography";
+import { useFeatureFlags } from "@madie/madie-util";
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
@@ -65,11 +70,34 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
   // utilities for filter & search
   const [filterBy, setFilterBy] = useState<string>("");
   const [searchField, setSearchField] = useState<string>("");
+  const [selectedIdForExpansion, setSelectedIdForExpansion] = useState(null);
+  const [isRowExpanded, setIsRowExpanded] = useState<boolean>(false);
+  const [expandedSectionData, setExpandedSectionData] = useState<TCRow[]>([]);
+  const featureFlags = useFeatureFlags();
 
   const [finalSearchAndFilterby, setFinalSearchAndFilterby] = useState({
     finalSearchField: "",
     finalFilterBy: "",
   });
+
+  type TCRow = {
+    id: string;
+    measureName: string;
+    version: string;
+    actions: any;
+    hasAssociatedMeasures: boolean;
+    cmsId?: string;
+  };
+
+  const transFormData = (measureList): TCRow[] => {
+    return measureList.map((measure) => ({
+      id: measure?.id,
+      measureName: measure?.measureName,
+      version: measure?.version,
+      actions: measure,
+      hasAssociatedMeasures: measure?.hasAssociatedMeasures,
+    }));
+  };
 
   const handleSearch = (e) => {
     setSearchField(e.target.value);
@@ -85,6 +113,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
   const [continueDisabled, setContinueDisabled] = useState<boolean>(
     _.isEmpty(selectedRowId)
   );
+  const measureServiceApi = useRef(useMeasureServiceApi()).current;
 
   const fetchMeasures = useCallback(() => {
     if (!measure || !measure.model || !measure.id || !open) {
@@ -106,6 +135,17 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
         optionalSearchProperties.push(filterMap[condition]);
       });
     }
+
+    const searchCriteria: any = {
+      searchField: finalSearchField,
+      model: measure.model,
+      excludeByMeasureIds: [measure.id],
+      optionalSearchProperties,
+    };
+
+    if (!featureFlags?.EditTestsOnVersionedMeasures) {
+      searchCriteria.draft = true;
+    }
     measureSearchApi.current
       .searchMeasuresByCriteria(
         true,
@@ -113,13 +153,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
         page,
         "lastModifiedAt",
         "DESC",
-        {
-          searchField: finalSearchField,
-          model: measure.model,
-          excludeByMeasureIds: [measure.id],
-          draft: true,
-          optionalSearchProperties,
-        },
+        searchCriteria,
         abortController.current
       )
       .then((response) => {
@@ -164,10 +198,30 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
     };
   }, [fetchMeasures, measure?.id]);
 
+  const handleRowClick = async (actions) => {
+    if (!isRowExpanded || selectedIdForExpansion !== actions?.measureSetId) {
+      setSelectedIdForExpansion(actions?.measureSetId);
+      const results = await measureServiceApi.getMeasuresByMeasureSetId(
+        actions?.measureSetId,
+        true
+      );
+      const filteredResults = results.filter(
+        (result) => result.id !== actions?.id
+      );
+      setIsRowExpanded(true);
+      setExpandedSectionData(transFormData(filteredResults));
+    } else {
+      setIsRowExpanded(false);
+      setExpandedSectionData(null);
+      setSelectedIdForExpansion(null);
+    }
+  };
+
   const columns = useMemo<ColumnDef<Measure>[]>(() => {
     setContinueDisabled(_.isEmpty(selectedRowId));
     const columnDefs = [];
     columnDefs.push({
+      accessorKey: "select",
       id: "select",
       cell: ({ row }) => {
         return (
@@ -180,7 +234,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
       },
     });
 
-    return [
+    const updatedColumns = [
       ...columnDefs,
       {
         header: "Measure Name",
@@ -204,9 +258,6 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
               maxLength={20}
               dataTestId={`measure-version-${info.row.original.id}`}
             />
-            {`${info.row.original.measureMetaData?.draft}` === "true" && (
-              <Chip tw="ml-6" className="chip-draft" label="Draft" />
-            )}
           </>
         ),
         accessorKey: "version",
@@ -214,10 +265,21 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
           customSort(rowA.original.version, rowB.original.version),
       },
       {
+        header: "Status",
+        cell: (info) => (
+          <>
+            {`${info.row.original.measureMetaData?.draft}` === "true" && (
+              <Chip className="chip-draft" label="Draft" />
+            )}
+          </>
+        ),
+        accessorKey: "measureMetaData.draft",
+      },
+      {
         header: "CMS ID",
         cell: (info) => (
           <TruncateText
-            text={_.toString(info.row.original.measureSet.cmsId)}
+            text={_.toString(info.row.original?.measureSet?.cmsId)}
             maxLength={20}
             dataTestId={`measure-cmsId-${info.row.original.id}`}
           />
@@ -230,7 +292,57 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
           ),
       },
     ];
-  }, [selectedRowId]);
+
+    if (featureFlags?.EditTestsOnVersionedMeasures) {
+      updatedColumns.push({
+        header: "",
+        cell: (info) => {
+          if (info.row.original?.hasAssociatedMeasures) {
+            const handleKeyDown = (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                handleRowClick(info.row.original);
+              }
+            };
+            return (
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  handleRowClick(info.row.original);
+                }}
+                onKeyDown={handleKeyDown}
+                style={{
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {isRowExpanded &&
+                selectedIdForExpansion === info.row.original.measureSetId ? (
+                  <CollapseIcon />
+                ) : (
+                  <ExpandIcon />
+                )}
+              </span>
+            );
+          } else {
+            return <></>;
+          }
+        },
+        accessorKey: "expandArrow",
+        enableSorting: false,
+      });
+    }
+
+    return updatedColumns;
+  }, [
+    selectedRowId,
+    featureFlags?.EditTestsOnVersionedMeasures,
+    selectedIdForExpansion,
+    isRowExpanded,
+    expandedSectionData,
+  ]);
 
   const table = useReactTable({
     data: measureList,
@@ -317,6 +429,10 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
   const handleDialogClose = (e) => {
     onClose();
   };
+
+  const expandedColumns = useMemo<ColumnDef<Measure>[]>(() => {
+    return columns;
+  }, [columns]);
 
   return (
     <MadieDialog
@@ -507,27 +623,50 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
                     </tr>
                   ) : (
                     table.getRowModel().rows.map((row) => (
-                      <tr
-                        key={row.id}
-                        className="ml-tr"
-                        data-testid={`row-item`}
-                        style={{
-                          borderTop: "solid 1px #8c8c8c",
-                          borderSpacing: "0 2em !important",
-                        }}
-                      >
-                        {row.getVisibleCells().map((cell) => (
-                          <td
-                            key={cell.id}
-                            data-testid={`measure-name-${cell.id}`}
-                          >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext()
-                            )}
-                          </td>
-                        ))}
-                      </tr>
+                      <React.Fragment key={row.id}>
+                        <tr
+                          key={row.id}
+                          className="ml-tr"
+                          data-testid={`row-item`}
+                          style={{
+                            borderTop: "solid 1px #8c8c8c",
+                            borderSpacing: "0 2em !important",
+                          }}
+                        >
+                          {row.getVisibleCells().map((cell) => (
+                            <td
+                              key={cell.id}
+                              data-testid={`measure-name-${cell.id}`}
+                            >
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </td>
+                          ))}
+                        </tr>
+                        {featureFlags?.EditTestsOnVersionedMeasures &&
+                          selectedIdForExpansion ===
+                            row.original.measureSetId &&
+                          expandedSectionData?.map((subRow) => (
+                            <tr key={subRow.id} className="expanded-row">
+                              {expandedColumns.map((column: any) => (
+                                <td key={column?.accessorKey || column.id}>
+                                  {column.accessorKey === "cmsId"
+                                    ? subRow?.actions?.measureSet?.cmsId || "" // directly render cmsId
+                                    : flexRender(
+                                        column.cell ?? column.accessorKey,
+                                        {
+                                          row: { original: subRow },
+                                          getValue: () =>
+                                            subRow[column.accessorKey],
+                                        }
+                                      )}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                      </React.Fragment>
                     ))
                   )}
                 </tbody>

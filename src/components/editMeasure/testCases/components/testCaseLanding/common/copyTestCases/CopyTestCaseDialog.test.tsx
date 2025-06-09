@@ -14,6 +14,12 @@ const { getByTestId, getByRole, findByTestId, findByRole } = screen;
 
 const MEASURE_OWNER = "test.user";
 
+jest.mock("@madie/madie-util", () => ({
+  useFeatureFlags: jest.fn().mockReturnValue({
+    EditTestsOnVersionedMeasures: false,
+  }),
+}));
+
 const testCases = [
   {
     id: "1",
@@ -215,7 +221,8 @@ describe("Copy Test Case Dialog Component", () => {
 
     expect(tableHeaders[1]).toHaveTextContent("Measure Name");
     expect(tableHeaders[2]).toHaveTextContent("Version");
-    expect(tableHeaders[3]).toHaveTextContent("CMS ID");
+    expect(tableHeaders[3]).toHaveTextContent("Status");
+    expect(tableHeaders[4]).toHaveTextContent("CMS ID");
 
     const tableRows = table.querySelectorAll("tbody tr");
 
@@ -267,7 +274,8 @@ describe("Copy Test Case Dialog Component", () => {
     const tableHeaders = table.querySelectorAll("thead th");
     expect(tableHeaders[1]).toHaveTextContent("Measure Name");
     expect(tableHeaders[2]).toHaveTextContent("Version");
-    expect(tableHeaders[3]).toHaveTextContent("CMS ID");
+    expect(tableHeaders[3]).toHaveTextContent("Status");
+    expect(tableHeaders[4]).toHaveTextContent("CMS ID");
     const tableRows = table.querySelectorAll("tbody tr");
     expect(tableRows[0]).toHaveTextContent(
       otherMeasuresOwnedByUser[0].measureName
@@ -372,7 +380,8 @@ describe("Copy Test Case Dialog Component", () => {
 
     expect(tableHeaders[1]).toHaveTextContent("Measure Name");
     expect(tableHeaders[2]).toHaveTextContent("Version");
-    expect(tableHeaders[3]).toHaveTextContent("CMS ID");
+    expect(tableHeaders[3]).toHaveTextContent("Status");
+    expect(tableHeaders[4]).toHaveTextContent("CMS ID");
 
     const tableRows = table.querySelectorAll("tbody tr");
     expect(tableRows.length).toBe(1);
