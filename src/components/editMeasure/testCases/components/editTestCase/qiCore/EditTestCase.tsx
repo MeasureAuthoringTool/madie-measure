@@ -495,7 +495,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
             value.replace(/([+-]\d{2}:\d{2}|Z)$/, "+00:00")
           )
             .utc()
-            .format();
+            .toISOString();
           if (value != newValue) {
             timezoneUpdated = true;
           }
