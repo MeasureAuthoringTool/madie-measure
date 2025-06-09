@@ -366,20 +366,6 @@ const TypeEditor = ({
 
           // This work is commented out as it may need to be used later. This is for handling when an extension is not present.
           // It's possible that this will not be possible later with the workflow.
-
-          // if (foundIndex === -1){
-          //   const extensionsArray = _.get(formik.values, `${resource?.resourceType}.extension`);
-          //   if (!extensionsArray){
-          //     // Case 1: There is no extension array at all.
-          //     updatedLabel = `${resource?.resourceType}.extension[0]`
-          //     // @ts-ignore
-          //   } else if (extensionsArray?.length){
-          //     // Case 2: There is an extension Array, we need to designate a new index for a new entry on it.
-          //     //@ts-ignore
-          //     updatedLabel = `${resource?.resourceType}.extension[${extensionsArray.length}]`
-          //   }
-          // }
-          // updatedLabel = `${resource?.resourceType}.extension[${foundIndex}]`;
           const foundValue = _.get(formik.values, updatedLabel);
           return extensionProfileDef ? (
             <Box sx={{ display: "flex", flexDirection: "column" }}>
@@ -436,16 +422,6 @@ const TypeEditor = ({
                       localFoundValue = _.get(formik.values, updatedLocalLabel);
                     }
                   }
-                  // This work is commented out as it may need to be used later. This is for handling when an extension is not present.
-                  // else {
-                  //   const extensionsArray = _.get(formik.values, `${updatedLabel}.extension`);
-                  //   if (!extensionsArray){
-                  //     updatedLocalLabel = `${updatedLabel}.extension[0]`
-                  //     //@ts-ignore
-                  //   } else if (extensionsArray?.length)
-                  //     //@ts-ignore
-                  //   updatedLocalLabel = `${updatedLabel}.extension[${extensionsArray.length}]`;
-                  // }
 
                   return (
                     <Box
