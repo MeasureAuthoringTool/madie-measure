@@ -78,7 +78,8 @@ export const isPopulation = (name: string) => {
     name !== "Functions" &&
     name !== "Definitions" &&
     name !== "Unused" &&
-    name !== "SDE"
+    name !== "SDE" &&
+    name !== "RAV"
   );
 };
 

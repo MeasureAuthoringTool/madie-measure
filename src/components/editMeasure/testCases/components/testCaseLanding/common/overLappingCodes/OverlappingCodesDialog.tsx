@@ -54,7 +54,7 @@ const Description = ({ valueSet }: { valueSet: OverlappingValueSetDto }) => {
       </Box>
       <Box display="flex" alignItems="center" gap={1}>
         <Typography variant="subtitle1" fontWeight="bold">
-          {valueSet?.url ? "Url" : "Oid"}:
+          {valueSet?.url ? "URL" : "OID"}:
         </Typography>
         <Typography variant="body1" tw="break-all">
           {valueSet?.url ? valueSet.url : valueSet.oid}

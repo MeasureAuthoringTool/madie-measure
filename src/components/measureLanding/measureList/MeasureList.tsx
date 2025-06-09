@@ -1,5 +1,7 @@
 import React, {
+  Dispatch,
   HTMLProps,
+  SetStateAction,
   useCallback,
   useEffect,
   useMemo,
@@ -10,11 +12,9 @@ import tw from "twin.macro";
 import "styled-components/macro";
 import { Measure, Model } from "@madie/madie-models";
 import { useNavigate } from "react-router-dom";
-import { Chip, IconButton, InputAdornment } from "@mui/material";
+import { Chip } from "@mui/material";
 import {
   Button,
-  Popover,
-  TextField,
   Toast,
   TruncateText,
 } from "@madie/madie-design-system/dist/react";
@@ -28,16 +28,11 @@ import {
 } from "@tanstack/react-table";
 
 import InvalidTestCaseDialog from "../../common/invalidTestCaseDialog/InvalidTestCaseDialog";
-
-import ClearIcon from "@mui/icons-material/Clear";
-import SearchIcon from "@mui/icons-material/Search";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
 import CreatVersionDialog from "../../common/createVersionDialog/CreateVersionDialog";
 import DraftMeasureDialog from "../../common/draftMeasureDialog/DraftMeasureDialog";
 import versionErrorHelper from "../../../utils/versionErrorHelper";
-import getModelFamily from "../../../utils/measureModelHelpers";
-import _ from "lodash";
 import ExportDialog from "./exportDialog/ExportDialog";
 import InvalidMeasureNameDialog from "./InvalidMeasureNameDialog/InvalidMeasureNameDialog";
 import getLibraryNameErrors from "./InvalidMeasureNameDialog/getLibraryNameErrors";
@@ -52,39 +47,19 @@ import {
 } from "../../../icons/MeasureListTableRightArrowIcons";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { exportMeasure as downloadMeasureExport } from "../../../utils/exportUtil";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
-
-const searchInputStyle = {
-  borderRadius: "3px",
-  height: 40,
-  "& .MuiOutlinedInput-notchedOutline": {
-    borderRadius: "3px",
-    borderColor: "#8C8C8C",
-    "& legend": {
-      width: 0,
-    },
-  },
-  "& .MuiOutlinedInput-root": {
-    "&&": {
-      borderRadius: "3px",
-    },
-  },
-  "& .MuiInputBase-input": {
-    height: 40,
-    fontFamily: "Rubik",
-    fontSize: 14,
-    borderRadius: "3px",
-    padding: "9px 14px",
-    "&::placeholder": {
-      opacity: 1,
-      color: "#717171",
-    },
-  },
-};
+import { MeasureSearchCriteria } from "../MeasureLanding";
+import Search from "./measureSearch/Search";
+import queryString from "query-string";
 
 export default function MeasureList(props: {
+  retrieveMeasures?: (
+    tab: number,
+    limit: number,
+    page: number,
+    searchCriteria: MeasureSearchCriteria,
+    sort: string,
+    direction: string
+  ) => void;
   measureList: Measure[];
   setMeasureList;
   setTotalPages;
@@ -93,29 +68,28 @@ export default function MeasureList(props: {
   setOffset;
   setLoading;
   activeTab: number;
-  searchCriteria: string;
-  setSearchCriteria;
+  searchCriteria: MeasureSearchCriteria;
+  setSearchCriteria: Dispatch<SetStateAction<MeasureSearchCriteria>>;
   currentLimit: number;
   currentPage: number;
-  setMeasureCounts;
-  currentSort;
-  setCurrentSort;
-  currentDirection;
-  setCurrentDirection;
+  setCurrentPage?: Dispatch<SetStateAction<number>>;
+  handlePageChange?: any;
+  currentSort?;
+  setCurrentSort?;
+  currentDirection?;
+  setCurrentDirection?;
   setErrMsg;
+  measurePageOptionsLimit: any;
+  search: any;
 }) {
+  const { searchCriteria, setSearchCriteria, retrieveMeasures } = { ...props };
   const measureServiceApi = useRef(useMeasureServiceApi()).current; //needs to be ref or triggers jest. throws warn
-  // CanDraftLookup will be an object who's keys are measureSetIds, to check weather we can draft M
-  const [canDraftLookup, setCanDraftLookup] = useState<object>({});
-  const canDraftRef = useRef<object>();
-  canDraftRef.current = canDraftLookup;
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
 
   const navigate = useNavigate();
   // Popover utilities
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [selectedMeasure, setSelectedMeasure] = useState<Measure>(null);
-  const [canEdit, setCanEdit] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   // if user can edit and it is a version, then draft button
 
@@ -153,22 +127,6 @@ export default function MeasureList(props: {
     useState([]);
   const featureFlags = useFeatureFlags();
 
-  const buildLookup = useCallback(
-    async (measureList) => {
-      const measureSetList = measureList.map((m) => m.measureSetId);
-      try {
-        const results = await measureServiceApi.fetchMeasureDraftStatuses(
-          measureSetList
-        );
-        if (results) {
-          setCanDraftLookup(results);
-        }
-      } catch (e) {
-        console.warn("Error fetching draft statuses: ", e);
-      }
-    },
-    [measureServiceApi]
-  );
   const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
   const transFormData = (measureList): TCRow[] => {
     return measureList.map((measure) => ({
@@ -208,7 +166,6 @@ export default function MeasureList(props: {
   const [expandedSectionData, setExpandedSectionData] = useState<TCRow[]>([]);
   useEffect(() => {
     if (props.measureList && measureServiceApi) {
-      buildLookup(props.measureList);
       setData(transFormData(props.measureList));
     }
   }, [props.measureList, measureServiceApi]);
@@ -293,11 +250,22 @@ export default function MeasureList(props: {
         <Button
           variant="outline-filled"
           data-testid={`measure-action-${info.row.original.id}`}
-          aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
+          aria-live="polite"
+          aria-label={`${
+            checkUserCanEdit(
+              info.row.original.actions?.measureSet?.owner,
+              info.row.original.actions?.measureSet?.acls
+            ) && info.row.original.actions.measureMetaData?.draft
+              ? "Edit"
+              : "View"
+          } Measure ${info.row.original.measureName} ${
+            info.row.original.version
+          }${info.row.original.actions.measureMetaData?.draft ? " Draft" : ""}`}
           onClick={() =>
             navigate(`/measures/${info.row.original.id}/edit/details`)
           }
           role="button"
+          tabIndex={0}
         >
           {checkUserCanEdit(
             info.row.original.actions?.measureSet?.owner,
@@ -406,7 +374,7 @@ export default function MeasureList(props: {
         <Button
           variant="outline-filled"
           data-testid={`measure-action-${info.row.original.id}`}
-          aria-label={`Measure ${info.row.original.measureName} version ${info.row.original.version} draft status ${info.row.original.actions.measureMetaData?.draft} Select`}
+          aria-label={`Measure ${info.row.original.measureName} ${info.row.original.version}  ${info.row.original.actions.measureMetaData?.draft} Select`}
           onClick={() =>
             navigate(`/measures/${info.row.original.id}/edit/details`)
           }
@@ -650,54 +618,9 @@ export default function MeasureList(props: {
     setToastOpen(open);
   };
 
-  const handleClearClick = async (event) => {
-    props.setLoading(true);
-    abortController.current = new AbortController();
-    props.setSearchCriteria("");
-    measureServiceApi
-      .fetchMeasures(
-        props.activeTab === 0,
-        props.currentLimit,
-        0,
-        "",
-        "",
-        abortController.current.signal
-      )
-      .then((data) => {
-        setPageProps(data);
-      })
-      .catch((error: Error) => {
-        props.setErrMsg("");
-      });
-    navigate(`?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`);
-  };
-
-  const doSearch = () => {
-    abortController.current = new AbortController();
-    props.setErrMsg();
-    measureServiceApi
-      .searchMeasuresByCriteria(
-        props.activeTab === 0,
-        props.currentLimit,
-        0,
-        {
-          searchField: props.searchCriteria,
-        },
-        abortController.current.signal
-      )
-      .then((data) => {
-        setPageProps(data);
-      })
-      .catch((error: Error) => {
-        props.setLoading(false);
-        props.setErrMsg(error.message);
-      });
-  };
-
   const handleSort = async (sort: string) => {
     props.setLoading(true);
     abortController.current = new AbortController();
-    props.setSearchCriteria("");
     let sortChange = "lastModifiedAt";
     let directionChange = "DESC";
     if (sort === props.currentSort) {
@@ -714,65 +637,7 @@ export default function MeasureList(props: {
     }
     props.setCurrentSort(sortChange);
     props.setCurrentDirection(directionChange);
-    measureServiceApi
-      .fetchMeasures(
-        props.activeTab === 0,
-        props.currentLimit,
-        0,
-        sortChange,
-        directionChange,
-        abortController.current.signal
-      )
-      .then((data) => {
-        setPageProps(data);
-      })
-      .catch((error: Error) => {
-        props.setErrMsg("");
-      });
-    navigate(`?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`);
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (props.searchCriteria) {
-      props.setLoading(true);
-      doSearch();
-    }
-
-    navigate(`?tab=${props.activeTab}&page=${1}&limit=${props.currentLimit}`);
-  };
-  const setPageProps = (data) => {
-    if (data) {
-      const { content, totalPages, totalElements, numberOfElements, pageable } =
-        data;
-      table.toggleAllRowsSelected(false);
-      props.setTotalPages(totalPages);
-      props.setTotalItems(totalElements);
-      props.setVisibleItems(numberOfElements);
-
-      props.setMeasureList(content);
-      props.setOffset(pageable.offset);
-      props.setLoading(false);
-    }
-  };
-
-  const searchInputProps = {
-    startAdornment: (
-      <InputAdornment position="start">
-        <SearchIcon />
-      </InputAdornment>
-    ),
-    endAdornment: (
-      <IconButton
-        aria-label="Clear-Search"
-        sx={{
-          visibility: props.searchCriteria ? "visible" : "hidden",
-        }}
-        onClick={handleClearClick}
-      >
-        <ClearIcon />
-      </IconButton>
-    ),
+    props.handlePageChange(null, 1);
   };
 
   const updateTargetMeasure = (newValue) => {
@@ -825,24 +690,14 @@ export default function MeasureList(props: {
   };
 
   const doUpdateList = () => {
-    abortController.current = new AbortController();
-    props.setMeasureCounts();
-    measureServiceApi
-      .fetchMeasures(
-        props.activeTab === 0,
-        props.currentLimit,
-        props.currentPage,
-        "",
-        "",
-        abortController.current.signal
-      )
-      .then((data) => {
-        setPageProps(data);
-      })
-      .catch((error: Error) => {
-        props.setLoading(false);
-        props.setErrMsg(error.message);
-      });
+    retrieveMeasures(
+      props.activeTab,
+      props.measurePageOptionsLimit || 10,
+      props.currentPage,
+      searchCriteria,
+      props.currentSort,
+      props.currentDirection
+    );
   };
 
   const [invalidTestCaseOpen, setInvalidTestCaseOpen] =
@@ -989,6 +844,22 @@ export default function MeasureList(props: {
         setToastOpen(true);
         doUpdateList();
         handleDialogClose();
+
+        const values = queryString.parse(props.search);
+        const currentLimit = values.limit === "All" ? 50 : values.limit;
+
+        localStorage.setItem(
+          "cqlLibraryPageOptions",
+          JSON.stringify({
+            page: values.page || 1,
+            limit: currentLimit,
+          })
+        );
+        navigate(
+          `?tab=${props.activeTab}&page=${
+            values.page || 1
+          }&limit=${currentLimit}`
+        );
       }
     } catch (e) {
       if (e?.response?.data) {
@@ -1042,33 +913,13 @@ export default function MeasureList(props: {
 
   return (
     <div style={{ overflow: "auto" }}>
-      <div tw="grid grid-cols-3 gap-4 m-4">
-        <div tw="col-span-2">
-          <form onSubmit={handleSubmit} tw="w-1/4">
-            <TextField
-              onChange={(newValue) => {
-                props.setSearchCriteria(newValue.target.value);
-              }}
-              id="searchMeasure"
-              name="searchMeasure"
-              placeholder="Search Measure"
-              type="search"
-              fullWidth
-              data-testid="measure-search-input"
-              label="Filter Measures"
-              variant="outlined"
-              defaultValue={props.searchCriteria}
-              value={props.searchCriteria}
-              inputProps={{
-                "data-testid": "searchMeasure-input",
-                "aria-required": "false",
-              }}
-              InputProps={searchInputProps}
-              sx={searchInputStyle}
-            />
-          </form>
-        </div>
-        <div tw="justify-self-end p-3">
+      <div tw="grid grid-cols-4 gap-4 m-4">
+        <Search
+          searchCriteria={searchCriteria}
+          setSearchCriteria={setSearchCriteria}
+          handlePageChange={props.handlePageChange}
+        />
+        <div tw="col-start-4 justify-self-end p-3">
           <ActionCenter
             updateTargetMeasure={updateTargetMeasure}
             exportMeasure={exportMeasure}

@@ -22,7 +22,15 @@ import {
 import "./MeasureLanding.scss";
 import { useDocumentTitle, useFeatureFlags } from "@madie/madie-util";
 import StatusHandler from "../editMeasure/editor/StatusHandler";
+import _ from "lodash";
 
+export interface MeasureSearchCriteria {
+  searchField?: string;
+  optionalSearchProperties?: string[]; // can be ["measureName", "version", "cmsId"] ..etc
+  model?: string;
+  draft?: boolean;
+  excludeByMeasureIds?: string[];
+}
 export default function MeasureLanding() {
   useDocumentTitle("MADiE Measures");
   const { search } = useLocation();
@@ -40,7 +48,10 @@ export default function MeasureLanding() {
   const [visibleItems, setVisibleItems] = useState<number>(0);
   const activeTab: number = values.tab ? Number(values.tab) : 0;
   const [offset, setOffset] = useState<number>(0);
-  const [searchCriteria, setSearchCriteria] = useState("");
+  const [searchCriteria, setSearchCriteria] = useState<MeasureSearchCriteria>({
+    searchField: "",
+    optionalSearchProperties: [],
+  });
   const [currentLimit, setCurrentLimit] = useState(10);
   const [currentPage, setCurrentPage] = useState(0);
   const [errMsg, setErrMsg] = useState(undefined);
@@ -50,48 +61,82 @@ export default function MeasureLanding() {
   const featureFlags = useFeatureFlags();
 
   // pull info from some query url
-  const curLimit = values.limit && Number(values.limit);
-  const curPage = (values.page && Number(values.page)) || 1;
+  const measurePageOptions = JSON.parse(
+    window.localStorage.getItem("measurePageOptions")
+  );
+
+  const curLimit = measurePageOptions?.limit
+    ? measurePageOptions.limit
+    : values.limit
+    ? values.limit
+    : 10;
+
+  const curPage = measurePageOptions?.page
+    ? measurePageOptions.page
+    : values.page
+    ? Number(values.page)
+    : 1;
+
   // can we do stuff
   const canGoNext = (() => {
     return curPage < totalPages;
   })();
   const canGoPrev = Number(values?.page) > 1;
   const handlePageChange = (e, v) => {
+    const updatedLimit =
+      curLimit !== undefined ? (curLimit === "All" ? 50 : curLimit) : 10;
+
     setCurrentPage(v - 1);
-    navigate(`?tab=${activeTab}&page=${v}&limit=${values?.limit || 10}`);
+    navigate(`?tab=${activeTab}&page=${v}&limit=${updatedLimit}`);
   };
   const handleLimitChange = (e) => {
     setCurrentLimit(e.target.value);
-    navigate(`?tab=${activeTab}&page=${0}&limit=${e.target.value}`);
+    navigate(`?tab=${activeTab}&page=1&limit=${e.target.value}`);
   };
 
+  useEffect(() => {
+    if (measurePageOptions) {
+      if (
+        !Object.keys(values).length &&
+        Object.keys(measurePageOptions).length
+      ) {
+        const { page, limit } = measurePageOptions;
+        navigate(`?tab=${activeTab}&page=${page}&limit=${limit}`);
+      }
+    }
+  }, [measurePageOptions, values]);
+
   const retrieveMeasures = useCallback(
-    async (tab, limit, page, searchCriteria, sort, direction) => {
+    async (
+      tab,
+      limit,
+      page,
+      searchCriteria: MeasureSearchCriteria,
+      sort,
+      direction
+    ) => {
       abortController.current = new AbortController();
       setLoading(true);
       try {
-        if (!searchCriteria) {
-          setErrMsg(null);
-          const data = await measureServiceApi.fetchMeasures(
-            tab === 0,
-            limit,
-            page,
-            sort,
-            direction,
-            abortController.current.signal
-          );
-          setPageProps(data);
-        } else {
-          const data = await measureServiceApi.searchMeasuresByCriteria(
-            tab === 0,
-            limit,
-            page,
-            { searchField: searchCriteria },
-            abortController.current.signal
-          );
-          setPageProps(data);
-        }
+        const optionalParams = searchCriteria?.optionalSearchProperties ?? [];
+        const firstParam = _.trim(optionalParams[0]);
+
+        const modifiedSearchCriteria = {
+          ...searchCriteria,
+          optionalSearchProperties:
+            firstParam && firstParam !== "-" ? [_.camelCase(firstParam)] : [],
+        };
+        const data = await measureServiceApi.searchMeasuresByCriteria(
+          tab === 0,
+          limit,
+          page,
+          sort,
+          direction,
+          modifiedSearchCriteria,
+          abortController.current.signal
+        );
+        setPageProps(data);
+        setMeasureCounts();
       } catch (error) {
         if (error.message !== "canceled") {
           setErrMsg(error.message);
@@ -138,15 +183,37 @@ export default function MeasureLanding() {
   ]);
 
   useEffect(() => {
+    const values = queryString.parse(search);
+    const updatedPage = values.page ? Number(values.page) : curPage;
+    const updatedLimit = values.limit || curLimit;
+
+    localStorage.setItem(
+      "measurePageOptions",
+      JSON.stringify({
+        page: updatedPage,
+        limit: updatedLimit,
+      })
+    );
+
     retrieveMeasures(
       activeTab,
-      curLimit === undefined ? 10 : curLimit,
-      curPage - 1,
+      updatedLimit,
+      updatedPage - 1,
       searchCriteria,
       currentSort,
       currentDirection
     );
-  }, [retrieveMeasures, activeTab, curLimit, curPage, measureServiceApi]);
+  }, [
+    search,
+    retrieveMeasures,
+    activeTab,
+    curLimit,
+    curPage,
+    measureServiceApi,
+    searchCriteria,
+    currentSort,
+    currentDirection,
+  ]);
   // create is in a different app, so we need to listen for it.
   useEffect(() => {
     const createListener = () => {
@@ -154,7 +221,7 @@ export default function MeasureLanding() {
         0,
         curLimit === undefined ? 10 : curLimit,
         0,
-        undefined,
+        searchCriteria,
         currentSort,
         currentDirection
       );
@@ -169,8 +236,22 @@ export default function MeasureLanding() {
   const handleTabChange = (event, nextTab) => {
     abortController.current.abort();
     setMeasureList(null);
-    const limit = values?.limit || 10;
-    navigate(`?tab=${nextTab}&page=0&limit=${limit}`);
+    const updatedLimit =
+      values?.limit !== undefined
+        ? nextTab === 1 && values?.limit === "All"
+          ? 50
+          : values?.limit
+        : 10;
+    // Save updated limit to local storage
+    localStorage.setItem(
+      "measurePageOptions",
+      JSON.stringify({
+        page: 1, // Reset to the first page
+        limit: updatedLimit,
+      })
+    );
+
+    navigate(`?tab=${nextTab}&page=1&limit=${updatedLimit}`);
   };
 
   // we need to tell our layout page that we've loaded to prevent strange tab order
@@ -232,6 +313,8 @@ export default function MeasureLanding() {
           {!loading && (
             <div className="table">
               <MeasureList
+                measurePageOptionsLimit={measurePageOptions?.limit}
+                retrieveMeasures={retrieveMeasures}
                 measureList={measureList}
                 setMeasureList={setMeasureList}
                 setTotalPages={setTotalPages}
@@ -244,24 +327,33 @@ export default function MeasureLanding() {
                 setSearchCriteria={setSearchCriteria}
                 currentLimit={currentLimit}
                 currentPage={currentPage}
-                setMeasureCounts={setMeasureCounts}
+                setCurrentPage={setCurrentPage}
+                handlePageChange={handlePageChange}
                 currentSort={currentSort}
                 setCurrentSort={setCurrentSort}
                 currentDirection={currentDirection}
                 setCurrentDirection={setCurrentDirection}
                 setErrMsg={setErrMsg}
+                search={search}
               />
               <div className="pagination-container">
                 {totalItems > 0 && (
                   <Pagination
                     totalItems={totalItems}
                     visibleItems={visibleItems}
-                    limitOptions={[10, 25, 50]}
+                    limitOptions={[
+                      10,
+                      25,
+                      50,
+                      ...(totalItems > 50 && activeTab === 0 ? ["All"] : []),
+                    ]}
                     offset={offset}
                     handlePageChange={handlePageChange}
                     handleLimitChange={handleLimitChange}
-                    page={Number(values?.page) || 1}
-                    limit={Number(values?.limit) || 10}
+                    page={curPage}
+                    limit={
+                      curLimit === "All" && totalItems <= 50 ? 50 : curLimit
+                    }
                     count={totalPages}
                     shape="rounded"
                     hideNextButton={!canGoNext}

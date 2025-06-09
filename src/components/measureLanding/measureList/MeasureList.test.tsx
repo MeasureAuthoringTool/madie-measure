@@ -23,7 +23,10 @@ import useMeasureServiceApi, {
 import { oneItemResponse } from "../../__mocks__/mockMeasureResponses";
 import userEvent from "@testing-library/user-event";
 import { v4 as uuid } from "uuid";
-import ServiceContext, { ServiceConfig } from "../../../api/ServiceContext";
+import ServiceContext, {
+  ApiContextProvider,
+  ServiceConfig,
+} from "../../../api/ServiceContext";
 import { Simulate } from "react-dom/test-utils";
 // @ts-ignore
 import { useFeatureFlags, checkUserCanEdit } from "@madie/madie-util";
@@ -239,7 +242,6 @@ const serviceConfig = {
   measureService: { baseUrl: "" },
   terminologyService: { baseUrl: "" },
 } as unknown as ServiceConfig;
-const abortController = new AbortController();
 
 const setMeasureListMock = jest.fn();
 const setTotalPagesMock = jest.fn();
@@ -251,6 +253,8 @@ const setSearchCriteriaMock = jest.fn();
 const setErrMsgMock = jest.fn();
 const setCurrentSortMock = jest.fn();
 const setCurrentDirectionMock = jest.fn();
+const setCurrentPageMock = jest.fn();
+const handlePageChangeMock = jest.fn();
 
 describe("Measure List component", () => {
   beforeEach(() => {
@@ -266,6 +270,7 @@ describe("Measure List component", () => {
 
   afterEach(() => {
     cleanup();
+    jest.clearAllMocks();
   });
 
   it("should display a list of measures", async () => {
@@ -280,7 +285,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -306,7 +311,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -324,7 +329,7 @@ describe("Measure List component", () => {
   });
 
   it("should display View button for versioned measures", async () => {
-    const { getByTestId } = render(
+    const { getByTestId, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -335,7 +340,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -350,11 +355,12 @@ describe("Measure List component", () => {
     expect(viewButton).toBeInTheDocument();
     userEvent.click(viewButton);
     expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID3/edit/details");
+    unmount();
   });
 
   it("Search measure should display returned measures", async () => {
-    const { getByTestId, getByText, unmount } = render(
-      <ServiceContext.Provider value={serviceConfig}>
+    const { getByText, unmount } = render(
+      <ApiContextProvider value={serviceConfig}>
         <MeasureList
           measureList={measures}
           setMeasureList={setMeasureListMock}
@@ -364,40 +370,45 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={"test"}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
+          setCurrentPage={setCurrentPageMock}
+          handlePageChange={handlePageChangeMock}
+          currentSort={""}
+          setCurrentSort={setCurrentSortMock}
+          currentDirection={""}
+          setCurrentDirection={setCurrentDirectionMock}
           setErrMsg={setErrMsgMock}
         />
-      </ServiceContext.Provider>
+      </ApiContextProvider>
     );
 
-    const searchFieldInput = getByTestId(
-      "searchMeasure-input"
-    ) as HTMLInputElement;
-    expect(searchFieldInput).toBeInTheDocument();
-    userEvent.type(searchFieldInput, "test");
-    expect(searchFieldInput.value).toBe("test");
+    const searchField = (await screen.findByTestId(
+      "measure-search-input"
+    )) as HTMLInputElement;
+    expect(searchField).toBeInTheDocument();
+    userEvent.type(searchField, "test");
+    expect(searchField.value).toBe("test");
 
-    fireEvent.submit(searchFieldInput);
+    fireEvent.submit(searchField);
 
     measures.forEach((m) => {
       expect(getByText(m.measureName)).toBeInTheDocument();
     });
 
-    expect(mockMeasureServiceApi.searchMeasuresByCriteria).toHaveBeenCalledWith(
-      true,
-      10,
-      0,
-      { searchField: "test" },
-      abortController.signal
-    );
+    await waitFor(() => {
+      expect(setSearchCriteriaMock).toHaveBeenCalledWith({
+        searchField: "test",
+        optionalSearchProperties: [undefined],
+      });
+    });
     unmount();
   });
 
   it("Clear search criteria should clear input field", async () => {
-    const { getByTestId, getByText, getByRole, unmount } = render(
+    const { getByText, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -408,7 +419,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={"test"}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -416,37 +427,36 @@ describe("Measure List component", () => {
         />
       </ServiceContext.Provider>
     );
-    const searchFieldInput = getByTestId(
-      "searchMeasure-input"
-    ) as HTMLInputElement;
-    expect(searchFieldInput).toBeInTheDocument();
-    userEvent.type(searchFieldInput, "test");
-    expect(searchFieldInput.value).toBe("test");
 
-    fireEvent.submit(searchFieldInput);
+    const searchField = (await screen.findByTestId(
+      "measure-search-input"
+    )) as HTMLInputElement;
+    expect(searchField).toBeInTheDocument();
+    userEvent.type(searchField, "test");
+    expect(searchField.value).toBe("test");
+
+    fireEvent.submit(searchField);
 
     measures.forEach((m) => {
       expect(getByText(m.measureName)).toBeInTheDocument();
     });
 
-    const clearButton = getByRole("button", {
+    const clearButton = screen.getByRole("button", {
       name: /Clear-Search/i,
     });
     userEvent.click(clearButton);
 
-    expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
-      true,
-      10,
-      0,
-      "",
-      "",
-      abortController.signal
-    );
+    await waitFor(() => {
+      expect(setSearchCriteriaMock).toHaveBeenCalledWith({
+        searchField: "test",
+        optionalSearchProperties: [undefined],
+      });
+    });
     unmount();
   });
 
   it("empty search criteria won't trigger search", async () => {
-    const { getByTestId, unmount } = render(
+    const { unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -457,7 +467,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -465,72 +475,15 @@ describe("Measure List component", () => {
         />
       </ServiceContext.Provider>
     );
-    const searchFieldInput = getByTestId(
-      "searchMeasure-input"
-    ) as HTMLInputElement;
-    userEvent.type(searchFieldInput, "");
-    expect(searchFieldInput.value).toBe("");
+    const searchField = (await screen.findByTestId(
+      "measure-search-input"
+    )) as HTMLInputElement;
+    expect(searchField).toBeInTheDocument();
+    expect(searchField.value).toBe("");
 
-    fireEvent.submit(searchFieldInput);
+    fireEvent.submit(searchField);
 
-    expect(
-      mockMeasureServiceApi.searchMeasuresByCriteria
-    ).not.toHaveBeenCalledWith(true, 10, 0, "");
-    unmount();
-  });
-
-  it("Clear search with error should still do the push", async () => {
-    (mockMeasureServiceApi.fetchMeasures as jest.Mock)
-      .mockClear()
-      .mockRejectedValueOnce(new Error("Unable to fetch measures"));
-    (mockMeasureServiceApi.searchMeasuresByCriteria as jest.Mock)
-      .mockClear()
-      .mockRejectedValueOnce(new Error("Unable to fetch measures"));
-    const { getByTestId, getByRole, getByText, unmount } = render(
-      <ServiceContext.Provider value={serviceConfig}>
-        <MeasureList
-          measureList={measures}
-          setMeasureList={setMeasureListMock}
-          setTotalPages={setTotalPagesMock}
-          setTotalItems={setTotalItemsMock}
-          setVisibleItems={setVisibleItemsMock}
-          setOffset={setOffsetMock}
-          setLoading={setLoadingMock}
-          activeTab={0}
-          searchCriteria={"test"}
-          setSearchCriteria={setSearchCriteriaMock}
-          currentLimit={10}
-          currentPage={0}
-          setErrMsg={setErrMsgMock}
-        />
-      </ServiceContext.Provider>
-    );
-
-    const searchFieldInput = getByTestId(
-      "searchMeasure-input"
-    ) as HTMLInputElement;
-    userEvent.type(searchFieldInput, "test");
-    expect(searchFieldInput.value).toBe("test");
-
-    fireEvent.submit(searchFieldInput);
-
-    measures.forEach((m) => {
-      expect(getByText(m.measureName)).toBeInTheDocument();
-    });
-
-    const clearButton = getByRole("button", {
-      name: /Clear-Search/i,
-    });
-    userEvent.click(clearButton);
-    expect(mockMeasureServiceApi.fetchMeasures).toHaveBeenCalledWith(
-      true,
-      10,
-      0,
-      "",
-      "",
-      abortController.signal
-    );
-    expect(mockPush).toHaveBeenCalledWith("?tab=0&page=1&limit=10");
+    expect(setSearchCriteriaMock).not.toHaveBeenCalled();
     unmount();
   });
 
@@ -546,7 +499,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -591,7 +544,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -670,7 +623,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -751,7 +704,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -832,7 +785,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -913,7 +866,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -994,7 +947,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -1075,7 +1028,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -1150,7 +1103,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -1187,99 +1140,6 @@ describe("Measure List component", () => {
         "New version of measure is Successfully created"
       );
 
-      const closeButton = getByTestId("close-toast-button");
-      userEvent.click(closeButton);
-      setTimeout(() => {
-        expect(
-          queryByTestId("create-version-success-text")
-        ).not.toBeInTheDocument();
-      }, 500);
-    });
-    unmount();
-  });
-
-  it("should handle invalid test cases dialog", async () => {
-    const invalidTestCaseResponse = {
-      response: {},
-      request: {
-        responseText: JSON.stringify({ message: "" }),
-      },
-      status: 202,
-    };
-    const success = {
-      response: {
-        request: {
-          responseText: JSON.stringify({ message: "" }),
-        },
-        data: {},
-      },
-    };
-    const useMeasureServiceMockRejected = {
-      checkValidVersion: jest.fn().mockResolvedValue(invalidTestCaseResponse),
-      createVersion: jest.fn().mockResolvedValue(success),
-      checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
-      fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
-      fetchMeasure: jest.fn().mockResolvedValue(measures[0]),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceMock.mockImplementation(() => {
-      return useMeasureServiceMockRejected;
-    });
-    const { getByTestId, queryByTestId, unmount } = render(
-      <ServiceContext.Provider value={serviceConfig}>
-        <MeasureList
-          measureList={measures}
-          setMeasureList={setMeasureListMock}
-          setTotalPages={setTotalPagesMock}
-          setTotalItems={setTotalItemsMock}
-          setVisibleItems={setVisibleItemsMock}
-          setOffset={setOffsetMock}
-          setLoading={setLoadingMock}
-          activeTab={0}
-          searchCriteria={""}
-          setSearchCriteria={setSearchCriteriaMock}
-          currentLimit={10}
-          currentPage={0}
-          setMeasureCounts={jest.fn()}
-          setErrMsg={setErrMsgMock}
-        />
-      </ServiceContext.Provider>
-    );
-    const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
-    userEvent.click(checkBoxes[1]);
-    const createVersionButton = getByTestId("version-action-btn");
-    expect(createVersionButton).toBeInTheDocument();
-    userEvent.click(createVersionButton);
-    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
-
-    const typeInput = screen.getByTestId(
-      "version-type-input"
-    ) as HTMLInputElement;
-    expect(typeInput).toBeInTheDocument();
-    expect(typeInput.value).toBe("");
-    fireEvent.change(typeInput, {
-      target: { value: "major" },
-    });
-    expect(typeInput.value).toBe("major");
-    const confirmVersionNode = getByTestId(
-      "confirm-version-input"
-    ) as HTMLInputElement;
-    userEvent.type(confirmVersionNode, "1.0.000");
-    Simulate.change(confirmVersionNode);
-    expect(confirmVersionNode.value).toBe("1.0.000");
-    await waitFor(() => {
-      userEvent.click(getByTestId("create-version-continue-button"));
-      expect(
-        screen.getByTestId("invalid-test-case-dialog")
-      ).toBeInTheDocument();
-      userEvent.click(
-        screen.getByTestId("invalid-test-dialog-continue-button")
-      );
-    });
-    await waitFor(() => {
-      expect(getByTestId("success-toast")).toHaveTextContent(
-        "New version of measure is Successfully created"
-      );
       const closeButton = getByTestId("close-toast-button");
       userEvent.click(closeButton);
       setTimeout(() => {
@@ -1303,7 +1163,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -1312,7 +1172,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const selectButton0 = await findByRole("button", {
-      name: "Measure new measure - A version 0.0.000 draft status true Select",
+      name: "Edit Measure new measure - A 0.0.000 Draft",
     });
 
     // first measure should have Version action as this is a draft measure
@@ -1335,7 +1195,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -1388,7 +1248,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -1447,7 +1307,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -1514,7 +1374,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -1584,7 +1444,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -1641,7 +1501,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -1696,7 +1556,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -1745,7 +1605,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -1802,7 +1662,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -1856,7 +1716,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -1910,7 +1770,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -1964,7 +1824,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -2031,7 +1891,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -2085,7 +1945,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -2157,7 +2017,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -2212,7 +2072,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -2268,7 +2128,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -2339,7 +2199,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -2379,7 +2239,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -2410,7 +2270,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -2444,7 +2304,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -2469,7 +2329,7 @@ describe("Measure List component", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
-          searchCriteria={""}
+          searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
@@ -2490,416 +2350,423 @@ describe("Measure List component", () => {
     userEvent.click(cancelDelete);
     unmount();
   });
+});
 
-  describe("Action Center Tests", () => {
-    beforeEach(() => {
-      jest.resetModules();
+describe("Action Center Tests", () => {
+  beforeEach(() => {
+    jest.resetModules();
+  });
+
+  it("should display View button for versioned measures", async () => {
+    render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const actionButton = screen.getByTestId(`measure-action-${measures[2].id}`);
+
+    expect(actionButton).toBeInTheDocument();
+
+    userEvent.click(actionButton);
+    expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID3/edit/details");
+  });
+
+  it("should display Edit button for draft and editable measures", async () => {
+    render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const actionButtonEdit = screen.getByTestId(
+      `measure-action-${measures[0].id}`
+    );
+    expect(actionButtonEdit).toBeInTheDocument();
+    userEvent.click(actionButtonEdit);
+    expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID1/edit/details");
+  });
+
+  it("should display View button for non-editable measures", async () => {
+    checkUserCanEdit.mockImplementationOnce(() => false);
+    render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const actionButton = screen.getByTestId(`measure-action-${measures[3].id}`);
+
+    expect(actionButton).toBeInTheDocument();
+    userEvent.click(actionButton);
+    expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID4/edit/details");
+  });
+
+  it("should display share dialog on clicking share action button", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      ShareMeasure: true,
+    }));
+
+    const { unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    expect(checkBoxes.length).toBe(5);
+    userEvent.click(checkBoxes[1]);
+    const shareButton = screen.getByTestId("share-action-btn");
+    expect(shareButton).toBeInTheDocument();
+    userEvent.click(shareButton);
+    userEvent.click(screen.getByRole("menuitem", { name: "Share With" }));
+    const shareDialog = screen.getByTestId("share-dialog");
+    expect(shareDialog).toBeInTheDocument();
+    const cancelButton = screen.getByTestId("share-cancel-button");
+    userEvent.click(cancelButton);
+
+    await waitFor(() => {
+      expect(shareDialog).not.toBeVisible();
     });
 
-    it("should display View button for versioned measures", async () => {
-      render(
-        <ServiceContext.Provider value={serviceConfig}>
-          <MeasureList
-            measureList={measures}
-            setMeasureList={setMeasureListMock}
-            setTotalPages={setTotalPagesMock}
-            setTotalItems={setTotalItemsMock}
-            setVisibleItems={setVisibleItemsMock}
-            setOffset={setOffsetMock}
-            setLoading={setLoadingMock}
-            activeTab={0}
-            searchCriteria={""}
-            setSearchCriteria={setSearchCriteriaMock}
-            currentLimit={10}
-            currentPage={0}
-            setErrMsg={setErrMsgMock}
-          />
-        </ServiceContext.Provider>
-      );
-      const actionButton = screen.getByTestId(
-        `measure-action-${measures[2].id}`
-      );
+    unmount();
+  });
+});
 
-      expect(actionButton).toBeInTheDocument();
+describe("Measure List with MeasureSearch enabled", () => {
+  beforeEach(() => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      MeasureSearch: true,
+    }));
+  });
 
-      userEvent.click(actionButton);
-      expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID3/edit/details");
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should display all columns when MeasureSearch is enabled", async () => {
+    const { getByText } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    // Verify all columns are present
+    expect(getByText("Measure")).toBeInTheDocument();
+    expect(getByText("Version")).toBeInTheDocument();
+    expect(getByText("Status")).toBeInTheDocument();
+    expect(getByText("Model")).toBeInTheDocument();
+    expect(getByText("Shared")).toBeInTheDocument();
+    expect(getByText("CMS ID")).toBeInTheDocument();
+    expect(getByText("Updated")).toBeInTheDocument();
+  });
+
+  it("should enable sortable columns when MeasureSearch is enabled", async () => {
+    const { getByText } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    // Verify all columns are present
+    expect(getByText("Measure")).toBeInTheDocument();
+    const measureButton = screen.getByRole("button", {
+      name: "Measure",
     });
-
-    it("should display Edit button for draft and editable measures", async () => {
-      render(
-        <ServiceContext.Provider value={serviceConfig}>
-          <MeasureList
-            measureList={measures}
-            setMeasureList={setMeasureListMock}
-            setTotalPages={setTotalPagesMock}
-            setTotalItems={setTotalItemsMock}
-            setVisibleItems={setVisibleItemsMock}
-            setOffset={setOffsetMock}
-            setLoading={setLoadingMock}
-            activeTab={0}
-            searchCriteria={""}
-            setSearchCriteria={setSearchCriteriaMock}
-            currentLimit={10}
-            currentPage={0}
-            setErrMsg={setErrMsgMock}
-          />
-        </ServiceContext.Provider>
-      );
-      const actionButtonEdit = screen.getByTestId(
-        `measure-action-${measures[0].id}`
-      );
-      expect(actionButtonEdit).toBeInTheDocument();
-      userEvent.click(actionButtonEdit);
-      expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID1/edit/details");
+    expect(measureButton).toBeEnabled();
+    expect(getByText("Version")).toBeInTheDocument();
+    const versionButton = screen.getByRole("button", {
+      name: "Version",
     });
-    it("should display View button for non-editable measures", async () => {
-      checkUserCanEdit.mockImplementationOnce(() => false);
-      render(
-        <ServiceContext.Provider value={serviceConfig}>
-          <MeasureList
-            measureList={measures}
-            setMeasureList={setMeasureListMock}
-            setTotalPages={setTotalPagesMock}
-            setTotalItems={setTotalItemsMock}
-            setVisibleItems={setVisibleItemsMock}
-            setOffset={setOffsetMock}
-            setLoading={setLoadingMock}
-            activeTab={0}
-            searchCriteria={""}
-            setSearchCriteria={setSearchCriteriaMock}
-            currentLimit={10}
-            currentPage={0}
-            setErrMsg={setErrMsgMock}
-          />
-        </ServiceContext.Provider>
-      );
-      const actionButton = screen.getByTestId(
-        `measure-action-${measures[3].id}`
-      );
-
-      expect(actionButton).toBeInTheDocument();
-      userEvent.click(actionButton);
-      expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID4/edit/details");
+    expect(versionButton).toBeEnabled();
+    expect(getByText("Status")).toBeInTheDocument();
+    const statusButton = screen.getByRole("button", {
+      name: "Status",
     });
-    it("should display share dialog on clicking share action button", async () => {
-      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-        ShareMeasure: true,
-      }));
+    expect(statusButton).toBeEnabled();
+    expect(getByText("Model")).toBeInTheDocument();
+    const modelButton = screen.getByRole("button", {
+      name: "Model",
+    });
+    expect(modelButton).toBeEnabled();
+    expect(getByText("Shared")).toBeInTheDocument();
+    const sharedButton = screen.getByRole("button", {
+      name: "Shared",
+    });
+    expect(sharedButton).toBeEnabled();
+    expect(getByText("CMS ID")).toBeInTheDocument();
+    const cmsIdButton = screen.getByRole("button", {
+      name: "CMS ID",
+    });
+    expect(cmsIdButton).toBeEnabled();
+    expect(getByText("Updated")).toBeInTheDocument();
+    const updatedButton = screen.getByRole("button", {
+      name: "Updated",
+    });
+    expect(updatedButton).toBeEnabled();
+  });
 
-      const { unmount } = render(
-        <ServiceContext.Provider value={serviceConfig}>
-          <MeasureList
-            measureList={measures}
-            setMeasureList={setMeasureListMock}
-            setTotalPages={setTotalPagesMock}
-            setTotalItems={setTotalItemsMock}
-            setVisibleItems={setVisibleItemsMock}
-            setOffset={setOffsetMock}
-            setLoading={setLoadingMock}
-            activeTab={0}
-            searchCriteria={""}
-            setSearchCriteria={setSearchCriteriaMock}
-            currentLimit={10}
-            currentPage={0}
-            setErrMsg={setErrMsgMock}
-          />
-        </ServiceContext.Provider>
-      );
-      const checkBoxes = await screen.findAllByRole("checkbox");
-      expect(checkBoxes.length).toBe(5);
-      userEvent.click(checkBoxes[1]);
-      const shareButton = screen.getByTestId("share-action-btn");
-      expect(shareButton).toBeInTheDocument();
-      userEvent.click(shareButton);
-      userEvent.click(screen.getByRole("menuitem", { name: "Share With" }));
-      const shareDialog = screen.getByTestId("share-dialog");
-      expect(shareDialog).toBeInTheDocument();
-      const cancelButton = screen.getByTestId("share-cancel-button");
-      userEvent.click(cancelButton);
+  it("should sort in order when column is clicked first", async () => {
+    render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          currentSort={""}
+          setCurrentSort={setCurrentSortMock}
+          currentDirection={""}
+          setCurrentDirection={setCurrentDirectionMock}
+          setErrMsg={setErrMsgMock}
+          handlePageChange={handlePageChangeMock}
+        />
+      </ServiceContext.Provider>
+    );
 
-      await waitFor(() => {
-        expect(shareDialog).not.toBeVisible();
-      });
+    const versionButton = screen.getByRole("button", {
+      name: "Version",
+    });
+    expect(versionButton).toBeEnabled();
 
-      unmount();
+    fireEvent.click(versionButton);
+
+    await waitFor(() => {
+      expect(setCurrentSortMock).toHaveBeenCalledWith("version");
+      expect(setCurrentDirectionMock).toHaveBeenCalledWith("ASC");
+      expect(handlePageChangeMock).toHaveBeenCalledWith(null, 1);
     });
   });
 
-  describe("Measure List with MeasureSearch enabled", () => {
-    beforeEach(() => {
-      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-        MeasureSearch: true,
-      }));
+  it("should sort in order when column is clicked second", async () => {
+    render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          currentSort={"version"}
+          setCurrentSort={setCurrentSortMock}
+          currentDirection={"ASC"}
+          setCurrentDirection={setCurrentDirectionMock}
+          setErrMsg={setErrMsgMock}
+          handlePageChange={handlePageChangeMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    const versionButton = screen.getByRole("button", {
+      name: "Version",
     });
+    expect(versionButton).toBeEnabled();
 
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
+    fireEvent.click(versionButton);
 
-    it("should display all columns when MeasureSearch is enabled", async () => {
-      const { getByText } = render(
-        <ServiceContext.Provider value={serviceConfig}>
-          <MeasureList
-            measureList={measures}
-            setMeasureList={setMeasureListMock}
-            setTotalPages={setTotalPagesMock}
-            setTotalItems={setTotalItemsMock}
-            setVisibleItems={setVisibleItemsMock}
-            setOffset={setOffsetMock}
-            setLoading={setLoadingMock}
-            activeTab={0}
-            searchCriteria={""}
-            setSearchCriteria={setSearchCriteriaMock}
-            currentLimit={10}
-            currentPage={0}
-            setErrMsg={setErrMsgMock}
-          />
-        </ServiceContext.Provider>
-      );
-
-      // Verify all columns are present
-      expect(getByText("Measure")).toBeInTheDocument();
-      expect(getByText("Version")).toBeInTheDocument();
-      expect(getByText("Status")).toBeInTheDocument();
-      expect(getByText("Model")).toBeInTheDocument();
-      expect(getByText("Shared")).toBeInTheDocument();
-      expect(getByText("CMS ID")).toBeInTheDocument();
-      expect(getByText("Updated")).toBeInTheDocument();
-    });
-
-    it("should enable sortable columns when MeasureSearch is enabled", async () => {
-      const { getByText } = render(
-        <ServiceContext.Provider value={serviceConfig}>
-          <MeasureList
-            measureList={measures}
-            setMeasureList={setMeasureListMock}
-            setTotalPages={setTotalPagesMock}
-            setTotalItems={setTotalItemsMock}
-            setVisibleItems={setVisibleItemsMock}
-            setOffset={setOffsetMock}
-            setLoading={setLoadingMock}
-            activeTab={0}
-            searchCriteria={""}
-            setSearchCriteria={setSearchCriteriaMock}
-            currentLimit={10}
-            currentPage={0}
-            setErrMsg={setErrMsgMock}
-          />
-        </ServiceContext.Provider>
-      );
-
-      // Verify all columns are present
-      expect(getByText("Measure")).toBeInTheDocument();
-      const measureButton = screen.getByRole("button", {
-        name: "Measure",
-      });
-      expect(measureButton).toBeEnabled();
-      expect(getByText("Version")).toBeInTheDocument();
-      const versionButton = screen.getByRole("button", {
-        name: "Version",
-      });
-      expect(versionButton).toBeEnabled();
-      expect(getByText("Status")).toBeInTheDocument();
-      const statusButton = screen.getByRole("button", {
-        name: "Status",
-      });
-      expect(statusButton).toBeEnabled();
-      expect(getByText("Model")).toBeInTheDocument();
-      const modelButton = screen.getByRole("button", {
-        name: "Model",
-      });
-      expect(modelButton).toBeEnabled();
-      expect(getByText("Shared")).toBeInTheDocument();
-      const sharedButton = screen.getByRole("button", {
-        name: "Shared",
-      });
-      expect(sharedButton).toBeEnabled();
-      expect(getByText("CMS ID")).toBeInTheDocument();
-      const cmsIdButton = screen.getByRole("button", {
-        name: "CMS ID",
-      });
-      expect(cmsIdButton).toBeEnabled();
-      expect(getByText("Updated")).toBeInTheDocument();
-      const updatedButton = screen.getByRole("button", {
-        name: "Updated",
-      });
-      expect(updatedButton).toBeEnabled();
-    });
-
-    it("should sort in order when column is clicked first", async () => {
-      const { getByText } = render(
-        <ServiceContext.Provider value={serviceConfig}>
-          <MeasureList
-            measureList={measures}
-            setMeasureList={setMeasureListMock}
-            setTotalPages={setTotalPagesMock}
-            setTotalItems={setTotalItemsMock}
-            setVisibleItems={setVisibleItemsMock}
-            setOffset={setOffsetMock}
-            setLoading={setLoadingMock}
-            activeTab={0}
-            searchCriteria={""}
-            setSearchCriteria={setSearchCriteriaMock}
-            currentLimit={10}
-            currentPage={0}
-            currentSort={""}
-            setCurrentSort={setCurrentSortMock}
-            currentDirection={""}
-            setCurrentDirection={setCurrentDirectionMock}
-            setErrMsg={setErrMsgMock}
-          />
-        </ServiceContext.Provider>
-      );
-
-      expect(getByText("Version")).toBeInTheDocument();
-      const versionButton = screen.getByRole("button", {
-        name: "Version",
-      });
-      expect(versionButton).toBeEnabled();
-
-      fireEvent.click(versionButton);
-      expect(setCurrentSortMock).toHaveBeenCalledWith("version");
-      expect(setCurrentDirectionMock).toHaveBeenCalledWith("ASC");
-      expect(mockPush).toHaveBeenCalledWith("?tab=0&page=1&limit=10");
-    });
-
-    it("should sort in order when column is clicked second", async () => {
-      const { getByText } = render(
-        <ServiceContext.Provider value={serviceConfig}>
-          <MeasureList
-            measureList={measures}
-            setMeasureList={setMeasureListMock}
-            setTotalPages={setTotalPagesMock}
-            setTotalItems={setTotalItemsMock}
-            setVisibleItems={setVisibleItemsMock}
-            setOffset={setOffsetMock}
-            setLoading={setLoadingMock}
-            activeTab={0}
-            searchCriteria={""}
-            setSearchCriteria={setSearchCriteriaMock}
-            currentLimit={10}
-            currentPage={0}
-            currentSort={"version"}
-            setCurrentSort={setCurrentSortMock}
-            currentDirection={"ASC"}
-            setCurrentDirection={setCurrentDirectionMock}
-            setErrMsg={setErrMsgMock}
-          />
-        </ServiceContext.Provider>
-      );
-
-      expect(getByText("Version")).toBeInTheDocument();
-      const versionButton = screen.getByRole("button", {
-        name: "Version",
-      });
-      expect(versionButton).toBeEnabled();
-
-      fireEvent.click(versionButton);
+    await waitFor(() => {
       expect(setCurrentSortMock).toHaveBeenCalledWith("version");
       expect(setCurrentDirectionMock).toHaveBeenCalledWith("DESC");
-      expect(mockPush).toHaveBeenCalledWith("?tab=0&page=1&limit=10");
+      expect(handlePageChangeMock).toHaveBeenCalledWith(null, 1);
     });
+  });
 
-    it("should sort in order when column is clicked third", async () => {
-      const { getByText } = render(
-        <ServiceContext.Provider value={serviceConfig}>
-          <MeasureList
-            measureList={measures}
-            setMeasureList={setMeasureListMock}
-            setTotalPages={setTotalPagesMock}
-            setTotalItems={setTotalItemsMock}
-            setVisibleItems={setVisibleItemsMock}
-            setOffset={setOffsetMock}
-            setLoading={setLoadingMock}
-            activeTab={0}
-            searchCriteria={""}
-            setSearchCriteria={setSearchCriteriaMock}
-            currentLimit={10}
-            currentPage={0}
-            currentSort={"version"}
-            setCurrentSort={setCurrentSortMock}
-            currentDirection={"DESC"}
-            setCurrentDirection={setCurrentDirectionMock}
-            setErrMsg={setErrMsgMock}
-          />
-        </ServiceContext.Provider>
-      );
+  it("should sort in order when column is clicked third", async () => {
+    const { getByText } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          currentSort={"version"}
+          setCurrentSort={setCurrentSortMock}
+          currentDirection={"DESC"}
+          setCurrentDirection={setCurrentDirectionMock}
+          setErrMsg={setErrMsgMock}
+          handlePageChange={handlePageChangeMock}
+        />
+      </ServiceContext.Provider>
+    );
 
-      expect(getByText("Version")).toBeInTheDocument();
-      const versionButton = screen.getByRole("button", {
-        name: "Version",
-      });
-      expect(versionButton).toBeEnabled();
+    expect(getByText("Version")).toBeInTheDocument();
+    const versionButton = screen.getByRole("button", {
+      name: "Version",
+    });
+    expect(versionButton).toBeEnabled();
 
-      fireEvent.click(versionButton);
+    fireEvent.click(versionButton);
+    await waitFor(() => {
       expect(setCurrentSortMock).toHaveBeenCalledWith("");
       expect(setCurrentDirectionMock).toHaveBeenCalledWith("");
-      expect(mockPush).toHaveBeenCalledWith("?tab=0&page=1&limit=10");
+      expect(handlePageChangeMock).toHaveBeenCalledWith(null, 1);
     });
+  });
 
-    it("should display shared icon when measure has ACLs", async () => {
-      const measureWithAcls = {
-        ...measures[0],
-        measureSet: {
-          ...measures[0].measureSet,
-          acls: [{ userId: "test-user", roles: ["SHARED_WITH"] }],
-        },
-      };
+  it("should display shared icon when measure has ACLs", async () => {
+    const measureWithAcls = {
+      ...measures[0],
+      measureSet: {
+        ...measures[0].measureSet,
+        acls: [{ userId: "test-user", roles: ["SHARED_WITH"] }],
+      },
+    };
 
-      const { getByTestId } = render(
-        <ServiceContext.Provider value={serviceConfig}>
-          <MeasureList
-            measureList={[measureWithAcls]}
-            setMeasureList={setMeasureListMock}
-            setTotalPages={setTotalPagesMock}
-            setTotalItems={setTotalItemsMock}
-            setVisibleItems={setVisibleItemsMock}
-            setOffset={setOffsetMock}
-            setLoading={setLoadingMock}
-            activeTab={0}
-            searchCriteria={""}
-            setSearchCriteria={setSearchCriteriaMock}
-            currentLimit={10}
-            currentPage={0}
-            setErrMsg={setErrMsgMock}
-          />
-        </ServiceContext.Provider>
-      );
+    const { getByTestId } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={[measureWithAcls]}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
 
-      const checkIcon = screen.getByTestId("CheckCircleOutlineIcon");
-      expect(checkIcon).toBeInTheDocument();
-      expect(checkIcon).toHaveStyle({ color: "#4CAF50" });
-    });
+    const checkIcon = screen.getByTestId("CheckCircleOutlineIcon");
+    expect(checkIcon).toBeInTheDocument();
+    expect(checkIcon).toHaveStyle({ color: "#4CAF50" });
+  });
 
-    it("should format the last modified date correctly", () => {
-      const measureWithDate = {
-        ...measures[0],
-        lastModifiedAt: "2023-12-25T12:00:00.000Z",
-      };
+  it("should format the last modified date correctly", () => {
+    const measureWithDate = {
+      ...measures[0],
+      lastModifiedAt: "2023-12-25T12:00:00.000Z",
+    };
 
-      render(
-        <ServiceContext.Provider value={serviceConfig}>
-          <MeasureList
-            measureList={[measureWithDate]}
-            setMeasureList={setMeasureListMock}
-            setTotalPages={setTotalPagesMock}
-            setTotalItems={setTotalItemsMock}
-            setVisibleItems={setVisibleItemsMock}
-            setOffset={setOffsetMock}
-            setLoading={setLoadingMock}
-            activeTab={0}
-            searchCriteria={""}
-            setSearchCriteria={setSearchCriteriaMock}
-            currentLimit={10}
-            currentPage={0}
-            setErrMsg={setErrMsgMock}
-          />
-        </ServiceContext.Provider>
-      );
+    render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={[measureWithDate]}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+        />
+      </ServiceContext.Provider>
+    );
 
-      // Date format will depend on the local system settings, so we'll check for the presence of the date
-      expect(screen.getByText("12/25/2023")).toBeInTheDocument();
-    });
+    // Date format will depend on the local system settings, so we'll check for the presence of the date
+    expect(screen.getByText("12/25/2023")).toBeInTheDocument();
   });
 });

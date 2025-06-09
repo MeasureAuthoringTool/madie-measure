@@ -3,7 +3,6 @@ import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import {
   Button,
   MadieDiscardDialog,
-  TextArea,
   Toast,
 } from "@madie/madie-design-system/dist/react";
 import { Typography } from "@mui/material";
@@ -13,8 +12,8 @@ import {
   checkUserCanEdit,
 } from "@madie/madie-util";
 import { useFormik } from "formik";
-import * as Yup from "yup";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
+import TextEditor from "../../populationCriteria/groups/TextEditor";
 
 interface TransmissionFormatProps {
   setErrorMessage: Function;
@@ -121,17 +120,10 @@ const TransmissionFormat = (props: TransmissionFormatProps) => {
         </div>
         <div>
           <div className="top-row">
-            <TextArea
-              disabled={!canEdit}
+            <TextEditor
               label="Description"
-              placeholder="Enter"
-              readOnly={!canEdit}
-              id="measure-transmission-format"
-              data-testid="measure-transmission-format"
-              inputProps={{
-                "data-testid": "measure-transmission-format-input",
-                "aria-describedby": "measure-transmission-format-helper-text",
-              }}
+              setFieldValue={formik.setFieldValue}
+              canEdit={canEdit}
               error={
                 formik.touched.transmissionFormat &&
                 Boolean(formik.errors.transmissionFormat)

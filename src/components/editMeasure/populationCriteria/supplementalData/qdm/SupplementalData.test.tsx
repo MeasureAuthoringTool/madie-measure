@@ -19,7 +19,7 @@ import { checkUserCanEdit } from "@madie/madie-util";
 import SupplementalData from "./SupplementalData";
 import { QdmMeasureCQL } from "../../../../common/QdmMeasureCQL";
 
-const serviceConfig: ServiceConfig = {
+const serviceConfig = {
   measureService: {
     baseUrl: "example-service-url",
   },
@@ -32,7 +32,7 @@ const serviceConfig: ServiceConfig = {
   terminologyService: {
     baseUrl: "terminology-service.com",
   },
-};
+} as ServiceConfig;
 
 const mockTestMeasure = {
   id: "test measure",
@@ -78,6 +78,11 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
   },
+  useFeatureFlags: jest.fn(() => {
+    return {
+      EnhancedTextFormatting: false,
+    };
+  }),
 }));
 
 jest.mock("../../../../../api/useMeasureServiceApi");
@@ -104,7 +109,9 @@ describe("SupplementalData Component QDM", () => {
       screen.getByRole("button", { name: "Initial Population" })
     ).toBeInTheDocument();
 
-    const description = screen.getByTestId("supplementalDataDescription");
+    const description = screen.getByTestId(
+      "supplemental-data-description-text"
+    );
     expect(description).toHaveTextContent("test description");
   });
 
@@ -122,7 +129,9 @@ describe("SupplementalData Component QDM", () => {
     const comboBoxInput = screen.getByRole("combobox");
     expect(comboBoxInput).toBeDisabled();
 
-    const description = screen.getByTestId("supplementalDataDescription");
+    const description = screen.getByTestId(
+      "supplemental-data-description-text"
+    );
     expect(description).toHaveTextContent("test description");
     expect(description).toBeDisabled();
   });
@@ -156,15 +165,15 @@ describe("SupplementalData Component QDM", () => {
     RenderSupplementalElements();
 
     // Verifies if SE already loads values from store and able to add new
-    const suppolementalElementsSelect = screen.getByTestId(
+    const supplementalElementsSelect = screen.getByTestId(
       "supplemental-data-dropdown"
     );
-    expect(suppolementalElementsSelect).toBeInTheDocument();
+    expect(supplementalElementsSelect).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Initial Population" })
     ).toBeInTheDocument();
     const supplementalDataButton = within(
-      suppolementalElementsSelect
+      supplementalElementsSelect
     ).getByTitle("Open");
 
     userEvent.click(supplementalDataButton);
@@ -176,7 +185,9 @@ describe("SupplementalData Component QDM", () => {
     ).toBeInTheDocument();
 
     // Verifies if SD description already loads values from store and able to update
-    const description = screen.getByTestId("supplementalDataDescription");
+    const description = screen.getByTestId(
+      "supplemental-data-description-text"
+    );
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
       target: { value: "Updated test description" },
@@ -188,14 +199,10 @@ describe("SupplementalData Component QDM", () => {
     userEvent.click(saveButton);
 
     // verifies if success toast message is displayed
-    await waitFor(
-      () =>
-        expect(
-          screen.getByTestId("supplemental-data-success")
-        ).toBeInTheDocument(),
-      {
-        timeout: 5000,
-      }
+    await waitFor(() =>
+      expect(
+        screen.getByTestId("supplemental-data-success")
+      ).toBeInTheDocument()
     );
     const toastCloseButton = await screen.findByTestId("close-error-button");
     expect(toastCloseButton).toBeInTheDocument();
@@ -220,7 +227,9 @@ describe("SupplementalData Component QDM", () => {
     RenderSupplementalElements();
 
     // Verifies if SD description already loads values from store and able to update
-    const description = screen.getByTestId("supplementalDataDescription");
+    const description = screen.getByTestId(
+      "supplemental-data-description-text"
+    );
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
       target: { value: "Updated test description" },
@@ -240,14 +249,8 @@ describe("SupplementalData Component QDM", () => {
     );
 
     // verifies if error toast message is displayed because of service failure
-    await waitFor(
-      () =>
-        expect(
-          screen.getByTestId("supplemental-data-error")
-        ).toBeInTheDocument(),
-      {
-        timeout: 5000,
-      }
+    await waitFor(() =>
+      expect(screen.getByTestId("supplemental-data-error")).toBeInTheDocument()
     );
     const toastCloseButton = await screen.findByTestId("close-error-button");
     expect(toastCloseButton).toBeInTheDocument();
@@ -282,7 +285,9 @@ describe("SupplementalData Component QDM", () => {
     ).toBeInTheDocument();
 
     // Verifies if SD description already loads values from store and able to update
-    const description = screen.getByTestId("supplementalDataDescription");
+    const description = screen.getByTestId(
+      "supplemental-data-description-text"
+    );
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
       target: { value: "Updated test description" },
@@ -338,7 +343,9 @@ describe("SupplementalData Component QDM", () => {
     ).toBeInTheDocument();
 
     // Verifies if SD description already loads values from store and able to update
-    const description = screen.getByTestId("supplementalDataDescription");
+    const description = screen.getByTestId(
+      "supplemental-data-description-text"
+    );
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
       target: { value: "Updated test description" },

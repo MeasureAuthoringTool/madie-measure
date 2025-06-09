@@ -540,6 +540,7 @@ export default function EditMeasure() {
                   }
                   canClose={false}
                   copyButton={true}
+                  minimizeAlerts={featureFlags?.MinimizeAlerts}
                 />
               )}
             </div>
