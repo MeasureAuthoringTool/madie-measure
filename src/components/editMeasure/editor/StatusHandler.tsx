@@ -27,7 +27,7 @@ const generateAlertConfig = (
     type,
     copyButton: true,
     content: (
-      <div aria-live="polite" role="alert"> 
+      <div aria-live="polite" role="alert">
         <h3
           aria-live="polite"
           role="alert"
