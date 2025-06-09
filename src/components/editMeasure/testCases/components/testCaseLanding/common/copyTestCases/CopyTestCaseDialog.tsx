@@ -653,7 +653,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
                               {expandedColumns.map((column: any) => (
                                 <td key={column?.accessorKey || column.id}>
                                   {column.accessorKey === "cmsId"
-                                    ? subRow?.actions?.measureSet?.cmsId || "" // directly render cmsId
+                                    ? subRow?.actions?.measureSet?.cmsId || ""
                                     : flexRender(
                                         column.cell ?? column.accessorKey,
                                         {
