@@ -143,21 +143,6 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
         />
       </Tabs>
       <div tw="flex flex-wrap space-x-4 justify-end h-10">
-        {!featureFlags.TestCaseListActionCenter && (
-          //Remove button when feature flag is removed
-          <Button
-            variant="danger-primary"
-            disabled={!canEdit || measure?.testCases?.length === 0}
-            onClick={onDeleteAllTestCases}
-            data-testid="delete-all-test-cases-button"
-          >
-            <KeyboardArrowRightIcon
-              style={{ margin: "0 5px 0 -2px" }}
-              fontSize="small"
-            />
-            Delete All
-          </Button>
-        )}
         {featureFlags.OverlappingValueSets && (
           <LoadingButtonWithMenu
             hasErrors={hasErrors}
@@ -175,48 +160,45 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
             setShowOptions={props.setShowReportOptions}
           />
         )}
-        {((featureFlags.TestCaseListActionCenter && canEdit) ||
-          !featureFlags.TestCaseListActionCenter) && (
-          <>
+        <>
+          <Button
+            variant="outline"
+            onClick={onImportTestCases}
+            disabled={!canEdit}
+            data-testid="import-test-cases-button"
+          >
+            <FileUploadIcon
+              style={{ margin: "0 5px 0 -2px" }}
+              fontSize="small"
+            />
+            MADiE Import
+          </Button>
+          {featureFlags?.qiCoreBonnieTestCases && (
             <Button
-              variant="outline"
-              onClick={onImportTestCases}
+              onClick={() => {
+                if (onImportTestCasesFromBonnie) {
+                  onImportTestCasesFromBonnie();
+                }
+              }}
               disabled={!canEdit}
-              data-testid="import-test-cases-button"
+              data-testid="import-test-cases-from-bonnie-button"
             >
               <FileUploadIcon
                 style={{ margin: "0 5px 0 -2px" }}
                 fontSize="small"
               />
-              MADiE Import
+              Bonnie Import
             </Button>
-            {featureFlags?.qiCoreBonnieTestCases && (
-              <Button
-                onClick={() => {
-                  if (onImportTestCasesFromBonnie) {
-                    onImportTestCasesFromBonnie();
-                  }
-                }}
-                disabled={!canEdit}
-                data-testid="import-test-cases-from-bonnie-button"
-              >
-                <FileUploadIcon
-                  style={{ margin: "0 5px 0 -2px" }}
-                  fontSize="small"
-                />
-                Bonnie Import
-              </Button>
-            )}
-            <Button
-              disabled={!canEdit}
-              onClick={createNewTestCase}
-              data-testid="create-new-test-case-button"
-            >
-              <AddIcon style={{ margin: "0 5px 0 -2px" }} fontSize="small" />
-              New Case
-            </Button>
-          </>
-        )}
+          )}
+          <Button
+            disabled={!canEdit}
+            onClick={createNewTestCase}
+            data-testid="create-new-test-case-button"
+          >
+            <AddIcon style={{ margin: "0 5px 0 -2px" }} fontSize="small" />
+            New Case
+          </Button>
+        </>
         <LoadingButton
           hasErrors={hasErrors}
           isExecutionContextReady={executionContextReady}
@@ -225,22 +207,6 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
           primary={true}
           label="Run Test(s)"
         />
-
-        {!featureFlags.TestCaseListActionCenter && (
-          //Remove button when feature flag is removed
-          <Button
-            variant={"outline"}
-            className="export-bundle-button"
-            onClick={handleOpen}
-            data-testid="export-test-cases-button"
-          >
-            <div className="export-action">Export Test Cases</div>
-            <div className="export-chevron-container">
-              <ExpandMoreIcon />
-            </div>
-          </Button>
-        )}
-
         <Popover
           optionsOpen={optionsOpen}
           anchorEl={anchorEl}

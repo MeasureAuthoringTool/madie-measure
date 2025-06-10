@@ -880,11 +880,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                         setSorting={setSorting}
                         testCases={currentSlice}
                         canEdit={canEdit}
-                        deleteTestCase={
-                          featureFlags.TestCaseListActionCenter
-                            ? deleteMultipleTestCases
-                            : deleteTestCase
-                        }
+                        deleteTestCase={deleteMultipleTestCases}
                         exportTestCase={null}
                         onCloneTestCase={handleCloneTestCase}
                         measure={measure}

@@ -195,22 +195,6 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
           />
         </Tabs>
         <div style={{ margin: "6px 0 0 auto", display: "flex", gap: "10px" }}>
-          {!featureFlags.TestCaseListActionCenter && (
-            //Remove button when feature flag is removed
-            <Button
-              variant="danger-primary"
-              disabled={!canEdit || measure?.testCases?.length === 0}
-              onClick={onDeleteAllTestCases}
-              data-testid="delete-all-test-cases-button"
-            >
-              <KeyboardArrowRightIcon
-                style={{ margin: "0 5px 0 -2px" }}
-                fontSize="small"
-              />
-              Delete All
-            </Button>
-          )}
-
           {featureFlags.OverlappingValueSets && (
             <LoadingButtonWithMenu
               hasErrors={hasErrors}
@@ -228,36 +212,33 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
               setShowOptions={props.setShowReportOptions}
             />
           )}
-          {((featureFlags.TestCaseListActionCenter && canEdit) ||
-            !featureFlags.TestCaseListActionCenter) && (
-            <>
-              <Button
-                onClick={() => {
-                  if (onImportTestCases) {
-                    onImportTestCases();
-                  }
-                }}
-                variant="outline"
-                disabled={!canEdit}
-                data-testid="show-import-test-cases-button"
-              >
-                <FileUploadIcon
-                  style={{ margin: "0 5px 0 -2px" }}
-                  fontSize="small"
-                />
-                Bonnie Import
-              </Button>
+          <>
+            <Button
+              onClick={() => {
+                if (onImportTestCases) {
+                  onImportTestCases();
+                }
+              }}
+              variant="outline"
+              disabled={!canEdit}
+              data-testid="show-import-test-cases-button"
+            >
+              <FileUploadIcon
+                style={{ margin: "0 5px 0 -2px" }}
+                fontSize="small"
+              />
+              Bonnie Import
+            </Button>
 
-              <Button
-                disabled={!canEdit}
-                onClick={createNewTestCase}
-                data-testid="create-new-test-case-button"
-              >
-                <AddIcon style={{ margin: "0 5px 0 -2px" }} fontSize="small" />
-                New Case
-              </Button>
-            </>
-          )}
+            <Button
+              disabled={!canEdit}
+              onClick={createNewTestCase}
+              data-testid="create-new-test-case-button"
+            >
+              <AddIcon style={{ margin: "0 5px 0 -2px" }} fontSize="small" />
+              New Case
+            </Button>
+          </>
           <LoadingButton
             hasErrors={hasErrors}
             isExecutionContextReady={executionContextReady}
@@ -266,47 +247,6 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
             primary={true}
             label="Run Test(s)"
           />
-
-          {/* disabled elements do not fire events. we wrap a listener around it to bypass */}
-          {!featureFlags.TestCaseListActionCenter && (
-            //Remove button when feature flag is removed
-            <div
-              {...focusTrapAttributes}
-              id="export-button-focus-trap"
-              data-testid="export-button-focus-trap"
-            >
-              <Button
-                onClick={(e) => {
-                  handleOpen(e);
-                }}
-                disabled={!executeAllTestCases || exportExecuting}
-                id="show-export-test-cases-button"
-                aria-describedby="show-export-test-cases-button-tooltip"
-                data-testid="show-export-test-cases-button"
-                tabIndex={0}
-              >
-                Export Test Cases
-                <div
-                  role="tooltip"
-                  id="show-export-test-cases-button-tooltip"
-                  data-testid="show-export-test-case-button-tooltip"
-                  aria-live="polite"
-                  className={toolTipClass}
-                >
-                  <p>{exportMessage}</p>
-                </div>
-                <ExpandMoreIcon
-                  style={{ margin: "0 5px 0 5px" }}
-                  fontSize="small"
-                />
-                {exportExecuting ? (
-                  <MadieSpinner style={{ height: 10, width: 10 }} />
-                ) : (
-                  ""
-                )}
-              </Button>
-            </div>
-          )}
           <Popover
             optionsOpen={optionsOpen}
             anchorEl={anchorEl}

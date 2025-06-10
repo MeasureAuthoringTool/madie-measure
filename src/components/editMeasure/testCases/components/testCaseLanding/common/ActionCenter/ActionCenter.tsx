@@ -280,92 +280,15 @@ export default function ActionCenter(props: ActionCenterProps) {
         </div>
 
         {/* Action Buttons (Delete, Shift Test Case Dates, Clone, Export) */}
-        {featureFlags?.TestCaseListActionCenter && (
-          <div tw="flex items-center">
-            {canEdit && (
-              <div tw="flex items-center">
-                <Tooltip
-                  data-testid="delete-tooltip"
-                  title={
-                    disableDeleteBtn
-                      ? disabledDeleteBtnMessage
-                      : "Delete test case"
-                  }
-                  placement="top"
-                  arrow
-                >
-                  <span>
-                    <IconButton
-                      onClick={() => {
-                        setDeleteDialogModalOpen(true);
-                      }}
-                      disabled={disableDeleteBtn}
-                      data-testid="delete-action-btn"
-                    >
-                      <DeleteOutlinedIcon data-testid={`delete-action-icon`} />
-                    </IconButton>
-                  </span>
-                </Tooltip>
-
-                {isDraft && (
-                  <Tooltip
-                    data-testid="shift-test-case-dates-tooltip"
-                    title={
-                      disableShiftDatesBtn
-                        ? "Select test cases to shift test case dates"
-                        : "Shift test case dates"
-                    }
-                    placement="top"
-                    arrow
-                  >
-                    <span>
-                      <IconButton
-                        onClick={() => {
-                          setShiftDatesDialogModalOpen(true);
-                        }}
-                        disabled={disableShiftDatesBtn}
-                        data-testid="shift-test-case-dates-action-btn"
-                      >
-                        <EditCalendarOutlinedIcon
-                          data-testid={`shift-test-case-dates-action-icon`}
-                        />
-                      </IconButton>
-                    </span>
-                  </Tooltip>
-                )}
-
-                <Tooltip
-                  data-testid="clone-tooltip"
-                  title={
-                    disableCloneBtn
-                      ? "Select a valid test case to clone"
-                      : "Clone test case"
-                  }
-                  placement="top"
-                  arrow
-                >
-                  <span>
-                    <IconButton
-                      onClick={(e) => {
-                        onCloneTestCase(selectedTestCases?.[0]);
-                      }}
-                      disabled={disableCloneBtn}
-                      data-testid="clone-action-btn"
-                    >
-                      <LibraryAddIcon data-testid={`clone-action-icon`} />
-                    </IconButton>
-                  </span>
-                </Tooltip>
-              </div>
-            )}
-
-            {featureFlags.CopyTestCases && (
+        <div tw="flex items-center">
+          {canEdit && (
+            <div tw="flex items-center">
               <Tooltip
-                data-testid="copy-tooltip"
+                data-testid="delete-tooltip"
                 title={
-                  disableCopyBtn
-                    ? "Select test cases to copy to another measure"
-                    : "Copy to another measure"
+                  disableDeleteBtn
+                    ? disabledDeleteBtnMessage
+                    : "Delete test case"
                 }
                 placement="top"
                 arrow
@@ -373,97 +296,170 @@ export default function ActionCenter(props: ActionCenterProps) {
                 <span>
                   <IconButton
                     onClick={() => {
-                      displayTestCaseCopyDialog();
+                      setDeleteDialogModalOpen(true);
                     }}
-                    disabled={disableCopyBtn}
-                    data-testid="copy-action-btn"
+                    disabled={disableDeleteBtn}
+                    data-testid="delete-action-btn"
                   >
-                    <Icon
-                      icon="fluent:share-screen-start-24-regular"
-                      data-testid={`copy-action-icon`}
-                      rotate={45}
-                    />
+                    <DeleteOutlinedIcon data-testid={`delete-action-icon`} />
                   </IconButton>
                 </span>
               </Tooltip>
-            )}
 
-            <Tooltip
-              data-testid="export-tooltip"
-              title={
-                disableExportBtn
-                  ? isQDM
-                    ? executeAllTestCases
-                      ? "Select test cases to export"
-                      : "Test cases must be executed prior to exporting."
-                    : "Select test cases to export"
-                  : "Export test cases"
-              }
-              placement="top"
-              arrow
-            >
-              <span>
-                <IconButton
-                  disabled={disableExportBtn}
-                  data-testid="export-action-btn"
+              {isDraft && (
+                <Tooltip
+                  data-testid="shift-test-case-dates-tooltip"
+                  title={
+                    disableShiftDatesBtn
+                      ? "Select test cases to shift test case dates"
+                      : "Shift test case dates"
+                  }
+                  placement="top"
+                  arrow
                 >
-                  <FileUploadOutlinedIcon
-                    data-testid={`export-action-icon`}
-                    onClick={(event) => {
-                      event.preventDefault();
-                      setAnchorEl(event.currentTarget);
-                      setExportOptionsOpen(true);
+                  <span>
+                    <IconButton
+                      onClick={() => {
+                        setShiftDatesDialogModalOpen(true);
+                      }}
+                      disabled={disableShiftDatesBtn}
+                      data-testid="shift-test-case-dates-action-btn"
+                    >
+                      <EditCalendarOutlinedIcon
+                        data-testid={`shift-test-case-dates-action-icon`}
+                      />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              )}
+
+              <Tooltip
+                data-testid="clone-tooltip"
+                title={
+                  disableCloneBtn
+                    ? "Select a valid test case to clone"
+                    : "Clone test case"
+                }
+                placement="top"
+                arrow
+              >
+                <span>
+                  <IconButton
+                    onClick={(e) => {
+                      onCloneTestCase(selectedTestCases?.[0]);
                     }}
+                    disabled={disableCloneBtn}
+                    data-testid="clone-action-btn"
+                  >
+                    <LibraryAddIcon data-testid={`clone-action-icon`} />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            </div>
+          )}
+
+          <Tooltip
+            data-testid="copy-tooltip"
+            title={
+              disableCopyBtn
+                ? "Select test cases to copy to another measure"
+                : "Copy to another measure"
+            }
+            placement="top"
+            arrow
+          >
+            <span>
+              <IconButton
+                onClick={() => {
+                  displayTestCaseCopyDialog();
+                }}
+                disabled={disableCopyBtn}
+                data-testid="copy-action-btn"
+              >
+                <Icon
+                  icon="fluent:share-screen-start-24-regular"
+                  data-testid={`copy-action-icon`}
+                  rotate={45}
+                />
+              </IconButton>
+            </span>
+          </Tooltip>
+
+          <Tooltip
+            data-testid="export-tooltip"
+            title={
+              disableExportBtn
+                ? isQDM
+                  ? executeAllTestCases
+                    ? "Select test cases to export"
+                    : "Test cases must be executed prior to exporting."
+                  : "Select test cases to export"
+                : "Export test cases"
+            }
+            placement="top"
+            arrow
+          >
+            <span>
+              <IconButton
+                disabled={disableExportBtn}
+                data-testid="export-action-btn"
+              >
+                <FileUploadOutlinedIcon
+                  data-testid={`export-action-icon`}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    setAnchorEl(event.currentTarget);
+                    setExportOptionsOpen(true);
+                  }}
+                />
+                {!isQDM && (
+                  <Popover
+                    optionsOpen={exportOptionsOpen}
+                    anchorEl={anchorEl}
+                    handleClose={handleClose}
+                    canEdit={canEdit}
+                    additionalSelectOptionProps={[
+                      {
+                        label: "Transaction Bundle",
+                        dataTestId: `export-transaction-bundle`,
+                        toImplementFunction: () => {
+                          exportTestCases("TRANSACTION");
+                        },
+                      },
+                      {
+                        label: "Collection Bundle",
+                        dataTestId: `export-collection-bundle`,
+                        toImplementFunction: () => {
+                          exportTestCases("COLLECTION");
+                        },
+                      },
+                    ]}
                   />
-                  {!isQDM && (
-                    <Popover
-                      optionsOpen={exportOptionsOpen}
-                      anchorEl={anchorEl}
-                      handleClose={handleClose}
-                      canEdit={canEdit}
-                      additionalSelectOptionProps={[
-                        {
-                          label: "Transaction Bundle",
-                          dataTestId: `export-transaction-bundle`,
-                          toImplementFunction: () => {
-                            exportTestCases("TRANSACTION");
-                          },
-                        },
-                        {
-                          label: "Collection Bundle",
-                          dataTestId: `export-collection-bundle`,
-                          toImplementFunction: () => {
-                            exportTestCases("COLLECTION");
-                          },
-                        },
-                      ]}
-                    />
-                  )}
-                  {isQDM && (
-                    <Popover
-                      optionsOpen={exportOptionsOpen}
-                      anchorEl={anchorEl}
-                      handleClose={handleClose}
-                      canEdit={canEdit}
-                      additionalSelectOptionProps={[
-                        {
-                          label: "QRDA",
-                          toImplementFunction: onExportQRDA,
-                          dataTestId: `export-qrda-${measureId}`,
-                        },
-                        {
-                          label: "Excel",
-                          toImplementFunction: onExportExcel,
-                          dataTestId: `export-excel-${measureId}`,
-                        },
-                      ]}
-                    />
-                  )}
-                </IconButton>
-              </span>
-            </Tooltip>
-          </div>
-        )}
+                )}
+                {isQDM && (
+                  <Popover
+                    optionsOpen={exportOptionsOpen}
+                    anchorEl={anchorEl}
+                    handleClose={handleClose}
+                    canEdit={canEdit}
+                    additionalSelectOptionProps={[
+                      {
+                        label: "QRDA",
+                        toImplementFunction: onExportQRDA,
+                        dataTestId: `export-qrda-${measureId}`,
+                      },
+                      {
+                        label: "Excel",
+                        toImplementFunction: onExportExcel,
+                        dataTestId: `export-excel-${measureId}`,
+                      },
+                    ]}
+                  />
+                )}
+              </IconButton>
+            </span>
+          </Tooltip>
+        </div>
       </div>
     </form>
   );
