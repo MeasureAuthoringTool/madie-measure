@@ -10,6 +10,7 @@ import userEvent from "@testing-library/user-event";
 import useTestCaseServiceApi, {
   TestCaseServiceApi,
 } from "../../../../api/useTestCaseServiceApi";
+import { useFeatureFlags } from "@madie/madie-util";
 const { getByTestId, getByRole, findByTestId, findByRole } = screen;
 
 const MEASURE_OWNER = "test.user";
@@ -50,6 +51,7 @@ const testCases = [
 const mockCurrentMeasure = {
   id: "1",
   measureName: "QDM Measure Name",
+  hasAssociatedMeasures: true,
   groups: [],
   model: Model.QDM_5_6,
   measureSet: {
@@ -67,6 +69,7 @@ const mockCurrentMeasure = {
 const otherMeasuresOwnedByUser = [
   {
     id: "2",
+    hasAssociatedMeasures: true,
     measureName: "QDM Measure Name 2",
     groups: [],
     model: Model.QDM_5_6,
@@ -84,6 +87,7 @@ const otherMeasuresOwnedByUser = [
   },
   {
     id: "3",
+    hasAssociatedMeasures: true,
     measureName: "QDM Measure Name 3",
     groups: [],
     model: Model.QDM_5_6,
@@ -101,6 +105,7 @@ const otherMeasuresOwnedByUser = [
   },
   {
     id: "4",
+    hasAssociatedMeasures: true,
     measureName: "QDM Measure Name 4",
     groups: [],
     model: Model.QDM_5_6,
@@ -118,6 +123,7 @@ const otherMeasuresOwnedByUser = [
   },
   {
     id: "5",
+    hasAssociatedMeasures: true,
     measureName: "QDM Measure Name 5",
     groups: [],
     model: Model.QDM_5_6,
@@ -135,6 +141,7 @@ const otherMeasuresOwnedByUser = [
   },
   {
     id: "6",
+    hasAssociatedMeasures: true,
     measureName: "QDM Measure Name 6",
     groups: [],
     model: Model.QDM_5_6,
@@ -206,6 +213,9 @@ describe("Copy Test Case Dialog Component", () => {
         copyTestCasesToMeasure: jest.fn().mockResolvedValueOnce(["1", "2"]),
       } as unknown as TestCaseServiceApi;
     });
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EditTestsOnVersionedMeasures: true,
+    }));
     render(
       <CopyTestCaseDialog
         open={true}
@@ -223,6 +233,7 @@ describe("Copy Test Case Dialog Component", () => {
     expect(tableHeaders[2]).toHaveTextContent("Version");
     expect(tableHeaders[3]).toHaveTextContent("Status");
     expect(tableHeaders[4]).toHaveTextContent("CMS ID");
+    expect(tableHeaders[5]).toHaveTextContent("");
 
     const tableRows = table.querySelectorAll("tbody tr");
 
@@ -231,7 +242,7 @@ describe("Copy Test Case Dialog Component", () => {
     );
     expect(tableRows[0]).toHaveTextContent(otherMeasuresOwnedByUser[0].version);
     expect(tableRows[0]).toHaveTextContent(
-      _.toString(otherMeasuresOwnedByUser[0].measureSet.cmsId)
+      _.toString(otherMeasuresOwnedByUser[0]?.measureSet.cmsId)
     );
 
     // test sorting
@@ -252,6 +263,9 @@ describe("Copy Test Case Dialog Component", () => {
 
   it("Filter and Search, changes, fire, clear", async () => {
     const testFn = jest.fn().mockResolvedValue(mockMeasureSearchResponse);
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EditTestsOnVersionedMeasures: false,
+    }));
     const useMeasureServiceMockResolvedMultiple = {
       searchMeasuresByCriteria: testFn,
     } as unknown as MeasureServiceApi;

@@ -84,7 +84,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
     id: string;
     measureName: string;
     version: string;
-    actions: any;
+    actions: Measure;
     hasAssociatedMeasures: boolean;
     cmsId?: string;
   };
@@ -221,7 +221,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
     setContinueDisabled(_.isEmpty(selectedRowId));
     const columnDefs = [];
     columnDefs.push({
-      accessorKey: "select",
+      accessorKey: "",
       id: "select",
       cell: ({ row }) => {
         return (
