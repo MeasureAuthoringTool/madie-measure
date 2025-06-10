@@ -206,7 +206,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
         true
       );
       const filteredResults = results.filter(
-        (result) => result.id !== actions?.id
+        (result) => result.id !== actions?.id && result.id !== measure?.id
       );
       setIsRowExpanded(true);
       setExpandedSectionData(transFormData(filteredResults));
