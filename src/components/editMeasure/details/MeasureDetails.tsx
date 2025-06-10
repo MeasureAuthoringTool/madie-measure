@@ -207,16 +207,14 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
       displayCompletedIcon: !!measure?.measureMetaData.measureSetTitle,
     });
   } else {
-    if (featureFlags?.QICoreMeasureDefinitions) {
-      links[1].links.push({
-        title: "Definition",
-        href: measureDefinitionLink,
-        dataTestId: "leftPanelQiCoreMeasureDefinition",
-        id: "sideNavQiCoreMeasureDefinition",
-        displayCompletedIcon:
-          !!measure?.measureMetaData.measureDefinitions?.[0]?.term,
-      });
-    }
+    links[1].links.push({
+      title: "Definition",
+      href: measureDefinitionLink,
+      dataTestId: "leftPanelQiCoreMeasureDefinition",
+      id: "sideNavQiCoreMeasureDefinition",
+      displayCompletedIcon:
+        !!measure?.measureMetaData.measureDefinitions?.[0]?.term,
+    });
     links[1].links.splice(2, 0, {
       title: "Purpose",
       href: purposeLink,
@@ -224,15 +222,13 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
       id: "sideNavMeasurePurpose",
       displayCompletedIcon: !!measure?.measureMetaData.purpose,
     });
-    if (featureFlags?.QICoreMeasureReferences) {
-      links[1].links.splice(links[1].links.length - 1, 0, {
-        title: "References",
-        href: referencesLink,
-        dataTestId: "leftPanelMeasureReferences",
-        id: "sideNavMeasureReferences",
-        displayCompletedIcon: measure?.measureMetaData.references?.length > 0,
-      });
-    }
+    links[1].links.splice(links[1].links.length - 1, 0, {
+      title: "References",
+      href: referencesLink,
+      dataTestId: "leftPanelMeasureReferences",
+      id: "sideNavMeasureReferences",
+      displayCompletedIcon: measure?.measureMetaData.references?.length > 0,
+    });
   }
   useEffect(() => {
     setErrorMessage("");
@@ -376,7 +372,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               />
             </>
           )}
-          {!isQDM && featureFlags?.QICoreMeasureDefinitions && (
+          {!isQDM && (
             <>
               <Route
                 path={measureDefinitionLink}
@@ -386,7 +382,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               />
             </>
           )}
-          {!isQDM && featureFlags.QICoreMeasureReferences && (
+          {!isQDM && (
             <>
               <Route
                 path={measureReferencesLink}

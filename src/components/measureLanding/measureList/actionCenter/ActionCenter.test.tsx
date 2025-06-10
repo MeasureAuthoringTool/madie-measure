@@ -21,7 +21,6 @@ jest.mock("@madie/madie-util", () => ({
 
 jest.mock("../../../../api/useMeasureServiceApi");
 
-const mockFeatureFlags = { ShareMeasure: true };
 const mockGetUserName = jest.fn(() => "test user");
 const mockCheckUserCanEdit = jest.fn();
 const setViewHumanReadableModal = jest.fn();
@@ -50,7 +49,6 @@ const qdmMeasureVersion = {
 describe("ActionCenter", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useFeatureFlags as jest.Mock).mockReturnValue(mockFeatureFlags);
     (useOktaTokens as jest.Mock).mockReturnValue({
       getUserName: mockGetUserName,
     });
