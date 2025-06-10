@@ -2442,10 +2442,6 @@ describe("Action Center Tests", () => {
   });
 
   it("should display share dialog on clicking share action button", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      ShareMeasure: true,
-    }));
-
     const { unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList

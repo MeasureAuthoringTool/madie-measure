@@ -118,16 +118,14 @@ const TestCaseListSideBarNav = ({
                   onChange={handleChange}
                   value={endRoute}
                 >
-                  {(featureFlags?.QICoreIncludeSDEValues || qdm) && (
-                    <Tab
-                      label="SDE"
-                      value="sde"
-                      data-testid="nav-link-sde"
-                      type="C"
-                      orientation="vertical"
-                      onChange={handleChange}
-                    />
-                  )}
+                  <Tab
+                    label="SDE"
+                    value="sde"
+                    data-testid="nav-link-sde"
+                    type="C"
+                    orientation="vertical"
+                    onChange={handleChange}
+                  />
                   {featureFlags?.QDMIncludeRAVValues && qdm && (
                     <Tab
                       label="RAV"
@@ -138,16 +136,14 @@ const TestCaseListSideBarNav = ({
                       onChange={handleChange}
                     />
                   )}
-                  {(featureFlags.QICoreManifestExpansion || qdm) && (
-                    <Tab
-                      label="Expansion"
-                      value="expansion"
-                      data-testid="nav-link-expansion"
-                      type="C"
-                      orientation="vertical"
-                      onChange={handleChange}
-                    />
-                  )}
+                  <Tab
+                    label="Expansion"
+                    value="expansion"
+                    data-testid="nav-link-expansion"
+                    type="C"
+                    orientation="vertical"
+                    onChange={handleChange}
+                  />
                   <Tab
                     label="Test Case Data"
                     value="test-case-data"

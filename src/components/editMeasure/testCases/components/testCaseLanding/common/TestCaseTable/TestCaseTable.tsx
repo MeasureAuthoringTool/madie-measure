@@ -110,21 +110,21 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     useState<boolean>(false);
   const featureFlags = useFeatureFlags();
   const navigate = useNavigate();
-  const handleOpen = (
-    selected: TestCase,
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    setSelectedTestCase(selected);
-    setAnchorEl(event.currentTarget);
-    setOptionsOpen(true);
-  };
+  // const handleOpen = (
+  //   selected: TestCase,
+  //   event: React.MouseEvent<HTMLButtonElement>
+  // ) => {
+  //   setSelectedTestCase(selected);
+  //   setAnchorEl(event.currentTarget);
+  //   setOptionsOpen(true);
+  // };
 
-  const handleClose = () => {
-    setOptionsOpen(false);
-    setSelectedTestCase(null);
-    setAnchorEl(null);
-    setShiftDatesDialogOpen(false);
-  };
+  // const handleClose = () => {
+  //   setOptionsOpen(false);
+  //   setSelectedTestCase(null);
+  //   setAnchorEl(null);
+  //   setShiftDatesDialogOpen(false);
+  // };
 
   const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
@@ -162,28 +162,26 @@ const TestCaseTable = (props: TestCaseTableProps) => {
 
   const columns = useMemo<ColumnDef<TCRow>[]>(() => {
     const columnDefs = [];
-    if (featureFlags?.TestCaseListActionCenter) {
-      columnDefs.push({
-        id: "select",
-        header: ({ table }) => (
+    columnDefs.push({
+      id: "select",
+      header: ({ table }) => (
+        <IndeterminateCheckbox
+          checked={table.getIsAllRowsSelected()}
+          indeterminate={table.getIsSomePageRowsSelected()}
+          onChange={table.getToggleAllPageRowsSelectedHandler()}
+        />
+      ),
+      cell: ({ row }) => (
+        <div className="px-1">
           <IndeterminateCheckbox
-            checked={table.getIsAllRowsSelected()}
-            indeterminate={table.getIsSomePageRowsSelected()}
-            onChange={table.getToggleAllPageRowsSelectedHandler()}
+            checked={row.getIsSelected()}
+            disabled={!row.getCanSelect()}
+            indeterminate={row.getIsSomeSelected()}
+            onChange={row.getToggleSelectedHandler()}
           />
-        ),
-        cell: ({ row }) => (
-          <div className="px-1">
-            <IndeterminateCheckbox
-              checked={row.getIsSelected()}
-              disabled={!row.getCanSelect()}
-              indeterminate={row.getIsSomeSelected()}
-              onChange={row.getToggleSelectedHandler()}
-            />
-          </div>
-        ),
-      });
-    }
+        </div>
+      ),
+    });
 
     columnDefs.push({
       header: "Case #",
@@ -257,51 +255,42 @@ const TestCaseTable = (props: TestCaseTableProps) => {
         accessorKey: "lastModifiedAt",
       },
       {
-        header: featureFlags.TestCaseListActionCenter ? "" : "Action",
-        cell: (info) => {
-          return featureFlags.TestCaseListActionCenter ? (
-            <Button
-              variant="outline-filled"
-              data-testid={`view-edit-test-case-button-${info.row.original.id}`}
-              aria-live="polite"
-              aria-label={`${
-                checkUserCanEdit(
-                  measure.measureSet?.owner,
-                  measure.measureSet?.acls
-                ) && measure.measureMetaData?.draft
-                  ? "Edit"
-                  : "View"
-              } Test Case ${info.row.original.group} ${
-                info.row.original.title
-              }`}
-              onClick={() => {
-                const editTestCaseUrl = _.isEmpty(measure?.groups)
-                  ? `../${info.row.original.id}`
-                  : `../../${info.row.original.id}`;
-                navigate(editTestCaseUrl);
-              }}
-              role="button"
-              tabIndex={0}
-            >
-              {checkUserCanEdit(
+        header: "",
+        cell: (info) => (
+          <Button
+            variant="outline-filled"
+            data-testid={`view-edit-test-case-button-${info.row.original.id}`}
+            aria-live="polite"
+            aria-label={`${
+              checkUserCanEdit(
                 measure.measureSet?.owner,
                 measure.measureSet?.acls
               ) && measure.measureMetaData?.draft
                 ? "Edit"
-                : "View"}
-            </Button>
-          ) : (
-            <TestCaseActionButton
-              testCase={info.row.original.action}
-              handleOpen={handleOpen}
-            />
-          );
-        },
+                : "View"
+            } Test Case ${info.row.original.group} ${info.row.original.title}`}
+            onClick={() => {
+              const editTestCaseUrl = _.isEmpty(measure?.groups)
+                ? `../${info.row.original.id}`
+                : `../../${info.row.original.id}`;
+              navigate(editTestCaseUrl, { relative: "path" });
+            }}
+            role="button"
+            tabIndex={0}
+          >
+            {checkUserCanEdit(
+              measure.measureSet?.owner,
+              measure.measureSet?.acls
+            ) && measure.measureMetaData?.draft
+              ? "Edit"
+              : "View"}
+          </Button>
+        ),
         accessorKey: "action",
         enableSorting: false,
       },
     ];
-  }, [testCases, featureFlags?.TestCaseListActionCenter]);
+  }, [testCases]);
 
   const table = useReactTable({
     data,
@@ -409,7 +398,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
             </tr>
           ))}
         </tbody>
-        <TestCaseTablePopover
+        {/* <TestCaseTablePopover
           canEdit={canEdit}
           viewOrEdit={viewOrEdit}
           model={measure?.model}
@@ -423,7 +412,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           setDeleteDialogModalOpen={setDeleteDialogModalOpen}
           handleClose={handleClose}
           handleQiCloneTestCase={handleQiCloneTestCase}
-        />
+        /> */}
         <Toast
           toastKey="test-case-action-toast"
           aria-live="polite"
@@ -440,22 +429,14 @@ const TestCaseTable = (props: TestCaseTableProps) => {
         <MadieDeleteDialog
           open={deleteDialogModalOpen}
           onContinue={() => {
-            if (featureFlags?.TestCaseListActionCenter) {
-              deleteTestCase();
-            } else {
-              deleteTestCase(selectedTestCase.id);
-            }
+            deleteTestCase();
             setDeleteDialogModalOpen(false);
           }}
           onClose={() => {
             setDeleteDialogModalOpen(false);
           }}
           dialogTitle={`Delete Test Case`}
-          name={
-            featureFlags.TestCaseListActionCenter
-              ? selectedTestCases?.map((testCase) => testCase.title).join(", ")
-              : selectedTestCase?.title
-          }
+          name={selectedTestCases?.map((testCase) => testCase.title).join(", ")}
         />
 
         <ShiftDatesDialog
