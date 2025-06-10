@@ -648,8 +648,10 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 started running, please continue working in MADiE.
               </h3>
               <ul>
-                MADiE only supports a timezone offset of 0. MADiE has
-                overwritten any timezone offsets that are not zero.
+                MADiE enforces a UTC (offset 0) timestamp format with mandatory
+                millisecond precision. All timestamps with non-zero offsets have
+                been overwritten to UTC, and missing milliseconds have been
+                defaulted to '000'.
               </ul>
             </div>,
             "warning"
@@ -667,8 +669,10 @@ const EditTestCase = (props: EditTestCaseProps) => {
             <div>
               <h3>Test case {action}d successfully!</h3>
               <ul>
-                MADiE only supports a timezone offset of 0. MADiE has
-                overwritten any timezone offsets that are not zero.
+                MADiE enforces a UTC (offset 0) timestamp format with mandatory
+                millisecond precision. All timestamps with non-zero offsets have
+                been overwritten to UTC, and missing milliseconds have been
+                defaulted to '000'.
               </ul>
             </div>,
             "warning"
@@ -688,8 +692,10 @@ const EditTestCase = (props: EditTestCaseProps) => {
             </h3>
             {timezoneUpdated && (
               <ul>
-                MADiE only supports a timezone offset of 0. MADiE has
-                overwritten any timezone offsets that are not zero.
+                MADiE enforces a UTC (offset 0) timestamp format with mandatory
+                millisecond precision. All timestamps with non-zero offsets have
+                been overwritten to UTC, and missing milliseconds have been
+                defaulted to '000'.
               </ul>
             )}
             <ul>{valErrors}</ul>
@@ -703,8 +709,10 @@ const EditTestCase = (props: EditTestCaseProps) => {
             {timezoneUpdated && (
               <ul style={{ listStyle: "inside" }}>
                 <li>
-                  MADiE only supports a timezone offset of 0. MADiE has
-                  overwritten any timezone offsets that are not zero.
+                  MADiE enforces a UTC (offset 0) timestamp format with
+                  mandatory millisecond precision. All timestamps with non-zero
+                  offsets have been overwritten to UTC, and missing milliseconds
+                  have been defaulted to '000'.
                 </li>
               </ul>
             )}
