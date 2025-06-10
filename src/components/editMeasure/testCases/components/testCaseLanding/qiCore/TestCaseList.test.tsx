@@ -700,38 +700,7 @@ describe("TestCaseList component", () => {
 
       const tableHeaders = table.querySelectorAll("thead th");
 
-      expect(tableHeaders[1]).toHaveTextContent("Status");
-      expect(tableHeaders[2]).toHaveTextContent("Group");
-      expect(tableHeaders[3]).toHaveTextContent("Title");
-      expect(tableHeaders[4]).toHaveTextContent("Description");
-      expect(tableHeaders[5]).toHaveTextContent("Last Saved");
-      expect(tableHeaders[6]).toHaveTextContent("Action");
-
-      const tableRows = table.querySelectorAll("tbody tr");
-
-      expect(tableRows[0]).toHaveTextContent(testCases[2].title);
-      expect(tableRows[0]).toHaveTextContent(testCases[2].series);
-      expect(
-        screen.getByTestId(`select-action-${testCases[0].id}`)
-      ).toBeInTheDocument();
-
-      expect(tableRows[1]).toHaveTextContent(testCases[1].title);
-      expect(tableRows[1]).toHaveTextContent(testCases[1].series);
-      expect(
-        screen.getByTestId(`select-action-${testCases[1].id}`)
-      ).toBeInTheDocument();
-    });
-  }, 15000);
-  it("should render list of test cases with checkboxes if flag is true", async () => {
-    (useFeatureFlags as jest.Mock).mockReturnValue({
-      TestCaseListActionCenter: true,
-    });
-    renderTestCaseListComponent();
-    await waitFor(() => {
-      const table = screen.getByTestId("test-case-tbl");
-
-      const tableHeaders = table.querySelectorAll("thead th");
-
+      expect(tableHeaders[1]).toHaveTextContent("Case #");
       expect(tableHeaders[2]).toHaveTextContent("Status");
       expect(tableHeaders[3]).toHaveTextContent("Group");
       expect(tableHeaders[4]).toHaveTextContent("Title");
@@ -742,11 +711,39 @@ describe("TestCaseList component", () => {
 
       expect(tableRows[0]).toHaveTextContent(testCases[2].title);
       expect(tableRows[0]).toHaveTextContent(testCases[2].series);
+      expect(
+        screen.getByTestId(`test-case-title-0_select`)
+      ).toBeInTheDocument();
 
       expect(tableRows[1]).toHaveTextContent(testCases[1].title);
       expect(tableRows[1]).toHaveTextContent(testCases[1].series);
+      expect(
+        screen.getByTestId(`test-case-title-1_select`)
+      ).toBeInTheDocument();
     });
   }, 15000);
+  // it("should render list of test cases with checkboxes", async () => {
+  //   renderTestCaseListComponent();
+  //   await waitFor(() => {
+  //     const table = screen.getByTestId("test-case-tbl");
+  //
+  //     const tableHeaders = table.querySelectorAll("thead th");
+  //
+  //     expect(tableHeaders[2]).toHaveTextContent("Status");
+  //     expect(tableHeaders[3]).toHaveTextContent("Group");
+  //     expect(tableHeaders[4]).toHaveTextContent("Title");
+  //     expect(tableHeaders[5]).toHaveTextContent("Description");
+  //     expect(tableHeaders[6]).toHaveTextContent("Last Saved");
+  //
+  //     const tableRows = table.querySelectorAll("tbody tr");
+  //
+  //     expect(tableRows[0]).toHaveTextContent(testCases[2].title);
+  //     expect(tableRows[0]).toHaveTextContent(testCases[2].series);
+  //
+  //     expect(tableRows[1]).toHaveTextContent(testCases[1].title);
+  //     expect(tableRows[1]).toHaveTextContent(testCases[1].series);
+  //   });
+  // }, 15000);
 
   it("should not display error message when fetch test cases fails", async () => {
     const error = {
@@ -773,11 +770,15 @@ describe("TestCaseList component", () => {
   it("should render delete dialogue on Test Case list page when delete button is clicked", async () => {
     const { getByTestId } = renderTestCaseListComponent();
     await waitFor(() => {
-      const selectButton = getByTestId(`select-action-${testCases[0].id}`);
-      expect(selectButton).toBeInTheDocument();
-      fireEvent.click(selectButton);
+      const selectButton = screen.getByTestId(`test-case-title-0_select`);
+      const checkboxButton = within(selectButton).getByRole("checkbox");
+      expect(checkboxButton).toBeInTheDocument();
+      fireEvent.click(checkboxButton);
+      expect(checkboxButton).toBeChecked();
     });
-    const deleteButton = getByTestId(`delete-test-case-btn-${testCases[0].id}`);
+
+    const deleteButton = screen.getByTestId("delete-action-icon");
+    expect(deleteButton).toBeEnabled();
     fireEvent.click(deleteButton);
 
     await waitFor(() => {
@@ -801,9 +802,7 @@ describe("TestCaseList component", () => {
     useTestCaseServiceMock.mockImplementation(() => {
       return {
         ...useTestCaseServiceMockResolved,
-        deleteTestCaseByTestCaseId: jest
-          .fn()
-          .mockRejectedValue(new Error("BAD THINGS")),
+        deleteTestCases: jest.fn().mockRejectedValue(new Error("BAD THINGS")),
       } as unknown as TestCaseServiceApi;
     });
 
@@ -814,11 +813,15 @@ describe("TestCaseList component", () => {
 
     const { getByTestId } = renderTestCaseListComponent();
     await waitFor(() => {
-      const selectButton = getByTestId(`select-action-${testCases[0].id}`);
-      expect(selectButton).toBeInTheDocument();
-      fireEvent.click(selectButton);
+      const selectButton = screen.getByTestId(`test-case-title-0_select`);
+      const checkboxButton = within(selectButton).getByRole("checkbox");
+      expect(checkboxButton).toBeInTheDocument();
+      fireEvent.click(checkboxButton);
+      expect(checkboxButton).toBeChecked();
     });
-    const deleteButton = getByTestId(`delete-test-case-btn-${testCases[0].id}`);
+
+    const deleteButton = screen.getByTestId("delete-action-icon");
+    expect(deleteButton).toBeEnabled();
     fireEvent.click(deleteButton);
 
     await waitFor(() => {
@@ -835,82 +838,6 @@ describe("TestCaseList component", () => {
     userEvent.click(confirmDeleteBtn);
     await waitFor(() => expect(setError).toHaveBeenCalled());
     expect(nextState).toEqual(["BAD THINGS"]);
-  });
-
-  it("Should delete all existing test cases", async () => {
-    useTestCaseServiceMock.mockImplementation(() => {
-      return {
-        ...useTestCaseServiceMockResolved,
-        deleteTestCases: jest
-          .fn()
-          .mockResolvedValue("All Test cases are deleted successfully"),
-      } as unknown as TestCaseServiceApi;
-    });
-    renderTestCaseListComponent();
-
-    const table = await screen.findByTestId("test-case-tbl");
-    const tableRows = table.querySelectorAll("tbody tr");
-    expect(tableRows.length).toBe(3);
-
-    const deleteAllButton = screen.getByRole("button", { name: "Delete All" });
-    userEvent.click(deleteAllButton);
-    expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
-
-    const continueButton = screen.getByRole("button", { name: "Yes, Delete" });
-    userEvent.click(continueButton);
-
-    const toastMessage = await screen.findByTestId("test-case-list-success");
-    expect(toastMessage).toHaveTextContent("Test cases successfully deleted");
-    expect(screen.queryByTestId("delete-dialog-body")).toBeNull();
-  });
-
-  it("Should throw error message for delete all existing test cases", async () => {
-    useTestCaseServiceMock.mockReset().mockImplementation(() => {
-      return {
-        ...useTestCaseServiceMockResolved,
-        deleteTestCases: jest.fn().mockRejectedValue({
-          response: {
-            data: {
-              message: "Unable to delete test cases.",
-            },
-          },
-        }),
-      } as unknown as TestCaseServiceApi;
-    });
-
-    let nextState;
-    setError.mockImplementation((callback) => {
-      nextState = callback([]);
-    });
-
-    renderTestCaseListComponent();
-
-    const table = await screen.findByTestId("test-case-tbl");
-    const tableRows = table.querySelectorAll("tbody tr");
-    expect(tableRows.length).toBe(3);
-
-    const deleteAllButton = screen.getByRole("button", { name: "Delete All" });
-    userEvent.click(deleteAllButton);
-    expect(await screen.findByTestId("delete-dialog")).toBeInTheDocument();
-
-    const continueButton = screen.getByRole("button", { name: "Yes, Delete" });
-    userEvent.click(continueButton);
-
-    expect(screen.queryByTestId("delete-dialog-body")).toBeNull();
-
-    await waitFor(() => expect(setError).toHaveBeenCalled());
-    expect(nextState).toEqual(["Unable to delete test cases."]);
-  });
-
-  it("Should disable delete all button", async () => {
-    mockMeasure.testCases = [];
-    renderTestCaseListComponent();
-
-    expect(
-      await screen.findByRole("button", {
-        name: "Delete All",
-      })
-    ).toBeDisabled();
   });
 
   it("should execute test cases", async () => {
@@ -1038,10 +965,12 @@ describe("TestCaseList component", () => {
     const table = await screen.findByTestId("test-case-tbl");
     const tableHeaders = table.querySelectorAll("thead th");
 
-    expect(tableHeaders[1]).toHaveTextContent("Status");
-    expect(tableHeaders[2]).toHaveTextContent("Group");
-    expect(tableHeaders[3]).toHaveTextContent("Title");
-    expect(tableHeaders[4]).toHaveTextContent("Description");
+    expect(tableHeaders[1]).toHaveTextContent("Case #");
+    expect(tableHeaders[2]).toHaveTextContent("Status");
+    expect(tableHeaders[3]).toHaveTextContent("Group");
+    expect(tableHeaders[4]).toHaveTextContent("Title");
+    expect(tableHeaders[5]).toHaveTextContent("Description");
+    expect(tableHeaders[6]).toHaveTextContent("Last Saved");
 
     const tableRows = table.querySelectorAll("tbody tr");
     expect(tableRows[0]).toHaveTextContent(testCases[0].title.substring(0, 59));
@@ -1412,20 +1341,26 @@ describe("TestCaseList component", () => {
       .mockReturnValueOnce("http://fileurl");
 
     await waitFor(() => {
-      const selectButton = screen.getByTestId(
-        `select-action-${testCases[0].id}`
-      );
-      expect(selectButton).toBeInTheDocument();
-      fireEvent.click(selectButton);
+      const selectButton = screen.getByTestId(`test-case-title-0_select`);
+      const checkboxButton = within(selectButton).getByRole("checkbox");
+      expect(checkboxButton).toBeInTheDocument();
+      fireEvent.click(checkboxButton);
+      expect(checkboxButton).toBeChecked();
     });
-    const exportButton = screen.getByTestId(
-      `export-collection-bundle-${testCases[0].id}`
-    );
+
+    const exportButton = screen.getByTestId("export-action-icon");
+    expect(exportButton).toBeEnabled();
     fireEvent.click(exportButton);
+
+    const exportCollectionButton = screen.getByTestId(
+      `export-collection-bundle`
+    );
+    expect(exportCollectionButton).toBeInTheDocument();
+    fireEvent.click(exportCollectionButton);
 
     await waitFor(() => {
       expect(
-        screen.getByText("Test case exported successfully")
+        screen.getByText("Test cases exported successfully")
       ).toBeInTheDocument();
     });
   });
@@ -1447,16 +1382,22 @@ describe("TestCaseList component", () => {
     renderTestCaseListComponent();
 
     await waitFor(() => {
-      const selectButton = screen.getByTestId(
-        `select-action-${testCases[0].id}`
-      );
-      expect(selectButton).toBeInTheDocument();
-      fireEvent.click(selectButton);
+      const selectButton = screen.getByTestId(`test-case-title-0_select`);
+      const checkboxButton = within(selectButton).getByRole("checkbox");
+      expect(checkboxButton).toBeInTheDocument();
+      fireEvent.click(checkboxButton);
+      expect(checkboxButton).toBeChecked();
     });
-    const exportButton = screen.getByTestId(
-      `export-collection-bundle-${testCases[0].id}`
-    );
+
+    const exportButton = screen.getByTestId("export-action-icon");
+    expect(exportButton).toBeEnabled();
     fireEvent.click(exportButton);
+
+    const exportCollectionButton = screen.getByTestId(
+      `export-collection-bundle`
+    );
+    expect(exportCollectionButton).toBeInTheDocument();
+    fireEvent.click(exportCollectionButton);
 
     await waitFor(() => {
       expect(
@@ -1471,16 +1412,11 @@ describe("TestCaseList component", () => {
     renderTestCaseListComponent();
 
     await waitFor(() => {
-      const selectButton = screen.getByTestId(
-        `select-action-${testCases[0].id}`
+      const editButton = screen.getByTestId(
+        `view-edit-test-case-button-${testCases[0].id}`
       );
-      expect(selectButton).toBeInTheDocument();
-      fireEvent.click(selectButton);
+      fireEvent.click(editButton);
     });
-    const editButton = screen.getByTestId(
-      `view-edit-test-case-${testCases[0].id}`
-    );
-    fireEvent.click(editButton);
     const editPage = await screen.findByTestId("edit-page");
     expect(editPage).toBeInTheDocument();
   });
@@ -1488,16 +1424,11 @@ describe("TestCaseList component", () => {
   it("should navigate to the Test Case details page on edit button click for shared user", async () => {
     renderTestCaseListComponent();
     await waitFor(() => {
-      const selectButton = screen.getByTestId(
-        `select-action-${testCases[0].id}`
+      const editButton = screen.getByTestId(
+        `view-edit-test-case-button-${testCases[0].id}`
       );
-      expect(selectButton).toBeInTheDocument();
-      fireEvent.click(selectButton);
+      fireEvent.click(editButton);
     });
-    const editButton = screen.getByTestId(
-      `view-edit-test-case-${testCases[0].id}`
-    );
-    fireEvent.click(editButton);
     const editPage = await screen.findByTestId("edit-page");
     expect(editPage).toBeInTheDocument();
   });
@@ -1507,16 +1438,11 @@ describe("TestCaseList component", () => {
     renderTestCaseListComponent();
 
     await waitFor(() => {
-      const selectButton = screen.getByTestId(
-        `select-action-${testCases[0].id}`
+      const editButton = screen.getByTestId(
+        `view-edit-test-case-button-${testCases[0].id}`
       );
-      expect(selectButton).toBeInTheDocument();
-      fireEvent.click(selectButton);
+      fireEvent.click(editButton);
     });
-    const viewButton = screen.getByTestId(
-      `view-edit-test-case-${testCases[0].id}`
-    );
-    fireEvent.click(viewButton);
     const editPage = await screen.findByTestId("edit-page");
     expect(editPage).toBeInTheDocument();
   });
@@ -1544,169 +1470,22 @@ describe("TestCaseList component", () => {
     renderTestCaseListComponent();
 
     await waitFor(() => {
-      const selectButton = screen.getByTestId(
-        `select-action-${testCases[0].id}`
-      );
-      expect(selectButton).toBeInTheDocument();
-      fireEvent.click(selectButton);
+      const selectButton = screen.getByTestId(`test-case-title-0_select`);
+      const checkboxButton = within(selectButton).getByRole("checkbox");
+      expect(checkboxButton).toBeInTheDocument();
+      fireEvent.click(checkboxButton);
+      expect(checkboxButton).toBeChecked();
     });
-    const exportButton = screen.getByTestId(
-      `export-collection-bundle-${testCases[0].id}`
-    );
+
+    const exportButton = screen.getByTestId("export-action-icon");
+    expect(exportButton).toBeEnabled();
     fireEvent.click(exportButton);
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(
-          "Test Case(s) are empty or contain errors. Please update your Test Case(s) and export again."
-        )
-      ).toBeInTheDocument();
-    });
-  });
-
-  it("should render Export Test Cases button and export test cases successfully", async () => {
-    window.URL.createObjectURL = jest
-      .fn()
-      .mockReturnValueOnce("http://fileurl");
-    const { getByTestId } = renderTestCaseListComponent();
-
-    const codeCoverageTabs = await screen.findByTestId("code-coverage-tabs");
-    expect(codeCoverageTabs).toBeInTheDocument();
-    const passingTab = await screen.findByTestId("passing-tab");
-    expect(passingTab).toBeInTheDocument();
-    const testCaseList = await screen.findByTestId("test-case-tbl");
-    expect(testCaseList).toBeInTheDocument();
-
-    const exportTestCasesButton = getByTestId("export-test-cases-button");
-    fireEvent.click(exportTestCasesButton);
-    userEvent.click(screen.getByText("Collection Bundle"));
-
-    await waitFor(() => {
-      expect(
-        screen.getByText("Test cases exported successfully")
-      ).toBeInTheDocument();
-    });
-  });
-
-  it("should render options for exporting bundle types when Export Test Cases button is clicked", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({}));
-
-    const { getByTestId } = renderTestCaseListComponent();
-    const codeCoverageTabs = await screen.findByTestId("code-coverage-tabs");
-    expect(codeCoverageTabs).toBeInTheDocument();
-    const passingTab = await screen.findByTestId("passing-tab");
-    expect(passingTab).toBeInTheDocument();
-    const testCaseList = await screen.findByTestId("test-case-tbl");
-    expect(testCaseList).toBeInTheDocument();
-
-    const exportTestCasesButton = getByTestId("export-test-cases-button");
-    fireEvent.click(exportTestCasesButton);
-    expect(screen.getByText("Transaction Bundle")).toBeInTheDocument();
-    expect(screen.getByText("Collection Bundle")).toBeInTheDocument();
-  });
-
-  it("should render Export Test Cases button and export partial test cases successfully", async () => {
-    useTestCaseServiceMock.mockImplementation(() => {
-      return {
-        getTestCasesByMeasureId: jest.fn().mockResolvedValue(testCases),
-        getTestCaseSeriesForMeasure: jest
-          .fn()
-          .mockResolvedValue(["Series 1", "Series 2"]),
-        exportTestCases: jest.fn().mockResolvedValue({
-          body: new Blob([JSON.stringify("exported test data")], {
-            type: "application/json",
-          }),
-          status: 206,
-        }),
-      } as unknown as TestCaseServiceApi;
-    });
-    window.URL.createObjectURL = jest
-      .fn()
-      .mockReturnValueOnce("http://fileurl");
-    const { getByTestId } = renderTestCaseListComponent();
-
-    const codeCoverageTabs = await screen.findByTestId("code-coverage-tabs");
-    expect(codeCoverageTabs).toBeInTheDocument();
-    const passingTab = await screen.findByTestId("passing-tab");
-    expect(passingTab).toBeInTheDocument();
-    const testCaseList = await screen.findByTestId("test-case-tbl");
-    expect(testCaseList).toBeInTheDocument();
-
-    const exportTestCasesButton = getByTestId("export-test-cases-button");
-    fireEvent.click(exportTestCasesButton);
-    userEvent.click(screen.getByText("Collection Bundle"));
-
-    await waitFor(() => {
-      expect(
-        screen.getByText(
-          "Test Case Export has successfully been generated. Some Test Cases were invalid and could not be exported."
-        )
-      ).toBeInTheDocument();
-    });
-  });
-
-  it("should throw exceptions when exporting bulk test cases", async () => {
-    useTestCaseServiceMock.mockImplementation(() => {
-      return {
-        getTestCasesByMeasureId: jest.fn().mockResolvedValue(testCases),
-        getTestCaseSeriesForMeasure: jest
-          .fn()
-          .mockResolvedValue(["Series 1", "Series 2"]),
-        exportTestCases: jest
-          .fn()
-          .mockRejectedValueOnce(new Error("error exporting bulk test cases")),
-      } as unknown as TestCaseServiceApi;
-    });
-    const { getByTestId } = renderTestCaseListComponent();
-
-    const codeCoverageTabs = await screen.findByTestId("code-coverage-tabs");
-    expect(codeCoverageTabs).toBeInTheDocument();
-    const passingTab = await screen.findByTestId("passing-tab");
-    expect(passingTab).toBeInTheDocument();
-    const testCaseList = await screen.findByTestId("test-case-tbl");
-    expect(testCaseList).toBeInTheDocument();
-
-    const exportTestCasesButton = getByTestId("export-test-cases-button");
-    fireEvent.click(exportTestCasesButton);
-    userEvent.click(screen.getByText("Collection Bundle"));
-
-    await waitFor(() => {
-      expect(
-        screen.getByText(
-          "Unable to export test cases for measureName. Please try again and contact the Help Desk if the problem persists."
-        )
-      ).toBeInTheDocument();
-    });
-  });
-
-  it("should throw 404 exception when exporting bulk test cases", async () => {
-    const error = {
-      response: {
-        status: 404,
-      },
-    };
-
-    useTestCaseServiceMock.mockImplementation(() => {
-      return {
-        getTestCasesByMeasureId: jest.fn().mockResolvedValue(testCases),
-        getTestCaseSeriesForMeasure: jest
-          .fn()
-          .mockResolvedValue(["Series 1", "Series 2"]),
-        exportTestCases: jest.fn().mockRejectedValueOnce(error),
-      } as unknown as TestCaseServiceApi;
-    });
-    const { getByTestId } = renderTestCaseListComponent();
-
-    const codeCoverageTabs = await screen.findByTestId("code-coverage-tabs");
-    expect(codeCoverageTabs).toBeInTheDocument();
-    const passingTab = await screen.findByTestId("passing-tab");
-    expect(passingTab).toBeInTheDocument();
-    const testCaseList = await screen.findByTestId("test-case-tbl");
-    expect(testCaseList).toBeInTheDocument();
-
-    const exportTestCasesButton = getByTestId("export-test-cases-button");
-    fireEvent.click(exportTestCasesButton);
-    userEvent.click(screen.getByText("Collection Bundle"));
+    const exportCollectionButton = screen.getByTestId(
+      `export-collection-bundle`
+    );
+    expect(exportCollectionButton).toBeInTheDocument();
+    fireEvent.click(exportCollectionButton);
 
     await waitFor(() => {
       expect(
@@ -1889,43 +1668,7 @@ describe("TestCaseList component", () => {
     });
   });
 
-  it("should clone a test case when the clone button is clicked", async () => {
-    const createTestCaseApiMock = jest.fn().mockResolvedValue({});
-    const getTestCasesByMeasureIdMock = jest.fn().mockResolvedValue(testCases);
-    useTestCaseServiceMock.mockImplementation(() => {
-      return {
-        ...useTestCaseServiceMockResolved,
-        getTestCasesByMeasureId: getTestCasesByMeasureIdMock,
-        createTestCase: createTestCaseApiMock,
-      } as unknown as TestCaseServiceApi;
-    });
-    renderTestCaseListComponent();
-    await waitFor(() => {
-      expect(getTestCasesByMeasureIdMock).toHaveBeenCalled();
-      const selectButton = screen.getByTestId(
-        `select-action-${testCases[0].id}`
-      );
-      expect(selectButton).toBeInTheDocument();
-      userEvent.click(selectButton);
-    });
-    const cloneButton = screen.getByTestId(
-      `clone-test-case-btn-${testCases[0].id}`
-    );
-    userEvent.click(cloneButton);
-
-    await waitFor(() => {
-      expect(createTestCaseApiMock).toHaveBeenCalled();
-      expect(getTestCasesByMeasureIdMock).toHaveBeenCalled();
-      expect(
-        screen.getByText("Test case cloned successfully")
-      ).toBeInTheDocument();
-    });
-  });
-
   it("Should display shift test case dialog when at least one test case is selected", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TestCaseListActionCenter: true,
-    }));
     renderTestCaseListComponent();
 
     const table = await screen.findByTestId("test-case-tbl");
@@ -1956,10 +1699,6 @@ describe("TestCaseList component", () => {
   });
 
   it("should attempt to shift the dates in test case when the Save button within the shift test case dates dialogue is clicked and display a success message", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TestCaseListActionCenter: true,
-    }));
-
     const responseData: string[] = [];
 
     const shiftQiCoreTestCaseDates = jest
@@ -2014,10 +1753,6 @@ describe("TestCaseList component", () => {
   });
 
   it("should attempt to shift the dates in test case when the Save button within the shift test case dates dialogue is clicked and display an error message", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TestCaseListActionCenter: true,
-    }));
-
     const responseData: string[] = ["testId1", "testId2"];
 
     const shiftQiCoreTestCaseDates = jest
@@ -2066,10 +1801,6 @@ describe("TestCaseList component", () => {
   });
 
   it("should attempt to shift the dates in test case when the Save button within the shift test case dates dialogue is clicked and display an error message when the endpoint throws an error", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TestCaseListActionCenter: true,
-    }));
-
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
         getTestCasesByMeasureId: jest.fn().mockResolvedValue(testCases),
@@ -2123,8 +1854,6 @@ describe("TestCaseList component", () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       applyDefaults: false,
       qiCoreBonnieTestCases: false,
-      CopyTestCases: true,
-      TestCaseListActionCenter: true,
     }));
     renderTestCaseListComponent();
 
@@ -2154,7 +1883,7 @@ describe("TestCaseList component", () => {
   });
 
   describe("TestCaseList component with deleteMultipleTestCases", () => {
-    it("should delete selected test cases if the flag is true", async () => {
+    it("should delete selected test cases", async () => {
       useTestCaseServiceMock.mockImplementation(() => {
         return {
           ...useTestCaseServiceMockResolved,
@@ -2164,9 +1893,6 @@ describe("TestCaseList component", () => {
         } as unknown as TestCaseServiceApi;
       });
 
-      (useFeatureFlags as jest.Mock).mockReturnValue({
-        TestCaseListActionCenter: true,
-      });
       renderTestCaseListComponent();
       await waitFor(() => {
         const table = screen.getByTestId("test-case-tbl");

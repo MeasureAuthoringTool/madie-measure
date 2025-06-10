@@ -20,7 +20,6 @@ import {
   removeUndefinedAndEmptyObjects,
   mapElementsRequired,
   buildFullValidationSchema,
-  extractNameWithoutIndex,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import {
   useQiCoreResource,
@@ -61,6 +60,8 @@ export function simplifySnapshotElements(data) {
       type: details.type,
       required: details.required,
       canBeMultipleCardinality: details.max === "*",
+      max: details.max,
+      min: details.min,
     },
   ]);
 }
@@ -157,6 +158,8 @@ const ElementEditor = ({
         required,
         validation: null,
         canBeMultipleCardinality,
+        max: child.max,
+        min: child.min,
       };
       return nodeList.concat(builtNode);
     } else {
@@ -176,6 +179,8 @@ const ElementEditor = ({
         validation: getValidation(type, required, label),
         canBeMultipleCardinality,
         snapshot: child.snapshot,
+        max: child.max,
+        min: child.min,
       };
       return nodeList.concat(builtNode);
     }
