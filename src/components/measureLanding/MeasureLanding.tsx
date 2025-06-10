@@ -60,9 +60,11 @@ export default function MeasureLanding() {
   const abortController = useRef(null);
   const featureFlags = useFeatureFlags();
 
-  // pull info from some query url
+  const getStorageKey = (tab) =>
+    tab === 0 ? "myMeasurePageOptions" : "allMeasurePageOptions";
+
   const measurePageOptions = JSON.parse(
-    window.localStorage.getItem("measurePageOptions")
+    window.localStorage.getItem(getStorageKey(activeTab))
   );
 
   const curLimit = measurePageOptions?.limit
@@ -87,24 +89,27 @@ export default function MeasureLanding() {
       curLimit !== undefined ? (curLimit === "All" ? 50 : curLimit) : 10;
 
     setCurrentPage(v - 1);
+    localStorage.setItem(
+      getStorageKey(activeTab),
+      JSON.stringify({
+        page: v,
+        limit: updatedLimit,
+      })
+    );
     navigate(`?tab=${activeTab}&page=${v}&limit=${updatedLimit}`);
   };
   const handleLimitChange = (e) => {
-    setCurrentLimit(e.target.value);
-    navigate(`?tab=${activeTab}&page=1&limit=${e.target.value}`);
+    const newLimit = e.target.value;
+    setCurrentLimit(newLimit);
+    localStorage.setItem(
+      getStorageKey(activeTab),
+      JSON.stringify({
+        page: 1,
+        limit: newLimit,
+      })
+    );
+    navigate(`?tab=${activeTab}&page=1&limit=${newLimit}`);
   };
-
-  useEffect(() => {
-    if (measurePageOptions) {
-      if (
-        !Object.keys(values).length &&
-        Object.keys(measurePageOptions).length
-      ) {
-        const { page, limit } = measurePageOptions;
-        navigate(`?tab=${activeTab}&page=${page}&limit=${limit}`);
-      }
-    }
-  }, [measurePageOptions, values]);
 
   const retrieveMeasures = useCallback(
     async (
@@ -184,16 +189,28 @@ export default function MeasureLanding() {
 
   useEffect(() => {
     const values = queryString.parse(search);
-    const updatedPage = values.page ? Number(values.page) : curPage;
-    const updatedLimit = values.limit || curLimit;
+    const tabStorageKey = getStorageKey(activeTab);
+    const tabPageOptions = JSON.parse(localStorage.getItem(tabStorageKey)) || {
+      page: 1,
+      limit: 10,
+    };
+
+    // Determine the current page and limit
+    const updatedPage = values.page ? Number(values.page) : tabPageOptions.page;
+    const updatedLimit = values.limit || tabPageOptions.limit;
 
     localStorage.setItem(
-      "measurePageOptions",
+      tabStorageKey,
       JSON.stringify({
         page: updatedPage,
         limit: updatedLimit,
       })
     );
+
+    // Navigate to the updated URL if query parameters are missing
+    if (!values.page || !values.limit) {
+      navigate(`?tab=${activeTab}&page=${updatedPage}&limit=${updatedLimit}`);
+    }
 
     retrieveMeasures(
       activeTab,
@@ -207,12 +224,10 @@ export default function MeasureLanding() {
     search,
     retrieveMeasures,
     activeTab,
-    curLimit,
-    curPage,
-    measureServiceApi,
     searchCriteria,
     currentSort,
     currentDirection,
+    navigate,
   ]);
   // create is in a different app, so we need to listen for it.
   useEffect(() => {
@@ -236,22 +251,31 @@ export default function MeasureLanding() {
   const handleTabChange = (event, nextTab) => {
     abortController.current.abort();
     setMeasureList(null);
+
+    const tabStorageKey = getStorageKey(nextTab);
+    const tabPageOptions = JSON.parse(localStorage.getItem(tabStorageKey)) || {
+      page: 1,
+      limit: 10,
+    };
+
     const updatedLimit =
-      values?.limit !== undefined
-        ? nextTab === 1 && values?.limit === "All"
+      tabPageOptions.limit !== undefined
+        ? nextTab === 1 && tabPageOptions.limit === "All"
           ? 50
-          : values?.limit
+          : tabPageOptions.limit
         : 10;
     // Save updated limit to local storage
     localStorage.setItem(
-      "measurePageOptions",
+      tabStorageKey,
       JSON.stringify({
-        page: 1, // Reset to the first page
+        page: tabPageOptions.page,
         limit: updatedLimit,
       })
     );
 
-    navigate(`?tab=${nextTab}&page=1&limit=${updatedLimit}`);
+    navigate(
+      `?tab=${nextTab}&page=${tabPageOptions.page}&limit=${updatedLimit}`
+    );
   };
 
   // we need to tell our layout page that we've loaded to prevent strange tab order
@@ -313,7 +337,6 @@ export default function MeasureLanding() {
           {!loading && (
             <div className="table">
               <MeasureList
-                measurePageOptionsLimit={measurePageOptions?.limit}
                 retrieveMeasures={retrieveMeasures}
                 measureList={measureList}
                 setMeasureList={setMeasureList}

@@ -79,7 +79,6 @@ export default function MeasureList(props: {
   currentDirection?;
   setCurrentDirection?;
   setErrMsg;
-  measurePageOptionsLimit: any;
   search: any;
 }) {
   const { searchCriteria, setSearchCriteria, retrieveMeasures } = { ...props };
@@ -690,9 +689,19 @@ export default function MeasureList(props: {
   };
 
   const doUpdateList = () => {
+    const tabStorageKey =
+      props.activeTab === 0 ? "myMeasurePageOptions" : "allMeasurePageOptions";
+
+    const tabPageOptions = JSON.parse(localStorage.getItem(tabStorageKey)) || {
+      page: 1,
+      limit: 10,
+    };
+
+    const currentLimit = tabPageOptions.limit || 10;
+
     retrieveMeasures(
       props.activeTab,
-      props.measurePageOptionsLimit || 10,
+      currentLimit,
       props.currentPage,
       searchCriteria,
       props.currentSort,
@@ -845,11 +854,16 @@ export default function MeasureList(props: {
         doUpdateList();
         handleDialogClose();
 
+        const tabStorageKey =
+          props.activeTab === 0
+            ? "myMeasurePageOptions"
+            : "allMeasurePageOptions";
+
         const values = queryString.parse(props.search);
         const currentLimit = values.limit === "All" ? 50 : values.limit;
 
         localStorage.setItem(
-          "cqlLibraryPageOptions",
+          tabStorageKey,
           JSON.stringify({
             page: values.page || 1,
             limit: currentLimit,
