@@ -92,7 +92,6 @@ jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: jest.fn().mockImplementation(() => ({
     applyDefaults: false,
     qiCoreBonnieTestCases: false,
-    TestCaseListActionCenter: false,
   })),
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
@@ -152,7 +151,7 @@ describe("TestCaseRoutes", () => {
     expect(testCaseTitle).toBeInTheDocument();
     const testCaseSeries = await screen.findByText("IPP_Pass");
     expect(testCaseSeries).toBeInTheDocument();
-    const editBtn = screen.getByRole("button", { name: "select-action-TC1" });
+    const editBtn = screen.getByTestId("view-edit-test-case-button-id1");
     expect(editBtn).toBeInTheDocument();
   });
 
