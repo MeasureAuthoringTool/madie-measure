@@ -190,7 +190,6 @@ const INITIAL_ALERT_MESSAGE = {
 
 const MeasureGroups = (props: MeasureGroupProps) => {
   useDocumentTitle("MADiE Edit Measure Population Criteria");
-  const featureFlags = useFeatureFlags();
   const defaultPopulationBasis = "boolean";
   const [expressionDefinitions, setExpressionDefinitions] = useState<
     Array<ExpressionDefinition>
@@ -205,8 +204,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       subscription.unsubscribe();
     };
   }, []);
-  const [refreshFlag, setRefreshFlag] = useState<boolean>(true);
-
   const canEdit = checkUserCanEdit(
     measure?.measureSet?.owner,
     measure?.measureSet?.acls,
