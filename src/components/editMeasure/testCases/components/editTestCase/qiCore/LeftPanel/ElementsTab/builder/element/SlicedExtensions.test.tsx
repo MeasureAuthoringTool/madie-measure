@@ -12,6 +12,7 @@ import {
 import { RequiredFieldsProvider } from "./RequiredFieldsContext";
 import mockRequiredFields from "./mockRequiredFields";
 import mockFormInfo from "./mockFormInfo";
+import { ExecutionContextProvider } from "../../../../../../routes/qiCore/ExecutionContext";
 jest.mock("../../../../../../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
@@ -37,7 +38,44 @@ const getNestedProperty = (obj, path) => {
 
 const patientResource = {
   Patient: {
-    "extention:ethnicity": undefined,
+    extension: [
+      {
+        url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        extension: [
+          {
+            url: "ombCategory",
+            valueCoding: {
+              system: "urn:oid:2.16.840.1.113883.6.238",
+              code: "1002-5",
+              display: "American Indian or Alaska Native",
+              userSelected: true,
+            },
+          },
+          {
+            url: "text",
+            valueString: "American Indian or Alaska Native",
+          },
+        ],
+      },
+      {
+        url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+        extension: [
+          {
+            url: "ombCategory",
+            valueCoding: {
+              system: "urn:oid:2.16.840.1.113883.6.238",
+              code: "2135-2",
+              display: "Hispanic or Latino",
+              userSelected: true,
+            },
+          },
+          {
+            url: "text",
+            valueString: "Hispanic or Latino",
+          },
+        ],
+      },
+    ],
   },
 };
 
@@ -159,28 +197,42 @@ describe("TypeEditor for profiled extensions/slices ", () => {
 
     render(
       <ApiContextProvider value={mockServiceConfig}>
-        <FormikProvider value={mockFormik}>
-          <RequiredFieldsProvider
-            requiredFields={mockRequiredFields}
-            formInfo={mockFormInfo}
-          >
-            <TypeEditor
-              type="Extension"
-              resource={resource}
-              required={false}
-              value={undefined}
-              onChange={handleChange}
-              structureDefinition={qiCoreEthnicityStructureDefinition}
-              parentStructureDefinition={null}
-              label={label}
-              canEdit={true}
-            />
-          </RequiredFieldsProvider>
-        </FormikProvider>
+        <ExecutionContextProvider
+          value={{
+            measureState: [null, jest.fn()],
+            bundleState: [null, jest.fn()],
+            valueSetsState: [null, jest.fn()],
+            executionContextReady: true,
+            executing: false,
+            setExecuting: jest.fn(),
+            contextFailure: false,
+          }}
+        >
+          <FormikProvider value={mockFormik}>
+            <RequiredFieldsProvider
+              requiredFields={mockRequiredFields}
+              formInfo={mockFormInfo}
+            >
+              <TypeEditor
+                type="Extension"
+                resource={resource}
+                required={false}
+                value={undefined}
+                onChange={handleChange}
+                structureDefinition={qiCoreEthnicityStructureDefinition}
+                parentStructureDefinition={null}
+                label={"Patient.extension[0].extension[0]"}
+                canEdit={true}
+              />
+            </RequiredFieldsProvider>
+          </FormikProvider>
+        </ExecutionContextProvider>
       </ApiContextProvider>
     );
     await waitFor(() => {
-      expect(screen.getByTestId("string-field-input-id")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("string-field-Patient.extension[1].id")
+      ).toBeInTheDocument();
     });
     expect(screen.getByTestId("extension:ombCategory")).toBeInTheDocument();
     expect(screen.getByTestId("extension:detailed")).toBeInTheDocument();

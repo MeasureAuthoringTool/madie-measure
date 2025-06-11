@@ -14,16 +14,10 @@ declare module "@madie/madie-util" {
     qiCoreBonnieTestCases: boolean;
     qiCoreElementsTab: boolean;
     qdmHideJson: boolean;
-    TestCaseListButtons: boolean;
     stu6TestCaseValidation: boolean;
-    TestCaseListActionCenter: boolean;
-    CopyTestCases: boolean;
-    QICoreMeasureDefinitions: boolean;
-    ShareMeasure: boolean;
-    QICoreIncludeSDEValues: boolean;
     QDMIncludeRAVValues: boolean;
+    QICoreIncludeRAVValues: boolean;
     MeasureSearch: boolean;
-    QICoreManifestExpansion: boolean;
     OverlappingValueSets: boolean;
     EditTestsOnVersionedMeasures: boolean;
     MinimizeAlerts: boolean;

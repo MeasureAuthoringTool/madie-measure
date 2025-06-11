@@ -20,10 +20,10 @@ import {
   stripAllIndexes,
   getRequired,
   getTopLevelElements,
-  stripResourcePath,
   getFirstChildren,
   getNestedProperty,
   getIndexFromPath,
+  getLastPart,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import CodingComponent from "./types/CodingComponent";
 import { useRequiredFields } from "./RequiredFieldsContext";
@@ -347,20 +347,82 @@ const TypeEditor = ({
           />
         );
       case "Extension":
-        // map when profiles are there
+        // This case is hit when we're on a complex extension like race, gender that has children inputs
         if (extensionProfileDef) {
           const topLevelElements = extensionProfileDef
             ? getTopLevelElements(extensionProfileDef)
             : null;
+
+          //@ts-ignore
+          const { definition } = extensionProfileDef;
+          let foundIndex = formik?.values?.[
+            resource?.resourceType
+          ]?.extension?.findIndex((el) => {
+            return el.url === definition.url;
+          });
+          // This is our root label ex: Patient.extension[0]
+          let updatedLabel = `${resource?.resourceType}.extension[${foundIndex}]`;
+          // couldn't find it, need to change it
+
+          // This work is commented out as it may need to be used later. This is for handling when an extension is not present.
+          // It's possible that this will not be possible later with the workflow.
+          const foundValue = _.get(formik.values, updatedLabel);
           return extensionProfileDef ? (
             <Box sx={{ display: "flex", flexDirection: "column" }}>
               <Box>{structureDefinition.short}</Box>
               <Box sx={{ display: "flex", flexDirection: "column" }}>
                 {topLevelElements.map((elementDefinition, index) => {
-                  const elemPath = stripResourcePath(
-                    "Extension",
-                    elementDefinition.path
-                  );
+                  // given updatedLabel = Patient.extension[1],
+                  /*
+                  and our json string looks like this.., we need to do a find on each one of the elements. to get the name
+                    {
+                      "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+                      "extension": [
+                        {
+                          "url": "ombCategory",
+                          "valueCoding": {
+                            "system": "urn:oid:2.16.840.1.113883.6.238",
+                            "code": "2135-2",
+                            "display": "Hispanic or Latino",
+                            "userSelected": true
+                          }
+                        },
+                        {
+                          "url": "text",
+                          "valueString": "Hispanic or Latino"
+                        }
+                      ]
+                    }
+                  */
+                  let updatedLocalLabel = updatedLabel;
+                  let localFoundValue = null;
+                  // we already have a root extension here that lives in the form
+                  if (foundValue) {
+                    if (elementDefinition.sliceName) {
+                      // This is like.. extension::ethnicity. sliceName is ethnicity
+                      let foundIndex = foundValue?.extension?.findIndex(
+                        (el) => {
+                          return el.url === elementDefinition.sliceName;
+                        }
+                      );
+                      // The case where it exists.
+                      if (foundIndex > -1) {
+                        updatedLocalLabel = `${updatedLabel}.extension[${foundIndex}]`;
+                        localFoundValue = _.get(
+                          formik.values,
+                          updatedLocalLabel
+                        );
+                      }
+                    } else {
+                      // it's not a slice. It's like...extension.url, extension.id
+                      updatedLocalLabel =
+                        updatedLocalLabel = `${updatedLabel}.${getLastPart(
+                          elementDefinition.path
+                        )}`;
+                      localFoundValue = _.get(formik.values, updatedLocalLabel);
+                    }
+                  }
+
                   return (
                     <Box
                       sx={{
@@ -375,8 +437,8 @@ const TypeEditor = ({
                         // parent structure definition should be structureDefinition, since these are the children
                         parentStructureDefinition={extensionProfileDef} // parent structureDefinition needs snapshot.element
                         canEdit={canEdit}
-                        label={elemPath} //this is wrong, TODO: figure out what this should be
-                        // label={}
+                        label={updatedLocalLabel} // updated local label based off of a find find matching id or slicename
+                        {...formik.getFieldProps(updatedLocalLabel)}
                       />
                       <Divider />
                     </Box>
@@ -390,15 +452,44 @@ const TypeEditor = ({
         }
         // baes case for extensions. returns [URL, Value] || [FIXEDUri , value]
         // TODO figure out when NOT to render these components because they can live on anything. Patient.name does not need extensions.
+        // if no index, we need to provide one.
+        // we could get an object of {url: "somestring", extension: [{url, valueString, etc..}, {}]}
+        // from here it may make sense to render each
+        // parentStructureDefinition.url can be used to locate the extension index..
+        // if (foundValue?.extension?.length) {
+        // it's a list.
+        // return foundValue?.extension?.map((ext, index) => {
+        //   label = `${updatedLabel}.extension[${index}]`
+        //   return (
+        //     <div></div>
+        //   <ExtensionComponent
+        //     label={label}
+        //     canEdit={canEdit}
+        //     {...formik.getFieldProps(label)}
+        //     onChange={() => {}}
+        //     formikHandleChange={formik.handleChange}
+        //     // Being depcreated for a formik handleChange
+        //     // label={label} // label will be needed later to hook up to formik.
+        //     fhirResource={resource}
+        //     elementDefinition={structureDefinition} // id is patient.identifier[0].extension    ;
+        //     parentStructureDefinition={parentStructureDefinition} // id: patient.identifier[0]  ;
+        //     //   />
+        //     );
+        //   })
+        // }
+
         return (
           <ExtensionComponent
+            label={label}
             canEdit={canEdit}
+            {...formik.getFieldProps(label)}
             onChange={() => {}}
+            formikHandleChange={formik.handleChange}
             // Being depcreated for a formik handleChange
             // label={label} // label will be needed later to hook up to formik.
             fhirResource={resource}
-            elementDefinition={structureDefinition}
-            parentStructureDefinition={parentStructureDefinition}
+            elementDefinition={structureDefinition} // id is patient.identifier[0].extension    ;
+            parentStructureDefinition={parentStructureDefinition} // id: patient.identifier[0]  ;
           />
         );
       default:

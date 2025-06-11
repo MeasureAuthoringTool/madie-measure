@@ -132,13 +132,11 @@ export default function ActionCenter(props: PropTypes) {
       />
       <ExportAction measures={props.measures} onClick={exportMeasure} />
 
-      {featureFlags?.ShareMeasure && (
-        <ShareAction
-          measures={props.measures}
-          onClick={shareMeasure}
-          isOwner={isOwner}
-        />
-      )}
+      <ShareAction
+        measures={props.measures}
+        onClick={shareMeasure}
+        isOwner={isOwner}
+      />
 
       <AssociateCmsIdAction
         measures={props.measures}
