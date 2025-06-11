@@ -91,7 +91,7 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
   },
-  useFeatureFlags: jest.fn().mockReturnValue({}),
+  useFeatureFlags: jest.fn().mockReturnValue({ EnhancedTextFormatting: false }),
 }));
 
 const populationBasisValues: string[] = [
@@ -2186,28 +2186,21 @@ describe("Measure Groups Page", () => {
     });
   });
 
-  test("Measure Group Scoring should not render options if user is not the measure owner", async () => {
+  test("render Measure group properties if user is not the measure owner", async () => {
     (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
     await waitFor(() => renderMeasureGroupComponent());
-    const scoringSelectInput = screen.getByTestId("scoring-select-input");
-    expect(scoringSelectInput).toBeDisabled();
-  });
-
-  test("Measure Group Description should not render input field if user is not the measure owner", async () => {
-    (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
-    const { queryByTestId } = await waitFor(() =>
-      renderMeasureGroupComponent()
-    );
-    const inputField = queryByTestId("group-description-text");
-    expect(inputField).toBeDisabled();
-  });
-
-  test("Measure Group Save button should not render if user is not the measure owner", async () => {
-    (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
-    const { queryByTestId } = await waitFor(() =>
-      renderMeasureGroupComponent()
-    );
-    const saveButton = queryByTestId("group-form-submit-btn");
+    const descriptionField = screen.getByRole("textbox", {
+      name: "Population Criteria 1 Description",
+    });
+    expect(descriptionField).toHaveAttribute("readonly");
+    expect(descriptionField).toHaveValue("-");
+    const scoringSelectInput = screen.getByRole("textbox", { name: "Scoring" });
+    expect(scoringSelectInput).toHaveAttribute("readonly");
+    expect(scoringSelectInput).toHaveValue("-");
+    const measureType = screen.getByRole("textbox", { name: "Measure Type" });
+    expect(measureType).toHaveAttribute("readonly");
+    expect(measureType).toHaveValue("-");
+    const saveButton = screen.queryByTestId("group-form-submit-btn");
     expect(saveButton).not.toBeInTheDocument();
   });
 
@@ -2240,6 +2233,7 @@ describe("Measure Groups Page", () => {
   });
 
   test("should fail Ratio measures with multiple IPs when selecting multiple stratification associations", async () => {
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => true);
     const errorMessage =
       "Ratio measures with two IPs must have one population for associations";
     const group1: Group = {
