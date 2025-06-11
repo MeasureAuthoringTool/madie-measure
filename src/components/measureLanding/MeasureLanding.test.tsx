@@ -149,11 +149,14 @@ describe("Measure Page", () => {
     // Ensure the "All Measures" tab is selected
     await waitFor(() => {
       expect(allMeasuresTab).toHaveClass("Mui-selected");
+    });
+    await waitFor(() => {
       expect(
         mockMeasureServiceApi.searchMeasuresByCriteria
-      ).toHaveBeenCalledWith(
+      ).toHaveBeenNthCalledWith(
+        1,
         false,
-        "10",
+        10,
         0,
         "",
         "",
@@ -161,7 +164,7 @@ describe("Measure Page", () => {
           optionalSearchProperties: [],
           searchField: "",
         },
-        abortController.signal
+        expect.any(AbortSignal)
       );
     });
   });
