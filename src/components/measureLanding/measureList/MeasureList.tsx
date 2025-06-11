@@ -79,7 +79,6 @@ export default function MeasureList(props: {
   currentDirection?;
   setCurrentDirection?;
   setErrMsg;
-  measurePageOptionsLimit: any;
   search: any;
 }) {
   const { searchCriteria, setSearchCriteria, retrieveMeasures } = { ...props };
@@ -690,11 +689,20 @@ export default function MeasureList(props: {
   };
 
   const doUpdateList = () => {
-    retrieveMeasures(
+    const tabStorageKey =
+      props.activeTab === 0 ? "myMeasurePageOptions" : "allMeasurePageOptions";
+    const tabPageOptions = JSON.parse(localStorage.getItem(tabStorageKey)) || {
+      page: 1,
+      limit: 10,
+    };
+
+    const currentLimit = tabPageOptions.limit || 10;
+
+    props.retrieveMeasures(
       props.activeTab,
-      props.measurePageOptionsLimit || 10,
+      currentLimit,
       props.currentPage,
-      searchCriteria,
+      props.searchCriteria,
       props.currentSort,
       props.currentDirection
     );
