@@ -31,6 +31,8 @@ const TestCaseStratification = ({
   QDM = false,
   isTestCaseExecuted = false,
 }: TestCaseStratificationProps) => {
+  const label = `${QDM ? "Stratification" : strataCode}`;
+
   return (
     <React.Fragment key={`fragment-key-${strataCode}`}>
       <tr
@@ -40,11 +42,11 @@ const TestCaseStratification = ({
         role="row"
       >
         <td>&nbsp;</td>
-        <td role="cell">{QDM ? "Stratification" : strataCode}</td>
+        <td role="cell">{label}</td>
         <td role="cell">
           <ExpectActualInput
             id={`${stratification.name}-expected-cb`}
-            aria-labelledby={`stratification${stratificationCount}-expected`}
+            aria-label={`${label} expected`}
             name={`stratification${stratificationCount}-expected`}
             expectedValue={stratification.expected}
             onChange={(expectedValue) => {
@@ -68,7 +70,7 @@ const TestCaseStratification = ({
           {isTestCaseExecuted ? (
             <ExpectActualInput
               id={`${stratResult.name}-actual-cb`}
-              aria-labelledby={`stratification${stratificationCount}-actual`}
+              aria-label={`${label} actual`}
               name={`stratification${stratificationCount}-actual`}
               expectedValue={stratResult.actual}
               onChange={() => {}}

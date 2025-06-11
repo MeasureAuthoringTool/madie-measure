@@ -76,6 +76,7 @@ const TestCasePopulation = ({
   };
 
   const count = countTemplate(population.name as PopulationType);
+  const label = populationNameTemplate(population.name as PopulationType);
 
   return (
     <React.Fragment key={`fragment-key-${population.name}`}>
@@ -90,13 +91,11 @@ const TestCasePopulation = ({
         role="row"
       >
         <td>&nbsp;</td>
-        <td role="cell">
-          {populationNameTemplate(population.name as PopulationType)}
-        </td>
+        <td role="cell">{label}</td>
         <td role="cell">
           <ExpectActualInput
             id={`${population.id}-expected-cb`}
-            aria-labelledby={`${population.name}${count}-expected`}
+            aria-label={`${label} expected`}
             name={`${population.name}${count}-expected`}
             expectedValue={population.expected}
             onChange={(expectedValue) => {
@@ -117,7 +116,7 @@ const TestCasePopulation = ({
           {isTestCaseExecuted && populationResult ? (
             <ExpectActualInput
               id={`${populationResult?.id}-actual-cb`}
-              aria-labelledby={`${population.name}${count}-actual`}
+              aria-label={`${label} actual`}
               name={`${population.name}${count}-actual`}
               expectedValue={populationResult?.actual}
               onChange={() => {}} // do nothing - should not be editable here
