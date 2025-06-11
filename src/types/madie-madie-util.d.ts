@@ -16,6 +16,7 @@ declare module "@madie/madie-util" {
     qdmHideJson: boolean;
     stu6TestCaseValidation: boolean;
     QDMIncludeRAVValues: boolean;
+    QICoreIncludeRAVValues: boolean;
     MeasureSearch: boolean;
     OverlappingValueSets: boolean;
     EditTestsOnVersionedMeasures: boolean;
