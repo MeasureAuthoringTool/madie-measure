@@ -1080,7 +1080,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                 }
                                 isExclusionPop={isExclusionPop}
                               >
-                                <div className="population-col-gap-24">
+                                <div className="population-column">
                                   {/* Population Definition */}
                                   <Field
                                     {...fieldProps}
@@ -1391,16 +1391,16 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                 )}
 
                 {activeTab === "reporting" && (
-                  <div tw="grid grid-cols-4 mt-6">
-                    <div tw="lg:col-span-3">
+                  <>
+                    <Box sx={formRowGapped}>
                       <TextEditor
                         label="Rate Aggregation"
                         setFieldValue={formik.setFieldValue}
                         canEdit={canEdit}
                         {...formik.getFieldProps("rateAggregation")}
                       />
-                    </div>
-                    <div tw="pt-6 pb-6 grid grid-cols-2 gap-4 col-start-1 col-end-4">
+                    </Box>
+                    <Box sx={formRowGapped}>
                       <Select
                         placeHolder={{
                           name: "Select Improvement Notation",
@@ -1434,8 +1434,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                           "improvementNotationDescription"
                         )}
                       />
-                    </div>
-                  </div>
+                    </Box>
+                  </>
                 )}
               </div>
 

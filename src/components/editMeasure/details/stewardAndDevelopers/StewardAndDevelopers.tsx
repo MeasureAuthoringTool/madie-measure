@@ -17,6 +17,7 @@ import { useFormik } from "formik";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 import * as Yup from "yup";
 import { Typography } from "@mui/material";
+import { Box } from "@mui/system";
 import { Organization } from "@madie/madie-models";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
@@ -168,7 +169,7 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
         {/* steward and developers role select for checkbox */}
         {organizations && (
           <>
-            <div tw="mb-4 w-1/2">
+            <Box sx={{ marginBottom: "32px" }}>
               <AutoComplete
                 {...formik.getFieldProps("steward")}
                 id="steward"
@@ -183,8 +184,8 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
                 onChange={formik.setFieldValue}
                 onKeyDown={goBackToNav}
               />
-            </div>
-            <div tw="mb-4 w-1/2" style={{ border: "none" }}>
+            </Box>
+            <Box>
               <MultipleSelectDropDown
                 formControl={formik.getFieldProps("measureGroupTypes")}
                 id="developers"
@@ -206,7 +207,7 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
                 options={organizations.map((element) => element.name)}
                 multipleSelect={true}
               />
-            </div>
+            </Box>
           </>
         )}
       </div>

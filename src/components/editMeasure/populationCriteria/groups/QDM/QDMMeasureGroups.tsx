@@ -868,7 +868,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                 }
                                 isExclusionPop={isExclusionPop}
                               >
-                                <div className="population-col-gap-24">
+                                <div className="population-column">
                                   {/* Population Definition */}
 
                                   <Field

@@ -61,7 +61,7 @@ const MeasureGroupPopulationSelect = ({
   };
   return (
     <div data-testid="temp-test-id" tw="relative">
-      <div className="population-col-gap-24">
+      <div className="population-column">
         <Select
           placeHolder={{ name: `Select ${label}`, value: "" }}
           required={required}
