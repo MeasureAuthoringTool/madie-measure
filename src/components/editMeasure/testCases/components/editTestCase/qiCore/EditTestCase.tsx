@@ -681,7 +681,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
           showToast(`Test case ${action}d successfully!`, "success");
         }
       } else {
-        const valErrors = validationErrors.map((error) => (
+        const valErrors = validationErrors?.map((error) => (
           <li>{error.diagnostics}</li>
         ));
         const message: ReactNode = testCaseAlertToast ? (
@@ -1422,6 +1422,32 @@ const EditTestCase = (props: EditTestCaseProps) => {
           message={toastMessage}
           onClose={onToastClose}
           autoHideDuration={10000}
+          // Override default styles to account for longer message
+          sx={{
+            overflow: "hidden",
+            "& .MuiPaper-root": {
+              backgroundColor: "#fff",
+              padding: 0,
+            },
+            "& .MuiSnackbar-root": {
+              overflow: "hidden",
+              borderRadius: 4,
+            },
+            "& .MuiSnackbarContent-message": {
+              padding: 0,
+              flexGrow: 1,
+              ".messageCont": {
+                display: "flex",
+                flexDirection: "row",
+                flexGrow: 1,
+                justifyContent: "space-between",
+                div: {
+                  display: "flex",
+                },
+              },
+            },
+            ".toast": { minHeight: "80px" },
+          }}
         />
       </TestCaseForm>
     </>
