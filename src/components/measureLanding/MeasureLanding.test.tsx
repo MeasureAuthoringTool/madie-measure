@@ -156,7 +156,7 @@ describe("Measure Page", () => {
       ).toHaveBeenNthCalledWith(
         1,
         false,
-        10,
+        "10",
         0,
         "",
         "",
