@@ -7,6 +7,7 @@ import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import { mockPaginationResponses } from "../__mocks__/mockMeasureResponses";
 import { describe, expect, test } from "@jest/globals";
+import userEvent from "@testing-library/user-event";
 
 jest.mock("react-router-dom", () => ({
   ...(jest.requireActual("react-router-dom") as any),
@@ -52,13 +53,7 @@ const { findAllByTestId, findByTestId, queryByTestId } = screen;
 describe("Measures Pagination", () => {
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  beforeEach(() => {
-    localStorage.setItem(
-      "measurePageOptions",
-      JSON.stringify({ page: 1, limit: 10 })
-    );
+    localStorage.clear(); // Clear local storage after each test
   });
 
   const renderRouter = (initialEntries) => {
@@ -71,30 +66,60 @@ describe("Measures Pagination", () => {
       </ApiContextProvider>
     );
   };
-  test("On Page load, 10 measures are displayed by default  ", async () => {
+
+  test("On Page load, 10 measures are displayed by default for My Measures tab", async () => {
+    // Set local storage for My Measures tab
+    localStorage.setItem(
+      "myMeasurePageOptions",
+      JSON.stringify({ page: 1, limit: 10 })
+    );
+
     renderRouter([
       {
         pathname: "/measures",
-        search: "",
+        search: "?tab=0",
         hash: "",
         state: undefined,
         key: "1fewtg",
       },
     ]);
+
     const rowItems = await findAllByTestId("row-item");
     expect(rowItems).toHaveLength(10);
+  });
+
+  test("On Page load, 25 measures are displayed by default for All Measures tab", async () => {
+    // Set local storage for All Measures tab
+    localStorage.setItem(
+      "allMeasurePageOptions",
+      JSON.stringify({ page: 1, limit: 25 })
+    );
+
+    renderRouter([
+      {
+        pathname: "/measures",
+        search: "?tab=1",
+        hash: "",
+        state: undefined,
+        key: "1fewtg",
+      },
+    ]);
+
+    const rowItems = await findAllByTestId("row-item");
+    expect(rowItems).toHaveLength(25);
   });
 
   test("On First page, previous button is hidden, next is available", async () => {
     renderRouter([
       {
         pathname: "/measures",
-        search: "?page=1&limit=10",
+        search: "?tab=0&page=1&limit=10",
         hash: "",
         state: undefined,
         key: "1fewtg",
       },
     ]);
+
     const nextButton = await findByTestId("NavigateNextIcon");
     expect(nextButton).toBeTruthy();
     expect(queryByTestId("NavigateBeforeIcon")).toBeNull();
@@ -104,12 +129,13 @@ describe("Measures Pagination", () => {
     renderRouter([
       {
         pathname: "/measures",
-        search: "?page=2&limit=10",
+        search: "?tab=0&page=2&limit=10",
         hash: "",
         state: undefined,
         key: "1fewtg",
       },
     ]);
+
     const prevButton = await findByTestId("NavigateBeforeIcon");
     expect(prevButton).toBeTruthy();
     const nextButton = await findByTestId("NavigateNextIcon");
@@ -120,12 +146,13 @@ describe("Measures Pagination", () => {
     renderRouter([
       {
         pathname: "/measures",
-        search: "?page=1&limit=25",
+        search: "?tab=0&page=1&limit=25",
         hash: "",
         state: undefined,
         key: "1fewtg",
       },
     ]);
+
     const itemList = await findAllByTestId("row-item");
     expect(itemList).toHaveLength(25);
   });
@@ -134,15 +161,38 @@ describe("Measures Pagination", () => {
     renderRouter([
       {
         pathname: "/measures",
-        search: "?page=1&limit=25",
+        search: "?tab=0&page=1&limit=25",
         hash: "",
         state: undefined,
         key: "1fewtg",
       },
     ]);
+
     await waitFor(() => {
       const itemList = screen.getAllByTestId("row-item");
       expect(itemList).toHaveLength(25);
+    });
+  });
+
+  test("Local storage is updated correctly when navigating pages", async () => {
+    renderRouter([
+      {
+        pathname: "/measures",
+        search: "?tab=0&page=1&limit=10",
+        hash: "",
+        state: undefined,
+        key: "1fewtg",
+      },
+    ]);
+
+    const nextButton = await findByTestId("NavigateNextIcon");
+    userEvent.click(nextButton);
+
+    await waitFor(() => {
+      const updatedStorage = JSON.parse(
+        localStorage.getItem("myMeasurePageOptions")
+      );
+      expect(updatedStorage).toEqual({ page: 2, limit: 10 });
     });
   });
 });
