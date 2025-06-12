@@ -124,7 +124,7 @@ const Builder = ({
           />
         </Tabs>
       </Box>
-      <div className="panel-content-pane">
+      <div className="panel-content-pane" id="tc-builder-panel-content-pane">
         {/* available elements that we don't want to display when a resource is selected */}
         {activeTab === "Available" && canEdit && (
           <ResourceList
@@ -165,6 +165,15 @@ const Builder = ({
               bundle={state?.bundle}
               onRowEdit={(row) => {
                 setSelectedResourceId(row?.resource?.id);
+                const interval = setInterval(() => {
+                  const target = document.getElementById(
+                    "tc-builder-resource-editor"
+                  );
+                  if (target) {
+                    clearInterval(interval);
+                    target.scrollIntoView({ behavior: "smooth" });
+                  }
+                }, 100);
               }}
               onRowDelete={(row) => {
                 dispatch({
