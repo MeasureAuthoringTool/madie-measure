@@ -6,6 +6,7 @@ import ExpectActualInput from "../populations/ExpectActualInput";
 export interface TestCaseStratificationProps {
   strataCode: string;
   stratification: DisplayStratificationValue;
+  stratificationCount: number;
   stratResult?: any;
   populationBasis: string;
   showExpected?: boolean;
@@ -20,6 +21,7 @@ export interface TestCaseStratificationProps {
 const TestCaseStratification = ({
   strataCode,
   stratification,
+  stratificationCount,
   stratResult,
   populationBasis,
   disableExpected = false,
@@ -29,6 +31,8 @@ const TestCaseStratification = ({
   QDM = false,
   isTestCaseExecuted = false,
 }: TestCaseStratificationProps) => {
+  const label = `${QDM ? "Stratification" : strataCode}`;
+
   return (
     <React.Fragment key={`fragment-key-${strataCode}`}>
       <tr
@@ -38,10 +42,12 @@ const TestCaseStratification = ({
         role="row"
       >
         <td>&nbsp;</td>
-        <td role="cell">{QDM ? "Stratification" : strataCode}</td>
+        <td role="cell">{label}</td>
         <td role="cell">
           <ExpectActualInput
             id={`${stratification.name}-expected-cb`}
+            aria-label={`${label} expected`}
+            name={`stratification${stratificationCount}-expected`}
             expectedValue={stratification.expected}
             onChange={(expectedValue) => {
               setIsTestCaseExecuted(false);
@@ -64,6 +70,8 @@ const TestCaseStratification = ({
           {isTestCaseExecuted ? (
             <ExpectActualInput
               id={`${stratResult.name}-actual-cb`}
+              aria-label={`${label} actual`}
+              name={`stratification${stratificationCount}-actual`}
               expectedValue={stratResult.actual}
               onChange={() => {}}
               populationBasis={populationBasis}

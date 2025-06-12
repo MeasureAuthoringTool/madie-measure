@@ -128,7 +128,9 @@ describe("Group Populations", () => {
     const g1ScoringName = screen.getByTestId("measure-group-1-scoring-unit-1");
     expect(g1ScoringName).toBeInTheDocument();
 
-    const ippRow = screen.getByRole("row", { name: "Initial Population" });
+    const ippRow = screen.getByTestId(
+      "test-row-population-id-initialPopulation"
+    );
     expect(ippRow).toBeInTheDocument();
     const ippCell = within(ippRow).getByRole("cell", {
       name: "Initial Population",
@@ -157,7 +159,7 @@ describe("Group Populations", () => {
     expect(msrpopl[1]).not.toBeChecked();
 
     const msrpoplexRow = screen.getByRole("row", {
-      name: "Measure Population Exclusion",
+      name: /Measure Population Exclusion/,
     });
     expect(msrpoplexRow).toBeInTheDocument();
     const msrpoplexCell = within(msrpoplexRow).getByRole("cell", {
@@ -236,7 +238,9 @@ describe("Group Populations", () => {
       />
     );
 
-    const ippRow = screen.getByRole("row", { name: "Initial Population" });
+    const ippRow = screen.getByTestId(
+      "test-row-population-id-initialPopulation"
+    );
     const ippCbs = within(ippRow).getAllByRole("checkbox");
     expect(ippCbs[0]).toBeDisabled();
     expect(ippCbs[0]).toBeChecked();
@@ -261,7 +265,9 @@ describe("Group Populations", () => {
       />
     );
 
-    const ippRow = screen.getByRole("row", { name: "Initial Population" });
+    const ippRow = screen.getByTestId(
+      "test-row-population-id-initialPopulation"
+    );
     const ippCbs = within(ippRow).getAllByRole("checkbox");
     expect(ippCbs[0]).not.toBeDisabled();
     expect(ippCbs[0]).toBeChecked();
@@ -285,7 +291,7 @@ describe("Group Populations", () => {
     );
 
     const stratRow = screen.getByRole("row", {
-      name: "Strata 1 Initial Population",
+      name: /Strata 1 Initial Population/,
     });
     const stratCbs = within(stratRow).getAllByRole("checkbox");
     expect(stratCbs[0]).not.toBeDisabled();
