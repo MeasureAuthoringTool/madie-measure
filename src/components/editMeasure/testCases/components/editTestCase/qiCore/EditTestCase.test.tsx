@@ -823,7 +823,7 @@ describe("EditTestCase component", () => {
         "Test case updated successfully with errors in JSON"
       );
       expect(debugOutput).toHaveTextContent(
-        "MADiE only supports a timezone offset of 0. MADiE has overwritten any timezone offsets that are not zero."
+        "MADiE enforces a UTC (offset 0) timestamp format with mandatory millisecond precision. All timestamps with non-zero offsets have been overwritten to UTC, and missing milliseconds have been defaulted to '000'."
       );
     });
 
@@ -968,7 +968,7 @@ describe("EditTestCase component", () => {
         "Test case updated successfully! Test case validation has started running, please continue working in MADiE."
       );
       expect(debugOutput).toHaveTextContent(
-        "MADiE only supports a timezone offset of 0. MADiE has overwritten any timezone offsets that are not zero."
+        "MADiE enforces a UTC (offset 0) timestamp format with mandatory millisecond precision. All timestamps with non-zero offsets have been overwritten to UTC, and missing milliseconds have been defaulted to '000'."
       );
     });
 
@@ -1053,7 +1053,7 @@ describe("EditTestCase component", () => {
         "Test case updated successfully with errors in JSON"
       );
       expect(debugOutput).toHaveTextContent(
-        "MADiE only supports a timezone offset of 0. MADiE has overwritten any timezone offsets that are not zero."
+        "MADiE enforces a UTC (offset 0) timestamp format with mandatory millisecond precision. All timestamps with non-zero offsets have been overwritten to UTC, and missing milliseconds have been defaulted to '000'."
       );
     });
 
