@@ -105,10 +105,6 @@ jest.mock("@madie/madie-util", () => ({
       return { unsubscribe: () => null };
     },
   },
-  useFeatureFlags: jest.fn().mockReturnValue({
-    QICoreMeasureDefinitions: true,
-    QICoreMeasureReferences: false,
-  }),
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),
@@ -128,10 +124,6 @@ jest.mock("@madie/madie-util", () => ({
 const MeasureInformationMock = MeasureInformation as jest.Mock<JSX.Element>;
 const MeasureMetadataMock = MeasureMetadata as jest.Mock<JSX.Element>;
 const setErrorMessage = jest.fn();
-const featureFlags = {
-  QICoreMeasureDefinitions: true,
-  QICoreMeasureReferences: false,
-};
 
 MeasureInformationMock.mockImplementation(() => {
   return <div>Mock Measure Info</div>;
@@ -167,7 +159,6 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
-                  featureFlags={featureFlags}
                 />
               }
             />
@@ -191,7 +182,6 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
-                  featureFlags={featureFlags}
                 />
               }
             />
@@ -215,7 +205,6 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
-                  featureFlags={featureFlags}
                 />
               }
             />
@@ -247,7 +236,6 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
-                  featureFlags={featureFlags}
                 />
               }
             />
@@ -281,7 +269,6 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
-                  featureFlags={featureFlags}
                 />
               }
             />
@@ -313,7 +300,6 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
-                  featureFlags={featureFlags}
                 />
               }
             />
@@ -345,7 +331,6 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
-                  featureFlags={featureFlags}
                 />
               }
             />
@@ -380,7 +365,6 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
-                  featureFlags={featureFlags}
                 />
               }
             />
@@ -513,10 +497,6 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
-                  featureFlags={{
-                    QICoreMeasureDefinitions: true,
-                    QICoreMeasureReferences: true,
-                  }}
                 />
               }
             />
@@ -534,38 +514,6 @@ describe("MeasureDetails component", () => {
     expect(measureDefinitionTerms).toBeNull();
   });
 
-  it("should not render qi-core measure definitions if feature flag is not on", () => {
-    const { getByTestId, queryByTestId } = render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
-          <Routes>
-            <Route
-              path="/foo/*"
-              element={
-                <MeasureDetails
-                  setErrorMessage={setErrorMessage}
-                  isQDM={false}
-                  featureFlags={{
-                    QICoreMeasureDefinitions: false,
-                    QICoreMeasureReferences: false,
-                  }}
-                />
-              }
-            />
-          </Routes>
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
-
-    expect(getByTestId("leftPanelMeasureInformation")).toBeInTheDocument();
-    const leftPanelQiCoreMeasureDefinitions = queryByTestId(
-      "leftPanelQiCoreMeasureDefinition"
-    );
-    expect(leftPanelQiCoreMeasureDefinitions).toBeNull();
-    const measureDefinitionTerms = queryByTestId("measure-definitions");
-    expect(measureDefinitionTerms).toBeNull();
-  });
-
   it("should render the tabs in the measure details side nav with completed icons", () => {
     render(
       <ApiContextProvider value={serviceConfig}>
@@ -576,10 +524,6 @@ describe("MeasureDetails component", () => {
               element={
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
-                  featureFlags={{
-                    ...featureFlags,
-                    QICoreMeasureReferences: true,
-                  }}
                   isQDM={true}
                 />
               }

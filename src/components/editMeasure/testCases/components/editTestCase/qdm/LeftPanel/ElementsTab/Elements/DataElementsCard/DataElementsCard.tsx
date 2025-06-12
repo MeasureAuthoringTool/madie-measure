@@ -59,7 +59,7 @@ export const deleteAttribute = (chip, dataElement) => {
       } else {
         updatedDataElement[attributePath] = _.filter(
           updatedDataElement[attributePath],
-          (a) => a.id !== chip.id
+          (a) => (a._id?.valueOf() ? a._id?.valueOf() : a.id) !== chip.id
         );
       }
     }

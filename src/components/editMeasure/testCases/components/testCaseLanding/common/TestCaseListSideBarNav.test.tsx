@@ -4,6 +4,7 @@ import { MemoryRouter } from "react-router-dom";
 import TestCaseListSideBarNav from "./TestCaseListSideBarNav";
 import { Group } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
+// @ts-ignore
 import { useFeatureFlags } from "@madie/madie-util";
 
 const groups: Group[] = [
@@ -22,9 +23,8 @@ const groups: Group[] = [
 ];
 jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: jest.fn().mockReturnValue({
-    QICoreIncludeSDEValues: true,
     QDMIncludeRAVValues: true,
-    QICoreManifestExpansion: true,
+    QICoreIncludeRAVValues: true,
   }),
 }));
 describe("TestCase component", () => {
@@ -67,34 +67,7 @@ describe("TestCase component", () => {
     );
 
     expect(screen.getByRole("navigation")).toBeInTheDocument();
-    expect(screen.getAllByRole("tab").length).toEqual(5);
-    const activeLink = screen.getByRole("tab", {
-      name: "Population Criteria 2",
-    });
-    expect(activeLink).toBeInTheDocument();
-    userEvent.click(activeLink);
-    const inactiveLink = screen.getByRole("tab", {
-      name: "Population Criteria 1",
-    });
-    expect(inactiveLink).toBeInTheDocument();
-    userEvent.click(inactiveLink);
-  });
-
-  it("shouldn't render SDE tab for QI Core measures when QICoreIncludeSDEValues flag is false", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => {
-      return {
-        QICoreIncludeSDEValues: false,
-      };
-    });
-    const onChange = jest.fn();
-    render(
-      <MemoryRouter>
-        <TestCaseListSideBarNav allPopulationCriteria={groups} />
-      </MemoryRouter>
-    );
-
-    expect(screen.getByRole("navigation")).toBeInTheDocument();
-    expect(screen.getAllByRole("tab").length).toEqual(3);
+    expect(screen.getAllByRole("tab").length).toEqual(6);
     const activeLink = screen.getByRole("tab", {
       name: "Population Criteria 2",
     });
@@ -108,11 +81,6 @@ describe("TestCase component", () => {
   });
 
   it("should render SDE tab for QDM measures", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => {
-      return {
-        QICoreIncludeSDEValues: false,
-      };
-    });
     const onChange = jest.fn();
     render(
       <MemoryRouter>
@@ -121,7 +89,7 @@ describe("TestCase component", () => {
     );
 
     expect(screen.getByRole("navigation")).toBeInTheDocument();
-    expect(screen.getAllByRole("tab").length).toEqual(5);
+    expect(screen.getAllByRole("tab").length).toEqual(6);
   });
 
   it("shouldn't render RAV tab for QDM measures when QDMIncludeRAVValues flag is false", async () => {
@@ -150,25 +118,33 @@ describe("TestCase component", () => {
     expect(screen.queryByRole("tab", { name: "RAV" })).toBeInTheDocument();
   });
 
-  it("shouldn't render Expansion tab for QI Core measures when QICoreManifestExpansion flag is false", async () => {
+  it("shouldn't render RAV tab for QI Core measures when QICoreIncludeRAVValues flag is false", async () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => {
       return {
-        QICoreManifestExpansion: false,
+        QICoreIncludeRAVValues: false,
       };
     });
 
     render(
       <MemoryRouter>
-        <TestCaseListSideBarNav allPopulationCriteria={groups} />
+        <TestCaseListSideBarNav allPopulationCriteria={groups} qdm={false} />
       </MemoryRouter>
     );
 
-    expect(
-      screen.queryByRole("tab", { name: "Expansion" })
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: "RAV" })).not.toBeInTheDocument();
   });
 
-  it("should render Expansion tab for QI Core measures when QICoreManifestExpansion flag is true", async () => {
+  it("should render RAV tab for QI Core measures when QICoreIncludeRAVValues flag is true", async () => {
+    render(
+      <MemoryRouter>
+        <TestCaseListSideBarNav allPopulationCriteria={groups} qdm={false} />
+      </MemoryRouter>
+    );
+
+    expect(screen.queryByRole("tab", { name: "RAV" })).toBeInTheDocument();
+  });
+
+  it("should render Expansion tab for QI Core measures", async () => {
     render(
       <MemoryRouter>
         <TestCaseListSideBarNav allPopulationCriteria={groups} />

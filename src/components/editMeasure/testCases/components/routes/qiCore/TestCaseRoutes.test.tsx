@@ -19,6 +19,8 @@ import { getExampleValueSet } from "../../../util/CalculationTestHelpers";
 import { Bundle } from "fhir/r4";
 import { act } from "react-dom/test-utils";
 import NotFound from "../../notfound/NotFound";
+// @ts-ignore
+import { useFeatureFlags } from "@madie/madie-util";
 
 // mock the editor cause we don't care for this test and it gets rid of errors
 jest.mock("../../editor/Editor", () => () => <div>editor contents</div>);
@@ -92,7 +94,7 @@ jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: jest.fn().mockImplementation(() => ({
     applyDefaults: false,
     qiCoreBonnieTestCases: false,
-    TestCaseListActionCenter: false,
+    QICoreIncludeRAVValues: true,
   })),
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
@@ -152,7 +154,7 @@ describe("TestCaseRoutes", () => {
     expect(testCaseTitle).toBeInTheDocument();
     const testCaseSeries = await screen.findByText("IPP_Pass");
     expect(testCaseSeries).toBeInTheDocument();
-    const editBtn = screen.getByRole("button", { name: "select-action-TC1" });
+    const editBtn = screen.getByTestId("view-edit-test-case-button-id1");
     expect(editBtn).toBeInTheDocument();
   });
 
@@ -851,5 +853,77 @@ describe("TestCaseRoutes", () => {
       const error = getByTestId("execution_context_loading_errors");
       expect(error).toBeInTheDocument();
     });
+  });
+
+  it("should render the RAVPage when QICoreIncludeRAVValues flag is true", async () => {
+    mockedAxios.get.mockImplementation(() => {
+      return Promise.resolve({
+        data: [
+          {
+            id: "id1",
+            title: "TC12",
+            description: "Desc1",
+            series: "IPP_Pass",
+            status: null,
+          },
+        ],
+      });
+    });
+    render(
+      <MemoryRouter
+        initialEntries={["/measures/m1234/edit/test-cases/list-page/rav"]}
+      >
+        <ApiContextProvider value={serviceConfig}>
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+    expect(
+      screen.queryByTestId("rav-option-radio-buttons-group")
+    ).toBeInTheDocument();
+  });
+
+  it("shouldn't render the RAVPage when QICoreIncludeRAVValues flag is false", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
+      return {
+        QICoreIncludeRAVValues: false,
+      };
+    });
+
+    mockedAxios.get.mockImplementation(() => {
+      return Promise.resolve({
+        data: [
+          {
+            id: "id1",
+            title: "TC12",
+            description: "Desc1",
+            series: "IPP_Pass",
+            status: null,
+          },
+        ],
+      });
+    });
+    render(
+      <MemoryRouter
+        initialEntries={["/measures/m1234/edit/test-cases/list-page/rav"]}
+      >
+        <ApiContextProvider value={serviceConfig}>
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+    expect(
+      screen.queryByTestId("rav-option-radio-buttons-group")
+    ).not.toBeInTheDocument();
   });
 });

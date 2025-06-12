@@ -719,11 +719,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                         // test cases doesn't know how to sort by category
                         testCases={currentSlice}
                         canEdit={canEdit}
-                        deleteTestCase={
-                          featureFlags.TestCaseListActionCenter
-                            ? deleteMultipleTestCases
-                            : deleteTestCase
-                        }
+                        deleteTestCase={deleteMultipleTestCases}
                         exportTestCase={exportTestCase}
                         measure={measure}
                         onTestCaseShiftDates={onTestCaseShiftDates}
