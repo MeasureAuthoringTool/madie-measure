@@ -116,24 +116,18 @@ describe("SupplementalData Component QI-Core", () => {
   it("Should render disabled components if the user doesn't have permissions", async () => {
     checkUserCanEdit.mockReturnValue(false);
     RenderSupplementalElements();
-    const suppolementalElementsSelect = screen.getByTestId(
-      "supplemental-data-dropdown"
-    );
-    expect(suppolementalElementsSelect).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Initial Population" })
-    ).toBeInTheDocument();
+    const supplementalElements = screen.getByRole("textbox", {
+      name: "Definition",
+    });
+    expect(supplementalElements).toHaveTextContent("Initial Population");
 
-    const comboBoxInputs = screen.getAllByRole("combobox");
-    for (const comboBoxInput of comboBoxInputs) {
-      expect(comboBoxInput).toBeDisabled();
+    const comboBoxInputs = screen.getByRole("textbox", { name: "Description" });
+    expect(comboBoxInputs).toHaveTextContent("test description");
+
+    const allFormFields = screen.getAllByRole("textbox");
+    for (const formField of allFormFields) {
+      expect(formField).toHaveAttribute("readonly");
     }
-
-    const description = screen.getByTestId(
-      "supplemental-data-description-text"
-    );
-    expect(description).toHaveTextContent("test description");
-    expect(description).toBeDisabled();
   });
 
   it("Should successfully update supplemental Elements values with default IncludeInReportTypes and save to DB", async () => {

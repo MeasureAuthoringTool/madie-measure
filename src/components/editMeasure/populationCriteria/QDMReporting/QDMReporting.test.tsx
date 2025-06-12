@@ -12,7 +12,7 @@ import useMeasureServiceApi, {
 import { Measure } from "@madie/madie-models";
 import QDMReporting from "./QDMReporting";
 import userEvent from "@testing-library/user-event";
-import { measureStore } from "@madie/madie-util";
+import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 
 jest.mock("../../../../api/useMeasureServiceApi");
 
@@ -286,22 +286,25 @@ describe("QDMReporting component", () => {
 
   test("Improvement Notation description is mandatory for 'Other' Improvement Notation", async () => {
     render(<QDMReporting />);
-    const description = screen.getByTestId(
-      "improvement-notation-description-text"
-    ) as HTMLInputElement;
+    const description = screen.getByRole("textbox", {
+      name: "Improvement Notation Description",
+    }) as HTMLInputElement;
     // if no notation is selected
-    expect(description).toBeDisabled();
+    expect(description).toHaveAttribute("readonly");
     // select notation
     await selectAnOptionForImprovementNotation(otherNotation);
     expect(description).toBeEnabled();
-    expect(description.value).toBe("");
+    expect(description.value).toBe("-");
     const saveButton = getByRole("button", {
       name: "Save",
     });
     expect(saveButton).toBeInTheDocument();
     // save btn should be disabled until description is entered
     await waitFor(() => expect(saveButton).toBeDisabled());
-    userEvent.type(description, "Test description");
+    userEvent.type(
+      screen.getByRole("textbox", { name: "Improvement Notation Description" }),
+      "Test description"
+    );
     await waitFor(() => expect(saveButton).toBeEnabled());
   });
 

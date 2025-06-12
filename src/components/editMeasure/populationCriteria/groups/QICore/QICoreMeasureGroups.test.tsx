@@ -2205,6 +2205,7 @@ describe("Measure Groups Page", () => {
   });
 
   test("should allow Ratio measures to select stratifications", async () => {
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => true);
     const group1: Group = {
       id: "1",
       scoring: "Ratio",
