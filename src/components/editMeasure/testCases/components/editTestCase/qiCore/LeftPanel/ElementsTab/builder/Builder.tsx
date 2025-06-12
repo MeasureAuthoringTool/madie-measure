@@ -35,6 +35,27 @@ interface BuilderProps {
   setValidationSchema: Dispatch<SetStateAction<Object>>;
 }
 
+export function scrollToElementByIdWhenAvailable(
+  id: string,
+  options: ScrollIntoViewOptions = { behavior: "smooth" },
+  checkInterval = 100,
+  maxAttempts = 50
+) {
+  let attempts = 0;
+
+  const interval = setInterval(() => {
+    const target = document.getElementById(id);
+    attempts++;
+
+    if (target) {
+      clearInterval(interval);
+      target.scrollIntoView(options);
+    } else if (attempts >= maxAttempts) {
+      clearInterval(interval);
+    }
+  }, checkInterval);
+}
+
 const Builder = ({
   canEdit,
   setInitialFormikValuesStu6,
@@ -165,15 +186,7 @@ const Builder = ({
               bundle={state?.bundle}
               onRowEdit={(row) => {
                 setSelectedResourceId(row?.resource?.id);
-                const interval = setInterval(() => {
-                  const target = document.getElementById(
-                    "tc-builder-resource-editor"
-                  );
-                  if (target) {
-                    clearInterval(interval);
-                    target.scrollIntoView({ behavior: "smooth" });
-                  }
-                }, 100);
+                scrollToElementByIdWhenAvailable("tc-builder-resource-editor");
               }}
               onRowDelete={(row) => {
                 dispatch({
