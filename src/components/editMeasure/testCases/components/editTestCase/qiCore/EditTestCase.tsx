@@ -929,7 +929,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
               </div>
             }
             canClose={false}
-            minimizeAlerts={featureFlags?.MinimizeAlerts}
           />
         </div>
       )}
