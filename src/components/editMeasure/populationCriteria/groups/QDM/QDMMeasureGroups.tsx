@@ -738,7 +738,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
 
               {/* Form control later should be moved to own component and dynamically rendered by switch based on measure. */}
 
-              <div>
+              <div tw="mb-5">
                 <div>
                   <FormFieldInner>
                     <FieldSeparator>
