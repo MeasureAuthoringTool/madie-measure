@@ -309,6 +309,7 @@ const TestCasePopulationList = ({
               isTestCaseExecuted={isTestCaseExecuted}
               setIsTestCaseExecuted={setIsTestCaseExecuted}
               stratification={stratification}
+              stratificationCount={j + 1}
               populationBasis={populationBasis}
               key={stratification.id}
               disableExpected={disableExpected}

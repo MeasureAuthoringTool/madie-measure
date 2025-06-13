@@ -13,10 +13,10 @@ const ExpectActualInput = ({
     actual: displayType === "actual",
   });
   return props.populationBasis?.toLowerCase() === "true" &&
-    props.name !== "measureObservation" &&
-    props.name !== "measurePopulationObservation" &&
-    props.name !== "numeratorObservation" &&
-    props.name != "denominatorObservation" ? (
+    !props.name?.includes("measureObservation") &&
+    !props.name?.includes("measurePopulationObservation") &&
+    !props.name?.includes("numeratorObservation") &&
+    !props.name?.includes("denominatorObservation") ? (
     <input
       type="checkbox"
       className={checkBoxClass}

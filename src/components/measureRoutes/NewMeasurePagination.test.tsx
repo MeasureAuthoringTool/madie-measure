@@ -192,7 +192,7 @@ describe("Measures Pagination", () => {
       const updatedStorage = JSON.parse(
         localStorage.getItem("myMeasurePageOptions")
       );
-      expect(updatedStorage).toEqual({ page: 2, limit: 10 });
+      expect(updatedStorage).toEqual({ page: 1, limit: "10" });
     });
   });
 });

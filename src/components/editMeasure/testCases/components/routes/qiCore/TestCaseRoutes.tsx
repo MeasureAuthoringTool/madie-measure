@@ -19,6 +19,7 @@ import {
 import TestCaseData from "../../testCaseConfiguration/testCaseData/TestCaseData";
 import SDEPage from "../../testCaseConfiguration/sde/SDEPage";
 import Expansion from "../../testCaseConfiguration/expansion/Expansion";
+import RAVPage from "../../testCaseConfiguration/rav/RAVPage";
 
 export const CQL_RETURN_TYPES_MISMATCH_ERROR =
   "One or more Population Criteria has a mismatch with CQL return types. Test Cases cannot be executed until this is resolved.";
@@ -200,6 +201,21 @@ const TestCaseRoutes = () => {
               />
             }
           />
+          {featureFlags?.QICoreIncludeRAVValues && (
+            <Route
+              path="/list-page/rav"
+              element={
+                <TestCaseLandingWrapper
+                  qdm={false}
+                  children={
+                    <RAVPage
+                      setExecutionContextReady={setExecutionContextReady}
+                    />
+                  }
+                />
+              }
+            />
+          )}
 
           <Route
             path="/list-page/expansion"

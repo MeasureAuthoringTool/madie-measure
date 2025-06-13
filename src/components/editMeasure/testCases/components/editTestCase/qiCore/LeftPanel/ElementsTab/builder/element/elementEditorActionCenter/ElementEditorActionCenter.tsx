@@ -6,10 +6,11 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { MadieDeleteDialog } from "@madie/madie-design-system/dist/react";
 
 interface PropTypes {
-  //  ...and it's HERE!  Thanks to GAK & MAT-8338
   rootDefinition: any;
   numElements: number;
-  handleDelete: (string) => void;
+  elementValue: any;
+  elementName: string;
+  handleDelete: (path: string, element: any, elementName: string) => void;
   addElementOfMultipleCardinality: () => void;
 }
 interface Action {
@@ -21,7 +22,7 @@ interface Action {
 const ElementEditorActionCenter = (props: PropTypes) => {
   const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
     useState<boolean>(false);
-  const { handleDelete, rootDefinition } = props;
+  const { handleDelete, rootDefinition, elementValue, elementName } = props;
   const [open, setOpen] = useState(false);
 
   const [actions, setActions] = useState<Array<Action>>([]);
@@ -35,6 +36,9 @@ const ElementEditorActionCenter = (props: PropTypes) => {
   const copyAction = {
     name: "Copy",
     icon: <ContentCopyIcon sx={{ color: "#3171C2" }} />,
+    onClick: () => {
+      // GAK MAT-8682.. avoiding an ugly error; Copy logic can be implemented here if needed
+    },
   };
   const deleteAction = {
     name: "Delete",
@@ -136,7 +140,7 @@ const ElementEditorActionCenter = (props: PropTypes) => {
         <MadieDeleteDialog
           open={deleteDialogModalOpen}
           onContinue={() => {
-            handleDelete(rootDefinition?.path);
+            handleDelete(rootDefinition?.path, elementValue, elementName);
             setDeleteDialogModalOpen(false);
           }}
           onClose={() => {

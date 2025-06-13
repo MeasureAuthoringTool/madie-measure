@@ -91,25 +91,11 @@ export default function MeasureLanding() {
       curLimit !== undefined ? (curLimit === "All" ? 50 : curLimit) : 10;
 
     setCurrentPage(v - 1);
-    localStorage.setItem(
-      getStorageKey(activeTab),
-      JSON.stringify({
-        page: v,
-        limit: updatedLimit,
-      })
-    );
     navigate(`?tab=${activeTab}&page=${v}&limit=${updatedLimit}`);
   };
   const handleLimitChange = (e) => {
     const newLimit = e.target.value;
     setCurrentLimit(newLimit);
-    localStorage.setItem(
-      getStorageKey(activeTab),
-      JSON.stringify({
-        page: 1,
-        limit: newLimit,
-      })
-    );
     navigate(`?tab=${activeTab}&page=1&limit=${newLimit}`);
   };
 
@@ -207,18 +193,14 @@ export default function MeasureLanding() {
       limit: 10,
     };
 
-    // Determine the current page and limit
     const updatedPage = values.page ? Number(values.page) : tabPageOptions.page;
-    const updatedLimit = values.limit
-      ? Number(values.limit)
-      : tabPageOptions.limit;
+    const updatedLimit = values.limit || tabPageOptions.limit;
 
     // If query parameters are missing, update the URL
     if (!values.page || !values.limit) {
-      navigate(
-        `?tab=${tabFromUrl}&page=${updatedPage}&limit=${updatedLimit}`,
-        { replace: true } // Use replace to avoid adding unnecessary history entries
-      );
+      navigate(`?tab=${tabFromUrl}&page=${updatedPage}&limit=${updatedLimit}`, {
+        replace: true,
+      });
     }
 
     localStorage.setItem(

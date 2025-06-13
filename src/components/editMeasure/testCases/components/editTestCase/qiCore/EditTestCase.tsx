@@ -487,7 +487,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
       let timezoneUpdated = false;
       dayjs.extend(utc);
       const regex =
-        /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})/;
+        /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2}|[+-]\d{4})/;
       const updatedData = JSON.stringify(parsedValue, (key, value) => {
         if (typeof value === "string" && regex.test(value)) {
           //overwrite timezones
@@ -495,7 +495,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
             value.replace(/([+-]\d{2}:\d{2}|Z)$/, "+00:00")
           )
             .utc()
-            .format();
+            .toISOString();
           if (value != newValue) {
             timezoneUpdated = true;
           }
@@ -648,8 +648,10 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 started running, please continue working in MADiE.
               </h3>
               <ul>
-                MADiE only supports a timezone offset of 0. MADiE has
-                overwritten any timezone offsets that are not zero.
+                MADiE enforces a UTC (offset 0) timestamp format with mandatory
+                millisecond precision. All timestamps with non-zero offsets have
+                been overwritten to UTC, and missing milliseconds have been
+                defaulted to '000'.
               </ul>
             </div>,
             "warning"
@@ -667,8 +669,10 @@ const EditTestCase = (props: EditTestCaseProps) => {
             <div>
               <h3>Test case {action}d successfully!</h3>
               <ul>
-                MADiE only supports a timezone offset of 0. MADiE has
-                overwritten any timezone offsets that are not zero.
+                MADiE enforces a UTC (offset 0) timestamp format with mandatory
+                millisecond precision. All timestamps with non-zero offsets have
+                been overwritten to UTC, and missing milliseconds have been
+                defaulted to '000'.
               </ul>
             </div>,
             "warning"
@@ -677,7 +681,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
           showToast(`Test case ${action}d successfully!`, "success");
         }
       } else {
-        const valErrors = validationErrors.map((error) => (
+        const valErrors = validationErrors?.map((error) => (
           <li>{error.diagnostics}</li>
         ));
         const message: ReactNode = testCaseAlertToast ? (
@@ -688,8 +692,10 @@ const EditTestCase = (props: EditTestCaseProps) => {
             </h3>
             {timezoneUpdated && (
               <ul>
-                MADiE only supports a timezone offset of 0. MADiE has
-                overwritten any timezone offsets that are not zero.
+                MADiE enforces a UTC (offset 0) timestamp format with mandatory
+                millisecond precision. All timestamps with non-zero offsets have
+                been overwritten to UTC, and missing milliseconds have been
+                defaulted to '000'.
               </ul>
             )}
             <ul>{valErrors}</ul>
@@ -703,8 +709,10 @@ const EditTestCase = (props: EditTestCaseProps) => {
             {timezoneUpdated && (
               <ul style={{ listStyle: "inside" }}>
                 <li>
-                  MADiE only supports a timezone offset of 0. MADiE has
-                  overwritten any timezone offsets that are not zero.
+                  MADiE enforces a UTC (offset 0) timestamp format with
+                  mandatory millisecond precision. All timestamps with non-zero
+                  offsets have been overwritten to UTC, and missing milliseconds
+                  have been defaulted to '000'.
                 </li>
               </ul>
             )}
@@ -921,7 +929,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
               </div>
             }
             canClose={false}
-            minimizeAlerts={featureFlags?.MinimizeAlerts}
           />
         </div>
       )}
@@ -1409,6 +1416,32 @@ const EditTestCase = (props: EditTestCaseProps) => {
           message={toastMessage}
           onClose={onToastClose}
           autoHideDuration={10000}
+          // Override default styles to account for longer message
+          sx={{
+            overflow: "hidden",
+            "& .MuiPaper-root": {
+              backgroundColor: "#fff",
+              padding: 0,
+            },
+            "& .MuiSnackbar-root": {
+              overflow: "hidden",
+              borderRadius: 4,
+            },
+            "& .MuiSnackbarContent-message": {
+              padding: 0,
+              flexGrow: 1,
+              ".messageCont": {
+                display: "flex",
+                flexDirection: "row",
+                flexGrow: 1,
+                justifyContent: "space-between",
+                div: {
+                  display: "flex",
+                },
+              },
+            },
+            ".toast": { minHeight: "80px" },
+          }}
         />
       </TestCaseForm>
     </>
