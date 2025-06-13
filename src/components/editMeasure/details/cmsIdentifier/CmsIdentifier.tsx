@@ -35,7 +35,7 @@ export default function CmsIdentifier({
           data-testid="cms-id-text-field"
           inputProps={{ "data-testid": "cms-id-input" }}
           size="small"
-          value={model.startsWith("QI-Core") ? `${cmsId}FHIR` : cmsId}
+          value={model.startsWith("QI-Core") ? `${cmsId}FHIR` : String(cmsId)}
           area-describedby="cms-id-tooltip"
         />
       ) : (

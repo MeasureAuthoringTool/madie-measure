@@ -5,8 +5,8 @@ import {
   waitFor,
   screen,
   within,
+  act,
 } from "@testing-library/react";
-import { act } from "react-dom/test-utils";
 import ModelAndMeasurementPeriod from "./ModelAndMeasurementPeriod";
 import useMeasureServiceApi, {
   MeasureServiceApi,
@@ -188,8 +188,10 @@ describe("Model and Measurement Period component", () => {
     render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
     const result: HTMLElement = getByTestId("model-measurement-form");
     expect(result).toBeInTheDocument();
-    await act(async () => {
-      const text = getByTestId("model-id-input") as HTMLInputElement;
+    await waitFor(() => {
+      const text = screen.getByRole("textbox", {
+        name: "Model",
+      }) as HTMLInputElement;
       expect(text.value).toBe("QI-Core v4.1.1");
     });
   });
@@ -284,8 +286,10 @@ describe("Model and Measurement Period component", () => {
     measure.measurementPeriodEnd = null;
     measure.measurementPeriodStart = null;
     render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
-    await act(async () => {
-      const text = getByTestId("model-id-input") as HTMLInputElement;
+    await waitFor(() => {
+      const text = screen.getByRole("textbox", {
+        name: "Model",
+      }) as HTMLInputElement;
       expect(text.value).toBe("QI-Core v4.1.1");
     });
     const measurementPeriodStartNode = getByTestId("measurement-period-start");
@@ -324,7 +328,9 @@ describe("Model and Measurement Period component", () => {
     measure.measurementPeriodStart = null;
     render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
     await act(async () => {
-      const text = getByTestId("model-id-input") as HTMLInputElement;
+      const text = screen.getByRole("textbox", {
+        name: "Model",
+      }) as HTMLInputElement;
       expect(text.value).toBe("QI-Core v4.1.1");
     });
     const measurementPeriodStartNode = getByTestId("measurement-period-start");

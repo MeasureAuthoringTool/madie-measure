@@ -2808,8 +2808,12 @@ describe("EditTestCase component", () => {
           expect(
             screen.queryByRole("button", { name: "Save" })
           ).not.toBeInTheDocument();
-          expect(screen.getByTestId("test-case-title")).toBeDisabled();
-          expect(screen.getByTestId("test-case-description")).toBeDisabled();
+          expect(
+            screen.getByRole("textbox", { name: "Title" })
+          ).toHaveAttribute("readonly");
+          expect(
+            screen.getByRole("textbox", { name: "Description" })
+          ).toHaveAttribute("readonly");
           expect(screen.getByLabelText("Group")).toBeDisabled();
         },
         { timeout: 1500 }

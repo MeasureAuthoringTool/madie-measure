@@ -184,7 +184,7 @@ const Expansion = () => {
               { label: "Manifest", value: true },
             ]}
             disabled={!canEdit}
-            value={formik.values.isManifestExpansion}
+            value={Boolean(formik.values.isManifestExpansion)}
             onChange={(e) =>
               formik.setFieldValue(
                 "isManifestExpansion",

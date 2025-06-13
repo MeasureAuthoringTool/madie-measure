@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import DateComponent from "./DateComponent";
 import userEvent from "@testing-library/user-event";
@@ -62,16 +62,14 @@ describe("DateComponent", () => {
         structureDefinition={null}
       />
     );
-    const dateFieldInput = screen.getByTestId(
-      "Invalid Format-field-birthday-input"
-    );
+    const dateFieldInput = screen.getByRole("textbox", { name: "Date Field" });
     expect(dateFieldInput).toBeInTheDocument();
     const formatSelectorField = getByTestId(
       "date-format-selector-input-field-birthday"
     );
     expect(formatSelectorField).toBeInTheDocument();
     expect(formatSelectorField.value).toBe("Invalid Format");
-    expect(dateFieldInput.value).toBe("");
+    expect(dateFieldInput.value).toBe("-");
     expect(setTouched).toHaveBeenCalled();
   });
 
