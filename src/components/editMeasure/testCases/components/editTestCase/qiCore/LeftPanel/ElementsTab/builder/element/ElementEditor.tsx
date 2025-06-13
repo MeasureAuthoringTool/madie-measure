@@ -42,7 +42,7 @@ interface ElementEditorProps {
   displayedElementsTree: Object;
   setInitialFormikValuesStu6: Dispatch<SetStateAction<Object>>;
   setValidationSchema: Dispatch<SetStateAction<Object>>;
-  deleteElement?: (string) => void;
+  deleteElement?: (path: string, element: any, elementName: string) => void;
   setLastAddedElemPath: (string) => void;
 }
 /*

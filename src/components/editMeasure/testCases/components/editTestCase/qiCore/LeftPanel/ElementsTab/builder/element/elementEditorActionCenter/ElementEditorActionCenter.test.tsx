@@ -18,6 +18,14 @@ describe("ElementEditorActionCenter Component", () => {
         rootDefinition={mockRootDefinition}
         numElements={1}
         handleDelete={mockHandleDelete}
+        addElementOfMultipleCardinality={jest.fn()}
+        elementValue={[
+          {
+            family: "IPPFail",
+            given: ["EncounterInMPNotDone"],
+          },
+        ]}
+        elementName={" *name "}
       />
     );
     const actionCenterButton = await screen.findByTestId(
@@ -42,7 +50,11 @@ describe("ElementEditorActionCenter Component", () => {
     userEvent.click(deleteConfirmationButton);
 
     expect(mockHandleDelete).toHaveBeenCalledTimes(1);
-    expect(mockHandleDelete).toHaveBeenCalledWith("test-observation");
+    expect(mockHandleDelete).toHaveBeenCalledWith(
+      "test-observation",
+      [{ family: "IPPFail", given: ["EncounterInMPNotDone"] }],
+      " *name "
+    );
   });
 
   it("should render Action Center for zero to many elements", async () => {

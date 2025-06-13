@@ -110,6 +110,7 @@ const GroupPopulations = ({
                             : []
                         }
                         stratification={strat}
+                        stratificationCount={stratIndex + 1}
                         stratResult={
                           testCaseResults
                             ? testCaseResults.find(
