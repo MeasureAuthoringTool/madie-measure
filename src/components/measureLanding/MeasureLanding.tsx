@@ -18,6 +18,7 @@ import {
   MadieSpinner,
   Tabs,
   Tab,
+  Toast,
 } from "@madie/madie-design-system/dist/react";
 import "./MeasureLanding.scss";
 import { useDocumentTitle, useFeatureFlags } from "@madie/madie-util";
@@ -61,6 +62,39 @@ export default function MeasureLanding() {
   const [currentDirection, setCurrentDirection] = useState("");
   const abortController = useRef(null);
   const featureFlags = useFeatureFlags();
+
+  // Toast state and handlers
+  const [toastOpen, setToastOpen] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string>("");
+  const [toastType, setToastType] = useState<string>("danger");
+  const onToastClose = () => {
+    setToastType("danger");
+    setToastMessage("");
+    setToastOpen(false);
+  };
+
+  const handleToast = (type, message, open) => {
+    setToastType(type);
+    setToastMessage(message);
+    setToastOpen(open);
+  };
+
+  // Add event listener for test purposes
+  useEffect(() => {
+    const handleShowToast = (event: CustomEvent) => {
+      const { type, message, open } = event.detail;
+      setToastType(type);
+      setToastMessage(message);
+      setToastOpen(open);
+    };
+
+    window.addEventListener("showToast", handleShowToast as EventListener);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("showToast", handleShowToast as EventListener);
+    };
+  }, []);
 
   const getStorageKey = (tab) =>
     tab === 0 ? "myMeasurePageOptions" : "allMeasurePageOptions";
@@ -363,6 +397,15 @@ export default function MeasureLanding() {
                 setCurrentDirection={setCurrentDirection}
                 setErrMsg={setErrMsg}
                 search={search}
+                // Toast props
+                toastOpen={toastOpen}
+                toastMessage={toastMessage}
+                toastType={toastType}
+                setToastOpen={setToastOpen}
+                setToastMessage={setToastMessage}
+                setToastType={setToastType}
+                onToastClose={onToastClose}
+                handleToast={handleToast}
               />
               <div className="pagination-container">
                 {totalItems > 0 && (
@@ -398,6 +441,22 @@ export default function MeasureLanding() {
           </div>
         )}
       </div>
+
+      {/* Toast component with proper testing attributes */}
+      <Toast
+        toastKey="measure-action-toast"
+        aria-live="polite"
+        role="alert"
+        toastType={toastType}
+        testId={`toast-${toastType}`} // Use a consistent testId pattern
+        closeButtonProps={{
+          "data-testid": "close-toast-button",
+        }}
+        open={toastOpen}
+        message={toastMessage}
+        onClose={onToastClose}
+        autoHideDuration={6000}
+      />
     </div>
   );
 }

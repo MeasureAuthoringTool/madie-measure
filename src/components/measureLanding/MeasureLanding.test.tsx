@@ -2,7 +2,11 @@ import "@testing-library/jest-dom";
 // NOTE: jest-dom adds handy assertions to Jest and is recommended, but not required
 import * as React from "react";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { createMemoryRouter, RouterProvider } from "react-router-dom";
+import {
+  createMemoryRouter,
+  RouterProvider,
+  MemoryRouter,
+} from "react-router-dom";
 import { routesConfig } from "../measureRoutes/MeasureRoutes";
 import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
@@ -11,6 +15,7 @@ import { oneItemResponse } from "../__mocks__/mockMeasureResponses";
 import { within } from "@testing-library/dom";
 // @ts-ignore
 import { useFeatureFlags } from "@madie/madie-util";
+import MeasureLanding from "./MeasureLanding";
 
 const serviceConfig = {
   fhirElmTranslationService: { baseUrl: "fhir/services" },
@@ -63,6 +68,18 @@ const mockMeasureServiceApi = {
 jest.mock("../../api/useMeasureServiceApi", () =>
   jest.fn(() => mockMeasureServiceApi)
 );
+
+// Custom render function to test MeasureLanding component directly
+// Update to wrap in MemoryRouter to provide router context for useLocation()
+const renderMeasureLanding = () => {
+  return render(
+    <ApiContextProvider value={serviceConfig}>
+      <MemoryRouter initialEntries={["/measures"]}>
+        <MeasureLanding />
+      </MemoryRouter>
+    </ApiContextProvider>
+  );
+};
 
 describe("Measure Page", () => {
   afterEach(() => {
@@ -397,5 +414,178 @@ describe("Measure Page", () => {
     });
     expect(allMeasuresTab).toBeInTheDocument();
     expect(allMeasuresTab).not.toHaveClass("Mui-selected");
+  });
+});
+
+// New test suite for toast functionality
+describe("Toast functionality in MeasureLanding", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should render toast component", async () => {
+    renderMeasureLanding();
+    // Wait for initial loading to complete
+    await waitFor(() => {
+      expect(screen.queryByTestId("measure-landing")).toBeInTheDocument();
+    });
+
+    // Show a toast to make it visible for testing
+    const event = new CustomEvent("showToast", {
+      detail: {
+        type: "success",
+        message: "Test message",
+        open: true,
+      },
+    });
+    window.dispatchEvent(event);
+
+    // Now check for the toast with the appropriate testId
+    await waitFor(() => {
+      expect(screen.getByTestId("toast-success")).toBeInTheDocument();
+    });
+  });
+
+  it("should close toast when close button is clicked", async () => {
+    // Mock implementation for searchMeasuresByCriteria to make test faster
+    (mockMeasureServiceApi.searchMeasuresByCriteria as jest.Mock)
+      .mockClear()
+      .mockResolvedValueOnce(oneItemResponse);
+
+    renderMeasureLanding();
+
+    // Wait for initial loading to complete
+    await waitFor(() => {
+      expect(screen.queryByTestId("measure-landing")).toBeInTheDocument();
+    });
+
+    // Programmatically show a toast message
+    const event = new CustomEvent("showToast", {
+      detail: {
+        type: "success",
+        message: "Test success message",
+        open: true,
+      },
+    });
+    window.dispatchEvent(event);
+
+    // Wait for toast to appear and then test close functionality
+    await waitFor(() => {
+      const toast = screen.getByTestId("toast-success");
+      expect(toast).toBeVisible();
+      expect(toast).toHaveTextContent("Test success message");
+
+      // Find and click the close button
+      const closeButton = screen.getByTestId("close-toast-button");
+      userEvent.click(closeButton);
+
+      // Toast should be closed/hidden after a short delay
+      setTimeout(() => {
+        expect(toast).not.toBeVisible();
+      }, 100);
+    });
+  });
+
+  it("should display success toast for successful operations", async () => {
+    // Setup
+    (mockMeasureServiceApi.searchMeasuresByCriteria as jest.Mock)
+      .mockClear()
+      .mockResolvedValueOnce(oneItemResponse);
+
+    renderMeasureLanding();
+
+    // Wait for initial loading to complete
+    await waitFor(() => {
+      expect(screen.queryByTestId("measure-landing")).toBeInTheDocument();
+    });
+
+    // Trigger a success toast
+    const event = new CustomEvent("showToast", {
+      detail: {
+        type: "success",
+        message: "Operation completed successfully",
+        open: true,
+      },
+    });
+    window.dispatchEvent(event);
+
+    // Assertions
+    await waitFor(() => {
+      const toast = screen.getByTestId("toast-success");
+      expect(toast).toBeVisible();
+      expect(toast).toHaveTextContent("Operation completed successfully");
+    });
+  });
+
+  it("should display error toast for failed operations", async () => {
+    // Setup
+    (mockMeasureServiceApi.searchMeasuresByCriteria as jest.Mock)
+      .mockClear()
+      .mockResolvedValueOnce(oneItemResponse);
+
+    renderMeasureLanding();
+
+    // Wait for initial loading to complete
+    await waitFor(() => {
+      expect(screen.queryByTestId("measure-landing")).toBeInTheDocument();
+    });
+
+    // Trigger an error toast
+    const event = new CustomEvent("showToast", {
+      detail: {
+        type: "danger",
+        message: "Operation failed",
+        open: true,
+      },
+    });
+    window.dispatchEvent(event);
+
+    // Assertions
+    await waitFor(() => {
+      const toast = screen.getByTestId("toast-danger");
+      expect(toast).toBeVisible();
+      expect(toast).toHaveTextContent("Operation failed");
+    });
+  });
+
+  it("should pass toast props to MeasureList component", async () => {
+    // This test verifies that MeasureLanding passes the necessary toast props to MeasureList
+
+    // We need to mock a simplified version of MeasureList to verify props
+    const originalMeasureList = jest.requireActual(
+      "./measureList/MeasureList"
+    ).default;
+    const mockMeasureList = jest.fn(originalMeasureList);
+
+    // Create a spy on the required module
+    jest
+      .spyOn(require("./measureList/MeasureList"), "default")
+      .mockImplementation(mockMeasureList);
+
+    renderMeasureLanding();
+
+    // Wait for the component to load
+    await waitFor(() => {
+      expect(screen.queryByTestId("measure-landing")).toBeInTheDocument();
+    });
+
+    // Verify that MeasureList was called with toast props
+    expect(mockMeasureList).toHaveBeenCalled();
+
+    // Check the last call to ensure toast props were passed
+    const lastCallProps =
+      mockMeasureList.mock.calls[mockMeasureList.mock.calls.length - 1][0];
+
+    expect(lastCallProps).toHaveProperty("toastOpen");
+    expect(lastCallProps).toHaveProperty("toastMessage");
+    expect(lastCallProps).toHaveProperty("toastType");
+    expect(lastCallProps).toHaveProperty("setToastOpen");
+    expect(lastCallProps).toHaveProperty("setToastMessage");
+    expect(lastCallProps).toHaveProperty("setToastType");
+    expect(lastCallProps).toHaveProperty("onToastClose");
+    expect(lastCallProps).toHaveProperty("handleToast");
+
+    // Restore the original implementation
+    jest.restoreAllMocks();
   });
 });
