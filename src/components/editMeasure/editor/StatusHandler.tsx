@@ -67,7 +67,6 @@ const StatusHandler = ({
 }) => {
   const featureFlags = useFeatureFlags();
   const alerts = [];
-
   if (success?.status === "success") {
     if (outboundAnnotations?.length > 0) {
       alerts.push(
@@ -139,6 +138,22 @@ const StatusHandler = ({
           "Errors were found within the CQL",
           null,
           null
+        )
+      );
+    }
+  } else if (outboundAnnotations && outboundAnnotations.length > 0) {
+    const warningAnnotation = _.size(
+      _.filter(outboundAnnotations, {
+        type: "warning",
+      })
+    );
+    if (warningAnnotation === 0) {
+      alerts.push(
+        generateAlertConfig(
+          "warning",
+          "Following issues were found within the CQL",
+          null,
+          outboundAnnotations
         )
       );
     }
