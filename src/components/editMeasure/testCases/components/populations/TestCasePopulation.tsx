@@ -54,6 +54,24 @@ const TestCasePopulation = ({
     }
   };
 
+  const countTemplate = (populationType) => {
+    if (populationType === PopulationType.INITIAL_POPULATION) {
+      return initialPopulationCount > 0 ? `${initialPopulationCount}` : "";
+    }
+    if (
+      populationType === PopulationType.MEASURE_POPULATION_OBSERVATION ||
+      populationType === PopulationType.NUMERATOR_OBSERVATION ||
+      populationType === PopulationType.DENOMINATOR_OBSERVATION
+    ) {
+      return measureObservationsCount > 0 ? `${measureObservationsCount}` : "";
+    }
+
+    return "";
+  };
+
+  const count = countTemplate(population.name as PopulationType);
+  const label = populationNameTemplate(population.name as PopulationType);
+
   return (
     <React.Fragment key={`fragment-key-${population.name}`}>
       <tr
@@ -63,14 +81,12 @@ const TestCasePopulation = ({
         role="row"
       >
         <td>&nbsp;</td>
-        <td role="cell">
-          {populationNameTemplate(population.name as PopulationType)}
-        </td>
+        <td role="cell">{label}</td>
         <td role="cell">
           <ExpectActualInput
             id={`${population.id}-expected-cb`}
-            aria-labelledby={`${population.name}-expected`}
-            name={population.name}
+            aria-label={`${label} expected`}
+            name={`${population.name}${count}-expected`}
             expectedValue={population.expected}
             onChange={(expectedValue) => {
               setIsTestCaseExecuted(false);
@@ -86,8 +102,8 @@ const TestCasePopulation = ({
           {isTestCaseExecuted ? (
             <ExpectActualInput
               id={`${population.id}-actual-cb`}
-              aria-labelledby={`${population.name}-actual`}
-              name={population.name}
+              aria-label={`${label} actual`}
+              name={`${population.name}${count}-actual`}
               expectedValue={population.actual}
               onChange={() => {}} // do nothing - should not be editable here
               populationBasis={populationBasis}

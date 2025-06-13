@@ -70,6 +70,12 @@ const ElementEditorChildren = ({
                 ? elementValue.length
                 : 1
             }
+            elementName={getElementName(
+              rootDefinition,
+              resourcePath,
+              getNestedProperty(values, stripAllIndexes(rootDefinition.id))
+            )}
+            elementValue={elementValue}
             addElementOfMultipleCardinality={addElementOfMultipleCardinality}
             rootDefinition={rootDefinition}
             handleDelete={deleteElement}

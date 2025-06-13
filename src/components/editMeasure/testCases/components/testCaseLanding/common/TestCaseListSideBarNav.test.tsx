@@ -4,6 +4,7 @@ import { MemoryRouter } from "react-router-dom";
 import TestCaseListSideBarNav from "./TestCaseListSideBarNav";
 import { Group } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
+// @ts-ignore
 import { useFeatureFlags } from "@madie/madie-util";
 
 const groups: Group[] = [
@@ -23,6 +24,7 @@ const groups: Group[] = [
 jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: jest.fn().mockReturnValue({
     QDMIncludeRAVValues: true,
+    QICoreIncludeRAVValues: true,
   }),
 }));
 describe("TestCase component", () => {
@@ -65,7 +67,7 @@ describe("TestCase component", () => {
     );
 
     expect(screen.getByRole("navigation")).toBeInTheDocument();
-    expect(screen.getAllByRole("tab").length).toEqual(5);
+    expect(screen.getAllByRole("tab").length).toEqual(6);
     const activeLink = screen.getByRole("tab", {
       name: "Population Criteria 2",
     });
@@ -110,6 +112,32 @@ describe("TestCase component", () => {
     render(
       <MemoryRouter>
         <TestCaseListSideBarNav allPopulationCriteria={groups} qdm={true} />
+      </MemoryRouter>
+    );
+
+    expect(screen.queryByRole("tab", { name: "RAV" })).toBeInTheDocument();
+  });
+
+  it("shouldn't render RAV tab for QI Core measures when QICoreIncludeRAVValues flag is false", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => {
+      return {
+        QICoreIncludeRAVValues: false,
+      };
+    });
+
+    render(
+      <MemoryRouter>
+        <TestCaseListSideBarNav allPopulationCriteria={groups} qdm={false} />
+      </MemoryRouter>
+    );
+
+    expect(screen.queryByRole("tab", { name: "RAV" })).not.toBeInTheDocument();
+  });
+
+  it("should render RAV tab for QI Core measures when QICoreIncludeRAVValues flag is true", async () => {
+    render(
+      <MemoryRouter>
+        <TestCaseListSideBarNav allPopulationCriteria={groups} qdm={false} />
       </MemoryRouter>
     );
 

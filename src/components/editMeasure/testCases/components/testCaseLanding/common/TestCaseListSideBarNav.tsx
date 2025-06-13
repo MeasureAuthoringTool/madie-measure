@@ -126,7 +126,8 @@ const TestCaseListSideBarNav = ({
                     orientation="vertical"
                     onChange={handleChange}
                   />
-                  {featureFlags?.QDMIncludeRAVValues && qdm && (
+                  {((featureFlags?.QDMIncludeRAVValues && qdm) ||
+                    (featureFlags?.QICoreIncludeRAVValues && !qdm)) && (
                     <Tab
                       label="RAV"
                       value="rav"
