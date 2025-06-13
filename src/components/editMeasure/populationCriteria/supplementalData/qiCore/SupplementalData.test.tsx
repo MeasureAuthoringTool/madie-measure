@@ -121,8 +121,8 @@ describe("SupplementalData Component QI-Core", () => {
     });
     expect(supplementalElements).toHaveTextContent("Initial Population");
 
-    const comboBoxInputs = screen.getByRole("textbox", { name: "Description" });
-    expect(comboBoxInputs).toHaveTextContent("test description");
+    const description = screen.getByRole("textbox", { name: "Description" });
+    expect(description).toHaveTextContent("test description");
 
     const allFormFields = screen.getAllByRole("textbox");
     for (const formField of allFormFields) {

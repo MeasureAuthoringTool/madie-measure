@@ -2186,7 +2186,7 @@ describe("Measure Groups Page", () => {
     });
   });
 
-  test("render Measure group properties if user is not the measure owner", async () => {
+  test("render Measure group properties in readonly mode if user is not the measure owner", async () => {
     (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
     await waitFor(() => renderMeasureGroupComponent());
     const descriptionField = screen.getByRole("textbox", {
