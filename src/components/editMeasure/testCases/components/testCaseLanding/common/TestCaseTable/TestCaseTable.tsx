@@ -21,6 +21,7 @@ import TestCaseTablePopover from "./TestCaseTablePopover";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import ShiftDatesDialog from "../shiftDates/ShiftDatesDialog";
 import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
 import _ from "lodash";
@@ -44,6 +45,12 @@ interface TestCaseTableProps {
   shiftDatesDialogModalOpen: any;
   setShiftDatesDialogModalOpen: any;
 }
+
+const fiberManualRecordStyles = {
+  color: "#003366",
+  width: 8,
+  height: 8,
+};
 
 export const convertDate = (date: string) => {
   if (!date) {
@@ -245,11 +252,29 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           const converted = convertDate(info.row.original.lastSaved);
           const { date, time } = converted;
           return (
-            <span>
-              {date}
-              <br />
-              {time}
-            </span>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              {featureFlags?.EditTestsOnVersionedMeasures &&
+              !measure.measureMetaData?.draft &&
+              !info.row.original.action.createdBeforeVersioning ? (
+                <div>
+                  <FiberManualRecord
+                    sx={fiberManualRecordStyles}
+                    data-testid={`test-case-fiber-manual-record-icon-${info.row.original.id}`}
+                  />
+                </div>
+              ) : null}
+              <div style={{ marginLeft: "8px" }}>
+                {date}
+                <br />
+                {time}
+              </div>
+            </div>
           );
         },
         accessorKey: "lastModifiedAt",
@@ -265,7 +290,10 @@ const TestCaseTable = (props: TestCaseTableProps) => {
               checkUserCanEdit(
                 measure.measureSet?.owner,
                 measure.measureSet?.acls
-              ) && measure.measureMetaData?.draft
+              ) &&
+              (!featureFlags?.EditTestsOnVersionedMeasures
+                ? measure.measureMetaData?.draft
+                : true)
                 ? "Edit"
                 : "View"
             } Test Case ${info.row.original.group} ${info.row.original.title}`}
@@ -281,7 +309,10 @@ const TestCaseTable = (props: TestCaseTableProps) => {
             {checkUserCanEdit(
               measure.measureSet?.owner,
               measure.measureSet?.acls
-            ) && measure.measureMetaData?.draft
+            ) &&
+            (!featureFlags?.EditTestsOnVersionedMeasures
+              ? measure.measureMetaData?.draft
+              : true)
               ? "Edit"
               : "View"}
           </Button>
@@ -290,7 +321,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
         enableSorting: false,
       },
     ];
-  }, [testCases]);
+  }, [testCases, featureFlags?.EditTestsOnVersionedMeasures]);
 
   const table = useReactTable({
     data,
