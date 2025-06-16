@@ -130,9 +130,15 @@ const DraftMeasureDialog = ({ open, onClose, onSubmit, measure, loading }) => {
                   id: "model-select",
                   "aria-describedby": "model-select-helper-text",
                   required: true,
-                  readOnly: measure?.model === "QI-Core v6.0.0",
+                  readOnly: featureFlags?.qiCore7
+                    ? measure?.model === "QI-Core v7.0.0"
+                    : measure?.model === "QI-Core v6.0.0",
                 }}
-                readOnly={measure?.model === "QI-Core v6.0.0"}
+                readOnly={
+                  featureFlags?.qiCore7
+                    ? measure?.model === "QI-Core v7.0.0"
+                    : measure?.model === "QI-Core v6.0.0"
+                }
                 SelectDisplayProps={{
                   "aria-required": "true",
                 }}
@@ -141,19 +147,35 @@ const DraftMeasureDialog = ({ open, onClose, onSubmit, measure, loading }) => {
                 error={formik.touched.model && Boolean(formik.errors.model)}
                 helperText={formik.touched.model && formik.errors.model}
                 size="small"
-                options={modelOptions.map((modelKey) => {
-                  if (!modelKey.startsWith("QDM")) {
-                    return (
-                      <MenuItem
-                        key={modelKey}
-                        value={Model[modelKey]}
-                        data-testid={`measure-model-option-${Model[modelKey]}`}
-                      >
-                        {Model[modelKey]}
-                      </MenuItem>
-                    );
-                  }
-                })}
+                options={modelOptions
+                  // Limit the model options based on the measure's current model
+                  .filter((modelKey) => {
+                    if (measure?.model === "QI-Core v6.0.0") {
+                      return (
+                        modelKey === "QICORE_6_0_0" ||
+                        modelKey === "QICORE_7_0_0"
+                      );
+                    } else if (measure?.model === "QI-Core v7.0.0") {
+                      return modelKey === "QICORE_7_0_0";
+                    }
+                    return true; // Exclude all other cases
+                  })
+                  .map((modelKey) => {
+                    if (
+                      !modelKey.startsWith("QDM") &&
+                      (featureFlags?.qiCore7 || modelKey != "QICORE_7_0_0")
+                    ) {
+                      return (
+                        <MenuItem
+                          key={modelKey}
+                          value={Model[modelKey]}
+                          data-testid={`measure-model-option-${Model[modelKey]}`}
+                        >
+                          {Model[modelKey]}
+                        </MenuItem>
+                      );
+                    }
+                  })}
               />
             </Box>
           ) : null}
