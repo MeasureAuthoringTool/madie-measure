@@ -314,11 +314,14 @@ const EditTestCase = (props: EditTestCaseProps) => {
     testCaseId: id,
     measureId,
     shouldStart: shouldPoll,
-    onUpdate: (updatedTc) => {
+    onUpdate: (updatedTc: TestCase) => {
       const nextTc = _.cloneDeep(updatedTc);
       handleHapiOutcome(nextTc?.hapiOperationOutcome);
     },
     validateTest: !isQiCoreV6,
+    onError: (error) => {
+      showToast(error, "danger");
+    },
   });
 
   //needs to be added to feature flag config once the feature flags are moved to Util

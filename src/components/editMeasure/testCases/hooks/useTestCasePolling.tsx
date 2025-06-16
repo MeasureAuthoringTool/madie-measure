@@ -8,6 +8,7 @@ type UseTestCasePollingParams = {
   shouldStart: boolean;
   onUpdate: (updated: TestCase) => void;
   validateTest: boolean;
+  onError?: (error: unknown) => void;
 };
 
 export function useTestCasePolling({
@@ -16,6 +17,7 @@ export function useTestCasePolling({
   shouldStart,
   onUpdate,
   validateTest,
+  onError,
 }: UseTestCasePollingParams) {
   const testCaseService = useRef(useTestCaseServiceApi());
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -38,6 +40,11 @@ export function useTestCasePolling({
         }
       } catch (err) {
         stopPolling();
+        if (onError) {
+          onError(
+            "Unable to retrieve validation results for the test case, please try again. If the error persists, please contact the help desk."
+          );
+        }
       }
     };
 

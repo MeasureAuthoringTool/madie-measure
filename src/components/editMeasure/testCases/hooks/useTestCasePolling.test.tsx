@@ -7,6 +7,7 @@ jest.mock("../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const mockedOnUpdate = jest.fn();
+const mockOnError = jest.fn();
 const WrapperComponent = ({ shouldStart }: { shouldStart: boolean }) => {
   useTestCasePolling({
     testCaseId: "123",
@@ -14,6 +15,7 @@ const WrapperComponent = ({ shouldStart }: { shouldStart: boolean }) => {
     shouldStart,
     onUpdate: mockedOnUpdate,
     validateTest: false,
+    onError: mockOnError,
   });
   return <div>Polling...</div>;
 };
@@ -99,5 +101,26 @@ describe("useTestCasePolling", () => {
     });
 
     expect(mockedAxios.get).toHaveBeenCalledTimes(2);
+  });
+
+  it("should stop polling if api call fails and returns an error message", async () => {
+    mockedAxios.get
+      .mockResolvedValueOnce({ data: { testCaseValidationStatus: "Pending" } })
+      .mockResolvedValueOnce({ data: { testCaseValidationStatus: "Pending" } })
+      .mockRejectedValueOnce(new Error("Unable to retrieve test case object"));
+    await act(async () => {
+      render(<WrapperComponent shouldStart={true} />);
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(5000);
+      jest.advanceTimersByTime(5000);
+    });
+
+    expect(mockedAxios.get).toHaveBeenCalledTimes(3);
+    expect(mockedOnUpdate).toHaveBeenCalledTimes(0);
+    expect(mockOnError).toHaveBeenCalledWith(
+      "Unable to retrieve validation results for the test case, please try again. If the error persists, please contact the help desk."
+    );
   });
 });
