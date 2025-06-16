@@ -34,7 +34,6 @@ import { TestCaseValidator } from "../../../validators/TestCaseValidator";
 import { MadieError, sanitizeUserInput } from "../../../util/Utils";
 import TestCaseSeries from "../../createTestCase/TestCaseSeries";
 import _ from "lodash";
-import { Ace } from "ace-builds";
 import {
   FHIR_POPULATION_CODES,
   mapExistingTestCasePopulations,
@@ -89,6 +88,7 @@ import {
   extractValidationErrorsFromOutcome,
   isHapiOutcomeIssueCodeInformational,
 } from "./EditTestCaseUtil";
+import { useTestCasePolling } from "../../../hooks/useTestCasePolling";
 
 const TestCaseForm = tw.form`m-3`;
 const ValidationErrorsButton = tw.button`
@@ -305,6 +305,22 @@ const EditTestCase = (props: EditTestCaseProps) => {
     onSubmit: () => {},
   });
   useFormikResetOnEvent(formikStu6Context);
+
+  const [shouldPoll, setShouldPoll] = useState(false);
+
+  const isQiCoreV6 = measure?.model === "QI-Core v6.0.0";
+  // testCase polling, gets triggered when validationStatus is either Pending or Validating
+  useTestCasePolling({
+    testCaseId: id,
+    measureId,
+    shouldStart: shouldPoll,
+    onUpdate: (updatedTc) => {
+      const nextTc = _.cloneDeep(updatedTc);
+      handleHapiOutcome(nextTc?.hapiOperationOutcome);
+    },
+    validateTest: !isQiCoreV6,
+  });
+
   //needs to be added to feature flag config once the feature flags are moved to Util
   const testCaseAlertToast = false;
   useEffect(() => {
@@ -382,7 +398,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
   };
 
   const loadTestCase = () => {
-    const isQiCoreV6 = measure?.model === "QI-Core v6.0.0";
     testCaseService.current
       .getTestCase(id, measureId, !isQiCoreV6)
       .then((tc: TestCase) => {
@@ -407,6 +422,11 @@ const EditTestCase = (props: EditTestCaseProps) => {
         }
         resetForm({ values: _.cloneDeep(nextTc) });
         handleHapiOutcome(nextTc?.hapiOperationOutcome);
+        if (["Pending", "Validating"].includes(tc.testCaseValidationStatus)) {
+          setShouldPoll(true);
+        } else {
+          setShouldPoll(false);
+        }
       })
       .catch((error) => {
         if (error.toString().includes("404")) {
@@ -530,6 +550,12 @@ const EditTestCase = (props: EditTestCaseProps) => {
         testCase,
         measureId
       );
+      // initiate polling for validation response
+      if (updatedTestCase.testCaseValidationStatus === "Pending") {
+        setShouldPoll(true);
+      } else {
+        setShouldPoll(false);
+      }
       const updatedTc = _.cloneDeep(updatedTestCase);
       updatedTc.json = standardizeJson(updatedTc);
       resetForm({
