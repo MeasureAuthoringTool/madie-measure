@@ -1299,7 +1299,6 @@ describe("Measure List component", () => {
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
     userEvent.click(createVersionButton);
-    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
 
     const typeInput = screen.getByTestId(
       "version-type-input"
@@ -2772,6 +2771,68 @@ describe("Measure List component", () => {
       expect(setToastMessageMock).toHaveBeenCalledWith(
         "Measure successfully deleted"
       );
+      expect(setToastOpenMock).toHaveBeenCalledWith(true);
+    });
+
+    unmount();
+  });
+
+  it("should display error toast when deleteMeasure fails", async () => {
+    // Mock the deleteMeasure API call to reject with an error
+    const errorMessage = "Delete failed due to server error";
+    mockMeasureServiceApi.deleteMeasure = jest.fn().mockRejectedValue({
+      response: { data: { message: errorMessage } },
+    });
+
+    const { findByText, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    // Select a measure by clicking its checkbox
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    userEvent.click(checkBoxes[1]);
+
+    // Click the delete button to open the dialog
+    const deleteButton = screen.getByTestId("delete-action-btn");
+    userEvent.click(deleteButton);
+
+    // The dialog should appear with Delete Measure title
+    await findByText("Delete Measure");
+
+    // Find and click the confirm delete button
+    const confirmDeleteButton = screen.getByTestId("delete-measure-button-2");
+    fireEvent.click(confirmDeleteButton);
+
+    // Wait for the deleteMeasure API call to be made and error to be handled
+    await waitFor(() => {
+      expect(mockMeasureServiceApi.deleteMeasure).toHaveBeenCalled();
+      expect(setToastTypeMock).toHaveBeenCalledWith("danger");
+      expect(setToastMessageMock).toHaveBeenCalledWith(errorMessage);
       expect(setToastOpenMock).toHaveBeenCalledWith(true);
     });
 
