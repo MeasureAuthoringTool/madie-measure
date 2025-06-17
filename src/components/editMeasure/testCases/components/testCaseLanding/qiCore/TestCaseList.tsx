@@ -612,6 +612,15 @@ const TestCaseList = (props: TestCaseListProps) => {
     }
   };
 
+  const totalTestCases = testCases?.length;
+  const validTestCasesCount = _.filter(testCases, {
+    testCaseValidationStatus: "Valid",
+  })?.length;
+  const validationPercentage =
+    totalTestCases > 0
+      ? Math.floor((validTestCasesCount / totalTestCases) * 100)
+      : 0;
+
   return (
     <div>
       {!loadingState.loading && (
@@ -664,11 +673,9 @@ const TestCaseList = (props: TestCaseListProps) => {
                 coveragePercentage={coveragePercentage}
                 validTestCases={testCases?.filter((tc) => tc.validResource)}
                 exportTestCases={exportTestCases}
-                onDeleteAllTestCases={() =>
-                  setOpenDeleteAllTestCasesDialog(true)
-                }
                 showReportOptions={showReportOptions}
                 setShowReportOptions={setShowReportOptions}
+                validationPercentage={validationPercentage}
               />
             </div>
             <CreateNewTestCaseDialog open={createOpen} onClose={handleClose} />
