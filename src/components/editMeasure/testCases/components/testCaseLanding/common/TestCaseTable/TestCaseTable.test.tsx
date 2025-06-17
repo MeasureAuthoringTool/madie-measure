@@ -21,6 +21,7 @@ const testCase = {
   lastModifiedAt: "2024-09-06T15:15:14.382Z",
   executionStatus: "pass",
   caseNumber: 1,
+  action: { createdBeforeVersioning: true },
 } as unknown as TestCase;
 
 const testCaseFail = {
@@ -159,6 +160,7 @@ let mockApplyDefaults = false;
 jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: jest.fn().mockImplementation(() => ({
     applyDefaults: mockApplyDefaults,
+    EditTestsOnVersionedMeasures: false,
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
 }));
@@ -211,7 +213,7 @@ describe("TestCase component", () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
-    const setSelectedTestCasesMock = jest.fn(); // Mock setSelectedTestCases
+    const setSelectedTestCasesMock = jest.fn();
 
     renderWithTestCase(
       testCases,
@@ -240,7 +242,7 @@ describe("TestCase component", () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
-    const setSelectedTestCasesMock = jest.fn(); // Mock setSelectedTestCases
+    const setSelectedTestCasesMock = jest.fn();
 
     renderWithTestCase(
       testCases,
@@ -269,7 +271,7 @@ describe("TestCase component", () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
-    const setSelectedTestCasesMock = jest.fn(); // Mock setSelectedTestCases
+    const setSelectedTestCasesMock = jest.fn();
 
     renderWithTestCase(
       testCases,
@@ -303,7 +305,7 @@ describe("TestCase component", () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
-    const setSelectedTestCasesMock = jest.fn(); // Mock setSelectedTestCases
+    const setSelectedTestCasesMock = jest.fn();
 
     renderWithTestCase(
       testCases,
@@ -338,11 +340,13 @@ describe("TestCase component", () => {
     expect(screen.queryByText("Shift Test Case dates")).not.toBeInTheDocument();
   });
 
-  it("should display View button if the measure without population criteria is not a draft", async () => {
+  it("should display View button if the user does not have edit access to the measure and navigate to test case onClick", async () => {
+    checkUserCanEdit.mockImplementation(() => false);
+
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
-    const setSelectedTestCasesMock = jest.fn(); // Mock setSelectedTestCases
+    const setSelectedTestCasesMock = jest.fn();
 
     renderWithTestCase(
       testCases,
@@ -369,46 +373,13 @@ describe("TestCase component", () => {
     });
   });
 
-  it("should display View button if the user does not have edit access to the measure without population criteria and navigate to test case onClick", async () => {
-    checkUserCanEdit.mockImplementation(() => false);
-
-    const deleteTestCase = jest.fn();
-    const exportTestCase = jest.fn();
-    const onCloneTestCase = jest.fn();
-    const setSelectedTestCasesMock = jest.fn(); // Mock setSelectedTestCases
-
-    renderWithTestCase(
-      testCases,
-      true,
-      deleteTestCase,
-      exportTestCase,
-      onCloneTestCase,
-      measures[2],
-      setSelectedTestCasesMock
-    );
-
-    await waitFor(() => {
-      const actionButton = screen.getByTestId(
-        `view-edit-test-case-button-${testCases[0].id}`
-      );
-
-      expect(actionButton).toBeInTheDocument();
-      expect(actionButton).toHaveTextContent("View");
-
-      userEvent.click(actionButton);
-
-      expect(mockPush).toHaveBeenCalled();
-      expect(mockPush).toHaveBeenCalledWith("../ID", { relative: "path" });
-    });
-  });
-
-  it("should display Edit button if the user has edit access to the measure without population criteria and it's a draft and navigate to test case onClick", async () => {
+  it("should display Edit button if the user has edit access to the measure and is a draft and navigate to test case onClick", async () => {
     checkUserCanEdit.mockImplementation(() => true);
 
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
-    const setSelectedTestCasesMock = jest.fn(); // Mock setSelectedTestCases
+    const setSelectedTestCasesMock = jest.fn();
 
     renderWithTestCase(
       testCases,
@@ -435,13 +406,17 @@ describe("TestCase component", () => {
     });
   });
 
-  it("should display View button if the user does not have edit access to the measure with population criteria and navigate to test case onClick", async () => {
-    checkUserCanEdit.mockImplementation(() => true);
+  it("should display View button if the EditTestsOnVersionedMeasures feature flag is true and the user does not have edit access to the measure and navigate to test case onClick", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EditTestsOnVersionedMeasures: true,
+    }));
+
+    checkUserCanEdit.mockImplementation(() => false);
 
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
-    const setSelectedTestCasesMock = jest.fn(); // Mock setSelectedTestCases
+    const setSelectedTestCasesMock = jest.fn();
 
     renderWithTestCase(
       testCases,
@@ -449,7 +424,7 @@ describe("TestCase component", () => {
       deleteTestCase,
       exportTestCase,
       onCloneTestCase,
-      measures[0],
+      measures[2],
       setSelectedTestCasesMock
     );
 
@@ -464,7 +439,255 @@ describe("TestCase component", () => {
       userEvent.click(actionButton);
 
       expect(mockPush).toHaveBeenCalled();
-      expect(mockPush).toHaveBeenCalledWith("../../ID", { relative: "path" });
+      expect(mockPush).toHaveBeenCalledWith("../ID", { relative: "path" });
+    });
+  });
+
+  it("should display Edit button if the EditTestsOnVersionedMeasures feature flag is true and the user has edit access to the measure and it's a draft and navigate to test case onClick", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EditTestsOnVersionedMeasures: true,
+    }));
+
+    checkUserCanEdit.mockImplementation(() => true);
+
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
+
+    renderWithTestCase(
+      testCases,
+      true,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      measures[2],
+      setSelectedTestCasesMock
+    );
+
+    await waitFor(() => {
+      const actionButton = screen.getByTestId(
+        `view-edit-test-case-button-${testCases[0].id}`
+      );
+
+      expect(actionButton).toBeInTheDocument();
+      expect(actionButton).toHaveTextContent("Edit");
+
+      userEvent.click(actionButton);
+
+      expect(mockPush).toHaveBeenCalled();
+      expect(mockPush).toHaveBeenCalledWith("../ID", { relative: "path" });
+    });
+  });
+
+  it("should display Edit button if the EditTestsOnVersionedMeasures feature flag is true and the user has edit access to the measure and is not a draft and navigate to test case onClick", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EditTestsOnVersionedMeasures: true,
+    }));
+
+    checkUserCanEdit.mockImplementation(() => true);
+
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
+
+    renderWithTestCase(
+      testCases,
+      true,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      measures[2],
+      setSelectedTestCasesMock
+    );
+
+    await waitFor(() => {
+      const actionButton = screen.getByTestId(
+        `view-edit-test-case-button-${testCases[0].id}`
+      );
+
+      expect(actionButton).toBeInTheDocument();
+      expect(actionButton).toHaveTextContent("Edit");
+
+      userEvent.click(actionButton);
+
+      expect(mockPush).toHaveBeenCalled();
+      expect(mockPush).toHaveBeenCalledWith("../ID", { relative: "path" });
+    });
+  });
+
+  it("should display FiberManualRecord icon when the EditTestsOnVersionedMeasures feature flag is true, draft is false, createdBeforeVersioning is false (all icon conditions are true)", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EditTestsOnVersionedMeasures: true,
+    }));
+
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
+
+    renderWithTestCase(
+      [{ ...testCase, action: { createdBeforeVersioning: false } }],
+      true,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      measures[1],
+      setSelectedTestCasesMock
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId(
+          `test-case-fiber-manual-record-icon-${testCases[0].id}`
+        )
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("should not display FiberManualRecord icon when the EditTestsOnVersionedMeasures feature flag is false, draft is false, createdBeforeVersioning is false", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EditTestsOnVersionedMeasures: false,
+    }));
+
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
+
+    renderWithTestCase(
+      [{ ...testCase, action: { createdBeforeVersioning: false } }],
+      true,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      measures[1],
+      setSelectedTestCasesMock
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId(
+          `test-case-fiber-manual-record-icon-${testCases[0].id}`
+        )
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it("should not display FiberManualRecord icon when the EditTestsOnVersionedMeasures feature flag is true, draft is true, createdBeforeVersioning is false", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EditTestsOnVersionedMeasures: true,
+    }));
+
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
+
+    renderWithTestCase(
+      [{ ...testCase, action: { createdBeforeVersioning: false } }],
+      true,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      measures[2],
+      setSelectedTestCasesMock
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId(
+          `test-case-fiber-manual-record-icon-${testCases[0].id}`
+        )
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it("should not display FiberManualRecord icon when the EditTestsOnVersionedMeasures feature flag is true, draft is false, createdBeforeVersioning is true", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EditTestsOnVersionedMeasures: true,
+    }));
+
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
+
+    renderWithTestCase(
+      [{ ...testCase, action: { createdBeforeVersioning: false } }],
+      true,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      measures[2],
+      setSelectedTestCasesMock
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId(
+          `test-case-fiber-manual-record-icon-${testCases[0].id}`
+        )
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it("should not display FiberManualRecord icon when the EditTestsOnVersionedMeasures feature flag is true, draft is false, createdBeforeVersioning is true", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EditTestsOnVersionedMeasures: true,
+    }));
+
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
+
+    renderWithTestCase(
+      [{ ...testCase, action: { createdBeforeVersioning: true } }],
+      true,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      measures[2],
+      setSelectedTestCasesMock
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId(
+          `test-case-fiber-manual-record-icon-${testCases[0].id}`
+        )
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it("should not display FiberManualRecord icon when the EditTestsOnVersionedMeasures feature flag is false, draft is true, createdBeforeVersioning is true (all icon conditions are false)", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EditTestsOnVersionedMeasures: false,
+    }));
+
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
+
+    renderWithTestCase(
+      [{ ...testCase, action: { createdBeforeVersioning: true } }],
+      true,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      measures[2],
+      setSelectedTestCasesMock
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId(
+          `test-case-fiber-manual-record-icon-${testCases[0].id}`
+        )
+      ).not.toBeInTheDocument();
     });
   });
 });
