@@ -79,23 +79,6 @@ export default function MeasureLanding() {
     setToastOpen(open);
   };
 
-  // Add event listener for test purposes
-  useEffect(() => {
-    const handleShowToast = (event: CustomEvent) => {
-      const { type, message, open } = event.detail;
-      setToastType(type);
-      setToastMessage(message);
-      setToastOpen(open);
-    };
-
-    window.addEventListener("showToast", handleShowToast as EventListener);
-
-    // Cleanup
-    return () => {
-      window.removeEventListener("showToast", handleShowToast as EventListener);
-    };
-  }, []);
-
   const getStorageKey = (tab) =>
     tab === 0 ? "myMeasurePageOptions" : "allMeasurePageOptions";
 
