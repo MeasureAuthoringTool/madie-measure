@@ -132,6 +132,10 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
       <Tabs
         value={activeTab}
         onChange={(e, v) => {
+          if (v === "validation") {
+            e.preventDefault();
+            return;
+          }
           setActiveTab(v);
         }}
         type="B"
@@ -164,7 +168,6 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
             label={getValidationResultsDisplay("Valid")}
             data-testid="validation-tab"
             value="validation"
-            disabled
           />
         )}
       </Tabs>
