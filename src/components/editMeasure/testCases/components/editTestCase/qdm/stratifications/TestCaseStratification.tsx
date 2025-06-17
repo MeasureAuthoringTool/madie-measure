@@ -16,6 +16,7 @@ export interface TestCaseStratificationProps {
   index?: number;
   isTestCaseExecuted?: boolean;
   setIsTestCaseExecuted?: (isTestCaseExecuted: boolean) => void;
+  content: string;
 }
 
 const TestCaseStratification = ({
@@ -30,6 +31,7 @@ const TestCaseStratification = ({
   index,
   QDM = false,
   isTestCaseExecuted = false,
+  content,
 }: TestCaseStratificationProps) => {
   const label = `${QDM ? "Stratification" : strataCode}`;
 
@@ -46,7 +48,7 @@ const TestCaseStratification = ({
         <td role="cell">
           <ExpectActualInput
             id={`${stratification.name}-expected-cb`}
-            aria-label={`${label} expected`}
+            aria-label={`${content} ${label} expected`}
             name={`stratification${stratificationCount}-expected`}
             expectedValue={stratification.expected}
             onChange={(expectedValue) => {
@@ -70,7 +72,7 @@ const TestCaseStratification = ({
           {isTestCaseExecuted ? (
             <ExpectActualInput
               id={`${stratResult.name}-actual-cb`}
-              aria-label={`${label} actual`}
+              aria-label={`${content} ${label} actual`}
               name={`stratification${stratificationCount}-actual`}
               expectedValue={stratResult.actual}
               onChange={() => {}}
