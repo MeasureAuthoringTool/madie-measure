@@ -14,7 +14,7 @@ const generateAlertConfig = (
     <li key={index}>{transformAnnotation(el)}</li>
   ));
   if (type === "success" && errorAnnotation && errorAnnotation.length > 0) {
-    type = "warning";
+    type = "error";
   }
 
   return {
@@ -142,18 +142,16 @@ const StatusHandler = ({
       );
     }
   } else if (outboundAnnotations && outboundAnnotations.length > 0) {
-    const warningAnnotation = _.size(
-      _.filter(outboundAnnotations, {
-        type: "warning",
-      })
-    );
-    if (warningAnnotation === 0) {
+    const errorAnnotations = _.filter(outboundAnnotations, {
+      type: "error",
+    });
+    if (errorAnnotations?.length > 0) {
       alerts.push(
         generateAlertConfig(
-          "warning",
+          "error",
           "Following issues were found within the CQL",
           null,
-          outboundAnnotations
+          errorAnnotations
         )
       );
     }

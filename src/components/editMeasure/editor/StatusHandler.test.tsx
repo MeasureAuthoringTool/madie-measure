@@ -151,7 +151,7 @@ describe("StatusHandler Component", () => {
       expect.objectContaining({
         alerts: expect.arrayContaining([
           expect.objectContaining({
-            type: "warning",
+            type: "error",
             copyButton: true,
             canClose: false,
           }),
@@ -161,7 +161,7 @@ describe("StatusHandler Component", () => {
       expect.anything()
     );
 
-    expect(screen.getByTestId("generic-warning-text-header")).toHaveTextContent(
+    expect(screen.getByTestId("generic-error-text-header")).toHaveTextContent(
       success.primaryMessage
     );
     expect(screen.getByTestId("library-warning")).toHaveTextContent(
@@ -180,7 +180,7 @@ describe("StatusHandler Component", () => {
       />
     );
 
-    expect(screen.getByTestId("generic-warning-text-header")).toHaveTextContent(
+    expect(screen.getByTestId("generic-error-text-header")).toHaveTextContent(
       success.primaryMessage
     );
     expect(screen.getByTestId("library-warning")).toHaveTextContent(
@@ -191,7 +191,7 @@ describe("StatusHandler Component", () => {
       expect.objectContaining({
         alerts: expect.arrayContaining([
           expect.objectContaining({
-            type: "warning",
+            type: "error",
           }),
         ]),
       }),
@@ -389,11 +389,12 @@ describe("StatusHandler Component", () => {
     );
   });
 
-  it("Should not display annotations when Error flag is false", () => {
+  it("Should not display annotations when Error flag is false and annotations are warning type", () => {
     const success = {
       status: undefined,
       message: "",
     };
+    annotationsObject[0].type = "warning";
     render(
       <StatusHandler
         success={success}
@@ -453,5 +454,36 @@ describe("StatusHandler Component", () => {
     );
 
     expect(screen.queryByTestId("madie-alert-mock")).not.toBeInTheDocument();
+  });
+
+  it("Should not display annotations when Error flag is false and annotations are error type", () => {
+    const success = {
+      status: undefined,
+      message: "",
+    };
+    annotationsObject[1].type = "error";
+    render(
+      <StatusHandler
+        success={success}
+        error={false}
+        errorMessage=""
+        outboundAnnotations={annotationsObject}
+        hasSubTitle={false}
+      />
+    );
+
+    expect(screen.queryByTestId("generic-error-text-header")).not.toBeNull();
+    expect(screen.queryByTestId("generic-errors-text-list")).toBeNull();
+    expect(screen.queryByTestId("generic-warnings-text-list")).toBeNull();
+    expect(MadieAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alerts: expect.arrayContaining([
+          expect.objectContaining({
+            type: "error",
+          }),
+        ]),
+      }),
+      expect.anything()
+    );
   });
 });
