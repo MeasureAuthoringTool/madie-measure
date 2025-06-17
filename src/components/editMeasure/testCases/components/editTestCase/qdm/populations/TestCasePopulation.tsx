@@ -18,6 +18,7 @@ export interface TestCasePopulationProps {
   strat?: boolean;
   isTestCaseExecuted?: boolean;
   setIsTestCaseExecuted?: (isTestCaseExecuted: boolean) => void;
+  content: string;
 }
 
 const TestCasePopulation = ({
@@ -33,6 +34,7 @@ const TestCasePopulation = ({
   i,
   isTestCaseExecuted,
   setIsTestCaseExecuted,
+  content,
 }: TestCasePopulationProps) => {
   const populationNameTemplate = (prop) => {
     if (prop === PopulationType.INITIAL_POPULATION) {
@@ -95,7 +97,7 @@ const TestCasePopulation = ({
         <td role="cell">
           <ExpectActualInput
             id={`${population.id}-expected-cb`}
-            aria-label={`${label} expected`}
+            aria-label={`${content} ${label} expected`}
             name={`${population.name}${count}-expected`}
             expectedValue={population.expected}
             onChange={(expectedValue) => {
@@ -116,7 +118,7 @@ const TestCasePopulation = ({
           {isTestCaseExecuted && populationResult ? (
             <ExpectActualInput
               id={`${populationResult?.id}-actual-cb`}
-              aria-label={`${label} actual`}
+              aria-label={`${content} ${label} actual`}
               name={`${population.name}${count}-actual`}
               expectedValue={populationResult?.actual}
               onChange={() => {}} // do nothing - should not be editable here
