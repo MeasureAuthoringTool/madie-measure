@@ -199,7 +199,11 @@ export default function MeasureList(props: {
 
   const columnsToBeAdded = [
     {
-      header: "Measure Name",
+      header: () => (
+        <button tabIndex={0} aria-label="Measure Name">
+          Measure Name
+        </button>
+      ),
       cell: (info) => (
         <TruncateText
           text={info.row.original.measureName}
@@ -212,7 +216,11 @@ export default function MeasureList(props: {
         customSort(rowA.original.measureName, rowB.original.measureName),
     },
     {
-      header: "Version",
+      header: () => (
+        <button tabIndex={0} aria-label="Version">
+          Version
+        </button>
+      ),
       cell: (info) => (
         <>
           <TruncateText
@@ -231,7 +239,11 @@ export default function MeasureList(props: {
         customSort(rowA.original.version, rowB.original.version),
     },
     {
-      header: "Model",
+      header: () => (
+        <button tabIndex={0} aria-label="Model">
+          Model
+        </button>
+      ),
       cell: (info) => (
         <TruncateText
           text={info.row.original.model}
@@ -244,7 +256,12 @@ export default function MeasureList(props: {
         customSort(rowA.original.model, rowB.original.model),
     },
     {
-      header: "",
+      // Use tabIndex={0} for accessibility, and make sure it's not inside a button.
+      header: () => (
+        <button tabIndex={0} aria-label="Edit or View Measure">
+          ADD
+        </button>
+      ),
       cell: (info) => (
         <Button
           variant="outline-filled"
@@ -368,7 +385,12 @@ export default function MeasureList(props: {
         new Date(rowB.original.actions.lastModifiedAt).getTime(),
     },
     {
-      header: "",
+      // Use tabIndex={0} for accessibility, and make sure it's not inside a button.
+      header: () => (
+        <button tabIndex={0} aria-label="Edit or View Measure">
+          ADD
+        </button>
+      ),
       cell: (info) => (
         <Button
           variant="outline-filled"
@@ -407,6 +429,11 @@ export default function MeasureList(props: {
     const t = [
       {
         id: "select", // retain ID so we have the column for checkboxes but the header is blank
+        header: () => (
+          <button tabIndex={0} aria-label="Measure Selection">
+            ADD
+          </button>
+        ),
         cell: ({ row }) => {
           return (
             <div className="px-1">
@@ -427,7 +454,7 @@ export default function MeasureList(props: {
     ];
     if (featureFlags?.MeasureSearch) {
       t.push({
-        header: "",
+        header: () => <span aria-label="expandArrow"></span>,
         cell: (info) => {
           if (info.row.original?.hasAssociatedMeasures) {
             const handleKeyDown = (e) => {
@@ -976,7 +1003,10 @@ export default function MeasureList(props: {
                     onMouseLeave={() => setHoveredHeader(null)}
                     className="header-cell"
                   >
-                    {header.isPlaceholder ? null : (
+                    {/* Only render a <button> for sortable columns.
+                        For non-sortable columns like "ADD", render the header content directly, not inside a <button>. 
+                    */}
+                    {header.isPlaceholder ? null : header.column.getCanSort() ? (
                       <button
                         className={
                           header.column.getCanSort()
@@ -1014,6 +1044,11 @@ export default function MeasureList(props: {
                           header.getContext()
                         )}
                       </button>
+                    ) : (
+                      flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )
                     )}
                   </TH>
                 );
