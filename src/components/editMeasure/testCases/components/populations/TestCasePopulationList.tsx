@@ -295,6 +295,7 @@ const TestCasePopulationList = ({
               }
               initialPopulationCount={getIppCount(population)}
               error={errors?.populationValues?.[j]}
+              content={content}
             />
           ))}
 
@@ -314,6 +315,7 @@ const TestCasePopulationList = ({
               key={stratification.id}
               disableExpected={disableExpected}
               onStratificationChange={handleStratificationChange}
+              content={content}
             />
           ))}
         </tbody>
