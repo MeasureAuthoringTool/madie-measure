@@ -332,7 +332,8 @@ describe("Copy Test Case Dialog Component", () => {
         optionalSearchProperties: ["measureName"],
         searchField: "test",
       },
-      test
+      test,
+      "testCase"
     );
     // Finally, check the second call for the correct values
     const clearIcon = getByTestId("ClearIcon");
@@ -352,7 +353,8 @@ describe("Copy Test Case Dialog Component", () => {
         optionalSearchProperties: [],
         searchField: "",
       },
-      test
+      test,
+      "testCase"
     );
 
     userEvent.type(searchFieldInput, "test{enter}");
@@ -371,7 +373,8 @@ describe("Copy Test Case Dialog Component", () => {
         optionalSearchProperties: ["measureName", "version", "cmsId"],
         searchField: "test",
       },
-      test
+      test,
+      "testCase"
     );
   });
 
