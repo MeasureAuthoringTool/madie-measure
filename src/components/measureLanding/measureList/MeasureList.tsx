@@ -84,7 +84,6 @@ export default function MeasureList(props: {
   setToastMessage: Dispatch<SetStateAction<string>>;
   setToastType: Dispatch<SetStateAction<string>>;
   onToastClose: () => void;
-  handleToast: (type: string, message: string, open: boolean) => void;
 }) {
   const { searchCriteria, setSearchCriteria, retrieveMeasures } = { ...props };
   const measureServiceApi = useRef(useMeasureServiceApi()).current; //needs to be ref or triggers jest. throws warn
@@ -615,7 +614,9 @@ export default function MeasureList(props: {
       option: "",
     });
 
-    props.handleToast(toastType, toastMessage, toastOpen);
+    props.setToastType(toastType);
+    props.setToastMessage(toastMessage);
+    props.setToastOpen(toastOpen);
   };
 
   const handleSort = async (sort: string) => {

@@ -73,12 +73,6 @@ export default function MeasureLanding() {
     setToastOpen(false);
   };
 
-  const handleToast = (type, message, open) => {
-    setToastType(type);
-    setToastMessage(message);
-    setToastOpen(open);
-  };
-
   const getStorageKey = (tab) =>
     tab === 0 ? "myMeasurePageOptions" : "allMeasurePageOptions";
 
@@ -388,7 +382,6 @@ export default function MeasureLanding() {
                 setToastMessage={setToastMessage}
                 setToastType={setToastType}
                 onToastClose={onToastClose}
-                handleToast={handleToast}
               />
               <div className="pagination-container">
                 {totalItems > 0 && (
