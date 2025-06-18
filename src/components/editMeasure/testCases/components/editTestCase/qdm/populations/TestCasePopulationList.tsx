@@ -251,6 +251,7 @@ const TestCasePopulationList = ({
               onStratificationChange={(updatedStratification) =>
                 onStratificationChange(updatedStratification)
               }
+              content={content}
             />
           )}
           {populations?.map((population, j) => (
@@ -272,6 +273,7 @@ const TestCasePopulationList = ({
               }
               initialPopulationCount={getIppCount(population)}
               error={errors?.populationValues?.[j]}
+              content={content}
             />
           ))}
         </tbody>
