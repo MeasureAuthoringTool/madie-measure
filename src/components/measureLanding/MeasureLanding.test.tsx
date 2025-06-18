@@ -2,7 +2,11 @@ import "@testing-library/jest-dom";
 // NOTE: jest-dom adds handy assertions to Jest and is recommended, but not required
 import * as React from "react";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { createMemoryRouter, RouterProvider } from "react-router-dom";
+import {
+  createMemoryRouter,
+  RouterProvider,
+  MemoryRouter,
+} from "react-router-dom";
 import { routesConfig } from "../measureRoutes/MeasureRoutes";
 import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
@@ -11,6 +15,7 @@ import { oneItemResponse } from "../__mocks__/mockMeasureResponses";
 import { within } from "@testing-library/dom";
 // @ts-ignore
 import { useFeatureFlags } from "@madie/madie-util";
+import MeasureLanding from "./MeasureLanding";
 
 const serviceConfig = {
   fhirElmTranslationService: { baseUrl: "fhir/services" },
@@ -63,6 +68,18 @@ const mockMeasureServiceApi = {
 jest.mock("../../api/useMeasureServiceApi", () =>
   jest.fn(() => mockMeasureServiceApi)
 );
+
+// Custom render function to test MeasureLanding component directly
+// Update to wrap in MemoryRouter to provide router context for useLocation()
+const renderMeasureLanding = () => {
+  return render(
+    <ApiContextProvider value={serviceConfig}>
+      <MemoryRouter initialEntries={["/measures"]}>
+        <MeasureLanding />
+      </MemoryRouter>
+    </ApiContextProvider>
+  );
+};
 
 describe("Measure Page", () => {
   afterEach(() => {
