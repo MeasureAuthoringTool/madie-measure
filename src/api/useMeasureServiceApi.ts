@@ -436,7 +436,8 @@ export class MeasureServiceApi {
     sort: string = "lastModifiedAt",
     direction: string = "DESC",
     searchCriteria: MeasureSearchCriteria,
-    abortController: AbortController
+    abortController: AbortController,
+    invocationSource?: string
   ): Promise<any> {
     try {
       limit = limit === "All" ? 1000 : limit; // if limit is "All", set it to a high number to fetch all results
@@ -454,6 +455,7 @@ export class MeasureServiceApi {
             page,
             sort,
             direction,
+            invocationSource,
           },
           signal: abortController.signal,
         }

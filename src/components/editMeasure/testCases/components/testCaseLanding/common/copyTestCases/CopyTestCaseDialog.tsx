@@ -154,7 +154,8 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
         "lastModifiedAt",
         "DESC",
         searchCriteria,
-        abortController.current
+        abortController.current,
+        "testCase"
       )
       .then((response) => {
         const {
