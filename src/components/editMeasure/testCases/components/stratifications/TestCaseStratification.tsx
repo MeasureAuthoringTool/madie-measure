@@ -18,6 +18,7 @@ export interface TestCaseStratificationProps {
   ) => void;
   groupsStratificationAssociationMap?: any;
   group?: Group;
+  content: string;
 }
 
 const TestCaseStratification = ({
@@ -31,6 +32,7 @@ const TestCaseStratification = ({
   onStratificationChange,
   groupsStratificationAssociationMap,
   group,
+  content,
 }: TestCaseStratificationProps) => {
   let associations = groupsStratificationAssociationMap
     ? groupsStratificationAssociationMap[stratification?.id]
@@ -61,6 +63,7 @@ const TestCaseStratification = ({
             populationBasis={populationBasis}
             disableExpected={disableExpected}
             onStratificationChange={onStratificationChange}
+            content={content}
           />
         );
       })}
