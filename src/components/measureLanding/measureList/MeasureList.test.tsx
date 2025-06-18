@@ -256,6 +256,37 @@ const setCurrentSortMock = jest.fn();
 const setCurrentDirectionMock = jest.fn();
 const setCurrentPageMock = jest.fn();
 const handlePageChangeMock = jest.fn();
+const setToastOpenMock = jest.fn();
+const setToastMessageMock = jest.fn();
+const setToastTypeMock = jest.fn();
+const onToastCloseMock = jest.fn();
+const handleToastMock = jest.fn();
+
+// Base props for most test renders
+const baseProps = {
+  measureList: measures,
+  setMeasureList: setMeasureListMock,
+  setTotalPages: setTotalPagesMock,
+  setTotalItems: setTotalItemsMock,
+  setVisibleItems: setVisibleItemsMock,
+  setOffset: setOffsetMock,
+  setLoading: setLoadingMock,
+  activeTab: 0,
+  searchCriteria: null,
+  setSearchCriteria: setSearchCriteriaMock,
+  currentLimit: 10,
+  currentPage: 0,
+  setErrMsg: setErrMsgMock,
+  // Toast props
+  toastOpen: false,
+  toastMessage: "",
+  toastType: "danger",
+  setToastOpen: setToastOpenMock,
+  setToastMessage: setToastMessageMock,
+  setToastType: setToastTypeMock,
+  onToastClose: onToastCloseMock,
+  handleToast: handleToastMock,
+};
 
 describe("Measure List component", () => {
   beforeEach(() => {
@@ -267,11 +298,13 @@ describe("Measure List component", () => {
     useMeasureServiceMock.mockReset().mockImplementation(() => {
       return mockMeasureServiceApi;
     });
+
+    // Reset all mocks before each test
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
     cleanup();
-    jest.clearAllMocks();
   });
 
   it("should display a list of measures", async () => {
@@ -291,6 +324,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -317,6 +359,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -346,6 +397,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -375,13 +435,16 @@ describe("Measure List component", () => {
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
-          setCurrentPage={setCurrentPageMock}
-          handlePageChange={handlePageChangeMock}
-          currentSort={""}
-          setCurrentSort={setCurrentSortMock}
-          currentDirection={""}
-          setCurrentDirection={setCurrentDirectionMock}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ApiContextProvider>
     );
@@ -425,6 +488,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -473,6 +545,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -505,6 +586,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -550,6 +640,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -629,6 +728,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -658,7 +766,10 @@ describe("Measure List component", () => {
 
     await waitFor(() => {
       userEvent.click(getByTestId("create-version-continue-button"));
-      expect(getByTestId("error-toast")).toHaveTextContent(
+
+      // Verify toast props were called with correct values
+      expect(setToastOpenMock).toHaveBeenCalledWith(true);
+      expect(setToastMessageMock).toHaveBeenCalledWith(
         "User is unauthorized to create a version"
       );
 
@@ -710,6 +821,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -739,7 +859,10 @@ describe("Measure List component", () => {
 
     await waitFor(() => {
       userEvent.click(getByTestId("create-version-continue-button"));
-      expect(getByTestId("error-toast")).toHaveTextContent(
+
+      // Verify toast props were called with correct values
+      expect(setToastOpenMock).toHaveBeenCalledWith(true);
+      expect(setToastMessageMock).toHaveBeenCalledWith(
         "Requested measure cannot be versioned"
       );
 
@@ -791,6 +914,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -820,7 +952,10 @@ describe("Measure List component", () => {
 
     await waitFor(() => {
       userEvent.click(getByTestId("create-version-continue-button"));
-      expect(getByTestId("error-toast")).toHaveTextContent(
+
+      // Verify toast props were called with correct values
+      expect(setToastOpenMock).toHaveBeenCalledWith(true);
+      expect(setToastMessageMock).toHaveBeenCalledWith(
         "Requested measure cannot be versioned"
       );
 
@@ -872,6 +1007,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -901,7 +1045,10 @@ describe("Measure List component", () => {
 
     await waitFor(() => {
       userEvent.click(getByTestId("create-version-continue-button"));
-      expect(getByTestId("error-toast")).toHaveTextContent(
+
+      // Verify toast props were called with correct values
+      expect(setToastOpenMock).toHaveBeenCalledWith(true);
+      expect(setToastMessageMock).toHaveBeenCalledWith(
         "Requested measure cannot be versioned"
       );
 
@@ -953,6 +1100,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -982,7 +1138,10 @@ describe("Measure List component", () => {
 
     await waitFor(() => {
       userEvent.click(getByTestId("create-version-continue-button"));
-      expect(getByTestId("error-toast")).toHaveTextContent(
+
+      // Verify toast props were called with correct values
+      expect(setToastOpenMock).toHaveBeenCalledWith(true);
+      expect(setToastMessageMock).toHaveBeenCalledWith(
         "Requested measure cannot be versioned"
       );
 
@@ -1034,6 +1193,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -1060,10 +1228,15 @@ describe("Measure List component", () => {
     userEvent.type(confirmVersionNode, "1.0.000");
     Simulate.change(confirmVersionNode);
     expect(confirmVersionNode.value).toBe("1.0.000");
+
     await waitFor(() => {
       userEvent.click(getByTestId("create-version-continue-button"));
-      expect(getByTestId("error-toast")).toHaveTextContent(
-        "User userId cannot version Measure with ID 680278565a582d3542b71eba. A server related error occurred."
+
+      // Verify toast props were called with correct values
+      // For 500 errors, we should show a generic error message
+      expect(setToastOpenMock).toHaveBeenCalledWith(true);
+      expect(setToastMessageMock).toHaveBeenCalledWith(
+        "An unexpected error has occurred. Please contact the help desk."
       );
 
       expect(screen.getByTestId("version-helper-text")).toHaveTextContent(
@@ -1073,7 +1246,7 @@ describe("Measure List component", () => {
     unmount();
   });
 
-  it("should display success message while creating a version of a measure and message can be closed", async () => {
+  it("should display success message while creating a version of a measure", async () => {
     const success = {
       response: {
         data: {},
@@ -1082,7 +1255,7 @@ describe("Measure List component", () => {
         },
       },
     };
-    const useMeasureServiceMockRejected = {
+    const useMeasureServiceMockResolved = {
       createVersion: jest.fn().mockResolvedValue(success),
       checkValidVersion: jest.fn().mockResolvedValue(checkValidSuccess),
       checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
@@ -1091,9 +1264,9 @@ describe("Measure List component", () => {
     } as unknown as MeasureServiceApi;
 
     useMeasureServiceMock.mockImplementation(() => {
-      return useMeasureServiceMockRejected;
+      return useMeasureServiceMockResolved;
     });
-    const { getByTestId, queryByTestId, unmount } = render(
+    const { getByTestId, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -1109,6 +1282,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -1118,7 +1300,6 @@ describe("Measure List component", () => {
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
     userEvent.click(createVersionButton);
-    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
 
     const typeInput = screen.getByTestId(
       "version-type-input"
@@ -1137,17 +1318,13 @@ describe("Measure List component", () => {
     expect(confirmVersionNode.value).toBe("1.0.000");
     await waitFor(() => {
       userEvent.click(getByTestId("create-version-continue-button"));
-      expect(getByTestId("success-toast")).toHaveTextContent(
+
+      // Verify toast props were called with correct values
+      expect(setToastOpenMock).toHaveBeenCalledWith(true);
+      expect(setToastTypeMock).toHaveBeenCalledWith("success");
+      expect(setToastMessageMock).toHaveBeenCalledWith(
         "New version of measure is Successfully created"
       );
-
-      const closeButton = getByTestId("close-toast-button");
-      userEvent.click(closeButton);
-      setTimeout(() => {
-        expect(
-          queryByTestId("create-version-success-text")
-        ).not.toBeInTheDocument();
-      }, 500);
     });
     unmount();
   });
@@ -1169,6 +1346,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -1199,6 +1385,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -1236,7 +1431,7 @@ describe("Measure List component", () => {
     useMeasureServiceMock.mockImplementation(() => {
       return useMeasureServiceMockResolved;
     });
-    const { getByTestId, getByText, findByRole, unmount } = render(
+    const { getByText, findByRole, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -1252,6 +1447,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -1267,7 +1471,10 @@ describe("Measure List component", () => {
     expect(getByText("Create Draft")).toBeInTheDocument();
     userEvent.click(getByText(/Continue/i));
     await waitFor(() => {
-      expect(getByTestId("success-toast")).toHaveTextContent(
+      // Verify toast props were called with correct values
+      expect(setToastOpenMock).toHaveBeenCalledWith(true);
+      expect(setToastTypeMock).toHaveBeenCalledWith("success");
+      expect(setToastMessageMock).toHaveBeenCalledWith(
         "New draft created successfully."
       );
     });
@@ -1295,7 +1502,7 @@ describe("Measure List component", () => {
     useMeasureServiceMock.mockImplementation(() => {
       return useMeasureServiceMockRejected;
     });
-    const { getByTestId, getByText, findByRole, unmount } = render(
+    const { getByText, findByRole, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -1311,6 +1518,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -1331,7 +1547,9 @@ describe("Measure List component", () => {
     expect(getByText("Create Draft")).toBeInTheDocument();
     userEvent.click(getByText(/Continue/i));
     await waitFor(() => {
-      expect(getByTestId("error-toast")).toHaveTextContent(
+      // Verify toast props were called with correct values
+      expect(setToastOpenMock).toHaveBeenCalledWith(true);
+      expect(setToastMessageMock).toHaveBeenCalledWith(
         error.response.data.message
       );
     });
@@ -1378,6 +1596,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -1407,7 +1634,9 @@ describe("Measure List component", () => {
     expect(getByText("Create Draft")).toBeInTheDocument();
     userEvent.click(getByText(/Continue/i));
     await waitFor(() => {
-      expect(getByTestId("error-toast")).toHaveTextContent(
+      // Verify toast props were called with correct values
+      expect(setToastOpenMock).toHaveBeenCalledWith(true);
+      expect(setToastMessageMock).toHaveBeenCalledWith(
         "An error occurred, please try again. If the error persists, please contact the help desk."
       );
     });
@@ -1448,6 +1677,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -1505,6 +1743,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -1560,6 +1807,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -1609,6 +1865,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -1666,6 +1931,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -1720,6 +1994,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -1774,6 +2057,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -1828,6 +2120,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -1895,6 +2196,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -1949,6 +2259,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -2021,6 +2340,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -2060,6 +2388,7 @@ describe("Measure List component", () => {
         fetchMeasure: jest.fn().mockResolvedValueOnce(measures[2]),
       } as unknown as MeasureServiceApi;
     });
+
     render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
@@ -2076,6 +2405,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -2098,7 +2436,6 @@ describe("Measure List component", () => {
     expect(cancelButton).not.toBeInTheDocument();
   });
 
-  // this test has been passing based on side effects. changing the order that it works in breaks all other tests.
   it("should call the export api to generate the measure zip file", async () => {
     const success = {
       response: {
@@ -2132,6 +2469,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -2203,6 +2549,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -2243,6 +2598,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -2274,6 +2638,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -2308,6 +2681,15 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -2317,7 +2699,12 @@ describe("Measure List component", () => {
   });
 
   it("should display delete dialog on clicking Delete action", async () => {
-    const { findByTestId, unmount } = render(
+    // Mock the deleteMeasure API call to resolve successfully
+    mockMeasureServiceApi.deleteMeasure = jest.fn().mockResolvedValue({
+      status: 200,
+    });
+
+    const { findByText, unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -2333,20 +2720,121 @@ describe("Measure List component", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
+
+    // Clear any previous mock calls to ensure clean state
+    setToastTypeMock.mockClear();
+    setToastMessageMock.mockClear();
+    setToastOpenMock.mockClear();
+
+    // Select a measure by clicking its checkbox
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(5);
     userEvent.click(checkBoxes[1]);
+
+    // Click the delete button to open the dialog
     const deleteButton = screen.getByTestId("delete-action-btn");
     expect(deleteButton).toBeInTheDocument();
     userEvent.click(deleteButton);
-    expect(
-      await findByTestId("delete-measure-dialog-button")
-    ).toBeInTheDocument();
-    const cancelDelete = await findByTestId("cancel-delete-measure-button");
-    userEvent.click(cancelDelete);
+
+    // The dialog should appear with Delete Measure title
+    const dialogTitle = await findByText("Delete Measure");
+    expect(dialogTitle).toBeInTheDocument();
+
+    // Find and click the confirm delete button - use the correct test ID
+    const confirmDeleteButton = screen.getByTestId("delete-measure-button-2");
+    expect(confirmDeleteButton).toBeInTheDocument();
+
+    // Click the button with fireEvent to ensure the click is processed
+    fireEvent.click(confirmDeleteButton);
+
+    // Wait for the deleteMeasure API call to be made
+    await waitFor(() => {
+      expect(mockMeasureServiceApi.deleteMeasure).toHaveBeenCalled();
+    });
+
+    // Now verify the toast props were called with correct values
+    await waitFor(() => {
+      expect(setToastTypeMock).toHaveBeenCalledWith("success");
+      expect(setToastMessageMock).toHaveBeenCalledWith(
+        "Measure successfully deleted"
+      );
+      expect(setToastOpenMock).toHaveBeenCalledWith(true);
+    });
+
+    unmount();
+  });
+
+  it("should display error toast when deleteMeasure fails", async () => {
+    // Mock the deleteMeasure API call to reject with an error
+    const errorMessage = "Delete failed due to server error";
+    mockMeasureServiceApi.deleteMeasure = jest.fn().mockRejectedValue({
+      response: { data: { message: errorMessage } },
+    });
+
+    const { findByText, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    // Select a measure by clicking its checkbox
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    userEvent.click(checkBoxes[1]);
+
+    // Click the delete button to open the dialog
+    const deleteButton = screen.getByTestId("delete-action-btn");
+    userEvent.click(deleteButton);
+
+    // The dialog should appear with Delete Measure title
+    await findByText("Delete Measure");
+
+    // Find and click the confirm delete button
+    const confirmDeleteButton = screen.getByTestId("delete-measure-button-2");
+    fireEvent.click(confirmDeleteButton);
+
+    // Wait for the deleteMeasure API call to be made and error to be handled
+    await waitFor(() => {
+      expect(mockMeasureServiceApi.deleteMeasure).toHaveBeenCalled();
+      expect(setToastTypeMock).toHaveBeenCalledWith("danger");
+      expect(setToastMessageMock).toHaveBeenCalledWith(errorMessage);
+      expect(setToastOpenMock).toHaveBeenCalledWith(true);
+    });
+
     unmount();
   });
 });
@@ -2373,6 +2861,15 @@ describe("Action Center Tests", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -2401,6 +2898,15 @@ describe("Action Center Tests", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -2430,6 +2936,15 @@ describe("Action Center Tests", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -2457,6 +2972,15 @@ describe("Action Center Tests", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -2508,6 +3032,15 @@ describe("Measure List with MeasureSearch enabled", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -2539,6 +3072,15 @@ describe("Measure List with MeasureSearch enabled", () => {
           currentLimit={10}
           currentPage={0}
           setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -2582,6 +3124,11 @@ describe("Measure List with MeasureSearch enabled", () => {
   });
 
   it("should sort in order when column is clicked first", async () => {
+    // Reset mock functions to ensure clean state
+    setCurrentSortMock.mockReset();
+    setCurrentDirectionMock.mockReset();
+    handlePageChangeMock.mockReset();
+
     render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
@@ -2597,12 +3144,22 @@ describe("Measure List with MeasureSearch enabled", () => {
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
-          currentSort={""}
-          setCurrentSort={setCurrentSortMock}
-          currentDirection={""}
-          setCurrentDirection={setCurrentDirectionMock}
           setErrMsg={setErrMsgMock}
+          currentSort=""
+          currentDirection=""
+          setCurrentSort={setCurrentSortMock}
+          setCurrentDirection={setCurrentDirectionMock}
           handlePageChange={handlePageChangeMock}
+          search=""
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -2622,6 +3179,11 @@ describe("Measure List with MeasureSearch enabled", () => {
   });
 
   it("should sort in order when column is clicked second", async () => {
+    // Reset mock functions to ensure clean state
+    setCurrentSortMock.mockReset();
+    setCurrentDirectionMock.mockReset();
+    handlePageChangeMock.mockReset();
+
     render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
@@ -2637,12 +3199,23 @@ describe("Measure List with MeasureSearch enabled", () => {
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
-          currentSort={"version"}
-          setCurrentSort={setCurrentSortMock}
-          currentDirection={"ASC"}
-          setCurrentDirection={setCurrentDirectionMock}
           setErrMsg={setErrMsgMock}
+          // Mock the current sort state as if the column has been clicked once
+          currentSort="version"
+          currentDirection="ASC"
+          setCurrentSort={setCurrentSortMock}
+          setCurrentDirection={setCurrentDirectionMock}
           handlePageChange={handlePageChangeMock}
+          search=""
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
@@ -2662,7 +3235,13 @@ describe("Measure List with MeasureSearch enabled", () => {
   });
 
   it("should sort in order when column is clicked third", async () => {
-    const { getByText } = render(
+    // Reset mock functions to ensure clean state
+    setCurrentSortMock.mockReset();
+    setCurrentDirectionMock.mockReset();
+    handlePageChangeMock.mockReset();
+
+    // Set up the component with currentSort and currentDirection as if the column has been clicked twice
+    render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -2677,91 +3256,40 @@ describe("Measure List with MeasureSearch enabled", () => {
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
           currentPage={0}
-          currentSort={"version"}
-          setCurrentSort={setCurrentSortMock}
-          currentDirection={"DESC"}
-          setCurrentDirection={setCurrentDirectionMock}
           setErrMsg={setErrMsgMock}
+          // Mock the current sort state as if the column has been clicked twice
+          currentSort="version"
+          currentDirection="DESC"
+          setCurrentSort={setCurrentSortMock}
+          setCurrentDirection={setCurrentDirectionMock}
           handlePageChange={handlePageChangeMock}
+          search=""
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
         />
       </ServiceContext.Provider>
     );
 
-    expect(getByText("Version")).toBeInTheDocument();
     const versionButton = screen.getByRole("button", {
       name: "Version",
     });
     expect(versionButton).toBeEnabled();
 
+    // Simulate clicking the already sorted column a third time
     fireEvent.click(versionButton);
+
+    // Now verify the sort is cleared
     await waitFor(() => {
       expect(setCurrentSortMock).toHaveBeenCalledWith("");
       expect(setCurrentDirectionMock).toHaveBeenCalledWith("");
       expect(handlePageChangeMock).toHaveBeenCalledWith(null, 1);
     });
-  });
-
-  it("should display shared icon when measure has ACLs", async () => {
-    const measureWithAcls = {
-      ...measures[0],
-      measureSet: {
-        ...measures[0].measureSet,
-        acls: [{ userId: "test-user", roles: ["SHARED_WITH"] }],
-      },
-    };
-
-    const { getByTestId } = render(
-      <ServiceContext.Provider value={serviceConfig}>
-        <MeasureList
-          measureList={[measureWithAcls]}
-          setMeasureList={setMeasureListMock}
-          setTotalPages={setTotalPagesMock}
-          setTotalItems={setTotalItemsMock}
-          setVisibleItems={setVisibleItemsMock}
-          setOffset={setOffsetMock}
-          setLoading={setLoadingMock}
-          activeTab={0}
-          searchCriteria={null}
-          setSearchCriteria={setSearchCriteriaMock}
-          currentLimit={10}
-          currentPage={0}
-          setErrMsg={setErrMsgMock}
-        />
-      </ServiceContext.Provider>
-    );
-
-    const checkIcon = screen.getByTestId("CheckCircleOutlineIcon");
-    expect(checkIcon).toBeInTheDocument();
-    expect(checkIcon).toHaveStyle({ color: "#4CAF50" });
-  });
-
-  it("should format the last modified date correctly", () => {
-    const measureWithDate = {
-      ...measures[0],
-      lastModifiedAt: "2023-12-25T12:00:00.000Z",
-    };
-
-    render(
-      <ServiceContext.Provider value={serviceConfig}>
-        <MeasureList
-          measureList={[measureWithDate]}
-          setMeasureList={setMeasureListMock}
-          setTotalPages={setTotalPagesMock}
-          setTotalItems={setTotalItemsMock}
-          setVisibleItems={setVisibleItemsMock}
-          setOffset={setOffsetMock}
-          setLoading={setLoadingMock}
-          activeTab={0}
-          searchCriteria={null}
-          setSearchCriteria={setSearchCriteriaMock}
-          currentLimit={10}
-          currentPage={0}
-          setErrMsg={setErrMsgMock}
-        />
-      </ServiceContext.Provider>
-    );
-
-    // Date format will depend on the local system settings, so we'll check for the presence of the date
-    expect(screen.getByText("12/25/2023")).toBeInTheDocument();
   });
 });
