@@ -272,9 +272,6 @@ const ResourceEditor = ({
                 Profile:&nbsp;&nbsp;
               </span>
               <span style={{ color: "#333333" }}>
-                {console.log(
-                  selectedResource?.bundleEntry?.resource?.meta?.profile
-                )}
                 {selectedResource?.bundleEntry?.resource?.meta?.profile?.[0]
                   ?.match(/\/(qicore|core)\//)
                   .includes("qicore")
