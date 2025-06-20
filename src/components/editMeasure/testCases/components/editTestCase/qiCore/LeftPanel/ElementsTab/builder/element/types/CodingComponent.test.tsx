@@ -458,17 +458,13 @@ describe("CodingComponent Tests", () => {
     const valueSetSelect = screen.getByRole("combobox", {
       name: "Value Set / Direct Reference Code",
     });
-    await waitFor(() => {
-      expect(valueSetSelect).toHaveTextContent("- Select -");
-    });
+    expect(valueSetSelect).toHaveTextContent("- Select -");
 
     // verify code system
     const codeSystem = screen.getByRole("textbox", {
       name: "Code System",
     });
-    await waitFor(() => {
-      expect(codeSystem).toHaveTextContent(coding.system);
-    });
+    expect(codeSystem).toHaveTextContent(coding.system);
     expect(codeSystem).toHaveAttribute("readonly");
 
     // verify code
