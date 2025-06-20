@@ -421,4 +421,61 @@ describe("CodingComponent Tests", () => {
       });
     });
   });
+
+  it("display existing code from a value set in readonly mode if the coding extension is missing", async () => {
+    const coding = {
+      ...mockBindingValueSet.expansion?.contains[0],
+    };
+    mockedAxios.get.mockResolvedValue({
+      data: mockBindingValueSet,
+    });
+
+    render(
+      <ApiContextProvider value={mockConfig}>
+        <ExecutionContextProvider
+          value={{
+            measureState: [null, jest.fn()],
+            bundleState: [null, jest.fn()],
+            valueSetsState: [null, jest.fn()],
+            executionContextReady: true,
+            executing: false,
+            setExecuting: jest.fn(),
+            contextFailure: false,
+          }}
+        >
+          <CodingComponent
+            canEdit={true}
+            structureDefinition={mockStructureDefinition}
+            label="test-label"
+            value={coding}
+            onChange={mockOnChange}
+          />
+        </ExecutionContextProvider>
+      </ApiContextProvider>
+    );
+
+    // verify value set
+    const valueSetSelect = screen.getByRole("combobox", {
+      name: "Value Set / Direct Reference Code",
+    });
+    await waitFor(() => {
+      expect(valueSetSelect).toHaveTextContent("- Select -");
+    });
+
+    // verify code system
+    const codeSystem = screen.getByRole("textbox", {
+      name: "Code System",
+    });
+    await waitFor(() => {
+      expect(codeSystem).toHaveTextContent(coding.system);
+    });
+    expect(codeSystem).toHaveAttribute("readonly");
+
+    // verify code
+    const code = screen.getByRole("textbox", {
+      name: "Code",
+    });
+    expect(code).toHaveTextContent(coding.code);
+    expect(code).toHaveAttribute("readonly");
+  });
 });

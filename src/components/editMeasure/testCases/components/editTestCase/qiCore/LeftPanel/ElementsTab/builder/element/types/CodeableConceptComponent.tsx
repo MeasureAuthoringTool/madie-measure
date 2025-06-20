@@ -13,7 +13,7 @@ const CodeableConceptComponent = ({
 }) => {
   const handleChange = useCallback(
     (value: Coding) => {
-      onChange({ coding: value });
+      onChange({ coding: [value] });
     },
     [onChange]
   );
@@ -24,7 +24,7 @@ const CodeableConceptComponent = ({
       canEdit={canEdit}
       structureDefinition={structureDefinition}
       onChange={handleChange}
-      value={value?.coding}
+      value={value?.coding?.[0]} //TODO: handle multiple codings
     />
   );
 };
