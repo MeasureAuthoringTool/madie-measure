@@ -13,11 +13,7 @@ import "styled-components/macro";
 import { Measure, Model } from "@madie/madie-models";
 import { useNavigate } from "react-router-dom";
 import { Chip } from "@mui/material";
-import {
-  Button,
-  Toast,
-  TruncateText,
-} from "@madie/madie-design-system/dist/react";
+import { Button, TruncateText } from "@madie/madie-design-system/dist/react";
 import {
   useReactTable,
   ColumnDef,
@@ -80,6 +76,14 @@ export default function MeasureList(props: {
   setCurrentDirection?;
   setErrMsg;
   search: any;
+  // Toast props
+  toastOpen: boolean;
+  toastMessage: string;
+  toastType: string;
+  setToastOpen: Dispatch<SetStateAction<boolean>>;
+  setToastMessage: Dispatch<SetStateAction<string>>;
+  setToastType: Dispatch<SetStateAction<string>>;
+  onToastClose: () => void;
 }) {
   const { searchCriteria, setSearchCriteria, retrieveMeasures } = { ...props };
   const measureServiceApi = useRef(useMeasureServiceApi()).current; //needs to be ref or triggers jest. throws warn
@@ -199,7 +203,11 @@ export default function MeasureList(props: {
 
   const columnsToBeAdded = [
     {
-      header: "Measure Name",
+      header: () => (
+        <button tabIndex={0} aria-label="Measure Name">
+          Measure Name
+        </button>
+      ),
       cell: (info) => (
         <TruncateText
           text={info.row.original.measureName}
@@ -212,7 +220,11 @@ export default function MeasureList(props: {
         customSort(rowA.original.measureName, rowB.original.measureName),
     },
     {
-      header: "Version",
+      header: () => (
+        <button tabIndex={0} aria-label="Version">
+          Version
+        </button>
+      ),
       cell: (info) => (
         <>
           <TruncateText
@@ -231,7 +243,11 @@ export default function MeasureList(props: {
         customSort(rowA.original.version, rowB.original.version),
     },
     {
-      header: "Model",
+      header: () => (
+        <button tabIndex={0} aria-label="Model">
+          Model
+        </button>
+      ),
       cell: (info) => (
         <TruncateText
           text={info.row.original.model}
@@ -244,7 +260,12 @@ export default function MeasureList(props: {
         customSort(rowA.original.model, rowB.original.model),
     },
     {
-      header: "",
+      // Use tabIndex={0} for accessibility, and make sure it's not inside a button.
+      header: () => (
+        <button tabIndex={0} aria-label="Edit or View Measure">
+          ADD
+        </button>
+      ),
       cell: (info) => (
         <Button
           variant="outline-filled"
@@ -368,7 +389,12 @@ export default function MeasureList(props: {
         new Date(rowB.original.actions.lastModifiedAt).getTime(),
     },
     {
-      header: "",
+      // Use tabIndex={0} for accessibility, and make sure it's not inside a button.
+      header: () => (
+        <button tabIndex={0} aria-label="Edit or View Measure">
+          ADD
+        </button>
+      ),
       cell: (info) => (
         <Button
           variant="outline-filled"
@@ -407,6 +433,11 @@ export default function MeasureList(props: {
     const t = [
       {
         id: "select", // retain ID so we have the column for checkboxes but the header is blank
+        header: () => (
+          <button tabIndex={0} aria-label="Measure Selection">
+            ADD
+          </button>
+        ),
         cell: ({ row }) => {
           return (
             <div className="px-1">
@@ -427,7 +458,7 @@ export default function MeasureList(props: {
     ];
     if (featureFlags?.MeasureSearch) {
       t.push({
-        header: "",
+        header: () => <span aria-label="expandArrow"></span>,
         cell: (info) => {
           if (info.row.original?.hasAssociatedMeasures) {
             const handleKeyDown = (e) => {
@@ -610,22 +641,9 @@ export default function MeasureList(props: {
       option: "",
     });
 
-    handleToast(toastType, toastMessage, toastOpen);
-  };
-
-  const [toastOpen, setToastOpen] = useState<boolean>(false);
-  const [toastMessage, setToastMessage] = useState<string>("");
-  const [toastType, setToastType] = useState<string>("danger");
-  const onToastClose = () => {
-    setToastType("danger");
-    setToastMessage("");
-    setToastOpen(false);
-  };
-
-  const handleToast = (type, message, open) => {
-    setToastType(type);
-    setToastMessage(message);
-    setToastOpen(open);
+    props.setToastType(toastType);
+    props.setToastMessage(toastMessage);
+    props.setToastOpen(toastOpen);
   };
 
   const handleSort = async (sort: string) => {
@@ -680,9 +698,9 @@ export default function MeasureList(props: {
         abortController,
         measure,
         measureServiceApi,
-        setToastOpen,
-        setToastType,
-        setToastMessage,
+        props.setToastOpen,
+        props.setToastType,
+        props.setToastMessage,
         elmErrorSeverity
       );
     } catch (error) {
@@ -728,14 +746,19 @@ export default function MeasureList(props: {
     const errorData = error?.response;
     const message = errorData?.data?.message;
 
-    setToastOpen(true);
+    props.setToastOpen(true);
     setLoading(false);
     if (errorData?.status === 400) {
-      setToastMessage("Requested measure cannot be versioned");
+      props.setToastMessage("Requested measure cannot be versioned");
     } else if (errorData?.status === 403) {
-      setToastMessage("User is unauthorized to create a version");
+      props.setToastMessage("User is unauthorized to create a version");
+    } else if (errorData?.status === 500) {
+      // For server errors (500), always show a generic error message
+      props.setToastMessage(
+        "An unexpected error has occurred. Please contact the help desk."
+      );
     } else {
-      setToastMessage(
+      props.setToastMessage(
         message ||
           "Requested operation could not be completed. Please contact the Help Desk."
       );
@@ -752,10 +775,10 @@ export default function MeasureList(props: {
       .createVersion(targetMeasure.current?.id, versionType)
       .then((r) => {
         handleDialogClose();
-        setToastOpen(true);
-        setToastType("success");
+        props.setToastOpen(true);
+        props.setToastType("success");
         setLoading(false);
-        setToastMessage("New version of measure is Successfully created");
+        props.setToastMessage("New version of measure is Successfully created");
         doUpdateList();
       })
       .catch((error) => {
@@ -820,9 +843,11 @@ export default function MeasureList(props: {
         }
       }
     } catch (e) {
-      setToastMessage(
+      props.setToastMessage(
         "An error occurred, please try again. If the error persists, please contact the help desk."
       );
+      props.setToastOpen(true);
+      props.setToastType("danger");
     }
   };
 
@@ -833,19 +858,19 @@ export default function MeasureList(props: {
       .then(async () => {
         setLoading(false);
         handleDialogClose();
-        setToastOpen(true);
-        setToastType("success");
-        setToastMessage("New draft created successfully.");
+        props.setToastOpen(true);
+        props.setToastType("success");
+        props.setToastMessage("New draft created successfully.");
         doUpdateList();
       })
       .catch((error) => {
         setLoading(false);
         const errorOb = error?.response?.data;
-        setToastOpen(true);
+        props.setToastOpen(true);
         if (errorOb?.message) {
-          setToastMessage(errorOb.message);
+          props.setToastMessage(errorOb.message);
         } else {
-          setToastMessage(
+          props.setToastMessage(
             "An error occurred, please try again. If the error persists, please contact the help desk."
           );
         }
@@ -858,9 +883,9 @@ export default function MeasureList(props: {
         targetMeasure?.current.id
       );
       if (result.status === 200) {
-        setToastType("success");
-        setToastMessage("Measure successfully deleted");
-        setToastOpen(true);
+        props.setToastType("success");
+        props.setToastMessage("Measure successfully deleted");
+        props.setToastOpen(true);
         doUpdateList();
         handleDialogClose();
 
@@ -883,12 +908,12 @@ export default function MeasureList(props: {
     } catch (e) {
       if (e?.response?.data) {
         const { message } = e.response.data;
-        setToastMessage(message);
+        props.setToastMessage(message);
       } else {
-        setToastMessage(e.toString());
+        props.setToastMessage(e.toString());
       }
-      setToastType("danger");
-      setToastOpen(true);
+      props.setToastType("danger");
+      props.setToastOpen(true);
       handleDialogClose();
     }
   };
@@ -908,9 +933,9 @@ export default function MeasureList(props: {
         doUpdateList();
 
         table.toggleAllRowsSelected(false);
-        setToastOpen(true);
-        setToastType("success");
-        setToastMessage(
+        props.setToastOpen(true);
+        props.setToastType("success");
+        props.setToastMessage(
           `Measures successfully associated with CMS ID ${measureSet?.cmsId}${
             copyMetaData ? " and meta data is copied over" : ""
           }.`
@@ -919,11 +944,11 @@ export default function MeasureList(props: {
       })
       .catch((err) => {
         const errorOb = err?.response?.data;
-        setToastOpen(true);
+        props.setToastOpen(true);
         if (errorOb?.message) {
-          setToastMessage(errorOb.message);
+          props.setToastMessage(errorOb.message);
         } else {
-          setToastMessage(
+          props.setToastMessage(
             "An error occurred, please try again. If the error persists, please contact the help desk."
           );
         }
@@ -976,7 +1001,10 @@ export default function MeasureList(props: {
                     onMouseLeave={() => setHoveredHeader(null)}
                     className="header-cell"
                   >
-                    {header.isPlaceholder ? null : (
+                    {/* Only render a <button> for sortable columns.
+                        For non-sortable columns like "ADD", render the header content directly, not inside a <button>. 
+                    */}
+                    {header.isPlaceholder ? null : header.column.getCanSort() ? (
                       <button
                         className={
                           header.column.getCanSort()
@@ -1014,6 +1042,11 @@ export default function MeasureList(props: {
                           header.getContext()
                         )}
                       </button>
+                    ) : (
+                      flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )
                     )}
                   </TH>
                 );
@@ -1061,19 +1094,6 @@ export default function MeasureList(props: {
           ))}
         </tbody>
       </table>
-      <Toast
-        toastKey="measure-action-toast"
-        aria-live="polite"
-        toastType={toastType}
-        testId={toastType === "danger" ? "error-toast" : "success-toast"}
-        closeButtonProps={{
-          "data-testid": "close-toast-button",
-        }}
-        open={toastOpen}
-        message={toastMessage}
-        onClose={onToastClose}
-        autoHideDuration={6000}
-      />
       <CreatVersionDialog
         currentVersion={targetMeasure?.current?.version}
         open={createVersionDialog.open}

@@ -6,10 +6,14 @@ import {
   Popover,
 } from "@madie/madie-design-system/dist/react";
 import AddIcon from "@mui/icons-material/Add";
-import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import * as _ from "lodash";
-import { Measure, MeasureErrorType, TestCase } from "@madie/madie-models";
+import {
+  Measure,
+  MeasureErrorType,
+  Model,
+  TestCase,
+} from "@madie/madie-models";
 import useExecutionContext from "../../routes/qiCore/useExecutionContext";
 import { TestCasesPassingDetailsProps } from "../common/interfaces";
 import { useFeatureFlags } from "@madie/madie-util";
@@ -17,7 +21,6 @@ import "twin.macro";
 import "styled-components/macro";
 import LoadingButton from "../common/loadingButton/LoadingButton";
 import LoadingButtonWithMenu from "../common/loadingButton/LoadingButtonWithMenu";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export interface NavTabProps {
   activeTab: string;
@@ -33,7 +36,7 @@ export interface NavTabProps {
   coveragePercentage: number;
   validTestCases: TestCase[];
   exportTestCases: (bundleType: string) => void;
-  onDeleteAllTestCases: () => void;
+  validationPercentage?: number;
   onGenerateOverlappingCodesReport: () => void;
   showReportOptions: boolean;
   setShowReportOptions: (show: boolean) => void;
@@ -67,7 +70,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
     coveragePercentage,
     validTestCases,
     exportTestCases,
-    onDeleteAllTestCases,
+    validationPercentage,
     onGenerateOverlappingCodesReport,
   } = props;
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
@@ -90,6 +93,17 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
             label !== "Coverage" &&
             `(${testCasePassFailStats.passFailRatio})`}
         </div>
+      </div>
+    );
+  };
+
+  const getValidationResultsDisplay = (label: string) => {
+    return (
+      <div>
+        <div style={{ fontSize: "29px", fontWeight: "600" }}>
+          {validationPercentage ? validationPercentage + "%" : "-"}
+        </div>
+        <div style={{ fontSize: "19px" }}>{label}</div>
       </div>
     );
   };
@@ -118,6 +132,10 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
       <Tabs
         value={activeTab}
         onChange={(e, v) => {
+          if (v === "validation") {
+            e.preventDefault();
+            return;
+          }
           setActiveTab(v);
         }}
         type="B"
@@ -141,6 +159,17 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
           data-testid="coverage-tab"
           value="coverage"
         />
+        {_.isEqual(measure?.model, Model.QICORE_6_0_0) && (
+          <Tab
+            type="B"
+            tabIndex={0}
+            aria-label="Validation tab panel"
+            sx={defaultStyle}
+            label={getValidationResultsDisplay("Valid")}
+            data-testid="validation-tab"
+            value="validation"
+          />
+        )}
       </Tabs>
       <div tw="flex flex-wrap space-x-4 justify-end h-10">
         {featureFlags.OverlappingValueSets && (

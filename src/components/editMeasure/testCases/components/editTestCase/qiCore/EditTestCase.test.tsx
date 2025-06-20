@@ -2586,6 +2586,64 @@ describe("EditTestCase component", () => {
       expect(errorText).not.toBeInTheDocument();
     });
 
+    it("should start polling if the validation response is either Pending or Validating", async () => {
+      const testCase = {
+        id: "1234",
+        createdBy: MEASURE_CREATEDBY,
+        description: "Test IPP",
+        series: "SeriesA",
+        json: `{"test":"test"}`,
+        testCaseValidationStatus: "Pending",
+        hapiOperationOutcome: null,
+      } as TestCase;
+
+      const measure = {
+        id: "m1234",
+        createdBy: MEASURE_CREATEDBY,
+        testCases: [],
+        groups: [
+          {
+            id: "Group1_ID",
+            scoring: "Cohort",
+            population: {
+              initialPopulation: "Pop1",
+            },
+          },
+        ],
+      } as unknown as Measure;
+      mockedAxios.get
+        .mockClear()
+        .mockImplementation((args) => {
+          if (args && args.endsWith("series")) {
+            return Promise.resolve({ data: ["SeriesA", "SeriesB", "SeriesC"] });
+          } else if (args && args.endsWith("resources")) {
+            return Promise.resolve({
+              data: [...resourceIdentifiers],
+            });
+          }
+          return Promise.resolve({ data: testCase });
+        })
+        .mockResolvedValueOnce(
+          Promise.resolve({
+            data: { ...testCase, testCaseValidationStatus: "Valid" },
+          })
+        );
+
+      renderWithRouter(
+        ["/measures/m1234/edit/test-cases/1234"],
+        "/measures/:measureId/edit/test-cases/:id",
+        measure
+      );
+
+      expect(mockedAxios.get).toHaveBeenCalledTimes(2);
+
+      await act(async () => {
+        jest.advanceTimersByTime(5000);
+      });
+
+      expect(mockedAxios.get).toHaveBeenCalledTimes(3);
+    });
+
     it("should handle displaying a test case with null groupPopulation data", async () => {
       const testCase = {
         id: "1234",
