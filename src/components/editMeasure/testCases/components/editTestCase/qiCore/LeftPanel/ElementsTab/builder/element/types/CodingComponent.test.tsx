@@ -473,5 +473,12 @@ describe("CodingComponent Tests", () => {
     });
     expect(code).toHaveTextContent(coding.code);
     expect(code).toHaveAttribute("readonly");
+
+    // verify note
+    expect(
+      screen.getByText(
+        "To update code system or code please select a valid value set."
+      )
+    ).toBeInTheDocument();
   });
 });

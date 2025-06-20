@@ -350,7 +350,7 @@ const CodingComponent = ({
               <ReadOnlyTextField
                 label="Code System"
                 id="code-system"
-                data-testid="code-system"
+                data-testid={`code-system-${value.code}`}
                 value={value.system}
               />
             </div>
@@ -358,12 +358,15 @@ const CodingComponent = ({
               <ReadOnlyTextField
                 label="Code"
                 id="code"
-                data-testid="code"
+                data-testid={`code-${value.code}`}
                 value={`${value.code} - ${value.display}`}
               />
             </div>
           </div>
-          <div tw="mt-3 text-sm text-red-500">
+          <div
+            tw="mt-3 text-sm text-red-500"
+            data-testid={`select-valueset-warning-${value.code}`}
+          >
             To update code system or code please select a valid value set.
           </div>
         </>
