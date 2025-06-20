@@ -58,7 +58,7 @@ const MeasureObservationDetails = ({
   return (
     <>
       <div className="first">
-        <div className="population-col-gap-24">
+        <div className="population-column">
           <Select
             placeHolder={{ name: "Select Observation", value: "" }}
             required={required}

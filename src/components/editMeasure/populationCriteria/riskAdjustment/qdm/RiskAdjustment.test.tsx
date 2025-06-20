@@ -112,25 +112,6 @@ describe("QdmRiskAdjustment Component", () => {
     expect(description).toHaveTextContent("test description");
   });
 
-  it("Should render disabled components if the user doesn't have permissions", async () => {
-    checkUserCanEdit.mockReturnValue(false);
-    RenderRiskAdjustment();
-    const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
-    expect(riskAdjustmentSelect).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Initial Population" })
-    ).toBeInTheDocument();
-
-    const comboBoxInput = screen.getByRole("combobox");
-    expect(comboBoxInput).toBeDisabled();
-
-    const description = screen.getByRole("textbox", {
-      name: "Description",
-    });
-    expect(description).toHaveTextContent("test description");
-    expect(description).toBeDisabled();
-  });
-
   it("Should successfully update risk Adjustment values and save to DB on 200", async () => {
     checkUserCanEdit.mockReturnValue(true);
     // Mocking service call to update measure
@@ -217,20 +198,18 @@ describe("QdmRiskAdjustment Component", () => {
   it("Should render disabled components if the user doesn't have permissions", async () => {
     checkUserCanEdit.mockReturnValue(false);
     RenderRiskAdjustment();
-    const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
-    expect(riskAdjustmentSelect).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Initial Population" })
-    ).toBeInTheDocument();
-
-    const comboBoxInput = screen.getByRole("combobox");
-    expect(comboBoxInput).toBeDisabled();
-
-    const description = screen.getByRole("textbox", {
-      name: "Description",
+    const riskAdjustments = screen.getByRole("textbox", {
+      name: "Definition",
     });
+    expect(riskAdjustments).toHaveTextContent("Initial Population");
+
+    const description = screen.getByRole("textbox", { name: "Description" });
     expect(description).toHaveTextContent("test description");
-    expect(description).toBeDisabled();
+
+    const allFormFields = screen.getAllByRole("textbox");
+    for (const formField of allFormFields) {
+      expect(formField).toHaveAttribute("readonly");
+    }
   });
 
   it("Should successfully update risk Adjustment values and save to DB on 201", async () => {

@@ -5,16 +5,6 @@ import MeasureGroupScoringUnit from "./MeasureGroupScoringUnit";
 import { act } from "react-dom/test-utils";
 
 describe("MeasureGroupScoringUnit Component", () => {
-  const testValue = {
-    value: {
-      code: "mho",
-      guidance:
-        "unit of electric conductance (the inverse of electrical resistance) equal to ohm^-1",
-      name: "mho",
-      system: "https://clinicaltables.nlm.nih.gov/",
-    },
-  };
-
   test("Should render scoring unit field", () => {
     const handleChange = jest.fn();
     render(

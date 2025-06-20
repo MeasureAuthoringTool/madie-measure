@@ -89,7 +89,7 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: true, pendingPath: "" },
     initialState: { canTravel: true, pendingPath: "" },
   },
-  checkUserCanEdit: jest.fn(),
+  checkUserCanEdit: jest.fn().mockResolvedValue(true),
 }));
 
 let serviceApiMock: MeasureServiceApi;
@@ -106,22 +106,20 @@ describe("Steward and Developers component", () => {
   const setErrorMessage = jest.fn();
   afterEach(() => jest.clearAllMocks());
 
-  it("should disable dropdowns if the user does not have measure edit permissions", async () => {
-    checkUserCanEdit.mockImplementationOnce(() => false);
-    await act(async () => {
-      render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
-      const stewardAutoComplete = await screen.findByTestId("steward");
-      const stewardComboBox = await within(stewardAutoComplete).getByRole(
-        "combobox"
-      );
-      await waitFor(() => expect(stewardComboBox).toBeDisabled());
-
-      const developersAutoComplete = await screen.findByTestId("developers");
-      const developersComboBox = await within(developersAutoComplete).getByRole(
-        "combobox"
-      );
-      await waitFor(() => expect(developersComboBox).toBeDisabled());
+  it("should display readonly text if user does not have measure edit permissions", async () => {
+    (checkUserCanEdit as jest.Mock).mockReturnValue(false);
+    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
+    await waitFor(() => {
+      const steward = screen.getByRole("textbox", { name: "Steward" });
+      expect(steward).toHaveAttribute("readonly");
+      expect(steward).toHaveValue(mockMetaData.steward.name);
     });
+
+    const developers = screen.getByRole("textbox", { name: "Developers" });
+    expect(developers).toHaveAttribute("readonly");
+    expect(developers).toHaveValue(
+      mockMetaData.developers[0].name + "; " + mockMetaData.developers[1].name
+    );
   });
 
   it("should render steward and developers form with disabled save and discard buttons", async () => {
@@ -199,7 +197,6 @@ describe("Steward and Developers component", () => {
   });
 
   it("should render steward and developers fields with values from DB", async () => {
-    checkUserCanEdit.mockImplementationOnce(() => true);
     render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
     const stewardAutoComplete = await screen.findByTestId("steward");
     const stewardComboBox = within(stewardAutoComplete).getByRole("combobox");
