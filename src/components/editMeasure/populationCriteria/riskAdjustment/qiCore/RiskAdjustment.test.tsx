@@ -116,20 +116,18 @@ describe("QiCore RiskAdjustment Component", () => {
   it("Should render disabled components if the user doesn't have permissions", async () => {
     checkUserCanEdit.mockReturnValue(false);
     RenderRiskAdjustment();
-    const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
-    expect(riskAdjustmentSelect).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Initial Population" })
-    ).toBeInTheDocument();
+    const riskAdjustments = screen.getByRole("textbox", {
+      name: "Definition",
+    });
+    expect(riskAdjustments).toHaveTextContent("Initial Population");
 
-    const comboBoxInputs = screen.getAllByRole("combobox");
-    for (const comboBoxInput of comboBoxInputs) {
-      expect(comboBoxInput).toBeDisabled();
-    }
-
-    const description = screen.getByTestId("risk-adjustment-description-text");
+    const description = screen.getByRole("textbox", { name: "Description" });
     expect(description).toHaveTextContent("test description");
-    expect(description).toBeDisabled();
+
+    const allFormFields = screen.getAllByRole("textbox");
+    for (const formField of allFormFields) {
+      expect(formField).toHaveAttribute("readonly");
+    }
   });
 
   it("Should successfully update risk Adjustment values and save to DB on 200", async () => {

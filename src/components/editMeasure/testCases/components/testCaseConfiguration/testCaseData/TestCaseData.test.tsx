@@ -344,14 +344,14 @@ describe("TestCaseData", () => {
       return false;
     });
     renderTestCaseDataComponent();
-    const shiftTestCaseDatesInput = screen.getByRole("spinbutton", {
+    const shiftTestCaseDatesInput = screen.getByRole("textbox", {
       name: "Shift Test Case Dates",
     }) as HTMLInputElement;
     const saveButton = screen.getByRole("button", { name: "Save" });
     const discardButton = screen.getByRole("button", {
       name: "Discard Changes",
     });
-    expect(shiftTestCaseDatesInput).toBeDisabled();
+    expect(shiftTestCaseDatesInput).toHaveAttribute("readonly");
     expect(saveButton).toBeDisabled();
     expect(discardButton).toBeDisabled();
   });
@@ -364,14 +364,14 @@ describe("TestCaseData", () => {
       };
     });
     renderTestCaseDataComponent();
-    const shiftTestCaseDatesInput = screen.getByRole("spinbutton", {
+    const shiftTestCaseDatesInput = screen.getByRole("textbox", {
       name: "Shift Test Case Dates",
     }) as HTMLInputElement;
     const saveButton = screen.getByRole("button", { name: "Save" });
     const discardButton = screen.getByRole("button", {
       name: "Discard Changes",
     });
-    expect(shiftTestCaseDatesInput).toBeDisabled();
+    expect(shiftTestCaseDatesInput).toHaveAttribute("readonly");
     expect(saveButton).toBeDisabled();
     expect(discardButton).toBeDisabled();
   });

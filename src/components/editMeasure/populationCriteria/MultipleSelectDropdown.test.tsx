@@ -5,15 +5,17 @@ import userEvent from "@testing-library/user-event";
 
 describe("MultipleSelectDropDown Component", () => {
   const selectOptions: string[] = ["Option 1", "Option 2"];
-  test("Should provide auto complete selection", () => {
-    render(
-      <MultipleSelectDropDown
-        formControl={null}
-        id="measure-group-type"
-        label="Type"
-        options={selectOptions}
-      />
-    );
+  const props = {
+    formControl: null,
+    id: "measure-group-type",
+    label: "Type",
+    options: selectOptions,
+    onClose: jest.fn(),
+    value: [],
+  };
+
+  it("Should provide auto complete selection", () => {
+    render(<MultipleSelectDropDown {...props} />);
 
     const measureGroupTypeSelect = screen.getByTestId(
       "measure-group-type-dropdown"
@@ -31,5 +33,20 @@ describe("MultipleSelectDropDown Component", () => {
     userEvent.type(measureGroupTypeSelectButton, "Option 1");
     expect(screen.getByText("Option 1")).toBeInTheDocument();
     expect(screen.queryByText("Option 2")).not.toBeInTheDocument();
+  });
+
+  it("Should render readonly state", () => {
+    render(
+      <MultipleSelectDropDown {...props} disabled={true} value={["Option 2"]} />
+    );
+    const developers = screen.getByRole("textbox");
+    expect(developers).toHaveValue("Option 2");
+    expect(developers).toHaveAttribute("readonly");
+  });
+
+  it("Should render - for readonly state if state is absent", () => {
+    render(<MultipleSelectDropDown {...props} disabled={true} />);
+    const developers = screen.getByRole("textbox");
+    expect(developers).toHaveValue("-");
   });
 });

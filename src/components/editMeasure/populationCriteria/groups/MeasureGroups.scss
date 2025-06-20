@@ -10,6 +10,15 @@ input {
 #populations-content {
   .second {
     margin-left: 16px;
+    .population-column {
+      column-gap: 12px;
+    }
+  }
+
+  .first {
+    .population-column {
+      column-gap: 30px;
+    }
   }
 
   .first,
@@ -31,11 +40,10 @@ input {
   }
 }
 
-.population-col-gap-24 {
+.population-column {
   display: flex;
   flex-direction: row;
   flex-grow: 1;
-  column-gap: 24px;
   > div:first-of-type {
     width: 300px;
     min-width: 300px;

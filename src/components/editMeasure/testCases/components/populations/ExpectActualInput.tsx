@@ -29,6 +29,8 @@ const ExpectActualInput = ({
   ) : (
     <input
       type="text"
+      style={props.disabled ? { border: "none" } : {}}
+      aria-disabled={props.disabled ? "true" : "false"}
       size={2}
       value={
         expectedValue || (expectedValue == 0 && expectedValue !== false)

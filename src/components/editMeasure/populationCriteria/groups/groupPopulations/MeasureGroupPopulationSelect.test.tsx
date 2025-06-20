@@ -127,10 +127,8 @@ describe("Measure Group Population Select Component", () => {
       />
     );
 
-    const populationSelectInput = screen.queryByTestId(
-      "select-measure-group-population-input"
-    );
-    expect(populationSelectInput).toBeDisabled();
+    const populationSelectInput = screen.getByRole("textbox");
+    expect(populationSelectInput).toHaveAttribute("readonly");
   });
 
   test("should display the default option value if passed and measure is editable", () => {

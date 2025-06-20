@@ -1224,7 +1224,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         {...formik.getFieldProps("title")}
                         maxLength={250}
                       />
-                      <div tw="mt-4">
+                      <div tw="mt-6">
                         <TextArea
                           placeholder="Test Case Description"
                           id="test-case-description"
@@ -1248,12 +1248,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         />
                       </div>
 
-                      <div
-                        tw="-mt-5"
-                        style={{
-                          marginTop: 10,
-                        }}
-                      >
+                      <div tw="mt-6">
                         <label
                           htmlFor="test-case-series"
                           tw="text-gray-980"

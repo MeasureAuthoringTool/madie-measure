@@ -1,9 +1,13 @@
 import React from "react";
 import { FormControl, Autocomplete, Checkbox } from "@mui/material";
 import PropTypes from "prop-types";
-import { TextField } from "@madie/madie-design-system/dist/react/";
+import {
+  TextField,
+  ReadOnlyTextField,
+} from "@madie/madie-design-system/dist/react/";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import _ from "lodash";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -50,7 +54,7 @@ const MultipleSelectDropDown = ({
   helperText = undefined,
   options,
   multipleSelect = true,
-  limitTags = 1,
+  limitTags = 2,
   textFieldInputProps = undefined,
   tooltipText = "",
   onClose,
@@ -59,6 +63,19 @@ const MultipleSelectDropDown = ({
   value,
   ...rest
 }) => {
+  if (disabled) {
+    return (
+      <ReadOnlyTextField
+        required={required}
+        label={label}
+        id={id}
+        size="small"
+        {...rest}
+        value={_.isEmpty(value) ? "-" : value.join("; ")}
+      />
+    );
+  }
+
   const requiredLabelReadable = <span className="sr-only">required</span>;
   const labelReadable = required ? (
     <span>
@@ -67,6 +84,7 @@ const MultipleSelectDropDown = ({
   ) : (
     label
   );
+
   // we're putting Select All in as an option to please the 508 since other ways to add it will modify html bad
   return (
     <FormControl

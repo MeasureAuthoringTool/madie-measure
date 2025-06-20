@@ -5,7 +5,6 @@ import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import {
   Button,
   MadieDiscardDialog,
-  TextField,
   Toast,
   AutoComplete,
 } from "@madie/madie-design-system/dist/react";
@@ -17,11 +16,12 @@ import {
 import { useFormik } from "formik";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 import * as Yup from "yup";
-import { Checkbox, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
+import { Box } from "@mui/system";
 import { Organization } from "@madie/madie-models";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-import { autoCompleteStyles } from "../../populationCriteria/MultipleSelectDropDown";
+import MultipleSelectDropDown from "../../populationCriteria/MultipleSelectDropDown";
 
 const asterisk = { color: "#D92F2F", marginRight: 3 };
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
@@ -166,11 +166,12 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
             </Typography>
           </div>
         </div>
-        {/* stewrd and developers role select for checkbox */}
+        {/* steward and developers role select for checkbox */}
         {organizations && (
           <>
-            <div tw="mb-4 w-1/2">
+            <Box sx={{ marginBottom: "32px" }}>
               <AutoComplete
+                {...formik.getFieldProps("steward")}
                 id="steward"
                 dataTestId="steward"
                 label="Steward"
@@ -180,69 +181,33 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
                 error={formik.touched.steward && formik.errors["steward"]}
                 helperText={formik.touched.steward && formik.errors["steward"]}
                 options={organizations.map((element) => element.name)}
-                {...formik.getFieldProps("steward")}
                 onChange={formik.setFieldValue}
                 onKeyDown={goBackToNav}
               />
-            </div>
-            <div tw="mb-4 w-1/2" style={{ border: "none" }}>
-              <AutoComplete
-                multiple
+            </Box>
+            <Box>
+              <MultipleSelectDropDown
+                formControl={formik.getFieldProps("measureGroupTypes")}
                 id="developers"
+                label="Developers"
                 data-testid="developers"
-                sx={autoCompleteStyles}
-                placeholder="-"
+                placeHolder="-"
+                defaultValue={formik.values.developers}
+                required={true}
                 disabled={!canEdit}
-                error={formik.touched.developers && formik.errors["developers"]}
-                options={organizations.map((element) => element.name)}
-                renderOption={(props: any, option, { selected }) => {
-                  const uniqueProps = {
-                    ...props,
-                    key: `${props.key}_${props.id}`,
-                  };
-                  return (
-                    <li
-                      {...uniqueProps}
-                      aria-label={`option ${option} ${
-                        selected ? "selected" : "not selected"
-                      }`}
-                    >
-                      <Checkbox
-                        icon={icon}
-                        checkedIcon={checkedIcon}
-                        style={{ marginRight: 8 }}
-                        checked={selected}
-                      />
-                      {option}
-                    </li>
-                  );
-                }}
+                error={
+                  formik.touched.developers && Boolean(formik.errors.developers)
+                }
+                helperText={formik.errors.developers}
                 {...formik.getFieldProps("developers")}
-                renderInput={(params) => {
-                  const { inputProps } = params;
-                  inputProps["aria-required"] = "true";
-                  inputProps["aria-describedby"] = "developers-text";
-                  inputProps[
-                    "aria-label"
-                  ] = `Developers multiple developers can be selected`;
-                  return (
-                    <TextField
-                      label="Developers"
-                      placeholder="Select All That Apply"
-                      error={
-                        formik.touched.developers && formik.errors["developers"]
-                      }
-                      {...params}
-                      required={true}
-                      helperText={
-                        formik.touched.developers && formik.errors["developers"]
-                      }
-                    />
-                  );
+                onChange={(_event: any, selectedVal: string | null) => {
+                  formik.setFieldValue("developers", selectedVal);
                 }}
-                onChange={formik.setFieldValue}
+                onClose={() => formik.setFieldTouched("developers", true)}
+                options={organizations.map((element) => element.name)}
+                multipleSelect={true}
               />
-            </div>
+            </Box>
           </>
         )}
       </div>
