@@ -121,7 +121,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     flexDirection: "row",
   };
   const spaced = {
-    marginBottom: "23px",
+    marginBottom: "32px",
   };
   const gap = {
     columnGap: "24px",
