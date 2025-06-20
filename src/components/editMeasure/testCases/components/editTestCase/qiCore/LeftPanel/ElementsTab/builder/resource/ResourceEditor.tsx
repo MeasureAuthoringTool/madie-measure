@@ -267,7 +267,7 @@ const ResourceEditor = ({
               <span style={{ color: "#333333" }}>
                 {selectedResource?.bundleEntry?.resource?.id}
               </span>
-                            <div />
+              <div />
               <span style={{ color: "125496", fontWeight: 700 }}>
                 Profile:&nbsp;&nbsp;
               </span>
