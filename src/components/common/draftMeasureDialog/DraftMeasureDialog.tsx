@@ -158,7 +158,7 @@ const DraftMeasureDialog = ({ open, onClose, onSubmit, measure, loading }) => {
                     } else if (measure?.model === "QI-Core v7.0.0") {
                       return modelKey === "QICORE_7_0_0";
                     }
-                    return true; // Exclude all other cases
+                    return true; // Include all other cases
                   })
                   .map((modelKey) => {
                     if (
