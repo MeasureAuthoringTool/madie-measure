@@ -1174,18 +1174,17 @@ describe("TestCaseList component", () => {
     expect(importBtn).not.toBeInTheDocument();
   });
 
-  it("should have a disabled button for import test cases from bonnie when feature is enabled but user cannot edit", async () => {
+  it("should not show import test cases from bonnie when feature is enabled but user cannot edit", async () => {
     (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => false);
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       qiCoreBonnieTestCases: true,
     }));
 
     renderTestCaseListComponent();
-    const importBtn = await screen.findByRole("button", {
+    const importBtn = screen.queryByRole("button", {
       name: /Bonnie Import/i,
     });
-    expect(importBtn).toBeInTheDocument();
-    expect(importBtn).toBeDisabled();
+    expect(importBtn).not.toBeInTheDocument();
   });
 
   it("should have a enabled button for import test cases when feature is enabled and user can edit", async () => {
@@ -1505,13 +1504,13 @@ describe("TestCaseList component", () => {
     expect(importButton).toBeEnabled();
   });
 
-  it("should disable import test case button for unauthorized users", async () => {
+  it("shouldn't show import test case button for unauthorized users", async () => {
     (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => false);
     renderTestCaseListComponent();
-    const importButton = await screen.findByRole("button", {
-      name: /MADiE Import/i,
+    const importBtn = screen.queryByRole("button", {
+      name: /Bonnie Import/i,
     });
-    expect(importButton).toBeDisabled();
+    expect(importBtn).not.toBeInTheDocument();
   });
 
   it("should succesfully import test cases", async () => {
