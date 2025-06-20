@@ -1,6 +1,7 @@
 import * as React from "react";
 import {
   cleanup,
+  findByTestId,
   fireEvent,
   render,
   screen,
@@ -1329,7 +1330,7 @@ describe("Measure List component", () => {
   });
 
   it("should display draft/version actions based on whether measure is draft or versioned", async () => {
-    const { findByRole } = render(
+    const { findByRole, findByTestId } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
           measureList={measures}
@@ -1363,9 +1364,7 @@ describe("Measure List component", () => {
 
     // first measure should have Version action as this is a draft measure
     userEvent.click(selectButton0);
-    const versionButton = await findByRole("button", {
-      name: "Version",
-    });
+    const versionButton = await findByTestId("version-action-btn");
     expect(versionButton).toBeInTheDocument();
   });
 
