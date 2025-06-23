@@ -359,7 +359,9 @@ const CodingComponent = ({
                 label="Code"
                 id="code"
                 data-testid={`code-${value.code}`}
-                value={`${value.code} - ${value.display}`}
+                value={`${value.code} ${
+                  value.display ? `- ${value.display}` : ""
+                }`}
               />
             </div>
           </div>
