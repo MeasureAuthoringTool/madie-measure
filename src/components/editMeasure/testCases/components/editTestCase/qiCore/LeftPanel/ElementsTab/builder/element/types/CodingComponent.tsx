@@ -1,7 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
-import { Select, TextField } from "@madie/madie-design-system/dist/react";
+import {
+  Select,
+  TextField,
+  ReadOnlyTextField,
+} from "@madie/madie-design-system/dist/react";
 import { MenuItem } from "@mui/material";
 import useFhirDefinitionsServiceApi from "../../../../../../../../api/useFhirDefinitionsService";
 import useExecutionContext from "../../../../../../../routes/qiCore/useExecutionContext";
@@ -338,6 +342,34 @@ const CodingComponent = ({
             </>
           )}
         </div>
+      )}
+      {!selectedValueSet && value && !value.extension && (
+        <>
+          <div tw="flex mt-3">
+            <div tw="w-1/2">
+              <ReadOnlyTextField
+                label="Code System"
+                id="code-system"
+                data-testid={`code-system-${value.code}`}
+                value={value.system}
+              />
+            </div>
+            <div tw="w-1/2 pl-3">
+              <ReadOnlyTextField
+                label="Code"
+                id="code"
+                data-testid={`code-${value.code}`}
+                value={`${value.code} - ${value.display}`}
+              />
+            </div>
+          </div>
+          <div
+            tw="mt-3 text-sm text-red-500"
+            data-testid={`select-valueset-warning-${value.code}`}
+          >
+            To update code system or code please select a valid value set.
+          </div>
+        </>
       )}
     </>
   );
