@@ -365,18 +365,11 @@ describe("Expansion component", () => {
     );
     renderExpansionComponent();
 
-    const latestRadioInput = screen.getByLabelText(
-      "Latest"
-    ) as HTMLInputElement;
-    const manifestRadioInput = screen.getByLabelText(
-      "Manifest"
-    ) as HTMLInputElement;
-
-    expect(latestRadioInput).not.toBeChecked();
-    expect(latestRadioInput).toBeDisabled();
-    expect(manifestRadioInput).toBeChecked();
-    expect(manifestRadioInput).toBeDisabled();
-    expect(screen.getByTestId("manifest-select-input")).toBeDisabled();
+    const latestRadioInput = screen.getByRole("textbox", {
+      name: "Choose Type",
+    }) as HTMLInputElement;
+    expect(latestRadioInput).toHaveValue("Manifest");
+    expect(latestRadioInput).toHaveAttribute("readonly");
 
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     expect(

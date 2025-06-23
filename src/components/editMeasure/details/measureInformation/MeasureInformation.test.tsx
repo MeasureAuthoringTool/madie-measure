@@ -202,10 +202,6 @@ describe("MeasureInformation component", () => {
     await act(async () => {
       render(<MeasureInformation setErrorMessage={setErrorMessage} />);
       const endorserAutoComplete = await screen.findByTestId("endorser");
-      const endorserId = getByTestId(
-        "endorsement-number-input"
-      ) as HTMLInputElement;
-
       fireEvent.keyDown(endorserAutoComplete, { key: "ArrowDown" });
       // selects 2nd option
       const endorserOptions = await screen.findAllByRole("option");
@@ -216,6 +212,9 @@ describe("MeasureInformation component", () => {
         within(endorserAutoComplete).getByRole("combobox");
       expect(endorserComboBox).toHaveValue("NQF");
       //verifies endorserId was enabled
+      const endorserId = getByTestId(
+        "endorsement-number-input"
+      ) as HTMLInputElement;
       expect(endorserId).toBeEnabled();
       //clear endorserId
       fireEvent.change(endorserId, {
@@ -245,10 +244,6 @@ describe("MeasureInformation component", () => {
     render(<MeasureInformation setErrorMessage={setErrorMessage} />);
 
     const endorserAutoComplete = await screen.findByTestId("endorser");
-    const endorserId = getByTestId(
-      "endorsement-number-input"
-    ) as HTMLInputElement;
-
     fireEvent.keyDown(endorserAutoComplete, { key: "ArrowDown" });
     // selects 2nd option
     const endorserOptions = await screen.findAllByRole("option");
@@ -258,6 +253,9 @@ describe("MeasureInformation component", () => {
     const endorserComboBox = within(endorserAutoComplete).getByRole("combobox");
     expect(endorserComboBox).toHaveValue("NQF");
     //verifies endorserId was enabled
+    const endorserId = getByTestId(
+      "endorsement-number-input"
+    ) as HTMLInputElement;
     expect(endorserId).toBeEnabled();
     //enter endorserId
     fireEvent.change(endorserId, {
@@ -294,11 +292,11 @@ describe("MeasureInformation component", () => {
     });
     render(<MeasureInformation setErrorMessage={setErrorMessage} />);
 
-    const intendedVenueComplete = (await screen.findByTestId(
-      "intended-venue-input"
-    )) as HTMLInputElement;
+    const intendedVenueComplete = screen.getByRole("textbox", {
+      name: "Intended Venue",
+    }) as HTMLInputElement;
     expect(intendedVenueComplete).toBeInTheDocument();
-    expect(intendedVenueComplete).toBeDisabled();
+    expect(intendedVenueComplete).toHaveAttribute("readonly");
   });
 
   test("Adding intended venue and saving it", async () => {
@@ -421,10 +419,6 @@ describe("MeasureInformation component", () => {
     await act(async () => {
       render(<MeasureInformation setErrorMessage={setErrorMessage} />);
       const endorserAutoComplete = await screen.findByTestId("endorser");
-      const endorserId = getByTestId(
-        "endorsement-number-input"
-      ) as HTMLInputElement;
-
       fireEvent.keyDown(endorserAutoComplete, { key: "ArrowDown" });
       // selects 2nd option
       const endorserOptions = await screen.findAllByRole("option");
@@ -435,6 +429,9 @@ describe("MeasureInformation component", () => {
         within(endorserAutoComplete).getByRole("combobox");
       expect(endorserComboBox).toHaveValue("NQF");
       //verifies endorserId was enabled
+      const endorserId = getByTestId(
+        "endorsement-number-input"
+      ) as HTMLInputElement;
       expect(endorserId).toBeEnabled();
       //change endorserId
       fireEvent.change(endorserId, {
@@ -526,6 +523,7 @@ describe("MeasureInformation component", () => {
   });
 
   it("should render the component with measure's information populated", async () => {
+    checkUserCanEdit.mockImplementationOnce(() => true);
     render(<MeasureInformation setErrorMessage={setErrorMessage} />);
 
     const result: HTMLElement = getByTestId("measure-information-form");
@@ -534,13 +532,19 @@ describe("MeasureInformation component", () => {
     await act(async () => {
       const text = getByTestId("measure-name-input") as HTMLInputElement;
       expect(text.value).toBe(measure.measureName);
-      const measureId = getByTestId("measure-id-input") as HTMLInputElement;
+      const measureId = screen.getByRole("textbox", {
+        name: "Measure Id",
+      }) as HTMLInputElement;
       expect(measureId.value).toBe(measure.measureSetId);
       expect(measureId).toHaveProperty("readOnly", true);
-      const versionId = getByTestId("version-id-input") as HTMLInputElement;
+      const versionId = screen.getByRole("textbox", {
+        name: "Version ID",
+      }) as HTMLInputElement;
       expect(versionId.value).toBe(measure.id);
       expect(versionId).toHaveProperty("readOnly", true);
-      const cmsId = getByTestId("cms-id-input") as HTMLInputElement;
+      const cmsId = screen.getByRole("textbox", {
+        name: "CMS ID",
+      }) as HTMLInputElement;
       expect(cmsId.value).toBe("23FHIR");
       expect(cmsId).toHaveProperty("readOnly", true);
       const cqlLibraryNameText = getByTestId(
@@ -639,7 +643,9 @@ describe("MeasureInformation component", () => {
       owner: "test.com",
     };
     render(<MeasureInformation setErrorMessage={setErrorMessage} />);
-    const cmsId = getByTestId("cms-id-input") as HTMLInputElement;
+    const cmsId = screen.getByRole("textbox", {
+      name: "CMS ID",
+    }) as HTMLInputElement;
     expect(cmsId.value).toBe("2");
     expect(cmsId).toHaveProperty("readOnly", true);
   });
@@ -730,7 +736,9 @@ describe("MeasureInformation component", () => {
     await act(async () => {
       const text = getByTestId("measure-name-input") as HTMLInputElement;
       expect(text.value).toBe(measure.measureName);
-      const versionId = getByTestId("version-id-input") as HTMLInputElement;
+      const versionId = screen.getByRole("textbox", {
+        name: "Version ID",
+      }) as HTMLInputElement;
       expect(versionId.value).toBe(measure.versionId);
       expect(versionId).toHaveProperty("readOnly", true);
     });
@@ -860,28 +868,30 @@ describe("MeasureInformation component", () => {
       const result: HTMLElement = getByTestId("measure-information-form");
       expect(result).toBeInTheDocument();
 
-      const measureNameInput = getByTestId(
-        "measure-name-input"
-      ) as HTMLInputElement;
-      expect(measureNameInput).toBeDisabled();
+      const measureNameInput = screen.getByRole("textbox", {
+        name: "Measure Name",
+      }) as HTMLInputElement;
+      expect(measureNameInput).toHaveProperty("readOnly", true);
 
-      const cqlLibraryNameText = getByTestId(
-        "cql-library-name-input"
-      ) as HTMLInputElement;
-      expect(cqlLibraryNameText).toBeDisabled();
+      const cqlLibraryNameText = screen.getByRole("textbox", {
+        name: "Measure CQL Library Name",
+      }) as HTMLInputElement;
+      expect(cqlLibraryNameText).toHaveProperty("readOnly", true);
 
-      const ecqmTitleText = getByTestId("ecqm-input") as HTMLInputElement;
-      expect(ecqmTitleText).toBeDisabled();
+      const ecqmTitleText = screen.getByRole("textbox", {
+        name: "eCQM Abbreviated Title",
+      }) as HTMLInputElement;
+      expect(ecqmTitleText).toHaveProperty("readOnly", true);
 
-      const endorserAutoComplete = getByTestId("endorser") as HTMLInputElement;
-      const endorserComboBox =
-        within(endorserAutoComplete).getByRole("combobox");
-      expect(endorserComboBox).toBeDisabled();
+      const endorser = screen.getByRole("textbox", {
+        name: "Endorsing Organization",
+      }) as HTMLInputElement;
+      expect(endorser).toHaveProperty("readOnly", true);
 
-      const endorserId = getByTestId(
-        "endorsement-number-input"
-      ) as HTMLInputElement;
-      expect(endorserId).toBeDisabled();
+      const endorserId = screen.getByRole("textbox", {
+        name: "Endorsement #",
+      }) as HTMLInputElement;
+      expect(endorserId).toHaveProperty("readOnly", true);
     });
   });
 
@@ -891,10 +901,6 @@ describe("MeasureInformation component", () => {
     });
     render(<MeasureInformation setErrorMessage={setErrorMessage} />);
     const endorserAutoComplete = await screen.findByTestId("endorser");
-    const endorserId = getByTestId(
-      "endorsement-number-input"
-    ) as HTMLInputElement;
-
     fireEvent.keyDown(endorserAutoComplete, { key: "ArrowDown" });
     // selects 2nd option
     const endorserOptions = await screen.findAllByRole("option");
@@ -904,6 +910,9 @@ describe("MeasureInformation component", () => {
     const endorserComboBox = within(endorserAutoComplete).getByRole("combobox");
     expect(endorserComboBox).toHaveValue("NQF");
     //verifies endorserId was enabled
+    const endorserId = getByTestId(
+      "endorsement-number-input"
+    ) as HTMLInputElement;
     expect(endorserId).toBeEnabled();
     //enter endorserId
     fireEvent.change(endorserId, {
@@ -942,7 +951,7 @@ describe("MeasureInformation component", () => {
     const clearButton = screen.getByTestId("CloseIcon") as HTMLButtonElement;
     fireEvent.click(clearButton);
     expect(endorserComboBox).toHaveValue("");
-    expect(endorserId).toHaveValue("");
+    expect(getByTestId("endorsement-number-text-field")).toHaveValue("-");
   });
 
   it("Discard dialog opens and succeeds", async () => {
@@ -1023,10 +1032,6 @@ describe("MeasureInformation component", () => {
     await act(async () => {
       render(<MeasureInformation setErrorMessage={setErrorMessage} />);
       const endorserAutoComplete = await screen.findByTestId("endorser");
-      const endorserId = getByTestId(
-        "endorsement-number-input"
-      ) as HTMLInputElement;
-
       fireEvent.keyDown(endorserAutoComplete, { key: "ArrowDown" });
       // selects 2nd option
       const endorserOptions = await screen.findAllByRole("option");
@@ -1037,6 +1042,9 @@ describe("MeasureInformation component", () => {
         within(endorserAutoComplete).getByRole("combobox");
       expect(endorserComboBox).toHaveValue("NQF");
       //verifies endorserId was enabled
+      const endorserId = getByTestId(
+        "endorsement-number-input"
+      ) as HTMLInputElement;
       expect(endorserId).toBeEnabled();
       //Add input for endorserId
       fireEvent.change(endorserId, {
@@ -1050,9 +1058,12 @@ describe("MeasureInformation component", () => {
       fireEvent.click(endorserOptions2[0]);
 
       // verifies if the option is selected and endorserId has been cleared and disabled
-      expect(endorserComboBox).toHaveValue("");
-      expect(endorserId).toBeDisabled();
-      expect(endorserId).toHaveValue("");
+      expect(endorserComboBox).toHaveValue("-");
+      expect(getByTestId("endorsement-number-text-field")).toHaveProperty(
+        "readOnly",
+        true
+      );
+      expect(getByTestId("endorsement-number-text-field")).toHaveValue("-");
     });
   });
 
@@ -1063,9 +1074,11 @@ describe("MeasureInformation component", () => {
     } as unknown as Measure;
     measureStore.state.mockImplementationOnce(() => testMeasure);
     checkUserCanEdit.mockImplementationOnce(() => true);
-    await act(async () => {
-      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
-      const translatorVersion = await findByTestId("translator-version-input");
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    await waitFor(async () => {
+      const translatorVersion = await findByTestId(
+        "translator-version-text-field"
+      );
       expect(translatorVersion).toBeInTheDocument();
       expect(translatorVersion).toHaveValue("3.2.0");
     });
@@ -1077,9 +1090,11 @@ describe("MeasureInformation component", () => {
     } as unknown as Measure;
     measureStore.state.mockImplementationOnce(() => testMeasure);
     checkUserCanEdit.mockImplementationOnce(() => true);
-    await act(async () => {
-      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
-      const translatorVersion = await findByTestId("translator-version-input");
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    await waitFor(async () => {
+      const translatorVersion = await findByTestId(
+        "translator-version-text-field"
+      );
       expect(translatorVersion).toBeInTheDocument();
       expect(translatorVersion).toHaveValue("3.1.0");
     });
@@ -1093,9 +1108,11 @@ describe("MeasureInformation component", () => {
     } as unknown as Measure;
     measureStore.state.mockImplementationOnce(() => testMeasure);
     checkUserCanEdit.mockImplementationOnce(() => true);
-    await act(async () => {
-      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
-      const translatorVersion = await findByTestId("translator-version-input");
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    await waitFor(async () => {
+      const translatorVersion = await findByTestId(
+        "translator-version-text-field"
+      );
       expect(translatorVersion).toBeInTheDocument();
       expect(translatorVersion).toHaveValue("1.5.0");
     });
@@ -1108,9 +1125,11 @@ describe("MeasureInformation component", () => {
     } as unknown as Measure;
     measureStore.state.mockImplementationOnce(() => testMeasure);
     checkUserCanEdit.mockImplementationOnce(() => true);
-    await act(async () => {
-      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
-      const translatorVersion = await findByTestId("translator-version-input");
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    await waitFor(async () => {
+      const translatorVersion = await findByTestId(
+        "translator-version-text-field"
+      );
       expect(translatorVersion).toBeInTheDocument();
       expect(translatorVersion).toHaveValue("99.9.9");
     });

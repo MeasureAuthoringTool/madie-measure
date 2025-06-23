@@ -6,12 +6,12 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
-import { MemoryRouter, Routes, Route } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import {
   ApiContextProvider,
   ServiceConfig,
 } from "../../../../../../api/ServiceContext";
-import TestCaseList, {
+import {
   getCoverageValueFromHtml,
   IMPORT_ERROR,
   removeHtmlCoverageHeader,
@@ -274,6 +274,7 @@ const testCases = [
         ] as PopulationExpectedValue[],
       },
     ] as GroupPopulation[],
+    testCaseValidationStatus: "Valid",
   },
   {
     id: "2",
@@ -302,6 +303,7 @@ const testCases = [
         ] as PopulationExpectedValue[],
       },
     ] as GroupPopulation[],
+    testCaseValidationStatus: "Valid",
   },
   {
     id: "3",
@@ -1174,18 +1176,17 @@ describe("TestCaseList component", () => {
     expect(importBtn).not.toBeInTheDocument();
   });
 
-  it("should have a disabled button for import test cases from bonnie when feature is enabled but user cannot edit", async () => {
+  it("should not show import test cases from bonnie when feature is enabled but user cannot edit", async () => {
     (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => false);
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       qiCoreBonnieTestCases: true,
     }));
 
     renderTestCaseListComponent();
-    const importBtn = await screen.findByRole("button", {
+    const importBtn = screen.queryByRole("button", {
       name: /Bonnie Import/i,
     });
-    expect(importBtn).toBeInTheDocument();
-    expect(importBtn).toBeDisabled();
+    expect(importBtn).not.toBeInTheDocument();
   });
 
   it("should have a enabled button for import test cases when feature is enabled and user can edit", async () => {
@@ -1505,16 +1506,16 @@ describe("TestCaseList component", () => {
     expect(importButton).toBeEnabled();
   });
 
-  it("should disable import test case button for unauthorized users", async () => {
+  it("shouldn't show import test case button for unauthorized users", async () => {
     (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => false);
     renderTestCaseListComponent();
-    const importButton = await screen.findByRole("button", {
-      name: /MADiE Import/i,
+    const importBtn = screen.queryByRole("button", {
+      name: /Bonnie Import/i,
     });
-    expect(importButton).toBeDisabled();
+    expect(importBtn).not.toBeInTheDocument();
   });
 
-  it("should succesfully import test cases", async () => {
+  it("should successfully import test cases", async () => {
     const zipFile = await createZipFile(
       [patientId1, patientId2],
       [jsonBundle, jsonBundle]
@@ -1880,6 +1881,21 @@ describe("TestCaseList component", () => {
 
     userEvent.click(await screen.findByRole("button", { name: "Cancel" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
+
+  it("Should display valid test case percentage for QiCore v6 measures", async () => {
+    mockMeasure.model = Model.QICORE_6_0_0;
+    renderTestCaseListComponent();
+    const tabElement = await screen.findByTestId("validation-tab");
+    expect(tabElement).toBeInTheDocument();
+    expect(tabElement).toHaveAttribute("aria-label", "Validation tab panel");
+    expect(tabElement).toHaveTextContent("66%");
+  });
+
+  it("Should not display valid test case percentage for QiCore v4 measures", async () => {
+    renderTestCaseListComponent();
+    const tabElement = screen.queryByTestId("validation-tab");
+    expect(tabElement).not.toBeInTheDocument();
   });
 
   describe("TestCaseList component with deleteMultipleTestCases", () => {

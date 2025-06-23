@@ -38,7 +38,7 @@ describe("DateTimeComponent", () => {
     );
 
     expect(
-      screen.getByTestId("Invalid Format-field-birthday-input")
+      screen.getByRole("textbox", { name: "Date Field" })
     ).toBeInTheDocument();
     expect(
       (

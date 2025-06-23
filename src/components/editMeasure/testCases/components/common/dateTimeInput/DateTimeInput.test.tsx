@@ -19,7 +19,9 @@ describe("DateTimeInput Component", () => {
       />
     );
 
-    expect(screen.getByTestId("author-date-time-input")).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Author Date/Time" })
+    ).toBeInTheDocument();
     expect(screen.getByText("Author Date/Time")).toBeInTheDocument();
     expect(screen.getByDisplayValue("04/17/2022 03:30 PM")).toBeInTheDocument();
   });
@@ -35,7 +37,9 @@ describe("DateTimeInput Component", () => {
       />
     );
 
-    expect(screen.getByTestId("author-date-time-input")).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Author Date/Time" })
+    ).toBeInTheDocument();
     expect(screen.getByText("Author Date/Time")).toBeInTheDocument();
     const inputValue = screen.getByDisplayValue("04/17/2022 03:30 PM");
     expect(inputValue).toBeInTheDocument();
