@@ -125,7 +125,7 @@ describe("AttributeSelector Component", () => {
           value: options[0],
         }}
         attributeTypeProps={{
-          label: "test Type",
+          label: "Test Type",
           options: options,
           required: true,
           error: false,
@@ -135,16 +135,10 @@ describe("AttributeSelector Component", () => {
       />
     );
 
-    const AttributeSelectInput = screen.getByTestId(
-      "test-attribute-select-input"
-    ) as HTMLInputElement;
+    const AttributeSelectInput = screen.getByRole("textbox", {
+      name: "Test Type",
+    }) as HTMLInputElement;
 
-    expect(AttributeSelectInput).toBeDisabled();
-
-    const AttributeTypeSelectInput = screen.getByTestId(
-      "test-type-select-input"
-    ) as HTMLInputElement;
-
-    expect(AttributeTypeSelectInput).toBeDisabled();
+    expect(AttributeSelectInput).toHaveAttribute("readonly");
   });
 });

@@ -26,11 +26,9 @@ describe("DateTimeInterval Field Component", () => {
 
     expect(screen.getByText("Active Period - Start")).toBeInTheDocument();
     expect(screen.getByDisplayValue("04/17/2022 03:30 PM")).toBeInTheDocument();
-    expect(screen.getByTestId("active-period-start-input")).toBeInTheDocument();
 
     expect(screen.getByText("Active Period - End")).toBeInTheDocument();
     expect(screen.getByDisplayValue("09/17/2022 03:30 PM")).toBeInTheDocument();
-    expect(screen.getByTestId("active-period-end-input")).toBeInTheDocument();
   });
 
   it("Should display changed DateTimeInterval values when input changes", async () => {
@@ -45,12 +43,16 @@ describe("DateTimeInterval Field Component", () => {
     );
 
     expect(screen.getByText("Active Period - Start")).toBeInTheDocument();
-    expect(screen.getByTestId("active-period-start-input")).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Active Period - Start" })
+    ).toBeInTheDocument();
     const inputStart = screen.getByDisplayValue("04/17/2022 03:30 PM");
     expect(inputStart).toBeInTheDocument();
 
     expect(screen.getByText("Active Period - End")).toBeInTheDocument();
-    expect(screen.getByTestId("active-period-end-input")).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Active Period - End" })
+    ).toBeInTheDocument();
     const inputEnd = screen.getByDisplayValue("09/17/2022 03:30 PM");
     expect(inputEnd).toBeInTheDocument();
 
@@ -78,12 +80,16 @@ describe("DateTimeInterval Field Component", () => {
     );
 
     expect(screen.getByText("Active Period - Start")).toBeInTheDocument();
-    expect(screen.getByTestId("active-period-start-input")).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Active Period - Start" })
+    ).toBeInTheDocument();
     const inputStart = screen.getByDisplayValue("04/17/2022 03:30 PM");
     expect(inputStart).toBeInTheDocument();
 
     expect(screen.getByText("Active Period - End")).toBeInTheDocument();
-    expect(screen.getByTestId("active-period-end-input")).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Active Period - End" })
+    ).toBeInTheDocument();
     const inputEnd = screen.getByDisplayValue("09/17/2022 03:30 PM");
     expect(inputEnd).toBeInTheDocument();
 

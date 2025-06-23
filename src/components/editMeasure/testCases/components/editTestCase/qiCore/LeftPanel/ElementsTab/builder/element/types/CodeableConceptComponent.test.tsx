@@ -51,15 +51,17 @@ const mockStructureDefinition = {
 describe("CodeableConceptComponent Tests", () => {
   it("render and update codeable concept", async () => {
     const value = {
-      coding: {
-        ...mockBindingValueSet.expansion?.contains[0],
-        extension: [
-          {
-            url: "http://hl7.org/fhir/StructureDefinition/valueset-reference",
-            valueUrl: mockBindingValueSet.url,
-          },
-        ],
-      },
+      coding: [
+        {
+          ...mockBindingValueSet.expansion?.contains[0],
+          extension: [
+            {
+              url: "http://hl7.org/fhir/StructureDefinition/valueset-reference",
+              valueUrl: mockBindingValueSet.url,
+            },
+          ],
+        },
+      ],
     };
     mockedAxios.get.mockResolvedValue({
       data: mockBindingValueSet,
@@ -132,17 +134,19 @@ describe("CodeableConceptComponent Tests", () => {
     userEvent.click(codeOptions[0]);
     await waitFor(() => {
       expect(mockOnChange).toHaveBeenCalledWith({
-        coding: {
-          code: mockBindingValueSet.expansion?.contains[1].code,
-          system: mockBindingValueSet.expansion?.contains[1].system,
-          display: mockBindingValueSet.expansion?.contains[1].display,
-          extension: [
-            {
-              url: "http://hl7.org/fhir/StructureDefinition/valueset-reference",
-              valueUrl: mockBindingValueSet.url,
-            },
-          ],
-        },
+        coding: [
+          {
+            code: mockBindingValueSet.expansion?.contains[1].code,
+            system: mockBindingValueSet.expansion?.contains[1].system,
+            display: mockBindingValueSet.expansion?.contains[1].display,
+            extension: [
+              {
+                url: "http://hl7.org/fhir/StructureDefinition/valueset-reference",
+                valueUrl: mockBindingValueSet.url,
+              },
+            ],
+          },
+        ],
       });
     });
   });

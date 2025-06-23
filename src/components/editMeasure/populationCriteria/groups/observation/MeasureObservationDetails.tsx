@@ -58,7 +58,7 @@ const MeasureObservationDetails = ({
   return (
     <>
       <div className="first">
-        <div className="population-col-gap-24">
+        <div className="population-column">
           <Select
             placeHolder={{ name: "Select Observation", value: "" }}
             required={required}
@@ -103,7 +103,7 @@ const MeasureObservationDetails = ({
               }
               required={required}
               id={`${name}-observation-description`}
-              canEdit={canEdit}
+              disabled={!canEdit}
               content={measureObservation?.description || ""}
               onChange={(value: string) => {
                 onChange({
@@ -123,6 +123,7 @@ const MeasureObservationDetails = ({
               placeholder="-"
               // to do: input following props
               value={measureObservation?.description || ""}
+              disabled={!canEdit}
               onChange={(e) => {
                 if (onChange) {
                   onChange({

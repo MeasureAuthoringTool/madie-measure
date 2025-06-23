@@ -189,45 +189,49 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
             setShowOptions={props.setShowReportOptions}
           />
         )}
-        <>
-          <Button
-            variant="outline"
-            onClick={onImportTestCases}
-            disabled={!canEdit}
-            data-testid="import-test-cases-button"
-          >
-            <FileUploadIcon
-              style={{ margin: "0 5px 0 -2px" }}
-              fontSize="small"
-            />
-            MADiE Import
-          </Button>
-          {featureFlags?.qiCoreBonnieTestCases && (
+
+        {canEdit && (
+          <>
             <Button
-              onClick={() => {
-                if (onImportTestCasesFromBonnie) {
-                  onImportTestCasesFromBonnie();
-                }
-              }}
+              variant="outline"
+              onClick={onImportTestCases}
               disabled={!canEdit}
-              data-testid="import-test-cases-from-bonnie-button"
+              data-testid="import-test-cases-button"
             >
               <FileUploadIcon
                 style={{ margin: "0 5px 0 -2px" }}
                 fontSize="small"
               />
-              Bonnie Import
+              MADiE Import
             </Button>
-          )}
-          <Button
-            disabled={!canEdit}
-            onClick={createNewTestCase}
-            data-testid="create-new-test-case-button"
-          >
-            <AddIcon style={{ margin: "0 5px 0 -2px" }} fontSize="small" />
-            New Case
-          </Button>
-        </>
+            {featureFlags?.qiCoreBonnieTestCases && (
+              <Button
+                onClick={() => {
+                  if (onImportTestCasesFromBonnie) {
+                    onImportTestCasesFromBonnie();
+                  }
+                }}
+                disabled={!canEdit}
+                data-testid="import-test-cases-from-bonnie-button"
+              >
+                <FileUploadIcon
+                  style={{ margin: "0 5px 0 -2px" }}
+                  fontSize="small"
+                />
+                Bonnie Import
+              </Button>
+            )}
+            <Button
+              disabled={!canEdit}
+              onClick={createNewTestCase}
+              data-testid="create-new-test-case-button"
+            >
+              <AddIcon style={{ margin: "0 5px 0 -2px" }} fontSize="small" />
+              New Case
+            </Button>
+          </>
+        )}
+
         <LoadingButton
           hasErrors={hasErrors}
           isExecutionContextReady={executionContextReady}

@@ -190,7 +190,6 @@ const INITIAL_ALERT_MESSAGE = {
 
 const MeasureGroups = (props: MeasureGroupProps) => {
   useDocumentTitle("MADiE Edit Measure Population Criteria");
-  const featureFlags = useFeatureFlags();
   const defaultPopulationBasis = "boolean";
   const [expressionDefinitions, setExpressionDefinitions] = useState<
     Array<ExpressionDefinition>
@@ -205,8 +204,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       subscription.unsubscribe();
     };
   }, []);
-  const [refreshFlag, setRefreshFlag] = useState<boolean>(true);
-
   const canEdit = checkUserCanEdit(
     measure?.measureSet?.owner,
     measure?.measureSet?.acls,
@@ -817,7 +814,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
 
               {/* Form control later should be moved to own component and dynamically rendered by switch based on measure. */}
 
-              <div>
+              <div tw="mb-5">
                 <div>
                   <FormFieldInner>
                     <FieldSeparator>
@@ -1080,7 +1077,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                 }
                                 isExclusionPop={isExclusionPop}
                               >
-                                <div className="population-col-gap-24">
+                                <div className="population-column">
                                   {/* Population Definition */}
                                   <Field
                                     {...fieldProps}
@@ -1391,16 +1388,16 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                 )}
 
                 {activeTab === "reporting" && (
-                  <div tw="grid grid-cols-4 mt-6">
-                    <div tw="lg:col-span-3">
+                  <>
+                    <Box sx={formRowGapped}>
                       <TextEditor
                         label="Rate Aggregation"
                         setFieldValue={formik.setFieldValue}
                         canEdit={canEdit}
                         {...formik.getFieldProps("rateAggregation")}
                       />
-                    </div>
-                    <div tw="pt-6 pb-6 grid grid-cols-2 gap-4 col-start-1 col-end-4">
+                    </Box>
+                    <Box sx={formRowGapped}>
                       <Select
                         placeHolder={{
                           name: "Select Improvement Notation",
@@ -1434,8 +1431,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                           "improvementNotationDescription"
                         )}
                       />
-                    </div>
-                  </div>
+                    </Box>
+                  </>
                 )}
               </div>
 

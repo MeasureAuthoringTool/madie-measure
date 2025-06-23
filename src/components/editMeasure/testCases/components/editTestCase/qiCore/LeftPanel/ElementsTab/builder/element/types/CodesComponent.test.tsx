@@ -140,9 +140,8 @@ describe("Codes Component", () => {
       { headers: { Authorization: "Bearer test.jwt" } }
     );
 
-    const codeSelect = screen.getByRole("combobox", { name: "Gender" });
+    const codeSelect = screen.getByRole("textbox", { name: "Gender" });
     expect(codeSelect).toHaveTextContent("female");
-    const codeInput = screen.getByTestId("code-selector-input-Gender");
-    expect(codeInput).toBeDisabled();
+    expect(codeSelect).toHaveAttribute("readonly");
   });
 });

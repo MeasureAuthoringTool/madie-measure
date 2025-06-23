@@ -35,6 +35,27 @@ interface BuilderProps {
   setValidationSchema: Dispatch<SetStateAction<Object>>;
 }
 
+export function scrollToElementByIdWhenAvailable(
+  id: string,
+  options: ScrollIntoViewOptions = { behavior: "smooth" },
+  checkInterval = 100,
+  maxAttempts = 50
+) {
+  let attempts = 0;
+
+  const interval = setInterval(() => {
+    const target = document.getElementById(id);
+    attempts++;
+
+    if (target) {
+      clearInterval(interval);
+      target.scrollIntoView(options);
+    } else if (attempts >= maxAttempts) {
+      clearInterval(interval);
+    }
+  }, checkInterval);
+}
+
 const Builder = ({
   canEdit,
   setInitialFormikValuesStu6,
@@ -124,7 +145,7 @@ const Builder = ({
           />
         </Tabs>
       </Box>
-      <div className="panel-content-pane">
+      <div className="panel-content-pane" id="tc-builder-panel-content-pane">
         {/* available elements that we don't want to display when a resource is selected */}
         {activeTab === "Available" && canEdit && (
           <ResourceList
@@ -165,6 +186,7 @@ const Builder = ({
               bundle={state?.bundle}
               onRowEdit={(row) => {
                 setSelectedResourceId(row?.resource?.id);
+                scrollToElementByIdWhenAvailable("tc-builder-resource-editor");
               }}
               onRowDelete={(row) => {
                 dispatch({

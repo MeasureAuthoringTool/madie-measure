@@ -1,5 +1,5 @@
 import * as React from "react";
-import Builder from "./Builder";
+import Builder, { scrollToElementByIdWhenAvailable } from "./Builder";
 import { render, screen, waitFor } from "@testing-library/react";
 import { Measure, TestCase } from "@madie/madie-models";
 import { QiCoreResourceProvider } from "../../../../../../util/QiCorePatientProvider";
@@ -192,5 +192,52 @@ describe("Builder Component", () => {
     userEvent.click(addedTab);
     expect(addedTab).toHaveAttribute("aria-selected", "true");
     expect(screen.getByText("Resource & Value Set")).toBeInTheDocument();
+  });
+});
+
+describe("scrollToElementByIdWhenAvailable", () => {
+  jest.useFakeTimers();
+
+  let scrollIntoViewMock: jest.Mock;
+
+  beforeEach(() => {
+    document.body.innerHTML = "";
+    scrollIntoViewMock = jest.fn();
+  });
+
+  it("scrolls to the element once it becomes available", () => {
+    // Trigger scroll on third check
+    setTimeout(() => {
+      const div = document.createElement("div");
+      div.id = "target";
+      div.scrollIntoView = scrollIntoViewMock;
+      document.body.appendChild(div);
+    }, 250);
+
+    scrollToElementByIdWhenAvailable("target");
+
+    jest.advanceTimersByTime(100); // attempt 1
+    expect(scrollIntoViewMock).not.toHaveBeenCalled();
+
+    jest.advanceTimersByTime(100); // attempt 2
+    expect(scrollIntoViewMock).not.toHaveBeenCalled();
+
+    jest.advanceTimersByTime(100); // attempt 3 (element appears)
+    expect(scrollIntoViewMock).toHaveBeenCalledWith({ behavior: "smooth" });
+  });
+
+  it("stops checking after maxAttempts if element is not found", () => {
+    const clearIntervalSpy = jest.spyOn(global, "clearInterval");
+
+    scrollToElementByIdWhenAvailable(
+      "non-existent",
+      { behavior: "instant" },
+      10,
+      3
+    );
+
+    jest.advanceTimersByTime(30); // 3 attempts of 10ms
+
+    expect(clearIntervalSpy).toHaveBeenCalledTimes(1);
   });
 });

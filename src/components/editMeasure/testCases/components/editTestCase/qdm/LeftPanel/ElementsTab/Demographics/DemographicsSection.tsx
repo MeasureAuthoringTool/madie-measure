@@ -316,6 +316,7 @@ const DemographicsSection = ({ canEdit }) => {
                   labelId="demographics-ethnicity-select-label"
                   id="demographics-ethnicity-select-id"
                   label="Ethnicity"
+                  className="demographics-ethnicity"
                   disabled={!canEdit}
                   inputProps={{
                     "data-testid": `demographics-ethnicity-input`,
@@ -326,7 +327,6 @@ const DemographicsSection = ({ canEdit }) => {
                   placeHolder={{ name: "Select an Ethnicity", value: "" }}
                   onChange={handleEthnicityChange}
                   options={selectOptions(ethnicityValueSet?.concepts)}
-                  style={{ minWidth: "250px" }}
                 ></Select>
               </FormControl>
             </div>
