@@ -546,4 +546,54 @@ describe("Measure Observation Details", () => {
     expect(handleRemove).toHaveBeenCalledTimes(1);
     expect(handleRemove).toHaveBeenCalledWith(measureObservation);
   });
+
+  it("should render measure observation form in readonly mode if measure is not editable", async () => {
+    const elmJson = JSON.stringify({
+      library: {
+        statements: {
+          def: [
+            {
+              type: "FunctionDef",
+              name: "Measure Observation",
+            },
+            {
+              type: "FunctionDef",
+              name: "My Func 2",
+            },
+          ],
+        },
+      },
+    });
+    const measureObservation: MeasureObservation = {
+      id: "1234",
+      definition: "Measure Observation",
+      description: "This is Numerator Observation",
+    };
+    const handleChange = jest.fn();
+    render(
+      <MeasureObservationDetails
+        name="numerator"
+        label="Numerator Observation"
+        required={false}
+        elmJson={elmJson}
+        measureObservation={measureObservation}
+        onChange={handleChange}
+        canEdit={false}
+        errors={undefined}
+        ratio={true}
+      />
+    );
+
+    const observationSelect = screen.getByRole("textbox", {
+      name: "Numerator Observation",
+    });
+    expect(observationSelect).toHaveValue(measureObservation.definition);
+    expect(observationSelect).toHaveAttribute("readonly");
+
+    const observationDescription = screen.getByRole("textbox", {
+      name: "Numerator Observation Description",
+    });
+    expect(observationDescription).toHaveValue(measureObservation.description);
+    expect(observationDescription).toHaveAttribute("readonly");
+  });
 });

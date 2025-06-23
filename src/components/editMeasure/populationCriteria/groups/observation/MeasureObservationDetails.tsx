@@ -103,7 +103,7 @@ const MeasureObservationDetails = ({
               }
               required={required}
               id={`${name}-observation-description`}
-              canEdit={canEdit}
+              disabled={!canEdit}
               content={measureObservation?.description || ""}
               onChange={(value: string) => {
                 onChange({
@@ -123,6 +123,7 @@ const MeasureObservationDetails = ({
               placeholder="-"
               // to do: input following props
               value={measureObservation?.description || ""}
+              disabled={!canEdit}
               onChange={(e) => {
                 if (onChange) {
                   onChange({
