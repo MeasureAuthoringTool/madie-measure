@@ -604,7 +604,7 @@ describe("Measure List component", () => {
     expect(window.location.href).toBe("http://localhost/");
 
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[1]);
 
     const createVersionButton = getByTestId("version-action-btn");
@@ -653,7 +653,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -741,7 +741,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -834,7 +834,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -927,7 +927,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -1020,7 +1020,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -1113,7 +1113,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -1206,7 +1206,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -1295,7 +1295,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[1]);
     const createVersionButton = getByTestId("version-action-btn");
     expect(createVersionButton).toBeInTheDocument();
@@ -1690,7 +1690,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1756,7 +1756,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1820,7 +1820,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1878,7 +1878,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -1944,7 +1944,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -2007,7 +2007,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[3]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -2070,7 +2070,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -2133,7 +2133,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[4]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -2209,8 +2209,8 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(1);
-    userEvent.click(checkBoxes[0]);
+    expect(checkBoxes.length).toBe(2);
+    userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
     userEvent.click(exportButton);
@@ -2272,7 +2272,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -2353,7 +2353,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[2]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -2419,7 +2419,7 @@ describe("Measure List component", () => {
     );
 
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -2483,7 +2483,7 @@ describe("Measure List component", () => {
     );
 
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -2563,7 +2563,7 @@ describe("Measure List component", () => {
     );
 
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[1]);
     const exportButton = screen.getByTestId("export-action-btn");
     expect(exportButton).toBeInTheDocument();
@@ -2611,7 +2611,7 @@ describe("Measure List component", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[1]);
 
     const createVersionButton = getByTestId("version-action-btn");
@@ -2659,7 +2659,7 @@ describe("Measure List component", () => {
     });
     const checkboxes = await within(tableBody).findAllByRole("checkbox");
     await waitFor(() => {
-      expect(checkboxes).toHaveLength(5);
+      expect(checkboxes.length).toBe(6);
     });
     unmount();
   });
@@ -2740,7 +2740,7 @@ describe("Measure List component", () => {
 
     // Select a measure by clicking its checkbox
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[1]);
 
     // Click the delete button to open the dialog
@@ -2985,7 +2985,7 @@ describe("Action Center Tests", () => {
       </ServiceContext.Provider>
     );
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(5);
+    expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[1]);
     const shareButton = screen.getByTestId("share-action-btn");
     expect(shareButton).toBeInTheDocument();

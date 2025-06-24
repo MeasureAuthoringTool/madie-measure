@@ -2,7 +2,6 @@ import React, {
   Dispatch,
   HTMLProps,
   SetStateAction,
-  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -13,7 +12,11 @@ import "styled-components/macro";
 import { Measure, Model } from "@madie/madie-models";
 import { useNavigate } from "react-router-dom";
 import { Chip } from "@mui/material";
-import { Button, TruncateText } from "@madie/madie-design-system/dist/react";
+import {
+  Button,
+  TruncateText,
+  MadieTooltip,
+} from "@madie/madie-design-system/dist/react";
 import {
   useReactTable,
   ColumnDef,
@@ -262,8 +265,12 @@ export default function MeasureList(props: {
     {
       // Use tabIndex={0} for accessibility, and make sure it's not inside a button.
       header: () => (
-        <button tabIndex={0} aria-label="Edit or View Measure">
-          ADD
+        <button
+          tabIndex={0}
+          aria-label="Edit or View Measure"
+          style={{ marginLeft: "-16px" }}
+        >
+          Action
         </button>
       ),
       cell: (info) => (
@@ -392,7 +399,7 @@ export default function MeasureList(props: {
       // Use tabIndex={0} for accessibility, and make sure it's not inside a button.
       header: () => (
         <button tabIndex={0} aria-label="Edit or View Measure">
-          ADD
+          Action
         </button>
       ),
       cell: (info) => (
@@ -428,16 +435,26 @@ export default function MeasureList(props: {
       enableSorting: false,
     },
   ];
-
+  const getHeader = () => {
+    if (props.activeTab === 0) {
+      return (
+        <IndeterminateCheckbox
+          checked={table.getIsAllRowsSelected()}
+          indeterminate={table.getIsSomePageRowsSelected()}
+          onChange={table.getToggleAllPageRowsSelectedHandler()}
+        />
+      );
+    } else {
+      return (
+        <MadieTooltip tooltipText="Select" id={`measure-list-select-tooltip`} />
+      );
+    }
+  };
   const columns = useMemo<ColumnDef<TCRow>[]>(() => {
     const t = [
       {
         id: "select", // retain ID so we have the column for checkboxes but the header is blank
-        header: () => (
-          <button tabIndex={0} aria-label="Measure Selection">
-            ADD
-          </button>
-        ),
+        header: () => <div aria-label="Measure Selection">{getHeader()}</div>,
         cell: ({ row }) => {
           return (
             <div className="px-1">
@@ -1002,7 +1019,7 @@ export default function MeasureList(props: {
                     className="header-cell"
                   >
                     {/* Only render a <button> for sortable columns.
-                        For non-sortable columns like "ADD", render the header content directly, not inside a <button>. 
+                        For non-sortable columns like "Action", render the header content directly, not inside a <button>. 
                     */}
                     {header.isPlaceholder ? null : header.column.getCanSort() ? (
                       <button
