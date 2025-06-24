@@ -58,7 +58,7 @@ const TestCaseListSideBarNav = ({
           paddingTop: 16,
           backgroundColor: "#ededed",
         }}
-        data-testid="test-case-sidebar-collapsed"
+        data-testid="test-case-sidebar-collapsed-button"
         aria-label="Expand Test Case Sidebar"
         onClick={() => setIsCollapsed(false)}
       >
