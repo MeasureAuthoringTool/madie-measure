@@ -50,7 +50,7 @@ export function getElementName(
   if (element.sliceName) {
     return `${requiredIndicator}${element.sliceName}${index}`;
   }
-  if (element.path?.endsWith("[x]")) {
+  if (element.path?.endsWith("[x]") || element.id?.endsWith("[x]")) {
     // if the path ends with [x], we need to get the type code (which in the values we have here is the only type on the element even though it's a choiceType because we handled that with the naming convention in testcase editor JSON as choice[x] == choiceType where x = Type )
     return `${extractNameWithoutIndex(
       element,
@@ -80,8 +80,8 @@ const removeArrayIndexes = (path) => {
 
 export function extractNameWithoutIndex(
   element: ElementDefinition,
-  requiredIndicator: string,
-  basePath: string
+  requiredIndicator: string = "",
+  basePath: string = ""
 ) {
   if (basePath) {
     return `${requiredIndicator}${stripAllIndexes(
@@ -460,32 +460,34 @@ export function addCardinalityToElement(nextEntry, elemPath) {
 
 // This switch is a check to see weather we have the means to render an input for a given fhir type. needs to be udpated with all validations.
 export function isComponentDataType(datatype) {
-  switch (datatype) {
+  //adding a toLower to the datatype to allow this to handle choiceType when
+  // the types have already been modified by a _toLowerCase function.
+  switch (_.toLower(datatype)) {
     case "boolean":
-    case "base64Binary":
+    case "base64binary":
     case "date":
-    case "dateTime":
-    case "http://hl7.org/fhirpath/System.DateTime":
+    case "datetime":
+    case "http://hl7.org/fhirpath/system.datetime":
     case "decimal":
     case "id":
     case "instant":
     case "integer":
     case "integer64":
-    case "positiveInt":
+    case "positiveint":
     case "time":
-    case "unsignedInt":
+    case "unsignedint":
     case "uri":
     case "url":
     case "uuid":
     case "canonical":
     case "string":
     case "markdown":
-    case "http://hl7.org/fhirpath/System.String":
+    case "http://hl7.org/fhirpath/system.string":
     case "code":
-    case "Coding":
-    case "CodeableConcept":
-    case "Extension":
-    case "Reference":
+    case "coding":
+    case "codeableconcept":
+    case "extension":
+    case "reference":
       return true;
     default:
       return false;
