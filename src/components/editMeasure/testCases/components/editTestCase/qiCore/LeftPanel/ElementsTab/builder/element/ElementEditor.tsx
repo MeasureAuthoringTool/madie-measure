@@ -199,7 +199,6 @@ const ElementEditor = ({
     for (const node of allNodes) {
       nodeList.push(...(await buildNode(node, resourcePath, resource)));
     }
-
     for (const builtNode of nodeList) {
       // associate id with form
 
@@ -213,16 +212,13 @@ const ElementEditor = ({
 
   const buildSchemaAndInitialValues = (formInfo, resource) => {
     setFormInfo(simplifySnapshotElements(Object.entries(formInfo)));
-
     // Get the correct initial values more simply.
     const correctInitialValues = {}; // set a root
     correctInitialValues[resource.resourceType] = {}; // establish root property so we can add more properties to it
-
     const entries = Object.entries(resource);
     for (const [key, value] of entries) {
       correctInitialValues[resource.resourceType][key] = value;
     }
-
     const validationSchemaObject = buildFullValidationSchema(
       formInfo,
       resource.resourceType

@@ -85,7 +85,6 @@ const ResourceEditor = ({
       const selectedEntry = state.bundle?.entry?.find(
         (entry) => entry.resource.id === selectedResourceID
       );
-
       // at this point we have a selectedEntry that has the correct attribute, but it's formed incorrectly
       const profile = _.isArray(selectedEntry?.resource?.meta?.profile)
         ? selectedEntry?.resource?.meta?.profile[0]
@@ -102,7 +101,6 @@ const ResourceEditor = ({
           };
 
           const topElements = getTopLevelElements(selectedResource);
-
           //the topElements from the selectedResource contains elements from resource.definition.snapshot.element
 
           const requiredElements = [...topElements.filter((e) => e.min > 0)];
@@ -114,7 +112,6 @@ const ResourceEditor = ({
               );
               //let's look at e.path and see if it is a choice type
               //if e.path ends with [x] then we need to check if the resource has a value for that type
-
               if (elemPath.endsWith("[x]")) {
                 //if it does, then we need to check if the resource has a value for that type
                 const type = elemPath.substring(
@@ -136,7 +133,6 @@ const ResourceEditor = ({
                   selectedResource.bundleEntry.resource,
                   elemPathType
                 );
-
                 if (!_.isNil(elemValue)) {
                   return true;
                 }
