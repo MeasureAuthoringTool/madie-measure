@@ -478,20 +478,28 @@ const TypeEditor = ({
         //   })
         // }
 
-        return (
-          <ExtensionComponent
-            label={label}
-            canEdit={canEdit}
-            {...formik.getFieldProps(label)}
-            onChange={() => {}}
-            formikHandleChange={formik.handleChange}
-            // Being depcreated for a formik handleChange
-            // label={label} // label will be needed later to hook up to formik.
-            fhirResource={resource}
-            elementDefinition={structureDefinition} // id is patient.identifier[0].extension    ;
-            parentStructureDefinition={parentStructureDefinition} // id: patient.identifier[0]  ;
-          />
-        );
+        // render extension component only if parent structure defintion is Extension type
+        if (
+          parentStructureDefinition?.type?.[0]?.code === "Extension" ||
+          parentStructureDefinition?.definition?.type === "Extension"
+        ) {
+          return (
+            <ExtensionComponent
+              label={label}
+              canEdit={canEdit}
+              {...formik.getFieldProps(label)}
+              onChange={() => {}}
+              formikHandleChange={formik.handleChange}
+              // Being depcreated for a formik handleChange
+              // label={label} // label will be needed later to hook up to formik.
+              fhirResource={resource}
+              elementDefinition={structureDefinition} // id is patient.identifier[0].extension    ;
+              parentStructureDefinition={parentStructureDefinition} // id: patient.identifier[0]  ;
+            />
+          );
+        } else {
+          return <></>;
+        }
       default:
         return <div>Unsupported Type [{type}]</div>;
     }
