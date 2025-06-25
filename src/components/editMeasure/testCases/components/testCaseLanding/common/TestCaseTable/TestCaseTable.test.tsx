@@ -234,7 +234,7 @@ describe("TestCase component", () => {
     expect(columns[6]).toHaveTextContent("09/06/202415:15:14 (UTC)");
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(12);
+    expect(buttons).toHaveLength(11);
     expect(buttons[8]).toHaveTextContent("View");
   });
 
@@ -264,7 +264,7 @@ describe("TestCase component", () => {
     expect(columns[6]).toHaveTextContent("09/06/202415:15:14 (UTC)");
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(12);
+    expect(buttons).toHaveLength(11);
   });
 
   it.skip("should render test case table with checkboxes when flag is set", async () => {
@@ -298,7 +298,7 @@ describe("TestCase component", () => {
     expect(columns[7]).toHaveTextContent(convertDate(testCase.lastModifiedAt));
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(12);
+    expect(buttons).toHaveLength(11);
   });
 
   it("should render test case view for non-owners and no delete option", async () => {
@@ -327,7 +327,7 @@ describe("TestCase component", () => {
     expect(columns[6]).toHaveTextContent("09/06/202415:15:14 (UTC)");
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(12);
+    expect(buttons).toHaveLength(11);
     fireEvent.click(buttons[6]);
     expect(screen.queryByText("edit")).not.toBeInTheDocument();
     expect(
