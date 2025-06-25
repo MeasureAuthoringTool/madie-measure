@@ -176,6 +176,8 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           checked={table.getIsAllRowsSelected()}
           indeterminate={table.getIsSomePageRowsSelected()}
           onChange={table.getToggleAllPageRowsSelectedHandler()}
+          aria-label="Test Case Selection"
+          tabIndex={0}
         />
       ),
       cell: ({ row }) => (
@@ -280,7 +282,11 @@ const TestCaseTable = (props: TestCaseTableProps) => {
         accessorKey: "lastModifiedAt",
       },
       {
-        header: "",
+        header: () => (
+          <button tabIndex={0} aria-label="Edit or View Test Case">
+            Action
+          </button>
+        ),
         cell: (info) => (
           <Button
             variant="outline-filled"
@@ -375,7 +381,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
                     onMouseLeave={() => setHoveredHeader(null)}
                     className="header-cell"
                   >
-                    {header.isPlaceholder ? null : (
+                    {header.isPlaceholder ? null : header.column.getCanSort() ? (
                       <button
                         className={
                           header.column.getCanSort()
@@ -407,6 +413,11 @@ const TestCaseTable = (props: TestCaseTableProps) => {
                           header.getContext()
                         )}
                       </button>
+                    ) : (
+                      flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )
                     )}
                   </TH>
                 );
