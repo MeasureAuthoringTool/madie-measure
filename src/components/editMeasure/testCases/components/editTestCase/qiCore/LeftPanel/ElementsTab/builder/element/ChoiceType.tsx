@@ -88,6 +88,7 @@ export const ChoiceType = (props: ChoiceTypePropsInterface) => {
         onChange={(e) => {
           e.preventDefault();
           const selectedType: any = e.target.value;
+
           // get the index from the label
           const choice = extractNameWithoutIndex(childDef);
           // if there is no index, we need to add one.
@@ -109,14 +110,13 @@ export const ChoiceType = (props: ChoiceTypePropsInterface) => {
       {selectedChoiceType && (
         //put a border around the TypeEditor
         <Box sx={{ border: "1px solid #ccc", padding: 2, mt: 2 }}>
-          <p>{"True"}</p>
-          {/* <TypeEditor
+          <TypeEditor
             resource={resource}
             structureDefinition={childDef}
             parentStructureDefinition={parentStructureDefinition}
             canEdit={canEdit}
             label={`${determineLabel(childDef, selectedChoiceType)}`}
-          /> */}
+          />
         </Box>
       )}
     </Box>

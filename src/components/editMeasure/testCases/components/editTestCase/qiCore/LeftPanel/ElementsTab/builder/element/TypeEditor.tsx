@@ -54,15 +54,16 @@ const TypeEditor = ({
   //let type:string = isComponentDataType(label) ? label : structureDefinition?.type?.[0]?.code;
 
   //Iterate Types and determine which one is the correct one to use based on the label (which is a concatenation of the path and the type)
-  const idWithoutChoice = structureDefinition?.id?.replace(/\[x\]$/, "");
-
+  const idWithoutChoice = structureDefinition?.id?.replace(
+    /\[[x,0..9]\]/gi,
+    ""
+  );
   let type: string = structureDefinition?.type?.find((t) => {
     return _.toLower(t.code) === _.toLower(label.replace(idWithoutChoice, ""));
   })?.code;
   if (!type) {
     type = structureDefinition?.type?.[0]?.code;
   }
-
   // is multiple cardinality?
   if (structureDefinition?.max === "*") {
     // is it not already terminated with an index?
@@ -134,7 +135,6 @@ const TypeEditor = ({
       return errors;
     }
   };
-
   if (isComponentDataType(type)) {
     switch (type) {
       case "string":
