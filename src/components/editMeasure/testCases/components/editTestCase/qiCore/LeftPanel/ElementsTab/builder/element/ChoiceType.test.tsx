@@ -1,14 +1,29 @@
 import React from "react";
-import { render, fireEvent, screen, waitFor } from "@testing-library/react";
+import {
+  render,
+  fireEvent,
+  screen,
+  waitFor,
+  within,
+  act,
+} from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { Formik } from "formik";
 import ChoiceType from "./ChoiceType";
+//import { extractNameWithoutIndex } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 
 // Mock dependencies
 jest.mock("./TypeEditor", () => (props: any) => (
-  <div data-testid="type-editor">{props.label}</div>
+  <div data-testid="type-editor">Widget {props.label}</div>
 ));
+
+// Minimal mock type for ElementDefinition
+type ElementDefinition = { id?: string };
+const mockExtract = jest.fn();
+
 jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => ({
   extractNameWithoutIndex: jest.fn((childDef, _a, _b) => {
+    mockExtract();
     // Simulate extracting the name without index
     if (childDef && childDef.id) {
       return childDef.id.replace(/\[x\]$/, "");
@@ -37,7 +52,7 @@ const renderWithFormik = (props: any, formikValues: any = {}) =>
   );
 
 describe("ChoiceType", () => {
-  it("renders label and select with options", () => {
+  it("renders label and select with options", async () => {
     renderWithFormik(
       {
         childDef: getChildDef(),
@@ -47,8 +62,22 @@ describe("ChoiceType", () => {
       getFormikValues()
     );
     expect(screen.getByText("Patient.deceased[x]")).toBeInTheDocument();
-    expect(screen.getByTestId("choice-type")).toBeInTheDocument();
-    expect(screen.getByTestId("choice-type-input")).toBeInTheDocument();
+    const choiceTypeSelect = screen.getByTestId("choice-type");
+    expect(choiceTypeSelect).toBeInTheDocument();
+    fireEvent.mouseDown(choiceTypeSelect);
+
+    const booleanSelection = screen.getByText("Boolean");
+    userEvent.click(booleanSelection);
+    const booleanOption = await screen.getByTestId("boolean-option");
+    const stringOption = await screen.getByTestId("string-option");
+    expect(booleanOption).toBeInTheDocument();
+    expect(stringOption).toBeInTheDocument();
+    act(() => {
+      fireEvent.click(booleanOption);
+      fireEvent.click(stringOption);
+    });
+
+    expect(mockExtract).toHaveBeenCalledTimes(1);
   });
 
   it("selects the correct type based on formik values", () => {

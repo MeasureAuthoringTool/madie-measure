@@ -109,13 +109,14 @@ export const ChoiceType = (props: ChoiceTypePropsInterface) => {
       {selectedChoiceType && (
         //put a border around the TypeEditor
         <Box sx={{ border: "1px solid #ccc", padding: 2, mt: 2 }}>
-          <TypeEditor
+          <p>{"True"}</p>
+          {/* <TypeEditor
             resource={resource}
             structureDefinition={childDef}
             parentStructureDefinition={parentStructureDefinition}
             canEdit={canEdit}
             label={`${determineLabel(childDef, selectedChoiceType)}`}
-          />
+          /> */}
         </Box>
       )}
     </Box>
