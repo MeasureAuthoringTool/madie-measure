@@ -109,7 +109,8 @@ export class CalculationService {
       valueSets,
       measure.measurementPeriodStart,
       measure.measurementPeriodEnd,
-      measure?.testCaseConfiguration?.sdeIncluded
+      measure?.testCaseConfiguration?.sdeIncluded,
+      measure?.testCaseConfiguration?.ravIncluded
     );
 
     // set onto window for any environment debug purposes
@@ -140,7 +141,8 @@ export class CalculationService {
     valueSets: ValueSet[],
     measurementPeriodStart,
     measurementPeriodEnd,
-    sdeIncluded: boolean
+    sdeIncluded: boolean,
+    ravIncluded: boolean
   ): Promise<CalculationOutput<any>> {
     try {
       return await Calculator.calculate(
@@ -152,7 +154,8 @@ export class CalculationService {
           buildStatementLevelHTML: true,
           measurementPeriodStart: measurementPeriodStart,
           measurementPeriodEnd: measurementPeriodEnd,
-          calculateSDEs: sdeIncluded,
+          calculateSDEs: sdeIncluded === true,
+          calculateRAVs: ravIncluded === true,
         },
         valueSets
       );
