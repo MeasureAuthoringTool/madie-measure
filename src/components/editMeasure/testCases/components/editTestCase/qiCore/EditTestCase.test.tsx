@@ -2282,7 +2282,7 @@ describe("EditTestCase component", () => {
       expect(screen.getByTestId("elements-content")).toBeInTheDocument();
 
       const validationErrorsBtn = screen.getByRole("button", {
-        name: "Validation Errors",
+        name: "Open Validations",
       });
       userEvent.click(validationErrorsBtn);
       jest.advanceTimersByTime(100);
@@ -2441,7 +2441,7 @@ describe("EditTestCase component", () => {
       expect(debugOutput).toBeInTheDocument();
 
       const showValidationErrorsBtn = screen.getByRole("button", {
-        name: "Validation Errors",
+        name: "Open Validations",
       });
       expect(showValidationErrorsBtn).toBeInTheDocument();
       userEvent.click(showValidationErrorsBtn);
@@ -2555,7 +2555,7 @@ describe("EditTestCase component", () => {
       );
 
       const showValidationErrorsBtn = screen.getByRole("button", {
-        name: "Validation Errors",
+        name: "Open Validations",
       });
       expect(showValidationErrorsBtn).toBeInTheDocument();
       userEvent.click(showValidationErrorsBtn);
@@ -2570,8 +2570,8 @@ describe("EditTestCase component", () => {
       );
       expect(noErrors).toBeInTheDocument();
 
-      const closeValidationErrorsBtn = await screen.getByRole("button", {
-        name: "Validation Errors",
+      const closeValidationErrorsBtn = await screen.findByRole("button", {
+        name: "Close Panel",
       });
       expect(closeValidationErrorsBtn).toBeInTheDocument();
       userEvent.click(closeValidationErrorsBtn);
