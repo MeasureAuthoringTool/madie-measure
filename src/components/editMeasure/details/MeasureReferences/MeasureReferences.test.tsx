@@ -715,4 +715,62 @@ describe("Measure References Component", () => {
     });
     await checkRows(11);
   });
+
+  it("Editing existing reference with type Documentation, user does not see Documentation in the dropdown", async () => {
+    const reference: Reference = {
+      id: "id 1",
+      referenceType: "Documentation",
+      referenceText: "text 1",
+    };
+    const testMeasure = {
+      ...measure,
+      measureMetaData: { references: [reference] },
+    };
+    measureStore.state.mockImplementation(() => testMeasure);
+    measureStore.initialState.mockImplementation(() => testMeasure);
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    await checkRows(1);
+
+    const editButton = screen.getByTestId(`edit-measure-reference-id 1`);
+    expect(editButton).toBeInTheDocument();
+
+    const deleteButton = getByTestId(`delete-measure-reference-id 1`);
+    expect(deleteButton).toBeInTheDocument();
+
+    userEvent.click(editButton);
+
+    await waitFor(() => {
+      expect(getByTestId("dialog-form")).toBeInTheDocument();
+    });
+
+    const typeInput = screen.getByTestId(
+      "measure-referenceType-input"
+    ) as HTMLInputElement;
+    // Documentation should not be in the dropdown
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    const textAreaInput = getByTestId(
+      "measure-referenceText"
+    ) as HTMLTextAreaElement;
+    expect(textAreaInput.value).toBe("text 1");
+
+    fireEvent.change(typeInput, {
+      target: { value: "Citation" },
+    });
+    expect(typeInput.value).toBe("Citation");
+
+    act(() => {
+      fireEvent.change(textAreaInput, {
+        target: { value: "text 10" },
+      });
+    });
+    fireEvent.blur(textAreaInput);
+    expectInputValue(textAreaInput, "text 10");
+  });
 });
