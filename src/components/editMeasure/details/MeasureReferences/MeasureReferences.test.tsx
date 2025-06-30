@@ -30,6 +30,9 @@ let serviceApiMock = {
 } as unknown as MeasureServiceApi;
 useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
 
+const expectedOptions1 = ["Citation", "Justification", "Unknown"];
+const expectedOptions2 = ["Citation", "Justification"];
+
 function referenceHelper(number: number): Reference[] {
   const references: Reference[] = [];
   for (let i = 0; i < number; i++) {
@@ -551,13 +554,6 @@ describe("Measure References Component", () => {
   });
 
   it("Should open the Type dropdown with expected options for QDM v5.6 measure", async () => {
-    const expectedOptions = [
-      "Citation",
-      "Documentation",
-      "Justification",
-      "Unknown",
-    ];
-
     measureStore.state.mockImplementation(() => {
       return {
         ...measureWithNineItems,
@@ -584,16 +580,14 @@ describe("Measure References Component", () => {
     userEvent.click(referenceTypeSelectDropdown);
 
     const referenceTypeOptionsList = await findAllByTestId(/-option/i);
-    expect(referenceTypeOptionsList).toHaveLength(4);
+    expect(referenceTypeOptionsList).toHaveLength(3);
 
     referenceTypeOptionsList.forEach((option, index) => {
-      expect(option).toHaveTextContent(expectedOptions[index]);
+      expect(option).toHaveTextContent(expectedOptions1[index]);
     });
   });
 
   it("Should open the Type dropdown with expected options for QI-Core v4.1.1 measure", async () => {
-    const expectedOptions = ["Citation", "Documentation", "Justification"];
-
     measureStore.state.mockImplementation(() => {
       return {
         ...measureWithNineItems,
@@ -620,16 +614,14 @@ describe("Measure References Component", () => {
     userEvent.click(referenceTypeSelectDropdown);
 
     const referenceTypeOptionsList = await findAllByTestId(/-option/i);
-    expect(referenceTypeOptionsList).toHaveLength(3);
+    expect(referenceTypeOptionsList).toHaveLength(2);
 
     referenceTypeOptionsList.forEach((option, index) => {
-      expect(option).toHaveTextContent(expectedOptions[index]);
+      expect(option).toHaveTextContent(expectedOptions2[index]);
     });
   });
 
   it("Should open the Type dropdown with expected options for QI-Core v6.0.0 measure", async () => {
-    const expectedOptions = ["Citation", "Documentation", "Justification"];
-
     measureStore.state.mockImplementation(() => {
       return {
         ...measureWithNineItems,
@@ -656,10 +648,10 @@ describe("Measure References Component", () => {
     userEvent.click(referenceTypeSelectDropdown);
 
     const referenceTypeOptionsList = await findAllByTestId(/-option/i);
-    expect(referenceTypeOptionsList).toHaveLength(3);
+    expect(referenceTypeOptionsList).toHaveLength(2);
 
     referenceTypeOptionsList.forEach((option, index) => {
-      expect(option).toHaveTextContent(expectedOptions[index]);
+      expect(option).toHaveTextContent(expectedOptions2[index]);
     });
   });
 
