@@ -716,10 +716,10 @@ describe("Measure References Component", () => {
     await checkRows(11);
   });
 
-  it("Editing existing reference with type Documentation, user does not see Documentation in the dropdown", async () => {
+  it("Editing existing reference with type Citation, user should see Citation in the dropdown", async () => {
     const reference: Reference = {
       id: "id 1",
-      referenceType: "Documentation",
+      referenceType: "Citation",
       referenceText: "text 1",
     };
     const testMeasure = {
@@ -752,9 +752,8 @@ describe("Measure References Component", () => {
     const typeInput = screen.getByTestId(
       "measure-referenceType-input"
     ) as HTMLInputElement;
-    // Documentation should not be in the dropdown
     expect(typeInput).toBeInTheDocument();
-    expect(typeInput.value).toBe("");
+    expect(typeInput.value).toBe("Citation");
     const textAreaInput = getByTestId(
       "measure-referenceText"
     ) as HTMLTextAreaElement;
