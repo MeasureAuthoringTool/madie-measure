@@ -69,6 +69,17 @@ export const convertDate = (date: string) => {
   };
 };
 
+// Returns true if the test case was created or modified after the measure was last versioned
+const isCreatedOrModifiedAfterVersioning = (
+  testCaseLastModifiedDateStr: string,
+  measureLastModifiedDateStr: string
+) => {
+  const testCaseLastModifiedDate = new Date(testCaseLastModifiedDateStr);
+  const measureLastModifiedDate = new Date(measureLastModifiedDateStr);
+
+  return testCaseLastModifiedDate > measureLastModifiedDate;
+};
+
 const IndeterminateCheckbox = ({ indeterminate, checked, ...rest }: any) => {
   const ref = React.useRef<HTMLInputElement>(null);
 
@@ -263,7 +274,10 @@ const TestCaseTable = (props: TestCaseTableProps) => {
             >
               {featureFlags?.EditTestsOnVersionedMeasures &&
               !measure.measureMetaData?.draft &&
-              !info.row.original.action.createdBeforeVersioning ? (
+              isCreatedOrModifiedAfterVersioning(
+                info.row.original.lastSaved,
+                measure?.lastModifiedAt
+              ) ? (
                 <div>
                   <FiberManualRecord
                     sx={fiberManualRecordStyles}

@@ -49,7 +49,7 @@ const testCaseInvalid = {
   title: "TEST IPP3",
   description: "TEST DESCRIPTION3",
   series: "TEST SERIES3",
-  lastModifiedAt: "2024-09-06T15:18:14.382Z",
+  lastModifiedAt: "2022-03-01T14:18:14.382Z",
   executionStatus: "Invalid",
   caseNumber: null,
 } as unknown as TestCase;
@@ -94,7 +94,7 @@ const measures = [
     cql: null,
     createdAt: null,
     createdBy: "testuser",
-    lastModifiedAt: null,
+    lastModifiedAt: "2023-05-01T14:18:14.382Z",
     lastModifiedBy: null,
     model: Model.QDM_5_6,
     active: true,
@@ -117,7 +117,7 @@ const measures = [
     cql: null,
     createdAt: null,
     createdBy: "testuser",
-    lastModifiedAt: null,
+    lastModifiedAt: "2023-05-01T14:18:14.382Z",
     lastModifiedBy: null,
     model: Model.QDM_5_6,
     active: true,
@@ -517,7 +517,36 @@ describe("TestCase component", () => {
     });
   });
 
-  it("should display FiberManualRecord icon when the EditTestsOnVersionedMeasures feature flag is true, draft is false, createdBeforeVersioning is false (all icon conditions are true)", async () => {
+  it("should not display FiberManualRecord icon when the EditTestsOnVersionedMeasures feature flag is false", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EditTestsOnVersionedMeasures: false,
+    }));
+
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
+
+    renderWithTestCase(
+      [testCase],
+      true,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      measures[1],
+      setSelectedTestCasesMock
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId(
+          `test-case-fiber-manual-record-icon-${testCases[0].id}`
+        )
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it("should not display FiberManualRecord icon when draft is false", async () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       EditTestsOnVersionedMeasures: true,
     }));
@@ -528,7 +557,65 @@ describe("TestCase component", () => {
     const setSelectedTestCasesMock = jest.fn();
 
     renderWithTestCase(
-      [{ ...testCase, action: { createdBeforeVersioning: false } }],
+      [testCase],
+      true,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      measures[2],
+      setSelectedTestCasesMock
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId(
+          `test-case-fiber-manual-record-icon-${testCases[0].id}`
+        )
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it("should not display FiberManualRecord icon when the test case was created or modified before the measure was last versioned", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EditTestsOnVersionedMeasures: true,
+    }));
+
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
+
+    renderWithTestCase(
+      [testCaseFail],
+      true,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      measures[1],
+      setSelectedTestCasesMock
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId(
+          `test-case-fiber-manual-record-icon-${testCases[0].id}`
+        )
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it("should display FiberManualRecord icon when the EditTestsOnVersionedMeasures feature flag is true, draft is false, and the test case was created or modified after the measure was last versioned", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EditTestsOnVersionedMeasures: true,
+    }));
+
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
+
+    renderWithTestCase(
+      [testCase],
       true,
       deleteTestCase,
       exportTestCase,
@@ -543,151 +630,6 @@ describe("TestCase component", () => {
           `test-case-fiber-manual-record-icon-${testCases[0].id}`
         )
       ).toBeInTheDocument();
-    });
-  });
-
-  it("should not display FiberManualRecord icon when the EditTestsOnVersionedMeasures feature flag is false, draft is false, createdBeforeVersioning is false", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      EditTestsOnVersionedMeasures: false,
-    }));
-
-    const deleteTestCase = jest.fn();
-    const exportTestCase = jest.fn();
-    const onCloneTestCase = jest.fn();
-    const setSelectedTestCasesMock = jest.fn();
-
-    renderWithTestCase(
-      [{ ...testCase, action: { createdBeforeVersioning: false } }],
-      true,
-      deleteTestCase,
-      exportTestCase,
-      onCloneTestCase,
-      measures[1],
-      setSelectedTestCasesMock
-    );
-
-    await waitFor(() => {
-      expect(
-        screen.queryByTestId(
-          `test-case-fiber-manual-record-icon-${testCases[0].id}`
-        )
-      ).not.toBeInTheDocument();
-    });
-  });
-
-  it("should not display FiberManualRecord icon when the EditTestsOnVersionedMeasures feature flag is true, draft is true, createdBeforeVersioning is false", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      EditTestsOnVersionedMeasures: true,
-    }));
-
-    const deleteTestCase = jest.fn();
-    const exportTestCase = jest.fn();
-    const onCloneTestCase = jest.fn();
-    const setSelectedTestCasesMock = jest.fn();
-
-    renderWithTestCase(
-      [{ ...testCase, action: { createdBeforeVersioning: false } }],
-      true,
-      deleteTestCase,
-      exportTestCase,
-      onCloneTestCase,
-      measures[2],
-      setSelectedTestCasesMock
-    );
-
-    await waitFor(() => {
-      expect(
-        screen.queryByTestId(
-          `test-case-fiber-manual-record-icon-${testCases[0].id}`
-        )
-      ).not.toBeInTheDocument();
-    });
-  });
-
-  it("should not display FiberManualRecord icon when the EditTestsOnVersionedMeasures feature flag is true, draft is false, createdBeforeVersioning is true", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      EditTestsOnVersionedMeasures: true,
-    }));
-
-    const deleteTestCase = jest.fn();
-    const exportTestCase = jest.fn();
-    const onCloneTestCase = jest.fn();
-    const setSelectedTestCasesMock = jest.fn();
-
-    renderWithTestCase(
-      [{ ...testCase, action: { createdBeforeVersioning: false } }],
-      true,
-      deleteTestCase,
-      exportTestCase,
-      onCloneTestCase,
-      measures[2],
-      setSelectedTestCasesMock
-    );
-
-    await waitFor(() => {
-      expect(
-        screen.queryByTestId(
-          `test-case-fiber-manual-record-icon-${testCases[0].id}`
-        )
-      ).not.toBeInTheDocument();
-    });
-  });
-
-  it("should not display FiberManualRecord icon when the EditTestsOnVersionedMeasures feature flag is true, draft is false, createdBeforeVersioning is true", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      EditTestsOnVersionedMeasures: true,
-    }));
-
-    const deleteTestCase = jest.fn();
-    const exportTestCase = jest.fn();
-    const onCloneTestCase = jest.fn();
-    const setSelectedTestCasesMock = jest.fn();
-
-    renderWithTestCase(
-      [{ ...testCase, action: { createdBeforeVersioning: true } }],
-      true,
-      deleteTestCase,
-      exportTestCase,
-      onCloneTestCase,
-      measures[2],
-      setSelectedTestCasesMock
-    );
-
-    await waitFor(() => {
-      expect(
-        screen.queryByTestId(
-          `test-case-fiber-manual-record-icon-${testCases[0].id}`
-        )
-      ).not.toBeInTheDocument();
-    });
-  });
-
-  it("should not display FiberManualRecord icon when the EditTestsOnVersionedMeasures feature flag is false, draft is true, createdBeforeVersioning is true (all icon conditions are false)", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      EditTestsOnVersionedMeasures: false,
-    }));
-
-    const deleteTestCase = jest.fn();
-    const exportTestCase = jest.fn();
-    const onCloneTestCase = jest.fn();
-    const setSelectedTestCasesMock = jest.fn();
-
-    renderWithTestCase(
-      [{ ...testCase, action: { createdBeforeVersioning: true } }],
-      true,
-      deleteTestCase,
-      exportTestCase,
-      onCloneTestCase,
-      measures[2],
-      setSelectedTestCasesMock
-    );
-
-    await waitFor(() => {
-      expect(
-        screen.queryByTestId(
-          `test-case-fiber-manual-record-icon-${testCases[0].id}`
-        )
-      ).not.toBeInTheDocument();
     });
   });
 });
