@@ -8,6 +8,7 @@ import {
   PopulationType,
   TestCase,
   Model,
+  TestCaseValidationStatus,
 } from "@madie/madie-models";
 // @ts-ignore
 import { useFeatureFlags, checkUserCanEdit } from "@madie/madie-util";
@@ -22,6 +23,7 @@ const testCase = {
   executionStatus: "pass",
   caseNumber: 1,
   action: { createdBeforeVersioning: true },
+  testCaseValidationStatus: "Valid",
 } as unknown as TestCase;
 
 const testCaseFail = {
@@ -127,6 +129,31 @@ const measures = [
     measureSet: {
       cmsId: "cmsId2",
     },
+  },
+  {
+    id: "IDIDID3",
+    measureScoring: MeasureScoring.COHORT,
+    createdBy: "testuser",
+    groups: [
+      {
+        groupId: "Group1_ID",
+        scoring: "Cohort",
+        populations: [
+          {
+            id: "id-1",
+            name: PopulationType.INITIAL_POPULATION,
+            definition: "Pop1",
+          },
+        ],
+        stratifications: [
+          {
+            id: "strat-id-1",
+          },
+        ],
+      },
+    ],
+    model: "QI-Core v6.0.0",
+    acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
   },
 ] as unknown as Measure[];
 
@@ -689,5 +716,35 @@ describe("TestCase component", () => {
         )
       ).not.toBeInTheDocument();
     });
+  });
+
+  it("should render test case table with validation status for qiCore6", async () => {
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
+
+    renderWithTestCase(
+      testCases,
+      true,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      measures[3],
+      setSelectedTestCasesMock
+    );
+
+    const rows = await screen.findByTestId(`test-case-row-0`);
+    const columns = rows.querySelectorAll("td");
+    expect(columns[1]).toHaveTextContent("1");
+    expect(columns[2]).toHaveTextContent("Pass");
+    expect(columns[3]).toHaveTextContent("Valid");
+    expect(columns[4]).toHaveTextContent(testCase.series);
+    expect(columns[5]).toHaveTextContent(testCase.title);
+    expect(columns[6]).toHaveTextContent(testCase.description);
+    expect(columns[7]).toHaveTextContent("09/06/202415:15:14 (UTC)");
+
+    const buttons = await screen.findAllByRole("button");
+    expect(buttons).toHaveLength(13);
   });
 });

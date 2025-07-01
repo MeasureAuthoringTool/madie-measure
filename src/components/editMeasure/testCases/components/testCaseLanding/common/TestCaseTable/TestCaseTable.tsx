@@ -8,8 +8,13 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import "styled-components/macro";
-import { TestCase } from "@madie/madie-models";
-import { TestCaseStatus, TestCaseActionButton } from "./TestCaseTableHelpers";
+import { Model, TestCase } from "@madie/madie-models";
+import {
+  TestCaseStatus,
+  TestCaseValidationStatus,
+  TestCaseActionButton,
+  getTranslatedValidationStatus,
+} from "./TestCaseTableHelpers";
 import {
   MadieDeleteDialog,
   Toast,
@@ -17,7 +22,6 @@ import {
   Button,
 } from "@madie/madie-design-system/dist/react";
 import "../TestCase.scss";
-import TestCaseTablePopover from "./TestCaseTablePopover";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -110,28 +114,9 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     setToastOpen(false);
   };
 
-  const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedTestCase, setSelectedTestCase] = useState<TestCase>(null);
-  const [shiftDatesDialogOpen, setShiftDatesDialogOpen] =
-    useState<boolean>(false);
   const featureFlags = useFeatureFlags();
   const navigate = useNavigate();
-  // const handleOpen = (
-  //   selected: TestCase,
-  //   event: React.MouseEvent<HTMLButtonElement>
-  // ) => {
-  //   setSelectedTestCase(selected);
-  //   setAnchorEl(event.currentTarget);
-  //   setOptionsOpen(true);
-  // };
-
-  // const handleClose = () => {
-  //   setOptionsOpen(false);
-  //   setSelectedTestCase(null);
-  //   setAnchorEl(null);
-  //   setShiftDatesDialogOpen(false);
-  // };
+  const isQICore6 = measure?.model === Model.QICORE_6_0_0;
 
   const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
@@ -139,6 +124,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     return testCases.map((tc: TestCase) => ({
       id: tc.id,
       status: tc.executionStatus,
+      validationStatus: tc.testCaseValidationStatus,
       group: tc.series,
       title: tc.title,
       description: tc.description,
@@ -150,6 +136,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
 
   type TCRow = {
     status: any;
+    validationStatus: any;
     group: string;
     title: string;
     description: string;
@@ -190,29 +177,54 @@ const TestCaseTable = (props: TestCaseTableProps) => {
       ),
     });
 
-    columnDefs.push({
-      header: "Case #",
-      cell: (info) => (
-        <TruncateText
-          text={_.toString(info.row.original.caseNumber)}
-          maxLength={60}
-          dataTestId={`test-case-caseNumber-${info.row.original.id}`}
-        />
-      ),
-      accessorKey: "caseNumber",
-      sortingFn: "alphanumeric",
-      sortDescFirst: false,
-    });
-
-    return [
-      ...columnDefs,
+    columnDefs.push(
+      {
+        header: "Case #",
+        cell: (info) => (
+          <TruncateText
+            text={_.toString(info.row.original.caseNumber)}
+            maxLength={60}
+            dataTestId={`test-case-caseNumber-${info.row.original.id}`}
+          />
+        ),
+        accessorKey: "caseNumber",
+        sortingFn: "alphanumeric",
+        sortDescFirst: false,
+      },
       {
         header: "Status",
         cell: (info) => (
           <TestCaseStatus executionStatus={info.row.original.status} />
         ),
         accessorKey: "executionStatus",
-      },
+      }
+    );
+
+    if (isQICore6) {
+      columnDefs.push({
+        header: "Validation",
+        cell: (info) => (
+          <TestCaseValidationStatus
+            validationStatus={info.row.original.validationStatus}
+          />
+        ),
+        accessorKey: "testCaseValidationStatus",
+        // ValidationStatus doesn't naturally sort, so we provide a custom sorting function
+        sortingFn: (rowA, rowB, columnId) => {
+          return getTranslatedValidationStatus(rowA.original.validationStatus) >
+            getTranslatedValidationStatus(rowB.original.validationStatus)
+            ? 1
+            : getTranslatedValidationStatus(rowA.original.validationStatus) <
+              getTranslatedValidationStatus(rowB.original.validationStatus)
+            ? -1
+            : 0;
+        },
+        sortDescFirst: false,
+      });
+    }
+
+    return [
+      ...columnDefs,
       {
         header: "Group",
         cell: (info) => (
@@ -337,7 +349,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     state: {
       sorting,
     },
-    manualSorting: true,
   });
   useEffect(() => {
     const selectedRowIds = table
@@ -429,21 +440,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
             </tr>
           ))}
         </tbody>
-        {/* <TestCaseTablePopover
-          canEdit={canEdit}
-          viewOrEdit={viewOrEdit}
-          model={measure?.model}
-          groups={measure?.groups}
-          selectedTestCase={selectedTestCase}
-          anchorEl={anchorEl}
-          optionsOpen={optionsOpen}
-          setOptionsOpen={setOptionsOpen}
-          exportTestCase={exportTestCase}
-          onCloneTestCase={onCloneTestCase}
-          setDeleteDialogModalOpen={setDeleteDialogModalOpen}
-          handleClose={handleClose}
-          handleQiCloneTestCase={handleQiCloneTestCase}
-        /> */}
         <Toast
           toastKey="test-case-action-toast"
           aria-live="polite"
