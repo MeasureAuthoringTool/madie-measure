@@ -46,7 +46,6 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
   const REFERENCE_TYPES = useMemo(
     () => [
       "Citation",
-      "Documentation",
       "Justification",
       ...(measure?.model === Model.QICORE ||
       measure?.model === Model.QICORE_6_0_0
@@ -95,7 +94,10 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
   );
   const INITIAL_VALUES = {
     id: selectedReference?.id,
-    referenceType: selectedReference?.referenceType,
+    referenceType:
+      selectedReference?.referenceType !== "Documentation"
+        ? selectedReference?.referenceType
+        : "",
     referenceText: selectedReference?.referenceText,
   } as Reference;
   const [measureReferences, setMeasureReferences] = useState<Reference[]>(
