@@ -8,6 +8,7 @@ import "twin.macro";
 import "styled-components/macro";
 import { Select, TextField } from "@madie/madie-design-system/dist/react";
 import { MeasureSearchCriteria } from "../../MeasureLanding";
+import { useFeatureFlags } from "@madie/madie-util";
 
 const renderMenuItemsForFilter = (options: string[]) => {
   return [
@@ -28,6 +29,7 @@ const Search = (props: {
   setSearchCriteria: Dispatch<SetStateAction<MeasureSearchCriteria>>;
   handlePageChange: (e, v) => void;
 }) => {
+  const featureFlags = useFeatureFlags();
   const { searchCriteria, setSearchCriteria, handlePageChange } = { ...props };
   const formik = useFormik({
     initialValues: {
@@ -49,25 +51,27 @@ const Search = (props: {
       onSubmit={formik.handleSubmit}
       tw="col-span-3 grid grid-cols-3 gap-4 items-end"
     >
-      <Select
-        defaultValue=""
-        placeHolder={{ name: "Filter By", value: "" }}
-        label="Filter By"
-        name="filterBy"
-        id={`filter-by`}
-        data-testid={`filter-by`}
-        inputProps={{
-          "data-testid": `filter-by-input`,
-        }}
-        {...formik.getFieldProps("filterBy")}
-        options={renderMenuItemsForFilter([
-          "-",
-          "Measure",
-          "Version",
-          "Model",
-          "CMS ID",
-        ])}
-      />
+      {featureFlags?.MeasureSearch && (
+        <Select
+          defaultValue=""
+          placeHolder={{ name: "Filter By", value: "" }}
+          label="Filter By"
+          name="filterBy"
+          id={`filter-by`}
+          data-testid={`filter-by`}
+          inputProps={{
+            "data-testid": `filter-by-input`,
+          }}
+          {...formik.getFieldProps("filterBy")}
+          options={renderMenuItemsForFilter([
+            "-",
+            "Measure",
+            "Version",
+            "Model",
+            "CMS ID",
+          ])}
+        />
+      )}
       <TextField
         id="measure-search-field"
         name="searchField"

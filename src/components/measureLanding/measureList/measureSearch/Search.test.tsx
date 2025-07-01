@@ -3,6 +3,14 @@ import { render, screen, waitFor } from "@testing-library/react";
 import Search from "./Search";
 import userEvent from "@testing-library/user-event";
 import { within } from "@testing-library/dom";
+// @ts-ignore
+import { useFeatureFlags } from "@madie/madie-util";
+
+jest.mock("@madie/madie-util", () => ({
+  useFeatureFlags: jest.fn().mockReturnValue({
+    MeasureSearch: true,
+  }),
+}));
 
 describe("Search Component", () => {
   const mockSetSearchCriteria = jest.fn();
@@ -104,5 +112,15 @@ describe("Search Component", () => {
 
     expect(clearButton).toBeInTheDocument();
     expect(clearButton).toHaveStyle("visibility: hidden");
+  });
+
+  it("Should not render filterBy component when feature flag is turned off", () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      MeasureSearch: false,
+    }));
+    renderComponent();
+
+    const filterBy = screen.queryByTestId("filter-by");
+    expect(filterBy).not.toBeInTheDocument();
   });
 });

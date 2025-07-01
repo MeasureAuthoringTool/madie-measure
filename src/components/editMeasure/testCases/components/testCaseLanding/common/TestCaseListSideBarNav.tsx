@@ -5,6 +5,8 @@ import tw from "twin.macro";
 import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import ExpansionIcon from "@mui/icons-material/KeyboardTabOutlined";
+import IconButton from "@mui/material/IconButton";
 import "../../../../../../styles/VerticalSideBarNav.scss";
 import { useFeatureFlags } from "@madie/madie-util";
 
@@ -13,11 +15,15 @@ const InnerWrapper = tw.div`flex flex-grow flex-col`;
 export interface TestCaseListSideBarNavProps {
   allPopulationCriteria: Group[];
   qdm?: Boolean;
+  isCollapsed: boolean;
+  setIsCollapsed: Function;
 }
 
 const TestCaseListSideBarNav = ({
   allPopulationCriteria,
   qdm,
+  isCollapsed,
+  setIsCollapsed,
 }: TestCaseListSideBarNavProps) => {
   let navigate = useNavigate();
   const { measureId, criteriaId } = useParams<{
@@ -32,36 +38,94 @@ const TestCaseListSideBarNav = ({
   const [showConfigTabs, setShowConfigTabs] = useState<boolean>(true);
   const [showPopulationCriteriaTabs, setShowPopulationCriteriaTabs] =
     useState<boolean>(true);
+
   const handleChange = (e, v) => {
     const newPath = `/measures/${measureId}/edit/test-cases/list-page/${v}`;
     navigate(newPath);
   };
+
   const endRoute = /[^/]*$/.exec(pathname)[0];
+
+  if (isCollapsed) {
+    // Show only the "expand" icon when collapsed
+    return (
+      <button
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "flex-start",
+          cursor: "pointer",
+          paddingTop: 16,
+          backgroundColor: "#ededed",
+        }}
+        data-testid="test-case-sidebar-collapsed-button"
+        aria-label="Expand Test Case Sidebar"
+        onClick={() => setIsCollapsed(false)}
+      >
+        <IconButton
+          aria-label="Expand Test Case Sidebar"
+          data-testid="test-case-sidebar-expand-icon"
+        >
+          <ExpansionIcon
+            style={{
+              color: "#0073C8",
+            }}
+            titleAccess="Expand Test Case Sidebar"
+          />
+        </IconButton>
+      </button>
+    );
+  }
+
   return (
     <div className="outer-wrapper">
       <InnerWrapper
         className="vertical-side-nav"
         id="edit-measure-details-side-nav"
       >
-        <nav data-testid="test-case-pop-criteria-nav" aria-label="Sidebar">
-          <>
-            <button
-              onClick={() => {
-                setShowPopulationCriteriaTabs(!showPopulationCriteriaTabs);
-              }}
-              data-testid="test-case-pop-criteria-nav-collapser"
-              className={"collapsable-button"}
+        <nav
+          data-testid="test-case-sidebar"
+          aria-label="Test Case Sidebar Navigation"
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
+              height: 48,
+              padding: 16,
+            }}
+          >
+            <IconButton
+              onClick={() => setIsCollapsed(true)}
+              aria-label="Collapse Test Case Sidebar"
+              data-testid="test-case-sidebar-collapse-icon"
             >
-              Population Criteria
-              <span className="tab-dropdown">
-                {showPopulationCriteriaTabs ? (
-                  <ExpandLessIcon />
-                ) : (
-                  <ExpandMoreIcon />
-                )}
-              </span>
-            </button>
-          </>
+              <ExpansionIcon
+                style={{
+                  color: "#0073C8",
+                  transform: "rotate(180deg)",
+                }}
+                titleAccess="Collapse Test Case Sidebar"
+              />
+            </IconButton>
+          </div>
+          <button
+            onClick={() => {
+              setShowPopulationCriteriaTabs(!showPopulationCriteriaTabs);
+            }}
+            data-testid="test-case-pop-criteria-nav-collapser"
+            className={"collapsable-button"}
+          >
+            Population Criteria
+            <span className="tab-dropdown">
+              {showPopulationCriteriaTabs ? (
+                <ExpandLessIcon />
+              ) : (
+                <ExpandMoreIcon />
+              )}
+            </span>
+          </button>
           {showPopulationCriteriaTabs && (
             <div className="indented-tabs">
               <Tabs
@@ -108,7 +172,6 @@ const TestCaseListSideBarNav = ({
                 {showConfigTabs ? <ExpandLessIcon /> : <ExpandMoreIcon />}
               </span>
             </button>
-
             {showConfigTabs && (
               <div className="indented-tabs">
                 <Tabs

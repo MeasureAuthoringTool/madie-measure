@@ -974,4 +974,5 @@ export const structuredDefinitionUSCoreEthnicity = {
       },
     ],
   },
+  type: "Extension",
 };

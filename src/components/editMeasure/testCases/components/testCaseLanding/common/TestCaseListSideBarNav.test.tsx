@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import TestCaseListSideBarNav from "./TestCaseListSideBarNav";
 import { Group } from "@madie/madie-models";
@@ -32,10 +32,20 @@ describe("TestCase component", () => {
     jest.clearAllMocks();
   });
 
+  const defaultProps = {
+    allPopulationCriteria: groups,
+    isCollapsed: false,
+    setIsCollapsed: jest.fn(),
+  };
+
   it("should render no population criteria for null groups array", async () => {
     render(
       <MemoryRouter>
-        <TestCaseListSideBarNav allPopulationCriteria={null} />
+        <TestCaseListSideBarNav
+          allPopulationCriteria={null}
+          isCollapsed={false}
+          setIsCollapsed={jest.fn()}
+        />
       </MemoryRouter>
     );
 
@@ -48,7 +58,11 @@ describe("TestCase component", () => {
   it("should render no population criteria for empty groups array", async () => {
     render(
       <MemoryRouter>
-        <TestCaseListSideBarNav allPopulationCriteria={[]} />
+        <TestCaseListSideBarNav
+          allPopulationCriteria={[]}
+          isCollapsed={false}
+          setIsCollapsed={jest.fn()}
+        />
       </MemoryRouter>
     );
 
@@ -59,10 +73,9 @@ describe("TestCase component", () => {
   });
 
   it("should render multiple population criteria", async () => {
-    const onChange = jest.fn();
     render(
       <MemoryRouter>
-        <TestCaseListSideBarNav allPopulationCriteria={groups} />
+        <TestCaseListSideBarNav {...defaultProps} />
       </MemoryRouter>
     );
 
@@ -84,7 +97,7 @@ describe("TestCase component", () => {
     const onChange = jest.fn();
     render(
       <MemoryRouter>
-        <TestCaseListSideBarNav allPopulationCriteria={groups} qdm={true} />
+        <TestCaseListSideBarNav {...defaultProps} qdm={true} />
       </MemoryRouter>
     );
 
@@ -101,7 +114,7 @@ describe("TestCase component", () => {
 
     render(
       <MemoryRouter>
-        <TestCaseListSideBarNav allPopulationCriteria={groups} qdm={true} />
+        <TestCaseListSideBarNav {...defaultProps} qdm={true} />
       </MemoryRouter>
     );
 
@@ -111,7 +124,7 @@ describe("TestCase component", () => {
   it("should render RAV tab for QDM measures when QDMIncludeRAVValues flag is true", async () => {
     render(
       <MemoryRouter>
-        <TestCaseListSideBarNav allPopulationCriteria={groups} qdm={true} />
+        <TestCaseListSideBarNav {...defaultProps} qdm={true} />
       </MemoryRouter>
     );
 
@@ -127,7 +140,7 @@ describe("TestCase component", () => {
 
     render(
       <MemoryRouter>
-        <TestCaseListSideBarNav allPopulationCriteria={groups} qdm={false} />
+        <TestCaseListSideBarNav {...defaultProps} qdm={false} />
       </MemoryRouter>
     );
 
@@ -137,7 +150,7 @@ describe("TestCase component", () => {
   it("should render RAV tab for QI Core measures when QICoreIncludeRAVValues flag is true", async () => {
     render(
       <MemoryRouter>
-        <TestCaseListSideBarNav allPopulationCriteria={groups} qdm={false} />
+        <TestCaseListSideBarNav {...defaultProps} qdm={false} />
       </MemoryRouter>
     );
 
@@ -147,12 +160,55 @@ describe("TestCase component", () => {
   it("should render Expansion tab for QI Core measures", async () => {
     render(
       <MemoryRouter>
-        <TestCaseListSideBarNav allPopulationCriteria={groups} />
+        <TestCaseListSideBarNav {...defaultProps} />
       </MemoryRouter>
     );
 
     expect(
       screen.queryByRole("tab", { name: "Expansion" })
     ).toBeInTheDocument();
+  });
+
+  it("renders only expand icon when collapsed and expands on click", () => {
+    const setIsCollapsed = jest.fn();
+    render(
+      <MemoryRouter>
+        <TestCaseListSideBarNav
+          allPopulationCriteria={groups}
+          isCollapsed={true}
+          setIsCollapsed={setIsCollapsed}
+        />
+      </MemoryRouter>
+    );
+
+    // Only the expand icon should be visible
+    expect(
+      screen.getByTestId("test-case-sidebar-expand-icon")
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("test-case-sidebar-expand-icon"));
+    expect(setIsCollapsed).toHaveBeenCalledWith(false);
+  });
+
+  it("renders collapse icon when expanded and collapses on click", () => {
+    const setIsCollapsed = jest.fn();
+    render(
+      <MemoryRouter>
+        <TestCaseListSideBarNav
+          allPopulationCriteria={groups}
+          isCollapsed={false}
+          setIsCollapsed={setIsCollapsed}
+        />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByTestId("test-case-sidebar")).toBeInTheDocument();
+    // Should have the collapse icon
+    expect(
+      screen.getByTestId("test-case-sidebar-collapse-icon")
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("test-case-sidebar-collapse-icon"));
+    expect(setIsCollapsed).toHaveBeenCalledWith(true);
   });
 });

@@ -73,6 +73,17 @@ export const convertDate = (date: string) => {
   };
 };
 
+// Returns true if the test case was created or modified after the measure was last versioned
+const isCreatedOrModifiedAfterVersioning = (
+  testCaseLastModifiedDateStr: string,
+  measureLastModifiedDateStr: string
+) => {
+  const testCaseLastModifiedDate = new Date(testCaseLastModifiedDateStr);
+  const measureLastModifiedDate = new Date(measureLastModifiedDateStr);
+
+  return testCaseLastModifiedDate > measureLastModifiedDate;
+};
+
 const IndeterminateCheckbox = ({ indeterminate, checked, ...rest }: any) => {
   const ref = React.useRef<HTMLInputElement>(null);
 
@@ -163,6 +174,8 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           checked={table.getIsAllRowsSelected()}
           indeterminate={table.getIsSomePageRowsSelected()}
           onChange={table.getToggleAllPageRowsSelectedHandler()}
+          aria-label="Test Case Selection"
+          tabIndex={0}
         />
       ),
       cell: ({ row }) => (
@@ -273,7 +286,10 @@ const TestCaseTable = (props: TestCaseTableProps) => {
             >
               {featureFlags?.EditTestsOnVersionedMeasures &&
               !measure.measureMetaData?.draft &&
-              !info.row.original.action.createdBeforeVersioning ? (
+              isCreatedOrModifiedAfterVersioning(
+                info.row.original.lastSaved,
+                measure?.lastModifiedAt
+              ) ? (
                 <div>
                   <FiberManualRecord
                     sx={fiberManualRecordStyles}
@@ -292,7 +308,11 @@ const TestCaseTable = (props: TestCaseTableProps) => {
         accessorKey: "lastModifiedAt",
       },
       {
-        header: "",
+        header: () => (
+          <button tabIndex={0} aria-label="Edit or View Test Case">
+            Action
+          </button>
+        ),
         cell: (info) => (
           <Button
             variant="outline-filled"
@@ -386,7 +406,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
                     onMouseLeave={() => setHoveredHeader(null)}
                     className="header-cell"
                   >
-                    {header.isPlaceholder ? null : (
+                    {header.isPlaceholder ? null : header.column.getCanSort() ? (
                       <button
                         className={
                           header.column.getCanSort()
@@ -418,6 +438,11 @@ const TestCaseTable = (props: TestCaseTableProps) => {
                           header.getContext()
                         )}
                       </button>
+                    ) : (
+                      flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )
                     )}
                   </TH>
                 );
