@@ -687,6 +687,6 @@ describe("TestCase component", () => {
     expect(columns[7]).toHaveTextContent("09/06/202415:15:14 (UTC)");
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(13);
+    expect(buttons).toHaveLength(12);
   });
 });
