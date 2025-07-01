@@ -81,18 +81,6 @@ const TestCaseSeries = ({
     setInputValue("");
   };
 
-  const handleInputChange = (event) => {
-    if (!event || !event.target) return;
-
-    const newValue = event.target.value;
-    setInputValue(newValue);
-    setInputLength(newValue.length || 0);
-
-    if (newValue === "" && value !== "") {
-      onChange("");
-    }
-  };
-
   const renderOption = (props, option) => {
     return (
       <li {...props} data-testid={`${option}-aa-option`}>
@@ -119,7 +107,6 @@ const TestCaseSeries = ({
         renderOption={renderOption}
         inputProps={{
           maxLength: maxLength,
-          onChange: handleInputChange,
           "data-testid": "test-case-series-input",
           value: inputValue || value,
         }}
