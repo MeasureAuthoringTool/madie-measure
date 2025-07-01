@@ -1,9 +1,6 @@
-import React, { useState, ChangeEvent } from "react";
-import { TextField } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { AutoComplete } from "@madie/madie-design-system/dist/react";
 import * as _ from "lodash";
-import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
-
-const filter = createFilterOptions();
 
 export interface TestCaseSeriesProps {
   disabled?: boolean;
@@ -20,108 +17,116 @@ const TestCaseSeries = ({
   seriesOptions = [],
   sx,
 }: TestCaseSeriesProps) => {
-  const maxLength = 250; // Define maxLength as a constant
+  const maxLength = 250;
   const [inputLength, setInputLength] = useState(value?.length || 0);
+  const [inputValue, setInputValue] = useState("");
+
+  useEffect(() => {
+    setInputLength(value?.length || 0);
+  }, [value]);
+
   const cleanedOptions = _.isArray(seriesOptions)
     ? seriesOptions.filter((o) => !_.isNil(o) && o.trim().length > 0)
     : [];
 
+  const getOptions = () => {
+    if (!inputValue) {
+      return cleanedOptions;
+    }
+
+    const matchingOptions = cleanedOptions.filter((option) =>
+      option.toLowerCase().includes(inputValue.toLowerCase())
+    );
+
+    const exactMatch = cleanedOptions.some(
+      (option) => option.toLowerCase() === inputValue.toLowerCase()
+    );
+
+    if (!exactMatch && inputValue.trim() !== "") {
+      return [...matchingOptions, `Add "${inputValue}"`];
+    }
+
+    return matchingOptions;
+  };
+
+  const handleAutoCompleteChange = (id, selectedValue, reason, details) => {
+    if (reason === "clear") {
+      onChange("");
+      setInputValue("");
+      return;
+    }
+
+    if (selectedValue === null || selectedValue === undefined) {
+      onChange("");
+      setInputValue("");
+      return;
+    }
+
+    if (
+      typeof selectedValue === "string" &&
+      selectedValue.startsWith('Add "') &&
+      selectedValue.endsWith('"')
+    ) {
+      const newValue = selectedValue.substring(5, selectedValue.length - 1);
+      onChange(newValue);
+      setInputValue(newValue);
+      return;
+    }
+
+    const existingOption = cleanedOptions.find(
+      (option) => option.toLowerCase() === selectedValue.toLowerCase()
+    );
+
+    onChange(existingOption || selectedValue);
+    setInputValue("");
+  };
+
+  const handleInputChange = (event) => {
+    if (!event || !event.target) return;
+
+    const newValue = event.target.value;
+    setInputValue(newValue);
+    setInputLength(newValue.length || 0);
+
+    if (newValue === "" && value !== "") {
+      onChange("");
+    }
+  };
+
+  const renderOption = (props, option) => {
+    return (
+      <li {...props} data-testid={`${option}-aa-option`}>
+        {option}
+      </li>
+    );
+  };
+
   return (
-    <div style={{ position: "relative" }}>
-      <Autocomplete
-        disabled={disabled}
+    <div
+      style={{ position: "relative" }}
+      data-testid="test-case-series-container"
+    >
+      <AutoComplete
         id="test-case-series"
-        freeSolo
-        clearOnBlur
+        dataTestId="test-case-series"
+        disabled={disabled}
+        placeholder="Start typing or select"
+        options={getOptions()}
+        freeSolo={true}
         value={value}
-        onChange={(event, newValue) => {
-          event.preventDefault();
-          if (_.isNil(newValue)) {
-            onChange("");
-            return;
-          }
-
-          const v = newValue?.inputValue || newValue;
-          const existingOption = cleanedOptions.find(
-            (s) => s?.trim().toUpperCase() === v?.trim().toUpperCase()
-          );
-          _.isNil(existingOption) ? onChange(v) : onChange(existingOption);
-        }}
+        onChange={handleAutoCompleteChange}
         sx={sx}
-        renderInput={(params) => {
-          const { inputProps } = params;
-          inputProps["maxLength"] = maxLength;
-          return (
-            <TextField
-              sx={{
-                "& .MuiInputBase-input": {
-                  opacity: 1,
-                  color: "#717171",
-                  "&::placeholder": {
-                    opacity: 1,
-                    color: "#717171",
-                  },
-                },
-              }}
-              {...params}
-              onChange={(
-                e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-              ) => {
-                params.inputProps.onChange(e as ChangeEvent<HTMLInputElement>);
-                onChange(e.target.value);
-                setInputLength(e.target.value.length);
-              }}
-              onKeyUp={(e) => {
-                setInputLength((e.target as HTMLInputElement).value.length);
-              }}
-              data-testid="test-case-series"
-              placeholder="Start typing or select"
-            />
-          );
+        renderOption={renderOption}
+        inputProps={{
+          maxLength: maxLength,
+          onChange: handleInputChange,
+          "data-testid": "test-case-series-input",
+          value: inputValue || value,
         }}
-        options={cleanedOptions}
-        filterOptions={(options, params) => {
-          const filtered = filter(options, params);
-
-          const { inputValue } = params;
-          // Suggest the creation of a new value
-          const isExisting = options.some(
-            (option) =>
-              inputValue.trim().toUpperCase() === option?.trim().toUpperCase()
-          );
-          if (inputValue !== "" && !isExisting) {
-            filtered.push({
-              inputValue,
-              title: `Add "${inputValue}"`,
-            });
-          }
-
-          return filtered;
-        }}
-        getOptionLabel={(option: any): any => {
-          // Value selected with enter, right from the input
-          if (typeof option === "string") {
-            return option;
-          }
-          // Add "xxx" option created dynamically
-          if (option?.inputValue) {
-            return option.inputValue;
-          }
-          return option?.title;
-        }}
-        renderOption={(props, option) => {
-          if (typeof option === "string") {
-            return (
-              <li {...props} data-testid={`${option}-aa-option`}>
-                {option}
-              </li>
-            );
-          } else {
-            return (
-              <li {...props} data-testid={`${option?.title}-aa-option`}>
-                {option?.title}
-              </li>
-            );
+        onInputChange={(event, newInputValue) => {
+          if (event) {
+            setInputValue(newInputValue);
+            setInputLength(newInputValue.length || 0);
           }
         }}
       />
@@ -135,6 +140,7 @@ const TestCaseSeries = ({
             bottom: -26,
             right: 0,
           }}
+          data-testid="character-count"
         >
           {inputLength}/{maxLength} Characters
         </span>

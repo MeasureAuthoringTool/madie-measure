@@ -2872,7 +2872,9 @@ describe("EditTestCase component", () => {
           expect(
             screen.getByRole("textbox", { name: "Description" })
           ).toHaveAttribute("readonly");
-          expect(screen.getByLabelText("Group")).toBeDisabled();
+          expect(
+            screen.getByRole("textbox", { name: "Group" })
+          ).toHaveAttribute("readonly");
         },
         { timeout: 1500 }
       );

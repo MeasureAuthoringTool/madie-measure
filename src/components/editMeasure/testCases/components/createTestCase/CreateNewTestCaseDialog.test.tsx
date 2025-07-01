@@ -143,7 +143,9 @@ describe("Create New Test Case Dialog", () => {
     expect(getByTestId('Add "test case series"-aa-option')).toBeInTheDocument();
     expect(seriesOption).toBeInTheDocument();
     userEvent.click(seriesOption);
-    expect(seriesInput).toHaveValue(formikInfo.series);
+    await waitFor(() => {
+      expect(seriesInput).toHaveValue(formikInfo.series);
+    });
 
     const saveButton = getByTestId("create-test-case-save-button");
     expect(saveButton).not.toBeDisabled();
@@ -190,7 +192,9 @@ describe("Create New Test Case Dialog", () => {
     expect(getByTestId('Add "test case series"-aa-option')).toBeInTheDocument();
     expect(seriesOption).toBeInTheDocument();
     userEvent.click(seriesOption);
-    expect(seriesInput).toHaveValue(formikInfo.series);
+    await waitFor(() => {
+      expect(seriesInput).toHaveValue(formikInfo.series);
+    });
 
     const saveButton = getByTestId("create-test-case-save-button");
     expect(saveButton).not.toBeDisabled();
@@ -253,7 +257,9 @@ describe("Create New Test Case Dialog", () => {
     expect(getByTestId('Add "test case series"-aa-option')).toBeInTheDocument();
     expect(seriesOption).toBeInTheDocument();
     userEvent.click(seriesOption);
-    expect(seriesInput).toHaveValue(formikInfo.series);
+    await waitFor(() => {
+      expect(seriesInput).toHaveValue(formikInfo.series);
+    });
 
     const saveButton = getByTestId("create-test-case-save-button");
     expect(saveButton).not.toBeDisabled();
@@ -264,6 +270,55 @@ describe("Create New Test Case Dialog", () => {
       expect(serverErrorAlert).toHaveTextContent(
         "Test Case Title can not contain special characters: " + specialChars
       );
+    });
+  }, 16000);
+
+  it("should handle custom series by clicking 'Add \"...\"'", async () => {
+    const measure: Measure = {
+      model: "QDM",
+    } as unknown as Measure;
+    const { getByRole, getByTestId, getByText, queryByTestId } = render(
+      <MemoryRouter
+        initialEntries={[
+          `/measures/${mockMeasure.id}/edit/test-cases/list-page`,
+        ]}
+      >
+        <CreateNewTestCaseDialog
+          open={true}
+          onClose={jest.fn()}
+          measure={measure}
+        />
+      </MemoryRouter>
+    );
+
+    const titleInput = getByTestId(
+      "create-test-case-title-input"
+    ) as HTMLInputElement;
+    userEvent.type(titleInput, formikInfo.title);
+    expect(titleInput.value).toBe(formikInfo.title);
+    Simulate.change(titleInput);
+
+    const descriptionInput = getByTestId(
+      "create-test-case-description"
+    ) as HTMLInputElement;
+    userEvent.type(descriptionInput, formikInfo.description);
+    expect(descriptionInput.value).toBe(formikInfo.description);
+    Simulate.change(descriptionInput);
+
+    const seriesInput = getByRole("combobox");
+    userEvent.type(seriesInput, "test case series");
+    const addOption = await screen.findByText('Add "test case series"');
+    expect(addOption).toBeInTheDocument();
+    userEvent.click(addOption);
+    await waitFor(() => {
+      expect(seriesInput).toHaveValue("test case series");
+    });
+
+    const saveButton = getByTestId("create-test-case-save-button");
+    expect(saveButton).not.toBeDisabled();
+    userEvent.click(saveButton);
+    await waitFor(() => {
+      expect(queryByTestId("server-error-alerts")).not.toBeVisible();
     });
   }, 16000);
 });
