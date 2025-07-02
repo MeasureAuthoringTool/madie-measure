@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import * as _ from "lodash";
-import Box from "@mui/material/Box";
+import { Box, Divider } from "@mui/material";
+
 import StringComponent from "./types/StringComponent";
 import PeriodComponent from "./types/PeriodComponent";
 import DateTimeComponent from "./types/DateTimeComponent";
@@ -28,8 +29,8 @@ import {
 import CodingComponent from "./types/CodingComponent";
 import { useRequiredFields } from "./RequiredFieldsContext";
 import ElementSection from "../../../../../../common/ElementSection";
-import { Divider } from "@mui/material";
 import CodeableConceptComponent from "./types/CodeableConceptComponent";
+import ChoiceType from "./ChoiceType";
 
 // onChange is being deprecated as no updates to the resource are tracked.
 // Changes directly to the json should be done with a dispatch, this propagates downstream changes in formik.
@@ -45,7 +46,24 @@ const TypeEditor = ({
   const { requiredFields, formInfo } = useRequiredFields();
   let required = getRequired(requiredFields, stripAllIndexes(label));
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
-  const type = structureDefinition?.type?.[0]?.code;
+  if (typeof label !== "string") {
+    console.warn("TypeEditor: label is not a string", label);
+    throw new Error("TypeEditor: label is not a string");
+  }
+  //if isComponentDataType, we need to render the component based on the label, otherwise, use type from the StructureDefinition.type[0].code
+  //let type:string = isComponentDataType(label) ? label : structureDefinition?.type?.[0]?.code;
+
+  //Iterate Types and determine which one is the correct one to use based on the label (which is a concatenation of the path and the type)
+  const idWithoutChoice = structureDefinition?.id?.replace(
+    /\[[x,0..9]\]/gi,
+    ""
+  );
+  let type: string = structureDefinition?.type?.find((t) => {
+    return _.toLower(t.code) === _.toLower(label.replace(idWithoutChoice, ""));
+  })?.code;
+  if (!type) {
+    type = structureDefinition?.type?.[0]?.code;
+  }
   // is multiple cardinality?
   if (structureDefinition?.max === "*") {
     // is it not already terminated with an index?
@@ -85,6 +103,7 @@ const TypeEditor = ({
     // can't be a memo since it's async.
     const fetchProfiles = async () => {
       const type = structureDefinition?.type?.[0];
+
       if (!_.isEmpty(type?.profile)) {
         const loadProfiles = type.profile.map((profile: string) => {
           const resourceId = profile.split("/").pop();
@@ -116,7 +135,6 @@ const TypeEditor = ({
       return errors;
     }
   };
-
   if (isComponentDataType(type)) {
     switch (type) {
       case "string":
@@ -505,11 +523,24 @@ const TypeEditor = ({
     }
   } else if (!_.isEmpty(childDefs)) {
     //  If we have childTypeDefs, we need to check to make weather or not there's an index supplied so we can attach it to the label
+
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {childDefs?.map((childDef) => {
           // if it's not a component dataType, we should render a header since it will have it's own property paths
-          if (!isComponentDataType(childDef?.type?.[0]?.code)) {
+          if (_.endsWith(childDef.id, "[x]") && childDef?.type?.length > 1) {
+            //Let's render a select that allows us to select the type of childDef we want to render.
+            return (
+              <ChoiceType
+                childDef={childDef}
+                resource={resource}
+                structureDefinition={structureDefinition}
+                parentStructureDefinition={parentStructureDefinition}
+                canEdit={canEdit}
+                label={label}
+              />
+            );
+          } else if (!isComponentDataType(childDef?.type?.[0]?.code)) {
             // add additional check for if the type exists because I have no idea what ClaimResponse.item.detail.adjudication is but it has no type.
             // TODO Figure out whats up with ClaimResponse.item.detail.adjudication. Doesn't appear to have children, but a backbone el
             // TODO probably have to map these multiple cardinality elements against the length of the formik.values[propertyPath] if multiple and add index like done in elementEditorChildren.
