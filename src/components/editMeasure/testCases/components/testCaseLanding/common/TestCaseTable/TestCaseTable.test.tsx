@@ -13,6 +13,7 @@ import {
 // @ts-ignore
 import { useFeatureFlags, checkUserCanEdit } from "@madie/madie-util";
 import userEvent from "@testing-library/user-event";
+import { within } from "@testing-library/dom";
 
 const testCase = {
   id: "ID",
@@ -34,6 +35,7 @@ const testCaseFail = {
   lastModifiedAt: "2024-09-06T15:16:14.382Z",
   executionStatus: "fail",
   caseNumber: null,
+  testCaseValidationStatus: "Invalid JSON",
 } as unknown as TestCase;
 
 const testCaseNA = {
@@ -44,6 +46,7 @@ const testCaseNA = {
   lastModifiedAt: "2024-09-06T15:17:14.382Z",
   executionStatus: "NA",
   caseNumber: null,
+  testCaseValidationStatus: "Not Complete",
 } as unknown as TestCase;
 
 const testCaseInvalid = {
@@ -54,9 +57,28 @@ const testCaseInvalid = {
   lastModifiedAt: "2022-03-01T14:18:14.382Z",
   executionStatus: "Invalid",
   caseNumber: null,
+  testCaseValidationStatus: "Invalid",
 } as unknown as TestCase;
 
-const testCases = [testCase, testCaseFail, testCaseNA, testCaseInvalid];
+const testCaseValidating = {
+  id: "ID4",
+  title: "TEST IPP4",
+  description: "TEST DESCRIPTION4",
+  series: "TEST SERIES4",
+  lastModifiedAt: "2024-09-06T15:15:14.382Z",
+  executionStatus: "pass",
+  caseNumber: 1,
+  action: { createdBeforeVersioning: true },
+  testCaseValidationStatus: "Validating",
+} as unknown as TestCase;
+
+const testCases = [
+  testCase,
+  testCaseFail,
+  testCaseNA,
+  testCaseInvalid,
+  testCaseValidating,
+];
 
 const measures = [
   {
@@ -261,7 +283,7 @@ describe("TestCase component", () => {
     expect(columns[6]).toHaveTextContent("09/06/202415:15:14 (UTC)");
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(11);
+    expect(buttons).toHaveLength(12);
     expect(buttons[8]).toHaveTextContent("View");
   });
 
@@ -291,7 +313,7 @@ describe("TestCase component", () => {
     expect(columns[6]).toHaveTextContent("09/06/202415:15:14 (UTC)");
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(11);
+    expect(buttons).toHaveLength(12);
   });
 
   it.skip("should render test case table with checkboxes when flag is set", async () => {
@@ -354,7 +376,7 @@ describe("TestCase component", () => {
     expect(columns[6]).toHaveTextContent("09/06/202415:15:14 (UTC)");
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(11);
+    expect(buttons).toHaveLength(12);
     fireEvent.click(buttons[6]);
     expect(screen.queryByText("edit")).not.toBeInTheDocument();
     expect(
@@ -660,7 +682,7 @@ describe("TestCase component", () => {
     });
   });
 
-  it("should render test case table with validation status for qiCore6", async () => {
+  it("should render test case table with validation status for qiCore6 and be sortable", async () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
@@ -687,6 +709,9 @@ describe("TestCase component", () => {
     expect(columns[7]).toHaveTextContent("09/06/202415:15:14 (UTC)");
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(12);
+    expect(buttons).toHaveLength(13);
+
+    expect(buttons[2].textContent).toBe("Validation");
+    fireEvent.click(buttons[2]);
   });
 });
