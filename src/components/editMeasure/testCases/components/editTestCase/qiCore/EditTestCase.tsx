@@ -89,6 +89,8 @@ import {
   isHapiOutcomeIssueCodeInformational,
 } from "./EditTestCaseUtil";
 import { useTestCasePolling } from "../../../hooks/useTestCasePolling";
+import WarningIcon from "@mui/icons-material/Warning";
+import KeyboardTabIcon from "@mui/icons-material/KeyboardTab";
 
 const TestCaseForm = tw.form`m-3`;
 const ValidationErrorsButton = tw.button`
@@ -969,9 +971,8 @@ const EditTestCase = (props: EditTestCaseProps) => {
         <EditTestCaseBreadCrumbs testCase={testCase} measureId={measureId} />
         <div className="allotment-wrapper">
           <Allotment
-            minSize={10}
             ref={allotmentRef}
-            defaultSizes={[200, 200, 10]}
+            defaultSizes={[48, 48, 4]}
             vertical={false}
           >
             <Allotment.Pane>
@@ -1061,7 +1062,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 )}
               </div>
             </Allotment.Pane>
-
             <Allotment.Pane>
               <div className="right-panel">
                 <CreateTestCaseRightPanelNavTabs
@@ -1275,93 +1275,91 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 )}
               </div>
             </Allotment.Pane>
-            <Allotment.Pane>
-              <div className="validation-panel">
-                {showValidationErrors ? (
-                  <aside
-                    tw="w-full h-full flex flex-col"
-                    data-testid="open-json-validation-errors-aside"
-                  >
-                    <button
-                      data-testid="hide-json-validation-errors-button"
-                      onClick={() => {
-                        setShowValidationErrors((prevState) => {
-                          allotmentRef.current.resize([200, 200, 10]);
-                          return !prevState;
-                        });
-                      }}
-                    >
-                      <StyledIcon
-                        icon={faExclamationCircle}
-                        errorSeverity={severityOfValidationErrors(
-                          validationErrors
-                        )}
-                      />
-                      Validation Errors
-                    </button>
 
+            <Allotment.Pane minSize={4}>
+              <div
+                className={`validation-panel ${
+                  showValidationErrors ? "open" : "closed"
+                }`}
+              >
+                {showValidationErrors ? (
+                  <>
+                    <div className="flex justify-between items-center w-full mb-2">
+                      <div className="validation-header">
+                        <div className="header-left">
+                          <WarningIcon color="warning" />
+                          <span className="ml-2">
+                            Validations ({validationErrors?.length || 0})
+                          </span>
+                        </div>
+
+                        <Button
+                          variant="action"
+                          data-testid="hide-json-validation-errors-button"
+                          onClick={() => {
+                            setShowValidationErrors(false);
+                            setTimeout(() => {
+                              allotmentRef.current.resize([48, 48, 4]);
+                            }, 0);
+                          }}
+                          className="validation-panel-toggle-button"
+                          title="Close Panel"
+                        >
+                          <KeyboardTabIcon />
+                        </Button>
+                      </div>
+                    </div>
                     <div
-                      tw="h-full flex flex-col overflow-y-scroll"
-                      data-testid="json-validation-errors-list"
                       className="validation-content"
+                      data-testid="json-validation-errors-list"
                     >
                       {validationErrors && validationErrors.length > 0 ? (
                         validationErrors
                           .filter(
-                            (error) =>
-                              /^information/.exec(error?.severity) === null
+                            (error) => !/^information/.test(error?.severity)
                           )
-                          .map((error) => {
-                            return (
-                              <ValidationAlertCard
-                                key={error.key}
-                                status={
-                                  error.diagnostics.includes("Meta.profile")
-                                    ? "meta"
-                                    : error.severity
-                                    ? error.severity
-                                    : "error"
-                                }
-                              >
-                                {error.diagnostics.includes("Meta.profile")
-                                  ? "Meta.profile: "
-                                  : error.severity
-                                  ? error.severity.charAt(0).toUpperCase() +
-                                    error.severity.slice(1) +
-                                    ": "
-                                  : ""}
-                                {error.diagnostics}
-                              </ValidationAlertCard>
-                            );
-                          })
+                          .map((error) => (
+                            <ValidationAlertCard
+                              key={error.key}
+                              status={
+                                error.diagnostics.includes("Meta.profile")
+                                  ? "meta"
+                                  : error.severity || "error"
+                              }
+                            >
+                              {error.diagnostics.includes("Meta.profile")
+                                ? "Meta.profile: "
+                                : error.severity
+                                ? error.severity.charAt(0).toUpperCase() +
+                                  error.severity.slice(1) +
+                                  ": "
+                                : ""}
+                              {error.diagnostics}
+                            </ValidationAlertCard>
+                          ))
                       ) : (
                         <span>Nothing to see here!</span>
                       )}
                     </div>
-                  </aside>
+                  </>
                 ) : (
-                  <aside
-                    tw="h-full w-full"
-                    data-testid="closed-json-validation-errors-aside"
-                  >
-                    <ValidationErrorsButton
-                      data-testid="show-json-validation-errors-button"
-                      onClick={() =>
-                        setShowValidationErrors((prevState) => {
-                          allotmentRef.current.resize([200, 200, 50]);
-                          return !prevState;
-                        })
-                      }
-                    >
-                      <StyledIcon
-                        icon={faExclamationCircle}
-                        errorSeverity={severityOfValidationErrors(
-                          validationErrors
-                        )}
-                      />
-                      Validation Errors
-                    </ValidationErrorsButton>
-                  </aside>
+                  <div data-testid="closed-json-validation-errors-aside">
+                    <div className="closed-header">
+                      <Button
+                        size="small"
+                        data-testid="show-json-validation-errors-button"
+                        onClick={() => {
+                          setShowValidationErrors(true);
+                          allotmentRef.current.resize([34, 33, 33]);
+                        }}
+                        className="validation-panel-toggle-button"
+                        title="Open Validations"
+                      >
+                        <WarningIcon color="warning" />
+                      </Button>
+                    </div>
+                    <div className="closed-body"></div>
+                  </div>
                 )}
               </div>
             </Allotment.Pane>
