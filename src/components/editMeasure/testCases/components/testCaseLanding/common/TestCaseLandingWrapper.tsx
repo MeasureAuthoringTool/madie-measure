@@ -6,28 +6,48 @@ import * as _ from "lodash";
 import TestCaseListSideBarNav from "./TestCaseListSideBarNav";
 import { measureStore, useFeatureFlags } from "@madie/madie-util";
 
+const COLLAPSED_WIDTH = 48;
+const EXPANDED_WIDTH = 260;
+
+const testCaseSidebarCollapsedKey = "testCaseSidebarCollapsed";
+
 const TestCaseLandingWrapper = (props) => {
   const [measure, setMeasure] = useState<any>(measureStore.state);
+  const [isCollapsed, setIsCollapsed] = useState(
+    () => localStorage.getItem(testCaseSidebarCollapsedKey) === "true"
+  );
+
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
     return () => {
       subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem(
+      testCaseSidebarCollapsedKey,
+      isCollapsed ? "true" : "false"
+    );
+  }, [isCollapsed]);
+
   return (
     <div
-      tw="grid lg:grid-cols-6 gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate bg-white"
-      style={{ marginTop: 16 }}
+      tw="grid gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate bg-white"
+      style={{
+        marginTop: 16,
+        gridTemplateColumns: `${
+          isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH
+        }px 1fr`,
+      }}
     >
-      <>
-        <TestCaseListSideBarNav
-          allPopulationCriteria={measure?.groups}
-          qdm={props.qdm}
-        />
-        <div tw="lg:col-span-5 pl-2 pr-2">
-          {props.children && props.children}
-        </div>
-      </>
+      <TestCaseListSideBarNav
+        allPopulationCriteria={measure?.groups}
+        qdm={props.qdm}
+        isCollapsed={isCollapsed}
+        setIsCollapsed={setIsCollapsed}
+      />
+      <div tw="pl-2 pr-2">{props.children && props.children}</div>
     </div>
   );
 };

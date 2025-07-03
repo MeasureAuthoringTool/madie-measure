@@ -30,6 +30,9 @@ let serviceApiMock = {
 } as unknown as MeasureServiceApi;
 useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
 
+const expectedOptions1 = ["Citation", "Justification", "Unknown"];
+const expectedOptions2 = ["Citation", "Justification"];
+
 function referenceHelper(number: number): Reference[] {
   const references: Reference[] = [];
   for (let i = 0; i < number; i++) {
@@ -551,13 +554,6 @@ describe("Measure References Component", () => {
   });
 
   it("Should open the Type dropdown with expected options for QDM v5.6 measure", async () => {
-    const expectedOptions = [
-      "Citation",
-      "Documentation",
-      "Justification",
-      "Unknown",
-    ];
-
     measureStore.state.mockImplementation(() => {
       return {
         ...measureWithNineItems,
@@ -584,16 +580,14 @@ describe("Measure References Component", () => {
     userEvent.click(referenceTypeSelectDropdown);
 
     const referenceTypeOptionsList = await findAllByTestId(/-option/i);
-    expect(referenceTypeOptionsList).toHaveLength(4);
+    expect(referenceTypeOptionsList).toHaveLength(3);
 
     referenceTypeOptionsList.forEach((option, index) => {
-      expect(option).toHaveTextContent(expectedOptions[index]);
+      expect(option).toHaveTextContent(expectedOptions1[index]);
     });
   });
 
   it("Should open the Type dropdown with expected options for QI-Core v4.1.1 measure", async () => {
-    const expectedOptions = ["Citation", "Documentation", "Justification"];
-
     measureStore.state.mockImplementation(() => {
       return {
         ...measureWithNineItems,
@@ -620,16 +614,14 @@ describe("Measure References Component", () => {
     userEvent.click(referenceTypeSelectDropdown);
 
     const referenceTypeOptionsList = await findAllByTestId(/-option/i);
-    expect(referenceTypeOptionsList).toHaveLength(3);
+    expect(referenceTypeOptionsList).toHaveLength(2);
 
     referenceTypeOptionsList.forEach((option, index) => {
-      expect(option).toHaveTextContent(expectedOptions[index]);
+      expect(option).toHaveTextContent(expectedOptions2[index]);
     });
   });
 
   it("Should open the Type dropdown with expected options for QI-Core v6.0.0 measure", async () => {
-    const expectedOptions = ["Citation", "Documentation", "Justification"];
-
     measureStore.state.mockImplementation(() => {
       return {
         ...measureWithNineItems,
@@ -656,10 +648,10 @@ describe("Measure References Component", () => {
     userEvent.click(referenceTypeSelectDropdown);
 
     const referenceTypeOptionsList = await findAllByTestId(/-option/i);
-    expect(referenceTypeOptionsList).toHaveLength(3);
+    expect(referenceTypeOptionsList).toHaveLength(2);
 
     referenceTypeOptionsList.forEach((option, index) => {
-      expect(option).toHaveTextContent(expectedOptions[index]);
+      expect(option).toHaveTextContent(expectedOptions2[index]);
     });
   });
 
@@ -722,5 +714,120 @@ describe("Measure References Component", () => {
       expect(mockedNavigate).toHaveBeenCalled();
     });
     await checkRows(11);
+  });
+
+  it("Editing existing reference with type Citation, user should see Citation in the dropdown", async () => {
+    const reference: Reference = {
+      id: "id 1",
+      referenceType: "Citation",
+      referenceText: "text 1",
+    };
+    const testMeasure = {
+      ...measure,
+      measureMetaData: { references: [reference] },
+    };
+    measureStore.state.mockImplementation(() => testMeasure);
+    measureStore.initialState.mockImplementation(() => testMeasure);
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    await checkRows(1);
+
+    const editButton = screen.getByTestId(`edit-measure-reference-id 1`);
+    expect(editButton).toBeInTheDocument();
+
+    const deleteButton = getByTestId(`delete-measure-reference-id 1`);
+    expect(deleteButton).toBeInTheDocument();
+
+    userEvent.click(editButton);
+
+    await waitFor(() => {
+      expect(getByTestId("dialog-form")).toBeInTheDocument();
+    });
+
+    const typeInput = screen.getByTestId(
+      "measure-referenceType-input"
+    ) as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("Citation");
+    const textAreaInput = getByTestId(
+      "measure-referenceText"
+    ) as HTMLTextAreaElement;
+    expect(textAreaInput.value).toBe("text 1");
+
+    fireEvent.change(typeInput, {
+      target: { value: "Citation" },
+    });
+    expect(typeInput.value).toBe("Citation");
+
+    act(() => {
+      fireEvent.change(textAreaInput, {
+        target: { value: "text 10" },
+      });
+    });
+    fireEvent.blur(textAreaInput);
+    expectInputValue(textAreaInput, "text 10");
+  });
+
+  it("Editing existing reference with type Documentation, user should not see Documentation in the dropdown", async () => {
+    const reference: Reference = {
+      id: "id 1",
+      referenceType: "Documentation",
+      referenceText: "text 1",
+    };
+    const testMeasure = {
+      ...measure,
+      measureMetaData: { references: [reference] },
+    };
+    measureStore.state.mockImplementation(() => testMeasure);
+    measureStore.initialState.mockImplementation(() => testMeasure);
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    await checkRows(1);
+
+    const editButton = screen.getByTestId(`edit-measure-reference-id 1`);
+    expect(editButton).toBeInTheDocument();
+
+    const deleteButton = getByTestId(`delete-measure-reference-id 1`);
+    expect(deleteButton).toBeInTheDocument();
+
+    userEvent.click(editButton);
+
+    await waitFor(() => {
+      expect(getByTestId("dialog-form")).toBeInTheDocument();
+    });
+
+    const typeInput = screen.getByTestId(
+      "measure-referenceType-input"
+    ) as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    //user should not see Documentation in the dropdown
+    expect(typeInput.value).toBe("");
+    const textAreaInput = getByTestId(
+      "measure-referenceText"
+    ) as HTMLTextAreaElement;
+    expect(textAreaInput.value).toBe("text 1");
+
+    fireEvent.change(typeInput, {
+      target: { value: "Citation" },
+    });
+    expect(typeInput.value).toBe("Citation");
+
+    act(() => {
+      fireEvent.change(textAreaInput, {
+        target: { value: "text 10" },
+      });
+    });
+    fireEvent.blur(textAreaInput);
+    expectInputValue(textAreaInput, "text 10");
   });
 });

@@ -14,7 +14,6 @@ const ElementSection = (props: ElementSectionProps) => {
   const [open, setOpen] = useState(startOpen);
   const chevronClass = open ? "chevron-display open" : "chevron-display";
   const growingDivClass = open ? "growing-div open" : "growing-div";
-
   return (
     <div
       className="test-case-tab-heading"
@@ -31,7 +30,6 @@ const ElementSection = (props: ElementSectionProps) => {
             setOpen(!open);
           }
         }}
-        className="heading-row"
       >
         <h4 className="header">{props.title}</h4>
         <ChevronRightIcon className={chevronClass} />
