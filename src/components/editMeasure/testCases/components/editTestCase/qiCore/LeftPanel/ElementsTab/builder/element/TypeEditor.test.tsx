@@ -1438,4 +1438,44 @@ describe("TypeEditor Component", () => {
     });
     expect(valueSetSelector).toHaveTextContent("- Select -");
   });
+
+  test("Should filter out excluded child types for '[x]' definitions", () => {
+    render(
+      <FormikProvider value={mockFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "SomeResource.value[x]",
+              path: "SomeResource.value[x]",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  code: "base64Binary",
+                },
+                {
+                  code: "Annotation",
+                },
+                {
+                  code: "string",
+                },
+              ],
+            }}
+            label={"SomeResource.value[x]"}
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+    const filteredChildDef = screen.getByTestId(
+      "string-field-input-SomeResource.value[x]"
+    );
+    expect(filteredChildDef).toBeInTheDocument();
+    expect(filteredChildDef.value).toBe("");
+  });
 });
