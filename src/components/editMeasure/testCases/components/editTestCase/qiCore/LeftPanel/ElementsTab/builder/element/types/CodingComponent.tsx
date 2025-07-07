@@ -100,6 +100,7 @@ const CodingComponent = ({
               terminologyService.current
                 .getValueSetsExpansionForOids(valueSetOids)
                 .then((expandedValueSets) => {
+                  // TODO: doesn't handle compose.exclude
                   const concepts = expandedValueSets.reduce((acc, vs) => {
                     if (vs.expansion?.contains) {
                       return acc.concat(vs.expansion.contains);
