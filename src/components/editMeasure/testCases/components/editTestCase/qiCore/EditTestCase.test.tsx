@@ -30,6 +30,7 @@ import {
   PopulationExpectedValue,
   PopulationType,
   TestCase,
+  ValidationStatus,
 } from "@madie/madie-models";
 import TestCaseRoutes from "../../routes/qiCore/TestCaseRoutes";
 import { PopulationEpisodeResult } from "../../../api/CalculationService";
@@ -840,8 +841,8 @@ describe("EditTestCase component", () => {
         name: "TestIPP",
         executionStatus: "false",
         json: null,
-        testCaseValidationStatus: "Pending",
-      } as TestCase;
+        validationStatus: ValidationStatus.PENDING,
+      } as unknown as TestCase;
       mockedAxios.get.mockClear().mockImplementation((args) => {
         if (args && args.endsWith("series")) {
           return Promise.resolve({ data: [] });
@@ -912,8 +913,8 @@ describe("EditTestCase component", () => {
         name: "TestIPP",
         executionStatus: "false",
         json: null,
-        testCaseValidationStatus: "Pending",
-      } as TestCase;
+        validationStatus: ValidationStatus.PENDING,
+      } as unknown as TestCase;
       mockedAxios.get.mockClear().mockImplementation((args) => {
         if (args && args.endsWith("series")) {
           return Promise.resolve({ data: [] });
@@ -2240,6 +2241,7 @@ describe("EditTestCase component", () => {
       const mockResponse = {
         data: {
           id: "testID",
+          validationStatus: ValidationStatus.INVALID,
           hapiOperationOutcome: {
             code: 400,
             outcomeResponse: {
@@ -2593,9 +2595,9 @@ describe("EditTestCase component", () => {
         description: "Test IPP",
         series: "SeriesA",
         json: `{"test":"test"}`,
-        testCaseValidationStatus: "Pending",
+        validationStatus: ValidationStatus.PENDING,
         hapiOperationOutcome: null,
-      } as TestCase;
+      } as unknown as TestCase;
 
       const measure = {
         id: "m1234",
@@ -2625,7 +2627,7 @@ describe("EditTestCase component", () => {
         })
         .mockResolvedValueOnce(
           Promise.resolve({
-            data: { ...testCase, testCaseValidationStatus: "Valid" },
+            data: { ...testCase, validationStatus: ValidationStatus.VALID },
           })
         );
 
