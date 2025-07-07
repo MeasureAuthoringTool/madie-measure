@@ -6,7 +6,9 @@ import TypeEditor from "./TypeEditor";
 import useFhirDefinitionsServiceApi, {
   FhirDefinitionsServiceApi,
 } from "../../../../../../../api/useFhirDefinitionsService";
-import useTerminologyServiceApi, { TerminologyServiceApi } from "../../../../../../../api/useTerminologyServiceApi";
+import useTerminologyServiceApi, {
+  TerminologyServiceApi,
+} from "../../../../../../../api/useTerminologyServiceApi";
 import { FormikProvider, FormikContextType, FormikProps } from "formik";
 import { RequiredFieldsProvider } from "./RequiredFieldsContext";
 import mockRequiredFields from "./mockRequiredFields";
