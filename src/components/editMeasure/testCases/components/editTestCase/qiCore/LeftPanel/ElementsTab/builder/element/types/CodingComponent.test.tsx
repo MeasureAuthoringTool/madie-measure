@@ -12,11 +12,24 @@ import {
 
 jest.mock("../../../../../../../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
+const mockOid = "1.2.3.4";
+jest.mock("@madie/madie-util", () => ({
+  useOktaTokens: () => ({
+    getAccessToken: () => "test.jwt",
+  }),
+  getOidFromString: jest.fn(() => {
+    return [mockOid];
+  }),
+}));
+
 const mockOnChange = jest.fn();
 
 const mockConfig = {
   fhirService: {
     baseUrl: "fhirService.com",
+  },
+  terminologyService: {
+    baseUrl: "terminologyService.com",
   },
 } as unknown as ServiceConfig;
 
@@ -534,5 +547,121 @@ describe("CodingComponent Tests", () => {
     });
     expect(code).toHaveTextContent(coding.code);
     expect(code).toHaveAttribute("readonly");
+  });
+
+  it("fetches the expansion for value set composed of another value sets", async () => {
+    const mockValueSetWithCompose = {
+      resourceType: "ValueSet",
+      name: "ValueSetWithCompose",
+      title: "ValueSet With Compose",
+      url: "http://example.com/v2",
+      compose: {
+        include: [{ valueSet: ["ValueSet/OID1"] }],
+      },
+    };
+
+    const mockExpandedValueSets = [
+      {
+        resourceType: "ValueSet",
+        name: "ExpandedValueSet1",
+        url: "ValueSet/OID1",
+        expansion: {
+          contains: [
+            {
+              system: "http://example.com/system1",
+              code: "C1",
+              display: "C1 Code",
+            },
+          ],
+        },
+      },
+    ];
+
+    mockedAxios.get.mockResolvedValue({ data: mockValueSetWithCompose });
+    mockedAxios.put.mockResolvedValue({ data: mockExpandedValueSets });
+
+    render(
+      <ApiContextProvider value={mockConfig}>
+        <ExecutionContextProvider
+          value={{
+            measureState: [null, jest.fn()],
+            bundleState: [null, jest.fn()],
+            valueSetsState: [null, jest.fn()],
+            executionContextReady: true,
+            executing: false,
+            setExecuting: jest.fn(),
+            contextFailure: false,
+          }}
+        >
+          <CodingComponent
+            canEdit={true}
+            structureDefinition={mockStructureDefinition}
+            label="test-label"
+            value={null}
+            onChange={mockOnChange}
+          />
+        </ExecutionContextProvider>
+      </ApiContextProvider>
+    );
+    // fetch value set definition
+    await waitFor(() => {
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        "fhirService.com/qicore/resources/value-set-definition?url=http://example.com/ValueSet/123",
+        expect.any(Object)
+      );
+    });
+    // fetch value set expansion for composed value sets
+    await waitFor(() => {
+      expect(mockedAxios.put).toHaveBeenCalledWith(
+        "terminologyService.com/terminology/value-sets/expansion/fhir",
+        expect.objectContaining({
+          valueSetParams: [{ oid: [mockOid] }],
+        }),
+        expect.any(Object)
+      );
+    });
+
+    expect(
+      screen.getByRole("combobox", {
+        name: "Value Set / Direct Reference Code",
+      })
+    ).toHaveTextContent("- Select -");
+
+    // verify value sets
+    const valueSetSelect = screen.getByRole("combobox", {
+      name: "Value Set / Direct Reference Code",
+    });
+    userEvent.click(valueSetSelect);
+    expect(screen.getAllByRole("option")).toHaveLength(
+      mockExpandedValueSets[0].expansion.contains.length
+    );
+    expect(screen.getAllByRole("option")[0]).toHaveTextContent(
+      mockValueSetWithCompose.title
+    );
+    userEvent.click(screen.getAllByRole("option")[0]);
+
+    // verify code system options
+    const codeSystem = screen.getByRole("combobox", {
+      name: "Code System",
+    });
+    userEvent.click(codeSystem);
+    const codeSystemOptions = screen.getAllByRole("option");
+    await waitFor(() => {
+      expect(codeSystemOptions[0]).toHaveTextContent(
+        mockExpandedValueSets[0].expansion?.contains[0].system
+      );
+    });
+    userEvent.click(codeSystemOptions[0]);
+
+    // verify code options
+    const codeSelect = screen.getByRole("combobox", {
+      name: "Code",
+    });
+    userEvent.click(codeSelect);
+    const codeOptions = screen.getAllByRole("option");
+    userEvent.click(codeOptions[0]);
+    expect(codeOptions[0]).toHaveTextContent(
+      mockExpandedValueSets[0].expansion?.contains[0].code
+    );
   });
 });

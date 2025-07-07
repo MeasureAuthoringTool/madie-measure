@@ -2,19 +2,33 @@ import React, { useEffect, useRef, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import {
+  ReadOnlyTextField,
   Select,
   TextField,
-  ReadOnlyTextField,
 } from "@madie/madie-design-system/dist/react";
 import { MenuItem } from "@mui/material";
 import useFhirDefinitionsServiceApi from "../../../../../../../../api/useFhirDefinitionsService";
 import useExecutionContext from "../../../../../../../routes/qiCore/useExecutionContext";
-import { ValueSet, Extension, Coding } from "fhir/r4";
+import { Coding, Extension, ValueSet } from "fhir/r4";
 import { getValueSetUrl } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
+import useTerminologyServiceApi from "../../../../../../../../api/useTerminologyServiceApi";
+import { getOidFromString } from "@madie/madie-util";
 
 const placeHolder = (label: string) => (
   <span style={{ color: "#717171" }}>{label}</span>
 );
+
+const getValueSetComposeIncludeOids = (valueSet: ValueSet) => {
+  return valueSet.compose.include
+    .map((include) => include.valueSet)
+    .reduce((acc, curr) => {
+      const oid = getOidFromString(curr[0], "FHIR");
+      if (oid) {
+        return [...acc, oid];
+      }
+      return acc;
+    }, []);
+};
 
 const CodingComponent = ({
   canEdit,
@@ -28,6 +42,7 @@ const CodingComponent = ({
   const [selectedConcept, setSelectedConcept] = useState<Coding>();
 
   const fhirDefinitionService = useRef(useFhirDefinitionsServiceApi());
+  const terminologyService = useRef(useTerminologyServiceApi());
   const { valueSetsState, executionContextReady } = useExecutionContext();
 
   const isBindingRequired =
@@ -73,12 +88,36 @@ const CodingComponent = ({
         fhirDefinitionService.current
           .getValueSetDefinition(valueSetUrl)
           .then((valueSet) => {
-            setAllValueSets((prev) => {
-              if (prev) {
-                return [...prev, valueSet];
-              }
-              return [valueSet];
-            });
+            if (valueSet.expansion) {
+              setAllValueSets((prev) => {
+                if (prev) {
+                  return [...prev, valueSet];
+                }
+                return [valueSet];
+              });
+            } else if (valueSet.compose) {
+              const valueSetOids = getValueSetComposeIncludeOids(valueSet);
+              terminologyService.current
+                .getValueSetsExpansionForOids(valueSetOids)
+                .then((expandedValueSets) => {
+                  const concepts = expandedValueSets.reduce((acc, vs) => {
+                    if (vs.expansion?.contains) {
+                      return acc.concat(vs.expansion.contains);
+                    }
+                    return acc;
+                  }, []);
+                  valueSet.expansion = {
+                    contains: concepts,
+                    timestamp: new Date().toISOString(),
+                  };
+                  setAllValueSets((prev) => {
+                    if (prev) {
+                      return [...prev, valueSet];
+                    }
+                    return [valueSet];
+                  });
+                });
+            }
           })
           .catch((error) => {
             console.error(
