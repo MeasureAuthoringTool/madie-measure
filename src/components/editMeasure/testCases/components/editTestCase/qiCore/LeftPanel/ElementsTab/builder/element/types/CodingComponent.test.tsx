@@ -556,7 +556,7 @@ describe("CodingComponent Tests", () => {
       title: "ValueSet With Compose",
       url: "http://example.com/v2",
       compose: {
-        include: [{ valueSet: ["ValueSet/OID1"] }],
+        include: [{ valueSet: ["ValueSet/" + mockOid] }],
       },
     };
 
@@ -564,7 +564,7 @@ describe("CodingComponent Tests", () => {
       {
         resourceType: "ValueSet",
         name: "ExpandedValueSet1",
-        url: "ValueSet/OID1",
+        url: "ValueSet/" + mockOid,
         expansion: {
           contains: [
             {
