@@ -3817,3 +3817,73 @@ describe("findEpisodeActualValue", () => {
     expect(output).toEqual(3);
   });
 });
+
+describe("Validation Panel", () => {
+  it("Should open and close validation panel", async () => {
+    const hapiOperationOutcome = {
+      code: 200,
+      message: null,
+      successful: true,
+      outcomeResponse: {
+        resourceType: "OperationOutcome",
+        text: undefined,
+        issue: [
+          {
+            severity: "error",
+            code: "error",
+            diagnostics: "Test error",
+            location: undefined,
+          },
+        ],
+      },
+    };
+    const testCase = {
+      id: "1234",
+      description: "Test IPP",
+      series: "SeriesA",
+      createdBy: MEASURE_CREATEDBY,
+      createdAt: "",
+      lastModifiedAt: "",
+      lastModifiedBy: "null",
+      title: "TestIPP",
+      name: "TestIPP",
+      executionStatus: "false",
+      json: null,
+      validationStatus: ValidationStatus.INVALID,
+      hapiOperationOutcome: hapiOperationOutcome,
+    } as unknown as TestCase;
+    mockedAxios.get.mockClear().mockImplementation((args) => {
+      if (args && args.endsWith("series")) {
+        return Promise.resolve({ data: [] });
+      } else if (args && args.endsWith("resources")) {
+        return Promise.resolve({
+          data: [...resourceIdentifiers],
+        });
+      }
+      return Promise.resolve({
+        data: testCase,
+      });
+    });
+    renderWithRouter(
+      ["/measures/m1234/edit/test-cases/1234"],
+      "/measures/:measureId/edit/test-cases/:id"
+    );
+
+    const showValidationErrorsButton = screen.getByTestId(
+      "show-json-validation-errors-button"
+    );
+    userEvent.click(showValidationErrorsButton);
+    expect(
+      screen.getByTestId("json-validation-errors-list")
+    ).toBeInTheDocument();
+
+    const hideValidationErrorsButton = screen.getByTestId(
+      "hide-json-validation-errors-button"
+    );
+    userEvent.click(hideValidationErrorsButton);
+
+    expect(
+      screen.queryByTestId("json-validation-errors-list")
+    ).not.toBeInTheDocument();
+  });
+});
