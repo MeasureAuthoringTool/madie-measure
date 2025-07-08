@@ -366,6 +366,20 @@ export function mapElementsByPath(structureDefinition) {
   }, {});
 }
 
+// Exclude entries where the path contains".contained",".text",".meta",".language",".implicitRules"
+export const filterElements = (elements: ElementDefinition[]) => {
+  return elements.filter((el) => {
+    return (
+      el?.path &&
+      !el?.path?.includes(".contained") &&
+      !el?.path?.includes(".text") &&
+      !el?.path?.includes(".meta") &&
+      !el?.path?.includes(".language") &&
+      !el?.path?.includes(".implicitRules")
+    );
+  });
+};
+
 // generate a map of { label: [label] required: true/fales} so we don't need to prop drill poor component into the ground any worse than it is.
 export function mapElementsRequired(structureDefinition) {
   const elements = structureDefinition?.definition?.snapshot?.element || [];

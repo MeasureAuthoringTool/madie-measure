@@ -37,6 +37,7 @@ import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefini
 import tw from "twin.macro";
 import "../../../../../../../../../../styles/VerticalSideBarNav.scss";
 import "./ResourceEditor.scss";
+import { filterElements } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 
 const InnerWrapper = tw.div`flex-grow flex flex-col`;
 
@@ -100,18 +101,8 @@ const ResourceEditor = ({
             bundleEntry: selectedEntry,
           };
 
-          const topElements = getTopLevelElements(selectedResource).filter(
-            (el) => {
-              // Exclude entries where the path contains".contained",".text",".meta",".language",".implicitRules"
-              return (
-                el?.path &&
-                !el?.path?.includes(".contained") &&
-                !el?.path?.includes(".text") &&
-                !el?.path?.includes(".meta") &&
-                !el?.path?.includes(".language") &&
-                !el?.path?.includes(".implicitRules")
-              );
-            }
+          const topElements = filterElements(
+            getTopLevelElements(selectedResource)
           );
           //the topElements from the selectedResource contains elements from resource.definition.snapshot.element
 

@@ -1,4 +1,5 @@
 import * as Yup from "yup";
+import { ElementDefinition } from "fhir/r4";
 import {
   getBasePath,
   getTopLevelElements,
@@ -25,6 +26,7 @@ import {
   recursiveAddYupObject,
   addCardinalityToElement,
   formatChoiceType,
+  filterElements,
 } from "./fhirDefinitionServiceUtilities";
 import _ from "lodash";
 
@@ -675,5 +677,23 @@ describe("addCardinalityToElement", () => {
     const elemPath = "name";
     const result = addCardinalityToElement(nextEntry, elemPath);
     expect(result.resource[elemPath]).toEqual([{}, {}]);
+  });
+
+  it("should filter out elements with specific paths", () => {
+    const elements = [
+      { path: "Patient.name" },
+      { path: "Patient.contained" },
+      { path: "Patient.text" },
+      { path: "Patient.meta" },
+      { path: "Patient.language" },
+      { path: "Patient.implicitRules" },
+      { path: "Patient.address" },
+    ];
+
+    const result = filterElements(elements as ElementDefinition[]);
+    expect(result).toEqual([
+      { path: "Patient.name" },
+      { path: "Patient.address" },
+    ]);
   });
 });
