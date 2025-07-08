@@ -429,7 +429,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
         }
         resetForm({ values: _.cloneDeep(nextTc) });
         handleHapiOutcome(nextTc?.hapiOperationOutcome);
-        if (["Pending", "Validating"].includes(tc.validationStatus)) {
+        if ([ValidationStatus.Pending, ValidationStatus.Validating].includes(tc.validationStatus)) {
           setShouldPoll(true);
         } else {
           setShouldPoll(false);
