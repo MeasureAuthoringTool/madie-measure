@@ -342,7 +342,7 @@ export function getFirstChildren(path, formInfo) {
         !key.slice(path.length + 1).includes(".") &&
         !value?.id?.endsWith(".id")
     )
-    .map(([, value]) => value);
+    .map(([, el]) => el);
 }
 // Access from formInfo when array
 export function stripArrayIndices(path) {
