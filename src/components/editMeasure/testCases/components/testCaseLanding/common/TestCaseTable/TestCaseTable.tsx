@@ -135,7 +135,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     return testCases.map((tc: TestCase) => ({
       id: tc.id,
       status: tc.executionStatus,
-      validationStatus: tc.testCaseValidationStatus,
+      validationStatus: tc.validationStatus,
       group: tc.series,
       title: tc.title,
       description: tc.description,

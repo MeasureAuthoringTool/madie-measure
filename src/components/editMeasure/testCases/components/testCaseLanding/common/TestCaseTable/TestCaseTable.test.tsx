@@ -8,7 +8,6 @@ import {
   PopulationType,
   TestCase,
   Model,
-  TestCaseValidationStatus,
 } from "@madie/madie-models";
 // @ts-ignore
 import { useFeatureFlags, checkUserCanEdit } from "@madie/madie-util";
@@ -24,7 +23,7 @@ const testCase = {
   executionStatus: "pass",
   caseNumber: 1,
   action: { createdBeforeVersioning: true },
-  testCaseValidationStatus: "Valid",
+  validationStatus: "Valid",
 } as unknown as TestCase;
 
 const testCaseFail = {
@@ -35,7 +34,7 @@ const testCaseFail = {
   lastModifiedAt: "2024-09-06T15:16:14.382Z",
   executionStatus: "fail",
   caseNumber: null,
-  testCaseValidationStatus: "Invalid JSON",
+  validationStatus: "Invalid JSON",
 } as unknown as TestCase;
 
 const testCaseNA = {
@@ -46,7 +45,7 @@ const testCaseNA = {
   lastModifiedAt: "2024-09-06T15:17:14.382Z",
   executionStatus: "NA",
   caseNumber: null,
-  testCaseValidationStatus: "Not Complete",
+  validationStatus: "Not Complete",
 } as unknown as TestCase;
 
 const testCaseInvalid = {
@@ -57,7 +56,7 @@ const testCaseInvalid = {
   lastModifiedAt: "2022-03-01T14:18:14.382Z",
   executionStatus: "Invalid",
   caseNumber: null,
-  testCaseValidationStatus: "Invalid",
+  validationStatus: "Invalid",
 } as unknown as TestCase;
 
 const testCaseValidating = {
@@ -69,7 +68,7 @@ const testCaseValidating = {
   executionStatus: "pass",
   caseNumber: 1,
   action: { createdBeforeVersioning: true },
-  testCaseValidationStatus: "Validating",
+  validationStatus: "Validating",
 } as unknown as TestCase;
 
 const testCases = [

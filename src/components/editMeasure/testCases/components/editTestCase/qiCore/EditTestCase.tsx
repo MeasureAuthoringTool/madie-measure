@@ -427,7 +427,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
         }
         resetForm({ values: _.cloneDeep(nextTc) });
         handleHapiOutcome(nextTc?.hapiOperationOutcome);
-        if (["Pending", "Validating"].includes(tc.testCaseValidationStatus)) {
+        if (["Pending", "Validating"].includes(tc.validationStatus)) {
           setShouldPoll(true);
         } else {
           setShouldPoll(false);
@@ -556,7 +556,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
         measureId
       );
       // initiate polling for validation response
-      if (updatedTestCase.testCaseValidationStatus === "Pending") {
+      if (updatedTestCase.validationStatus === "Pending") {
         setShouldPoll(true);
       } else {
         setShouldPoll(false);
@@ -670,7 +670,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
     if (testCase && testCase.id) {
       const validationErrors =
         testCase?.hapiOperationOutcome?.outcomeResponse?.issue;
-      if (testCase.testCaseValidationStatus === "Pending") {
+      if (testCase.validationStatus === "Pending") {
         if (timezoneUpdated) {
           showToast(
             <div>

@@ -840,7 +840,7 @@ describe("EditTestCase component", () => {
         name: "TestIPP",
         executionStatus: "false",
         json: null,
-        testCaseValidationStatus: "Pending",
+        validationStatus: "Pending",
       } as TestCase;
       mockedAxios.get.mockClear().mockImplementation((args) => {
         if (args && args.endsWith("series")) {
@@ -912,7 +912,7 @@ describe("EditTestCase component", () => {
         name: "TestIPP",
         executionStatus: "false",
         json: null,
-        testCaseValidationStatus: "Pending",
+        validationStatus: "Pending",
       } as TestCase;
       mockedAxios.get.mockClear().mockImplementation((args) => {
         if (args && args.endsWith("series")) {
@@ -2593,7 +2593,7 @@ describe("EditTestCase component", () => {
         description: "Test IPP",
         series: "SeriesA",
         json: `{"test":"test"}`,
-        testCaseValidationStatus: "Pending",
+        validationStatus: "Pending",
         hapiOperationOutcome: null,
       } as TestCase;
 
@@ -2625,7 +2625,7 @@ describe("EditTestCase component", () => {
         })
         .mockResolvedValueOnce(
           Promise.resolve({
-            data: { ...testCase, testCaseValidationStatus: "Valid" },
+            data: { ...testCase, validationStatus: "Valid" },
           })
         );
 

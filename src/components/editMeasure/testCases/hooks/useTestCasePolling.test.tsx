@@ -32,7 +32,7 @@ describe("useTestCasePolling", () => {
   it("should start polling and call getTestCase every 5 seconds for Pending status", async () => {
     mockedAxios.get.mockResolvedValue({
       data: {
-        testCaseValidationStatus: "Pending",
+        validationStatus: "Pending",
         id: "123",
       },
     });
@@ -58,9 +58,9 @@ describe("useTestCasePolling", () => {
 
   it("should stop polling when status becomes Valid", async () => {
     mockedAxios.get
-      .mockResolvedValueOnce({ data: { testCaseValidationStatus: "Pending" } })
-      .mockResolvedValueOnce({ data: { testCaseValidationStatus: "Pending" } })
-      .mockResolvedValueOnce({ data: { testCaseValidationStatus: "Valid" } });
+      .mockResolvedValueOnce({ data: { validationStatus: "Pending" } })
+      .mockResolvedValueOnce({ data: { validationStatus: "Pending" } })
+      .mockResolvedValueOnce({ data: { validationStatus: "Valid" } });
 
     await act(async () => {
       render(<WrapperComponent shouldStart={true} />);
@@ -77,7 +77,7 @@ describe("useTestCasePolling", () => {
 
   it("should stop polling on unmount", async () => {
     mockedAxios.get.mockResolvedValue({
-      data: { testCaseValidationStatus: "Pending" },
+      data: { validationStatus: "Pending" },
     });
 
     let unmount: any;
@@ -105,8 +105,8 @@ describe("useTestCasePolling", () => {
 
   it("should stop polling if api call fails and returns an error message", async () => {
     mockedAxios.get
-      .mockResolvedValueOnce({ data: { testCaseValidationStatus: "Pending" } })
-      .mockResolvedValueOnce({ data: { testCaseValidationStatus: "Pending" } })
+      .mockResolvedValueOnce({ data: { validationStatus: "Pending" } })
+      .mockResolvedValueOnce({ data: { validationStatus: "Pending" } })
       .mockRejectedValueOnce(new Error("Unable to retrieve test case object"));
     await act(async () => {
       render(<WrapperComponent shouldStart={true} />);

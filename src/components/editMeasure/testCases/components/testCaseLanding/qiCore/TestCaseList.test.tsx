@@ -274,7 +274,7 @@ const testCases = [
         ] as PopulationExpectedValue[],
       },
     ] as GroupPopulation[],
-    testCaseValidationStatus: "Valid",
+    validationStatus: "Valid",
   },
   {
     id: "2",
@@ -303,7 +303,7 @@ const testCases = [
         ] as PopulationExpectedValue[],
       },
     ] as GroupPopulation[],
-    testCaseValidationStatus: "Valid",
+    validationStatus: "Valid",
   },
   {
     id: "3",

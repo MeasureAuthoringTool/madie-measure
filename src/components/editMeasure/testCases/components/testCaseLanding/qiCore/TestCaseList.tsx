@@ -614,7 +614,7 @@ const TestCaseList = (props: TestCaseListProps) => {
 
   const totalTestCases = testCases?.length;
   const validTestCasesCount = _.filter(testCases, {
-    testCaseValidationStatus: "Valid",
+    validationStatus: "Valid",
   })?.length;
   const validationPercentage =
     totalTestCases > 0
