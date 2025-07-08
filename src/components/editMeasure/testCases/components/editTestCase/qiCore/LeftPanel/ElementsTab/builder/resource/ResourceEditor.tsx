@@ -100,7 +100,19 @@ const ResourceEditor = ({
             bundleEntry: selectedEntry,
           };
 
-          const topElements = getTopLevelElements(selectedResource);
+          const topElements = getTopLevelElements(selectedResource).filter(
+            (el) => {
+              // Exclude entries where the path contains".contained",".text",".meta",".language",".implicitRules"
+              return (
+                el?.path &&
+                !el?.path?.includes(".contained") &&
+                !el?.path?.includes(".text") &&
+                !el?.path?.includes(".meta") &&
+                !el?.path?.includes(".language") &&
+                !el?.path?.includes(".implicitRules")
+              );
+            }
+          );
           //the topElements from the selectedResource contains elements from resource.definition.snapshot.element
 
           const requiredElements = [...topElements.filter((e) => e.min > 0)];

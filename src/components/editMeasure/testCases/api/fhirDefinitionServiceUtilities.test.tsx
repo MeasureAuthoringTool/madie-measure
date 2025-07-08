@@ -453,6 +453,21 @@ describe("getFirstChildren", () => {
     expect(result.length).toBe(1);
   });
 
+  it("should exclude elements ending with '.id'", () => {
+    const formInfo = [
+      ["Patient.name", { id: "Patient.name" }],
+      ["Patient.name.given", { id: "Patient.name.given" }],
+      ["Patient.name.family", { id: "Patient.name.family" }],
+      ["Patient.name.id", { id: "Patient.name.id" }],
+    ];
+
+    const result = getFirstChildren("Patient.name", formInfo);
+    expect(result).toEqual([
+      { id: "Patient.name.given" },
+      { id: "Patient.name.family" },
+    ]);
+  });
+
   it("returns empty array if no children", () => {
     const formInfo = [["Patient.gender", {}]];
     expect(getFirstChildren("Patient.name", formInfo)).toEqual([]);

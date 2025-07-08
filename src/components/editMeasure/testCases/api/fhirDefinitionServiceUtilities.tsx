@@ -337,7 +337,8 @@ export function getFirstChildren(path, formInfo) {
       const subPath = el[0].slice(path.length + 1);
       return !subPath.includes(".");
     })
-    .map((el) => el[1]);
+    .map((el) => el[1])
+    .filter((el) => !el?.id?.endsWith(".id")); // exclude elements ending with ".id"
 }
 // Access from formInfo when array
 export function stripArrayIndices(path) {
