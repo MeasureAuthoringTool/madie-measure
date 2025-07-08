@@ -25,6 +25,7 @@ import {
   removeUndefinedAndEmptyObjects,
   getNestedProperty,
   stripAllIndexes,
+  filterElements,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import { useFormikContext } from "formik";
 import {
@@ -37,7 +38,6 @@ import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefini
 import tw from "twin.macro";
 import "../../../../../../../../../../styles/VerticalSideBarNav.scss";
 import "./ResourceEditor.scss";
-import { filterElements } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 
 const InnerWrapper = tw.div`flex-grow flex flex-col`;
 
