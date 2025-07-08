@@ -679,21 +679,29 @@ describe("addCardinalityToElement", () => {
     expect(result.resource[elemPath]).toEqual([{}, {}]);
   });
 
-  it("should filter out elements with specific paths", () => {
-    const elements = [
-      { path: "Patient.name" },
-      { path: "Patient.contained" },
-      { path: "Patient.text" },
-      { path: "Patient.meta" },
-      { path: "Patient.language" },
-      { path: "Patient.implicitRules" },
-      { path: "Patient.address" },
-    ];
+  it("should return an empty array if no elements match the criteria", () => {
+    const resource = {
+      definition: {
+        snapshot: {
+          element: [
+            { path: "Patient.meta", id: "Patient.meta", max: "1" },
+            { path: "Patient.language", id: "Patient.language", max: "1" },
+            { path: "Patient.name", id: "Patient.name", max: "1" },
+            { path: "Patient.contained", id: "Patient.contained", max: "1" },
+            {
+              path: "Patient.implicitRules",
+              id: "Patient.implicitRules",
+              max: "1",
+            },
+            { path: "Patient.text", id: "Patient.text", max: "1" },
+          ],
+        },
+      },
+    };
 
-    const result = filterElements(elements as ElementDefinition[]);
+    const result = getTopLevelElements(resource);
     expect(result).toEqual([
-      { path: "Patient.name" },
-      { path: "Patient.address" },
+      { id: "Patient.name", max: "1", path: "Patient.name" },
     ]);
   });
 });

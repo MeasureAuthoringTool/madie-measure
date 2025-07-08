@@ -25,7 +25,6 @@ import {
   removeUndefinedAndEmptyObjects,
   getNestedProperty,
   stripAllIndexes,
-  filterElements,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import { useFormikContext } from "formik";
 import {
@@ -101,9 +100,7 @@ const ResourceEditor = ({
             bundleEntry: selectedEntry,
           };
 
-          const topElements = filterElements(
-            getTopLevelElements(selectedResource)
-          );
+          const topElements = getTopLevelElements(selectedResource);
           //the topElements from the selectedResource contains elements from resource.definition.snapshot.element
 
           const requiredElements = [...topElements.filter((e) => e.min > 0)];
