@@ -27,6 +27,7 @@ import {
   PopulationExpectedValue,
   MeasureErrorType,
   Model,
+  ValidationStatus,
 } from "@madie/madie-models";
 import useTestCaseServiceApi from "../../../api/useTestCaseServiceApi";
 import Editor from "../../editor/Editor";
@@ -429,7 +430,11 @@ const EditTestCase = (props: EditTestCaseProps) => {
         }
         resetForm({ values: _.cloneDeep(nextTc) });
         handleHapiOutcome(nextTc?.hapiOperationOutcome);
-        if ([ValidationStatus.Pending, ValidationStatus.Validating].includes(tc.validationStatus)) {
+        if (
+          [ValidationStatus.Pending, ValidationStatus.Validating].includes(
+            tc.validationStatus
+          )
+        ) {
           setShouldPoll(true);
         } else {
           setShouldPoll(false);
@@ -558,7 +563,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
         measureId
       );
       // initiate polling for validation response
-      if (updatedTestCase.validationStatus === "Pending") {
+      if (updatedTestCase.validationStatus === ValidationStatus.PENDING) {
         setShouldPoll(true);
       } else {
         setShouldPoll(false);
@@ -672,7 +677,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
     if (testCase && testCase.id) {
       const validationErrors =
         testCase?.hapiOperationOutcome?.outcomeResponse?.issue;
-      if (testCase.validationStatus === "Pending") {
+      if (testCase.validationStatus === ValidationStatus.PENDING) {
         if (timezoneUpdated) {
           showToast(
             <div>
@@ -1289,9 +1294,10 @@ const EditTestCase = (props: EditTestCaseProps) => {
                     <div className="flex justify-between items-center w-full mb-2">
                       <div className="validation-header">
                         <div className="header-left">
-                          {["Pending", "Validating"].includes(
-                            testCase?.validationStatus
-                          ) ? (
+                          {[
+                            ValidationStatus.PENDING,
+                            ValidationStatus.VALIDATING,
+                          ].includes(testCase?.validationStatus) ? (
                             <MadieSpinner style={{ width: 20, height: 20 }} />
                           ) : (
                             <WarningIcon color="warning" />
@@ -1322,9 +1328,10 @@ const EditTestCase = (props: EditTestCaseProps) => {
                       className="validation-content"
                       data-testid="json-validation-errors-list"
                     >
-                      {["Pending", "Validating"].includes(
-                        testCase?.validationStatus
-                      ) ? (
+                      {[
+                        ValidationStatus.PENDING,
+                        ValidationStatus.VALIDATING,
+                      ].includes(testCase?.validationStatus) ? (
                         <Box
                           data-testid="validation-skeleton-box"
                           aria-label="Validation loading skeletons"
@@ -1390,9 +1397,10 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         className="validation-panel-toggle-button"
                         title="Open Validations"
                       >
-                        {["Pending", "Validating"].includes(
-                          testCase?.validationStatus
-                        ) ? (
+                        {[
+                          ValidationStatus.PENDING,
+                          ValidationStatus.VALIDATING,
+                        ].includes(testCase?.validationStatus) ? (
                           <MadieSpinner style={{ width: 20, height: 20 }} />
                         ) : (
                           <WarningIcon color="warning" />
