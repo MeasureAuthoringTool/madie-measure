@@ -431,7 +431,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
         resetForm({ values: _.cloneDeep(nextTc) });
         handleHapiOutcome(nextTc?.hapiOperationOutcome);
         if (
-          [ValidationStatus.Pending, ValidationStatus.Validating].includes(
+          [ValidationStatus.PENDING, ValidationStatus.VALIDATING].includes(
             tc.validationStatus
           )
         ) {
