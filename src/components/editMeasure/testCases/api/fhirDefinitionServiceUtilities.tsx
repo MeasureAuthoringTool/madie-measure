@@ -262,7 +262,11 @@ export function getTopLevelElements(resource: any) {
     (e) =>
       e.path.split(".")?.length === 2 &&
       e.id !== "Extension.extension" &&
-      e.max !== "0"
+      e.max !== "0" &&
+      // Exclude entries where the path contains".contained",".text",".meta",".language",".implicitRules"
+      ![".contained", ".text", ".meta", ".language", ".implicitRules"].some(
+        (attribute) => e?.path?.includes(attribute)
+      )
   );
   //for each elementsFiltered, if type contains more than one type, duplicate the element and restrict the type to only that type
 
@@ -332,12 +336,13 @@ export function getParentDefinition(path, formInfo) {
 // given a path, and formInfo, get all property paths one .[property] deep Patient.name -> Patient.name.given, Patient.name.family
 export function getFirstChildren(path, formInfo) {
   return formInfo
-    .filter((el) => {
-      if (!el[0]?.startsWith(path + ".")) return false;
-      const subPath = el[0].slice(path.length + 1);
-      return !subPath.includes(".");
-    })
-    .map((el) => el[1]);
+    .filter(
+      ([key, value]) =>
+        key?.startsWith(`${path}.`) &&
+        !key.slice(path.length + 1).includes(".") &&
+        !value?.id?.endsWith(".id")
+    )
+    .map(([, el]) => el);
 }
 // Access from formInfo when array
 export function stripArrayIndices(path) {
