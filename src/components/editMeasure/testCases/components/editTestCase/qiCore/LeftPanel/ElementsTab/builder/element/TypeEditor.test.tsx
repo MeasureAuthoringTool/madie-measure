@@ -6,6 +6,9 @@ import TypeEditor from "./TypeEditor";
 import useFhirDefinitionsServiceApi, {
   FhirDefinitionsServiceApi,
 } from "../../../../../../../api/useFhirDefinitionsService";
+import useTerminologyServiceApi, {
+  TerminologyServiceApi,
+} from "../../../../../../../api/useTerminologyServiceApi";
 import { FormikProvider, FormikContextType, FormikProps } from "formik";
 import { RequiredFieldsProvider } from "./RequiredFieldsContext";
 import mockRequiredFields from "./mockRequiredFields";
@@ -111,6 +114,16 @@ jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
 });
 useFhirDefinitionsServiceApiMock.mockImplementation(
   () => fhirDefinitionsServiceApiMock
+);
+
+jest.mock("../../../../../../../api/useTerminologyServiceApi");
+const useTerminologyServiceApiMock =
+  useTerminologyServiceApi as jest.Mock<TerminologyServiceApi>;
+const terminologyServiceApiMock = {
+  getValueSetsExpansionForOids: jest.fn().mockResolvedValue([]),
+} as unknown as TerminologyServiceApi;
+useTerminologyServiceApiMock.mockImplementation(
+  () => terminologyServiceApiMock
 );
 
 describe("TypeEditor Component", () => {
