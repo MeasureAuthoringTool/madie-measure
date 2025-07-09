@@ -4,7 +4,7 @@ import {
   MeasureGroupTypes,
   PopulationType,
   TestCase,
-  TestCaseValidationStatus,
+  ValidationStatus,
 } from "@madie/madie-models";
 import {
   DetailedPopulationGroupResult,
@@ -77,7 +77,7 @@ export const ContinuousVariableBoolean: TestCaseProcessingScenario = {
     validResource: true,
     json: null,
     hapiOperationOutcome: null,
-    testCaseValidationStatus: null,
+    validationStatus: null,
     executionStatus: null,
     groupPopulations: [
       {
@@ -897,7 +897,7 @@ export const ContinuousVariableBooleanFail: TestCaseProcessingScenario = {
     validResource: true,
     json: null,
     hapiOperationOutcome: null,
-    testCaseValidationStatus: null,
+    validationStatus: null,
     executionStatus: null,
     groupPopulations: [
       {
@@ -1729,7 +1729,7 @@ export const ContinuousVariable_Encounter_Pass: TestCaseProcessingScenario = {
         text: null,
       },
     },
-    testCaseValidationStatus: TestCaseValidationStatus.VALID,
+    validationStatus: ValidationStatus.VALID,
     groupPopulations: [
       {
         groupId: "638e14401b05491a43ce8a18",
@@ -2583,7 +2583,7 @@ export const ContinuousVariable_Encounter_Fail: TestCaseProcessingScenario = {
         text: null,
       },
     },
-    testCaseValidationStatus: TestCaseValidationStatus.VALID,
+    validationStatus: ValidationStatus.VALID,
     groupPopulations: [
       {
         groupId: "638e14401b05491a43ce8a18",
@@ -3449,7 +3449,7 @@ export const Ratio_Boolean_SingleIP_DenObs_NumObs_Pass: TestCaseProcessingScenar
       executionStatus: null,
       json: '{\n  "resourceType": "Bundle",\n  "id": "2106",\n  "meta": {\n    "versionId": "1",\n    "lastUpdated": "2022-09-06T20:47:21.183+00:00"\n  },\n  "type": "collection",\n  "entry": [ {\n    "fullUrl": "http://local/Encounter/2",\n    "resource": { \n      "id": "2", \n      "resourceType": "Encounter",\n      "meta": {\n        "versionId": "1",\n        "lastUpdated": "2021-10-13T03:34:10.160+00:00",\n        "source": "#nEcAkGd8PRwPP5fA"\n      },\n      "text": {\n        "status": "generated",\n        "div": "<div xmlns=\\"http://www.w3.org/1999/xhtml\\">Sep 9th 2021 for Asthma<a name=\\"mm\\"/></div>"\n      },\n      "class": {\n        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",\n        "code": "IMP",\n        "display": "inpatient encounter"\n      },\n      "status": "planned",\n      "type": [ {\n        "text": "OutPatient"\n      } ],\n      "subject": {\n        "reference": "Patient/1"\n      },\n      "participant": [ {\n        "individual": {\n          "reference": "Practitioner/30164",\n          "display": "Dr John Doe"\n        }\n      } ],\n      "period": {\n        "start": "2023-08-10T03:34:10.054Z",\n        "end": "2023-08-15T03:34:10.054Z"\n      }\n    }\n  }, {\n    "fullUrl": "http://local/Encounter/3",\n    "resource": {\n      "id": "3",\n      "resourceType": "Encounter",\n      "meta": {\n        "versionId": "1",\n        "lastUpdated": "2021-10-13T03:34:10.160+00:00",\n        "source": "#nEcAkGd8PRwPP5fA"\n      },\n      "text": { \n        "status": "generated",\n        "div": "<div xmlns=\\"http://www.w3.org/1999/xhtml\\">Sep 9th 2021 for Asthma<a name=\\"mm\\"/></div>"\n      },\n      "class": {\n        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",\n        "code": "IMP",\n        "display": "inpatient encounter"\n      },\n      "status": "finished",\n      "type": [ {\n        "text": "OutPatient"\n      } ],\n      "subject": {\n        "reference": "Patient/1"\n      },\n      "participant": [ {\n        "individual": {\n          "reference": "Practitioner/30164",\n          "display": "Dr John Doe"\n        }\n      } ],\n      "period": {\n        "start": "2023-09-12T03:34:10.054Z",\n        "end": "2023-09-13T09:34:10.054Z"\n      }\n    }\n  }, {\n    "fullUrl": "http://local/Patient/1",\n    "resource": {\n      "id": "1",\n      "resourceType": "Patient",\n      "text": {\n        "status": "generated",\n        "div": "<div xmlns=\\"http://www.w3.org/1999/xhtml\\">Lizzy Health</div>"\n      },\n      "meta": {\n        "profile": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"\n      },\n      "identifier": [ {\n        "system": "http://clinfhir.com/fhir/NamingSystem/identifier",\n        "value": "20181011LizzyHealth"\n      } ],\n      "name": [ {\n        "use": "official",\n        "text": "Lizzy Health",\n        "family": "Health",\n        "given": [ "Lizzy" ]\n      } ],\n      "gender": "female",\n      "birthDate": "2000-10-11"\n    }\n  } ]\n\n}\n',
       hapiOperationOutcome: null,
-      testCaseValidationStatus: null,
+      validationStatus: null,
       groupPopulations: [
         {
           groupId: "63879ae21b05491a43ce8a12",
@@ -4377,7 +4377,7 @@ export const Ratio_Encounter_SingleIP_DenObs_NumObs_Pass: TestCaseProcessingScen
       executionStatus: null,
       json: '{\n  "resourceType": "Bundle",\n  "id": "2106",\n  "meta": {\n    "versionId": "1",\n    "lastUpdated": "2022-09-06T20:47:21.183+00:00"\n  },\n  "type": "collection",\n  "entry": [ {\n    "fullUrl": "http://local/Encounter/2",\n    "resource": { \n      "id": "2", \n      "resourceType": "Encounter",\n      "meta": {\n        "versionId": "1",\n        "lastUpdated": "2021-10-13T03:34:10.160+00:00",\n        "source": "#nEcAkGd8PRwPP5fA"\n      },\n      "text": {\n        "status": "generated",\n        "div": "<div xmlns=\\"http://www.w3.org/1999/xhtml\\">Sep 9th 2021 for Asthma<a name=\\"mm\\"/></div>"\n      },\n      "class": {\n        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",\n        "code": "IMP",\n        "display": "inpatient encounter"\n      },\n      "status": "planned",\n      "type": [ {\n        "text": "OutPatient"\n      } ],\n      "subject": {\n        "reference": "Patient/1"\n      },\n      "participant": [ {\n        "individual": {\n          "reference": "Practitioner/30164",\n          "display": "Dr John Doe"\n        }\n      } ],\n      "period": {\n        "start": "2023-08-10T03:34:10.054Z",\n        "end": "2023-08-15T03:34:10.054Z"\n      }\n    }\n  }, {\n    "fullUrl": "http://local/Encounter/3",\n    "resource": {\n      "id": "3",\n      "resourceType": "Encounter",\n      "meta": {\n        "versionId": "1",\n        "lastUpdated": "2021-10-13T03:34:10.160+00:00",\n        "source": "#nEcAkGd8PRwPP5fA"\n      },\n      "text": { \n        "status": "generated",\n        "div": "<div xmlns=\\"http://www.w3.org/1999/xhtml\\">Sep 9th 2021 for Asthma<a name=\\"mm\\"/></div>"\n      },\n      "class": {\n        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",\n        "code": "IMP",\n        "display": "inpatient encounter"\n      },\n      "status": "finished",\n      "type": [ {\n        "text": "OutPatient"\n      } ],\n      "subject": {\n        "reference": "Patient/1"\n      },\n      "participant": [ {\n        "individual": {\n          "reference": "Practitioner/30164",\n          "display": "Dr John Doe"\n        }\n      } ],\n      "period": {\n        "start": "2023-09-12T03:34:10.054Z",\n        "end": "2023-09-13T09:34:10.054Z"\n      }\n    }\n  }, {\n    "fullUrl": "http://local/Patient/1",\n    "resource": {\n      "id": "1",\n      "resourceType": "Patient",\n      "text": {\n        "status": "generated",\n        "div": "<div xmlns=\\"http://www.w3.org/1999/xhtml\\">Lizzy Health</div>"\n      },\n      "meta": {\n        "profile": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"\n      },\n      "identifier": [ {\n        "system": "http://clinfhir.com/fhir/NamingSystem/identifier",\n        "value": "20181011LizzyHealth"\n      } ],\n      "name": [ {\n        "use": "official",\n        "text": "Lizzy Health",\n        "family": "Health",\n        "given": [ "Lizzy" ]\n      } ],\n      "gender": "female",\n      "birthDate": "2000-10-11"\n    }\n  } ]\n\n}\n',
       hapiOperationOutcome: null,
-      testCaseValidationStatus: null,
+      validationStatus: null,
       groupPopulations: [
         {
           groupId: "63879a071b05491a43ce8a10",

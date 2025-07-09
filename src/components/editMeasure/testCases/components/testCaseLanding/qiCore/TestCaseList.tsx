@@ -9,6 +9,7 @@ import {
   TestCaseImportRequest,
   TestCaseImportOutcome,
   OverlappingCodeDto,
+  ValidationStatus,
 } from "@madie/madie-models";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import queryString from "query-string";
@@ -614,7 +615,7 @@ const TestCaseList = (props: TestCaseListProps) => {
 
   const totalTestCases = testCases?.length;
   const validTestCasesCount = _.filter(testCases, {
-    testCaseValidationStatus: "Valid",
+    validationStatus: ValidationStatus.VALID,
   })?.length;
   const validationPercentage =
     totalTestCases > 0

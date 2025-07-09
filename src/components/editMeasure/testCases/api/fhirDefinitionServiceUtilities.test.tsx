@@ -1,4 +1,5 @@
 import * as Yup from "yup";
+import { ElementDefinition } from "fhir/r4";
 import {
   getBasePath,
   getTopLevelElements,
@@ -25,6 +26,7 @@ import {
   recursiveAddYupObject,
   addCardinalityToElement,
   formatChoiceType,
+  filterElements,
 } from "./fhirDefinitionServiceUtilities";
 import _ from "lodash";
 
@@ -453,6 +455,21 @@ describe("getFirstChildren", () => {
     expect(result.length).toBe(1);
   });
 
+  it("should exclude elements ending with '.id'", () => {
+    const formInfo = [
+      ["Patient.name", { id: "Patient.name" }],
+      ["Patient.name.given", { id: "Patient.name.given" }],
+      ["Patient.name.family", { id: "Patient.name.family" }],
+      ["Patient.name.id", { id: "Patient.name.id" }],
+    ];
+
+    const result = getFirstChildren("Patient.name", formInfo);
+    expect(result).toEqual([
+      { id: "Patient.name.given" },
+      { id: "Patient.name.family" },
+    ]);
+  });
+
   it("returns empty array if no children", () => {
     const formInfo = [["Patient.gender", {}]];
     expect(getFirstChildren("Patient.name", formInfo)).toEqual([]);
@@ -660,5 +677,31 @@ describe("addCardinalityToElement", () => {
     const elemPath = "name";
     const result = addCardinalityToElement(nextEntry, elemPath);
     expect(result.resource[elemPath]).toEqual([{}, {}]);
+  });
+
+  it("should return an empty array if no elements match the criteria", () => {
+    const resource = {
+      definition: {
+        snapshot: {
+          element: [
+            { path: "Patient.meta", id: "Patient.meta", max: "1" },
+            { path: "Patient.language", id: "Patient.language", max: "1" },
+            { path: "Patient.name", id: "Patient.name", max: "1" },
+            { path: "Patient.contained", id: "Patient.contained", max: "1" },
+            {
+              path: "Patient.implicitRules",
+              id: "Patient.implicitRules",
+              max: "1",
+            },
+            { path: "Patient.text", id: "Patient.text", max: "1" },
+          ],
+        },
+      },
+    };
+
+    const result = getTopLevelElements(resource);
+    expect(result).toEqual([
+      { id: "Patient.name", max: "1", path: "Patient.name" },
+    ]);
   });
 });
