@@ -24,6 +24,7 @@ import {
   PopulationExpectedValue,
   MeasureErrorType,
   Model,
+  ValidationStatus,
 } from "@madie/madie-models";
 import useTestCaseServiceApi from "../../../api/useTestCaseServiceApi";
 import Editor from "../../editor/Editor";
@@ -399,7 +400,11 @@ const EditTestCase = (props: EditTestCaseProps) => {
         }
         resetForm({ values: _.cloneDeep(nextTc) });
         handleHapiOutcome(nextTc?.hapiOperationOutcome);
-        if (["Pending", "Validating"].includes(tc.validationStatus)) {
+        if (
+          [ValidationStatus.PENDING, ValidationStatus.VALIDATING].includes(
+            tc.validationStatus
+          )
+        ) {
           setShouldPoll(true);
         } else {
           setShouldPoll(false);
@@ -528,7 +533,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
         measureId
       );
       // initiate polling for validation response
-      if (updatedTestCase.validationStatus === "Pending") {
+      if (updatedTestCase.validationStatus === ValidationStatus.PENDING) {
         setShouldPoll(true);
       } else {
         setShouldPoll(false);
@@ -642,7 +647,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
     if (testCase && testCase.id) {
       const validationErrors =
         testCase?.hapiOperationOutcome?.outcomeResponse?.issue;
-      if (testCase.validationStatus === "Pending") {
+      if (testCase.validationStatus === ValidationStatus.PENDING) {
         if (timezoneUpdated) {
           showToast(
             <div>
@@ -1262,6 +1267,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                           <ValidationStatusIcon
                             validationStatus={testCase?.validationStatus}
                           />
+
                           <span className="ml-2">
                             Validations ({validationErrors?.length || 0})
                           </span>
