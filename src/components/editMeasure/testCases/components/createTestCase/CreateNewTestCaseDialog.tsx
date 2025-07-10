@@ -8,7 +8,7 @@ import {
   TextField,
   Toast,
   TextArea,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import { Box } from "@mui/system";
 import { InputLabel, Typography } from "@mui/material";
 import { useFormik } from "formik";

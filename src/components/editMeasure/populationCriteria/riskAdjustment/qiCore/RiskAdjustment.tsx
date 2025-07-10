@@ -15,7 +15,7 @@ import MultipleSelectDropDown from "../../MultipleSelectDropDown";
 import {
   MadieDiscardDialog,
   Toast,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import {
   Measure,
   MeasureReportType,

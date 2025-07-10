@@ -26,7 +26,7 @@ import {
   MadieSpinner,
   MadieDiscardDialog,
   Toast,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import {
   Measure,
   MeasureErrorType,
@@ -215,7 +215,7 @@ const MeasureEditor = () => {
   const [toastType, setToastType] = useState<string>("danger");
 
   const [refValueSetDetails, setRefValueSetDetails] = useState();
-  const prevSelectedValueSetDetails = useRef();
+  const prevSelectedValueSetDetails = useRef(null);
 
   // on load fetch elm translations results to display errors on editor not just on load..
   useEffect(() => {

@@ -31,7 +31,7 @@ import {
   MadieDiscardDialog,
   Tab,
   Tabs,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import AddElementDialog from "./AddElementDialog";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import tw from "twin.macro";

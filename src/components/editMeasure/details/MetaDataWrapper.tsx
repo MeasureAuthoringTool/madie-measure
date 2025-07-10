@@ -1,5 +1,5 @@
 import React from "react";
-import { Button } from "@madie/madie-design-system/dist/react";
+import { Button } from "@madie/madie-design-system";
 import { Typography } from "@mui/material";
 
 const MetaDataWrapper = ({

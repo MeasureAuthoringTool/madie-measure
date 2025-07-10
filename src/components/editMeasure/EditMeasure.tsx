@@ -30,7 +30,7 @@ import {
   MadieAlert,
   MadieDiscardDialog,
   MadieSpinner,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import DeleteDialog from "./DeleteDialog";
 import NotFound from "../notfound/NotFound";
 import ReviewInfo from "./reviewInfo/ReviewInfo";

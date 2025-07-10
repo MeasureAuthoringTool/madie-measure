@@ -1,17 +1,17 @@
 {
   "extends": "ts-config-single-spa",
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es2015",
+    "allowSyntheticDefaultImports": true,
     "declaration": true,
     "declarationDir": "dist",
     "declarationMap": true,
     "jsx": "react-jsx",
-    "sourceMap": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
+    "target": "ES2022",
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "skipLibCheck": true
   },
   "files": ["src/madie-madie-measure.tsx"],
   "include": ["src/**/*"],

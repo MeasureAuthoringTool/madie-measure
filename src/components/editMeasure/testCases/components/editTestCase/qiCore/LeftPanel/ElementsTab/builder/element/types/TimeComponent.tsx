@@ -1,6 +1,6 @@
 import React from "react";
 import { TypeComponentProps } from "./TypeComponentProps";
-import { TimeField } from "@madie/madie-design-system/dist/react";
+import { TimeField } from "@madie/madie-design-system"
 import timezone from "dayjs/plugin/timezone";
 import dayjs from "dayjs";
 

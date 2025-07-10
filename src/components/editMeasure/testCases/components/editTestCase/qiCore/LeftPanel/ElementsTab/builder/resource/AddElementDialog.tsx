@@ -3,7 +3,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { IconButton, DialogActions, Divider } from "@mui/material";
 import ElementSelector, { getOptionLabel } from "../element/ElementSelector";
 import { ElementDefinition } from "fhir/r4";
-import { MadieDialog as Dialog } from "@madie/madie-design-system/dist/react";
+import { MadieDialog as Dialog } from "@madie/madie-design-system";
 
 export interface AddElementDialogProps {
   open: boolean;

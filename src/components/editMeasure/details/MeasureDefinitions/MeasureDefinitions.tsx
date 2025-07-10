@@ -10,7 +10,7 @@ import {
   Toast,
   MadieDialog,
   MadieDeleteDialog,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import "twin.macro";
 import SearchIcon from "@mui/icons-material/Search";
 

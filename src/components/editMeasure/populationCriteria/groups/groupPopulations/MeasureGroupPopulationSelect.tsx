@@ -3,7 +3,7 @@ import "styled-components/macro";
 import { kebabCase } from "lodash";
 import { MenuItem } from "@mui/material";
 import { ExpressionDefinition } from "../QICore/QICoreMeasureGroups";
-import { Select } from "@madie/madie-design-system/dist/react";
+import { Select } from "@madie/madie-design-system";
 import {
   SubTitle,
   SecondIpLabel,

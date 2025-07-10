@@ -6,7 +6,7 @@ import {
   Select,
   TextField,
   Popover,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import SearchIcon from "@mui/icons-material/Search";
 
 import ClearIcon from "@mui/icons-material/Clear";

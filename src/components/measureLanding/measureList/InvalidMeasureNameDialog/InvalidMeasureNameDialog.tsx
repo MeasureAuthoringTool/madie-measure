@@ -1,6 +1,6 @@
 import React from "react";
 import { Box } from "@mui/system";
-import { Button } from "@madie/madie-design-system/dist/react";
+import { Button } from "@madie/madie-design-system";
 import {
   Dialog,
   DialogContent,

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { TextField } from "@madie/madie-design-system/dist/react/";
+import { TextField } from "@madie/madie-design-system";
 import "twin.macro";
 import "styled-components/macro";
 import { CQL } from "cqm-models";

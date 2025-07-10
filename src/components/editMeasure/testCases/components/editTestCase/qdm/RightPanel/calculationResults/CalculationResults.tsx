@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import QdmGroupCoverage from "../../../groupCoverage/QdmGroupCoverage";
 import { isEmpty } from "lodash";
-import { MadieAlert } from "@madie/madie-design-system/dist/react";
+import { MadieAlert } from "@madie/madie-design-system";
 import "twin.macro";
 import "styled-components/macro";
 import { CqlDefinitionCallstack } from "../../../groupCoverage/QiCoreGroupCoverage";

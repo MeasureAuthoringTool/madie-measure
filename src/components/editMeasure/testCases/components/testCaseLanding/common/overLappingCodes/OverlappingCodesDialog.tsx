@@ -4,6 +4,7 @@ import React, {
   useMemo,
   useState,
   useRef,
+  JSX,
 } from "react";
 import {
   useReactTable,
@@ -16,7 +17,7 @@ import {
   MadieDialog,
   Pagination,
   Toast,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import tw from "twin.macro";
 import "styled-components/macro";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";

@@ -1,7 +1,7 @@
 import React from "react";
 import "twin.macro";
 import "styled-components/macro";
-import { MadieAlert } from "@madie/madie-design-system/dist/react";
+import { MadieAlert } from "@madie/madie-design-system";
 import { useFeatureFlags } from "@madie/madie-util";
 interface MeasureGroupAlertsTypes {
   type?: string;

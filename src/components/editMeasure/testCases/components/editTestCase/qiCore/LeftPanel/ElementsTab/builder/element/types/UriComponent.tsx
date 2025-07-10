@@ -1,7 +1,7 @@
 import React from "react";
 import { TypeComponentProps } from "./TypeComponentProps";
 import Box from "@mui/material/Box";
-import { TextField } from "@madie/madie-design-system/dist/react/";
+import { TextField } from "@madie/madie-design-system";
 
 const UriComponent = ({
   canEdit,

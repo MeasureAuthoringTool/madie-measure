@@ -1,6 +1,6 @@
 import React from "react";
 import "../../../../../../styles/DataElementsTable.scss";
-import { Button } from "@madie/madie-design-system/dist/react";
+import { Button } from "@madie/madie-design-system"
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import MadieSpeedDial from "./MadieSpeedDial";
 import CloneIcon from "../../../../../../../../../../common/CloneIcon";

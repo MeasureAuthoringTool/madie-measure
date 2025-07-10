@@ -7,7 +7,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import "../../../../styles/VerticalSideBarNav.scss";
 import "../../../common/madie-link.scss";
-import { DSLink, Tabs, Tab } from "@madie/madie-design-system/dist/react";
+import { DSLink, Tabs, Tab } from "@madie/madie-design-system";
 import { INCOMPLETE, NONE } from "../PopulationCriteriaHome";
 import CompletionIndicator from "../groups/CompletionIndicator";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";

@@ -1,7 +1,7 @@
 import React, { ComponentProps } from "react";
 import "twin.macro";
 import "styled-components/macro";
-import { Select } from "@madie/madie-design-system/dist/react";
+import { Select } from "@madie/madie-design-system";
 import { MenuItem } from "@mui/material";
 import { kebabCase } from "lodash";
 import * as _ from "lodash";

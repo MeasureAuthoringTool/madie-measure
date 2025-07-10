@@ -1,5 +1,5 @@
 import React from "react";
-import { Button } from "@madie/madie-design-system/dist/react";
+import { Button } from "@madie/madie-design-system";
 
 const FileUploader = ({ onFileImport }) => {
   // reference to file input element

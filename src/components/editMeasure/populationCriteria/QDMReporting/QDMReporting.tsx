@@ -13,7 +13,7 @@ import {
   Select,
   MadieDiscardDialog,
   Toast,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import "./QDMReporting.scss";
 import { MenuItem as MuiMenuItem } from "@mui/material";
 import { QDMReportingValidator } from "./QDMReportingValidator";

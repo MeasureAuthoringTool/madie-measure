@@ -4,7 +4,7 @@ import {
   DateField,
   TimeField,
   Button,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import IntegerInput from "../../../../../../../common/IntegerInput/IntegerInput";
 import "./DisplayAttributeInputs.scss";
 import RatioInput from "../../../../../../../common/ratioInput/RatioInput";

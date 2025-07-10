@@ -8,7 +8,7 @@ import {
   Toast,
   ReadOnlyTextField,
   DateField,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 
 import { Typography } from "@mui/material";
 import { useFormik } from "formik";

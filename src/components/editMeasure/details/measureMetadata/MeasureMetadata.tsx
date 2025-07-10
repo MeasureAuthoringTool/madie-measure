@@ -13,7 +13,7 @@ import {
   Button,
   MadieDiscardDialog,
   Toast,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import _ from "lodash";
 import TextEditor from "../../populationCriteria/groups/TextEditor";
 

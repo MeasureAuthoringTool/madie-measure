@@ -8,7 +8,7 @@ import {
   TextField,
   Toast,
   AutoComplete,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import {
   measureStore,
   routeHandlerStore,

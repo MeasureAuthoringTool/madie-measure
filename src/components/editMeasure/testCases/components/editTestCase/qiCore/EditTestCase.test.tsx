@@ -1,5 +1,4 @@
-import * as React from "react";
-import { ChangeEvent } from "react";
+import React, { ChangeEvent } from "react";
 import {
   act,
   fireEvent,
@@ -61,7 +60,6 @@ jest.mock(
   "../../editor/Editor",
   () =>
     ({ setEditor, value, onChange, readOnly }) => {
-      const React = require("react");
       React.useEffect(() => {
         if (setEditor) {
           setEditor(mockEditor);

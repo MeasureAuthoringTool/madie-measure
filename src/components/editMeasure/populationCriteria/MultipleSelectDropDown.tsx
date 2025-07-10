@@ -1,7 +1,7 @@
 import React from "react";
 import { FormControl, Autocomplete, Checkbox } from "@mui/material";
 import PropTypes from "prop-types";
-import { TextField } from "@madie/madie-design-system/dist/react/";
+import { TextField } from "@madie/madie-design-system";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 
@@ -93,7 +93,7 @@ const MultipleSelectDropDown = ({
         disablePortal
         id={id}
         onClose={onClose}
-        placeholder={placeHolder}
+        // placeholder={placeHolder}
         defaultValue={defaultValue}
         disabled={disabled}
         data-testid={`${id}-dropdown`}

@@ -4,7 +4,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { Measure } from "@madie/madie-models";
 import EditCalendarOutlinedIcon from "@mui/icons-material/EditCalendarOutlined";
 import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
-import { Toast } from "@madie/madie-design-system/dist/react";
+import { Toast } from "@madie/madie-design-system";
 
 import _ from "lodash";
 

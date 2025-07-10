@@ -15,7 +15,7 @@ import {
   Toast,
   TruncateText,
   Button,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import "../TestCase.scss";
 import TestCaseTablePopover from "./TestCaseTablePopover";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";

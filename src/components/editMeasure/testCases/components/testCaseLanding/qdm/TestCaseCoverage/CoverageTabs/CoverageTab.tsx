@@ -5,7 +5,7 @@ interface Props {
   cqlDefinitionCallstack: any;
   groupCoverageResult: any;
 }
-import { Accordion } from "@madie/madie-design-system/dist/react";
+import { Accordion } from "@madie/madie-design-system";
 import parse from "html-react-parser";
 import { StatementCoverageResult } from "../../../../../util/cqlCoverageBuilder/CqlCoverageBuilder";
 import _, { isNil } from "lodash";

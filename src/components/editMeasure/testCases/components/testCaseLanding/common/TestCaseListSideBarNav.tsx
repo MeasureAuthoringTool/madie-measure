@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Group } from "@madie/madie-models";
 import tw from "twin.macro";
-import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
+import { Tabs, Tab } from "@madie/madie-design-system";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import "../../../../../../styles/VerticalSideBarNav.scss";

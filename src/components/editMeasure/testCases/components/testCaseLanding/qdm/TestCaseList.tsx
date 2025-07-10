@@ -24,7 +24,7 @@ import {
   MadieSpinner,
   Pagination,
   Toast,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import Typography from "@mui/material/Typography";
 import {
   TestCaseListProps,

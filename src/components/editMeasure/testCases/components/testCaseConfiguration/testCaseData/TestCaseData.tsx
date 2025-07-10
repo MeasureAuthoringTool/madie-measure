@@ -5,7 +5,7 @@ import {
   MadieSpinner,
   Toast,
   NumberInput,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import { useFormik } from "formik";
 import {
   measureStore,

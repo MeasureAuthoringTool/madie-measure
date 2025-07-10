@@ -9,7 +9,7 @@ import {
 import { useFormik } from "formik";
 import DisplayAttributeInputs from "./DisplayAttributeInputs";
 import AttributeChipList from "../AttributeChipList";
-import { MadieDiscardDialog } from "@madie/madie-design-system/dist/react";
+import { MadieDiscardDialog } from "@madie/madie-design-system";
 import { routeHandlerStore } from "@madie/madie-util";
 import useFormikResetOnEvent from "../../../../../../../../../../common/useFormikResetOnEvent";
 

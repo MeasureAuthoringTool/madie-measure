@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { DataElement } from "cqm-models";
-import { Select } from "@madie/madie-design-system/dist/react";
+import { Select } from "@madie/madie-design-system";
 import { useQdmPatient } from "../../../util/QdmPatientContext";
 import { filterDataElements } from "../../../util/DataElementHelper";
 import { MenuItem } from "@mui/material";

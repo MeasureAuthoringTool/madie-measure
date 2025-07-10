@@ -9,7 +9,7 @@ import {
   Select,
   TextField,
   MadieSpinner,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import { MeasureNameSchema } from "../../../validations/MeasureSchemaValidator";
 import { Model } from "@madie/madie-models";
 import { useFeatureFlags } from "@madie/madie-util";

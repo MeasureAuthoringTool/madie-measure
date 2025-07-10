@@ -12,7 +12,7 @@ import {
   Button,
   Toast,
   MadieDiscardDialog,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import qdmCalculationService from "../../../api/QdmCalculationService";
 import { Allotment } from "allotment";
 import RightPanel from "./RightPanel/RightPanel";

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Instant } from "@madie/madie-design-system/dist/react";
+import { Instant } from "@madie/madie-design-system";
 
 import dayjs from "dayjs";
 import { INSTANT_REGEX } from "../typesValidations/fhirR4Validations";

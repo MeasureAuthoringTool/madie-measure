@@ -1,9 +1,9 @@
 import * as React from "react";
 import { render, screen } from "@testing-library/react";
 import StatusHandler, { transformAnnotation } from "./StatusHandler";
-import { MadieAlert } from "@madie/madie-design-system/dist/react";
+import { MadieAlert } from "@madie/madie-design-system";
 
-jest.mock("@madie/madie-design-system/dist/react", () => ({
+jest.mock("@madie/madie-design-system", () => ({
   MadieAlert: jest.fn(({ alerts, minimizeAlerts }) => {
     return (
       <div data-testid="madie-alert-mock">

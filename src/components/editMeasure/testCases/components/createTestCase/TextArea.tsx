@@ -1,5 +1,5 @@
 import React from "react";
-import { InputLabel } from "@madie/madie-design-system/dist/react";
+import { InputLabel } from "@madie/madie-design-system";
 import {
   FormControl,
   FormHelperText,

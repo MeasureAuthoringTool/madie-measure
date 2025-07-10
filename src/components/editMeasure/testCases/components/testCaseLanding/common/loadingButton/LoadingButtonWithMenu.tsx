@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import LoadingButton from "@mui/lab/LoadingButton";
-import { Popover } from "@madie/madie-design-system/dist/react";
+import { Popover } from "@madie/madie-design-system";
 
 interface MenuItem {
   label: string;

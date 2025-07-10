@@ -5,7 +5,7 @@ import {
   StructureDefinition,
 } from "fhir/r4";
 import UriComponent from "./UriComponent";
-import { Select } from "@madie/madie-design-system/dist/react";
+import { Select } from "@madie/madie-design-system";
 import { MenuItem, Typography } from "@mui/material";
 import TypeEditor from "../TypeEditor";
 import { StructureDefinitionDto } from "../../../../../../../../api/models/StructureDefinitionDto";

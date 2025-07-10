@@ -8,7 +8,7 @@ import timezone from "dayjs/plugin/timezone";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import advancedFormat from "dayjs/plugin/advancedFormat";
-import { Select, InputLabel } from "@madie/madie-design-system/dist/react";
+import { Select, InputLabel } from "@madie/madie-design-system";
 import DateField from "./DateField";
 import {
   isFormatLessComplex,

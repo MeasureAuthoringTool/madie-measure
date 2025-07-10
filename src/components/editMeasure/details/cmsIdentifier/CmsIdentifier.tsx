@@ -4,7 +4,7 @@ import {
   MadieTooltip,
   Button,
   ReadOnlyTextField,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import GenerateCmsID from "../../../../icons/GenerateCmsID";
 
 export default function CmsIdentifier({

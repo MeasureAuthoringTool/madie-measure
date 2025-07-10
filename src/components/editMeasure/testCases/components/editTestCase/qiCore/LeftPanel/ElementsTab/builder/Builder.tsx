@@ -24,7 +24,7 @@ import {
   Tabs,
   Tab,
   MadieDiscardDialog,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import { useFormikContext } from "formik";
 import "./Builder.scss";
 

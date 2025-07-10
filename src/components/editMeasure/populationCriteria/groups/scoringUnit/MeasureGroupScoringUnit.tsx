@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TextField } from "@madie/madie-design-system/dist/react/";
+import { TextField } from "@madie/madie-design-system";
 
 export interface ScoringUnitProps {
   value: any;

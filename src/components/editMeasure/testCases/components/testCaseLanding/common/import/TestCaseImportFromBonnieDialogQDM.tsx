@@ -9,7 +9,7 @@ import {
   Button,
   Toast,
   MadieDialog,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import "./TestCaseImportDialog.css";
 import * as _ from "lodash";
 import useTestCaseServiceApi from "../../../../api/useTestCaseServiceApi";

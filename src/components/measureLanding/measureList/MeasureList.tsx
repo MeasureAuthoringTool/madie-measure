@@ -2,7 +2,6 @@ import React, {
   Dispatch,
   HTMLProps,
   SetStateAction,
-  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -13,7 +12,7 @@ import "styled-components/macro";
 import { Measure, Model } from "@madie/madie-models";
 import { useNavigate } from "react-router-dom";
 import { Chip } from "@mui/material";
-import { Button, TruncateText } from "@madie/madie-design-system/dist/react";
+import { Button, TruncateText } from "@madie/madie-design-system";
 import {
   useReactTable,
   ColumnDef,
@@ -96,7 +95,7 @@ export default function MeasureList(props: {
   const [loading, setLoading] = useState<boolean>(false);
   // if user can edit and it is a version, then draft button
 
-  const targetMeasure = useRef<Measure>();
+  const targetMeasure = useRef<Measure>(null);
 
   const [createVersionDialog, setCreateVersionDialog] = useState({
     open: false,

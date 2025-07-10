@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FormHelperText } from "@mui/material";
 import { validate as uuidValidate } from "uuid";
 import { TypeComponentProps } from "./TypeComponentProps";
-import { TextField } from "@madie/madie-design-system/dist/react";
+import { TextField } from "@madie/madie-design-system";
 import _ from "lodash";
 
 const UuidComponent = ({

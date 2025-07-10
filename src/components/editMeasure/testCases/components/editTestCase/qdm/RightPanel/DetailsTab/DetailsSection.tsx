@@ -5,7 +5,7 @@ import {
   TextField,
   InputLabel,
   TextArea,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system"
 import TestCaseSeries from "../../../../createTestCase/TestCaseSeries";
 import { useParams } from "react-router-dom";
 import useTestCaseServiceApi from "../../../../../api/useTestCaseServiceApi";

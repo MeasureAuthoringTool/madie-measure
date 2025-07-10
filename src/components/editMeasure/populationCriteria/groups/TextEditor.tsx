@@ -4,7 +4,7 @@ import { useDebouncedCallback } from "use-debounce";
 import {
   TextArea,
   RichTextEditor,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import { useFeatureFlags } from "@madie/madie-util";
 
 type Props = {

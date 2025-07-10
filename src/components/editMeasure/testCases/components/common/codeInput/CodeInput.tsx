@@ -5,7 +5,7 @@ import {
   Select,
   TextField,
   MadieDiscardDialog,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import { MenuItem } from "@mui/material";
 import { CQL, ValueSet, Concept } from "cqm-models";
 import { routeHandlerStore } from "@madie/madie-util";

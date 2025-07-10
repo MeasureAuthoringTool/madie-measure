@@ -8,7 +8,7 @@ import {
   Select,
   MadieDialog,
   MadieSpinner,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import "./CreateVersionDialog.scss";
 import * as _ from "lodash";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";

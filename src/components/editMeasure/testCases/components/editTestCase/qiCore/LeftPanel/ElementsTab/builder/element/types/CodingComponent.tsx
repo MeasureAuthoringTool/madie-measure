@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
-import { Select, TextField } from "@madie/madie-design-system/dist/react";
+import { Select, TextField } from "@madie/madie-design-system";
 import { MenuItem } from "@mui/material";
 import useFhirDefinitionsServiceApi from "../../../../../../../../api/useFhirDefinitionsService";
 import useExecutionContext from "../../../../../../../routes/qiCore/useExecutionContext";

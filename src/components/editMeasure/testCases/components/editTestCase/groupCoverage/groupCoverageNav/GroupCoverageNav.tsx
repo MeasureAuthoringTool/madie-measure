@@ -1,5 +1,5 @@
 import React from "react";
-import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
+import { Tabs, Tab } from "@madie/madie-design-system";
 import { PopulationType } from "@madie/madie-models";
 import { useFeatureFlags } from "@madie/madie-util";
 

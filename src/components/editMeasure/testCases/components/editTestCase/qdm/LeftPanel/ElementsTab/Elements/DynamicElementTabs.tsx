@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Tabs } from "@madie/madie-design-system/dist/react";
+import { Tabs } from "@madie/madie-design-system";
 
 import { categoriesMap } from "./categories";
 import DynamicElementTab from "./DynamicElementTab";

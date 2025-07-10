@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, JSX } from "react";
 import { SpeedDial, SpeedDialAction } from "@mui/material";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import { MadieDeleteDialog } from "@madie/madie-design-system/dist/react";
+import { MadieDeleteDialog } from "@madie/madie-design-system";
 
 interface PropTypes {
   rootDefinition: any;

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { IconButton } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import { Measure, Model } from "@madie/madie-models";
-import { Popover } from "@madie/madie-design-system/dist/react";
+import { Popover } from "@madie/madie-design-system";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import { grey, blue } from "@mui/material/colors";
 

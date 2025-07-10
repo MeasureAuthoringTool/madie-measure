@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { FormControl } from "@mui/material";
-import { TextField } from "@madie/madie-design-system/dist/react";
+import { TextField } from "@madie/madie-design-system";
 import { kebabCase } from "lodash";
 
 export interface StringInputProps {

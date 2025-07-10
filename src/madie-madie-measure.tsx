@@ -1,16 +1,18 @@
 import React, { FC } from "react";
-import ReactDOM from "react-dom";
-import singleSpaReact from "single-spa-react";
+import ReactDOMClient from "react-dom/client";
+import singleSpaReact, { SingleSpaContext } from "single-spa-react";
 import Root from "./root.component";
 import Home from "./components/Home";
 
 const lifecycles = singleSpaReact({
   React,
-  ReactDOM,
+  ReactDOMClient,
   rootComponent: Root,
+  renderType: "createRoot",
   errorBoundary(err, info, props) {
-    // Customize the root error boundary for your microfrontend here.
-    return null;
+    console.log('madie-measure-error', err)
+    // console.log('madie-measure-info', info);
+    return <div>The app has fallen, and cannot get up. Please contact the help desk</div>;
   },
 });
 

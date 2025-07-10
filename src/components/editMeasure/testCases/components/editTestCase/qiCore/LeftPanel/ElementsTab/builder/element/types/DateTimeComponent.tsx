@@ -12,7 +12,7 @@ import {
   Select,
   TimeField,
   InputLabel,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import DateField from "./DateField";
 
 dayjs.extend(utc);

@@ -1,6 +1,6 @@
 import React from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Tab, Tabs } from "@madie/madie-design-system/dist/react";
+import { Tab, Tabs } from "@madie/madie-design-system";
 import "../../../styles/VerticalSideBarNav.scss";
 import { Link } from "./MeasureDetails";
 import CompletionIndicator from "../populationCriteria/groups/CompletionIndicator";

@@ -1,4 +1,4 @@
-import React, { lazy, useEffect, useMemo, useState } from "react";
+import React, { lazy, Suspense, useEffect, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
@@ -9,6 +9,18 @@ import BaseConfiguration from "./baseConfiguration/BaseConfiguration";
 import QDMReporting from "./QDMReporting/QDMReporting";
 import MeasureGroupAlerts from "./groups/MeasureGroupAlerts";
 
+// Stable lazy imports. Without this child component infinitely renders.
+const QdmSupplementalData = lazy(() => import("./supplementalData/qdm/SupplementalData"));
+const QiCoreSupplementalData = lazy(() => import("./supplementalData/qiCore/SupplementalData"));
+const EmptySupplementalData = lazy(() => import("./supplementalData/EmptySupplementalData"));
+
+const QdmRiskAdjustment = lazy(() => import("./riskAdjustment/qdm/RiskAdjustment"));
+const QiCoreRiskAdjustment = lazy(() => import("./riskAdjustment/qiCore/RiskAdjustment"));
+const EmptyRiskAdjustment = lazy(() => import("./riskAdjustment/EmptyRiskAdjustment"));
+
+const QdmMeasureGroups = lazy(() => import("./groups/QDM/QDMMeasureGroups"));
+const QicoreMeasureGroups = lazy(() => import("./groups/QICore/QICoreMeasureGroups"));
+
 export const COMPLETE = "complete";
 export const INCOMPLETE = "incomplete";
 export const NONE = "none";
@@ -17,62 +29,43 @@ export function PopulationCriteriaHome() {
   const { pathname } = useLocation();
   const { groupNumber } = useParams();
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
+
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
-  let navigate = useNavigate();
-  const canEdit: boolean = checkUserCanEdit(
+  const navigate = useNavigate();
+  const canEdit = checkUserCanEdit(
     measure?.measureSet?.owner,
     measure?.measureSet?.acls,
     measure?.measureMetaData?.draft
   );
+
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(null);
   const [sideNavLinks, setSideNavLinks] = useState<Array<any>>();
   const [isFormDirty, setIsFormDirty] = useState<boolean>(false);
   const [alertMessage, setAlertMessage] = useState(null);
 
-  const groupsBaseUrl = "/measures/" + measure?.id + "/edit/groups";
+  const groupsBaseUrl = `/measures/${measure?.id}/edit/groups`;
 
-  const SupplementalDataComponent = useMemo(
-    () =>
-      lazy(() => {
-        if (measure?.model?.includes("QDM")) {
-          return import("./supplementalData/qdm/SupplementalData");
-        }
-        if (measure?.model?.includes("QI-Core")) {
-          return import("./supplementalData/qiCore/SupplementalData");
-        } else {
-          return import("./supplementalData/EmptySupplementalData");
-        }
-      }),
-    [measure?.model]
-  );
+  const isQDM = measure?.model?.includes("QDM");
 
-  const RiskAdjustmentComponent = useMemo(
-    () =>
-      lazy(() => {
-        if (measure?.model?.includes("QDM")) {
-          return import("./riskAdjustment/qdm/RiskAdjustment");
-        }
-        if (measure?.model?.includes("QI-Core")) {
-          return import("./riskAdjustment/qiCore/RiskAdjustment");
-        } else {
-          return import("./riskAdjustment/EmptyRiskAdjustment");
-        }
-      }),
-    [measure?.model]
-  );
+  const SupplementalDataComponent = measure?.model?.includes("QDM")
+    ? QdmSupplementalData
+    : measure?.model?.includes("QI-Core")
+    ? QiCoreSupplementalData
+    : EmptySupplementalData;
 
-  // this works for a specific QDM version
-  // If we specify weather the string contains QDM, we can have a more flexible check. All QDM versions will trigger that render, then we can handle differently
-  const isQDM = ((): boolean => {
-    // return measure?.model === Model.QDM_5_6;
-    return measure?.model.includes("QDM");
-  })();
+  const RiskAdjustmentComponent = measure?.model?.includes("QDM")
+    ? QdmRiskAdjustment
+    : measure?.model?.includes("QI-Core")
+    ? QiCoreRiskAdjustment
+    : EmptyRiskAdjustment;
+
+  const MeasureGroupsComponent = measure?.model?.includes("QDM")
+    ? QdmMeasureGroups
+    : QicoreMeasureGroups;
 
   useEffect(() => {
     if (pathname.includes("/groups")) {
@@ -86,21 +79,19 @@ export function PopulationCriteriaHome() {
     }
   }, [groupNumber]);
 
-  /* This useEffect generates information required for left side nav bar
-   * If a measure doesn't have any groups, then a new one is added. */
   useEffect(() => {
     const measureGroups =
       measure?.groups && measure.groups.length > 0
-        ? measure.groups?.map((_group, id) => ({
+        ? measure.groups.map((_group, id) => ({
             title: `Criteria ${id + 1}`,
-            href: groupsBaseUrl + "/" + (id + 1),
+            href: `${groupsBaseUrl}/${id + 1}`,
             dataTestId: `leftPanelMeasureInformation-MeasureGroup${id + 1}`,
             groupPopulated: true,
           }))
         : [
             {
               title: "Criteria 1",
-              href: groupsBaseUrl + "/1",
+              href: `${groupsBaseUrl}/1`,
               dataTestId: "leftPanelMeasureInformation-MeasureGroup1",
               groupPopulated: false,
             },
@@ -115,87 +106,35 @@ export function PopulationCriteriaHome() {
     ]);
   }, [groupsBaseUrl, measure?.groups]);
 
-  // lets dynamically load our measureGroups component based on weather it's QDM or QICore
-  // this needs to be memoized as it loses state otherwise and refreshes on change
-
-  const MeasureGroupsComponent = useMemo(
-    () =>
-      lazy(() => {
-        if (measure?.model.includes("QDM")) {
-          return import("./groups/QDM/QDMMeasureGroups");
-        } else {
-          return import("./groups/QICore/QICoreMeasureGroups");
-        }
-      }),
-    [measure?.model]
-  );
-
-  const checkBaseConfigPopulated = () => {
-    if (measure?.model.includes("QDM")) {
-      return measure?.baseConfigurationTypes?.length > 0;
-    }
-    return false;
-  };
+  const checkBaseConfigPopulated = () =>
+    measure?.model?.includes("QDM") &&
+    measure?.baseConfigurationTypes?.length > 0;
 
   const checkReporting = () => {
-    if (
-      measure?.improvementNotation &&
-      measure?.improvementNotationDescription &&
-      measure?.rateAggregation
-    ) {
-      return COMPLETE;
-    } else {
-      if (
-        !measure?.improvementNotation &&
-        !measure?.improvementNotationDescription &&
-        !measure?.rateAggregation
-      ) {
-        return NONE;
-      } else {
-        return INCOMPLETE;
-      }
-    }
+    const { improvementNotation, improvementNotationDescription, rateAggregation } = measure || {};
+    if (improvementNotation && improvementNotationDescription && rateAggregation) return COMPLETE;
+    if (!improvementNotation && !improvementNotationDescription && !rateAggregation) return NONE;
+    return INCOMPLETE;
   };
 
   const checkSupplementalData = () => {
-    if (
-      measure?.supplementalData?.length > 0 &&
-      measure?.supplementalDataDescription
-    ) {
-      return COMPLETE;
-    } else {
-      if (
-        measure?.supplementalData?.length == 0 &&
-        !measure?.supplementalDataDescription
-      ) {
-        return NONE;
-      } else {
-        return INCOMPLETE;
-      }
-    }
+    const hasData = measure?.supplementalData?.length > 0;
+    const hasDesc = !!measure?.supplementalDataDescription;
+    if (hasData && hasDesc) return COMPLETE;
+    if (!hasData && !hasDesc) return NONE;
+    return INCOMPLETE;
   };
 
   const checkRiskAdjustment = () => {
-    if (
-      measure?.riskAdjustments?.length > 0 &&
-      measure?.riskAdjustmentDescription
-    ) {
-      return COMPLETE;
-    } else {
-      if (
-        measure?.riskAdjustments?.length == 0 &&
-        !measure?.riskAdjustmentDescription
-      ) {
-        return NONE;
-      } else {
-        return INCOMPLETE;
-      }
-    }
+    const hasData = measure?.riskAdjustments?.length > 0;
+    const hasDesc = !!measure?.riskAdjustmentDescription;
+    if (hasData && hasDesc) return COMPLETE;
+    if (!hasData && !hasDesc) return NONE;
+    return INCOMPLETE;
   };
 
   return (
     <>
-      {/* Status handler for Population Criteria tab */}
       <MeasureGroupAlerts {...alertMessage} />
       <div
         tw="grid lg:grid-cols-6 gap-4 mx-8 shadow-lg rounded-md border bg-white"
@@ -218,28 +157,34 @@ export function PopulationCriteriaHome() {
           supplementalDataStatus={checkSupplementalData()}
           riskAdjustmentStatus={checkRiskAdjustment()}
         />
-        {/* path can be independent of nav */}
+
         {pathname.includes("/base-configuration") && <BaseConfiguration />}
 
-        {/* we will load A measureGroups component*/}
         {pathname.includes("/groups") && (
-          <MeasureGroupsComponent
-            setIsFormDirty={setIsFormDirty}
-            measureGroupNumber={measureGroupNumber}
-            setMeasureGroupNumber={setMeasureGroupNumber}
-            measureId={measure?.id}
-            setAlertMessage={setAlertMessage}
-          />
+          <Suspense fallback={<div>Loading groups…</div>}>
+            <MeasureGroupsComponent
+              setIsFormDirty={setIsFormDirty}
+              measureGroupNumber={measureGroupNumber}
+              setMeasureGroupNumber={setMeasureGroupNumber}
+              measureId={measure?.id}
+              setAlertMessage={setAlertMessage}
+            />
+          </Suspense>
         )}
-        {/* what's a better way to say if QDM or QICore?
-          To do: Find a more elegant solution for future when we have more than two models to avoid if else if else. */}
+
         {pathname.includes("reporting") && <QDMReporting />}
 
         {pathname.includes("/supplemental-data") && (
-          <SupplementalDataComponent />
+          <Suspense fallback={<div>Loading supplemental data…</div>}>
+            <SupplementalDataComponent />
+          </Suspense>
         )}
 
-        {pathname.includes("/risk-adjustment") && <RiskAdjustmentComponent />}
+        {pathname.includes("/risk-adjustment") && (
+          <Suspense fallback={<div>Loading risk adjustment…</div>}>
+            <RiskAdjustmentComponent />
+          </Suspense>
+        )}
       </div>
     </>
   );

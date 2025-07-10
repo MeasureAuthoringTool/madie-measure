@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import "twin.macro";
 import "styled-components/macro";
-import { Popover } from "@madie/madie-design-system/dist/react";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import BorderColorOutlinedIcon from "@mui/icons-material/BorderColorOutlined";
 import { blue, red } from "@mui/material/colors";

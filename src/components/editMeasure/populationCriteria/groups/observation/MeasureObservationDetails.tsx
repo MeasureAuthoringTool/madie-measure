@@ -11,7 +11,7 @@ import {
   Select,
   TextArea,
   RichTextEditor,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import camelCaseConverter from "../../../../../utils/camelCaseConverter";
 import { useFeatureFlags } from "@madie/madie-util";
 

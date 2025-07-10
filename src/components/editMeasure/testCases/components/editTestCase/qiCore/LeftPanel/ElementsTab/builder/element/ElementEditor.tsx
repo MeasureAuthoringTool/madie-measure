@@ -26,7 +26,7 @@ import {
   ResourceActionType,
 } from "../../../../../../../util/QiCorePatientProvider";
 import { useFormikContext } from "formik";
-import { Button, Toast } from "@madie/madie-design-system/dist/react";
+import { Button, Toast } from "@madie/madie-design-system";
 import useFormikResetOnEvent from "../../../../../../../../../common/useFormikResetOnEvent";
 import { RequiredFieldsProvider } from "./RequiredFieldsContext";
 

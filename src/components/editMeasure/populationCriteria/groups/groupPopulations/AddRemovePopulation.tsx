@@ -1,7 +1,7 @@
 import React from "react";
 import { InitialPopulationAssociationType } from "./GroupPopulation";
 import { GroupScoring, PopulationType } from "@madie/madie-models";
-import { DSLink } from "@madie/madie-design-system/dist/react";
+import { DSLink } from "@madie/madie-design-system";
 import tw, { styled } from "twin.macro";
 import { v4 as uuidv4 } from "uuid";
 import * as _ from "lodash";

@@ -81,7 +81,7 @@ function UseFetchTestCases({ measureId, setErrors }) {
     visibleItems: null,
     offset: 0,
     page: 1,
-    limit: 10 || "All",
+    limit: 10,
     count: undefined,
     currentSlice: [],
     canGoNext: false,
@@ -192,6 +192,7 @@ function UseFetchTestCases({ measureId, setErrors }) {
           visibleItems: currentSlice.length,
           offset: start,
           page: curPage,
+          // @ts-ignore
           limit: (values.limit === "All" && values.limit) || curLimit,
           count: Math.ceil(filteredTestCases.length / curLimit),
           currentSlice,
@@ -212,6 +213,7 @@ function UseFetchTestCases({ measureId, setErrors }) {
           visibleItems: currentSlice.length,
           offset: start,
           page: curPage,
+          // @ts-ignore
           limit: (values.limit === "All" && values.limit) || curLimit,
           count,
           currentSlice,

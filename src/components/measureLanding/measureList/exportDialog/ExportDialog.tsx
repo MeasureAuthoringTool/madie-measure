@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import { Box } from "@mui/system";
 
-import { Button } from "@madie/madie-design-system/dist/react";
+import { Button } from "@madie/madie-design-system";
 import ExportIcon from "./ExportIcon";
 import "./ExportDialog.scss";
 

@@ -9,7 +9,7 @@ import {
   SupplementalData,
   Group,
 } from "@madie/madie-models";
-import { Select } from "@madie/madie-design-system/dist/react";
+import { Select } from "@madie/madie-design-system";
 import GroupCoverageNav, {
   Population,
 } from "./groupCoverageNav/GroupCoverageNav";

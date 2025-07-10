@@ -1,5 +1,5 @@
 import React from "react";
-import { Tab } from "@madie/madie-design-system/dist/react";
+import { Tab } from "@madie/madie-design-system";
 
 const DynamicElementTab = ({
   label,

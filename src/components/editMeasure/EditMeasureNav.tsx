@@ -7,7 +7,7 @@ import {
   useParams,
 } from "react-router-dom";
 import tw, { styled } from "twin.macro";
-import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
+import { Tabs, Tab } from "@madie/madie-design-system";
 import { measureStore } from "@madie/madie-util";
 interface PropTypes {
   isActive?: boolean;

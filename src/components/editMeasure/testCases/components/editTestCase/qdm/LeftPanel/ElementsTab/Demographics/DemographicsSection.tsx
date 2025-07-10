@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ElementSection from "../../../../../common/ElementSection";
-import { Select } from "@madie/madie-design-system/dist/react";
+import { Select } from "@madie/madie-design-system";
 import FormControl from "@mui/material/FormControl";
 import { DataElement } from "cqm-models";
 import DateTimeInput from "../../../../../common/dateTimeInput/DateTimeInput";

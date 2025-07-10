@@ -9,7 +9,7 @@ import {
   Pagination,
   TextField,
   MadieSpinner,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import {
   ColumnDef,
   flexRender,

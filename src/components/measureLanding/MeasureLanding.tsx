@@ -19,7 +19,7 @@ import {
   Tabs,
   Tab,
   Toast,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import "./MeasureLanding.scss";
 import { useDocumentTitle, useFeatureFlags } from "@madie/madie-util";
 import StatusHandler from "../editMeasure/editor/StatusHandler";
@@ -299,7 +299,7 @@ export default function MeasureLanding() {
     const event = new Event("measures-mount");
     window.dispatchEvent(event);
   }, []);
-
+  console.log('activeTab', activeTab);
   return (
     <div id="measure-landing" data-testid="measure-landing">
       <div className="measure-table">

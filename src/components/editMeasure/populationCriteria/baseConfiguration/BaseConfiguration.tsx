@@ -20,7 +20,7 @@ import {
   MadieDiscardDialog,
   Toast,
   RadioButton,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import "./BaseConfiguration.scss";
 import MeasureGroupsWarningDialog from "../groups/MeasureGroupWarningDialog";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";

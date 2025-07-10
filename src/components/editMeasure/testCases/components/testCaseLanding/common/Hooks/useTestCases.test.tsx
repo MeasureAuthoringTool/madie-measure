@@ -5,7 +5,7 @@ import UseFetchTestCases, { sortFilteredTestCases } from "./UseTestCases";
 import useTestCaseServiceApi, {
   TestCaseServiceApi,
 } from "../../../../api/useTestCaseServiceApi";
-import { renderHook, act } from "@testing-library/react-hooks";
+// import { renderHook, act } from "@testing-library/react-hooks";
 import { TestCase } from "@madie/madie-models";
 import { SortingState } from "@tanstack/react-table";
 

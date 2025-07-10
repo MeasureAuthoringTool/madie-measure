@@ -6,7 +6,7 @@ import {
   TextField,
   Button,
   MadieDiscardDialog,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import { MenuItem, Chip } from "@mui/material";
 import _ from "lodash";
 import {
@@ -126,6 +126,7 @@ const Codes = ({
             value={name as string}
             data-testid={`code-system-option-${name}`}
           >
+            {/* @ts-ignore */}
             {name}
           </MenuItem>
         )),

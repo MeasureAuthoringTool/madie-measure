@@ -139,4 +139,7 @@ module.exports = {
     },
   },
   plugins: [formsPlugin],
+  content: [
+    './src/**/*.{js,ts,jsx,tsx}',
+  ]
 };

@@ -1,28 +1,21 @@
 /** @format */
 
-const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { mergeWithRules } = require("webpack-merge");
 const singleSpaDefaults = require("webpack-config-single-spa-react-ts");
 const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
 const fs = require("fs");
 
 module.exports = (webpackConfigEnv, argv) => {
-  const protocol = webpackConfigEnv.protocol
-    ? webpackConfigEnv.protocol
-    : "http";
-  console.log("Branch Name " + protocol);
+  const protocol = webpackConfigEnv.protocol || "http";
 
   let https;
-  console.log("Dir Name " + __dirname);
   try {
     if (protocol === "https") {
       https = {
         key: fs.readFileSync(path.resolve(__dirname, "localhost.key"), "utf-8"),
-        cert: fs.readFileSync(
-          path.resolve(__dirname, "localhost.crt"),
-          "utf-8"
-        ),
+        cert: fs.readFileSync(path.resolve(__dirname, "localhost.crt"), "utf-8"),
       };
     } else {
       https = false;
@@ -42,54 +35,87 @@ module.exports = (webpackConfigEnv, argv) => {
     orgPackagesAsExternal: false,
   });
 
-  // This must be updated for any single-spa applications or utilities,
-  // or any other package to be loaded externally
-  const externalsConfig = {
-    externals: ["@madie/madie-editor", "@madie/madie-util"],
+  const babelLoaderRule = {
+    test: /\.(js|ts|jsx|tsx)$/,
+    exclude: /node_modules/,
+    use: "babel-loader",
   };
-  // We need to override the css loading rule from the parent configuration
-  // so that we can add postcss-loader to the chain
-  const newCssRule = {
+
+  const cssRules = {
     module: {
       rules: [
-        { test: /\.m?js/, type: "javascript/auto" },
+        { test: /\.m?js$/, type: "javascript/auto" },
+        babelLoaderRule,
         {
           test: /\.css$/i,
-          include: [/node_modules/, /src/],
-          use: [
-            "style-loader",
-            "css-loader", // uses modules: true, which I think we want. Parent does not
-            "postcss-loader",
-          ],
+          include: path.resolve(__dirname, "src"),
+          use: ["style-loader", "css-loader", "postcss-loader"],
         },
         {
           test: /\.scss$/,
-          resolve: {
-            extensions: [".scss", ".sass"],
-          },
           use: [
-            {
-              loader: "style-loader",
-            },
+            "style-loader",
             {
               loader: "css-loader",
               options: { sourceMap: true, importLoaders: 2 },
             },
             {
               loader: "postcss-loader",
-              options: {
-                sourceMap: true,
-              },
+              options: { sourceMap: true },
             },
-            {
-              loader: "sass-loader",
-            },
+            "sass-loader",
           ],
           exclude: /node_modules/,
         },
         { test: /\.json$/, type: "json" },
       ],
     },
+  };
+
+  const polyfillConfig = {
+    plugins: [new NodePolyfillPlugin()],
+  };
+
+  const handlebarsConfig = {
+    module: {
+      rules: [
+        {
+          include: [/node_modules\/.*\/fqm_execution\/templates/],
+          test: /\.(js|handlebars|hbs)$/,
+          loader: "handlebars-loader",
+        },
+      ],
+    },
+  };
+
+  const esmOutputConfig = {
+    target: "web",
+    output: {
+      filename: "madie-madie-measure.js",
+    },
+    externals: {
+      react: "react",
+      "react-dom": "react-dom",
+      "react-dom/client": "react-dom/client",
+
+      'react/jsx-runtime': 'react/jsx-runtime',
+      'react/jsx-dev-runtime': 'react/jsx-dev-runtime',
+
+      "@madie/madie-util": "@madie/madie-util",
+      "@madie/madie-editor": "@madie/madie-editor",
+    },
+    resolve: {
+      extensions: [".tsx", ".ts", ".js", ".jsx", ".scss", ".sass"],
+      fallback: {
+        fs: false,
+      },
+      alias: {
+        handlebars: "handlebars/dist/handlebars.min.js",
+      },
+    },
+  };
+
+  const devServerConfig = {
     devServer: {
       https,
       static: [
@@ -120,7 +146,7 @@ module.exports = (webpackConfigEnv, argv) => {
         },
       ],
     },
-    plugins: [
+     plugins: [
       new HtmlWebpackPlugin({
         template: path.join(
           __dirname,
@@ -130,32 +156,16 @@ module.exports = (webpackConfigEnv, argv) => {
     ],
   };
 
-  // node polyfills
-  const polyfillConfig = {
-    resolve: {
-      fallback: {
-        fs: false,
-      },
-    },
-    plugins: [new NodePolyfillPlugin()],
-  };
-
-  //handlebar madness
-  const handlebarsConfig = {
-    module: {
-      rules: [
-        {
-          include: [/node_modules\/ * \/fqm_execution\/templates/],
-          test: /\.(js|handlebars|hbs)$/,
-          loader: "handlebars-loader",
-        },
-      ],
-    },
-    resolve: {
-      alias: {
-        handlebars: "handlebars/dist/handlebars.min.js",
-      },
-    },
+  // I have no idea what this was supposed to do, but it didn't do it.
+  const htmlPluginConfig = {
+    plugins: [
+      new HtmlWebpackPlugin({
+        template: path.join(
+          __dirname,
+          "node_modules/@madie/madie-root/dist/index.html"
+        ),
+      }),
+    ],
   };
 
   return mergeWithRules({
@@ -167,11 +177,13 @@ module.exports = (webpackConfigEnv, argv) => {
     },
     plugins: "append",
   })(
-    externalsConfig,
     defaultConfig,
     polyfillConfig,
     handlebarsConfig,
-    newCssRule,
+    htmlPluginConfig,
+    cssRules,
+    esmOutputConfig,
+    devServerConfig,
     {
       optimization: {
         minimize: false,

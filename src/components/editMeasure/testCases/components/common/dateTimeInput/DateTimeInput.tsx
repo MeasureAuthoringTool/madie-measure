@@ -1,5 +1,5 @@
 import React from "react";
-import { DateTimeField } from "@madie/madie-design-system/dist/react";
+import { DateTimeField } from "@madie/madie-design-system";
 import dayjs from "dayjs";
 import { CQL } from "cqm-models";
 import utc from "dayjs/plugin/utc";

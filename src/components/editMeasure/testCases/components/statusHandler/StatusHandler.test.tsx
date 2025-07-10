@@ -3,9 +3,9 @@ import { render, screen } from "@testing-library/react";
 import StatusHandler from "./StatusHandler";
 import { EXPORT_ERROR_CHARACTERS_MESSAGE } from "../../util/checkSpecialCharacters";
 import { TestCaseImportOutcome } from "@madie/madie-models";
-import { MadieAlert } from "@madie/madie-design-system/dist/react";
+import { MadieAlert } from "@madie/madie-design-system";
 
-jest.mock("@madie/madie-design-system/dist/react", () => ({
+jest.mock("@madie/madie-design-system", () => ({
   MadieAlert: jest.fn(({ alerts, minimizeAlerts }) => (
     <div data-testid="madie-alert-mock">
       {alerts.map((alert, index) => (

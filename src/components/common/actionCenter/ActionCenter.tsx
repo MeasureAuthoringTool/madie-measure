@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { SpeedDial, SpeedDialAction, Tooltip } from "@mui/material";
-import { MadieDeleteDialog } from "@madie/madie-design-system/dist/react";
+import { MadieDeleteDialog } from "@madie/madie-design-system";
 
 export interface PropTypes {
   actions?: ActionItemDef[];

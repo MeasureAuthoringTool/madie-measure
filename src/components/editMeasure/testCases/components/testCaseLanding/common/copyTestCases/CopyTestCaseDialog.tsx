@@ -15,7 +15,7 @@ import {
   Pagination,
   Select,
   TextField,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";

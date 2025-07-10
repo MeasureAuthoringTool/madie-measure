@@ -1,6 +1,6 @@
 import React from "react";
 import { MenuItem as MuiMenuItem } from "@mui/material";
-import { Select } from "@madie/madie-design-system/dist/react";
+import { Select } from "@madie/madie-design-system";
 import { TypeComponentProps } from "./TypeComponentProps";
 
 const BooleanComponent = ({

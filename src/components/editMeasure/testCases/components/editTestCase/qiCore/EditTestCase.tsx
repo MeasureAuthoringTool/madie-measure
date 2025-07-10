@@ -71,7 +71,7 @@ import {
   MadieDiscardDialog,
   Toast,
   TextArea,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import FileUploader from "../../fileUploader/FileUploader";
 import { ScanValidationDto } from "../../../api/models/ScanValidationDto";
 import { Bundle } from "fhir/r4";

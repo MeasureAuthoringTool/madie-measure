@@ -5,7 +5,7 @@ import {
   MadieDiscardDialog,
   Toast,
   Select,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import { useFormik } from "formik";
 import { ManifestExpansion, Measure } from "@madie/madie-models";
 import {

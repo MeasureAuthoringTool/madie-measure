@@ -11,7 +11,7 @@ import {
   TextField,
   ReadOnlyTextField,
   Select,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import {
   Typography,
   FormControlLabel,

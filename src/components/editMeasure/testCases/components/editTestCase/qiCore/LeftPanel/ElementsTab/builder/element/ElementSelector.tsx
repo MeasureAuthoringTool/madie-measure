@@ -1,5 +1,5 @@
 import React from "react";
-import { AutoComplete } from "@madie/madie-design-system/dist/react";
+import { AutoComplete } from "@madie/madie-design-system"
 import { Checkbox, TextField, Chip } from "@mui/material";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";

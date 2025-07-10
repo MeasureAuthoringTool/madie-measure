@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import ErrorIcon from "@mui/icons-material/Error";
-import { MadieDialog } from "@madie/madie-design-system/dist/react";
+import { MadieDialog } from "@madie/madie-design-system";
 
 const GenerateCmsIdConfirmationDialog = ({ open, onClose, onContinue }) => (
   <MadieDialog

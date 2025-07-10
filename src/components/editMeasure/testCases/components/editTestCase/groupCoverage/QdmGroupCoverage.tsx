@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import GroupCoverageNav from "./groupCoverageNav/GroupCoverageNav";
-import { Select } from "@madie/madie-design-system/dist/react";
+import { Select } from "@madie/madie-design-system";
 import { MenuItem } from "@mui/material";
 import { isEmpty, isNil } from "lodash";
 import {

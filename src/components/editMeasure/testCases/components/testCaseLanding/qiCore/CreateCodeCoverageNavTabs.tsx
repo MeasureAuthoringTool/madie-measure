@@ -4,7 +4,7 @@ import {
   Tabs,
   Tab,
   Popover,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import AddIcon from "@mui/icons-material/Add";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import * as _ from "lodash";

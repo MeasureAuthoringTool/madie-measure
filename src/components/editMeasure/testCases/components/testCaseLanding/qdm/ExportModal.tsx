@@ -1,7 +1,7 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
-import { MadieSpinner } from "@madie/madie-design-system/dist/react";
+import { MadieSpinner } from "@madie/madie-design-system";
 import { AlignHorizontalRight } from "@mui/icons-material";
 
 const style = {

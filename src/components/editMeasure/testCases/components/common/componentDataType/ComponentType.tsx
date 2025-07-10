@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import CodeInput from "../codeInput/CodeInput";
-import { Select } from "@madie/madie-design-system/dist/react";
+import { Select } from "@madie/madie-design-system";
 import { ValueSet, DataElement, Component } from "cqm-models";
 import { MenuItem } from "@mui/material";
 import * as _ from "lodash";

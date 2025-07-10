@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import PropTypes from "prop-types";
-import { TextField } from "@madie/madie-design-system/dist/react";
+import { TextField } from "@madie/madie-design-system";
 import { Box } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";

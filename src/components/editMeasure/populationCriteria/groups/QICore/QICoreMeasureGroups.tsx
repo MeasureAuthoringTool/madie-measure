@@ -31,7 +31,7 @@ import {
   Toast,
   Tab,
   Tabs,
-} from "@madie/madie-design-system/dist/react";
+} from "@madie/madie-design-system";
 import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
 import useFormikResetOnEvent from "../../../../common/useFormikResetOnEvent";
 import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
