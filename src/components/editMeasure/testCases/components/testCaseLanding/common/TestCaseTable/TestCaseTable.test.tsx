@@ -12,6 +12,7 @@ import {
 // @ts-ignore
 import { useFeatureFlags, checkUserCanEdit } from "@madie/madie-util";
 import userEvent from "@testing-library/user-event";
+import { within } from "@testing-library/dom";
 
 const testCase = {
   id: "ID",
@@ -22,6 +23,7 @@ const testCase = {
   executionStatus: "pass",
   caseNumber: 1,
   action: { createdBeforeVersioning: true },
+  validationStatus: "Valid",
 } as unknown as TestCase;
 
 const testCaseFail = {
@@ -32,6 +34,7 @@ const testCaseFail = {
   lastModifiedAt: "2024-09-06T15:16:14.382Z",
   executionStatus: "fail",
   caseNumber: null,
+  validationStatus: "Invalid JSON",
 } as unknown as TestCase;
 
 const testCaseNA = {
@@ -42,6 +45,7 @@ const testCaseNA = {
   lastModifiedAt: "2024-09-06T15:17:14.382Z",
   executionStatus: "NA",
   caseNumber: null,
+  validationStatus: "Not Complete",
 } as unknown as TestCase;
 
 const testCaseInvalid = {
@@ -52,9 +56,28 @@ const testCaseInvalid = {
   lastModifiedAt: "2022-03-01T14:18:14.382Z",
   executionStatus: "Invalid",
   caseNumber: null,
+  validationStatus: "Invalid",
 } as unknown as TestCase;
 
-const testCases = [testCase, testCaseFail, testCaseNA, testCaseInvalid];
+const testCaseValidating = {
+  id: "ID4",
+  title: "TEST IPP4",
+  description: "TEST DESCRIPTION4",
+  series: "TEST SERIES4",
+  lastModifiedAt: "2024-09-06T15:15:14.382Z",
+  executionStatus: "pass",
+  caseNumber: 1,
+  action: { createdBeforeVersioning: true },
+  validationStatus: "Validating",
+} as unknown as TestCase;
+
+const testCases = [
+  testCase,
+  testCaseFail,
+  testCaseNA,
+  testCaseInvalid,
+  testCaseValidating,
+];
 
 const measures = [
   {
@@ -127,6 +150,31 @@ const measures = [
     measureSet: {
       cmsId: "cmsId2",
     },
+  },
+  {
+    id: "IDIDID3",
+    measureScoring: MeasureScoring.COHORT,
+    createdBy: "testuser",
+    groups: [
+      {
+        groupId: "Group1_ID",
+        scoring: "Cohort",
+        populations: [
+          {
+            id: "id-1",
+            name: PopulationType.INITIAL_POPULATION,
+            definition: "Pop1",
+          },
+        ],
+        stratifications: [
+          {
+            id: "strat-id-1",
+          },
+        ],
+      },
+    ],
+    model: "QI-Core v6.0.0",
+    acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
   },
 ] as unknown as Measure[];
 
@@ -234,7 +282,7 @@ describe("TestCase component", () => {
     expect(columns[6]).toHaveTextContent("09/06/202415:15:14 (UTC)");
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(11);
+    expect(buttons).toHaveLength(12);
     expect(buttons[8]).toHaveTextContent("View");
   });
 
@@ -264,7 +312,7 @@ describe("TestCase component", () => {
     expect(columns[6]).toHaveTextContent("09/06/202415:15:14 (UTC)");
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(11);
+    expect(buttons).toHaveLength(12);
   });
 
   it.skip("should render test case table with checkboxes when flag is set", async () => {
@@ -327,7 +375,7 @@ describe("TestCase component", () => {
     expect(columns[6]).toHaveTextContent("09/06/202415:15:14 (UTC)");
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(11);
+    expect(buttons).toHaveLength(12);
     fireEvent.click(buttons[6]);
     expect(screen.queryByText("edit")).not.toBeInTheDocument();
     expect(
@@ -631,5 +679,38 @@ describe("TestCase component", () => {
         )
       ).toBeInTheDocument();
     });
+  });
+
+  it("should render test case table with validation status for qiCore6 and be sortable", async () => {
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
+
+    renderWithTestCase(
+      testCases,
+      true,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      measures[3],
+      setSelectedTestCasesMock
+    );
+
+    const rows = await screen.findByTestId(`test-case-row-0`);
+    const columns = rows.querySelectorAll("td");
+    expect(columns[1]).toHaveTextContent("1");
+    expect(columns[2]).toHaveTextContent("Pass");
+    expect(columns[3]).toHaveTextContent("Valid");
+    expect(columns[4]).toHaveTextContent(testCase.series);
+    expect(columns[5]).toHaveTextContent(testCase.title);
+    expect(columns[6]).toHaveTextContent(testCase.description);
+    expect(columns[7]).toHaveTextContent("09/06/202415:15:14 (UTC)");
+
+    const buttons = await screen.findAllByRole("button");
+    expect(buttons).toHaveLength(13);
+
+    expect(buttons[2].textContent).toBe("Validation");
+    fireEvent.click(buttons[2]);
   });
 });
