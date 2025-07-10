@@ -259,7 +259,7 @@ export default function MeasureLanding() {
   ]);
 
   // Create Event will be dispatched from madie-layout, so we need to listen for it.
-  // Should only render once, hence no deps, but it should listen to
+  // Should only render once, hence no deps, but the values need to make API call has to be the most latest
   useEffect(() => {
     const createListener = () => {
       retrieveMeasures(
