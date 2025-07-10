@@ -110,6 +110,40 @@ export default function MeasureLanding() {
     navigate(`?tab=${activeTab}&page=1&limit=${newLimit}`);
   };
 
+  const searchCriteriaRef = useRef(searchCriteria);
+  const currentSortRef = useRef(currentSort);
+  const currentDirectionRef = useRef(currentDirection);
+  const curLimitRef = useRef(curLimit);
+  useEffect(() => {
+    searchCriteriaRef.current = searchCriteria;
+  }, [searchCriteria]);
+  useEffect(() => {
+    currentSortRef.current = currentSort;
+  }, [currentSort]);
+  useEffect(() => {
+    currentDirectionRef.current = currentDirection;
+  }, [currentDirection]);
+  useEffect(() => {
+    curLimitRef.current = curLimit;
+  }, [curLimit]);
+
+  const setMeasureCounts = useCallback(() => {
+    if (featureFlags.MeasureSearch) {
+      measureServiceApi
+        .getMeasureCounts()
+        .then((data) => {
+          setMyMeasuresCount(data.myMeasures);
+          setAllMeasuresCount(data.allMeasures);
+        })
+        .catch(() => console.error("Unable to retrieve measure counts"));
+    }
+  }, [featureFlags.MeasureSearch, measureServiceApi]);
+
+  // Get the count when component mounts or when featureFlag changes
+  useEffect(() => {
+    setMeasureCounts();
+  }, [setMeasureCounts]);
+
   const retrieveMeasures = useCallback(
     async (
       tab,
@@ -117,7 +151,8 @@ export default function MeasureLanding() {
       page,
       searchCriteria: MeasureSearchCriteria,
       sort,
-      direction
+      direction,
+      doUpdateMeasureCount
     ) => {
       abortController.current = new AbortController();
       setLoading(true);
@@ -140,7 +175,9 @@ export default function MeasureLanding() {
           abortController.current.signal
         );
         setPageProps(data);
-        setMeasureCounts();
+        if (doUpdateMeasureCount) {
+          setMeasureCounts();
+        }
       } catch (error) {
         if (error.message !== "canceled") {
           setErrMsg(error.message);
@@ -149,7 +186,7 @@ export default function MeasureLanding() {
         setLoading(false);
       }
     },
-    [measureServiceApi]
+    [measureServiceApi, setMeasureCounts]
   );
   const setPageProps = (data) => {
     if (data) {
@@ -163,28 +200,6 @@ export default function MeasureLanding() {
       setLoading(false);
     }
   };
-
-  const setMeasureCounts = () => {
-    if (featureFlags?.MeasureSearch) {
-      measureServiceApi
-        .getMeasureCounts()
-        .then((data) => {
-          setMyMeasuresCount(data.myMeasures);
-          setAllMeasuresCount(data.allMeasures);
-        })
-        .catch(() => console.error("Unable to retrieve measure counts"));
-    }
-  };
-
-  useEffect(() => {
-    if (featureFlags?.MeasureSearch) {
-      setMeasureCounts();
-    }
-  }, [
-    activeTab,
-    featureFlags?.MeasureSearch,
-    measureServiceApi.getMeasureCounts,
-  ]);
 
   useEffect(() => {
     const values = queryString.parse(search);
@@ -228,7 +243,8 @@ export default function MeasureLanding() {
       updatedPage - 1,
       searchCriteria,
       currentSort,
-      currentDirection
+      currentDirection,
+      false
     );
   }, [
     search,
@@ -241,24 +257,26 @@ export default function MeasureLanding() {
     currentSort,
     currentDirection,
   ]);
-  // create is in a different app, so we need to listen for it.
+
+  // Create Event will be dispatched from madie-layout, so we need to listen for it.
+  // Should only render once, hence no deps, but it should listen to
   useEffect(() => {
     const createListener = () => {
       retrieveMeasures(
         0,
-        curLimit === undefined ? 10 : curLimit,
+        curLimitRef.current ?? 10,
         0,
-        searchCriteria,
-        currentSort,
-        currentDirection
+        searchCriteriaRef.current,
+        currentSortRef.current,
+        currentDirectionRef.current,
+        true
       );
-      setMeasureCounts();
     };
     window.addEventListener("create", createListener, false);
     return () => {
       window.removeEventListener("create", createListener, false);
     };
-  }, [featureFlags?.MeasureSearch]);
+  }, []);
 
   const handleTabChange = (event, nextTab) => {
     abortController.current.abort();
